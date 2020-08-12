@@ -119,10 +119,10 @@ Now you can **go to the GitHub site** and **create a pull request from "vendors/
 * You already have a remote named "_VendorName_" and a local branch named "vendor-remotes/_vendor-name_" which tracks thar remove.  
 If not, see above.
 
-* Pull your "vendor-remotes/_vendor-name_"_ branch.
+* Pull your "vendor-remotes/_vendor-name_" branch.
 
 * Merge your local branch "vendor-remotes/_vendor-name_" which tracks the vendor remote into your local branch "vendors/_vendor-name_" which tracks the OTel remote (origin).
 
-* Push your “vendors/vendor-name” branch.
+* Push your "vendors/_vendor-name_" branch to the OTel remote (origin).
 
-* Create a PR from “vendors/vendor-name” Into “master”.
+* Create a PR from "vendors/_vendor-name_" into "master".
