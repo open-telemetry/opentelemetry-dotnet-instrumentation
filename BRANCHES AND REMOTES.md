@@ -89,18 +89,45 @@ Switched to a new branch 'vendor-remotes/datadog'
 Branch 'vendor-remotes/datadog' set up to track remote branch 'master' from 'DataDog'.
 ```
 
-**Create a new branch with the same contents as the one you just created, but tracking the OTel origin (please mind the naming convention):**  
+**Pull your new branch** (to be sure)**:**
 ```
+c:\Code\DotNET-Instrumentation\opentelemetry-dotnet-instrumentation>git pull
+```
+
+Validate that this pulls from your vendor repo. I.e., this the output should contain a line such as
+```
+From github.com:VendorName/_VendorRemoteRepoAddress_
+```
+e.g.:
+```
+From github.com:DataDog/dd-trace-dotnet
+```
+
+**Create a new branch that will be mirroring your vendor-repo into a remote branch in the OTel repo (please mind the naming convention). That branch should initially sub-branch from master:**
+```
+c:\Code\DotNET-Instrumentation\opentelemetry-dotnet-instrumentation>git checkout master
 c:\Code\DotNET-Instrumentation\opentelemetry-dotnet-instrumentation>git checkout -b vendors/_vendor-name_
 ```
-for example:
+e.g.:
 ```
+c:\Code\DotNET-Instrumentation\opentelemetry-dotnet-instrumentation>git checkout master
 c:\Code\DotNET-Instrumentation\opentelemetry-dotnet-instrumentation>git checkout -b vendors/datadog
 ```
 
-**Merge from master into vendors/vendor-name to create a common baseline:**
+**Merge from the branch tracking your vendor repo into the branch mirroring your vendor repo into OTel:**
+- **Make sure to squash.** It is important because every person who made a commit to the code you are merging will need to sign the OTel contributor license agreement (CLA). If you squash, only you need to sign.
+- **Make sure to create a common baseline/history.**
+``` 
+c:\Code\DotNET-Instrumentation\opentelemetry-dotnet-instrumentation>git merge vendor-remotes/_vendor-name_ --squash --allow-unrelated-histories
 ```
-c:\Code\DotNET-Instrumentation\opentelemetry-dotnet-instrumentation>git merge master --allow-unrelated-histories
+e.g.:
+```
+c:\Code\DotNET-Instrumentation\opentelemetry-dotnet-instrumentation>git merge vendor-remotes/datadog --squash --allow-unrelated-histories
+```
+
+**Commit your merge:**
+```
+c:\Code\DotNET-Instrumentation\opentelemetry-dotnet-instrumentation>git commit -m "Descriptive commit message such as 'Merging feature XYZ from VendorName'."
 ```
 
 **Push to OTel repo:**
@@ -121,7 +148,8 @@ If not, see above.
 
 * Pull your "vendor-remotes/_vendor-name_" branch.
 
-* Merge your local branch "vendor-remotes/_vendor-name_" which tracks the vendor remote into your local branch "vendors/_vendor-name_" which tracks the OTel remote (origin).
+* Merge your local branch "vendor-remotes/_vendor-name_" which tracks the vendor remote into your local branch "vendors/_vendor-name_" which tracks the OTel remote (origin).  
+You may need to either have everybody who made commits that are part of this merge sign the OTel contributor license agreement (CLA), or you need to make sure that this is a squash-merge (then only you will need to sign the CLA). The CLA only needs to be signed once.
 
 * Push your "vendors/_vendor-name_" branch to the OTel remote (origin).
 
