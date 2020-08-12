@@ -12,4 +12,4 @@
 #  https://help.github.com/en/articles/about-code-owners
 #
 
-* @open-telemetry/dotnet-approvers @macrogreg 
+* @open-telemetry/dotnet-instrumentation-approvers
