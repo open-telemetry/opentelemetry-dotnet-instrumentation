@@ -1,0 +1,34 @@
+<Project>
+  <Import Project="..\Directory.Build.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net45;net461;netstandard2.0</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- NuGet packages -->
+    <IsPackable>true</IsPackable>
+    <PackageIconUrl>https://github.com/DataDog/dd-trace-dotnet/raw/master/datadog-logo-64x64.png</PackageIconUrl>
+    <PackageIcon>packageIcon.png</PackageIcon>
+    <PackageProjectUrl>https://docs.datadoghq.com/tracing/setup/dotnet/</PackageProjectUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageReleaseNotes>See release notes at https://github.com/DataDog/dd-trace-dotnet/releases</PackageReleaseNotes>
+    <PackageTags>Datadog;APM;tracing;profiling;instrumentation</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/DataDog/dd-trace-dotnet.git</RepositoryUrl>
+    <Copyright>Copyright 2017 Datadog, Inc.</Copyright>
+    <Company>Datadog</Company>
+    <Authors>lucas.pimentel.datadog;colinhigginsdatadog;zachmontoyadd;bobuva</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- NuGet -->
+    <None Include="$(MSBuildThisFileDirectory)\..\datadog-logo-256x256.png" Pack="true" Visible="false" PackagePath="packageIcon.png" />
+
+    <!-- StyleCop -->
+    <Compile Include="..\GlobalSuppressions.cs" Link="GlobalSuppressions.src.cs" />
+
+    <!-- reference assemblies let us target .NET Framework without the SDK (for example, on non-Windows) -->
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="all" />
+  </ItemGroup>
+</Project>
