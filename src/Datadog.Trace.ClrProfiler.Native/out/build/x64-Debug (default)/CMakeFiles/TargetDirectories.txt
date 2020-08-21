@@ -1,0 +1,4 @@
+C:/00/Code/GitHubOTel/DotNET-Instrumentation/opentelemetry-dotnet-instrumentation/src/Datadog.Trace.ClrProfiler.Native/out/build/x64-Debug (default)/CMakeFiles/rebuild_cache.dir
+C:/00/Code/GitHubOTel/DotNET-Instrumentation/opentelemetry-dotnet-instrumentation/src/Datadog.Trace.ClrProfiler.Native/out/build/x64-Debug (default)/CMakeFiles/Datadog.Trace.ClrProfiler.Native.static.dir
+C:/00/Code/GitHubOTel/DotNET-Instrumentation/opentelemetry-dotnet-instrumentation/src/Datadog.Trace.ClrProfiler.Native/out/build/x64-Debug (default)/CMakeFiles/Datadog.Trace.ClrProfiler.Native.dir
+C:/00/Code/GitHubOTel/DotNET-Instrumentation/opentelemetry-dotnet-instrumentation/src/Datadog.Trace.ClrProfiler.Native/out/build/x64-Debug (default)/CMakeFiles/edit_cache.dir

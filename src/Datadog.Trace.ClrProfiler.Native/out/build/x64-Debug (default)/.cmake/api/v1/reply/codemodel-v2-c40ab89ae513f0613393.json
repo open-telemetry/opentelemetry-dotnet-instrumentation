@@ -1,0 +1,68 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "Datadog.Trace.ClrProfiler.Native",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "Datadog.Trace.ClrProfiler.Native::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Datadog.Trace.ClrProfiler.Native-Debug-075ef21a84410b0fe417.json",
+					"name" : "Datadog.Trace.ClrProfiler.Native",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Datadog.Trace.ClrProfiler.Native.static::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Datadog.Trace.ClrProfiler.Native.static-Debug-ee7332bca2b4aad63c36.json",
+					"name" : "Datadog.Trace.ClrProfiler.Native.static",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/00/Code/GitHubOTel/DotNET-Instrumentation/opentelemetry-dotnet-instrumentation/src/Datadog.Trace.ClrProfiler.Native/out/build/x64-Debug (default)",
+		"source" : "C:/00/Code/GitHubOTel/DotNET-Instrumentation/opentelemetry-dotnet-instrumentation/src/Datadog.Trace.ClrProfiler.Native"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 0
+	}
+}

@@ -1,0 +1,224 @@
+{
+	"artifacts" : 
+	[
+		{
+			"path" : "Datadog.Trace.ClrProfiler.Native.dll"
+		},
+		{
+			"path" : "Datadog.Trace.ClrProfiler.Native.lib"
+		},
+		{
+			"path" : "Datadog.Trace.ClrProfiler.Native.pdb"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library",
+			"target_link_libraries",
+			"add_compile_options"
+		],
+		"files" : 
+		[
+			"CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 67,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 72,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 6,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 7,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 8,
+				"parent" : 0
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "/DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1  "
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-std=c++11"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-fPIC"
+				},
+				{
+					"backtrace" : 3,
+					"fragment" : "-fms-extensions"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-DBIT64"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-DPAL_STDCPP_COMPAT"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-DPLATFORM_UNIX"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-DUNICODE"
+				},
+				{
+					"backtrace" : 5,
+					"fragment" : "-Wno-invalid-noreturn"
+				},
+				{
+					"backtrace" : 5,
+					"fragment" : "-Wno-macro-redefined"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"define" : "Datadog_Trace_ClrProfiler_Native_EXPORTS"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 2,
+					"path" : "C:/00/Code/GitHubOTel/DotNET-Instrumentation/opentelemetry-dotnet-instrumentation/src/Datadog.Trace.ClrProfiler.Native/../../lib/coreclr/src/pal/inc/rt"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "C:/00/Code/GitHubOTel/DotNET-Instrumentation/opentelemetry-dotnet-instrumentation/src/Datadog.Trace.ClrProfiler.Native/../../lib/coreclr/src/pal/prebuilt/inc"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "C:/00/Code/GitHubOTel/DotNET-Instrumentation/opentelemetry-dotnet-instrumentation/src/Datadog.Trace.ClrProfiler.Native/../../lib/coreclr/src/pal/inc"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "C:/00/Code/GitHubOTel/DotNET-Instrumentation/opentelemetry-dotnet-instrumentation/src/Datadog.Trace.ClrProfiler.Native/../../lib/coreclr/src/inc"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "/opt/re2"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "/opt/json/include"
+				}
+			],
+			"language" : "CXX",
+			"sourceIndexes" : 
+			[
+				0,
+				1
+			]
+		}
+	],
+	"dependencies" : 
+	[
+		{
+			"backtrace" : 2,
+			"id" : "Datadog.Trace.ClrProfiler.Native.static::@6890427a1f51a3e7e1df"
+		}
+	],
+	"id" : "Datadog.Trace.ClrProfiler.Native::@6890427a1f51a3e7e1df",
+	"link" : 
+	{
+		"commandFragments" : 
+		[
+			{
+				"fragment" : "/machine:x64 /debug /INCREMENTAL",
+				"role" : "flags"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "Datadog.Trace.ClrProfiler.Native.static.lib",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "\\opt\\re2\\obj\\libre2.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-static-libgcc",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-static-libstdc++",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib",
+				"role" : "libraries"
+			}
+		],
+		"language" : "CXX"
+	},
+	"name" : "Datadog.Trace.ClrProfiler.Native",
+	"nameOnDisk" : "Datadog.Trace.ClrProfiler.Native.dll",
+	"paths" : 
+	{
+		"build" : ".",
+		"source" : "."
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0,
+				1
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "dllmain.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "interop.cpp",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "SHARED_LIBRARY"
+}
