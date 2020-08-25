@@ -1,4 +1,4 @@
-using Datadog.Trace.Vendors.Newtonsoft.Json;
+using Newtonsoft.Json;
 
 namespace Datadog.Trace.MSBuild
 {
