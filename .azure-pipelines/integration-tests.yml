@@ -65,10 +65,11 @@ jobs:
   condition: succeeded()
   strategy:
     matrix:
-      netcoreapp2_1:
-        publishTargetFramework: netcoreapp2.1
-      netcoreapp3_0:
-        publishTargetFramework: netcoreapp3.0
+      # Temporarily running only netcoreapp3_1
+      # netcoreapp2_1:
+      #   publishTargetFramework: netcoreapp2.1
+      # netcoreapp3_0:
+      #   publishTargetFramework: netcoreapp3.0
       netcoreapp3_1:
         publishTargetFramework: netcoreapp3.1
 
@@ -142,10 +143,11 @@ jobs:
   condition: succeeded()
   strategy:
     matrix:
-      netcoreapp2_1:
-        publishTargetFramework: netcoreapp2.1
-      netcoreapp3_0:
-        publishTargetFramework: netcoreapp3.0
+      # Temporarily running only netcoreapp3_1
+      # netcoreapp2_1:
+      #   publishTargetFramework: netcoreapp2.1
+      # netcoreapp3_0:
+      #   publishTargetFramework: netcoreapp3.0
       netcoreapp3_1:
         publishTargetFramework: netcoreapp3.1
 
