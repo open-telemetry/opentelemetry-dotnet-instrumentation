@@ -14,6 +14,24 @@
 
 We'd love your help!
 
+The OpenTelemetry .NET Instrumentation special interest group (SIG) meets regularly.
+See the OpenTelemetry [community](https://github.com/open-telemetry/community#net-auto-instrumentation)
+repo for information on this and other SIGs.
+
+See the [public meeting notes](https://docs.google.com/document/d/1XedN2D8_PH4YLej-maT8sp4RKogfuhFpccRi3QpUcoI/edit)
+for a summary description of past meetings.
+Join the meeting or get in touch on
+[Gitter](https://gitter.im/open-telemetry/opentelemetry-dotnet-auto-instr).
+
+Even though, anybody can contribute, there are benefits of being a member of
+our community. See to the [community membership
+document](https://github.com/open-telemetry/community/blob/master/community-membership.md)
+on how to become a
+[**Member**](https://github.com/open-telemetry/community/blob/master/community-membership.md#member),
+[**Approver**](https://github.com/open-telemetry/community/blob/master/community-membership.md#approver)
+and
+[**Maintainer**](https://github.com/open-telemetry/community/blob/master/community-membership.md#maintainer).
+
 ## Report a bug or requesting feature
 
 Reporting bugs is an important contribution. Please make sure to include:
