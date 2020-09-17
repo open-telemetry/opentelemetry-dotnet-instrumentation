@@ -1,8 +1,7 @@
-﻿using OpenTelemetry.DynamicActivityBinding.OpenTelemetry.Util;
-using OpenTelemetry.Util;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using OpenTelemetry.Util;
 
 namespace OpenTelemetry.DynamicActivityBinding
 {

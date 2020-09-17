@@ -12,7 +12,7 @@ namespace DemoNetFx45
 
             //var a = new System.Diagnostics.Activity("a");
 
-            ActivityStub activity = ActivityFactory.Create();
+            ActivityStub activity = ActivityStub.StartNewActivity("a");
 
             Console.WriteLine("Done. Press enter.");
             Console.ReadLine();

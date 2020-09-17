@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace OpenTelemetry.DynamicActivityBinding.OpenTelemetry.Util
+namespace OpenTelemetry.Util
 {
     internal static class ArrayExtensions
     {

@@ -9,7 +9,7 @@ namespace DemoNetCore31
         {
             Console.WriteLine("DemoNetCore31");
 
-            ActivityStub activity = ActivityFactory.Create();
+            ActivityStub activity = ActivityStub.StartNewActivity("a");
 
             Console.WriteLine("Done. Press enter.");
             Console.ReadLine();

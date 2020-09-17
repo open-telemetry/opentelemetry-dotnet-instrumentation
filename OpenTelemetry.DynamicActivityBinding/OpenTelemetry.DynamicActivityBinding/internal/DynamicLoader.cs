@@ -33,45 +33,52 @@ namespace OpenTelemetry.DynamicActivityBinding
 
         public const string ActivityType_FullName = "System.Diagnostics.Activity";
 
+        public enum InitState : int
+        {
+            NotInitialized = 0,
+            Initializing = 1,
+            Initialized = 2,
+            Error = 3,
+        }
 
-        public const int InitState_NotInitialized = 0;
-        public const int InitState_Initializing = 1;
-        public const int InitState_Initialized = 2;
-        public const int InitState_Error = 3;
-
-        private static int s_InilializationState = InitState_NotInitialized;
+        private static int s_InilializationState = (int) InitState.NotInitialized;
 
         private static Assembly s_diagnosticSourceAssembly = null;
         private static PackagedAssemblyLookup s_packagedAssemblies = null;
+
+        public static InitState InitializationState { get { return (InitState) s_InilializationState; } }
 
         public static bool EnsureInitialized()
         {
             // Only initialize once:
 
-            if (s_InilializationState == InitState_Initialized)
+            if (InitState.Initialized == (InitState) s_InilializationState)
             {
                 return true;
             }
 
             while (true)
             {
-                int prevInitState = Interlocked.CompareExchange(ref s_InilializationState, InitState_Initializing, InitState_NotInitialized);
-                if (prevInitState == InitState_Error)
+                InitState prevInitState = (InitState) Interlocked.CompareExchange(
+                                                                        ref s_InilializationState, 
+                                                                        (int) InitState.Initializing, 
+                                                                        (int) InitState.NotInitialized);
+                if (prevInitState == InitState.Error)
                 {
                     return false;
                 }
-                else if (prevInitState == InitState_Initialized)
+                else if (prevInitState == InitState.Initialized)
                 {
                     return true;
                 }
-                else if (prevInitState == InitState_Initializing)
+                else if (prevInitState == InitState.Initializing)
                 {
                     // Another thread is initializing the loader.
                     // Perform a short blocking wait.
                     // This is OK, becasue it can only happen early on, before initialization is complete.
                     Thread.Sleep(10);
                 }
-                else if (prevInitState == InitState_NotInitialized)
+                else if (prevInitState == InitState.NotInitialized)
                 {
                     // That means we won the race and set it to InitState_Initializing. 
                     // Let's do it!
@@ -91,13 +98,13 @@ namespace OpenTelemetry.DynamicActivityBinding
 
                 bool success = PerformInitialization();
 
-                Interlocked.Exchange(ref s_InilializationState, success ? InitState_Initialized : InitState_Error);
+                Interlocked.Exchange(ref s_InilializationState, success ? (int) InitState.Initialized : (int) InitState.Error);
                 return success;
             }
             catch (Exception ex)
             {
                 Log.Error(ex);
-                Interlocked.Exchange(ref s_InilializationState, InitState_Error);
+                Interlocked.Exchange(ref s_InilializationState, (int) InitState.Error);
                 return false;
             }
         }
@@ -442,8 +449,8 @@ namespace OpenTelemetry.DynamicActivityBinding
             // The full path should be in some option of environment setting.
             // use a placefolder for now.
 
-            //string tracerHomePath = "C:/00/Code/HypotheticalTracerHome/System.Diagnostics.DiagnosticSource-DistributionBinaries/5.0.0-rc.1.20451.14";
-            string tracerHomePath = "c:\\00\\Code\\HypotheticalTracerHome\\System.Diagnostics.DiagnosticSource-DistributionBinaries\\4.4.0\\";
+            string tracerHomePath = "C:/00/Code/HypotheticalTracerHome/System.Diagnostics.DiagnosticSource-DistributionBinaries/5.0.0-rc.1.20451.14";
+            //string tracerHomePath = "c:\\00\\Code\\HypotheticalTracerHome\\System.Diagnostics.DiagnosticSource-DistributionBinaries\\4.4.0\\";
 
             const string diagnosticSourceVersionSubPath =
 #if NET452 || NET451 || NET45
