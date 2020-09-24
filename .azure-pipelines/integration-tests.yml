@@ -1,0 +1,337 @@
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    exclude:
+      - docs/*
+      - .github/*
+pr:
+  branches:
+    include:
+      - master
+      - release/*
+  paths:
+    exclude:
+      - docs/*
+      - .github/*
+
+pool:
+  vmImage: ubuntu-18.04
+
+variables:
+  buildConfiguration: Debug
+  publishOutput: $(System.DefaultWorkingDirectory)/src/bin/managed-publish
+  dotnetCoreSdkVersion: 3.1.107
+
+jobs:
+
+- job: build_linux_profiler
+
+  steps:
+  - task: UseDotNet@2
+    displayName: install dotnet core sdk 3.1
+    inputs:
+      version: $(dotnetCoreSdkVersion)
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build Datadog.Trace.ClrProfiler.Managed.Loader
+    inputs:
+      command: build
+      projects: src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
+      arguments: --configuration $(buildConfiguration)
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed
+    inputs:
+      command: publish
+      publishWebProjects: false
+      modifyOutputPath: false
+      zipAfterPublish: false
+      projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
+      arguments: --configuration $(buildConfiguration) --framework netstandard2.0 --output $(publishOutput)/netstandard2.0
+
+  - task: DockerCompose@0
+    displayName: docker-compose run Profiler
+    inputs:
+      containerregistrytype: Container Registry
+      dockerComposeCommand: run Profiler
+
+  - publish: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin/$(buildConfiguration)/x64
+    artifact: linux-tracer-home
+
+- job: Linux
+  dependsOn: build_linux_profiler
+  condition: succeeded()
+  strategy:
+    matrix:
+      # Temporarily running only netcoreapp3_1
+      # netcoreapp2_1:
+      #   publishTargetFramework: netcoreapp2.1
+      # netcoreapp3_0:
+      #   publishTargetFramework: netcoreapp3.0
+      netcoreapp3_1:
+        publishTargetFramework: netcoreapp3.1
+
+  variables:
+    TestAllPackageVersions: true
+
+  steps:
+  - download: current
+    artifact: linux-tracer-home
+
+  - task: CopyFiles@2
+    inputs:
+      sourceFolder: $(Pipeline.Workspace)/linux-tracer-home
+      targetFolder: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin/$(buildConfiguration)/x64
+
+  - task: DockerCompose@0
+    displayName: docker-compose run build
+    inputs:
+      containerregistrytype: Container Registry
+      dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) -e publishTargetFramework=$(publishTargetFramework) build
+
+  - task: DockerCompose@0
+    displayName: docker-compose run IntegrationTests
+    inputs:
+      containerregistrytype: Container Registry
+      dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) -e publishTargetFramework=$(publishTargetFramework) IntegrationTests
+
+  - task: PublishTestResults@2
+    displayName: publish test results
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: test/**/*.trx
+    condition: succeededOrFailed()
+
+- job: build_alpine_linux_profiler
+
+  steps:
+  - task: UseDotNet@2
+    displayName: install dotnet core sdk 3.1
+    inputs:
+      version: $(dotnetCoreSdkVersion)
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build Datadog.Trace.ClrProfiler.Managed.Loader
+    inputs:
+      command: build
+      projects: src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
+      arguments: --configuration $(buildConfiguration)
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed
+    inputs:
+      command: publish
+      publishWebProjects: false
+      modifyOutputPath: false
+      zipAfterPublish: false
+      projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
+      arguments: --configuration $(buildConfiguration) --framework netstandard2.0 --output $(publishOutput)/netstandard2.0
+
+  - task: DockerCompose@0
+    displayName: docker-compose run Profiler.Alpine
+    inputs:
+      containerregistrytype: Container Registry
+      dockerComposeCommand: run Profiler.Alpine
+
+  - publish: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin/$(buildConfiguration)/x64
+    artifact: alpine-linux-tracer-home
+
+- job: Alpine_Linux
+  dependsOn: build_alpine_linux_profiler
+  condition: succeeded()
+  strategy:
+    matrix:
+      # Temporarily running only netcoreapp3_1
+      # netcoreapp2_1:
+      #   publishTargetFramework: netcoreapp2.1
+      # netcoreapp3_0:
+      #   publishTargetFramework: netcoreapp3.0
+      netcoreapp3_1:
+        publishTargetFramework: netcoreapp3.1
+
+  variables:
+    TestAllPackageVersions: true
+
+  steps:
+  - download: current
+    artifact: alpine-linux-tracer-home
+
+  - task: CopyFiles@2
+    inputs:
+      sourceFolder: $(Pipeline.Workspace)/alpine-linux-tracer-home
+      targetFolder: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin/$(buildConfiguration)/x64
+
+  - task: DockerCompose@0
+    displayName: docker-compose run build
+    inputs:
+      containerregistrytype: Container Registry
+      dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) -e publishTargetFramework=$(publishTargetFramework) build
+
+  - task: DockerCompose@0
+    displayName: docker-compose run IntegrationTests.Alpine.Core21
+    condition: eq(variables['publishTargetFramework'], 'netcoreapp2.1')
+    inputs:
+      containerregistrytype: Container Registry
+      dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) IntegrationTests.Alpine.Core21
+
+  - task: DockerCompose@0
+    displayName: docker-compose run IntegrationTests.Alpine.Core30
+    condition: eq(variables['publishTargetFramework'], 'netcoreapp3.0')
+    inputs:
+      containerregistrytype: Container Registry
+      dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) IntegrationTests.Alpine.Core30
+
+  - task: DockerCompose@0
+    displayName: docker-compose run IntegrationTests.Alpine.Core31
+    condition: eq(variables['publishTargetFramework'], 'netcoreapp3.1')
+    inputs:
+      containerregistrytype: Container Registry
+      dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) IntegrationTests.Alpine.Core31
+
+  - task: PublishTestResults@2
+    displayName: publish test results
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: test/**/*.trx
+    condition: succeededOrFailed()
+
+- job: Windows
+  strategy:
+    matrix:
+      x64:
+        buildPlatform: x64
+        enable32bit: false
+      x86:
+        buildPlatform: x86
+        enable32bit: true
+  pool:
+    vmImage: windows-2019
+  variables:
+    msiOutputDirectory: deploy/Datadog.Trace.ClrProfiler.WindowsInstaller/bin/$(buildConfiguration)/$(buildPlatform)/en-us
+
+  steps:
+  - task: UseDotNet@2
+    displayName: install dotnet core sdk 2.1
+    inputs:
+      packageType: sdk
+      version: 2.1.x
+
+  - task: UseDotNet@2
+    displayName: install dotnet core sdk 3.0
+    inputs:
+      packageType: sdk
+      version: 3.0.x
+
+  - task: UseDotNet@2
+    displayName: install dotnet core sdk 3.1
+    inputs:
+      packageType: sdk
+      version: $(dotnetCoreSdkVersion)
+
+  - task: NuGetToolInstaller@1
+    displayName: install nuget
+
+  - task: NuGetCommand@2
+    displayName: nuget restore
+    inputs:
+      restoreSolution: Datadog.Trace.sln
+      verbosityRestore: Normal
+
+  # this triggers a dependency chain that builds all the managed and native dlls
+  - task: MSBuild@1
+    displayName: msbuild tracer-home
+    inputs:
+      solution: Datadog.Trace.proj
+      platform: $(buildPlatform)
+      configuration: $(buildConfiguration)
+      msbuildArguments: /t:msi /p:RunWixToolsOutOfProc=true /p:TracerHomeDirectory=$(publishOutput)
+      maximumCpuCount: true
+
+  - task: MSBuild@1
+    displayName: Build .NET Framework projects (not SDK-based projects)
+    inputs:
+      solution: Datadog.Trace.proj
+      platform: $(buildPlatform)
+      configuration: $(buildConfiguration)
+      msbuildArguments: /t:BuildFrameworkReproductions
+      maximumCpuCount: true
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build integration tests
+    inputs:
+      command: build
+      projects: |
+        reproductions/**/*.csproj
+        samples/**/*.csproj
+        test/*.IntegrationTests/*.IntegrationTests.csproj
+        !reproductions/**/ExpenseItDemo*.csproj
+        !reproductions/**/EntityFramework6x*.csproj
+        !reproductions/**/StackExchange.Redis.AssemblyConflict.LegacyProject.csproj
+      arguments: --configuration $(buildConfiguration) -p:Platform=$(buildPlatform) -p:ManagedProfilerOutputDirectory=$(publishOutput)
+
+  - task: NuGetCommand@2
+    displayName: nuget restore IIS samples
+    inputs:
+      restoreSolution: samples-iis/samples-iis.sln
+      verbosityRestore: Normal
+
+  - task: MSBuild@1
+    displayName: Publish IIS samples
+    inputs:
+      solution: samples-iis/samples-iis.sln
+      configuration: '$(buildConfiguration)'
+      msbuildArguments: '/p:DeployOnBuild=true /p:PublishProfile=FolderProfile.pubxml'
+      maximumCpuCount: true
+
+  - task: DockerCompose@0
+    displayName: docker-compose build IIS containers
+    inputs:
+      containerregistrytype: Container Registry
+      dockerComposeCommand: build --build-arg DOTNET_TRACER_MSI=$(msiOutputDirectory)/*.msi --build-arg ENABLE_32_BIT=$(enable32bit) IntegrationTests.IIS.LoaderOptimizationRegKey
+
+  - task: DockerCompose@0
+    displayName: docker-compose start IIS containers
+    inputs:
+      containerregistrytype: Container Registry
+      dockerComposeCommand: up -d IntegrationTests.IIS.LoaderOptimizationRegKey
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet test
+    inputs:
+      command: test
+      configuration: $(buildConfiguration)
+      projects: |
+        test/Datadog.Trace.IntegrationTests/Datadog.Trace.IntegrationTests.csproj
+        test/Datadog.Trace.OpenTracing.IntegrationTests/Datadog.Trace.OpenTracing.IntegrationTests.csproj
+      arguments: -p:Platform=$(buildPlatform)
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet test
+    inputs:
+      command: test
+      configuration: $(buildConfiguration)
+      projects: test/Datadog.Trace.ClrProfiler.IntegrationTests/Datadog.Trace.ClrProfiler.IntegrationTests.csproj
+      arguments: --filter "(RunOnWindows=True|Category=Smoke)&LoadFromGAC!=True" -p:Platform=$(buildPlatform)
+
+  - powershell: |
+      [System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")
+      $publish = New-Object System.EnterpriseServices.Internal.Publish
+      Get-ChildItem $(publishOutput)/net45 -Filter *.dll | Foreach-Object { $publish.GacInstall($_.FullName) }
+    displayName: Add net45 Datadog.Trace.ClrProfiler.Managed assets to the GAC
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet test --filter LoadFromGAC=True
+    inputs:
+      command: test
+      configuration: $(buildConfiguration)
+      projects: test/Datadog.Trace.ClrProfiler.IntegrationTests/Datadog.Trace.ClrProfiler.IntegrationTests.csproj
+      arguments: --filter "(RunOnWindows=True|Category=Smoke)&LoadFromGAC=True" -p:Platform=$(buildPlatform)
+
+  - task: DockerCompose@0
+    displayName: docker-compose stop services
+    inputs:
+      containerregistrytype: Container Registry
+      dockerComposeCommand: down
+    condition: succeededOrFailed()
