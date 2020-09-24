@@ -9,4 +9,10 @@
     <ProjectReference Include="..\OpenTelemetry.DynamicActivityBinding\OpenTelemetry.DynamicActivityBinding.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="System.Diagnostics.DiagnosticSource">
+      <HintPath>..\..\..\..\..\HypotheticalTracerHome\System.Diagnostics.DiagnosticSource-DistributionBinaries\5.0.0-rc.1.20451.14\netstandard1.3\System.Diagnostics.DiagnosticSource.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

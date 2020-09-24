@@ -11,6 +11,9 @@ namespace DemoNetCore31
 
             ActivityStub activity = ActivityStub.StartNewActivity("a");
 
+            var a = new System.Diagnostics.Activity("a2");
+            Console.WriteLine($"a.IdFormat: {a.IdFormat}");
+
             Console.WriteLine("Done. Press enter.");
             Console.ReadLine();
         }

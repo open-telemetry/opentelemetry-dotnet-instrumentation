@@ -43,10 +43,31 @@ namespace OpenTelemetry.DynamicActivityBinding
 
         private static int s_InilializationState = (int) InitState.NotInitialized;
 
-        private static Assembly s_diagnosticSourceAssembly = null;
         private static PackagedAssemblyLookup s_packagedAssemblies = null;
+        private static Assembly s_diagnosticSourceAssembly = null;
+
+        private static DynamicInvoker s_invoker = null;
 
         public static InitState InitializationState { get { return (InitState) s_InilializationState; } }
+
+        public static DynamicInvoker Invoker
+        {
+            get
+            {
+                if (!EnsureInitialized())
+                {
+                    throw new InvalidOperationException($"Cannot obtain a dynamic invoker because the {nameof(DynamicLoader)} is not initialized.");
+                }
+
+                DynamicInvoker invoker = s_invoker;
+                if (invoker == null)
+                {
+                    throw new InvalidOperationException($"Cannot obtain a dynamic invoker. The {nameof(DynamicLoader)} may not be initialized.");
+                }
+
+                return invoker;
+            }
+        }
 
         public static bool EnsureInitialized()
         {
@@ -92,11 +113,14 @@ namespace OpenTelemetry.DynamicActivityBinding
 
             try
             {
-                Log.Debug($"Runtime version: {Environment.Version}.");
-                Log.Debug($"BCL version: {typeof(object).Assembly.FullName}.");
+                Log.Debug($"Initializing {nameof(DynamicLoader)}.");
+                Log.Debug($"Runtime version:        {Environment.Version}.");
+                Log.Debug($"BCL version:            {typeof(object).Assembly.FullName}.");
                 Log.Debug();
 
                 bool success = PerformInitialization();
+
+                Log.Debug($"Initialization success: {success}.");
 
                 Interlocked.Exchange(ref s_InilializationState, success ? (int) InitState.Initialized : (int) InitState.Error);
                 return success;
@@ -117,21 +141,19 @@ namespace OpenTelemetry.DynamicActivityBinding
             // Otherwise we prefer the version included with this library, which should be a relatively recent one.
 
             Assembly diagnosticSourceAssembly = LoadDiagnosticSourceAssembly();
-
             if (diagnosticSourceAssembly == null)
             {
                 return false;
             }
 
             Type activityType = diagnosticSourceAssembly.GetType(ActivityType_FullName, throwOnError: true);
+            if (activityType == null)
+            {
+                return false;
+            }
 
-
-            Log.Debug($"Dynamic Activity Type: {activityType.AssemblyQualifiedName}");
-            Log.Debug($"Dynamic Assembly name: {activityType.Assembly.FullName}");
-            Log.Debug($"Dynamic Assembly location: {activityType.Assembly.Location}");
-
+            s_invoker = new DynamicInvoker(activityType);
             return true;
-
         }
 
         private static Assembly LoadDiagnosticSourceAssembly()

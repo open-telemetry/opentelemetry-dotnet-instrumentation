@@ -40,7 +40,7 @@ namespace OpenTelemetry.DynamicActivityBinding
             }
             else
             {
-                //ValidateActivityInstance(activityInstance);
+                DynamicLoader.Invoker.ValidateIsActivity(activityInstance);
                 _activityInstance = activityInstance;
             }
         }
