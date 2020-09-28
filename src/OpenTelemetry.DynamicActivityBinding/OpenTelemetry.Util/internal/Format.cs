@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -34,6 +34,12 @@ namespace OpenTelemetry.Util
             builder.Append('"');
 
             return builder.ToString();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsLowerHexChar(char c)
+        {
+            return ('0' <= c && c <= '9') || ('a' <= c && c <= 'f');
         }
 
         public static IEnumerable<string> AsTextLines<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> table)

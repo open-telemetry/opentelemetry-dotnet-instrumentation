@@ -2,14 +2,15 @@
 
   <PropertyGroup>
       <TargetFrameworks>netcoreapp3.1;netcoreapp2.0;net45</TargetFrameworks>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   
   <ItemGroup>
-    <Compile Remove="System.Diagnostics\**\*" />
+      <Compile Remove="System.Diagnostics\**\*" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="System.Diagnostics\**\*" />
+      <None Include="System.Diagnostics\**\*" />
   </ItemGroup>
 
   <PropertyGroup>

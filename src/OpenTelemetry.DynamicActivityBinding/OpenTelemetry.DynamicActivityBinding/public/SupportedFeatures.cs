@@ -1,16 +1,14 @@
-﻿using System;
+using System;
 
 namespace OpenTelemetry.DynamicActivityBinding
 {
     public class SupportedFeatures
     {
-        internal static readonly SupportedFeatures SingeltonInstance = new SupportedFeatures();
+        public bool ActivityIdFormatOptions { get; }
 
-        public bool ActivityIdFormatOptions { get; internal set; }
+        public bool FeatureSet_4020 { get; }
 
-        public bool FeatureSet_4020 { get; internal set; }
-
-        public bool FeatureSet_5000 { get; internal set; }
+        public bool FeatureSet_5000 { get; }
 
         public string FormatFeatureSetSupportList()
         {

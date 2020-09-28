@@ -1,81 +1,221 @@
-﻿using OpenTelemetry.Util;
+using OpenTelemetry.Util;
 using System;
-using System.Reflection;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace OpenTelemetry.DynamicActivityBinding
 {
     internal class DynamicInvoker
     {
-        private readonly Type _activityType;
+        public readonly DynamicActivityInvoker Activity;
+        public readonly DynamicDiagnosticListenerInvoker DiagnosticListener;
+        public readonly DynamicActivitySourceInvoker ActivitySource;
+        
+        private readonly SupportedFeatures _supportedFeatures;
 
-        internal DynamicInvoker(Type activityType)
+        internal DynamicInvoker(
+                            SupportedFeatures supportedFeatures,
+                            Type activityType,
+                            Type activityListenerType,
+                            Type activitySourceType)
         {
-            Validate.NotNull(activityType, nameof(activityType));
-            _activityType = activityType;
+            Validate.NotNull(supportedFeatures, nameof(supportedFeatures));
+            _supportedFeatures = supportedFeatures;
+
+            Activity = new DynamicActivityInvoker(activityType);
+            DiagnosticListener = new DynamicDiagnosticListenerInvoker(activityListenerType);
+            ActivitySource = (activitySourceType == null) ? null : new DynamicActivitySourceInvoker(activitySourceType);
         }
 
-        public void ValidateIsActivity(object activity)
-        {
-            Validate.NotNull(activity, nameof(activity));
+        public SupportedFeatures SupportedFeatures { get { return _supportedFeatures; } }
 
-            Type actualType = activity.GetType();
-            if (!_activityType.Equals(actualType))
+        internal class DynamicActivityInvoker
+        {
+            private class CashedDelegates
             {
-                if (_activityType.IsAssignableFrom(actualType))
+                public Action<object, string, string> AddBagage = null;
+                public Func<object, string, string> GetBaggageItem = null;
+                public Func<object, IEnumerable<KeyValuePair<string, string>>> get_Baggage;
+            }
+
+            private readonly CashedDelegates _cashedDelegates = new CashedDelegates();
+            private readonly Type _activityType;
+
+            internal DynamicActivityInvoker(Type activityType)
+            {
+                Validate.NotNull(activityType, nameof(activityType));
+                _activityType = activityType;
+            }
+
+            public void ValidateType(object activityInstance)
+            {
+                Validate.NotNull(activityInstance, nameof(activityInstance));
+
+                Type actualType = activityInstance.GetType();
+                if (!_activityType.Equals(actualType))
                 {
-                    throw new ArgumentException($"The specified object is expected to be of type {_activityType.FullName},"
-                                              + $" but the actual runtime type is {actualType.FullName}."
-                                              + $" Notably, the expected type {_activityType.Name} is assignable from the actual runtime type {actualType.Name}."
-                                              + $" However, an exact match is required.");
+                    if (_activityType.IsAssignableFrom(actualType))
+                    {
+                        throw new ArgumentException($"The specified {nameof(activityInstance)} is expected to be of type {_activityType.AssemblyQualifiedName},"
+                                                  + $" but the actual runtime type is {actualType.AssemblyQualifiedName}."
+                                                  + $" Notably, the expected type {_activityType.Name} is assignable from the actual runtime type {actualType.Name}."
+                                                  + $" However, an exact match is required.");
+                    }
+                    else
+                    {
+                        throw new ArgumentException($"The specified {nameof(activityInstance)} is expected to be of type {_activityType.AssemblyQualifiedName},"
+                                                  + $" but the actual runtime type is {actualType.AssemblyQualifiedName}.");
+                    }
                 }
-                else
+            }
+
+            //public object StartNewActivity(string operationName)
+            //{
+            //    invoker = (operationName) =>
+            //    {
+            //        Activity activity = new Activity(operationName);
+            //        ActivityStub activityStub = ActivityStub.Wrap(activity);
+            //        PreStartInitializationCallback(activityStub);
+            //        autoInstrumentationDiagnosticSource.StartActivity(actvitiy, activity);
+            //    }
+            //}
+
+            public void AddBaggage(object activityInstance, string key, string value)
+            {
+                // Activity API signature:
+                // public Activity AddBaggage(string key, string value)
+
+                // invoker = (activityInstance, key, value) => ((Activity) activityInstance).AddBaggage(key, value);
+
+                ValidateType(activityInstance);
+
+                Action<object, string, string> invoker = _cashedDelegates.AddBagage;
+                if (invoker == null)
                 {
-                    throw new ArgumentException($"The specified object is expected to be of type {_activityType.FullName},"
-                                              + $" but the actual runtime type is {actualType.FullName}.");
+                    ParameterExpression exprActivityInstance = Expression.Parameter(_activityType, "activityInstance");
+                    ParameterExpression exprKey = Expression.Parameter(typeof(string), "key");
+                    ParameterExpression exprValue = Expression.Parameter(typeof(string), "value");
+
+                    var exprInvoker = Expression.Lambda<Action<object, string, string>>(
+                            Expression.Call(
+                                    Expression.Convert(exprActivityInstance, _activityType),
+                                    "AddBaggage", new[] { typeof(string), typeof(string) }, exprKey, exprValue),
+                            exprActivityInstance, exprKey, exprValue);
+
+                    invoker = exprInvoker.Compile();
+                    invoker = Concurrent.SetOrGetRaceWinner(ref _cashedDelegates.AddBagage, invoker);
                 }
+
+                invoker(activityInstance, key, value);
+            }
+
+            public string GetBaggageItem(object activityInstance, string key)
+            {
+                // Activity API signature:
+                // public string GetBaggageItem(string key)
+
+                // invoker = (activityInstance, key) => ((Activity) activityInstance).GetBaggageItem(key);
+
+                ValidateType(activityInstance);
+
+                Func<object, string, string> invoker = _cashedDelegates.GetBaggageItem;
+                if (invoker == null)
+                {
+                    ParameterExpression exprActivityInstance = Expression.Parameter(_activityType, "activityInstance");
+                    ParameterExpression exprKey = Expression.Parameter(typeof(string), "key");
+
+                    var exprInvoker = Expression.Lambda<Func<object, string, string>>(
+                            Expression.Call(
+                                    Expression.Convert(exprActivityInstance, _activityType),
+                                    "GetBaggageItem", new[] { typeof(string) }, exprKey),
+                            exprActivityInstance, exprKey);
+
+                    invoker = exprInvoker.Compile();
+                    invoker = Concurrent.SetOrGetRaceWinner(ref _cashedDelegates.GetBaggageItem, invoker);
+                }
+
+                string result = invoker(activityInstance, key);
+                return result;
+            }
+
+            public IEnumerable<KeyValuePair<string, string>> get_Baggage(object activityInstance)
+            {
+                // Activity API signature:
+                // public IEnumerable<KeyValuePair<string, string>> Baggage { get; }
+
+                // invoker = (activityInstance) => ((Activity) activityInstance).Baggage;
+
+                ValidateType(activityInstance);
+
+                Func<object, IEnumerable<KeyValuePair<string, string>>> invoker = _cashedDelegates.get_Baggage;
+                if (invoker == null)
+                {
+                    ParameterExpression exprActivityInstance = Expression.Parameter(_activityType, "activityInstance");
+
+                    var exprInvoker = Expression.Lambda<Func<object, IEnumerable<KeyValuePair<string, string>>>>(
+                            Expression.Property(
+                                    Expression.Convert(exprActivityInstance, _activityType),
+                                    "Baggage"),
+                            exprActivityInstance);
+
+                    invoker = exprInvoker.Compile();
+                    invoker = Concurrent.SetOrGetRaceWinner(ref _cashedDelegates.get_Baggage, invoker);
+                }
+
+                IEnumerable<KeyValuePair<string, string>> result = invoker(activityInstance);
+                return result;
+            }
+
+
+            //private static MethodInfo GetMethodInfo(Type containingType, string methodName, bool isStatic)
+            //{
+            //    BindingFlags staticOrInstanceFlag = (isStatic ? BindingFlags.Static : BindingFlags.Instance);
+
+            //    MethodInfo methodInfo = containingType.GetMethod(methodName, BindingFlags.Public | staticOrInstanceFlag);
+            //    if (methodInfo == null)
+            //    {
+            //        throw new InvalidOperationException($"Cannot reflect over the method \"{methodName}\" with the BindingFlags Public and {staticOrInstanceFlag.ToString()}."
+            //                                          + $" The type being reflected is \"{containingType.AssemblyQualifiedName}\".");
+            //    }
+
+            //    return methodInfo;
+            //}
+
+           
+        }
+
+        internal class DynamicActivitySourceInvoker
+        {
+            private class CashedDelegates
+            {
+                
+            }
+
+            private readonly CashedDelegates _cashedDelegates = new CashedDelegates();
+            private readonly Type _activitySourceType;
+
+            internal DynamicActivitySourceInvoker(Type activitySourceType)
+            {
+                Validate.NotNull(activitySourceType, nameof(activitySourceType));
+                _activitySourceType = activitySourceType;
             }
         }
 
-        //public object Current()
-        //{
-        //    const string propertyName = "Current";
-        //    const bool isStatic = true;
-        //    const bool setMethod = false;
-
-        //    BindingFlags staticOrInstanceFlag = (isStatic ? BindingFlags.Static : BindingFlags.Instance);
-
-        //    PropertyInfo propInfo = _activityType.GetProperty(propertyName, BindingFlags.Public | staticOrInstanceFlag);
-        //    if (propInfo == null)
-        //    {
-        //        throw new InvalidOperationException($"Cannot reflect over the property \"{propertyName}\" with the BindingFlags Public and {staticOrInstanceFlag.ToString()}."
-        //                                          + $" The type being reflected is {_activityType.AssemblyQualifiedName}");
-        //    }
-
-        //    MethodInfo methodInfo = setMethod ? propInfo.SetMethod : propInfo.GetMethod;
-        //    if (methodInfo == null)
-        //    {
-        //        throw new InvalidOperationException($"Cannot obtain the {(setMethod ? "SetMethod" : "GetMethod")} for property \"{propertyName}\" via reflection."
-        //                                          + $" The type being reflected is {_activityType.AssemblyQualifiedName}");
-        //    }
-
-        //    //MulticastDelegate proxy = Delegate.CreateDelegate(typeof(Func<T, R>), methodInfo, throwOnBindFailure: true);
-        //    //proxy.I
-        //}
-
-        public void AddBaggage()
+        internal class DynamicDiagnosticListenerInvoker
         {
-            const string methodName = "AddBaggage";
-            const bool isStatic = true;
-
-            BindingFlags staticOrInstanceFlag = (isStatic ? BindingFlags.Static : BindingFlags.Instance);
-
-            MethodInfo methodInfo = _activityType.GetMethod(methodName, BindingFlags.Public | staticOrInstanceFlag);
-            if (methodInfo == null)
+            private class CashedDelegates
             {
-                throw new InvalidOperationException($"Cannot reflect over the method \"{methodName}\" with the BindingFlags Public and {staticOrInstanceFlag.ToString()}."
-                                                  + $" The type being reflected is {_activityType.AssemblyQualifiedName}");
+
             }
-            Type funcType = typeof(Func<,,>).MakeGenericType(_activityType, typeof(string), typeof(string));
+
+            private readonly CashedDelegates _cashedDelegates = new CashedDelegates();
+            private readonly Type _diagnosticListenerType;
+
+            internal DynamicDiagnosticListenerInvoker(Type diagnosticListenerType)
+            {
+                Validate.NotNull(diagnosticListenerType, nameof(diagnosticListenerType));
+                _diagnosticListenerType = diagnosticListenerType;
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿
+
 #if NET5_0 || NETCOREAPP3_1 || NETCOREAPP3_0
     #define SUPPORTED_ASSEMBLYLOADCONTEXT_LOADED_ENUMERATIONS
 #endif
@@ -62,7 +62,7 @@ namespace OpenTelemetry.DynamicActivityBinding
                 DynamicInvoker invoker = s_invoker;
                 if (invoker == null)
                 {
-                    throw new InvalidOperationException($"Cannot obtain a dynamic invoker. The {nameof(DynamicLoader)} may not be initialized.");
+                    throw new InvalidOperationException($"Cannot obtain a dynamic invoker. The {nameof(DynamicLoader)} was initialized, but the loader is null.");
                 }
 
                 return invoker;
@@ -152,7 +152,12 @@ namespace OpenTelemetry.DynamicActivityBinding
                 return false;
             }
 
-            s_invoker = new DynamicInvoker(activityType);
+            var supportedFeatures = new SupportedFeatures()
+            {
+
+            };
+
+            s_invoker = new DynamicInvoker(activityType, supportedFeatures);
             return true;
         }
 
@@ -393,9 +398,7 @@ namespace OpenTelemetry.DynamicActivityBinding
             if (packagedAssemblies == null)
             {
                 packagedAssemblies = ReadPackagedAssembliesFromDisk();
-
-                PackagedAssemblyLookup existingPackagedAssemblies = Interlocked.CompareExchange(ref s_packagedAssemblies, packagedAssemblies, null);
-                packagedAssemblies = existingPackagedAssemblies ?? packagedAssemblies;
+                packagedAssemblies = Concurrent.SetOrGetRaceWinner(ref s_packagedAssemblies, packagedAssemblies);
             }
 
             return packagedAssemblies;
