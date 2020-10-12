@@ -43,7 +43,7 @@ namespace OpenTelemetry.DynamicActivityBinding
                 {
                     // TODO: is the no-op stub enough to represent "no current activity"? no need to differentiate
                     // "no current activity" from "no-op activity"?
-                    return NoOpSingeltons.ActivityStub;
+                    return NoOpSingletons.ActivityStub;
                 }
 
                 throw new NotImplementedException(MissingCapability);
@@ -92,7 +92,7 @@ namespace OpenTelemetry.DynamicActivityBinding
             {
                 if (ActivityInstance == null)
                 {
-                    return NoOpSingeltons.KvpEnumerable;
+                    return NoOpSingletons.KvpEnumerable;
                 }
 
                 throw new NotImplementedException(MissingCapability);
@@ -112,7 +112,7 @@ namespace OpenTelemetry.DynamicActivityBinding
             {
                 if (ActivityInstance == null)
                 {
-                    return NoOpSingeltons.TimeSpan;
+                    return NoOpSingletons.TimeSpan;
                 }
 
                 throw new NotImplementedException(MissingCapability);
@@ -174,7 +174,7 @@ namespace OpenTelemetry.DynamicActivityBinding
             {
                 if (ActivityInstance == null)
                 {
-                    return NoOpSingeltons.ActivityIdFormat;
+                    return NoOpSingletons.ActivityIdFormat;
                 }
 
                 throw new NotImplementedException(MissingCapability);
@@ -202,7 +202,7 @@ namespace OpenTelemetry.DynamicActivityBinding
             {
                 if (ActivityInstance == null)
                 {
-                    return NoOpSingeltons.ActivityKind;
+                    return NoOpSingletons.ActivityKind;
                 }
 
                 throw new NotImplementedException(MissingCapability);
@@ -295,7 +295,7 @@ namespace OpenTelemetry.DynamicActivityBinding
             {
                 if (ActivityInstance == null)
                 {
-                    return NoOpSingeltons.KvpEnumerable;
+                    return NoOpSingletons.KvpEnumerable;
                 }
 
                 throw new NotImplementedException(MissingCapability);
@@ -331,7 +331,7 @@ namespace OpenTelemetry.DynamicActivityBinding
         {
             if (activity == null)
             {
-                return NoOpSingeltons.ActivityStub;
+                return NoOpSingletons.ActivityStub;
             }
             else
             {
@@ -476,7 +476,7 @@ namespace OpenTelemetry.DynamicActivityBinding
             if (ActivityInstance == null)
             {
                 hasParent = false;
-                return NoOpSingeltons.ActivityStub;
+                return NoOpSingletons.ActivityStub;
             }
 
             throw new NotImplementedException(MissingCapability);
@@ -567,7 +567,7 @@ namespace OpenTelemetry.DynamicActivityBinding
             throw new NotImplementedException(MissingCapability);
         }
 
-        private static class NoOpSingeltons
+        private static class NoOpSingletons
         {
             internal static readonly ActivityStub ActivityStub = new ActivityStub(null);
             internal static readonly IEnumerable<KeyValuePair<string, string?>> KvpEnumerable = new KeyValuePair<string, string?>[0];
