@@ -11,8 +11,9 @@ using Datadog.Trace.DiagnosticListeners;
 using Datadog.Trace.DogStatsd;
 using Datadog.Trace.Logging;
 using Datadog.Trace.Sampling;
+using Datadog.Trace.Tagging;
+using Datadog.Trace.Vendors.Newtonsoft.Json;
 using Datadog.Trace.Vendors.StatsdClient;
-using Newtonsoft.Json;
 
 namespace Datadog.Trace
 {
@@ -36,6 +37,10 @@ namespace Datadog.Trace
         /// </summary>
         private static int _firstInitialization = 1;
 
+        private static Tracer _instance;
+        private static bool _globalInstanceInitialized;
+        private static object _globalInstanceLock = new object();
+
         private readonly IScopeManager _scopeManager;
         private readonly Timer _heartbeatTimer;
 
@@ -44,8 +49,6 @@ namespace Datadog.Trace
         static Tracer()
         {
             TracingProcessManager.Initialize();
-            // create the default global Tracer
-            Instance = new Tracer();
         }
 
         /// <summary>
@@ -102,14 +105,15 @@ namespace Datadog.Trace
                     Log.Debug("Attempting to override trace agent port with {0}", port);
                     var builder = new UriBuilder(Settings.AgentUri) { Port = port };
                     var baseEndpoint = builder.Uri;
-                    IApi overridingApiClient = new Api(baseEndpoint, apiRequestFactory: null, Statsd);
+
                     if (_agentWriter == null)
                     {
+                        IApi overridingApiClient = new Api(baseEndpoint, apiRequestFactory: null, Statsd);
                         _agentWriter = _agentWriter ?? new AgentWriter(overridingApiClient, Statsd);
                     }
                     else
                     {
-                        _agentWriter.OverrideApi(overridingApiClient);
+                        _agentWriter.SetApiBaseEndpoint(baseEndpoint);
                     }
                 });
 
@@ -121,9 +125,6 @@ namespace Datadog.Trace
 
             if (!string.IsNullOrWhiteSpace(Settings.CustomSamplingRules))
             {
-                // User has opted in, ensure rate limiter is used
-                RuleBasedSampler.OptInTracingWithoutLimits();
-
                 foreach (var rule in CustomSamplingRule.BuildFromConfigurationString(Settings.CustomSamplingRules))
                 {
                     Sampler.RegisterRule(rule);
@@ -176,9 +177,26 @@ namespace Datadog.Trace
         }
 
         /// <summary>
-        /// Gets or sets the global tracer object
+        /// Gets or sets the global <see cref="Tracer"/> instance.
+        /// Used by all automatic instrumentation and recommended
+        /// as the entry point for manual instrumentation.
         /// </summary>
-        public static Tracer Instance { get; set; }
+        public static Tracer Instance
+        {
+            get
+            {
+                return LazyInitializer.EnsureInitialized(ref _instance, ref _globalInstanceInitialized, ref _globalInstanceLock);
+            }
+
+            set
+            {
+                lock (_globalInstanceLock)
+                {
+                    _instance = value;
+                    _globalInstanceInitialized = true;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the active scope
@@ -378,56 +396,75 @@ namespace Datadog.Trace
             }
         }
 
+        internal Scope StartActiveWithTags(string operationName, ISpanContext parent = null, string serviceName = null, DateTimeOffset? startTime = null, bool ignoreActiveScope = false, bool finishOnClose = true, ITags tags = null)
+        {
+            var span = StartSpan(operationName, tags, parent, serviceName, startTime, ignoreActiveScope);
+            return _scopeManager.Activate(span, finishOnClose);
+        }
+
+        internal Span StartSpan(string operationName, ITags tags, ISpanContext parent = null, string serviceName = null, DateTimeOffset? startTime = null, bool ignoreActiveScope = false)
+        {
+            if (parent == null && !ignoreActiveScope)
+            {
+                parent = _scopeManager.Active?.Span?.Context;
+            }
+
+            ITraceContext traceContext;
+
+            // try to get the trace context (from local spans) or
+            // sampling priority (from propagated spans),
+            // otherwise start a new trace context
+            if (parent is SpanContext parentSpanContext)
+            {
+                traceContext = parentSpanContext.TraceContext ??
+                               new TraceContext(this)
+                               {
+                                   SamplingPriority = parentSpanContext.SamplingPriority
+                               };
+            }
+            else
+            {
+                traceContext = new TraceContext(this);
+            }
+
+            var finalServiceName = serviceName ?? parent?.ServiceName ?? DefaultServiceName;
+            var spanContext = new SpanContext(parent, traceContext, finalServiceName);
+
+            var span = new Span(spanContext, startTime, tags)
+            {
+                OperationName = operationName,
+            };
+
+            // Apply any global tags
+            if (Settings.GlobalTags.Count > 0)
+            {
+                foreach (var entry in Settings.GlobalTags)
+                {
+                    span.SetTag(entry.Key, entry.Value);
+                }
+            }
+
+            // automatically add the "env" tag if defined, taking precedence over an "env" tag set from a global tag
+            var env = Settings.Environment;
+            if (!string.IsNullOrWhiteSpace(env))
+            {
+                span.SetTag(Tags.Env, env);
+            }
+
+            // automatically add the "version" tag if defined, taking precedence over an "version" tag set from a global tag
+            var version = Settings.ServiceVersion;
+            if (!string.IsNullOrWhiteSpace(version) && string.Equals(finalServiceName, DefaultServiceName))
+            {
+                span.SetTag(Tags.Version, version);
+            }
+
+            traceContext.AddSpan(span);
+            return span;
+        }
+
         internal Task FlushAsync()
         {
             return _agentWriter.FlushTracesAsync();
-        }
-
-        internal void StartDiagnosticObservers()
-        {
-            // instead of adding a hard dependency on DiagnosticSource,
-            // check if it is available before trying to use it
-            var type = Type.GetType("System.Diagnostics.DiagnosticSource, System.Diagnostics.DiagnosticSource", throwOnError: false);
-
-            if (type == null)
-            {
-                Log.Warning("DiagnosticSource type could not be loaded. Disabling diagnostic observers.");
-            }
-            else
-            {
-                // don't call this method unless the necessary types are available
-                StartDiagnosticObserversInternal();
-            }
-        }
-
-        internal void StartDiagnosticObserversInternal()
-        {
-            DiagnosticManager?.Stop();
-
-            var observers = new List<DiagnosticObserver>();
-
-#if NETSTANDARD
-            if (Settings.IsIntegrationEnabled(AspNetCoreDiagnosticObserver.IntegrationName))
-            {
-                Log.Debug("Adding AspNetCoreDiagnosticObserver");
-
-                var aspNetCoreDiagnosticOptions = new AspNetCoreDiagnosticOptions();
-                observers.Add(new AspNetCoreDiagnosticObserver(this, aspNetCoreDiagnosticOptions));
-            }
-#endif
-
-            if (observers.Count == 0)
-            {
-                Log.Debug("DiagnosticManager not started, zero observers added.");
-            }
-            else
-            {
-                Log.Debug("Starting DiagnosticManager with {0} observers.", observers.Count);
-
-                var diagnosticManager = new DiagnosticManager(observers);
-                diagnosticManager.Start();
-                DiagnosticManager = diagnosticManager;
-            }
         }
 
         internal async Task WriteDiagnosticLog()
@@ -559,7 +596,7 @@ namespace Datadog.Trace
         {
             try
             {
-#if !NETSTANDARD2_0
+#if NETFRAMEWORK
                 // System.Web.dll is only available on .NET Framework
                 if (System.Web.Hosting.HostingEnvironment.IsHosted)
                 {

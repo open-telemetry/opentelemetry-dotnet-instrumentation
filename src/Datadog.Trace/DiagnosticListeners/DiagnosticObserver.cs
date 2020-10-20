@@ -1,3 +1,4 @@
+#if !NETFRAMEWORK
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,13 +9,6 @@ namespace Datadog.Trace.DiagnosticListeners
     internal abstract class DiagnosticObserver : IObserver<KeyValuePair<string, object>>
     {
         private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.For<DiagnosticObserver>();
-
-        protected DiagnosticObserver(IDatadogTracer tracer)
-        {
-            Tracer = tracer ?? throw new ArgumentNullException(nameof(tracer));
-        }
-
-        protected IDatadogTracer Tracer { get; }
 
         /// <summary>
         /// Gets the name of the <see cref="DiagnosticListener"/> that should be instrumented.
@@ -65,3 +59,4 @@ namespace Datadog.Trace.DiagnosticListeners
         protected abstract void OnNext(string eventName, object arg);
     }
 }
+#endif

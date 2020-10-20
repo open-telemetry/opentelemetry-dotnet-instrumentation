@@ -1,3 +1,4 @@
+#if !NETFRAMEWORK
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -25,13 +26,15 @@ namespace Datadog.Trace.DiagnosticListeners
             _diagnosticObservers = diagnosticSubscribers.Where(x => x.IsSubscriberEnabled());
         }
 
+        public static DiagnosticManager Instance { get; set; }
+
         public bool IsRunning => _allListenersSubscription != null;
 
         public void Start()
         {
             if (_allListenersSubscription == null)
             {
-                Log.Verbose("Starting AllListeners subscription");
+                Log.Verbose("Starting DiagnosticListener.AllListeners subscription");
                 _allListenersSubscription = DiagnosticListener.AllListeners.Subscribe(this);
             }
         }
@@ -71,7 +74,7 @@ namespace Datadog.Trace.DiagnosticListeners
             {
                 if (Log.IsEnabled(LogEventLevel.Verbose))
                 {
-                    Log.Verbose("Stopping AllListeners subscription");
+                    Log.Verbose("Stopping DiagnosticListener.AllListeners subscription");
                 }
 
                 _allListenersSubscription.Dispose();
@@ -92,3 +95,4 @@ namespace Datadog.Trace.DiagnosticListeners
         }
     }
 }
+#endif

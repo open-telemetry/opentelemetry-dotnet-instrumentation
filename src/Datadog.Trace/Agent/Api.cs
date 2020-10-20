@@ -6,8 +6,8 @@ using Datadog.Trace.Agent.MessagePack;
 using Datadog.Trace.DogStatsd;
 using Datadog.Trace.Logging;
 using Datadog.Trace.PlatformHelpers;
+using Datadog.Trace.Vendors.Newtonsoft.Json;
 using Datadog.Trace.Vendors.StatsdClient;
-using Newtonsoft.Json;
 
 namespace Datadog.Trace.Agent
 {
@@ -19,10 +19,11 @@ namespace Datadog.Trace.Agent
 
         private readonly IApiRequestFactory _apiRequestFactory;
         private readonly IStatsd _statsd;
-        private readonly Uri _tracesEndpoint;
         private readonly FormatterResolverWrapper _formatterResolver = new FormatterResolverWrapper(SpanFormatterResolver.Instance);
         private readonly string _containerId;
         private readonly FrameworkDescription _frameworkDescription;
+        private Uri _tracesEndpoint; // The Uri may be reassigned dynamically so that retry attempts may attempt updated Agent ports
+        private string _cachedResponse;
 
         public Api(Uri baseEndpoint, IApiRequestFactory apiRequestFactory, IStatsd statsd)
         {
@@ -31,7 +32,7 @@ namespace Datadog.Trace.Agent
             _tracesEndpoint = new Uri(baseEndpoint, TracesPath);
             _statsd = statsd;
             _containerId = ContainerMetadata.GetContainerId();
-            _apiRequestFactory = apiRequestFactory ?? new ApiWebRequestFactory();
+            _apiRequestFactory = apiRequestFactory ?? CreateRequestFactory();
 
             // report runtime details
             try
@@ -47,6 +48,11 @@ namespace Datadog.Trace.Agent
             {
                 Log.SafeLogError(e, "Error getting framework description");
             }
+        }
+
+        public void SetBaseEndpoint(Uri baseEndpoint)
+        {
+            _tracesEndpoint = new Uri(baseEndpoint, TracesPath);
         }
 
         public async Task<bool> SendTracesAsync(Span[][] traces)
@@ -96,27 +102,42 @@ namespace Datadog.Trace.Agent
                 // Error handling block
                 if (!success)
                 {
-                    bool isSocketException = false;
-
-                    if (exception?.InnerException is SocketException se)
-                    {
-                        isSocketException = true;
-                        Log.Error(se, "Unable to communicate with the trace agent at {0}", _tracesEndpoint);
-                        TracingProcessManager.TryForceTraceAgentRefresh();
-                    }
-
+                    // Exit if we've hit our retry limit
                     if (retryCount >= retryLimit)
                     {
                         // stop retrying
                         Log.Error(exception, "An error occurred while sending traces to the agent at {0}", _tracesEndpoint);
+                        _statsd?.Send();
                         return false;
                     }
 
-                    // retry
+                    // Before retry delay
+                    bool isSocketException = false;
+                    Exception innerException = exception;
+
+                    while (innerException != null)
+                    {
+                        if (innerException is SocketException)
+                        {
+                            isSocketException = true;
+                            break;
+                        }
+
+                        innerException = innerException.InnerException;
+                    }
+
+                    if (isSocketException)
+                    {
+                        Log.Error(exception, "Unable to communicate with the trace agent at {0}", _tracesEndpoint);
+                        TracingProcessManager.TryForceTraceAgentRefresh();
+                    }
+
+                    // Execute retry delay
                     await Task.Delay(sleepDuration).ConfigureAwait(false);
                     retryCount++;
                     sleepDuration *= 2;
 
+                    // After retry delay
                     if (isSocketException)
                     {
                         // Ensure we have the most recent port before trying again
@@ -129,6 +150,15 @@ namespace Datadog.Trace.Agent
                 _statsd?.Send();
                 return true;
             }
+        }
+
+        private static IApiRequestFactory CreateRequestFactory()
+        {
+#if NETCOREAPP
+            return new HttpClientRequestFactory();
+#else
+            return new ApiWebRequestFactory();
+#endif
         }
 
         private static HashSet<ulong> GetUniqueTraceIds(Span[][] traces)
@@ -182,11 +212,18 @@ namespace Datadog.Trace.Agent
 
                 try
                 {
-                    if (response.ContentLength > 0 && Tracer.Instance.Sampler != null)
+                    if (response.ContentLength != 0 && Tracer.Instance.Sampler != null)
                     {
                         var responseContent = await response.ReadAsStringAsync().ConfigureAwait(false);
-                        var apiResponse = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
-                        Tracer.Instance.Sampler.SetDefaultSampleRates(apiResponse?.RateByService);
+
+                        if (responseContent != _cachedResponse)
+                        {
+                            var apiResponse = JsonConvert.DeserializeObject<ApiResponse>(responseContent);
+
+                            Tracer.Instance.Sampler.SetDefaultSampleRates(apiResponse?.RateByService);
+
+                            _cachedResponse = responseContent;
+                        }
                     }
                 }
                 catch (Exception ex)

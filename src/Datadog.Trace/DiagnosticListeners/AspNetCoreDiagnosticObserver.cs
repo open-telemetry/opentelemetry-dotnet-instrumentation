@@ -1,4 +1,4 @@
-#if NETSTANDARD
+#if !NETFRAMEWORK
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +6,7 @@ using Datadog.Trace.Abstractions;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Headers;
 using Datadog.Trace.Logging;
+using Datadog.Trace.Tagging;
 using Datadog.Trace.Util;
 using Datadog.Trace.Vendors.Serilog.Events;
 using Microsoft.AspNetCore.Http;
@@ -39,15 +40,17 @@ namespace Datadog.Trace.DiagnosticListeners
         private static readonly PropertyFetcher BeforeActionHttpContextFetcher = new PropertyFetcher("httpContext");
         private static readonly PropertyFetcher BeforeActionActionDescriptorFetcher = new PropertyFetcher("actionDescriptor");
 
-        private readonly IDatadogTracer _tracer;
-        private readonly AspNetCoreDiagnosticOptions _options;
+        private readonly Tracer _tracer;
         private readonly bool _isLogLevelDebugEnabled = Log.IsEnabled(LogEventLevel.Debug);
 
-        public AspNetCoreDiagnosticObserver(IDatadogTracer tracer, AspNetCoreDiagnosticOptions options)
-            : base(tracer)
+        public AspNetCoreDiagnosticObserver()
+            : this(null)
         {
-            _tracer = tracer ?? throw new ArgumentNullException(nameof(tracer));
-            _options = options ?? throw new ArgumentNullException(nameof(options));
+        }
+
+        public AspNetCoreDiagnosticObserver(Tracer tracer)
+        {
+            _tracer = tracer;
         }
 
         protected override string ListenerName => DiagnosticListenerName;
@@ -112,120 +115,124 @@ namespace Datadog.Trace.DiagnosticListeners
 
         private static IEnumerable<KeyValuePair<string, string>> ExtractHeaderTags(HttpRequest request, IDatadogTracer tracer)
         {
-            try
-            {
-                // extract propagation details from http headers
-                var requestHeaders = request.Headers;
+            var settings = tracer.Settings;
 
-                if (requestHeaders != null)
-                {
-                    return SpanContextPropagator.Instance.ExtractHeaderTags(new HeadersCollectionAdapter(requestHeaders), tracer.Settings.HeaderTags);
-                }
-            }
-            catch (Exception ex)
+            if (!settings.HeaderTags.IsEmpty())
             {
-                Log.SafeLogError(ex, "Error extracting propagated HTTP headers.");
+                try
+                {
+                    // extract propagation details from http headers
+                    var requestHeaders = request.Headers;
+
+                    if (requestHeaders != null)
+                    {
+                        return SpanContextPropagator.Instance.ExtractHeaderTags(new HeadersCollectionAdapter(requestHeaders), settings.HeaderTags);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.SafeLogError(ex, "Error extracting propagated HTTP headers.");
+                }
             }
 
             return Enumerable.Empty<KeyValuePair<string, string>>();
         }
 
-        private bool ShouldIgnore(HttpContext httpContext)
-        {
-            foreach (Func<HttpContext, bool> ignore in _options.IgnorePatterns)
-            {
-                if (ignore(httpContext))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         private void OnHostingHttpRequestInStart(object arg)
         {
-            var httpContext = HttpRequestInStartHttpContextFetcher.Fetch<HttpContext>(arg);
+            var tracer = _tracer ?? Tracer.Instance;
 
-            if (ShouldIgnore(httpContext))
+            if (!tracer.Settings.IsIntegrationEnabled(IntegrationName))
             {
-                if (_isLogLevelDebugEnabled)
-                {
-                    Log.Debug("Ignoring request");
-                }
+                return;
             }
-            else
+
+            var httpContext = HttpRequestInStartHttpContextFetcher.Fetch<HttpContext>(arg);
+            HttpRequest request = httpContext.Request;
+            string host = request.Host.Value;
+            string httpMethod = request.Method?.ToUpperInvariant() ?? "UNKNOWN";
+            string url = GetUrl(request);
+
+            string absolutePath = request.Path.Value;
+
+            if (request.PathBase.HasValue)
             {
-                HttpRequest request = httpContext.Request;
-                string host = request.Host.Value;
-                string httpMethod = request.Method?.ToUpperInvariant() ?? "UNKNOWN";
-                string url = GetUrl(request);
+                absolutePath = request.PathBase.Value + absolutePath;
+            }
 
-                string resourceUrl = UriHelpers.GetRelativeUrl(new Uri(url), tryRemoveIds: true)
-                                               .ToLowerInvariant();
+            string resourceUrl = UriHelpers.GetRelativeUrl(absolutePath, tryRemoveIds: true)
+                                           .ToLowerInvariant();
 
-                string resourceName = $"{httpMethod} {resourceUrl}";
+            string resourceName = $"{httpMethod} {resourceUrl}";
 
-                SpanContext propagatedContext = ExtractPropagatedContext(request);
-                var tagsFromHeaders = ExtractHeaderTags(request, _tracer);
+            SpanContext propagatedContext = ExtractPropagatedContext(request);
+            var tagsFromHeaders = ExtractHeaderTags(request, tracer);
 
-                Span span = _tracer.StartSpan(HttpRequestInOperationName, propagatedContext)
-                                   .SetTag(Tags.InstrumentationName, ComponentName);
+            var tags = new AspNetCoreTags();
+            var scope = tracer.StartActiveWithTags(HttpRequestInOperationName, propagatedContext, tags: tags);
 
-                span.DecorateWebServerSpan(resourceName, httpMethod, host, url, tagsFromHeaders);
+            tags.InstrumentationName = ComponentName;
 
-                // set analytics sample rate if enabled
-                var analyticsSampleRate = _tracer.Settings.GetIntegrationAnalyticsSampleRate(IntegrationName, enabledWithGlobalSetting: true);
-                span.SetMetric(Tags.Analytics, analyticsSampleRate);
+            scope.Span.DecorateWebServerSpan(resourceName, httpMethod, host, url, tags, tagsFromHeaders);
 
-                Scope scope = _tracer.ActivateSpan(span);
+            // set analytics sample rate if enabled
+            var analyticsSampleRate = tracer.Settings.GetIntegrationAnalyticsSampleRate(IntegrationName, enabledWithGlobalSetting: true);
 
-                _options.OnRequest?.Invoke(scope.Span, httpContext);
+            if (analyticsSampleRate != null)
+            {
+                tags.AnalyticsSampleRate = analyticsSampleRate;
             }
         }
 
         private void OnMvcBeforeAction(object arg)
         {
+            var tracer = _tracer ?? Tracer.Instance;
+
+            if (!tracer.Settings.IsIntegrationEnabled(IntegrationName))
+            {
+                return;
+            }
+
             var httpContext = BeforeActionHttpContextFetcher.Fetch<HttpContext>(arg);
 
-            if (ShouldIgnore(httpContext))
+            Span span = tracer.ActiveScope?.Span;
+
+            if (span != null)
             {
-                if (_isLogLevelDebugEnabled)
-                {
-                    Log.Debug("Ignoring request");
-                }
-            }
-            else
-            {
-                Span span = _tracer.ScopeManager.Active?.Span;
+                // NOTE: This event is the start of the action pipeline. The action has been selected, the route
+                //       has been selected but no filters have run and model binding hasn't occurred.
+                var actionDescriptor = BeforeActionActionDescriptorFetcher.Fetch<ActionDescriptor>(arg);
+                HttpRequest request = httpContext.Request;
 
-                if (span != null)
-                {
-                    // NOTE: This event is the start of the action pipeline. The action has been selected, the route
-                    //       has been selected but no filters have run and model binding hasn't occured.
-                    var actionDescriptor = BeforeActionActionDescriptorFetcher.Fetch<ActionDescriptor>(arg);
-                    HttpRequest request = httpContext.Request;
+                string httpMethod = request.Method?.ToUpperInvariant() ?? "UNKNOWN";
+                string controllerName = actionDescriptor.RouteValues["controller"];
+                string actionName = actionDescriptor.RouteValues["action"];
+                string routeTemplate = actionDescriptor.AttributeRouteInfo?.Template ?? $"{controllerName}/{actionName}";
+                string resourceName = $"{httpMethod} {routeTemplate}";
 
-                    string httpMethod = request.Method?.ToUpperInvariant() ?? "UNKNOWN";
-                    string controllerName = actionDescriptor.RouteValues["controller"];
-                    string actionName = actionDescriptor.RouteValues["action"];
-                    string routeTemplate = actionDescriptor.AttributeRouteInfo?.Template ?? $"{controllerName}/{actionName}";
-                    string resourceName = $"{httpMethod} {routeTemplate}";
-
-                    // override the parent's resource name with the MVC route template
-                    span.ResourceName = resourceName;
-                }
+                // override the parent's resource name with the MVC route template
+                span.ResourceName = resourceName;
             }
         }
 
         private void OnHostingHttpRequestInStop(object arg)
         {
-            IScope scope = _tracer.ScopeManager.Active;
+            var tracer = _tracer ?? Tracer.Instance;
+
+            if (!tracer.Settings.IsIntegrationEnabled(IntegrationName))
+            {
+                return;
+            }
+
+            IScope scope = tracer.ActiveScope;
 
             if (scope != null)
             {
                 var httpContext = HttpRequestInStopHttpContextFetcher.Fetch<HttpContext>(arg);
-                scope.Span.SetTag(Tags.HttpStatusCode, httpContext.Response.StatusCode.ToString());
+
+                var statusCode = HttpTags.ConvertStatusCodeToString(httpContext.Response.StatusCode);
+
+                scope.Span.SetTag(Tags.HttpStatusCode, statusCode);
 
                 if (httpContext.Response.StatusCode / 100 == 5)
                 {
@@ -239,7 +246,14 @@ namespace Datadog.Trace.DiagnosticListeners
 
         private void OnHostingUnhandledException(object arg)
         {
-            ISpan span = _tracer.ScopeManager.Active?.Span;
+            var tracer = _tracer ?? Tracer.Instance;
+
+            if (!tracer.Settings.IsIntegrationEnabled(IntegrationName))
+            {
+                return;
+            }
+
+            ISpan span = tracer.ActiveScope?.Span;
 
             if (span != null)
             {
@@ -247,7 +261,6 @@ namespace Datadog.Trace.DiagnosticListeners
                 var httpContext = UnhandledExceptionHttpContextFetcher.Fetch<HttpContext>(arg);
 
                 span.SetException(exception);
-                _options.OnError?.Invoke(span, exception, httpContext);
             }
         }
 

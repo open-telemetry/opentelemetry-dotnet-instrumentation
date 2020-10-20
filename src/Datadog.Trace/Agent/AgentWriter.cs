@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Datadog.Trace.DogStatsd;
 using Datadog.Trace.Logging;
+using Datadog.Trace.Util;
 using Datadog.Trace.Vendors.StatsdClient;
 
 namespace Datadog.Trace.Agent
@@ -33,14 +34,14 @@ namespace Datadog.Trace.Agent
             _flushTask = automaticFlush ? Task.Run(FlushTracesTaskLoopAsync) : Task.FromResult(true);
         }
 
-        public void OverrideApi(IApi api)
+        public void SetApiBaseEndpoint(Uri uri)
         {
-            _api = api;
+            _api.SetBaseEndpoint(uri);
         }
 
         public Task<bool> Ping()
         {
-            return _api.SendTracesAsync(new Span[0][]);
+            return _api.SendTracesAsync(ArrayHelper.Empty<Span[]>());
         }
 
         public void WriteTrace(Span[] trace)

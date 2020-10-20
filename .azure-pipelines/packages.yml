@@ -5,13 +5,6 @@ trigger:
       - refs/tags/*
 pr: none
 
-schedules:
-- cron: "0 0 * * *"
-  displayName: Daily midnight build
-  branches:
-    include:
-    - master
-
 variables:
   buildConfiguration: release
   dotnetCoreSdkVersion: 3.1.107
@@ -104,7 +97,7 @@ stages:
         arguments: --configuration $(buildConfiguration)
 
     - task: DotNetCoreCLI@2
-      displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed
+      displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed netstandard 2.0
       inputs:
         command: publish
         publishWebProjects: false
@@ -112,6 +105,16 @@ stages:
         zipAfterPublish: false
         projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
         arguments: --configuration $(buildConfiguration) --framework netstandard2.0 --output $(tracerHome)/netstandard2.0
+
+    - task: DotNetCoreCLI@2
+      displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed netcoreapp 3.1
+      inputs:
+        command: publish
+        publishWebProjects: false
+        modifyOutputPath: false
+        zipAfterPublish: false
+        projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
+        arguments: --configuration $(buildConfiguration) --framework netcoreapp3.1 --output $(tracerHome)/netcoreapp3.1
 
     - task: DockerCompose@0
       displayName: docker-compose run Profiler
@@ -148,7 +151,7 @@ stages:
         arguments: --configuration $(buildConfiguration)
 
     - task: DotNetCoreCLI@2
-      displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed
+      displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed 2.0
       inputs:
         command: publish
         publishWebProjects: false
@@ -156,6 +159,16 @@ stages:
         zipAfterPublish: false
         projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
         arguments: --configuration $(buildConfiguration) --framework netstandard2.0 --output $(tracerHome)/netstandard2.0
+
+    - task: DotNetCoreCLI@2
+      displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed 3.1
+      inputs:
+        command: publish
+        publishWebProjects: false
+        modifyOutputPath: false
+        zipAfterPublish: false
+        projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
+        arguments: --configuration $(buildConfiguration) --framework netcoreapp3.1 --output $(tracerHome)/netcoreapp3.1
 
     - task: DockerCompose@0
       displayName: docker-compose run Profiler.Alpine
@@ -182,11 +195,6 @@ stages:
       vmImage: ubuntu-18.04
 
     steps:
-    - task: GitVersion@5
-      displayName: GitVersion
-      inputs:
-        preferBundledVersion: false
-
     - download: current
       artifact: windows-msi
       patterns: '**/*x64.msi'
@@ -211,12 +219,18 @@ stages:
         mv s3_upload/*.deb $PACKAGE_NAME-amd64.deb
       displayName: Rename deb package name to match MSI name
 
+    # Create index.txt file with the following format:
+    # BRANCH_NAME
+    # SHA
+    # ARTIFACT WILDCARD (datadog-dotnet-apm-vX.X.X-*)
+    # COMMIT AUTHOR
+    # Note: For the branch name, normalize 'refs/heads/<branch>' to '<branch>' and 'refs/tags/<tag_name>' to 'tags/<tag_name>'
     - script: |
         INDEX_FILE=$(pwd)/s3_upload/index.txt
-        echo $(GitVersion.BranchName) >> $INDEX_FILE
-        echo $(GitVersion.Sha) >> $INDEX_FILE
+        echo $(Build.SourceBranch) | sed 's/refs\/heads\///g' | sed 's/refs\/tags\//tags\//g' >> $INDEX_FILE
+        git rev-parse HEAD >> $INDEX_FILE
         pushd s3_upload && name=$(ls *.deb) && echo "${name::-9}*" >> $INDEX_FILE && popd
-        git show -s --format='%ae' $(GitVersion.Sha) >> $INDEX_FILE
+        git show -s --format='%ae' HEAD >> $INDEX_FILE
         echo Generated index.txt file:
         cat $INDEX_FILE
       displayName: Write index.txt
