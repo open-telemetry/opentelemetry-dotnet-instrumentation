@@ -116,7 +116,7 @@ namespace OpenTelemetry.DynamicActivityBinding
                 Log.Debug($"Initializing {nameof(DynamicLoader)}.");
                 Log.Debug($"Runtime version:        {Environment.Version}.");
                 Log.Debug($"BCL version:            {typeof(object).Assembly.FullName}.");
-                Log.Debug();
+                Log.Debug("");
 
                 bool success = PerformInitialization();
 
