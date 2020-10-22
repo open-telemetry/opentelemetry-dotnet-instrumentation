@@ -222,6 +222,11 @@ namespace OpenTelemetry.DynamicActivityBinding
             _isRemote = isRemote;
         }
 
+        public bool IsNotInitialized()
+        {
+            return _w3cTraceContext == null && _traceState == null && _isRemote == false;
+        }
+
         public bool IsRemote { get { return _isRemote; } }
 
         public string SpanIdHexString

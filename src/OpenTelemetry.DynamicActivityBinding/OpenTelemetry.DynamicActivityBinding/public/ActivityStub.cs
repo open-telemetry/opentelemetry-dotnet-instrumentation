@@ -214,8 +214,11 @@ namespace OpenTelemetry.DynamicActivityBinding
                 // https://github.com/dotnet/runtime/blob/7666224cfcfb4349da28f9f7fb1de931528ef208/src/libraries/System.Diagnostics.DiagnosticSource/src/System/Diagnostics/Activity.cs#L405
                 // https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#id-format
 
-                string parentId = "|" + parentContext.TraceIdHexString + "." + parentContext.SpanIdHexString + "_";
-                invoker.Activity.SetParentId(activityInstance, parentId);
+                if (parentContext.IsNotInitialized())
+                {
+                    string parentId = "|" + parentContext.TraceIdHexString + "." + parentContext.SpanIdHexString + "_";
+                    invoker.Activity.SetParentId(activityInstance, parentId);
+                }
 
                 // Internal is the default. For internal, we avoid creating supplemantal data.
                 if (activityKind != ActivityKindStub.Internal)
@@ -284,6 +287,10 @@ namespace OpenTelemetry.DynamicActivityBinding
         #endregion Public API stubs for static Activity APIs
 
         #region Public API stubs for instance Activity APIs
+
+        public string TraceId { get { throw new NotImplementedException(); } } 
+        public string SpanId { get { throw new NotImplementedException(); } }
+        public string ParentSpanId { get { throw new NotImplementedException(); } }
 
         public void AddBaggage(string key, string value)
         {
@@ -544,20 +551,35 @@ namespace OpenTelemetry.DynamicActivityBinding
             }
         }
 
-        public ActivityStub Parent(out bool hasParent)
+        public bool TryGetParent(out ActivityStub parent)
         {
-            // A more appropriate shape for this API would be
-            //   bool TryGetParentStub(out ActivityStub parentStub);
-            // However, we want Intellisense to place this next to Parent.
             if (_activityInstance == null)
             {
-                hasParent = false;
-                return NoOpSingeltons.ActivityStub;
+                parent = NoOpSingeltons.ActivityStub;
+                return false;
             }
 
-            object parent = Parent;
-            hasParent = (parent != null);
-            return hasParent ? ActivityStub.Wrap(parent) : NoOpSingeltons.ActivityStub;
+            DynamicInvoker invoker = DynamicLoader.Invoker;
+
+            if (invoker.SupportedFeatures.FeatureSet_5000 || invoker.SupportedFeatures.FeatureSet_4020)
+            {
+                object parentObject = default;
+                if (parentObject == null)
+                {
+                    parent = NoOpSingeltons.ActivityStub;
+                    return false;
+                }
+                else
+                {
+                    parent = ActivityStub.Wrap(parentObject);
+                    return true;
+                }
+            }
+            else
+            {
+                string errMsg = FormatNotSupportedErrorMessage(nameof(RootId), "4020", invoker);
+                throw new NotSupportedException(errMsg);
+            }
         }
 
         public string RootId
@@ -709,17 +731,7 @@ namespace OpenTelemetry.DynamicActivityBinding
             }
         }
 
-        
-
-        
-
-       
-
-        
-
-  
-
-#endregion Public API stubs for instance Activity APIs
+        #endregion Public API stubs for instance Activity APIs
 
     }
 }

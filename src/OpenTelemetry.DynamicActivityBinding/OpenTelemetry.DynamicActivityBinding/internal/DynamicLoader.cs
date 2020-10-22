@@ -157,7 +157,7 @@ namespace OpenTelemetry.DynamicActivityBinding
 
             };
 
-            s_invoker = new DynamicInvoker(activityType, supportedFeatures);
+            s_invoker = new DynamicInvoker(supportedFeatures, activityType, null, null);
             return true;
         }
 

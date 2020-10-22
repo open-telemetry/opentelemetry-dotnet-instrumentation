@@ -109,6 +109,16 @@ namespace OpenTelemetry.DynamicActivityBinding
                 invoker(activityInstance, key, value);
             }
 
+            internal ActivityIdFormatStub get_DefaultIdFormat()
+            {
+                throw new NotImplementedException();
+            }
+
+            internal object get_Current()
+            {
+                throw new NotImplementedException();
+            }
+
             public string GetBaggageItem(object activityInstance, string key)
             {
                 // Activity API signature:
@@ -166,6 +176,21 @@ namespace OpenTelemetry.DynamicActivityBinding
                 return result;
             }
 
+            internal object Ctor(string operationName)
+            {
+                throw new NotImplementedException();
+            }
+
+            internal void SetParentId(object activityInstance, string parentId)
+            {
+                throw new NotImplementedException();
+            }
+
+            internal void AddTag(object activityInstance, string key, string value)
+            {
+                throw new NotImplementedException();
+            }
+
 
             //private static MethodInfo GetMethodInfo(Type containingType, string methodName, bool isStatic)
             //{
@@ -181,7 +206,7 @@ namespace OpenTelemetry.DynamicActivityBinding
             //    return methodInfo;
             //}
 
-           
+
         }
 
         internal class DynamicActivitySourceInvoker
@@ -199,6 +224,11 @@ namespace OpenTelemetry.DynamicActivityBinding
                 Validate.NotNull(activitySourceType, nameof(activitySourceType));
                 _activitySourceType = activitySourceType;
             }
+
+            internal object StartActivity(string operationName, ActivityKindStub activityKind, ActivityContextStub parentContext, IEnumerable<KeyValuePair<string, string>> tags)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         internal class DynamicDiagnosticListenerInvoker
@@ -211,10 +241,17 @@ namespace OpenTelemetry.DynamicActivityBinding
             private readonly CashedDelegates _cashedDelegates = new CashedDelegates();
             private readonly Type _diagnosticListenerType;
 
+            public object DefaultDiagnosticSource { get { throw new NotImplementedException(); } }
+
             internal DynamicDiagnosticListenerInvoker(Type diagnosticListenerType)
             {
                 Validate.NotNull(diagnosticListenerType, nameof(diagnosticListenerType));
                 _diagnosticListenerType = diagnosticListenerType;
+            }
+
+            internal void StartActivity(object activityInstance1, object activityInstance2)
+            {
+                throw new NotImplementedException();
             }
         }
     }
