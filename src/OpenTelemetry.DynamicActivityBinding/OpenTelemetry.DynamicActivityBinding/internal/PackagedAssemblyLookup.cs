@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
-using OpenTelemetry.Util;
+using Datadog.Util;
 
 namespace OpenTelemetry.DynamicActivityBinding
 {

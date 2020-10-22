@@ -1,7 +1,8 @@
-using OpenTelemetry.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+
+using Datadog.Util;
 
 namespace OpenTelemetry.DynamicActivityBinding
 {
@@ -103,7 +104,7 @@ namespace OpenTelemetry.DynamicActivityBinding
                             exprActivityInstance, exprKey, exprValue);
 
                     invoker = exprInvoker.Compile();
-                    invoker = Concurrent.SetOrGetRaceWinner(ref _cashedDelegates.AddBagage, invoker);
+                    invoker = Concurrent.TrySetOrGetValue(ref _cashedDelegates.AddBagage, invoker);
                 }
 
                 invoker(activityInstance, key, value);
@@ -141,7 +142,7 @@ namespace OpenTelemetry.DynamicActivityBinding
                             exprActivityInstance, exprKey);
 
                     invoker = exprInvoker.Compile();
-                    invoker = Concurrent.SetOrGetRaceWinner(ref _cashedDelegates.GetBaggageItem, invoker);
+                    invoker = Concurrent.TrySetOrGetValue(ref _cashedDelegates.GetBaggageItem, invoker);
                 }
 
                 string result = invoker(activityInstance, key);
@@ -169,7 +170,7 @@ namespace OpenTelemetry.DynamicActivityBinding
                             exprActivityInstance);
 
                     invoker = exprInvoker.Compile();
-                    invoker = Concurrent.SetOrGetRaceWinner(ref _cashedDelegates.get_Baggage, invoker);
+                    invoker = Concurrent.TrySetOrGetValue(ref _cashedDelegates.get_Baggage, invoker);
                 }
 
                 IEnumerable<KeyValuePair<string, string>> result = invoker(activityInstance);

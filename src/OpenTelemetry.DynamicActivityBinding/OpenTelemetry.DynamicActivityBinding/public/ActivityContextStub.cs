@@ -1,5 +1,5 @@
 using System;
-using OpenTelemetry.Util;
+using Datadog.Util;
 
 namespace OpenTelemetry.DynamicActivityBinding
 {

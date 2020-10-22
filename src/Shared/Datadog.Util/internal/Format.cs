@@ -3,24 +3,42 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace OpenTelemetry.Util
+namespace Datadog.Util
 {
     internal static class Format
     {
         private const string NullWord = "null";
 
+        /// <summary>
+        /// Returns either the specified <c>str</c> instrance, or the string <c>"null"</c> if <c>str</c> was <c>null</c>.
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string SpellIfNull(string str)
         {
             return str ?? NullWord;
         }
 
+        /// <summary>
+        /// Returns either the specified <c>val</c> instrance, or the string <c>"null"</c> if <c>val</c> was <c>null</c>.
+        /// </summary>
+        /// <param name="val"></param>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object SpellIfNull(object val)
         {
             return val ?? NullWord;
         }
 
+        /// <summary>
+        /// If the specified parameter <c>str</c> is <c>null</c>,
+        /// returns the string <c>"null"</c> (the quotes (") are delimeters, not actual string contents).
+        /// If the specified parameter <c>str</c> is not <c>null</c>,
+        /// returns the a string that contains the specified <c>str</c> value pre-fixed and post-fixed with a quotes (") character.
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
         public static string QuoteOrSpellNull(string str)
         {
             if (str == null)
@@ -36,12 +54,25 @@ namespace OpenTelemetry.Util
             return builder.ToString();
         }
 
+        /// <summary>
+        /// Determines whether the specified character is a valid lower-case hex digit.
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsLowerHexChar(char c)
         {
             return ('0' <= c && c <= '9') || ('a' <= c && c <= 'f');
         }
 
+        /// <summary>
+        /// Converts the specified key-value enumeration to a C#-style text notation.
+        /// Null values are spelled as "null", strings are quoted (") other objects are converted to strings and left unquoted.
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="table"></param>
+        /// <returns></returns>
         public static IEnumerable<string> AsTextLines<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> table)
         {
             string QuoteIfString<T>(T val)
@@ -72,6 +103,17 @@ namespace OpenTelemetry.Util
             }
         }
 
+
+        /// <summary>
+        /// Converts the specified value to a string and shortens it to not exceed the specified length.
+        /// If the specified length is 5 or more chars, the shortening occurs by removing characters from
+        /// the middle of the string and inserting "...".
+        /// Otherwise the string is truncated at the end.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="maxLength"></param>
+        /// <param name="trim"></param>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string LimitLength(object value, int maxLength, bool trim)
         {
@@ -79,6 +121,16 @@ namespace OpenTelemetry.Util
             return LimitLength(valueStr, maxLength, trim);
         }
 
+        /// <summary>
+        /// Converts the specified value to a string and shortens it to not exceed the specified length.
+        /// If the specified length is 5 or more chars, the shortening occurs by removing characters from
+        /// the middle of the string and inserting "...".
+        /// Otherwise the string is truncated at the end.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="maxLength"></param>
+        /// <param name="trim"></param>
+        /// <returns></returns>
         public static string LimitLength(string value, int maxLength, bool trim)
         {
             if (maxLength < 0)

@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 
-namespace OpenTelemetry.Util
+namespace Datadog.Util
 {
     internal static class Validate
     {

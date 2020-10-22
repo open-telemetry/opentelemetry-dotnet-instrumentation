@@ -13,7 +13,7 @@ using System.IO;
     using System.Runtime.Loader;
 #endif
 
-using OpenTelemetry.Util;
+using Datadog.Util;
 
 namespace OpenTelemetry.DynamicActivityBinding
 {
@@ -398,7 +398,7 @@ namespace OpenTelemetry.DynamicActivityBinding
             if (packagedAssemblies == null)
             {
                 packagedAssemblies = ReadPackagedAssembliesFromDisk();
-                packagedAssemblies = Concurrent.SetOrGetRaceWinner(ref s_packagedAssemblies, packagedAssemblies);
+                packagedAssemblies = Concurrent.TrySetOrGetValue(ref s_packagedAssemblies, packagedAssemblies);
             }
 
             return packagedAssemblies;

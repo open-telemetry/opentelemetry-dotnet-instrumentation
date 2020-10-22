@@ -1,9 +1,16 @@
-﻿using System;
+using System;
 
-namespace OpenTelemetry.Util
+namespace Datadog.Util
 {
     internal static class ArrayExtensions
     {
+        /// <summary>
+        /// Compare two arrays for equality by making sure each element pair in order are equal in respect to .Equals(..).
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="arr1"></param>
+        /// <param name="arr2"></param>
+        /// <returns></returns>
         public static bool IsEqual<T>(this T[] arr1, T[] arr2) where T : IEquatable<T>
         {
             if (arr1 == arr2)
