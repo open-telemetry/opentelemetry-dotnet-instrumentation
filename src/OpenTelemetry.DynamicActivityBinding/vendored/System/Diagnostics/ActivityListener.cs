@@ -6,9 +6,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 
-namespace System.Diagnostics
+namespace Vendored.System.Diagnostics
 {
     /// <summary>
     /// Define the callback that can be used in <see cref="ActivityListener"/> to allow deciding to create the Activity objects and with what data state.

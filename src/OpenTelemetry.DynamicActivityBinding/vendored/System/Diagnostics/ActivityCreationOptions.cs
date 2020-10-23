@@ -5,10 +5,12 @@
 
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace System.Diagnostics
+namespace Vendored.System.Diagnostics
 {
     /// <summary>
     /// ActivityCreationOptions is encapsulating all needed information which will be sent to the ActivityListener to decide about creating the Activity object and with what state.
@@ -87,7 +89,7 @@ namespace System.Diagnostics
         public ActivityTagsCollection SamplingTags
         {
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-            [System.Security.SecuritySafeCriticalAttribute]
+            [global::System.Security.SecuritySafeCriticalAttribute]
 #endif
             get
             {
@@ -103,7 +105,7 @@ namespace System.Diagnostics
         public ActivityTraceId TraceId
         {
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-            [System.Security.SecuritySafeCriticalAttribute]
+            [global::System.Security.SecuritySafeCriticalAttribute]
 #endif
             get
             {

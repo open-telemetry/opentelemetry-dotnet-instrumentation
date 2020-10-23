@@ -7,11 +7,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Messaging;
 using System.Security;
 
-namespace System.Diagnostics
+namespace Vendored.System.Diagnostics
 {
     public partial class Activity
     {
@@ -22,7 +23,7 @@ namespace System.Diagnostics
         public static Activity Current
         {
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-            [System.Security.SecuritySafeCriticalAttribute]
+            [global::System.Security.SecuritySafeCriticalAttribute]
 #endif
             get
             {
@@ -37,7 +38,7 @@ namespace System.Diagnostics
             }
 
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-            [System.Security.SecuritySafeCriticalAttribute]
+            [global::System.Security.SecuritySafeCriticalAttribute]
 #endif
             set
             {
@@ -51,7 +52,7 @@ namespace System.Diagnostics
 #region private
 
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [System.Security.SecuritySafeCriticalAttribute]
+        [global::System.Security.SecuritySafeCriticalAttribute]
 #endif
         private static void SetCurrent(Activity activity)
         {

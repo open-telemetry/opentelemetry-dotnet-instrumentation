@@ -3,7 +3,7 @@
 #pragma warning disable CS1591
 
 
-namespace System.Diagnostics
+namespace Vendored.System.Diagnostics
 {
     internal class SR : Local.System.Diagnostics.DiagnosticSource.System_Diagnostics_Resources_Strings
     {

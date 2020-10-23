@@ -8,7 +8,7 @@
 
 using System.Threading;
 
-namespace System.Diagnostics
+namespace Vendored.System.Diagnostics
 {
     public partial class Activity
     {

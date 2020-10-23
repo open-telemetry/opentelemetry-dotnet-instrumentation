@@ -9,7 +9,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace System.Diagnostics
+namespace Vendored.System.Diagnostics
 {
     /// <summary>
     /// A text annotation associated with a collection of tags.

@@ -7,9 +7,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics;
 using System.Threading;
 
-namespace System.Diagnostics
+namespace Vendored.System.Diagnostics
 {
     partial class Activity
     {

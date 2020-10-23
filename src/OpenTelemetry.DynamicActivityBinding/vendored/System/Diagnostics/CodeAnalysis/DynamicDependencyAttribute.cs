@@ -6,7 +6,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace System.Diagnostics.CodeAnalysis
+using System;
+
+namespace Vendored.System.Diagnostics.CodeAnalysis
 {
     /// <summary>
     /// States a dependency that one member has on another.
@@ -37,10 +39,10 @@ namespace System.Diagnostics.CodeAnalysis
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DynamicDependencyAttribute"/> class
-        /// with the specified signature of a member on a <see cref="System.Type"/>.
+        /// with the specified signature of a member on a <see cref="global::System.Type"/>.
         /// </summary>
         /// <param name="memberSignature">The signature of the member depended on.</param>
-        /// <param name="type">The <see cref="System.Type"/> containing <paramref name="memberSignature"/>.</param>
+        /// <param name="type">The <see cref="global::System.Type"/> containing <paramref name="memberSignature"/>.</param>
         public DynamicDependencyAttribute(string memberSignature, Type type)
         {
             MemberSignature = memberSignature;
@@ -63,10 +65,10 @@ namespace System.Diagnostics.CodeAnalysis
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DynamicDependencyAttribute"/> class
-        /// with the specified types of members on a <see cref="System.Type"/>.
+        /// with the specified types of members on a <see cref="global::System.Type"/>.
         /// </summary>
         /// <param name="memberTypes">The types of members depended on.</param>
-        /// <param name="type">The <see cref="System.Type"/> containing the specified members.</param>
+        /// <param name="type">The <see cref="global::System.Type"/> containing the specified members.</param>
         public DynamicDependencyAttribute(DynamicallyAccessedMemberTypes memberTypes, Type type)
         {
             MemberTypes = memberTypes;
@@ -107,7 +109,7 @@ namespace System.Diagnostics.CodeAnalysis
         public DynamicallyAccessedMemberTypes MemberTypes { get; }
 
         /// <summary>
-        /// Gets the <see cref="System.Type"/> containing the specified member.
+        /// Gets the <see cref="global::System.Type"/> containing the specified member.
         /// </summary>
         /// <remarks>
         /// If neither <see cref="Type"/> nor <see cref="TypeName"/> are specified,

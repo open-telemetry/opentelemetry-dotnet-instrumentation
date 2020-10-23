@@ -9,7 +9,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace System
+namespace Vendored.System
 {
     internal static class HexConverter
     {
@@ -76,7 +76,7 @@ namespace System
         }
 
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [System.Security.SecuritySafeCriticalAttribute]
+        [global::System.Security.SecuritySafeCriticalAttribute]
 #endif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ToCharsBuffer(byte value, char[] buffer, int startingIndex = 0, Casing casing = Casing.Upper)
@@ -99,7 +99,7 @@ namespace System
         }
 
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [System.Security.SecuritySafeCriticalAttribute]
+        [global::System.Security.SecuritySafeCriticalAttribute]
 #endif
         public static unsafe string ToString(byte[] bytes, Casing casing = Casing.Upper)
         {

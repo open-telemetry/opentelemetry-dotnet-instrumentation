@@ -2,11 +2,11 @@
 #nullable enable annotations
 #pragma warning disable CS1591
 
-#nullable disable
 
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
@@ -17,7 +17,7 @@ using System.Text;
 
 // This HttpHandlerDiagnosticListener class is applicable only for .NET 4.6, and not for .NET core.
 
-namespace System.Diagnostics
+namespace Vendored.System.Diagnostics
 {
     /// <summary>
     /// A HttpHandlerDiagnosticListener is a DiagnosticListener for .NET 4.6 and above where

@@ -6,18 +6,20 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Buffers.Binary;
-using System.Buffers.Text;
+using System;
+using Vendored.System.Buffers.Binary;
+using Vendored.System.Buffers.Text;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics;
+using Vendored.System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
-namespace System.Diagnostics
+namespace Vendored.System.Diagnostics
 {
     /// <summary>
     /// Activity represents operation with context to be used for logging.
@@ -158,7 +160,7 @@ namespace System.Diagnostics
         public string? Id
         {
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [System.Security.SecuritySafeCriticalAttribute]
+        [global::System.Security.SecuritySafeCriticalAttribute]
 #endif
             get
             {
@@ -675,7 +677,7 @@ namespace System.Diagnostics
         public ActivitySpanId SpanId
         {
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-            [System.Security.SecuritySafeCriticalAttribute]
+            [global::System.Security.SecuritySafeCriticalAttribute]
 #endif
             get
             {
@@ -747,7 +749,7 @@ namespace System.Diagnostics
         public ActivitySpanId ParentSpanId
         {
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-            [System.Security.SecuritySafeCriticalAttribute]
+            [global::System.Security.SecuritySafeCriticalAttribute]
 #endif
             get
             {
@@ -842,7 +844,7 @@ namespace System.Diagnostics
         }
 
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [System.Security.SecuritySafeCriticalAttribute]
+        [global::System.Security.SecuritySafeCriticalAttribute]
 #endif
         internal static bool TryConvertIdToContext(string traceParent, string? traceState, out ActivityContext context)
         {
@@ -1159,7 +1161,7 @@ namespace System.Diagnostics
             return parentId.Substring(0, trimPosition) + overflowSuffix + '#';
         }
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [System.Security.SecuritySafeCriticalAttribute]
+        [global::System.Security.SecuritySafeCriticalAttribute]
 #endif
         private static unsafe long GetRandomNumber()
         {
@@ -1180,7 +1182,7 @@ namespace System.Diagnostics
         }
 
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [System.Security.SecuritySafeCriticalAttribute]
+        [global::System.Security.SecuritySafeCriticalAttribute]
 #endif
         private bool TrySetTraceIdFromParent()
         {
@@ -1206,7 +1208,7 @@ namespace System.Diagnostics
         }
 
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [System.Security.SecuritySafeCriticalAttribute]
+        [global::System.Security.SecuritySafeCriticalAttribute]
 #endif
         private void TrySetTraceFlagsFromParent()
         {
@@ -1538,7 +1540,7 @@ namespace System.Diagnostics
     /// It is mostly useful as an exchange type.
     /// </summary>
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [System.Security.SecuritySafeCriticalAttribute]
+        [global::System.Security.SecuritySafeCriticalAttribute]
 #endif
     public readonly struct ActivityTraceId : IEquatable<ActivityTraceId>
     {
@@ -1721,7 +1723,7 @@ namespace System.Diagnostics
     /// It is mostly useful as an exchange type.
     /// </summary>
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [System.Security.SecuritySafeCriticalAttribute]
+        [global::System.Security.SecuritySafeCriticalAttribute]
 #endif
     public readonly struct ActivitySpanId : IEquatable<ActivitySpanId>
     {

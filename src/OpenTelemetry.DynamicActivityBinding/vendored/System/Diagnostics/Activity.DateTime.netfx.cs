@@ -6,9 +6,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Diagnostics;
 using System.Threading;
 
-namespace System.Diagnostics
+namespace Vendored.System.Diagnostics
 {
     partial class Activity
     {
@@ -50,7 +52,7 @@ namespace System.Diagnostics
         private static readonly Timer syncTimeUpdater = InitalizeSyncTimer();
 #pragma warning restore CA1823
 
-        [System.Security.SecuritySafeCritical]
+        [global::System.Security.SecuritySafeCritical]
         private static Timer InitalizeSyncTimer()
         {
             Timer timer;

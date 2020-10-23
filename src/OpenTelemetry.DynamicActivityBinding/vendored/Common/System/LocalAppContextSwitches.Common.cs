@@ -6,9 +6,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Runtime.CompilerServices;
 
-namespace System
+namespace Vendored.System
 {
     // Helper method for local caching of compatibility quirks. Keep this lean and simple - this file is included into
     // every framework assembly that implements any compatibility quirks.

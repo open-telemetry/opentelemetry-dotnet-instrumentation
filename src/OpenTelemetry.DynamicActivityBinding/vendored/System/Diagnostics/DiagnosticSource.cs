@@ -8,7 +8,7 @@
 
 using System;
 
-namespace System.Diagnostics
+namespace Vendored.System.Diagnostics
 {
     /// <summary>
     /// This is the basic API to 'hook' parts of the framework.   It is like an EventSource
