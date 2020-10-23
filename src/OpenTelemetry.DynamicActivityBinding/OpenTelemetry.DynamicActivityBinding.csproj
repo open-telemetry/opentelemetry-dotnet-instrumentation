@@ -27,6 +27,10 @@
     <DefineConstants Condition="'$(TargetFramework)' == '$(NetCoreAppCurrent)'">$(DefineConstants);W3C_DEFAULT_ID_FORMAT</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="public\**\*.cs" />
+    <Compile Include="internal\**\*.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="$(VendoredPath)System\Buffers\Binary\Reader.cs" />
     <Compile Include="$(VendoredPath)System\Buffers\Text\Utf8Parser\ParserHelpers.cs" />
     <Compile Include="$(VendoredPath)System\Buffers\Text\Utf8Parser\Utf8Parser.Integer.Unsigned.X.cs" />
