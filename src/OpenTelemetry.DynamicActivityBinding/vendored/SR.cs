@@ -5,7 +5,7 @@
 
 namespace Vendored.System.Diagnostics
 {
-    internal class SR : Local.System.Diagnostics.DiagnosticSource.System_Diagnostics_Resources_Strings
+    internal class SR : OpenTelemetry.DynamicActivityBinding.vendored.System_Diagnostics_Resources_Strings
     {
         internal static string Format(string format, object? obj)
         {

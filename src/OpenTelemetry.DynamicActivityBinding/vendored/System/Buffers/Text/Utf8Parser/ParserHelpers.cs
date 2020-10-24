@@ -4,7 +4,7 @@
 
 
 // Modified excerpt from dotnet/runtime. This version contains only
-// the types, methods, and interfaces used by Local.System.Diagnostics.DiagnosticSource.csproj
+// the types, methods, and interfaces used by Vendored.System.Diagnostics.DiagnosticSource.csproj
 
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.

@@ -107,16 +107,16 @@
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.1' and '$(TargetFramework)' != '$(NetCoreAppCurrent)'">
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="System.Diagnostics.Resources.Strings.Designer.cs">
+    <Compile Update="$(VendoredPath)System.Diagnostics.Resources.Strings.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>System.Diagnostics.Resources.Strings.resx</DependentUpon>
+      <DependentUpon>$(VendoredPath)System.Diagnostics.Resources.Strings.resx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Update="System.Diagnostics.Resources.Strings.resx">
+    <EmbeddedResource Update="$(VendoredPath)System.Diagnostics.Resources.Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>System.Diagnostics.Resources.Strings.Designer.cs</LastGenOutput>
+      <LastGenOutput>$(VendoredPath)System.Diagnostics.Resources.Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 </Project> 

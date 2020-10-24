@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Local.System.Diagnostics.DiagnosticSource {
+namespace OpenTelemetry.DynamicActivityBinding.vendored {
     using System;
     
     
@@ -39,7 +39,8 @@ namespace Local.System.Diagnostics.DiagnosticSource {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Local.System.Diagnostics.DiagnosticSource.System.Diagnostics.Resources.Strings", typeof(System_Diagnostics_Resources_Strings).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("OpenTelemetry.DynamicActivityBinding.vendored.System.Diagnostics.Resources.String" +
+                            "s", typeof(System_Diagnostics_Resources_Strings).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
