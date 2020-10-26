@@ -21,6 +21,11 @@ namespace OpenTelemetry.DynamicActivityBinding
 
         private static readonly ConditionalWeakTable<object, SupplementalActivityData> s_supplementalActivityData = new ConditionalWeakTable<object, SupplementalActivityData>();
 
+        public void GetLocalTraceInfo(out bool isLocalRootActivity, out ulong rootActivitySpanIdHash)
+        {
+            throw new NotImplementedException();
+        }
+
         private static string FormatNotSupportedErrorMessage(string apiName, string minRequiredFeatureSet, DynamicInvoker invoker)
         {
             string errMsg = $"{nameof(ActivityStub)}.{apiName} is not supported."
@@ -29,6 +34,11 @@ namespace OpenTelemetry.DynamicActivityBinding
                                   + $" SupportedFeatureSets={invoker.SupportedFeatures.FormatFeatureSetSupportList()}}}";
             return errMsg;
         }
+
+        //public ulong GetSpanIdHash()
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         private readonly object _activityInstance;
 
@@ -728,6 +738,14 @@ namespace OpenTelemetry.DynamicActivityBinding
                     string errMsg = FormatNotSupportedErrorMessage(nameof(Tags), "4020", invoker);
                     throw new NotSupportedException(errMsg);
                 }
+            }
+        }
+
+        public ActivityStub LocalRoot 
+        {
+            get
+            {
+                throw new NotImplementedException();
             }
         }
 

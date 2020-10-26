@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net45;net461;netstandard2.0;netcoreapp3.1</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <!-- Play a trick with the VS Solution Explorer:                                                            -->
+      <!-- We want all these files to be grouped under a key that is:                                             -->
+      <!-- the name of the immediate subfolder within the "Shared " sources folder.                               -->
+      <!-- For that, we need to create an item group rooted in "Shared" and then exclude all except these files.  -->
+      <IncludedSharedItem Include="..\Shared\Datadog.Util\internal\ArrayExtensions.cs" />
+      <IncludedSharedItem Include="..\Shared\Datadog.Util\internal\Concurrent.cs" />
+      <IncludedSharedItem Include="..\Shared\Datadog.Util\internal\Format.cs" />
+      <IncludedSharedItem Include="..\Shared\Datadog.Util\internal\Validate.cs" />
+      <IncludedSharedItem Include="..\Shared\Datadog.Collections\internal\GrowingCollection.cs" />
+
+    <ExcludedSharedItems Include="..\Shared\**\*.cs" Exclude="@(IncludedSharedItem)" />
+      <Compile Include="..\Shared\**\*.cs" Exclude="@(ExcludedSharedItems)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- These are work in progress, temporarily remove from build. -->
+    <Compile Remove="OpenTelemetry.AutoInstrumentation.ActivityExporter.Vendors.Datadog\ActivityExtensions.cs" />
+    <Compile Remove="OpenTelemetry.AutoInstrumentation.ActivityExporter.Vendors.Datadog\ActivitySpanIdExtensions.cs" />
+    <Compile Remove="OpenTelemetry.AutoInstrumentation.ActivityExporter.Vendors.Datadog\DatadogAgentMessagePackActivityExporter.cs" />
+    <None Include="OpenTelemetry.AutoInstrumentation.ActivityExporter.Vendors.Datadog\ActivityExtensions.cs" />
+    <None Include="OpenTelemetry.AutoInstrumentation.ActivityExporter.Vendors.Datadog\ActivitySpanIdExtensions.cs" />
+    <None Include="OpenTelemetry.AutoInstrumentation.ActivityExporter.Vendors.Datadog\DatadogAgentMessagePackActivityExporter.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenTelemetry.DynamicActivityBinding\OpenTelemetry.DynamicActivityBinding.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+      <!-- <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild> -->
+  </PropertyGroup>
+
+</Project>

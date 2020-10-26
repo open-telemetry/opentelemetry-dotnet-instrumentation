@@ -22,7 +22,7 @@ namespace OpenTelemetry.DynamicActivityBinding
 
             public static void ErrorException(Exception exception)
             {
-                Error(exception?.ToString());
+                Log.Error(exception?.ToString());
             }
 
             public static void Info(string message)

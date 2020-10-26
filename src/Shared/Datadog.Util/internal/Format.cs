@@ -54,6 +54,21 @@ namespace Datadog.Util
             return builder.ToString();
         }
 
+        public static string QuoteIfString<T>(T val)
+        {
+            if (val == null)
+            {
+                return NullWord;
+            }
+
+            if (val is string valStr)
+            {
+                return QuoteOrSpellNull(valStr);
+            }
+
+            return val.ToString();
+        }
+
         /// <summary>
         /// Determines whether the specified character is a valid lower-case hex digit.
         /// </summary>
@@ -75,21 +90,6 @@ namespace Datadog.Util
         /// <returns></returns>
         public static IEnumerable<string> AsTextLines<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> table)
         {
-            string QuoteIfString<T>(T val)
-            {
-                if (val == null)
-                {
-                    return NullWord;
-                }
-
-                if (val is string valStr)
-                {
-                    return QuoteOrSpellNull(valStr);
-                }
-
-                return val.ToString();
-            }
-
             if (table == null)
             {
                 yield return NullWord;
