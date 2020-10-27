@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.DynamicActivityBinding", "..\OpenTelemetry.DynamicActivityBinding\OpenTelemetry.DynamicActivityBinding.csproj", "{F447CF51-4269-4188-8587-2C85BEBA5B46}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Datadog.Trace", "..\Datadog.Trace\Datadog.Trace.csproj", "{5C4A144D-B51C-4474-AAE2-E019D636BB64}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{F447CF51-4269-4188-8587-2C85BEBA5B46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F447CF51-4269-4188-8587-2C85BEBA5B46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F447CF51-4269-4188-8587-2C85BEBA5B46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C4A144D-B51C-4474-AAE2-E019D636BB64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C4A144D-B51C-4474-AAE2-E019D636BB64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C4A144D-B51C-4474-AAE2-E019D636BB64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C4A144D-B51C-4474-AAE2-E019D636BB64}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,38 +1,40 @@
 using System;
-using System.Diagnostics;
 
-namespace Datadog.Trace.ClrProfiler
+namespace Datadog.AutoInstrumentation.ActivityExporter
 {
+    /// <summary>
+    /// Currently not actually used in prod. Contains APIs for an Actvity Export POC prototype.
+    /// </summary>
     internal static class ActivitySpanIdExtensions
     {
         private const int SpanIdByteLength = 8;
 
-        public static ulong ToUInt64(this ActivitySpanId rootSpanId)
-        {
-            string hexStr = rootSpanId.ToHexString();
+        ////public static ulong ToUInt64(this ActivitySpanId rootSpanId)
+        ////{
+        ////    string hexStr = rootSpanId.ToHexString();
 
-            if (hexStr.Length != SpanIdByteLength * 2)
-            {
-                // This is is a static check. It should really never happen.
-                throw new Exception($"There is a wrong assumption about the {nameof(ActivitySpanId)} Hex String representation format in {typeof(ActivitySpanIdExtensions).FullName}.");
-            }
+        ////    if (hexStr.Length != SpanIdByteLength * 2)
+        ////    {
+        ////        // This is is a static check. It should really never happen.
+        ////        throw new Exception($"There is a wrong assumption about the {nameof(ActivitySpanId)} Hex String representation format in {typeof(ActivitySpanIdExtensions).FullName}.");
+        ////    }
 
-            ulong spanValue = 0;
+        ////    ulong spanValue = 0;
 
-            char c1, c2;
-            for (int b = 0; b < SpanIdByteLength; b++)
-            {
-                c1 = hexStr[(b << 1)];
-                c2 = hexStr[(b << 1) + 1];
+        ////    char c1, c2;
+        ////    for (int b = 0; b < SpanIdByteLength; b++)
+        ////    {
+        ////        c1 = hexStr[(b << 1)];
+        ////        c2 = hexStr[(b << 1) + 1];
 
-                spanValue <<= 4;
-                spanValue |= HexCharToUInt64(c1);
-                spanValue <<= 4;
-                spanValue |= HexCharToUInt64(c2);
-            }
+        ////        spanValue <<= 4;
+        ////        spanValue |= HexCharToUInt64(c1);
+        ////        spanValue <<= 4;
+        ////        spanValue |= HexCharToUInt64(c2);
+        ////    }
 
-            return spanValue;
-        }
+        ////    return spanValue;
+        ////}
 
         private static ulong HexCharToUInt64(char hexChar)
         {

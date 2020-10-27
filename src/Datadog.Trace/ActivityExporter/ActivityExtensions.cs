@@ -1,25 +1,31 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+
+using Datadog.Trace;
 using Datadog.Trace.Configuration;
 
-namespace Datadog.Trace.ExtensionMethods
+using OpenTelemetry.DynamicActivityBinding;
+
+namespace Datadog.AutoInstrumentation.ActivityExporter
 {
+#pragma warning disable SA1611 // Element parameters must be documented
+
     /// <summary>
-    /// Extension methods for the <see cref="Activity"/> class.
+    /// Currently not actually used in prod. Contains APIs for an Actvity Export POC prototype.
     /// </summary>
-    public static class ActivityExtensions
+    internal static class ActivityExtensions
     {
-        internal static void DecorateWebServerSpan(
-            this Activity activity,
-            string resourceName,
+        /// <summary>
+        /// MISSING: must set OperationName to resourceName?.Trim() at creation time, cannot do it h=n here.
+        /// </summary>
+        public static void DecorateWebServerSpan(
+            this ActivityStub activity,
             string method,
             string host,
             string httpUrl,
             IEnumerable<KeyValuePair<string, string>> tags)
         {
             activity.SetCustomProperty("Type", SpanTypes.Web);
-            activity.DisplayName = resourceName?.Trim();
             activity.AddTag(Tags.SpanKind, SpanKinds.Server);
             activity.AddTag(Tags.HttpMethod, method);
             activity.AddTag(Tags.HttpRequestHeadersHost, host);
@@ -32,7 +38,7 @@ namespace Datadog.Trace.ExtensionMethods
             }
         }
 
-        internal static void SetException(this Activity activity, Exception exception)
+        public static void SetException(this ActivityStub activity, Exception exception)
         {
             activity.SetCustomProperty("Error", true);
 
@@ -52,7 +58,7 @@ namespace Datadog.Trace.ExtensionMethods
             }
         }
 
-        internal static Activity AddServiceName(this Activity activity, string serviceName)
+        internal static ActivityStub AddServiceName(this ActivityStub activity, string serviceName)
         {
             switch ((string)activity.GetCustomProperty("Type"))
             {
@@ -64,13 +70,13 @@ namespace Datadog.Trace.ExtensionMethods
             return activity;
         }
 
-        internal static Activity AddEnvironment(this Activity activity, string environment)
+        internal static ActivityStub AddEnvironment(this ActivityStub activity, string environment)
             => activity.AddTagWhen(Tags.Env, environment, () => !string.IsNullOrWhiteSpace(environment));
 
-        internal static Activity AddVersion(this Activity activity, string version)
-            => activity.AddTagWhen(Tags.Version, version, () => !string.IsNullOrWhiteSpace(version) && activity.Kind != ActivityKind.Client);
+        internal static ActivityStub AddVersion(this ActivityStub activity, string version)
+            => activity.AddTagWhen(Tags.Version, version, () => !string.IsNullOrWhiteSpace(version) && activity.Kind != ActivityKindStub.Client);
 
-        internal static Activity AddAnalyticsSampleRate(this Activity activity, TracerSettings settings)
+        internal static ActivityStub AddAnalyticsSampleRate(this ActivityStub activity, TracerSettings settings)
         {
             double? analyticsSampleRate = settings.GetIntegrationAnalyticsSampleRate((string)activity.GetCustomProperty(Tags.InstrumentationName), enabledWithGlobalSetting: false);
             if (analyticsSampleRate != null)
@@ -83,7 +89,7 @@ namespace Datadog.Trace.ExtensionMethods
         }
 
         // TODO: Change to SetTag API once we upgrade our DiagnosticSource ref, to better align with existing SetTag logic
-        internal static Activity AddTagWhen(this Activity activity, string key, string value, Func<bool> predicate)
+        internal static ActivityStub AddTagWhen(this ActivityStub activity, string key, string value, Func<bool> predicate)
         {
             if (predicate())
             {
@@ -94,7 +100,7 @@ namespace Datadog.Trace.ExtensionMethods
         }
 
         // TODO: Change to SetTag API once we upgrade our DiagnosticSource ref, to better align with existing SetTag logic
-        internal static Activity AddTags(this Activity activity, IDictionary<string, string> tags)
+        internal static ActivityStub AddTags(this ActivityStub activity, IDictionary<string, string> tags)
         {
             foreach (KeyValuePair<string, string> entry in tags)
             {
@@ -104,4 +110,5 @@ namespace Datadog.Trace.ExtensionMethods
             return activity;
         }
     }
+#pragma warning restore SA1611 // Element parameters must be documented
 }

@@ -24,6 +24,11 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="4.4.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\OpenTelemetry.AutoInstrumentation.ActivityCollector\OpenTelemetry.AutoInstrumentation.ActivityCollector.csproj" />
+    <ProjectReference Include="..\OpenTelemetry.DynamicActivityBinding\OpenTelemetry.DynamicActivityBinding.csproj" />
+  </ItemGroup>
+
   <!-- Below this point is reserved for vendor items -->
   <!--Serilog-->
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
