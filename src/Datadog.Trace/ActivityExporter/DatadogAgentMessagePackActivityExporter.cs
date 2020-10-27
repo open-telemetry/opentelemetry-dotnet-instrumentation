@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+
 using Datadog.Trace;
 using Datadog.Trace.Agent.MessagePack;
 using Datadog.Trace.Vendors.MessagePack;
+
 using OpenTelemetry.AutoInstrumentation.ActivityCollector;
 using OpenTelemetry.AutoInstrumentation.ActivityExporter;
 using OpenTelemetry.DynamicActivityBinding;

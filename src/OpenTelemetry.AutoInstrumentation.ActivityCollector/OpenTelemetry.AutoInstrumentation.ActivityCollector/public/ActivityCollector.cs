@@ -99,15 +99,6 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
                 return;
             }
 
-            // Move this to exporter!
-            // Add values controlled by the Tracer configuration
-            //Tracer tracer = Tracer.Instance;
-            //activity.AddServiceName(tracer.DefaultServiceName)
-            //        .AddTags(tracer.Settings.GlobalTags) // Add global tags first so service unification tags added later can override them
-            //        .AddEnvironment(tracer.Settings.Environment)
-            //        .AddVersion(tracer.Settings.ServiceVersion)
-            //        .AddAnalyticsSampleRate(tracer.Settings);
-
             if (_onActivityStoppedProcessor != null)
             {
                 try
