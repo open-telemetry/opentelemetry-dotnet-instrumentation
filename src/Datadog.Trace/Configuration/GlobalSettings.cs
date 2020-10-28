@@ -27,6 +27,10 @@ namespace Datadog.Trace.Configuration
             DebugEnabled = source?.GetBool(ConfigurationKeys.DebugEnabled) ??
                            // default value
                            false;
+
+            DiagnosticSourceEnabled = source?.GetBool(ConfigurationKeys.DiagnosticSourceEnabled) ??
+                                      // default value
+                                      true;
         }
 
         /// <summary>
@@ -41,6 +45,14 @@ namespace Datadog.Trace.Configuration
         /// Gets or sets the global settings instance.
         /// </summary>
         internal static GlobalSettings Source { get; set; } = FromDefaultSources();
+
+        /// <summary>
+        /// Gets a value indicating whether the use
+        /// of System.Diagnostics.DiagnosticSource is enabled.
+        /// This value can only be set with environment variables
+        /// or a configuration file, not through code.
+        /// </summary>
+        internal bool DiagnosticSourceEnabled { get; }
 
         /// <summary>
         /// Set whether debug mode is enabled.
@@ -93,7 +105,7 @@ namespace Datadog.Trace.Configuration
             {
                 new EnvironmentConfigurationSource(),
 
-#if !NETSTANDARD2_0
+#if NETFRAMEWORK
                 // on .NET Framework only, also read from app.config/web.config
                 new NameValueConfigurationSource(System.Configuration.ConfigurationManager.AppSettings)
 #endif
@@ -101,7 +113,7 @@ namespace Datadog.Trace.Configuration
 
             string currentDirectory = System.Environment.CurrentDirectory;
 
-#if !NETSTANDARD2_0
+#if NETFRAMEWORK
             // on .NET Framework only, use application's root folder
             // as default path when looking for datadog.json
             if (System.Web.Hosting.HostingEnvironment.IsHosted)

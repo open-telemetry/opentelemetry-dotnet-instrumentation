@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GeneratePackageVersions": {
+      "commandName": "Project",
+      "commandLineArgs": "$(SolutionDir)"
+    }
+  }
+}

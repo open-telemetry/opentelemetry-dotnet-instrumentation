@@ -2,7 +2,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using Datadog.Trace.Sampling;
 using Datadog.Trace.Util;
 
 namespace Datadog.Trace.Configuration
@@ -74,6 +73,16 @@ namespace Datadog.Trace.Configuration
 
             AgentUri = new Uri(agentUri);
 
+            if (string.Equals(AgentUri.Host, "localhost", StringComparison.OrdinalIgnoreCase))
+            {
+                // Replace localhost with 127.0.0.1 to avoid DNS resolution.
+                // When ipv6 is enabled, localhost is first resolved to ::1, which fails
+                // because the trace agent is only bound to ipv4.
+                // This causes delays when sending traces.
+                var builder = new UriBuilder(agentUri) { Host = "127.0.0.1" };
+                AgentUri = builder.Uri;
+            }
+
             AnalyticsEnabled = source?.GetBool(ConfigurationKeys.GlobalAnalyticsEnabled) ??
                                // default value
                                false;
@@ -82,19 +91,9 @@ namespace Datadog.Trace.Configuration
                                    // default value
                                    false;
 
-            var maxTracesPerSecond = source?.GetInt32(ConfigurationKeys.MaxTracesSubmittedPerSecond);
-
-            if (maxTracesPerSecond != null)
-            {
-                // Ensure our flag for the rate limiter is enabled
-                RuleBasedSampler.OptInTracingWithoutLimits();
-            }
-            else
-            {
-                maxTracesPerSecond = 100; // default
-            }
-
-            MaxTracesSubmittedPerSecond = maxTracesPerSecond.Value;
+            MaxTracesSubmittedPerSecond = source?.GetInt32(ConfigurationKeys.MaxTracesSubmittedPerSecond) ??
+                                          // default value
+                                          100;
 
             Integrations = new IntegrationSettingsCollection(source);
 
@@ -127,10 +126,6 @@ namespace Datadog.Trace.Configuration
             CustomSamplingRules = source?.GetString(ConfigurationKeys.CustomSamplingRules);
 
             GlobalSamplingRate = source?.GetDouble(ConfigurationKeys.GlobalSamplingRate);
-
-            DiagnosticSourceEnabled = source?.GetBool(ConfigurationKeys.DiagnosticSourceEnabled) ??
-                                      // default value
-                                      true;
 
             StartupDiagnosticLogEnabled = source?.GetBool(ConfigurationKeys.StartupDiagnosticLogEnabled) ??
                                           // default value
@@ -251,9 +246,19 @@ namespace Datadog.Trace.Configuration
 
         /// <summary>
         /// Gets or sets a value indicating whether the use
-        /// of <see cref="System.Diagnostics.DiagnosticSource"/> is enabled.
+        /// of System.Diagnostics.DiagnosticSource is enabled.
+        /// Default is <c>true</c>.
         /// </summary>
-        public bool DiagnosticSourceEnabled { get; set; }
+        /// <remark>
+        /// This value cannot be set in code. Instead,
+        /// set it using the <c>DD_TRACE_DIAGNOSTIC_SOURCE_ENABLED</c>
+        /// environment variable or in configuration files.
+        /// </remark>
+        public bool DiagnosticSourceEnabled
+        {
+            get => GlobalSettings.Source.DiagnosticSourceEnabled;
+            set { }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether the diagnostic log at startup is enabled

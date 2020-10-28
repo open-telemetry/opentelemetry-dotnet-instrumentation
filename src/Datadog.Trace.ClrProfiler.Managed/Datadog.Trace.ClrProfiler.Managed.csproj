@@ -4,7 +4,7 @@
     <RootNamespace>Datadog.Trace.ClrProfiler</RootNamespace>
 
     <!-- NuGet -->
-    <Version>1.19.1</Version>
+    <Version>1.19.6-prerelease</Version>
     <Title>Datadog APM - ClrProfiler</Title>
     <PackageDescription>
 DEPRECATED. This package exists only for backwards compatibility. If your project references this package ("Datadog.Trace.ClrProfiler.Managed") or "Datadog.Trace.AspNet", you can remove them both.
@@ -23,19 +23,19 @@ Users who need manual instrumentation should reference the "Datadog.Trace" packa
 
   <!-- For VS testing purposes only, copy all implementation assemblies to the
        to test the loading of managed profiler assemblies from disk -->
-  <PropertyGroup Condition="'$(BuildingInsideVisualStudio)'=='true' and '$(TargetFramework)' == 'netstandard2.0'">
+  <PropertyGroup Condition="'$(BuildingInsideVisualStudio)'=='true' AND ('$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netcoreapp3.1')">
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Datadog.Trace.ClrProfiler.Managed.Core\Datadog.Trace.ClrProfiler.Managed.Core.csproj" />
+    <ProjectReference Include="..\Datadog.Trace.DuckTyping\Datadog.Trace.DuckTyping.csproj" />
     <ProjectReference Include="..\Datadog.Trace\Datadog.Trace.csproj" />
   </ItemGroup>
  
-  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0' AND '$(TargetFramework)' != 'netcoreapp3.1'">
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web" />
-    <Reference Include="System.ServiceModel" />
 
     <ProjectReference Include="..\Datadog.Trace.AspNet\Datadog.Trace.AspNet.csproj" PrivateAssets="all" />
   </ItemGroup>
@@ -49,4 +49,9 @@ Users who need manual instrumentation should reference the "Datadog.Trace" packa
   </ItemGroup>
 
   <Import Project="..\Datadog.Trace.Ci.Shared\Datadog.Trace.Ci.Shared.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <!-- Include Datadog.Trace.Build assembly as a reference for publishing purposes -->
+    <ProjectReference Include="..\Datadog.Trace.MSBuild\Datadog.Trace.MSBuild.csproj" PrivateAssets="all" />
+  </ItemGroup>
 </Project>
