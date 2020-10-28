@@ -1,5 +1,5 @@
 # opentelemetry-dotnet-instrumentation
-.NET instrumentation and auto-instrumentation
+OpenTelemetry .NET auto-instrumentation.
 
 ### Community Roles
 
