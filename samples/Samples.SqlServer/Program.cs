@@ -16,7 +16,7 @@ namespace Samples.SqlServer
 
             using (var connection = OpenConnection())
             {
-                await RelationalDatabaseTestHarness.RunAllAsync(connection, commandFactory, commandExecutor, cts.Token);
+                await RelationalDatabaseTestHarness.RunAllAsync<SqlCommand>(connection, commandFactory, commandExecutor, cts.Token);
             }
 
             // allow time to flush
@@ -27,7 +27,7 @@ namespace Samples.SqlServer
         {
             int numAttempts = 3;
             var connectionString = Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION_STRING") ??
-@"Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Connection Timeout=30";
+@"Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Connection Timeout=60";
 
             for (int i = 0; i < numAttempts; i++)
             {

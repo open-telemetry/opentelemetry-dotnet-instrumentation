@@ -46,6 +46,12 @@ namespace StackExchange.Redis.StackOverflowException
                 return (int)ExitCode.UnknownError;
             }
 
+#if NETCOREAPP2_1
+            // Add a delay to avoid a race condition on shutdown: https://github.com/dotnet/coreclr/pull/22712
+            // This would cause a segmentation fault on .net core 2.x
+            System.Threading.Thread.Sleep(5000);
+#endif
+
             return (int)ExitCode.Success;
         }
 
@@ -55,7 +61,7 @@ namespace StackExchange.Redis.StackOverflowException
 
             while (true)
             {
-                yield return new KeyValuePair<RedisKey, RedisValue>($"key{count}", $"value{count}");
+                yield return new KeyValuePair<RedisKey, RedisValue>($"StackOverflowExceptionKey{count}", $"value{count}");
                 count++;
             }
         }
