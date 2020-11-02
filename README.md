@@ -6,7 +6,7 @@ This project provides a .NET tracer that leverages the .NET profiling APIs to su
 
 ## Status
 
-This project is in the early stages of development starting with an initial seeding of code from the [.NET Tracer for DataDog APM](https://github.com/DataDog/dd-trace-dotnet). Our current goal is to take the seeded tracer and update it to both listen to and generate OpenTelemetry tracing data. To accomplish this our current priorities are to:
+This project is in the early stages of development starting with an initial seeding of code from the [.NET Tracer for Datadog APM](https://github.com/DataDog/dd-trace-dotnet). Our current goal is to take the seeded tracer and update it to both listen to and generate OpenTelemetry tracing data. To accomplish this our current priorities are to:
 1. Define System.Diagnostics.DiagnosticSource wrappers to generate and consume [.NET Activities](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.activity?view=net-5.0)
 2. Validate that the performance of this wrapping approach will be acceptable.
 
