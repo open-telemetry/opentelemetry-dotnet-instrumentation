@@ -14,7 +14,7 @@ using System.Runtime.CompilerServices;
 // Some routines inspired by the Stanford Bit Twiddling Hacks by Sean Eron Anderson:
 // http://graphics.stanford.edu/~seander/bithacks.html
 
-namespace Vendored.System.Numerics
+namespace System.Numerics
 {
     /// <summary>
     /// Utility methods for intrinsic bit-twiddling operations.
