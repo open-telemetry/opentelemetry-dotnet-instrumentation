@@ -37,12 +37,12 @@ namespace Datadog.Trace.TestHelpers
             string sampleName,
             Type anchorType,
             ITestOutputHelper output,
-            string samplesDirectory = "samples",
+            string samplesDirectory = "test/test-applications/integrations",
             bool prependSamplesToAppName = true,
             bool requiresProfiling = true)
         {
             SampleName = sampleName;
-            _samplesDirectory = samplesDirectory ?? "samples";
+            _samplesDirectory = samplesDirectory ?? "test/test-applications/integrations";
             _anchorType = anchorType;
             _anchorAssembly = Assembly.GetAssembly(_anchorType);
             _targetFramework = Assembly.GetAssembly(anchorType).GetCustomAttribute<TargetFrameworkAttribute>();
@@ -180,11 +180,11 @@ namespace Datadog.Trace.TestHelpers
 
             string integrations = string.Join(";", GetIntegrationsFilePaths());
             environmentVariables["DD_INTEGRATIONS"] = integrations;
-            environmentVariables["DD_TRACE_AGENT_HOSTNAME"] = "localhost";
+            environmentVariables["DD_TRACE_AGENT_HOSTNAME"] = "127.0.0.1";
             environmentVariables["DD_TRACE_AGENT_PORT"] = agentPort.ToString();
 
             // for ASP.NET Core sample apps, set the server's port
-            environmentVariables["ASPNETCORE_URLS"] = $"http://localhost:{aspNetCorePort}/";
+            environmentVariables["ASPNETCORE_URLS"] = $"http://127.0.0.1:{aspNetCorePort}/";
 
             foreach (var name in new[] { "SERVICESTACK_REDIS_HOST", "STACKEXCHANGE_REDIS_HOST" })
             {

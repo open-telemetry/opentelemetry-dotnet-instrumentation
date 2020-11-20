@@ -37,6 +37,15 @@ CorProfiler::Initialize(IUnknown* cor_profiler_info_unknown) {
     debug_logging_enabled = true;
   }
 
+  // check if dump il rewrite is enabled
+  const auto dump_il_rewrite_enabled_value = 
+      GetEnvironmentValue(environment::dump_il_rewrite_enabled);
+
+  if (dump_il_rewrite_enabled_value == "1"_W ||
+      dump_il_rewrite_enabled_value == "true"_W) {
+    dump_il_rewrite_enabled = true;
+  }
+
   CorProfilerBase::Initialize(cor_profiler_info_unknown);
 
   // check if tracing is completely disabled
@@ -72,10 +81,10 @@ CorProfiler::Initialize(IUnknown* cor_profiler_info_unknown) {
   }
 
   // get Profiler interface
-  HRESULT hr = cor_profiler_info_unknown->QueryInterface<ICorProfilerInfo3>(
+  HRESULT hr = cor_profiler_info_unknown->QueryInterface<ICorProfilerInfo4>(
       &this->info_);
   if (FAILED(hr)) {
-    Warn("DATADOG TRACER DIAGNOSTICS - Failed to attach profiler: interface ICorProfilerInfo3 not found.");
+    Warn("DATADOG TRACER DIAGNOSTICS - Failed to attach profiler: interface ICorProfilerInfo4 not found.");
     return E_FAIL;
   }
 
@@ -206,6 +215,14 @@ CorProfiler::Initialize(IUnknown* cor_profiler_info_unknown) {
       process_name == "iisexpress.exe"_W) {
     is_desktop_iis = runtime_information_.is_desktop();
   }
+
+  // writing opcodes vector for the IL dumper
+#define OPDEF(c, s, pop, push, args, type, l, s1, s2, flow) \
+  opcodes_names.push_back(s);
+#include "opcode.def"
+#undef OPDEF
+  opcodes_names.push_back("(count)"); // CEE_COUNT
+  opcodes_names.push_back("->"); // CEE_SWITCH_ARG
 
   // we're in!
   Info("Profiler attached.");
@@ -509,7 +526,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(
                                             &function_token);
 
   if (FAILED(hr)) {
-    Warn("JITCompilationStarted: Call to ICorProfilerInfo3.GetFunctionInfo() failed for ", function_id);
+    Warn("JITCompilationStarted: Call to ICorProfilerInfo4.GetFunctionInfo() failed for ", function_id);
     return S_OK;
   }
 
@@ -740,6 +757,12 @@ HRESULT CorProfiler::ProcessReplacementCalls(
     return hr;
   }
 
+  std::string original_code;
+  if (dump_il_rewrite_enabled) {
+    original_code =
+        GetILCodes("***   IL original code for caller: ", &rewriter, caller);
+  }
+
   // Perform method call replacements
   for (auto& method_replacement : method_replacements) {
     // Exit early if the method replacement isn't actually doing a replacement
@@ -927,13 +950,12 @@ HRESULT CorProfiler::ProcessReplacementCalls(
         continue;
       }
 
-      bool caller_assembly_is_domain_neutral =
-          runtime_information_.is_desktop() && corlib_module_loaded &&
-          module_metadata->app_domain_id == corlib_app_domain_id;
-
       // At this point we know we've hit a match. Error out if
       //   1) The managed profiler has not been loaded yet
-      //   2) The caller is domain-neutral AND we want to instrument domain-neutral assemblies AND the Profiler has already been loaded
+      //   2) The caller is domain-neutral AND we do not want to instrument domain-neutral assemblies
+      //   3) The target instruction is a constrained virtual method call (a constrained IL instruction followed by a callvirt IL instruction)
+
+      //   1) The managed profiler has not been loaded yet
       if (!ProfilerAssemblyIsLoadedIntoAppDomain(module_metadata->app_domain_id)) {
         Warn(
             "JITCompilationStarted skipping method: Method replacement "
@@ -945,9 +967,11 @@ HRESULT CorProfiler::ProcessReplacementCalls(
         continue;
       }
 
-      // At this point we know we've hit a match. Error out if
-      //   1) The calling assembly is domain-neutral
-      //   2) The profiler is not configured to instrument domain-neutral assemblies
+      //   2) The caller is domain-neutral AND we do not want to instrument domain-neutral assemblies
+      bool caller_assembly_is_domain_neutral =
+          runtime_information_.is_desktop() && corlib_module_loaded &&
+          module_metadata->app_domain_id == corlib_app_domain_id;
+
       if (caller_assembly_is_domain_neutral && !instrument_domain_neutral_assemblies) {
         Warn(
             "JITCompilationStarted skipping method: Method replacement",
@@ -957,6 +981,19 @@ HRESULT CorProfiler::ProcessReplacementCalls(
             " function_id=", function_id, " token=", function_token,
             " caller_name=", caller.type.name, ".", caller.name, "()",
             " target_name=", target.type.name, ".", target.name, "()");
+        continue;
+      }
+
+      //   3) The target instruction is a constrained virtual method call (a constrained IL instruction followed by a callvirt IL instruction)
+      if (pInstr->m_opcode == CEE_CALLVIRT && pInstr->m_pPrev->m_opcode == CEE_CONSTRAINED) {
+        Warn("JITCompilationStarted skipping method: Method replacement",
+             " found but the target method call is a constrained virtual method call ",
+             " (a 'constrained' IL instruction followed by a 'callvirt' IL instruction).",
+             " This type of method call is not currently supported for automatic"
+             " instrumentation.",
+             " function_id=", function_id, " token=", function_token,
+             " caller_name=", caller.type.name, ".", caller.name, "()",
+             " target_name=", target.type.name, ".", target.name, "()");
         continue;
       }
 
@@ -1091,6 +1128,11 @@ HRESULT CorProfiler::ProcessReplacementCalls(
     if (FAILED(hr)) {
       Warn("ProcessReplacementCalls: Call to ILRewriter.Export() failed for ModuleID=", module_id, " ", function_token);
       return hr;
+    }
+
+    if (dump_il_rewrite_enabled) {
+      Info(original_code);
+      Info(GetILCodes("***   IL modification  for caller: ", &rewriter, caller));
     }
   }
 
@@ -1240,6 +1282,40 @@ bool CorProfiler::ProfilerAssemblyIsLoadedIntoAppDomain(AppDomainID app_domain_i
   return managed_profiler_loaded_domain_neutral ||
          managed_profiler_loaded_app_domains.find(app_domain_id) !=
              managed_profiler_loaded_app_domains.end();
+}
+
+std::string CorProfiler::GetILCodes(std::string title, ILRewriter* rewriter,
+                                    const FunctionInfo& caller) {
+  std::stringstream orig_sstream;
+  orig_sstream << title;
+  orig_sstream << ToString(caller.type.name);
+  orig_sstream << ".";
+  orig_sstream << ToString(caller.name.c_str());
+  orig_sstream << " => (max_stack: ";
+  orig_sstream << rewriter->GetMaxStackValue();
+  orig_sstream << ")" << std::endl;
+  for (ILInstr* cInstr = rewriter->GetILList()->m_pNext;
+       cInstr != rewriter->GetILList(); cInstr = cInstr->m_pNext) {
+    
+    orig_sstream << cInstr;
+    orig_sstream << ": ";
+    if (cInstr->m_opcode < opcodes_names.size()) {
+      orig_sstream << std::setw(10) << opcodes_names[cInstr->m_opcode];
+    } else {
+       orig_sstream << "0x";
+       orig_sstream << std::setfill('0') << std::setw(2) << std::hex
+                   << cInstr->m_opcode;
+    }
+    if (cInstr->m_pTarget != NULL) {
+      orig_sstream << " ";
+      orig_sstream << cInstr->m_pTarget;
+    } else if (cInstr->m_Arg64 != 0) {
+      orig_sstream << " ";
+      orig_sstream << cInstr->m_Arg64;
+    }
+    orig_sstream << std::endl;
+  }
+  return orig_sstream.str();
 }
 
 //

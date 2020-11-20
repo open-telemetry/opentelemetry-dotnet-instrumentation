@@ -42,7 +42,7 @@ jobs:
       arguments: --configuration $(buildConfiguration)
 
   - task: DotNetCoreCLI@2
-    displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed
+    displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed 2.0
     inputs:
       command: publish
       publishWebProjects: false
@@ -51,6 +51,16 @@ jobs:
       projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
       arguments: --configuration $(buildConfiguration) --framework netstandard2.0 --output $(publishOutput)/netstandard2.0
 
+  - task: DotNetCoreCLI@2
+    displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed 3.1
+    inputs:
+      command: publish
+      publishWebProjects: false
+      modifyOutputPath: false
+      zipAfterPublish: false
+      projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
+      arguments: --configuration $(buildConfiguration) --framework netcoreapp3.1 --output $(publishOutput)/netcoreapp3.1
+      
   - task: DockerCompose@0
     displayName: docker-compose run Profiler
     inputs:
@@ -65,11 +75,10 @@ jobs:
   condition: succeeded()
   strategy:
     matrix:
-      # Temporarily running only netcoreapp3_1
-      # netcoreapp2_1:
-      #   publishTargetFramework: netcoreapp2.1
-      # netcoreapp3_0:
-      #   publishTargetFramework: netcoreapp3.0
+      netcoreapp2_1:
+        publishTargetFramework: netcoreapp2.1
+      netcoreapp3_0:
+        publishTargetFramework: netcoreapp3.0
       netcoreapp3_1:
         publishTargetFramework: netcoreapp3.1
 
@@ -120,7 +129,7 @@ jobs:
       arguments: --configuration $(buildConfiguration)
 
   - task: DotNetCoreCLI@2
-    displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed
+    displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed 2.0
     inputs:
       command: publish
       publishWebProjects: false
@@ -128,6 +137,16 @@ jobs:
       zipAfterPublish: false
       projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
       arguments: --configuration $(buildConfiguration) --framework netstandard2.0 --output $(publishOutput)/netstandard2.0
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed 3.1
+    inputs:
+      command: publish
+      publishWebProjects: false
+      modifyOutputPath: false
+      zipAfterPublish: false
+      projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
+      arguments: --configuration $(buildConfiguration) --framework netcoreapp3.1 --output $(publishOutput)/netcoreapp3.1
 
   - task: DockerCompose@0
     displayName: docker-compose run Profiler.Alpine
@@ -143,11 +162,10 @@ jobs:
   condition: succeeded()
   strategy:
     matrix:
-      # Temporarily running only netcoreapp3_1
-      # netcoreapp2_1:
-      #   publishTargetFramework: netcoreapp2.1
-      # netcoreapp3_0:
-      #   publishTargetFramework: netcoreapp3.0
+      netcoreapp2_1:
+        publishTargetFramework: netcoreapp2.1
+      netcoreapp3_0:
+        publishTargetFramework: netcoreapp3.0
       netcoreapp3_1:
         publishTargetFramework: netcoreapp3.1
 
@@ -198,6 +216,7 @@ jobs:
     condition: succeededOrFailed()
 
 - job: Windows
+  timeoutInMinutes: 80
   strategy:
     matrix:
       x64:
@@ -209,7 +228,7 @@ jobs:
   pool:
     vmImage: windows-2019
   variables:
-    msiOutputDirectory: deploy/Datadog.Trace.ClrProfiler.WindowsInstaller/bin/$(buildConfiguration)/$(buildPlatform)/en-us
+    msiOutputDirectory: src/WindowsInstaller/bin/$(buildConfiguration)/$(buildPlatform)/en-us
 
   steps:
   - task: UseDotNet@2
@@ -263,39 +282,21 @@ jobs:
     inputs:
       command: build
       projects: |
-        reproductions/**/*.csproj
-        samples/**/*.csproj
+        test/test-applications/regression/**/*.csproj
         test/*.IntegrationTests/*.IntegrationTests.csproj
-        !reproductions/**/ExpenseItDemo*.csproj
-        !reproductions/**/EntityFramework6x*.csproj
-        !reproductions/**/StackExchange.Redis.AssemblyConflict.LegacyProject.csproj
+        !test/test-applications/regression/**/ExpenseItDemo*.csproj
+        !test/test-applications/regression/**/EntityFramework6x*.csproj
+        !test/test-applications/regression/**/StackExchange.Redis.AssemblyConflict.LegacyProject.csproj
       arguments: --configuration $(buildConfiguration) -p:Platform=$(buildPlatform) -p:ManagedProfilerOutputDirectory=$(publishOutput)
 
-  - task: NuGetCommand@2
-    displayName: nuget restore IIS samples
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build samples
     inputs:
-      restoreSolution: samples-iis/samples-iis.sln
-      verbosityRestore: Normal
-
-  - task: MSBuild@1
-    displayName: Publish IIS samples
-    inputs:
-      solution: samples-iis/samples-iis.sln
-      configuration: '$(buildConfiguration)'
-      msbuildArguments: '/p:DeployOnBuild=true /p:PublishProfile=FolderProfile.pubxml'
-      maximumCpuCount: true
-
-  - task: DockerCompose@0
-    displayName: docker-compose build IIS containers
-    inputs:
-      containerregistrytype: Container Registry
-      dockerComposeCommand: build --build-arg DOTNET_TRACER_MSI=$(msiOutputDirectory)/*.msi --build-arg ENABLE_32_BIT=$(enable32bit) IntegrationTests.IIS.LoaderOptimizationRegKey
-
-  - task: DockerCompose@0
-    displayName: docker-compose start IIS containers
-    inputs:
-      containerregistrytype: Container Registry
-      dockerComposeCommand: up -d IntegrationTests.IIS.LoaderOptimizationRegKey
+      command: build
+      projects: |
+        test/test-applications/integrations/**/*.csproj
+        !test/test-applications/integrations/dependency-libs/**/*.csproj
+      arguments: --configuration $(buildConfiguration) -p:Platform=$(buildPlatform) -p:ManagedProfilerOutputDirectory=$(publishOutput) -p:BuildInParallel=false
 
   - task: DotNetCoreCLI@2
     displayName: dotnet test
@@ -313,7 +314,123 @@ jobs:
       command: test
       configuration: $(buildConfiguration)
       projects: test/Datadog.Trace.ClrProfiler.IntegrationTests/Datadog.Trace.ClrProfiler.IntegrationTests.csproj
-      arguments: --filter "(RunOnWindows=True|Category=Smoke)&LoadFromGAC!=True" -p:Platform=$(buildPlatform)
+      arguments: --filter "(RunOnWindows=True|Category=Smoke)&LoadFromGAC!=True&IIS!=True" -p:Platform=$(buildPlatform)
+
+  - task: DockerCompose@0
+    displayName: docker-compose stop services
+    inputs:
+      containerregistrytype: Container Registry
+      dockerComposeCommand: down
+    condition: succeededOrFailed()
+    
+- job: Windows_IIS
+  timeoutInMinutes: 80
+  strategy:
+    matrix:
+      x64:
+        buildPlatform: x64
+        enable32bit: false
+      x86:
+        buildPlatform: x86
+        enable32bit: true
+  pool:
+    vmImage: windows-2019
+  variables:
+    msiOutputDirectory: src/WindowsInstaller/bin/$(buildConfiguration)/$(buildPlatform)/en-us
+
+  steps:
+  - task: UseDotNet@2
+    displayName: install dotnet core sdk 2.1
+    inputs:
+      packageType: sdk
+      version: 2.1.x
+
+  - task: UseDotNet@2
+    displayName: install dotnet core sdk 3.0
+    inputs:
+      packageType: sdk
+      version: 3.0.x
+
+  - task: UseDotNet@2
+    displayName: install dotnet core sdk 3.1
+    inputs:
+      packageType: sdk
+      version: $(dotnetCoreSdkVersion)
+
+  - task: NuGetToolInstaller@1
+    displayName: install nuget
+
+  - task: NuGetCommand@2
+    displayName: nuget restore
+    inputs:
+      restoreSolution: Datadog.Trace.sln
+      verbosityRestore: Normal
+
+  # this triggers a dependency chain that builds all the managed and native dlls
+  - task: MSBuild@1
+    displayName: msbuild tracer-home
+    inputs:
+      solution: Datadog.Trace.proj
+      platform: $(buildPlatform)
+      configuration: $(buildConfiguration)
+      msbuildArguments: /t:msi /p:RunWixToolsOutOfProc=true /p:TracerHomeDirectory=$(publishOutput)
+      maximumCpuCount: true
+
+  - task: MSBuild@1
+    displayName: Build .NET Framework projects (not SDK-based projects)
+    inputs:
+      solution: Datadog.Trace.proj
+      platform: $(buildPlatform)
+      configuration: $(buildConfiguration)
+      msbuildArguments: /t:BuildFrameworkReproductions
+      maximumCpuCount: true
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build integration tests
+    inputs:
+      command: build
+      projects: |
+        test/test-applications/regression/**/*.csproj
+        test/*.IntegrationTests/*.IntegrationTests.csproj
+        !test/test-applications/regression/**/ExpenseItDemo*.csproj
+        !test/test-applications/regression/**/EntityFramework6x*.csproj
+        !test/test-applications/regression/**/StackExchange.Redis.AssemblyConflict.LegacyProject.csproj
+      arguments: --configuration $(buildConfiguration) -p:Platform=$(buildPlatform) -p:ManagedProfilerOutputDirectory=$(publishOutput)
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build samples
+    inputs:
+      command: build
+      projects: |
+        test/test-applications/integrations/**/*.csproj
+        !test/test-applications/integrations/dependency-libs/**/*.csproj
+      arguments: --configuration $(buildConfiguration) -p:Platform=$(buildPlatform) -p:ManagedProfilerOutputDirectory=$(publishOutput) -p:BuildInParallel=false
+
+  - task: NuGetCommand@2
+    displayName: nuget restore IIS samples
+    inputs:
+      restoreSolution: test/test-applications/aspnet/samples-iis.sln
+      verbosityRestore: Normal
+
+  - task: MSBuild@1
+    displayName: Publish IIS samples
+    inputs:
+      solution: test/test-applications/aspnet/samples-iis.sln
+      configuration: '$(buildConfiguration)'
+      msbuildArguments: '/p:DeployOnBuild=true /p:PublishProfile=FolderProfile.pubxml'
+      maximumCpuCount: true
+
+  - task: DockerCompose@0
+    displayName: docker-compose build IIS containers
+    inputs:
+      containerregistrytype: Container Registry
+      dockerComposeCommand: build --build-arg DOTNET_TRACER_MSI=$(msiOutputDirectory)/*.msi --build-arg ENABLE_32_BIT=$(enable32bit) IntegrationTests.IIS.LoaderOptimizationRegKey
+
+  - task: DockerCompose@0
+    displayName: docker-compose start IIS containers
+    inputs:
+      containerregistrytype: Container Registry
+      dockerComposeCommand: up -d IntegrationTests.IIS.LoaderOptimizationRegKey
 
   - powershell: |
       [System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")
@@ -327,7 +444,15 @@ jobs:
       command: test
       configuration: $(buildConfiguration)
       projects: test/Datadog.Trace.ClrProfiler.IntegrationTests/Datadog.Trace.ClrProfiler.IntegrationTests.csproj
-      arguments: --filter "(RunOnWindows=True|Category=Smoke)&LoadFromGAC=True" -p:Platform=$(buildPlatform)
+      arguments: --filter "(RunOnWindows=True|Category=Smoke)&LoadFromGAC=True&IIS!=True" -p:Platform=$(buildPlatform)
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet test IIS
+    inputs:
+      command: test
+      configuration: $(buildConfiguration)
+      projects: test/Datadog.Trace.ClrProfiler.IntegrationTests/Datadog.Trace.ClrProfiler.IntegrationTests.csproj
+      arguments: --filter "(IIS=True)" -p:Platform=$(buildPlatform)
 
   - task: DockerCompose@0
     displayName: docker-compose stop services

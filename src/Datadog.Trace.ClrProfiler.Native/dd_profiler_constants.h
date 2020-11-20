@@ -9,6 +9,7 @@ namespace trace {
   WSTRING env_vars_to_display[]{
     environment::tracing_enabled,
     environment::debug_enabled,
+    environment::dump_il_rewrite_enabled,
     environment::profiler_home_path,
     environment::integrations_path,
     environment::include_process_names,
@@ -21,6 +22,7 @@ namespace trace {
     environment::disabled_integrations,
     environment::clr_disable_optimizations,
     environment::domain_neutral_instrumentation,
+    environment::netstandard_enabled,
     environment::azure_app_services,
     environment::azure_app_services_app_pool_id,
     environment::azure_app_services_cli_telemetry_profile_value};
@@ -58,6 +60,6 @@ namespace trace {
       "Anonymously Hosted DynamicMethods Assembly"_W,
       "ISymWrapper"_W};
 
-  WSTRING managed_profiler_full_assembly_version = "Datadog.Trace.ClrProfiler.Managed, Version=1.19.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb"_W;
+  WSTRING managed_profiler_full_assembly_version = "Datadog.Trace.ClrProfiler.Managed, Version=1.19.6.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb"_W;
 
 }  // namespace trace
