@@ -123,6 +123,9 @@ namespace Datadog.Trace.Configuration
                                    // default value
                                    false;
 
+            RuntimeMetricsEnabled = source?.GetBool(ConfigurationKeys.RuntimeMetricsEnabled) ??
+                                    false;
+
             CustomSamplingRules = source?.GetString(ConfigurationKeys.CustomSamplingRules);
 
             GlobalSamplingRate = source?.GetDouble(ConfigurationKeys.GlobalSamplingRate);
@@ -254,6 +257,11 @@ namespace Datadog.Trace.Configuration
         /// <seealso cref="ConfigurationKeys.Exporter"/>
         /// </summary>
         public ExporterType Exporter { get; set; }
+
+        /// Gets or sets a value indicating whether runtime metrics
+        /// are enabled and sent to DogStatsd.
+        /// </summary>
+        public bool RuntimeMetricsEnabled { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the use
