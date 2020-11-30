@@ -112,7 +112,7 @@ namespace Datadog.Trace
                     if (_agentWriter == null)
                     {
                         IApi overridingApiClient = new Api(baseEndpoint, apiRequestFactory: null, Statsd);
-                        _agentWriter = _agentWriter ?? new AgentWriter(overridingApiClient, Statsd);
+                        _agentWriter = _agentWriter ?? new AgentWriter(overridingApiClient, Statsd, queueSize: Settings.TraceQueueSize);
                     }
                     else
                     {
@@ -139,7 +139,7 @@ namespace Datadog.Trace
                         break;
                 }
 
-                _agentWriter = new AgentWriter(api, Statsd);
+                _agentWriter = new AgentWriter(api, Statsd, queueSize: Settings.TraceQueueSize);
             }
 
             _scopeManager = scopeManager ?? new AsyncLocalScopeManager();
