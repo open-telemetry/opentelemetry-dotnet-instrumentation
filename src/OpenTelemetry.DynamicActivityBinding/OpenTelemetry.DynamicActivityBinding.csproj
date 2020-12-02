@@ -43,7 +43,7 @@
     <None Include="$(VendoredPath)DiagnosticSourceUsersGuide.md" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="$(VendoredPath)System\Diagnostics\CodeAnalysis\NullableAttribute.cs" />
+    <Compile Include="$(VendoredPath)System\Diagnostics\CodeAnalysis\NullableAttributes.cs" />
     <Compile Include="$(VendoredPath)System\Diagnostics\CodeAnalysis\DynamicDependencyAttribute.cs" />
     <Compile Include="$(VendoredPath)System\Diagnostics\CodeAnalysis\DynamicallyAccessedMemberTypes.cs" />
   </ItemGroup>
