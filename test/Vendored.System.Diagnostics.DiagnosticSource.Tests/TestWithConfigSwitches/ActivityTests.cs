@@ -55,8 +55,8 @@ namespace Vendored.System.Diagnostics.Tests
             string child1ReleaseString = $"|{parent.RootId}.1.";
             string child2ReleaseString = $"|{parent.RootId}.2.";
 
-            //AssertExtensions.AtLeastOneEquals(child1DebugString, child1ReleaseString, child1.Id);
-            //AssertExtensions.AtLeastOneEquals(child2DebugString, child2ReleaseString, child2.Id);
+            AssertExtensions.AtLeastOneEquals(child1DebugString, child1ReleaseString, child1.Id);
+            AssertExtensions.AtLeastOneEquals(child2DebugString, child2ReleaseString, child2.Id);
 
             Assert.Equal(parent.RootId, child1.RootId);
             Assert.Equal(parent.RootId, child2.RootId);
@@ -68,7 +68,7 @@ namespace Vendored.System.Diagnostics.Tests
             string child3DebugString = $"|{parent.RootId}.{child3.OperationName}-3.";
             string child3ReleaseString = $"|{parent.RootId}.3.";
 
-            //AssertExtensions.AtLeastOneEquals(child3DebugString, child3ReleaseString, child3.Id);
+            AssertExtensions.AtLeastOneEquals(child3DebugString, child3ReleaseString, child3.Id);
 
             var grandChild = new Activity("grandChild");
             grandChild.Start();
@@ -76,7 +76,7 @@ namespace Vendored.System.Diagnostics.Tests
             child3DebugString = $"{child3.Id}{grandChild.OperationName}-1.";
             child3ReleaseString = $"{child3.Id}1.";
 
-            //AssertExtensions.AtLeastOneEquals(child3DebugString, child3ReleaseString, grandChild.Id);
+            AssertExtensions.AtLeastOneEquals(child3DebugString, child3ReleaseString, grandChild.Id);
         }
 
         [Fact]
