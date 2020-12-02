@@ -1,6 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+// Modified excerpt from dotnet/runtime. This version contains only
+// the types, methods, and interfaces used by Vendored.System.Diagnostics.DiagnosticSource.Tests.csproj
+
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
