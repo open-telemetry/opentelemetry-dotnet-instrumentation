@@ -433,7 +433,7 @@ namespace Vendored.System.Diagnostics.Tests
                 {
                     callingByContext++;
 
-                    Assert.Equal(new ActivityContext(ActivityTraceId.CreateFromString(w3cId.Substring(3,  32)), ActivitySpanId.CreateFromString(w3cId.Substring(36, 16)), ActivityTraceFlags.None),
+                    Assert.Equal(new ActivityContext(ActivityTraceId.CreateFromString(w3cId.Substring(3,  32)), ActivitySpanId.CreateFromString(w3cId.Substring(36, 16)), ActivityTraceFlags.Recorded),
                                  activityOptions.Parent);
 
                     return ActivitySamplingResult.AllData;
