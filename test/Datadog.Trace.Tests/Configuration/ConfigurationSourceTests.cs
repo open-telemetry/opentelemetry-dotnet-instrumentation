@@ -86,6 +86,12 @@ namespace Datadog.Trace.Tests.Configuration
             yield return new object[] { ConfigurationKeys.HeaderTags, "header1:tag1,:tagonly,headeronly:,:,nocolon", CreateFunc(s => s.HeaderTags), HeaderTags };
             yield return new object[] { ConfigurationKeys.HeaderTags, "header1:tag1,header2:tag1", CreateFunc(s => s.HeaderTags), HeaderTagsSameTag };
             yield return new object[] { ConfigurationKeys.HeaderTags, "header1:tag1,header1:tag2", CreateFunc(s => s.HeaderTags.Count), 1 };
+
+            yield return new object[] { ConfigurationKeys.Exporter, null, CreateFunc(s => s.Exporter), ExporterType.Default };
+            yield return new object[] { ConfigurationKeys.Exporter, string.Empty, CreateFunc(s => s.Exporter), ExporterType.Default };
+            yield return new object[] { ConfigurationKeys.Exporter, "datadogagent", CreateFunc(s => s.Exporter), ExporterType.DatadogAgent };
+            yield return new object[] { ConfigurationKeys.Exporter, "Zipkin", CreateFunc(s => s.Exporter), ExporterType.Zipkin };
+            yield return new object[] { ConfigurationKeys.Exporter, "unknown", CreateFunc(s => s.Exporter), ExporterType.Default };
         }
 
         // JsonConfigurationSource needs to be tested with JSON data, which cannot be used with the other IConfigurationSource implementations.
