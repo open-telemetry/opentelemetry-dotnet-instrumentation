@@ -11,9 +11,9 @@ namespace Datadog.Trace.Tagging
         private List<KeyValuePair<string, double>> _metrics;
         private List<KeyValuePair<string, string>> _tags;
 
-        protected List<KeyValuePair<string, double>> Metrics => Volatile.Read(ref _metrics);
+        public List<KeyValuePair<string, double>> Metrics => Volatile.Read(ref _metrics);
 
-        protected List<KeyValuePair<string, string>> Tags => Volatile.Read(ref _tags);
+        public List<KeyValuePair<string, string>> Tags => Volatile.Read(ref _tags);
 
         public string GetTag(string key)
         {
