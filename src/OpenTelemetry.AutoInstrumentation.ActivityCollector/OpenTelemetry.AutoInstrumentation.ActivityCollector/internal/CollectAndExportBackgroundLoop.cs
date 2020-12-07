@@ -63,7 +63,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
         /// See code for the detailed logic.
         /// <br />
         /// Also note that <c>exportBatchSizeCap</c> is a SOFT CAP. When it is reached, we signal the backgroud loop to start export
-        /// as soon as possible. HOwever, additional item may be added to the completed items buffers before the export actually starts.
+        /// as soon as possible. However, additional item may be added to the completed items buffers before the export actually starts.
         /// </param>
         /// <param name="aggregateActivitiesIntoTraces"></param>
         /// <param name="activityExporter"></param>
@@ -152,7 +152,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
             _loopThread.Name = this.GetType().Name + "." + nameof(MainLoop) + "-" + _activityExporter.GetType().Name;
             _loopThread.IsBackground = false;
 
-            Log.Info(nameof(CollectAndExportBackgroundLoop),
+            Log.Info(typeof(CollectAndExportBackgroundLoop).FullName,
                      "Starting loop thread",
                      nameof(_activityExporter), _activityExporter.GetType().FullName,
                      nameof(_exportInterval), _exportInterval,
@@ -184,7 +184,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
 
         private void MainLoop()
         {
-            Log.Info(nameof(CollectAndExportBackgroundLoop),
+            Log.Info(typeof(CollectAndExportBackgroundLoop).FullName,
                      "Entering main loop",
                      nameof(_activityExporter), _activityExporter.GetType().FullName,
                      $"{nameof(_loopThread)}.{nameof(Thread.Name)}", _loopThread?.Name,
@@ -208,7 +208,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
                     // The exporting of items from the previous interval will occur during it.
                     nextSendTargetTime = DateTimeOffset.Now + _exportInterval;
 
-                    // Grab the items and initial the export:
+                    // Grab the items and initiate the export:
                     ExportResult exportResult;
                     if (_aggregateActivitiesIntoTraces)
                     {
@@ -228,7 +228,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
                     {
                         // If the exporter gave us a batch size hint, use it:
 
-                        Log.Info(nameof(CollectAndExportBackgroundLoop),
+                        Log.Info(typeof(CollectAndExportBackgroundLoop).FullName,
                                  $"{nameof(IActivityExporter)} provided a Batch-Size-Hint.",
                                  nameof(_activityExporter), _activityExporter.GetType().FullName,
                                  $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId,
@@ -258,7 +258,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
                                 change = delta;
                             }
 
-                            Log.Debug(nameof(CollectAndExportBackgroundLoop),
+                            Log.Debug(typeof(CollectAndExportBackgroundLoop).FullName,
                                       $"Adjusting {nameof(_exportBatchSizeCapCurrent)} because last Batch-Size-Hint"
                                      + " is older than {MoveTowardsDefaultBatchSizeAfterAge} cycles.",
                                       nameof(_activityExporter), _activityExporter.GetType().FullName,
@@ -273,7 +273,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(nameof(CollectAndExportBackgroundLoop), ex,
+                    Log.Error(typeof(CollectAndExportBackgroundLoop).FullName, ex,
                               nameof(_activityExporter), _activityExporter.GetType().FullName,
                               $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId);
                 }
@@ -286,7 +286,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
         {
             if (exportResult == null)
             {
-                Log.Error(nameof(CollectAndExportBackgroundLoop),
+                Log.Error(typeof(CollectAndExportBackgroundLoop).FullName,
                           "Items export failed",
                           nameof(_activityExporter), _activityExporter.GetType().FullName,
                           $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId,
@@ -294,7 +294,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
             }
             else if (exportResult.IsSuccess)
             {
-                Log.Debug(nameof(CollectAndExportBackgroundLoop),
+                Log.Debug(typeof(CollectAndExportBackgroundLoop).FullName,
                           "Items export completed",
                           nameof(_activityExporter), _activityExporter.GetType().FullName,
                           $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId,
@@ -306,7 +306,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
             }
             else if (exportResult.Error != null)
             {
-                Log.Error(nameof(CollectAndExportBackgroundLoop),
+                Log.Error(typeof(CollectAndExportBackgroundLoop).FullName,
                           "Items export failed",
                           nameof(_activityExporter), _activityExporter.GetType().FullName,
                           $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId,
@@ -321,7 +321,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
             }
             else
             {
-                Log.Error(nameof(CollectAndExportBackgroundLoop),
+                Log.Error(typeof(CollectAndExportBackgroundLoop).FullName,
                          "Items export failed",
                           nameof(_activityExporter), _activityExporter.GetType().FullName,
                           $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId,
@@ -364,7 +364,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(nameof(CollectAndExportBackgroundLoop), ex,
+                    Log.Error(typeof(CollectAndExportBackgroundLoop).FullName, ex,
                               nameof(_activityExporter), _activityExporter.GetType().FullName,
                               $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId);
                 }
@@ -387,7 +387,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
                 return;
             }
 
-            Log.Info(nameof(CollectAndExportBackgroundLoop),
+            Log.Info(typeof(CollectAndExportBackgroundLoop).FullName,
                      "Requesting to shut down main loop",
                      nameof(_activityExporter), _activityExporter.GetType().FullName,
                      $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId);
@@ -396,7 +396,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
             int prevState = Interlocked.CompareExchange(ref _loopState, State.ShutDown, State.NotStarted);
             if (prevState == State.NotStarted)
             {
-                Log.Info(nameof(CollectAndExportBackgroundLoop),
+                Log.Info(typeof(CollectAndExportBackgroundLoop).FullName,
                          "Main loop shut down before it started",
                          nameof(_activityExporter), _activityExporter.GetType().FullName,
                          $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId);
@@ -434,7 +434,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
                 }
             }
 
-            Log.Info(nameof(CollectAndExportBackgroundLoop),
+            Log.Info(typeof(CollectAndExportBackgroundLoop).FullName,
                      "Main loop shut down; requesting toi shut down th exporter",
                      nameof(_activityExporter), _activityExporter.GetType().FullName,
                      $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId);
@@ -445,7 +445,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
             }
             catch (Exception ex)
             {
-                Log.Error(nameof(CollectAndExportBackgroundLoop), ex,
+                Log.Error(typeof(CollectAndExportBackgroundLoop).FullName, ex,
                           nameof(_activityExporter), _activityExporter.GetType().FullName,
                           $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId);
             }
@@ -475,7 +475,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(nameof(CollectAndExportBackgroundLoop), ex,
+                        Log.Error(typeof(CollectAndExportBackgroundLoop).FullName, ex,
                                   nameof(_activityExporter), _activityExporter.GetType().FullName,
                                   $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId);
                     }
@@ -486,7 +486,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(nameof(CollectAndExportBackgroundLoop), ex,
+                        Log.Error(typeof(CollectAndExportBackgroundLoop).FullName, ex,
                                   nameof(_activityExporter), _activityExporter.GetType().FullName,
                                   $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId);
                     }
@@ -500,7 +500,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(nameof(CollectAndExportBackgroundLoop), ex,
+                    Log.Error(typeof(CollectAndExportBackgroundLoop).FullName, ex,
                               nameof(_activityExporter), _activityExporter.GetType().FullName,
                               $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId);
                 }
@@ -543,7 +543,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(nameof(CollectAndExportBackgroundLoop), ex,
+                    Log.Error(typeof(CollectAndExportBackgroundLoop).FullName, ex,
                               nameof(_activityExporter), _activityExporter.GetType().FullName,
                               $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId);
                 }
@@ -571,7 +571,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
 
                 if (!isNewTrace)
                 {
-                    Log.Error(nameof(CollectAndExportBackgroundLoop),
+                    Log.Error(typeof(CollectAndExportBackgroundLoop).FullName,
                               $"{nameof(OnActivityStarted)}; activity is a local root, but a trace for this activity is already in-flight",
                               nameof(_activityExporter), _activityExporter.GetType().FullName,
                               $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId,
@@ -585,7 +585,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
 
                 if (!isTraceExists)
                 {
-                    Log.Error(nameof(CollectAndExportBackgroundLoop),
+                    Log.Error(typeof(CollectAndExportBackgroundLoop).FullName,
                               $"{nameof(OnActivityStarted)}; activity is NOT a local root; a trace for its parent chain should be in-flight, but it cannot be found",
                               nameof(_activityExporter), _activityExporter.GetType().FullName,
                               $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId,
@@ -625,7 +625,7 @@ namespace OpenTelemetry.AutoInstrumentation.ActivityCollector
 
                     if (!isTraceExists)
                     {
-                        Log.Error(nameof(CollectAndExportBackgroundLoop),
+                        Log.Error(typeof(CollectAndExportBackgroundLoop).FullName,
                               $"{nameof(OnActivityStopped)}; activity is a local root; a trace for its parent chain should be in-flight, but it cannot be found",
                               nameof(_activityExporter), _activityExporter.GetType().FullName,
                               $"{nameof(_loopThread)}.{nameof(Thread.ManagedThreadId)}", _loopThread?.ManagedThreadId,
