@@ -118,7 +118,26 @@ namespace Datadog.Trace
                 });
 
             // fall back to default implementations of each dependency if not provided
-            _agentWriter = agentWriter ?? new AgentWriter(new Api(Settings.AgentUri, apiRequestFactory: null, Statsd), Statsd);
+            if (agentWriter != null)
+            {
+                _agentWriter = agentWriter;
+            }
+            else
+            {
+                IApi api = null;
+                switch (Settings.Exporter)
+                {
+                    case ExporterType.Zipkin:
+                        api = new ZipkinApi(Settings);
+                        break;
+                    case ExporterType.DatadogAgent:
+                    default:
+                        api = new Api(Settings.AgentUri, apiRequestFactory: null, Statsd);
+                        break;
+                }
+
+                _agentWriter = new AgentWriter(api, Statsd);
+            }
 
             _scopeManager = scopeManager ?? new AsyncLocalScopeManager();
             Sampler = sampler ?? new RuleBasedSampler(new RateLimiter(Settings.MaxTracesSubmittedPerSecond));

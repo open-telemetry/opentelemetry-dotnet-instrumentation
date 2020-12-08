@@ -35,25 +35,10 @@ namespace Datadog.Trace.Agent
             }
         }
 
-        private static IDictionary<string, string> BuildTags(Span span, TracerSettings settings)
-        {
-            var tags = new Dictionary<string, string>();
-
-            foreach (var entry in span.Tags.Tags)
-            {
-                if (!entry.Key.Equals(Trace.Tags.SpanKind))
-                {
-                    tags[entry.Key] = entry.Value;
-                }
-            }
-
-            return tags;
-        }
-
-        [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
+        [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy), ItemNullValueHandling = NullValueHandling.Ignore)]
         internal class ZipkinSpan
         {
-            private static IDictionary<string, string> emptyTags = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
+            private static readonly IDictionary<string, string> EmptyTags = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
 
             private readonly Span _span;
             private readonly TracerSettings _settings;
@@ -63,7 +48,7 @@ namespace Datadog.Trace.Agent
             {
                 _span = span;
                 _settings = settings;
-                _tags = span.Tags != null ? BuildTags(span, settings) : emptyTags;
+                _tags = BuildTags(span, settings);
             }
 
             public string Id
@@ -98,7 +83,8 @@ namespace Datadog.Trace.Agent
 
             public string Kind
             {
-                get => _span.GetTag(Trace.Tags.SpanKind)?.ToUpper();
+                // Per Zipkin convention these are always upper case.
+                get => _span.GetTag(Trace.Tags.SpanKind)?.ToUpperInvariant();
             }
 
             public Dictionary<string, string> LocalEndpoint
@@ -109,7 +95,7 @@ namespace Datadog.Trace.Agent
                         ? _span.ServiceName
                         : Tracer.Instance.DefaultServiceName;
 
-                    // TODO: Save this allocation
+                    // TODO: Save this allocation.
                     return new Dictionary<string, string>() { { "serviceName", actualServiceName } };
                 }
             }
@@ -119,22 +105,24 @@ namespace Datadog.Trace.Agent
                 get => _tags;
             }
 
-            // Methods below are used by Newtonsoft JSON serializer to decide if should serialize
-            // some properties when they are null.
-
-            public bool ShouldSerializeTags()
+            private static IDictionary<string, string> BuildTags(Span span, TracerSettings settings)
             {
-                return _tags != null;
-            }
+                var spanTags = span?.Tags?.Tags;
+                if (spanTags == null || spanTags.Count == 0)
+                {
+                    return EmptyTags;
+                }
 
-            public bool ShouldSerializeParentId()
-            {
-                return _span.Context.ParentId != null;
-            }
+                var tags = new Dictionary<string, string>(spanTags.Count);
+                foreach (var entry in spanTags)
+                {
+                    if (!entry.Key.Equals(Trace.Tags.SpanKind))
+                    {
+                        tags[entry.Key] = entry.Value;
+                    }
+                }
 
-            public bool ShouldSerializeKind()
-            {
-                return _span.Tags?.GetTag(Trace.Tags.SpanKind) != null;
+                return tags;
             }
         }
     }
