@@ -48,7 +48,7 @@ namespace Datadog.Trace.Agent
             {
                 _span = span;
                 _settings = settings;
-                _tags = BuildTags(span, settings);
+                _tags = BuildTags(span);
             }
 
             public string Id
@@ -105,7 +105,7 @@ namespace Datadog.Trace.Agent
                 get => _tags;
             }
 
-            private static IDictionary<string, string> BuildTags(Span span, TracerSettings settings)
+            private static IDictionary<string, string> BuildTags(Span span)
             {
                 var spanTags = span?.Tags?.Tags;
                 if (spanTags == null || spanTags.Count == 0)

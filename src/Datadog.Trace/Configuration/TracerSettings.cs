@@ -248,7 +248,7 @@ namespace Datadog.Trace.Configuration
         public bool TracerMetricsEnabled { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the exporter to be used the Tracer uses it to encode and
+        /// Gets or sets the name of the exporter to be used. The Tracer uses it to encode and
         /// dispatch traces.
         /// Default is <c>"DatadogAgent"</c>.
         /// <seealso cref="ConfigurationKeys.Exporter"/>

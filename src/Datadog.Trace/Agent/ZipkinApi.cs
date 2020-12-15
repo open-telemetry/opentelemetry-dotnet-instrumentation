@@ -23,7 +23,7 @@ namespace Datadog.Trace.Agent
 
         public void SetBaseEndpoint(Uri baseEndpoint)
         {
-            // TODO: This doesn't make sense for this exporter.
+            // TODO: Remove this method when it is also removed from the interface.
             _tracesEndpoint = new Uri(baseEndpoint, _tracesEndpoint.PathAndQuery);
         }
 
@@ -47,11 +47,6 @@ namespace Datadog.Trace.Agent
                 request.Method = "POST";
                 request.ContentType = "application/json";
 
-                foreach (var header in _settings.HeaderTags)
-                {
-                    request.Headers.Add(header.Key, header.Value);
-                }
-
                 using (var requestStream = await request.GetRequestStreamAsync().ConfigureAwait(false))
                 {
                     var serializer = new ZipkinSerializer();
@@ -65,7 +60,10 @@ namespace Datadog.Trace.Agent
                     using var httpWebResponse = (HttpWebResponse)await request.GetResponseAsync().ConfigureAwait(false);
 
                     // Zipkin specifies only "Accepted" as valid response, the code is more tolerant here.
-                    if (httpWebResponse.StatusCode >= HttpStatusCode.OK && httpWebResponse.StatusCode <= HttpStatusCode.Accepted)
+                    // Following a criteria equivalent to HttpResponseMessage.EnsureSuccessStatusCode as
+                    // done by the OpenTelemetry .NET SDK for their Zipkin exporter:
+                    // See https://github.com/open-telemetry/opentelemetry-dotnet/blob/8cda9ef394a1b075fd156d73dace48e48f5b3c9b/src/OpenTelemetry.Exporter.Zipkin/ZipkinExporter.cs#L86
+                    if (httpWebResponse.StatusCode >= HttpStatusCode.OK && httpWebResponse.StatusCode < HttpStatusCode.MultipleChoices)
                     {
                         return true;
                     }
