@@ -212,6 +212,14 @@ namespace Datadog.Trace.Configuration
         public const string DiagnosticSourceEnabled = "DD_DIAGNOSTIC_SOURCE_ENABLED";
 
         /// <summary>
+        /// Configuration key for the exporter to be used. The Tracer uses it to encode and
+        /// dispatch traces.
+        /// Default is <c>"DatadogAgent"</c>.
+        /// </summary>
+        /// <seealso cref="TracerSettings.Exporter"/>
+        public const string Exporter = "OTEL_EXPORTER";
+
+        /// <summary>
         /// String format patterns used to match integration-specific configuration keys.
         /// </summary>
         public static class Integrations

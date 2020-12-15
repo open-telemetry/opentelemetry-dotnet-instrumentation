@@ -130,6 +130,9 @@ namespace Datadog.Trace.Configuration
             StartupDiagnosticLogEnabled = source?.GetBool(ConfigurationKeys.StartupDiagnosticLogEnabled) ??
                                           // default value
                                           true;
+
+            Enum.TryParse(source?.GetString(ConfigurationKeys.Exporter) ?? "default", ignoreCase: true, out ExporterType exporterType);
+            Exporter = exporterType;
         }
 
         /// <summary>
@@ -243,6 +246,14 @@ namespace Datadog.Trace.Configuration
         /// are enabled and sent to DogStatsd.
         /// </summary>
         public bool TracerMetricsEnabled { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the exporter to be used. The Tracer uses it to encode and
+        /// dispatch traces.
+        /// Default is <c>"DatadogAgent"</c>.
+        /// <seealso cref="ConfigurationKeys.Exporter"/>
+        /// </summary>
+        public ExporterType Exporter { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the use
