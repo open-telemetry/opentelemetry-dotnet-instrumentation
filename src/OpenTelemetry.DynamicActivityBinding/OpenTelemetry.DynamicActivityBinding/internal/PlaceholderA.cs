@@ -2,8 +2,8 @@
 
 namespace OpenTelemetry.DynamicActivityBinding
 {
-    internal static class DynamicLoader
+    internal static class PlaceholderA
     {
-
+        // Source files will go here.
     }
 }
