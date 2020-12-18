@@ -1,122 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CLSCompliant>false</CLSCompliant>
-    <NoWarn>$(NoWarn);SA1205</NoWarn>
-    <Nullable>enable</Nullable>
-    <VendoredPath Condition="$(VendoredPath) == ''">vendored/</VendoredPath>
-    <CommonPath Condition="$(CommonPath) == ''">$(VendoredPath)Common/</CommonPath>
-    <EnableDefaultCompileItems Condition="$(EnableDefaultCompileItems) == ''">false</EnableDefaultCompileItems>
-    <TargetFrameworks>netcoreapp2.1;netcoreapp3.0;netcoreapp3.1;net45;net46;netstandard2.0</TargetFrameworks>
-    <NetCoreAppCurrent Condition="$(TargetFramework.StartsWith('netcoreapp'))">$(TargetFramework)</NetCoreAppCurrent>
-    <AvoidRestoreCycleOnSelfReference>true</AvoidRestoreCycleOnSelfReference>
-    <LangVersion>8.0</LangVersion>
+    <TargetFrameworks>net45;net461;netstandard2.0;netcoreapp3.1</TargetFrameworks>
   </PropertyGroup>
-  <!-- DesignTimeBuild requires all the TargetFramework Derived Properties to not be present in the first property group. -->
+ 
   <PropertyGroup>
-      <!-- To allow this library to work on V4.5 runtimes and other old platforms
-         we also have a separate complilation of this DLL that works for V4.5
-         (which is netstandard1.1).  Again we duplicate in a portable-* folder
-         to work with older NuGet clients -->
-    <PackageTargetFramework Condition="'$(TargetFramework)' == 'netstandard1.1'">netstandard1.1;portable-net45+win8+wpa81</PackageTargetFramework>
-    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'net45'">$(DefineConstants);NO_EVENTSOURCE_COMPLEX_TYPE_SUPPORT</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)' != 'netstandard1.1'">$(DefineConstants);EVENTSOURCE_ACTIVITY_SUPPORT</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)' != 'netstandard1.1' and '$(TargetFramework)' != 'netstandard1.3'">$(DefineConstants);EVENTSOURCE_ENUMERATE_SUPPORT</DefineConstants>
-    <DefineConstants Condition="$(TargetFramework.StartsWith('net4'))">$(DefineConstants);ALLOW_PARTIALLY_TRUSTED_CALLERS;ENABLE_HTTP_HANDLER</DefineConstants>
-    <ExcludeFromPackage Condition="'$(TargetFramework)' == 'netstandard2.0'">true</ExcludeFromPackage>
-    <DefineConstants Condition="'$(TargetFramework)' == '$(NetCoreAppCurrent)'">$(DefineConstants);W3C_DEFAULT_ID_FORMAT</DefineConstants>
+    <VendoredPath Condition="$(VendoredPath) == ''">VendoredLibs/</VendoredPath>
   </PropertyGroup>
+   
   <ItemGroup>
-    <Compile Include="public\**\*.cs" />
-    <Compile Include="internal\**\*.cs" />
+      <Compile Remove="VendoredLibs\**\*" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="$(VendoredPath)System\Buffers\Binary\Reader.cs" />
-    <Compile Include="$(VendoredPath)System\Buffers\Text\Utf8Parser\ParserHelpers.cs" />
-    <Compile Include="$(VendoredPath)System\Buffers\Text\Utf8Parser\Utf8Parser.Integer.Unsigned.X.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\DiagnosticSource.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\DiagnosticListener.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\DiagnosticSourceEventSource.cs" />
-    <Compile Include="$(VendoredPath)System.Diagnostics.Resources.Strings.Designer.cs" />
-    <Compile Include="$(VendoredPath)SR.cs" />
-    <Compile Include="$(VendoredPath)System\Numerics\BitOperations.cs" />
-    <None Include="$(VendoredPath)DiagnosticSourceUsersGuide.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="$(VendoredPath)System\Diagnostics\CodeAnalysis\NullableAttributes.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\CodeAnalysis\DynamicDependencyAttribute.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\CodeAnalysis\DynamicallyAccessedMemberTypes.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.1'">
-    <Compile Include="$(CommonPath)System\HexConverter.cs" Link="Common\System\HexConverter.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\Activity.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\ActivityTagsCollection.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\ActivityContext.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\ActivityCreationOptions.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\ActivitySamplingResult.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\ActivityEvent.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\ActivityKind.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\ActivityLink.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\ActivityListener.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\ActivitySource.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\DiagnosticSourceActivity.cs" />
-    <None Include="$(VendoredPath)ActivityUserGuide.md" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == '$(NetCoreAppCurrent)'">
-    <Compile Include="$(VendoredPath)System\Diagnostics\LocalAppContextSwitches.cs" />
-    <Compile Include="$(CommonPath)System\LocalAppContextSwitches.Common.cs">
-      <Link>$(VendoredPath)Common\System\LocalAppContextSwitches.Common.cs</Link>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' != 'net45' And '$(TargetFramework)' != 'netstandard1.1'">
-    <Compile Include="$(VendoredPath)System\Diagnostics\Activity.Current.net46.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
-    <Compile Include="$(VendoredPath)System\Diagnostics\Activity.Current.net45.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == '$(NetCoreAppCurrent)' or '$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'netstandard2.0'">
-    <Compile Include="$(VendoredPath)System\Diagnostics\Activity.DateTime.corefx.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == '$(NetCoreAppCurrent)' or '$(TargetFramework)' == 'netstandard2.1'">
-    <Compile Include="$(VendoredPath)System\Diagnostics\Activity.GenerateRootId.netcoreapp.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\ActivityContext.netcoreapp.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\ActivityLink.netcoreapp.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' != '$(NetCoreAppCurrent)' and '$(TargetFramework)' != 'netstandard2.1' and '$(TargetFramework)' != 'netstandard1.1'">
-    <Compile Include="$(VendoredPath)System\Diagnostics\Activity.GenerateRootId.netfx.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\ActivityContext.netfx.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\ActivityLink.netfx.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
-    <Compile Include="$(VendoredPath)System\Diagnostics\HttpHandlerDiagnosticListener.cs" />
-    <Compile Include="$(VendoredPath)AssemblyInfo.netfx.cs" />
-    <Compile Include="$(VendoredPath)System\Diagnostics\Activity.DateTime.netfx.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
-    <Reference Include="System.Collections" />
-    <Reference Include="System.Collections.Concurrent" />
-    <Reference Include="System.Diagnostics.Debug" />
-    <Reference Include="System.Diagnostics.Tracing" />
-    <Reference Include="System.Reflection" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.Extensions" />
-    <Reference Include="System.Runtime.InteropServices" />
-    <Reference Include="System.Threading" />
-    <Reference Include="System.Resources.ResourceManager" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.1' and '$(TargetFramework)' != '$(NetCoreAppCurrent)'">
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="$(VendoredPath)System.Diagnostics.Resources.Strings.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>$(VendoredPath)System.Diagnostics.Resources.Strings.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Update="$(VendoredPath)System.Diagnostics.Resources.Strings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>$(VendoredPath)System.Diagnostics.Resources.Strings.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
+  
+  <Import Project="VendoredLibs.DiagnosticSource.props" />
+
 </Project> 
