@@ -246,6 +246,11 @@ namespace Datadog.Trace.Configuration
         /// <seealso cref="TracerSettings.Exporter"/>
         public const string Exporter = "OTEL_EXPORTER";
 
+        /// Configuration key for setting the API key, used by the Agent.
+        /// This key is here for troubleshooting purposes.
+        /// </summary>
+        public const string ApiKey = "DD_API_KEY";
+
         /// <summary>
         /// String format patterns used to match integration-specific configuration keys.
         /// </summary>
