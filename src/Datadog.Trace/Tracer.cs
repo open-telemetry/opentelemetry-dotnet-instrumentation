@@ -48,7 +48,7 @@ namespace Datadog.Trace
         private readonly IScopeManager _scopeManager;
         private readonly Timer _heartbeatTimer;
 
-        private IAgentWriter _agentWriter;
+        private readonly IAgentWriter _agentWriter;
 
         static Tracer()
         {
@@ -92,17 +92,10 @@ namespace Datadog.Trace
             // only set DogStatsdClient if tracer metrics are enabled
             if (Settings.TracerMetricsEnabled)
             {
-                // Run this first in case the port override is ready
-                TracingProcessManager.SubscribeToDogStatsDPortOverride(
-                    port =>
-                    {
-                        Log.Debug("Attempting to override dogstatsd port with {0}", port);
-                        Statsd = CreateDogStatsdClient(Settings, DefaultServiceName, port);
-                    });
-
                 Statsd = statsd ?? CreateDogStatsdClient(Settings, DefaultServiceName, Settings.DogStatsdPort);
             }
 
+<<<<<<< HEAD
             // Run this first in case the port override is ready
             TracingProcessManager.SubscribeToTraceAgentPortOverride(
                 port =>
@@ -137,7 +130,7 @@ namespace Datadog.Trace
                         break;
                     case ExporterType.DatadogAgent:
                     default:
-                        api = new Api(Settings.AgentUri, apiRequestFactory: null, Statsd);
+                        api = new Api(Settings.AgentUri, TransportStrategy.Get(Settings), Statsd);
                         break;
                 }
 
@@ -765,15 +758,6 @@ namespace Datadog.Trace
             catch (Exception ex)
             {
                 Log.SafeLogError(ex, "Error flushing traces on shutdown.");
-            }
-
-            try
-            {
-                TracingProcessManager.StopProcesses();
-            }
-            catch (Exception ex)
-            {
-                Log.SafeLogError(ex, "Error stopping sub processes on shutdown.");
             }
         }
 
