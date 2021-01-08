@@ -32,7 +32,6 @@ Maintainers ([@open-telemetry/dotnet-instrumentation-maintainers](https://github
 
 - [Chris Ventura](https://github.com/nrcventura), New Relic
 - [Greg Paperin](https://github.com/macrogreg), Datadog
-- [James Davis](https://github.com/debugthings), Microsoft
 - [Lucas Pimentel-Ordyna](https://github.com/lucaspimentel), Datadog
 - [Paulo Janotti](https://github.com/pjanotti), Splunk
 
