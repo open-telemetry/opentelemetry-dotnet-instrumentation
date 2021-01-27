@@ -59,7 +59,11 @@ namespace PrepareRelease
                 NugetVersionReplace);
 
             SynchronizeVersion(
-                "src/Datadog.Trace.DuckTyping/Datadog.Trace.DuckTyping.csproj",
+                "src/Datadog.Trace.Tools.Runner/Datadog.Trace.Tools.Runner.Standalone.csproj",
+                NugetVersionReplace);
+
+            SynchronizeVersion(
+                "src/Datadog.Trace.Tools.Runner/Datadog.Trace.Tools.Runner.Tool.csproj",
                 NugetVersionReplace);
 
             // Fully qualified name updates
@@ -71,6 +75,11 @@ namespace PrepareRelease
                 "src/Datadog.Trace.ClrProfiler.Native/dd_profiler_constants.h",
                 FullAssemblyNameReplace);
 
+            // Four-part AssemblyVersion update
+            SynchronizeVersion(
+                "src/Datadog.Trace/TracerConstants.cs",
+                FourPartVersionReplace);
+
             // Locked AssemblyVersion #.0.0.0 updates
             SynchronizeVersion(
                 "src/Datadog.Trace.AspNet/AssemblyInfo.cs",
@@ -80,14 +89,10 @@ namespace PrepareRelease
                 "src/Datadog.Trace.ClrProfiler.Managed.Core/AssemblyInfo.cs",
                 text => MajorAssemblyVersionReplace(text, "."));
 
-            SynchronizeVersion(
-                "src/Datadog.Trace.DuckTyping/AssemblyInfo.cs",
-                text => MajorAssemblyVersionReplace(text, "."));
-
             // Native profiler updates
             SynchronizeVersion(
                 "src/Datadog.Trace.ClrProfiler.Native/CMakeLists.txt",
-                text => FullVersionReplace(text, "."));
+                text => FullVersionReplace(text, ".", prefix: "VERSION "));
 
             SynchronizeVersion(
                 "src/Datadog.Trace.ClrProfiler.Native/Resource.rc",
@@ -118,9 +123,14 @@ namespace PrepareRelease
             Console.WriteLine($"Completed synchronizing versions to {VersionString()}");
         }
 
-        private static string FullVersionReplace(string text, string split)
+        private static string FourPartVersionReplace(string text)
         {
-            return Regex.Replace(text, VersionPattern(split), VersionString(split), RegexOptions.Singleline);
+            return Regex.Replace(text, VersionPattern(fourPartVersion: true), FourPartVersionString(), RegexOptions.Singleline);
+        }
+
+        private static string FullVersionReplace(string text, string split, string prefix = "")
+        {
+            return Regex.Replace(text, prefix + VersionPattern(split), prefix + VersionString(split), RegexOptions.Singleline);
         }
 
         private static string FullAssemblyNameReplace(string text)
@@ -176,6 +186,11 @@ namespace PrepareRelease
             var newFileContent = transform(fileContent);
 
             File.WriteAllText(fullPath, newFileContent, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        }
+
+        private static string FourPartVersionString(string split = ".")
+        {
+            return $"{TracerVersion.Major}{split}{TracerVersion.Minor}{split}{TracerVersion.Patch}{split}0";
         }
 
         private static string MajorVersionString(string split = ".")

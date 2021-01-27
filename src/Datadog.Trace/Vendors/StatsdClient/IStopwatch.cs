@@ -7,7 +7,9 @@ namespace Datadog.Trace.Vendors.StatsdClient
     internal interface IStopwatch
     {
         void Start();
+
         void Stop();
+
         int ElapsedMilliseconds();
     }
 }

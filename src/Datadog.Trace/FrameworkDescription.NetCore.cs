@@ -8,43 +8,64 @@ namespace Datadog.Trace
 {
     internal partial class FrameworkDescription
     {
+        private static FrameworkDescription _instance = null;
+
+        public static FrameworkDescription Instance
+        {
+            get { return _instance ?? (_instance = Create()); }
+        }
+
         public static FrameworkDescription Create()
         {
-            string frameworkName = null;
-            string osPlatform = null;
+            var frameworkName = "unknown";
+            var frameworkVersion = "unknown";
+            var osPlatform = "unknown";
+            var osArchitecture = "unknown";
+            var processArchitecture = "unknown";
 
             try
             {
-                // RuntimeInformation.FrameworkDescription returns a string like ".NET Framework 4.7.2" or ".NET Core 2.1",
-                // we want to return everything before the last space
-                string frameworkDescription = RuntimeInformation.FrameworkDescription;
-                int index = frameworkDescription.LastIndexOf(' ');
-                frameworkName = frameworkDescription.Substring(0, index).Trim();
-            }
-            catch (Exception e)
-            {
-                Log.SafeLogError(e, "Error getting framework name from RuntimeInformation");
-            }
+                try
+                {
+                    // RuntimeInformation.FrameworkDescription returns a string like ".NET Framework 4.7.2" or ".NET Core 2.1",
+                    // we want to return everything before the last space
+                    frameworkVersion = RuntimeInformation.FrameworkDescription;
+                    int index = frameworkVersion.LastIndexOf(' ');
+                    frameworkName = frameworkVersion.Substring(0, index).Trim();
+                }
+                catch (Exception e)
+                {
+                    Log.SafeLogError(e, "Error getting framework name from RuntimeInformation");
+                }
 
-            if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
-            {
-                osPlatform = "Windows";
+                if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+                {
+                    osPlatform = "Windows";
+                }
+                else if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
+                {
+                    osPlatform = "Linux";
+                }
+                else if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
+                {
+                    osPlatform = "MacOS";
+                }
+
+                osArchitecture = RuntimeInformation.OSArchitecture.ToString().ToLowerInvariant();
+                processArchitecture = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
+                frameworkVersion = GetNetCoreOrNetFrameworkVersion();
             }
-            else if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
+            catch (Exception ex)
             {
-                osPlatform = "Linux";
-            }
-            else if (RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
-            {
-                osPlatform = "MacOS";
+                Log.SafeLogError(ex, "Error getting framework description.");
             }
 
             return new FrameworkDescription(
-                frameworkName ?? "unknown",
-                GetNetCoreOrNetFrameworkVersion() ?? "unknown",
-                osPlatform ?? "unknown",
-                RuntimeInformation.OSArchitecture.ToString().ToLowerInvariant(),
-                RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant());
+                name: frameworkName,
+                productVersion: frameworkVersion,
+                osPlatform: osPlatform,
+                osArchitecture: osArchitecture,
+                processArchitecture: processArchitecture);
         }
 
         private static string GetNetCoreOrNetFrameworkVersion()

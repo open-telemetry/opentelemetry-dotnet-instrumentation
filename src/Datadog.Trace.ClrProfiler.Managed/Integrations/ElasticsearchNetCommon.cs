@@ -1,8 +1,8 @@
 using System;
 using System.Threading;
 using Datadog.Trace.ClrProfiler.Emit;
+using Datadog.Trace.Configuration;
 using Datadog.Trace.Logging;
-using Datadog.Trace.Tagging;
 
 namespace Datadog.Trace.ClrProfiler.Integrations
 {
@@ -19,9 +19,9 @@ namespace Datadog.Trace.ClrProfiler.Integrations
 
         private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.GetLogger(typeof(ElasticsearchNetCommon));
 
-        public static Scope CreateScope(Tracer tracer, string integrationName, object pipeline, object requestData)
+        public static Scope CreateScope(Tracer tracer, IntegrationInfo integrationId, object pipeline, object requestData)
         {
-            if (!tracer.Settings.IsIntegrationEnabled(integrationName))
+            if (!tracer.Settings.IsIntegrationEnabled(integrationId))
             {
                 // integration disabled, don't create a scope, skip this trace
                 return null;
@@ -39,7 +39,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             string method = requestData.GetProperty("Method").GetValueOrDefault()?.ToString();
             var url = requestData.GetProperty("Uri").GetValueOrDefault()?.ToString();
 
-            var serviceName = $"{tracer.DefaultServiceName}-{ServiceName}";
+            string serviceName = tracer.Settings.GetServiceName(tracer, ServiceName);
 
             Scope scope = null;
 
@@ -50,19 +50,11 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                 var span = scope.Span;
                 span.ResourceName = requestName ?? pathAndQuery ?? string.Empty;
                 span.Type = SpanType;
-                tags.InstrumentationName = ComponentValue;
-                tags.SpanKind = SpanKinds.Client;
                 tags.Action = requestName;
                 tags.Method = method;
                 tags.Url = url;
 
-                // set analytics sample rate if enabled
-                var analyticsSampleRate = tracer.Settings.GetIntegrationAnalyticsSampleRate(integrationName, enabledWithGlobalSetting: false);
-
-                if (analyticsSampleRate != null)
-                {
-                    tags.AnalyticsSampleRate = analyticsSampleRate;
-                }
+                tags.SetAnalyticsSampleRate(integrationId, tracer.Settings, enabledWithGlobalSetting: false);
             }
             catch (Exception ex)
             {

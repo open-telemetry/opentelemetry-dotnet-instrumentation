@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using Datadog.Trace.ClrProfiler.Integrations.AdoNet;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Logging;
@@ -24,14 +25,14 @@ namespace Datadog.Trace.ClrProfiler
         /// <param name="tracer">The tracer instance to use to create the new scope.</param>
         /// <param name="httpMethod">The HTTP method used by the request.</param>
         /// <param name="requestUri">The URI requested by the request.</param>
-        /// <param name="integrationName">The name of the integration creating this scope.</param>
+        /// <param name="integrationId">The id of the integration creating this scope.</param>
         /// <param name="tags">The tags associated to the scope</param>
         /// <returns>A new pre-populated scope.</returns>
-        public static Scope CreateOutboundHttpScope(Tracer tracer, string httpMethod, Uri requestUri, string integrationName, out HttpTags tags)
+        public static Scope CreateOutboundHttpScope(Tracer tracer, string httpMethod, Uri requestUri, IntegrationInfo integrationId, out HttpTags tags)
         {
             tags = null;
 
-            if (!tracer.Settings.IsIntegrationEnabled(integrationName))
+            if (!tracer.Settings.IsIntegrationEnabled(integrationId))
             {
                 // integration disabled, don't create a scope, skip this trace
                 return null;
@@ -57,27 +58,19 @@ namespace Datadog.Trace.ClrProfiler
                 string httpUrl = requestUri != null ? UriHelpers.CleanUri(requestUri, removeScheme: false, tryRemoveIds: false) : null;
 
                 tags = new HttpTags();
-                scope = tracer.StartActiveWithTags(OperationName, tags: tags, serviceName: $"{tracer.DefaultServiceName}-{ServiceName}");
+
+                string serviceName = tracer.Settings.GetServiceName(tracer, ServiceName);
+                scope = tracer.StartActiveWithTags(OperationName, tags: tags, serviceName: serviceName);
                 var span = scope.Span;
 
                 span.Type = SpanTypes.Http;
                 span.ResourceName = $"{httpMethod} {resourceUrl}";
 
-                tags.SpanKind = SpanKinds.Client;
                 tags.HttpMethod = httpMethod?.ToUpperInvariant();
                 tags.HttpUrl = httpUrl;
-                tags.InstrumentationName = integrationName;
+                tags.InstrumentationName = IntegrationRegistry.GetName(integrationId);
 
-                // set analytics sample rate if enabled
-                if (integrationName != null)
-                {
-                    var analyticsSampleRate = tracer.Settings.GetIntegrationAnalyticsSampleRate(integrationName, enabledWithGlobalSetting: false);
-
-                    if (analyticsSampleRate != null)
-                    {
-                        tags.AnalyticsSampleRate = analyticsSampleRate;
-                    }
-                }
+                tags.SetAnalyticsSampleRate(integrationId, tracer.Settings, enabledWithGlobalSetting: false);
             }
             catch (Exception ex)
             {
@@ -89,11 +82,18 @@ namespace Datadog.Trace.ClrProfiler
             return scope;
         }
 
-        public static Scope CreateDbCommandScope(Tracer tracer, IDbCommand command, string integrationName)
+        public static Scope CreateDbCommandScope(Tracer tracer, IDbCommand command)
         {
-            if (!tracer.Settings.IsIntegrationEnabled(integrationName))
+            if (!tracer.Settings.IsIntegrationEnabled(AdoNetConstants.IntegrationId))
             {
                 // integration disabled, don't create a scope, skip this trace
+                return null;
+            }
+
+            var commandType = command.GetType();
+            if (tracer.Settings.AdoNetExcludedTypes.Count > 0 && tracer.Settings.AdoNetExcludedTypes.Contains(commandType.FullName))
+            {
+                // AdoNet type disabled, don't create a scope, skip this trace
                 return null;
             }
 
@@ -101,7 +101,7 @@ namespace Datadog.Trace.ClrProfiler
 
             try
             {
-                string dbType = GetDbType(command.GetType().Name);
+                string dbType = GetDbType(commandType.Name);
 
                 if (dbType == null)
                 {
@@ -122,7 +122,7 @@ namespace Datadog.Trace.ClrProfiler
                     return null;
                 }
 
-                string serviceName = $"{tracer.DefaultServiceName}-{dbType}";
+                string serviceName = tracer.Settings.GetServiceName(tracer, dbType);
                 string operationName = $"{dbType}.query";
 
                 var tags = new SqlTags();
@@ -130,17 +130,10 @@ namespace Datadog.Trace.ClrProfiler
                 var span = scope.Span;
 
                 tags.DbType = dbType;
-                tags.InstrumentationName = integrationName;
 
                 span.AddTagsFromDbCommand(command);
 
-                // set analytics sample rate if enabled
-                var analyticsSampleRate = tracer.Settings.GetIntegrationAnalyticsSampleRate(integrationName, enabledWithGlobalSetting: false);
-
-                if (analyticsSampleRate != null)
-                {
-                    tags.AnalyticsSampleRate = analyticsSampleRate;
-                }
+                tags.SetAnalyticsSampleRate(AdoNetConstants.IntegrationId, tracer.Settings, enabledWithGlobalSetting: false);
             }
             catch (Exception ex)
             {

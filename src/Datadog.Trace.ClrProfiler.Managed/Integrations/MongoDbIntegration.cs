@@ -4,8 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Datadog.Trace.ClrProfiler.Emit;
 using Datadog.Trace.ClrProfiler.Helpers;
+using Datadog.Trace.Configuration;
 using Datadog.Trace.Logging;
-using Datadog.Trace.Tagging;
 
 namespace Datadog.Trace.ClrProfiler.Integrations
 {
@@ -14,7 +14,8 @@ namespace Datadog.Trace.ClrProfiler.Integrations
     /// </summary>
     public static class MongoDbIntegration
     {
-        private const string IntegrationName = "MongoDb";
+        internal const string IntegrationName = nameof(IntegrationIds.MongoDb);
+
         private const string OperationName = "mongodb.query";
         private const string ServiceName = "mongodb";
 
@@ -24,6 +25,8 @@ namespace Datadog.Trace.ClrProfiler.Integrations
         private const string MongoDbClientAssembly = "MongoDB.Driver.Core";
         private const string IWireProtocol = "MongoDB.Driver.Core.WireProtocol.IWireProtocol";
         private const string IWireProtocolGeneric = "MongoDB.Driver.Core.WireProtocol.IWireProtocol`1";
+
+        internal static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(IntegrationName);
 
         private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.GetLogger(typeof(MongoDbIntegration));
 
@@ -373,7 +376,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
 
         private static Scope CreateScope(object wireProtocol, object connection)
         {
-            if (!Tracer.Instance.Settings.IsIntegrationEnabled(IntegrationName))
+            if (!Tracer.Instance.Settings.IsIntegrationEnabled(IntegrationId))
             {
                 // integration disabled, don't create a scope, skip this trace
                 return null;
@@ -437,19 +440,9 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                         }
                     }
 
-                    // get the "query" element from the command BsonDocument, if it exists
-                    if (command.TryCallMethod("Contains", "query", out bool found) && found)
-                    {
-                        if (command.TryCallMethod("GetElement", "query", out object queryElement) && queryElement != null)
-                        {
-                            if (queryElement.TryGetPropertyValue("Value", out object queryValue) && queryValue != null)
-                            {
-                                query = queryValue.ToString();
-                            }
-                        }
-                    }
+                    query = command.ToString();
 
-                    resourceName = $"{operationName ?? "operation"} {databaseName ?? "database"} {query ?? "query"}";
+                    resourceName = $"{operationName ?? "operation"} {databaseName ?? "database"}";
                 }
             }
             catch (Exception ex)
@@ -458,7 +451,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             }
 
             Tracer tracer = Tracer.Instance;
-            string serviceName = $"{tracer.DefaultServiceName}-{ServiceName}";
+            string serviceName = tracer.Settings.GetServiceName(tracer, ServiceName);
 
             Scope scope = null;
 
@@ -475,13 +468,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                 tags.Host = host;
                 tags.Port = port;
 
-                // set analytics sample rate if enabled
-                var analyticsSampleRate = tracer.Settings.GetIntegrationAnalyticsSampleRate(IntegrationName, enabledWithGlobalSetting: false);
-
-                if (analyticsSampleRate != null)
-                {
-                    tags.AnalyticsSampleRate = analyticsSampleRate;
-                }
+                tags.SetAnalyticsSampleRate(IntegrationId, tracer.Settings, enabledWithGlobalSetting: false);
             }
             catch (Exception ex)
             {

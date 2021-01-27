@@ -37,11 +37,11 @@ then
     dotnet publish -f $publishTargetFramework -c $buildConfiguration test/test-applications/integrations/Samples.AspNetCoreMvc31/Samples.AspNetCoreMvc31.csproj -p:Configuration=$buildConfiguration -p:ManagedProfilerOutputDirectory="$PUBLISH_OUTPUT"
 fi
 
-for sample in Samples.Elasticsearch Samples.Elasticsearch.V5 Samples.ServiceStack.Redis Samples.StackExchange.Redis Samples.SqlServer Samples.MongoDB Samples.HttpMessageHandler Samples.WebRequest Samples.Npgsql Samples.MySql Samples.GraphQL Samples.FakeKudu Samples.Dapper ; do
+for sample in Samples.Elasticsearch Samples.Elasticsearch.V5 Samples.ServiceStack.Redis Samples.StackExchange.Redis Samples.SqlServer Samples.Microsoft.Data.SqlClient Samples.MongoDB Samples.HttpMessageHandler Samples.WebRequest Samples.Npgsql Samples.MySql Samples.GraphQL Samples.FakeKudu Samples.Dapper Samples.NoMultiLoader Samples.RabbitMQ Samples.RuntimeMetrics ; do
     dotnet publish -f $publishTargetFramework -c $buildConfiguration test/test-applications/integrations/$sample/$sample.csproj -p:Configuration=$buildConfiguration -p:ManagedProfilerOutputDirectory="$PUBLISH_OUTPUT"
 done
 
-for sample in OrleansCrash DataDogThreadTest HttpMessageHandler.StackOverflowException StackExchange.Redis.StackOverflowException AspNetMvcCorePerformance AssemblyLoad.FileNotFoundException TraceContext.InvalidOperationException AssemblyResolveMscorlibResources.InfiniteRecursionCrash StackExchange.Redis.AssemblyConflict.SdkProject ; do
+for sample in OrleansCrash DataDogThreadTest HttpMessageHandler.StackOverflowException StackExchange.Redis.StackOverflowException AspNetMvcCorePerformance AssemblyLoad.FileNotFoundException TraceContext.InvalidOperationException AssemblyResolveMscorlibResources.InfiniteRecursionCrash StackExchange.Redis.AssemblyConflict.SdkProject NetCoreAssemblyLoadFailureOlderNuGet ; do
     dotnet publish -f $publishTargetFramework -c $buildConfiguration test/test-applications/regression/$sample/$sample.csproj -p:Configuration=$buildConfiguration -p:ManagedProfilerOutputDirectory="$PUBLISH_OUTPUT"
 done
 

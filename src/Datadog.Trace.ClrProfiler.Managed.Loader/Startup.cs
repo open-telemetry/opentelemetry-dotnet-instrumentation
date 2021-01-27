@@ -15,7 +15,16 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
         static Startup()
         {
             ManagedProfilerDirectory = ResolveManagedProfilerDirectory();
-            AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve_ManagedProfilerDependencies;
+
+            try
+            {
+                AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve_ManagedProfilerDependencies;
+            }
+            catch (Exception ex)
+            {
+                StartupLogger.Log(ex, "Unable to register a callback to the CurrentDomain.AssemblyResolve event.");
+            }
+
             TryLoadManagedAssembly();
         }
 
@@ -25,7 +34,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
         {
             try
             {
-                var assembly = Assembly.Load("Datadog.Trace.ClrProfiler.Managed, Version=1.19.6.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb");
+                var assembly = Assembly.Load("Datadog.Trace.ClrProfiler.Managed, Version=1.22.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb");
 
                 if (assembly != null)
                 {

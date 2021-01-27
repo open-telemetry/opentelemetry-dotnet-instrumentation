@@ -50,7 +50,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
 
         protected ITestOutputHelper Output { get; }
 
-        public Process StartSample(int traceAgentPort, string arguments, string packageVersion, int aspNetCorePort, string framework = "")
+        public Process StartSample(int traceAgentPort, string arguments, string packageVersion, int aspNetCorePort, int? statsdPort = null, string framework = "")
         {
             // get path to sample app that the profiler will attach to
             string sampleAppPath = EnvironmentHelper.GetSampleApplicationPath(packageVersion, framework);
@@ -70,12 +70,13 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
                 integrationPaths,
                 arguments,
                 traceAgentPort: traceAgentPort,
+                statsdPort: statsdPort,
                 aspNetCorePort: aspNetCorePort);
         }
 
-        public ProcessResult RunSampleAndWaitForExit(int traceAgentPort, string arguments = null, string packageVersion = "", string framework = "")
+        public ProcessResult RunSampleAndWaitForExit(int traceAgentPort, int? statsdPort = null, string arguments = null, string packageVersion = "", string framework = "")
         {
-            var process = StartSample(traceAgentPort, arguments, packageVersion, aspNetCorePort: 5000, framework: framework);
+            var process = StartSample(traceAgentPort, arguments, packageVersion, aspNetCorePort: 5000, statsdPort: statsdPort, framework: framework);
 
             var standardOutput = process.StandardOutput.ReadToEnd();
             var standardError = process.StandardError.ReadToEnd();
@@ -228,12 +229,20 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
             SetEnvironmentVariable("DD_VERSION", serviceVersion);
         }
 
+        protected void SetCallTargetSettings(bool enableCallTarget, bool enableMethodInlining)
+        {
+            SetEnvironmentVariable("DD_TRACE_CALLTARGET_ENABLED", enableCallTarget ? "true" : "false");
+            SetEnvironmentVariable("DD_CLR_ENABLE_INLINING", enableMethodInlining ? "true" : "false");
+        }
+
         protected async Task AssertWebServerSpan(
             string path,
             MockTracerAgent agent,
             int httpPort,
             HttpStatusCode expectedHttpStatusCode,
             bool isError,
+            string expectedErrorType,
+            string expectedErrorMessage,
             string expectedSpanType,
             string expectedOperationName,
             string expectedResourceName,
@@ -260,10 +269,18 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
             }
 
             MockTracerAgent.Span span = spans[0];
-            Assert.Equal(isError, span.Error == 1);
+
+            // base properties
             Assert.Equal(expectedSpanType, span.Type);
             Assert.Equal(expectedOperationName, span.Name);
             Assert.Equal(expectedResourceName, span.Resource);
+
+            // errors
+            Assert.Equal(isError, span.Error == 1);
+            Assert.Equal(expectedErrorType, span.Tags.GetValueOrDefault(Tags.ErrorType));
+            Assert.Equal(expectedErrorMessage, span.Tags.GetValueOrDefault(Tags.ErrorMsg));
+
+            // other tags
             Assert.Equal(SpanKinds.Server, span.Tags.GetValueOrDefault(Tags.SpanKind));
             Assert.Equal(expectedServiceVersion, span.Tags.GetValueOrDefault(Tags.Version));
         }

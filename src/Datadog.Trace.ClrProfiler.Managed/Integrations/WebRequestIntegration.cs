@@ -2,9 +2,9 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 using Datadog.Trace.ClrProfiler.Emit;
+using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Logging;
-using Datadog.Trace.Tagging;
 
 namespace Datadog.Trace.ClrProfiler.Integrations
 {
@@ -14,9 +14,11 @@ namespace Datadog.Trace.ClrProfiler.Integrations
     public static class WebRequestIntegration
     {
         private const string WebRequestTypeName = "System.Net.WebRequest";
-        private const string IntegrationName = "WebRequest";
+        private const string Major2 = "2";
         private const string Major4 = "4";
+        private const string Major5 = "5";
 
+        private static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(nameof(IntegrationIds.WebRequest));
         private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.GetLogger(typeof(WebRequestIntegration));
 
         /// <summary>
@@ -31,14 +33,14 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             TargetAssembly = "System", // .NET Framework
             TargetType = WebRequestTypeName,
             TargetSignatureTypes = new[] { "System.Net.WebResponse" },
-            TargetMinimumVersion = Major4,
+            TargetMinimumVersion = Major2,
             TargetMaximumVersion = Major4)]
         [InterceptMethod(
             TargetAssembly = "System.Net.Requests", // .NET Core
             TargetType = WebRequestTypeName,
             TargetSignatureTypes = new[] { "System.Net.WebResponse" },
             TargetMinimumVersion = Major4,
-            TargetMaximumVersion = Major4)]
+            TargetMaximumVersion = Major5)]
         public static object GetResponse(object webRequest, int opCode, int mdToken, long moduleVersionPtr)
         {
             if (webRequest == null)
@@ -80,7 +82,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                 return callGetResponse(webRequest);
             }
 
-            using (var scope = ScopeFactory.CreateOutboundHttpScope(Tracer.Instance, request.Method, request.RequestUri, IntegrationName, out var tags))
+            using (var scope = ScopeFactory.CreateOutboundHttpScope(Tracer.Instance, request.Method, request.RequestUri, IntegrationId, out var tags))
             {
                 try
                 {
@@ -94,7 +96,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
 
                     if (scope != null && response is HttpWebResponse webResponse)
                     {
-                        tags.HttpStatusCode = HttpTags.ConvertStatusCodeToString((int)webResponse.StatusCode);
+                        scope.Span.SetHttpStatusCode((int)webResponse.StatusCode, isServer: false);
                     }
 
                     return response;
@@ -126,7 +128,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             TargetType = WebRequestTypeName,
             TargetSignatureTypes = new[] { "System.Threading.Tasks.Task`1<System.Net.WebResponse>" },
             TargetMinimumVersion = Major4,
-            TargetMaximumVersion = Major4)]
+            TargetMaximumVersion = Major5)]
         public static object GetResponseAsync(object webRequest, int opCode, int mdToken, long moduleVersionPtr)
         {
             const string methodName = nameof(GetResponseAsync);
@@ -165,7 +167,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                 return await originalMethod(webRequest).ConfigureAwait(false);
             }
 
-            using (var scope = ScopeFactory.CreateOutboundHttpScope(Tracer.Instance, webRequest.Method, webRequest.RequestUri, IntegrationName, out var tags))
+            using (var scope = ScopeFactory.CreateOutboundHttpScope(Tracer.Instance, webRequest.Method, webRequest.RequestUri, IntegrationId, out var tags))
             {
                 try
                 {
@@ -179,7 +181,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
 
                     if (scope != null && response is HttpWebResponse webResponse)
                     {
-                        tags.HttpStatusCode = HttpTags.ConvertStatusCodeToString((int)webResponse.StatusCode);
+                        scope.Span.SetHttpStatusCode((int)webResponse.StatusCode, isServer: false);
                     }
 
                     return response;

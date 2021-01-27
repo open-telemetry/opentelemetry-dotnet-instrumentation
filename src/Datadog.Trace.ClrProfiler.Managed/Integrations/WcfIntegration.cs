@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using Datadog.Trace.ClrProfiler.Emit;
+using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Logging;
 using Datadog.Trace.Tagging;
@@ -15,12 +16,12 @@ namespace Datadog.Trace.ClrProfiler.Integrations
     /// </summary>
     public static class WcfIntegration
     {
-        private const string IntegrationName = "Wcf";
         private const string Major4 = "4";
 
         private const string ChannelHandlerTypeName = "System.ServiceModel.Dispatcher.ChannelHandler";
         private const string HttpRequestMessagePropertyTypeName = "System.ServiceModel.Channels.HttpRequestMessageProperty";
 
+        private static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(nameof(IntegrationIds.Wcf));
         private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.GetLogger(typeof(WcfIntegration));
 
         /// <summary>
@@ -105,7 +106,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
 
             var tracer = Tracer.Instance;
 
-            if (!tracer.Settings.IsIntegrationEnabled(IntegrationName))
+            if (!tracer.Settings.IsIntegrationEnabled(IntegrationId))
             {
                 // integration disabled, don't create a scope, skip this trace
                 return null;
@@ -162,13 +163,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                     tags,
                     tagsFromHeaders);
 
-                // set analytics sample rate if enabled
-                var analyticsSampleRate = tracer.Settings.GetIntegrationAnalyticsSampleRate(IntegrationName, enabledWithGlobalSetting: true);
-
-                if (analyticsSampleRate != null)
-                {
-                    tags.AnalyticsSampleRate = analyticsSampleRate;
-                }
+                tags.SetAnalyticsSampleRate(IntegrationId, tracer.Settings, enabledWithGlobalSetting: true);
             }
             catch (Exception ex)
             {

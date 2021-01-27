@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -10,8 +9,11 @@ using Datadog.Trace.Configuration;
 using Datadog.Trace.DiagnosticListeners;
 using Datadog.Trace.DogStatsd;
 using Datadog.Trace.Logging;
+using Datadog.Trace.PlatformHelpers;
+using Datadog.Trace.RuntimeMetrics;
 using Datadog.Trace.Sampling;
 using Datadog.Trace.Tagging;
+using Datadog.Trace.Util;
 using Datadog.Trace.Vendors.Newtonsoft.Json;
 using Datadog.Trace.Vendors.StatsdClient;
 
@@ -41,10 +43,12 @@ namespace Datadog.Trace
         private static bool _globalInstanceInitialized;
         private static object _globalInstanceLock = new object();
 
+        private static RuntimeMetricsWriter _runtimeMetricsWriter;
+
         private readonly IScopeManager _scopeManager;
         private readonly Timer _heartbeatTimer;
 
-        private IAgentWriter _agentWriter;
+        private readonly IAgentWriter _agentWriter;
 
         static Tracer()
         {
@@ -72,12 +76,13 @@ namespace Datadog.Trace
         {
         }
 
-        internal Tracer(TracerSettings settings, IAgentWriter agentWriter, ISampler sampler, IScopeManager scopeManager, IStatsd statsd)
+        internal Tracer(TracerSettings settings, IAgentWriter agentWriter, ISampler sampler, IScopeManager scopeManager, IDogStatsd statsd)
         {
             // update the count of Tracer instances
             Interlocked.Increment(ref _liveTracerCount);
 
             Settings = settings ?? TracerSettings.FromDefaultSources();
+            Settings.Freeze();
 
             // if not configured, try to determine an appropriate service name
             DefaultServiceName = Settings.ServiceName ??
@@ -87,35 +92,8 @@ namespace Datadog.Trace
             // only set DogStatsdClient if tracer metrics are enabled
             if (Settings.TracerMetricsEnabled)
             {
-                // Run this first in case the port override is ready
-                TracingProcessManager.SubscribeToDogStatsDPortOverride(
-                    port =>
-                    {
-                        Log.Debug("Attempting to override dogstatsd port with {0}", port);
-                        Statsd = CreateDogStatsdClient(Settings, DefaultServiceName, port);
-                    });
-
                 Statsd = statsd ?? CreateDogStatsdClient(Settings, DefaultServiceName, Settings.DogStatsdPort);
             }
-
-            // Run this first in case the port override is ready
-            TracingProcessManager.SubscribeToTraceAgentPortOverride(
-                port =>
-                {
-                    Log.Debug("Attempting to override trace agent port with {0}", port);
-                    var builder = new UriBuilder(Settings.AgentUri) { Port = port };
-                    var baseEndpoint = builder.Uri;
-
-                    if (_agentWriter == null)
-                    {
-                        IApi overridingApiClient = new Api(baseEndpoint, apiRequestFactory: null, Statsd);
-                        _agentWriter = _agentWriter ?? new AgentWriter(overridingApiClient, Statsd);
-                    }
-                    else
-                    {
-                        _agentWriter.SetApiBaseEndpoint(baseEndpoint);
-                    }
-                });
 
             // fall back to default implementations of each dependency if not provided
             if (agentWriter != null)
@@ -132,11 +110,11 @@ namespace Datadog.Trace
                         break;
                     case ExporterType.DatadogAgent:
                     default:
-                        api = new Api(Settings.AgentUri, apiRequestFactory: null, Statsd);
+                        api = new Api(Settings.AgentUri, TransportStrategy.Get(Settings), Statsd);
                         break;
                 }
 
-                _agentWriter = new AgentWriter(api, Statsd);
+                _agentWriter = new AgentWriter(api, Statsd, queueSize: Settings.TraceQueueSize);
             }
 
             _scopeManager = scopeManager ?? new AsyncLocalScopeManager();
@@ -156,7 +134,7 @@ namespace Datadog.Trace
 
                 if (globalRate < 0f || globalRate > 1f)
                 {
-                    Log.Warning("{0} configuration of {1} is out of range", ConfigurationKeys.GlobalSamplingRate, Settings.GlobalSamplingRate);
+                    Log.Warning("{ConfigurationKey} configuration of {ConfigurationValue} is out of range", ConfigurationKeys.GlobalSamplingRate, Settings.GlobalSamplingRate);
                 }
                 else
                 {
@@ -167,8 +145,27 @@ namespace Datadog.Trace
             // Register callbacks to make sure we flush the traces before exiting
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
             AppDomain.CurrentDomain.DomainUnload += CurrentDomain_DomainUnload;
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-            Console.CancelKeyPress += Console_CancelKeyPress;
+
+            try
+            {
+                // Registering for the AppDomain.UnhandledException event cannot be called by a security transparent method
+                // This will only happen if the Tracer is not run full-trust
+                AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Unable to register a callback to the AppDomain.UnhandledException event.");
+            }
+
+            try
+            {
+                // Registering for the cancel key press event requires the System.Security.Permissions.UIPermission
+                Console.CancelKeyPress += Console_CancelKeyPress;
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Unable to register a callback to the Console.CancelKeyPress event.");
+            }
 
             // start the heartbeat loop
             _heartbeatTimer = new Timer(HeartbeatCallback, state: null, dueTime: TimeSpan.Zero, period: TimeSpan.FromMinutes(1));
@@ -180,9 +177,17 @@ namespace Datadog.Trace
                 InitializeLibLogScopeEventSubscriber(_scopeManager, DefaultServiceName, Settings.ServiceVersion, Settings.Environment);
             }
 
-            if (Interlocked.Exchange(ref _firstInitialization, 0) == 1 && Settings.StartupDiagnosticLogEnabled)
+            if (Interlocked.Exchange(ref _firstInitialization, 0) == 1)
             {
-                _ = WriteDiagnosticLog();
+                if (Settings.StartupDiagnosticLogEnabled)
+                {
+                    _ = WriteDiagnosticLog();
+                }
+
+                if (Settings.RuntimeMetricsEnabled)
+                {
+                    _runtimeMetricsWriter = new RuntimeMetricsWriter(Statsd ?? CreateDogStatsdClient(Settings, DefaultServiceName, Settings.DogStatsdPort), TimeSpan.FromSeconds(10));
+                }
             }
         }
 
@@ -246,7 +251,7 @@ namespace Datadog.Trace
 
         internal ISampler Sampler { get; }
 
-        internal IStatsd Statsd { get; private set; }
+        internal IDogStatsd Statsd { get; private set; }
 
         /// <summary>
         /// Create a new Tracer with the given parameters
@@ -490,24 +495,27 @@ namespace Datadog.Trace
         {
             string agentError = null;
 
-            try
+            // In AAS, the trace agent is deployed alongside the tracer and managed by the tracer
+            // Disable this check as it may hit the trace agent before it is ready to receive requests and give false negatives
+            if (!AzureAppServices.Metadata.IsRelevant)
             {
-                var success = await _agentWriter.Ping().ConfigureAwait(false);
-
-                if (!success)
+                try
                 {
-                    agentError = "An error occurred while sending traces to the agent";
+                    var success = await _agentWriter.Ping().ConfigureAwait(false);
+
+                    if (!success)
+                    {
+                        agentError = "An error occurred while sending traces to the agent";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    agentError = ex.Message;
                 }
             }
-            catch (Exception ex)
-            {
-                agentError = ex.Message;
-            }
 
             try
             {
-                var frameworkDescription = FrameworkDescription.Create();
-
                 var stringWriter = new StringWriter();
 
                 using (var writer = new JsonTextWriter(stringWriter))
@@ -518,22 +526,22 @@ namespace Datadog.Trace
                     writer.WriteValue(DateTime.Now);
 
                     writer.WritePropertyName("os_name");
-                    writer.WriteValue(frameworkDescription.OSPlatform);
+                    writer.WriteValue(FrameworkDescription.Instance.OSPlatform);
 
                     writer.WritePropertyName("os_version");
                     writer.WriteValue(Environment.OSVersion.ToString());
 
                     writer.WritePropertyName("version");
-                    writer.WriteValue(typeof(Tracer).Assembly.GetName().Version.ToString());
+                    writer.WriteValue(TracerConstants.AssemblyVersion);
 
                     writer.WritePropertyName("platform");
-                    writer.WriteValue(frameworkDescription.ProcessArchitecture);
+                    writer.WriteValue(FrameworkDescription.Instance.ProcessArchitecture);
 
                     writer.WritePropertyName("lang");
-                    writer.WriteValue(frameworkDescription.Name);
+                    writer.WriteValue(FrameworkDescription.Instance.Name);
 
                     writer.WritePropertyName("lang_version");
-                    writer.WriteValue(frameworkDescription.ProductVersion);
+                    writer.WriteValue(FrameworkDescription.Instance.ProductVersion);
 
                     writer.WritePropertyName("env");
                     writer.WriteValue(Settings.Environment);
@@ -574,7 +582,7 @@ namespace Datadog.Trace
                     writer.WriteValue(Settings.LogsInjectionEnabled);
 
                     writer.WritePropertyName("runtime_metrics_enabled");
-                    writer.WriteValue(Settings.TracerMetricsEnabled);
+                    writer.WriteValue(Settings.RuntimeMetricsEnabled);
 
                     writer.WritePropertyName("disabled_integrations");
                     writer.WriteStartArray();
@@ -598,7 +606,7 @@ namespace Datadog.Trace
                     writer.WriteEndObject();
                 }
 
-                Log.Information("DATADOG TRACER CONFIGURATION - {0}", stringWriter.ToString());
+                Log.Information("DATADOG TRACER CONFIGURATION - {Configuration}", stringWriter.ToString());
             }
             catch (Exception ex)
             {
@@ -615,18 +623,21 @@ namespace Datadog.Trace
         {
             try
             {
-#if NETFRAMEWORK
-                // System.Web.dll is only available on .NET Framework
-                if (System.Web.Hosting.HostingEnvironment.IsHosted)
+                try
                 {
-                    // if this app is an ASP.NET application, return "SiteName/ApplicationVirtualPath".
-                    // note that ApplicationVirtualPath includes a leading slash.
-                    return (System.Web.Hosting.HostingEnvironment.SiteName + System.Web.Hosting.HostingEnvironment.ApplicationVirtualPath).TrimEnd('/');
+                    if (TryLoadAspNetSiteName(out var siteName))
+                    {
+                        return siteName;
+                    }
                 }
-#endif
+                catch (Exception ex)
+                {
+                    // Unable to call into System.Web.dll
+                    Log.SafeLogError(ex, "Unable to get application name through ASP.NET settings");
+                }
 
                 return Assembly.GetEntryAssembly()?.GetName().Name ??
-                       Process.GetCurrentProcess().ProcessName;
+                   ProcessHelpers.GetCurrentProcessName();
             }
             catch (Exception ex)
             {
@@ -635,17 +646,32 @@ namespace Datadog.Trace
             }
         }
 
-        private static IStatsd CreateDogStatsdClient(TracerSettings settings, string serviceName, int port)
+        private static bool TryLoadAspNetSiteName(out string siteName)
+        {
+#if NETFRAMEWORK
+            // System.Web.dll is only available on .NET Framework
+            if (System.Web.Hosting.HostingEnvironment.IsHosted)
+            {
+                // if this app is an ASP.NET application, return "SiteName/ApplicationVirtualPath".
+                // note that ApplicationVirtualPath includes a leading slash.
+                siteName = (System.Web.Hosting.HostingEnvironment.SiteName + System.Web.Hosting.HostingEnvironment.ApplicationVirtualPath).TrimEnd('/');
+                return true;
+            }
+
+#endif
+            siteName = default;
+            return false;
+        }
+
+        private static IDogStatsd CreateDogStatsdClient(TracerSettings settings, string serviceName, int port)
         {
             try
             {
-                var frameworkDescription = FrameworkDescription.Create();
-
                 var constantTags = new List<string>
                                    {
                                        "lang:.NET",
-                                       $"lang_interpreter:{frameworkDescription.Name}",
-                                       $"lang_version:{frameworkDescription.ProductVersion}",
+                                       $"lang_interpreter:{FrameworkDescription.Instance.Name}",
+                                       $"lang_version:{FrameworkDescription.Instance.ProductVersion}",
                                        $"tracer_version:{TracerConstants.AssemblyVersion}",
                                        $"service:{serviceName}"
                                    };
@@ -660,8 +686,15 @@ namespace Datadog.Trace
                     constantTags.Add($"version:{settings.ServiceVersion}");
                 }
 
-                var statsdUdp = new StatsdUDP(settings.AgentUri.DnsSafeHost, port, StatsdConfig.DefaultStatsdMaxUDPPacketSize);
-                return new Statsd(statsdUdp, new RandomGenerator(), new StopWatchFactory(), prefix: string.Empty, constantTags.ToArray());
+                var statsd = new DogStatsdService();
+                statsd.Configure(new StatsdConfig
+                {
+                    StatsdServerName = settings.AgentUri.DnsSafeHost,
+                    StatsdPort = port,
+                    ConstantTags = constantTags.ToArray()
+                });
+
+                return statsd;
             }
             catch (Exception ex)
             {
@@ -682,6 +715,7 @@ namespace Datadog.Trace
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
+            Log.Warning("Application threw an unhandled exception: {Exception}", e.ExceptionObject);
             RunShutdownTasks();
         }
 
@@ -705,27 +739,14 @@ namespace Datadog.Trace
             {
                 Log.SafeLogError(ex, "Error flushing traces on shutdown.");
             }
-
-            try
-            {
-                TracingProcessManager.StopProcesses();
-            }
-            catch (Exception ex)
-            {
-                Log.SafeLogError(ex, "Error stopping sub processes on shutdown.");
-            }
         }
 
         private void HeartbeatCallback(object state)
         {
-            if (Statsd != null)
-            {
-                // use the count of Tracer instances as the heartbeat value
-                // to estimate the number of "live" Tracers than can potentially
-                // send traces to the Agent
-                Statsd.AppendSetGauge(TracerMetricNames.Health.Heartbeat, _liveTracerCount);
-                Statsd.Send();
-            }
+            // use the count of Tracer instances as the heartbeat value
+            // to estimate the number of "live" Tracers than can potentially
+            // send traces to the Agent
+            Statsd?.Gauge(TracerMetricNames.Health.Heartbeat, _liveTracerCount);
         }
     }
 }

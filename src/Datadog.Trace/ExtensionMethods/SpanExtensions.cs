@@ -57,11 +57,9 @@ namespace Datadog.Trace.ExtensionMethods
             span.Type = SpanTypes.Web;
             span.ResourceName = resourceName?.Trim();
 
-            tags.SpanKind = SpanKinds.Server;
             tags.HttpMethod = method;
             tags.HttpRequestHeadersHost = host;
             tags.HttpUrl = httpUrl;
-            tags.Language = TracerConstants.Language;
 
             foreach (KeyValuePair<string, string> kvp in tagsFromHeaders)
             {
@@ -69,15 +67,70 @@ namespace Datadog.Trace.ExtensionMethods
             }
         }
 
-        internal static void SetServerStatusCode(this Span span, int statusCode)
+        internal static void SetHttpStatusCode(this Span span, int statusCode, bool isServer)
         {
-            span.SetTag(Tags.HttpStatusCode, HttpTags.ConvertStatusCodeToString(statusCode));
+            string statusCodeString = ConvertStatusCodeToString(statusCode);
 
-            // 5xx codes are server-side errors
-            if (statusCode / 100 == 5)
+            if (span.Tags is IHasStatusCode statusCodeTags)
+            {
+                statusCodeTags.HttpStatusCode = statusCodeString;
+            }
+            else
+            {
+                span.SetTag(Tags.HttpStatusCode, statusCodeString);
+            }
+
+            // Check the customers http statuses that should be marked as errors
+            if (Tracer.Instance.Settings.IsErrorStatusCode(statusCode, isServer))
             {
                 span.Error = true;
+
+                // if an error message already exists (e.g. from a previous exception), don't replace it
+                if (string.IsNullOrEmpty(span.GetTag(Tags.ErrorMsg)))
+                {
+                    span.SetTag(Tags.ErrorMsg, $"The HTTP response has status code {statusCodeString}.");
+                }
             }
+        }
+
+        private static string ConvertStatusCodeToString(int statusCode)
+        {
+            if (statusCode == 200)
+            {
+                return "200";
+            }
+
+            if (statusCode == 302)
+            {
+                return "302";
+            }
+
+            if (statusCode == 401)
+            {
+                return "401";
+            }
+
+            if (statusCode == 403)
+            {
+                return "403";
+            }
+
+            if (statusCode == 404)
+            {
+                return "404";
+            }
+
+            if (statusCode == 500)
+            {
+                return "500";
+            }
+
+            if (statusCode == 503)
+            {
+                return "503";
+            }
+
+            return statusCode.ToString();
         }
     }
 }

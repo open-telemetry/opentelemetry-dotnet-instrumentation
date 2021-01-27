@@ -39,8 +39,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             if (statsd != null)
             {
                 string[] tags = { $"instrumented-method:{instrumentedMethod}" };
-                statsd.AppendException(exception, source: instrumentedType, message: "Error retrieving instrumented method", tags);
-                statsd.Send();
+                statsd.Exception(exception, source: instrumentedType, message: "Error retrieving instrumented method", tags);
             }
         }
     }

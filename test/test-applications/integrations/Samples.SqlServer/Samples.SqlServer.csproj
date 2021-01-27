@@ -6,14 +6,15 @@
     <!-- Required to build multiple projects with the same Configuration|Platform -->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+
     <LoadManagedProfilerFromProfilerDirectory>true</LoadManagedProfilerFromProfilerDirectory>
   </PropertyGroup>
 
-  <ItemGroup Condition="!$(TargetFramework.StartsWith('netcoreapp'))">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <Reference Include="System.Data" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework.StartsWith('netcoreapp'))">
+  <ItemGroup Condition="!$(TargetFramework.StartsWith('net4'))">
     <PackageReference Include="System.Data.SqlClient" Version="$(ApiVersion)" />
   </ItemGroup>
 
@@ -22,6 +23,7 @@
 
     <!-- this referenced project only targets netstandard2.0 -->
     <ProjectReference Condition="'$(TargetFramework)' != 'net452'" Include="..\dependency-libs\Samples.DatabaseHelper.netstandard\Samples.DatabaseHelper.netstandard.csproj" />
+    <ProjectReference Include="..\dependency-libs\Samples.SqlServer.Vb\Samples.SqlServer.Vb.vbproj" />
   </ItemGroup>
 
 </Project>

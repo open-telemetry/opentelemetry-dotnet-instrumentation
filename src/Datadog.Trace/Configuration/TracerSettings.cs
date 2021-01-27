@@ -1,8 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
+using Datadog.Trace.PlatformHelpers;
 using Datadog.Trace.Util;
+using Datadog.Trace.Vendors.Serilog;
 
 namespace Datadog.Trace.Configuration
 {
@@ -48,11 +52,24 @@ namespace Datadog.Trace.Configuration
                            // default value
                            true;
 
+            if (AzureAppServices.Metadata.IsRelevant && AzureAppServices.Metadata.IsUnsafeToTrace)
+            {
+                TraceEnabled = false;
+            }
+
             var disabledIntegrationNames = source?.GetString(ConfigurationKeys.DisabledIntegrations)
                                                  ?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries) ??
                                            Enumerable.Empty<string>();
 
             DisabledIntegrationNames = new HashSet<string>(disabledIntegrationNames, StringComparer.OrdinalIgnoreCase);
+
+            var adonetExcludedTypes = source?.GetString(ConfigurationKeys.AdoNetExcludedTypes)
+                                                 ?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries) ??
+                                           Enumerable.Empty<string>();
+
+            AdoNetExcludedTypes = new HashSet<string>(adonetExcludedTypes, StringComparer.OrdinalIgnoreCase);
+
+            Integrations = new IntegrationSettingsCollection(source);
 
             var agentHost = source?.GetString(ConfigurationKeys.AgentHost) ??
                             // backwards compatibility for names used in the past
@@ -72,6 +89,17 @@ namespace Datadog.Trace.Configuration
                            $"http://{agentHost}:{agentPort}";
 
             AgentUri = new Uri(agentUri);
+
+            TracesPipeName = source?.GetString(ConfigurationKeys.TracesPipeName);
+
+            TracesPipeTimeoutMs = source?.GetInt32(ConfigurationKeys.TracesPipeTimeoutMs)
+#if DEBUG
+            ?? 20_000;
+#else
+            ?? 100;
+#endif
+
+            TracesTransport = source?.GetString(ConfigurationKeys.TracesTransport);
 
             if (string.Equals(AgentUri.Host, "localhost", StringComparison.OrdinalIgnoreCase))
             {
@@ -95,8 +123,6 @@ namespace Datadog.Trace.Configuration
                                           // default value
                                           100;
 
-            Integrations = new IntegrationSettingsCollection(source);
-
             GlobalTags = source?.GetDictionary(ConfigurationKeys.GlobalTags) ??
                          // backwards compatibility for names used in the past
                          source?.GetDictionary("DD_TRACE_GLOBAL_TAGS") ??
@@ -104,7 +130,7 @@ namespace Datadog.Trace.Configuration
                          new ConcurrentDictionary<string, string>();
 
             // Filter out tags with empty keys or empty values, and trim whitespace
-            GlobalTags = GlobalTags.Where(kvp => !string.IsNullOrEmpty(kvp.Key) && !string.IsNullOrEmpty(kvp.Value))
+            GlobalTags = GlobalTags.Where(kvp => !string.IsNullOrWhiteSpace(kvp.Key) && !string.IsNullOrWhiteSpace(kvp.Value))
                                    .ToDictionary(kvp => kvp.Key.Trim(), kvp => kvp.Value.Trim());
 
             HeaderTags = source?.GetDictionary(ConfigurationKeys.HeaderTags) ??
@@ -112,8 +138,14 @@ namespace Datadog.Trace.Configuration
                          new ConcurrentDictionary<string, string>();
 
             // Filter out tags with empty keys or empty values, and trim whitespace
-            HeaderTags = HeaderTags.Where(kvp => !string.IsNullOrEmpty(kvp.Key) && !string.IsNullOrEmpty(kvp.Value))
+            HeaderTags = HeaderTags.Where(kvp => !string.IsNullOrWhiteSpace(kvp.Key) && !string.IsNullOrWhiteSpace(kvp.Value))
                                    .ToDictionary(kvp => kvp.Key.Trim(), kvp => kvp.Value.Trim());
+
+            var serviceNameMappings = source?.GetDictionary(ConfigurationKeys.ServiceNameMappings)
+                                      ?.Where(kvp => !string.IsNullOrWhiteSpace(kvp.Key) && !string.IsNullOrWhiteSpace(kvp.Value))
+                                      ?.ToDictionary(kvp => kvp.Key.Trim(), kvp => kvp.Value.Trim());
+
+            ServiceNameMappings = new ServiceNames(serviceNameMappings);
 
             DogStatsdPort = source?.GetInt32(ConfigurationKeys.DogStatsdPort) ??
                             // default value
@@ -122,6 +154,9 @@ namespace Datadog.Trace.Configuration
             TracerMetricsEnabled = source?.GetBool(ConfigurationKeys.TracerMetricsEnabled) ??
                                    // default value
                                    false;
+
+            RuntimeMetricsEnabled = source?.GetBool(ConfigurationKeys.RuntimeMetricsEnabled) ??
+                                    false;
 
             CustomSamplingRules = source?.GetString(ConfigurationKeys.CustomSamplingRules);
 
@@ -133,6 +168,19 @@ namespace Datadog.Trace.Configuration
 
             Enum.TryParse(source?.GetString(ConfigurationKeys.Exporter) ?? "default", ignoreCase: true, out ExporterType exporterType);
             Exporter = exporterType;
+
+            var httpServerErrorStatusCodes = source?.GetString(ConfigurationKeys.HttpServerErrorStatusCodes) ??
+                                           // Default value
+                                           "500-599";
+            HttpServerErrorStatusCodes = ParseHttpCodesToArray(httpServerErrorStatusCodes);
+
+            var httpClientErrorStatusCodes = source?.GetString(ConfigurationKeys.HttpClientErrorStatusCodes) ??
+                                        // Default value
+                                        "400-499";
+            HttpClientErrorStatusCodes = ParseHttpCodesToArray(httpClientErrorStatusCodes);
+
+            TraceQueueSize = source?.GetInt32(ConfigurationKeys.QueueSize)
+                        ?? 1000;
         }
 
         /// <summary>
@@ -175,6 +223,12 @@ namespace Datadog.Trace.Configuration
         public HashSet<string> DisabledIntegrationNames { get; set; }
 
         /// <summary>
+        /// Gets or sets the AdoNet types to exclude from automatic instrumentation.
+        /// </summary>
+        /// <seealso cref="ConfigurationKeys.AdoNetExcludedTypes"/>
+        public HashSet<string> AdoNetExcludedTypes { get; set; }
+
+        /// <summary>
         /// Gets or sets the Uri where the Tracer can connect to the Agent.
         /// Default is <c>"http://localhost:8126"</c>.
         /// </summary>
@@ -182,6 +236,34 @@ namespace Datadog.Trace.Configuration
         /// <seealso cref="ConfigurationKeys.AgentHost"/>
         /// <seealso cref="ConfigurationKeys.AgentPort"/>
         public Uri AgentUri { get; set; }
+
+        /// <summary>
+        /// Gets or sets the key used to determine the transport for sending traces.
+        /// Default is <c>null</c>, which will use the default path decided in <see cref="Agent.Api"/>.
+        /// </summary>
+        /// <seealso cref="ConfigurationKeys.TracesTransport"/>
+        public string TracesTransport { get; set; }
+
+        /// <summary>
+        /// Gets or sets the windows pipe name where the Tracer can connect to the Agent.
+        /// Default is <c>null</c>.
+        /// </summary>
+        /// <seealso cref="ConfigurationKeys.TracesPipeName"/>
+        public string TracesPipeName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the timeout in milliseconds for the windows named pipe requests.
+        /// Default is <c>100</c>.
+        /// </summary>
+        /// <seealso cref="ConfigurationKeys.TracesPipeTimeoutMs"/>
+        public int TracesPipeTimeoutMs { get; set; }
+
+        /// <summary>
+        /// Gets or sets the windows pipe name where the Tracer can send stats.
+        /// Default is <c>null</c>.
+        /// </summary>
+        /// <seealso cref="ConfigurationKeys.MetricsPipeName"/>
+        public string MetricsPipeName { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether default Analytics are enabled.
@@ -256,6 +338,12 @@ namespace Datadog.Trace.Configuration
         public ExporterType Exporter { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether runtime metrics
+        /// are enabled and sent to DogStatsd.
+        /// </summary>
+        public bool RuntimeMetricsEnabled { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the use
         /// of System.Diagnostics.DiagnosticSource is enabled.
         /// Default is <c>true</c>.
@@ -275,6 +363,28 @@ namespace Datadog.Trace.Configuration
         /// Gets or sets a value indicating whether the diagnostic log at startup is enabled
         /// </summary>
         public bool StartupDiagnosticLogEnabled { get; set; }
+
+        /// <summary>
+        /// Gets or sets the HTTP status code that should be marked as errors for server integrations.
+        /// </summary>
+        /// <seealso cref="ConfigurationKeys.HttpServerErrorStatusCodes"/>
+        internal bool[] HttpServerErrorStatusCodes { get; set; }
+
+        /// <summary>
+        /// Gets or sets the HTTP status code that should be marked as errors for client integrations.
+        /// </summary>
+        /// <seealso cref="ConfigurationKeys.HttpClientErrorStatusCodes"/>
+        internal bool[] HttpClientErrorStatusCodes { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating the size of the trace buffer
+        /// </summary>
+        internal int TraceQueueSize { get; }
+
+        /// <summary>
+        /// Gets configuration values for changing service names based on configuration
+        /// </summary>
+        internal ServiceNames ServiceNameMappings { get; }
 
         /// <summary>
         /// Create a <see cref="TracerSettings"/> populated from the default sources
@@ -297,31 +407,85 @@ namespace Datadog.Trace.Configuration
             return GlobalSettings.CreateDefaultConfigurationSource();
         }
 
-        internal bool IsIntegrationEnabled(string name)
+        /// <summary>
+        /// Sets the HTTP status code that should be marked as errors for client integrations.
+        /// </summary>
+        /// <seealso cref="ConfigurationKeys.HttpClientErrorStatusCodes"/>
+        /// <param name="statusCodes">Status codes that should be marked as errors</param>
+        public void SetHttpClientErrorStatusCodes(IEnumerable<int> statusCodes)
+        {
+            HttpClientErrorStatusCodes = ParseHttpCodesToArray(string.Join(",", statusCodes));
+        }
+
+        /// <summary>
+        /// Sets the HTTP status code that should be marked as errors for server integrations.
+        /// </summary>
+        /// <seealso cref="ConfigurationKeys.HttpServerErrorStatusCodes"/>
+        /// <param name="statusCodes">Status codes that should be marked as errors</param>
+        public void SetHttpServerErrorStatusCodes(IEnumerable<int> statusCodes)
+        {
+            HttpServerErrorStatusCodes = ParseHttpCodesToArray(string.Join(",", statusCodes));
+        }
+
+        /// <summary>
+        /// Sets the mappings to use for service names within a <see cref="Span"/>
+        /// </summary>
+        /// <param name="mappings">Mappings to use from original service name (e.g. <code>sql-server</code> or <code>graphql</code>)
+        /// as the <see cref="KeyValuePair{TKey, TValue}.Key"/>) to replacement service names as <see cref="KeyValuePair{TKey, TValue}.Value"/>).</param>
+        public void SetServiceNameMappings(IEnumerable<KeyValuePair<string, string>> mappings)
+        {
+            ServiceNameMappings.SetServiceNameMappings(mappings);
+        }
+
+        /// <summary>
+        /// Populate the internal structures. Modifying the settings past this point is not supported
+        /// </summary>
+        internal void Freeze()
+        {
+            Integrations.SetDisabledIntegrations(DisabledIntegrationNames);
+        }
+
+        internal bool IsErrorStatusCode(int statusCode, bool serverStatusCode)
+        {
+            var source = serverStatusCode ? HttpServerErrorStatusCodes : HttpClientErrorStatusCodes;
+
+            if (source == null)
+            {
+                return false;
+            }
+
+            if (statusCode >= source.Length)
+            {
+                return false;
+            }
+
+            return source[statusCode];
+        }
+
+        internal bool IsIntegrationEnabled(IntegrationInfo integration, bool defaultValue = true)
         {
             if (TraceEnabled && !DomainMetadata.ShouldAvoidAppDomain())
             {
-                bool disabled = Integrations[name].Enabled == false || DisabledIntegrationNames.Contains(name);
-                return !disabled;
+                return Integrations[integration].Enabled ?? defaultValue;
             }
 
             return false;
         }
 
-        internal bool IsOptInIntegrationEnabled(string name)
+        internal bool IsIntegrationEnabled(string integrationName)
         {
             if (TraceEnabled && !DomainMetadata.ShouldAvoidAppDomain())
             {
-                var disabled = Integrations[name].Enabled != true || DisabledIntegrationNames.Contains(name);
-                return !disabled;
+                bool? enabled = Integrations[integrationName].Enabled;
+                return enabled != false;
             }
 
             return false;
         }
 
-        internal double? GetIntegrationAnalyticsSampleRate(string name, bool enabledWithGlobalSetting)
+        internal double? GetIntegrationAnalyticsSampleRate(IntegrationInfo integration, bool enabledWithGlobalSetting)
         {
-            var integrationSettings = Integrations[name];
+            var integrationSettings = Integrations[integration];
             var analyticsEnabled = integrationSettings.AnalyticsEnabled ?? (enabledWithGlobalSetting && AnalyticsEnabled);
             return analyticsEnabled ? integrationSettings.AnalyticsSampleRate : (double?)null;
         }
@@ -331,6 +495,63 @@ namespace Datadog.Trace.Configuration
             var value = EnvironmentHelpers.GetEnvironmentVariable("DD_TRACE_NETSTANDARD_ENABLED", string.Empty);
 
             return value == "1" || value == "true";
+        }
+
+        internal bool[] ParseHttpCodesToArray(string httpStatusErrorCodes)
+        {
+            bool[] httpErrorCodesArray = new bool[600];
+
+            void TrySetValue(int index)
+            {
+                if (index >= 0 && index < httpErrorCodesArray.Length)
+                {
+                    httpErrorCodesArray[index] = true;
+                }
+            }
+
+            string[] configurationsArray = httpStatusErrorCodes.Replace(" ", string.Empty).Split(',');
+
+            foreach (string statusConfiguration in configurationsArray)
+            {
+                int startStatus;
+
+                // Checks that the value about to be used follows the `401-404` structure or single 3 digit number i.e. `401` else log the warning
+                if (!Regex.IsMatch(statusConfiguration, @"^\d{3}-\d{3}$|^\d{3}$"))
+                {
+                    Log.Warning("Wrong format '{0}' for DD_HTTP_SERVER/CLIENT_ERROR_STATUSES configuration.", statusConfiguration);
+                }
+
+                // If statusConfiguration equals a single value i.e. `401` parse the value and save to the array
+                else if (int.TryParse(statusConfiguration, out startStatus))
+                {
+                    TrySetValue(startStatus);
+                }
+                else
+                {
+                    string[] statusCodeLimitsRange = statusConfiguration.Split('-');
+
+                    startStatus = int.Parse(statusCodeLimitsRange[0]);
+                    int endStatus = int.Parse(statusCodeLimitsRange[1]);
+
+                    if (endStatus < startStatus)
+                    {
+                        startStatus = endStatus;
+                        endStatus = int.Parse(statusCodeLimitsRange[0]);
+                    }
+
+                    for (int statusCode = startStatus; statusCode <= endStatus; statusCode++)
+                    {
+                        TrySetValue(statusCode);
+                    }
+                }
+            }
+
+            return httpErrorCodesArray;
+        }
+
+        internal string GetServiceName(Tracer tracer, string serviceName)
+        {
+            return ServiceNameMappings.GetServiceName(tracer.DefaultServiceName, serviceName);
         }
     }
 }

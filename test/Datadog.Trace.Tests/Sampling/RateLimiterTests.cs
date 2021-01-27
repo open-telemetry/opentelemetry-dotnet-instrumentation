@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Datadog.Trace.Sampling;
+using Datadog.Trace.Util;
 using Xunit;
 
 namespace Datadog.Trace.Tests.Sampling
@@ -12,7 +11,6 @@ namespace Datadog.Trace.Tests.Sampling
     public class RateLimiterTests
     {
         private const int DefaultLimitPerSecond = 100;
-        private static readonly ThreadLocal<Random> Random = new ThreadLocal<Random>(() => new Random());
 
         [Fact]
         public void One_Is_Allowed()
@@ -74,9 +72,8 @@ namespace Datadog.Trace.Tests.Sampling
 
             var result = RunTest(intervalLimit, test);
 
-            var totalMilliseconds = result.TimeElapsed.TotalMilliseconds;
-
-            var expectedLimit = totalMilliseconds * actualIntervalLimit / 1_000;
+            var theoreticalTime = numberOfBursts * millisecondsBetweenBursts;
+            var expectedLimit = theoreticalTime * actualIntervalLimit / 1_000;
 
             var acceptableUpperVariance = (actualIntervalLimit * 1.0);
             var acceptableLowerVariance = (actualIntervalLimit * 1.15); // Allow for increased tolerance on lower limit since the rolling window does not get dequeued as quickly as it can queued
@@ -85,7 +82,7 @@ namespace Datadog.Trace.Tests.Sampling
 
             Assert.True(
                 result.TotalAllowed >= lowerLimit && result.TotalAllowed <= upperLimit,
-                $"Expected between {lowerLimit} and {upperLimit}, received {result.TotalAllowed} out of {result.TotalAttempted} within {totalMilliseconds} milliseconds.");
+                $"Expected between {lowerLimit} and {upperLimit}, received {result.TotalAllowed} out of {result.TotalAttempted} within {theoreticalTime} milliseconds.");
 
             // Rate should match for the last two intervals, which is a total of two seconds
             var numberOfBurstsWithinTwoIntervals = 2_000 / millisecondsBetweenBursts;
@@ -130,57 +127,46 @@ namespace Datadog.Trace.Tests.Sampling
         {
             var parallelism = test.NumberPerBurst;
 
-            if (parallelism > 10)
+            if (parallelism > Environment.ProcessorCount)
             {
-                parallelism = 10;
+                parallelism = Environment.ProcessorCount;
             }
 
-            var result = new RateLimitResult();
+            var clock = new SimpleClock();
 
             var limiter = new RateLimiter(maxTracesPerInterval: intervalLimit);
-
-            var traceContext = new TraceContext(Tracer.Instance);
-
-            var barrier = new Barrier(parallelism + 1);
-
+            var barrier = new Barrier(parallelism + 1, _ => clock.UtcNow += test.TimeBetweenBursts);
             var numberPerThread = test.NumberPerBurst / parallelism;
-
             var workers = new Task[parallelism];
+            int totalAttempted = 0;
+            int totalAllowed = 0;
 
             for (int i = 0; i < workers.Length; i++)
             {
                 workers[i] = Task.Factory.StartNew(
                     () =>
                     {
-                        var stopwatch = new Stopwatch();
+                        using var lease = Clock.SetForCurrentThread(clock);
 
                         for (var i = 0; i < test.NumberOfBursts; i++)
                         {
                             // Wait for every worker to be ready for next burst
                             barrier.SignalAndWait();
 
-                            stopwatch.Restart();
-
                             for (int j = 0; j < numberPerThread; j++)
                             {
-                                var spanContext = new SpanContext(null, traceContext, "Weeeee");
-                                var span = new Span(spanContext, null);
+                                // trace id and span id are not used in rate-limiting
+                                var spanContext = new SpanContext(traceId: 1, spanId: 1, serviceName: "Weeeee");
+
+                                // pass a specific start time since there is no TraceContext
+                                var span = new Span(spanContext, DateTimeOffset.UtcNow);
+
+                                Interlocked.Increment(ref totalAttempted);
 
                                 if (limiter.Allowed(span))
                                 {
-                                    result.Allowed.Add(span.SpanId);
+                                    Interlocked.Increment(ref totalAllowed);
                                 }
-                                else
-                                {
-                                    result.Denied.Add(span.SpanId);
-                                }
-                            }
-
-                            var remainingTime = (test.TimeBetweenBursts - stopwatch.Elapsed).TotalMilliseconds;
-
-                            if (remainingTime > 0)
-                            {
-                                Thread.Sleep((int)remainingTime);
                             }
                         }
                     },
@@ -190,17 +176,19 @@ namespace Datadog.Trace.Tests.Sampling
             // Wait for all workers to be ready
             barrier.SignalAndWait();
 
-            var sw = Stopwatch.StartNew();
-
             // We do not need to synchronize with workers anymore
             barrier.RemoveParticipant();
 
             // Wait for workers to finish
             Task.WaitAll(workers);
 
-            result.TimeElapsed = sw.Elapsed;
-            result.RateLimiter = limiter;
-            result.ReportedRate = limiter.GetEffectiveRate();
+            var result = new RateLimitResult
+            {
+                RateLimiter = limiter,
+                ReportedRate = limiter.GetEffectiveRate(),
+                TotalAttempted = totalAttempted,
+                TotalAllowed = totalAllowed
+            };
 
             return result;
         }
@@ -218,17 +206,11 @@ namespace Datadog.Trace.Tests.Sampling
         {
             public RateLimiter RateLimiter { get; set; }
 
-            public TimeSpan TimeElapsed { get; set; }
-
-            public ConcurrentBag<ulong> Allowed { get; } = new ConcurrentBag<ulong>();
-
-            public ConcurrentBag<ulong> Denied { get; } = new ConcurrentBag<ulong>();
-
             public float ReportedRate { get; set; }
 
-            public int TotalAttempted => Allowed.Count + Denied.Count;
+            public int TotalAttempted { get; set; }
 
-            public int TotalAllowed => Allowed.Count;
+            public int TotalAllowed { get; set; }
         }
     }
 }
