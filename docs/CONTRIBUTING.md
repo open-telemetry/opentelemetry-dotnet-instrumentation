@@ -25,12 +25,12 @@ Join the meeting or get in touch on
 
 Even though, anybody can contribute, there are benefits of being a member of
 our community. See to the [community membership
-document](https://github.com/open-telemetry/community/blob/master/community-membership.md)
+document](https://github.com/open-telemetry/community/blob/main/community-membership.md)
 on how to become a
-[**Member**](https://github.com/open-telemetry/community/blob/master/community-membership.md#member),
-[**Approver**](https://github.com/open-telemetry/community/blob/master/community-membership.md#approver)
+[**Member**](https://github.com/open-telemetry/community/blob/main/community-membership.md#member),
+[**Approver**](https://github.com/open-telemetry/community/blob/main/community-membership.md#approver)
 and
-[**Maintainer**](https://github.com/open-telemetry/community/blob/master/community-membership.md#maintainer).
+[**Maintainer**](https://github.com/open-telemetry/community/blob/main/community-membership.md#maintainer).
 
 ## Report a bug or requesting feature
 
@@ -45,9 +45,9 @@ Reporting bugs is an important contribution. Please make sure to include:
 ### Before you start
 
 Please read the
-[contribution guide](https://github.com/open-telemetry/community/blob/master/CONTRIBUTING.md)
+[contribution guide](https://github.com/open-telemetry/community/blob/main/CONTRIBUTING.md)
 and the
-[code of conduct](https://github.com/open-telemetry/community/blob/master/code-of-conduct.md).
+[code of conduct](https://github.com/open-telemetry/community/blob/main/code-of-conduct.md).
 for general practices of the OpenTelemetry project.
 
 Select a good issue from the links below (ordered by difficulty/complexity):
