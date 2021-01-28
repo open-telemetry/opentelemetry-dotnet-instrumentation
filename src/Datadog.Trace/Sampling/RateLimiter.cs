@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using Datadog.Trace.Logging;
+using Datadog.Trace.Util;
 
 namespace Datadog.Trace.Sampling
 {
@@ -30,7 +31,7 @@ namespace Datadog.Trace.Sampling
             _maxTracesPerInterval = maxTracesPerInterval ?? 100;
             _intervalMilliseconds = 1_000;
             _interval = TimeSpan.FromMilliseconds(_intervalMilliseconds);
-            _windowBegin = DateTime.UtcNow;
+            _windowBegin = Clock.UtcNow;
         }
 
         public bool Allowed(Span span)
@@ -58,11 +59,11 @@ namespace Datadog.Trace.Sampling
 
                 if (count >= _maxTracesPerInterval)
                 {
-                    Log.Debug("Dropping trace id {0} with count of {1} for last {2}ms.", span.TraceId, count, _intervalMilliseconds);
+                    Log.Debug("Dropping trace id {TraceId} with count of {Count} for last {Interval}ms.", span.TraceId, count, _intervalMilliseconds);
                     return false;
                 }
 
-                _intervalQueue.Enqueue(DateTime.UtcNow);
+                _intervalQueue.Enqueue(Clock.UtcNow);
                 Interlocked.Increment(ref _windowAllowed);
 
                 return true;
@@ -116,7 +117,7 @@ namespace Datadog.Trace.Sampling
                     return;
                 }
 
-                var now = DateTime.UtcNow;
+                var now = Clock.UtcNow;
 
                 var timeSinceWindowStart = (now - _windowBegin).TotalMilliseconds;
 

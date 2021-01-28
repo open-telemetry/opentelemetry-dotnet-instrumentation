@@ -93,7 +93,7 @@ namespace Datadog.Trace.TestHelpers
 
         public static bool IsCoreClr()
         {
-            return RuntimeFrameworkDescription.Contains("core");
+            return RuntimeFrameworkDescription.Contains("core") || Environment.Version.Major >= 5;
         }
 
         public static string GetRuntimeIdentifier()
@@ -143,6 +143,7 @@ namespace Datadog.Trace.TestHelpers
         public void SetEnvironmentVariables(
             int agentPort,
             int aspNetCorePort,
+            int? statsdPort,
             string processPath,
             StringDictionary environmentVariables)
         {
@@ -185,6 +186,11 @@ namespace Datadog.Trace.TestHelpers
 
             // for ASP.NET Core sample apps, set the server's port
             environmentVariables["ASPNETCORE_URLS"] = $"http://127.0.0.1:{aspNetCorePort}/";
+
+            if (statsdPort != null)
+            {
+                environmentVariables["DD_DOGSTATSD_PORT"] = statsdPort.Value.ToString();
+            }
 
             foreach (var name in new[] { "SERVICESTACK_REDIS_HOST", "STACKEXCHANGE_REDIS_HOST" })
             {
@@ -391,6 +397,11 @@ namespace Datadog.Trace.TestHelpers
         {
             if (_isCoreClr)
             {
+                if (_major >= 5)
+                {
+                    return $"net{_major}.{_minor}";
+                }
+
                 return $"netcoreapp{_major}.{_minor}";
             }
 

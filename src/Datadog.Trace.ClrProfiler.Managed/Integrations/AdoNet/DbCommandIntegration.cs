@@ -13,9 +13,9 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AdoNet
     /// </summary>
     public static class DbCommandIntegration
     {
-        private const string IntegrationName = "AdoNet";
-        private const string Major4 = "4";
         private const string Major2 = "2";
+        private const string Major4 = "4";
+        private const string Major5 = "5";
 
         private const string DbCommandTypeName = AdoNetConstants.TypeNames.DbCommand;
 
@@ -30,12 +30,19 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AdoNet
         /// <param name="moduleVersionPtr">A pointer to the module version GUID.</param>
         /// <returns>The value returned by the instrumented method.</returns>
         [InterceptMethod(
-            TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.SystemData, AdoNetConstants.AssemblyNames.SystemDataCommon },
+            TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.SystemData },
+            TargetMethod = AdoNetConstants.MethodNames.ExecuteReader,
+            TargetType = DbCommandTypeName,
+            TargetSignatureTypes = new[] { AdoNetConstants.TypeNames.DbDataReader },
+            TargetMinimumVersion = Major2,
+            TargetMaximumVersion = Major4)]
+        [InterceptMethod(
+            TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.SystemDataCommon },
             TargetMethod = AdoNetConstants.MethodNames.ExecuteReader,
             TargetType = DbCommandTypeName,
             TargetSignatureTypes = new[] { AdoNetConstants.TypeNames.DbDataReader },
             TargetMinimumVersion = Major4,
-            TargetMaximumVersion = Major4)]
+            TargetMaximumVersion = Major5)]
         [InterceptMethod(
             TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.NetStandard },
             TargetMethod = AdoNetConstants.MethodNames.ExecuteReader,
@@ -78,7 +85,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AdoNet
 
             var dbCommand = command as DbCommand;
 
-            using (var scope = ScopeFactory.CreateDbCommandScope(Tracer.Instance, dbCommand, IntegrationName))
+            using (var scope = ScopeFactory.CreateDbCommandScope(Tracer.Instance, dbCommand))
             {
                 try
                 {
@@ -102,12 +109,19 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AdoNet
         /// <param name="moduleVersionPtr">A pointer to the module version GUID.</param>
         /// <returns>The value returned by the instrumented method.</returns>
         [InterceptMethod(
-            TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.SystemData, AdoNetConstants.AssemblyNames.SystemDataCommon },
+            TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.SystemData },
+            TargetMethod = AdoNetConstants.MethodNames.ExecuteReader,
+            TargetType = DbCommandTypeName,
+            TargetSignatureTypes = new[] { AdoNetConstants.TypeNames.DbDataReader, AdoNetConstants.TypeNames.CommandBehavior },
+            TargetMinimumVersion = Major2,
+            TargetMaximumVersion = Major4)]
+        [InterceptMethod(
+            TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.SystemDataCommon },
             TargetMethod = AdoNetConstants.MethodNames.ExecuteReader,
             TargetType = DbCommandTypeName,
             TargetSignatureTypes = new[] { AdoNetConstants.TypeNames.DbDataReader, AdoNetConstants.TypeNames.CommandBehavior },
             TargetMinimumVersion = Major4,
-            TargetMaximumVersion = Major4)]
+            TargetMaximumVersion = Major5)]
         [InterceptMethod(
             TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.NetStandard },
             TargetMethod = AdoNetConstants.MethodNames.ExecuteReader,
@@ -153,7 +167,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AdoNet
 
             var dbCommand = command as DbCommand;
 
-            using (var scope = ScopeFactory.CreateDbCommandScope(Tracer.Instance, dbCommand, IntegrationName))
+            using (var scope = ScopeFactory.CreateDbCommandScope(Tracer.Instance, dbCommand))
             {
                 try
                 {
@@ -182,7 +196,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AdoNet
             TargetType = DbCommandTypeName,
             TargetSignatureTypes = new[] { "System.Threading.Tasks.Task`1<System.Data.Common.DbDataReader>", AdoNetConstants.TypeNames.CommandBehavior, ClrNames.CancellationToken },
             TargetMinimumVersion = Major4,
-            TargetMaximumVersion = Major4)]
+            TargetMaximumVersion = Major5)]
         [InterceptMethod(
             TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.NetStandard },
             TargetType = DbCommandTypeName,
@@ -244,7 +258,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AdoNet
                 throw;
             }
 
-            using (var scope = ScopeFactory.CreateDbCommandScope(Tracer.Instance, command, IntegrationName))
+            using (var scope = ScopeFactory.CreateDbCommandScope(Tracer.Instance, command))
             {
                 try
                 {
@@ -267,12 +281,19 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AdoNet
         /// <param name="moduleVersionPtr">A pointer to the module version GUID.</param>
         /// <returns>The value returned by the instrumented method.</returns>
         [InterceptMethod(
-            TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.SystemData, AdoNetConstants.AssemblyNames.SystemDataCommon },
+            TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.SystemData },
+            TargetMethod = AdoNetConstants.MethodNames.ExecuteNonQuery,
+            TargetType = DbCommandTypeName,
+            TargetSignatureTypes = new[] { ClrNames.Int32 },
+            TargetMinimumVersion = Major2,
+            TargetMaximumVersion = Major4)]
+        [InterceptMethod(
+            TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.SystemDataCommon },
             TargetMethod = AdoNetConstants.MethodNames.ExecuteNonQuery,
             TargetType = DbCommandTypeName,
             TargetSignatureTypes = new[] { ClrNames.Int32 },
             TargetMinimumVersion = Major4,
-            TargetMaximumVersion = Major4)]
+            TargetMaximumVersion = Major5)]
         [InterceptMethod(
             TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.NetStandard },
             TargetMethod = AdoNetConstants.MethodNames.ExecuteNonQuery,
@@ -315,7 +336,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AdoNet
 
             var dbCommand = command as DbCommand;
 
-            using (var scope = ScopeFactory.CreateDbCommandScope(Tracer.Instance, dbCommand, IntegrationName))
+            using (var scope = ScopeFactory.CreateDbCommandScope(Tracer.Instance, dbCommand))
             {
                 try
                 {
@@ -343,7 +364,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AdoNet
             TargetType = DbCommandTypeName,
             TargetSignatureTypes = new[] { "System.Threading.Tasks.Task`1<System.Int32>", ClrNames.CancellationToken },
             TargetMinimumVersion = Major4,
-            TargetMaximumVersion = Major4)]
+            TargetMaximumVersion = Major5)]
         [InterceptMethod(
             TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.NetStandard },
             TargetType = DbCommandTypeName,
@@ -402,7 +423,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AdoNet
                 throw;
             }
 
-            using (var scope = ScopeFactory.CreateDbCommandScope(Tracer.Instance, command, IntegrationName))
+            using (var scope = ScopeFactory.CreateDbCommandScope(Tracer.Instance, command))
             {
                 try
                 {
@@ -425,12 +446,19 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AdoNet
         /// <param name="moduleVersionPtr">A pointer to the module version GUID.</param>
         /// <returns>The value returned by the instrumented method.</returns>
         [InterceptMethod(
-            TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.SystemData, AdoNetConstants.AssemblyNames.SystemDataCommon },
+            TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.SystemData },
+            TargetMethod = AdoNetConstants.MethodNames.ExecuteScalar,
+            TargetType = DbCommandTypeName,
+            TargetSignatureTypes = new[] { ClrNames.Object },
+            TargetMinimumVersion = Major2,
+            TargetMaximumVersion = Major4)]
+        [InterceptMethod(
+            TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.SystemDataCommon },
             TargetMethod = AdoNetConstants.MethodNames.ExecuteScalar,
             TargetType = DbCommandTypeName,
             TargetSignatureTypes = new[] { ClrNames.Object },
             TargetMinimumVersion = Major4,
-            TargetMaximumVersion = Major4)]
+            TargetMaximumVersion = Major5)]
         [InterceptMethod(
             TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.NetStandard },
             TargetMethod = AdoNetConstants.MethodNames.ExecuteScalar,
@@ -473,7 +501,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AdoNet
 
             var dbCommand = command as DbCommand;
 
-            using (var scope = ScopeFactory.CreateDbCommandScope(Tracer.Instance, dbCommand, IntegrationName))
+            using (var scope = ScopeFactory.CreateDbCommandScope(Tracer.Instance, dbCommand))
             {
                 try
                 {
@@ -501,7 +529,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AdoNet
             TargetType = DbCommandTypeName,
             TargetSignatureTypes = new[] { "System.Threading.Tasks.Task`1<System.Object>", ClrNames.CancellationToken },
             TargetMinimumVersion = Major4,
-            TargetMaximumVersion = Major4)]
+            TargetMaximumVersion = Major5)]
         [InterceptMethod(
             TargetAssemblies = new[] { AdoNetConstants.AssemblyNames.NetStandard },
             TargetType = DbCommandTypeName,
@@ -560,7 +588,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AdoNet
                 throw;
             }
 
-            using (var scope = ScopeFactory.CreateDbCommandScope(Tracer.Instance, command, IntegrationName))
+            using (var scope = ScopeFactory.CreateDbCommandScope(Tracer.Instance, command))
             {
                 try
                 {

@@ -1,5 +1,12 @@
 version: '3'
 services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    command: rabbitmq-server
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+
   servicestackredis:
     image: redis:4-alpine
     command: redis-server --bind 0.0.0.0
@@ -34,6 +41,14 @@ services:
     environment:
     - discovery.type=single-node
 
+  elasticsearch7_arm64:
+    image: elasticsearch:7.10.1
+    ports:
+    - "127.0.0.1:9200:9200"
+    - "127.0.0.1:9300:9300"
+    environment:
+    - discovery.type=single-node
+
   postgres:
     image: postgres:10.5-alpine
     environment:
@@ -44,7 +59,7 @@ services:
     - "127.0.0.1:5432:5432"
 
   mysql:
-    image: mysql/mysql-server:5.7
+    image: mysql/mysql-server:8.0
     environment:
     - MYSQL_DATABASE=world
     - MYSQL_ROOT_PASSWORD=mysqldb
@@ -55,6 +70,14 @@ services:
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:latest
+    ports:
+    - "127.0.0.1:1433:1433"
+    environment:
+    - ACCEPT_EULA=Y
+    - SA_PASSWORD=Strong!Passw0rd
+
+  sqledge:
+    image: mcr.microsoft.com/azure-sql-edge:latest
     ports:
     - "127.0.0.1:1433:1433"
     environment:
@@ -75,6 +98,18 @@ services:
     - buildConfiguration=${buildConfiguration}
     - publishTargetFramework=${publishTargetFramework}
     command: /project/build/docker/build.sh
+    volumes:
+    - ./:/project
+
+  build.arm64:
+    build:
+      context: ./
+      dockerfile: ./build/docker/dotnet.arm64.dockerfile
+    image: datadog-dotnet
+    environment:
+    - buildConfiguration=${buildConfiguration}
+    - publishTargetFramework=${publishTargetFramework}
+    command: /project/build/docker/build.arm64.sh
     volumes:
     - ./:/project
 
@@ -225,6 +260,20 @@ services:
     depends_on:
     - mongo
 
+  Samples.RabbitMQ:
+    build:
+      context: ./
+      dockerfile: ./build/docker/dotnet.dockerfile
+    image: datadog-dotnet
+    command: bash -c "/project/build/docker/with-profiler-logs.bash wait-for-it rabbitmq:5672 -- /project/build/docker/with-profiler.bash dotnet /project/test/test-applications/integrations/Samples.RabbitMQ/bin/${buildConfiguration}/${publishTargetFramework}/publish/Samples.RabbitMQ.dll"
+    volumes:
+    - ./:/project
+    environment:
+    - RABBITMQ_HOST=rabbitmq
+    - DD_TRACE_CALLTARGET_ENABLED=true
+    depends_on:
+    - rabbitmq
+
   # The IIS images are based on Windows images, so they can only be run on Docker for Windows,
   # and only after switching to run Windows containers
   IntegrationTests.IIS.LoaderOptimizationRegKey:
@@ -256,6 +305,7 @@ services:
     - POSTGRES_HOST=postgres
     - MYSQL_HOST=mysql
     - MYSQL_PORT=3306
+    - RABBITMQ_HOST=rabbitmq
     - buildConfiguration=${buildConfiguration}
     - publishTargetFramework=netcoreapp2.1
     depends_on:
@@ -267,6 +317,7 @@ services:
     - mongo
     - postgres
     - mysql
+    - rabbitmq
 
   IntegrationTests.Alpine.Core30:
     build:
@@ -286,6 +337,7 @@ services:
     - POSTGRES_HOST=postgres
     - MYSQL_HOST=mysql
     - MYSQL_PORT=3306
+    - RABBITMQ_HOST=rabbitmq
     - buildConfiguration=${buildConfiguration}
     - publishTargetFramework=netcoreapp3.0
     depends_on:
@@ -297,6 +349,7 @@ services:
     - mongo
     - postgres
     - mysql
+    - rabbitmq
 
   IntegrationTests.Alpine.Core31:
     build:
@@ -316,6 +369,7 @@ services:
     - POSTGRES_HOST=postgres
     - MYSQL_HOST=mysql
     - MYSQL_PORT=3306
+    - RABBITMQ_HOST=rabbitmq
     - buildConfiguration=${buildConfiguration}
     - publishTargetFramework=netcoreapp3.1
     depends_on:
@@ -327,6 +381,39 @@ services:
     - mongo
     - postgres
     - mysql
+    - rabbitmq
+
+  IntegrationTests.Alpine.Core50:
+    build:
+      context: ./
+      dockerfile: ./build/docker/dotnet.alpine.core50.dockerfile
+    image: datadog-dotnet-alpine-core50
+    command: /project/build/docker/Datadog.Trace.ClrProfiler.IntegrationTests.sh
+    volumes:
+    - ./:/project
+    environment:
+    - MONGO_HOST=mongo
+    - SERVICESTACK_REDIS_HOST=servicestackredis:6379
+    - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
+    - ELASTICSEARCH6_HOST=elasticsearch6:9200
+    - ELASTICSEARCH5_HOST=elasticsearch5:9200
+    - SQLSERVER_CONNECTION_STRING=Server=sqlserver;User=sa;Password=Strong!Passw0rd
+    - POSTGRES_HOST=postgres
+    - MYSQL_HOST=mysql
+    - MYSQL_PORT=3306
+    - RABBITMQ_HOST=rabbitmq
+    - buildConfiguration=${buildConfiguration}
+    - publishTargetFramework=net5.0
+    depends_on:
+    - servicestackredis
+    - stackexchangeredis
+    - elasticsearch6
+    - elasticsearch5
+    - sqlserver
+    - mongo
+    - postgres
+    - mysql
+    - rabbitmq
 
   IntegrationTests:
     build:
@@ -346,6 +433,7 @@ services:
     - POSTGRES_HOST=postgres
     - MYSQL_HOST=mysql
     - MYSQL_PORT=3306
+    - RABBITMQ_HOST=rabbitmq
     - buildConfiguration=${buildConfiguration}
     - publishTargetFramework=${publishTargetFramework}
     depends_on:
@@ -357,3 +445,35 @@ services:
     - mongo
     - postgres
     - mysql
+    - rabbitmq
+
+  IntegrationTests.ARM64.Core50:
+    build:
+      context: ./
+      dockerfile: ./build/docker/dotnet.arm64.core50.dockerfile
+    image: datadog-dotnet-arm64-core50
+    command: /project/build/docker/Datadog.Trace.ClrProfiler.IntegrationTests.arm64.sh
+    volumes:
+    - ./:/project
+    environment:
+    - MONGO_HOST=mongo
+    - SERVICESTACK_REDIS_HOST=servicestackredis:6379
+    - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
+    - ELASTICSEARCH6_HOST=elasticsearch7_arm64:9200
+    - ELASTICSEARCH5_HOST=elasticsearch7_arm64:9200
+    - SQLSERVER_CONNECTION_STRING=Server=sqledge;User=sa;Password=Strong!Passw0rd
+    - POSTGRES_HOST=postgres
+    - MYSQL_HOST=mysql
+    - MYSQL_PORT=3306
+    - RABBITMQ_HOST=rabbitmq
+    - buildConfiguration=${buildConfiguration}
+    - publishTargetFramework=net5.0
+    depends_on:
+    - servicestackredis
+    - stackexchangeredis
+    - elasticsearch7_arm64
+    - sqledge
+    - mongo
+    - postgres
+    - mysql
+    - rabbitmq

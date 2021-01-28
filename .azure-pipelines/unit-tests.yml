@@ -12,21 +12,15 @@ trigger:
 variables:
   buildConfiguration: Debug
   dotnetCoreSdkVersion: 3.1.107
+  dotnetCoreSdk5Version: 5.0.100
   ddApiKey: $(DD_API_KEY)
   DD_DOTNET_TRACER_MSBUILD:
 
 # Declare the datadog agent as a resource to be used as a pipeline service
 resources:
   containers:
-  - container: dd_agent_dev_windows
-    image: datadog/agent-dev:olivielpeau-ci-container-defaults-py3-win1809
-    ports:
-    - 8126:8126
-    env:
-      DD_API_KEY: $(ddApiKey)
-      DD_INSIDE_CI: true
-  - container: dd_agent_dev_linux
-    image: datadog/agent-dev:olivielpeau-ci-container-defaults-py3
+  - container: dd_agent
+    image: datadog/agent
     ports:
     - 8126:8126
     env:
@@ -40,16 +34,14 @@ jobs:
     matrix:
       windows:
         imageName: windows-2019
-        serviceName: dd_agent_dev_windows
       linux:
         imageName: ubuntu-18.04
-        serviceName: dd_agent_dev_linux
   pool:
     vmImage: $(imageName)
 
   # Enable the Datadog Agent service for this job
   services:
-    dd_agent: $[ variables['serviceName'] ]
+    dd_agent: dd_agent
 
   steps:
 
@@ -78,16 +70,23 @@ jobs:
       packageType: sdk
       version: $(dotnetCoreSdkVersion)
 
+  - task: UseDotNet@2
+    displayName: install dotnet core sdk 5.0
+    inputs:
+      packageType: sdk
+      version: $(dotnetCoreSdk5Version)
+
   - task: DotNetCoreCLI@2
     displayName: dotnet build
     inputs:
       command: build
       configuration: $(buildConfiguration)
-      arguments: -l:DatadogLogger,"$(DD_DOTNET_TRACER_MSBUILD)"
+      arguments: /nowarn:netsdk1138 #-l:DatadogLogger,"$(DD_DOTNET_TRACER_MSBUILD)"
       projects: |
         src/**/*.csproj
         test/**/*.Tests.csproj
-        benchmarks/**/*.csproj
+        test/benchmarks/**/*.csproj
+        !src/Datadog.Trace.Tools.Runner/*.csproj
     env:
       DD_SERVICE_NAME: dd-tracer-dotnet
 
@@ -100,7 +99,83 @@ jobs:
     env:
       DD_SERVICE_NAME: dd-tracer-dotnet
 
-- job: native_windows
+- job: managed_linux_arm64
+  pool: Arm64
+  workspace:
+    clean: all
+
+  steps:
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build
+    inputs:
+      command: build
+      configuration: $(buildConfiguration)
+      arguments: /nowarn:netsdk1138
+      projects: |
+        src/**/*.csproj
+        test/**/*.Tests.csproj
+        benchmarks/**/*.csproj
+        !src/Datadog.Trace.Tools.Runner/*.csproj
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet test
+    inputs:
+      command: test
+      configuration: $(buildConfiguration)
+      projects: test/**/*.Tests.csproj
+
+- job: managed_macos
+  pool:
+    vmImage: macOS-10.15
+
+  steps:
+
+  - task: UseDotNet@2
+    displayName: install dotnet core runtime 2.1
+    inputs:
+      packageType: runtime
+      version: 2.1.x
+
+  - task: UseDotNet@2
+    displayName: install dotnet core runtime 3.0
+    inputs:
+      packageType: runtime
+      version: 3.0.x
+
+  - task: UseDotNet@2
+    displayName: install dotnet core sdk 3.1
+    inputs:
+      packageType: sdk
+      version: $(dotnetCoreSdkVersion)
+
+  - task: UseDotNet@2
+    displayName: install dotnet core sdk 5.0
+    inputs:
+      packageType: sdk
+      version: $(dotnetCoreSdk5Version)
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build
+    inputs:
+      command: build
+      configuration: $(buildConfiguration)
+      arguments: /nowarn:netsdk1138
+      projects: |
+        src/**/*.csproj
+        test/**/*.Tests.csproj
+        benchmarks/**/*.csproj
+        !src/Datadog.Trace.Tools.Runner/*.csproj
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet test
+    inputs:
+      command: test
+      configuration: $(buildConfiguration)
+      projects: test/**/*.Tests.csproj
+
+
+- job: windows_profiler
   strategy:
     matrix:
       x64:
@@ -110,18 +185,7 @@ jobs:
   pool:
     vmImage: windows-2019
 
-  # Enable the Datadog Agent service for this job
-  services:
-    dd_agent: dd_agent_dev_windows
-
   steps:
-
-  # Install the tracer latest stable release to attach the profiler to the build and test steps.
-  # The script exposes the required environment variables to the following steps
-  - task: PowerShell@2
-    displayName: Install profiler latest release
-    inputs:
-      filePath: ./.azure-pipelines/setup_tracer.ps1
 
   - task: UseDotNet@2
     displayName: install dotnet core sdk 3.1
@@ -129,17 +193,21 @@ jobs:
       packageType: sdk
       version: $(dotnetCoreSdkVersion)
 
+  - task: UseDotNet@2
+    displayName: install dotnet core sdk 5.0
+    inputs:
+      packageType: sdk
+      version: $(dotnetCoreSdk5Version)
+
   - task: DotNetCoreCLI@2
     displayName: dotnet build
     inputs:
       command: build
       configuration: $(buildConfiguration)
+      arguments: /nowarn:netsdk1138
       projects: |
         src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
         sample-libs/**/Samples.ExampleLibrary*.csproj
-      arguments: -l:DatadogLogger,"$(DD_DOTNET_TRACER_MSBUILD)"
-    env:
-      DD_SERVICE_NAME: dd-tracer-dotnet-native
 
   - task: NuGetToolInstaller@1
     displayName: install nuget
@@ -156,10 +224,8 @@ jobs:
       solution: Datadog.Trace.proj
       platform: $(buildPlatform)
       configuration: $(buildConfiguration)
-      msbuildArguments: /t:BuildCpp;BuildCppTests /l:DatadogLogger,"$(DD_DOTNET_TRACER_MSBUILD)"
+      msbuildArguments: /t:BuildCpp;BuildCppTests
       maximumCpuCount: true
-    env:
-      DD_SERVICE_NAME: dd-tracer-dotnet-native
 
   - script: Datadog.Trace.ClrProfiler.Native.Tests.exe --gtest_output=xml
     displayName: run tests
@@ -172,3 +238,94 @@ jobs:
       buildPlatform: $(buildPlatform)
       buildConfiguration: $(buildConfiguration)
     condition: succeededOrFailed()
+
+- job: linux_profiler
+  pool:
+    vmImage: ubuntu-20.04
+  steps:
+
+  - task: UseDotNet@2
+    displayName: install dotnet core sdk 3.1
+    inputs:
+      packageType: sdk
+      version: $(dotnetCoreSdkVersion)
+
+  - task: UseDotNet@2
+    displayName: install dotnet core sdk 5.0
+    inputs:
+      packageType: sdk
+      version: $(dotnetCoreSdk5Version)
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build
+    inputs:
+      command: build
+      configuration: $(buildConfiguration)
+      arguments: /nowarn:netsdk1138
+      projects: |
+        src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
+  
+  - script: |
+      sudo apt-get update
+      sudo apt-get install -y llvm clang
+    displayName: install_dependencies
+
+  - script: |
+      cd ./src/Datadog.Trace.ClrProfiler.Native
+      CXX=clang++ CC=clang cmake .
+      make
+    displayName: build_profiler
+
+- job: linux_profiler_arm64
+  pool: Arm64
+  workspace:
+    clean: all
+
+  steps:
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build
+    inputs:
+      command: build
+      configuration: $(buildConfiguration)
+      arguments: /nowarn:netsdk1138
+      projects: |
+        src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
+  
+  - script: |
+      cd ./src/Datadog.Trace.ClrProfiler.Native
+      CXX=clang++ CC=clang cmake .
+      make
+    displayName: build_profiler
+
+- job: macos_profiler
+  pool:
+    vmImage: macOS-10.15
+  steps:
+
+  - task: UseDotNet@2
+    displayName: install dotnet core sdk 3.1
+    inputs:
+      packageType: sdk
+      version: $(dotnetCoreSdkVersion)
+
+  - task: UseDotNet@2
+    displayName: install dotnet core sdk 5.0
+    inputs:
+      packageType: sdk
+      version: $(dotnetCoreSdk5Version)
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build
+    inputs:
+      command: build
+      configuration: $(buildConfiguration)
+      arguments: /nowarn:netsdk1138
+      projects: |
+        src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
+
+  - script: |
+      cd ./src/Datadog.Trace.ClrProfiler.Native
+      cmake .
+      make
+    displayName: build_profiler

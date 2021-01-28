@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Logging;
 using Datadog.Trace.Tagging;
@@ -15,10 +16,7 @@ namespace Datadog.Trace.AspNet
     /// </summary>
     public class TracingHttpModule : IHttpModule
     {
-        /// <summary>
-        /// Name of the Integration
-        /// </summary>
-        public const string IntegrationName = "AspNet";
+        internal static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(nameof(IntegrationIds.AspNet));
 
         private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.GetLogger(typeof(TracingHttpModule));
 
@@ -90,7 +88,7 @@ namespace Datadog.Trace.AspNet
             {
                 var tracer = Tracer.Instance;
 
-                if (!tracer.Settings.IsIntegrationEnabled(IntegrationName))
+                if (!tracer.Settings.IsIntegrationEnabled(IntegrationId))
                 {
                     // integration disabled
                     return;
@@ -132,15 +130,14 @@ namespace Datadog.Trace.AspNet
                 scope = tracer.StartActiveWithTags(_requestOperationName, propagatedContext, tags: tags);
                 scope.Span.DecorateWebServerSpan(resourceName, httpMethod, host, url, tags, tagsFromHeaders);
 
-                // set analytics sample rate if enabled
-                var analyticsSampleRate = tracer.Settings.GetIntegrationAnalyticsSampleRate(IntegrationName, enabledWithGlobalSetting: true);
-
-                if (analyticsSampleRate != null)
-                {
-                    tags.AnalyticsSampleRate = analyticsSampleRate;
-                }
+                tags.SetAnalyticsSampleRate(IntegrationId, tracer.Settings, enabledWithGlobalSetting: true);
 
                 httpContext.Items[_httpContextScopeKey] = scope;
+
+                // Decorate the incoming HTTP Request with distributed tracing headers
+                // in case the next processor cannot access the stored Scope
+                // (e.g. WCF being hosted in IIS)
+                SpanContextPropagator.Instance.Inject(scope.Span.Context, httpRequest.Headers.Wrap());
             }
             catch (Exception ex)
             {
@@ -154,7 +151,7 @@ namespace Datadog.Trace.AspNet
         {
             try
             {
-                if (!Tracer.Instance.Settings.IsIntegrationEnabled(IntegrationName))
+                if (!Tracer.Instance.Settings.IsIntegrationEnabled(IntegrationId))
                 {
                     // integration disabled
                     return;
@@ -163,7 +160,7 @@ namespace Datadog.Trace.AspNet
                 if (sender is HttpApplication app &&
                     app.Context.Items[_httpContextScopeKey] is Scope scope)
                 {
-                    scope.Span.SetServerStatusCode(app.Context.Response.StatusCode);
+                    scope.Span.SetHttpStatusCode(app.Context.Response.StatusCode, isServer: true);
                     scope.Dispose();
                 }
             }

@@ -6,7 +6,7 @@ trigger:
 
 variables:
   buildConfiguration: release
-  dotnetCoreSdkVersion: 3.1.107
+  dotnetCoreSdkVersion: 5.0.100
   ddApiKey: $(DD_API_KEY)
   publishOutput: $(Build.SourcesDirectory)/src/bin/managed-publish
 
@@ -14,14 +14,12 @@ variables:
 resources:
   containers:
   - container: dd_agent
-    image: datadog/agent-dev:master-py3-win1809
+    image: datadog/agent
     ports:
     - 8126:8126
     env:
       DD_API_KEY: $(ddApiKey)
-      DD_HOSTNAME: none
-      DD_APM_ENABLED: true
-      DD_APM_NON_LOCAL_TRAFFIC: true
+      DD_INSIDE_CI: true
 
 stages:
 - stage: build
@@ -47,7 +45,7 @@ stages:
     steps:
 
     - task: UseDotNet@2
-      displayName: install dotnet core sdk 3.1
+      displayName: install dotnet core sdk
       inputs:
         packageType: sdk
         version: $(dotnetCoreSdkVersion)

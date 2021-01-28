@@ -5,10 +5,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Datadog.Trace.ClrProfiler.Emit;
 using Datadog.Trace.ClrProfiler.Helpers;
+using Datadog.Trace.Configuration;
 using Datadog.Trace.DuckTyping;
+using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Headers;
 using Datadog.Trace.Logging;
-using Datadog.Trace.Tagging;
 
 namespace Datadog.Trace.ClrProfiler.Integrations
 {
@@ -17,9 +18,9 @@ namespace Datadog.Trace.ClrProfiler.Integrations
     /// </summary>
     public static class HttpMessageHandlerIntegration
     {
-        private const string IntegrationName = "HttpMessageHandler";
         private const string SystemNetHttp = "System.Net.Http";
         private const string Major4 = "4";
+        private const string Major5 = "5";
 
         private const string HttpMessageHandlerTypeName = "HttpMessageHandler";
         private const string HttpClientHandlerTypeName = "HttpClientHandler";
@@ -27,6 +28,9 @@ namespace Datadog.Trace.ClrProfiler.Integrations
         private const string HttpMessageHandler = SystemNetHttp + "." + HttpMessageHandlerTypeName;
         private const string HttpClientHandler = SystemNetHttp + "." + HttpClientHandlerTypeName;
         private const string SendAsync = "SendAsync";
+
+        private static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(nameof(IntegrationIds.HttpMessageHandler));
+        private static readonly IntegrationInfo SocketHandlerIntegrationId = IntegrationRegistry.GetIntegrationInfo(nameof(IntegrationIds.HttpSocketsHandler));
 
         private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.GetLogger(typeof(HttpMessageHandlerIntegration));
         private static readonly string[] NamespaceAndNameFilters = { ClrNames.GenericTask, ClrNames.HttpRequestMessage, ClrNames.CancellationToken };
@@ -50,7 +54,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             TargetMethod = SendAsync,
             TargetSignatureTypes = new[] { ClrNames.HttpResponseMessageTask, ClrNames.HttpRequestMessage, ClrNames.CancellationToken },
             TargetMinimumVersion = Major4,
-            TargetMaximumVersion = Major4)]
+            TargetMaximumVersion = Major5)]
         public static object HttpMessageHandler_SendAsync(
             object handler,
             object request,
@@ -152,7 +156,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             TargetMethod = SendAsync,
             TargetSignatureTypes = new[] { ClrNames.HttpResponseMessageTask, ClrNames.HttpRequestMessage, ClrNames.CancellationToken },
             TargetMinimumVersion = Major4,
-            TargetMaximumVersion = Major4)]
+            TargetMaximumVersion = Major5)]
         public static object HttpClientHandler_SendAsync(
             object handler,
             object request,
@@ -246,7 +250,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             var httpMethod = requestValue.Method.Method;
             var requestUri = requestValue.RequestUri;
 
-            using (var scope = ScopeFactory.CreateOutboundHttpScope(Tracer.Instance, httpMethod, requestUri, IntegrationName, out var tags))
+            using (var scope = ScopeFactory.CreateOutboundHttpScope(Tracer.Instance, httpMethod, requestUri, IntegrationId, out var tags))
             {
                 try
                 {
@@ -268,7 +272,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
 
                     if (scope != null)
                     {
-                        tags.HttpStatusCode = HttpTags.ConvertStatusCodeToString(statusCode);
+                        scope.Span.SetHttpStatusCode(statusCode, isServer: false);
                     }
 
                     return response;
@@ -283,7 +287,8 @@ namespace Datadog.Trace.ClrProfiler.Integrations
 
         private static bool IsSocketsHttpHandlerEnabled(Type reportedType)
         {
-            return Tracer.Instance.Settings.IsOptInIntegrationEnabled("HttpSocketsHandler") && reportedType.FullName.Equals("System.Net.Http.SocketsHttpHandler", StringComparison.OrdinalIgnoreCase);
+            return Tracer.Instance.Settings.IsIntegrationEnabled(SocketHandlerIntegrationId, defaultValue: false)
+                && reportedType.FullName.Equals("System.Net.Http.SocketsHttpHandler", StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool IsTracingEnabled(IRequestHeaders headers)

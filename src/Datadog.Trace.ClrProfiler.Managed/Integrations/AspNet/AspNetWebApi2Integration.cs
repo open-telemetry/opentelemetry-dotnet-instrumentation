@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Datadog.Trace.ClrProfiler.Emit;
 using Datadog.Trace.ClrProfiler.Helpers;
+using Datadog.Trace.Configuration;
 using Datadog.Trace.DogStatsd;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Logging;
@@ -19,7 +20,6 @@ namespace Datadog.Trace.ClrProfiler.Integrations
     /// </summary>
     public static class AspNetWebApi2Integration
     {
-        private const string IntegrationName = "AspNetWebApi2";
         private const string OperationName = "aspnet-webapi.request";
         private const string Major5Minor1 = "5.1";
         private const string Major5 = "5";
@@ -28,6 +28,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
         private const string HttpControllerTypeName = "System.Web.Http.Controllers.IHttpController";
         private const string HttpControllerContextTypeName = "System.Web.Http.Controllers.HttpControllerContext";
 
+        private static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(nameof(IntegrationIds.AspNetWebApi2));
         private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.GetLogger(typeof(AspNetWebApi2Integration));
 
         /// <summary>
@@ -79,11 +80,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                 {
                     Log.Warning($"{nameof(AspNetWebApi2Integration)}.{nameof(ExecuteAsync)}: Unable to find System.Net.Http.HttpResponseMessage Type from method arguments. Using fallback logic to find the Type needed for return type.");
                     var statsd = Tracer.Instance.Statsd;
-                    if (statsd != null)
-                    {
-                        statsd.AppendWarning(source: $"{nameof(AspNetWebApi2Integration)}.{nameof(ExecuteAsync)}", message: "Unable to find System.Net.Http.HttpResponseMessage Type from method arguments. Using fallback logic to find the Type needed for return type.", null);
-                        statsd.Send();
-                    }
+                    statsd?.Warning(source: $"{nameof(AspNetWebApi2Integration)}.{nameof(ExecuteAsync)}", message: "Unable to find System.Net.Http.HttpResponseMessage Type from method arguments. Using fallback logic to find the Type needed for return type.", null);
 
                     var systemNetHttpAssemblies = AppDomain.CurrentDomain.GetAssemblies().Where(assembly => assembly.GetName().Name.Equals("System.Net.Http", StringComparison.OrdinalIgnoreCase));
                     var firstSystemNetHttpAssembly = systemNetHttpAssemblies.First();
@@ -165,7 +162,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                     UpdateSpan(controllerContext, scope.Span, tags, Enumerable.Empty<KeyValuePair<string, string>>());
 
                     var statusCode = responseMessage.GetProperty("StatusCode");
-                    scope.Span.SetServerStatusCode((int)statusCode.Value);
+                    scope.Span.SetHttpStatusCode((int)statusCode.Value, isServer: true);
                     scope.Dispose();
                 }
 
@@ -208,7 +205,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
 
             try
             {
-                if (!Tracer.Instance.Settings.IsIntegrationEnabled(IntegrationName))
+                if (!Tracer.Instance.Settings.IsIntegrationEnabled(IntegrationId))
                 {
                     // integration disabled, don't create a scope, skip this trace
                     return null;
@@ -240,13 +237,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                 scope = tracer.StartActiveWithTags(OperationName, propagatedContext, tags: tags);
                 UpdateSpan(controllerContext, scope.Span, tags, tagsFromHeaders);
 
-                // set analytics sample rate if enabled
-                var analyticsSampleRate = tracer.Settings.GetIntegrationAnalyticsSampleRate(IntegrationName, enabledWithGlobalSetting: true);
-
-                if (analyticsSampleRate != null)
-                {
-                    tags.AnalyticsSampleRate = analyticsSampleRate;
-                }
+                tags.SetAnalyticsSampleRate(IntegrationId, tracer.Settings, enabledWithGlobalSetting: true);
             }
             catch (Exception ex)
             {
@@ -329,7 +320,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
 
         private static void OnRequestCompleted(System.Web.HttpContext httpContext, Scope scope, DateTimeOffset finishTime)
         {
-            scope.Span.SetServerStatusCode(httpContext.Response.StatusCode);
+            scope.Span.SetHttpStatusCode(httpContext.Response.StatusCode, isServer: true);
             scope.Span.Finish(finishTime);
             scope.Dispose();
         }

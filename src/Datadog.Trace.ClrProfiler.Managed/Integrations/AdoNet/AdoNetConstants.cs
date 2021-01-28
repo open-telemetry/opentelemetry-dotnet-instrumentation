@@ -1,7 +1,12 @@
+using Datadog.Trace.Configuration;
+
 namespace Datadog.Trace.ClrProfiler.Integrations.AdoNet
 {
     internal static class AdoNetConstants
     {
+        internal const string IntegrationName = nameof(IntegrationIds.AdoNet);
+        internal static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(IntegrationName);
+
         public static class AssemblyNames
         {
             // .NET Framework
@@ -9,7 +14,6 @@ namespace Datadog.Trace.ClrProfiler.Integrations.AdoNet
 
             // .NET Core
             public const string SystemDataCommon = "System.Data.Common";
-            public const string SystemDataSqlClient = "System.Data.SqlClient";
 
             // .NET Standard
             public const string NetStandard = "netstandard";

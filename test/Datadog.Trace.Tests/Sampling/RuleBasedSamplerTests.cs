@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Datadog.Trace.Sampling;
+using Datadog.Trace.Util;
 using Xunit;
 
 namespace Datadog.Trace.Tests.Sampling
@@ -8,13 +9,12 @@ namespace Datadog.Trace.Tests.Sampling
     [Collection(nameof(Datadog.Trace.Tests.Sampling))]
     public class RuleBasedSamplerTests
     {
-        private static readonly float FallbackRate = 0.25f;
-        private static readonly string ServiceName = "my-service-name";
-        private static readonly string Env = "my-test-env";
-        private static readonly string OperationName = "test";
-        private static readonly IEnumerable<KeyValuePair<string, float>> MockAgentRates = new List<KeyValuePair<string, float>>() { new KeyValuePair<string, float>($"service:{ServiceName},env:{Env}", FallbackRate) };
+        private const float FallbackRate = 0.25f;
+        private const string ServiceName = "my-service-name";
+        private const string Env = "my-test-env";
+        private const string OperationName = "test";
 
-        private static ulong _id = 1;
+        private static readonly IEnumerable<KeyValuePair<string, float>> MockAgentRates = new List<KeyValuePair<string, float>>() { new KeyValuePair<string, float>($"service:{ServiceName},env:{Env}", FallbackRate) };
 
         [Fact]
         public void RateLimiter_Never_Applied_For_DefaultRule()
@@ -70,7 +70,7 @@ namespace Datadog.Trace.Tests.Sampling
             sampler.RegisterRule(new CustomSamplingRule(0.5f, "Allow_nothing", ".*", ".*"));
             RunSamplerTest(
                 sampler,
-                10_000, // Higher number for lower variance
+                50_000, // Higher number for lower variance
                 0.5f,
                 0.05f);
         }
@@ -83,14 +83,14 @@ namespace Datadog.Trace.Tests.Sampling
 
             RunSamplerTest(
                 sampler,
-                10_000, // Higher number for lower variance
+                50_000, // Higher number for lower variance
                 FallbackRate,
                 0.05f);
         }
 
-        private static Span GetMyServiceSpan()
+        private static Span GetMyServiceSpan(ulong traceId)
         {
-            var span = new Span(new SpanContext(_id++, _id++, null, serviceName: ServiceName), DateTimeOffset.Now) { OperationName = OperationName };
+            var span = new Span(new SpanContext(traceId, spanId: 1, null, serviceName: ServiceName), DateTimeOffset.Now) { OperationName = OperationName };
             span.SetTag(Tags.Env, Env);
             return span;
         }
@@ -103,9 +103,13 @@ namespace Datadog.Trace.Tests.Sampling
         {
             var sampleSize = iterations;
             var autoKeeps = 0;
+            int seed = new Random().Next();
+            var idGenerator = new SpanIdGenerator(seed);
+
             while (sampleSize-- > 0)
             {
-                var span = GetMyServiceSpan();
+                var traceId = idGenerator.CreateNew();
+                var span = GetMyServiceSpan(traceId);
                 var priority = sampler.GetSamplingPriority(span);
                 if (priority == SamplingPriority.AutoKeep)
                 {
@@ -120,7 +124,7 @@ namespace Datadog.Trace.Tests.Sampling
 
             Assert.True(
                 autoKeepRate >= lowerLimit && autoKeepRate <= upperLimit,
-                $"Expected between {lowerLimit} and {upperLimit}, actual rate is {autoKeepRate}.");
+                $"Expected between {lowerLimit} and {upperLimit}, actual rate is {autoKeepRate}. Random generator seeded with {seed}.");
         }
 
         private class NoLimits : IRateLimiter

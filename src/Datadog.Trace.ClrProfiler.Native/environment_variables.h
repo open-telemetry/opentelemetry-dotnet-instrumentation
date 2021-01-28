@@ -58,10 +58,15 @@ const WSTRING service_version = "DD_VERSION"_W;
 const WSTRING disabled_integrations = "DD_DISABLED_INTEGRATIONS"_W;
 
 // Sets the path for the profiler's log file.
-// If not set, default is
-// "%ProgramData%"\Datadog .NET Tracer\logs\dotnet-profiler.log" on Windows or
-// "/var/log/datadog/dotnet/dotnet-profiler.log" on Linux.
+// Environment variable DD_TRACE_LOG_DIRECTORY takes precedence over this setting, if set.
 const WSTRING log_path = "DD_TRACE_LOG_PATH"_W;
+
+// Sets the directory for the profiler's log file.
+// If set, this setting takes precedence over environment variable DD_TRACE_LOG_PATH.
+// If not set, default is
+// "%ProgramData%"\Datadog .NET Tracer\logs\" on Windows or
+// "/var/log/datadog/dotnet/" on Linux.
+const WSTRING log_directory = "DD_TRACE_LOG_DIRECTORY"_W;
 
 // Sets whether to disable all JIT optimizations.
 // Default value is false (do not disable all optimizations).
@@ -97,6 +102,12 @@ const WSTRING netstandard_enabled = "DD_TRACE_NETSTANDARD_ENABLED"_W;
 
 // Enable the profiler to dump the IL original code and modification to the log.
 const WSTRING dump_il_rewrite_enabled = "DD_DUMP_ILREWRITE_ENABLED"_W;
+
+// Sets whether to enable JIT inlining
+const WSTRING clr_enable_inlining = "DD_CLR_ENABLE_INLINING"_W;
+
+// Sets whether to enable the CallTarget instrumentation mode
+const WSTRING calltarget_enabled = "DD_TRACE_CALLTARGET_ENABLED"_W;
 
 }  // namespace environment
 }  // namespace trace

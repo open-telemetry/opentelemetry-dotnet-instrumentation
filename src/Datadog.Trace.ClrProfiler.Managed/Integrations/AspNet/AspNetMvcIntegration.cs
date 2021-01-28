@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Routing;
 using Datadog.Trace.ClrProfiler.Emit;
+using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Logging;
 using Datadog.Trace.Tagging;
@@ -17,7 +18,6 @@ namespace Datadog.Trace.ClrProfiler.Integrations
     /// </summary>
     public static class AspNetMvcIntegration
     {
-        private const string IntegrationName = "AspNetMvc";
         private const string OperationName = "aspnet-mvc.request";
         private const string HttpContextKey = "__Datadog.Trace.ClrProfiler.Integrations.AspNetMvcIntegration";
         private const string MinimumVersion = "4";
@@ -28,6 +28,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
         private const string ControllerContextTypeName = "System.Web.Mvc.ControllerContext";
         private const string RouteCollectionRouteTypeName = "System.Web.Mvc.Routing.RouteCollectionRoute";
 
+        private static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(nameof(IntegrationIds.AspNetMvc));
         private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.GetLogger(typeof(AspNetMvcIntegration));
 
         /// <summary>
@@ -41,7 +42,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
 
             try
             {
-                if (!Tracer.Instance.Settings.IsIntegrationEnabled(IntegrationName))
+                if (!Tracer.Instance.Settings.IsIntegrationEnabled(IntegrationId))
                 {
                     // integration disabled, don't create a scope, skip this trace
                     return null;
@@ -148,13 +149,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                 tags.AspNetController = controllerName;
                 tags.AspNetAction = actionName;
 
-                // set analytics sample rate if enabled
-                var analyticsSampleRate = tracer.Settings.GetIntegrationAnalyticsSampleRate(IntegrationName, enabledWithGlobalSetting: true);
-
-                if (analyticsSampleRate != null)
-                {
-                    tags.AnalyticsSampleRate = analyticsSampleRate;
-                }
+                tags.SetAnalyticsSampleRate(IntegrationId, tracer.Settings, enabledWithGlobalSetting: true);
             }
             catch (Exception ex)
             {
@@ -210,7 +205,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error instrumenting method {0}", "System.Web.Mvc.Async.IAsyncActionInvoker.BeginInvokeAction()");
+                Log.Error(ex, "Error instrumenting method {MethodName}", "System.Web.Mvc.Async.IAsyncActionInvoker.BeginInvokeAction()");
             }
 
             Func<object, object, object, object, object, object> instrumentedMethod;
@@ -293,7 +288,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error instrumenting method {0}", $"{AsyncActionInvokerTypeName}.EndInvokeAction()");
+                Log.Error(ex, "Error instrumenting method {MethodName}", $"{AsyncActionInvokerTypeName}.EndInvokeAction()");
             }
 
             Func<object, object, bool> instrumentedMethod;
@@ -329,7 +324,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
 
                 if (scope != null)
                 {
-                    scope.Span.SetServerStatusCode(httpContext.Response.StatusCode);
+                    scope.Span.SetHttpStatusCode(httpContext.Response.StatusCode, isServer: true);
                     scope.Dispose();
                 }
 
@@ -360,7 +355,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
 
         private static void OnRequestCompleted(HttpContext httpContext, Scope scope, DateTimeOffset finishTime)
         {
-            scope.Span.SetServerStatusCode(httpContext.Response.StatusCode);
+            scope.Span.SetHttpStatusCode(httpContext.Response.StatusCode, isServer: true);
             scope.Span.Finish(finishTime);
             scope.Dispose();
         }

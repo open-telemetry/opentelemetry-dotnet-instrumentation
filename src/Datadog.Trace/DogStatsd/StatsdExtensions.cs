@@ -6,17 +6,7 @@ namespace Datadog.Trace.DogStatsd
 {
     internal static class StatsdExtensions
     {
-        public static void AppendIncrementCount(this IStatsd statsd, string name, int value = 1, double sampleRate = 1, string[] tags = null)
-        {
-            statsd?.Add<Statsd.Counting, int>(name, value, sampleRate, tags);
-        }
-
-        public static void AppendSetGauge(this IStatsd statsd, string name, int value, double sampleRate = 1, string[] tags = null)
-        {
-            statsd?.Add<Statsd.Gauge, int>(name, value, sampleRate, tags);
-        }
-
-        public static void AppendException(this IStatsd statsd, Exception exception, string source, string message, string[] tags = null)
+        public static void Exception(this IDogStatsd statsd, Exception exception, string source, string message, string[] tags = null)
         {
             if (statsd != null)
             {
@@ -30,11 +20,11 @@ namespace Datadog.Trace.DogStatsd
 
                 string[] allTags = exceptionTags.Concat(tags ?? Enumerable.Empty<string>()).ToArray();
 
-                statsd.Add<Statsd.Counting, int>(TracerMetricNames.Health.Exceptions, value: 1, sampleRate: 1, allTags);
+                statsd.Counter(TracerMetricNames.Health.Exceptions, value: 1, sampleRate: 1, allTags);
             }
         }
 
-        public static void AppendWarning(this IStatsd statsd, string source, string message, string[] tags = null)
+        public static void Warning(this IDogStatsd statsd, string source, string message, string[] tags = null)
         {
             if (statsd != null)
             {
@@ -46,7 +36,7 @@ namespace Datadog.Trace.DogStatsd
 
                 string[] allTags = warningTags.Concat(tags ?? Enumerable.Empty<string>()).ToArray();
 
-                statsd.Add<Statsd.Counting, int>(TracerMetricNames.Health.Warnings, value: 1, sampleRate: 1, allTags);
+                statsd.Counter(TracerMetricNames.Health.Warnings, value: 1, sampleRate: 1, allTags);
             }
         }
     }

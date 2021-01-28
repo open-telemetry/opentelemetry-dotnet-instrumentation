@@ -55,8 +55,16 @@ namespace Datadog.Trace.Configuration
         public const string DisabledIntegrations = "DD_DISABLED_INTEGRATIONS";
 
         /// <summary>
+        /// Configuration key for a list of AdoNet types that will be excluded from automatic instrumentation.
+        /// Default is empty (all AdoNet types are included in automatic instrumentation).
+        /// Supports multiple values separated with semi-colons.
+        /// </summary>
+        /// <seealso cref="TracerSettings.AdoNetExcludedTypes"/>
+        public const string AdoNetExcludedTypes = "DD_TRACE_ADONET_EXCLUDED_TYPES";
+
+        /// <summary>
         /// Configuration key for the Agent host where the Tracer can send traces.
-        /// Overriden by <see cref="AgentUri"/> if present.
+        /// Overridden by <see cref="AgentUri"/> if present.
         /// Default value is "localhost".
         /// </summary>
         /// <seealso cref="TracerSettings.AgentUri"/>
@@ -68,6 +76,27 @@ namespace Datadog.Trace.Configuration
         /// </summary>
         /// <seealso cref="TracerSettings.AgentUri"/>
         public const string AgentPort = "DD_TRACE_AGENT_PORT";
+
+        /// <summary>
+        /// Configuration key for the named pipe where the Tracer can send traces.
+        /// Default value is <c>null</c>.
+        /// </summary>
+        /// <seealso cref="TracerSettings.TracesPipeName"/>
+        public const string TracesPipeName = "DD_TRACE_PIPE_NAME";
+
+        /// <summary>
+        /// Configuration key for setting the timeout in milliseconds for named pipes communication.
+        /// Default value is <c>0</c>.
+        /// </summary>
+        /// <seealso cref="TracerSettings.TracesPipeTimeoutMs"/>
+        public const string TracesPipeTimeoutMs = "DD_TRACE_PIPE_TIMEOUT_MS";
+
+        /// <summary>
+        /// Configuration key for the name of the pipe where the Tracer can send metrics.
+        /// Default value is <c>null</c>.
+        /// </summary>
+        /// <seealso cref="TracerSettings.MetricsPipeName"/>
+        public const string MetricsPipeName = "DD_DOGSTATSD_WINDOWS_PIPE_NAME";
 
         /// <summary>
         /// Sibling setting for <see cref="AgentPort"/>.
@@ -103,6 +132,17 @@ namespace Datadog.Trace.Configuration
         /// </summary>
         /// <seealso cref="TracerSettings.HeaderTags"/>
         public const string HeaderTags = "DD_TRACE_HEADER_TAGS";
+
+        /// <summary>
+        /// Configuration key for a map of services to rename.
+        /// </summary>
+        /// <seealso cref="TracerSettings.ServiceNameMappings"/>
+        public const string ServiceNameMappings = "DD_TRACE_SERVICE_MAPPING";
+
+        /// <summary>
+        /// Configuration key for setting the size of the trace buffer
+        /// </summary>
+        public const string QueueSize = "DD_TRACE_QUEUE_SIZE";
 
         /// <summary>
         /// Configuration key for enabling or disabling the automatic injection
@@ -172,6 +212,12 @@ namespace Datadog.Trace.Configuration
         public const string TracerMetricsEnabled = "DD_TRACE_METRICS_ENABLED";
 
         /// <summary>
+        /// Configuration key for enabling or disabling runtime metrics sent to DogStatsD.
+        /// Default value is <c>false</c> (disabled).
+        /// </summary>
+        public const string RuntimeMetricsEnabled = "DD_RUNTIME_METRICS_ENABLED";
+
+        /// <summary>
         /// Configuration key for setting the approximate maximum size,
         /// in bytes, for Tracer log files.
         /// Default value is 10 MB.
@@ -179,11 +225,19 @@ namespace Datadog.Trace.Configuration
         public const string MaxLogFileSize = "DD_MAX_LOGFILE_SIZE";
 
         /// <summary>
-        /// Configuration key for setting the path to the profiler log file.
-        /// Default value is "%ProgramData%"\Datadog .NET Tracer\logs\dotnet-profiler.log" on Windows
-        /// or "/var/log/datadog/dotnet/dotnet-profiler.log" on Linux.
+        /// Configuration key for setting the path to the .NET Tracer native log file.
+        /// This also determines the output folder of the .NET Tracer managed log files.
+        /// Overridden by <see cref="LogDirectory"/> if present.
         /// </summary>
         public const string ProfilerLogPath = "DD_TRACE_LOG_PATH";
+
+        /// <summary>
+        /// Configuration key for setting the directory of the .NET Tracer logs.
+        /// Overrides the value in <see cref="ProfilerLogPath"/> if present.
+        /// Default value is "%ProgramData%"\Datadog .NET Tracer\logs\" on Windows
+        /// or "/var/log/datadog/dotnet/" on Linux.
+        /// </summary>
+        public const string LogDirectory = "DD_TRACE_LOG_DIRECTORY";
 
         /// <summary>
         /// Configuration key for when a standalone instance of the Trace Agent needs to be started.
@@ -218,6 +272,31 @@ namespace Datadog.Trace.Configuration
         /// </summary>
         /// <seealso cref="TracerSettings.Exporter"/>
         public const string Exporter = "OTEL_EXPORTER";
+
+        /// <summary>
+        /// Configuration key for setting the API key, used by the Agent.
+        /// This key is here for troubleshooting purposes.
+        /// </summary>
+        public const string ApiKey = "DD_API_KEY";
+
+        /// <summary>
+        /// Configuration key for overriding the transport to use for communicating with the trace agent.
+        /// Default value is <c>null</c>.
+        /// Override options available: <c>datadog-tcp</c>, <c>datadog-named-pipes</c>
+        /// </summary>
+        public const string TracesTransport = "DD_TRACE_TRANSPORT";
+
+        /// <summary>
+        /// Configuration key for the application's server http statuses to set spans as errors by.
+        /// </summary>
+        /// <seealso cref="TracerSettings.HttpServerErrorStatusCodes"/>
+        public const string HttpServerErrorStatusCodes = "DD_HTTP_SERVER_ERROR_STATUSES";
+
+        /// <summary>
+        /// Configuration key for the application's client http statuses to set spans as errors by.
+        /// </summary>
+        /// <seealso cref="TracerSettings.HttpClientErrorStatusCodes"/>
+        public const string HttpClientErrorStatusCodes = "DD_HTTP_CLIENT_ERROR_STATUSES";
 
         /// <summary>
         /// String format patterns used to match integration-specific configuration keys.

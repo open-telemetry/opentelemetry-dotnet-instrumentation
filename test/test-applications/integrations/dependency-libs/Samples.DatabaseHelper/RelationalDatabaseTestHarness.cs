@@ -63,6 +63,50 @@ namespace Samples.DatabaseHelper
             }
         }
 
+        public static async Task RunSingleAsync(
+            IDbConnection connection,
+            DbCommandFactory commandFactory,
+            IDbCommandExecutor providerSpecificCommandExecutor,
+            CancellationToken cancellationToken)
+        {
+            var executors = new List<IDbCommandExecutor>
+                            {
+                                providerSpecificCommandExecutor
+                            };
+
+            using (var root = Tracer.Instance.StartActive("root"))
+            {
+                foreach (var executor in executors)
+                {
+                    await RunAsync(connection, commandFactory, executor, cancellationToken);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Helper method that runs ADO.NET test suite for the specified <see cref="IDbCommandExecutor"/>
+        /// in addition to other built-in implementations.
+        /// </summary>
+        /// <param name="connection">The <see cref="IDbConnection"/> to use to connect to the database.</param>
+        /// <param name="commandFactory">A <see cref="DbCommandFactory"/> implementation specific to an ADO.NET provider, e.g. SqlCommand, NpgsqlCommand.</param>
+        /// <param name="cancellationToken">A cancellation token passed into downstream async methods.</param>
+        /// <param name="providerSpecificCommandExecutors">A list of instantiated <see cref="IDbCommandExecutor"/> objects to directly control the ADO.NET providers tested.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public static async Task RunAllAsync(
+            IDbConnection connection,
+            DbCommandFactory commandFactory,
+            CancellationToken cancellationToken,
+            params IDbCommandExecutor[] providerSpecificCommandExecutors)
+        {
+            using (var root = Tracer.Instance.StartActive("root"))
+            {
+                foreach (var executor in providerSpecificCommandExecutors)
+                {
+                    await RunAsync(connection, commandFactory, executor, cancellationToken);
+                }
+            }
+        }
+
         /// <summary>
         /// Runs ADO.NET test suite for the specified <see cref="IDbCommandExecutor"/>.
         /// </summary>

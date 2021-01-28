@@ -1,4 +1,6 @@
-#pragma once
+#ifndef DD_PROFILER_CONSTANTS_H
+#define DD_PROFILER_CONSTANTS_H
+
 #include <string>
 
 #include "environment_variables.h"
@@ -6,10 +8,10 @@
 
 namespace trace {
 
-  WSTRING env_vars_to_display[]{
+  inline WSTRING env_vars_to_display[]{
     environment::tracing_enabled,
     environment::debug_enabled,
-    environment::dump_il_rewrite_enabled,
+    environment::calltarget_enabled,
     environment::profiler_home_path,
     environment::integrations_path,
     environment::include_process_names,
@@ -20,14 +22,18 @@ namespace trace {
     environment::service_name,
     environment::service_version,
     environment::disabled_integrations,
+    environment::log_path,
+    environment::log_directory,
     environment::clr_disable_optimizations,
+    environment::clr_enable_inlining,
     environment::domain_neutral_instrumentation,
+    environment::dump_il_rewrite_enabled,
     environment::netstandard_enabled,
     environment::azure_app_services,
     environment::azure_app_services_app_pool_id,
     environment::azure_app_services_cli_telemetry_profile_value};
 
-  WSTRING skip_assembly_prefixes[]{
+  inline WSTRING skip_assembly_prefixes[]{
     "Datadog.Trace"_W,
     "MessagePack"_W,
     "Microsoft.AI"_W,
@@ -51,7 +57,7 @@ namespace trace {
     "System.Xml"_W,
     "Newtonsoft"_W,};
 
-  WSTRING skip_assemblies[]{
+  inline WSTRING skip_assemblies[]{
       "mscorlib"_W,
       "netstandard"_W,
       "System.Configuration"_W,
@@ -60,6 +66,10 @@ namespace trace {
       "Anonymously Hosted DynamicMethods Assembly"_W,
       "ISymWrapper"_W};
 
-  WSTRING managed_profiler_full_assembly_version = "Datadog.Trace.ClrProfiler.Managed, Version=1.19.6.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb"_W;
+  inline WSTRING managed_profiler_full_assembly_version = "Datadog.Trace.ClrProfiler.Managed, Version=1.22.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb"_W;
+
+  inline WSTRING calltarget_modification_action = "CallTargetModification"_W;
 
 }  // namespace trace
+
+#endif  // DD_PROFILER_CONSTANTS_H

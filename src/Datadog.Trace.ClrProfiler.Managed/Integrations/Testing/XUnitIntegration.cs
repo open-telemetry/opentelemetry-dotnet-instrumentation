@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Datadog.Trace.Ci;
 using Datadog.Trace.ClrProfiler.Emit;
+using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Logging;
 
@@ -13,7 +14,6 @@ namespace Datadog.Trace.ClrProfiler.Integrations.Testing
     /// </summary>
     public static class XUnitIntegration
     {
-        private const string IntegrationName = "XUnit";
         private const string Major2 = "2";
         private const string Major2Minor2 = "2.2";
 
@@ -29,15 +29,13 @@ namespace Datadog.Trace.ClrProfiler.Integrations.Testing
         private const string XUnitRunTestCollectionAsyncMethod = "RunTestCollectionAsync";
         private const string XUnitQueueTestOutputMethod = "QueueTestOutput";
 
+        private static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(nameof(IntegrationIds.XUnit));
         private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.GetLogger(typeof(XUnitIntegration));
-        private static readonly FrameworkDescription _runtimeDescription;
 
         static XUnitIntegration()
         {
             // Preload environment variables.
             CIEnvironmentValues.DecorateSpan(null);
-
-            _runtimeDescription = FrameworkDescription.Create();
         }
 
         /// <summary>
@@ -329,7 +327,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.Testing
 
         private static Scope CreateScope(object testSdk)
         {
-            if (!Tracer.Instance.Settings.IsIntegrationEnabled(IntegrationName))
+            if (!Tracer.Instance.Settings.IsIntegrationEnabled(IntegrationId))
             {
                 // integration disabled, don't create a scope, skip this trace
                 return null;
@@ -417,7 +415,6 @@ namespace Datadog.Trace.ClrProfiler.Integrations.Testing
                 Span span = scope.Span;
 
                 span.Type = SpanTypes.Test;
-                span.SetMetric(Tags.Analytics, 1.0d);
                 span.SetTraceSamplingPriority(SamplingPriority.AutoKeep);
                 span.ResourceName = $"{testSuite}.{testName}";
                 span.SetTag(TestTags.Suite, testSuite);
@@ -426,11 +423,13 @@ namespace Datadog.Trace.ClrProfiler.Integrations.Testing
                 span.SetTag(TestTags.Type, TestTags.TypeTest);
                 CIEnvironmentValues.DecorateSpan(span);
 
-                span.SetTag(CommonTags.RuntimeName, _runtimeDescription.Name);
-                span.SetTag(CommonTags.RuntimeOSArchitecture, _runtimeDescription.OSArchitecture);
-                span.SetTag(CommonTags.RuntimeOSPlatform, _runtimeDescription.OSPlatform);
-                span.SetTag(CommonTags.RuntimeProcessArchitecture, _runtimeDescription.ProcessArchitecture);
-                span.SetTag(CommonTags.RuntimeVersion, _runtimeDescription.ProductVersion);
+                var framework = FrameworkDescription.Instance;
+
+                span.SetTag(CommonTags.RuntimeName, framework.Name);
+                span.SetTag(CommonTags.RuntimeOSArchitecture, framework.OSArchitecture);
+                span.SetTag(CommonTags.RuntimeOSPlatform, framework.OSPlatform);
+                span.SetTag(CommonTags.RuntimeProcessArchitecture, framework.ProcessArchitecture);
+                span.SetTag(CommonTags.RuntimeVersion, framework.ProductVersion);
 
                 if (testArguments != null)
                 {

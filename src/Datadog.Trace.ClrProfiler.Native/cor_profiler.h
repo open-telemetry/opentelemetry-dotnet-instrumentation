@@ -15,12 +15,13 @@
 #include "module_metadata.h"
 #include "pal.h"
 #include "il_rewriter.h"
+#include "rejit_handler.h"
 
 namespace trace {
 
 class CorProfiler : public CorProfilerBase {
  private:
-  bool is_attached_ = false;
+  std::atomic_bool is_attached_ = {false};
   RuntimeInformation runtime_information_;
   std::vector<IntegrationMethod> integration_methods_;
 
@@ -29,12 +30,20 @@ class CorProfiler : public CorProfilerBase {
 
   bool instrument_domain_neutral_assemblies = false;
   bool corlib_module_loaded = false;
-  AppDomainID corlib_app_domain_id;
+  AppDomainID corlib_app_domain_id = 0;
   bool managed_profiler_loaded_domain_neutral = false;
   std::unordered_set<AppDomainID> managed_profiler_loaded_app_domains;
   std::unordered_set<AppDomainID> first_jit_compilation_app_domains;
   bool in_azure_app_services = false;
   bool is_desktop_iis = false;
+  
+  //
+  // CallTarget Members
+  //
+  RejitHandler* rejit_handler = nullptr;
+
+  // Cor assembly properties
+  AssemblyProperty corAssemblyProperty{};
 
   //
   // OpCodes helper
@@ -53,7 +62,8 @@ class CorProfiler : public CorProfilerBase {
   bool GetWrapperMethodRef(ModuleMetadata* module_metadata,
                            ModuleID module_id,
                            const MethodReplacement& method_replacement,
-                           mdMemberRef& wrapper_method_ref);
+                           mdMemberRef& wrapper_method_ref,
+                           mdTypeRef& wrapper_type_ref);
   HRESULT ProcessReplacementCalls(ModuleMetadata* module_metadata,
                                          const FunctionID function_id,
                                          const ModuleID module_id,
@@ -67,8 +77,9 @@ class CorProfiler : public CorProfilerBase {
                                          const FunctionInfo& caller,
                                          const std::vector<MethodReplacement> method_replacements);
   bool ProfilerAssemblyIsLoadedIntoAppDomain(AppDomainID app_domain_id);
-  std::string GetILCodes(std::string title, ILRewriter* rewriter,
-                         const FunctionInfo& caller);
+  std::string GetILCodes(const std::string& title, ILRewriter* rewriter,
+                         const FunctionInfo& caller,
+                         ModuleMetadata* module_metadata);
   //
   // Startup methods
   //
@@ -77,6 +88,14 @@ class CorProfiler : public CorProfilerBase {
                              const mdToken function_token);
   HRESULT GenerateVoidILStartupMethod(const ModuleID module_id,
                            mdMethodDef* ret_method_token);
+
+  //
+  // CallTarget Methods
+  //
+  size_t CallTarget_RequestRejitForModule(
+    ModuleID module_id, ModuleMetadata* module_metadata,
+    const std::vector<IntegrationMethod>& filtered_integrations);
+  HRESULT CallTarget_RewriterCallback(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler);
 
  public:
   CorProfiler() = default;
@@ -104,6 +123,30 @@ class CorProfiler : public CorProfilerBase {
   JITCompilationStarted(FunctionID function_id, BOOL is_safe_to_block) override;
 
   HRESULT STDMETHODCALLTYPE Shutdown() override;
+
+  HRESULT STDMETHODCALLTYPE ProfilerDetachSucceeded() override;
+  
+  HRESULT STDMETHODCALLTYPE JITInlining(FunctionID callerId,
+                                        FunctionID calleeId,
+                                        BOOL* pfShouldInline) override;
+  //
+  // ReJIT Methods
+  //
+
+  HRESULT STDMETHODCALLTYPE ReJITCompilationStarted(
+      FunctionID functionId, ReJITID rejitId, BOOL fIsSafeToBlock) override;
+
+  HRESULT STDMETHODCALLTYPE
+  GetReJITParameters(ModuleID moduleId, mdMethodDef methodId,
+                     ICorProfilerFunctionControl* pFunctionControl) override;
+
+  HRESULT STDMETHODCALLTYPE ReJITCompilationFinished(
+      FunctionID functionId, ReJITID rejitId, HRESULT hrStatus,
+      BOOL fIsSafeToBlock) override;
+
+  HRESULT STDMETHODCALLTYPE ReJITError(ModuleID moduleId, mdMethodDef methodId,
+                                       FunctionID functionId,
+                                       HRESULT hrStatus) override;
 
   //
   // ICorProfilerCallback6 methods

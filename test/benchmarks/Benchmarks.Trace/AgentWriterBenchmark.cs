@@ -5,6 +5,7 @@ using BenchmarkDotNet.Attributes;
 using Datadog.Trace;
 using Datadog.Trace.Agent;
 using Datadog.Trace.Agent.MessagePack;
+using Datadog.Trace.Agent.Transports;
 using Datadog.Trace.BenchmarkDotNet;
 using Datadog.Trace.Configuration;
 
@@ -29,7 +30,7 @@ namespace Benchmarks.Trace
 
             var api = new Api(settings.AgentUri, new FakeApiRequestFactory(), statsd: null);
 
-            AgentWriter = new AgentWriter(api, statsd: null, automaticFlush: false);
+            AgentWriter = new AgentWriter(api, statsd: null, automaticFlush: false, queueSize: SpanCount * 2);
 
             Spans = new Span[SpanCount];
             EnrichedSpans = new Span[SpanCount];
@@ -75,6 +76,11 @@ namespace Benchmarks.Trace
         private class FakeApiRequestFactory : IApiRequestFactory
         {
             private readonly IApiRequestFactory _realFactory = new ApiWebRequestFactory();
+
+            public string Info(Uri endpoint)
+            {
+                return endpoint.ToString();
+            }
 
             public IApiRequest Create(Uri endpoint)
             {
