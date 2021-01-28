@@ -502,6 +502,7 @@ jobs:
     condition: succeededOrFailed()
 
 - job: build_linux_profiler_arm64
+  condition: eq(0, 1) # Temporary workaround to disable this Job (OTel.NET Instr doesn't have an Arm64 pool)
   pool: Arm64
   workspace:
     clean: all
@@ -545,6 +546,7 @@ jobs:
     artifact: linux-tracer-home_arm
 
 - job: Linux_arm64
+  condition: eq(0, 1) # Temporary workaround to disable this Job (OTel.NET Instr doesn't have an Arm64 pool)
   pool: Arm64
   workspace:
     clean: all
