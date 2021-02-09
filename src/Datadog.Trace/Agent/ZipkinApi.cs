@@ -21,12 +21,6 @@ namespace Datadog.Trace.Agent
             _tracesEndpoint = _settings.AgentUri; // User needs to include the proper path.
         }
 
-        public void SetBaseEndpoint(Uri baseEndpoint)
-        {
-            // TODO: Remove this method when it is also removed from the interface.
-            _tracesEndpoint = new Uri(baseEndpoint, _tracesEndpoint.PathAndQuery);
-        }
-
         public async Task<bool> SendTracesAsync(Span[][] traces)
         {
             if (traces == null || traces.Length == 0)
