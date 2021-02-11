@@ -99,32 +99,6 @@ jobs:
     env:
       DD_SERVICE_NAME: dd-tracer-dotnet
 
-- job: managed_linux_arm64
-  pool: Arm64
-  workspace:
-    clean: all
-
-  steps:
-
-  - task: DotNetCoreCLI@2
-    displayName: dotnet build
-    inputs:
-      command: build
-      configuration: $(buildConfiguration)
-      arguments: /nowarn:netsdk1138
-      projects: |
-        src/**/*.csproj
-        test/**/*.Tests.csproj
-        benchmarks/**/*.csproj
-        !src/Datadog.Trace.Tools.Runner/*.csproj
-
-  - task: DotNetCoreCLI@2
-    displayName: dotnet test
-    inputs:
-      command: test
-      configuration: $(buildConfiguration)
-      projects: test/**/*.Tests.csproj
-
 - job: managed_macos
   pool:
     vmImage: macOS-10.15
@@ -270,28 +244,6 @@ jobs:
       sudo apt-get install -y llvm clang
     displayName: install_dependencies
 
-  - script: |
-      cd ./src/Datadog.Trace.ClrProfiler.Native
-      CXX=clang++ CC=clang cmake .
-      make
-    displayName: build_profiler
-
-- job: linux_profiler_arm64
-  pool: Arm64
-  workspace:
-    clean: all
-
-  steps:
-
-  - task: DotNetCoreCLI@2
-    displayName: dotnet build
-    inputs:
-      command: build
-      configuration: $(buildConfiguration)
-      arguments: /nowarn:netsdk1138
-      projects: |
-        src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
-  
   - script: |
       cd ./src/Datadog.Trace.ClrProfiler.Native
       CXX=clang++ CC=clang cmake .
