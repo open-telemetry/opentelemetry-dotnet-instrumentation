@@ -70,6 +70,7 @@ jobs:
         test/**/*.Tests.csproj
         test/benchmarks/**/*.csproj
         !src/Datadog.Trace.Tools.Runner/*.csproj
+        !test/Vendored.System.Diagnostics.DiagnosticSource.Tests/Vendored.System.Diagnostics.DiagnosticSource.Tests.csproj # because of #49.
     env:
       DD_SERVICE_NAME: dd-tracer-dotnet
 
@@ -78,7 +79,9 @@ jobs:
     inputs:
       command: test
       configuration: $(buildConfiguration)
-      projects: test/**/*.Tests.csproj
+      projects: |
+        test/**/*.Tests.csproj
+        !test/Vendored.System.Diagnostics.DiagnosticSource.Tests/Vendored.System.Diagnostics.DiagnosticSource.Tests.csproj # because of #49.
     env:
       DD_SERVICE_NAME: dd-tracer-dotnet
 
