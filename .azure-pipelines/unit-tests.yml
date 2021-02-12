@@ -11,8 +11,7 @@ trigger:
 
 variables:
   buildConfiguration: Debug
-  dotnetCoreSdkVersion: 3.1.107
-  dotnetCoreSdk5Version: 5.0.100
+  dotnetCoreSdkVersion: 5.0.103
   DD_DOTNET_TRACER_MSBUILD:
 
 jobs:
@@ -49,16 +48,16 @@ jobs:
       version: 3.0.x
 
   - task: UseDotNet@2
-    displayName: install dotnet core sdk 3.1
+    displayName: install dotnet core runtime 3.1
     inputs:
       packageType: sdk
-      version: $(dotnetCoreSdkVersion)
+      version: 3.1.x
 
   - task: UseDotNet@2
     displayName: install dotnet core sdk 5.0
     inputs:
       packageType: sdk
-      version: $(dotnetCoreSdk5Version)
+      version: $(dotnetCoreSdkVersion)
 
   - task: DotNetCoreCLI@2
     displayName: dotnet build
