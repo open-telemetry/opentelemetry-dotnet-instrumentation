@@ -9,7 +9,7 @@ namespace Datadog.Trace
     /// </summary>
     public class SpanContext : ISpanContext
     {
-        private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.For<SpanContext>();
+        private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor<SpanContext>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SpanContext"/> class
@@ -52,10 +52,11 @@ namespace Datadog.Trace
         /// <param name="parent">The parent context.</param>
         /// <param name="traceContext">The trace context.</param>
         /// <param name="serviceName">The service name to propagate to child spans.</param>
-        internal SpanContext(ISpanContext parent, ITraceContext traceContext, string serviceName)
+        /// <param name="spanId">The propagated span id.</param>
+        internal SpanContext(ISpanContext parent, ITraceContext traceContext, string serviceName, ulong? spanId = null)
             : this(parent?.TraceId, serviceName)
         {
-            SpanId = SpanIdGenerator.ThreadInstance.CreateNew();
+            SpanId = spanId ?? SpanIdGenerator.ThreadInstance.CreateNew();
             Parent = parent;
             TraceContext = traceContext;
             if (parent is SpanContext spanContext)
