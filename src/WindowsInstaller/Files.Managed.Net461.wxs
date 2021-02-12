@@ -6,28 +6,28 @@
   <Fragment>
     <ComponentGroup Id="Files.Managed.Net461" Directory="net461">
       <Component Win64="$(var.Win64)">
-        <File Id="net461_Datadog.Trace.AspNet.dll"
-              Source="$(var.TracerHomeDirectory)\net461\Datadog.Trace.AspNet.dll"
+        <File Id="net461_OpenTelemetry.Instrumentation.AspNet.dll"
+              Source="$(var.TracerHomeDirectory)\net461\OpenTelemetry.Instrumentation.AspNet.dll"
               KeyPath="yes" Checksum="yes"/>
       </Component>
       <Component Win64="$(var.Win64)">
-        <File Id="net461_Datadog.Trace.ClrProfiler.Managed.Core.dll"
-              Source="$(var.TracerHomeDirectory)\net461\Datadog.Trace.ClrProfiler.Managed.Core.dll"
+        <File Id="net461_OpenTelemetry.Instrumentation.ClrProfiler.Managed.Core.dll"
+              Source="$(var.TracerHomeDirectory)\net461\OpenTelemetry.Instrumentation.ClrProfiler.Managed.Core.dll"
               KeyPath="yes" Checksum="yes"/>
       </Component>
       <Component Win64="$(var.Win64)">
-        <File Id="net461_Datadog.Trace.ClrProfiler.Managed.dll"
-              Source="$(var.TracerHomeDirectory)\net461\Datadog.Trace.ClrProfiler.Managed.dll"
+        <File Id="net461_OpenTelemetry.Instrumentation.ClrProfiler.Managed.dll"
+              Source="$(var.TracerHomeDirectory)\net461\OpenTelemetry.Instrumentation.ClrProfiler.Managed.dll"
               KeyPath="yes" Checksum="yes"/>
       </Component>
       <Component Win64="$(var.Win64)">
-        <File Id="net461_Datadog.Trace.dll"
-              Source="$(var.TracerHomeDirectory)\net461\Datadog.Trace.dll"
+        <File Id="net461_OpenTelemetry.Instrumentation.dll"
+              Source="$(var.TracerHomeDirectory)\net461\OpenTelemetry.Instrumentation.dll"
               KeyPath="yes" Checksum="yes"/>
       </Component>
       <Component Win64="$(var.Win64)">
-        <File Id="net461_Datadog.Trace.MSBuild.dll"
-              Source="$(var.TracerHomeDirectory)\net461\Datadog.Trace.MSBuild.dll"
+        <File Id="net461_OpenTelemetry.Instrumentation.MSBuild.dll"
+              Source="$(var.TracerHomeDirectory)\net461\OpenTelemetry.Instrumentation.MSBuild.dll"
               KeyPath="yes" Checksum="yes"/>
       </Component>
     </ComponentGroup>

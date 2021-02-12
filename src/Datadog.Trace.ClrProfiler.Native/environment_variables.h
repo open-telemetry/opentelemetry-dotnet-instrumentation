@@ -76,7 +76,7 @@ const WSTRING clr_disable_optimizations = "DD_CLR_DISABLE_OPTIMIZATIONS"_W;
 
 // Sets whether to intercept method calls when the caller method is inside a
 // domain-neutral assembly. This is dangerous because the integration assembly
-// Datadog.Trace.ClrProfiler.Managed.dll must also be loaded domain-neutral,
+// OpenTelemetry.Instrumentation.ClrProfiler.Managed.dll must also be loaded domain-neutral,
 // otherwise a sharing violation (HRESULT 0x80131401) may occur. This setting should only be
 // enabled when there is only one AppDomain or, when hosting applications in IIS,
 // the user can guarantee that all Application Pools on the system have at most

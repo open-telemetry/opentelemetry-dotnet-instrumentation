@@ -6,7 +6,7 @@ using System.Reflection;
 namespace Datadog.Trace.ClrProfiler.Managed.Loader
 {
     /// <summary>
-    /// A class that attempts to load the Datadog.Trace.ClrProfiler.Managed .NET assembly.
+    /// A class that attempts to load the OpenTelemetry.Instrumentation.ClrProfiler.Managed .NET assembly.
     /// </summary>
     public partial class Startup
     {
@@ -53,7 +53,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
             // 2) The AssemblyVersion is lower than the version used by Datadog.Trace.ClrProfiler.Managed, the assembly will fail to load
             //    and invoke this resolve event. It must be loaded in a separate AssemblyLoadContext since the application will only
             //    load the originally referenced version
-            if (assemblyName.Name.StartsWith("Datadog.Trace.ClrProfiler.Managed", StringComparison.OrdinalIgnoreCase)
+            if (assemblyName.Name.StartsWith("OpenTelemetry.Instrumentation.ClrProfiler.Managed", StringComparison.OrdinalIgnoreCase)
                 && assemblyName.FullName.IndexOf("PublicKeyToken=def86d061d0d2eeb", StringComparison.OrdinalIgnoreCase) >= 0
                 && File.Exists(path))
             {

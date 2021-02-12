@@ -3,9 +3,10 @@
   <PropertyGroup>
     <!-- NuGet -->
     <Version>1.23.0</Version>
-    <Title>Datadog APM - OpenTracing</Title>
-    <Description>Provides OpenTracing support for Datadog APM</Description>
+    <Title>OpenTelemetry Instrumentation - OpenTracing</Title>
+    <Description>Provides OpenTracing support for OpenTelemetry Instrumentation</Description>
     <PackageTags>$(PackageTags);OpenTracing</PackageTags>
+    <AssemblyName>OpenTelemetry.Instrumentation.OpenTracing</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

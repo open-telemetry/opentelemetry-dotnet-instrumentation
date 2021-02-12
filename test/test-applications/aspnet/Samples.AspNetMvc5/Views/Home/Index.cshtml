@@ -24,11 +24,11 @@
                 <td>@(System.Web.Hosting.HostingEnvironment.IsHosted ? System.Web.Hosting.HostingEnvironment.MapPath("~") : null)</td>
             </tr>
             <tr>
-                <th scope="row">Datadog.Trace.dll path</th>
+                <th scope="row">OpenTelemetry.Instrumentation.dll path</th>
                 <td>@typeof(Datadog.Trace.Tracer).Assembly.Location</td>
             </tr>
             <tr>
-                <th scope="row">Datadog.Trace.ClrProfiler.Managed.dll</th>
+                <th scope="row">OpenTelemetry.Instrumentation.ClrProfiler.Managed.dll</th>
                 <td>@typeof(Datadog.Trace.ClrProfiler.Instrumentation).Assembly.Location</td>
             </tr>
         </tbody>
