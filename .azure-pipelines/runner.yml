@@ -83,9 +83,10 @@ jobs:
   pool:
     vmImage: windows-2019
 
-  # Enable the Datadog Agent service for this job
-  services:
-    # dd_agent: dd_agent # disable Datadog Agent as we do not have to test it in OpenTelemetry
+  # DO NOT enable Datadog Agent as we do not have to test it in OpenTelemetry
+  # # Enable the Datadog Agent service for this job
+  # services:
+  #   dd_agent: dd_agent
 
   steps:
   - download: current

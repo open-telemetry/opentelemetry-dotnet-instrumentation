@@ -33,9 +33,10 @@ stages:
     workspace:
       clean: all
 
-    # Enable the Datadog Agent service for this job
-    services:
-      # dd_agent: dd_agent # disable Datadog Agent as we do not have to test it in OpenTelemetry
+    # DO NOT enable Datadog Agent as we do not have to test it in OpenTelemetry
+    # # Enable the Datadog Agent service for this job
+    # services:
+    #   dd_agent: dd_agent
     variables:
       tracerHomeName: windows-tracer-home
       tracerHome: $(System.DefaultWorkingDirectory)/src/bin/$(tracerHomeName)
