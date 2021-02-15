@@ -72,7 +72,7 @@ namespace Datadog.Trace.PlatformHelpers
         /// </summary>
         internal const string OperatingSystemKey = "WEBSITE_OS";
 
-        private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.GetLogger(typeof(AzureAppServices));
+        private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor(typeof(AzureAppServices));
 
         static AzureAppServices()
         {
@@ -131,16 +131,20 @@ namespace Datadog.Trace.PlatformHelpers
                     }
 
                     Runtime = FrameworkDescription.Instance.Name;
+
+                    DebugModeEnabled = GetVariableIfExists(Configuration.ConfigurationKeys.DebugEnabled, environmentVariables)?.ToBoolean() ?? true;
                 }
             }
             catch (Exception ex)
             {
                 IsUnsafeToTrace = true;
-                Log.SafeLogError(ex, "Unable to initialize AzureAppServices metadata.");
+                Log.Error(ex, "Unable to initialize AzureAppServices metadata.");
             }
         }
 
         public static AzureAppServices Metadata { get; set; }
+
+        public bool DebugModeEnabled { get; }
 
         public bool IsRelevant { get; }
 
@@ -206,7 +210,7 @@ namespace Datadog.Trace.PlatformHelpers
             }
             catch (Exception ex)
             {
-                Log.SafeLogError(ex, "Could not successfully setup the resource ID for Azure App Services.");
+                Log.Error(ex, "Could not successfully setup the resource ID for Azure App Services.");
             }
 
             return resourceId;
@@ -228,7 +232,7 @@ namespace Datadog.Trace.PlatformHelpers
             }
             catch (Exception ex)
             {
-                Log.SafeLogError(ex, "Could not successfully retrieve the subscription ID for Azure App Services.");
+                Log.Error(ex, "Could not successfully retrieve the subscription ID for Azure App Services.");
             }
 
             return null;

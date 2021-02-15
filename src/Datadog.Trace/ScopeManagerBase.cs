@@ -5,7 +5,9 @@ namespace Datadog.Trace
 {
     internal abstract class ScopeManagerBase : IScopeManager, IScopeRawAccess
     {
-        private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.GetLogger(typeof(ScopeManagerBase));
+        private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor(typeof(ScopeManagerBase));
+
+        public event EventHandler<SpanEventArgs> TraceStarted;
 
         public event EventHandler<SpanEventArgs> SpanOpened;
 
@@ -30,6 +32,11 @@ namespace Datadog.Trace
             var newParent = Active;
             var scope = new Scope(newParent, span, this, finishOnClose);
             var scopeOpenedArgs = new SpanEventArgs(span);
+
+            if (newParent == null)
+            {
+                TraceStarted?.Invoke(this, scopeOpenedArgs);
+            }
 
             SpanOpened?.Invoke(this, scopeOpenedArgs);
 
