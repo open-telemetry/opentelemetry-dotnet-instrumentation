@@ -78,15 +78,20 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
         {
             var process = StartSample(traceAgentPort, arguments, packageVersion, aspNetCorePort: 5000, statsdPort: statsdPort, framework: framework);
 
-            var standardOutput = process.StandardOutput.ReadToEnd();
-            var standardError = process.StandardError.ReadToEnd();
+            using var helper = new ProcessHelper(process);
+
             process.WaitForExit();
+            helper.Drain();
             var exitCode = process.ExitCode;
+
+            var standardOutput = helper.StandardOutput;
 
             if (!string.IsNullOrWhiteSpace(standardOutput))
             {
                 Output.WriteLine($"StandardOutput:{Environment.NewLine}{standardOutput}");
             }
+
+            var standardError = helper.ErrorOutput;
 
             if (!string.IsNullOrWhiteSpace(standardError))
             {
@@ -246,7 +251,8 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
             string expectedSpanType,
             string expectedOperationName,
             string expectedResourceName,
-            string expectedServiceVersion)
+            string expectedServiceVersion,
+            IDictionary<string, string> expectedTags = null)
         {
             IImmutableList<MockTracerAgent.Span> spans;
 
@@ -283,6 +289,14 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
             // other tags
             Assert.Equal(SpanKinds.Server, span.Tags.GetValueOrDefault(Tags.SpanKind));
             Assert.Equal(expectedServiceVersion, span.Tags.GetValueOrDefault(Tags.Version));
+
+            if (expectedTags is not null)
+            {
+                foreach (var expectedTag in expectedTags)
+                {
+                    Assert.Equal(expectedTag.Value, span.Tags.GetValueOrDefault(expectedTag.Key));
+                }
+            }
         }
 
         internal class TupleList<T1, T2> : List<Tuple<T1, T2>>
