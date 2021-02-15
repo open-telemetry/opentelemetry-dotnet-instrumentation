@@ -236,6 +236,12 @@ jobs:
       make
     displayName: build_profiler
 
+  - script: |
+      cd ./src/Datadog.Trace.ClrProfiler.Native
+      CXX=clang++ CC=clang cmake .
+      make
+    displayName: build_profiler
+
 - job: macos_profiler
   pool:
     vmImage: macOS-10.15

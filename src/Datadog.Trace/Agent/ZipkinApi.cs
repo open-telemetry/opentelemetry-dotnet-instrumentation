@@ -8,7 +8,7 @@ namespace Datadog.Trace.Agent
 {
     internal class ZipkinApi : IApi
     {
-        private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.For<ZipkinApi>();
+        private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor(typeof(ZipkinApi));
 
         private readonly TracerSettings _settings;
         private Uri _tracesEndpoint;

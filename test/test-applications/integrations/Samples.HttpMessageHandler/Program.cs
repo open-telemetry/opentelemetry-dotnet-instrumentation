@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,11 +33,72 @@ namespace Samples.HttpMessageHandler
                 Console.WriteLine();
                 Console.WriteLine($"Starting HTTP listener at {Url}");
 
-                // send http requests using HttpClient
+                // send async http requests using HttpClient
                 Console.WriteLine();
-                Console.WriteLine("Sending request with HttpClient.");
-                await RequestHelpers.SendHttpClientRequestsAsync(tracingDisabled, Url, RequestContent);
+                Console.WriteLine("Sending async request with default HttpClient.");
+                using (var client = new HttpClient())
+                {
+                    await RequestHelpers.SendHttpClientRequestsAsync(client, tracingDisabled, Url, RequestContent);
+                }
 
+                // send async http requests using HttpClient with CustomHandler
+                Console.WriteLine();
+                Console.WriteLine("Sending async request with HttpClient(CustomHandler).");
+                using (var client = new HttpClient(new CustomHandler()))
+                {
+                    await RequestHelpers.SendHttpClientRequestsAsync(client, tracingDisabled, Url, RequestContent);
+                }
+
+#if !NET452
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // send async http requests using HttpClient with raw WinHttpHandler
+                    Console.WriteLine();
+                    Console.WriteLine("Sending async request with HttpClient(WinHttpHandler).");
+                    using (var client = new HttpClient(new WinHttpHandler()))
+                    {
+                        await RequestHelpers.SendHttpClientRequestsAsync(client, tracingDisabled, Url, RequestContent);
+                    }
+                }
+#endif
+
+#if NETCOREAPP
+                // send async http requests using HttpClient with raw SocketsHttpHandler
+                Console.WriteLine();
+                Console.WriteLine("Sending async request with HttpClient(SocketsHttpHandler).");
+                using (var client = new HttpClient(new SocketsHttpHandler()))
+                {
+                    await RequestHelpers.SendHttpClientRequestsAsync(client, tracingDisabled, Url, RequestContent);
+                }
+#endif
+
+#if NET5_0
+                // send sync http requests using HttpClient
+                Console.WriteLine();
+                Console.WriteLine("Sending sync request with default HttpClient.");
+                using (var client = new HttpClient())
+                {
+                    RequestHelpers.SendHttpClientRequests(client, tracingDisabled, Url, RequestContent);
+                }
+
+                // send async http requests using HttpClient with CustomHandler
+                Console.WriteLine();
+                Console.WriteLine("Sending sync request with HttpClient(CustomHandler).");
+                using (var client = new HttpClient(new CustomHandler()))
+                {
+                    RequestHelpers.SendHttpClientRequests(client, tracingDisabled, Url, RequestContent);
+                }
+
+                // send sync http requests using HttpClient with raw SocketsHttpHandler
+                Console.WriteLine();
+                Console.WriteLine("Sending sync request with HttpClient(SocketsHttpHandler).");
+                using (var client = new HttpClient(new SocketsHttpHandler()))
+                {
+                    RequestHelpers.SendHttpClientRequests(client, tracingDisabled, Url, RequestContent);
+                }
+
+                // sync http requests using HttpClient are not supported with WinHttpHandler
+#endif
                 Console.WriteLine();
                 Console.WriteLine("Stopping HTTP listener.");
                 listener.Stop();
