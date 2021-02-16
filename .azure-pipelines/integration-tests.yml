@@ -508,5 +508,3 @@ jobs:
       containerregistrytype: Container Registry
       dockerComposeCommand: down
     condition: succeededOrFailed()
-
-    condition: succeededOrFailed()
