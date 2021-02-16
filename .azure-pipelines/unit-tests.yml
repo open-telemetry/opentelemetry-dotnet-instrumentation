@@ -206,16 +206,16 @@ jobs:
   steps:
 
   - task: UseDotNet@2
-    displayName: install dotnet core runtime 3.1
+    displayName: install dotnet core sdk 3.1
     inputs:
-      packageType: runtime
-      version: 3.1.x
+      packageType: sdk
+      version: $(dotnetCoreSdkVersion)
 
   - task: UseDotNet@2
     displayName: install dotnet core sdk 5.0
     inputs:
       packageType: sdk
-      version: $(dotnetCoreSdkVersion)
+      version: $(dotnetCoreSdk5Version)
 
   - task: DotNetCoreCLI@2
     displayName: dotnet build
@@ -249,16 +249,16 @@ jobs:
   steps:
 
   - task: UseDotNet@2
-    displayName: install dotnet core runtime 3.1
+    displayName: install dotnet core sdk 3.1
     inputs:
-      packageType: runtime
-      version: 3.1.x
+      packageType: sdk
+      version: $(dotnetCoreSdkVersion)
 
   - task: UseDotNet@2
     displayName: install dotnet core sdk 5.0
     inputs:
       packageType: sdk
-      version: $(dotnetCoreSdkVersion)
+      version: $(dotnetCoreSdk5Version)
 
   - task: DotNetCoreCLI@2
     displayName: dotnet build
