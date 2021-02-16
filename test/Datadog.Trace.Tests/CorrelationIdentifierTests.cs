@@ -27,7 +27,7 @@ namespace Datadog.Trace.Tests
             }
         }
 
-        [Fact(Skip = "This test is not compatible with the xUnit integration. Neither TraceId or SpanId are Zero.")]
+        [Fact]
         public void TraceIdSpanId_ZeroOutsideActiveSpan()
         {
             using (var parentScope = Tracer.Instance.StartActive("parent"))
