@@ -16,7 +16,7 @@ namespace Datadog.Trace.Agent
         {
             Log.Debug("Creating new Zipkin Api");
 
-            _tracesEndpoint = tracesEndpoint; // User needs to include the proper path.
+            _tracesEndpoint = tracesEndpoint ?? throw new ArgumentNullException(nameof(tracesEndpoint)); // User needs to include the proper path.
         }
 
         public async Task<bool> SendTracesAsync(Span[][] traces)
