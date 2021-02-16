@@ -44,7 +44,7 @@ namespace Datadog.Trace.Agent
                 using (var requestStream = await request.GetRequestStreamAsync().ConfigureAwait(false))
                 {
                     var serializer = new ZipkinSerializer();
-                    serializer.Serialize(requestStream, traces, _settings);
+                    serializer.Serialize(requestStream, traces);
                 }
 
                 Exception requestException = null;
