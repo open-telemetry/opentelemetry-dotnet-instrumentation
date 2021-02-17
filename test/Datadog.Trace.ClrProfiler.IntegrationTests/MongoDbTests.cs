@@ -1,17 +1,22 @@
 using Datadog.Core.Tools;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.TestHelpers;
+using DockerComposeFixture;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Datadog.Trace.ClrProfiler.IntegrationTests
 {
-    public class MongoDbTests : TestHelper
+    public class MongoDbTests : TestHelper, IClassFixture<DockerFixture>
     {
-        public MongoDbTests(ITestOutputHelper output)
+        public MongoDbTests(ITestOutputHelper output, DockerFixture dockerFixture)
             : base("MongoDB", output)
         {
             SetServiceVersion("1.0.0");
+            dockerFixture.InitOnce(() => new DockerFixtureOptions
+            {
+                DockerComposeFiles = new[] { "mongo-docker-compose.yml" }
+            });
         }
 
         [Theory]
