@@ -413,6 +413,8 @@ services:
       dockerfile: ./build/docker/dotnet.dockerfile
     image: datadog-dotnet
     command: /project/build/docker/Datadog.Trace.ClrProfiler.IntegrationTests.sh
+    privileged: true
+    init: true
     volumes:
     - ./:/project
     environment:
