@@ -114,7 +114,7 @@ jobs:
     displayName: docker-compose run IntegrationTests
     inputs:
       containerregistrytype: Container Registry
-      dockerComposeCommand: run -f docker-compose.yml -f docker-compose.linux.yml -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) -e publishTargetFramework=$(publishTargetFramework) IntegrationTests
+      dockerComposeCommand: -f docker-compose.yml -f docker-compose.linux.yml run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) -e publishTargetFramework=$(publishTargetFramework) IntegrationTests
 
   - publish: dotnet-tracer-native.log
     artifact: $(Agent.JobName)_profiler-logs
