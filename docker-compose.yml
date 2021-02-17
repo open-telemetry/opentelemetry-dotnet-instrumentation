@@ -413,11 +413,14 @@ services:
       dockerfile: ./build/docker/dotnet.dockerfile
     image: datadog-dotnet
     command: /project/build/docker/Datadog.Trace.ClrProfiler.IntegrationTests.sh
-    privileged: true
+    # privileged: true
     init: true
+    #network_mode: host
     volumes:
     - ./:/project
+    - /var/run/docker.sock:/var/run/docker.sock
     environment:
+    - MONGO_HOST=host.docker.internal
     - SERVICESTACK_REDIS_HOST=servicestackredis:6379
     - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
     - ELASTICSEARCH6_HOST=elasticsearch6:9200
