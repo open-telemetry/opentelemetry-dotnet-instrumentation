@@ -295,8 +295,8 @@ services:
     command: /project/build/docker/Datadog.Trace.ClrProfiler.IntegrationTests.sh
     volumes:
     - ./:/project
+    - /var/run/docker.sock:/var/run/docker.sock
     environment:
-    - MONGO_HOST=mongo
     - SERVICESTACK_REDIS_HOST=servicestackredis:6379
     - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
     - ELASTICSEARCH6_HOST=elasticsearch6:9200
@@ -314,7 +314,6 @@ services:
     - elasticsearch6
     - elasticsearch5
     - sqlserver
-    - mongo
     - postgres
     - mysql
     - rabbitmq
@@ -327,8 +326,8 @@ services:
     command: /project/build/docker/Datadog.Trace.ClrProfiler.IntegrationTests.sh
     volumes:
     - ./:/project
+    - /var/run/docker.sock:/var/run/docker.sock
     environment:
-    - MONGO_HOST=mongo
     - SERVICESTACK_REDIS_HOST=servicestackredis:6379
     - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
     - ELASTICSEARCH6_HOST=elasticsearch6:9200
@@ -346,7 +345,6 @@ services:
     - elasticsearch6
     - elasticsearch5
     - sqlserver
-    - mongo
     - postgres
     - mysql
     - rabbitmq
@@ -359,8 +357,8 @@ services:
     command: /project/build/docker/Datadog.Trace.ClrProfiler.IntegrationTests.sh
     volumes:
     - ./:/project
+    - /var/run/docker.sock:/var/run/docker.sock
     environment:
-    - MONGO_HOST=mongo
     - SERVICESTACK_REDIS_HOST=servicestackredis:6379
     - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
     - ELASTICSEARCH6_HOST=elasticsearch6:9200
@@ -378,7 +376,6 @@ services:
     - elasticsearch6
     - elasticsearch5
     - sqlserver
-    - mongo
     - postgres
     - mysql
     - rabbitmq
@@ -391,8 +388,8 @@ services:
     command: /project/build/docker/Datadog.Trace.ClrProfiler.IntegrationTests.sh
     volumes:
     - ./:/project
+    - /var/run/docker.sock:/var/run/docker.sock
     environment:
-    - MONGO_HOST=mongo
     - SERVICESTACK_REDIS_HOST=servicestackredis:6379
     - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
     - ELASTICSEARCH6_HOST=elasticsearch6:9200
@@ -410,7 +407,6 @@ services:
     - elasticsearch6
     - elasticsearch5
     - sqlserver
-    - mongo
     - postgres
     - mysql
     - rabbitmq
@@ -423,8 +419,8 @@ services:
     command: /project/build/docker/Datadog.Trace.ClrProfiler.IntegrationTests.sh
     volumes:
     - ./:/project
+    - /var/run/docker.sock:/var/run/docker.sock
     environment:
-    - MONGO_HOST=mongo
     - SERVICESTACK_REDIS_HOST=servicestackredis:6379
     - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
     - ELASTICSEARCH6_HOST=elasticsearch6:9200
@@ -442,7 +438,6 @@ services:
     - elasticsearch6
     - elasticsearch5
     - sqlserver
-    - mongo
     - postgres
     - mysql
     - rabbitmq
@@ -455,8 +450,8 @@ services:
     command: /project/build/docker/Datadog.Trace.ClrProfiler.IntegrationTests.arm64.sh
     volumes:
     - ./:/project
+    - /var/run/docker.sock:/var/run/docker.sock
     environment:
-    - MONGO_HOST=mongo
     - SERVICESTACK_REDIS_HOST=servicestackredis:6379
     - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
     - ELASTICSEARCH6_HOST=elasticsearch7_arm64:9200
@@ -473,7 +468,6 @@ services:
     - stackexchangeredis
     - elasticsearch7_arm64
     - sqledge
-    - mongo
     - postgres
     - mysql
     - rabbitmq
