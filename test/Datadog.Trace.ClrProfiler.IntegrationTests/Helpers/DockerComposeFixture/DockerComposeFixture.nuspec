@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata minClientVersion="2.12">
+    <id>dockercomposefixture</id>
+    <title>docker-compose Fixture</title>
+    <version>1.0.9</version>
+    <authors>Joe Shearn</authors>
+    <owners>Joe Shearn</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A XUnit fixture that allows you to spin up docker compose files and then run tests against them.</description>
+    <summary>A XUnit fixture that allows you to spin up docker compose files and then run tests against them.</summary>
+    <copyright>Copyright 2018</copyright>
+    <tags>XUnit Docker Compose</tags>
+    <projectUrl>https://github.com/devjoes/DockerComposeFixture</projectUrl>
+    <licenseUrl>https://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <dependencies>
+      <dependency id="xunit" version="2.3.0" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Release\netstandard2.0\DockerComposeFixture.dll" target="lib\netstandard2.0\" />
+  </files>
+</package>
