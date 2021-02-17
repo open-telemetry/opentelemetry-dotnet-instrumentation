@@ -14,7 +14,6 @@ wait-for-it servicestackredis:6379 -- \
 wait-for-it stackexchangeredis:6379 -- \
 wait-for-it elasticsearch7_arm64:9200 -- \
 wait-for-it sqledge:1433 -- \
-wait-for-it mongo:27017 -- \
 wait-for-it postgres:5432 -- \
 dotnet vstest test/Datadog.Trace.ClrProfiler.IntegrationTests/bin/$buildConfiguration/$publishTargetFramework/publish/Datadog.Trace.ClrProfiler.IntegrationTests.dll --logger:trx --ResultsDirectory:test/Datadog.Trace.ClrProfiler.IntegrationTests/results --TestCaseFilter:Category!=ArmUnsupported
 

@@ -295,7 +295,6 @@ services:
     command: /project/build/docker/Datadog.Trace.ClrProfiler.IntegrationTests.sh
     volumes:
     - ./:/project
-    - /var/run/docker.sock:/var/run/docker.sock
     environment:
     - SERVICESTACK_REDIS_HOST=servicestackredis:6379
     - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
@@ -326,7 +325,6 @@ services:
     command: /project/build/docker/Datadog.Trace.ClrProfiler.IntegrationTests.sh
     volumes:
     - ./:/project
-    - /var/run/docker.sock:/var/run/docker.sock
     environment:
     - SERVICESTACK_REDIS_HOST=servicestackredis:6379
     - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
@@ -357,7 +355,6 @@ services:
     command: /project/build/docker/Datadog.Trace.ClrProfiler.IntegrationTests.sh
     volumes:
     - ./:/project
-    - /var/run/docker.sock:/var/run/docker.sock
     environment:
     - SERVICESTACK_REDIS_HOST=servicestackredis:6379
     - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
@@ -388,7 +385,6 @@ services:
     command: /project/build/docker/Datadog.Trace.ClrProfiler.IntegrationTests.sh
     volumes:
     - ./:/project
-    - /var/run/docker.sock:/var/run/docker.sock
     environment:
     - SERVICESTACK_REDIS_HOST=servicestackredis:6379
     - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
