@@ -1,0 +1,5 @@
+version: '3'
+services:
+  IntegrationTests:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
