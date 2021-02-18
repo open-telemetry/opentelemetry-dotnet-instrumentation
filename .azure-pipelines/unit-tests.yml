@@ -13,19 +13,7 @@ variables:
   buildConfiguration: Debug
   dotnetCoreSdkVersion: 3.1.107
   dotnetCoreSdk5Version: 5.0.100
-  ddApiKey: $(DD_API_KEY)
   DD_DOTNET_TRACER_MSBUILD:
-
-# Declare the datadog agent as a resource to be used as a pipeline service
-resources:
-  containers:
-  - container: dd_agent
-    image: datadog/agent
-    ports:
-    - 8126:8126
-    env:
-      DD_API_KEY: $(ddApiKey)
-      DD_INSIDE_CI: true
 
 jobs:
 
@@ -38,10 +26,6 @@ jobs:
         imageName: ubuntu-18.04
   pool:
     vmImage: $(imageName)
-
-  # Enable the Datadog Agent service for this job
-  services:
-    dd_agent: dd_agent
 
   steps:
 
@@ -87,6 +71,7 @@ jobs:
         test/**/*.Tests.csproj
         test/benchmarks/**/*.csproj
         !src/Datadog.Trace.Tools.Runner/*.csproj
+        !test/Vendored.System.Diagnostics.DiagnosticSource.Tests/Vendored.System.Diagnostics.DiagnosticSource.Tests.csproj
     env:
       DD_SERVICE_NAME: dd-tracer-dotnet
 
@@ -95,7 +80,9 @@ jobs:
     inputs:
       command: test
       configuration: $(buildConfiguration)
-      projects: test/**/*.Tests.csproj
+      projects: |
+        test/**/*.Tests.csproj
+        !test/Vendored.System.Diagnostics.DiagnosticSource.Tests/Vendored.System.Diagnostics.DiagnosticSource.Tests.csproj
     env:
       DD_SERVICE_NAME: dd-tracer-dotnet
 
