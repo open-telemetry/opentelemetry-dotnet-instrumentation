@@ -15,7 +15,7 @@ namespace Datadog.Trace.IntegrationTests
             var agentUri = new System.Uri("http://localhost:9411/api/v2/spans");
             var api = new ZipkinApi(agentUri);
             var agentWriter = new AgentWriter(api, statsd: null);
-            _tracer = new Tracer(settings, agentWriter, sampler: null, scopeManager: null, statsd: null);
+            _tracer = new Tracer(new TracerSettings(), agentWriter, sampler: null, scopeManager: null, statsd: null);
         }
 
         [Fact]
