@@ -12,19 +12,7 @@ trigger:
 variables:
   publishOutput: $(System.DefaultWorkingDirectory)/src/bin/managed-publish
   dotnetCoreSdkVersion: 5.0.103
-  ddApiKey: $(DD_API_KEY)
   DD_DOTNET_TRACER_MSBUILD:
-
-# Declare the datadog agent as a resource to be used as a pipeline service
-resources:
-  containers:
-  - container: dd_agent
-    image: datadog/agent
-    ports:
-    - 8126:8126
-    env:
-      DD_API_KEY: $(ddApiKey)
-      DD_INSIDE_CI: true
 
 jobs:
 
@@ -119,10 +107,6 @@ jobs:
 
   pool:
     vmImage: windows-2019
-
-  # Enable the Datadog Agent service for this job
-  services:
-    dd_agent: dd_agent
 
   steps:
   - download: current
