@@ -17,7 +17,7 @@ namespace Samples.AspNetMvc5_0.Controllers
     {
         public ActionResult Index()
         {
-            var prefixes = new[] { "COR_", "CORECLR_", "DD_", "DATADOG_" };
+            var prefixes = new[] { "COR_", "CORECLR_", "OPENTELEMETRY_", "DATADOG_" };
 
             var envVars = from envVar in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>()
                           from prefix in prefixes

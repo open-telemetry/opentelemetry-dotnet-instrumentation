@@ -130,10 +130,10 @@ namespace Datadog.Trace.TestHelpers
                 "COR_PROFILER_PATH",
 
                 // Datadog
-                "DD_PROFILER_PROCESSES",
-                "DD_DOTNET_TRACER_HOME",
-                "DD_INTEGRATIONS",
-                "DD_DISABLED_INTEGRATIONS",
+                "OPENTELEMETRY_PROFILER_PROCESSES",
+                "OPENTELEMETRY_DOTNET_TRACER_HOME",
+                "OPENTELEMETRY_INTEGRATIONS",
+                "OPENTELEMETRY_DISABLED_INTEGRATIONS",
                 "DD_SERVICE",
                 "DD_VERSION",
                 "DD_TAGS"
@@ -163,7 +163,7 @@ namespace Datadog.Trace.TestHelpers
 
                 profilerPath = GetProfilerPath();
                 environmentVariables["CORECLR_PROFILER_PATH"] = profilerPath;
-                environmentVariables["DD_DOTNET_TRACER_HOME"] = Path.GetDirectoryName(profilerPath);
+                environmentVariables["OPENTELEMETRY_DOTNET_TRACER_HOME"] = Path.GetDirectoryName(profilerPath);
             }
             else
             {
@@ -172,29 +172,29 @@ namespace Datadog.Trace.TestHelpers
 
                 profilerPath = GetProfilerPath();
                 environmentVariables["COR_PROFILER_PATH"] = profilerPath;
-                environmentVariables["DD_DOTNET_TRACER_HOME"] = Path.GetDirectoryName(profilerPath);
+                environmentVariables["OPENTELEMETRY_DOTNET_TRACER_HOME"] = Path.GetDirectoryName(profilerPath);
 
                 processName = Path.GetFileName(processPath);
             }
 
             if (DebugModeEnabled)
             {
-                environmentVariables["DD_TRACE_DEBUG"] = "1";
+                environmentVariables["OPENTELEMETRY_TRACE_DEBUG"] = "1";
             }
 
-            environmentVariables["DD_PROFILER_PROCESSES"] = processName;
+            environmentVariables["OPENTELEMETRY_PROFILER_PROCESSES"] = processName;
 
             string integrations = string.Join(";", GetIntegrationsFilePaths());
-            environmentVariables["DD_INTEGRATIONS"] = integrations;
+            environmentVariables["OPENTELEMETRY_INTEGRATIONS"] = integrations;
             environmentVariables["DD_TRACE_AGENT_HOSTNAME"] = "127.0.0.1";
-            environmentVariables["DD_TRACE_AGENT_PORT"] = agentPort.ToString();
+            environmentVariables["OPENTELEMETRY_TRACE_AGENT_PORT"] = agentPort.ToString();
 
             // for ASP.NET Core sample apps, set the server's port
             environmentVariables["ASPNETCORE_URLS"] = $"http://127.0.0.1:{aspNetCorePort}/";
 
             if (statsdPort != null)
             {
-                environmentVariables["DD_DOGSTATSD_PORT"] = statsdPort.Value.ToString();
+                environmentVariables["OPENTELEMETRY_DOGSTATSD_PORT"] = statsdPort.Value.ToString();
             }
 
             foreach (var name in new[] { "SERVICESTACK_REDIS_HOST", "STACKEXCHANGE_REDIS_HOST" })
@@ -270,7 +270,7 @@ namespace Datadog.Trace.TestHelpers
                                        ? "dll"
                                        : "so";
 
-                string fileName = $"Datadog.Trace.ClrProfiler.Native.{extension}";
+                string fileName = $"OpenTelemetry.Instrumentation.ClrProfiler.Native.{extension}";
 
                 var directory = GetSampleApplicationOutputDirectory();
 

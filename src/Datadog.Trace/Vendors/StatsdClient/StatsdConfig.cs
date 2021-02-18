@@ -27,12 +27,12 @@ namespace Datadog.Trace.Vendors.StatsdClient
         /// <summary>
         /// The name of the environment variable defining the port of the targeted StatsD server.
         /// </summary>
-        public const string DogStatsdPortEnvVar = "DD_DOGSTATSD_PORT";
+        public const string DogStatsdPortEnvVar = "OPENTELEMETRY_DOGSTATSD_PORT";
 
         /// <summary>
         /// The name of the environment variable defining the host name of the targeted StatsD server.
         /// </summary>
-        public const string AgentHostEnvVar = "DD_AGENT_HOST";
+        public const string AgentHostEnvVar = "OPENTELEMETRY_AGENT_HOST";
 
         /// <summary>
         /// The name of the environment variable defining the name of the pipe. INTERNAL USAGE ONLY.
@@ -47,7 +47,7 @@ namespace Datadog.Trace.Vendors.StatsdClient
         /// <summary>
         /// The name of the environment variable defining the environment name
         /// </summary>
-        public const string EnvironmentEnvVar = "DD_ENV";
+        public const string EnvironmentEnvVar = "OPENTELEMETRY_ENV";
 
         /// <summary>
         /// The name of the environment variable defining the version of the service

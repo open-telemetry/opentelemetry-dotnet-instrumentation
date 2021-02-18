@@ -64,18 +64,18 @@ else
 # Set all environment variables to attach the profiler to the following pipeline steps
 echo "Setting environment variables..."
 
-echo "##vso[task.setvariable variable=DD_ENV]CI"
-echo "##vso[task.setvariable variable=DD_DOTNET_TRACER_HOME]$dd_tracer_home"
+echo "##vso[task.setvariable variable=OPENTELEMETRY_ENV]CI"
+echo "##vso[task.setvariable variable=OPENTELEMETRY_DOTNET_TRACER_HOME]$dd_tracer_home"
 echo "##vso[task.setvariable variable=DD_DOTNET_TRACER_MSBUILD]$dd_tracer_msbuild"
-echo "##vso[task.setvariable variable=DD_INTEGRATIONS]$dd_tracer_integrations"
+echo "##vso[task.setvariable variable=OPENTELEMETRY_INTEGRATIONS]$dd_tracer_integrations"
 
 echo "##vso[task.setvariable variable=CORECLR_ENABLE_PROFILING]1"
-echo "##vso[task.setvariable variable=CORECLR_PROFILER]{846F5F1C-F9AE-4B07-969E-05C26BC060D8}"
+echo "##vso[task.setvariable variable=CORECLR_PROFILER]{918728DD-259F-4A6A-AC2B-B85E1B658318}"
 echo "##vso[task.setvariable variable=CORECLR_PROFILER_PATH_32]$dd_tracer_profiler_32"
 echo "##vso[task.setvariable variable=CORECLR_PROFILER_PATH_64]$dd_tracer_profiler_64"
 
 echo "##vso[task.setvariable variable=COR_ENABLE_PROFILING]1"
-echo "##vso[task.setvariable variable=COR_PROFILER]{846F5F1C-F9AE-4B07-969E-05C26BC060D8}"
+echo "##vso[task.setvariable variable=COR_PROFILER]{918728DD-259F-4A6A-AC2B-B85E1B658318}"
 echo "##vso[task.setvariable variable=COR_PROFILER_PATH_32]$dd_tracer_profiler_32"
 echo "##vso[task.setvariable variable=COR_PROFILER_PATH_64]$dd_tracer_profiler_64"
 

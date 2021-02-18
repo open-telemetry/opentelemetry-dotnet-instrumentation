@@ -16,7 +16,7 @@ namespace Datadog.Trace.Configuration
         /// Configuration key for the application's environment. Sets the "env" tag on every <see cref="Span"/>.
         /// </summary>
         /// <seealso cref="TracerSettings.Environment"/>
-        public const string Environment = "DD_ENV";
+        public const string Environment = "OPENTELEMETRY_ENV";
 
         /// <summary>
         /// Configuration key for the application's default service name.
@@ -37,14 +37,14 @@ namespace Datadog.Trace.Configuration
         /// Default is value is true (enabled).
         /// </summary>
         /// <seealso cref="TracerSettings.TraceEnabled"/>
-        public const string TraceEnabled = "DD_TRACE_ENABLED";
+        public const string TraceEnabled = "OPENTELEMETRY_TRACE_ENABLED";
 
         /// <summary>
         /// Configuration key for enabling or disabling the Tracer's debug mode.
         /// Default is value is false (disabled).
         /// </summary>
         /// <seealso cref="TracerSettings.DebugEnabled"/>
-        public const string DebugEnabled = "DD_TRACE_DEBUG";
+        public const string DebugEnabled = "OPENTELEMETRY_TRACE_DEBUG";
 
         /// <summary>
         /// Configuration key for a list of integrations to disable. All other integrations remain enabled.
@@ -52,7 +52,7 @@ namespace Datadog.Trace.Configuration
         /// Supports multiple values separated with semi-colons.
         /// </summary>
         /// <seealso cref="TracerSettings.DisabledIntegrationNames"/>
-        public const string DisabledIntegrations = "DD_DISABLED_INTEGRATIONS";
+        public const string DisabledIntegrations = "OPENTELEMETRY_DISABLED_INTEGRATIONS";
 
         /// <summary>
         /// Configuration key for a list of AdoNet types that will be excluded from automatic instrumentation.
@@ -68,14 +68,14 @@ namespace Datadog.Trace.Configuration
         /// Default value is "localhost".
         /// </summary>
         /// <seealso cref="TracerSettings.AgentUri"/>
-        public const string AgentHost = "DD_AGENT_HOST";
+        public const string AgentHost = "OPENTELEMETRY_AGENT_HOST";
 
         /// <summary>
         /// Configuration key for the Agent port where the Tracer can send traces.
         /// Default value is 8126.
         /// </summary>
         /// <seealso cref="TracerSettings.AgentUri"/>
-        public const string AgentPort = "DD_TRACE_AGENT_PORT";
+        public const string AgentPort = "OPENTELEMETRY_TRACE_AGENT_PORT";
 
         /// <summary>
         /// Configuration key for the named pipe where the Tracer can send traces.
@@ -149,14 +149,14 @@ namespace Datadog.Trace.Configuration
         /// of correlation identifiers into the logging context.
         /// </summary>
         /// <seealso cref="TracerSettings.LogsInjectionEnabled"/>
-        public const string LogsInjectionEnabled = "DD_LOGS_INJECTION";
+        public const string LogsInjectionEnabled = "OPENTELEMETRY_LOGS_INJECTION";
 
         /// <summary>
         /// Configuration key for setting the number of traces allowed
         /// to be submitted per second.
         /// </summary>
         /// <seealso cref="TracerSettings.MaxTracesSubmittedPerSecond"/>
-        public const string MaxTracesSubmittedPerSecond = "DD_MAX_TRACES_PER_SECOND";
+        public const string MaxTracesSubmittedPerSecond = "OPENTELEMETRY_MAX_TRACES_PER_SECOND";
 
         /// <summary>
         /// Configuration key for enabling or disabling the diagnostic log at startup
@@ -203,13 +203,13 @@ namespace Datadog.Trace.Configuration
         /// Configuration key for the DogStatsd port where the Tracer can send metrics.
         /// Default value is 8125.
         /// </summary>
-        public const string DogStatsdPort = "DD_DOGSTATSD_PORT";
+        public const string DogStatsdPort = "OPENTELEMETRY_DOGSTATSD_PORT";
 
         /// <summary>
         /// Configuration key for enabling or disabling internal metrics sent to DogStatsD.
         /// Default value is <c>false</c> (disabled).
         /// </summary>
-        public const string TracerMetricsEnabled = "DD_TRACE_METRICS_ENABLED";
+        public const string TracerMetricsEnabled = "OPENTELEMETRY_TRACE_METRICS_ENABLED";
 
         /// <summary>
         /// Configuration key for enabling or disabling runtime metrics sent to DogStatsD.
@@ -222,7 +222,7 @@ namespace Datadog.Trace.Configuration
         /// in bytes, for Tracer log files.
         /// Default value is 10 MB.
         /// </summary>
-        public const string MaxLogFileSize = "DD_MAX_LOGFILE_SIZE";
+        public const string MaxLogFileSize = "OPENTELEMETRY_MAX_LOGFILE_SIZE";
 
         /// <summary>
         /// Configuration key for setting the number of seconds between,
@@ -236,7 +236,7 @@ namespace Datadog.Trace.Configuration
         /// This also determines the output folder of the .NET Tracer managed log files.
         /// Overridden by <see cref="LogDirectory"/> if present.
         /// </summary>
-        public const string ProfilerLogPath = "DD_TRACE_LOG_PATH";
+        public const string ProfilerLogPath = "OPENTELEMETRY_TRACE_LOG_PATH";
 
         /// <summary>
         /// Configuration key for setting the directory of the .NET Tracer logs.
@@ -334,12 +334,12 @@ namespace Datadog.Trace.Configuration
             /// <summary>
             /// Configuration key for forcing the automatic instrumentation to only use the mdToken method lookup mechanism.
             /// </summary>
-            public const string ForceMdTokenLookup = "DD_TRACE_DEBUG_LOOKUP_MDTOKEN";
+            public const string ForceMdTokenLookup = "OPENTELEMETRY_TRACE_DEBUG_LOOKUP_MDTOKEN";
 
             /// <summary>
             /// Configuration key for forcing the automatic instrumentation to only use the fallback method lookup mechanism.
             /// </summary>
-            public const string ForceFallbackLookup = "DD_TRACE_DEBUG_LOOKUP_FALLBACK";
+            public const string ForceFallbackLookup = "OPENTELEMETRY_TRACE_DEBUG_LOOKUP_FALLBACK";
         }
     }
 }

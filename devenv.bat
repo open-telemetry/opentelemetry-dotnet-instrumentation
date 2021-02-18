@@ -48,11 +48,11 @@ SET CORECLR_PROFILER={846F5F1C-F9AE-4B07-969E-05C26BC060D8}
 SET CORECLR_PROFILER_PATH=%~dp0\src\Datadog.Trace.ClrProfiler.Native\bin\%profiler_configuration%\%profiler_platform%\Datadog.Trace.ClrProfiler.Native.dll
 
 rem Don't attach the profiler to these processes
-SET DD_PROFILER_EXCLUDE_PROCESSES=devenv.exe;Microsoft.ServiceHub.Controller.exe;ServiceHub.Host.CLR.exe;ServiceHub.TestWindowStoreHost.exe;ServiceHub.DataWarehouseHost.exe;sqlservr.exe;VBCSCompiler.exe;iisexpresstray.exe;msvsmon.exe;PerfWatson2.exe;ServiceHub.IdentityHost.exe;ServiceHub.VSDetouredHost.exe;ServiceHub.SettingsHost.exe;ServiceHub.Host.CLR.x86.exe;vstest.console.exe;ServiceHub.RoslynCodeAnalysisService32.exe;testhost.x86.exe;MSBuild.exe;ServiceHub.ThreadedWaitDialog.exe
+SET OPENTELEMETRY_PROFILER_EXCLUDE_PROCESSES=devenv.exe;Microsoft.ServiceHub.Controller.exe;ServiceHub.Host.CLR.exe;ServiceHub.TestWindowStoreHost.exe;ServiceHub.DataWarehouseHost.exe;sqlservr.exe;VBCSCompiler.exe;iisexpresstray.exe;msvsmon.exe;PerfWatson2.exe;ServiceHub.IdentityHost.exe;ServiceHub.VSDetouredHost.exe;ServiceHub.SettingsHost.exe;ServiceHub.Host.CLR.x86.exe;vstest.console.exe;ServiceHub.RoslynCodeAnalysisService32.exe;testhost.x86.exe;MSBuild.exe;ServiceHub.ThreadedWaitDialog.exe
 
 rem Set dotnet tracer home path
-SET DD_DOTNET_TRACER_HOME=%~dp0
-SET DD_INTEGRATIONS=%DD_DOTNET_TRACER_HOME%\integrations.json
+SET OPENTELEMETRY_DOTNET_TRACER_HOME=%~dp0
+SET OPENTELEMETRY_INTEGRATIONS=%OPENTELEMETRY_DOTNET_TRACER_HOME%\integrations.json
 
 if "%start_visual_studio%" == "true" (
     echo Starting Visual Studio...

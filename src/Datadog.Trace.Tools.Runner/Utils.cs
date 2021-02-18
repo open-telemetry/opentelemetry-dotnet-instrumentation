@@ -10,7 +10,7 @@ namespace Datadog.Trace.Tools.Runner
 {
     internal class Utils
     {
-        public const string PROFILERID = "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}";
+        public const string PROFILERID = "{918728DD-259F-4A6A-AC2B-B85E1B658318}";
 
         public static Dictionary<string, string> GetProfilerEnvironmentVariables(string runnerFolder, Platform platform, Options options)
         {
@@ -52,9 +52,9 @@ namespace Datadog.Trace.Tools.Runner
 
             var envVars = new Dictionary<string, string>
             {
-                ["DD_DOTNET_TRACER_HOME"] = tracerHome,
+                ["OPENTELEMETRY_DOTNET_TRACER_HOME"] = tracerHome,
                 ["DD_DOTNET_TRACER_MSBUILD"] = tracerMsBuild,
-                ["DD_INTEGRATIONS"] = tracerIntegrations,
+                ["OPENTELEMETRY_INTEGRATIONS"] = tracerIntegrations,
                 ["CORECLR_ENABLE_PROFILING"] = "1",
                 ["CORECLR_PROFILER"] = PROFILERID,
                 ["CORECLR_PROFILER_PATH_32"] = tracerProfiler32,
@@ -67,7 +67,7 @@ namespace Datadog.Trace.Tools.Runner
 
             if (!string.IsNullOrWhiteSpace(options.Environment))
             {
-                envVars["DD_ENV"] = options.Environment;
+                envVars["OPENTELEMETRY_ENV"] = options.Environment;
             }
 
             if (!string.IsNullOrWhiteSpace(options.Service))

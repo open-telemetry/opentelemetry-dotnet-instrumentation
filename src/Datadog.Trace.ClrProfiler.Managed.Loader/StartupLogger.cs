@@ -65,7 +65,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
 
                 if (logDirectory == null)
                 {
-                    var nativeLogFile = Environment.GetEnvironmentVariable("DD_TRACE_LOG_PATH");
+                    var nativeLogFile = Environment.GetEnvironmentVariable("OPENTELEMETRY_TRACE_LOG_PATH");
 
                     if (!string.IsNullOrEmpty(nativeLogFile))
                     {
@@ -143,7 +143,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
         {
             try
             {
-                var ddTraceDebugValue = Environment.GetEnvironmentVariable("DD_TRACE_DEBUG");
+                var ddTraceDebugValue = Environment.GetEnvironmentVariable("OPENTELEMETRY_TRACE_DEBUG");
 
                 if (ddTraceDebugValue == null)
                 {

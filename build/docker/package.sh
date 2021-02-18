@@ -5,7 +5,9 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 VERSION=1.23.0
 
 mkdir -p $DIR/../../deploy/linux
-cp $DIR/../../integrations.json $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/Debug/x64/
+for target in integrations.json defaults.env LICENSE NOTICE ; do
+    cp $DIR/../../$target $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/Debug/x64/
+done
 cp $DIR/../../build/artifacts/createLogPath.sh $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/Debug/x64/
 
 cd $DIR/../../deploy/linux
@@ -14,21 +16,28 @@ for pkgtype in $PKGTYPES ; do
         -f \
         -s dir \
         -t $pkgtype \
-        -n datadog-dotnet-apm \
+        -n opentelemetry-instrumentation \
+        --license "Apache License, Version 2.0" \
+        --provides opentelemetry-dotnet-instrumentation \
         -v $VERSION \
-        $(if [ $pkgtype != 'tar' ] ; then echo --prefix /opt/datadog ; fi) \
+        --prefix opentelemetry-dotnet-instrumentation \
         --chdir $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/Debug/x64 \
         netstandard2.0/ \
         netcoreapp3.1/ \
-        Datadog.Trace.ClrProfiler.Native.so \
+        OpenTelemetry.Instrumentation.ClrProfiler.Native.so \
         integrations.json \
-        createLogPath.sh
+        createLogPath.sh \
+        OpenTelemetry.Instrumentation.ClrProfiler.Native.so \
+        integrations.json \
+        defaults.env \
+        LICENSE \
+        NOTICE
 done
 
 gzip -f datadog-dotnet-apm.tar
 
 if [ -z "${MUSL-}" ]; then
-  mv datadog-dotnet-apm.tar.gz datadog-dotnet-apm-$VERSION.tar.gz
+  mv opentelemetry-dotnet-instrumentation.tar.gz opentelemetry-dotnet-instrumentation-$VERSION.tar.gz
 else
-  mv datadog-dotnet-apm.tar.gz datadog-dotnet-apm-$VERSION-musl.tar.gz
+  mv opentelemetry-dotnet-instrumentation.tar.gz opentelemetry-dotnet-instrumentation-$VERSION-musl.tar.gz
 fi

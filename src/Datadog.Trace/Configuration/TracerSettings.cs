@@ -44,7 +44,7 @@ namespace Datadog.Trace.Configuration
 
             ServiceName = source?.GetString(ConfigurationKeys.ServiceName) ??
                           // backwards compatibility for names used in the past
-                          source?.GetString("DD_SERVICE_NAME");
+                          source?.GetString("OPENTELEMETRY_SERVICE_NAME");
 
             ServiceVersion = source?.GetString(ConfigurationKeys.ServiceVersion);
 
@@ -125,7 +125,7 @@ namespace Datadog.Trace.Configuration
 
             GlobalTags = source?.GetDictionary(ConfigurationKeys.GlobalTags) ??
                          // backwards compatibility for names used in the past
-                         source?.GetDictionary("DD_TRACE_GLOBAL_TAGS") ??
+                         source?.GetDictionary("OPENTELEMETRY_TRACE_GLOBAL_TAGS") ??
                          // default value (empty)
                          new ConcurrentDictionary<string, string>();
 

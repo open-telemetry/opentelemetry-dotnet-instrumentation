@@ -70,7 +70,7 @@ RUN cmake .. && make && cp -f ./bin/Datadog.Trace.ClrProfiler.Native.so ${PUBLIS
 RUN mkdir -p /var/log/datadog/dotnet
 RUN touch /var/log/datadog/dotnet/dotnet-tracer-native.log
 WORKDIR ${PUBLISH_FOLDER}
-RUN echo "#!/bin/bash\n set -euxo pipefail\n export CORECLR_ENABLE_PROFILING=\"1\"\n export CORECLR_PROFILER=\"{846F5F1C-F9AE-4B07-969E-05C26BC060D8}\"\n export DD_DOTNET_TRACER_HOME=\"${TRACER_HOME}\"\n export CORECLR_PROFILER_PATH=\"\${DD_DOTNET_TRACER_HOME}/Datadog.Trace.ClrProfiler.Native.so\"\n export DD_INTEGRATIONS=\"\${DD_DOTNET_TRACER_HOME}/integrations.json\"\n eval \"\$@\"\n" > dd-trace.bash
+RUN echo "#!/bin/bash\n set -euxo pipefail\n export CORECLR_ENABLE_PROFILING=\"1\"\n export CORECLR_PROFILER=\"{918728DD-259F-4A6A-AC2B-B85E1B658318}\"\n export OPENTELEMETRY_DOTNET_TRACER_HOME=\"${TRACER_HOME}\"\n export CORECLR_PROFILER_PATH=\"\${OPENTELEMETRY_DOTNET_TRACER_HOME}/Datadog.Trace.ClrProfiler.Native.so\"\n export OPENTELEMETRY_INTEGRATIONS=\"\${OPENTELEMETRY_DOTNET_TRACER_HOME}/integrations.json\"\n eval \"\$@\"\n" > dd-trace.bash
 RUN chmod +x dd-trace.bash
 
 
