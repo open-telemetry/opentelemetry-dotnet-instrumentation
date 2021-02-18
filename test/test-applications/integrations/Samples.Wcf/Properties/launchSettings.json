@@ -14,8 +14,8 @@
 
         "OPENTELEMETRY_DOTNET_TRACER_HOME": "$(ProjectDir)$(OutputPath)profiler-lib",
         "OPENTELEMETRY_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json",
-        "DD_VERSION": "1.0.0",
-        "DD_TRACE_HEADER_TAGS": "upstream-service:upstream-service-tag"
+        "OPENTELEMETRY_VERSION": "1.0.0",
+        "OPENTELEMETRY_TRACE_HEADER_TAGS": "upstream-service:upstream-service-tag"
       },
       "nativeDebugging": true
     }

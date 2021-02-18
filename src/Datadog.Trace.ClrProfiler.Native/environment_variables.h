@@ -46,10 +46,10 @@ const WSTRING env = "OPENTELEMETRY_ENV"_W;
 // Sets the default service name for every span.
 // If not set, Tracer will try to determine service name automatically
 // from application name (e.g. entry assembly or IIS application name).
-const WSTRING service_name = "DD_SERVICE"_W;
+const WSTRING service_name = "OPENTELEMETRY_SERVICE"_W;
 
 // Sets the "service_version" tag for every span that belong to the root service (and not an external service).
-const WSTRING service_version = "DD_VERSION"_W;
+const WSTRING service_version = "OPENTELEMETRY_VERSION"_W;
 
 // Sets a list of integrations to disable. All other integrations will remain
 // enabled. If not set (default), all integrations are enabled. Supports
@@ -58,7 +58,7 @@ const WSTRING service_version = "DD_VERSION"_W;
 const WSTRING disabled_integrations = "OPENTELEMETRY_DISABLED_INTEGRATIONS"_W;
 
 // Sets the path for the profiler's log file.
-// Environment variable DD_TRACE_LOG_DIRECTORY takes precedence over this setting, if set.
+// Environment variable OPENTELEMETRY_TRACE_LOG_DIRECTORY takes precedence over this setting, if set.
 const WSTRING log_path = "OPENTELEMETRY_TRACE_LOG_PATH"_W;
 
 // Sets the directory for the profiler's log file.
@@ -66,7 +66,7 @@ const WSTRING log_path = "OPENTELEMETRY_TRACE_LOG_PATH"_W;
 // If not set, default is
 // "%ProgramData%"\Datadog .NET Tracer\logs\" on Windows or
 // "/var/log/datadog/dotnet/" on Linux.
-const WSTRING log_directory = "DD_TRACE_LOG_DIRECTORY"_W;
+const WSTRING log_directory = "OPENTELEMETRY_TRACE_LOG_DIRECTORY"_W;
 
 // Sets whether to disable all JIT optimizations.
 // Default value is false (do not disable all optimizations).
@@ -83,7 +83,7 @@ const WSTRING clr_disable_optimizations = "OPENTELEMETRY_CLR_DISABLE_OPTIMIZATIO
 // one application.
 // Default is false. Only used in .NET Framework 4.5 and 4.5.1.
 // https://github.com/DataDog/dd-trace-dotnet/pull/671
-const WSTRING domain_neutral_instrumentation = "DD_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION"_W;
+const WSTRING domain_neutral_instrumentation = "OPENTELEMETRY_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION"_W;
 
 // Indicates whether the profiler is running in the context
 // of Azure App Services
@@ -107,7 +107,7 @@ const WSTRING dump_il_rewrite_enabled = "DD_DUMP_ILREWRITE_ENABLED"_W;
 const WSTRING clr_enable_inlining = "DD_CLR_ENABLE_INLINING"_W;
 
 // Sets whether to enable the CallTarget instrumentation mode
-const WSTRING calltarget_enabled = "DD_TRACE_CALLTARGET_ENABLED"_W;
+const WSTRING calltarget_enabled = "OPENTELEMETRY_TRACE_CALLTARGET_ENABLED"_W;
 
 }  // namespace environment
 }  // namespace trace

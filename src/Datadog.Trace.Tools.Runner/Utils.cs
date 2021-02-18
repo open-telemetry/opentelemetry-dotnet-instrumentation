@@ -53,7 +53,7 @@ namespace Datadog.Trace.Tools.Runner
             var envVars = new Dictionary<string, string>
             {
                 ["OPENTELEMETRY_DOTNET_TRACER_HOME"] = tracerHome,
-                ["DD_DOTNET_TRACER_MSBUILD"] = tracerMsBuild,
+                ["OPENTELEMETRY_DOTNET_TRACER_MSBUILD"] = tracerMsBuild,
                 ["OPENTELEMETRY_INTEGRATIONS"] = tracerIntegrations,
                 ["CORECLR_ENABLE_PROFILING"] = "1",
                 ["CORECLR_PROFILER"] = PROFILERID,
@@ -72,17 +72,17 @@ namespace Datadog.Trace.Tools.Runner
 
             if (!string.IsNullOrWhiteSpace(options.Service))
             {
-                envVars["DD_SERVICE"] = options.Service;
+                envVars["OPENTELEMETRY_SERVICE"] = options.Service;
             }
 
             if (!string.IsNullOrWhiteSpace(options.Version))
             {
-                envVars["DD_VERSION"] = options.Version;
+                envVars["OPENTELEMETRY_VERSION"] = options.Version;
             }
 
             if (!string.IsNullOrWhiteSpace(options.AgentUrl))
             {
-                envVars["DD_TRACE_AGENT_URL"] = options.AgentUrl;
+                envVars["OPENTELEMETRY_TRACE_AGENT_URL"] = options.AgentUrl;
             }
 
             return envVars;

@@ -134,9 +134,9 @@ namespace Datadog.Trace.TestHelpers
                 "OPENTELEMETRY_DOTNET_TRACER_HOME",
                 "OPENTELEMETRY_INTEGRATIONS",
                 "OPENTELEMETRY_DISABLED_INTEGRATIONS",
-                "DD_SERVICE",
-                "DD_VERSION",
-                "DD_TAGS"
+                "OPENTELEMETRY_SERVICE",
+                "OPENTELEMETRY_VERSION",
+                "OPENTELEMETRY_TAGS"
             };
 
             foreach (string variable in environmentVariables)
@@ -186,7 +186,7 @@ namespace Datadog.Trace.TestHelpers
 
             string integrations = string.Join(";", GetIntegrationsFilePaths());
             environmentVariables["OPENTELEMETRY_INTEGRATIONS"] = integrations;
-            environmentVariables["DD_TRACE_AGENT_HOSTNAME"] = "127.0.0.1";
+            environmentVariables["OPENTELEMETRY_TRACE_AGENT_HOSTNAME"] = "127.0.0.1";
             environmentVariables["OPENTELEMETRY_TRACE_AGENT_PORT"] = agentPort.ToString();
 
             // for ASP.NET Core sample apps, set the server's port

@@ -231,12 +231,12 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
 
         protected void SetServiceVersion(string serviceVersion)
         {
-            SetEnvironmentVariable("DD_VERSION", serviceVersion);
+            SetEnvironmentVariable("OPENTELEMETRY_VERSION", serviceVersion);
         }
 
         protected void SetCallTargetSettings(bool enableCallTarget, bool enableMethodInlining)
         {
-            SetEnvironmentVariable("DD_TRACE_CALLTARGET_ENABLED", enableCallTarget ? "true" : "false");
+            SetEnvironmentVariable("OPENTELEMETRY_TRACE_CALLTARGET_ENABLED", enableCallTarget ? "true" : "false");
             SetEnvironmentVariable("DD_CLR_ENABLE_INLINING", enableMethodInlining ? "true" : "false");
         }
 

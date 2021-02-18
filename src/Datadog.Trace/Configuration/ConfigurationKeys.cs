@@ -10,7 +10,7 @@ namespace Datadog.Trace.Configuration
         /// Can only be set with an environment variable
         /// or in the <c>app.config</c>/<c>web.config</c> file.
         /// </summary>
-        public const string ConfigurationFileName = "DD_TRACE_CONFIG_FILE";
+        public const string ConfigurationFileName = "OPENTELEMETRY_TRACE_CONFIG_FILE";
 
         /// <summary>
         /// Configuration key for the application's environment. Sets the "env" tag on every <see cref="Span"/>.
@@ -24,13 +24,13 @@ namespace Datadog.Trace.Configuration
         /// and used to determine service name of some child spans.
         /// </summary>
         /// <seealso cref="TracerSettings.ServiceName"/>
-        public const string ServiceName = "DD_SERVICE";
+        public const string ServiceName = "OPENTELEMETRY_SERVICE";
 
         /// <summary>
         /// Configuration key for the application's version. Sets the "version" tag on every <see cref="Span"/>.
         /// </summary>
         /// <seealso cref="TracerSettings.ServiceVersion"/>
-        public const string ServiceVersion = "DD_VERSION";
+        public const string ServiceVersion = "OPENTELEMETRY_VERSION";
 
         /// <summary>
         /// Configuration key for enabling or disabling the Tracer.
@@ -60,7 +60,7 @@ namespace Datadog.Trace.Configuration
         /// Supports multiple values separated with semi-colons.
         /// </summary>
         /// <seealso cref="TracerSettings.AdoNetExcludedTypes"/>
-        public const string AdoNetExcludedTypes = "DD_TRACE_ADONET_EXCLUDED_TYPES";
+        public const string AdoNetExcludedTypes = "OPENTELEMETRY_TRACE_ADONET_EXCLUDED_TYPES";
 
         /// <summary>
         /// Configuration key for the Agent host where the Tracer can send traces.
@@ -82,21 +82,21 @@ namespace Datadog.Trace.Configuration
         /// Default value is <c>null</c>.
         /// </summary>
         /// <seealso cref="TracerSettings.TracesPipeName"/>
-        public const string TracesPipeName = "DD_TRACE_PIPE_NAME";
+        public const string TracesPipeName = "OPENTELEMETRY_TRACE_PIPE_NAME";
 
         /// <summary>
         /// Configuration key for setting the timeout in milliseconds for named pipes communication.
         /// Default value is <c>0</c>.
         /// </summary>
         /// <seealso cref="TracerSettings.TracesPipeTimeoutMs"/>
-        public const string TracesPipeTimeoutMs = "DD_TRACE_PIPE_TIMEOUT_MS";
+        public const string TracesPipeTimeoutMs = "OPENTELEMETRY_TRACE_PIPE_TIMEOUT_MS";
 
         /// <summary>
         /// Configuration key for the named pipe that DogStatsD binds to.
         /// Default value is <c>null</c>.
         /// </summary>
         /// <seealso cref="TracerSettings.MetricsPipeName"/>
-        public const string MetricsPipeName = "DD_DOGSTATSD_PIPE_NAME";
+        public const string MetricsPipeName = "OPENTELEMETRY_DOGSTATSD_PIPE_NAME";
 
         /// <summary>
         /// Sibling setting for <see cref="AgentPort"/>.
@@ -104,7 +104,7 @@ namespace Datadog.Trace.Configuration
         /// Default value is 8126.
         /// </summary>
         /// <seealso cref="TracerSettings.AgentUri"/>
-        public const string TraceAgentPortKey = "DD_APM_RECEIVER_PORT";
+        public const string TraceAgentPortKey = "OPENTELEMETRY_APM_RECEIVER_PORT";
 
         /// <summary>
         /// Configuration key for the Agent URL where the Tracer can send traces.
@@ -112,37 +112,37 @@ namespace Datadog.Trace.Configuration
         /// Default value is "http://localhost:8126".
         /// </summary>
         /// <seealso cref="TracerSettings.AgentUri"/>
-        public const string AgentUri = "DD_TRACE_AGENT_URL";
+        public const string AgentUri = "OPENTELEMETRY_TRACE_AGENT_URL";
 
         /// <summary>
         /// Configuration key for enabling or disabling default Analytics.
         /// </summary>
         /// <seealso cref="TracerSettings.AnalyticsEnabled"/>
-        public const string GlobalAnalyticsEnabled = "DD_TRACE_ANALYTICS_ENABLED";
+        public const string GlobalAnalyticsEnabled = "OPENTELEMETRY_TRACE_ANALYTICS_ENABLED";
 
         /// <summary>
         /// Configuration key for a list of tags to be applied globally to spans.
         /// </summary>
         /// <seealso cref="TracerSettings.GlobalTags"/>
-        public const string GlobalTags = "DD_TAGS";
+        public const string GlobalTags = "OPENTELEMETRY_TAGS";
 
         /// <summary>
         /// Configuration key for a map of header keys to tag names.
         /// Automatically apply header values as tags on traces.
         /// </summary>
         /// <seealso cref="TracerSettings.HeaderTags"/>
-        public const string HeaderTags = "DD_TRACE_HEADER_TAGS";
+        public const string HeaderTags = "OPENTELEMETRY_TRACE_HEADER_TAGS";
 
         /// <summary>
         /// Configuration key for a map of services to rename.
         /// </summary>
         /// <seealso cref="TracerSettings.ServiceNameMappings"/>
-        public const string ServiceNameMappings = "DD_TRACE_SERVICE_MAPPING";
+        public const string ServiceNameMappings = "OPENTELEMETRY_TRACE_SERVICE_MAPPING";
 
         /// <summary>
         /// Configuration key for setting the size of the trace buffer
         /// </summary>
-        public const string QueueSize = "DD_TRACE_QUEUE_SIZE";
+        public const string QueueSize = "OPENTELEMETRY_TRACE_QUEUE_SIZE";
 
         /// <summary>
         /// Configuration key for enabling or disabling the automatic injection
@@ -162,7 +162,7 @@ namespace Datadog.Trace.Configuration
         /// Configuration key for enabling or disabling the diagnostic log at startup
         /// </summary>
         /// <seealso cref="TracerSettings.StartupDiagnosticLogEnabled"/>
-        public const string StartupDiagnosticLogEnabled = "DD_TRACE_STARTUP_LOGS";
+        public const string StartupDiagnosticLogEnabled = "OPENTELEMETRY_TRACE_STARTUP_LOGS";
 
         /// <summary>
         /// Configuration key for setting custom sampling rules based on regular expressions.
@@ -192,12 +192,12 @@ namespace Datadog.Trace.Configuration
         /// If no rules are specified, or none match, default internal sampling logic will be used.
         /// </summary>
         /// <seealso cref="TracerSettings.CustomSamplingRules"/>
-        public const string CustomSamplingRules = "DD_TRACE_SAMPLING_RULES";
+        public const string CustomSamplingRules = "OPENTELEMETRY_TRACE_SAMPLING_RULES";
 
         /// <summary>
         /// Configuration key for setting the global rate for the sampler.
         /// </summary>
-        public const string GlobalSamplingRate = "DD_TRACE_SAMPLE_RATE";
+        public const string GlobalSamplingRate = "OPENTELEMETRY_TRACE_SAMPLE_RATE";
 
         /// <summary>
         /// Configuration key for the DogStatsd port where the Tracer can send metrics.
@@ -215,7 +215,7 @@ namespace Datadog.Trace.Configuration
         /// Configuration key for enabling or disabling runtime metrics sent to DogStatsD.
         /// Default value is <c>false</c> (disabled).
         /// </summary>
-        public const string RuntimeMetricsEnabled = "DD_RUNTIME_METRICS_ENABLED";
+        public const string RuntimeMetricsEnabled = "OPENTELEMETRY_RUNTIME_METRICS_ENABLED";
 
         /// <summary>
         /// Configuration key for setting the approximate maximum size,
@@ -229,7 +229,7 @@ namespace Datadog.Trace.Configuration
         /// identical log messages, for Tracer log files.
         /// Default value is 60s. Setting to 0 disables rate limiting.
         /// </summary>
-        public const string LogRateLimit = "DD_TRACE_LOGGING_RATE";
+        public const string LogRateLimit = "OPENTELEMETRY_TRACE_LOGGING_RATE";
 
         /// <summary>
         /// Configuration key for setting the path to the .NET Tracer native log file.
@@ -244,33 +244,33 @@ namespace Datadog.Trace.Configuration
         /// Default value is "%ProgramData%"\Datadog .NET Tracer\logs\" on Windows
         /// or "/var/log/datadog/dotnet/" on Linux.
         /// </summary>
-        public const string LogDirectory = "DD_TRACE_LOG_DIRECTORY";
+        public const string LogDirectory = "OPENTELEMETRY_TRACE_LOG_DIRECTORY";
 
         /// <summary>
         /// Configuration key for when a standalone instance of the Trace Agent needs to be started.
         /// </summary>
-        public const string TraceAgentPath = "DD_TRACE_AGENT_PATH";
+        public const string TraceAgentPath = "OPENTELEMETRY_TRACE_AGENT_PATH";
 
         /// <summary>
         /// Configuration key for arguments to pass to the Trace Agent process.
         /// </summary>
-        public const string TraceAgentArgs = "DD_TRACE_AGENT_ARGS";
+        public const string TraceAgentArgs = "OPENTELEMETRY_TRACE_AGENT_ARGS";
 
         /// <summary>
         /// Configuration key for when a standalone instance of DogStatsD needs to be started.
         /// </summary>
-        public const string DogStatsDPath = "DD_DOGSTATSD_PATH";
+        public const string DogStatsDPath = "OPENTELEMETRY_DOGSTATSD_PATH";
 
         /// <summary>
         /// Configuration key for arguments to pass to the DogStatsD process.
         /// </summary>
-        public const string DogStatsDArgs = "DD_DOGSTATSD_ARGS";
+        public const string DogStatsDArgs = "OPENTELEMETRY_DOGSTATSD_ARGS";
 
         /// <summary>
         /// Configuration key for enabling or disabling the use of System.Diagnostics.DiagnosticSource.
         /// Default value is <c>true</c> (enabled).
         /// </summary>
-        public const string DiagnosticSourceEnabled = "DD_DIAGNOSTIC_SOURCE_ENABLED";
+        public const string DiagnosticSourceEnabled = "OPENTELEMETRY_DIAGNOSTIC_SOURCE_ENABLED";
 
         /// <summary>
         /// Configuration key for the exporter to be used. The Tracer uses it to encode and
@@ -284,26 +284,26 @@ namespace Datadog.Trace.Configuration
         /// Configuration key for setting the API key, used by the Agent.
         /// This key is here for troubleshooting purposes.
         /// </summary>
-        public const string ApiKey = "DD_API_KEY";
+        public const string ApiKey = "OPENTELEMETRY_API_KEY";
 
         /// <summary>
         /// Configuration key for overriding the transport to use for communicating with the trace agent.
         /// Default value is <c>null</c>.
         /// Override options available: <c>datadog-tcp</c>, <c>datadog-named-pipes</c>
         /// </summary>
-        public const string TracesTransport = "DD_TRACE_TRANSPORT";
+        public const string TracesTransport = "OPENTELEMETRY_TRACE_TRANSPORT";
 
         /// <summary>
         /// Configuration key for the application's server http statuses to set spans as errors by.
         /// </summary>
         /// <seealso cref="TracerSettings.HttpServerErrorStatusCodes"/>
-        public const string HttpServerErrorStatusCodes = "DD_HTTP_SERVER_ERROR_STATUSES";
+        public const string HttpServerErrorStatusCodes = "OPENTELEMETRY_HTTP_SERVER_ERROR_STATUSES";
 
         /// <summary>
         /// Configuration key for the application's client http statuses to set spans as errors by.
         /// </summary>
         /// <seealso cref="TracerSettings.HttpClientErrorStatusCodes"/>
-        public const string HttpClientErrorStatusCodes = "DD_HTTP_CLIENT_ERROR_STATUSES";
+        public const string HttpClientErrorStatusCodes = "OPENTELEMETRY_HTTP_CLIENT_ERROR_STATUSES";
 
         /// <summary>
         /// String format patterns used to match integration-specific configuration keys.
@@ -313,17 +313,17 @@ namespace Datadog.Trace.Configuration
             /// <summary>
             /// Configuration key pattern for enabling or disabling an integration.
             /// </summary>
-            public const string Enabled = "DD_TRACE_{0}_ENABLED";
+            public const string Enabled = "OPENTELEMETRY_TRACE_{0}_ENABLED";
 
             /// <summary>
             /// Configuration key pattern for enabling or disabling Analytics in an integration.
             /// </summary>
-            public const string AnalyticsEnabled = "DD_TRACE_{0}_ANALYTICS_ENABLED";
+            public const string AnalyticsEnabled = "OPENTELEMETRY_TRACE_{0}_ANALYTICS_ENABLED";
 
             /// <summary>
             /// Configuration key pattern for setting Analytics sampling rate in an integration.
             /// </summary>
-            public const string AnalyticsSampleRate = "DD_TRACE_{0}_ANALYTICS_SAMPLE_RATE";
+            public const string AnalyticsSampleRate = "OPENTELEMETRY_TRACE_{0}_ANALYTICS_SAMPLE_RATE";
         }
 
         /// <summary>

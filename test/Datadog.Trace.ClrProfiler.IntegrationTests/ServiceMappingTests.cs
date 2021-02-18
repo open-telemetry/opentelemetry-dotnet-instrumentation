@@ -11,7 +11,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
         public ServiceMappingTests(ITestOutputHelper output)
             : base("WebRequest", output)
         {
-            SetEnvironmentVariable("DD_TRACE_SERVICE_MAPPING", "some-trace:not-used,http-client:my-custom-client");
+            SetEnvironmentVariable("OPENTELEMETRY_TRACE_SERVICE_MAPPING", "some-trace:not-used,http-client:my-custom-client");
             SetServiceVersion("1.0.0");
         }
 

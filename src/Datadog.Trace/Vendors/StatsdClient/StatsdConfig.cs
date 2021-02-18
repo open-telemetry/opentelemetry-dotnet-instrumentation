@@ -37,12 +37,12 @@ namespace Datadog.Trace.Vendors.StatsdClient
         /// <summary>
         /// The name of the environment variable defining the name of the pipe. INTERNAL USAGE ONLY.
         /// </summary>
-        public const string AgentPipeNameEnvVar = "DD_DOGSTATSD_PIPE_NAME";
+        public const string AgentPipeNameEnvVar = "OPENTELEMETRY_DOGSTATSD_PIPE_NAME";
 
         /// <summary>
         /// The name of the environment variable defining the service name
         /// </summary>
-        public const string ServiceEnvVar = "DD_SERVICE";
+        public const string ServiceEnvVar = "OPENTELEMETRY_SERVICE";
 
         /// <summary>
         /// The name of the environment variable defining the environment name
@@ -52,7 +52,7 @@ namespace Datadog.Trace.Vendors.StatsdClient
         /// <summary>
         /// The name of the environment variable defining the version of the service
         /// </summary>
-        public const string VersionEnvVar = "DD_VERSION";
+        public const string VersionEnvVar = "OPENTELEMETRY_VERSION";
 
         internal const string ServiceTagKey = "service";
 

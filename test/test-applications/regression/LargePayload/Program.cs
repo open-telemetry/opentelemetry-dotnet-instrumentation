@@ -50,7 +50,7 @@ namespace LargePayload
                     Console.WriteLine("Adding ridiculous amount of tags to overload the agent and fail the submit.");
                 }
 
-                var transport = Environment.GetEnvironmentVariable("DD_TRACE_TRANSPORT");
+                var transport = Environment.GetEnvironmentVariable("OPENTELEMETRY_TRACE_TRANSPORT");
 
                 var staticLength = 30;
                 transport = transport ?? string.Empty;

@@ -73,14 +73,13 @@ namespace Datadog.Trace.Configuration
 
             var agentHost = source?.GetString(ConfigurationKeys.AgentHost) ??
                             // backwards compatibility for names used in the past
-                            source?.GetString("DD_TRACE_AGENT_HOSTNAME") ??
-                            source?.GetString("DATADOG_TRACE_AGENT_HOSTNAME") ??
+                            source?.GetString("OPENTELEMETRY_TRACE_AGENT_HOSTNAME") ??
                             // default value
                             DefaultAgentHost;
 
             var agentPort = source?.GetInt32(ConfigurationKeys.AgentPort) ??
                             // backwards compatibility for names used in the past
-                            source?.GetInt32("DATADOG_TRACE_AGENT_PORT") ??
+                            source?.GetInt32("OPENTELEMETRY_TRACE_AGENT_PORT") ??
                             // default value
                             DefaultAgentPort;
 
