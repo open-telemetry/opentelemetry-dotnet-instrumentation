@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.30413.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.DynamicActivityBinding", "OpenTelemetry.DynamicActivityBinding.csproj", "{85212C50-B085-4EF4-87D0-60A8B0FEF406}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vendored.System.Diagnostics.DiagnosticSource.Tests", "..\..\test\Vendored.System.Diagnostics.DiagnosticSource.Tests\Vendored.System.Diagnostics.DiagnosticSource.Tests.csproj", "{E514426D-726C-41F9-95CB-33983700173B}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{85212C50-B085-4EF4-87D0-60A8B0FEF406}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{85212C50-B085-4EF4-87D0-60A8B0FEF406}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{85212C50-B085-4EF4-87D0-60A8B0FEF406}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E514426D-726C-41F9-95CB-33983700173B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E514426D-726C-41F9-95CB-33983700173B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E514426D-726C-41F9-95CB-33983700173B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E514426D-726C-41F9-95CB-33983700173B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
