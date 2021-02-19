@@ -238,7 +238,7 @@ jobs:
       CXX=clang++ CC=clang cmake .
       make
     displayName: build_profiler
-    
+
 - job: macos_profiler
   pool:
     vmImage: macOS-10.15
