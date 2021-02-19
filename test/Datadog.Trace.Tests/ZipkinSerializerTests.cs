@@ -23,13 +23,12 @@ namespace Datadog.Trace.Tests
             span.SetTag("k1", "v1");
             span.SetTag("k2", "v2");
 
-            var tracerSettings = new TracerSettings();
-            var serializerSpan = new ZipkinSerializer.ZipkinSpan(span, tracerSettings);
+            var serializerSpan = new ZipkinSerializer.ZipkinSpan(span);
 
             var serializer = new ZipkinSerializer();
             using var ms = new MemoryStream();
 
-            serializer.Serialize(ms, new[] { new[] { span } }, tracerSettings);
+            serializer.Serialize(ms, new[] { new[] { span } });
 
             ms.Position = 0;
             var jsonText = new StreamReader(ms).ReadToEnd();
