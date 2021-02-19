@@ -1,6 +1,6 @@
 # opentelemetry-dotnet-instrumentation
-[![Gitter
-chat](https://badges.gitter.im/open-telemetry/opentelemetry-dotnet.svg)](https://gitter.im/open-telemetry/opentelemetry-dotnet-auto-instr)
+[![Slack
+chat](https://img.shields.io/badge/slack-@cncf/otel%20dotnet%20auto%20instr-brightgreen.svg?logo=slack)](https://cloud-native.slack.com/archives/C01NR1YLSE7)
 
 This project provides a .NET tracer that leverages the .NET profiling APIs to support .NET instrumentation and auto-instrumentation without requiring code changes to an application.
 
@@ -24,7 +24,7 @@ Meetings take place via [Zoom video conference](https://zoom.us/j/8287234601). T
 Meeting notes are available as a public [Google
 doc](https://docs.google.com/document/d/1XedN2D8_PH4YLej-maT8sp4RKogfuhFpccRi3QpUcoI/edit?usp=sharing).
 For edit access, get in touch on
-[Gitter](https://gitter.im/open-telemetry/opentelemetry-dotnet-auto-instr).
+[Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
 
 ## Community Roles
 
