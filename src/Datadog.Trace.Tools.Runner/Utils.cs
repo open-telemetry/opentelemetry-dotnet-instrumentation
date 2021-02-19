@@ -31,7 +31,7 @@ namespace Datadog.Trace.Tools.Runner
             }
 
             tracerHome ??= DirectoryExists("Home", Path.Combine(runnerFolder, "..", "..", "..", "home"), Path.Combine(runnerFolder, "home"));
-            string tracerMsBuild = FileExists(Path.Combine(tracerHome, "netstandard2.0", "Datadog.Trace.MSBuild.dll"));
+            string tracerMsBuild = FileExists(Path.Combine(tracerHome, "netstandard2.0", "OpenTelemetry.Instrumentation.MSBuild.dll"));
             string tracerIntegrations = FileExists(Path.Combine(tracerHome, "integrations.json"));
             string tracerProfiler32 = string.Empty;
             string tracerProfiler64 = string.Empty;
