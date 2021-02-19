@@ -10,15 +10,13 @@ namespace Datadog.Trace.Agent
     {
         private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor(typeof(ZipkinApi));
 
-        private readonly TracerSettings _settings;
         private Uri _tracesEndpoint;
 
-        public ZipkinApi(TracerSettings settings)
+        public ZipkinApi(Uri tracesEndpoint)
         {
             Log.Debug("Creating new Zipkin Api");
 
-            _settings = settings ?? throw new ArgumentNullException(nameof(settings));
-            _tracesEndpoint = _settings.AgentUri; // User needs to include the proper path.
+            _tracesEndpoint = tracesEndpoint ?? throw new ArgumentNullException(nameof(tracesEndpoint)); // User needs to include the proper path.
         }
 
         public async Task<bool> SendTracesAsync(Span[][] traces)
@@ -44,7 +42,7 @@ namespace Datadog.Trace.Agent
                 using (var requestStream = await request.GetRequestStreamAsync().ConfigureAwait(false))
                 {
                     var serializer = new ZipkinSerializer();
-                    serializer.Serialize(requestStream, traces, _settings);
+                    serializer.Serialize(requestStream, traces);
                 }
 
                 Exception requestException = null;
