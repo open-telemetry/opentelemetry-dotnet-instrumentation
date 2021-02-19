@@ -16,7 +16,7 @@ namespace Datadog.Trace.Agent
         // Don't serialize with BOM
         private readonly Encoding utf8 = new UTF8Encoding(false);
 
-        public void Serialize(Stream stream, Span[][] traces, TracerSettings settings)
+        public void Serialize(Stream stream, Span[][] traces)
         {
             var zipkinTraces = new List<ZipkinSpan>();
 
@@ -24,7 +24,7 @@ namespace Datadog.Trace.Agent
             {
                 foreach (var span in trace)
                 {
-                    var zspan = new ZipkinSpan(span, settings);
+                    var zspan = new ZipkinSpan(span);
                     zipkinTraces.Add(zspan);
                 }
             }
@@ -41,13 +41,11 @@ namespace Datadog.Trace.Agent
             private static readonly IDictionary<string, string> EmptyTags = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
 
             private readonly Span _span;
-            private readonly TracerSettings _settings;
             private readonly IDictionary<string, string> _tags;
 
-            public ZipkinSpan(Span span, TracerSettings settings)
+            public ZipkinSpan(Span span)
             {
                 _span = span;
-                _settings = settings;
                 _tags = BuildTags(span);
             }
 
