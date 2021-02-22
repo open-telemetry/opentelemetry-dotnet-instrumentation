@@ -6,7 +6,6 @@ trigger:
 
 variables:
   buildConfiguration: release
-  dotnetCoreSdkVersion: 5.0.100
   publishOutput: $(Build.SourcesDirectory)/src/bin/managed-publish
 
 stages:
@@ -33,7 +32,7 @@ stages:
       displayName: install dotnet core sdk
       inputs:
         packageType: sdk
-        version: $(dotnetCoreSdkVersion)
+        version: 5.0.x
 
     - task: NuGetToolInstaller@1
       displayName: install nuget
