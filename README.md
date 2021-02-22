@@ -1,6 +1,6 @@
 # opentelemetry-dotnet-instrumentation
-[![Slack
-chat](https://img.shields.io/badge/slack-@cncf/otel%20dotnet%20auto%20instr-brightgreen.svg?logo=slack)](https://cloud-native.slack.com/archives/C01NR1YLSE7)
+
+[![Slack](https://img.shields.io/badge/slack-@cncf/otel--dotnet--auto--instr-brightgreen.svg?logo=slack)](https://cloud-native.slack.com/archives/C01NR1YLSE7)
 
 This project provides a .NET tracer that leverages the .NET profiling APIs to support .NET instrumentation and auto-instrumentation without requiring code changes to an application.
 
