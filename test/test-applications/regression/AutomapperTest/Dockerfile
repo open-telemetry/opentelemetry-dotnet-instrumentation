@@ -7,9 +7,9 @@ RUN curl -L https://github.com/DataDog/dd-trace-dotnet/releases/download/v$TRACE
 ENV CORECLR_ENABLE_PROFILING=1
 ENV CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
 ENV CORECLR_PROFILER_PATH=/opt/datadog/OpenTelemetry.Instrumentation.ClrProfiler.Native.so
-ENV OPENTELEMETRY_DOTNET_TRACER_HOME=/opt/opentelemetry-dotnet-instrumentation
-ENV OPENTELEMETRY_INTEGRATIONS=/opt/opentelemetry-dotnet-instrumentation/integrations.json
-ENV OPENTELEMETRY_TRACE_ENABLED=true
+ENV OTEL_DOTNET_TRACER_HOME=/opt/opentelemetry-dotnet-instrumentation
+ENV OTEL_INTEGRATIONS=/opt/opentelemetry-dotnet-instrumentation/integrations.json
+ENV OTEL_TRACE_ENABLED=true
 
 FROM mcr.microsoft.com/dotnet/core/sdk:2.1-stretch AS build
 WORKDIR "/src"

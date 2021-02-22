@@ -791,7 +791,7 @@ namespace CallTargetNativeTest
             mStream.SetLength(0);
             if (string.IsNullOrEmpty(str))
             {
-                throw new Exception("The profiler is not connected or is not compiled as DEBUG with the OPENTELEMETRY_CTARGET_TESTMODE=True environment variable.");
+                throw new Exception("The profiler is not connected or is not compiled as DEBUG with the OTEL_CTARGET_TESTMODE=True environment variable.");
             }
             if (!str.Contains("ProfilerOK: BeginMethod") || !str.Contains("ProfilerOK: EndMethod"))
             {

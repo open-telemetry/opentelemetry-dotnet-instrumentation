@@ -4,7 +4,7 @@ echo "Getting latest release version"
 # Get the latest release tag from the github release page
 $release_version = (Invoke-WebRequest https://api.github.com/repos/datadog/dd-trace-dotnet/releases | ConvertFrom-Json)[0].tag_name.SubString(1)
 
-$dd_tracer_workingfolder = $env:DD_TRACER_WORKINGFOLDER
+$dd_tracer_workingfolder = $env:OTEL_TRACER_WORKINGFOLDER
 $dd_tracer_home = ""
 $dd_tracer_msbuild = ""
 $dd_tracer_integrations = ""
@@ -64,10 +64,10 @@ else
 # Set all environment variables to attach the profiler to the following pipeline steps
 echo "Setting environment variables..."
 
-echo "##vso[task.setvariable variable=OPENTELEMETRY_ENV]CI"
-echo "##vso[task.setvariable variable=OPENTELEMETRY_DOTNET_TRACER_HOME]$dd_tracer_home"
-echo "##vso[task.setvariable variable=OPENTELEMETRY_DOTNET_TRACER_MSBUILD]$dd_tracer_msbuild"
-echo "##vso[task.setvariable variable=OPENTELEMETRY_INTEGRATIONS]$dd_tracer_integrations"
+echo "##vso[task.setvariable variable=OTEL_ENV]CI"
+echo "##vso[task.setvariable variable=OTEL_DOTNET_TRACER_HOME]$dd_tracer_home"
+echo "##vso[task.setvariable variable=OTEL_DOTNET_TRACER_MSBUILD]$dd_tracer_msbuild"
+echo "##vso[task.setvariable variable=OTEL_INTEGRATIONS]$dd_tracer_integrations"
 
 echo "##vso[task.setvariable variable=CORECLR_ENABLE_PROFILING]1"
 echo "##vso[task.setvariable variable=CORECLR_PROFILER]{918728DD-259F-4A6A-AC2B-B85E1B658318}"

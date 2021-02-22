@@ -11,7 +11,7 @@ trigger:
 
 variables:
   publishOutput: $(System.DefaultWorkingDirectory)/src/bin/managed-publish
-  DD_DOTNET_TRACER_MSBUILD:
+  OTEL_DOTNET_TRACER_MSBUILD:
 
 jobs:
 
@@ -165,7 +165,7 @@ jobs:
     inputs:
       command: build
       configuration: $(buildConfiguration)
-      arguments: -l:DatadogLogger,"$(DD_DOTNET_TRACER_MSBUILD)"
+      arguments: -l:DatadogLogger,"$(OTEL_DOTNET_TRACER_MSBUILD)"
       projects: |
         src/**/*.csproj
         test/**/*.Tests.csproj
@@ -187,7 +187,7 @@ jobs:
     displayName: tool build
     inputs:
       solution: src/Datadog.Trace.Tools.Runner/Datadog.Trace.Tools.Runner.proj
-      msbuildArguments: /t:BuildTool /l:DatadogLogger,"$(DD_DOTNET_TRACER_MSBUILD)"
+      msbuildArguments: /t:BuildTool /l:DatadogLogger,"$(OTEL_DOTNET_TRACER_MSBUILD)"
       maximumCpuCount: true
     env:
       OPENTELEMETRY_SERVICE_NAME: dd-tracer-dotnet-runner-tool
@@ -196,7 +196,7 @@ jobs:
     displayName: standalone build
     inputs:
       solution: src/Datadog.Trace.Tools.Runner/Datadog.Trace.Tools.Runner.proj
-      msbuildArguments: /t:BuildStandalone /l:DatadogLogger,"$(DD_DOTNET_TRACER_MSBUILD)"
+      msbuildArguments: /t:BuildStandalone /l:DatadogLogger,"$(OTEL_DOTNET_TRACER_MSBUILD)"
       maximumCpuCount: true
     env:
       OPENTELEMETRY_SERVICE_NAME: dd-tracer-dotnet-runner-tool

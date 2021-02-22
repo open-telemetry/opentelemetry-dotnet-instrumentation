@@ -19,13 +19,13 @@ namespace Datadog.Trace.PlatformHelpers
         /// Configuration key which is used as a flag to tell us whether we are running in the context of Azure App Services.
         /// This is set within the applicationHost.xdt file of the Azure Site Extension.
         /// </summary>
-        internal const string AzureAppServicesContextKey = "DD_AZURE_APP_SERVICES";
+        internal const string AzureAppServicesContextKey = "OTEL_AZURE_APP_SERVICES";
 
         /// <summary>
         /// Configuration key which has the running version of the Azure Site Extension.
         /// This is set within the applicationHost.xdt file.
         /// </summary>
-        internal const string SiteExtensionVersionKey = "DD_AAS_DOTNET_EXTENSION_VERSION";
+        internal const string SiteExtensionVersionKey = "OTEL_AAS_DOTNET_EXTENSION_VERSION";
 
         /// <summary>
         /// Example: 8c500027-5f00-400e-8f00-60000000000f+apm-dotnet-EastUSwebspace

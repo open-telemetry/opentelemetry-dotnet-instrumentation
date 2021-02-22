@@ -22,7 +22,7 @@ namespace Datadog.Trace.Vendors.StatsdClient
         /// <summary>
         /// The name of the environment variable defining the global tags to be applied to every metric, event, and service check.
         /// </summary>
-        public const string EntityIdEnvVar = "DD_ENTITY_ID";
+        public const string EntityIdEnvVar = "OTEL_ENTITY_ID";
 
         /// <summary>
         /// The name of the environment variable defining the port of the targeted StatsD server.

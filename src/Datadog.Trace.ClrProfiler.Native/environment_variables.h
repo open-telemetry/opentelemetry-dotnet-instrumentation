@@ -87,7 +87,7 @@ const WSTRING domain_neutral_instrumentation = "OTEL_TRACE_DOMAIN_NEUTRAL_INSTRU
 
 // Indicates whether the profiler is running in the context
 // of Azure App Services
-const WSTRING azure_app_services = "DD_AZURE_APP_SERVICES"_W;
+const WSTRING azure_app_services = "OTEL_AZURE_APP_SERVICES"_W;
 
 // The app_pool_id in the context of azure app services
 const WSTRING azure_app_services_app_pool_id = "APP_POOL_ID"_W;
@@ -98,13 +98,13 @@ const WSTRING azure_app_services_cli_telemetry_profile_value =
 
 // Determine whether to instrument calls into netstandard.dll.
 // Default to false for now to avoid the unexpected overhead of additional spans.
-const WSTRING netstandard_enabled = "DD_TRACE_NETSTANDARD_ENABLED"_W;
+const WSTRING netstandard_enabled = "OTEL_TRACE_NETSTANDARD_ENABLED"_W;
 
 // Enable the profiler to dump the IL original code and modification to the log.
-const WSTRING dump_il_rewrite_enabled = "DD_DUMP_ILREWRITE_ENABLED"_W;
+const WSTRING dump_il_rewrite_enabled = "OTEL_DUMP_ILREWRITE_ENABLED"_W;
 
 // Sets whether to enable JIT inlining
-const WSTRING clr_enable_inlining = "DD_CLR_ENABLE_INLINING"_W;
+const WSTRING clr_enable_inlining = "OTEL_CLR_ENABLE_INLINING"_W;
 
 // Sets whether to enable the CallTarget instrumentation mode
 const WSTRING calltarget_enabled = "OTEL_TRACE_CALLTARGET_ENABLED"_W;

@@ -349,7 +349,7 @@ namespace Datadog.Trace.Configuration
         /// </summary>
         /// <remark>
         /// This value cannot be set in code. Instead,
-        /// set it using the <c>DD_TRACE_DIAGNOSTIC_SOURCE_ENABLED</c>
+        /// set it using the <c>OTEL_TRACE_DIAGNOSTIC_SOURCE_ENABLED</c>
         /// environment variable or in configuration files.
         /// </remark>
         public bool DiagnosticSourceEnabled
@@ -491,7 +491,7 @@ namespace Datadog.Trace.Configuration
 
         internal bool IsNetStandardFeatureFlagEnabled()
         {
-            var value = EnvironmentHelpers.GetEnvironmentVariable("DD_TRACE_NETSTANDARD_ENABLED", string.Empty);
+            var value = EnvironmentHelpers.GetEnvironmentVariable("OTEL_TRACE_NETSTANDARD_ENABLED", string.Empty);
 
             return value == "1" || value == "true";
         }
@@ -517,7 +517,7 @@ namespace Datadog.Trace.Configuration
                 // Checks that the value about to be used follows the `401-404` structure or single 3 digit number i.e. `401` else log the warning
                 if (!Regex.IsMatch(statusConfiguration, @"^\d{3}-\d{3}$|^\d{3}$"))
                 {
-                    Log.Warning("Wrong format '{0}' for DD_HTTP_SERVER/CLIENT_ERROR_STATUSES configuration.", statusConfiguration);
+                    Log.Warning("Wrong format '{0}' for OTEL_HTTP_SERVER/CLIENT_ERROR_STATUSES configuration.", statusConfiguration);
                 }
 
                 // If statusConfiguration equals a single value i.e. `401` parse the value and save to the array

@@ -130,13 +130,13 @@ namespace Datadog.Trace.TestHelpers
                 "COR_PROFILER_PATH",
 
                 // Datadog
-                "OPENTELEMETRY_PROFILER_PROCESSES",
-                "OPENTELEMETRY_DOTNET_TRACER_HOME",
-                "OPENTELEMETRY_INTEGRATIONS",
-                "OPENTELEMETRY_DISABLED_INTEGRATIONS",
-                "OPENTELEMETRY_SERVICE",
-                "OPENTELEMETRY_VERSION",
-                "OPENTELEMETRY_TAGS"
+                "OTEL_PROFILER_PROCESSES",
+                "OTEL_DOTNET_TRACER_HOME",
+                "OTEL_INTEGRATIONS",
+                "OTEL_DISABLED_INTEGRATIONS",
+                "OTEL_SERVICE",
+                "OTEL_VERSION",
+                "OTEL_TAGS"
             };
 
             foreach (string variable in environmentVariables)
@@ -163,7 +163,7 @@ namespace Datadog.Trace.TestHelpers
 
                 profilerPath = GetProfilerPath();
                 environmentVariables["CORECLR_PROFILER_PATH"] = profilerPath;
-                environmentVariables["OPENTELEMETRY_DOTNET_TRACER_HOME"] = Path.GetDirectoryName(profilerPath);
+                environmentVariables["OTEL_DOTNET_TRACER_HOME"] = Path.GetDirectoryName(profilerPath);
             }
             else
             {
@@ -172,29 +172,29 @@ namespace Datadog.Trace.TestHelpers
 
                 profilerPath = GetProfilerPath();
                 environmentVariables["COR_PROFILER_PATH"] = profilerPath;
-                environmentVariables["OPENTELEMETRY_DOTNET_TRACER_HOME"] = Path.GetDirectoryName(profilerPath);
+                environmentVariables["OTEL_DOTNET_TRACER_HOME"] = Path.GetDirectoryName(profilerPath);
 
                 processName = Path.GetFileName(processPath);
             }
 
             if (DebugModeEnabled)
             {
-                environmentVariables["OPENTELEMETRY_TRACE_DEBUG"] = "1";
+                environmentVariables["OTEL_TRACE_DEBUG"] = "1";
             }
 
-            environmentVariables["OPENTELEMETRY_PROFILER_PROCESSES"] = processName;
+            environmentVariables["OTEL_PROFILER_PROCESSES"] = processName;
 
             string integrations = string.Join(";", GetIntegrationsFilePaths());
-            environmentVariables["OPENTELEMETRY_INTEGRATIONS"] = integrations;
-            environmentVariables["OPENTELEMETRY_TRACE_AGENT_HOSTNAME"] = "127.0.0.1";
-            environmentVariables["OPENTELEMETRY_TRACE_AGENT_PORT"] = agentPort.ToString();
+            environmentVariables["OTEL_INTEGRATIONS"] = integrations;
+            environmentVariables["OTEL_TRACE_AGENT_HOSTNAME"] = "127.0.0.1";
+            environmentVariables["OTEL_TRACE_AGENT_PORT"] = agentPort.ToString();
 
             // for ASP.NET Core sample apps, set the server's port
             environmentVariables["ASPNETCORE_URLS"] = $"http://127.0.0.1:{aspNetCorePort}/";
 
             if (statsdPort != null)
             {
-                environmentVariables["OPENTELEMETRY_DOGSTATSD_PORT"] = statsdPort.Value.ToString();
+                environmentVariables["OTEL_DOGSTATSD_PORT"] = statsdPort.Value.ToString();
             }
 
             foreach (var name in new[] { "SERVICESTACK_REDIS_HOST", "STACKEXCHANGE_REDIS_HOST" })

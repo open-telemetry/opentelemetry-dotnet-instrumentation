@@ -231,13 +231,13 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
 
         protected void SetServiceVersion(string serviceVersion)
         {
-            SetEnvironmentVariable("OPENTELEMETRY_VERSION", serviceVersion);
+            SetEnvironmentVariable("OTEL_VERSION", serviceVersion);
         }
 
         protected void SetCallTargetSettings(bool enableCallTarget, bool enableMethodInlining)
         {
-            SetEnvironmentVariable("OPENTELEMETRY_TRACE_CALLTARGET_ENABLED", enableCallTarget ? "true" : "false");
-            SetEnvironmentVariable("DD_CLR_ENABLE_INLINING", enableMethodInlining ? "true" : "false");
+            SetEnvironmentVariable("OTEL_TRACE_CALLTARGET_ENABLED", enableCallTarget ? "true" : "false");
+            SetEnvironmentVariable("OTEL_CLR_ENABLE_INLINING", enableMethodInlining ? "true" : "false");
         }
 
         protected async Task AssertWebServerSpan(
