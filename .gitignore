@@ -259,8 +259,11 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
 # vscode
 .vscode/
+.devcontainer/
+
 # Benchmark results
 BenchmarkDotNet.Artifacts/
 
@@ -272,8 +275,6 @@ deploy/AzureAppServices/
 !build/artifacts
 
 # macOS temporal files
-*..DS_Store
-.DS_Store/*
 .DS_Store
 
 # profiler output files
