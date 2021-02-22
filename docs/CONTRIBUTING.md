@@ -4,7 +4,7 @@
   <strong>
     <a href="https://github.com/open-telemetry/community#net-auto-instrumentation">Getting Involved<a/>
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
-    <a href="https://gitter.im/open-telemetry/opentelemetry-dotnet-auto-instr">Getting In Touch<a/>
+    <a href="https://cloud-native.slack.com/archives/C01NR1YLSE7">Getting In Touch<a/>
   </strong>
 </p>
 
@@ -21,7 +21,7 @@ repo for information on this and other SIGs.
 See the [public meeting notes](https://docs.google.com/document/d/1XedN2D8_PH4YLej-maT8sp4RKogfuhFpccRi3QpUcoI/edit)
 for a summary description of past meetings.
 Join the meeting or get in touch on
-[Gitter](https://gitter.im/open-telemetry/opentelemetry-dotnet-auto-instr).
+[Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
 
 Even though, anybody can contribute, there are benefits of being a member of
 our community. See to the [community membership
