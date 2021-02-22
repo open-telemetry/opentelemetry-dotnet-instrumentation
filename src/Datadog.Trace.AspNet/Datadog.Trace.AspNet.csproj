@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFrameworks></TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">net45</TargetFrameworks>
 
     <!-- NuGet -->
