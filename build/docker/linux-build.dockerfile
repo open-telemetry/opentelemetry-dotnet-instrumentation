@@ -6,7 +6,7 @@
 ARG BUILD_CONFIGURATION=Release
 ARG WORKSPACE=/workspace
 ARG PUBLISH_FOLDER=/workspace/publish
-ARG TRACER_HOME=/dd-tracer-dotnet
+ARG TRACER_HOME=/otel-tracer-dotnet
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build-managed-base
 # Instructions to install .NET Core runtimes from

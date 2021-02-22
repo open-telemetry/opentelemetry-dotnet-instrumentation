@@ -72,7 +72,7 @@ namespace PrepareRelease
                 FullAssemblyNameReplace);
 
             SynchronizeVersion(
-                "src/Datadog.Trace.ClrProfiler.Native/dd_profiler_constants.h",
+                "src/Datadog.Trace.ClrProfiler.Native/otel_profiler_constants.h",
                 FullAssemblyNameReplace);
 
             // Four-part AssemblyVersion update

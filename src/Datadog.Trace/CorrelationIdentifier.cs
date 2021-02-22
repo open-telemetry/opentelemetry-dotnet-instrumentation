@@ -17,8 +17,8 @@ namespace Datadog.Trace
         internal static readonly string SerilogServiceKey = "OTEL_SERVICE";
         internal static readonly string SerilogVersionKey = "OTEL_VERSION";
         internal static readonly string SerilogEnvKey = "OTEL_ENV";
-        internal static readonly string SerilogTraceIdKey = "dd_trace_id";
-        internal static readonly string SerilogSpanIdKey = "dd_span_id";
+        internal static readonly string SerilogTraceIdKey = "otel_trace_id";
+        internal static readonly string SerilogSpanIdKey = "otel_span_id";
 
         /// <summary>
         /// Gets the name of the service
