@@ -22,7 +22,6 @@ pool:
 variables:
   buildConfiguration: Debug
   publishOutput: $(System.DefaultWorkingDirectory)/src/bin/managed-publish
-  dotnetCoreSdkVersion: 5.0.103
 
 jobs:
 
@@ -39,7 +38,7 @@ jobs:
     displayName: install dotnet core sdk 5
     inputs:
       packageType: sdk
-      version: $(dotnetCoreSdkVersion)
+      version: 5.0.x
 
   - task: DotNetCoreCLI@2
     displayName: dotnet build Datadog.Trace.ClrProfiler.Managed.Loader
@@ -139,7 +138,7 @@ jobs:
     displayName: install dotnet core sdk 5
     inputs:
       packageType: sdk
-      version: $(dotnetCoreSdkVersion)
+      version: 5.0.x
 
   - task: DotNetCoreCLI@2
     displayName: dotnet build Datadog.Trace.ClrProfiler.Managed.Loader
@@ -265,29 +264,28 @@ jobs:
 
   steps:
   - task: UseDotNet@2
-    displayName: install dotnet core runtime 2.1
+    displayName: install dotnet core sdk 2.1
     inputs:
-      packageType: runtime
+      packageType: sdk
       version: 2.1.x
 
   - task: UseDotNet@2
-    displayName: install dotnet core runtime 3.0
+    displayName: install dotnet core sdk 3.0
     inputs:
-      packageType: runtime
+      packageType: sdk
       version: 3.0.x
 
   - task: UseDotNet@2
-    displayName: install dotnet core runtime 3.1
+    displayName: install dotnet core sdk 3.1
     inputs:
-      packageType: runtime
+      packageType: sdk
       version: 3.1.x
 
   - task: UseDotNet@2
     displayName: install dotnet core sdk 5
     inputs:
       packageType: sdk
-      version: $(dotnetCoreSdkVersion)
-      performMultiLevelLookup: true
+      version: 5.0.x
       
   - task: NuGetToolInstaller@1
     displayName: install nuget
@@ -401,7 +399,7 @@ jobs:
     displayName: install dotnet core sdk 5
     inputs:
       packageType: sdk
-      version: $(dotnetCoreSdkVersion)
+      version: 5.0.x
 
   - task: NuGetToolInstaller@1
     displayName: install nuget

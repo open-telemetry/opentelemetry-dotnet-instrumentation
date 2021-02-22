@@ -7,7 +7,6 @@ pr: none
 
 variables:
   buildConfiguration: release
-  dotnetCoreSdkVersion: 5.0.103
   publishOutput: $(Build.SourcesDirectory)/src/bin/managed-publish
 
 stages:
@@ -31,7 +30,7 @@ stages:
       displayName: install dotnet core sdk 5.0
       inputs:
         packageType: sdk
-        version: $(dotnetCoreSdkVersion)
+        version: 5.0.x
 
     - task: NuGetToolInstaller@1
       displayName: install nuget
@@ -87,7 +86,7 @@ stages:
     - task: UseDotNet@2
       displayName: install dotnet core sdk
       inputs:
-        version: $(dotnetCoreSdkVersion)
+        version: 5.0.x
 
     - task: DotNetCoreCLI@2
       displayName: dotnet build Datadog.Trace.ClrProfiler.Managed.Loader
@@ -141,7 +140,7 @@ stages:
     - task: UseDotNet@2
       displayName: install dotnet core sdk
       inputs:
-        version: $(dotnetCoreSdkVersion)
+        version: 5.0.x
 
     - task: DotNetCoreCLI@2
       displayName: dotnet build Datadog.Trace.ClrProfiler.Managed.Loader
