@@ -6,28 +6,28 @@
   <Fragment>
     <ComponentGroup Id="Files.Managed.Net45" Directory="net45">
       <Component Win64="$(var.Win64)">
-        <File Id="net45_OpenTelemetry.Instrumentation.AspNet.dll"
-              Source="$(var.TracerHomeDirectory)\net45\OpenTelemetry.Instrumentation.AspNet.dll"
+        <File Id="net45_OpenTelemetry.AutoInstrumentation.AspNet.dll"
+              Source="$(var.TracerHomeDirectory)\net45\OpenTelemetry.AutoInstrumentation.AspNet.dll"
               KeyPath="yes" Checksum="yes"/>
       </Component>
       <Component Win64="$(var.Win64)">
-        <File Id="net45_OpenTelemetry.Instrumentation.ClrProfiler.Managed.Core.dll"
-              Source="$(var.TracerHomeDirectory)\net45\OpenTelemetry.Instrumentation.ClrProfiler.Managed.Core.dll"
+        <File Id="net45_OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Core.dll"
+              Source="$(var.TracerHomeDirectory)\net45\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Core.dll"
               KeyPath="yes" Checksum="yes"/>
       </Component>
       <Component Win64="$(var.Win64)">
-        <File Id="net45_OpenTelemetry.Instrumentation.ClrProfiler.Managed.dll"
-              Source="$(var.TracerHomeDirectory)\net45\OpenTelemetry.Instrumentation.ClrProfiler.Managed.dll"
+        <File Id="net45_OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.dll"
+              Source="$(var.TracerHomeDirectory)\net45\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.dll"
               KeyPath="yes" Checksum="yes"/>
       </Component>
       <Component Win64="$(var.Win64)">
-        <File Id="net45_OpenTelemetry.Instrumentation.dll"
-              Source="$(var.TracerHomeDirectory)\net45\OpenTelemetry.Instrumentation.dll"
+        <File Id="net45_OpenTelemetry.AutoInstrumentation.dll"
+              Source="$(var.TracerHomeDirectory)\net45\OpenTelemetry.AutoInstrumentation.dll"
               KeyPath="yes" Checksum="yes"/>
       </Component>
       <Component Win64="$(var.Win64)">
-        <File Id="net45_OpenTelemetry.Instrumentation.MSBuild.dll"
-              Source="$(var.TracerHomeDirectory)\net45\OpenTelemetry.Instrumentation.MSBuild.dll"
+        <File Id="net45_OpenTelemetry.AutoInstrumentation.MSBuild.dll"
+              Source="$(var.TracerHomeDirectory)\net45\OpenTelemetry.AutoInstrumentation.MSBuild.dll"
               KeyPath="yes" Checksum="yes"/>
       </Component>
     </ComponentGroup>

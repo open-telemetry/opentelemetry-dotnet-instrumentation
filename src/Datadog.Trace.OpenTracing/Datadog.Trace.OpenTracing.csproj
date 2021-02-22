@@ -4,9 +4,9 @@
     <!-- NuGet -->
     <Version>1.23.0</Version>
     <Title>OpenTelemetry Instrumentation - OpenTracing</Title>
-    <Description>Provides OpenTracing support for OpenTelemetry Instrumentation</Description>
+    <Description>Provides OpenTracing support for OpenTelemetry AutoInstrumentation</Description>
     <PackageTags>$(PackageTags);OpenTracing</PackageTags>
-    <AssemblyName>OpenTelemetry.Instrumentation.OpenTracing</AssemblyName>
+    <AssemblyName>OpenTelemetry.AutoInstrumentation.OpenTracing</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
