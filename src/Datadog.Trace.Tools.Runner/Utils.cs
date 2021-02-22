@@ -52,9 +52,9 @@ namespace Datadog.Trace.Tools.Runner
 
             var envVars = new Dictionary<string, string>
             {
-                ["OPENTELEMETRY_DOTNET_TRACER_HOME"] = tracerHome,
-                ["OPENTELEMETRY_DOTNET_TRACER_MSBUILD"] = tracerMsBuild,
-                ["OPENTELEMETRY_INTEGRATIONS"] = tracerIntegrations,
+                ["OTEL_DOTNET_TRACER_HOME"] = tracerHome,
+                ["OTEL_DOTNET_TRACER_MSBUILD"] = tracerMsBuild,
+                ["OTEL_INTEGRATIONS"] = tracerIntegrations,
                 ["CORECLR_ENABLE_PROFILING"] = "1",
                 ["CORECLR_PROFILER"] = PROFILERID,
                 ["CORECLR_PROFILER_PATH_32"] = tracerProfiler32,
@@ -67,22 +67,22 @@ namespace Datadog.Trace.Tools.Runner
 
             if (!string.IsNullOrWhiteSpace(options.Environment))
             {
-                envVars["OPENTELEMETRY_ENV"] = options.Environment;
+                envVars["OTEL_ENV"] = options.Environment;
             }
 
             if (!string.IsNullOrWhiteSpace(options.Service))
             {
-                envVars["OPENTELEMETRY_SERVICE"] = options.Service;
+                envVars["OTEL_SERVICE"] = options.Service;
             }
 
             if (!string.IsNullOrWhiteSpace(options.Version))
             {
-                envVars["OPENTELEMETRY_VERSION"] = options.Version;
+                envVars["OTEL_VERSION"] = options.Version;
             }
 
             if (!string.IsNullOrWhiteSpace(options.AgentUrl))
             {
-                envVars["OPENTELEMETRY_TRACE_AGENT_URL"] = options.AgentUrl;
+                envVars["OTEL_TRACE_AGENT_URL"] = options.AgentUrl;
             }
 
             return envVars;

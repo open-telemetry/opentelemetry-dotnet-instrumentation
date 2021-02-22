@@ -15,7 +15,7 @@ namespace trace {
 using json = nlohmann::json;
 
 // LoadIntegrationsFromEnvironment loads integrations from any files specified
-// in the OPENTELEMETRY_INTEGRATIONS environment variable
+// in the OTEL_INTEGRATIONS environment variable
 std::vector<Integration> LoadIntegrationsFromEnvironment();
 // LoadIntegrationsFromFile loads the integrations from a file
 std::vector<Integration> LoadIntegrationsFromFile(const WSTRING& file_path);

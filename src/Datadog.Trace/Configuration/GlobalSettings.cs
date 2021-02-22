@@ -127,7 +127,7 @@ namespace Datadog.Trace.Configuration
             {
                 // if environment variable is not set, look for default file name in the current directory
                 var configurationFileName = configurationSource.GetString(ConfigurationKeys.ConfigurationFileName) ??
-                                            configurationSource.GetString("OPENTELEMETRY_DOTNET_TRACER_CONFIG_FILE") ??
+                                            configurationSource.GetString("OTEL_DOTNET_TRACER_CONFIG_FILE") ??
                                             Path.Combine(GetCurrentDirectory(), "datadog.json");
 
                 if (string.Equals(Path.GetExtension(configurationFileName), ".JSON", StringComparison.OrdinalIgnoreCase) &&

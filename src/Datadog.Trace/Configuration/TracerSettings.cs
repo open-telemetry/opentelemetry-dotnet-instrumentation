@@ -44,7 +44,7 @@ namespace Datadog.Trace.Configuration
 
             ServiceName = source?.GetString(ConfigurationKeys.ServiceName) ??
                           // backwards compatibility for names used in the past
-                          source?.GetString("OPENTELEMETRY_SERVICE_NAME");
+                          source?.GetString("OTEL_SERVICE_NAME");
 
             ServiceVersion = source?.GetString(ConfigurationKeys.ServiceVersion);
 
@@ -73,13 +73,13 @@ namespace Datadog.Trace.Configuration
 
             var agentHost = source?.GetString(ConfigurationKeys.AgentHost) ??
                             // backwards compatibility for names used in the past
-                            source?.GetString("OPENTELEMETRY_TRACE_AGENT_HOSTNAME") ??
+                            source?.GetString("OTEL_TRACE_AGENT_HOSTNAME") ??
                             // default value
                             DefaultAgentHost;
 
             var agentPort = source?.GetInt32(ConfigurationKeys.AgentPort) ??
                             // backwards compatibility for names used in the past
-                            source?.GetInt32("OPENTELEMETRY_TRACE_AGENT_PORT") ??
+                            source?.GetInt32("OTEL_TRACE_AGENT_PORT") ??
                             // default value
                             DefaultAgentPort;
 
@@ -124,7 +124,7 @@ namespace Datadog.Trace.Configuration
 
             GlobalTags = source?.GetDictionary(ConfigurationKeys.GlobalTags) ??
                          // backwards compatibility for names used in the past
-                         source?.GetDictionary("OPENTELEMETRY_TRACE_GLOBAL_TAGS") ??
+                         source?.GetDictionary("OTEL_TRACE_GLOBAL_TAGS") ??
                          // default value (empty)
                          new ConcurrentDictionary<string, string>();
 

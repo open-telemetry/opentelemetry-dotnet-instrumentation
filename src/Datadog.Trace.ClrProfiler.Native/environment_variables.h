@@ -8,71 +8,71 @@ namespace environment {
 
 // Sets whether the profiler is enabled. Default is true.
 // Setting this to false disabled the profiler entirely.
-const WSTRING tracing_enabled = "OPENTELEMETRY_TRACE_ENABLED"_W;
+const WSTRING tracing_enabled = "OTEL_TRACE_ENABLED"_W;
 
 // Sets whether debug mode is enabled. Default is false.
-const WSTRING debug_enabled = "OPENTELEMETRY_TRACE_DEBUG"_W;
+const WSTRING debug_enabled = "OTEL_TRACE_DEBUG"_W;
 
 // Sets the paths to integration definition JSON files.
 // Supports multiple values separated with semi-colons, for example:
 // "C:\Program Files\Datadog .NET Tracer\integrations.json;D:\temp\test_integrations.json"
-const WSTRING integrations_path = "OPENTELEMETRY_INTEGRATIONS"_W;
+const WSTRING integrations_path = "OTEL_INTEGRATIONS"_W;
 
 // Sets the path to the profiler's home directory, for example:
 // "C:\Program Files\Datadog .NET Tracer\" or "/opt/datadog/"
-const WSTRING profiler_home_path = "OPENTELEMETRY_DOTNET_TRACER_HOME"_W;
+const WSTRING profiler_home_path = "OTEL_DOTNET_TRACER_HOME"_W;
 
 // Sets the filename of executables the profiler can attach to.
 // If not defined (default), the profiler will attach to any process.
 // Supports multiple values separated with semi-colons, for example:
 // "MyApp.exe;dotnet.exe"
-const WSTRING include_process_names = "OPENTELEMETRY_PROFILER_PROCESSES"_W;
+const WSTRING include_process_names = "OTEL_PROFILER_PROCESSES"_W;
 
 // Sets the filename of executables the profiler cannot attach to.
 // If not defined (default), the profiler will attach to any process.
 // Supports multiple values separated with semi-colons, for example:
 // "MyApp.exe;dotnet.exe"
-const WSTRING exclude_process_names = "OPENTELEMETRY_PROFILER_EXCLUDE_PROCESSES"_W;
+const WSTRING exclude_process_names = "OTEL_PROFILER_EXCLUDE_PROCESSES"_W;
 
 // Sets the Agent's host. Default is localhost.
-const WSTRING agent_host = "OPENTELEMETRY_AGENT_HOST"_W;
+const WSTRING agent_host = "OTEL_AGENT_HOST"_W;
 
 // Sets the Agent's port. Default is 8126.
-const WSTRING agent_port = "OPENTELEMETRY_TRACE_AGENT_PORT"_W;
+const WSTRING agent_port = "OTEL_TRACE_AGENT_PORT"_W;
 
 // Sets the "env" tag for every span.
-const WSTRING env = "OPENTELEMETRY_ENV"_W;
+const WSTRING env = "OTEL_ENV"_W;
 
 // Sets the default service name for every span.
 // If not set, Tracer will try to determine service name automatically
 // from application name (e.g. entry assembly or IIS application name).
-const WSTRING service_name = "OPENTELEMETRY_SERVICE"_W;
+const WSTRING service_name = "OTEL_SERVICE"_W;
 
 // Sets the "service_version" tag for every span that belong to the root service (and not an external service).
-const WSTRING service_version = "OPENTELEMETRY_VERSION"_W;
+const WSTRING service_version = "OTEL_VERSION"_W;
 
 // Sets a list of integrations to disable. All other integrations will remain
 // enabled. If not set (default), all integrations are enabled. Supports
 // multiple values separated with semi-colons, for example:
 // "ElasticsearchNet;AspNetWebApi2"
-const WSTRING disabled_integrations = "OPENTELEMETRY_DISABLED_INTEGRATIONS"_W;
+const WSTRING disabled_integrations = "OTEL_DISABLED_INTEGRATIONS"_W;
 
 // Sets the path for the profiler's log file.
-// Environment variable OPENTELEMETRY_TRACE_LOG_DIRECTORY takes precedence over this setting, if set.
-const WSTRING log_path = "OPENTELEMETRY_TRACE_LOG_PATH"_W;
+// Environment variable OTEL_TRACE_LOG_DIRECTORY takes precedence over this setting, if set.
+const WSTRING log_path = "OTEL_TRACE_LOG_PATH"_W;
 
 // Sets the directory for the profiler's log file.
-// If set, this setting takes precedence over environment variable OPENTELEMETRY_TRACE_LOG_PATH.
+// If set, this setting takes precedence over environment variable OTEL_TRACE_LOG_PATH.
 // If not set, default is
 // "%ProgramData%"\Datadog .NET Tracer\logs\" on Windows or
 // "/var/log/datadog/dotnet/" on Linux.
-const WSTRING log_directory = "OPENTELEMETRY_TRACE_LOG_DIRECTORY"_W;
+const WSTRING log_directory = "OTEL_TRACE_LOG_DIRECTORY"_W;
 
 // Sets whether to disable all JIT optimizations.
 // Default value is false (do not disable all optimizations).
 // https://github.com/dotnet/coreclr/issues/24676
 // https://github.com/dotnet/coreclr/issues/12468
-const WSTRING clr_disable_optimizations = "OPENTELEMETRY_CLR_DISABLE_OPTIMIZATIONS"_W;
+const WSTRING clr_disable_optimizations = "OTEL_CLR_DISABLE_OPTIMIZATIONS"_W;
 
 // Sets whether to intercept method calls when the caller method is inside a
 // domain-neutral assembly. This is dangerous because the integration assembly
@@ -83,7 +83,7 @@ const WSTRING clr_disable_optimizations = "OPENTELEMETRY_CLR_DISABLE_OPTIMIZATIO
 // one application.
 // Default is false. Only used in .NET Framework 4.5 and 4.5.1.
 // https://github.com/DataDog/dd-trace-dotnet/pull/671
-const WSTRING domain_neutral_instrumentation = "OPENTELEMETRY_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION"_W;
+const WSTRING domain_neutral_instrumentation = "OTEL_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION"_W;
 
 // Indicates whether the profiler is running in the context
 // of Azure App Services
@@ -107,7 +107,7 @@ const WSTRING dump_il_rewrite_enabled = "DD_DUMP_ILREWRITE_ENABLED"_W;
 const WSTRING clr_enable_inlining = "DD_CLR_ENABLE_INLINING"_W;
 
 // Sets whether to enable the CallTarget instrumentation mode
-const WSTRING calltarget_enabled = "OPENTELEMETRY_TRACE_CALLTARGET_ENABLED"_W;
+const WSTRING calltarget_enabled = "OTEL_TRACE_CALLTARGET_ENABLED"_W;
 
 }  // namespace environment
 }  // namespace trace

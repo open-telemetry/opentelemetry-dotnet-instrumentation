@@ -90,7 +90,7 @@ namespace Datadog.Trace.PlatformHelpers
                     var apiKey = GetVariableIfExists(Configuration.ConfigurationKeys.ApiKey, environmentVariables);
                     if (apiKey == null)
                     {
-                        Log.Error("The Azure Site Extension will not work if you have not configured OPENTELEMETRY_API_KEY.");
+                        Log.Error("The Azure Site Extension will not work if you have not configured OTEL_API_KEY.");
                         IsUnsafeToTrace = true;
                         return;
                     }

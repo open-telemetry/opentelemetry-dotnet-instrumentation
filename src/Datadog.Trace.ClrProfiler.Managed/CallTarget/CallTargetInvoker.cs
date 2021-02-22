@@ -12,7 +12,7 @@ namespace Datadog.Trace.ClrProfiler.CallTarget
     public static class CallTargetInvoker
     {
 #if DEBUG
-        private static readonly bool IsTestMode = EnvironmentHelpers.GetEnvironmentVariable("OPENTELEMETRY_CTARGET_TESTMODE") == "True";
+        private static readonly bool IsTestMode = EnvironmentHelpers.GetEnvironmentVariable("OTEL_CTARGET_TESTMODE") == "True";
 #endif
 
         /// <summary>

@@ -27,32 +27,32 @@ namespace Datadog.Trace.Vendors.StatsdClient
         /// <summary>
         /// The name of the environment variable defining the port of the targeted StatsD server.
         /// </summary>
-        public const string DogStatsdPortEnvVar = "OPENTELEMETRY_DOGSTATSD_PORT";
+        public const string DogStatsdPortEnvVar = "OTEL_DOGSTATSD_PORT";
 
         /// <summary>
         /// The name of the environment variable defining the host name of the targeted StatsD server.
         /// </summary>
-        public const string AgentHostEnvVar = "OPENTELEMETRY_AGENT_HOST";
+        public const string AgentHostEnvVar = "OTEL_AGENT_HOST";
 
         /// <summary>
         /// The name of the environment variable defining the name of the pipe. INTERNAL USAGE ONLY.
         /// </summary>
-        public const string AgentPipeNameEnvVar = "OPENTELEMETRY_DOGSTATSD_PIPE_NAME";
+        public const string AgentPipeNameEnvVar = "OTEL_DOGSTATSD_PIPE_NAME";
 
         /// <summary>
         /// The name of the environment variable defining the service name
         /// </summary>
-        public const string ServiceEnvVar = "OPENTELEMETRY_SERVICE";
+        public const string ServiceEnvVar = "OTEL_SERVICE";
 
         /// <summary>
         /// The name of the environment variable defining the environment name
         /// </summary>
-        public const string EnvironmentEnvVar = "OPENTELEMETRY_ENV";
+        public const string EnvironmentEnvVar = "OTEL_ENV";
 
         /// <summary>
         /// The name of the environment variable defining the version of the service
         /// </summary>
-        public const string VersionEnvVar = "OPENTELEMETRY_VERSION";
+        public const string VersionEnvVar = "OTEL_VERSION";
 
         internal const string ServiceTagKey = "service";
 
