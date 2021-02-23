@@ -48,9 +48,9 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
 
             // Only load the main profiler into the default Assembly Load Context.
             // If Datadog.Trace or other libraries are provided by the NuGet package their loads are handled in the following two ways.
-            // 1) The AssemblyVersion is greater than or equal to the version used by Datadog.Trace.ClrProfiler.Managed, the assembly
+            // 1) The AssemblyVersion is greater than or equal to the version used by OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, the assembly
             //    will load successfully and will not invoke this resolve event.
-            // 2) The AssemblyVersion is lower than the version used by Datadog.Trace.ClrProfiler.Managed, the assembly will fail to load
+            // 2) The AssemblyVersion is lower than the version used by OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, the assembly will fail to load
             //    and invoke this resolve event. It must be loaded in a separate AssemblyLoadContext since the application will only
             //    load the originally referenced version
             if (assemblyName.Name.StartsWith("OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed", StringComparison.OrdinalIgnoreCase)
