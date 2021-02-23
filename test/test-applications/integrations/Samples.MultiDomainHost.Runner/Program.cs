@@ -22,7 +22,7 @@ namespace Samples.MultiDomainHost.Runner
             {
                 // First load the application that does not have bindingRedirect policies
                 // This will instrument at least one domain-neutral assembly with a
-                // domain-neutral version of Datadog.Trace.ClrProfiler.Managed.dll
+                // domain-neutral version of OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.dll
                 CreateAndRunAppDomain("Samples.MultiDomainHost.App.FrameworkHttpNoRedirects");
 
                 // Next load an application that does the same thing, still does not have

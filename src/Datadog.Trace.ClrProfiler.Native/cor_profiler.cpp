@@ -694,7 +694,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(
 
   // The first time a method is JIT compiled in an AppDomain, insert our startup
   // hook which, at a minimum, must add an AssemblyResolve event so we can find
-  // Datadog.Trace.ClrProfiler.Managed.dll and its dependencies on-disk since it
+  // OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.dll and its dependencies on-disk since it
   // is no longer provided in a NuGet package
   if (valid_startup_hook_callsite &&
       first_jit_compilation_app_domains.find(module_metadata->app_domain_id) ==
