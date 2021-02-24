@@ -36,7 +36,7 @@ done
 gzip -f otel-dotnet-autoinstrumentation.tar
 
 if [ -z "${MUSL-}" ]; then
-  mv otel-dotnet-instrumentation.tar.gz otel-dotnet-autoinstrumentation-$VERSION.tar.gz
+  mv otel-dotnet-autoinstrumentation.tar.gz otel-dotnet-autoinstrumentation-$VERSION.tar.gz
 else
-  mv otel-dotnet-instrumentation.tar.gz otel-dotnet-autoinstrumentation-$VERSION-musl.tar.gz
+  mv otel-dotnet-autoinstrumentation.tar.gz otel-dotnet-autoinstrumentation-$VERSION-musl.tar.gz
 fi
