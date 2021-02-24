@@ -16,28 +16,27 @@ for pkgtype in $PKGTYPES ; do
         -f \
         -s dir \
         -t $pkgtype \
-        -n otel-instrumentation \
+        -n otel-dotnet-autoinstrumentation \
         --license "Apache License, Version 2.0" \
-        --provides otel-dotnet-instrumentation \
+        --provides otel-dotnet-autoinstrumentation \
+        --vendor OpenTelemetry \
         -v $VERSION \
-        --prefix otel-dotnet-instrumentation \
+        --prefix /opt/otel-dotnet-autoinstrumentation \
         --chdir $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/Debug/x64 \
         netstandard2.0/ \
         netcoreapp3.1/ \
-        OpenTelemetry.Instrumentation.ClrProfiler.Native.so \
+        OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so \
         integrations.json \
         createLogPath.sh \
-        OpenTelemetry.Instrumentation.ClrProfiler.Native.so \
-        integrations.json \
         defaults.env \
         LICENSE \
         NOTICE
 done
 
-gzip -f datadog-dotnet-apm.tar
+gzip -f otel-dotnet-autoinstrumentation.tar
 
 if [ -z "${MUSL-}" ]; then
-  mv otel-dotnet-instrumentation.tar.gz otel-dotnet-instrumentation-$VERSION.tar.gz
+  mv otel-dotnet-instrumentation.tar.gz otel-dotnet-autoinstrumentation-$VERSION.tar.gz
 else
-  mv otel-dotnet-instrumentation.tar.gz otel-dotnet-instrumentation-$VERSION-musl.tar.gz
+  mv otel-dotnet-instrumentation.tar.gz otel-dotnet-autoinstrumentation-$VERSION-musl.tar.gz
 fi
