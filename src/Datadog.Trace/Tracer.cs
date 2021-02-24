@@ -106,7 +106,7 @@ namespace Datadog.Trace
                 switch (Settings.Exporter)
                 {
                     case ExporterType.Zipkin:
-                        api = new ZipkinApi(Settings);
+                        api = new ZipkinApi(Settings.AgentUri);
                         break;
                     case ExporterType.DatadogAgent:
                     default:
