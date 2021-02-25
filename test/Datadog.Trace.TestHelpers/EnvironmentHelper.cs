@@ -270,7 +270,7 @@ namespace Datadog.Trace.TestHelpers
                                        ? "dll"
                                        : "so";
 
-                string fileName = $"OpenTelemetry.Instrumentation.ClrProfiler.Native.{extension}";
+                string fileName = $"OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.{extension}";
 
                 var directory = GetSampleApplicationOutputDirectory();
 
