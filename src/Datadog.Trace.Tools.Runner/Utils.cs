@@ -38,8 +38,8 @@ namespace Datadog.Trace.Tools.Runner
 
             if (platform == Platform.Windows)
             {
-                tracerProfiler32 = FileExists(Path.Combine(tracerHome, "win-x86", "Datadog.Trace.ClrProfiler.Native.dll"));
-                tracerProfiler64 = FileExists(Path.Combine(tracerHome, "win-x64", "Datadog.Trace.ClrProfiler.Native.dll"));
+                tracerProfiler32 = FileExists(Path.Combine(tracerHome, "win-x86", "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll"));
+                tracerProfiler64 = FileExists(Path.Combine(tracerHome, "win-x64", "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll"));
             }
             else if (platform == Platform.Linux)
             {

@@ -31,8 +31,8 @@ if ($env:os -eq "Windows_NT")
 
     $otel_tracer_msbuild = "$otel_tracer_home\netstandard2.0\OpenTelemetry.AutoInstrumentation.MSBuild.dll"
     $otel_tracer_integrations = "$otel_tracer_home\integrations.json"
-    $otel_tracer_profiler_32 = "$otel_tracer_home\win-x86\Datadog.Trace.ClrProfiler.Native.dll"
-    $otel_tracer_profiler_64 = "$otel_tracer_home\win-x64\Datadog.Trace.ClrProfiler.Native.dll"
+    $otel_tracer_profiler_32 = "$otel_tracer_home\win-x86\OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll"
+    $otel_tracer_profiler_64 = "$otel_tracer_home\win-x64\OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll"
 } 
 else 
 {

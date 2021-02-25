@@ -153,7 +153,7 @@
     <ComponentGroup Id="Files.Native.64" Directory="INSTALLFOLDER">
       <Component Win64="yes">
         <File Id="Datadog.Trace.ClrProfiler.Native"
-              Source="$(var.TracerHomeDirectory)\win-x64\Datadog.Trace.ClrProfiler.Native.dll"
+              Source="$(var.TracerHomeDirectory)\win-x64\OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll"
               Checksum="yes">
           <Class Id="$(var.ProfilerCLSID)" Context="InprocServer32" ThreadingModel="both" Description="$(var.ProductNamePlatformAgnostic)"/>
         </File>
@@ -164,7 +164,7 @@
     <ComponentGroup Id="Files.Native.32" Directory="INSTALLFOLDER.32">
       <Component Win64="no" Id="Datadog.Trace.ClrProfiler.Native.32">
         <File Id="Datadog.Trace.ClrProfiler.Native.32"
-              Source="$(var.TracerHomeDirectory)\win-x86\Datadog.Trace.ClrProfiler.Native.dll"
+              Source="$(var.TracerHomeDirectory)\win-x86\OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll"
               Checksum="yes">
           <Class Id="$(var.ProfilerCLSID)" Context="InprocServer32" ThreadingModel="both" Description="$(var.ProductNamePlatformAgnostic)"/>
         </File>
@@ -177,7 +177,7 @@
     <ComponentGroup Id="Files.Native.32" Directory="INSTALLFOLDER">
       <Component Win64="no" Id="Datadog.Trace.ClrProfiler.Native.32">
         <File Id="Datadog.Trace.ClrProfiler.Native.32"
-              Source="$(var.TracerHomeDirectory)\win-x86\Datadog.Trace.ClrProfiler.Native.dll"
+              Source="$(var.TracerHomeDirectory)\win-x86\OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll"
               Checksum="yes">
           <Class Id="$(var.ProfilerCLSID)" Context="InprocServer32" ThreadingModel="both" Description="$(var.ProductNamePlatformAgnostic)"/>
         </File>

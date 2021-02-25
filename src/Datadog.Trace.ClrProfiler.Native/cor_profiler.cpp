@@ -1934,7 +1934,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id,
   }
 
 #ifdef _WIN32
-  WSTRING native_profiler_file = "DATADOG.TRACE.CLRPROFILER.NATIVE.DLL"_W;
+  WSTRING native_profiler_file = "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll"_W;
 #else // _WIN32
 
 #ifdef BIT64

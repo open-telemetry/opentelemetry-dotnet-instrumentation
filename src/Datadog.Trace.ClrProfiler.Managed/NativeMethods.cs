@@ -22,7 +22,7 @@ namespace Datadog.Trace.ClrProfiler
         // and optional on .NET Core
         private static class Windows
         {
-            [DllImport("Datadog.Trace.ClrProfiler.Native.dll")]
+            [DllImport("OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll")]
             public static extern bool IsProfilerAttached();
         }
 
