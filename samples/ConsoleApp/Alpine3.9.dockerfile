@@ -25,7 +25,7 @@ RUN curl -L https://github.com/DataDog/dd-trace-dotnet/releases/download/v${TRAC
 ENV CORECLR_ENABLE_PROFILING=1
 ENV CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
 ENV CORECLR_PROFILER_PATH=/opt/datadog/Datadog.Trace.ClrProfiler.Native.so
-ENV DD_INTEGRATIONS=/opt/datadog/integrations.json
-ENV DD_DOTNET_TRACER_HOME=/opt/datadog
+ENV OTEL_INTEGRATIONS=/opt/datadog/integrations.json
+ENV OTEL_DOTNET_TRACER_HOME=/opt/datadog
 
 CMD ["dotnet", "ConsoleApp.dll"]

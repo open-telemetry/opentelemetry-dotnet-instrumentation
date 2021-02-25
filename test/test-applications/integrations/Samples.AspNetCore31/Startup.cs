@@ -70,7 +70,7 @@ namespace Samples.AspNetCore31
                            {
                                "COR_",
                                "CORECLR_",
-                               "DD_",
+                               "OTEL_",
                                "DATADOG_"
                            };
 
