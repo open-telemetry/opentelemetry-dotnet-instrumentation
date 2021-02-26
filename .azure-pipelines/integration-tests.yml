@@ -125,127 +125,127 @@ jobs:
       testResultsFiles: test/**/*.trx
     condition: succeededOrFailed()
 
-- job: build_alpine_linux_profiler
+# - job: build_alpine_linux_profiler
 
-  steps:
-  - task: UseDotNet@2
-    displayName: install dotnet core runtime 3.1
-    inputs:
-      packageType: runtime
-      version: 3.1.x
+#   steps:
+#   - task: UseDotNet@2
+#     displayName: install dotnet core runtime 3.1
+#     inputs:
+#       packageType: runtime
+#       version: 3.1.x
 
-  - task: UseDotNet@2
-    displayName: install dotnet core sdk 5
-    inputs:
-      packageType: sdk
-      version: 5.0.x
+#   - task: UseDotNet@2
+#     displayName: install dotnet core sdk 5
+#     inputs:
+#       packageType: sdk
+#       version: 5.0.x
 
-  - task: DotNetCoreCLI@2
-    displayName: dotnet build Datadog.Trace.ClrProfiler.Managed.Loader
-    inputs:
-      command: build
-      projects: src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
-      arguments: --configuration $(buildConfiguration) /nowarn:netsdk1138
+#   - task: DotNetCoreCLI@2
+#     displayName: dotnet build Datadog.Trace.ClrProfiler.Managed.Loader
+#     inputs:
+#       command: build
+#       projects: src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
+#       arguments: --configuration $(buildConfiguration) /nowarn:netsdk1138
 
-  - task: DotNetCoreCLI@2
-    displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed 2.0
-    inputs:
-      command: publish
-      publishWebProjects: false
-      modifyOutputPath: false
-      zipAfterPublish: false
-      projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
-      arguments: --configuration $(buildConfiguration) --framework netstandard2.0 --output $(publishOutput)/netstandard2.0
+#   - task: DotNetCoreCLI@2
+#     displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed 2.0
+#     inputs:
+#       command: publish
+#       publishWebProjects: false
+#       modifyOutputPath: false
+#       zipAfterPublish: false
+#       projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
+#       arguments: --configuration $(buildConfiguration) --framework netstandard2.0 --output $(publishOutput)/netstandard2.0
 
-  - task: DotNetCoreCLI@2
-    displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed 3.1
-    inputs:
-      command: publish
-      publishWebProjects: false
-      modifyOutputPath: false
-      zipAfterPublish: false
-      projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
-      arguments: --configuration $(buildConfiguration) --framework netcoreapp3.1 --output $(publishOutput)/netcoreapp3.1
+#   - task: DotNetCoreCLI@2
+#     displayName: dotnet publish Datadog.Trace.ClrProfiler.Managed 3.1
+#     inputs:
+#       command: publish
+#       publishWebProjects: false
+#       modifyOutputPath: false
+#       zipAfterPublish: false
+#       projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
+#       arguments: --configuration $(buildConfiguration) --framework netcoreapp3.1 --output $(publishOutput)/netcoreapp3.1
 
-  - task: DockerCompose@0
-    displayName: docker-compose run Profiler.Alpine
-    inputs:
-      containerregistrytype: Container Registry
-      dockerComposeCommand: run Profiler.Alpine
+#   - task: DockerCompose@0
+#     displayName: docker-compose run Profiler.Alpine
+#     inputs:
+#       containerregistrytype: Container Registry
+#       dockerComposeCommand: run Profiler.Alpine
 
-  - publish: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin/$(buildConfiguration)/x64
-    artifact: alpine-linux-tracer-home
+#   - publish: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin/$(buildConfiguration)/x64
+#     artifact: alpine-linux-tracer-home
 
-- job: Alpine_Linux
-  dependsOn: build_alpine_linux_profiler
-  condition: succeeded()
-  strategy:
-    matrix:
-      netcoreapp2_1:
-        publishTargetFramework: netcoreapp2.1
-      netcoreapp3_0:
-        publishTargetFramework: netcoreapp3.0
-      netcoreapp3_1:
-        publishTargetFramework: netcoreapp3.1
-      net5_0:
-        publishTargetFramework: net5.0
+# - job: Alpine_Linux
+#   dependsOn: build_alpine_linux_profiler
+#   condition: succeeded()
+#   strategy:
+#     matrix:
+#       netcoreapp2_1:
+#         publishTargetFramework: netcoreapp2.1
+#       netcoreapp3_0:
+#         publishTargetFramework: netcoreapp3.0
+#       netcoreapp3_1:
+#         publishTargetFramework: netcoreapp3.1
+#       net5_0:
+#         publishTargetFramework: net5.0
 
-  variables:
-    TestAllPackageVersions: true
+#   variables:
+#     TestAllPackageVersions: true
 
-  steps:
-  - download: current
-    artifact: alpine-linux-tracer-home
+#   steps:
+#   - download: current
+#     artifact: alpine-linux-tracer-home
 
-  - task: CopyFiles@2
-    inputs:
-      sourceFolder: $(Pipeline.Workspace)/alpine-linux-tracer-home
-      targetFolder: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin/$(buildConfiguration)/x64
+#   - task: CopyFiles@2
+#     inputs:
+#       sourceFolder: $(Pipeline.Workspace)/alpine-linux-tracer-home
+#       targetFolder: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin/$(buildConfiguration)/x64
 
-  - task: DockerCompose@0
-    displayName: docker-compose run build
-    inputs:
-      containerregistrytype: Container Registry
-      dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) -e publishTargetFramework=$(publishTargetFramework) build
+#   - task: DockerCompose@0
+#     displayName: docker-compose run build
+#     inputs:
+#       containerregistrytype: Container Registry
+#       dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) -e publishTargetFramework=$(publishTargetFramework) build
 
-  - task: DockerCompose@0
-    displayName: docker-compose run IntegrationTests.Alpine.Core21
-    condition: eq(variables['publishTargetFramework'], 'netcoreapp2.1')
-    inputs:
-      containerregistrytype: Container Registry
-      dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) IntegrationTests.Alpine.Core21
+#   - task: DockerCompose@0
+#     displayName: docker-compose run IntegrationTests.Alpine.Core21
+#     condition: eq(variables['publishTargetFramework'], 'netcoreapp2.1')
+#     inputs:
+#       containerregistrytype: Container Registry
+#       dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) IntegrationTests.Alpine.Core21
 
-  - task: DockerCompose@0
-    displayName: docker-compose run IntegrationTests.Alpine.Core30
-    condition: eq(variables['publishTargetFramework'], 'netcoreapp3.0')
-    inputs:
-      containerregistrytype: Container Registry
-      dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) IntegrationTests.Alpine.Core30
+#   - task: DockerCompose@0
+#     displayName: docker-compose run IntegrationTests.Alpine.Core30
+#     condition: eq(variables['publishTargetFramework'], 'netcoreapp3.0')
+#     inputs:
+#       containerregistrytype: Container Registry
+#       dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) IntegrationTests.Alpine.Core30
 
-  - task: DockerCompose@0
-    displayName: docker-compose run IntegrationTests.Alpine.Core31
-    condition: eq(variables['publishTargetFramework'], 'netcoreapp3.1')
-    inputs:
-      containerregistrytype: Container Registry
-      dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) IntegrationTests.Alpine.Core31
+#   - task: DockerCompose@0
+#     displayName: docker-compose run IntegrationTests.Alpine.Core31
+#     condition: eq(variables['publishTargetFramework'], 'netcoreapp3.1')
+#     inputs:
+#       containerregistrytype: Container Registry
+#       dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) IntegrationTests.Alpine.Core31
 
-  - task: DockerCompose@0
-    displayName: docker-compose run IntegrationTests.Alpine.Core50
-    condition: eq(variables['publishTargetFramework'], 'net5.0')
-    inputs:
-      containerregistrytype: Container Registry
-      dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) IntegrationTests.Alpine.Core50
+#   - task: DockerCompose@0
+#     displayName: docker-compose run IntegrationTests.Alpine.Core50
+#     condition: eq(variables['publishTargetFramework'], 'net5.0')
+#     inputs:
+#       containerregistrytype: Container Registry
+#       dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) IntegrationTests.Alpine.Core50
 
-  - publish: dotnet-tracer-native.log
-    artifact: $(Agent.JobName)_profiler-logs
-    condition: succeededOrFailed()
+#   - publish: dotnet-tracer-native.log
+#     artifact: $(Agent.JobName)_profiler-logs
+#     condition: succeededOrFailed()
 
-  - task: PublishTestResults@2
-    displayName: publish test results
-    inputs:
-      testResultsFormat: VSTest
-      testResultsFiles: test/**/*.trx
-    condition: succeededOrFailed()
+#   - task: PublishTestResults@2
+#     displayName: publish test results
+#     inputs:
+#       testResultsFormat: VSTest
+#       testResultsFiles: test/**/*.trx
+#     condition: succeededOrFailed()
 
 - job: Windows
   timeoutInMinutes: 100
