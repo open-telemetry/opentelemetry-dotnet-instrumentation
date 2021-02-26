@@ -7,17 +7,22 @@ using System.Threading.Tasks;
 using Datadog.Core.Tools;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.TestHelpers;
+using DockerComposeFixture;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
 {
-    public class SqlCommand20Tests : TestHelper
+    public class SqlCommand20Tests : TestHelper, IClassFixture<DockerFixture>
     {
-        public SqlCommand20Tests(ITestOutputHelper output)
+        public SqlCommand20Tests(ITestOutputHelper output, DockerFixture dockerFixture)
         : base("SqlServer.NetFramework20", output)
         {
             SetServiceVersion("1.0.0");
+            dockerFixture.InitOnce(() => new DockerFixtureOptions
+            {
+                DockerComposeFiles = new[] { "sqlserver-docker-compose.yml" }
+            });
         }
 
         [Theory]

@@ -3,17 +3,22 @@ using System.Linq;
 using Datadog.Core.Tools;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.TestHelpers;
+using DockerComposeFixture;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
 {
-    public class NpgsqlCommandTests : TestHelper
+    public class NpgsqlCommandTests : TestHelper, IClassFixture<DockerFixture>
     {
-        public NpgsqlCommandTests(ITestOutputHelper output)
+        public NpgsqlCommandTests(ITestOutputHelper output, DockerFixture dockerFixture)
             : base("Npgsql", output)
         {
             SetServiceVersion("1.0.0");
+            dockerFixture.InitOnce(() => new DockerFixtureOptions
+            {
+                DockerComposeFiles = new[] { "postgres-docker-compose.yml" }
+            });
         }
 
         public static IEnumerable<object[]> GetNpgsql()

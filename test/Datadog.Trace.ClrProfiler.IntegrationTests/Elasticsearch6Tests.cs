@@ -3,17 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using Datadog.Core.Tools;
 using Datadog.Trace.TestHelpers;
+using DockerComposeFixture;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Datadog.Trace.ClrProfiler.IntegrationTests
 {
-    public class Elasticsearch6Tests : TestHelper
+    public class Elasticsearch6Tests : TestHelper, IClassFixture<DockerFixture>
     {
-        public Elasticsearch6Tests(ITestOutputHelper output)
+        public Elasticsearch6Tests(ITestOutputHelper output, DockerFixture dockerFixture)
             : base("Elasticsearch", output)
         {
             SetServiceVersion("1.0.0");
+            dockerFixture.InitOnce(() => new DockerFixtureOptions
+            {
+                DockerComposeFiles = new[] { "elasticsearch6-docker-compose.yml" }
+            });
         }
 
         [Theory]

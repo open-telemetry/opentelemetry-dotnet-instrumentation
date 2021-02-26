@@ -2,17 +2,22 @@ using System.Linq;
 using Datadog.Core.Tools;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.TestHelpers;
+using DockerComposeFixture;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
 {
-    public class MySqlCommandTests : TestHelper
+    public class MySqlCommandTests : TestHelper, IClassFixture<DockerFixture>
     {
-        public MySqlCommandTests(ITestOutputHelper output)
+        public MySqlCommandTests(ITestOutputHelper output, DockerFixture dockerFixture)
             : base("MySql", output)
         {
             SetServiceVersion("1.0.0");
+            dockerFixture.InitOnce(() => new DockerFixtureOptions
+            {
+                DockerComposeFiles = new[] { "mysql-docker-compose.yml" }
+            });
         }
 
         [Theory]

@@ -1,17 +1,22 @@
 #if !NET452
 using Datadog.Core.Tools;
 using Datadog.Trace.TestHelpers;
+using DockerComposeFixture;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
 {
-    public class DapperTests : TestHelper
+    public class DapperTests : TestHelper, IClassFixture<DockerFixture>
     {
-        public DapperTests(ITestOutputHelper output)
+        public DapperTests(ITestOutputHelper output, DockerFixture dockerFixture)
             : base("Dapper", output)
         {
             SetServiceVersion("1.0.0");
+            dockerFixture.InitOnce(() => new DockerFixtureOptions
+            {
+                DockerComposeFiles = new[] { "postgres-docker-compose.yml" }
+            });
         }
 
         [Fact]

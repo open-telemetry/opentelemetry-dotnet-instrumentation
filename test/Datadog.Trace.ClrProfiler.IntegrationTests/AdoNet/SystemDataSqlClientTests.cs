@@ -4,17 +4,22 @@ using System.Linq;
 using Datadog.Core.Tools;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.TestHelpers;
+using DockerComposeFixture;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
 {
-    public class SystemDataSqlClientTests : TestHelper
+    public class SystemDataSqlClientTests : TestHelper, IClassFixture<DockerFixture>
     {
-        public SystemDataSqlClientTests(ITestOutputHelper output)
+        public SystemDataSqlClientTests(ITestOutputHelper output, DockerFixture dockerFixture)
             : base("SqlServer", output)
         {
             SetServiceVersion("1.0.0");
+            dockerFixture.InitOnce(() => new DockerFixtureOptions
+            {
+                DockerComposeFiles = new[] { "sqlserver-docker-compose.yml" }
+            });
         }
 
         public static IEnumerable<object[]> GetSystemDataSqlClient()

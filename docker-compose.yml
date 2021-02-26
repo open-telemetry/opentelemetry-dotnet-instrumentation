@@ -429,15 +429,6 @@ services:
     - RABBITMQ_HOST=host.docker.internal
     - buildConfiguration=${buildConfiguration}
     - publishTargetFramework=${publishTargetFramework}
-    depends_on:
-    - servicestackredis
-    - stackexchangeredis
-    - elasticsearch6
-    - elasticsearch5
-    - sqlserver
-    - postgres
-    - mysql
-    - rabbitmq
 
   # IntegrationTests.ARM64.Core50:
   #   build:

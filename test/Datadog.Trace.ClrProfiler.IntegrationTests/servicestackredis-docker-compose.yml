@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+
+  servicestackredis:
+    image: redis:4-alpine
+    command: redis-server --bind 0.0.0.0
+    ports:
+    - "127.0.0.1:6379:6379"

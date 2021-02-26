@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Datadog.Core.Tools;
 using Datadog.Trace.TestHelpers;
+using DockerComposeFixture;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -12,12 +13,16 @@ using Datadog.Trace.ExtensionMethods; // needed for Dictionary<K,V>.GetValueOrDe
 
 namespace Datadog.Trace.ClrProfiler.IntegrationTests
 {
-    public class StackExchangeRedisTests : TestHelper
+    public class StackExchangeRedisTests : TestHelper, IClassFixture<DockerFixture>
     {
-        public StackExchangeRedisTests(ITestOutputHelper output)
+        public StackExchangeRedisTests(ITestOutputHelper output, DockerFixture dockerFixture)
             : base("StackExchange.Redis", output)
         {
             SetServiceVersion("1.0.0");
+            dockerFixture.InitOnce(() => new DockerFixtureOptions
+            {
+                DockerComposeFiles = new[] { "stackexchangeredis-docker-compose.yml" }
+            });
         }
 
         [Theory]

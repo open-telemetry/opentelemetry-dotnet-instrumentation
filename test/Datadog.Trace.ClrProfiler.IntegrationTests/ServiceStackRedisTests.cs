@@ -3,17 +3,22 @@ using System.Linq;
 using Datadog.Core.Tools;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.TestHelpers;
+using DockerComposeFixture;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Datadog.Trace.ClrProfiler.IntegrationTests
 {
-    public class ServiceStackRedisTests : TestHelper
+    public class ServiceStackRedisTests : TestHelper, IClassFixture<DockerFixture>
     {
-        public ServiceStackRedisTests(ITestOutputHelper output)
+        public ServiceStackRedisTests(ITestOutputHelper output, DockerFixture dockerFixture)
             : base("ServiceStack.Redis", output)
         {
             SetServiceVersion("1.0.0");
+            dockerFixture.InitOnce(() => new DockerFixtureOptions
+            {
+                DockerComposeFiles = new[] { "servicestackredis-docker-compose.yml" }
+            });
         }
 
         [Theory]
