@@ -418,15 +418,15 @@ services:
     - /var/run/docker.sock:/var/run/docker.sock
     environment:
     - MONGO_HOST=host.docker.internal
-    - SERVICESTACK_REDIS_HOST=servicestackredis:6379
-    - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
-    - ELASTICSEARCH6_HOST=elasticsearch6:9200
-    - ELASTICSEARCH5_HOST=elasticsearch5:9200
-    - SQLSERVER_CONNECTION_STRING=Server=sqlserver;User=sa;Password=Strong!Passw0rd
-    - POSTGRES_HOST=postgres
-    - MYSQL_HOST=mysql
-    - MYSQL_PORT=3306
-    - RABBITMQ_HOST=rabbitmq
+    - SERVICESTACK_REDIS_HOST=host.docker.internal:6379
+    - STACKEXCHANGE_REDIS_HOST=host.docker.internal:6379
+    - ELASTICSEARCH6_HOST=host.docker.internal:9200
+    - ELASTICSEARCH5_HOST=host.docker.internal:9205
+    - SQLSERVER_CONNECTION_STRING=Server=host.docker.internal;User=sa;Password=Strong!Passw0rd
+    - POSTGRES_HOST=host.docker.internal
+    - MYSQL_HOST=host.docker.internal
+    - MYSQL_PORT=3307
+    - RABBITMQ_HOST=host.docker.internal
     - buildConfiguration=${buildConfiguration}
     - publishTargetFramework=${publishTargetFramework}
     depends_on:
@@ -439,33 +439,33 @@ services:
     - mysql
     - rabbitmq
 
-  IntegrationTests.ARM64.Core50:
-    build:
-      context: ./
-      dockerfile: ./build/docker/dotnet.arm64.core50.dockerfile
-    image: datadog-dotnet-arm64-core50
-    command: /project/build/docker/Datadog.Trace.ClrProfiler.IntegrationTests.arm64.sh
-    volumes:
-    - ./:/project
-    - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-    - MONGO_HOST=host.docker.internal
-    - SERVICESTACK_REDIS_HOST=servicestackredis:6379
-    - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
-    - ELASTICSEARCH6_HOST=elasticsearch7_arm64:9200
-    - ELASTICSEARCH5_HOST=elasticsearch7_arm64:9200
-    - SQLSERVER_CONNECTION_STRING=Server=sqledge;User=sa;Password=Strong!Passw0rd
-    - POSTGRES_HOST=postgres
-    - MYSQL_HOST=mysql
-    - MYSQL_PORT=3306
-    - RABBITMQ_HOST=rabbitmq
-    - buildConfiguration=${buildConfiguration}
-    - publishTargetFramework=net5.0
-    depends_on:
-    - servicestackredis
-    - stackexchangeredis
-    - elasticsearch7_arm64
-    - sqledge
-    - postgres
-    - mysql
-    - rabbitmq
+  # IntegrationTests.ARM64.Core50:
+  #   build:
+  #     context: ./
+  #     dockerfile: ./build/docker/dotnet.arm64.core50.dockerfile
+  #   image: datadog-dotnet-arm64-core50
+  #   command: /project/build/docker/Datadog.Trace.ClrProfiler.IntegrationTests.arm64.sh
+  #   volumes:
+  #   - ./:/project
+  #   - /var/run/docker.sock:/var/run/docker.sock
+  #   environment:
+  #   - MONGO_HOST=host.docker.internal
+  #   - SERVICESTACK_REDIS_HOST=servicestackredis:6379
+  #   - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
+  #   - ELASTICSEARCH6_HOST=elasticsearch7_arm64:9200
+  #   - ELASTICSEARCH5_HOST=elasticsearch7_arm64:9200
+  #   - SQLSERVER_CONNECTION_STRING=Server=sqledge;User=sa;Password=Strong!Passw0rd
+  #   - POSTGRES_HOST=postgres
+  #   - MYSQL_HOST=mysql
+  #   - MYSQL_PORT=3306
+  #   - RABBITMQ_HOST=rabbitmq
+  #   - buildConfiguration=${buildConfiguration}
+  #   - publishTargetFramework=net5.0
+  #   depends_on:
+  #   - servicestackredis
+  #   - stackexchangeredis
+  #   - elasticsearch7_arm64
+  #   - sqledge
+  #   - postgres
+  #   - mysql
+  #   - rabbitmq
