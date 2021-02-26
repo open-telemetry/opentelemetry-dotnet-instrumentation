@@ -13,6 +13,7 @@ using Datadog.Trace.ExtensionMethods; // needed for Dictionary<K,V>.GetValueOrDe
 
 namespace Datadog.Trace.ClrProfiler.IntegrationTests
 {
+    [Collection("stackexchangeredis")]
     public class StackExchangeRedisTests : TestHelper, IClassFixture<DockerFixture>
     {
         public StackExchangeRedisTests(ITestOutputHelper output, DockerFixture dockerFixture)

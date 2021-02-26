@@ -7,6 +7,7 @@ using Xunit.Abstractions;
 
 namespace Datadog.Trace.ClrProfiler.IntegrationTests.SmokeTests
 {
+    [Collection("stackexchangeredis")]
     public class StackExchangeRedisStackOverflowExceptionSmokeTest : SmokeTestBase, IClassFixture<DockerFixture>
     {
         public StackExchangeRedisStackOverflowExceptionSmokeTest(ITestOutputHelper output, DockerFixture dockerFixture)
@@ -14,7 +15,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests.SmokeTests
         {
             dockerFixture.InitOnce(() => new DockerFixtureOptions
             {
-                DockerComposeFiles = new[] { "servicestackredis-docker-compose.yml" }
+                DockerComposeFiles = new[] { "stackexchangeredis-docker-compose.yml" }
             });
         }
 

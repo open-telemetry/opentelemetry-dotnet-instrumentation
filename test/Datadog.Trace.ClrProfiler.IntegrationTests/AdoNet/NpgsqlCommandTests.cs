@@ -9,6 +9,7 @@ using Xunit.Abstractions;
 
 namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
 {
+    [Collection("postgres")]
     public class NpgsqlCommandTests : TestHelper, IClassFixture<DockerFixture>
     {
         public NpgsqlCommandTests(ITestOutputHelper output, DockerFixture dockerFixture)

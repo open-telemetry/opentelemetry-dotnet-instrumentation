@@ -10,6 +10,7 @@ using Xunit.Abstractions;
 
 namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
 {
+    [Collection("sqlsever")]
     public class MicrosoftDataSqlClientTests : TestHelper, IClassFixture<DockerFixture>
     {
         public MicrosoftDataSqlClientTests(ITestOutputHelper output, DockerFixture dockerFixture)

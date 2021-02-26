@@ -7,6 +7,7 @@ using Xunit.Abstractions;
 
 namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
 {
+    [Collection("postgres")]
     public class DapperTests : TestHelper, IClassFixture<DockerFixture>
     {
         public DapperTests(ITestOutputHelper output, DockerFixture dockerFixture)
