@@ -12,7 +12,7 @@ namespace Datadog.Trace.ClrProfiler
     /// <summary>
     /// Convenience class that creates scopes and populates them with some standard details.
     /// </summary>
-    internal static partial class ScopeFactory
+    internal static class ScopeFactory
     {
         public const string OperationName = "http.request";
         public const string ServiceName = "http-client";
