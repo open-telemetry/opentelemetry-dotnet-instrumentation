@@ -1,5 +1,13 @@
 version: '3'
 services:
   IntegrationTests:
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    network_mode: "host"
+    environment:
+      - MONGO_HOST=localhost
+      - SERVICESTACK_REDIS_HOST=localhost:6379
+      - STACKEXCHANGE_REDIS_HOST=localhost:6379
+      - ELASTICSEARCH6_HOST=localhost:9200
+      - ELASTICSEARCH5_HOST=localhost:9200
+      - SQLSERVER_CONNECTION_STRING=Server=localhost;User=sa;Password=Strong!Passw0rd
+      - POSTGRES_HOST=localhost
+      - MYSQL_HOST=localhost
