@@ -1,0 +1,4 @@
+{
+    "razor.disabled": true,
+    "omnisharp.defaultLaunchSolution": "Datadog.Trace.Minimal.sln"
+}
