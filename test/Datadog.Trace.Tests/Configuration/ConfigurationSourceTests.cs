@@ -99,6 +99,7 @@ namespace Datadog.Trace.Tests.Configuration
 
             yield return new object[] { ConfigurationKeys.Convention, null, CreateFunc(s => s.Convention), ConventionType.Default };
             yield return new object[] { ConfigurationKeys.Convention, string.Empty, CreateFunc(s => s.Convention), ConventionType.Default };
+            yield return new object[] { ConfigurationKeys.Convention, "opentelemetry", CreateFunc(s => s.Convention), ConventionType.OpenTelemetry };
             yield return new object[] { ConfigurationKeys.Convention, "Datadog", CreateFunc(s => s.Convention), ConventionType.Datadog };
             yield return new object[] { ConfigurationKeys.Convention, "unknown", CreateFunc(s => s.Convention), ConventionType.Default };
         }

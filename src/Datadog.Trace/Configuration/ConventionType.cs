@@ -6,12 +6,17 @@ namespace Datadog.Trace.Configuration
     public enum ConventionType
     {
         /// <summary>
-        /// The default OpenTelemtry exporter.
+        /// The default OpenTelemtry convention.
         /// </summary>
         Default,
 
         /// <summary>
-        /// The Datadog exporter.
+        /// The OpenTelemetry convention.
+        /// </summary>
+        OpenTelemetry = Default,
+
+        /// <summary>
+        /// The Datadog convention.
         /// </summary>
         Datadog,
     }
