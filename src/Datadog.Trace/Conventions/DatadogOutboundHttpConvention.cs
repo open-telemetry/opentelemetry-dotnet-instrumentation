@@ -1,10 +1,17 @@
 using Datadog.Trace.Configuration;
 using Datadog.Trace.Util;
 
-namespace Datadog.Trace.ClrProfiler.Conventions
+namespace Datadog.Trace.Conventions
 {
     internal class DatadogOutboundHttpConvention : IOutboundHttpConvention
     {
+        private readonly TracerSettings _tracerSettings;
+
+        public DatadogOutboundHttpConvention(TracerSettings tracerSettings)
+        {
+            _tracerSettings = tracerSettings;
+        }
+
         public void Apply(OutboundHttpArgs args)
         {
             var span = args.Span;
@@ -12,7 +19,6 @@ namespace Datadog.Trace.ClrProfiler.Conventions
             var httpMethod = args.HttpMethod;
             var tags = args.HttpTags;
             var integrationId = args.IntegrationInfo;
-            var tracer = args.Tracer;
 
             span.OperationName = "http.request";
 
@@ -28,7 +34,7 @@ namespace Datadog.Trace.ClrProfiler.Conventions
 
             tags.InstrumentationName = IntegrationRegistry.GetName(integrationId);
 
-            tags.SetAnalyticsSampleRate(integrationId, tracer.Settings, enabledWithGlobalSetting: false);
+            tags.SetAnalyticsSampleRate(integrationId, _tracerSettings, enabledWithGlobalSetting: false);
         }
     }
 }

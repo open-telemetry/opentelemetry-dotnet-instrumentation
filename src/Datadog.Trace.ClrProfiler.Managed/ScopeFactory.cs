@@ -1,8 +1,8 @@
 using System;
 using System.Data;
-using Datadog.Trace.ClrProfiler.Conventions;
 using Datadog.Trace.ClrProfiler.Integrations.AdoNet;
 using Datadog.Trace.Configuration;
+using Datadog.Trace.Conventions;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Logging;
 using Datadog.Trace.Tagging;
@@ -102,14 +102,13 @@ namespace Datadog.Trace.ClrProfiler
                 tags = new HttpTags();
                 string serviceName = tracer.Settings.GetServiceName(tracer, ServiceName);
                 var scope = tracer.StartActiveWithTags(OperationName, tags: tags, serviceName: serviceName, spanId: spanId);
-                Convention.Get(tracer.Settings).OutboundHttpScopeConvention.Apply(new OutboundHttpArgs
+                tracer.OutboundHttpConvention.Apply(new OutboundHttpArgs
                 {
                     HttpMethod = httpMethod,
                     HttpTags = tags,
                     IntegrationInfo = integrationId,
                     RequestUri = requestUri,
                     Span = scope.Span,
-                    Tracer = tracer
                 });
                 return scope;
             }
