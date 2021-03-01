@@ -284,7 +284,7 @@ namespace Datadog.Trace.Configuration
         /// Configuration key for the convention to be used.
         /// The Tracer uses it to define operation names, span tags, statuses etc.
         /// Default is <c>"Default"</c>.
-        /// <seealso cref="ConfigurationKeys.Convention"/>
+        /// <seealso cref="TracerSettings.Convention"/>
         /// </summary>
         public const string Convention = "OTEL_CONVENTION";
 
