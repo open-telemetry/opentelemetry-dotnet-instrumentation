@@ -4,11 +4,11 @@ namespace Datadog.Trace.Tagging
 {
     internal class HttpTags : InstrumentationTags, IHasStatusCode
     {
-        private readonly HttpTagsKeysMapping _convension;
+        private readonly HttpTagsKeysMapping _convention;
 
-        public HttpTags(HttpTagsKeysMapping convension)
+        public HttpTags(HttpTagsKeysMapping convention)
         {
-            _convension = convension;
+            _convention = convention;
         }
 
         // for sake of TagsListTests using reflection
@@ -40,29 +40,29 @@ namespace Datadog.Trace.Tagging
         {
             var properties = InstrumentationTagsProperties;
 
-            if (_convension.Method != null)
+            if (_convention.Method != null)
             {
-                properties = properties.Concat(new Property<HttpTags, string>(_convension.Method, t => t.HttpMethod, (t, v) => t.HttpMethod = v));
+                properties = properties.Concat(new Property<HttpTags, string>(_convention.Method, t => t.HttpMethod, (t, v) => t.HttpMethod = v));
             }
 
-            if (_convension.Url != null)
+            if (_convention.Url != null)
             {
-                properties = properties.Concat(new Property<HttpTags, string>(_convension.Url, t => t.HttpUrl, (t, v) => t.HttpUrl = v));
+                properties = properties.Concat(new Property<HttpTags, string>(_convention.Url, t => t.HttpUrl, (t, v) => t.HttpUrl = v));
             }
 
-            if (_convension.StatusCode != null)
+            if (_convention.StatusCode != null)
             {
-                properties = properties.Concat(new Property<HttpTags, string>(_convension.StatusCode, t => t.HttpStatusCode, (t, v) => t.HttpStatusCode = v));
+                properties = properties.Concat(new Property<HttpTags, string>(_convention.StatusCode, t => t.HttpStatusCode, (t, v) => t.HttpStatusCode = v));
             }
 
-            if (_convension.InstrumentationName != null)
+            if (_convention.InstrumentationName != null)
             {
-                properties = properties.Concat(new Property<HttpTags, string>(_convension.InstrumentationName, t => t.InstrumentationName, (t, v) => t.InstrumentationName = v));
+                properties = properties.Concat(new Property<HttpTags, string>(_convention.InstrumentationName, t => t.InstrumentationName, (t, v) => t.InstrumentationName = v));
             }
 
-            if (_convension.HandlerType != null)
+            if (_convention.HandlerType != null)
             {
-                properties = properties.Concat(new Property<HttpTags, string>(_convension.HandlerType, t => t.HttpClientHandlerType, (t, v) => t.HttpClientHandlerType = v));
+                properties = properties.Concat(new Property<HttpTags, string>(_convention.HandlerType, t => t.HttpClientHandlerType, (t, v) => t.HttpClientHandlerType = v));
             }
 
             return properties;
