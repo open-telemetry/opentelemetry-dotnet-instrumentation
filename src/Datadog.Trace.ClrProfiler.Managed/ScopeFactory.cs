@@ -99,17 +99,14 @@ namespace Datadog.Trace.ClrProfiler
                     return null;
                 }
 
-                tags = new HttpTags();
-                string serviceName = tracer.Settings.GetServiceName(tracer, ServiceName);
-                var scope = tracer.StartActiveWithTags(OperationName, tags: tags, serviceName: serviceName, spanId: spanId);
-                tracer.OutboundHttpConvention.Apply(new OutboundHttpArgs
+                var args = new OutboundHttpArgs
                 {
+                    SpanId = spanId,
                     HttpMethod = httpMethod,
-                    HttpTags = tags,
                     IntegrationInfo = integrationId,
                     RequestUri = requestUri,
-                    Span = scope.Span,
-                });
+                };
+                var scope = tracer.OutboundHttpConvention.CreateScope(args, out tags);
                 return scope;
             }
             catch (Exception ex)

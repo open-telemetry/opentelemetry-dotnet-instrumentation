@@ -1,40 +1,37 @@
 using Datadog.Trace.Configuration;
+using Datadog.Trace.Tagging;
 using Datadog.Trace.Util;
 
 namespace Datadog.Trace.Conventions
 {
     internal class DatadogOutboundHttpConvention : IOutboundHttpConvention
     {
-        private readonly TracerSettings _tracerSettings;
+        private readonly Tracer _tracer;
 
-        public DatadogOutboundHttpConvention(TracerSettings tracerSettings)
+        public DatadogOutboundHttpConvention(Tracer tracer)
         {
-            _tracerSettings = tracerSettings;
+            _tracer = tracer;
         }
 
-        public void Apply(OutboundHttpArgs args)
+        public Scope CreateScope(OutboundHttpArgs args, out HttpTags tags)
         {
-            var span = args.Span;
+            tags = new HttpTags(); // TODO: HttpTags needs to support mapping different tag keys
+            string serviceName = _tracer.Settings.GetServiceName(_tracer, "http-client");
+            var scope = _tracer.StartActiveWithTags("http.request", tags: tags, serviceName: serviceName, spanId: args.SpanId);
+
+            scope.Span.Type = SpanTypes.Http;
             var requestUri = args.RequestUri;
             var httpMethod = args.HttpMethod;
-            var tags = args.HttpTags;
-            var integrationId = args.IntegrationInfo;
-
-            span.OperationName = "http.request";
-
-            span.Type = SpanTypes.Http;
-
             string resourceUrl = requestUri != null ? UriHelpers.CleanUri(requestUri, removeScheme: true, tryRemoveIds: true) : null;
             string httpUrl = requestUri != null ? UriHelpers.CleanUri(requestUri, removeScheme: false, tryRemoveIds: false) : null;
-            span.ResourceName = $"{httpMethod} {resourceUrl}";
-
+            scope.Span.ResourceName = $"{httpMethod} {resourceUrl}";
             tags.HttpMethod = httpMethod?.ToUpperInvariant();
-
             tags.HttpUrl = httpUrl;
 
+            var integrationId = args.IntegrationInfo;
             tags.InstrumentationName = IntegrationRegistry.GetName(integrationId);
-
-            tags.SetAnalyticsSampleRate(integrationId, _tracerSettings, enabledWithGlobalSetting: false);
+            tags.SetAnalyticsSampleRate(integrationId, _tracer.Settings, enabledWithGlobalSetting: false);
+            return scope;
         }
     }
 }

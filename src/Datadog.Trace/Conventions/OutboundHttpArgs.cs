@@ -9,15 +9,7 @@ namespace Datadog.Trace.Conventions
     /// </summary>
     internal struct OutboundHttpArgs
     {
-        /// <summary>
-        /// Span for which the conventions should be applied.
-        /// </summary>
-        public Span Span;
-
-        /// <summary>
-        /// Tags for which the conventions should be applied.
-        /// </summary>
-        public HttpTags HttpTags;
+        public ulong? SpanId;
 
         /// <summary>
         /// Request's HTTP method.

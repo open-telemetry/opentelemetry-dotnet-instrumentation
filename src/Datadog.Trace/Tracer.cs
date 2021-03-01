@@ -121,7 +121,7 @@ namespace Datadog.Trace
             switch (Settings.Convention)
             {
                 default:
-                    OutboundHttpConvention = new DatadogOutboundHttpConvention(Settings);
+                    OutboundHttpConvention = new DatadogOutboundHttpConvention(this);
                     break;
             }
 

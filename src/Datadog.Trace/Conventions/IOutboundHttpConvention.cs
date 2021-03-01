@@ -1,3 +1,5 @@
+using Datadog.Trace.Tagging;
+
 namespace Datadog.Trace.Conventions
 {
     /// <summary>
@@ -5,6 +7,6 @@ namespace Datadog.Trace.Conventions
     /// </summary>
     internal interface IOutboundHttpConvention
     {
-        void Apply(OutboundHttpArgs args);
+        Scope CreateScope(OutboundHttpArgs args, out HttpTags tags);
     }
 }
