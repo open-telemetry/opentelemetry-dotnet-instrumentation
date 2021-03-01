@@ -70,7 +70,7 @@ jobs:
         test/benchmarks/**/*.csproj
         !src/Datadog.Trace.Tools.Runner/*.csproj
     env:
-      OPENTELEMETRY_SERVICE_NAME: dd-tracer-dotnet
+      OTEL_SERVICE_NAME: dd-tracer-dotnet
 
   - task: DotNetCoreCLI@2
     displayName: dotnet test
@@ -80,7 +80,7 @@ jobs:
       projects: |
         test/**/*.Tests.csproj
     env:
-      OPENTELEMETRY_SERVICE_NAME: dd-tracer-dotnet
+      OTEL_SERVICE_NAME: dd-tracer-dotnet
 
 - job: managed_macos
   pool:

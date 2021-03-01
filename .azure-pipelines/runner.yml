@@ -172,7 +172,7 @@ jobs:
         benchmarks/**/*.csproj
         !src/Datadog.Trace.Tools.Runner/*.csproj
     env:
-      OPENTELEMETRY_SERVICE_NAME: dd-tracer-dotnet
+      OTEL_SERVICE_NAME: dd-tracer-dotnet
       
   - task: NuGetToolInstaller@1
     displayName: install nuget
@@ -190,7 +190,7 @@ jobs:
       msbuildArguments: /t:BuildTool /l:DatadogLogger,"$(OTEL_DOTNET_TRACER_MSBUILD)"
       maximumCpuCount: true
     env:
-      OPENTELEMETRY_SERVICE_NAME: dd-tracer-dotnet-runner-tool
+      OTEL_SERVICE_NAME: dd-tracer-dotnet-runner-tool
 
   - task: MSBuild@1
     displayName: standalone build
@@ -199,7 +199,7 @@ jobs:
       msbuildArguments: /t:BuildStandalone /l:DatadogLogger,"$(OTEL_DOTNET_TRACER_MSBUILD)"
       maximumCpuCount: true
     env:
-      OPENTELEMETRY_SERVICE_NAME: dd-tracer-dotnet-runner-tool
+      OTEL_SERVICE_NAME: dd-tracer-dotnet-runner-tool
 
   - task: DeleteFiles@1
     displayName: 'Remove unneeded files'
