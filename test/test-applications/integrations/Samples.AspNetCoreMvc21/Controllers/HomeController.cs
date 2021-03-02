@@ -14,13 +14,13 @@ namespace Samples.AspNetCoreMvc.Controllers
     {
         public IActionResult Index()
         {
-            var instrumentationType = Type.GetType("Datadog.Trace.ClrProfiler.Instrumentation, Datadog.Trace.ClrProfiler.Managed");
+            var instrumentationType = Type.GetType("Datadog.Trace.ClrProfiler.Instrumentation, OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed");
             ViewBag.ProfilerAttached = instrumentationType?.GetProperty("ProfilerAttached", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) ?? false;
-            ViewBag.TracerAssemblyLocation = Type.GetType("Datadog.Trace.Tracer, Datadog.Trace")?.Assembly.Location;
+            ViewBag.TracerAssemblyLocation = Type.GetType("Datadog.Trace.Tracer, OpenTelemetry.AutoInstrumentation")?.Assembly.Location;
             ViewBag.ClrProfilerAssemblyLocation = instrumentationType?.Assembly.Location;
             ViewBag.StackTrace = StackTraceHelper.GetUsefulStack();
 
-            var prefixes = new[] { "COR_", "CORECLR_", "DD_", "DATADOG_" };
+            var prefixes = new[] { "COR_", "CORECLR_", "OTEL_", "DATADOG_" };
 
             var envVars = from envVar in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>()
                           from prefix in prefixes

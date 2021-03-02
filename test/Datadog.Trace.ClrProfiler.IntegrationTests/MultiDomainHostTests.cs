@@ -43,7 +43,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
         [Trait("LoadFromGAC", "False")]
         public void WorksOutsideTheGAC(string targetFramework)
         {
-            Assert.False(typeof(Instrumentation).Assembly.GlobalAssemblyCache, "Datadog.Trace.ClrProfiler.Managed was loaded from the GAC. Ensure that the assembly and its dependencies are not installed in the GAC when running this test.");
+            Assert.False(typeof(Instrumentation).Assembly.GlobalAssemblyCache, "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed was loaded from the GAC. Ensure that the assembly and its dependencies are not installed in the GAC when running this test.");
 
             var expectedMap = new Dictionary<string, int>()
             {
@@ -66,7 +66,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
         [Trait("LoadFromGAC", "True")]
         public void WorksInsideTheGAC(string targetFramework)
         {
-            Assert.True(typeof(Instrumentation).Assembly.GlobalAssemblyCache, "Datadog.Trace.ClrProfiler.Managed was not loaded from the GAC. Ensure that the assembly and its dependencies are installed in the GAC when running this test.");
+            Assert.True(typeof(Instrumentation).Assembly.GlobalAssemblyCache, "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed was not loaded from the GAC. Ensure that the assembly and its dependencies are installed in the GAC when running this test.");
 
             var expectedMap = new Dictionary<string, int>()
             {
@@ -89,7 +89,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
         public void DoesNotCrashInBadConfiguration(string targetFramework)
         {
             // Set bad configuration
-            SetEnvironmentVariable("DD_DOTNET_TRACER_HOME", Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            SetEnvironmentVariable("OTEL_DOTNET_TRACER_HOME", Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
 
             int agentPort = TcpPortProvider.GetOpenPort();
             int httpPort = TcpPortProvider.GetOpenPort();

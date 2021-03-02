@@ -10,7 +10,7 @@ namespace Datadog.Trace.Tools.Runner
 {
     internal class Utils
     {
-        public const string PROFILERID = "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}";
+        public const string PROFILERID = "{918728DD-259F-4A6A-AC2B-B85E1B658318}";
 
         public static Dictionary<string, string> GetProfilerEnvironmentVariables(string runnerFolder, Platform platform, Options options)
         {
@@ -31,15 +31,15 @@ namespace Datadog.Trace.Tools.Runner
             }
 
             tracerHome ??= DirectoryExists("Home", Path.Combine(runnerFolder, "..", "..", "..", "home"), Path.Combine(runnerFolder, "home"));
-            string tracerMsBuild = FileExists(Path.Combine(tracerHome, "netstandard2.0", "Datadog.Trace.MSBuild.dll"));
+            string tracerMsBuild = FileExists(Path.Combine(tracerHome, "netstandard2.0", "OpenTelemetry.AutoInstrumentation.MSBuild.dll"));
             string tracerIntegrations = FileExists(Path.Combine(tracerHome, "integrations.json"));
             string tracerProfiler32 = string.Empty;
             string tracerProfiler64 = string.Empty;
 
             if (platform == Platform.Windows)
             {
-                tracerProfiler32 = FileExists(Path.Combine(tracerHome, "win-x86", "Datadog.Trace.ClrProfiler.Native.dll"));
-                tracerProfiler64 = FileExists(Path.Combine(tracerHome, "win-x64", "Datadog.Trace.ClrProfiler.Native.dll"));
+                tracerProfiler32 = FileExists(Path.Combine(tracerHome, "win-x86", "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll"));
+                tracerProfiler64 = FileExists(Path.Combine(tracerHome, "win-x64", "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll"));
             }
             else if (platform == Platform.Linux)
             {
@@ -52,9 +52,9 @@ namespace Datadog.Trace.Tools.Runner
 
             var envVars = new Dictionary<string, string>
             {
-                ["DD_DOTNET_TRACER_HOME"] = tracerHome,
-                ["DD_DOTNET_TRACER_MSBUILD"] = tracerMsBuild,
-                ["DD_INTEGRATIONS"] = tracerIntegrations,
+                ["OTEL_DOTNET_TRACER_HOME"] = tracerHome,
+                ["OTEL_DOTNET_TRACER_MSBUILD"] = tracerMsBuild,
+                ["OTEL_INTEGRATIONS"] = tracerIntegrations,
                 ["CORECLR_ENABLE_PROFILING"] = "1",
                 ["CORECLR_PROFILER"] = PROFILERID,
                 ["CORECLR_PROFILER_PATH_32"] = tracerProfiler32,
@@ -67,22 +67,22 @@ namespace Datadog.Trace.Tools.Runner
 
             if (!string.IsNullOrWhiteSpace(options.Environment))
             {
-                envVars["DD_ENV"] = options.Environment;
+                envVars["OTEL_ENV"] = options.Environment;
             }
 
             if (!string.IsNullOrWhiteSpace(options.Service))
             {
-                envVars["DD_SERVICE"] = options.Service;
+                envVars["OTEL_SERVICE"] = options.Service;
             }
 
             if (!string.IsNullOrWhiteSpace(options.Version))
             {
-                envVars["DD_VERSION"] = options.Version;
+                envVars["OTEL_VERSION"] = options.Version;
             }
 
             if (!string.IsNullOrWhiteSpace(options.AgentUrl))
             {
-                envVars["DD_TRACE_AGENT_URL"] = options.AgentUrl;
+                envVars["OTEL_TRACE_AGENT_URL"] = options.AgentUrl;
             }
 
             return envVars;

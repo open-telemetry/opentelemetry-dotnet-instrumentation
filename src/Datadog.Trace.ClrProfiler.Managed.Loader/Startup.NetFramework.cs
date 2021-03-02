@@ -7,7 +7,7 @@ using System.Reflection;
 namespace Datadog.Trace.ClrProfiler.Managed.Loader
 {
     /// <summary>
-    /// A class that attempts to load the Datadog.Trace.ClrProfiler.Managed .NET assembly.
+    /// A class that attempts to load the OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed .NET assembly.
     /// </summary>
     public partial class Startup
     {
@@ -24,7 +24,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
             var corlib461Version = new Version(corlib461FileVersionString);
             var tracerFrameworkDirectory = corlibVersion < corlib461Version ? "net45" : "net461";
 
-            var tracerHomeDirectory = ReadEnvironmentVariable("DD_DOTNET_TRACER_HOME") ?? string.Empty;
+            var tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_TRACER_HOME") ?? string.Empty;
             return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
         }
 

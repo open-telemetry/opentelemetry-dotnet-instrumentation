@@ -12,7 +12,7 @@ namespace Datadog.Core.Tools
     /// </summary>
     public class EnvironmentTools
     {
-        public const string ProfilerClsId = "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}";
+        public const string ProfilerClsId = "{918728DD-259F-4A6A-AC2B-B85E1B658318}";
         public const string DotNetFramework = ".NETFramework";
         public const string CoreFramework = ".NETCoreApp";
 

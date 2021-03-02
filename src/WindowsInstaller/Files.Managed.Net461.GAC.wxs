@@ -7,32 +7,32 @@
     <ComponentGroup Id="Files.Managed.Net461.GAC" Directory="net461.GAC">
       <Component Win64="$(var.Win64)">
         <Condition>WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED</Condition>
-        <File Id="net461_GAC_Datadog.Trace.AspNet.dll"
-              Source="$(var.TracerHomeDirectory)\net461\Datadog.Trace.AspNet.dll"
+        <File Id="net461_GAC_OpenTelemetry.AutoInstrumentation.AspNet.dll"
+              Source="$(var.TracerHomeDirectory)\net461\OpenTelemetry.AutoInstrumentation.AspNet.dll"
               KeyPath="yes" Checksum="yes" Assembly=".net"/>
       </Component>
       <Component Win64="$(var.Win64)">
         <Condition>WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED</Condition>
-        <File Id="net461_GAC_Datadog.Trace.ClrProfiler.Managed.Core.dll"
-              Source="$(var.TracerHomeDirectory)\net461\Datadog.Trace.ClrProfiler.Managed.Core.dll"
+        <File Id="net461_GAC_OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Core.dll"
+              Source="$(var.TracerHomeDirectory)\net461\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Core.dll"
               KeyPath="yes" Checksum="yes" Assembly=".net"/>
       </Component>
       <Component Win64="$(var.Win64)">
         <Condition>WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED</Condition>
-        <File Id="net461_GAC_Datadog.Trace.ClrProfiler.Managed.dll"
-              Source="$(var.TracerHomeDirectory)\net461\Datadog.Trace.ClrProfiler.Managed.dll"
+        <File Id="net461_GAC_OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.dll"
+              Source="$(var.TracerHomeDirectory)\net461\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.dll"
               KeyPath="yes" Checksum="yes" Assembly=".net"/>
       </Component>
       <Component Win64="$(var.Win64)">
         <Condition>WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED</Condition>
-        <File Id="net461_GAC_Datadog.Trace.dll"
-              Source="$(var.TracerHomeDirectory)\net461\Datadog.Trace.dll"
+        <File Id="net461_GAC_OpenTelemetry.AutoInstrumentation.dll"
+              Source="$(var.TracerHomeDirectory)\net461\OpenTelemetry.AutoInstrumentation.dll"
               KeyPath="yes" Checksum="yes" Assembly=".net"/>
       </Component>
       <Component Win64="$(var.Win64)">
         <Condition>WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED</Condition>
-        <File Id="net461_GAC_Datadog.Trace.MSBuild.dll"
-              Source="$(var.TracerHomeDirectory)\net461\Datadog.Trace.MSBuild.dll"
+        <File Id="net461_GAC_OpenTelemetry.AutoInstrumentation.MSBuild.dll"
+              Source="$(var.TracerHomeDirectory)\net461\OpenTelemetry.AutoInstrumentation.MSBuild.dll"
               KeyPath="yes" Checksum="yes" Assembly=".net"/>
       </Component>
     </ComponentGroup>

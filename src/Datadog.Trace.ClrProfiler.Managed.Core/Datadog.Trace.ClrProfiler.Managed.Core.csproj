@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <RootNamespace>Datadog.Trace.ClrProfiler</RootNamespace>
+    <AssemblyName>OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Core</AssemblyName>
 
     <!-- NuGet -->
     <Version>1.23.0</Version>
