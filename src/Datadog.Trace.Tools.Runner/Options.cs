@@ -21,13 +21,13 @@ namespace Datadog.Trace.Tools.Runner
         [Option("set-ci", Required = false, Default = false, HelpText = "Setup the clr profiler environment variables for the CI job and exit. (only supported in Azure Pipelines)")]
         public bool SetEnvironmentVariables { get; set; }
 
-        [Option("otel-env", Required = false, HelpText = "Sets the environment name for the unified service tagging.")]
+        [Option("dd-env", Required = false, HelpText = "Sets the environment name for the unified service tagging.")]
         public string Environment { get; set; }
 
-        [Option("otel-service", Required = false, HelpText = "Sets the service name for the unified service tagging.")]
+        [Option("dd-service", Required = false, HelpText = "Sets the service name for the unified service tagging.")]
         public string Service { get; set; }
 
-        [Option("otel-version", Required = false, HelpText = "Sets the version name for the unified service tagging.")]
+        [Option("dd-version", Required = false, HelpText = "Sets the version name for the unified service tagging.")]
         public string Version { get; set; }
 
         [Option("agent-url", Required = false, HelpText = "Datadog trace agent url.")]
