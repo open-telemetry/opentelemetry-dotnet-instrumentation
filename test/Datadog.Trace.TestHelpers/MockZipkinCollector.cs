@@ -24,7 +24,7 @@ namespace Datadog.Trace.TestHelpers
         private readonly Thread _listenerThread;
         private readonly CancellationTokenSource _listenerCts = new CancellationTokenSource();
 
-        public MockZipkinCollector(int port = 9080, int retries = 5)
+        public MockZipkinCollector(int port = 8126, int retries = 5)
         {
             // try up to 5 consecutive ports before giving up
             while (true)

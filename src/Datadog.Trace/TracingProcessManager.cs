@@ -85,7 +85,7 @@ namespace Datadog.Trace
         {
             if (AzureAppServices.Metadata.DebugModeEnabled)
             {
-                const string ddLogLevelKey = "DD_LOG_LEVEL";
+                const string ddLogLevelKey = "OTEL_LOG_LEVEL";
                 if (EnvironmentHelpers.GetEnvironmentVariable(ddLogLevelKey) == null)
                 {
                     // This ensures that a single setting from applicationConfig can enable debug logs for every aspect of the extension

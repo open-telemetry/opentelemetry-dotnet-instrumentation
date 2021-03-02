@@ -20,7 +20,7 @@ namespace Samples.WebForms.Empty
             }
         }
 
-        [DllImport("Datadog.Trace.ClrProfiler.Native.dll")]
+        [DllImport("OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll")]
         private static extern bool IsProfilerAttached();
     }
 }

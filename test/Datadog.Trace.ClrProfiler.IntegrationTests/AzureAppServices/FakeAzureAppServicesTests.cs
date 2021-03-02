@@ -24,7 +24,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests.AzureAppServices
             var testProcess = EnvironmentHelper.GetSampleApplicationPath();
             var fakeTraceAgentPath = testProcess.Replace($"{SampleName}.exe", "FakeTraceAgent.exe");
 
-            SetEnvironmentVariable("DD_TRACE_AGENT_PATH", fakeTraceAgentPath);
+            SetEnvironmentVariable("OTEL_TRACE_AGENT_PATH", fakeTraceAgentPath);
 
             int agentPort = TcpPortProvider.GetOpenPort();
             using (var agent = new MockTracerAgent(agentPort))

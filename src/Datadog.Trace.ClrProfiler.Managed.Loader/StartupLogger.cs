@@ -61,11 +61,11 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
 
             try
             {
-                logDirectory = Environment.GetEnvironmentVariable("DD_TRACE_LOG_DIRECTORY");
+                logDirectory = Environment.GetEnvironmentVariable("OTEL_TRACE_LOG_DIRECTORY");
 
                 if (logDirectory == null)
                 {
-                    var nativeLogFile = Environment.GetEnvironmentVariable("DD_TRACE_LOG_PATH");
+                    var nativeLogFile = Environment.GetEnvironmentVariable("OTEL_TRACE_LOG_PATH");
 
                     if (!string.IsNullOrEmpty(nativeLogFile))
                     {
@@ -143,7 +143,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
         {
             try
             {
-                var ddTraceDebugValue = Environment.GetEnvironmentVariable("DD_TRACE_DEBUG");
+                var ddTraceDebugValue = Environment.GetEnvironmentVariable("OTEL_TRACE_DEBUG");
 
                 if (ddTraceDebugValue == null)
                 {

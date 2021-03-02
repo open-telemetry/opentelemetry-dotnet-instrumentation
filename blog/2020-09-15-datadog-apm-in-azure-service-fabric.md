@@ -69,11 +69,11 @@ Next, replace the `ServiceManifest.xml` with the text below.
       </ContainerHost>
     </EntryPoint>
     <EnvironmentVariables>
-      <EnvironmentVariable Name="DD_API_KEY" Value="API_KEY_GOES_HERE"/>
-      <EnvironmentVariable Name="DD_APM_ENABLED" Value="true"/>
-      <EnvironmentVariable Name="DD_APM_NON_LOCAL_TRAFFIC" Value="true"/>
-      <EnvironmentVariable Name="DD_DOGSTATSD_NON_LOCAL_TRAFFIC" Value="true"/>
-      <EnvironmentVariable Name="DD_HEALTH_PORT" Value="5002"/>
+      <EnvironmentVariable Name="OTEL_API_KEY" Value="API_KEY_GOES_HERE"/>
+      <EnvironmentVariable Name="OTEL_APM_ENABLED" Value="true"/>
+      <EnvironmentVariable Name="OTEL_APM_NON_LOCAL_TRAFFIC" Value="true"/>
+      <EnvironmentVariable Name="OTEL_DOGSTATSD_NON_LOCAL_TRAFFIC" Value="true"/>
+      <EnvironmentVariable Name="OTEL_HEALTH_PORT" Value="5002"/>
     </EnvironmentVariables>
   </CodePackage>
   <ConfigPackage Name="Config" Version="1.0.0" />
