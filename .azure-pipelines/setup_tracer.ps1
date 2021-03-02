@@ -29,7 +29,7 @@ if ($env:os -eq "Windows_NT")
         $dd_tracer_home = "$dd_tracer_workingfolder\release"
     }
 
-    $dd_tracer_msbuild = "$dd_tracer_home\netstandard2.0\Datadog.Trace.MSBuild.dll"
+    $dd_tracer_msbuild = "$dd_tracer_home\netstandard2.0\OpenTelemetry.AutoInstrumentation.MSBuild.dll"
     $dd_tracer_integrations = "$dd_tracer_home\integrations.json"
     $dd_tracer_profiler_32 = "$dd_tracer_home\win-x86\Datadog.Trace.ClrProfiler.Native.dll"
     $dd_tracer_profiler_64 = "$dd_tracer_home\win-x64\Datadog.Trace.ClrProfiler.Native.dll"
@@ -56,7 +56,7 @@ else
         $dd_tracer_home = "$dd_tracer_workingfolder/release"
     }
 
-    $dd_tracer_msbuild = "$dd_tracer_home/netstandard2.0/Datadog.Trace.MSBuild.dll"
+    $dd_tracer_msbuild = "$dd_tracer_home/netstandard2.0/OpenTelemetry.AutoInstrumentation.MSBuild.dll"
     $dd_tracer_integrations = "$dd_tracer_home/integrations.json"
     $dd_tracer_profiler_64 = "$dd_tracer_home/Datadog.Trace.ClrProfiler.Native.so"
 }
