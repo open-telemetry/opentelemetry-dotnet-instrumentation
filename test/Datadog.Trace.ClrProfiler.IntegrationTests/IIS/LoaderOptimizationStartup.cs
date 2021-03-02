@@ -53,6 +53,11 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests.IIS
 
             // Server is ready to receive requests
             var responseMessage = await client.GetAsync(Url);
+            if (responseMessage.StatusCode != HttpStatusCode.OK)
+            {
+                Output.WriteLine($"Response status code: {responseMessage.StatusCode}\nResponse message content: {responseMessage.Content}");
+            }
+
             Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
         }
     }

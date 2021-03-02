@@ -319,7 +319,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
     Debug("AssemblyLoadFinished: AssemblyName=", assembly_info.name, " AssemblyVersion=", assembly_metadata.version.str());
   }
 
-  if (assembly_info.name == "Datadog.Trace.ClrProfiler.Managed"_W) {
+  if (assembly_info.name == "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed"_W) {
     // Configure a version string to compare with the profiler version
     std::stringstream ss;
     ss << assembly_metadata.version.major << '.'
@@ -330,22 +330,22 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
 
     // Check that Major.Minor.Build match the profiler version
     if (assembly_version == ToWSTRING(PROFILER_VERSION)) {
-      Info("AssemblyLoadFinished: Datadog.Trace.ClrProfiler.Managed v", assembly_version, " matched profiler version v", PROFILER_VERSION);
+      Info("AssemblyLoadFinished: OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed v", assembly_version, " matched profiler version v", PROFILER_VERSION);
       managed_profiler_loaded_app_domains.insert(assembly_info.app_domain_id);
 
       if (runtime_information_.is_desktop() && corlib_module_loaded) {
         // Set the managed_profiler_loaded_domain_neutral flag whenever the managed profiler is loaded shared
         if (assembly_info.app_domain_id == corlib_app_domain_id) {
-          Info("AssemblyLoadFinished: Datadog.Trace.ClrProfiler.Managed was loaded domain-neutral");
+          Info("AssemblyLoadFinished: OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed was loaded domain-neutral");
           managed_profiler_loaded_domain_neutral = true;
         }
         else {
-          Info("AssemblyLoadFinished: Datadog.Trace.ClrProfiler.Managed was not loaded domain-neutral");
+          Info("AssemblyLoadFinished: OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed was not loaded domain-neutral");
         }
       }
     }
     else {
-      Warn("AssemblyLoadFinished: Datadog.Trace.ClrProfiler.Managed v", assembly_version, " did not match profiler version v", PROFILER_VERSION);
+      Warn("AssemblyLoadFinished: OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed v", assembly_version, " did not match profiler version v", PROFILER_VERSION);
     }
   }
 
@@ -694,7 +694,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(
 
   // The first time a method is JIT compiled in an AppDomain, insert our startup
   // hook which, at a minimum, must add an AssemblyResolve event so we can find
-  // Datadog.Trace.ClrProfiler.Managed.dll and its dependencies on-disk since it
+  // OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.dll and its dependencies on-disk since it
   // is no longer provided in a NuGet package
   if (valid_startup_hook_callsite &&
       first_jit_compilation_app_domains.find(module_metadata->app_domain_id) ==

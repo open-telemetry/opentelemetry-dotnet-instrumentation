@@ -53,7 +53,7 @@ namespace Datadog.Trace.OpenTracing
                 return codec.Extract(carrier);
             }
 
-            throw new NotSupportedException($"Tracer.Extract is not implemented for {format} by Datadog.Trace");
+            throw new NotSupportedException($"Tracer.Extract is not implemented for {format} by OpenTelemetry.AutoInstrumentation");
         }
 
         public void Inject<TCarrier>(global::OpenTracing.ISpanContext spanContext, IFormat<TCarrier> format, TCarrier carrier)
@@ -66,7 +66,7 @@ namespace Datadog.Trace.OpenTracing
             }
             else
             {
-                throw new NotSupportedException($"Tracer.Inject is not implemented for {format} by Datadog.Trace");
+                throw new NotSupportedException($"Tracer.Inject is not implemented for {format} by OpenTelemetry.AutoInstrumentation");
             }
         }
     }
