@@ -120,6 +120,10 @@ namespace Datadog.Trace
 
             switch (Settings.Convention)
             {
+                case ConventionType.OpenTelemetry:
+                    OutboundHttpConvention = new OtelOutboundHttpConvention(this);
+                    break;
+                case ConventionType.Datadog:
                 default:
                     OutboundHttpConvention = new DatadogOutboundHttpConvention(this);
                     break;

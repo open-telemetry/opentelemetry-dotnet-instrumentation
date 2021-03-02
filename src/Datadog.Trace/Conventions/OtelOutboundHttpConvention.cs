@@ -1,10 +1,11 @@
+using System;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.Tagging;
 using Datadog.Trace.Util;
 
 namespace Datadog.Trace.Conventions
 {
-    internal class DatadogOutboundHttpConvention : IOutboundHttpConvention
+    internal class OtelOutboundHttpConvention : IOutboundHttpConvention
     {
         private static HttpTagsKeysMapping tagKeys = new HttpTagsKeysMapping
         {
@@ -17,7 +18,7 @@ namespace Datadog.Trace.Conventions
 
         private readonly Tracer _tracer;
 
-        public DatadogOutboundHttpConvention(Tracer tracer)
+        public OtelOutboundHttpConvention(Tracer tracer)
         {
             _tracer = tracer;
         }
@@ -32,10 +33,9 @@ namespace Datadog.Trace.Conventions
             var requestUri = args.RequestUri;
             var httpMethod = args.HttpMethod;
             string resourceUrl = requestUri != null ? UriHelpers.CleanUri(requestUri, removeScheme: true, tryRemoveIds: true) : null;
-            string httpUrl = requestUri != null ? UriHelpers.CleanUri(requestUri, removeScheme: false, tryRemoveIds: false) : null;
             scope.Span.ResourceName = $"{httpMethod} {resourceUrl}";
-            tags.HttpMethod = httpMethod?.ToUpperInvariant();
-            tags.HttpUrl = httpUrl;
+            tags.HttpMethod = httpMethod;
+            tags.HttpUrl = $"{requestUri.Scheme}{Uri.SchemeDelimiter}{requestUri.Authority}{requestUri.PathAndQuery}{requestUri.Fragment}";
 
             var integrationId = args.IntegrationInfo;
             tags.InstrumentationName = IntegrationRegistry.GetName(integrationId);
