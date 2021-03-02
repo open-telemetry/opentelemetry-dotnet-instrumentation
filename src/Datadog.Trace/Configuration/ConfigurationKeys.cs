@@ -281,7 +281,7 @@ namespace Datadog.Trace.Configuration
         public const string Exporter = "OTEL_EXPORTER";
 
         /// <summary>
-        /// Configuration key for the convention to be used.
+        /// Configuration key for the semantic convention to be used.
         /// The Tracer uses it to define operation names, span tags, statuses etc.
         /// Default is <c>"Default"</c>.
         /// <seealso cref="TracerSettings.Convention"/>

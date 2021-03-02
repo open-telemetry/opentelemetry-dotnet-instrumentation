@@ -340,7 +340,7 @@ namespace Datadog.Trace.Configuration
         public ExporterType Exporter { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the convention to be used.
+        /// Gets or sets the name of the semantic convention to be used.
         /// The Tracer uses it to define operation names, span tags, statuses etc.
         /// Default is <c>"Default"</c>.
         /// <seealso cref="ConfigurationKeys.Convention"/>

@@ -1,7 +1,7 @@
 namespace Datadog.Trace.Configuration
 {
     /// <summary>
-    /// Convention used to when defining operation names, span tags, statuses etc.
+    /// Semantic convention used to when defining operation names, span tags, statuses etc.
     /// </summary>
     public enum ConventionType
     {
