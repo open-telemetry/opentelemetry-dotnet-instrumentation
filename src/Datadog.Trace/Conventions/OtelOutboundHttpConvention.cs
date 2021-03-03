@@ -17,19 +17,22 @@ namespace Datadog.Trace.Conventions
         public Scope CreateScope(OutboundHttpArgs args, out HttpTags tags)
         {
             tags = new OtelHttpTags();
-            string serviceName = _tracer.Settings.GetServiceName(_tracer, "http-client");
-            var scope = _tracer.StartActiveWithTags("http.request", tags: tags, serviceName: serviceName, spanId: args.SpanId);
-
-            scope.Span.Type = SpanTypes.Http;
             var requestUri = args.RequestUri;
             var httpMethod = args.HttpMethod;
-            string resourceUrl = requestUri != null ? UriHelpers.CleanUri(requestUri, removeScheme: true, tryRemoveIds: true) : null;
-            scope.Span.ResourceName = $"{httpMethod} {resourceUrl}";
+
+            string operationName = $"HTTP {httpMethod}";
+            string serviceName = _tracer.Settings.GetServiceName(_tracer, "http-client");
+            var scope = _tracer.StartActiveWithTags(operationName, tags: tags, serviceName: serviceName, spanId: args.SpanId);
+            scope.Span.Type = SpanTypes.Http;
+
             tags.HttpMethod = httpMethod;
             tags.HttpUrl = $"{requestUri.Scheme}{Uri.SchemeDelimiter}{requestUri.Authority}{requestUri.PathAndQuery}{requestUri.Fragment}";
             tags.SetTag("http.scheme", requestUri.Scheme);
             tags.SetTag("http.host", requestUri.Authority);
             tags.SetTag("http.target", $"{requestUri.PathAndQuery}{requestUri.Fragment}");
+
+            string resourceUrl = requestUri != null ? UriHelpers.CleanUri(requestUri, removeScheme: true, tryRemoveIds: true) : null;
+            scope.Span.ResourceName = $"{httpMethod} {resourceUrl}";
 
             var integrationId = args.IntegrationInfo;
             tags.InstrumentationName = IntegrationRegistry.GetName(integrationId);
