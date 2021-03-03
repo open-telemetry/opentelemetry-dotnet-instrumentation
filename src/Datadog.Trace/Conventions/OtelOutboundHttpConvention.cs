@@ -27,6 +27,8 @@ namespace Datadog.Trace.Conventions
             scope.Span.ResourceName = $"{httpMethod} {resourceUrl}";
             tags.HttpMethod = httpMethod;
             tags.HttpUrl = $"{requestUri.Scheme}{Uri.SchemeDelimiter}{requestUri.Authority}{requestUri.PathAndQuery}{requestUri.Fragment}";
+            tags.SetTag("http.scheme", requestUri.Scheme);
+            tags.SetTag("http.host", requestUri.Authority);
             tags.SetTag("http.target", $"{requestUri.PathAndQuery}{requestUri.Fragment}");
 
             var integrationId = args.IntegrationInfo;
