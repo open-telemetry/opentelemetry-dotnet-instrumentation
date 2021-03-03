@@ -40,7 +40,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.StackExchange.Redis
             CallerAssembly = RedisAssembly,
             TargetAssembly = RedisAssembly,
             TargetType = RedisBaseTypeName,
-            TargetSignatureTypes = new[] { "System.Threading.Tasks.Task`1<T>", "StackExchange.Redis.Message", "StackExchange.Redis.ResultProcessor`1<T>", "StackExchange.Redis.ServerEndPoint" },
+            TargetSignatureTypes = new[] { ClrNames.GenericParameterTask, "StackExchange.Redis.Message", "StackExchange.Redis.ResultProcessor`1<T>", "StackExchange.Redis.ServerEndPoint" },
             TargetMinimumVersion = Major1,
             TargetMaximumVersion = Major2)]
         [InterceptMethod(
@@ -48,7 +48,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.StackExchange.Redis
             CallerAssembly = StrongNameRedisAssembly,
             TargetAssembly = StrongNameRedisAssembly,
             TargetType = RedisBaseTypeName,
-            TargetSignatureTypes = new[] { "System.Threading.Tasks.Task`1<T>", "StackExchange.Redis.Message", "StackExchange.Redis.ResultProcessor`1<T>", "StackExchange.Redis.ServerEndPoint" },
+            TargetSignatureTypes = new[] { ClrNames.GenericParameterTask, "StackExchange.Redis.Message", "StackExchange.Redis.ResultProcessor`1<T>", "StackExchange.Redis.ServerEndPoint" },
             TargetMinimumVersion = Major1,
             TargetMaximumVersion = Major2)]
         public static object ExecuteAsync<T>(
@@ -105,7 +105,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.StackExchange.Redis
                                         .WithMethodGenerics(typeof(T))
                                         .WithParameters(message, processor, server)
                                         .WithNamespaceAndNameFilters(
-                                             ClrNames.GenericTask,
+                                             ClrNames.GenericParameterTask,
                                              "StackExchange.Redis.Message",
                                              "StackExchange.Redis.ResultProcessor`1",
                                              "StackExchange.Redis.ServerEndPoint")
@@ -130,16 +130,20 @@ namespace Datadog.Trace.ClrProfiler.Integrations.StackExchange.Redis
 
             if (thisType == batchType)
             {
-                using (var scope = CreateScope(redisBase, message))
+                Scope scope = CreateScope(redisBase, message);
+                if (scope != null)
                 {
-                    try
+                    using (scope)
                     {
-                        return await instrumentedMethod(redisBase, message, processor, server).ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        scope?.Span.SetException(ex);
-                        throw;
+                        try
+                        {
+                            return await instrumentedMethod(redisBase, message, processor, server).ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            scope?.Span.SetException(ex);
+                            throw;
+                        }
                     }
                 }
             }
@@ -149,11 +153,18 @@ namespace Datadog.Trace.ClrProfiler.Integrations.StackExchange.Redis
 
         private static Scope CreateScope(object batch, object message)
         {
-            var multiplexerData = batch.As<BatchData>().Multiplexer;
-            var hostAndPort = StackExchangeRedisHelper.GetHostAndPort(multiplexerData.Configuration);
-            var rawCommand = message.As<MessageData>().CommandAndKey ?? "COMMAND";
+            if (batch.TryDuckCast<BatchData>(out var batchData))
+            {
+                var multiplexerData = batchData.Multiplexer;
+                var hostAndPort = StackExchangeRedisHelper.GetHostAndPort(multiplexerData.Configuration);
+                if (message.TryDuckCast<MessageData>(out var messageData))
+                {
+                    var rawCommand = messageData.CommandAndKey ?? "COMMAND";
+                    return RedisHelper.CreateScope(Tracer.Instance, IntegrationId, hostAndPort.Host, hostAndPort.Port, rawCommand);
+                }
+            }
 
-            return RedisHelper.CreateScope(Tracer.Instance, IntegrationId, hostAndPort.Host, hostAndPort.Port, rawCommand);
+            return null;
         }
 
         /*

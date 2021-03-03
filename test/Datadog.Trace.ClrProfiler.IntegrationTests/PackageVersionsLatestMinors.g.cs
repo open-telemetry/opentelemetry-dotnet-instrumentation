@@ -39,7 +39,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
                 new object[] { "2.8.1" },
                 new object[] { "2.9.3" },
                 new object[] { "2.10.4" },
-                new object[] { "2.11.5" },
+                new object[] { "2.11.6" },
 #endif
             };
 
@@ -60,7 +60,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
                 new object[] { "6.5.1" },
                 new object[] { "6.6.0" },
                 new object[] { "6.7.0" },
-                new object[] { "6.8.6" },
+                new object[] { "6.8.7" },
 #endif
             };
 
@@ -89,8 +89,8 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
 #else
 #if NETFRAMEWORK
 #endif
-                new object[] { "4.0.10" },
-                new object[] { "4.1.3.1" },
+                new object[] { "4.0.11" },
+                new object[] { "4.1.8" },
 #endif
             };
 
@@ -130,7 +130,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
                 new object[] { "4.5.3" },
                 new object[] { "4.6.1" },
                 new object[] { "4.7.0" },
-                new object[] { "4.8.1" },
+                new object[] { "4.8.2" },
 #endif
             };
 
@@ -146,6 +146,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
                 new object[] { "1.0.19269.1" },
                 new object[] { "1.1.3" },
                 new object[] { "2.0.1" },
+                new object[] { "2.1.1" },
 #endif
             };
 
@@ -183,7 +184,78 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
                 new object[] { "5.6.0" },
                 new object[] { "5.7.0" },
                 new object[] { "5.8.0" },
-                new object[] { "5.9.0" },
+                new object[] { "5.9.2" },
+                new object[] { "5.10.4" },
+#endif
+            };
+
+        public static IEnumerable<object[]> MySqlData =>
+
+            new List<object[]>
+            {
+#if DEFAULT_SAMPLES
+                new object[] { string.Empty },
+#else
+#if NETFRAMEWORK
+#endif
+                new object[] { "6.7.9" },
+                new object[] { "6.8.8" },
+                new object[] { "6.9.12" },
+                new object[] { "6.10.9" },
+                new object[] { "8.0.23" },
+#endif
+            };
+
+        public static IEnumerable<object[]> MicrosoftDataSqlite =>
+
+            new List<object[]>
+            {
+#if DEFAULT_SAMPLES
+                new object[] { string.Empty },
+#else
+#if NETFRAMEWORK
+#endif
+                new object[] { "2.0.1" },
+                new object[] { "2.1.14" },
+                new object[] { "2.2.6" },
+                new object[] { "3.0.3" },
+                new object[] { "3.1.12" },
+                new object[] { "5.0.3" },
+#endif
+            };
+
+        public static IEnumerable<object[]> OracleMDA =>
+
+            new List<object[]>
+            {
+#if DEFAULT_SAMPLES
+                new object[] { string.Empty },
+#else
+#if NETFRAMEWORK
+#endif
+                new object[] { "18.3.0" },
+                new object[] { "18.6.0" },
+                new object[] { "19.3.1" },
+                new object[] { "19.5.0" },
+                new object[] { "19.6.0" },
+                new object[] { "19.7.0" },
+                new object[] { "19.8.0" },
+                new object[] { "19.9.0" },
+                new object[] { "19.10.1" },
+#endif
+            };
+
+        public static IEnumerable<object[]> OracleMDACore =>
+
+            new List<object[]>
+            {
+#if DEFAULT_SAMPLES
+                new object[] { string.Empty },
+#else
+#if NETFRAMEWORK
+#endif
+                new object[] { "2.18.6" },
+                new object[] { "2.19.101" },
 #endif
             };
 

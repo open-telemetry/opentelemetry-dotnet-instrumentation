@@ -30,12 +30,12 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.XUnit
         /// <returns>Calltarget state value</returns>
         public static CallTargetState OnMethodBegin<TTarget>(TTarget instance)
         {
-            if (Tracer.Instance.Settings.IsIntegrationEnabled(IntegrationId))
+            if (!Common.TestTracer.Settings.IsIntegrationEnabled(IntegrationId))
             {
                 return CallTargetState.GetDefault();
             }
 
-            TestInvokerStruct invokerInstance = instance.As<TestInvokerStruct>();
+            TestInvokerStruct invokerInstance = instance.DuckCast<TestInvokerStruct>();
             TestRunnerStruct runnerInstance = new TestRunnerStruct
             {
                 Aggregator = invokerInstance.Aggregator,
@@ -62,7 +62,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.XUnit
             Scope scope = state.Scope;
             if (scope != null)
             {
-                TestInvokerStruct invokerInstance = instance.As<TestInvokerStruct>();
+                TestInvokerStruct invokerInstance = instance.DuckCast<TestInvokerStruct>();
                 XUnitIntegration.FinishScope(scope, invokerInstance.Aggregator);
             }
 

@@ -140,9 +140,14 @@ namespace Datadog.Trace.Configuration
         public const string ServiceNameMappings = "OTEL_TRACE_SERVICE_MAPPING";
 
         /// <summary>
-        /// Configuration key for setting the size of the trace buffer
+        /// Configuration key for setting the size in bytes of the trace buffer
         /// </summary>
-        public const string QueueSize = "OTEL_TRACE_QUEUE_SIZE";
+        public const string BufferSize = "OTEL_TRACE_BUFFER_SIZE";
+
+        /// <summary>
+        /// Configuration key for setting the batch interval in milliseconds for the serialization queue
+        /// </summary>
+        public const string SerializationBatchInterval = "OTEL_TRACE_BATCH_INTERVAL";
 
         /// <summary>
         /// Configuration key for enabling or disabling the automatic injection

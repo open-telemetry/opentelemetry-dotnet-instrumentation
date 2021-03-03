@@ -30,7 +30,7 @@ Integration tests | [![Build Status](https://dev.azure.com/datadoghq/dd-trace-do
 
 ### Minimum requirements
 
-- [Visual Studio 2019](https://visualstudio.microsoft.com/downloads/) or newer
+- [Visual Studio 2019 (16.8)](https://visualstudio.microsoft.com/downloads/) or newer
   - Workloads
     - Desktop development with C++
     - .NET desktop development
@@ -91,6 +91,8 @@ msbuild Datadog.Trace.proj /t:CreateHomeDirectory /p:Configuration=Release;Platf
 To build C# projects and NuGet packages only
 - [.NET 5.0 SDK](https://dotnet.microsoft.com/download/dotnet/5.0)
 - [.NET Core 3.1 Runtime](https://dotnet.microsoft.com/download/dotnet-core/3.1)
+- Optional: [.NET Core 2.1 Runtime](https://dotnet.microsoft.com/download/dotnet-core/2.1) to test in .NET Core 2.1 locally.
+- Optional: [.NET Core 3.0 Runtime](https://dotnet.microsoft.com/download/dotnet-core/3.0) to test in .NET Core 3.0 locally.
 
 To build everything and run integration tests
 - [Docker Compose](https://docs.docker.com/compose/install/)

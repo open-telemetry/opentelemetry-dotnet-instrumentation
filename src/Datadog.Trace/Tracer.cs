@@ -114,7 +114,8 @@ namespace Datadog.Trace
                         break;
                 }
 
-                _agentWriter = new AgentWriter(api, Statsd, queueSize: Settings.TraceQueueSize);
+                Log.Warning("Using eager agent writer");
+                _agentWriter = new AgentWriter(api, Statsd, maxBufferSize: Settings.TraceBufferSize);
             }
 
             _scopeManager = scopeManager ?? new AsyncLocalScopeManager();

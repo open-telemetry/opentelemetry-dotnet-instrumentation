@@ -134,7 +134,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.StackExchange.Redis
             CallerAssembly = RedisAssembly,
             TargetAssembly = RedisAssembly,
             TargetType = ConnectionMultiplexerTypeName,
-            TargetSignatureTypes = new[] { "System.Threading.Tasks.Task`1<T>", StackExchangeRedisMessage, StackExchangeRedisResultProcessorGeneric, ClrNames.Object, StackExchangeRedisServerEndPoint },
+            TargetSignatureTypes = new[] { ClrNames.GenericParameterTask, StackExchangeRedisMessage, StackExchangeRedisResultProcessorGeneric, ClrNames.Object, StackExchangeRedisServerEndPoint },
             TargetMinimumVersion = Major1,
             TargetMaximumVersion = Major2)]
         [InterceptMethod(
@@ -142,7 +142,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.StackExchange.Redis
             CallerAssembly = StrongNameRedisAssembly,
             TargetAssembly = StrongNameRedisAssembly,
             TargetType = ConnectionMultiplexerTypeName,
-            TargetSignatureTypes = new[] { "System.Threading.Tasks.Task`1<T>", StackExchangeRedisMessage, StackExchangeRedisResultProcessorGeneric, ClrNames.Object, StackExchangeRedisServerEndPoint },
+            TargetSignatureTypes = new[] { ClrNames.GenericParameterTask, StackExchangeRedisMessage, StackExchangeRedisResultProcessorGeneric, ClrNames.Object, StackExchangeRedisServerEndPoint },
             TargetMinimumVersion = Major1,
             TargetMaximumVersion = Major2)]
         public static object ExecuteAsyncImpl<T>(
@@ -173,7 +173,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.StackExchange.Redis
                         .WithParameters(message, processor, state, server)
                         .WithMethodGenerics(genericType)
                         .WithNamespaceAndNameFilters(
-                            ClrNames.GenericTask,
+                            ClrNames.GenericParameterTask,
                             StackExchangeRedisMessage,
                             StackExchangeRedisResultProcessor,
                             ClrNames.Object,
@@ -215,27 +215,35 @@ namespace Datadog.Trace.ClrProfiler.Integrations.StackExchange.Redis
             object server,
             Func<object, object, object, object, object, Task<T>> originalMethod)
         {
-            using (var scope = CreateScope(multiplexer, message))
+            var scope = CreateScope(multiplexer, message);
+            try
             {
-                try
-                {
-                    return await originalMethod(multiplexer, message, processor, state, server).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    scope?.Span.SetException(ex);
-                    throw;
-                }
+                return await originalMethod(multiplexer, message, processor, state, server).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                scope?.Span.SetException(ex);
+                throw;
+            }
+            finally
+            {
+                scope?.Dispose();
             }
         }
 
         private static Scope CreateScope(object multiplexer, object message)
         {
-            var multiplexerData = multiplexer.As<MultiplexerData>();
-            var hostAndPort = StackExchangeRedisHelper.GetHostAndPort(multiplexerData.Configuration);
-            var rawCommand = message.As<MessageData>().CommandAndKey ?? "COMMAND";
+            if (multiplexer.TryDuckCast<MultiplexerData>(out var multiplexerData))
+            {
+                var hostAndPort = StackExchangeRedisHelper.GetHostAndPort(multiplexerData.Configuration);
+                if (message.TryDuckCast<MessageData>(out var messageData))
+                {
+                    var rawCommand = messageData.CommandAndKey ?? "COMMAND";
+                    return RedisHelper.CreateScope(Tracer.Instance, IntegrationId, hostAndPort.Host, hostAndPort.Port, rawCommand);
+                }
+            }
 
-            return RedisHelper.CreateScope(Tracer.Instance, IntegrationId, hostAndPort.Host, hostAndPort.Port, rawCommand);
+            return null;
         }
 
         /*

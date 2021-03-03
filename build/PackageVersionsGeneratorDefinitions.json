@@ -64,5 +64,33 @@
     "MinVersion": "4.0.48",
     "MinVersionNetCore": "5.0.0",
     "MaxVersionExclusive": "6.0.0"
+  },
+  {
+    "IntegrationName": "MySqlData",
+    "SampleProjectName": "Samples.MySql",
+    "NugetPackageSearchName": "MySql.Data",
+    "MinVersion": "6.7.9",
+    "MaxVersionExclusive": "9.0.0"
+  },
+  {
+    "IntegrationName": "MicrosoftDataSqlite",
+    "SampleProjectName": "Samples.Microsoft.Data.Sqlite",
+    "NugetPackageSearchName": "Microsoft.Data.Sqlite",
+    "MinVersion": "2.0.0",
+    "MaxVersionExclusive": "6.0.0"
+  },
+  {
+    "IntegrationName": "OracleMDA",
+    "SampleProjectName": "Samples.OracleMDA",
+    "NugetPackageSearchName": "Oracle.ManagedDataAccess",
+    "MinVersion": "18.3.0",
+    "MaxVersionExclusive": "20.0.0"
+  },
+  {
+    "IntegrationName": "OracleMDACore",
+    "SampleProjectName": "Samples.OracleMDA.Core",
+    "NugetPackageSearchName": "Oracle.ManagedDataAccess.Core",
+    "MinVersion": "2.18.3",
+    "MaxVersionExclusive": "3.0.0"
   }
 ]

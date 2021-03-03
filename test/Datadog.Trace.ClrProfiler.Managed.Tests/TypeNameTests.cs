@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -32,7 +33,12 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             yield return new object[] { ClrNames.HttpResponseMessage, typeof(System.Net.Http.HttpResponseMessage) };
             yield return new object[] { ClrNames.HttpResponseMessageTask, "System.Threading.Tasks.Task`1<System.Net.Http.HttpResponseMessage>" }; // Generic full names have square brackets
             yield return new object[] { ClrNames.GenericTask, typeof(Task<>) };
-        }
+            yield return new object[] { ClrNames.Stream, typeof(Stream) };
+            yield return new object[] { ClrNames.IgnoreGenericTask, "System.Threading.Tasks.Task`1<_>" };
+            yield return new object[] { ClrNames.GenericParameterTask, "System.Threading.Tasks.Task`1<T>" };
+            yield return new object[] { ClrNames.ObjectTask, "System.Threading.Tasks.Task`1<System.Object>" };
+            yield return new object[] { ClrNames.Int32Task, "System.Threading.Tasks.Task`1<System.Int32>" };
+    }
 
         [Fact]
         public void EveryMemberOfTypeNamesIsRepresented()

@@ -130,6 +130,8 @@ jobs:
       command: test
       configuration: $(buildConfiguration)
       projects: test/**/*.Tests.csproj
+    env:
+      DD_SERVICE: dd-trace-dotnet
 
 
 - job: windows_profiler
