@@ -7,7 +7,7 @@
 - Add `IDbCommand` instrumentation to the ADO.NET integration (#562)
 
 ### Fixed
-- Fix `DD_LOGS_INJECTION` crash with the ASP.NET integration (#551)
+- Fix `OTEL_LOGS_INJECTION` crash with the ASP.NET integration (#551)
 - Fix scope creation failing in ASP.NET MVC integration when URL is empty (#553)
 - Fix crash when Profiler and NuGet package versions do not match (#570)
 - Add missing tags to GraphQL integration (#547)

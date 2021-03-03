@@ -57,7 +57,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
             const string expectedServiceName = "Samples.Microsoft.Data.SqlClient-" + dbType;
 
             // NOTE: opt into the additional instrumentation of calls into netstandard.dll
-            SetEnvironmentVariable("DD_TRACE_NETSTANDARD_ENABLED", "true");
+            SetEnvironmentVariable("OTEL_TRACE_NETSTANDARD_ENABLED", "true");
 
             int agentPort = TcpPortProvider.GetOpenPort();
 

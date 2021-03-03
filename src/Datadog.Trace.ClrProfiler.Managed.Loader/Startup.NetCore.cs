@@ -24,7 +24,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
                 tracerFrameworkDirectory = "netcoreapp3.1";
             }
 
-            var tracerHomeDirectory = ReadEnvironmentVariable("DD_DOTNET_TRACER_HOME") ?? string.Empty;
+            var tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_TRACER_HOME") ?? string.Empty;
             return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
         }
 

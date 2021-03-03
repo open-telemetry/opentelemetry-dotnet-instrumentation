@@ -1,5 +1,5 @@
 
-REM SET SOLUTION_DIR=C:\Github\dd-trace-dotnet
+REM SET SOLUTION_DIR=C:\Github\otel-trace-dotnet
 
 SET TOOL_BUILD_CONFIG=Release
 SET INTEGRATIONS_PROJ=%SOLUTION_DIR%\src\Datadog.Trace.ClrProfiler.Managed\Datadog.Trace.ClrProfiler.Managed.csproj

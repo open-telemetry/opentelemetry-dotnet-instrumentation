@@ -11,7 +11,7 @@ trigger:
 
 variables:
   publishOutput: $(System.DefaultWorkingDirectory)/src/bin/managed-publish
-  DD_DOTNET_TRACER_MSBUILD:
+  OTEL_DOTNET_TRACER_MSBUILD:
 
 jobs:
 
@@ -165,14 +165,14 @@ jobs:
     inputs:
       command: build
       configuration: $(buildConfiguration)
-      arguments: -l:DatadogLogger,"$(DD_DOTNET_TRACER_MSBUILD)"
+      arguments: -l:DatadogLogger,"$(OTEL_DOTNET_TRACER_MSBUILD)"
       projects: |
         src/**/*.csproj
         test/**/*.Tests.csproj
         benchmarks/**/*.csproj
         !src/Datadog.Trace.Tools.Runner/*.csproj
     env:
-      DD_SERVICE_NAME: dd-tracer-dotnet
+      OTEL_SERVICE_NAME: dd-tracer-dotnet
       
   - task: NuGetToolInstaller@1
     displayName: install nuget
@@ -187,19 +187,19 @@ jobs:
     displayName: tool build
     inputs:
       solution: src/Datadog.Trace.Tools.Runner/Datadog.Trace.Tools.Runner.proj
-      msbuildArguments: /t:BuildTool /l:DatadogLogger,"$(DD_DOTNET_TRACER_MSBUILD)"
+      msbuildArguments: /t:BuildTool /l:DatadogLogger,"$(OTEL_DOTNET_TRACER_MSBUILD)"
       maximumCpuCount: true
     env:
-      DD_SERVICE_NAME: dd-tracer-dotnet-runner-tool
+      OTEL_SERVICE_NAME: dd-tracer-dotnet-runner-tool
 
   - task: MSBuild@1
     displayName: standalone build
     inputs:
       solution: src/Datadog.Trace.Tools.Runner/Datadog.Trace.Tools.Runner.proj
-      msbuildArguments: /t:BuildStandalone /l:DatadogLogger,"$(DD_DOTNET_TRACER_MSBUILD)"
+      msbuildArguments: /t:BuildStandalone /l:DatadogLogger,"$(OTEL_DOTNET_TRACER_MSBUILD)"
       maximumCpuCount: true
     env:
-      DD_SERVICE_NAME: dd-tracer-dotnet-runner-tool
+      OTEL_SERVICE_NAME: dd-tracer-dotnet-runner-tool
 
   - task: DeleteFiles@1
     displayName: 'Remove unneeded files'

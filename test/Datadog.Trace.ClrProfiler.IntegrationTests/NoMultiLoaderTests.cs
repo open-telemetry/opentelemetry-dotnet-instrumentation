@@ -22,7 +22,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
         public void SingleLoaderTest()
         {
             string tmpFile = Path.GetTempFileName();
-            SetEnvironmentVariable("DD_TRACE_LOG_PATH", tmpFile);
+            SetEnvironmentVariable("OTEL_TRACE_LOG_PATH", tmpFile);
             using ProcessResult processResult = RunSampleAndWaitForExit(9696);
             string[] logFileContent = File.ReadAllLines(tmpFile);
             int numOfLoadersLoad = logFileContent.Count(line => line.Contains("Datadog.Trace.ClrProfiler.Managed.Loader loaded"));

@@ -17,7 +17,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
         public HttpMessageHandlerTests(ITestOutputHelper output)
             : base("HttpMessageHandler", output)
         {
-            SetEnvironmentVariable("DD_HTTP_CLIENT_ERROR_STATUSES", "400-499, 502,-343,11-53, 500-500-200");
+            SetEnvironmentVariable("OTEL_HTTP_CLIENT_ERROR_STATUSES", "400-499, 502,-343,11-53, 500-500-200");
             SetServiceVersion("1.0.0");
         }
 
@@ -185,12 +185,12 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
             // Enable specific integrations, or use defaults
             if (instrumentation.InstrumentSocketHandler.HasValue)
             {
-                SetEnvironmentVariable("DD_HttpSocketsHandler_ENABLED", instrumentation.InstrumentSocketHandler.Value ? "true" : "false");
+                SetEnvironmentVariable("OTEL_HttpSocketsHandler_ENABLED", instrumentation.InstrumentSocketHandler.Value ? "true" : "false");
             }
 
             if (instrumentation.InstrumentWinHttpHandler.HasValue)
             {
-                SetEnvironmentVariable("DD_WinHttpHandler_ENABLED", instrumentation.InstrumentWinHttpHandler.Value ? "true" : "false");
+                SetEnvironmentVariable("OTEL_WinHttpHandler_ENABLED", instrumentation.InstrumentWinHttpHandler.Value ? "true" : "false");
             }
         }
 
