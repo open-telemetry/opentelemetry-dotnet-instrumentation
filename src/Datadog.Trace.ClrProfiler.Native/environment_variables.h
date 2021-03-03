@@ -64,8 +64,8 @@ const WSTRING log_path = "OTEL_TRACE_LOG_PATH"_W;
 // Sets the directory for the profiler's log file.
 // If set, this setting takes precedence over environment variable OTEL_TRACE_LOG_PATH.
 // If not set, default is
-// "%ProgramData%"\Datadog .NET Tracer\logs\" on Windows or
-// "/var/log/datadog/dotnet/" on Linux.
+// "%ProgramData%"\OpenTelemetry.NET AutoInstrumentation\logs\" on Windows or
+// "/var/log/opentelemetry/dotnet/" on Linux.
 const WSTRING log_directory = "OTEL_TRACE_LOG_DIRECTORY"_W;
 
 // Sets whether to disable all JIT optimizations.

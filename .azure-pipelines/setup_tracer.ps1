@@ -47,8 +47,8 @@ else
     tar -xvzf linux.tar.gz -C ./release
     Remove-Item linux.tar.gz
     # Ensure the profiler can write the native log profiler
-    sudo mkdir -p /var/log/datadog/dotnet
-    sudo chmod -R 777 /var/log/datadog/dotnet
+    sudo mkdir -p /var/log/opentelemetry/dotnet
+    sudo chmod -R 777 /var/log/opentelemetry/dotnet
     
     if ([string]::IsNullOrEmpty($otel_tracer_workingfolder)) {
         $otel_tracer_home = "$(pwd)/release"
