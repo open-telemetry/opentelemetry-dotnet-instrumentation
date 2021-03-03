@@ -54,7 +54,7 @@ First, add a new Service Fabric service to the solution:
 
 Next, replace the `ServiceManifest.xml` with the text below.
 
-(As you do this, make sure to replace the value "*API_KEY_GOES_HERE*" for the `DD_API_KEY`-setting with your Datadog API key. An API key is a unique identifier that belongs to your organization and is required to submit telemetry to Datadog ([more info](https://docs.datadoghq.com/account_management/api-app-keys/)). You can obtain it from your [Datadog account page](https://app.datadoghq.com/account/settings#api).)
+(As you do this, make sure to replace the value "*API_KEY_GOES_HERE*" for the `OTEL_API_KEY`-setting with your Datadog API key. An API key is a unique identifier that belongs to your organization and is required to submit telemetry to Datadog ([more info](https://docs.datadoghq.com/account_management/api-app-keys/)). You can obtain it from your [Datadog account page](https://app.datadoghq.com/account/settings#api).)
 
 ```
 <?xml version="1.0" encoding="utf-8"?>

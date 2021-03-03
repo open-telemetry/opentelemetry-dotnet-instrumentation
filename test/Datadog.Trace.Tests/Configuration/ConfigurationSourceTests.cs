@@ -169,9 +169,9 @@ namespace Datadog.Trace.Tests.Configuration
 
             TracerSettings settings;
 
-            if (key == "DD_SERVICE_NAME")
+            if (key == "OTEL_SERVICE_NAME")
             {
-                // We need to ensure DD_SERVICE is empty.
+                // We need to ensure OTEL_SERVICE is empty.
                 string originalServiceName = Environment.GetEnvironmentVariable(ConfigurationKeys.ServiceName);
                 Environment.SetEnvironmentVariable(ConfigurationKeys.ServiceName, null, EnvironmentVariableTarget.Process);
 
@@ -179,7 +179,7 @@ namespace Datadog.Trace.Tests.Configuration
                 IConfigurationSource source = new EnvironmentConfigurationSource();
                 settings = new TracerSettings(source);
 
-                // after load settings we can restore the original DD_SERVICE
+                // after load settings we can restore the original OTEL_SERVICE
                 Environment.SetEnvironmentVariable(ConfigurationKeys.ServiceName, originalServiceName, EnvironmentVariableTarget.Process);
             }
             else

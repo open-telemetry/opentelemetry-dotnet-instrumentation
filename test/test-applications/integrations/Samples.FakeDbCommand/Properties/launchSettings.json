@@ -11,14 +11,14 @@
         "CORECLR_PROFILER": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}",
         "CORECLR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\Datadog.Trace.ClrProfiler.Native.dll",
 
-        "DD_DOTNET_TRACER_HOME": "$(ProjectDir)$(OutputPath)profiler-lib",
-        "DD_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json",
-        "DD_VERSION": "1.0.0",
+        "OTEL_DOTNET_TRACER_HOME": "$(ProjectDir)$(OutputPath)profiler-lib",
+        "OTEL_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json",
+        "OTEL_VERSION": "1.0.0",
 
-        "DD_TRACE_NETSTANDARD_ENABLED": "true",
+        "OTEL_TRACE_NETSTANDARD_ENABLED": "true",
         
-        "DD_TRACE_CALLTARGET_ENABLED": "true",
-        "DD_CLR_ENABLE_INLINING": "true"
+        "OTEL_TRACE_CALLTARGET_ENABLED": "true",
+        "OTEL_CLR_ENABLE_INLINING": "true"
       },
       "nativeDebugging": true
     }
