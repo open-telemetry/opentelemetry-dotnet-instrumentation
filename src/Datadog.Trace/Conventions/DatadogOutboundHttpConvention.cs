@@ -6,15 +6,6 @@ namespace Datadog.Trace.Conventions
 {
     internal class DatadogOutboundHttpConvention : IOutboundHttpConvention
     {
-        private static HttpTagsKeysMapping tagKeys = new HttpTagsKeysMapping
-        {
-            Method = Trace.Tags.HttpMethod,
-            Url = Trace.Tags.HttpUrl,
-            StatusCode = Trace.Tags.HttpStatusCode,
-            HandlerType = "http-client-handler-type",
-            InstrumentationName = Trace.Tags.InstrumentationName,
-        };
-
         private readonly Tracer _tracer;
 
         public DatadogOutboundHttpConvention(Tracer tracer)
@@ -24,7 +15,7 @@ namespace Datadog.Trace.Conventions
 
         public Scope CreateScope(OutboundHttpArgs args, out HttpTags tags)
         {
-            tags = new HttpTags(tagKeys);
+            tags = new DatadogHttpTags();
             string serviceName = _tracer.Settings.GetServiceName(_tracer, "http-client");
             var scope = _tracer.StartActiveWithTags("http.request", tags: tags, serviceName: serviceName, spanId: args.SpanId);
 
