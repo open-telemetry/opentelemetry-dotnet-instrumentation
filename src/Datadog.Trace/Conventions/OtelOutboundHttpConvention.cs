@@ -31,7 +31,7 @@ namespace Datadog.Trace.Conventions
             tags.SetTag("http.host", requestUri.Authority);
             tags.SetTag("http.target", $"{requestUri.PathAndQuery}{requestUri.Fragment}");
 
-            string resourceUrl = requestUri != null ? UriHelpers.CleanUri(requestUri, removeScheme: true, tryRemoveIds: true) : null;
+            string resourceUrl = UriHelpers.CleanUri(requestUri, removeScheme: true, tryRemoveIds: true);
             scope.Span.ResourceName = $"{httpMethod} {resourceUrl}";
 
             var integrationId = args.IntegrationInfo;

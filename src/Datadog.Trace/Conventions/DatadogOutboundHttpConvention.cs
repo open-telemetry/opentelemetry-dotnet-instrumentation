@@ -16,17 +16,17 @@ namespace Datadog.Trace.Conventions
         public Scope CreateScope(OutboundHttpArgs args, out HttpTags tags)
         {
             tags = new DatadogHttpTags();
-            string serviceName = _tracer.Settings.GetServiceName(_tracer, "http-client");
-            var scope = _tracer.StartActiveWithTags("http.request", tags: tags, serviceName: serviceName, spanId: args.SpanId);
-
-            scope.Span.Type = SpanTypes.Http;
             var requestUri = args.RequestUri;
             var httpMethod = args.HttpMethod;
-            string resourceUrl = requestUri != null ? UriHelpers.CleanUri(requestUri, removeScheme: true, tryRemoveIds: true) : null;
-            string httpUrl = requestUri != null ? UriHelpers.CleanUri(requestUri, removeScheme: false, tryRemoveIds: false) : null;
+
+            string serviceName = _tracer.Settings.GetServiceName(_tracer, "http-client");
+            var scope = _tracer.StartActiveWithTags("http.request", tags: tags, serviceName: serviceName, spanId: args.SpanId);
+            scope.Span.Type = SpanTypes.Http;
+
+            tags.HttpMethod = httpMethod;
+            tags.HttpUrl = UriHelpers.CleanUri(requestUri, removeScheme: false, tryRemoveIds: false);
+            string resourceUrl = UriHelpers.CleanUri(requestUri, removeScheme: true, tryRemoveIds: true);
             scope.Span.ResourceName = $"{httpMethod} {resourceUrl}";
-            tags.HttpMethod = httpMethod?.ToUpperInvariant();
-            tags.HttpUrl = httpUrl;
 
             var integrationId = args.IntegrationInfo;
             tags.InstrumentationName = IntegrationRegistry.GetName(integrationId);
