@@ -29,10 +29,10 @@ jobs:
 
   # Install the tracer latest stable release to attach the profiler to the build and test steps.
   # The script exposes the required environment variables to the following steps
-  - task: PowerShell@2
-    displayName: Install profiler latest release
-    inputs:
-      filePath: ./.azure-pipelines/setup_tracer.ps1
+  #- task: PowerShell@2
+  #  displayName: Install profiler latest release
+  #  inputs:
+  #    filePath: ./.azure-pipelines/setup_tracer.ps1
 
   - task: UseDotNet@2
     displayName: install dotnet core runtime 2.1
