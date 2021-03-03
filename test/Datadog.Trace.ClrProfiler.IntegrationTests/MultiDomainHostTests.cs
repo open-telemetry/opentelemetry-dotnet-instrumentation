@@ -89,7 +89,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
         public void DoesNotCrashInBadConfiguration(string targetFramework)
         {
             // Set bad configuration
-            SetEnvironmentVariable("DD_DOTNET_TRACER_HOME", Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            SetEnvironmentVariable("OTEL_DOTNET_TRACER_HOME", Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
 
             int agentPort = TcpPortProvider.GetOpenPort();
             int httpPort = TcpPortProvider.GetOpenPort();

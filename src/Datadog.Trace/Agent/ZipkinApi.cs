@@ -39,6 +39,9 @@ namespace Datadog.Trace.Agent
                 request.Method = "POST";
                 request.ContentType = "application/json";
 
+                // Disable automatic instrumentation for Zipkin exporter
+                request.Headers.Add(HttpHeaderNames.TracingEnabled, "false");
+
                 using (var requestStream = await request.GetRequestStreamAsync().ConfigureAwait(false))
                 {
                     var serializer = new ZipkinSerializer();

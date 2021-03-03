@@ -3,7 +3,7 @@
       "NLog10LogsInjection.NullReferenceException": {
         "commandName": "Project",
         "environmentVariables": {
-          "DD_LOGS_INJECTION": "true"
+          "OTEL_LOGS_INJECTION": "true"
         },
         "nativeDebugging": true
       }
