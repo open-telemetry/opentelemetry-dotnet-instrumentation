@@ -6,15 +6,15 @@ using Datadog.Trace.Logging;
 
 namespace Datadog.Trace.Agent
 {
-    internal class ZipkinApi : IApi
+    internal class ZipkinExporter : IExporter
     {
-        private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor(typeof(ZipkinApi));
+        private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor(typeof(ZipkinExporter));
 
         private Uri _tracesEndpoint;
 
-        public ZipkinApi(Uri tracesEndpoint)
+        public ZipkinExporter(Uri tracesEndpoint)
         {
-            Log.Debug("Creating new Zipkin Api");
+            Log.Debug("Creating new Zipkin exporter");
 
             _tracesEndpoint = tracesEndpoint ?? throw new ArgumentNullException(nameof(tracesEndpoint)); // User needs to include the proper path.
         }
