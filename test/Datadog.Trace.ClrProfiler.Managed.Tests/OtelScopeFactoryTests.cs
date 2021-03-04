@@ -24,18 +24,11 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
                 var actual = new Result
                 {
                     OperationName = span.OperationName,
-
                     HttpMethodTag = span.GetTag("http.method"),
-                    HttpMethodProperty = tags.HttpMethod,
-
                     HttpUrlTag = span.GetTag("http.url"),
-                    HttpUrlProperty = tags.HttpUrl,
-
                     HttpSchemeTag = span.GetTag("http.scheme"),
                     HttpHostTag = span.GetTag("http.host"),
                     HttpTargetTag = span.GetTag("http.target"),
-
-                    ResourceName = span.ResourceName,
                 };
 
                 Assert.Equal(expected, actual);
@@ -51,14 +44,11 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
         public struct Result
         {
             public string OperationName;
-            public string HttpMethodProperty;
             public string HttpMethodTag;
-            public string HttpUrlProperty;
             public string HttpUrlTag;
             public string HttpSchemeTag;
             public string HttpHostTag;
             public string HttpTargetTag;
-            public string ResourceName;
 
             public override string ToString()
             {
@@ -88,13 +78,10 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
                     {
                         OperationName = "HTTP GET",
                         HttpMethodTag = "GET",
-                        HttpMethodProperty = "GET",
-                        HttpUrlProperty = "https://example.com/path/to/file.aspx?query=1#fragment",
                         HttpUrlTag = "https://example.com/path/to/file.aspx?query=1#fragment",
                         HttpSchemeTag = "https",
                         HttpHostTag = "example.com",
                         HttpTargetTag = "/path/to/file.aspx?query=1#fragment",
-                        ResourceName = "GET example.com/path/to/file.aspx",
                     });
                 Add(
                     new Input
@@ -106,13 +93,10 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
                     {
                         OperationName = "HTTP GET",
                         HttpMethodTag = "GET",
-                        HttpMethodProperty = "GET",
-                        HttpUrlProperty = "https://example.com/path/to/file.aspx",
                         HttpUrlTag = "https://example.com/path/to/file.aspx",
                         HttpSchemeTag = "https",
                         HttpHostTag = "example.com",
                         HttpTargetTag = "/path/to/file.aspx",
-                        ResourceName = "GET example.com/path/to/file.aspx",
                     });
                 Add(
                     new Input
@@ -124,13 +108,10 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
                     {
                         OperationName = "HTTP GET",
                         HttpMethodTag = "GET",
-                        HttpMethodProperty = "GET",
-                        HttpUrlProperty = "https://example.com/path/to/file.aspx?query=1",
                         HttpUrlTag = "https://example.com/path/to/file.aspx?query=1",
                         HttpSchemeTag = "https",
                         HttpHostTag = "example.com",
                         HttpTargetTag = "/path/to/file.aspx?query=1",
-                        ResourceName = "GET example.com/path/to/file.aspx",
                     });
                 Add(
                     new Input
@@ -142,13 +123,10 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
                     {
                         OperationName = "HTTP GET",
                         HttpMethodTag = "GET",
-                        HttpMethodProperty = "GET",
-                        HttpUrlProperty = "https://example.com/path/to/file.aspx#fragment",
                         HttpUrlTag = "https://example.com/path/to/file.aspx#fragment",
                         HttpSchemeTag = "https",
                         HttpHostTag = "example.com",
                         HttpTargetTag = "/path/to/file.aspx#fragment",
-                        ResourceName = "GET example.com/path/to/file.aspx",
                     });
                 Add(
                     new Input
@@ -160,13 +138,10 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
                     {
                         OperationName = "HTTP GET",
                         HttpMethodTag = "GET",
-                        HttpMethodProperty = "GET",
-                        HttpUrlProperty = "https://example.com/path/to/file.aspx",
                         HttpUrlTag = "https://example.com/path/to/file.aspx",
                         HttpSchemeTag = "https",
                         HttpHostTag = "example.com",
                         HttpTargetTag = "/path/to/file.aspx",
-                        ResourceName = "GET example.com/path/to/file.aspx",
                     });
                 Add(
                     new Input
@@ -178,13 +153,10 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
                     {
                         OperationName = "HTTP GET",
                         HttpMethodTag = "GET",
-                        HttpMethodProperty = "GET",
-                        HttpUrlProperty = "https://example.com/path/123/file.aspx",
                         HttpUrlTag = "https://example.com/path/123/file.aspx",
                         HttpSchemeTag = "https",
                         HttpHostTag = "example.com",
                         HttpTargetTag = "/path/123/file.aspx",
-                        ResourceName = "GET example.com/path/?/file.aspx",
                     });
                 Add(
                     new Input
@@ -196,13 +168,10 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
                     {
                         OperationName = "HTTP GET",
                         HttpMethodTag = "GET",
-                        HttpMethodProperty = "GET",
-                        HttpUrlProperty = "https://example.com/path/123/",
                         HttpUrlTag = "https://example.com/path/123/",
                         HttpSchemeTag = "https",
                         HttpHostTag = "example.com",
                         HttpTargetTag = "/path/123/",
-                        ResourceName = "GET example.com/path/?/",
                     });
                 Add(
                     new Input
@@ -214,13 +183,10 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
                     {
                         OperationName = "HTTP GET",
                         HttpMethodTag = "GET",
-                        HttpMethodProperty = "GET",
-                        HttpUrlProperty = "https://example.com/path/123",
                         HttpUrlTag = "https://example.com/path/123",
                         HttpSchemeTag = "https",
                         HttpHostTag = "example.com",
                         HttpTargetTag = "/path/123",
-                        ResourceName = "GET example.com/path/?",
                     });
                 Add(
                     new Input
@@ -232,13 +198,10 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
                     {
                         OperationName = "HTTP GET",
                         HttpMethodTag = "GET",
-                        HttpMethodProperty = "GET",
-                        HttpUrlProperty = "https://example.com/path/E653C852-227B-4F0C-9E48-D30D83C68BF3",
                         HttpUrlTag = "https://example.com/path/E653C852-227B-4F0C-9E48-D30D83C68BF3",
                         HttpSchemeTag = "https",
                         HttpHostTag = "example.com",
                         HttpTargetTag = "/path/E653C852-227B-4F0C-9E48-D30D83C68BF3",
-                        ResourceName = "GET example.com/path/?",
                     });
                 Add(
                     new Input
@@ -250,13 +213,10 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
                     {
                         OperationName = "HTTP GET",
                         HttpMethodTag = "GET",
-                        HttpMethodProperty = "GET",
-                        HttpUrlProperty = "https://example.com/path/E653C852227B4F0C9E48D30D83C68BF3",
                         HttpUrlTag = "https://example.com/path/E653C852227B4F0C9E48D30D83C68BF3",
                         HttpSchemeTag = "https",
                         HttpHostTag = "example.com",
                         HttpTargetTag = "/path/E653C852227B4F0C9E48D30D83C68BF3",
-                        ResourceName = "GET example.com/path/?",
                     });
             }
 #pragma warning restore SA1118
