@@ -17,26 +17,21 @@ namespace Datadog.Trace.Conventions
         public Scope CreateScope(OutboundHttpArgs args, out HttpTags tags)
         {
             tags = new OtelHttpTags();
-            var requestUri = args.RequestUri;
-            var httpMethod = args.HttpMethod;
-
-            string operationName = $"HTTP {httpMethod}";
+            
+            string operationName = $"HTTP {args.HttpMethod}";
             string serviceName = _tracer.Settings.GetServiceName(_tracer, "http-client");
             var scope = _tracer.StartActiveWithTags(operationName, tags: tags, serviceName: serviceName, spanId: args.SpanId);
             scope.Span.Type = SpanTypes.Http;
 
-            tags.HttpMethod = httpMethod;
-            tags.HttpUrl = $"{requestUri.Scheme}{Uri.SchemeDelimiter}{requestUri.Authority}{requestUri.PathAndQuery}{requestUri.Fragment}";
-            tags.SetTag("http.scheme", requestUri.Scheme);
-            tags.SetTag("http.host", requestUri.Authority);
-            tags.SetTag("http.target", $"{requestUri.PathAndQuery}{requestUri.Fragment}");
+            tags.HttpMethod = args.HttpMethod;
 
-            string resourceUrl = UriHelpers.CleanUri(requestUri, removeScheme: true, tryRemoveIds: true);
-            scope.Span.ResourceName = $"{httpMethod} {resourceUrl}";
-
-            var integrationId = args.IntegrationInfo;
-            tags.InstrumentationName = IntegrationRegistry.GetName(integrationId);
-            tags.SetAnalyticsSampleRate(integrationId, _tracer.Settings, enabledWithGlobalSetting: false);
+            var uri = args.RequestUri;
+            tags.HttpUrl = $"{uri.Scheme}{Uri.SchemeDelimiter}{uri.Authority}{uri.PathAndQuery}{uri.Fragment}";
+            tags.SetTag("http.scheme", uri.Scheme);
+            tags.SetTag("http.host", uri.Authority);
+            tags.SetTag("http.target", $"{uri.PathAndQuery}{uri.Fragment}");
+            
+            tags.InstrumentationName = IntegrationRegistry.GetName(args.IntegrationInfo);
             return scope;
         }
     }
