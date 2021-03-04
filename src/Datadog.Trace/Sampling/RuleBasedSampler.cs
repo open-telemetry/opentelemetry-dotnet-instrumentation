@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Datadog.Trace.Logging;
 
@@ -74,7 +75,8 @@ namespace Datadog.Trace.Sampling
 
         private SamplingPriority GetSamplingPriority(Span span, float rate, bool agentSampling)
         {
-            var sample = ((span.TraceId * KnuthFactor) % TracerConstants.MaxTraceId) <= (rate * TracerConstants.MaxTraceId);
+            var traceId = (ulong)Convert.ToInt64(span.TraceId.ToString().Substring(startIndex: 0, length: 16), fromBase: 16);
+            var sample = ((traceId * KnuthFactor) % TracerConstants.MaxTraceId) <= (rate * TracerConstants.MaxTraceId);
             var priority = SamplingPriority.AutoReject;
 
             if (sample && (agentSampling || _limiter.Allowed(span)))

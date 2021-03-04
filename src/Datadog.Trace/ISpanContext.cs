@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Datadog.Trace
 {
     /// <summary>
@@ -8,7 +10,7 @@ namespace Datadog.Trace
         /// <summary>
         /// Gets the trace identifier.
         /// </summary>
-        ulong TraceId { get; }
+        ActivityTraceId TraceId { get; }
 
         /// <summary>
         /// Gets the span identifier.

@@ -1,4 +1,6 @@
 using System;
+using System.Numerics;
+using System.Security.Cryptography;
 
 namespace Datadog.Trace.Util
 {
@@ -57,7 +59,7 @@ namespace Datadog.Trace.Util
             }
         }
 
-        public ulong CreateNew()
+        public ulong CreateNew64Bit()
         {
             long high = _random.Next(int.MinValue, int.MaxValue);
             long low = _random.Next(int.MinValue, int.MaxValue);
@@ -66,6 +68,16 @@ namespace Datadog.Trace.Util
             var value = high << 32 | (low & 0xFFFFFFFF);
 
             return (ulong)value & 0x7FFFFFFFFFFFFFFF;
+        }
+
+        public BigInteger CreateNew128Bit()
+        {
+            var array = new byte[16];
+            using var generator = RandomNumberGenerator.Create();
+            generator.GetBytes(array);
+            var value = BigInteger.Abs(new BigInteger(array));
+
+            return value;
         }
     }
 }

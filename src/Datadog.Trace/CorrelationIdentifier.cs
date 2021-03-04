@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 namespace Datadog.Trace
 {
@@ -57,11 +58,11 @@ namespace Datadog.Trace
         /// Gets the id of the active trace.
         /// </summary>
         /// <returns>The id of the active trace. If there is no active trace, returns zero.</returns>
-        public static ulong TraceId
+        public static ActivityTraceId? TraceId
         {
             get
             {
-                return Tracer.Instance.ActiveScope?.Span?.TraceId ?? 0;
+                return Tracer.Instance.ActiveScope?.Span?.TraceId;
             }
         }
 

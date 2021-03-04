@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Datadog.Trace.ExtensionMethods;
 using MsgPack;
@@ -14,9 +15,10 @@ namespace Datadog.Trace.TestHelpers
     /// </summary>
     public static class MsgPackHelpers
     {
-        public static ulong TraceId(this MessagePackObject obj)
+        public static ActivityTraceId TraceId(this MessagePackObject obj)
         {
-            return obj.FirstDictionary()["trace_id"].AsUInt64();
+            var sth = obj.FirstDictionary()["trace_id"].ToString();
+            return ActivityTraceId.CreateFromString(sth);
         }
 
         public static ulong SpanId(this MessagePackObject obj)

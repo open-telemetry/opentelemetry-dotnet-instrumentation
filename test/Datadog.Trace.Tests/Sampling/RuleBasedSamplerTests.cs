@@ -108,7 +108,7 @@ namespace Datadog.Trace.Tests.Sampling
 
             while (sampleSize-- > 0)
             {
-                var traceId = idGenerator.CreateNew();
+                var traceId = idGenerator.CreateNew64Bit();
                 var span = GetMyServiceSpan(traceId);
                 var priority = sampler.GetSamplingPriority(span);
                 if (priority == SamplingPriority.AutoKeep)

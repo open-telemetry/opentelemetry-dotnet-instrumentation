@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using Datadog.Trace.Headers;
@@ -46,7 +47,7 @@ namespace Datadog.Trace
             // lock sampling priority when span propagates.
             context.TraceContext?.LockSamplingPriority();
 
-            headers.Set(HttpHeaderNames.TraceId, context.TraceId.ToString(InvariantCulture));
+            headers.Set(HttpHeaderNames.TraceId, context.TraceId.ToString());
             headers.Set(HttpHeaderNames.ParentId, context.SpanId.ToString(InvariantCulture));
 
             // avoid writing origin header if not set, keeping the previous behavior.
@@ -81,7 +82,7 @@ namespace Datadog.Trace
             // lock sampling priority when span propagates.
             context.TraceContext?.LockSamplingPriority();
 
-            setter(carrier, HttpHeaderNames.TraceId, context.TraceId.ToString(InvariantCulture));
+            setter(carrier, HttpHeaderNames.TraceId, context.TraceId.ToString());
             setter(carrier, HttpHeaderNames.ParentId, context.SpanId.ToString(InvariantCulture));
 
             // avoid writing origin header if not set, keeping the previous behavior.
@@ -109,9 +110,8 @@ namespace Datadog.Trace
                 throw new ArgumentNullException(nameof(headers));
             }
 
-            var traceId = ParseUInt64(headers, HttpHeaderNames.TraceId);
-
-            if (traceId == 0)
+            var traceId = ParseActivityTraceId(headers, HttpHeaderNames.TraceId);
+            if (traceId == null)
             {
                 // a valid traceId is required to use distributed tracing
                 return null;
@@ -137,9 +137,8 @@ namespace Datadog.Trace
 
             if (getter == null) { throw new ArgumentNullException(nameof(getter)); }
 
-            var traceId = ParseUInt64(carrier, getter, HttpHeaderNames.TraceId);
-
-            if (traceId == 0)
+            var traceId = ParseActivityTraceId(carrier, getter, HttpHeaderNames.TraceId);
+            if (traceId == null)
             {
                 // a valid traceId is required to use distributed tracing
                 return null;
@@ -164,6 +163,38 @@ namespace Datadog.Trace
                     yield return new KeyValuePair<string, string>(headerNameToTagName.Value, headerValue);
                 }
             }
+        }
+
+        private static ActivityTraceId? ParseActivityTraceId<T>(T headers, string headerName)
+            where T : IHeadersCollection
+        {
+            var headerValues = headers.GetValues(headerName);
+            return ParseActivityTraceId(headerValues, headerName);
+        }
+
+        private static ActivityTraceId? ParseActivityTraceId<T>(T carrier, Func<T, string, IEnumerable<string>> getter, string headerName)
+        {
+            var headerValues = getter(carrier, headerName).ToList();
+            return ParseActivityTraceId(headerValues, headerName);
+        }
+
+        private static ActivityTraceId? ParseActivityTraceId(IEnumerable<string> headerValues, string headerName)
+        {
+            var headerValuesList = headerValues.ToList();
+            foreach (var headerValue in headerValuesList)
+            {
+                try
+                {
+                    var traceId = ActivityTraceId.CreateFromString(new ReadOnlySpan<char>(headerValue.ToCharArray()));
+                    return traceId;
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                }
+            }
+
+            Log.Warning("Could not parse {HeaderName} headers: {HeaderValues}", headerName, string.Join(",", headerValuesList));
+            return null;
         }
 
         private static ulong ParseUInt64<T>(T headers, string headerName)

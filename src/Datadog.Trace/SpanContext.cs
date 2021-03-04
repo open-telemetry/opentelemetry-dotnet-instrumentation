@@ -1,4 +1,4 @@
-using Datadog.Trace.ExtensionMethods;
+using System.Diagnostics;
 using Datadog.Trace.Logging;
 using Datadog.Trace.Util;
 
@@ -20,7 +20,7 @@ namespace Datadog.Trace
         /// <param name="spanId">The propagated span id.</param>
         /// <param name="samplingPriority">The propagated sampling priority.</param>
         /// <param name="serviceName">The service name to propagate to child spans.</param>
-        public SpanContext(ulong? traceId, ulong spanId, SamplingPriority? samplingPriority = null, string serviceName = null)
+        public SpanContext(ActivityTraceId? traceId, ulong spanId, SamplingPriority? samplingPriority = null, string serviceName = null)
             : this(traceId, serviceName)
         {
             SpanId = spanId;
@@ -37,7 +37,7 @@ namespace Datadog.Trace
         /// <param name="samplingPriority">The propagated sampling priority.</param>
         /// <param name="serviceName">The service name to propagate to child spans.</param>
         /// <param name="origin">The propagated origin of the trace.</param>
-        internal SpanContext(ulong? traceId, ulong spanId, SamplingPriority? samplingPriority, string serviceName, string origin)
+        internal SpanContext(ActivityTraceId? traceId, ulong spanId, SamplingPriority? samplingPriority, string serviceName, string origin)
             : this(traceId, serviceName)
         {
             SpanId = spanId;
@@ -56,7 +56,7 @@ namespace Datadog.Trace
         internal SpanContext(ISpanContext parent, ITraceContext traceContext, string serviceName, ulong? spanId = null)
             : this(parent?.TraceId, serviceName)
         {
-            SpanId = spanId ?? SpanIdGenerator.ThreadInstance.CreateNew();
+            SpanId = spanId ?? SpanIdGenerator.ThreadInstance.CreateNew64Bit();
             Parent = parent;
             TraceContext = traceContext;
             if (parent is SpanContext spanContext)
@@ -65,12 +65,9 @@ namespace Datadog.Trace
             }
         }
 
-        private SpanContext(ulong? traceId, string serviceName)
+        private SpanContext(ActivityTraceId? traceId, string serviceName)
         {
-            TraceId = traceId > 0
-                          ? traceId.Value
-                          : SpanIdGenerator.ThreadInstance.CreateNew();
-
+            TraceId = traceId ?? ActivityTraceId.CreateRandom();
             ServiceName = serviceName;
         }
 
@@ -82,7 +79,7 @@ namespace Datadog.Trace
         /// <summary>
         /// Gets the trace id
         /// </summary>
-        public ulong TraceId { get; }
+        public ActivityTraceId TraceId { get; }
 
         /// <summary>
         /// Gets the span id of the parent span
