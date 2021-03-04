@@ -26,9 +26,6 @@ namespace Datadog.Trace.Conventions
             var uri = args.RequestUri;
             otelTags.HttpMethod = args.HttpMethod;
             otelTags.HttpUrl = string.Concat(uri.Scheme, Uri.SchemeDelimiter, uri.Authority, uri.PathAndQuery, uri.Fragment);
-            otelTags.HttpScheme = uri.Scheme;
-            otelTags.HttpHost = uri.Authority;
-            otelTags.HttpTarget = uri.PathAndQuery + uri.Fragment;
             otelTags.InstrumentationName = IntegrationRegistry.GetName(args.IntegrationInfo);
             return scope;
         }
