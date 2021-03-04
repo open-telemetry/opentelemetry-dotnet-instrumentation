@@ -99,13 +99,7 @@ namespace Datadog.Trace.ClrProfiler
                     return null;
                 }
 
-                var args = new OutboundHttpArgs
-                {
-                    SpanId = spanId,
-                    HttpMethod = httpMethod,
-                    IntegrationInfo = integrationId,
-                    RequestUri = requestUri,
-                };
+                var args = new OutboundHttpArgs(spanId, httpMethod, requestUri, integrationId);
                 var scope = tracer.OutboundHttpConvention.CreateScope(args, out tags);
                 return scope;
             }

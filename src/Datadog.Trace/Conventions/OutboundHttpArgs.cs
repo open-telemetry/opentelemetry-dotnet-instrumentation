@@ -7,23 +7,34 @@ namespace Datadog.Trace.Conventions
     /// <summary>
     /// Arguments used by <c>"IOutboundHttpConvention"</c>.
     /// </summary>
-    internal struct OutboundHttpArgs
+    internal readonly struct OutboundHttpArgs
     {
-        public ulong? SpanId;
+        /// <summary>
+        /// Optional span ID.
+        /// </summary>
+        public readonly ulong? SpanId;
 
         /// <summary>
         /// Request's HTTP method.
         /// </summary>
-        public string HttpMethod;
+        public readonly string HttpMethod;
 
         /// <summary>
         /// Request's URI.
         /// </summary>
-        public Uri RequestUri;
+        public readonly Uri RequestUri;
 
         /// <summary>
         /// Request's URI.
         /// </summary>
-        public IntegrationInfo IntegrationInfo;
+        public readonly IntegrationInfo IntegrationInfo;
+
+        public OutboundHttpArgs(ulong? spanId, string httpMethod, Uri requestUri, IntegrationInfo integrationInfo)
+        {
+            SpanId = spanId;
+            HttpMethod = httpMethod;
+            RequestUri = requestUri;
+            IntegrationInfo = integrationInfo;
+        }
     }
 }
