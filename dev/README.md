@@ -6,6 +6,6 @@ Run `docker-compose up` to run OTel Collector and Jaeger. Run it from this direc
 
 Navigate to http://localhost:16686/search to see the collected traces.
 
-Navigate to http://localhost:8889/metrics to see the collected  metrics.
+Navigate to http://localhost:8889/metrics to see the collected metrics.
 
 Navigate to http://localhost:13133 to see the collector's health.
