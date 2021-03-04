@@ -37,7 +37,7 @@ namespace Datadog.Trace.Tests.RuntimeMetrics
             writer.Dispose();
         }
 
-        [Fact]
+        [Fact(Skip = "Uninstable test see https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/67")]
         public void ShouldCaptureFirstChanceExceptions()
         {
             var statsd = new Mock<IDogStatsd>();
