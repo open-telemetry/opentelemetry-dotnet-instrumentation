@@ -23,18 +23,24 @@ namespace Datadog.Trace.Tagging
 
             if (customTags != null)
             {
-                allTags.AddRange(customTags);
+                lock (customTags)
+                {
+                    allTags.AddRange(customTags);
+                }
             }
 
             if (additionalTags != null)
             {
-                foreach (var property in additionalTags)
+                lock (additionalTags)
                 {
-                    var value = property.Getter(this);
-
-                    if (value != null)
+                    foreach (var property in additionalTags)
                     {
-                        allTags.Add(new KeyValuePair<string, string>(property.Key, value));
+                        var value = property.Getter(this);
+
+                        if (value != null)
+                        {
+                            allTags.Add(new KeyValuePair<string, string>(property.Key, value));
+                        }
                     }
                 }
             }

@@ -14,6 +14,32 @@ namespace Datadog.Trace.Tests.Tagging
     public class TagsListTests
     {
         [Fact]
+        public void SetTag_WillNotCauseDuplicates()
+        {
+            // Initialize common tags
+            var tags = new CommonTags()
+            {
+                Version = "v1.0",
+                Environment = "Test"
+            };
+
+            // Initialize custom tags
+            tags.SetTag("sample.1", "Temp 1");
+            tags.SetTag("sample.2", "Temp 2");
+
+            // Try set existing tag
+            tags.SetTag(Tags.Version, "v2.0");
+            tags.SetTag("sample.2", "Temp 3");
+
+            var all = tags.GetAll();
+            var distinctKeys = all.Select(x => x.Key).Distinct().Count();
+
+            Assert.Equal(all.Count, distinctKeys);
+            Assert.Single(all, x => x.Key == Tags.Version && x.Value == "v2.0");
+            Assert.Single(all, x => x.Key == "sample.2" && x.Value == "Temp 3");
+        }
+
+        [Fact]
         public void GetAll()
         {
             // Should be any actual implementation
