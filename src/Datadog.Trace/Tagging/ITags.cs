@@ -6,7 +6,7 @@ namespace Datadog.Trace.Tagging
     {
         List<KeyValuePair<string, double>> Metrics { get; }
 
-        List<KeyValuePair<string, string>> Tags { get; }
+        List<KeyValuePair<string, string>> GetAll();
 
         string GetTag(string key);
 

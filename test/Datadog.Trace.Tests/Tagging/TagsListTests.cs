@@ -5,6 +5,7 @@ using System.Reflection;
 using Datadog.Trace.Agent.MessagePack;
 using Datadog.Trace.ClrProfiler.Integrations.AdoNet;
 using Datadog.Trace.Tagging;
+using Datadog.Trace.Util;
 using Datadog.Trace.Vendors.MessagePack;
 using Xunit;
 
@@ -12,6 +13,35 @@ namespace Datadog.Trace.Tests.Tagging
 {
     public class TagsListTests
     {
+        [Fact]
+        public void GetAll()
+        {
+            // Should be any actual implementation
+            var tags = new HttpTags();
+            var values = new[]
+            {
+                "GET", "200", "Sample/Test", "value 1", "value 2"
+            };
+
+            tags.HttpMethod = values[0];
+            tags.HttpStatusCode = values[1];
+            tags.HttpUrl = values[2];
+
+            tags.SetTag("sample.1", values[3]);
+            tags.SetTag("sample.2", values[4]);
+
+            ValidateTags(tags.GetAll(), values);
+        }
+
+        [Fact]
+        public void GetAll_When_MissingTags()
+        {
+            var tags = new EmptyTags();
+            var values = ArrayHelper.Empty<string>();
+
+            ValidateTags(tags.GetAll(), values);
+        }
+
         [Fact]
         public void CheckProperties()
         {
@@ -129,6 +159,16 @@ namespace Datadog.Trace.Tests.Tagging
             }
         }
 
+        private void ValidateTags(List<KeyValuePair<string, string>> tags, string[] values)
+        {
+            Assert.True(tags.Count >= values.Length); // At least specified values
+
+            if (values.Length > 0)
+            {
+                Assert.Contains(values, v => values.Contains(v));
+            }
+        }
+
         [MessagePack.MessagePackObject]
         public struct FakeSpan
         {
@@ -167,6 +207,15 @@ namespace Datadog.Trace.Tests.Tagging
 
             [MessagePack.Key("metrics")]
             public Dictionary<string, double> Metrics { get; set; }
+        }
+
+        internal class EmptyTags : TagsList
+        {
+            protected override IProperty<string>[] GetAdditionalTags()
+            {
+                // custom logic with possibility of null return
+                return null;
+            }
         }
     }
 }
