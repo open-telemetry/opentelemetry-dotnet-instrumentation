@@ -26,12 +26,6 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.MsTestV2
         private const string IntegrationName = nameof(IntegrationIds.MsTestV2);
         private static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(IntegrationName);
 
-        static TestMethodRunnerExecuteIntegration()
-        {
-            // Preload environment variables.
-            CIEnvironmentValues.DecorateSpan(null);
-        }
-
         /// <summary>
         /// OnMethodBegin callback
         /// </summary>
@@ -41,7 +35,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.MsTestV2
         public static CallTargetState OnMethodBegin<TTarget>(TTarget instance)
             where TTarget : ITestMethodRunner, IDuckType
         {
-            if (!Tracer.Instance.Settings.IsIntegrationEnabled(IntegrationId))
+            if (!Common.TestTracer.Settings.IsIntegrationEnabled(IntegrationId))
             {
                 return CallTargetState.GetDefault();
             }
@@ -54,8 +48,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.MsTestV2
             string testSuite = testMethodInfo.TestClassName;
             string testName = testMethodInfo.TestMethodName;
 
-            Tracer tracer = Tracer.Instance;
-            Scope scope = tracer.StartActive("mstest.test");
+            Scope scope = Common.TestTracer.StartActive("mstest.test", serviceName: Common.ServiceName);
             Span span = scope.Span;
 
             span.Type = SpanTypes.Test;
@@ -70,36 +63,40 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.MsTestV2
             var framework = FrameworkDescription.Instance;
 
             span.SetTag(CommonTags.RuntimeName, framework.Name);
-            span.SetTag(CommonTags.RuntimeOSArchitecture, framework.OSArchitecture);
-            span.SetTag(CommonTags.RuntimeOSPlatform, framework.OSPlatform);
-            span.SetTag(CommonTags.RuntimeProcessArchitecture, framework.ProcessArchitecture);
             span.SetTag(CommonTags.RuntimeVersion, framework.ProductVersion);
+            span.SetTag(CommonTags.RuntimeArchitecture, framework.ProcessArchitecture);
+            span.SetTag(CommonTags.OSArchitecture, framework.OSArchitecture);
+            span.SetTag(CommonTags.OSPlatform, framework.OSPlatform);
+            span.SetTag(CommonTags.OSVersion, Environment.OSVersion.VersionString);
 
             // Get test parameters
             ParameterInfo[] methodParameters = testMethod.GetParameters();
             if (methodParameters?.Length > 0)
             {
+                TestParameters testParameters = new TestParameters();
+                testParameters.Metadata = new Dictionary<string, object>();
+                testParameters.Arguments = new Dictionary<string, object>();
+
                 for (int i = 0; i < methodParameters.Length; i++)
                 {
                     if (testMethodArguments != null && i < testMethodArguments.Length)
                     {
-                        span.SetTag($"{TestTags.Arguments}.{methodParameters[i].Name}", testMethodArguments[i]?.ToString() ?? "(null)");
+                        testParameters.Arguments[methodParameters[i].Name] = testMethodArguments[i]?.ToString() ?? "(null)";
                     }
                     else
                     {
-                        span.SetTag($"{TestTags.Arguments}.{methodParameters[i].Name}", "(default)");
+                        testParameters.Arguments[methodParameters[i].Name] = "(default)";
                     }
                 }
+
+                span.SetTag(TestTags.Parameters, testParameters.ToJSON());
             }
 
             // Get traits
             Dictionary<string, List<string>> testTraits = GetTraits(testMethod);
-            if (testTraits != null)
+            if (testTraits != null && testTraits.Count > 0)
             {
-                foreach (KeyValuePair<string, List<string>> keyValuePair in testTraits)
-                {
-                    span.SetTag($"{TestTags.Traits}.{keyValuePair.Key}", string.Join(", ", keyValuePair.Value) ?? "(null)");
-                }
+                span.SetTag(TestTags.Traits, Datadog.Trace.Vendors.Newtonsoft.Json.JsonConvert.SerializeObject(testTraits));
             }
 
             span.ResetStartTime();
@@ -126,10 +123,8 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.MsTestV2
                 if (returnValueArray.Length == 1)
                 {
                     object unitTestResultObject = returnValueArray.GetValue(0);
-                    if (unitTestResultObject != null)
+                    if (unitTestResultObject != null && unitTestResultObject.TryDuckCast<UnitTestResultStruct>(out var unitTestResult))
                     {
-                        UnitTestResultStruct unitTestResult = unitTestResultObject.As<UnitTestResultStruct>();
-
                         switch (unitTestResult.Outcome)
                         {
                             case UnitTestResultOutcome.Error:
@@ -178,7 +173,10 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.MsTestV2
                     testProperties["Category"] = categoryList;
                 }
 
-                categoryList.AddRange(tattr.As<TestCategoryAttributeStruct>().TestCategories);
+                if (tattr.TryDuckCast<TestCategoryAttributeStruct>(out var tattrStruct))
+                {
+                    categoryList.AddRange(tattrStruct.TestCategories);
+                }
             }
 
             var classCategories = methodInfo.DeclaringType?.GetCustomAttributes(true);
@@ -198,7 +196,10 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.MsTestV2
                         testProperties["Category"] = categoryList;
                     }
 
-                    categoryList.AddRange(tattr.As<TestCategoryAttributeStruct>().TestCategories);
+                    if (tattr.TryDuckCast<TestCategoryAttributeStruct>(out var tattrStruct))
+                    {
+                        categoryList.AddRange(tattrStruct.TestCategories);
+                    }
                 }
             }
 

@@ -42,5 +42,13 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
         public static IEnumerable<object[]> StackExchangeRedis => IsComprehensive ? PackageVersionsComprehensive.StackExchangeRedis : PackageVersionsLatestMinors.StackExchangeRedis;
 
         public static IEnumerable<object[]> ServiceStackRedis => IsComprehensive ? PackageVersionsComprehensive.ServiceStackRedis : PackageVersionsLatestMinors.ServiceStackRedis;
+
+        public static IEnumerable<object[]> MySqlData => IsComprehensive ? PackageVersionsComprehensive.MySqlData : PackageVersionsLatestMinors.MySqlData;
+
+        public static IEnumerable<object[]> MicrosoftDataSqlite => IsComprehensive ? PackageVersionsComprehensive.MicrosoftDataSqlite : PackageVersionsLatestMinors.MicrosoftDataSqlite;
+
+        public static IEnumerable<object[]> OracleMDA => IsComprehensive ? PackageVersionsComprehensive.OracleMDA : PackageVersionsLatestMinors.OracleMDA;
+
+        public static IEnumerable<object[]> OracleMDACore => IsComprehensive ? PackageVersionsComprehensive.OracleMDACore : PackageVersionsLatestMinors.OracleMDACore;
     }
 }

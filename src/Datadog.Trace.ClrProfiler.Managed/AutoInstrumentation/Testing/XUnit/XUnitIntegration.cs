@@ -8,12 +8,6 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.XUnit
 {
     internal static class XUnitIntegration
     {
-        static XUnitIntegration()
-        {
-            // Preload environment variables.
-            CIEnvironmentValues.DecorateSpan(null);
-        }
-
         internal static Scope CreateScope(ref TestRunnerStruct runnerInstance, Type targetType)
         {
             string testSuite = runnerInstance.TestClass.ToString();
@@ -21,10 +15,9 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.XUnit
 
             AssemblyName testInvokerAssemblyName = targetType.Assembly.GetName();
 
-            Tracer tracer = Tracer.Instance;
             string testFramework = "xUnit " + testInvokerAssemblyName.Version.ToString();
 
-            Scope scope = tracer.StartActive("xunit.test");
+            Scope scope = Common.TestTracer.StartActive("xunit.test", serviceName: Common.ServiceName);
             Span span = scope.Span;
 
             span.Type = SpanTypes.Test;
@@ -39,37 +32,42 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.XUnit
             var framework = FrameworkDescription.Instance;
 
             span.SetTag(CommonTags.RuntimeName, framework.Name);
-            span.SetTag(CommonTags.RuntimeOSArchitecture, framework.OSArchitecture);
-            span.SetTag(CommonTags.RuntimeOSPlatform, framework.OSPlatform);
-            span.SetTag(CommonTags.RuntimeProcessArchitecture, framework.ProcessArchitecture);
             span.SetTag(CommonTags.RuntimeVersion, framework.ProductVersion);
+            span.SetTag(CommonTags.RuntimeArchitecture, framework.ProcessArchitecture);
+            span.SetTag(CommonTags.OSArchitecture, framework.OSArchitecture);
+            span.SetTag(CommonTags.OSPlatform, framework.OSPlatform);
+            span.SetTag(CommonTags.OSVersion, Environment.OSVersion.VersionString);
 
             // Get test parameters
             object[] testMethodArguments = runnerInstance.TestMethodArguments;
             ParameterInfo[] methodParameters = runnerInstance.TestMethod.GetParameters();
             if (methodParameters?.Length > 0 && testMethodArguments?.Length > 0)
             {
+                TestParameters testParameters = new TestParameters();
+                testParameters.Metadata = new Dictionary<string, object>();
+                testParameters.Arguments = new Dictionary<string, object>();
+                testParameters.Metadata[TestTags.MetadataTestName] = runnerInstance.TestCase.DisplayName;
+
                 for (int i = 0; i < methodParameters.Length; i++)
                 {
                     if (i < testMethodArguments.Length)
                     {
-                        span.SetTag($"{TestTags.Arguments}.{methodParameters[i].Name}", testMethodArguments[i]?.ToString() ?? "(null)");
+                        testParameters.Arguments[methodParameters[i].Name] = testMethodArguments[i]?.ToString() ?? "(null)";
                     }
                     else
                     {
-                        span.SetTag($"{TestTags.Arguments}.{methodParameters[i].Name}", "(default)");
+                        testParameters.Arguments[methodParameters[i].Name] = "(default)";
                     }
                 }
+
+                span.SetTag(TestTags.Parameters, testParameters.ToJSON());
             }
 
             // Get traits
             Dictionary<string, List<string>> traits = runnerInstance.TestCase.Traits;
             if (traits.Count > 0)
             {
-                foreach (KeyValuePair<string, List<string>> traitValue in traits)
-                {
-                    span.SetTag($"{TestTags.Traits}.{traitValue.Key}", string.Join(", ", traitValue.Value) ?? "(null)");
-                }
+                span.SetTag(TestTags.Traits, Datadog.Trace.Vendors.Newtonsoft.Json.JsonConvert.SerializeObject(traits));
             }
 
             // Skip tests
@@ -77,7 +75,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.XUnit
             {
                 span.SetTag(TestTags.Status, TestTags.StatusSkip);
                 span.SetTag(TestTags.SkipReason, runnerInstance.SkipReason);
-                span.Finish(TimeSpan.Zero);
+                span.Finish(new TimeSpan(10));
                 scope.Dispose();
                 return null;
             }

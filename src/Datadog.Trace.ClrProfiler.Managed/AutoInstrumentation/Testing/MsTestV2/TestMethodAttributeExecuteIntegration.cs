@@ -47,26 +47,24 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.MsTestV2
         /// <returns>A response value, in an async scenario will be T of Task of T</returns>
         public static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TTarget instance, TReturn returnValue, Exception exception, CallTargetState state)
         {
-            if (Tracer.Instance.Settings.IsIntegrationEnabled(IntegrationId))
+            if (Common.TestTracer.Settings.IsIntegrationEnabled(IntegrationId))
             {
-                Scope scope = Tracer.Instance.ActiveScope;
+                Scope scope = Common.TestTracer.ActiveScope;
                 if (scope != null)
                 {
                     Array returnValueArray = returnValue as Array;
                     if (returnValueArray.Length == 1)
                     {
                         object testResultObject = returnValueArray.GetValue(0);
-                        if (testResultObject != null)
+                        if (testResultObject != null &&
+                            testResultObject.TryDuckCast<TestResultStruct>(out var testResult) &&
+                            testResult.TestFailureException != null)
                         {
-                            TestResultStruct testResult = testResultObject.As<TestResultStruct>();
-                            if (testResult.TestFailureException != null)
+                            Exception testException = testResult.TestFailureException.InnerException ?? testResult.TestFailureException;
+                            string testExceptionName = testException.GetType().Name;
+                            if (testExceptionName != "UnitTestAssertException" && testExceptionName != "AssertInconclusiveException")
                             {
-                                Exception testException = testResult.TestFailureException.InnerException ?? testResult.TestFailureException;
-                                string testExceptionName = testException.GetType().Name;
-                                if (testExceptionName != "UnitTestAssertException" && testExceptionName != "AssertInconclusiveException")
-                                {
-                                    scope.Span.SetException(testException);
-                                }
+                                scope.Span.SetException(testException);
                             }
                         }
                     }
