@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Datadog.Trace.ExtensionMethods;
 using MsgPack;
@@ -15,10 +14,9 @@ namespace Datadog.Trace.TestHelpers
     /// </summary>
     public static class MsgPackHelpers
     {
-        public static ActivityTraceId TraceId(this MessagePackObject obj)
+        public static string TraceId(this MessagePackObject obj)
         {
-            var sth = obj.FirstDictionary()["trace_id"].ToString();
-            return ActivityTraceId.CreateFromString(sth);
+            return obj.FirstDictionary()["trace_id"].ToString();
         }
 
         public static ulong SpanId(this MessagePackObject obj)
@@ -73,7 +71,7 @@ namespace Datadog.Trace.TestHelpers
 
         public static void AssertSpanEqual(Span expected, MessagePackObject actual)
         {
-            Assert.Equal(expected.Context.TraceId, actual.TraceId());
+            Assert.Equal(expected.Context.TraceId.ToString(), actual.TraceId());
             Assert.Equal(expected.Context.SpanId, actual.SpanId());
             if (expected.Context.ParentId.HasValue)
             {

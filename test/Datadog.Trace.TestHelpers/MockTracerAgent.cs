@@ -289,7 +289,7 @@ namespace Datadog.Trace.TestHelpers
         public struct Span
         {
             [Key("trace_id")]
-            public ulong TraceId { get; set; }
+            public string TraceId { get; set; }
 
             [Key("span_id")]
             public ulong SpanId { get; set; }
