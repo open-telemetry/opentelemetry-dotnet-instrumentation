@@ -279,3 +279,6 @@ deploy/AzureAppServices/
 
 # profiler output files
 src/Datadog.Trace.ClrProfiler.Native/build/
+
+# ignore blog folder from upstream
+blog/
