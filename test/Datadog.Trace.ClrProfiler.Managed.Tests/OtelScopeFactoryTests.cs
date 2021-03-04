@@ -72,6 +72,21 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
                     new Input
                     {
                         Method = "GET",
+                        Uri = "https://username:password@example.com:8080/path/to/file.aspx?query=1#fragment",
+                    },
+                    new Result
+                    {
+                        OperationName = "HTTP GET",
+                        HttpMethodTag = "GET",
+                        HttpUrlTag = "https://example.com:8080/path/to/file.aspx?query=1#fragment",
+                        HttpSchemeTag = "https",
+                        HttpHostTag = "example.com:8080",
+                        HttpTargetTag = "/path/to/file.aspx?query=1#fragment",
+                    });
+                Add(
+                    new Input
+                    {
+                        Method = "GET",
                         Uri = "https://username:password@example.com/path/to/file.aspx?query=1#fragment",
                     },
                     new Result
