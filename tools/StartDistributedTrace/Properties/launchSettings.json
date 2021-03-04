@@ -4,7 +4,7 @@
       "commandName": "Project",
       "commandLineArgs": "http://localhost",
       "environmentVariables": {
-        "DD_VERSION": "1.0.0"
+        "OTEL_VERSION": "1.0.0"
       },
       "nativeDebugging": true
     }

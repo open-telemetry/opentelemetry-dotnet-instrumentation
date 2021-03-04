@@ -270,7 +270,7 @@ services:
     - ./:/project
     environment:
     - RABBITMQ_HOST=rabbitmq
-    - DD_TRACE_CALLTARGET_ENABLED=true
+    - OTEL_TRACE_CALLTARGET_ENABLED=true
     depends_on:
     - rabbitmq
 

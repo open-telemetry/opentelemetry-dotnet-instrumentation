@@ -13,7 +13,7 @@ mkdir -p build
 (cd build && cmake ../ && make)
 
 mkdir -p bin/Debug/x64
-cp -f build/bin/Datadog.Trace.ClrProfiler.Native.so bin/Debug/x64/Datadog.Trace.ClrProfiler.Native.so
+cp -f build/bin/Datadog.Trace.ClrProfiler.Native.so bin/Debug/x64/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so
 
 mkdir -p bin/Debug/x64/netstandard2.0
 cp -f $PUBLISH_OUTPUT_NET2/*.dll bin/Debug/x64/netstandard2.0/
