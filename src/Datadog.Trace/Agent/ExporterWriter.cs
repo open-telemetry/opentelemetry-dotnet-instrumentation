@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Datadog.Trace.Abstractions;
 using Datadog.Trace.DogStatsd;
 using Datadog.Trace.Logging;
 using Datadog.Trace.Util;
-using Datadog.Trace.Vendors.StatsdClient;
 
 namespace Datadog.Trace.Agent
 {
@@ -13,17 +13,17 @@ namespace Datadog.Trace.Agent
         private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor<ExporterWriter>();
 
         private readonly ExporterWriterBuffer<Span[]> _tracesBuffer;
-        private readonly IDogStatsd _statsd;
+        private readonly IMetrics _metrics;
         private readonly Task _flushTask;
         private readonly TaskCompletionSource<bool> _processExit = new TaskCompletionSource<bool>();
 
         private readonly IExporter _exporter;
 
-        public ExporterWriter(IExporter exporter, IDogStatsd statsd, bool automaticFlush = true, int queueSize = 1000)
+        public ExporterWriter(IExporter exporter, IMetrics metrics, bool automaticFlush = true, int queueSize = 1000)
         {
             _tracesBuffer = new ExporterWriterBuffer<Span[]>(queueSize);
             _exporter = exporter;
-            _statsd = statsd;
+            _metrics = metrics;
 
             _flushTask = automaticFlush ? Task.Run(FlushTracesTaskLoopAsync) : Task.FromResult(true);
         }
@@ -42,16 +42,13 @@ namespace Datadog.Trace.Agent
                 Log.Warning("Trace buffer is full. Dropping a trace from the buffer.");
             }
 
-            if (_statsd != null)
-            {
-                _statsd.Increment(TracerMetricNames.Queue.EnqueuedTraces);
-                _statsd.Increment(TracerMetricNames.Queue.EnqueuedSpans, trace.Length);
+            _metrics.Increment(TracerMetricNames.Queue.EnqueuedTraces);
+            _metrics.Increment(TracerMetricNames.Queue.EnqueuedSpans, trace.Length);
 
-                if (!success)
-                {
-                    _statsd.Increment(TracerMetricNames.Queue.DroppedTraces);
-                    _statsd.Increment(TracerMetricNames.Queue.DroppedSpans, trace.Length);
-                }
+            if (!success)
+            {
+                _metrics.Increment(TracerMetricNames.Queue.DroppedTraces);
+                _metrics.Increment(TracerMetricNames.Queue.DroppedSpans, trace.Length);
             }
         }
 
@@ -75,13 +72,9 @@ namespace Datadog.Trace.Agent
         {
             var traces = _tracesBuffer.Pop();
 
-            if (_statsd != null)
-            {
-                var spanCount = traces.Sum(t => t.Length);
-
-                _statsd.Increment(TracerMetricNames.Queue.DequeuedTraces, traces.Length);
-                _statsd.Increment(TracerMetricNames.Queue.DequeuedSpans, spanCount);
-            }
+            var spanCount = traces.Sum(t => t.Length);
+            _metrics.Increment(TracerMetricNames.Queue.DequeuedTraces, traces.Length);
+            _metrics.Increment(TracerMetricNames.Queue.DequeuedSpans, spanCount);
 
             if (traces.Length > 0)
             {
