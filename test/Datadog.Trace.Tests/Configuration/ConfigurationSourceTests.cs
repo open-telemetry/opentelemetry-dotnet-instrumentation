@@ -173,9 +173,27 @@ namespace Datadog.Trace.Tests.Configuration
             // save original value so we can restore later
             var originalValue = Environment.GetEnvironmentVariable(key);
 
-            Environment.SetEnvironmentVariable(key, value, EnvironmentVariableTarget.Process);
-            IConfigurationSource source = new EnvironmentConfigurationSource();
-            var settings = new TracerSettings(source);
+            TracerSettings settings;
+
+            if (key == "OTEL_SERVICE_NAME")
+            {
+                // We need to ensure OTEL_SERVICE is empty.
+                string originalServiceName = Environment.GetEnvironmentVariable(ConfigurationKeys.ServiceName);
+                Environment.SetEnvironmentVariable(ConfigurationKeys.ServiceName, null, EnvironmentVariableTarget.Process);
+
+                Environment.SetEnvironmentVariable(key, value, EnvironmentVariableTarget.Process);
+                IConfigurationSource source = new EnvironmentConfigurationSource();
+                settings = new TracerSettings(source);
+
+                // after load settings we can restore the original OTEL_SERVICE
+                Environment.SetEnvironmentVariable(ConfigurationKeys.ServiceName, originalServiceName, EnvironmentVariableTarget.Process);
+            }
+            else
+            {
+                Environment.SetEnvironmentVariable(key, value, EnvironmentVariableTarget.Process);
+                IConfigurationSource source = new EnvironmentConfigurationSource();
+                settings = new TracerSettings(source);
+            }
 
             object actualValue = settingGetter(settings);
             Assert.Equal(expectedValue, actualValue);

@@ -34,7 +34,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
         private static readonly IntegrationInfo SocketHandlerIntegrationId = IntegrationRegistry.GetIntegrationInfo(nameof(IntegrationIds.HttpSocketsHandler));
 
         private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor(typeof(HttpMessageHandlerIntegration));
-        private static readonly string[] NamespaceAndNameFilters = { ClrNames.GenericTask, ClrNames.HttpRequestMessage, ClrNames.CancellationToken };
+        private static readonly string[] NamespaceAndNameFilters = { ClrNames.HttpResponseMessageTask, ClrNames.HttpRequestMessage, ClrNames.CancellationToken };
 
         private static Type _httpMessageHandlerResultType;
         private static Type _httpClientHandlerResultType;
@@ -101,7 +101,8 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             }
 
             var reportedType = callOpCode == OpCodeValue.Call ? httpMessageHandler : handler.GetType();
-            var requestValue = request.As<HttpRequestMessageStruct>();
+
+            var requestValue = request.DuckCast<HttpRequestMessageStruct>();
 
             var isHttpClientHandler = handler.GetInstrumentedType(SystemNetHttp, HttpClientHandlerTypeName) != null;
 
@@ -187,7 +188,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                        .Start(moduleVersionPtr, mdToken, opCode, Send)
                        .WithConcreteType(httpMessageHandler)
                        .WithParameters(request, cancellationToken)
-                       .WithNamespaceAndNameFilters(NamespaceAndNameFilters)
+                       .WithNamespaceAndNameFilters(ClrNames.HttpResponseMessage, ClrNames.HttpRequestMessage, ClrNames.CancellationToken)
                        .Build();
             }
             catch (Exception ex)
@@ -204,7 +205,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             }
 
             var reportedType = callOpCode == OpCodeValue.Call ? httpMessageHandler : handler.GetType();
-            var requestValue = request.As<HttpRequestMessageStruct>();
+            var requestValue = request.DuckCast<HttpRequestMessageStruct>();
 
             var isHttpClientHandler = handler.GetInstrumentedType(SystemNetHttp, HttpClientHandlerTypeName) != null;
 
@@ -285,7 +286,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                 throw;
             }
 
-            var requestValue = request.As<HttpRequestMessageStruct>();
+            var requestValue = request.DuckCast<HttpRequestMessageStruct>();
             var reportedType = callOpCode == OpCodeValue.Call ? httpClientHandler : handler.GetType();
 
             if (!IsTracingEnabled(requestValue.Headers))
@@ -368,7 +369,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                        .Start(moduleVersionPtr, mdToken, opCode, Send)
                        .WithConcreteType(httpClientHandler)
                        .WithParameters(request, cancellationToken)
-                       .WithNamespaceAndNameFilters(NamespaceAndNameFilters)
+                       .WithNamespaceAndNameFilters(ClrNames.HttpResponseMessage, ClrNames.HttpRequestMessage, ClrNames.CancellationToken)
                        .Build();
             }
             catch (Exception ex)
@@ -384,7 +385,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                 throw;
             }
 
-            var requestValue = request.As<HttpRequestMessageStruct>();
+            var requestValue = request.DuckCast<HttpRequestMessageStruct>();
             var reportedType = callOpCode == OpCodeValue.Call ? httpClientHandler : handler.GetType();
 
             if (!IsTracingEnabled(requestValue.Headers))
@@ -428,10 +429,10 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                     var task = (Task)sendAsync(handler, request, cancellationToken);
                     await task.ConfigureAwait(false);
 
-                    var response = task.As<TaskObjectStruct>().Result;
+                    var response = task.DuckCast<TaskObjectStruct>().Result;
 
                     // this tag can only be set after the response is returned
-                    int statusCode = response.As<HttpResponseMessageStruct>().StatusCode;
+                    int statusCode = response.DuckCast<HttpResponseMessageStruct>().StatusCode;
 
                     if (scope != null)
                     {
@@ -474,7 +475,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                     var response = send(handler, request, cancellationToken);
 
                     // this tag can only be set after the response is returned
-                    int statusCode = response.As<HttpResponseMessageStruct>().StatusCode;
+                    int statusCode = response.DuckCast<HttpResponseMessageStruct>().StatusCode;
 
                     if (scope != null)
                     {

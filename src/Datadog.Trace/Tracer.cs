@@ -96,26 +96,18 @@ namespace Datadog.Trace
                 Statsd = statsd ?? CreateDogStatsdClient(Settings, DefaultServiceName, Settings.DogStatsdPort);
             }
 
-            // fall back to default implementations of each dependency if not provided
             if (agentWriter != null)
             {
                 _agentWriter = agentWriter;
             }
+            else if (Settings.Exporter == ExporterType.Zipkin)
+            {
+                _agentWriter = new ExporterWriter(new ZipkinExporter(Settings.AgentUri), Statsd);
+            }
             else
             {
-                IApi api = null;
-                switch (Settings.Exporter)
-                {
-                    case ExporterType.Zipkin:
-                        api = new ZipkinApi(Settings.AgentUri);
-                        break;
-                    case ExporterType.DatadogAgent:
-                    default:
-                        api = new Api(Settings.AgentUri, TransportStrategy.Get(Settings), Statsd);
-                        break;
-                }
-
-                _agentWriter = new AgentWriter(api, Statsd, queueSize: Settings.TraceQueueSize);
+                Log.Warning("Using eager agent writer");
+                _agentWriter = new AgentWriter(new Api(Settings.AgentUri, TransportStrategy.Get(Settings), Statsd), Statsd, maxBufferSize: Settings.TraceBufferSize);
             }
 
             switch (Settings.Convention)
