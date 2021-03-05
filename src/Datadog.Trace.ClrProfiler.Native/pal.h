@@ -30,11 +30,11 @@ inline WSTRING DatadogLogFilePath() {
   if (directory.length() > 0) {
     return directory +
 #ifdef _WIN32
-           '\\'_W +
+           WStr('\\') +
 #else
-           '/'_W +
+           WStr('/') +
 #endif
-        "dotnet-tracer-native.log"_W;
+        WStr("dotnet-tracer-native.log");
   }
 
   WSTRING path = GetEnvironmentValue(environment::log_path);
@@ -58,7 +58,7 @@ inline WSTRING DatadogLogFilePath() {
   return ToWSTRING(program_data +
                    R"(\OpenTelemetry .NET AutoInstrumentation\logs\dotnet-tracer-native.log)");
 #else
-  return "/var/log/opentelemetry/dotnet/dotnet-tracer-native.log"_W;
+  return WStr("/var/log/opentelemetry/dotnet/dotnet-tracer-native.log");
 #endif
 }
 
