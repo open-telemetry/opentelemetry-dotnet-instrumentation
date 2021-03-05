@@ -52,7 +52,7 @@ namespace Datadog.Trace.Tests
         [Fact]
         public async Task FlushTwice()
         {
-            var w = new AgentWriter(_api.Object, metrics: null);
+            var w = new AgentWriter(_api.Object, new NullMetrics());
             await w.FlushAndCloseAsync();
             await w.FlushAndCloseAsync();
         }
@@ -63,7 +63,7 @@ namespace Datadog.Trace.Tests
             // The flush thread should be able to recover from an error when calling the API
             // Also, it should free the faulty buffer
             var api = new Mock<IApi>();
-            var agent = new AgentWriter(api.Object, metrics: null);
+            var agent = new AgentWriter(api.Object, new NullMetrics());
 
             var mutex = new ManualResetEventSlim();
 
@@ -91,7 +91,7 @@ namespace Datadog.Trace.Tests
         {
             // Make sure that the agent is able to switch to the secondary buffer when the primary is full/busy
             var api = new Mock<IApi>();
-            var agent = new AgentWriter(api.Object, metrics: null);
+            var agent = new AgentWriter(api.Object, new NullMetrics());
 
             var barrier = new Barrier(2);
 
@@ -151,7 +151,7 @@ namespace Datadog.Trace.Tests
             var sizeOfTrace = ComputeSizeOfTrace(CreateTrace(1));
 
             // Make the buffer size big enough for a single trace
-            var agent = new AgentWriter(api.Object, metrics: null, automaticFlush: false, maxBufferSize: (sizeOfTrace * 2) + SpanBuffer.HeaderSize - 1);
+            var agent = new AgentWriter(api.Object, new NullMetrics(), automaticFlush: false, maxBufferSize: (sizeOfTrace * 2) + SpanBuffer.HeaderSize - 1);
 
             agent.WriteTrace(CreateTrace(1));
             agent.WriteTrace(CreateTrace(1));
@@ -227,7 +227,7 @@ namespace Datadog.Trace.Tests
         [Fact]
         public Task WakeUpSerializationTask()
         {
-            var agent = new AgentWriter(Mock.Of<IApi>(), metrics: null, batchInterval: 0);
+            var agent = new AgentWriter(Mock.Of<IApi>(), new NullMetrics(), batchInterval: 0);
 
             // To reduce flackyness, first we make sure the serialization thread is started
             WaitForDequeue(agent);
