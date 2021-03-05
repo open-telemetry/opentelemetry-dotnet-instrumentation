@@ -76,7 +76,7 @@ namespace Datadog.Trace
         /// <summary>
         /// Gets the trace's unique identifier.
         /// </summary>
-        public ActivityTraceId TraceId => Context.TraceId;
+        public TraceId TraceId => Context.TraceId;
 
         /// <summary>
         /// Gets the span's unique identifier.

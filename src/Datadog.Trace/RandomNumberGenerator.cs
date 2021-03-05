@@ -47,8 +47,6 @@ namespace Datadog.Trace
             get => _random ??= new RandomNumberGenerator();
         }
 
-        private static ulong Rol64(ulong x, int k) => (x << k) | (x >> (64 - k));
-
         public long Next()
         {
             ulong result = Rol64(_s1 * 5, 7) * 9;
@@ -64,5 +62,7 @@ namespace Datadog.Trace
 
             return (long)result;
         }
+
+        private static ulong Rol64(ulong x, int k) => (x << k) | (x >> (64 - k));
     }
 }

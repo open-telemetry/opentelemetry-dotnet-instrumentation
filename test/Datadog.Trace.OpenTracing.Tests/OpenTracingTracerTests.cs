@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Datadog.Trace.Agent;
@@ -175,7 +174,7 @@ namespace Datadog.Trace.OpenTracing.Tests
         public void Extract_HttpHeadersFormat_HeadersProperlySet_SpanContext()
         {
             const ulong parentId = 10;
-            var traceId = ActivityTraceId.CreateFromString("00000000000000000000000000000042");
+            var traceId = TraceId.CreateFromString("00000000000000000000000000000042");
             var headers = new MockTextMap();
             headers.Set(HttpHeaderNames.ParentId, parentId.ToString());
             headers.Set(HttpHeaderNames.TraceId, traceId.ToString());
@@ -190,7 +189,7 @@ namespace Datadog.Trace.OpenTracing.Tests
         public void Extract_TextMapFormat_HeadersProperlySet_SpanContext()
         {
             const ulong parentId = 10;
-            var traceId = ActivityTraceId.CreateFromString("00000000000000000000000000000042");
+            var traceId = TraceId.CreateFromString("00000000000000000000000000000042");
             var headers = new MockTextMap();
             headers.Set(HttpHeaderNames.ParentId, parentId.ToString());
             headers.Set(HttpHeaderNames.TraceId, traceId.ToString());

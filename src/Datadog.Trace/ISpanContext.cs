@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using Datadog.Trace.Abstractions;
 
 namespace Datadog.Trace
 {
@@ -10,7 +10,7 @@ namespace Datadog.Trace
         /// <summary>
         /// Gets the trace identifier.
         /// </summary>
-        ActivityTraceId TraceId { get; }
+        TraceId TraceId { get; }
 
         /// <summary>
         /// Gets the span identifier.

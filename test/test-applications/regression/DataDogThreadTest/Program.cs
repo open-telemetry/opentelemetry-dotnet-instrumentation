@@ -62,7 +62,7 @@ namespace DataDogThreadTest
                                                     var innerTraceId = innerScope.Span.TraceId;
                                                     var innerSpanId = innerScope.Span.SpanId;
 
-                                                    if (outerTraceId != innerTraceId)
+                                                    if (!outerTraceId.Equals(innerTraceId))
                                                     {
                                                         throw new Exception($"TraceId mismatch - outer: {outerTraceId}, inner: {innerTraceId}");
                                                     }

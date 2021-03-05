@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using Datadog.Trace.ClrProfiler.Helpers;
 using Datadog.Trace.Headers;
 using Datadog.Trace.TestHelpers;
@@ -86,7 +84,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             var request = new HttpRequestMessage();
             var headers = new ReflectionHttpHeadersCollection(request.Headers);
 
-            var traceId = ActivityTraceId.CreateFromString("00000000000000000000000000000009");
+            var traceId = TraceId.CreateFromString("00000000000000000000000000000009");
             const int spanId = 7;
             const SamplingPriority samplingPriority = SamplingPriority.UserKeep;
             const string origin = "synthetics";
@@ -129,7 +127,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             var request = new HttpRequestMessage();
             var headers = new ReflectionHttpHeadersCollection(request.Headers);
 
-            var traceId = ActivityTraceId.CreateFromString("00000000000000000000000000000009");
+            var traceId = TraceId.CreateFromString("00000000000000000000000000000009");
             const SamplingPriority samplingPriority = SamplingPriority.UserKeep;
             const string origin = "synthetics";
 
@@ -157,7 +155,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             var request = new HttpRequestMessage();
             var headers = new ReflectionHttpHeadersCollection(request.Headers);
 
-            var traceId = ActivityTraceId.CreateFromString("00000000000000000000000000000009");
+            var traceId = TraceId.CreateFromString("00000000000000000000000000000009");
             const ulong spanId = 7;
             const string origin = "synthetics";
 

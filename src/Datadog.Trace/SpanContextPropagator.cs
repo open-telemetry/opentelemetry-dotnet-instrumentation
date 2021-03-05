@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using Datadog.Trace.Headers;
@@ -110,7 +109,7 @@ namespace Datadog.Trace
                 throw new ArgumentNullException(nameof(headers));
             }
 
-            var traceId = ParseActivityTraceId(headers, HttpHeaderNames.TraceId);
+            var traceId = ParseTraceId(headers, HttpHeaderNames.TraceId);
             if (traceId == null)
             {
                 // a valid traceId is required to use distributed tracing
@@ -137,7 +136,7 @@ namespace Datadog.Trace
 
             if (getter == null) { throw new ArgumentNullException(nameof(getter)); }
 
-            var traceId = ParseActivityTraceId(carrier, getter, HttpHeaderNames.TraceId);
+            var traceId = ParseTraceId(carrier, getter, HttpHeaderNames.TraceId);
             if (traceId == null)
             {
                 // a valid traceId is required to use distributed tracing
@@ -165,27 +164,27 @@ namespace Datadog.Trace
             }
         }
 
-        private static ActivityTraceId? ParseActivityTraceId<T>(T headers, string headerName)
+        private static TraceId? ParseTraceId<T>(T headers, string headerName)
             where T : IHeadersCollection
         {
             var headerValues = headers.GetValues(headerName);
-            return ParseActivityTraceId(headerValues, headerName);
+            return ParseTraceId(headerValues, headerName);
         }
 
-        private static ActivityTraceId? ParseActivityTraceId<T>(T carrier, Func<T, string, IEnumerable<string>> getter, string headerName)
+        private static TraceId? ParseTraceId<T>(T carrier, Func<T, string, IEnumerable<string>> getter, string headerName)
         {
             var headerValues = getter(carrier, headerName).ToList();
-            return ParseActivityTraceId(headerValues, headerName);
+            return ParseTraceId(headerValues, headerName);
         }
 
-        private static ActivityTraceId? ParseActivityTraceId(IEnumerable<string> headerValues, string headerName)
+        private static TraceId? ParseTraceId(IEnumerable<string> headerValues, string headerName)
         {
             var headerValuesList = headerValues.ToList();
             foreach (var headerValue in headerValuesList)
             {
                 try
                 {
-                    var traceId = ActivityTraceId.CreateFromString(new ReadOnlySpan<char>(headerValue.ToCharArray()));
+                    var traceId = TraceId.CreateFromString(headerValue);
                     return traceId;
                 }
                 catch (ArgumentOutOfRangeException)

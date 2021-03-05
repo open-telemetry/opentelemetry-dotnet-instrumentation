@@ -197,7 +197,7 @@ namespace Datadog.Trace.Logging
 
         private void SetDefaultValues()
         {
-            SetLogContext(ActivityTraceId.CreateFromBytes(new byte[16]), 0);
+            SetLogContext(TraceId.Zero, spanId: 0);
         }
 
         private void RemoveLastCorrelationIdentifierContext()
@@ -228,7 +228,7 @@ namespace Datadog.Trace.Logging
             }
         }
 
-        private void SetLogContext(ActivityTraceId traceId, ulong spanId)
+        private void SetLogContext(TraceId traceId, ulong spanId)
         {
             if (!_safeToAddToMdc)
             {
@@ -261,7 +261,7 @@ namespace Datadog.Trace.Logging
             }
         }
 
-        private void SetSerilogCompatibleLogContext(ActivityTraceId traceId, ulong spanId)
+        private void SetSerilogCompatibleLogContext(TraceId traceId, ulong spanId)
         {
             if (!_safeToAddToMdc)
             {
@@ -297,7 +297,7 @@ namespace Datadog.Trace.Logging
 #if NETFRAMEWORK
 #pragma warning disable SA1202 // Elements must be ordered by access
 #pragma warning disable SA1204 // Static elements must appear before instance elements
-        private static void RefreshIISPreAppState(ActivityTraceId traceId)
+        private static void RefreshIISPreAppState(TraceId traceId)
         {
             Debug.Assert(_executingIISPreStartInit, $"{nameof(_executingIISPreStartInit)} should always be true when entering {nameof(RefreshIISPreAppState)}");
 

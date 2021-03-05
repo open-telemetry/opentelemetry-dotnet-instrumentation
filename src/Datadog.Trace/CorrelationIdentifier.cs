@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using Datadog.Trace.Abstractions;
 
 namespace Datadog.Trace
 {
@@ -58,7 +59,7 @@ namespace Datadog.Trace
         /// Gets the id of the active trace.
         /// </summary>
         /// <returns>The id of the active trace. If there is no active trace, returns zero.</returns>
-        public static ActivityTraceId? TraceId
+        public static TraceId? TraceId
         {
             get
             {
