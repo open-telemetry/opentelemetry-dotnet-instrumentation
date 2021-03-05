@@ -56,7 +56,7 @@ namespace Datadog.Trace
         internal SpanContext(ISpanContext parent, ITraceContext traceContext, string serviceName, ulong? spanId = null)
             : this(parent?.TraceId, serviceName)
         {
-            SpanId = spanId ?? SpanIdGenerator.ThreadInstance.CreateNew64Bit();
+            SpanId = spanId ?? SpanIdGenerator.ThreadInstance.CreateNew();
             Parent = parent;
             TraceContext = traceContext;
             if (parent is SpanContext spanContext)
