@@ -96,6 +96,12 @@ namespace Datadog.Trace.Tests.Configuration
             yield return new object[] { ConfigurationKeys.Exporter, "datadogagent", CreateFunc(s => s.Exporter), ExporterType.DatadogAgent };
             yield return new object[] { ConfigurationKeys.Exporter, "Zipkin", CreateFunc(s => s.Exporter), ExporterType.Zipkin };
             yield return new object[] { ConfigurationKeys.Exporter, "unknown", CreateFunc(s => s.Exporter), ExporterType.Default };
+
+            yield return new object[] { ConfigurationKeys.Convention, null, CreateFunc(s => s.Convention), ConventionType.Default };
+            yield return new object[] { ConfigurationKeys.Convention, string.Empty, CreateFunc(s => s.Convention), ConventionType.Default };
+            yield return new object[] { ConfigurationKeys.Convention, "opentelemetry", CreateFunc(s => s.Convention), ConventionType.OpenTelemetry };
+            yield return new object[] { ConfigurationKeys.Convention, "Datadog", CreateFunc(s => s.Convention), ConventionType.Datadog };
+            yield return new object[] { ConfigurationKeys.Convention, "unknown", CreateFunc(s => s.Convention), ConventionType.Default };
         }
 
         // JsonConfigurationSource needs to be tested with JSON data, which cannot be used with the other IConfigurationSource implementations.
@@ -167,9 +173,27 @@ namespace Datadog.Trace.Tests.Configuration
             // save original value so we can restore later
             var originalValue = Environment.GetEnvironmentVariable(key);
 
-            Environment.SetEnvironmentVariable(key, value, EnvironmentVariableTarget.Process);
-            IConfigurationSource source = new EnvironmentConfigurationSource();
-            var settings = new TracerSettings(source);
+            TracerSettings settings;
+
+            if (key == "OTEL_SERVICE_NAME")
+            {
+                // We need to ensure OTEL_SERVICE is empty.
+                string originalServiceName = Environment.GetEnvironmentVariable(ConfigurationKeys.ServiceName);
+                Environment.SetEnvironmentVariable(ConfigurationKeys.ServiceName, null, EnvironmentVariableTarget.Process);
+
+                Environment.SetEnvironmentVariable(key, value, EnvironmentVariableTarget.Process);
+                IConfigurationSource source = new EnvironmentConfigurationSource();
+                settings = new TracerSettings(source);
+
+                // after load settings we can restore the original OTEL_SERVICE
+                Environment.SetEnvironmentVariable(ConfigurationKeys.ServiceName, originalServiceName, EnvironmentVariableTarget.Process);
+            }
+            else
+            {
+                Environment.SetEnvironmentVariable(key, value, EnvironmentVariableTarget.Process);
+                IConfigurationSource source = new EnvironmentConfigurationSource();
+                settings = new TracerSettings(source);
+            }
 
             object actualValue = settingGetter(settings);
             Assert.Equal(expectedValue, actualValue);

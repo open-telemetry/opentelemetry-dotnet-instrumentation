@@ -35,12 +35,6 @@ namespace Datadog.Trace.ClrProfiler.Integrations.Testing
 
         private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor(typeof(NUnitIntegration));
 
-        static NUnitIntegration()
-        {
-            // Preload environment variables.
-            CIEnvironmentValues.DecorateSpan(null);
-        }
-
         /// <summary>
         /// Wrap the original NUnit.Framework.Internal.Commands.TestMethodCommand.Execute method by adding instrumentation code around it
         /// </summary>
@@ -137,6 +131,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.Testing
                     MethodInfo testMethod = null;
                     object[] testMethodArguments = null;
                     object properties = null;
+                    string testCaseName = null;
 
                     if (currentTest != null)
                     {
@@ -147,6 +142,8 @@ namespace Datadog.Trace.ClrProfiler.Integrations.Testing
 
                         currentTest.TryGetPropertyValue<object[]>("Arguments", out testMethodArguments);
                         currentTest.TryGetPropertyValue<object>("Properties", out properties);
+
+                        currentTest.TryGetPropertyValue<string>("Name", out testCaseName);
                     }
 
                     if (testMethod != null)
@@ -155,24 +152,27 @@ namespace Datadog.Trace.ClrProfiler.Integrations.Testing
                         string testSuite = testMethod.DeclaringType?.FullName;
                         string testName = testMethod.Name;
                         string skipReason = null;
-                        List<KeyValuePair<string, string>> testArguments = null;
-                        List<KeyValuePair<string, string>> testTraits = null;
+                        Dictionary<string, List<string>> testTraits = null;
 
                         // Get test parameters
+                        TestParameters testParameters = null;
                         ParameterInfo[] methodParameters = testMethod.GetParameters();
                         if (methodParameters?.Length > 0)
                         {
-                            testArguments = new List<KeyValuePair<string, string>>();
+                            testParameters = new TestParameters();
+                            testParameters.Metadata = new Dictionary<string, object>();
+                            testParameters.Arguments = new Dictionary<string, object>();
+                            testParameters.Metadata[TestTags.MetadataTestName] = testCaseName;
 
                             for (int i = 0; i < methodParameters.Length; i++)
                             {
                                 if (testMethodArguments != null && i < testMethodArguments.Length)
                                 {
-                                    testArguments.Add(new KeyValuePair<string, string>($"{TestTags.Arguments}.{methodParameters[i].Name}", testMethodArguments[i]?.ToString() ?? "(null)"));
+                                    testParameters.Arguments[methodParameters[i].Name] = testMethodArguments[i]?.ToString() ?? "(null)";
                                 }
                                 else
                                 {
-                                    testArguments.Add(new KeyValuePair<string, string>($"{TestTags.Arguments}.{methodParameters[i].Name}", "(default)"));
+                                    testParameters.Arguments[methodParameters[i].Name] = "(default)";
                                 }
                             }
                         }
@@ -184,7 +184,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.Testing
 
                             if (properties.TryGetFieldValue<Dictionary<string, IList>>("inner", out Dictionary<string, IList> traits) && traits.Count > 0)
                             {
-                                testTraits = new List<KeyValuePair<string, string>>();
+                                testTraits = new Dictionary<string, List<string>>();
 
                                 foreach (KeyValuePair<string, IList> traitValue in traits)
                                 {
@@ -193,10 +193,9 @@ namespace Datadog.Trace.ClrProfiler.Integrations.Testing
                                         continue;
                                     }
 
-                                    IEnumerable<string> values = Enumerable.Empty<string>();
+                                    List<string> lstValues = new List<string>();
                                     if (traitValue.Value != null)
                                     {
-                                        List<string> lstValues = new List<string>();
                                         foreach (object valObj in traitValue.Value)
                                         {
                                             if (valObj is null)
@@ -206,17 +205,14 @@ namespace Datadog.Trace.ClrProfiler.Integrations.Testing
 
                                             lstValues.Add(valObj.ToString());
                                         }
-
-                                        values = lstValues;
                                     }
 
-                                    testTraits.Add(new KeyValuePair<string, string>($"{TestTags.Traits}.{traitValue.Key}", string.Join(", ", values) ?? "(null)"));
+                                    testTraits[traitValue.Key] = lstValues;
                                 }
                             }
                         }
 
-                        Tracer tracer = Tracer.Instance;
-                        scope = tracer.StartActive("nunit.test");
+                        scope = Common.TestTracer.StartActive("nunit.test", serviceName: Common.ServiceName);
                         Span span = scope.Span;
 
                         span.Type = SpanTypes.Test;
@@ -231,25 +227,20 @@ namespace Datadog.Trace.ClrProfiler.Integrations.Testing
                         var framework = FrameworkDescription.Instance;
 
                         span.SetTag(CommonTags.RuntimeName, framework.Name);
-                        span.SetTag(CommonTags.RuntimeOSArchitecture, framework.OSArchitecture);
-                        span.SetTag(CommonTags.RuntimeOSPlatform, framework.OSPlatform);
-                        span.SetTag(CommonTags.RuntimeProcessArchitecture, framework.ProcessArchitecture);
                         span.SetTag(CommonTags.RuntimeVersion, framework.ProductVersion);
+                        span.SetTag(CommonTags.RuntimeArchitecture, framework.ProcessArchitecture);
+                        span.SetTag(CommonTags.OSArchitecture, framework.OSArchitecture);
+                        span.SetTag(CommonTags.OSPlatform, framework.OSPlatform);
+                        span.SetTag(CommonTags.OSVersion, Environment.OSVersion.VersionString);
 
-                        if (testArguments != null)
+                        if (testParameters != null)
                         {
-                            foreach (KeyValuePair<string, string> argument in testArguments)
-                            {
-                                span.SetTag(argument.Key, argument.Value);
-                            }
+                            span.SetTag(TestTags.Parameters, testParameters.ToJSON());
                         }
 
-                        if (testTraits != null)
+                        if (testTraits != null && testTraits.Count > 0)
                         {
-                            foreach (KeyValuePair<string, string> trait in testTraits)
-                            {
-                                span.SetTag(trait.Key, trait.Value);
-                            }
+                            span.SetTag(TestTags.Traits, Datadog.Trace.Vendors.Newtonsoft.Json.JsonConvert.SerializeObject(testTraits));
                         }
 
                         if (skipReason != null)
@@ -279,10 +270,24 @@ namespace Datadog.Trace.ClrProfiler.Integrations.Testing
                 ex = ex.InnerException;
             }
 
-            if (ex != null && ex.GetType().FullName != "NUnit.Framework.SuccessException")
+            if (ex != null)
             {
-                scope.Span.SetException(ex);
-                scope.Span.SetTag(TestTags.Status, TestTags.StatusFail);
+                string exTypeName = ex.GetType().FullName;
+
+                if (exTypeName == "NUnit.Framework.SuccessException")
+                {
+                    scope.Span.SetTag(TestTags.Status, TestTags.StatusPass);
+                }
+                else if (exTypeName == "NUnit.Framework.IgnoreException")
+                {
+                    scope.Span.SetTag(TestTags.Status, TestTags.StatusSkip);
+                    scope.Span.SetTag(TestTags.SkipReason, ex.Message);
+                }
+                else
+                {
+                    scope.Span.SetException(ex);
+                    scope.Span.SetTag(TestTags.Status, TestTags.StatusFail);
+                }
             }
             else
             {
@@ -346,7 +351,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations.Testing
                 // So the last spans in buffer aren't send to the agent.
                 // Other times we reach the 500 items of the buffer in a sec and the tracer start to drop spans.
                 // In a test scenario we must keep all spans.
-                Tracer.Instance.FlushAsync().GetAwaiter().GetResult();
+                Common.TestTracer.FlushAsync().GetAwaiter().GetResult();
             }
             finally
             {
