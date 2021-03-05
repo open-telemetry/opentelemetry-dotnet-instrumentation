@@ -104,7 +104,7 @@ namespace Datadog.Trace.Agent
 
             private static IDictionary<string, string> BuildTags(Span span)
             {
-                var spanTags = span?.Tags?.GetAll();
+                var spanTags = span?.Tags?.GetAllTags();
                 if (spanTags == null || spanTags.Count == 0)
                 {
                     return EmptyTags;

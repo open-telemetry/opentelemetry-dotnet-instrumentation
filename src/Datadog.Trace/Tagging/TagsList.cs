@@ -13,7 +13,7 @@ namespace Datadog.Trace.Tagging
 
         public List<KeyValuePair<string, double>> Metrics => Volatile.Read(ref _metrics);
 
-        public List<KeyValuePair<string, string>> GetAll()
+        public List<KeyValuePair<string, string>> GetAllTags()
         {
             var customTags = GetCustomTags();
             var additionalTags = GetAdditionalTags();
@@ -269,10 +269,7 @@ namespace Datadog.Trace.Tagging
 
         protected virtual IProperty<double?>[] GetAdditionalMetrics() => ArrayHelper.Empty<IProperty<double?>>();
 
-        private List<KeyValuePair<string, string>> GetCustomTags()
-        {
-            return Volatile.Read(ref _tags);
-        }
+        protected virtual IList<KeyValuePair<string, string>> GetCustomTags() => Volatile.Read(ref _tags);
 
         private int WriteTags(ref byte[] bytes, int offset)
         {

@@ -31,7 +31,7 @@ namespace Datadog.Trace.Tests.Tagging
             tags.SetTag(Tags.Version, "v2.0");
             tags.SetTag("sample.2", "Temp 3");
 
-            var all = tags.GetAll();
+            var all = tags.GetAllTags();
             var distinctKeys = all.Select(x => x.Key).Distinct().Count();
 
             Assert.Equal(all.Count, distinctKeys);
@@ -56,7 +56,7 @@ namespace Datadog.Trace.Tests.Tagging
             tags.SetTag("sample.1", values[3]);
             tags.SetTag("sample.2", values[4]);
 
-            ValidateTags(tags.GetAll(), values);
+            ValidateTags(tags.GetAllTags(), values);
         }
 
         [Fact]
@@ -65,7 +65,7 @@ namespace Datadog.Trace.Tests.Tagging
             var tags = new EmptyTags();
             var values = ArrayHelper.Empty<string>();
 
-            ValidateTags(tags.GetAll(), values);
+            ValidateTags(tags.GetAllTags(), values);
         }
 
         [Fact]
