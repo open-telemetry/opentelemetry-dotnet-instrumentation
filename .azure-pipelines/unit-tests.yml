@@ -70,7 +70,7 @@ jobs:
         test/benchmarks/**/*.csproj
         !src/Datadog.Trace.Tools.Runner/*.csproj
     env:
-      OTEL_SERVICE_NAME: dd-tracer-dotnet
+      OTEL_SERVICE_NAME: dd-trace-dotnet
 
   - task: DotNetCoreCLI@2
     displayName: dotnet test
@@ -130,6 +130,8 @@ jobs:
       command: test
       configuration: $(buildConfiguration)
       projects: test/**/*.Tests.csproj
+    env:
+      OTEL_SERVICE: dd-trace-dotnet
 
 
 - job: windows_profiler

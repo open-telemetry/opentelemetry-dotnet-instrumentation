@@ -11,7 +11,6 @@ trigger:
 
 variables:
   publishOutput: $(System.DefaultWorkingDirectory)/src/bin/managed-publish
-  OTEL_DOTNET_TRACER_MSBUILD:
 
 jobs:
 
@@ -58,7 +57,7 @@ jobs:
       containerregistrytype: Container Registry
       dockerComposeCommand: run Profiler
 
-  - publish: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin/Debug/x64
+  - publish: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin/Release/x64
     displayName: Uploading linux tracer home artifact
     artifact: linux-tracer-home
 
@@ -68,16 +67,16 @@ jobs:
   steps:
 
   - task: UseDotNet@2
-    displayName: install dotnet core sdk 3.1
+    displayName: install dotnet core runtime 3.1
     inputs:
-      packageType: sdk
-      version: 5.0.x
+      packageType: runtime
+      version: 3.1.x
 
   - task: UseDotNet@2
     displayName: install dotnet core sdk 5.0
     inputs:
       packageType: sdk
-      version: $(dotnetCoreSdk5Version)
+      version: 5.0.x
 
   - task: DotNetCoreCLI@2
     displayName: dotnet build
@@ -90,7 +89,7 @@ jobs:
 
   - script: |
       cd ./src/Datadog.Trace.ClrProfiler.Native
-      cmake .
+      cmake . -DCMAKE_BUILD_TYPE=Release
       make
     displayName: build_profiler
 

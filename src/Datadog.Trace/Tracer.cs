@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Datadog.Trace.Agent;
 using Datadog.Trace.Configuration;
+using Datadog.Trace.Conventions;
 using Datadog.Trace.DiagnosticListeners;
 using Datadog.Trace.DogStatsd;
 using Datadog.Trace.Logging;
@@ -95,26 +96,29 @@ namespace Datadog.Trace
                 Statsd = statsd ?? CreateDogStatsdClient(Settings, DefaultServiceName, Settings.DogStatsdPort);
             }
 
-            // fall back to default implementations of each dependency if not provided
             if (agentWriter != null)
             {
                 _agentWriter = agentWriter;
             }
+            else if (Settings.Exporter == ExporterType.Zipkin)
+            {
+                _agentWriter = new ExporterWriter(new ZipkinExporter(Settings.AgentUri), Statsd);
+            }
             else
             {
-                IApi api = null;
-                switch (Settings.Exporter)
-                {
-                    case ExporterType.Zipkin:
-                        api = new ZipkinApi(Settings.AgentUri);
-                        break;
-                    case ExporterType.DatadogAgent:
-                    default:
-                        api = new Api(Settings.AgentUri, TransportStrategy.Get(Settings), Statsd);
-                        break;
-                }
+                Log.Warning("Using eager agent writer");
+                _agentWriter = new AgentWriter(new Api(Settings.AgentUri, TransportStrategy.Get(Settings), Statsd), Statsd, maxBufferSize: Settings.TraceBufferSize);
+            }
 
-                _agentWriter = new AgentWriter(api, Statsd, queueSize: Settings.TraceQueueSize);
+            switch (Settings.Convention)
+            {
+                case ConventionType.OpenTelemetry:
+                    OutboundHttpConvention = new OtelOutboundHttpConvention(this);
+                    break;
+                case ConventionType.Datadog:
+                default:
+                    OutboundHttpConvention = new DatadogOutboundHttpConvention(this);
+                    break;
             }
 
             _scopeManager = scopeManager ?? new AsyncLocalScopeManager();
@@ -252,6 +256,8 @@ namespace Datadog.Trace
         internal ISampler Sampler { get; }
 
         internal IDogStatsd Statsd { get; private set; }
+
+        internal IOutboundHttpConvention OutboundHttpConvention { get; }
 
         /// <summary>
         /// Create a new Tracer with the given parameters

@@ -140,9 +140,14 @@ namespace Datadog.Trace.Configuration
         public const string ServiceNameMappings = "OTEL_TRACE_SERVICE_MAPPING";
 
         /// <summary>
-        /// Configuration key for setting the size of the trace buffer
+        /// Configuration key for setting the size in bytes of the trace buffer
         /// </summary>
-        public const string QueueSize = "OTEL_TRACE_QUEUE_SIZE";
+        public const string BufferSize = "OTEL_TRACE_BUFFER_SIZE";
+
+        /// <summary>
+        /// Configuration key for setting the batch interval in milliseconds for the serialization queue
+        /// </summary>
+        public const string SerializationBatchInterval = "OTEL_TRACE_BATCH_INTERVAL";
 
         /// <summary>
         /// Configuration key for enabling or disabling the automatic injection
@@ -279,6 +284,14 @@ namespace Datadog.Trace.Configuration
         /// </summary>
         /// <seealso cref="TracerSettings.Exporter"/>
         public const string Exporter = "OTEL_EXPORTER";
+
+        /// <summary>
+        /// Configuration key for the semantic convention to be used.
+        /// The Tracer uses it to define operation names, span tags, statuses etc.
+        /// Default is <c>"Default"</c>.
+        /// <seealso cref="TracerSettings.Convention"/>
+        /// </summary>
+        public const string Convention = "OTEL_CONVENTION";
 
         /// <summary>
         /// Configuration key for setting the API key, used by the Agent.
