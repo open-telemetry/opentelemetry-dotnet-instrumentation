@@ -167,6 +167,9 @@ namespace Datadog.Trace.Configuration
             Enum.TryParse(source?.GetString(ConfigurationKeys.Exporter) ?? "default", ignoreCase: true, out ExporterType exporterType);
             Exporter = exporterType;
 
+            Enum.TryParse(source?.GetString(ConfigurationKeys.Convention) ?? "default", ignoreCase: true, out ConventionType conventionType);
+            Convention = conventionType;
+
             var httpServerErrorStatusCodes = source?.GetString(ConfigurationKeys.HttpServerErrorStatusCodes) ??
                                            // Default value
                                            "500-599";
@@ -337,6 +340,14 @@ namespace Datadog.Trace.Configuration
         /// <seealso cref="ConfigurationKeys.Exporter"/>
         /// </summary>
         public ExporterType Exporter { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the semantic convention to be used.
+        /// The Tracer uses it to define operation names, span tags, statuses etc.
+        /// Default is <c>"Default"</c>.
+        /// <seealso cref="ConfigurationKeys.Convention"/>
+        /// </summary>
+        public ConventionType Convention { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether runtime metrics
