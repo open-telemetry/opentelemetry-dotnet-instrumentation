@@ -43,18 +43,17 @@ namespace Datadog.Trace.Tests.Tagging
         public void GetAll()
         {
             // Should be any actual implementation
-            var tags = new HttpTags();
+            var tags = new CommonTags();
             var values = new[]
             {
-                "GET", "200", "Sample/Test", "value 1", "value 2"
+                "v1.0", "Test", "value 1", "value 2"
             };
 
-            tags.HttpMethod = values[0];
-            tags.HttpStatusCode = values[1];
-            tags.HttpUrl = values[2];
+            tags.Version = values[0];
+            tags.Environment = values[1];
 
-            tags.SetTag("sample.1", values[3]);
-            tags.SetTag("sample.2", values[4]);
+            tags.SetTag("sample.1", values[2]);
+            tags.SetTag("sample.2", values[3]);
 
             ValidateTags(tags.GetAllTags(), values);
         }

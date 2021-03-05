@@ -17,11 +17,10 @@ namespace Datadog.Trace.Tests
             var traceContext = new Mock<ITraceContext>();
             var spanContext = new SpanContext(parentSpanContext.Object, traceContext.Object, serviceName: null);
 
-            var additionalTags = new HttpTags();
+            var additionalTags = new CommonTags();
 
-            additionalTags.HttpMethod = "GET";
-            additionalTags.HttpStatusCode = "200";
-            additionalTags.HttpUrl = "Sample/Test";
+            additionalTags.Version = "v1.0";
+            additionalTags.Environment = "Test";
 
             var span = new Span(spanContext, start: null, tags: additionalTags);
             span.ServiceName = "ServiceName";
