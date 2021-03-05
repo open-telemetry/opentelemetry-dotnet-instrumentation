@@ -49,7 +49,7 @@ namespace Datadog.Trace
         private readonly IScopeManager _scopeManager;
         private readonly Timer _heartbeatTimer;
 
-        private readonly IAgentWriter _agentWriter;
+        private readonly ITraceWriter _agentWriter;
 
         static Tracer()
         {
@@ -77,7 +77,7 @@ namespace Datadog.Trace
         {
         }
 
-        internal Tracer(TracerSettings settings, IAgentWriter agentWriter, ISampler sampler, IScopeManager scopeManager, IDogStatsd statsd)
+        internal Tracer(TracerSettings settings, ITraceWriter agentWriter, ISampler sampler, IScopeManager scopeManager, IDogStatsd statsd)
         {
             // update the count of Tracer instances
             Interlocked.Increment(ref _liveTracerCount);

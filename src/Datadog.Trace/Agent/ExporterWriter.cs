@@ -8,7 +8,7 @@ using Datadog.Trace.Vendors.StatsdClient;
 
 namespace Datadog.Trace.Agent
 {
-    internal class ExporterWriter : IAgentWriter
+    internal class ExporterWriter : ITraceWriter
     {
         private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor<ExporterWriter>();
 
