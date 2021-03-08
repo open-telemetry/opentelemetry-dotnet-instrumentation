@@ -6,6 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Datadog.Trace.Abstractions;
 using Datadog.Trace.Agent;
+using Datadog.Trace.Agent.Jaeger;
+using Datadog.Trace.Agent.Zipkin;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.Conventions;
 using Datadog.Trace.DiagnosticListeners;
@@ -105,6 +107,10 @@ namespace Datadog.Trace
             else if (Settings.Exporter == ExporterType.Zipkin)
             {
                 _agentWriter = new ExporterWriter(new ZipkinExporter(Settings.AgentUri), metrics);
+            }
+            else if (Settings.Exporter == ExporterType.Jaeger)
+            {
+                _agentWriter = new ExporterWriter(new JaegerExporter(Settings.AgentUri, Settings.ServiceName), Statsd);
             }
             else
             {
