@@ -181,16 +181,16 @@ namespace Datadog.Trace.Logging
             if (logDirectory == null)
             {
 #if NETFRAMEWORK
-                logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"Datadog .NET Tracer", "logs");
+                logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OpenTelemetry .NET AutoInstrumentation", "logs");
 #else
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"Datadog .NET Tracer", "logs");
+                    logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OpenTelemetry .NET AutoInstrumentation", "logs");
                 }
                 else
                 {
                     // Linux
-                    logDirectory = "/var/log/datadog/dotnet";
+                    logDirectory = "/var/log/opentelemetry/dotnet";
                 }
 #endif
             }

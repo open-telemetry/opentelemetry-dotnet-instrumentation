@@ -124,8 +124,8 @@
 
       <Directory Id="CommonAppDataFolder">
         <!-- "C:\ProgramData" -->
-        <Directory Id="CommonAppDataFolder.DatadogDotNetTracer" Name="Datadog .NET Tracer">
-          <!-- ".\Datadog .NET Tracer" -->
+        <Directory Id="CommonAppDataFolder.DatadogDotNetTracer" Name="OpenTelemetry .NET AutoInstrumentation">
+          <!-- ".\OpenTelemetry .NET AutoInstrumentation" -->
           <Directory Id="CommonAppDataFolder.DatadogDotNetTracer.logs" Name="logs">
             <!-- ".\logs" -->
           </Directory>
