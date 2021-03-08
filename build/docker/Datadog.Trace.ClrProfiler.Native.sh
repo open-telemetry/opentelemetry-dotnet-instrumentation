@@ -10,13 +10,13 @@ PUBLISH_OUTPUT_NET31="$( pwd )/src/bin/managed-publish/netcoreapp3.1"
 
 cd src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native
 mkdir -p build
-(cd build && cmake ../ && make)
+(cd build && cmake ../ -DCMAKE_BUILD_TYPE=Release && make)
 
-mkdir -p bin/Debug/x64
-cp -f build/bin/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so bin/Debug/x64/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so
+mkdir -p bin/Release/x64
+cp -f build/bin/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so bin/Release/x64/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so
 
-mkdir -p bin/Debug/x64/netstandard2.0
-cp -f $PUBLISH_OUTPUT_NET2/*.dll bin/Debug/x64/netstandard2.0/
+mkdir -p bin/Release/x64/netstandard2.0
+cp -f $PUBLISH_OUTPUT_NET2/*.dll bin/Release/x64/netstandard2.0/
 
-mkdir -p bin/Debug/x64/netcoreapp3.1
-cp -f $PUBLISH_OUTPUT_NET31/*.dll bin/Debug/x64/netcoreapp3.1/
+mkdir -p bin/Release/x64/netcoreapp3.1
+cp -f $PUBLISH_OUTPUT_NET31/*.dll bin/Release/x64/netcoreapp3.1/

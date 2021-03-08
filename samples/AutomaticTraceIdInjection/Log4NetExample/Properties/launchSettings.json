@@ -1,17 +1,12 @@
 {
   "profiles": {
-    "LaunchWithServiceUnification": {
+    "Log4NetExample": {
       "commandName": "Project",
       "environmentVariables": {
         "OTEL_LOGS_INJECTION": "true",
-        "OTEL_ENV": "customer-sample",
-        "OTEL_VERSION": "1.0.0-beta"
-      }
-    },
-    "LaunchWithoutServiceUnification": {
-      "commandName": "Project",
-      "environmentVariables": {
-        "OTEL_LOGS_INJECTION": "true"
+        "OTEL_ENV": "dev",
+        "OTEL_SERVICE": "Log4NetExample",
+        "OTEL_VERSION": "1.0.0"
       }
     }
   }
