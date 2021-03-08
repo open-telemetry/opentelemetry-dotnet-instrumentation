@@ -40,7 +40,7 @@ namespace Datadog.Trace.Tests.Agent.Jaeger
         public void JaegerTraceExporter_BuildBatchesToTransmit_FlushedBatch()
         {
             // Arrange
-            var jaegerExporter = new JaegerExporter(_exporterUri, null, 125);
+            var jaegerExporter = new JaegerExporter(_exporterUri, null, 175);
             jaegerExporter.SetResourceAndInitializeBatch("TestService");
 
             // Act
