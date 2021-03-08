@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
-using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Vendors.Newtonsoft.Json;
 using Datadog.Trace.Vendors.Newtonsoft.Json.Serialization;
@@ -105,7 +104,7 @@ namespace Datadog.Trace.Agent
 
             private static IDictionary<string, string> BuildTags(Span span)
             {
-                var spanTags = span?.Tags?.Tags;
+                var spanTags = span?.Tags?.GetAllTags();
                 if (spanTags == null || spanTags.Count == 0)
                 {
                     return EmptyTags;

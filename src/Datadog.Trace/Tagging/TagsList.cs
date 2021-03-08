@@ -13,7 +13,40 @@ namespace Datadog.Trace.Tagging
 
         public List<KeyValuePair<string, double>> Metrics => Volatile.Read(ref _metrics);
 
-        public List<KeyValuePair<string, string>> Tags => Volatile.Read(ref _tags);
+        public List<KeyValuePair<string, string>> GetAllTags()
+        {
+            var customTags = GetCustomTags();
+            var additionalTags = GetAdditionalTags();
+            var allTags = new List<KeyValuePair<string, string>>(
+                customTags?.Count ?? 0 +
+                additionalTags?.Length ?? 0);
+
+            if (customTags != null)
+            {
+                lock (customTags)
+                {
+                    allTags.AddRange(customTags);
+                }
+            }
+
+            if (additionalTags != null)
+            {
+                lock (additionalTags)
+                {
+                    foreach (var property in additionalTags)
+                    {
+                        var value = property.Getter(this);
+
+                        if (value != null)
+                        {
+                            allTags.Add(new KeyValuePair<string, string>(property.Key, value));
+                        }
+                    }
+                }
+            }
+
+            return allTags;
+        }
 
         public string GetTag(string key)
         {
@@ -25,7 +58,7 @@ namespace Datadog.Trace.Tagging
                 }
             }
 
-            var tags = Tags;
+            var tags = GetCustomTags();
 
             if (tags == null)
             {
@@ -88,7 +121,7 @@ namespace Datadog.Trace.Tagging
                 }
             }
 
-            var tags = Tags;
+            var tags = GetCustomTags();
 
             if (tags == null)
             {
@@ -183,7 +216,7 @@ namespace Datadog.Trace.Tagging
         {
             var sb = new StringBuilder();
 
-            var tags = Tags;
+            var tags = GetCustomTags();
 
             if (tags != null)
             {
@@ -236,6 +269,8 @@ namespace Datadog.Trace.Tagging
 
         protected virtual IProperty<double?>[] GetAdditionalMetrics() => ArrayHelper.Empty<IProperty<double?>>();
 
+        protected virtual IList<KeyValuePair<string, string>> GetCustomTags() => Volatile.Read(ref _tags);
+
         private int WriteTags(ref byte[] bytes, int offset)
         {
             int originalOffset = offset;
@@ -244,7 +279,7 @@ namespace Datadog.Trace.Tagging
 
             int count = 0;
 
-            var tags = Tags;
+            var tags = GetCustomTags();
             var additionalTags = GetAdditionalTags();
 
             foreach (var property in additionalTags)
