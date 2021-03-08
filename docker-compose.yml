@@ -162,6 +162,8 @@ services:
       context: ./
       dockerfile: ./build/docker/native.alpine.dockerfile
     image: datadog-native-alpine
+    environment: 
+    - buildConfiguration=${buildConfiguration}
     command: /project/build/docker/Datadog.Trace.ClrProfiler.Native.sh
     volumes:
     - ./:/project
