@@ -4,7 +4,7 @@ trigger:
       - main
   paths:
     exclude:
-      - docs/*
+      - /**/*.md
       - .github/*
 pr:
   branches:
@@ -13,7 +13,7 @@ pr:
       - release/*
   paths:
     exclude:
-      - docs/*
+      - /**/*.md
       - .github/*
 
 pool:
