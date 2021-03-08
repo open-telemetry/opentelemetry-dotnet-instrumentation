@@ -6,9 +6,9 @@ VERSION=1.24.0
 
 mkdir -p $DIR/../../deploy/linux
 for target in integrations.json defaults.env LICENSE NOTICE ; do
-    cp $DIR/../../$target $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/Release/x64/
+    cp $DIR/../../$target $DIR/../../src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/bin/Release/x64/
 done
-cp $DIR/../../build/artifacts/createLogPath.sh $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/Release/x64/
+cp $DIR/../../build/artifacts/createLogPath.sh $DIR/../../src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/bin/Release/x64/
 
 cd $DIR/../../deploy/linux
 for pkgtype in $PKGTYPES ; do
@@ -22,7 +22,7 @@ for pkgtype in $PKGTYPES ; do
         --vendor OpenTelemetry \
         -v $VERSION \
         --prefix /opt/otel-dotnet-autoinstrumentation \
-        --chdir $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/Release/x64 \
+        --chdir $DIR/../../src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/bin/Release/x64 \
         netstandard2.0/ \
         netcoreapp3.1/ \
         OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so \

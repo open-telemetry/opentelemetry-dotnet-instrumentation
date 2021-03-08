@@ -418,7 +418,7 @@ namespace Datadog.Trace.TestHelpers
             return Path.Combine(
                 GetSolutionDirectory(),
                 "src",
-                "Datadog.Trace.ClrProfiler.Native",
+                "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native",
                 "bin",
                 EnvironmentTools.GetBuildConfiguration(),
                 EnvironmentTools.GetPlatform().ToLower());

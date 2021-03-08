@@ -89,7 +89,7 @@ namespace PrepareRelease
                 FullAssemblyNameReplace);
 
             SynchronizeVersion(
-                "src/Datadog.Trace.ClrProfiler.Native/dd_profiler_constants.h",
+                "src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/dd_profiler_constants.h",
                 FullAssemblyNameReplace);
 
             // Four-part AssemblyVersion update
@@ -108,11 +108,11 @@ namespace PrepareRelease
 
             // Native profiler updates
             SynchronizeVersion(
-                "src/Datadog.Trace.ClrProfiler.Native/CMakeLists.txt",
+                "src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/CMakeLists.txt",
                 text => FullVersionReplace(text, ".", prefix: "VERSION "));
 
             SynchronizeVersion(
-                "src/Datadog.Trace.ClrProfiler.Native/Resource.rc",
+                "src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/Resource.rc",
                 text =>
                 {
                     text = FullVersionReplace(text, ",");
@@ -121,7 +121,7 @@ namespace PrepareRelease
                 });
 
             SynchronizeVersion(
-                "src/Datadog.Trace.ClrProfiler.Native/version.h",
+                "src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/version.h",
                 text => FullVersionReplace(text, "."));
 
             // Deployment updates

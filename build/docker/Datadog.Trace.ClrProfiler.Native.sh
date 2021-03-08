@@ -8,12 +8,12 @@ cd "$DIR/../.."
 PUBLISH_OUTPUT_NET2="$( pwd )/src/bin/managed-publish/netstandard2.0"
 PUBLISH_OUTPUT_NET31="$( pwd )/src/bin/managed-publish/netcoreapp3.1"
 
-cd src/Datadog.Trace.ClrProfiler.Native
+cd src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native
 mkdir -p build
 (cd build && cmake ../ -DCMAKE_BUILD_TYPE=Release && make)
 
 mkdir -p bin/Release/x64
-cp -f build/bin/Datadog.Trace.ClrProfiler.Native.so bin/Release/x64/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so
+cp -f build/bin/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so bin/Release/x64/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so
 
 mkdir -p bin/Release/x64/netstandard2.0
 cp -f $PUBLISH_OUTPUT_NET2/*.dll bin/Release/x64/netstandard2.0/
