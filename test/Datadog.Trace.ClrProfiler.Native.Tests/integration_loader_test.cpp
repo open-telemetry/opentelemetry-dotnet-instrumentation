@@ -7,8 +7,8 @@
 #include <sstream>
 #include <string>
 
-#include "../../src/Datadog.Trace.ClrProfiler.Native/integration_loader.h"
-#include "../../src/Datadog.Trace.ClrProfiler.Native/environment_variables.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/integration_loader.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/environment_variables.h"
 
 using namespace trace;
 
