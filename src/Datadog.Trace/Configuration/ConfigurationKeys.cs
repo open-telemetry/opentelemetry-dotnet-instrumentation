@@ -246,8 +246,8 @@ namespace Datadog.Trace.Configuration
         /// <summary>
         /// Configuration key for setting the directory of the .NET Tracer logs.
         /// Overrides the value in <see cref="ProfilerLogPath"/> if present.
-        /// Default value is "%ProgramData%"\Datadog .NET Tracer\logs\" on Windows
-        /// or "/var/log/datadog/dotnet/" on Linux.
+        /// Default value is "%ProgramData%"\OpenTelemetry .NET AutoInstrumentation\logs\" on Windows
+        /// or "/var/log/opentelemetry/dotnet/" on Linux.
         /// </summary>
         public const string LogDirectory = "OTEL_TRACE_LOG_DIRECTORY";
 
