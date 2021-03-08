@@ -3,8 +3,11 @@ set -euxo pipefail
 
 cd "$( dirname "${BASH_SOURCE[0]}" )"/../../
 
+buildConfiguration=${buildConfiguration:-Debug}
+publishTargetFramework=${publishTargetFramework:-netcoreapp3.1}
+
 mkdir -p /var/log/opentelemetry/dotnet
-touch /var/log/opentelemetry/dotnet/dotnet-tracer-native.log
+touch /var/log/opentelemetry/dotnet/dotnet-tracer-native.logog
 
 dotnet vstest test/Datadog.Trace.IntegrationTests/bin/$buildConfiguration/$publishTargetFramework/publish/Datadog.Trace.IntegrationTests.dll --logger:trx --ResultsDirectory:test/Datadog.Trace.IntegrationTests/results
 
