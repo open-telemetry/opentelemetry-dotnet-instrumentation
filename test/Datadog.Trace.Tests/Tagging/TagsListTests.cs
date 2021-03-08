@@ -40,7 +40,7 @@ namespace Datadog.Trace.Tests.Tagging
         public void Serialization()
         {
             var tags = new CommonTags();
-            var span = new Span(new SpanContext(42, 41), DateTimeOffset.UtcNow, tags);
+            var span = new Span(new SpanContext(TraceId.CreateFromInt(42), 41), DateTimeOffset.UtcNow, tags);
 
             // The span has 1 "common" tag and 15 additional tags (and same number of metrics)
             // Those numbers are picked to test the variable-size header of MessagePack

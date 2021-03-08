@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Datadog.Trace
@@ -29,7 +28,7 @@ namespace Datadog.Trace
         /// <summary>
         /// Gets TraceId with zero id.
         /// </summary>
-        public static TraceId Zero => new TraceId(higher: 0, lower: 0);
+        public static TraceId Zero => new(lower: 0);
 
         /// <summary>
         /// Gets lower 64 bits of 128 bit traceID or the whole 64 bit traceID.
@@ -78,14 +77,13 @@ namespace Datadog.Trace
         /// <returns>Instance of <see cref="TraceId"/> representing the same traceId as the passed string.</returns>
         public static TraceId CreateFromString(string id)
         {
-            Debug.Assert(id.Length == 16 || id.Length == 32, "ID has to have 16 or 32 signs representing trace ID in hexadecimal format.");
-
             if (id.Length == 16)
             {
                 var lower = (ulong)Convert.ToInt64(id, fromBase: 16) & 0x7FFFFFFFFFFFFFFF;
                 return new TraceId(lower);
             }
-            else
+
+            if (id.Length == 32)
             {
                 var higherAsString = id.Substring(startIndex: 0, length: 16);
                 var lowerAsString = id.Substring(startIndex: 16, length: 16);
@@ -95,6 +93,31 @@ namespace Datadog.Trace
 
                 return new TraceId(higher, lower);
             }
+            else
+            {
+                var lower = ulong.Parse(id);
+                return new TraceId(lower);
+            }
+        }
+
+        /// <summary>
+        /// Creates 128 bit traceId from given int.
+        /// </summary>
+        /// <param name="id">Int32 ID to be parsed.</param>
+        /// <returns>Instance of <see cref="TraceId"/> representing the same traceId as the passed int.</returns>
+        public static TraceId CreateFromInt(int id)
+        {
+            return new((ulong)id);
+        }
+
+        /// <summary>
+        /// Creates 128 bit traceId from given ulong.
+        /// </summary>
+        /// <param name="id">Ulong ID to be parsed.</param>
+        /// <returns>Instance of <see cref="TraceId"/> representing the same traceId as the passed ulong.</returns>
+        public static TraceId CreateFromUlong(ulong id)
+        {
+            return new(id);
         }
 
         /// <inheritdoc/>
@@ -120,13 +143,19 @@ namespace Datadog.Trace
         /// <returns>True if TraceIds are equal, false otherwise.</returns>
         public bool Equals(TraceId other)
         {
-            return _higher == other._higher && Lower == other.Lower && _is64Bit == other._is64Bit;
+            var for32Bit = Lower == other.Lower;
+            if (_is64Bit)
+            {
+                return for32Bit && _higher == other._higher;
+            }
+
+            return for32Bit;
         }
 
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return HashCode.Combine(_higher, Lower, _is64Bit);
+            return HashCode.Combine(Lower, _is64Bit);
         }
     }
 }

@@ -108,7 +108,7 @@ namespace Datadog.Trace.Tests.Logging
             Contains(logEvent, service, version, env, scope.Span.TraceId, scope.Span.SpanId);
         }
 
-        internal static void Contains(Serilog.Events.LogEvent logEvent, string service, string version, string env, ulong traceId, ulong spanId)
+        internal static void Contains(Serilog.Events.LogEvent logEvent, string service, string version, string env, TraceId traceId, ulong spanId)
         {
             Assert.True(logEvent.Properties.ContainsKey(CorrelationIdentifier.SerilogServiceKey));
             Assert.Equal(service, logEvent.Properties[CorrelationIdentifier.SerilogServiceKey].ToString().Trim(new[] { '\"' }), ignoreCase: true);
@@ -120,7 +120,7 @@ namespace Datadog.Trace.Tests.Logging
             Assert.Equal(env, logEvent.Properties[CorrelationIdentifier.SerilogEnvKey].ToString().Trim(new[] { '\"' }), ignoreCase: true);
 
             Assert.True(logEvent.Properties.ContainsKey(CorrelationIdentifier.SerilogTraceIdKey));
-            Assert.Equal(traceId, ulong.Parse(logEvent.Properties[CorrelationIdentifier.SerilogTraceIdKey].ToString().Trim(new[] { '\"' })));
+            Assert.Equal(traceId, TraceId.CreateFromString(logEvent.Properties[CorrelationIdentifier.SerilogTraceIdKey].ToString().Trim(new[] { '\"' })));
 
             Assert.True(logEvent.Properties.ContainsKey(CorrelationIdentifier.SerilogSpanIdKey));
             Assert.Equal(spanId, ulong.Parse(logEvent.Properties[CorrelationIdentifier.SerilogSpanIdKey].ToString().Trim(new[] { '\"' })));

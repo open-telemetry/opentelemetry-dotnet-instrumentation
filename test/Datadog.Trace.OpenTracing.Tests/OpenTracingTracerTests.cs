@@ -174,7 +174,7 @@ namespace Datadog.Trace.OpenTracing.Tests
         public void Extract_HttpHeadersFormat_HeadersProperlySet_SpanContext()
         {
             const ulong parentId = 10;
-            var traceId = TraceId.CreateFromString("00000000000000000000000000000042");
+            var traceId = TraceId.CreateFromInt(42);
             var headers = new MockTextMap();
             headers.Set(HttpHeaderNames.ParentId, parentId.ToString());
             headers.Set(HttpHeaderNames.TraceId, traceId.ToString());
@@ -189,7 +189,7 @@ namespace Datadog.Trace.OpenTracing.Tests
         public void Extract_TextMapFormat_HeadersProperlySet_SpanContext()
         {
             const ulong parentId = 10;
-            var traceId = TraceId.CreateFromString("00000000000000000000000000000042");
+            var traceId = TraceId.CreateFromInt(42);
             var headers = new MockTextMap();
             headers.Set(HttpHeaderNames.ParentId, parentId.ToString());
             headers.Set(HttpHeaderNames.TraceId, traceId.ToString());
@@ -204,7 +204,7 @@ namespace Datadog.Trace.OpenTracing.Tests
         public void Extract_UnknownFormat_Throws()
         {
             const ulong parentId = 10;
-            const ulong traceId = 42;
+            var traceId = TraceId.CreateFromInt(42);
             var headers = new MockTextMap();
             headers.Set(HttpHeaderNames.ParentId, parentId.ToString());
             headers.Set(HttpHeaderNames.TraceId, traceId.ToString());

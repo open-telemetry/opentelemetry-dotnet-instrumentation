@@ -22,7 +22,7 @@ namespace Datadog.Trace.Tests
                 using (var childScope = Tracer.Instance.StartActive("child"))
                 {
                     Assert.Equal<ulong>(childScope.Span.SpanId, CorrelationIdentifier.SpanId);
-                    Assert.Equal<ulong>(childScope.Span.TraceId, CorrelationIdentifier.TraceId);
+                    Assert.Equal(childScope.Span.TraceId, CorrelationIdentifier.TraceId);
                 }
             }
         }
@@ -37,7 +37,7 @@ namespace Datadog.Trace.Tests
             }
 
             Assert.Equal<ulong>(0, CorrelationIdentifier.SpanId);
-            Assert.Equal<ulong>(0, CorrelationIdentifier.TraceId);
+            Assert.Equal(TraceId.Zero, CorrelationIdentifier.TraceId);
         }
 
         [Fact]

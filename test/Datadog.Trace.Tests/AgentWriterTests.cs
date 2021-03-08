@@ -28,7 +28,7 @@ namespace Datadog.Trace.Tests
         [Fact]
         public async Task WriteTrace_2Traces_SendToApi()
         {
-            var trace = new[] { new Span(new SpanContext(1, 1), DateTimeOffset.UtcNow) };
+            var trace = new[] { new Span(new SpanContext(TraceId.CreateFromInt(1), 1), DateTimeOffset.UtcNow) };
             var expectedData1 = Vendors.MessagePack.MessagePackSerializer.Serialize(trace, new FormatterResolverWrapper(SpanFormatterResolver.Instance));
 
             _agentWriter.WriteTrace(trace);
@@ -38,7 +38,7 @@ namespace Datadog.Trace.Tests
 
             _api.Invocations.Clear();
 
-            trace = new[] { new Span(new SpanContext(2, 2), DateTimeOffset.UtcNow) };
+            trace = new[] { new Span(new SpanContext(TraceId.CreateFromInt(2), 2), DateTimeOffset.UtcNow) };
             var expectedData2 = Vendors.MessagePack.MessagePackSerializer.Serialize(trace, new FormatterResolverWrapper(SpanFormatterResolver.Instance));
 
             _agentWriter.WriteTrace(trace);
@@ -270,7 +270,7 @@ namespace Datadog.Trace.Tests
         private static Span[] CreateTrace(int numberOfSpans)
         {
             return Enumerable.Range(0, numberOfSpans)
-                .Select(i => new Span(new SpanContext((ulong)i + 1, (ulong)i + 1), DateTimeOffset.UtcNow))
+                .Select(i => new Span(new SpanContext(TraceId.CreateFromInt(i + 1), (ulong)i + 1), DateTimeOffset.UtcNow))
                 .ToArray();
         }
     }

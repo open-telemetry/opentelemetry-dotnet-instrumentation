@@ -185,9 +185,14 @@ namespace Datadog.Trace
                 try
                 {
                     var traceId = TraceId.CreateFromString(headerValue);
+                    if (traceId.Equals(TraceId.Zero))
+                    {
+                        return null;
+                    }
+
                     return traceId;
                 }
-                catch (ArgumentOutOfRangeException)
+                catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is InvalidOperationException)
                 {
                 }
             }
