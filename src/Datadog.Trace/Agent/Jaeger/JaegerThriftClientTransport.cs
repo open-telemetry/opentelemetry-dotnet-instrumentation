@@ -27,15 +27,10 @@ namespace Datadog.Trace.Agent.Jaeger
         private readonly MemoryStream byteStream;
         private bool isDisposed;
 
-        public JaegerThriftClientTransport(string host, int port)
-            : this(host, port, new MemoryStream(), new JaegerUdpClient())
+        public JaegerThriftClientTransport(string host, int port, MemoryStream stream = null, IJaegerClient client = null)
         {
-        }
-
-        public JaegerThriftClientTransport(string host, int port, MemoryStream stream, IJaegerClient client)
-        {
-            this.byteStream = stream;
-            this.client = client;
+            this.byteStream = stream ?? new MemoryStream();
+            this.client = client ?? new JaegerUdpClient();
             this.client.Connect(host, port);
         }
 

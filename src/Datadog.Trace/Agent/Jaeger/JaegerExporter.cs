@@ -23,12 +23,12 @@ namespace Datadog.Trace.Agent.Jaeger
         private readonly Uri _agentUri;
         private int _batchByteSize;
 
-        public JaegerExporter(Uri agentUri, string serviceName, int? maxPayloadSizeInBytes = null)
+        public JaegerExporter(Uri agentUri, string serviceName, int? maxPayloadSizeInBytes = null, IJaegerClient jaegerClient = null)
         {
             var protocolFactory = new TCompactProtocol.Factory();
 
             _maxPayloadSizeInBytes = maxPayloadSizeInBytes ?? DefaultMaxPayloadSizeInBytes;
-            _clientTransport = new JaegerThriftClientTransport(agentUri.Host, agentUri.Port);
+            _clientTransport = new JaegerThriftClientTransport(agentUri.Host, agentUri.Port, stream: null, client: jaegerClient);
             _thriftClient = new JaegerThriftClient(protocolFactory.GetProtocol(_clientTransport));
             _memoryTransport = new InMemoryTransport(16000);
             _memoryProtocol = protocolFactory.GetProtocol(_memoryTransport);
