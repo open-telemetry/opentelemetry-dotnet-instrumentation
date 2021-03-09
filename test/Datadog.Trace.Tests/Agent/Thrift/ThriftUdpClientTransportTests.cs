@@ -130,7 +130,7 @@ namespace Datadog.Trace.Tests.Agent.Thrift
             var transport = new JaegerThriftClientTransport(host, port, this.testingMemoryStream, this.mockClient.Object);
             transport.Dispose();
 
-            this.mockClient.Verify(t => t.Dispose(), Times.Once);
+            this.mockClient.Verify(t => t.Close(), Times.Once);
             Assert.False(this.testingMemoryStream.CanRead);
             Assert.False(this.testingMemoryStream.CanSeek);
             Assert.False(this.testingMemoryStream.CanWrite);
@@ -146,7 +146,7 @@ namespace Datadog.Trace.Tests.Agent.Thrift
             transport.Dispose();
             transport.Dispose();
 
-            this.mockClient.Verify(t => t.Dispose(), Times.Once);
+            this.mockClient.Verify(t => t.Close(), Times.Once);
             Assert.False(this.testingMemoryStream.CanRead);
             Assert.False(this.testingMemoryStream.CanSeek);
             Assert.False(this.testingMemoryStream.CanWrite);

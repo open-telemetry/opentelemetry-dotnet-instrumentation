@@ -1,4 +1,3 @@
-using System;
 using Datadog.Trace.Agent.Jaeger;
 using Moq;
 using Xunit;
@@ -7,9 +6,6 @@ namespace Datadog.Trace.Tests.Agent.Jaeger
 {
     public class JaegerExporterTests
     {
-        // Dummy endpoint
-        private static readonly Uri _exporterUri = new("udp://localhost:6831");
-
         [Fact]
         public void JaegerTraceExporter_ctor_NullServiceNameAllowed()
         {
@@ -56,19 +52,26 @@ namespace Datadog.Trace.Tests.Agent.Jaeger
 
         internal static JaegerExporter BuildExporter(int? payloadSize = null)
         {
-            Mock<IJaegerClient> clientMock = new Mock<IJaegerClient>();
+            var clientMock = new Mock<IJaegerClient>();
 
             clientMock
-                .Setup(x => x.Send(It.IsAny<byte[]>())).Returns<byte[]>((buffer) => buffer?.Length ?? 0);
+                .Setup(x => x.Send(It.IsAny<byte[]>()))
+                .Returns<byte[]>((buffer) => buffer?.Length ?? 0);
             clientMock
                 .Setup(x => x.Send(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns<byte[], int, int>((buffer, offset, count) => count);
 
-            return new JaegerExporter(
-                agentUri: _exporterUri,
-                serviceName: null,
-                maxPayloadSizeInBytes: payloadSize.HasValue ? payloadSize.Value : JaegerExporter.DefaultMaxPayloadSizeInBytes,
-                jaegerClient: clientMock.Object);
+            var options = new JaegerOptions()
+            {
+                TransportClient = clientMock.Object
+            };
+
+            if (payloadSize.HasValue)
+            {
+                options.MaxPayloadSizeInBytes = payloadSize.Value;
+            }
+
+            return new JaegerExporter(options);
         }
 
         internal static JaegerSpan CreateTestJaegerSpan()

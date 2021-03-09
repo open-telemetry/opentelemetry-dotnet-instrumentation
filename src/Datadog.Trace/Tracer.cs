@@ -52,7 +52,7 @@ namespace Datadog.Trace
         private readonly IScopeManager _scopeManager;
         private readonly Timer _heartbeatTimer;
 
-        private readonly ITraceWriter _agentWriter;
+        private readonly ITraceWriter _traceWriter;
 
         static Tracer()
         {
@@ -63,7 +63,7 @@ namespace Datadog.Trace
         /// Initializes a new instance of the <see cref="Tracer"/> class with default settings.
         /// </summary>
         public Tracer()
-            : this(settings: null, agentWriter: null, sampler: null, scopeManager: null, statsd: null)
+            : this(settings: null, traceWriter: null, sampler: null, scopeManager: null, statsd: null)
         {
         }
 
@@ -76,11 +76,11 @@ namespace Datadog.Trace
         /// or null to use the default configuration sources.
         /// </param>
         public Tracer(TracerSettings settings)
-            : this(settings, agentWriter: null, sampler: null, scopeManager: null, statsd: null)
+            : this(settings, traceWriter: null, sampler: null, scopeManager: null, statsd: null)
         {
         }
 
-        internal Tracer(TracerSettings settings, ITraceWriter agentWriter, ISampler sampler, IScopeManager scopeManager, IDogStatsd statsd)
+        internal Tracer(TracerSettings settings, ITraceWriter traceWriter, ISampler sampler, IScopeManager scopeManager, IDogStatsd statsd)
         {
             // update the count of Tracer instances
             Interlocked.Increment(ref _liveTracerCount);
@@ -99,24 +99,7 @@ namespace Datadog.Trace
                 Statsd = statsd ?? CreateDogStatsdClient(Settings, DefaultServiceName, Settings.DogStatsdPort);
             }
 
-            IMetrics metrics = Statsd != null ? new DogStatsdMetrics(Statsd) : new NullMetrics();
-            if (agentWriter != null)
-            {
-                _agentWriter = agentWriter;
-            }
-            else if (Settings.Exporter == ExporterType.Zipkin)
-            {
-                _agentWriter = new ExporterWriter(new ZipkinExporter(Settings.AgentUri), metrics);
-            }
-            else if (Settings.Exporter == ExporterType.Jaeger)
-            {
-                _agentWriter = new ExporterWriter(new JaegerExporter(Settings.AgentUri, Settings.ServiceName), Statsd);
-            }
-            else
-            {
-                Log.Warning("Using eager agent writer");
-                _agentWriter = new AgentWriter(new Api(Settings.AgentUri, TransportStrategy.Get(Settings), Statsd), metrics, maxBufferSize: Settings.TraceBufferSize);
-            }
+            _traceWriter = traceWriter ?? CreateTraceWriter(Settings, Statsd);
 
             switch (Settings.Convention)
             {
@@ -375,7 +358,7 @@ namespace Datadog.Trace
         {
             if (Settings.TraceEnabled)
             {
-                _agentWriter.WriteTrace(trace);
+                _traceWriter.WriteTrace(trace);
             }
         }
 
@@ -454,7 +437,7 @@ namespace Datadog.Trace
 
         internal Task FlushAsync()
         {
-            return _agentWriter.FlushTracesAsync();
+            return _traceWriter.FlushTracesAsync();
         }
 
         internal async Task WriteDiagnosticLog()
@@ -467,7 +450,7 @@ namespace Datadog.Trace
             {
                 try
                 {
-                    var success = await _agentWriter.Ping().ConfigureAwait(false);
+                    var success = await _traceWriter.Ping().ConfigureAwait(false);
 
                     if (!success)
                     {
@@ -681,6 +664,33 @@ namespace Datadog.Trace
             }
         }
 
+        private static ITraceWriter CreateTraceWriter(TracerSettings settings, IDogStatsd statsd)
+        {
+            IMetrics metrics = statsd != null
+                ? new DogStatsdMetrics(statsd)
+                : new NullMetrics();
+
+            switch (settings.Exporter)
+            {
+                case ExporterType.Zipkin:
+                    return new ExporterWriter(new ZipkinExporter(settings.AgentUri), metrics);
+                case ExporterType.Jaeger:
+                    return new ExporterWriter(new JaegerExporter(CreateJagerOptions(settings)), metrics);
+                default:
+                    return new AgentWriter(new Api(settings.AgentUri, TransportStrategy.Get(settings), statsd), metrics, maxBufferSize: settings.TraceBufferSize);
+            }
+        }
+
+        private static JaegerOptions CreateJagerOptions(TracerSettings settings)
+        {
+            return new JaegerOptions()
+            {
+                Host = settings.AgentUri.Host,
+                Port = settings.AgentUri.Port,
+                ServiceName = settings.ServiceName
+            };
+        }
+
         private void InitializeLibLogScopeEventSubscriber(IScopeManager scopeManager, string defaultServiceName, string version, string env)
         {
             new LibLogScopeEventSubscriber(scopeManager, defaultServiceName, version ?? string.Empty, env ?? string.Empty);
@@ -711,7 +721,7 @@ namespace Datadog.Trace
         {
             try
             {
-                _agentWriter.FlushAndCloseAsync().Wait();
+                _traceWriter.FlushAndCloseAsync().Wait();
             }
             catch (Exception ex)
             {

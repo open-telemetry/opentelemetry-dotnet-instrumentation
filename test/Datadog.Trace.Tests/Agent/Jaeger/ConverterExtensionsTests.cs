@@ -1,7 +1,5 @@
-using System;
 using System.Linq;
 using Datadog.Trace.Agent.Jaeger;
-using Datadog.Trace.Tagging;
 using Datadog.Trace.Util;
 using Moq;
 using Xunit;
@@ -13,24 +11,8 @@ namespace Datadog.Trace.Tests.Agent.Jaeger
         [Fact]
         public void JaegerTraceExporter_SetResource_CreatesTags()
         {
-            var parentSpanContext = new Mock<ISpanContext>();
-            var traceContext = new Mock<ITraceContext>();
-            var spanContext = new SpanContext(parentSpanContext.Object, traceContext.Object, serviceName: null);
-
-            parentSpanContext.Setup(x => x.SpanId).Returns(SpanIdGenerator.ThreadInstance.CreateNew());
-
-            var additionalTags = new CommonTags();
-            additionalTags.Version = "v1.0";
-            additionalTags.Environment = "Test";
-
-            var start = DateTimeOffset.UtcNow.AddSeconds(-1.5);
-            var span = new Span(spanContext, start, additionalTags);
-            span.ServiceName = "ServiceName";
-            span.OperationName = "TestOperation";
-            span.SetTag("k0", "v0");
-            span.SetTag("k1", "v1");
-
-            span.Finish(TimeSpan.FromSeconds(1.5));
+            var parentSpanContext = Mock.Of<ISpanContext>(c => c.SpanId == SpanIdGenerator.ThreadInstance.CreateNew());
+            var span = SpanFactory.CreateSpan(parentSpanContext);
 
             JaegerSpan jaegerSpan = span.ToJaegerSpan();
 
@@ -47,22 +29,13 @@ namespace Datadog.Trace.Tests.Agent.Jaeger
             Assert.Equal((long)(span.Duration.TotalMilliseconds * 1000), jaegerSpan.Duration);
 
             var tags = jaegerSpan.Tags.ToArray();
-            var tag = tags[0];
-            Assert.Equal(JaegerTagType.STRING, tag.VType);
-            Assert.Equal("k0", tag.Key);
-            Assert.Equal("v0", tag.VStr);
-            tag = tags[1];
-            Assert.Equal(JaegerTagType.STRING, tag.VType);
-            Assert.Equal("k1", tag.Key);
-            Assert.Equal("v1", tag.VStr);
-            tag = tags[2];
-            Assert.Equal(JaegerTagType.STRING, tag.VType);
-            Assert.Equal(Tags.Env, tag.Key);
-            Assert.Equal("Test", tag.VStr);
-            tag = tags[3];
-            Assert.Equal(JaegerTagType.STRING, tag.VType);
-            Assert.Equal(Tags.Version, tag.Key);
-            Assert.Equal("v1.0", tag.VStr);
+
+            Assert.Equal(4, tags.Length);
+            Assert.All(tags, t => Assert.Equal(JaegerTagType.STRING, t.VType));
+            Assert.Single(tags, t => t.Key == "k0" && t.VStr == "v0");
+            Assert.Single(tags, t => t.Key == "k1" && t.VStr == "v1");
+            Assert.Single(tags, t => t.Key == Tags.Env && t.VStr == "Test");
+            Assert.Single(tags, t => t.Key == Tags.Version && t.VStr == "v1.0");
         }
     }
 }

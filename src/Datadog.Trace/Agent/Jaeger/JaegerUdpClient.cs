@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Net;
 using System.Net.Sockets;
 
@@ -23,10 +22,6 @@ namespace Datadog.Trace.Agent.Jaeger
     internal class JaegerUdpClient : IJaegerClient
     {
         private readonly UdpClient client;
-
-#if !NET45
-        private bool disposed;
-#endif
 
         public JaegerUdpClient()
         {
@@ -50,35 +45,5 @@ namespace Datadog.Trace.Agent.Jaeger
         {
             return this.client.Client.Send(buffer, offset, count, SocketFlags.None);
         }
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-#if !NET45
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
-#endif
-        }
-
-#if !NET45
-        /// <summary>
-        /// Releases the unmanaged resources used by this class and optionally releases the managed resources.
-        /// </summary>
-        /// <param name="disposing"><see langword="true"/> to release both managed and unmanaged resources; <see langword="false"/> to release only unmanaged resources.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (this.disposed)
-            {
-                return;
-            }
-
-            if (disposing)
-            {
-                this.client.Dispose();
-            }
-
-            this.disposed = true;
-        }
-#endif
     }
 }

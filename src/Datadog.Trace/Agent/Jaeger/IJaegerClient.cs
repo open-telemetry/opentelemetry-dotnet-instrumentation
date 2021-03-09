@@ -14,12 +14,11 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Net;
 
 namespace Datadog.Trace.Agent.Jaeger
 {
-    internal interface IJaegerClient : IDisposable
+    internal interface IJaegerClient
     {
         bool Connected { get; }
 

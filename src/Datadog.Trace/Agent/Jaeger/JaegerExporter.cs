@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Datadog.Trace.Logging;
@@ -10,32 +11,31 @@ namespace Datadog.Trace.Agent.Jaeger
 {
     internal class JaegerExporter : IExporter
     {
-        internal const int DefaultMaxPayloadSizeInBytes = 4096;
-
         private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor(typeof(JaegerExporter));
 
         private readonly int _maxPayloadSizeInBytes;
         private readonly string _serviceName;
         private readonly TTransport _clientTransport;
+        private readonly JaegerOptions _options;
         private readonly JaegerThriftClient _thriftClient;
         private readonly InMemoryTransport _memoryTransport;
         private readonly TProtocol _memoryProtocol;
-        private readonly Uri _agentUri;
+
         private int _batchByteSize;
 
-        public JaegerExporter(Uri agentUri, string serviceName, int? maxPayloadSizeInBytes = null, IJaegerClient jaegerClient = null)
+        public JaegerExporter(JaegerOptions options)
         {
             var protocolFactory = new TCompactProtocol.Factory();
 
-            _maxPayloadSizeInBytes = maxPayloadSizeInBytes ?? DefaultMaxPayloadSizeInBytes;
-            _clientTransport = new JaegerThriftClientTransport(agentUri.Host, agentUri.Port, stream: null, client: jaegerClient);
+            _options = options;
+            _maxPayloadSizeInBytes = options.MaxPayloadSizeInBytes;
+            _clientTransport = new JaegerThriftClientTransport(options.Host, options.Port, new MemoryStream(), options.TransportClient);
             _thriftClient = new JaegerThriftClient(protocolFactory.GetProtocol(_clientTransport));
             _memoryTransport = new InMemoryTransport(16000);
             _memoryProtocol = protocolFactory.GetProtocol(_memoryTransport);
-            _agentUri = agentUri ?? throw new ArgumentNullException(nameof(agentUri));
-            _serviceName = serviceName;
+            _serviceName = options.ServiceName;
 
-            Process = new Process(serviceName);
+            Process = new Process(_serviceName);
         }
 
         internal Process Process { get; set; }
@@ -71,7 +71,7 @@ namespace Datadog.Trace.Agent.Jaeger
             }
             catch (Exception ex)
             {
-                Log.Debug("Exception sending traces to {0}: {1}", _agentUri, ex.Message);
+                Log.Debug("Exception sending traces to {0}: {1}", $"{_options.Host}:{_options.Port}", ex.Message);
 
                 return Task.FromResult(false);
             }
