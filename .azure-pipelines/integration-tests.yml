@@ -73,7 +73,7 @@ jobs:
       containerregistrytype: Container Registry
       dockerComposeCommand: run Profiler
 
-  - publish: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin/$(buildConfiguration)/x64
+  - publish: $(System.DefaultWorkingDirectory)/src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/bin/$(buildConfiguration)/x64
     artifact: linux-tracer-home
 
 - job: Linux
@@ -100,7 +100,7 @@ jobs:
   - task: CopyFiles@2
     inputs:
       sourceFolder: $(Pipeline.Workspace)/linux-tracer-home
-      targetFolder: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin/$(buildConfiguration)/x64
+      targetFolder: $(System.DefaultWorkingDirectory)/src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/bin/$(buildConfiguration)/x64
 
   - task: DockerCompose@0
     displayName: docker-compose run build
@@ -173,7 +173,7 @@ jobs:
       containerregistrytype: Container Registry
       dockerComposeCommand: run Profiler.Alpine
 
-  - publish: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin/$(buildConfiguration)/x64
+  - publish: $(System.DefaultWorkingDirectory)/src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/bin/$(buildConfiguration)/x64
     artifact: alpine-linux-tracer-home
 
 - job: Alpine_Linux
@@ -200,7 +200,7 @@ jobs:
   - task: CopyFiles@2
     inputs:
       sourceFolder: $(Pipeline.Workspace)/alpine-linux-tracer-home
-      targetFolder: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin/$(buildConfiguration)/x64
+      targetFolder: $(System.DefaultWorkingDirectory)/src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/bin/$(buildConfiguration)/x64
 
   - task: DockerCompose@0
     displayName: docker-compose run build

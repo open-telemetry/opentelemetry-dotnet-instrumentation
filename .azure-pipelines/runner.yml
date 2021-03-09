@@ -57,7 +57,7 @@ jobs:
       containerregistrytype: Container Registry
       dockerComposeCommand: run Profiler
 
-  - publish: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin/Release/x64
+  - publish: $(System.DefaultWorkingDirectory)/src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/bin/Release/x64
     displayName: Uploading linux tracer home artifact
     artifact: linux-tracer-home
 
@@ -88,12 +88,12 @@ jobs:
         src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
 
   - script: |
-      cd ./src/Datadog.Trace.ClrProfiler.Native
+      cd ./src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native
       cmake . -DCMAKE_BUILD_TYPE=Release
       make
     displayName: build_profiler
 
-  - publish: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin
+  - publish: $(System.DefaultWorkingDirectory)/src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/bin
     displayName: Uploading macos profiler artifact
     artifact: macos-profiler
 
