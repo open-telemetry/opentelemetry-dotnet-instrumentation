@@ -6,8 +6,8 @@ trigger:
       - refs/pull/*/head
   paths:
     exclude:
-      - /*.md
-      - /**/*.md
+      - README.md
+      - /docs/*.md
       - .github/*
 
 variables:
