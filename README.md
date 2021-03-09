@@ -14,10 +14,9 @@ For more details about the preliminary roadmap refer to the [Preliminary Roadmap
 
 ## Contributing
 
-We meet weekly on Wednesdays at 1PM PT. The meeting is subject to change depending on contributors'
-availability. Check the [OpenTelemetry community
+We meet weekly, visit the [OpenTelemetry community
 calendar](https://calendar.google.com/calendar/embed?src=google.com_b79e3e90j7bbsa2n2p5an5lf60%40group.calendar.google.com)
-for specific dates.
+, for an up-to-date schedule.
 
 Meetings take place via [Zoom video conference](https://zoom.us/j/8287234601). The passcode is _77777_.
 
