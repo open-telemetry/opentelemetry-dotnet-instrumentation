@@ -3,6 +3,9 @@ set -euxo pipefail
 
 cd "$( dirname "${BASH_SOURCE[0]}" )"/../../
 
+buildConfiguration=${buildConfiguration:-Debug}
+publishTargetFramework=${publishTargetFramework:-netcoreapp3.1}
+
 mkdir -p /var/log/datadog/dotnet
 touch /var/log/datadog/dotnet/dotnet-tracer-native.log
 
