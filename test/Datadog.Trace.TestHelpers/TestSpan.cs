@@ -10,6 +10,8 @@ namespace Datadog.Trace.TestHelpers
 
         public string Type { get; set; }
 
+        public SpanStatus Status { get; set; }
+
         public bool Error { get; set; }
 
         private Dictionary<string, string> Tags { get; } = new Dictionary<string, string>();

@@ -64,6 +64,11 @@ namespace Datadog.Trace
         public bool Error { get; set; }
 
         /// <summary>
+        /// Gets or sets the span's execution status
+        /// </summary>
+        public SpanStatus Status { get; set; }
+
+        /// <summary>
         /// Gets or sets the service name.
         /// </summary>
         public string ServiceName
@@ -112,6 +117,7 @@ namespace Datadog.Trace
             sb.AppendLine($"Type: {Type}");
             sb.AppendLine($"Start: {StartTime}");
             sb.AppendLine($"Duration: {Duration}");
+            sb.AppendLine($"Status: {Status}");
             sb.AppendLine($"Error: {Error}");
             sb.AppendLine($"Meta: {Tags}");
 

@@ -9,6 +9,11 @@ namespace Datadog.Trace.Abstractions
         string Type { get; set; }
 
         /// <summary>
+        /// Gets or sets the span's execution status
+        /// </summary>
+        SpanStatus Status { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether this span represents an error.
         /// </summary>
         bool Error { get; set; }
