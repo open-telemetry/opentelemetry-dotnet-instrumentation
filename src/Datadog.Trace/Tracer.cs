@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Datadog.Trace.Abstractions;
 using Datadog.Trace.Agent;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.Conventions;
@@ -49,7 +50,7 @@ namespace Datadog.Trace
         private readonly IScopeManager _scopeManager;
         private readonly Timer _heartbeatTimer;
 
-        private readonly IAgentWriter _agentWriter;
+        private readonly ITraceWriter _agentWriter;
 
         static Tracer()
         {
@@ -77,7 +78,7 @@ namespace Datadog.Trace
         {
         }
 
-        internal Tracer(TracerSettings settings, IAgentWriter agentWriter, ISampler sampler, IScopeManager scopeManager, IDogStatsd statsd)
+        internal Tracer(TracerSettings settings, ITraceWriter agentWriter, ISampler sampler, IScopeManager scopeManager, IDogStatsd statsd)
         {
             // update the count of Tracer instances
             Interlocked.Increment(ref _liveTracerCount);
@@ -96,18 +97,19 @@ namespace Datadog.Trace
                 Statsd = statsd ?? CreateDogStatsdClient(Settings, DefaultServiceName, Settings.DogStatsdPort);
             }
 
+            IMetrics metrics = Statsd != null ? new DogStatsdMetrics(Statsd) : new NullMetrics();
             if (agentWriter != null)
             {
                 _agentWriter = agentWriter;
             }
             else if (Settings.Exporter == ExporterType.Zipkin)
             {
-                _agentWriter = new ExporterWriter(new ZipkinExporter(Settings.AgentUri), Statsd);
+                _agentWriter = new ExporterWriter(new ZipkinExporter(Settings.AgentUri), metrics);
             }
             else
             {
                 Log.Warning("Using eager agent writer");
-                _agentWriter = new AgentWriter(new Api(Settings.AgentUri, TransportStrategy.Get(Settings), Statsd), Statsd, maxBufferSize: Settings.TraceBufferSize);
+                _agentWriter = new AgentWriter(new Api(Settings.AgentUri, TransportStrategy.Get(Settings), Statsd), metrics, maxBufferSize: Settings.TraceBufferSize);
             }
 
             switch (Settings.Convention)
