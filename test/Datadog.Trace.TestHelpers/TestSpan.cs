@@ -12,8 +12,6 @@ namespace Datadog.Trace.TestHelpers
 
         public SpanStatus Status { get; set; }
 
-        public bool Error { get; set; }
-
         private Dictionary<string, string> Tags { get; } = new Dictionary<string, string>();
 
         ISpan ISpan.SetTag(string key, string value)
@@ -30,8 +28,7 @@ namespace Datadog.Trace.TestHelpers
 
         public void SetException(Exception exception)
         {
-            Error = true;
-
+            Status = SpanStatus.Error.WithDescription(exception.Message);
             SetTagInternal(Trace.Tags.ErrorMsg, exception.Message);
             SetTagInternal(Trace.Tags.ErrorStack, exception.StackTrace);
             SetTagInternal(Trace.Tags.ErrorType, exception.GetType().ToString());

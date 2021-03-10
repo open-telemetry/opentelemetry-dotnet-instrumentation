@@ -108,7 +108,7 @@ namespace Datadog.Trace.OpenTracing
 
             if (key == global::OpenTracing.Tag.Tags.Error.Key)
             {
-                Span.Error = value == bool.TrueString;
+                Span.Status = value == bool.TrueString ? SpanStatus.Error : SpanStatus.Ok;
                 return this;
             }
 
