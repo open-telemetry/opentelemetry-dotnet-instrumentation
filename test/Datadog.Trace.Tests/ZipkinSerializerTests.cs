@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Datadog.Trace.Agent;
-using Datadog.Trace.Configuration;
+using Datadog.Trace.Tagging;
 using Moq;
 using Newtonsoft.Json;
 using Xunit;
@@ -17,7 +17,12 @@ namespace Datadog.Trace.Tests
             var traceContext = new Mock<ITraceContext>();
             var spanContext = new SpanContext(parentSpanContext.Object, traceContext.Object, serviceName: null);
 
-            var span = new Span(spanContext, start: null);
+            var additionalTags = new CommonTags();
+
+            additionalTags.Version = "v1.0";
+            additionalTags.Environment = "Test";
+
+            var span = new Span(spanContext, start: null, tags: additionalTags);
             span.ServiceName = "ServiceName";
             span.SetTag("k0", "v0");
             span.SetTag("k1", "v1");

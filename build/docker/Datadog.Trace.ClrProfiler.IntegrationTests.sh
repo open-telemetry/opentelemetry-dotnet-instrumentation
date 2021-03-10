@@ -3,8 +3,11 @@ set -euxo pipefail
 
 cd "$( dirname "${BASH_SOURCE[0]}" )"/../../
 
-mkdir -p /var/log/datadog/dotnet
-touch /var/log/datadog/dotnet/dotnet-tracer-native.log
+buildConfiguration=${buildConfiguration:-Debug}
+publishTargetFramework=${publishTargetFramework:-netcoreapp3.1}
+
+mkdir -p /var/log/opentelemetry/dotnet
+touch /var/log/opentelemetry/dotnet/dotnet-tracer-native.logog
 
 dotnet vstest test/Datadog.Trace.IntegrationTests/bin/$buildConfiguration/$publishTargetFramework/publish/Datadog.Trace.IntegrationTests.dll --logger:trx --ResultsDirectory:test/Datadog.Trace.IntegrationTests/results
 
@@ -19,4 +22,4 @@ wait-for-it mongo:27017 -- \
 wait-for-it postgres:5432 -- \
 dotnet vstest test/Datadog.Trace.ClrProfiler.IntegrationTests/bin/$buildConfiguration/$publishTargetFramework/publish/Datadog.Trace.ClrProfiler.IntegrationTests.dll --logger:trx --ResultsDirectory:test/Datadog.Trace.ClrProfiler.IntegrationTests/results
 
-cp /var/log/datadog/dotnet/dotnet-tracer-native.log /project/
+cp /var/log/opentelemetry/dotnet/dotnet-tracer-native.log /project/

@@ -56,9 +56,9 @@ inline WSTRING DatadogLogFilePath() {
   }
 
   return ToWSTRING(program_data +
-                   R"(\Datadog .NET Tracer\logs\dotnet-tracer-native.log)");
+                   R"(\OpenTelemetry .NET AutoInstrumentation\logs\dotnet-tracer-native.log)");
 #else
-  return WStr("/var/log/datadog/dotnet/dotnet-tracer-native.log");
+  return WStr("/var/log/opentelemetry/dotnet/dotnet-tracer-native.log");
 #endif
 }
 

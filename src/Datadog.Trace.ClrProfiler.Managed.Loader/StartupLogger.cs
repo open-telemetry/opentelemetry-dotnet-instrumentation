@@ -6,7 +6,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
 {
     internal static class StartupLogger
     {
-        private const string NixDefaultDirectory = "/var/log/datadog/dotnet";
+        private const string NixDefaultDirectory = "/var/log/opentelemetry/dotnet";
 
         private static readonly bool DebugEnabled = IsDebugEnabled();
         private static readonly string LogDirectory = GetLogDirectory();
@@ -77,7 +77,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
                 {
                     if (Environment.OSVersion.Platform == PlatformID.Win32NT)
                     {
-                        var windowsDefaultDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"Datadog .NET Tracer", "logs");
+                        var windowsDefaultDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OpenTelemetry .NET AutoInstrumentation", "logs");
                         logDirectory = windowsDefaultDirectory;
                     }
                     else

@@ -15,11 +15,11 @@ const WSTRING debug_enabled = WStr("OTEL_TRACE_DEBUG");
 
 // Sets the paths to integration definition JSON files.
 // Supports multiple values separated with semi-colons, for example:
-// "C:\Program Files\Datadog .NET Tracer\integrations.json;D:\temp\test_integrations.json"
+// "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\integrations.json;D:\temp\test_integrations.json"
 const WSTRING integrations_path = WStr("OTEL_INTEGRATIONS");
 
 // Sets the path to the profiler's home directory, for example:
-// "C:\Program Files\Datadog .NET Tracer\" or "/opt/datadog/"
+// "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\" or "/opt/datadog/"
 const WSTRING profiler_home_path = WStr("OTEL_DOTNET_TRACER_HOME");
 
 // Sets the filename of executables the profiler can attach to.
@@ -64,8 +64,8 @@ const WSTRING log_path = WStr("OTEL_TRACE_LOG_PATH");
 // Sets the directory for the profiler's log file.
 // If set, this setting takes precedence over environment variable OTEL_TRACE_LOG_PATH.
 // If not set, default is
-// "%ProgramData%"\Datadog .NET Tracer\logs\" on Windows or
-// "/var/log/datadog/dotnet/" on Linux.
+// "%ProgramData%"\OpenTelemetry .NET AutoInstrumentation\logs\" on Windows or
+// "/var/log/opentelemetry/dotnet/" on Linux.
 const WSTRING log_directory = WStr("OTEL_TRACE_LOG_DIRECTORY");
 
 // Sets whether to disable all JIT optimizations.
