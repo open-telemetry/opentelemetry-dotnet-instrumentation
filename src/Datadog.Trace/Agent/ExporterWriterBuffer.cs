@@ -20,14 +20,19 @@ namespace Datadog.Trace.Agent
         {
             lock (_items)
             {
-                if (_count >= _items.Length)
+                if (_count < _items.Length)
                 {
-                    // drop the trace as the buffer is full
+                    _items[_count++] = item;
+                    return true;
+                }
+                else
+                {
+                    // drop a random trace.
+                    // note that Random.Next() is NOT thread-safe,
+                    // but we are running this inside a lock
+                    _items[_random.Next(_items.Length)] = item;
                     return false;
                 }
-
-                _items[_count++] = item;
-                return true;
             }
         }
 

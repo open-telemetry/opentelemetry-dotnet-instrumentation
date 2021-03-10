@@ -35,7 +35,7 @@ namespace Datadog.Trace.Tests
 
             Assert.False(buffer.Push(101));
 
-            // Check NONE element of the buffer was replaced
+            // Check that one random element of the queue was replaced
             var vals = buffer.Pop();
             var replaced = 0;
             for (int i = 0; i < 100; i++)
@@ -46,7 +46,7 @@ namespace Datadog.Trace.Tests
                 }
             }
 
-            Assert.Equal(0, replaced);
+            Assert.Equal(1, replaced);
         }
     }
 }
