@@ -203,7 +203,7 @@ namespace Datadog.Trace.OpenTracing.Tests
                                                .WithTag(global::OpenTracing.Tag.Tags.Error.Key, true)
                                                .Start();
 
-            Assert.True(span.DDSpan.Error);
+            Assert.Equal(SpanStatus.Error, span.DDSpan.Status);
         }
 
         [Fact]
