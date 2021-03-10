@@ -1,4 +1,5 @@
 using Datadog.Trace.Agent.Jaeger;
+using Datadog.Trace.TestHelpers.Factories;
 using Moq;
 using Xunit;
 

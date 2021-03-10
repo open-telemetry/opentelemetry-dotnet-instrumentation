@@ -2,7 +2,7 @@ using System;
 using Datadog.Trace.Tagging;
 using Moq;
 
-namespace Datadog.Trace.Tests.Agent
+namespace Datadog.Trace.TestHelpers.Factories
 {
     public static class SpanFactory
     {

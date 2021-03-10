@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Datadog.Trace.Agent;
+using Datadog.Trace.TestHelpers.Factories;
 using Newtonsoft.Json;
 using Xunit;
 
