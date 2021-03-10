@@ -79,7 +79,7 @@ namespace Datadog.Trace
         {
             if (id.Length == 16)
             {
-                var lower = (ulong)Convert.ToInt64(id, fromBase: 16) & 0x7FFFFFFFFFFFFFFF;
+                var lower = Convert.ToUInt64(id, fromBase: 16);
                 return new TraceId(lower);
             }
 
@@ -88,8 +88,8 @@ namespace Datadog.Trace
                 var higherAsString = id.Substring(startIndex: 0, length: 16);
                 var lowerAsString = id.Substring(startIndex: 16, length: 16);
 
-                var higher = (ulong)Convert.ToInt64(higherAsString, fromBase: 16) & 0x7FFFFFFFFFFFFFFF;
-                var lower = (ulong)Convert.ToInt64(lowerAsString, fromBase: 16) & 0x7FFFFFFFFFFFFFFF;
+                var higher = Convert.ToUInt64(higherAsString, fromBase: 16);
+                var lower = Convert.ToUInt64(lowerAsString, fromBase: 16);
 
                 return new TraceId(higher, lower);
             }
@@ -143,19 +143,13 @@ namespace Datadog.Trace
         /// <returns>True if TraceIds are equal, false otherwise.</returns>
         public bool Equals(TraceId other)
         {
-            var for32Bit = Lower == other.Lower;
-            if (_is64Bit)
-            {
-                return for32Bit && _higher == other._higher;
-            }
-
-            return for32Bit;
+            return Lower == other.Lower && _higher == other._higher && _is64Bit == other._is64Bit;
         }
 
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return HashCode.Combine(Lower, _is64Bit);
+            return HashCode.Combine(_higher, Lower, _is64Bit);
         }
     }
 }
