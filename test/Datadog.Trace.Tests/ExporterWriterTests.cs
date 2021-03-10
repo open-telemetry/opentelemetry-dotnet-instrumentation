@@ -19,7 +19,7 @@ namespace Datadog.Trace.Tests
             tracer.Setup(x => x.DefaultServiceName).Returns("Default");
 
             _exporter = new Mock<IExporter>();
-            _exporterWriter = new ExporterWriter(_exporter.Object, statsd: null);
+            _exporterWriter = new ExporterWriter(_exporter.Object, new NullMetrics());
 
             var parentSpanContext = new Mock<ISpanContext>();
             var traceContext = new Mock<ITraceContext>();
@@ -44,7 +44,7 @@ namespace Datadog.Trace.Tests
         [Fact]
         public async Task FlushTwice()
         {
-            var w = new ExporterWriter(_exporter.Object, statsd: null);
+            var w = new ExporterWriter(_exporter.Object, new NullMetrics());
             await w.FlushAndCloseAsync();
             await w.FlushAndCloseAsync();
         }
