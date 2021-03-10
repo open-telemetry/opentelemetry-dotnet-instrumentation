@@ -7,18 +7,18 @@
 
     <!-- NuGet packages -->
     <IsPackable>true</IsPackable>
-    <PackageIconUrl>https://github.com/DataDog/dd-trace-dotnet/raw/master/opentelemetry-logo-64x64.png</PackageIconUrl>
+    <PackageIconUrl>https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/raw/main/opentelemetry-logo-64x64.png</PackageIconUrl>
     <PackageIcon>packageIcon.png</PackageIcon>
-    <PackageProjectUrl>https://docs.datadoghq.com/tracing/setup/dotnet/</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <PackageReleaseNotes>See release notes at https://github.com/DataDog/dd-trace-dotnet/releases</PackageReleaseNotes>
-    <PackageTags>Datadog;APM;tracing;profiling;instrumentation</PackageTags>
+    <PackageReleaseNotes>See release notes at https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases</PackageReleaseNotes>
+    <PackageTags>OpenTelemetry;OTEL;APM;tracing;profiling;instrumentation</PackageTags>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/DataDog/dd-trace-dotnet.git</RepositoryUrl>
-    <Copyright>Copyright 2017 Datadog, Inc.</Copyright>
-    <Company>Datadog</Company>
-    <Authors>Datadog</Authors>
+    <RepositoryUrl>https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation.git</RepositoryUrl>
+    <Copyright>Copyright 2021 OpenTelemetry, originated from Datadog, Inc.</Copyright>
+    <Company>OpenTelemetry</Company>
+    <Authors>OpenTelemetry</Authors>
   </PropertyGroup>
 
   <ItemGroup>
