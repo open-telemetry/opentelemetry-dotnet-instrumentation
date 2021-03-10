@@ -192,7 +192,7 @@ namespace Datadog.Trace
 
                     return traceId;
                 }
-                catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is InvalidOperationException)
+                catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is InvalidOperationException || ex is OverflowException || ex is FormatException)
                 {
                 }
             }

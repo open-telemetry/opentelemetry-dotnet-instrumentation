@@ -216,14 +216,14 @@ namespace Datadog.Trace.ServiceFabric
 
         private static void InjectContext(PropagationContext context, IServiceRemotingRequestMessageHeader messageHeaders)
         {
-            if (context.TraceId == 0 || context.ParentSpanId == 0)
+            if (context.TraceId.Equals(TraceId.Zero) || context.ParentSpanId == 0)
             {
                 return;
             }
 
             try
             {
-                messageHeaders.TryAddHeader(HttpHeaderNames.TraceId, context, ctx => BitConverter.GetBytes(ctx.TraceId));
+                messageHeaders.TryAddHeader(HttpHeaderNames.TraceId, context, ctx => ConvertHexStringToByteArray(ctx.TraceId.ToString()));
 
                 messageHeaders.TryAddHeader(HttpHeaderNames.ParentId, context, ctx => BitConverter.GetBytes(ctx.ParentSpanId));
 
@@ -243,13 +243,28 @@ namespace Datadog.Trace.ServiceFabric
             }
         }
 
+        private static byte[] ConvertHexStringToByteArray(string hexString)
+        {
+            byte[] data = new byte[hexString.Length / 2];
+            for (var index = 0; index < data.Length; index++)
+            {
+                string byteValue = hexString.Substring(index * 2, 2);
+                data[index] = byte.Parse(byteValue, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+            }
+
+            return data;
+        }
+
         private static PropagationContext? ExtractContext(IServiceRemotingRequestMessageHeader messageHeaders)
         {
             try
             {
-                ulong traceId = messageHeaders.TryGetHeaderValueUInt64(HttpHeaderNames.TraceId) ?? 0;
+                var traceIdAsString = messageHeaders.TryGetHeaderValueString(HttpHeaderNames.TraceId);
+                var traceId = traceIdAsString == null
+                                  ? TraceId.Zero
+                                  : TraceId.CreateFromString(traceIdAsString);
 
-                if (traceId > 0)
+                if (!traceId.Equals(TraceId.Zero))
                 {
                     ulong parentSpanId = messageHeaders.TryGetHeaderValueUInt64(HttpHeaderNames.ParentId) ?? 0;
 
