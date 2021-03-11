@@ -51,8 +51,7 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
         build-essential \
         clang \
-        cmake \
-        aspnetcore-runtime-3.1
+        cmake
 
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
