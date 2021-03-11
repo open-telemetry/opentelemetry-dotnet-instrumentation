@@ -21,9 +21,13 @@ The following Web UI endpoints are exposed:
 - http://localhost:8889/metrics - collected metrics,
 - http://localhost:13133 - collector's health.
 
-## Instrumentation Script
+## Instrumentation Scripts
 
-The [`instrument.sh`](instrument.sh) is a script helping to run a command with .NET instrumentation in your shell (e.g. bash, zsh, git bash) .
+*Caution:* Make sure that before running you have build the tracer e.g. by running:
+- [`./build/docker/build.sh`](../build/docker/build.sh)
+- [`./build/docker/Datadog.Trace.ClrProfiler.Native.sh`](../build/docker/Datadog.Trace.ClrProfiler.Native.sh).
+
+[`instrument.sh`](instrument.sh) helps to run a command with .NET instrumentation in your shell (e.g. bash, zsh, git bash) .
 
 Example usage:
 
@@ -31,6 +35,9 @@ Example usage:
 ./dev/instrument.sh dotnet run -f netcoreapp3.1 -p ./samples/ConsoleApp/ConsoleApp.csproj
 ```
 
-*Caution:* Make sure that before running you have build the tracer e.g. by running:
-- [`./build/docker/build.sh`](../build/docker/build.sh)
-- [`./build/docker/Datadog.Trace.ClrProfiler.Native.sh`](../build/docker/Datadog.Trace.ClrProfiler.Native.sh).
+ [`envvars.sh`](envvars.sh) can be used to export profiler environmental variables to your current shell session. **It has to be executed from the root of this repository**. Example usage:
+
+ ```sh
+ source ./dev/envvars.sh
+ ./samples/ConsoleApp/bin/Debug/netcoreapp3.1/ConsoleApp
+ ```
