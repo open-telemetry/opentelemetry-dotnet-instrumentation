@@ -1,11 +1,36 @@
 # Development Environment
 
-Run `source dev/envvars.sh` in your shell (e.g. bash, zsh) where you want to run the .NET instrumented apps. Run it from the root of this repository.
+## Docker Compose
 
-Run `docker-compose up` to run OTel Collector and Jaeger. Run it from this directory. You should see trace logs in OTel Collector output.
+The [`docker-compose.yaml`](docker-compose.yaml) contains configuration for running OTel Collector and Jaeger.
 
-Navigate to http://localhost:16686/search to see the collected traces.
+You can run the services using from this directory by:
 
-Navigate to http://localhost:8889/metrics to see the collected metrics.
+```sh
+docker-compose up
+```
 
-Navigate to http://localhost:13133 to see the collector's health.
+You can also run it from any directory in the following way:
+
+```sh
+docker-compose -f dev/docker-compose.yaml up
+```
+
+The following Web UI endpoints are exposed:
+- http://localhost:16686/search - collected traces,
+- http://localhost:8889/metrics - collected metrics,
+- http://localhost:13133 - collector's health.
+
+## Instrumentation Script
+
+The [`instrument.sh`](instrument.sh) is a script helping to run a command with .NET instrumentation in your shell (e.g. bash, zsh, git bash) .
+
+Example usage:
+
+```sh
+./dev/instrument.sh dotnet run -f netcoreapp3.1 -p ./samples/ConsoleApp/ConsoleApp.csproj
+```
+
+*Caution:* Make sure that before running you have build the tracer e.g. by running:
+- [`./build/docker/build.sh`](../build/docker/build.sh)
+- [`./build/docker/Datadog.Trace.ClrProfiler.Native.sh`](../build/docker/Datadog.Trace.ClrProfiler.Native.sh).
