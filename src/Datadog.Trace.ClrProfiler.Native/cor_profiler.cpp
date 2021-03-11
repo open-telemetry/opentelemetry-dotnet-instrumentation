@@ -2653,7 +2653,7 @@ void CorProfiler::GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray, int* assembl
     for(auto i = 0; i < imgCount; i++) {
         const std::string name = std::string(_dyld_get_image_name(i));
 
-        if (name.rfind("Datadog.Trace.ClrProfiler.Native.dylib") != std::string::npos) {
+        if (name.rfind("OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dylib") != std::string::npos) {
             const mach_header_64* header = (const struct mach_header_64 *) _dyld_get_image_header(i);
 
             unsigned long dllSize;
