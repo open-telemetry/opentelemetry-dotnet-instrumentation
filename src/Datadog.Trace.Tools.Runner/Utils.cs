@@ -43,11 +43,11 @@ namespace Datadog.Trace.Tools.Runner
             }
             else if (platform == Platform.Linux)
             {
-                tracerProfiler64 = FileExists(Path.Combine(tracerHome, "linux-x64", "Datadog.Trace.ClrProfiler.Native.so"));
+                tracerProfiler64 = FileExists(Path.Combine(tracerHome, "linux-x64", "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so"));
             }
             else if (platform == Platform.MacOS)
             {
-                tracerProfiler64 = FileExists(Path.Combine(tracerHome, "osx-x64", "Datadog.Trace.ClrProfiler.Native.dylib"));
+                tracerProfiler64 = FileExists(Path.Combine(tracerHome, "osx-x64", "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dylib"));
             }
 
             var envVars = new Dictionary<string, string>
