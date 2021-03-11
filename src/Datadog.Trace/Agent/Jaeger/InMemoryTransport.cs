@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using Datadog.Trace.Util;
 using Thrift.Transport;
 
@@ -41,8 +40,7 @@ namespace Datadog.Trace.Agent.Jaeger
         {
             var memory = this.bufferWriter.GetMemory(length);
 
-            var span = new ReadOnlySpan<byte>(buffer, offset, length);
-            span.CopyTo(new Span<byte>(memory.BufferWriter.Buffer, memory.Offset, memory.Count));
+            ArrayHelper.Copy(buffer, memory.BufferWriter.Buffer, offset, memory.Offset, length);
 
             if (!this.buffer.HasValue)
             {

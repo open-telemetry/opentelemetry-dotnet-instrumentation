@@ -15,9 +15,10 @@
 // </copyright>
 
 using System;
-using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
+using Datadog.Trace.Internals;
+using Datadog.Trace.Util;
 
 namespace Datadog.Trace.Internal
 {
@@ -48,7 +49,7 @@ namespace Datadog.Trace.Internal
 
         public static PooledList<T> Create()
         {
-            return new PooledList<T>(ArrayPool<T>.Shared.Rent(lastAllocatedSize), 0);
+            return new PooledList<T>(SharedPool<T>.Rent(lastAllocatedSize), 0);
         }
 
         public static void Add(ref PooledList<T> list, T item)
@@ -65,11 +66,10 @@ namespace Datadog.Trace.Internal
                 lastAllocatedSize = buffer.Length * 2;
                 var previousBuffer = buffer;
 
-                buffer = ArrayPool<T>.Shared.Rent(lastAllocatedSize);
+                buffer = SharedPool<T>.Rent(lastAllocatedSize);
 
-                var span = previousBuffer.AsSpan();
-                span.CopyTo(buffer);
-                ArrayPool<T>.Shared.Return(previousBuffer);
+                ArrayHelper.Copy(previousBuffer, buffer);
+                SharedPool<T>.Return(previousBuffer);
             }
 
             buffer[list.Count] = item;
@@ -86,7 +86,7 @@ namespace Datadog.Trace.Internal
             var buffer = this.buffer;
             if (buffer != null)
             {
-                ArrayPool<T>.Shared.Return(buffer);
+                SharedPool<T>.Return(buffer);
             }
         }
 

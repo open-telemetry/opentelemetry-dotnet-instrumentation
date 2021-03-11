@@ -18,8 +18,8 @@
 // under the License.
 
 using System;
-using System.Buffers;
 using System.Text;
+using Datadog.Trace.Internals;
 using Thrift.Protocol.Entities;
 using Thrift.Transport;
 
@@ -119,7 +119,7 @@ namespace Thrift.Protocol
 
         public virtual void WriteString(string s)
         {
-            var buf = ArrayPool<byte>.Shared.Rent(Encoding.UTF8.GetByteCount(s));
+            var buf = SharedPool<byte>.Rent(Encoding.UTF8.GetByteCount(s));
             try
             {
                 var numberOfBytes = Encoding.UTF8.GetBytes(s, 0, s.Length, buf, 0);
@@ -128,7 +128,7 @@ namespace Thrift.Protocol
             }
             finally
             {
-                ArrayPool<byte>.Shared.Return(buf);
+                SharedPool<byte>.Return(buf);
             }
         }
 

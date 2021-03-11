@@ -18,10 +18,10 @@
 // under the License.
 
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Datadog.Trace.Internals;
 using Thrift.Protocol.Entities;
 using Thrift.Transport;
 
@@ -326,7 +326,7 @@ namespace Thrift.Protocol
 
         public override void WriteString(string str)
         {
-            var buf = ArrayPool<byte>.Shared.Rent(Encoding.UTF8.GetByteCount(str));
+            var buf = SharedPool<byte>.Rent(Encoding.UTF8.GetByteCount(str));
             try
             {
                 var numberOfBytes = Encoding.UTF8.GetBytes(str, 0, str.Length, buf, 0);
@@ -337,7 +337,7 @@ namespace Thrift.Protocol
             }
             finally
             {
-                ArrayPool<byte>.Shared.Return(buf);
+                SharedPool<byte>.Return(buf);
             }
         }
 

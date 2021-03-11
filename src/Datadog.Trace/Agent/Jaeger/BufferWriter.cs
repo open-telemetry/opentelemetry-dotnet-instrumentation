@@ -15,6 +15,7 @@
 // </copyright>
 
 using System;
+using Datadog.Trace.Util;
 
 namespace Datadog.Trace.Agent.Jaeger
 {
@@ -54,11 +55,7 @@ namespace Datadog.Trace.Agent.Jaeger
 
                 int newSize = checked(this.Buffer.Length + growBy);
 
-                var previousBuffer = this.Buffer.AsSpan(0, this.index);
-
-                this.Buffer = new byte[newSize];
-
-                previousBuffer.CopyTo(this.Buffer);
+                this.Buffer = ArrayHelper.Copy(this.Buffer, newSize, this.index);
             }
         }
     }
