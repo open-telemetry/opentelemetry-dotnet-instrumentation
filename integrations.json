@@ -249,7 +249,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Elasticsearch.V6.RequestPipeline_CallElasticsearchAsync_Integration",
           "action": "CallTargetModification"
         }
@@ -272,7 +272,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Elasticsearch.V6.RequestPipeline_CallElasticsearch_Integration",
           "action": "CallTargetModification"
         }
@@ -301,7 +301,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Elasticsearch.V5.RequestPipeline_CallElasticsearchAsync_Integration",
           "action": "CallTargetModification"
         }
@@ -324,7 +324,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Elasticsearch.V5.RequestPipeline_CallElasticsearch_Integration",
           "action": "CallTargetModification"
         }
@@ -432,13 +432,8 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-<<<<<<< HEAD
           "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
-          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.WinHttpHandler.WinHttpHandlerIntegration",
-=======
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.HttpClient.WinHttpHandler.WinHttpHandlerIntegration",
->>>>>>> a5ea6a11 (HttpMessageHandler based integrations refactor. (#1258))
           "action": "CallTargetModification"
         }
       },
@@ -461,13 +456,8 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-<<<<<<< HEAD
           "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
-          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.WinHttpHandler.WinHttpHandlerIntegration",
-=======
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.HttpClient.WinHttpHandler.WinHttpHandlerIntegration",
->>>>>>> a5ea6a11 (HttpMessageHandler based integrations refactor. (#1258))
           "action": "CallTargetModification"
         }
       },
@@ -489,7 +479,7 @@
           "maximum_minor": 65535,
           "maximum_patch": 65535
         },
-        "wrapper": { 
+        "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.HttpClient.SocketsHttpHandler.SocketsHttpHandlerIntegration",
           "action": "CallTargetModification"
@@ -2116,7 +2106,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.RabbitMQ.BasicDeliverIntegration",
           "action": "CallTargetModification"
         }
@@ -2140,7 +2130,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.RabbitMQ.BasicGetIntegration",
           "action": "CallTargetModification"
         }
@@ -2167,7 +2157,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.RabbitMQ.BasicPublishIntegration",
           "action": "CallTargetModification"
         }
@@ -2197,7 +2187,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.RabbitMQ.ExchangeDeclareIntegration",
           "action": "CallTargetModification"
         }
@@ -2223,7 +2213,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.RabbitMQ.QueueBindIntegration",
           "action": "CallTargetModification"
         }
@@ -2252,7 +2242,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.RabbitMQ.QueueDeclareIntegration",
           "action": "CallTargetModification"
         }
@@ -3565,7 +3555,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Wcf.ChannelHandlerIntegration",
           "action": "CallTargetModification"
         }
