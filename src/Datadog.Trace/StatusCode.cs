@@ -1,3 +1,4 @@
+// taken from: https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry.Api/Trace/StatusCode.cs
 namespace Datadog.Trace
 {
     /// <summary>
