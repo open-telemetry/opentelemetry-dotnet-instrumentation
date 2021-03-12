@@ -23,7 +23,7 @@ dotnet publish -f netstandard2.0 -c $buildConfiguration src/Datadog.Trace.ClrPro
 dotnet publish -f netcoreapp3.1 -c $buildConfiguration src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj -o "$PUBLISH_OUTPUT/netcoreapp3.1"
 
 # Exit if QUICK_BUILD env var is not empty
-if [ -n "${QUICK_BUILD}" ]
+if [ -n "${QUICK_BUILD-}" ]
 then
     exit
 fi
