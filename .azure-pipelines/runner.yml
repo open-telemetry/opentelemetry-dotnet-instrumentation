@@ -8,6 +8,7 @@ trigger:
     exclude:
       - docs/*
       - .github/*
+      - README.md
 
 variables:
   publishOutput: $(System.DefaultWorkingDirectory)/src/bin/managed-publish
