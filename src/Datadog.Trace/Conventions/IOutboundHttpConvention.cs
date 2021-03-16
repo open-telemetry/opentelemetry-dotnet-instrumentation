@@ -8,5 +8,7 @@ namespace Datadog.Trace.Conventions
     internal interface IOutboundHttpConvention
     {
         Scope CreateScope(OutboundHttpArgs args, out HttpTags tags);
+
+        TraceId GenerateNewTraceId();
     }
 }

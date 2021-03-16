@@ -33,5 +33,10 @@ namespace Datadog.Trace.Conventions
             tags.SetAnalyticsSampleRate(integrationId, _tracer.Settings, enabledWithGlobalSetting: false);
             return scope;
         }
+
+        public TraceId GenerateNewTraceId()
+        {
+            return TraceId.CreateRandom64Bit();
+        }
     }
 }
