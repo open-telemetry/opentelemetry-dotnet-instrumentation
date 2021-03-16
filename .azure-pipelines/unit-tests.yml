@@ -8,7 +8,6 @@ trigger:
     exclude:
       - docs/*
       - .github/*
-      - README.md
 
 variables:
   buildConfiguration: Debug

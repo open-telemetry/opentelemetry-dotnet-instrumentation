@@ -6,7 +6,6 @@ trigger:
     exclude:
       - docs/*
       - .github/*
-      - README.md
 pr:
   branches:
     include:
@@ -16,7 +15,6 @@ pr:
     exclude:
       - docs/*
       - .github/*
-      - README.md
 
 pool:
   vmImage: ubuntu-18.04
