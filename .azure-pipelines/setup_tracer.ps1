@@ -58,7 +58,7 @@ else
 
     $otel_tracer_msbuild = "$otel_tracer_home/netstandard2.0/OpenTelemetry.AutoInstrumentation.MSBuild.dll"
     $otel_tracer_integrations = "$otel_tracer_home/integrations.json"
-    $otel_tracer_profiler_64 = "$otel_tracer_home/Datadog.Trace.ClrProfiler.Native.so"
+    $otel_tracer_profiler_64 = "$otel_tracer_home/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so"
 }
 
 # Set all environment variables to attach the profiler to the following pipeline steps
