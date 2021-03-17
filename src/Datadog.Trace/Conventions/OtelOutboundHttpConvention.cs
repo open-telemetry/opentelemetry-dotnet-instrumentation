@@ -29,10 +29,5 @@ namespace Datadog.Trace.Conventions
             otelTags.InstrumentationName = IntegrationRegistry.GetName(args.IntegrationInfo);
             return scope;
         }
-
-        public TraceId GenerateNewTraceId()
-        {
-            return TraceId.CreateRandom();
-        }
     }
 }
