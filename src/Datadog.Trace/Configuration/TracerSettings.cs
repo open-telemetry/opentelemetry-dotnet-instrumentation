@@ -170,6 +170,9 @@ namespace Datadog.Trace.Configuration
             Enum.TryParse(source?.GetString(ConfigurationKeys.Convention) ?? "default", ignoreCase: true, out ConventionType conventionType);
             Convention = conventionType;
 
+            Enum.TryParse(source?.GetString(ConfigurationKeys.Propagator) ?? "default", ignoreCase: true, out PropagatorType propagatorType);
+            Propagator = propagatorType;
+
             var httpServerErrorStatusCodes = source?.GetString(ConfigurationKeys.HttpServerErrorStatusCodes) ??
                                            // Default value
                                            "500-599";
@@ -348,6 +351,13 @@ namespace Datadog.Trace.Configuration
         /// <seealso cref="ConfigurationKeys.Convention"/>
         /// </summary>
         public ConventionType Convention { get; set; }
+
+        /// <summary>
+        /// Gets or sets the propagator logic to be used.
+        /// Default is <c>Datadog</c>
+        /// <seealso cref="ConfigurationKeys.Propagator"/>
+        /// </summary>
+        public PropagatorType Propagator { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether runtime metrics

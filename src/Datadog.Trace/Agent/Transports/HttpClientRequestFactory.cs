@@ -1,6 +1,7 @@
 #if NETCOREAPP
 using System;
 using System.Net.Http;
+using Datadog.Trace.Propagation;
 
 namespace Datadog.Trace.Agent.Transports
 {
@@ -17,7 +18,7 @@ namespace Datadog.Trace.Agent.Transports
             _client.DefaultRequestHeaders.Add(AgentHttpHeaderNames.TracerVersion, TracerConstants.AssemblyVersion);
 
             // don't add automatic instrumentation to requests from this HttpClient
-            _client.DefaultRequestHeaders.Add(HttpHeaderNames.TracingEnabled, "false");
+            _client.DefaultRequestHeaders.Add(CommonHttpHeaderNames.TracingEnabled, "false");
         }
 
         public string Info(Uri endpoint)

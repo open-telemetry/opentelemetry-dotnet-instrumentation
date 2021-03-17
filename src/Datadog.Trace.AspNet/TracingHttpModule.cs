@@ -104,6 +104,7 @@ namespace Datadog.Trace.AspNet
                 HttpRequest httpRequest = httpContext.Request;
                 SpanContext propagatedContext = null;
                 var tagsFromHeaders = Enumerable.Empty<KeyValuePair<string, string>>();
+                var propagator = tracer.Propagator;
 
                 if (tracer.ActiveScope == null)
                 {
@@ -111,8 +112,8 @@ namespace Datadog.Trace.AspNet
                     {
                         // extract propagated http headers
                         var headers = httpRequest.Headers.Wrap();
-                        propagatedContext = SpanContextPropagator.Instance.Extract(headers);
-                        tagsFromHeaders = SpanContextPropagator.Instance.ExtractHeaderTags(headers, tracer.Settings.HeaderTags);
+                        propagatedContext = propagator.Extract(headers);
+                        tagsFromHeaders = propagator.ExtractHeaderTags(headers, tracer.Settings.HeaderTags);
                     }
                     catch (Exception ex)
                     {
@@ -137,7 +138,7 @@ namespace Datadog.Trace.AspNet
                 // Decorate the incoming HTTP Request with distributed tracing headers
                 // in case the next processor cannot access the stored Scope
                 // (e.g. WCF being hosted in IIS)
-                SpanContextPropagator.Instance.Inject(scope.Span.Context, httpRequest.Headers.Wrap());
+                propagator.Inject(scope.Span.Context, httpRequest.Headers.Wrap());
             }
             catch (Exception ex)
             {

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Datadog.Core.Tools;
-using Datadog.Trace;
+using Datadog.Trace.Propagation.Datadog;
 
 namespace Samples.WebRequest
 {
@@ -88,7 +88,7 @@ namespace Samples.WebRequest
 
         private static void HandleHttpRequests(object state)
         {
-            var expectedHeaders = new[] { HttpHeaderNames.TraceId, HttpHeaderNames.ParentId, HttpHeaderNames.SamplingPriority };
+            var expectedHeaders = new[] { DDHttpHeaderNames.TraceId, DDHttpHeaderNames.ParentId, DDHttpHeaderNames.SamplingPriority };
 
             var listener = (HttpListener)state;
 

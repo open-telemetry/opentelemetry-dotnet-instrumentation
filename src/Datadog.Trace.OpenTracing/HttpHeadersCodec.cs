@@ -1,13 +1,18 @@
 using System;
-using System.Globalization;
 using Datadog.Trace.Headers;
+using Datadog.Trace.Propagation;
 using OpenTracing.Propagation;
 
 namespace Datadog.Trace.OpenTracing
 {
     internal class HttpHeadersCodec : ICodec
     {
-        private static readonly CultureInfo InvariantCulture = CultureInfo.InvariantCulture;
+        private readonly IPropagator _propagator;
+
+        public HttpHeadersCodec(IPropagator propagator)
+        {
+            _propagator = propagator;
+        }
 
         public global::OpenTracing.ISpanContext Extract(object carrier)
         {
@@ -19,7 +24,8 @@ namespace Datadog.Trace.OpenTracing
             }
 
             IHeadersCollection headers = new TextMapHeadersCollection(map);
-            var propagationContext = SpanContextPropagator.Instance.Extract(headers);
+            var propagationContext = _propagator.Extract(headers);
+
             return new OpenTracingSpanContext(propagationContext);
         }
 
@@ -34,16 +40,9 @@ namespace Datadog.Trace.OpenTracing
 
             IHeadersCollection headers = new TextMapHeadersCollection(map);
 
-            if (context is OpenTracingSpanContext otSpanContext && otSpanContext.Context is SpanContext ddSpanContext)
+            if (context is OpenTracingSpanContext otSpanContext && otSpanContext.Context is SpanContext spanContext)
             {
-                // this is a Datadog context
-                SpanContextPropagator.Instance.Inject(ddSpanContext, headers);
-            }
-            else
-            {
-                // any other OpenTracing.ISpanContext
-                headers.Set(HttpHeaderNames.TraceId, context.TraceId.ToString(InvariantCulture));
-                headers.Set(HttpHeaderNames.ParentId, context.SpanId.ToString(InvariantCulture));
+                _propagator.Inject(spanContext, headers);
             }
         }
     }

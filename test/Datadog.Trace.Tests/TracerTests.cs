@@ -15,6 +15,7 @@ using Datadog.Trace.Agent;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Headers;
+using Datadog.Trace.Propagation.Datadog;
 using Datadog.Trace.Sampling;
 using Datadog.Trace.TestHelpers;
 using Moq;
@@ -365,8 +366,8 @@ namespace Datadog.Trace.Tests
 
             IHeadersCollection headers = WebRequest.CreateHttp("http://localhost").Headers.Wrap();
 
-            SpanContextPropagator.Instance.Inject(secondSpan.Span.Context, headers);
-            var resultContext = SpanContextPropagator.Instance.Extract(headers);
+            DDSpanContextPropagator.Instance.Inject(secondSpan.Span.Context, headers);
+            var resultContext = DDSpanContextPropagator.Instance.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(firstSpan.Span.Context.Origin, resultContext.Origin);

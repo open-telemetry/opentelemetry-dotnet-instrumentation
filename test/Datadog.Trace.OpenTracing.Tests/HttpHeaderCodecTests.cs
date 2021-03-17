@@ -1,4 +1,4 @@
-using System;
+using Datadog.Trace.Propagation.Datadog;
 using Xunit;
 
 namespace Datadog.Trace.OpenTracing.Tests
@@ -10,7 +10,7 @@ namespace Datadog.Trace.OpenTracing.Tests
         private const string HttpHeaderParentId = "x-datadog-parent-id";
         private const string HttpHeaderSamplingPriority = "x-datadog-sampling-priority";
 
-        private readonly HttpHeadersCodec _codec = new HttpHeadersCodec();
+        private readonly HttpHeadersCodec _codec = new HttpHeadersCodec(DDSpanContextPropagator.Instance);
 
         [Fact]
         public void Extract_ValidParentAndTraceId_ProperSpanContext()

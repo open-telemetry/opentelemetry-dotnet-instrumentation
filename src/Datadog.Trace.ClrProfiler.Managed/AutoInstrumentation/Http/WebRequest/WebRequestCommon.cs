@@ -3,6 +3,7 @@ using System.Net;
 using Datadog.Trace.ClrProfiler.CallTarget;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
+using Datadog.Trace.Propagation;
 
 namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.WebRequest
 {
@@ -33,19 +34,21 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.WebRequest
         {
             if (instance is HttpWebRequest request && IsTracingEnabled(request))
             {
+                Tracer tracer = Tracer.Instance;
+
                 // Check if any headers were injected by a previous call to GetRequestStream
-                var spanContext = SpanContextPropagator.Instance.Extract(request.Headers.Wrap());
+                var spanContext = tracer.Propagator.Extract(request.Headers.Wrap());
 
                 Scope scope = null;
 
                 try
                 {
-                    scope = ScopeFactory.CreateOutboundHttpScope(Tracer.Instance, request.Method, request.RequestUri, IntegrationId, out var tags, spanContext?.SpanId);
+                    scope = ScopeFactory.CreateOutboundHttpScope(tracer, request.Method, request.RequestUri, IntegrationId, out var tags, spanContext?.SpanId);
 
                     if (scope != null)
                     {
                         // add distributed tracing headers to the HTTP request
-                        SpanContextPropagator.Instance.Inject(scope.Span.Context, request.Headers.Wrap());
+                        tracer.Propagator.Inject(scope.Span.Context, request.Headers.Wrap());
 
                         return new CallTargetState(scope);
                     }
@@ -63,7 +66,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.WebRequest
         internal static bool IsTracingEnabled(System.Net.WebRequest request)
         {
             // check if tracing is disabled for this request via http header
-            string value = request.Headers[HttpHeaderNames.TracingEnabled];
+            string value = request.Headers[CommonHttpHeaderNames.TracingEnabled];
             return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
         }
     }

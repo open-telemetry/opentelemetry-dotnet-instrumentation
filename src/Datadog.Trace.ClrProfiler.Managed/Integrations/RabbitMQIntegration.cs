@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Datadog.Trace.ClrProfiler.Emit;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.DuckTyping;
@@ -119,12 +118,14 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             SpanContext propagatedContext = null;
             if (basicProperties.TryDuckCast<IBasicProperties>(out var basicPropertiesValue))
             {
+                Tracer tracer = Tracer.Instance;
+
                 // try to extract propagated context values from headers
                 if (basicPropertiesValue.Headers != null)
                 {
                     try
                     {
-                        propagatedContext = SpanContextPropagator.Instance.Extract(basicPropertiesValue.Headers, headersGetter);
+                        propagatedContext = tracer.Propagator.Extract(basicPropertiesValue.Headers, headersGetter);
                     }
                     catch (Exception ex)
                     {
@@ -132,7 +133,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                     }
                 }
 
-                using (var scope = CreateScope(Tracer.Instance, out RabbitMQTags tags, command, parentContext: propagatedContext, spanKind: SpanKinds.Consumer, exchange: exchange, routingKey: routingKey))
+                using (var scope = CreateScope(tracer, out RabbitMQTags tags, command, parentContext: propagatedContext, spanKind: SpanKinds.Consumer, exchange: exchange, routingKey: routingKey))
                 {
                     if (tags != null)
                     {
@@ -220,7 +221,9 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                 throw;
             }
 
+            Tracer tracer = Tracer.Instance;
             SpanContext propagatedContext = null;
+
             if (basicProperties.TryDuckCast<IBasicProperties>(out var basicPropertiesValue))
             {
                 // try to extract propagated context values from headers
@@ -228,7 +231,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                 {
                     try
                     {
-                        propagatedContext = SpanContextPropagator.Instance.Extract(basicPropertiesValue.Headers, headersGetter);
+                        propagatedContext = tracer.Propagator.Extract(basicPropertiesValue.Headers, headersGetter);
                     }
                     catch (Exception ex)
                     {
@@ -236,7 +239,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                     }
                 }
 
-                using (var scope = CreateScope(Tracer.Instance, out RabbitMQTags tags, command, parentContext: propagatedContext, spanKind: SpanKinds.Consumer, exchange: exchange, routingKey: routingKey))
+                using (var scope = CreateScope(tracer, out RabbitMQTags tags, command, parentContext: propagatedContext, spanKind: SpanKinds.Consumer, exchange: exchange, routingKey: routingKey))
                 {
                     if (tags != null && body != null && body.TryDuckCast<BodyStruct>(out var bodyStruct))
                     {
@@ -333,6 +336,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             }
             finally
             {
+                Tracer tracer = Tracer.Instance;
                 SpanContext propagatedContext = null;
                 string messageSize = null;
 
@@ -346,7 +350,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                     {
                         try
                         {
-                            propagatedContext = SpanContextPropagator.Instance.Extract(basicPropertiesHeaders, headersGetter);
+                            propagatedContext = tracer.Propagator.Extract(basicPropertiesHeaders, headersGetter);
                         }
                         catch (Exception ex)
                         {
@@ -355,7 +359,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                     }
                 }
 
-                using (var scope = CreateScope(Tracer.Instance, out tags, command, parentContext: propagatedContext, spanKind: SpanKinds.Consumer, queue: queue, startTime: startTime))
+                using (var scope = CreateScope(tracer, out tags, command, parentContext: propagatedContext, spanKind: SpanKinds.Consumer, queue: queue, startTime: startTime))
                 {
                     if (scope != null)
                     {
@@ -438,7 +442,9 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                 throw;
             }
 
-            using (var scope = CreateScope(Tracer.Instance, out RabbitMQTags tags, command, spanKind: SpanKinds.Producer, exchange: exchange, routingKey: routingKey))
+            Tracer tracer = Tracer.Instance;
+
+            using (var scope = CreateScope(tracer, out RabbitMQTags tags, command, spanKind: SpanKinds.Producer, exchange: exchange, routingKey: routingKey))
             {
                 if (scope != null)
                 {
@@ -464,7 +470,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                             basicPropertiesValue.Headers = new Dictionary<string, object>();
                         }
 
-                        SpanContextPropagator.Instance.Inject(scope.Span.Context, basicPropertiesValue.Headers, headersSetter);
+                        tracer.Propagator.Inject(scope.Span.Context, basicPropertiesValue.Headers, headersSetter);
                     }
                 }
 
@@ -540,7 +546,9 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                 throw;
             }
 
-            using (var scope = CreateScope(Tracer.Instance, out RabbitMQTags tags, command, spanKind: SpanKinds.Producer, exchange: exchange, routingKey: routingKey))
+            Tracer tracer = Tracer.Instance;
+
+            using (var scope = CreateScope(tracer, out RabbitMQTags tags, command, spanKind: SpanKinds.Producer, exchange: exchange, routingKey: routingKey))
             {
                 if (scope != null)
                 {
@@ -573,7 +581,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                             basicPropertiesValue.Headers = new Dictionary<string, object>();
                         }
 
-                        SpanContextPropagator.Instance.Inject(scope.Span.Context, basicPropertiesValue.Headers, headersSetter);
+                        tracer.Propagator.Inject(scope.Span.Context, basicPropertiesValue.Headers, headersSetter);
                     }
                 }
 

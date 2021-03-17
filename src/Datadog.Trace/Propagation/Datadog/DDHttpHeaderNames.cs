@@ -1,9 +1,9 @@
-namespace Datadog.Trace
+namespace Datadog.Trace.Propagation.Datadog
 {
     /// <summary>
     /// Names of HTTP headers that can be used tracing inbound or outbound HTTP requests.
     /// </summary>
-    public static class HttpHeaderNames
+    public static class DDHttpHeaderNames
     {
         /// <summary>
         /// ID of a distributed trace.
@@ -19,12 +19,6 @@ namespace Datadog.Trace
         /// Setting used to determine whether a trace should be sampled or not.
         /// </summary>
         public const string SamplingPriority = "x-datadog-sampling-priority";
-
-        /// <summary>
-        /// If header is set to "false", tracing is disabled for that http request.
-        /// Tracing is enabled by default.
-        /// </summary>
-        public const string TracingEnabled = "x-datadog-tracing-enabled";
 
         /// <summary>
         /// Origin of the distributed trace.
