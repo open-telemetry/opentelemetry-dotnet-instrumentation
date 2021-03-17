@@ -110,7 +110,7 @@ namespace Datadog.Trace
             }
 
             var traceId = ParseTraceId(headers, HttpHeaderNames.TraceId);
-            if (traceId == null)
+            if (traceId.Equals(TraceId.Zero))
             {
                 // a valid traceId is required to use distributed tracing
                 return null;
@@ -137,7 +137,7 @@ namespace Datadog.Trace
             if (getter == null) { throw new ArgumentNullException(nameof(getter)); }
 
             var traceId = ParseTraceId(carrier, getter, HttpHeaderNames.TraceId);
-            if (traceId == null)
+            if (traceId.Equals(TraceId.Zero))
             {
                 // a valid traceId is required to use distributed tracing
                 return null;
@@ -164,33 +164,27 @@ namespace Datadog.Trace
             }
         }
 
-        private static TraceId? ParseTraceId<T>(T headers, string headerName)
+        private static TraceId ParseTraceId<T>(T headers, string headerName)
             where T : IHeadersCollection
         {
             var headerValues = headers.GetValues(headerName);
             return ParseTraceId(headerValues, headerName);
         }
 
-        private static TraceId? ParseTraceId<T>(T carrier, Func<T, string, IEnumerable<string>> getter, string headerName)
+        private static TraceId ParseTraceId<T>(T carrier, Func<T, string, IEnumerable<string>> getter, string headerName)
         {
             var headerValues = getter(carrier, headerName).ToList();
             return ParseTraceId(headerValues, headerName);
         }
 
-        private static TraceId? ParseTraceId(IEnumerable<string> headerValues, string headerName)
+        private static TraceId ParseTraceId(IEnumerable<string> headerValues, string headerName)
         {
             var headerValuesList = headerValues.ToList();
             foreach (var headerValue in headerValuesList)
             {
                 try
                 {
-                    var traceId = TraceId.CreateFromString(headerValue);
-                    if (traceId.Equals(TraceId.Zero))
-                    {
-                        return null;
-                    }
-
-                    return traceId;
+                    return TraceId.CreateFromString(headerValue);
                 }
                 catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is InvalidOperationException || ex is OverflowException || ex is FormatException)
                 {
@@ -198,7 +192,7 @@ namespace Datadog.Trace
             }
 
             Log.Warning("Could not parse {HeaderName} headers: {HeaderValues}", headerName, string.Join(",", headerValuesList));
-            return null;
+            return TraceId.Zero;
         }
 
         private static ulong ParseUInt64<T>(T headers, string headerName)
