@@ -47,6 +47,12 @@ RUN wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod
         aspnetcore-runtime-3.0 \
         aspnetcore-runtime-3.1
 
+# Instructions to install packages to build native code
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        build-essential \
+        clang \
+        cmake
+
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 #     && apt-get -y install --no-install-recommends <your-package-list-here>
