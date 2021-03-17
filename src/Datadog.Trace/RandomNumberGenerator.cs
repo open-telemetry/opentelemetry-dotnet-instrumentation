@@ -4,6 +4,7 @@ namespace Datadog.Trace
 {
     /// <summary>
     /// RandomNumberGenerator implementation is the 64-bit random number generator based on the Xoshiro256StarStar algorithm (known as shift-register generators).
+    /// Originally committed here: https://github.com/dotnet/runtime/pull/46890
     /// </summary>
     internal class RandomNumberGenerator
     {
