@@ -228,6 +228,110 @@
     ]
   },
   {
+    "name": "ElasticsearchNet",
+    "method_replacements": [
+      {
+        "caller": {},
+        "target": {
+          "assembly": "Elasticsearch.Net",
+          "type": "Elasticsearch.Net.RequestPipeline",
+          "method": "CallElasticsearchAsync",
+          "signature_types": [
+            "System.Threading.Tasks.Task`1<T>",
+            "Elasticsearch.Net.RequestData",
+            "System.Threading.CancellationToken"
+          ],
+          "minimum_major": 6,
+          "minimum_minor": 0,
+          "minimum_patch": 0,
+          "maximum_major": 6,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Elasticsearch.V6.RequestPipeline_CallElasticsearchAsync_Integration",
+          "action": "CallTargetModification"
+        }
+      },
+      {
+        "caller": {},
+        "target": {
+          "assembly": "Elasticsearch.Net",
+          "type": "Elasticsearch.Net.RequestPipeline",
+          "method": "CallElasticsearch",
+          "signature_types": [
+            "T",
+            "Elasticsearch.Net.RequestData"
+          ],
+          "minimum_major": 6,
+          "minimum_minor": 0,
+          "minimum_patch": 0,
+          "maximum_major": 6,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Elasticsearch.V6.RequestPipeline_CallElasticsearch_Integration",
+          "action": "CallTargetModification"
+        }
+      }
+    ]
+  },
+  {
+    "name": "ElasticsearchNet5",
+    "method_replacements": [
+      {
+        "caller": {},
+        "target": {
+          "assembly": "Elasticsearch.Net",
+          "type": "Elasticsearch.Net.RequestPipeline",
+          "method": "CallElasticsearchAsync",
+          "signature_types": [
+            "System.Threading.Tasks.Task`1<Elasticsearch.Net.ElasticsearchResponse`1<T>>",
+            "Elasticsearch.Net.RequestData",
+            "System.Threading.CancellationToken"
+          ],
+          "minimum_major": 5,
+          "minimum_minor": 0,
+          "minimum_patch": 0,
+          "maximum_major": 5,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Elasticsearch.V5.RequestPipeline_CallElasticsearchAsync_Integration",
+          "action": "CallTargetModification"
+        }
+      },
+      {
+        "caller": {},
+        "target": {
+          "assembly": "Elasticsearch.Net",
+          "type": "Elasticsearch.Net.RequestPipeline",
+          "method": "CallElasticsearch",
+          "signature_types": [
+            "Elasticsearch.Net.ElasticsearchResponse`1<T>",
+            "Elasticsearch.Net.RequestData"
+          ],
+          "minimum_major": 5,
+          "minimum_minor": 0,
+          "minimum_patch": 0,
+          "maximum_major": 5,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Elasticsearch.V5.RequestPipeline_CallElasticsearch_Integration",
+          "action": "CallTargetModification"
+        }
+      }
+    ]
+  },
+  {
     "name": "GraphQL",
     "method_replacements": [
       {
@@ -329,7 +433,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
-          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.WinHttpHandler.WinHttpHandlerIntegration",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.HttpClient.WinHttpHandler.WinHttpHandlerIntegration",
           "action": "CallTargetModification"
         }
       },
@@ -353,7 +457,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
-          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.WinHttpHandler.WinHttpHandlerIntegration",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.HttpClient.WinHttpHandler.WinHttpHandlerIntegration",
           "action": "CallTargetModification"
         }
       },
@@ -377,7 +481,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
-          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.SocketsHttpHandler.SocketsHttpHandlerIntegration",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.HttpClient.SocketsHttpHandler.SocketsHttpHandlerIntegration",
           "action": "CallTargetModification"
         }
       },
@@ -401,7 +505,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
-          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.SocketsHttpHandler.SocketsHttpHandlerSyncIntegration",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.HttpClient.SocketsHttpHandler.SocketsHttpHandlerSyncIntegration",
           "action": "CallTargetModification"
         }
       },
@@ -425,7 +529,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
-          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.HttpClientHandler.HttpClientHandlerIntegration",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.HttpClient.HttpClientHandler.HttpClientHandlerIntegration",
           "action": "CallTargetModification"
         }
       },
@@ -449,7 +553,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
-          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.HttpClientHandler.HttpClientHandlerSyncIntegration",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.HttpClient.HttpClientHandler.HttpClientHandlerSyncIntegration",
           "action": "CallTargetModification"
         }
       },
@@ -473,7 +577,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
-          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.CurlHandler.CurlHandlerIntegration",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.HttpClient.CurlHandler.CurlHandlerIntegration",
           "action": "CallTargetModification"
         }
       }
@@ -1976,6 +2080,176 @@
     ]
   },
   {
+    "name": "RabbitMQ",
+    "method_replacements": [
+      {
+        "caller": {},
+        "target": {
+          "assembly": "RabbitMQ.Client",
+          "type": "RabbitMQ.Client.Events.EventingBasicConsumer",
+          "method": "HandleBasicDeliver",
+          "signature_types": [
+            "System.Void",
+            "System.String",
+            "System.UInt64",
+            "System.Boolean",
+            "System.String",
+            "System.String",
+            "RabbitMQ.Client.IBasicProperties",
+            "_"
+          ],
+          "minimum_major": 3,
+          "minimum_minor": 6,
+          "minimum_patch": 9,
+          "maximum_major": 6,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.RabbitMQ.BasicDeliverIntegration",
+          "action": "CallTargetModification"
+        }
+      },
+      {
+        "caller": {},
+        "target": {
+          "assembly": "RabbitMQ.Client",
+          "type": "RabbitMQ.Client.Impl.ModelBase",
+          "method": "BasicGet",
+          "signature_types": [
+            "RabbitMQ.Client.BasicGetResult",
+            "System.String",
+            "System.Boolean"
+          ],
+          "minimum_major": 3,
+          "minimum_minor": 6,
+          "minimum_patch": 9,
+          "maximum_major": 6,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.RabbitMQ.BasicGetIntegration",
+          "action": "CallTargetModification"
+        }
+      },
+      {
+        "caller": {},
+        "target": {
+          "assembly": "RabbitMQ.Client",
+          "type": "RabbitMQ.Client.Framing.Impl.Model",
+          "method": "_Private_BasicPublish",
+          "signature_types": [
+            "System.Void",
+            "System.String",
+            "System.String",
+            "System.Boolean",
+            "RabbitMQ.Client.IBasicProperties",
+            "_"
+          ],
+          "minimum_major": 3,
+          "minimum_minor": 6,
+          "minimum_patch": 9,
+          "maximum_major": 6,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.RabbitMQ.BasicPublishIntegration",
+          "action": "CallTargetModification"
+        }
+      },
+      {
+        "caller": {},
+        "target": {
+          "assembly": "RabbitMQ.Client",
+          "type": "RabbitMQ.Client.Framing.Impl.Model",
+          "method": "_Private_ExchangeDeclare",
+          "signature_types": [
+            "System.Void",
+            "System.String",
+            "System.String",
+            "System.Boolean",
+            "System.Boolean",
+            "System.Boolean",
+            "System.Boolean",
+            "System.Boolean",
+            "System.Collections.Generic.IDictionary`2[System.String,System.Object]"
+          ],
+          "minimum_major": 3,
+          "minimum_minor": 6,
+          "minimum_patch": 9,
+          "maximum_major": 6,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.RabbitMQ.ExchangeDeclareIntegration",
+          "action": "CallTargetModification"
+        }
+      },
+      {
+        "caller": {},
+        "target": {
+          "assembly": "RabbitMQ.Client",
+          "type": "RabbitMQ.Client.Impl.ModelBase",
+          "method": "QueueBind",
+          "signature_types": [
+            "System.Void",
+            "System.String",
+            "System.String",
+            "System.String",
+            "System.Collections.Generic.IDictionary`2[System.String,System.Object]"
+          ],
+          "minimum_major": 3,
+          "minimum_minor": 6,
+          "minimum_patch": 9,
+          "maximum_major": 6,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.RabbitMQ.QueueBindIntegration",
+          "action": "CallTargetModification"
+        }
+      },
+      {
+        "caller": {},
+        "target": {
+          "assembly": "RabbitMQ.Client",
+          "type": "RabbitMQ.Client.Framing.Impl.Model",
+          "method": "_Private_QueueDeclare",
+          "signature_types": [
+            "System.Void",
+            "System.String",
+            "System.Boolean",
+            "System.Boolean",
+            "System.Boolean",
+            "System.Boolean",
+            "System.Boolean",
+            "System.Collections.Generic.IDictionary`2[System.String,System.Object]"
+          ],
+          "minimum_major": 3,
+          "minimum_minor": 6,
+          "minimum_patch": 9,
+          "maximum_major": 6,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.RabbitMQ.QueueDeclareIntegration",
+          "action": "CallTargetModification"
+        }
+      }
+    ]
+  },
+  {
     "name": "ServiceStackRedis",
     "method_replacements": [
       {
@@ -3254,6 +3528,35 @@
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Redis.StackExchange.RedisExecuteSyncIntegration",
+          "action": "CallTargetModification"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Wcf",
+    "method_replacements": [
+      {
+        "caller": {},
+        "target": {
+          "assembly": "System.ServiceModel",
+          "type": "System.ServiceModel.Dispatcher.ChannelHandler",
+          "method": "HandleRequest",
+          "signature_types": [
+            "System.Boolean",
+            "System.ServiceModel.Channels.RequestContext",
+            "System.ServiceModel.OperationContext"
+          ],
+          "minimum_major": 4,
+          "minimum_minor": 0,
+          "minimum_patch": 0,
+          "maximum_major": 4,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Wcf.ChannelHandlerIntegration",
           "action": "CallTargetModification"
         }
       }
