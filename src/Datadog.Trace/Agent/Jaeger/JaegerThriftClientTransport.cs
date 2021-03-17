@@ -17,6 +17,7 @@
 using System;
 using System.IO;
 using System.Net.Sockets;
+using Datadog.Trace.Util;
 using Thrift.Transport;
 
 namespace Datadog.Trace.Agent.Jaeger
@@ -43,17 +44,7 @@ namespace Datadog.Trace.Agent.Jaeger
 
         public override int Flush()
         {
-            ArraySegment<byte> buffer;
-
-#if !NET45
-            // GetBuffer returns the underlying storage, which saves an allocation over ToArray.
-            if (!this.byteStream.TryGetBuffer(out buffer))
-            {
-#endif
-            buffer = new ArraySegment<byte>(this.byteStream.ToArray(), 0, (int)this.byteStream.Length);
-#if !NET45
-            }
-#endif
+            ArraySegment<byte> buffer = this.byteStream.GetMemoryBuffer();
 
             if (buffer.Count == 0)
             {
