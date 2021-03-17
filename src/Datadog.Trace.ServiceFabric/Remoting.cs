@@ -223,7 +223,7 @@ namespace Datadog.Trace.ServiceFabric
 
             try
             {
-                messageHeaders.TryAddHeader(HttpHeaderNames.TraceId, context, ctx => ConvertHexStringToByteArray(ctx.TraceId.ToString()));
+                messageHeaders.TryAddHeader(HttpHeaderNames.TraceId, context, ctx => ctx.TraceId.AsBytes);
 
                 messageHeaders.TryAddHeader(HttpHeaderNames.ParentId, context, ctx => BitConverter.GetBytes(ctx.ParentSpanId));
 
@@ -241,18 +241,6 @@ namespace Datadog.Trace.ServiceFabric
             {
                 Log.Error(ex, "Error injecting message headers.");
             }
-        }
-
-        private static byte[] ConvertHexStringToByteArray(string hexString)
-        {
-            byte[] data = new byte[hexString.Length / 2];
-            for (var index = 0; index < data.Length; index++)
-            {
-                string byteValue = hexString.Substring(index * 2, 2);
-                data[index] = byte.Parse(byteValue, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-            }
-
-            return data;
         }
 
         private static PropagationContext? ExtractContext(IServiceRemotingRequestMessageHeader messageHeaders)

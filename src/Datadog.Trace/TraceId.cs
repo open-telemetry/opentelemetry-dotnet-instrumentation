@@ -6,16 +6,19 @@ namespace Datadog.Trace
     /// <summary>
     /// Class representing 64 or 128 bit TraceID.
     /// </summary>
-    public readonly struct TraceId
+    public readonly struct TraceId : IEquatable<TraceId>
     {
         private readonly bool _is64Bit;
         private readonly ulong _higher;
+        private readonly string _hexString;
 
         private TraceId(ulong higher, ulong lower)
         {
             _is64Bit = false;
             _higher = higher;
             Lower = lower;
+            _hexString = $"{_higher:x16}{Lower:x16}";
+            AsBytes = StringToByteArray(_hexString);
         }
 
         private TraceId(ulong lower)
@@ -23,6 +26,8 @@ namespace Datadog.Trace
             _is64Bit = true;
             _higher = 0;
             Lower = lower;
+            _hexString = $"{Lower:x16}";
+            AsBytes = StringToByteArray(_hexString);
         }
 
         /// <summary>
@@ -34,6 +39,11 @@ namespace Datadog.Trace
         /// Gets lower 64 bits of 128 bit traceID or the whole 64 bit traceID.
         /// </summary>
         public ulong Lower { get; }
+
+        /// <summary>
+        /// Gets byte array representation of the TraceId.
+        /// </summary>
+        public byte[] AsBytes { get; }
 
         /// <summary>
         /// Creates random 128 bit traceId.
@@ -120,8 +130,11 @@ namespace Datadog.Trace
             return new(id);
         }
 
-        /// <inheritdoc/>
-        public override string ToString() => _is64Bit ? $"{Lower:x16}" : $"{_higher:x16}{Lower:x16}";
+        /// <summary>
+        /// Returns hex representation of TraceId as a string.
+        /// </summary>
+        /// <returns>Hex representation of TraceId as a string.</returns>
+        public override string ToString() => _hexString;
 
         /// <inheritdoc/>
         public override bool Equals(object obj)
@@ -150,6 +163,31 @@ namespace Datadog.Trace
         public override int GetHashCode()
         {
             return HashCode.Combine(_higher, Lower, _is64Bit);
+        }
+
+        private static byte[] StringToByteArray(string hexString)
+        {
+            var arr = new byte[hexString.Length >> 1];
+            for (var i = 0; i < hexString.Length >> 1; ++i)
+            {
+                arr[i] = (byte)((GetHexVal(hexString[i << 1]) << 4) + GetHexVal(hexString[(i << 1) + 1]));
+            }
+
+            return arr;
+        }
+
+        private static int GetHexVal(char hex)
+        {
+            var val = (int)hex;
+            // For uppercase A-F letters:
+            // return val - (val < 58 ? 48 : 55);
+            // For lowercase a-f letters:
+            // return val - (val < 58 ? 48 : 87);
+            return val - (val < 58
+                              ? 48
+                              : val < 97
+                                  ? 55
+                                  : 87);
         }
     }
 }
