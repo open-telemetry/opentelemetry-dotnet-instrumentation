@@ -32,7 +32,7 @@ namespace Datadog.Trace.Tests
             using (var scope = secondTracer.StartActive("manual.trace", parent: distributedTraceContext))
             {
                 scope.Span.SetTag(Tags.SamplingPriority, samplingPriorityText);
-                Assert.True(scope.Span.TraceId.Equals(traceId), "Trace ID must match the parent trace.");
+                Assert.True(scope.Span.TraceId == traceId, "Trace ID must match the parent trace.");
                 var actualSamplingPriorityText = scope.Span.GetTag(Tags.SamplingPriority);
                 Assert.True(actualSamplingPriorityText.Equals(expectedSamplingPriority.ToString()), "Sampling priority of manual distributed trace must match the original trace.");
             }

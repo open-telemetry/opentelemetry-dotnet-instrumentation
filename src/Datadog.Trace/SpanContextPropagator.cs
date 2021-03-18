@@ -110,7 +110,7 @@ namespace Datadog.Trace
             }
 
             var traceId = ParseTraceId(headers, HttpHeaderNames.TraceId);
-            if (traceId.Equals(TraceId.Zero))
+            if (traceId == TraceId.Zero)
             {
                 // a valid traceId is required to use distributed tracing
                 return null;
@@ -137,7 +137,7 @@ namespace Datadog.Trace
             if (getter == null) { throw new ArgumentNullException(nameof(getter)); }
 
             var traceId = ParseTraceId(carrier, getter, HttpHeaderNames.TraceId);
-            if (traceId.Equals(TraceId.Zero))
+            if (traceId == TraceId.Zero)
             {
                 // a valid traceId is required to use distributed tracing
                 return null;
@@ -183,7 +183,7 @@ namespace Datadog.Trace
             foreach (var headerValue in headerValuesList)
             {
                 var traceId = TraceId.CreateFromString(headerValue);
-                if (traceId.Equals(TraceId.Zero))
+                if (traceId == TraceId.Zero)
                 {
                     continue;
                 }

@@ -39,6 +39,28 @@ namespace Datadog.Trace
         public ulong Lower { get; }
 
         /// <summary>
+        /// Indicates if two specified instances of TraceId are not equal.
+        /// </summary>
+        /// <param name="traceId1">First <see cref="TraceId"/></param>
+        /// <param name="traceId2">Second <see cref="TraceId"/></param>
+        /// <returns>True if instances are equal, false otherwise.</returns>
+        public static bool operator ==(TraceId traceId1, TraceId traceId2)
+        {
+            return traceId1.Equals(traceId2);
+        }
+
+        /// <summary>
+        /// Indicates if two specified instances of TraceId are not equal.
+        /// </summary>
+        /// <param name="traceId1">First <see cref="TraceId"/></param>
+        /// <param name="traceId2">Second <see cref="TraceId"/></param>
+        /// <returns>True if instances are not equal, false otherwise.</returns>
+        public static bool operator !=(TraceId traceId1, TraceId traceId2)
+        {
+            return !(traceId1 == traceId2);
+        }
+
+        /// <summary>
         /// Creates random 128 bit traceId.
         /// </summary>
         /// <returns>Instance of randomly generated <see cref="TraceId"/>.</returns>
