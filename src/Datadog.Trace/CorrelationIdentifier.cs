@@ -59,11 +59,13 @@ namespace Datadog.Trace
         /// Gets the id of the active trace.
         /// </summary>
         /// <returns>The id of the active trace. If there is no active trace, returns zero.</returns>
-        public static TraceId? TraceId
+        public static TraceId TraceId
         {
             get
             {
-                return Tracer.Instance.ActiveScope?.Span?.TraceId;
+                return Tracer.Instance.ActiveScope?.Span == null
+                           ? TraceId.Zero
+                           : Tracer.Instance.ActiveScope.Span.TraceId;
             }
         }
 
