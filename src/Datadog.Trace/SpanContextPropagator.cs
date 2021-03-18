@@ -182,7 +182,7 @@ namespace Datadog.Trace
             var headerValuesList = headerValues.ToList();
             foreach (var headerValue in headerValuesList)
             {
-                var traceId = TraceId.CreateFromString(headerValue);
+                var traceId = Tracer.Instance.TraceIdConvention.CreateFromString(headerValue);
                 if (traceId == TraceId.Zero)
                 {
                     continue;

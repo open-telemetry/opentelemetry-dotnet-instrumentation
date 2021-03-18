@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 namespace Datadog.Trace
@@ -10,14 +11,14 @@ namespace Datadog.Trace
     {
         private readonly bool _is64Bit;
         private readonly ulong _higher;
-        private readonly string _hexString;
+        private readonly string _string;
 
         private TraceId(ulong higher, ulong lower)
         {
             _is64Bit = false;
             _higher = higher;
             Lower = lower;
-            _hexString = $"{_higher:x16}{Lower:x16}";
+            _string = $"{_higher:x16}{Lower:x16}";
         }
 
         private TraceId(ulong lower)
@@ -25,7 +26,7 @@ namespace Datadog.Trace
             _is64Bit = true;
             _higher = 0;
             Lower = lower;
-            _hexString = $"{Lower:x16}";
+            _string = Lower.ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -125,10 +126,27 @@ namespace Datadog.Trace
 
                     default:
                     {
-                        var lower = ulong.Parse(id);
-                        return new TraceId(lower);
+                        return Zero;
                     }
                 }
+            }
+            catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is InvalidOperationException || ex is OverflowException || ex is FormatException)
+            {
+                return Zero;
+            }
+        }
+
+        /// <summary>
+        /// Creates traceId from given string representing 64bit traceId in decimal format.
+        /// </summary>
+        /// <param name="id">String ID to be parsed.</param>
+        /// <returns>Instance of 64bit <see cref="TraceId"/> representing the same traceId as the passed string.</returns>
+        public static TraceId CreateFromDecimalString(string id)
+        {
+            try
+            {
+                var lower = ulong.Parse(id);
+                return new TraceId(lower);
             }
             catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is InvalidOperationException || ex is OverflowException || ex is FormatException)
             {
@@ -157,10 +175,10 @@ namespace Datadog.Trace
         }
 
         /// <summary>
-        /// Returns hex representation of TraceId as a string.
+        /// Returns hex representation of TraceId as a string (this is in decimal format for 64bit and hex for 128bit).
         /// </summary>
         /// <returns>Hex representation of TraceId as a string.</returns>
-        public override string ToString() => _hexString;
+        public override string ToString() => _string;
 
         /// <inheritdoc/>
         public override bool Equals(object obj)

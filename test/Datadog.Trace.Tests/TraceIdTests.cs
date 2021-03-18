@@ -34,7 +34,7 @@ namespace Datadog.Trace.Tests
         {
             var traceId = TraceId.CreateFromInt(123);
 
-            traceId.ToString().Should().Be("000000000000007b");
+            traceId.ToString().Should().Be("123");
         }
 
         [Fact]
@@ -42,7 +42,7 @@ namespace Datadog.Trace.Tests
         {
             var traceId = TraceId.CreateFromUlong(3212132132132132121);
 
-            traceId.ToString().Should().Be("2c93c927d35a9519");
+            traceId.ToString().Should().Be("3212132132132132121");
         }
 
         [Fact]
@@ -52,8 +52,7 @@ namespace Datadog.Trace.Tests
 
             using (new AssertionScope())
             {
-                traceId.ToString().Should().HaveLength(16);
-                FluentActions.Invoking(() => Convert.ToUInt64(traceId.ToString(), fromBase: 16)).Should().NotThrow();
+                FluentActions.Invoking(() => Convert.ToUInt64(traceId.ToString(), fromBase: 10)).Should().NotThrow();
             }
         }
 
@@ -88,26 +87,26 @@ namespace Datadog.Trace.Tests
 
             using (new AssertionScope())
             {
-                traceId1.Should().Be(TraceId.CreateFromString(traceId1.ToString()));
-                traceId1.GetHashCode().Should().Be(TraceId.CreateFromString(traceId1.ToString()).GetHashCode());
-                traceId2.Should().Be(TraceId.CreateFromString(traceId2.ToString()));
-                traceId2.GetHashCode().Should().Be(TraceId.CreateFromString(traceId2.ToString()).GetHashCode());
-                traceId1.Should().NotBe(TraceId.CreateFromString(traceId2.ToString()));
-                traceId2.Should().NotBe(TraceId.CreateFromString(traceId1.ToString()));
+                traceId1.Should().Be(TraceId.CreateFromDecimalString(traceId1.ToString()));
+                traceId1.GetHashCode().Should().Be(TraceId.CreateFromDecimalString(traceId1.ToString()).GetHashCode());
+                traceId2.Should().Be(TraceId.CreateFromDecimalString(traceId2.ToString()));
+                traceId2.GetHashCode().Should().Be(TraceId.CreateFromDecimalString(traceId2.ToString()).GetHashCode());
+                traceId1.Should().NotBe(TraceId.CreateFromDecimalString(traceId2.ToString()));
+                traceId2.Should().NotBe(TraceId.CreateFromDecimalString(traceId1.ToString()));
             }
         }
 
         [Fact]
-        public void Equals_WorksCorrectlyFBetween64And128BitIds()
+        public void Equals_WorksCorrectlyBetween64And128BitIds()
         {
             var traceId1 = TraceId.CreateRandom64Bit();
-            var traceId2 = TraceId.CreateFromString(TraceId.Zero.ToString() + traceId1);
+            var traceId2 = TraceId.CreateFromString(TraceId.Zero.Lower.ToString("x16") + traceId1.Lower.ToString("x16"));
 
             using (new AssertionScope())
             {
                 traceId1.Lower.Should().Be(traceId2.Lower);
                 traceId1.Should().NotBe(TraceId.CreateFromString(traceId2.ToString()));
-                traceId2.Should().NotBe(TraceId.CreateFromString(traceId1.ToString()));
+                traceId2.Should().NotBe(TraceId.CreateFromDecimalString(traceId1.ToString()));
                 traceId1.GetHashCode().Should().NotBe(traceId2.GetHashCode());
             }
         }
@@ -119,8 +118,8 @@ namespace Datadog.Trace.Tests
 
             using (new AssertionScope())
             {
-                traceId.ToString().Should().HaveLength(16);
-                traceId.ToString().Should().Be("0000000000000000");
+                traceId.ToString().Should().HaveLength(1);
+                traceId.ToString().Should().Be("0");
             }
         }
     }

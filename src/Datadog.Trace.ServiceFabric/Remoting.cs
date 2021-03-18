@@ -250,7 +250,7 @@ namespace Datadog.Trace.ServiceFabric
                 var traceIdAsString = messageHeaders.TryGetHeaderValueString(HttpHeaderNames.TraceId);
                 var traceId = traceIdAsString == null
                                   ? TraceId.Zero
-                                  : TraceId.CreateFromString(traceIdAsString);
+                                  : Tracer.Instance.TraceIdConvention.CreateFromString(traceIdAsString);
 
                 if (traceId != TraceId.Zero)
                 {

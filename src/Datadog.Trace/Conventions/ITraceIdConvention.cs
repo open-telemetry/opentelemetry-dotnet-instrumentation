@@ -6,5 +6,7 @@ namespace Datadog.Trace.Conventions
     internal interface ITraceIdConvention
     {
         TraceId GenerateNewTraceId();
+
+        TraceId CreateFromString(string id);
     }
 }
