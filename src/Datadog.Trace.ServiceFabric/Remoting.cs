@@ -223,7 +223,7 @@ namespace Datadog.Trace.ServiceFabric
 
             try
             {
-                messageHeaders.TryAddHeader(HttpHeaderNames.TraceId, context, ctx => ctx.TraceId.AsBytes);
+                messageHeaders.TryAddHeader(HttpHeaderNames.TraceId, context, ctx => ctx.TraceId.AsBytes());
 
                 messageHeaders.TryAddHeader(HttpHeaderNames.ParentId, context, ctx => BitConverter.GetBytes(ctx.ParentSpanId));
 

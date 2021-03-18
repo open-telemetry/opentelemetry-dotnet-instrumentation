@@ -182,13 +182,13 @@ namespace Datadog.Trace
             var headerValuesList = headerValues.ToList();
             foreach (var headerValue in headerValuesList)
             {
-                try
+                var traceId = TraceId.CreateFromString(headerValue);
+                if (traceId.Equals(TraceId.Zero))
                 {
-                    return TraceId.CreateFromString(headerValue);
+                    continue;
                 }
-                catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is InvalidOperationException || ex is OverflowException || ex is FormatException)
-                {
-                }
+
+                return traceId;
             }
 
             Log.Warning("Could not parse {HeaderName} headers: {HeaderValues}", headerName, string.Join(",", headerValuesList));

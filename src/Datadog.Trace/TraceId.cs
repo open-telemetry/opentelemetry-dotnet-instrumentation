@@ -18,7 +18,6 @@ namespace Datadog.Trace
             _higher = higher;
             Lower = lower;
             _hexString = $"{_higher:x16}{Lower:x16}";
-            AsBytes = StringToByteArray(_hexString);
         }
 
         private TraceId(ulong lower)
@@ -27,7 +26,6 @@ namespace Datadog.Trace
             _higher = 0;
             Lower = lower;
             _hexString = $"{Lower:x16}";
-            AsBytes = StringToByteArray(_hexString);
         }
 
         /// <summary>
@@ -39,11 +37,6 @@ namespace Datadog.Trace
         /// Gets lower 64 bits of 128 bit traceID or the whole 64 bit traceID.
         /// </summary>
         public ulong Lower { get; }
-
-        /// <summary>
-        /// Gets byte array representation of the TraceId.
-        /// </summary>
-        public byte[] AsBytes { get; }
 
         /// <summary>
         /// Creates random 128 bit traceId.
@@ -87,26 +80,37 @@ namespace Datadog.Trace
         /// <returns>Instance of <see cref="TraceId"/> representing the same traceId as the passed string.</returns>
         public static TraceId CreateFromString(string id)
         {
-            if (id.Length == 16)
+            try
             {
-                var lower = Convert.ToUInt64(id, fromBase: 16);
-                return new TraceId(lower);
+                switch (id.Length)
+                {
+                    case 16:
+                    {
+                        var lower = Convert.ToUInt64(id, fromBase: 16);
+                        return new TraceId(lower);
+                    }
+
+                    case 32:
+                    {
+                        var higherAsString = id.Substring(startIndex: 0, length: 16);
+                        var lowerAsString = id.Substring(startIndex: 16, length: 16);
+
+                        var higher = Convert.ToUInt64(higherAsString, fromBase: 16);
+                        var lower = Convert.ToUInt64(lowerAsString, fromBase: 16);
+
+                        return new TraceId(higher, lower);
+                    }
+
+                    default:
+                    {
+                        var lower = ulong.Parse(id);
+                        return new TraceId(lower);
+                    }
+                }
             }
-
-            if (id.Length == 32)
+            catch (Exception ex) when (ex is ArgumentOutOfRangeException || ex is InvalidOperationException || ex is OverflowException || ex is FormatException)
             {
-                var higherAsString = id.Substring(startIndex: 0, length: 16);
-                var lowerAsString = id.Substring(startIndex: 16, length: 16);
-
-                var higher = Convert.ToUInt64(higherAsString, fromBase: 16);
-                var lower = Convert.ToUInt64(lowerAsString, fromBase: 16);
-
-                return new TraceId(higher, lower);
-            }
-            else
-            {
-                var lower = ulong.Parse(id);
-                return new TraceId(lower);
+                return Zero;
             }
         }
 
@@ -163,31 +167,6 @@ namespace Datadog.Trace
         public override int GetHashCode()
         {
             return HashCode.Combine(_higher, Lower, _is64Bit);
-        }
-
-        private static byte[] StringToByteArray(string hexString)
-        {
-            var arr = new byte[hexString.Length >> 1];
-            for (var i = 0; i < hexString.Length >> 1; ++i)
-            {
-                arr[i] = (byte)((GetHexVal(hexString[i << 1]) << 4) + GetHexVal(hexString[(i << 1) + 1]));
-            }
-
-            return arr;
-        }
-
-        private static int GetHexVal(char hex)
-        {
-            var val = (int)hex;
-            // For uppercase A-F letters:
-            // return val - (val < 58 ? 48 : 55);
-            // For lowercase a-f letters:
-            // return val - (val < 58 ? 48 : 87);
-            return val - (val < 58
-                              ? 48
-                              : val < 97
-                                  ? 55
-                                  : 87);
         }
     }
 }
