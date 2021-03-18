@@ -173,7 +173,7 @@ namespace Datadog.Trace
 
         private static TraceId ParseTraceId<T>(T carrier, Func<T, string, IEnumerable<string>> getter, string headerName)
         {
-            var headerValues = getter(carrier, headerName).ToList();
+            var headerValues = getter(carrier, headerName);
             return ParseTraceId(headerValues, headerName);
         }
 
