@@ -198,7 +198,7 @@ namespace Datadog.Trace.Tests.Tagging
         public struct FakeSpan
         {
             [MessagePack.Key("trace_id")]
-            public string TraceId { get; set; }
+            public ulong TraceId { get; set; }
 
             [MessagePack.Key("span_id")]
             public ulong SpanId { get; set; }

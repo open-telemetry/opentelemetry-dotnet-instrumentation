@@ -14,9 +14,9 @@ namespace Datadog.Trace.TestHelpers
     /// </summary>
     public static class MsgPackHelpers
     {
-        public static string TraceId(this MessagePackObject obj)
+        public static ulong TraceId(this MessagePackObject obj)
         {
-            return obj.FirstDictionary()["trace_id"].ToString();
+            return obj.FirstDictionary()["trace_id"].AsUInt64();
         }
 
         public static ulong SpanId(this MessagePackObject obj)
@@ -71,7 +71,7 @@ namespace Datadog.Trace.TestHelpers
 
         public static void AssertSpanEqual(Span expected, MessagePackObject actual)
         {
-            Assert.Equal(expected.Context.TraceId.ToString(), actual.TraceId());
+            Assert.Equal(expected.Context.TraceId.Lower, actual.TraceId());
             Assert.Equal(expected.Context.SpanId, actual.SpanId());
             if (expected.Context.ParentId.HasValue)
             {
