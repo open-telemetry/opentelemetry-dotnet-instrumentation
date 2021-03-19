@@ -24,7 +24,7 @@ If applicable, add screenshots to help explain your problem.
 - Instrumentation mode: [e.g. automatic with msi installer or manual with NuGet package]
 - Tracer version: [e.g. 1.0.0]
 - OS: [e.g. Windows Server 2012 R2 ]
-- CLR: [e.g. .NET Framework 4.6.2, .NET Core 2.1]
+- .NET version: [e.g. .NET Framework 4.6.2, .NET Core 2.1]
 
 **Additional context**
 Add any other context about the problem here.
