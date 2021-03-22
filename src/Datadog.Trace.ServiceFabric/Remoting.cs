@@ -1,8 +1,8 @@
 using System;
 using System.Globalization;
-using System.Text;
 using System.Threading;
 using Datadog.Trace.Configuration;
+using Datadog.Trace.ServiceFabric.Propagators;
 using Microsoft.ServiceFabric.Services.Remoting.V2;
 using Microsoft.ServiceFabric.Services.Remoting.V2.Client;
 using Microsoft.ServiceFabric.Services.Remoting.V2.Runtime;
@@ -24,6 +24,7 @@ namespace Datadog.Trace.ServiceFabric
         private static bool _initialized;
         private static string? _clientAnalyticsSampleRate;
         private static string? _serverAnalyticsSampleRate;
+        private static ServiceFabricContextPropagator? _contextPropagator;
 
         /// <summary>
         /// Start tracing Service Remoting requests.
@@ -36,6 +37,9 @@ namespace Datadog.Trace.ServiceFabric
                 // cache settings
                 _clientAnalyticsSampleRate = GetAnalyticsSampleRate(Tracer.Instance, enabledWithGlobalSetting: false)?.ToString(CultureInfo.InvariantCulture);
                 _serverAnalyticsSampleRate = GetAnalyticsSampleRate(Tracer.Instance, enabledWithGlobalSetting: true)?.ToString(CultureInfo.InvariantCulture);
+
+                // Propagator
+                _contextPropagator = GetContextPropagator(Tracer.Instance);
 
                 // client events
                 ServiceRemotingClientEvents.SendRequest += ServiceRemotingClientEvents_SendRequest;
@@ -223,19 +227,7 @@ namespace Datadog.Trace.ServiceFabric
 
             try
             {
-                messageHeaders.TryAddHeader(HttpHeaderNames.TraceId, context, ctx => BitConverter.GetBytes(ctx.TraceId));
-
-                messageHeaders.TryAddHeader(HttpHeaderNames.ParentId, context, ctx => BitConverter.GetBytes(ctx.ParentSpanId));
-
-                if (context.SamplingPriority != null)
-                {
-                    messageHeaders.TryAddHeader(HttpHeaderNames.SamplingPriority, context, ctx => BitConverter.GetBytes((int)ctx.SamplingPriority!));
-                }
-
-                if (!string.IsNullOrEmpty(context.Origin))
-                {
-                    messageHeaders.TryAddHeader(HttpHeaderNames.Origin, context, ctx => Encoding.UTF8.GetBytes(ctx.Origin!));
-                }
+                _contextPropagator?.InjectContext(context, messageHeaders);
             }
             catch (Exception ex)
             {
@@ -247,22 +239,7 @@ namespace Datadog.Trace.ServiceFabric
         {
             try
             {
-                ulong traceId = messageHeaders.TryGetHeaderValueUInt64(HttpHeaderNames.TraceId) ?? 0;
-
-                if (traceId > 0)
-                {
-                    ulong parentSpanId = messageHeaders.TryGetHeaderValueUInt64(HttpHeaderNames.ParentId) ?? 0;
-
-                    if (parentSpanId > 0)
-                    {
-                        SamplingPriority? samplingPriority = (SamplingPriority?)messageHeaders.TryGetHeaderValueInt32(HttpHeaderNames.SamplingPriority);
-                        string? origin = messageHeaders.TryGetHeaderValueString(HttpHeaderNames.Origin);
-
-                        return new PropagationContext(traceId, parentSpanId, samplingPriority, origin);
-                    }
-                }
-
-                return null;
+                return _contextPropagator?.ExtractContext(messageHeaders);
             }
             catch (Exception ex)
             {
@@ -388,6 +365,20 @@ namespace Datadog.Trace.ServiceFabric
             IntegrationSettings integrationSettings = tracer.Settings.Integrations[IntegrationId];
             bool analyticsEnabled = integrationSettings.AnalyticsEnabled ?? (enabledWithGlobalSetting && tracer.Settings.AnalyticsEnabled);
             return analyticsEnabled ? integrationSettings.AnalyticsSampleRate : (double?)null;
+        }
+
+        private static ServiceFabricContextPropagator GetContextPropagator(Tracer instance)
+        {
+            switch (instance.Settings.Propagator)
+            {
+                case PropagatorType.Default:
+                case PropagatorType.Datadog:
+                    return new DDServiceFabricContextPropagator();
+                case PropagatorType.B3:
+                    return new B3ServiceFabricContextPropagator();
+                default:
+                    throw new InvalidOperationException($"Could not create service fabric context propagator for '{instance.Settings.Propagator}'");
+            }
         }
     }
 }
