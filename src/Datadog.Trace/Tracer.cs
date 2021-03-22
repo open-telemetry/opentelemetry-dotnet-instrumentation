@@ -99,7 +99,7 @@ namespace Datadog.Trace
                 Statsd = statsd ?? CreateDogStatsdClient(Settings, DefaultServiceName, Settings.DogStatsdPort);
             }
 
-            _traceWriter = traceWriter ?? CreateTraceWriter(Settings, Statsd);
+            _traceWriter = traceWriter ?? CreateTraceWriter(Settings, DefaultServiceName, Statsd);
 
             switch (Settings.Convention)
             {
@@ -664,7 +664,7 @@ namespace Datadog.Trace
             }
         }
 
-        private static ITraceWriter CreateTraceWriter(TracerSettings settings, IDogStatsd statsd)
+        private static ITraceWriter CreateTraceWriter(TracerSettings settings, string serviceName, IDogStatsd statsd)
         {
             IMetrics metrics = statsd != null
                 ? new DogStatsdMetrics(statsd)
@@ -675,19 +675,19 @@ namespace Datadog.Trace
                 case ExporterType.Zipkin:
                     return new ExporterWriter(new ZipkinExporter(settings.AgentUri), metrics);
                 case ExporterType.Jaeger:
-                    return new ExporterWriter(new JaegerExporter(CreateJaegerOptions(settings)), metrics);
+                    return new ExporterWriter(new JaegerExporter(CreateJaegerOptions(settings, serviceName)), metrics);
                 default:
                     return new AgentWriter(new Api(settings.AgentUri, TransportStrategy.Get(settings), statsd), metrics, maxBufferSize: settings.TraceBufferSize);
             }
         }
 
-        private static JaegerOptions CreateJaegerOptions(TracerSettings settings)
+        private static JaegerOptions CreateJaegerOptions(TracerSettings settings, string serviceName)
         {
             return new JaegerOptions()
             {
                 Host = settings.AgentUri.Host,
                 Port = settings.AgentUri.Port,
-                ServiceName = settings.ServiceName
+                ServiceName = serviceName
             };
         }
 
