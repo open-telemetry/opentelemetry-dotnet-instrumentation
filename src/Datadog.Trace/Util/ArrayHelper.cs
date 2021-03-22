@@ -30,23 +30,23 @@ namespace Datadog.Trace.Util
 
         public static void Copy<T>(T[] source, T[] target, int length)
         {
-            Copy(source, target, 0, 0, length);
+            Copy(source, 0, target, 0, length);
         }
 
-        public static void Copy<T>(T[] source, T[] target, int sourcOffset, int targetOffset, int length)
+        public static void Copy<T>(T[] source, int sourceOffset, T[] target, int targetOffset, int length)
         {
             if (typeof(T).IsPrimitive)
             {
 #if NETCOREAPP3_1_OR_GREATER
-                var span = source.AsSpan(sourcOffset, length);
+                var span = source.AsSpan(sourceOffset, length);
                 span.CopyTo(new Span<T>(target, targetOffset, length));
 #else
-                Buffer.BlockCopy(source, sourcOffset, target, targetOffset, length);
+                Buffer.BlockCopy(source, sourceOffset, target, targetOffset, length);
 #endif
             }
             else
             {
-                Array.Copy(source, sourcOffset, target, targetOffset, length);
+                Array.Copy(source, sourceOffset, target, targetOffset, length);
             }
         }
 

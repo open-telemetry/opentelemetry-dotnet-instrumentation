@@ -40,7 +40,7 @@ namespace Datadog.Trace.Agent.Jaeger
         {
             var memory = this.bufferWriter.GetMemory(length);
 
-            ArrayHelper.Copy(buffer, memory.BufferWriter.Buffer, offset, memory.Offset, length);
+            ArrayHelper.Copy(buffer, offset, memory.BufferWriter.Buffer, memory.Offset, length);
 
             if (!this.buffer.HasValue)
             {

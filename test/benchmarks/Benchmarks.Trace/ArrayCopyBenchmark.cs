@@ -20,7 +20,7 @@ namespace Benchmarks.Trace
             byte[] source = Encoding.UTF8.GetBytes(sourceMessage);
             byte[] target = new byte[source.Length - prefixLength - suffixLength];
 
-            ArrayHelper.Copy(source, target, prefixLength, 0, source.Length - prefixLength - suffixLength);
+            ArrayHelper.Copy(source, prefixLength, target, 0, source.Length - prefixLength - suffixLength);
         }
 
         [Benchmark]
