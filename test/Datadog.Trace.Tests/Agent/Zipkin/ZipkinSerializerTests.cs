@@ -1,34 +1,19 @@
 using System.Collections.Generic;
 using System.IO;
 using Datadog.Trace.Agent;
-using Datadog.Trace.Tagging;
-using Moq;
+using Datadog.Trace.TestHelpers.Factories;
 using Newtonsoft.Json;
 using Xunit;
 
-namespace Datadog.Trace.Tests
+namespace Datadog.Trace.Tests.Agent.Zipkin
 {
     public class ZipkinSerializerTests
     {
         [Fact]
         public void RoundTripRootSpanTest()
         {
-            var parentSpanContext = new Mock<ISpanContext>();
-            var traceContext = new Mock<ITraceContext>();
-            var spanContext = new SpanContext(parentSpanContext.Object, traceContext.Object, serviceName: null);
-
-            var additionalTags = new CommonTags();
-
-            additionalTags.Version = "v1.0";
-            additionalTags.Environment = "Test";
-
-            var span = new Span(spanContext, start: null, tags: additionalTags);
-            span.ServiceName = "ServiceName";
-            span.SetTag("k0", "v0");
-            span.SetTag("k1", "v1");
-            span.SetTag("k2", "v2");
-
-            var serializerSpan = new ZipkinSerializer.ZipkinSpan(span);
+            var span = SpanFactory.CreateSpan();
+            var zipkinSpan = new ZipkinSerializer.ZipkinSpan(span);
 
             var serializer = new ZipkinSerializer();
             using var ms = new MemoryStream();
@@ -42,7 +27,7 @@ namespace Datadog.Trace.Tests
             Assert.Single(actualTraces);
 
             var actualSpan = actualTraces[0];
-            actualSpan.AssertZipkinSerializerSpan(serializerSpan);
+            actualSpan.AssertZipkinSerializerSpan(zipkinSpan);
         }
 
         public class TestZipkinSpan

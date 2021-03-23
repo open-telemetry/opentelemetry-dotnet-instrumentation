@@ -1,4 +1,6 @@
+using System;
 using Datadog.Trace.Agent;
+using Datadog.Trace.Agent.Zipkin;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.TestHelpers;
 using Xunit;
@@ -12,7 +14,7 @@ namespace Datadog.Trace.IntegrationTests
 
         public SendTracesToZipkinCollector()
         {
-            var agentUri = new System.Uri("http://localhost:9411/api/v2/spans");
+            var agentUri = new Uri("http://localhost:9411/api/v2/spans");
             var exporter = new ZipkinExporter(agentUri);
             var exporterWriter = new ExporterWriter(exporter, new NullMetrics());
             _tracer = new Tracer(new TracerSettings(), exporterWriter, sampler: null, scopeManager: null, statsd: null);

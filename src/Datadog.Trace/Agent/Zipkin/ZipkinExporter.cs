@@ -1,10 +1,9 @@
 using System;
 using System.Net;
 using System.Threading.Tasks;
-using Datadog.Trace.Configuration;
 using Datadog.Trace.Logging;
 
-namespace Datadog.Trace.Agent
+namespace Datadog.Trace.Agent.Zipkin
 {
     internal class ZipkinExporter : IExporter
     {
