@@ -83,7 +83,7 @@
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="$(var.PlatformProgramFilesFolder)">
         <!-- "C:\Program Files" or "C:\Program Files (x86)"-->
-        <Directory Id="ProgramFilesFolder.Datadog" Name="$(var.Company)">
+        <Directory Id="ProgramFilesFolder.OpenTelemetry" Name="$(var.Company)">
           <!-- ".\Datadog" -->
           <Directory Id="INSTALLFOLDER" Name="$(var.BaseProductName)">
             <!-- ".\.NET Tracer" -->
@@ -113,7 +113,7 @@
       <?if $(var.Win64) = yes ?>
       <Directory Id="ProgramFilesFolder">
         <!-- "C:\Program Files (x86)" -->
-        <Directory Id="ProgramFilesFolder.Datadog.32" Name="$(var.Company)">
+        <Directory Id="ProgramFilesFolder.OpenTelemetry.32" Name="$(var.Company)">
           <!-- ".\Datadog" -->
           <Directory Id="INSTALLFOLDER.32" Name="$(var.BaseProductName)">
             <!-- ".\.NET Tracer" -->
