@@ -18,6 +18,11 @@ namespace Datadog.Trace.Configuration
         /// <summary>
         /// The Zipkin exporter.
         /// </summary>
-        Zipkin
+        Zipkin,
+
+        /// <summary>
+        /// The Jaeger exporter
+        /// </summary>
+        Jaeger
     }
 }
