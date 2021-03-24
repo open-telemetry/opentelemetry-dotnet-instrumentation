@@ -284,7 +284,7 @@ namespace Datadog.Trace.DiagnosticListeners
 
                 string resourceName = $"{httpMethod} {resourceUrl}";
 
-                IPropagator propagator = ContextPropagatorResolver.GetPropagator(tracer.Settings.Propagator);
+                IPropagator propagator = tracer.Propagator;
                 SpanContext propagatedContext = ExtractPropagatedContext(propagator, request);
                 var tagsFromHeaders = ExtractHeaderTags(request, tracer);
 
