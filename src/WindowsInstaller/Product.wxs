@@ -14,9 +14,9 @@
              InstallScope="perMachine"
              Description="$(var.ProductName)" />
 
-    <Icon Id="datadog.ico" SourceFile="datadog-icon.ico"/>
+    <Icon Id="opentelemetry.ico" SourceFile="opentelemetry-icon.ico"/>
     <PropertyRef Id="WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED" />
-    <Property Id="ARPPRODUCTICON">datadog.ico</Property>
+    <Property Id="ARPPRODUCTICON">opentelemetry.ico</Property>
     <Property Id="ARPURLINFOABOUT">https://datadoghq.com/</Property>
     <Property Id="ARPHELPLINK">https://datadoghq.com/support/</Property>
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER"/>
