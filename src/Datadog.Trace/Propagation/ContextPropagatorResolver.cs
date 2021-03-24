@@ -22,7 +22,7 @@ namespace Datadog.Trace.Propagation
                 return getter();
             }
 
-            throw new InvalidOperationException($"There is propagator registered for type '{propagator}'");
+            throw new InvalidOperationException($"There is no propagator registered for type '{propagator}'");
         }
     }
 }
