@@ -170,7 +170,8 @@ namespace Datadog.Trace.Configuration
             Enum.TryParse(source?.GetString(ConfigurationKeys.Convention) ?? "default", ignoreCase: true, out ConventionType conventionType);
             Convention = conventionType;
 
-            Enum.TryParse(source?.GetString(ConfigurationKeys.Propagator) ?? "default", ignoreCase: true, out PropagatorType propagatorType);
+            // Todo: Add support for multiple propagators
+            Enum.TryParse(source?.GetString(ConfigurationKeys.Propagators) ?? "default", ignoreCase: true, out PropagatorType propagatorType);
             Propagator = propagatorType;
 
             var httpServerErrorStatusCodes = source?.GetString(ConfigurationKeys.HttpServerErrorStatusCodes) ??
@@ -355,7 +356,7 @@ namespace Datadog.Trace.Configuration
         /// <summary>
         /// Gets or sets the propagator logic to be used.
         /// Default is <c>Datadog</c>
-        /// <seealso cref="ConfigurationKeys.Propagator"/>
+        /// <seealso cref="ConfigurationKeys.Propagators"/>
         /// </summary>
         public PropagatorType Propagator { get; set; }
 

@@ -7,6 +7,7 @@ namespace Datadog.Trace.Configuration
     {
         /// <summary>
         /// The default propagator.
+        /// Default is <c>Datadog</c>.
         /// </summary>
         Default,
 

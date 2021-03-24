@@ -298,7 +298,7 @@ namespace Datadog.Trace.Configuration
         /// Default is <c>Datadog</c>.
         /// <seealso cref="TracerSettings.Propagator"/>
         /// </summary>
-        public const string Propagator = "OTEL_PROPAGATOR";
+        public const string Propagators = "OTEL_PROPAGATORS";
 
         /// <summary>
         /// Configuration key for setting the API key, used by the Agent.
