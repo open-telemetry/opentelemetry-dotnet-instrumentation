@@ -4,16 +4,16 @@ using Datadog.Trace.Configuration;
 
 namespace Datadog.Trace.Propagation
 {
-    internal static class ContextPropagatorResolver
+    internal static class ContextPropagatorBuilder
     {
         private static readonly IReadOnlyDictionary<PropagatorType, Func<IPropagator>> _propagatorSelector = new Dictionary<PropagatorType, Func<IPropagator>>()
         {
-            { PropagatorType.B3, () => B3SpanContextPropagator.Instance },
-            { PropagatorType.Datadog, () => DDSpanContextPropagator.Instance },
-            { PropagatorType.Default, () => DDSpanContextPropagator.Instance },
+            { PropagatorType.B3, () => new B3SpanContextPropagator() },
+            { PropagatorType.Datadog, () => new DDSpanContextPropagator() },
+            { PropagatorType.Default, () => new DDSpanContextPropagator() },
         };
 
-        public static IPropagator GetPropagator(PropagatorType propagator)
+        public static IPropagator BuildPropagator(PropagatorType propagator)
         {
             if (_propagatorSelector.TryGetValue(propagator, out Func<IPropagator> getter))
             {

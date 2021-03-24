@@ -10,7 +10,7 @@ namespace Datadog.Trace.OpenTracing.Tests
         private const string HttpHeaderParentId = "x-datadog-parent-id";
         private const string HttpHeaderSamplingPriority = "x-datadog-sampling-priority";
 
-        private readonly HttpHeadersCodec _codec = new HttpHeadersCodec(DDSpanContextPropagator.Instance);
+        private readonly HttpHeadersCodec _codec = new HttpHeadersCodec(new DDSpanContextPropagator());
 
         [Fact]
         public void Extract_ValidParentAndTraceId_ProperSpanContext()

@@ -17,15 +17,6 @@ namespace Datadog.Trace.Propagation
         private static readonly string UserKeep = ((int)SamplingPriority.UserKeep).ToString(InvariantCulture);
         private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor<B3SpanContextPropagator>();
 
-        private B3SpanContextPropagator()
-        {
-        }
-
-        /// <summary>
-        /// Gets the singleton instance of the propagator.
-        /// </summary>
-        public static B3SpanContextPropagator Instance { get; } = new B3SpanContextPropagator();
-
         public void Inject<T>(SpanContext context, T carrier, Action<T, string, string> setter)
         {
             if (context == null) { throw new ArgumentNullException(nameof(context)); }

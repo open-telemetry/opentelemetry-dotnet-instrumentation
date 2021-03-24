@@ -117,7 +117,7 @@ namespace Datadog.Trace
             _scopeManager = scopeManager ?? new AsyncLocalScopeManager();
             Sampler = sampler ?? new RuleBasedSampler(new RateLimiter(Settings.MaxTracesSubmittedPerSecond));
 
-            _propagator = ContextPropagatorResolver.GetPropagator(Settings.Propagator);
+            _propagator = ContextPropagatorBuilder.BuildPropagator(Settings.Propagator);
 
             if (!string.IsNullOrWhiteSpace(Settings.CustomSamplingRules))
             {

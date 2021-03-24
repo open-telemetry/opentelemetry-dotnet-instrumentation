@@ -14,6 +14,8 @@ namespace Datadog.Trace.Tests.Headers
     // - B3SpanContextPropagator.Extract()
     public class B3HeadersCollectionTests : HeadersCollectionTestExtensions
     {
+        private readonly B3SpanContextPropagator _propagator = new B3SpanContextPropagator();
+
         [Theory]
         [MemberData(nameof(GetHeaderCollectionImplementations))]
         internal void HttpRequestMessage_InjectExtract_Identity(IHeadersCollection headers)
@@ -24,8 +26,8 @@ namespace Datadog.Trace.Tests.Headers
 
             var context = new SpanContext(traceId, spanId, samplingPriority);
 
-            B3SpanContextPropagator.Instance.Inject(context, headers);
-            var resultContext = B3SpanContextPropagator.Instance.Extract(headers);
+            _propagator.Inject(context, headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(context.SpanId, resultContext.SpanId);
@@ -43,8 +45,8 @@ namespace Datadog.Trace.Tests.Headers
 
             var context = new SpanContext(traceId, spanId, samplingPriority);
 
-            B3SpanContextPropagator.Instance.Inject(context, headers);
-            var resultContext = B3SpanContextPropagator.Instance.Extract(headers);
+            _propagator.Inject(context, headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(context.SpanId, resultContext.SpanId);
@@ -61,7 +63,7 @@ namespace Datadog.Trace.Tests.Headers
 
             InjectContext(headers, traceId, spanId, samplingPriority);
 
-            var resultContext = B3SpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             // invalid traceId should return a null context even if other values are set
             Assert.Null(resultContext);
@@ -80,7 +82,7 @@ namespace Datadog.Trace.Tests.Headers
                 spanId,
                 ((int)samplingPriority).ToString(CultureInfo.InvariantCulture));
 
-            var resultContext = B3SpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(traceId, resultContext.TraceId);
@@ -101,7 +103,7 @@ namespace Datadog.Trace.Tests.Headers
                 spanId.ToString("x16", CultureInfo.InvariantCulture),
                 samplingPriority);
 
-            var resultContext = B3SpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(traceId, resultContext.TraceId);

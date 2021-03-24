@@ -15,6 +15,8 @@ namespace Datadog.Trace.Tests.Headers
     // - SpanContextPropagator.Extract()
     public class DDHeadersCollectionTests : HeadersCollectionTestExtensions
     {
+        private readonly DDSpanContextPropagator _propagator = new DDSpanContextPropagator();
+
         [Theory]
         [MemberData(nameof(GetHeaderCollectionImplementations))]
         internal void ExtractHeaderTags_EmptyHeadersReturnsEmptyTagsList(IHeadersCollection headers)
@@ -64,7 +66,7 @@ namespace Datadog.Trace.Tests.Headers
         [MemberData(nameof(GetHeaderCollectionImplementations))]
         internal void Extract_EmptyHeadersReturnsNull(IHeadersCollection headers)
         {
-            var resultContext = DDSpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
             Assert.Null(resultContext);
         }
 
@@ -78,8 +80,8 @@ namespace Datadog.Trace.Tests.Headers
             const string origin = "synthetics";
 
             var context = new SpanContext(traceId, spanId, samplingPriority, null, origin);
-            DDSpanContextPropagator.Instance.Inject(context, headers);
-            var resultContext = DDSpanContextPropagator.Instance.Extract(headers);
+            _propagator.Inject(context, headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(context.SpanId, resultContext.SpanId);
@@ -97,7 +99,7 @@ namespace Datadog.Trace.Tests.Headers
             const string origin = "synthetics";
 
             InjectContext(headers, traceId, spanId, samplingPriority, origin);
-            var resultContext = DDSpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             // invalid traceId should return a null context even if other values are set
             Assert.Null(resultContext);
@@ -118,7 +120,7 @@ namespace Datadog.Trace.Tests.Headers
                 ((int)samplingPriority).ToString(CultureInfo.InvariantCulture),
                 origin);
 
-            var resultContext = DDSpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(traceId, resultContext.TraceId);
@@ -142,7 +144,7 @@ namespace Datadog.Trace.Tests.Headers
                 samplingPriority,
                 origin);
 
-            var resultContext = DDSpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(traceId, resultContext.TraceId);

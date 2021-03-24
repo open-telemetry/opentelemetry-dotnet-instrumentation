@@ -360,14 +360,15 @@ namespace Datadog.Trace.Tests
             const string origin = "synthetics";
 
             var propagatedContext = new SpanContext(traceId, spanId, samplingPriority, null, origin);
+            var propagator = new DDSpanContextPropagator();
 
             using var firstSpan = _tracer.StartActive("First Span", propagatedContext);
             using var secondSpan = _tracer.StartActive("Child", firstSpan.Span.Context);
 
             IHeadersCollection headers = WebRequest.CreateHttp("http://localhost").Headers.Wrap();
 
-            DDSpanContextPropagator.Instance.Inject(secondSpan.Span.Context, headers);
-            var resultContext = DDSpanContextPropagator.Instance.Extract(headers);
+            propagator.Inject(secondSpan.Span.Context, headers);
+            var resultContext = propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(firstSpan.Span.Context.Origin, resultContext.Origin);

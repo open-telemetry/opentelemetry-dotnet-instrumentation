@@ -26,12 +26,6 @@ namespace Datadog.Trace.Propagation
             SamplingPriorities = Enum.GetValues(typeof(SamplingPriority)).Cast<int>().ToArray();
         }
 
-        private DDSpanContextPropagator()
-        {
-        }
-
-        public static DDSpanContextPropagator Instance { get; } = new DDSpanContextPropagator();
-
         /// <summary>
         /// Propagates the specified context by adding new headers to a <see cref="IHeadersCollection"/>.
         /// This locks the sampling priority for <paramref name="context"/>.

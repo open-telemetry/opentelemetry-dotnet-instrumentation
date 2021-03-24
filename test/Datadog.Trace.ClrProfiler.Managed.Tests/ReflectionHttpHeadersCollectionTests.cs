@@ -11,6 +11,8 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
 {
     public class ReflectionHttpHeadersCollectionTests
     {
+        private readonly DDSpanContextPropagator _propagator = new DDSpanContextPropagator();
+
         public static IEnumerable<object[]> GetInvalidIds() => HeadersCollectionTestHelpers.GetInvalidIds();
 
         public static IEnumerable<object[]> GetInvalidSamplingPriorities() => HeadersCollectionTestHelpers.GetInvalidSamplingPriorities();
@@ -22,7 +24,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             var request = new HttpRequestMessage();
             var headers = new ReflectionHttpHeadersCollection(request.Headers);
 
-            var tagsFromHeader = DDSpanContextPropagator.Instance.ExtractHeaderTags(headers, new Dictionary<string, string>());
+            var tagsFromHeader = headers.ExtractHeaderTags(new Dictionary<string, string>());
 
             Assert.NotNull(tagsFromHeader);
             Assert.Empty(tagsFromHeader);
@@ -60,7 +62,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             expectedResults.Add(customHeader2TagName, customHeader2Value);
 
             // Test
-            var tagsFromHeader = DDSpanContextPropagator.Instance.ExtractHeaderTags(headers, headerToTagMap);
+            var tagsFromHeader = headers.ExtractHeaderTags(headerToTagMap);
 
             // Assert
             Assert.NotNull(tagsFromHeader);
@@ -74,7 +76,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             var request = new HttpRequestMessage();
             var headers = new ReflectionHttpHeadersCollection(request.Headers);
 
-            var resultContext = DDSpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
             Assert.Null(resultContext);
         }
 
@@ -91,8 +93,8 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             const string origin = "synthetics";
 
             var context = new SpanContext(traceId, spanId, samplingPriority, null, origin);
-            DDSpanContextPropagator.Instance.Inject(context, headers);
-            var resultContext = DDSpanContextPropagator.Instance.Extract(headers);
+            _propagator.Inject(context, headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(context.SpanId, resultContext.SpanId);
@@ -114,7 +116,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             const string origin = "synthetics";
 
             InjectContext(headers, traceId, spanId, samplingPriority, origin);
-            var resultContext = DDSpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             // invalid traceId should return a null context even if other values are set
             Assert.Null(resultContext);
@@ -139,7 +141,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
                 ((int)samplingPriority).ToString(CultureInfo.InvariantCulture),
                 origin);
 
-            var resultContext = DDSpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(traceId, resultContext.TraceId);
@@ -167,7 +169,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
                 samplingPriority,
                 origin);
 
-            var resultContext = DDSpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(traceId, resultContext.TraceId);

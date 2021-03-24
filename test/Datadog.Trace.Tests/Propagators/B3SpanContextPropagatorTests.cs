@@ -9,6 +9,13 @@ namespace Datadog.Trace.Tests.Propagators
 {
     public class B3SpanContextPropagatorTests : HeadersCollectionTestExtensions
     {
+        private B3SpanContextPropagator _propagator;
+
+        public B3SpanContextPropagatorTests()
+        {
+            _propagator = new B3SpanContextPropagator();
+        }
+
         [Theory]
         [MemberData(nameof(GetHeaderCollectionImplementations))]
         internal void HttpRequestMessage_InjectExtract_Identity(IHeadersCollection headers)
@@ -19,7 +26,7 @@ namespace Datadog.Trace.Tests.Propagators
 
             var context = new SpanContext(traceId, spanId, samplingPriority);
 
-            B3SpanContextPropagator.Instance.Inject(context, headers);
+            _propagator.Inject(context, headers);
 
             AssertExpected(headers, B3HttpHeaderNames.B3TraceId, "ffffffffffffffff");
             AssertExpected(headers, B3HttpHeaderNames.B3SpanId, "fffffffffffffffe");
@@ -27,7 +34,7 @@ namespace Datadog.Trace.Tests.Propagators
             AssertMissing(headers, B3HttpHeaderNames.B3ParentId);
             AssertMissing(headers, B3HttpHeaderNames.B3Flags);
 
-            var resultContext = B3SpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(context.SpanId, resultContext.SpanId);
@@ -51,7 +58,7 @@ namespace Datadog.Trace.Tests.Propagators
 
             var context = new SpanContext(parentContext, traceContext, null);
 
-            B3SpanContextPropagator.Instance.Inject(context, headers);
+            _propagator.Inject(context, headers);
 
             AssertExpected(headers, B3HttpHeaderNames.B3TraceId, "ffffffffffffffff");
             AssertExpected(headers, B3HttpHeaderNames.B3SpanId, context.SpanId.ToString("x16"));
@@ -59,7 +66,7 @@ namespace Datadog.Trace.Tests.Propagators
             AssertExpected(headers, B3HttpHeaderNames.B3Flags, "1");
             AssertMissing(headers, B3HttpHeaderNames.B3Sampled);
 
-            var resultContext = B3SpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(context.SpanId, resultContext.SpanId);
@@ -77,7 +84,7 @@ namespace Datadog.Trace.Tests.Propagators
 
             var context = new SpanContext(traceId, spanId, samplingPriority);
 
-            B3SpanContextPropagator.Instance.Inject(context, headers);
+            _propagator.Inject(context, headers);
 
             AssertExpected(headers, B3HttpHeaderNames.B3TraceId, "000000007fffffff");
             AssertExpected(headers, B3HttpHeaderNames.B3SpanId, "000000007ffffffe");
@@ -85,7 +92,7 @@ namespace Datadog.Trace.Tests.Propagators
             AssertMissing(headers, B3HttpHeaderNames.B3ParentId);
             AssertMissing(headers, B3HttpHeaderNames.B3Flags);
 
-            var resultContext = B3SpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(context.SpanId, resultContext.SpanId);
@@ -101,7 +108,7 @@ namespace Datadog.Trace.Tests.Propagators
             const string samplingPriority = "2";
 
             InjectContext(headers, traceId, spanId, samplingPriority);
-            var resultContext = B3SpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             // invalid traceId should return a null context even if other values are set
             Assert.Null(resultContext);
@@ -119,7 +126,7 @@ namespace Datadog.Trace.Tests.Propagators
                 traceId.ToString("x16", CultureInfo.InvariantCulture),
                 spanId,
                 ((int)samplingPriority).ToString(CultureInfo.InvariantCulture));
-            var resultContext = B3SpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(traceId, resultContext.TraceId);
@@ -140,7 +147,7 @@ namespace Datadog.Trace.Tests.Propagators
                 spanId.ToString("x16", CultureInfo.InvariantCulture),
                 samplingPriority);
 
-            var resultContext = B3SpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(traceId, resultContext.TraceId);
