@@ -244,7 +244,7 @@ namespace Datadog.Trace.DiagnosticListeners
 
                     if (requestHeaders != null)
                     {
-                        return tracer.Propagator.ExtractHeaderTags(new HeadersCollectionAdapter(requestHeaders), settings.HeaderTags);
+                        return new HeadersCollectionAdapter(requestHeaders).ExtractHeaderTags(settings.HeaderTags);
                     }
                 }
                 catch (Exception ex)

@@ -39,7 +39,5 @@ namespace Datadog.Trace.Propagation
         /// <typeparam name="T">Type of header collection</typeparam>
         /// <returns>A new <see cref="SpanContext"/> that contains the values obtained from <paramref name="carrier"/>.</returns>
         SpanContext Extract<T>(T carrier, Func<T, string, IEnumerable<string>> getter);
-
-        IEnumerable<KeyValuePair<string, string>> ExtractHeaderTags(IHeadersCollection headers, IEnumerable<KeyValuePair<string, string>> headerTags);
     }
 }

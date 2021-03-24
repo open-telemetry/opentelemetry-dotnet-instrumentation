@@ -12,6 +12,7 @@ using Datadog.Trace.DogStatsd;
 using Datadog.Trace.DuckTyping;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Logging;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.Tagging;
 using Datadog.Trace.Util;
 
@@ -228,7 +229,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                         var headersCollection = new HttpHeadersCollection(headers);
 
                         propagatedContext = tracer.Propagator.Extract(headersCollection);
-                        tagsFromHeaders = tracer.Propagator.ExtractHeaderTags(headersCollection, tracer.Settings.HeaderTags);
+                        tagsFromHeaders = headersCollection.ExtractHeaderTags(tracer.Settings.HeaderTags);
                     }
                     catch (Exception ex)
                     {

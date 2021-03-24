@@ -1,23 +1,11 @@
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Datadog.Trace.Headers;
 
 namespace Datadog.Trace.Propagation
 {
-    internal abstract class Propagator : IPropagator
+    internal static class PropagationExtensions
     {
-        protected static readonly CultureInfo InvariantCulture = CultureInfo.InvariantCulture;
-
-        public abstract void Inject(SpanContext context, IHeadersCollection headers);
-
-        public abstract void Inject<T>(SpanContext context, T carrier, Action<T, string, string> setter);
-
-        public abstract SpanContext Extract(IHeadersCollection headers);
-
-        public abstract SpanContext Extract<T>(T carrier, Func<T, string, IEnumerable<string>> getter);
-
-        public IEnumerable<KeyValuePair<string, string>> ExtractHeaderTags(IHeadersCollection headers, IEnumerable<KeyValuePair<string, string>> headerToTagMap)
+        public static IEnumerable<KeyValuePair<string, string>> ExtractHeaderTags(this IHeadersCollection headers, IEnumerable<KeyValuePair<string, string>> headerToTagMap)
         {
             foreach (KeyValuePair<string, string> headerNameToTagName in headerToTagMap)
             {
@@ -30,7 +18,7 @@ namespace Datadog.Trace.Propagation
             }
         }
 
-        protected static string ParseString(IHeadersCollection headers, string headerName)
+        public static string ParseString(this IHeadersCollection headers, string headerName)
         {
             var headerValues = headers.GetValues(headerName);
 

@@ -10,10 +10,12 @@ namespace Datadog.Trace.Propagation
     /// <summary>
     /// Class that hanbles B3 style context propagation.
     /// </summary>
-    internal class B3SpanContextPropagator : Propagator
+    internal class B3SpanContextPropagator : IPropagator
     {
         private const NumberStyles NumberStyle = NumberStyles.HexNumber;
-        private static readonly string UserKeep = ((int)SamplingPriority.UserKeep).ToString(CultureInfo.InvariantCulture);
+
+        private static readonly CultureInfo InvariantCulture = CultureInfo.InvariantCulture;
+        private static readonly string UserKeep = ((int)SamplingPriority.UserKeep).ToString(InvariantCulture);
         private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor<B3SpanContextPropagator>();
 
         private B3SpanContextPropagator()
@@ -31,7 +33,7 @@ namespace Datadog.Trace.Propagation
         /// </summary>
         /// <param name="context">A <see cref="SpanContext"/> value that will be propagated into <paramref name="headers"/>.</param>
         /// <param name="headers">A <see cref="IHeadersCollection"/> to add new headers to.</param>
-        public override void Inject(SpanContext context, IHeadersCollection headers)
+        public void Inject(SpanContext context, IHeadersCollection headers)
         {
             if (context == null) { throw new ArgumentNullException(nameof(context)); }
 
@@ -55,7 +57,7 @@ namespace Datadog.Trace.Propagation
             }
         }
 
-        public override void Inject<T>(SpanContext context, T carrier, Action<T, string, string> setter)
+        public void Inject<T>(SpanContext context, T carrier, Action<T, string, string> setter)
         {
             if (context == null) { throw new ArgumentNullException(nameof(context)); }
 
@@ -86,7 +88,7 @@ namespace Datadog.Trace.Propagation
         /// </summary>
         /// <param name="headers">The headers that contain the values to be extracted.</param>
         /// <returns>A new <see cref="SpanContext"/> that contains the values obtained from <paramref name="headers"/>.</returns>
-        public override SpanContext Extract(IHeadersCollection headers)
+        public SpanContext Extract(IHeadersCollection headers)
         {
             if (headers == null)
             {
@@ -107,7 +109,7 @@ namespace Datadog.Trace.Propagation
             return new SpanContext(traceId, spanId, samplingPriority);
         }
 
-        public override SpanContext Extract<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
+        public SpanContext Extract<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
         {
             if (carrier == null) { throw new ArgumentNullException(nameof(carrier)); }
 

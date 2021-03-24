@@ -7,12 +7,13 @@ using Datadog.Trace.Logging;
 
 namespace Datadog.Trace.Propagation
 {
-    internal class DDSpanContextPropagator : Propagator
+    internal class DDSpanContextPropagator : IPropagator
     {
         private const NumberStyles NumberStyles = System.Globalization.NumberStyles.Integer;
         private const int MinimumSamplingPriority = (int)SamplingPriority.UserReject;
         private const int MaximumSamplingPriority = (int)SamplingPriority.UserKeep;
 
+        private static readonly CultureInfo InvariantCulture = CultureInfo.InvariantCulture;
         private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor<DDSpanContextPropagator>();
 
         private static readonly int[] SamplingPriorities;
@@ -34,7 +35,7 @@ namespace Datadog.Trace.Propagation
         /// </summary>
         /// <param name="context">A <see cref="SpanContext"/> value that will be propagated into <paramref name="headers"/>.</param>
         /// <param name="headers">A <see cref="IHeadersCollection"/> to add new headers to.</param>
-        public override void Inject(SpanContext context, IHeadersCollection headers)
+        public void Inject(SpanContext context, IHeadersCollection headers)
         {
             if (context == null) { throw new ArgumentNullException(nameof(context)); }
 
@@ -67,7 +68,7 @@ namespace Datadog.Trace.Propagation
         /// <param name="carrier">The headers to add to.</param>
         /// <param name="setter">The action that can set a header in the carrier.</param>
         /// <typeparam name="T">Type of header collection</typeparam>
-        public override void Inject<T>(SpanContext context, T carrier, Action<T, string, string> setter)
+        public void Inject<T>(SpanContext context, T carrier, Action<T, string, string> setter)
         {
             if (context == null) { throw new ArgumentNullException(nameof(context)); }
 
@@ -97,7 +98,7 @@ namespace Datadog.Trace.Propagation
         /// </summary>
         /// <param name="headers">The headers that contain the values to be extracted.</param>
         /// <returns>A new <see cref="SpanContext"/> that contains the values obtained from <paramref name="headers"/>.</returns>
-        public override SpanContext Extract(IHeadersCollection headers)
+        public SpanContext Extract(IHeadersCollection headers)
         {
             if (headers == null)
             {
@@ -114,7 +115,7 @@ namespace Datadog.Trace.Propagation
 
             var parentId = ParseUInt64(headers, DDHttpHeaderNames.ParentId);
             var samplingPriority = ParseSamplingPriority(headers, DDHttpHeaderNames.SamplingPriority);
-            var origin = ParseString(headers, DDHttpHeaderNames.Origin);
+            var origin = headers.ParseString(DDHttpHeaderNames.Origin);
 
             return new SpanContext(traceId, parentId, samplingPriority, null, origin);
         }
@@ -126,7 +127,7 @@ namespace Datadog.Trace.Propagation
         /// <param name="getter">The function that can extract a list of values for a given header name.</param>
         /// <typeparam name="T">Type of header collection</typeparam>
         /// <returns>A new <see cref="SpanContext"/> that contains the values obtained from <paramref name="carrier"/>.</returns>
-        public override SpanContext Extract<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
+        public SpanContext Extract<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
         {
             if (carrier == null) { throw new ArgumentNullException(nameof(carrier)); }
 

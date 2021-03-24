@@ -7,6 +7,7 @@ using Datadog.Trace.ClrProfiler.Emit;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Logging;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.Tagging;
 
 namespace Datadog.Trace.ClrProfiler.Integrations
@@ -138,7 +139,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                         {
                             var headers = webHeaderCollection.Wrap();
                             propagatedContext = tracer.Propagator.Extract(headers);
-                            tagsFromHeaders = tracer.Propagator.ExtractHeaderTags(headers, tracer.Settings.HeaderTags);
+                            tagsFromHeaders = headers.ExtractHeaderTags(tracer.Settings.HeaderTags);
                         }
                         catch (Exception ex)
                         {

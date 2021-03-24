@@ -6,6 +6,7 @@ using System.Web;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Logging;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.Tagging;
 using Datadog.Trace.Util;
 
@@ -113,7 +114,7 @@ namespace Datadog.Trace.AspNet
                         // extract propagated http headers
                         var headers = httpRequest.Headers.Wrap();
                         propagatedContext = propagator.Extract(headers);
-                        tagsFromHeaders = propagator.ExtractHeaderTags(headers, tracer.Settings.HeaderTags);
+                        tagsFromHeaders = headers.ExtractHeaderTags(tracer.Settings.HeaderTags);
                     }
                     catch (Exception ex)
                     {

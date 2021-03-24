@@ -19,7 +19,7 @@ namespace Datadog.Trace.Tests.Headers
         [MemberData(nameof(GetHeaderCollectionImplementations))]
         internal void ExtractHeaderTags_EmptyHeadersReturnsEmptyTagsList(IHeadersCollection headers)
         {
-            var tagsFromHeader = DDSpanContextPropagator.Instance.ExtractHeaderTags(headers, new Dictionary<string, string>());
+            var tagsFromHeader = headers.ExtractHeaderTags(new Dictionary<string, string>());
 
             Assert.NotNull(tagsFromHeader);
             Assert.Empty(tagsFromHeader);
@@ -53,7 +53,7 @@ namespace Datadog.Trace.Tests.Headers
             expectedResults.Add(customHeader2TagName, customHeader2Value);
 
             // Test
-            var tagsFromHeader = DDSpanContextPropagator.Instance.ExtractHeaderTags(headers, headerToTagMap);
+            var tagsFromHeader = headers.ExtractHeaderTags(headerToTagMap);
 
             // Assert
             Assert.NotNull(tagsFromHeader);
