@@ -1,6 +1,6 @@
 using System.Globalization;
 using Datadog.Trace.Headers;
-using Datadog.Trace.Propagation.B3;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.TestHelpers;
 using Xunit;
 

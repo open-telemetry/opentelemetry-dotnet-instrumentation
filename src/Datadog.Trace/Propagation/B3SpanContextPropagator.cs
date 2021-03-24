@@ -5,7 +5,7 @@ using System.Linq;
 using Datadog.Trace.Headers;
 using Datadog.Trace.Logging;
 
-namespace Datadog.Trace.Propagation.B3
+namespace Datadog.Trace.Propagation
 {
     /// <summary>
     /// Class that hanbles B3 style context propagation.
@@ -145,7 +145,7 @@ namespace Datadog.Trace.Propagation.B3
         {
             if (headerValues.Any())
             {
-                foreach (string headerValue in headerValues)
+                foreach (var headerValue in headerValues)
                 {
                     if (ulong.TryParse(headerValue, NumberStyle, InvariantCulture, out var result))
                     {
@@ -182,7 +182,7 @@ namespace Datadog.Trace.Propagation.B3
 
             if (debugged.Count != 0 && (debugged[0] == "0" || debugged[0] == "1"))
             {
-                return debugged[0] == "1" ? SamplingPriority.UserKeep : (SamplingPriority?)null;
+                return debugged[0] == "1" ? SamplingPriority.UserKeep : null;
             }
             else if (sampled.Count != 0 && (sampled[0] == "0" || sampled[0] == "1"))
             {

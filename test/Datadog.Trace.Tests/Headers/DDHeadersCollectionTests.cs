@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Datadog.Trace.Headers;
-using Datadog.Trace.Propagation.Datadog;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.TestHelpers;
 using Xunit;
 

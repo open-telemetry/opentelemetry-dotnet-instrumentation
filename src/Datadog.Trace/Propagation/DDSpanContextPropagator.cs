@@ -5,7 +5,7 @@ using System.Linq;
 using Datadog.Trace.Headers;
 using Datadog.Trace.Logging;
 
-namespace Datadog.Trace.Propagation.Datadog
+namespace Datadog.Trace.Propagation
 {
     internal class DDSpanContextPropagator : Propagator
     {
@@ -151,9 +151,9 @@ namespace Datadog.Trace.Propagation.Datadog
         {
             var headerValues = headers.GetValues(headerName);
 
-            bool hasValue = false;
+            var hasValue = false;
 
-            foreach (string headerValue in headerValues)
+            foreach (var headerValue in headerValues)
             {
                 if (ulong.TryParse(headerValue, NumberStyles, InvariantCulture, out var result))
                 {
@@ -175,9 +175,9 @@ namespace Datadog.Trace.Propagation.Datadog
         {
             var headerValues = getter(carrier, headerName);
 
-            bool hasValue = false;
+            var hasValue = false;
 
-            foreach (string headerValue in headerValues)
+            foreach (var headerValue in headerValues)
             {
                 if (ulong.TryParse(headerValue, NumberStyles, InvariantCulture, out var result))
                 {
@@ -199,9 +199,9 @@ namespace Datadog.Trace.Propagation.Datadog
         {
             var headerValues = headers.GetValues(headerName);
 
-            bool hasValue = false;
+            var hasValue = false;
 
-            foreach (string headerValue in headerValues)
+            foreach (var headerValue in headerValues)
             {
                 if (int.TryParse(headerValue, out var result))
                 {
@@ -229,9 +229,9 @@ namespace Datadog.Trace.Propagation.Datadog
         {
             var headerValues = getter(carrier, headerName);
 
-            bool hasValue = false;
+            var hasValue = false;
 
-            foreach (string headerValue in headerValues)
+            foreach (var headerValue in headerValues)
             {
                 if (int.TryParse(headerValue, out var result))
                 {
@@ -259,7 +259,7 @@ namespace Datadog.Trace.Propagation.Datadog
         {
             var headerValues = getter(carrier, headerName);
 
-            foreach (string headerValue in headerValues)
+            foreach (var headerValue in headerValues)
             {
                 if (!string.IsNullOrEmpty(headerValue))
                 {

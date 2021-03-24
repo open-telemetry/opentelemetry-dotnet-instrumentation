@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using Datadog.Core.Tools;
 using Datadog.Trace.ClrProfiler.IntegrationTests.Helpers;
 using Datadog.Trace.Propagation;
-using Datadog.Trace.Propagation.Datadog;
 using Datadog.Trace.TestHelpers;
 using Xunit;
 using Xunit.Abstractions;

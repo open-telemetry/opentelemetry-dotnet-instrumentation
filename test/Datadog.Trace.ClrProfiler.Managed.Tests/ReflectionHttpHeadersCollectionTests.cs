@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Net.Http;
 using Datadog.Trace.ClrProfiler.Helpers;
 using Datadog.Trace.Headers;
-using Datadog.Trace.Propagation.Datadog;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.TestHelpers;
 using Xunit;
 

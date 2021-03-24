@@ -1,4 +1,4 @@
-namespace Datadog.Trace.Propagation.B3
+namespace Datadog.Trace.Propagation
 {
     internal static class B3HttpHeaderNames
     {

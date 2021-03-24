@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Datadog.Trace.Configuration;
-using Datadog.Trace.Propagation.B3;
-using Datadog.Trace.Propagation.Datadog;
 
 namespace Datadog.Trace.Propagation
 {

@@ -1,4 +1,4 @@
-using Datadog.Trace.Propagation.Datadog;
+using Datadog.Trace.Propagation;
 using Xunit;
 
 namespace Datadog.Trace.OpenTracing.Tests

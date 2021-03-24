@@ -15,7 +15,7 @@ using Datadog.Trace.Agent;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Headers;
-using Datadog.Trace.Propagation.Datadog;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.Sampling;
 using Datadog.Trace.TestHelpers;
 using Moq;

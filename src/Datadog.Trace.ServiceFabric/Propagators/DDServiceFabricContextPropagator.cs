@@ -1,6 +1,6 @@
 using System;
 using System.Text;
-using Datadog.Trace.Propagation.Datadog;
+using Datadog.Trace.Propagation;
 using Microsoft.ServiceFabric.Services.Remoting.V2;
 
 namespace Datadog.Trace.ServiceFabric.Propagators
