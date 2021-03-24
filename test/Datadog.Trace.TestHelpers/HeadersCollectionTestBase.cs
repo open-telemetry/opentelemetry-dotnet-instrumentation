@@ -7,7 +7,7 @@ using Datadog.Trace.Headers;
 
 namespace Datadog.Trace.TestHelpers
 {
-    public abstract class HeadersCollectionTestExtensions
+    public abstract class HeadersCollectionTestBase
     {
         public static IEnumerable<object[]> GetHeaderCollectionImplementations()
         {

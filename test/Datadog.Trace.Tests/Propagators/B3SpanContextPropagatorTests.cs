@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Datadog.Trace.Tests.Propagators
 {
-    public class B3SpanContextPropagatorTests : HeadersCollectionTestExtensions
+    public class B3SpanContextPropagatorTests : HeadersCollectionTestBase
     {
         private B3SpanContextPropagator _propagator;
 

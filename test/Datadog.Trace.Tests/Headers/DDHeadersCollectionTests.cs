@@ -13,7 +13,7 @@ namespace Datadog.Trace.Tests.Headers
     // - NameValueHeadersCollection wrapper over NameValueCollection (Get, Set, Add, Remove)
     // - SpanContextPropagator.Inject()
     // - SpanContextPropagator.Extract()
-    public class DDHeadersCollectionTests : HeadersCollectionTestExtensions
+    public class DDHeadersCollectionTests : HeadersCollectionTestBase
     {
         private readonly DDSpanContextPropagator _propagator = new DDSpanContextPropagator();
 
