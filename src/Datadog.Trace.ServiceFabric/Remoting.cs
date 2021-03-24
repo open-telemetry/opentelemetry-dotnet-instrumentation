@@ -24,7 +24,7 @@ namespace Datadog.Trace.ServiceFabric
         private static bool _initialized;
         private static string? _clientAnalyticsSampleRate;
         private static string? _serverAnalyticsSampleRate;
-        private static ServiceFabricContextPropagator? _contextPropagator;
+        private static IServiceFabricContextPropagator? _contextPropagator;
 
         /// <summary>
         /// Start tracing Service Remoting requests.
@@ -367,7 +367,7 @@ namespace Datadog.Trace.ServiceFabric
             return analyticsEnabled ? integrationSettings.AnalyticsSampleRate : (double?)null;
         }
 
-        private static ServiceFabricContextPropagator GetContextPropagator(Tracer instance)
+        private static IServiceFabricContextPropagator GetContextPropagator(Tracer instance)
         {
             switch (instance.Settings.Propagator)
             {

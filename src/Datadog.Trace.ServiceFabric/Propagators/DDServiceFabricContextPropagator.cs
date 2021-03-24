@@ -5,9 +5,9 @@ using Microsoft.ServiceFabric.Services.Remoting.V2;
 
 namespace Datadog.Trace.ServiceFabric.Propagators
 {
-    internal class DDServiceFabricContextPropagator : ServiceFabricContextPropagator
+    internal class DDServiceFabricContextPropagator : IServiceFabricContextPropagator
     {
-        public override void InjectContext(PropagationContext context, IServiceRemotingRequestMessageHeader messageHeaders)
+        public void InjectContext(PropagationContext context, IServiceRemotingRequestMessageHeader messageHeaders)
         {
             messageHeaders.TryAddHeader(DDHttpHeaderNames.TraceId, context, ctx => BitConverter.GetBytes(ctx.TraceId));
             messageHeaders.TryAddHeader(DDHttpHeaderNames.ParentId, context, ctx => BitConverter.GetBytes(ctx.ParentSpanId));
@@ -23,7 +23,7 @@ namespace Datadog.Trace.ServiceFabric.Propagators
             }
         }
 
-        public override PropagationContext? ExtractContext(IServiceRemotingRequestMessageHeader messageHeaders)
+        public PropagationContext? ExtractContext(IServiceRemotingRequestMessageHeader messageHeaders)
         {
             ulong traceId = messageHeaders.TryGetHeaderValueUInt64(DDHttpHeaderNames.TraceId) ?? 0;
 
