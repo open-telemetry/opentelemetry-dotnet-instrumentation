@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Datadog.Trace.Headers;
 using Datadog.Trace.Logging;
 
 namespace Datadog.Trace.Propagation
 {
     /// <summary>
-    /// Class that hanbles B3 style context propagation.
+    /// Class that handles B3 style context propagation.
     /// </summary>
     internal class B3SpanContextPropagator : IPropagator
     {
@@ -26,36 +25,6 @@ namespace Datadog.Trace.Propagation
         /// Gets the singleton instance of the propagator.
         /// </summary>
         public static B3SpanContextPropagator Instance { get; } = new B3SpanContextPropagator();
-
-        /// <summary>
-        /// Propagates the specified context by adding new headers to a <see cref="IHeadersCollection"/>.
-        /// This locks the sampling priority for <paramref name="context"/>.
-        /// </summary>
-        /// <param name="context">A <see cref="SpanContext"/> value that will be propagated into <paramref name="headers"/>.</param>
-        /// <param name="headers">A <see cref="IHeadersCollection"/> to add new headers to.</param>
-        public void Inject(SpanContext context, IHeadersCollection headers)
-        {
-            if (context == null) { throw new ArgumentNullException(nameof(context)); }
-
-            if (headers == null) { throw new ArgumentNullException(nameof(headers)); }
-
-            // lock sampling priority when span propagates.
-            context.TraceContext?.LockSamplingPriority();
-
-            headers.Set(B3HttpHeaderNames.B3TraceId, context.TraceId.ToString("x16", InvariantCulture));
-            headers.Set(B3HttpHeaderNames.B3SpanId, context.SpanId.ToString("x16", InvariantCulture));
-
-            if (context.ParentId != null)
-            {
-                headers.Set(B3HttpHeaderNames.B3ParentId, context.ParentId?.ToString("x16", InvariantCulture));
-            }
-
-            var samplingHeader = GetSamplingHeader(context);
-            if (samplingHeader.HasValue)
-            {
-                headers.Set(samplingHeader.Value.Key, samplingHeader.Value.Value);
-            }
-        }
 
         public void Inject<T>(SpanContext context, T carrier, Action<T, string, string> setter)
         {
@@ -83,32 +52,6 @@ namespace Datadog.Trace.Propagation
             }
         }
 
-        /// <summary>
-        /// Extracts a <see cref="SpanContext"/> from the values found in the specified headers.
-        /// </summary>
-        /// <param name="headers">The headers that contain the values to be extracted.</param>
-        /// <returns>A new <see cref="SpanContext"/> that contains the values obtained from <paramref name="headers"/>.</returns>
-        public SpanContext Extract(IHeadersCollection headers)
-        {
-            if (headers == null)
-            {
-                throw new ArgumentNullException(nameof(headers));
-            }
-
-            var traceId = ParseHexUInt64(headers, B3HttpHeaderNames.B3TraceId);
-
-            if (traceId == 0)
-            {
-                // a valid traceId is required to use distributed tracing
-                return null;
-            }
-
-            var spanId = ParseHexUInt64(headers, B3HttpHeaderNames.B3SpanId);
-            var samplingPriority = ParseB3Sampling(headers);
-
-            return new SpanContext(traceId, spanId, samplingPriority);
-        }
-
         public SpanContext Extract<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
         {
             if (carrier == null) { throw new ArgumentNullException(nameof(carrier)); }
@@ -129,22 +72,10 @@ namespace Datadog.Trace.Propagation
             return new SpanContext(traceId, spanId, samplingPriority);
         }
 
-        private static ulong ParseHexUInt64(IHeadersCollection headers, string headerName)
-        {
-            var headerValues = headers.GetValues(headerName).ToList();
-
-            return ParseHexUnit64(headerValues, headerName);
-        }
-
         private static ulong ParseHexUInt64<T>(T carrier, Func<T, string, IEnumerable<string>> getter, string headerName)
         {
             var headerValues = getter(carrier, headerName);
 
-            return ParseHexUnit64(headerValues, headerName);
-        }
-
-        private static ulong ParseHexUnit64(IEnumerable<string> headerValues, string headerName)
-        {
             if (headerValues.Any())
             {
                 foreach (var headerValue in headerValues)
@@ -161,26 +92,10 @@ namespace Datadog.Trace.Propagation
             return 0;
         }
 
-        private static SamplingPriority? ParseB3Sampling(IHeadersCollection headers)
-        {
-            var debugged = headers.GetValues(B3HttpHeaderNames.B3Flags);
-            var sampled = headers.GetValues(B3HttpHeaderNames.B3Sampled);
-
-            return ParseB3Sampling(debugged, sampled);
-        }
-
         private static SamplingPriority? ParseB3Sampling<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
         {
-            var debugged = getter(carrier, B3HttpHeaderNames.B3Flags);
-            var sampled = getter(carrier, B3HttpHeaderNames.B3Sampled);
-
-            return ParseB3Sampling(debugged, sampled);
-        }
-
-        private static SamplingPriority? ParseB3Sampling(IEnumerable<string> debuggedValues, IEnumerable<string> sampledValues)
-        {
-            var debugged = debuggedValues.ToList();
-            var sampled = sampledValues.ToList();
+            var debugged = getter(carrier, B3HttpHeaderNames.B3Flags).ToList();
+            var sampled = getter(carrier, B3HttpHeaderNames.B3Sampled).ToList();
 
             if (debugged.Count != 0 && (debugged[0] == "0" || debugged[0] == "1"))
             {
