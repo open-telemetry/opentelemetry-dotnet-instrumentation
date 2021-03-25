@@ -88,7 +88,13 @@ namespace Samples.WebRequest
 
         private static void HandleHttpRequests(object state)
         {
-            var expectedHeaders = new[] { DDHttpHeaderNames.TraceId, DDHttpHeaderNames.ParentId, DDHttpHeaderNames.SamplingPriority };
+            var expectedHeaders = new[] {
+                // Datadog headers
+                DDHttpHeaderNames.TraceId, DDHttpHeaderNames.ParentId, DDHttpHeaderNames.SamplingPriority,
+
+                // B3 headers
+                B3HttpHeaderNames.B3TraceId, B3HttpHeaderNames.B3SpanId, B3HttpHeaderNames.B3ParentId, B3HttpHeaderNames.B3Sampled
+            };
 
             var listener = (HttpListener)state;
 
