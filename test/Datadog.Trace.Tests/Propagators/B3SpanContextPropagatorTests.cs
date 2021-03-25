@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Linq;
 using Datadog.Trace.Conventions;
 using Datadog.Trace.Headers;
 using Datadog.Trace.Propagation;
@@ -184,19 +183,6 @@ namespace Datadog.Trace.Tests.Propagators
             }
 
             return headers;
-        }
-
-        private static void AssertExpected(IHeadersCollection headers, string key, string expected)
-        {
-            var matches = headers.GetValues(key);
-            Assert.Single(matches);
-            matches.ToList().ForEach(x => Assert.Equal(expected, x));
-        }
-
-        private static void AssertMissing(IHeadersCollection headers, string key)
-        {
-            var matches = headers.GetValues(key);
-            Assert.Empty(matches);
         }
     }
 }

@@ -58,16 +58,10 @@ namespace Datadog.Trace.Configuration
                 TraceEnabled = false;
             }
 
-            var disabledIntegrationNames = source?.GetString(ConfigurationKeys.DisabledIntegrations)
-                                                 ?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries) ??
-                                           Enumerable.Empty<string>();
-
+            var disabledIntegrationNames = source.GetStrings(ConfigurationKeys.DisabledIntegrations);
             DisabledIntegrationNames = new HashSet<string>(disabledIntegrationNames, StringComparer.OrdinalIgnoreCase);
 
-            var adonetExcludedTypes = source?.GetString(ConfigurationKeys.AdoNetExcludedTypes)
-                                                 ?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries) ??
-                                           Enumerable.Empty<string>();
-
+            var adonetExcludedTypes = source.GetStrings(ConfigurationKeys.AdoNetExcludedTypes);
             AdoNetExcludedTypes = new HashSet<string>(adonetExcludedTypes, StringComparer.OrdinalIgnoreCase);
 
             Integrations = new IntegrationSettingsCollection(source);
@@ -166,15 +160,9 @@ namespace Datadog.Trace.Configuration
                                           // default value
                                           true;
 
-            Enum.TryParse(source?.GetString(ConfigurationKeys.Exporter) ?? "default", ignoreCase: true, out ExporterType exporterType);
-            Exporter = exporterType;
-
-            Enum.TryParse(source?.GetString(ConfigurationKeys.Convention) ?? "default", ignoreCase: true, out ConventionType conventionType);
-            Convention = conventionType;
-
-            // Todo: Add support for multiple propagators
-            Enum.TryParse(source?.GetString(ConfigurationKeys.Propagators) ?? "default", ignoreCase: true, out PropagatorType propagatorType);
-            Propagator = propagatorType;
+            Exporter = source.GetTypedValue<ExporterType>(ConfigurationKeys.Exporter);
+            Convention = source.GetTypedValue<ConventionType>(ConfigurationKeys.Convention);
+            Propagators = source.GetTypedValues<PropagatorType>(ConfigurationKeys.Propagators);
 
             var httpServerErrorStatusCodes = source?.GetString(ConfigurationKeys.HttpServerErrorStatusCodes) ??
                                            // Default value
@@ -364,11 +352,11 @@ namespace Datadog.Trace.Configuration
         public ConventionType Convention { get; set; }
 
         /// <summary>
-        /// Gets or sets the propagator logic to be used.
+        /// Gets or sets the propagators be used.
         /// Default is <c>Datadog</c>
         /// <seealso cref="ConfigurationKeys.Propagators"/>
         /// </summary>
-        public PropagatorType Propagator { get; set; }
+        public HashSet<PropagatorType> Propagators { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether runtime metrics

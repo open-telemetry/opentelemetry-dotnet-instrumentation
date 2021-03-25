@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.Conventions;
 
@@ -16,12 +17,17 @@ namespace Datadog.Trace.Propagation
                 { PropagatorType.Default, convention => new DDSpanContextPropagator(convention) },
             };
 
-        public static IPropagator BuildPropagator(PropagatorType propagator, ITraceIdConvention traceIdConvention)
+        public static ICollection<IPropagator> BuildPropagators(IEnumerable<PropagatorType> propagatorTypes, ITraceIdConvention traceIdConvention)
         {
-            if (PropagatorSelector.TryGetValue(propagator, out Func<ITraceIdConvention, IPropagator> getter))
+            return propagatorTypes.Select(type => BuildPropagator(type, traceIdConvention)).ToList();
+        }
+
+        public static IPropagator BuildPropagator(PropagatorType propagatorType, ITraceIdConvention traceIdConvention)
+        {
+            if (PropagatorSelector.TryGetValue(propagatorType, out Func<ITraceIdConvention, IPropagator> getter))
             {
                 // W3C propagator requires Otel TraceId convention as it's specification clearly states lengths of traceId and spanId values in the header.
-                if (propagator == PropagatorType.W3C && traceIdConvention is not OtelTraceIdConvention)
+                if (propagatorType == PropagatorType.W3C && traceIdConvention is not OtelTraceIdConvention)
                 {
                     throw new NotSupportedException($"'{PropagatorType.W3C}' propagator requires '{ConventionType.OpenTelemetry}' convention to be set");
                 }
@@ -29,7 +35,7 @@ namespace Datadog.Trace.Propagation
                 return getter(traceIdConvention);
             }
 
-            throw new InvalidOperationException($"There is no propagator registered for type '{propagator}'");
+            throw new InvalidOperationException($"There is no propagator registered for type '{propagatorType}'");
         }
     }
 }
