@@ -32,7 +32,6 @@ namespace Datadog.Trace
         {
             Tags = tags ?? new CommonTags();
             Context = context;
-            ServiceName = context.ServiceName;
             StartTime = start ?? Context.TraceContext.UtcNow;
 
             Log.Debug(
