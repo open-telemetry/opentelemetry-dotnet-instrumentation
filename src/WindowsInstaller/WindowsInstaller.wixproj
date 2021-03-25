@@ -17,7 +17,7 @@
     <IntermediateOutputPath>obj\$(Configuration)\$(Platform)\</IntermediateOutputPath>
     <SuppressPdbOutput>True</SuppressPdbOutput>
     <DefineSolutionProperties>false</DefineSolutionProperties>
-    <OutputName>datadog-dotnet-apm-1.24.0-$(Platform)</OutputName>
+    <OutputName>opentelemetry-dotnet-autoinstrumentation-1.24.0-$(Platform)</OutputName>
     <TracerHomeDirectory Condition="'$(TracerHomeDirectory)' == ''">$(MSBuildThisFileDirectory)..\bin\tracer-home</TracerHomeDirectory>
     <DefineConstants>InstallerVersion=1.24.0;TracerHomeDirectory=$(TracerHomeDirectory)</DefineConstants>
   </PropertyGroup>
@@ -46,7 +46,7 @@
   <ItemGroup>
     <Content Include="banner.bmp" />
     <Content Include="build.ps1" />
-    <Content Include="datadog-icon.ico" />
+    <Content Include="opentelemetry-icon.ico" />
     <Content Include="dialog.bmp" />
     <Content Include="Config.wxi" />
     <Content Include="license.rtf" />
