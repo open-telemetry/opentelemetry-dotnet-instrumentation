@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using Datadog.Trace.ExtensionMethods;
 
 namespace Datadog.Trace.Configuration
@@ -69,7 +70,7 @@ namespace Datadog.Trace.Configuration
         {
             string value = GetString(key);
 
-            return double.TryParse(value, out double result)
+            return double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out double result)
                        ? result
                        : (double?)null;
         }

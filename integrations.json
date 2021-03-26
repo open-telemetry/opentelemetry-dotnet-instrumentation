@@ -3555,7 +3555,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=1.24.0.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.Wcf.ChannelHandlerIntegration",
           "action": "CallTargetModification"
         }
