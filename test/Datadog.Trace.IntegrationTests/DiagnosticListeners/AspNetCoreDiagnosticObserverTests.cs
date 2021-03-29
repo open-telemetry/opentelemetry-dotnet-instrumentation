@@ -97,7 +97,7 @@ namespace Datadog.Trace.IntegrationTests.DiagnosticListeners
             Assert.Equal(SpanKinds.Server, span.GetTag(Tags.SpanKind));
             Assert.Equal(TracerConstants.Language, span.GetTag(Tags.Language));
             Assert.Equal(((int)statusCode).ToString(), span.GetTag(Tags.HttpStatusCode));
-            Assert.Equal(isError, span.Error);
+            Assert.Equal(isError, span.Status.StatusCode == StatusCode.Error);
 
             if (expectedTags is not null)
             {
