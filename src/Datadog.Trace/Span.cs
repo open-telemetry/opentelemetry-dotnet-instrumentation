@@ -59,9 +59,9 @@ namespace Datadog.Trace
         public string Type { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this span represents an error
+        /// Gets or sets the span's execution status
         /// </summary>
-        public bool Error { get; set; }
+        public SpanStatus Status { get; set; }
 
         /// <summary>
         /// Gets or sets the service name.
@@ -112,7 +112,7 @@ namespace Datadog.Trace
             sb.AppendLine($"Type: {Type}");
             sb.AppendLine($"Start: {StartTime}");
             sb.AppendLine($"Duration: {Duration}");
-            sb.AppendLine($"Error: {Error}");
+            sb.AppendLine($"Status: {Status}");
             sb.AppendLine($"Meta: {Tags}");
 
             return sb.ToString();
@@ -278,8 +278,6 @@ namespace Datadog.Trace
         /// <param name="exception">The exception.</param>
         public void SetException(Exception exception)
         {
-            Error = true;
-
             if (exception != null)
             {
                 // for AggregateException, use the first inner exception until we can support multiple errors.
@@ -290,9 +288,14 @@ namespace Datadog.Trace
                     exception = aggregateException.InnerExceptions[0];
                 }
 
+                Status = SpanStatus.Error.WithDescription(exception.Message);
                 SetTag(Trace.Tags.ErrorMsg, exception.Message);
                 SetTag(Trace.Tags.ErrorStack, exception.ToString());
                 SetTag(Trace.Tags.ErrorType, exception.GetType().ToString());
+            }
+            else
+            {
+                Status = SpanStatus.Error;
             }
         }
 

@@ -18,7 +18,7 @@ namespace Datadog.Trace.Agent.MessagePack
                 len++;
             }
 
-            if (value.Error)
+            if (value.Status.StatusCode == StatusCode.Error)
             {
                 len++;
             }
@@ -59,7 +59,7 @@ namespace Datadog.Trace.Agent.MessagePack
                 offset += MessagePackBinary.WriteUInt64(ref bytes, offset, (ulong)value.Context.ParentId);
             }
 
-            if (value.Error)
+            if (value.Status.StatusCode == StatusCode.Error)
             {
                 offset += MessagePackBinary.WriteString(ref bytes, offset, "error");
                 offset += MessagePackBinary.WriteByte(ref bytes, offset, 1);

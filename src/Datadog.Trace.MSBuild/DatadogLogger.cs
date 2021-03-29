@@ -133,7 +133,7 @@ namespace Datadog.Trace.MSBuild
                 _buildSpan.SetTag(BuildTags.BuildStatus, e.Succeeded ? BuildTags.BuildSucceededStatus : BuildTags.BuildFailedStatus);
                 if (!e.Succeeded)
                 {
-                    _buildSpan.Error = true;
+                    _buildSpan.Status = SpanStatus.Error;
                 }
 
                 _buildSpan.SetTag(BuildTags.BuildEndMessage, e.Message);
@@ -202,7 +202,7 @@ namespace Datadog.Trace.MSBuild
                     projectSpan.SetTag(BuildTags.BuildStatus, e.Succeeded ? BuildTags.BuildSucceededStatus : BuildTags.BuildFailedStatus);
                     if (!e.Succeeded)
                     {
-                        projectSpan.Error = true;
+                        projectSpan.Status = SpanStatus.Error;
                     }
 
                     projectSpan.SetTag(BuildTags.BuildEndMessage, e.Message);
@@ -242,7 +242,7 @@ namespace Datadog.Trace.MSBuild
                     string stack = null;
                     string subCategory = e.Subcategory;
 
-                    projectSpan.Error = true;
+                    projectSpan.Status = SpanStatus.Error.WithDescription(message);
                     projectSpan.SetTag(BuildTags.ErrorMessage, message);
                     projectSpan.SetTag(BuildTags.ErrorType, type);
                     projectSpan.SetTag(BuildTags.ErrorCode, code);

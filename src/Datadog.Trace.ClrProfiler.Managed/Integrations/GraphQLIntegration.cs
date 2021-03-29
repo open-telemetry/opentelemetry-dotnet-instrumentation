@@ -307,9 +307,9 @@ namespace Datadog.Trace.ClrProfiler.Integrations
 
             if (errorCount > 0)
             {
-                span.Error = true;
-
-                span.SetTag(Trace.Tags.ErrorMsg, $"{errorCount} error(s)");
+                var message = $"{errorCount} error(s)";
+                span.Status = SpanStatus.Error.WithDescription(message);
+                span.SetTag(Trace.Tags.ErrorMsg, message);
                 span.SetTag(Trace.Tags.ErrorType, errorType);
                 span.SetTag(Trace.Tags.ErrorStack, ConstructErrorMessage(executionErrors));
             }
