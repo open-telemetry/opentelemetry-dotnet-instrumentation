@@ -18,9 +18,9 @@ variables:
   buildConfiguration: Release
   dotnetCoreSdk5Version: 5.0.103
   tracerHome: $(System.DefaultWorkingDirectory)/src/bin/windows-tracer-home
-  ddApiKey: $(DD_API_KEY)
+  ddApiKey: $(OTEL_API_KEY)
   isMainBranch: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
-  DD_DOTNET_TRACER_MSBUILD:
+  OTEL_DOTNET_TRACER_MSBUILD:
 
 # Declare the datadog agent as a resource to be used as a pipeline service
 resources:
@@ -30,8 +30,8 @@ resources:
     ports:
     - 8126:8126
     env:
-      DD_API_KEY: $(ddApiKey)
-      DD_INSIDE_CI: true
+      OTEL_API_KEY: $(ddApiKey)
+      OTEL_INSIDE_CI: true
 
 # Stages
 stages:
@@ -118,7 +118,7 @@ stages:
 
     # this triggers a dependency chain that builds all the managed, x64, and x86 dlls, and the zip and msi files
     # Outputs include:
-    # - Windows Datadog.Trace.ClrProfiler.Native.dll (x86 and x64)
+    # - Windows OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll (x86 and x64)
     # - Windows MSI (x86 and x64)
     # - Windows tracer home directory
     - task: MSBuild@1
@@ -343,7 +343,7 @@ stages:
         arguments: --configuration $(buildConfiguration) /nowarn:netsdk1138
         projects: test/**/*.Tests.csproj
       env:
-        DD_SERVICE: dd-trace-dotnet
+        OTEL_SERVICE: dd-trace-dotnet
 
     - task: DotNetCoreCLI@2
       displayName: dotnet test
@@ -352,7 +352,7 @@ stages:
         arguments: --configuration $(buildConfiguration) --no-build
         projects: test/**/*.Tests.csproj
       env:
-        DD_SERVICE: dd-trace-dotnet
+        OTEL_SERVICE: dd-trace-dotnet
 
   - job: unit_tests_managed_linux_arm64
     pool: Arm64
@@ -375,7 +375,7 @@ stages:
         arguments: --configuration $(buildConfiguration)
         projects: test/**/*.Tests.csproj
       env:
-        DD_SERVICE: dd-trace-dotnet
+        OTEL_SERVICE: dd-trace-dotnet
 
   - job: native_unit_tests_windows
     pool:
@@ -887,8 +887,8 @@ stages:
         projects: '$(System.DefaultWorkingDirectory)/test/benchmarks/Benchmarks.Trace/Benchmarks.Trace.csproj'
         arguments: '-c $(buildConfiguration) -f netcoreapp3.1 -- -r net472 netcoreapp3.1 -m -f * --iterationTime 2000'
       env:
-        DD_ENV: CI
-        DD_SERVICE: dd-trace-dotnet
+        OTEL_ENV: CI
+        OTEL_SERVICE: dd-trace-dotnet
 
     - task: PowerShell@2
       inputs:
@@ -979,7 +979,7 @@ stages:
         arguments: --configuration $(buildConfiguration) /nowarn:netsdk1138
         projects: src/Datadog.Trace.Tools.Runner/Datadog.Trace.Tools.Runner.Tool.csproj
       env:
-        DD_SERVICE: dd-trace-dotnet-runner-tool
+        OTEL_SERVICE: dd-trace-dotnet-runner-tool
 
     - task: DotNetCoreCLI@2
       displayName: standalone build win-x86
@@ -991,7 +991,7 @@ stages:
         projects: src/Datadog.Trace.Tools.Runner/Datadog.Trace.Tools.Runner.Standalone.csproj
         arguments: --configuration $(buildConfiguration) --framework netcoreapp3.1 --runtime win-x86
       env:
-        DD_SERVICE: dd-trace-dotnet-runner-tool
+        OTEL_SERVICE: dd-trace-dotnet-runner-tool
 
     - task: DotNetCoreCLI@2
       displayName: standalone build win-x64
@@ -1003,7 +1003,7 @@ stages:
         projects: src/Datadog.Trace.Tools.Runner/Datadog.Trace.Tools.Runner.Standalone.csproj
         arguments: --configuration $(buildConfiguration) --framework netcoreapp3.1 --runtime win-x64
       env:
-        DD_SERVICE: dd-trace-dotnet-runner-tool
+        OTEL_SERVICE: dd-trace-dotnet-runner-tool
 
     - task: DotNetCoreCLI@2
       displayName: standalone build linux-x64
@@ -1015,7 +1015,7 @@ stages:
         projects: src/Datadog.Trace.Tools.Runner/Datadog.Trace.Tools.Runner.Standalone.csproj
         arguments: --configuration $(buildConfiguration) --framework netcoreapp3.1 --runtime linux-x64
       env:
-        DD_SERVICE: dd-trace-dotnet-runner-tool
+        OTEL_SERVICE: dd-trace-dotnet-runner-tool
 
     - task: DotNetCoreCLI@2
       displayName: standalone build linux-musl-x64
@@ -1027,7 +1027,7 @@ stages:
         projects: src/Datadog.Trace.Tools.Runner/Datadog.Trace.Tools.Runner.Standalone.csproj
         arguments: --configuration $(buildConfiguration) --framework netcoreapp3.1 --runtime linux-musl-x64
       env:
-        DD_SERVICE: dd-trace-dotnet-runner-tool
+        OTEL_SERVICE: dd-trace-dotnet-runner-tool
 
     - task: DotNetCoreCLI@2
       displayName: standalone build linux-osx-x64
@@ -1039,7 +1039,7 @@ stages:
         projects: src/Datadog.Trace.Tools.Runner/Datadog.Trace.Tools.Runner.Standalone.csproj
         arguments: --configuration $(buildConfiguration) --framework netcoreapp3.1 --runtime osx-x64
       env:
-        DD_SERVICE: dd-trace-dotnet-runner-tool
+        OTEL_SERVICE: dd-trace-dotnet-runner-tool
 
     - task: DeleteFiles@1
       displayName: 'Remove unneeded files'
@@ -1192,4 +1192,4 @@ stages:
         ./run.sh
       displayName: Crank
       env:
-        DD_SERVICE: dd-trace-dotnet
+        OTEL_SERVICE: dd-trace-dotnet

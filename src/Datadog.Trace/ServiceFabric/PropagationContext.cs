@@ -1,4 +1,4 @@
-using System.Diagnostics;
+#nullable enable
 
 namespace Datadog.Trace.ServiceFabric
 {
