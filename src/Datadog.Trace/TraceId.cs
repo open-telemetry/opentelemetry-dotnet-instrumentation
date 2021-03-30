@@ -11,22 +11,21 @@ namespace Datadog.Trace
     public readonly struct TraceId : IEquatable<TraceId>
     {
         private readonly bool _isDataDogCompatible;
-        private readonly ulong _higher;
         private readonly string _string;
 
-        private TraceId(ulong higher, ulong lower)
+        private TraceId(long higher, long lower)
         {
             _isDataDogCompatible = false;
-            _higher = higher;
+            Higher = higher;
             Lower = lower;
-            _string = $"{_higher:x16}{Lower:x16}";
+            _string = $"{Higher:x16}{Lower:x16}";
         }
 
         private TraceId(ulong lower)
         {
             _isDataDogCompatible = true;
-            _higher = 0;
-            Lower = lower;
+            Higher = 0;
+            Lower = (long)lower;
             _string = Lower.ToString(CultureInfo.InvariantCulture);
         }
 
@@ -36,9 +35,14 @@ namespace Datadog.Trace
         public static TraceId Zero => new(lower: 0);
 
         /// <summary>
-        /// Gets lower 64 bits of 128 bit traceID or the whole 64 bit traceID.
+        /// Gets higher 64 bits of 128 bit traceID.
         /// </summary>
-        public ulong Lower { get; }
+        public long Higher { get; }
+
+        /// <summary>
+        /// Gets lower 64 bits of 128 bit traceID.
+        /// </summary>
+        public long Lower { get; }
 
         /// <summary>
         /// Indicates if two specified instances of TraceId are not equal.
@@ -75,8 +79,8 @@ namespace Datadog.Trace
             Unsafe.WriteUnaligned(ref higherBytes[0],  randomNumberGenerator.Next());
             Unsafe.WriteUnaligned(ref lowerBytes[0], randomNumberGenerator.Next());
 
-            var higher = (ulong)BitConverter.ToInt64(higherBytes, startIndex: 0) & 0x7FFFFFFFFFFFFFFF;
-            var lower = (ulong)BitConverter.ToInt64(lowerBytes, startIndex: 0) & 0x7FFFFFFFFFFFFFFF;
+            var higher = BitConverter.ToInt64(higherBytes, startIndex: 0) & 0x7FFFFFFFFFFFFFFF;
+            var lower = BitConverter.ToInt64(lowerBytes, startIndex: 0) & 0x7FFFFFFFFFFFFFFF;
 
             return new TraceId(higher, lower);
         }
@@ -110,8 +114,8 @@ namespace Datadog.Trace
                 {
                     case 16:
                     {
-                        var lower = Convert.ToUInt64(id, fromBase: 16);
-                        return new TraceId(lower);
+                        var lower = Convert.ToInt64(id, fromBase: 16);
+                        return new TraceId(higher: 0, lower);
                     }
 
                     case 32:
@@ -119,8 +123,8 @@ namespace Datadog.Trace
                         var higherAsString = id.Substring(startIndex: 0, length: 16);
                         var lowerAsString = id.Substring(startIndex: 16, length: 16);
 
-                        var higher = Convert.ToUInt64(higherAsString, fromBase: 16);
-                        var lower = Convert.ToUInt64(lowerAsString, fromBase: 16);
+                        var higher = Convert.ToInt64(higherAsString, fromBase: 16);
+                        var lower = Convert.ToInt64(lowerAsString, fromBase: 16);
 
                         return new TraceId(higher, lower);
                     }
@@ -156,7 +160,7 @@ namespace Datadog.Trace
         }
 
         /// <summary>
-        /// Creates 128 bit traceId from given int.
+        /// Creates 64 bit DataDog compatible traceId from given int.
         /// </summary>
         /// <param name="id">Int32 ID to be parsed.</param>
         /// <returns>Instance of <see cref="TraceId"/> representing the same traceId as the passed int.</returns>
@@ -166,7 +170,7 @@ namespace Datadog.Trace
         }
 
         /// <summary>
-        /// Creates 128 bit traceId from given ulong.
+        /// Creates 64 bit DataDog compatible traceId from given ulong.
         /// </summary>
         /// <param name="id">Ulong ID to be parsed.</param>
         /// <returns>Instance of <see cref="TraceId"/> representing the same traceId as the passed ulong.</returns>
@@ -202,13 +206,13 @@ namespace Datadog.Trace
         /// <returns>True if TraceIds are equal, false otherwise.</returns>
         public bool Equals(TraceId other)
         {
-            return Lower == other.Lower && _higher == other._higher && _isDataDogCompatible == other._isDataDogCompatible;
+            return Lower == other.Lower && Higher == other.Higher && _isDataDogCompatible == other._isDataDogCompatible;
         }
 
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return HashCode.Combine(_higher, Lower, _isDataDogCompatible);
+            return HashCode.Combine(Higher, Lower, _isDataDogCompatible);
         }
     }
 }

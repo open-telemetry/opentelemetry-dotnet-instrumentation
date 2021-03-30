@@ -71,7 +71,7 @@ namespace Datadog.Trace.TestHelpers
 
         public static void AssertSpanEqual(Span expected, MessagePackObject actual)
         {
-            Assert.Equal(expected.Context.TraceId.Lower, actual.TraceId());
+            Assert.Equal((ulong)expected.Context.TraceId.Lower, actual.TraceId());
             Assert.Equal(expected.Context.SpanId, actual.SpanId());
             if (expected.Context.ParentId.HasValue)
             {
