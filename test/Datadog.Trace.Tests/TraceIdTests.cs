@@ -48,7 +48,7 @@ namespace Datadog.Trace.Tests
         [Fact]
         public void CreateRandom64Bit_CreatesValid64BitId()
         {
-            var traceId = TraceId.CreateRandom64Bit();
+            var traceId = TraceId.CreateRandomDataDogCompatible();
 
             using (new AssertionScope())
             {
@@ -82,31 +82,31 @@ namespace Datadog.Trace.Tests
         [Fact]
         public void Equals_WorksCorrectlyFor64BitId()
         {
-            var traceId1 = TraceId.CreateRandom64Bit();
-            var traceId2 = TraceId.CreateRandom64Bit();
+            var traceId1 = TraceId.CreateRandomDataDogCompatible();
+            var traceId2 = TraceId.CreateRandomDataDogCompatible();
 
             using (new AssertionScope())
             {
-                traceId1.Should().Be(TraceId.CreateFromDecimalString(traceId1.ToString()));
-                traceId1.GetHashCode().Should().Be(TraceId.CreateFromDecimalString(traceId1.ToString()).GetHashCode());
-                traceId2.Should().Be(TraceId.CreateFromDecimalString(traceId2.ToString()));
-                traceId2.GetHashCode().Should().Be(TraceId.CreateFromDecimalString(traceId2.ToString()).GetHashCode());
-                traceId1.Should().NotBe(TraceId.CreateFromDecimalString(traceId2.ToString()));
-                traceId2.Should().NotBe(TraceId.CreateFromDecimalString(traceId1.ToString()));
+                traceId1.Should().Be(TraceId.CreateDataDogCompatibleFromDecimalString(traceId1.ToString()));
+                traceId1.GetHashCode().Should().Be(TraceId.CreateDataDogCompatibleFromDecimalString(traceId1.ToString()).GetHashCode());
+                traceId2.Should().Be(TraceId.CreateDataDogCompatibleFromDecimalString(traceId2.ToString()));
+                traceId2.GetHashCode().Should().Be(TraceId.CreateDataDogCompatibleFromDecimalString(traceId2.ToString()).GetHashCode());
+                traceId1.Should().NotBe(TraceId.CreateDataDogCompatibleFromDecimalString(traceId2.ToString()));
+                traceId2.Should().NotBe(TraceId.CreateDataDogCompatibleFromDecimalString(traceId1.ToString()));
             }
         }
 
         [Fact]
         public void Equals_WorksCorrectlyBetween64And128BitIds()
         {
-            var traceId1 = TraceId.CreateRandom64Bit();
+            var traceId1 = TraceId.CreateRandomDataDogCompatible();
             var traceId2 = TraceId.CreateFromString(TraceId.Zero.Lower.ToString("x16") + traceId1.Lower.ToString("x16"));
 
             using (new AssertionScope())
             {
                 traceId1.Lower.Should().Be(traceId2.Lower);
                 traceId1.Should().NotBe(TraceId.CreateFromString(traceId2.ToString()));
-                traceId2.Should().NotBe(TraceId.CreateFromDecimalString(traceId1.ToString()));
+                traceId2.Should().NotBe(TraceId.CreateDataDogCompatibleFromDecimalString(traceId1.ToString()));
                 traceId1.GetHashCode().Should().NotBe(traceId2.GetHashCode());
             }
         }

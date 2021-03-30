@@ -5,17 +5,18 @@ using System.Runtime.CompilerServices;
 namespace Datadog.Trace
 {
     /// <summary>
-    /// Class representing 64 or 128 bit TraceID.
+    /// Class representing 64 or 128 bit TraceID. 64 bit representation is compatible with DataDog conventions (parsed from and to decimal representation).
+    /// 128 bit representation is compatible with OpenTelemetry conventions (parsed from and to hexadecimal representation).
     /// </summary>
     public readonly struct TraceId : IEquatable<TraceId>
     {
-        private readonly bool _is64Bit;
+        private readonly bool _isDataDogCompatible;
         private readonly ulong _higher;
         private readonly string _string;
 
         private TraceId(ulong higher, ulong lower)
         {
-            _is64Bit = false;
+            _isDataDogCompatible = false;
             _higher = higher;
             Lower = lower;
             _string = $"{_higher:x16}{Lower:x16}";
@@ -23,7 +24,7 @@ namespace Datadog.Trace
 
         private TraceId(ulong lower)
         {
-            _is64Bit = true;
+            _isDataDogCompatible = true;
             _higher = 0;
             Lower = lower;
             _string = Lower.ToString(CultureInfo.InvariantCulture);
@@ -81,10 +82,10 @@ namespace Datadog.Trace
         }
 
         /// <summary>
-        /// Creates random 64 bit traceId.
+        /// Creates random DataDog compatible 64 bit traceId.
         /// </summary>
         /// <returns>Instance of randomly generated <see cref="TraceId"/>.</returns>
-        public static TraceId CreateRandom64Bit()
+        public static TraceId CreateRandomDataDogCompatible()
         {
             var lowerBytes = new byte[8];
 
@@ -137,11 +138,11 @@ namespace Datadog.Trace
         }
 
         /// <summary>
-        /// Creates traceId from given string representing 64bit traceId in decimal format.
+        /// Creates DataDog compatible traceId from given string representing 64bit traceId in decimal format.
         /// </summary>
         /// <param name="id">String ID to be parsed.</param>
         /// <returns>Instance of 64bit <see cref="TraceId"/> representing the same traceId as the passed string.</returns>
-        public static TraceId CreateFromDecimalString(string id)
+        public static TraceId CreateDataDogCompatibleFromDecimalString(string id)
         {
             try
             {
@@ -175,9 +176,10 @@ namespace Datadog.Trace
         }
 
         /// <summary>
-        /// Returns hex representation of TraceId as a string (this is in decimal format for 64bit and hex for 128bit).
+        /// For Datadog compatible traceId this returns decimal representation of the 64 bit id.
+        /// For OpenTelemetry compatible traceId this returns hexadecimal representation of the 128 bit id.
         /// </summary>
-        /// <returns>Hex representation of TraceId as a string.</returns>
+        /// <returns>Depending on the traceId compatibility - dec or hex representation of <see cref="TraceId"/> as a string.</returns>
         public override string ToString() => _string;
 
         /// <inheritdoc/>
@@ -200,13 +202,13 @@ namespace Datadog.Trace
         /// <returns>True if TraceIds are equal, false otherwise.</returns>
         public bool Equals(TraceId other)
         {
-            return Lower == other.Lower && _higher == other._higher && _is64Bit == other._is64Bit;
+            return Lower == other.Lower && _higher == other._higher && _isDataDogCompatible == other._isDataDogCompatible;
         }
 
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return HashCode.Combine(_higher, Lower, _is64Bit);
+            return HashCode.Combine(_higher, Lower, _isDataDogCompatible);
         }
     }
 }
