@@ -344,7 +344,7 @@ namespace Datadog.Trace.DiagnosticListeners
             if (scope != null)
             {
                 // if we had an unhandled exception, the status code is already updated
-                if (!scope.Span.Error && arg.TryDuckCast<HttpRequestInStopStruct>(out var httpRequest))
+                if (scope.Span.Status.StatusCode != StatusCode.Error && arg.TryDuckCast<HttpRequestInStopStruct>(out var httpRequest))
                 {
                     HttpContext httpContext = httpRequest.HttpContext;
                     scope.Span.SetHttpStatusCode(httpContext.Response.StatusCode, isServer: true);
