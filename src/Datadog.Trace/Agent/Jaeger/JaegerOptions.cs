@@ -1,3 +1,5 @@
+using Datadog.Trace.Configuration;
+
 namespace Datadog.Trace.Agent.Jaeger
 {
     /// <summary>
@@ -6,6 +8,22 @@ namespace Datadog.Trace.Agent.Jaeger
     public class JaegerOptions
     {
         internal const int DefaultMaxPayloadSizeInBytes = 4096;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JaegerOptions"/> class.
+        /// </summary>
+        /// <param name="settings"><see cref="TracerSettings"/> to read configuration from</param>
+        public JaegerOptions(TracerSettings settings = null)
+        {
+            if (settings == null)
+            {
+                return;
+            }
+
+            Host = settings.AgentUri.Host;
+            Port = settings.AgentUri.Port;
+            ServiceName = settings.ServiceName;
+        }
 
         /// <summary>
         /// Gets or sets the Service name.

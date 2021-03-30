@@ -89,17 +89,15 @@ namespace Datadog.Trace
             Settings.Freeze();
 
             // if not configured, try to determine an appropriate service name
-            DefaultServiceName = Settings.ServiceName ??
-                                 GetApplicationName() ??
-                                 UnknownServiceName;
+            Settings.ServiceName ??= GetApplicationName() ?? UnknownServiceName;
 
             // only set DogStatsdClient if tracer metrics are enabled
             if (Settings.TracerMetricsEnabled)
             {
-                Statsd = statsd ?? CreateDogStatsdClient(Settings, DefaultServiceName, Settings.DogStatsdPort);
+                Statsd = statsd ?? CreateDogStatsdClient(Settings, Settings.DogStatsdPort);
             }
 
-            _traceWriter = traceWriter ?? CreateTraceWriter(Settings, DefaultServiceName, Statsd);
+            _traceWriter = traceWriter ?? CreateTraceWriter(Settings, Statsd);
 
             switch (Settings.Convention)
             {
@@ -181,7 +179,7 @@ namespace Datadog.Trace
 
                 if (Settings.RuntimeMetricsEnabled)
                 {
-                    _runtimeMetricsWriter = new RuntimeMetricsWriter(Statsd ?? CreateDogStatsdClient(Settings, DefaultServiceName, Settings.DogStatsdPort), TimeSpan.FromSeconds(10));
+                    _runtimeMetricsWriter = new RuntimeMetricsWriter(Statsd ?? CreateDogStatsdClient(Settings, Settings.DogStatsdPort), TimeSpan.FromSeconds(10));
                 }
             }
         }
@@ -225,7 +223,7 @@ namespace Datadog.Trace
         /// <summary>
         /// Gets the default service name for traces where a service name is not specified.
         /// </summary>
-        public string DefaultServiceName { get; }
+        public string DefaultServiceName => Settings.ServiceName;
 
         /// <summary>
         /// Gets this tracer's settings.
@@ -612,7 +610,7 @@ namespace Datadog.Trace
             return false;
         }
 
-        private static IDogStatsd CreateDogStatsdClient(TracerSettings settings, string serviceName, int port)
+        private static IDogStatsd CreateDogStatsdClient(TracerSettings settings, int port)
         {
             try
             {
@@ -622,7 +620,7 @@ namespace Datadog.Trace
                                        $"lang_interpreter:{FrameworkDescription.Instance.Name}",
                                        $"lang_version:{FrameworkDescription.Instance.ProductVersion}",
                                        $"tracer_version:{TracerConstants.AssemblyVersion}",
-                                       $"service:{serviceName}"
+                                       $"service:{settings.ServiceName}"
                                    };
 
                 if (settings.Environment != null)
@@ -664,7 +662,7 @@ namespace Datadog.Trace
             }
         }
 
-        private static ITraceWriter CreateTraceWriter(TracerSettings settings, string serviceName, IDogStatsd statsd)
+        private static ITraceWriter CreateTraceWriter(TracerSettings settings, IDogStatsd statsd)
         {
             IMetrics metrics = statsd != null
                 ? new DogStatsdMetrics(statsd)
@@ -675,20 +673,10 @@ namespace Datadog.Trace
                 case ExporterType.Zipkin:
                     return new ExporterWriter(new ZipkinExporter(settings.AgentUri), metrics);
                 case ExporterType.Jaeger:
-                    return new ExporterWriter(new JaegerExporter(CreateJaegerOptions(settings, serviceName)), metrics);
+                    return new ExporterWriter(new JaegerExporter(new JaegerOptions(settings)), metrics);
                 default:
                     return new AgentWriter(new Api(settings.AgentUri, TransportStrategy.Get(settings), statsd), metrics, maxBufferSize: settings.TraceBufferSize);
             }
-        }
-
-        private static JaegerOptions CreateJaegerOptions(TracerSettings settings, string serviceName)
-        {
-            return new JaegerOptions()
-            {
-                Host = settings.AgentUri.Host,
-                Port = settings.AgentUri.Port,
-                ServiceName = serviceName
-            };
         }
 
         private void InitializeLibLogScopeEventSubscriber(IScopeManager scopeManager, string defaultServiceName, string version, string env)
