@@ -84,7 +84,7 @@ namespace Datadog.Trace.TestHelpers
             Assert.Equal(expected.Type, actual.Type());
             Assert.Equal(expected.StartTime.ToUnixTimeNanoseconds(), actual.StartTime());
             Assert.Equal(expected.Duration.ToNanoseconds(), actual.Duration());
-            if (expected.Error)
+            if (expected.Status.StatusCode == StatusCode.Error)
             {
                 Assert.Equal("1", actual.Error());
             }
