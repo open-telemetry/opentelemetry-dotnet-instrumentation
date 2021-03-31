@@ -319,6 +319,31 @@ namespace Datadog.Trace.Configuration
         public const string HttpClientErrorStatusCodes = "OTEL_HTTP_CLIENT_ERROR_STATUSES";
 
         /// <summary>
+        /// Configuration key for hostname for the Jaeger agent.
+        /// </summary>
+        public const string JaegerExporterAgentHost = "OTEL_EXPORTER_JAEGER_AGENT_HOST";
+
+        /// <summary>
+        /// Configuration key for port for the Jaeger agent.
+        /// </summary>
+        public const string JaegerExporterAgentPort = "OTEL_EXPORTER_JAEGER_AGENT_PORT";
+
+        /// <summary>
+        /// Configuration key for HTTP endpoint for Jaeger traces.
+        /// </summary>
+        public const string JaegerExporterEndpoint = "OTEL_EXPORTER_JAEGER_ENDPOINT";
+
+        /// <summary>
+        /// Configuration key for username to be used for HTTP basic authentication.
+        /// </summary>
+        public const string JaegerExporterUser = "OTEL_EXPORTER_JAEGER_USER";
+
+        /// <summary>
+        /// Configuration key for password to be used for HTTP basic authentication.
+        /// </summary>
+        public const string JaegerExporterPassword = "OTEL_EXPORTER_JAEGER_PASSWORD";
+
+        /// <summary>
         /// String format patterns used to match integration-specific configuration keys.
         /// </summary>
         public static class Integrations

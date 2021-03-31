@@ -677,7 +677,7 @@ namespace Datadog.Trace
                 case ExporterType.Zipkin:
                     return new ExporterWriter(new ZipkinExporter(settings.AgentUri), metrics);
                 case ExporterType.Jaeger:
-                    return new ExporterWriter(new JaegerExporter(new JaegerOptions(settings)), metrics);
+                    return new ExporterWriter(new JaegerExporter(JaegerOptions.FromTracerSettings(settings)), metrics);
                 default:
                     return new AgentWriter(new Api(settings.AgentUri, TransportStrategy.Get(settings), statsd), metrics, maxBufferSize: settings.TraceBufferSize);
             }

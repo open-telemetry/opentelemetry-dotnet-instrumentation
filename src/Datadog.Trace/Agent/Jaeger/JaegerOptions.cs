@@ -1,3 +1,4 @@
+using System;
 using Datadog.Trace.Configuration;
 
 namespace Datadog.Trace.Agent.Jaeger
@@ -8,22 +9,6 @@ namespace Datadog.Trace.Agent.Jaeger
     public class JaegerOptions
     {
         internal const int DefaultMaxPayloadSizeInBytes = 4096;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="JaegerOptions"/> class.
-        /// </summary>
-        /// <param name="settings"><see cref="TracerSettings"/> to read configuration from</param>
-        public JaegerOptions(TracerSettings settings = null)
-        {
-            if (settings == null)
-            {
-                return;
-            }
-
-            Host = settings.AgentUri.Host;
-            Port = settings.AgentUri.Port;
-            ServiceName = settings.ServiceName;
-        }
 
         /// <summary>
         /// Gets or sets the Service name.
@@ -49,5 +34,24 @@ namespace Datadog.Trace.Agent.Jaeger
         /// Gets or sets the network stack exporter. Default exporter: JaegerUdpClient.
         /// </summary>
         internal IJaegerClient TransportClient { get; set; } = new JaegerUdpClient();
+
+        /// <summary>
+        /// Creates an instance of <see cref="JaegerOptions"/> based on passed <see cref="FromTracerSettings"/>.
+        /// </summary>
+        /// <param name="settings"><see cref="TracerSettings"/> to read configuration from</param>
+        /// <returns>New instance of <see cref="JaegerOptions"/></returns>
+        public static JaegerOptions FromTracerSettings(TracerSettings settings)
+        {
+            var agentHost = settings.ConfigurationSource?.GetString(ConfigurationKeys.JaegerExporterAgentHost) ?? "localhost";
+            var agentPort = settings.ConfigurationSource?.GetInt32(ConfigurationKeys.AgentPort) ?? 6831;
+            var agentUri = new Uri(settings.ConfigurationSource?.GetString(ConfigurationKeys.AgentUri) ?? $"http://{agentHost}:{agentPort}");
+
+            return new JaegerOptions
+            {
+                Host = agentUri.Host,
+                Port = agentUri.Port,
+                ServiceName = settings.ServiceName
+            };
+        }
     }
 }
