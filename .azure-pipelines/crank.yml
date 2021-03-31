@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-      - master
+      - main
   paths:
     exclude:
       - docs/*
@@ -9,7 +9,7 @@ trigger:
 pr:
   branches:
     include:
-      - master
+      - main
       - release/*
   paths:
     exclude:
@@ -21,7 +21,7 @@ schedules:
   displayName: Daily 4am (UTC) build
   branches:
     include:
-    - master
+    - main
     - benchmarks/*
   always: true
 

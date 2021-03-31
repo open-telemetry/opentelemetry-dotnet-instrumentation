@@ -9,7 +9,7 @@ schedules:
   displayName: Daily 3am (UTC) build
   branches:
     include:
-    - master
+    - main
     - benchmarks/*
   always: true
 
