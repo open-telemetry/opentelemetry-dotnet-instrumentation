@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Datadog.Trace.Propagation;
 
 namespace Datadog.Trace
 {
@@ -50,7 +51,7 @@ namespace Datadog.Trace
         {
             new(Language, ".NET"),
             new(TracerVersion, TracerConstants.AssemblyVersion),
-            new(HttpHeaderNames.TracingEnabled, "false"), // don't add automatic instrumentation to requests directed to the agent
+            new(CommonHttpHeaderNames.TracingEnabled, "false"), // don't add automatic instrumentation to requests directed to the agent
             new(LanguageInterpreter, FrameworkDescription.Instance.Name),
             new(LanguageVersion, FrameworkDescription.Instance.ProductVersion),
             new(ComputedTopLevelSpan, "1")
