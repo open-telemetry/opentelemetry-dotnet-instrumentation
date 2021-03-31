@@ -44,6 +44,12 @@ namespace Datadog.Trace.OpenTracing
             {
                 _propagator.Inject(spanContext, headers);
             }
+            else
+            {
+                // TODO: Consider using OpenTracing headers
+                headers.Set(DDHttpHeaderNames.TraceId, context.TraceId);
+                headers.Set(DDHttpHeaderNames.ParentId, context.SpanId);
+            }
         }
     }
 }
