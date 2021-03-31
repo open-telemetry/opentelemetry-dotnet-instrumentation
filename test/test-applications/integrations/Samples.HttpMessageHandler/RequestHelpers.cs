@@ -1,11 +1,11 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Datadog.Trace;
+using Datadog.Trace.Propagation;
 
 namespace Samples.HttpMessageHandler
 {
@@ -20,7 +20,7 @@ namespace Samples.HttpMessageHandler
 
             if (tracingDisabled)
             {
-                client.DefaultRequestHeaders.Add(HttpHeaderNames.TracingEnabled, "false");
+                client.DefaultRequestHeaders.Add(CommonHttpHeaderNames.TracingEnabled, "false");
             }
 
             using (Tracer.Instance.StartActive("HttpClientRequestAsync"))
@@ -172,7 +172,7 @@ namespace Samples.HttpMessageHandler
 
             if (tracingDisabled)
             {
-                client.DefaultRequestHeaders.Add(HttpHeaderNames.TracingEnabled, "false");
+                client.DefaultRequestHeaders.Add(CommonHttpHeaderNames.TracingEnabled, "false");
             }
 
             using (Tracer.Instance.StartActive("HttpClientRequest"))
@@ -269,7 +269,7 @@ namespace Samples.HttpMessageHandler
 
             if (tracingDisabled)
             {
-                httpRequest.Headers.Add(HttpHeaderNames.TracingEnabled, "false");
+                httpRequest.Headers.Add(CommonHttpHeaderNames.TracingEnabled, "false");
             }
 
             httpRequest.Method = HttpMethod.Get;

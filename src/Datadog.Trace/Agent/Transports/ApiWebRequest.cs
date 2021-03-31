@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using Datadog.Trace.Propagation;
 
 namespace Datadog.Trace.Agent.Transports
 {

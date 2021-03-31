@@ -14,6 +14,7 @@ using Datadog.Trace.DiagnosticListeners;
 using Datadog.Trace.DogStatsd;
 using Datadog.Trace.Logging;
 using Datadog.Trace.PlatformHelpers;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.RuntimeMetrics;
 using Datadog.Trace.Sampling;
 using Datadog.Trace.Tagging;
@@ -53,6 +54,7 @@ namespace Datadog.Trace
         private readonly Timer _heartbeatTimer;
 
         private readonly ITraceWriter _traceWriter;
+        private readonly IPropagator _propagator;
 
         static Tracer()
         {
@@ -116,6 +118,8 @@ namespace Datadog.Trace
 
             _scopeManager = scopeManager ?? new AsyncLocalScopeManager();
             Sampler = sampler ?? new RuleBasedSampler(new RateLimiter(Settings.MaxTracesSubmittedPerSecond));
+
+            _propagator = ContextPropagatorBuilder.BuildPropagator(Settings.Propagator, TraceIdConvention);
 
             if (!string.IsNullOrWhiteSpace(Settings.CustomSamplingRules))
             {
@@ -244,6 +248,11 @@ namespace Datadog.Trace
         /// </summary>
         ISampler IDatadogTracer.Sampler => Sampler;
 
+        /// <summary>
+        /// Gets the propagator logic <see cref="TracerSettings.Propagator"/>.
+        /// </summary>
+        IPropagator IDatadogTracer.Propagator => _propagator;
+
         internal IDiagnosticManager DiagnosticManager { get; set; }
 
         internal ISampler Sampler { get; }
@@ -253,6 +262,8 @@ namespace Datadog.Trace
         internal IOutboundHttpConvention OutboundHttpConvention { get; }
 
         internal ITraceIdConvention TraceIdConvention { get; }
+
+        internal IPropagator Propagator => _propagator;
 
         /// <summary>
         /// Create a new Tracer with the given parameters

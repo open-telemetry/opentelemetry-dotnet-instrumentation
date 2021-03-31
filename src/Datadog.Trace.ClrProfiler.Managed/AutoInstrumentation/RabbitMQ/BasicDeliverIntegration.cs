@@ -42,6 +42,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.RabbitMQ
             where TBasicProperties : IBasicProperties
             where TBody : IBody // ReadOnlyMemory<byte> body in 6.0.0
         {
+            Tracer tracer = Tracer.Instance;
             SpanContext propagatedContext = null;
 
             // try to extract propagated context values from headers
@@ -49,7 +50,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.RabbitMQ
             {
                 try
                 {
-                    propagatedContext = SpanContextPropagator.Instance.Extract(basicProperties.Headers, ContextPropagation.HeadersGetter);
+                    propagatedContext = tracer.Propagator.Extract(basicProperties.Headers, ContextPropagation.HeadersGetter);
                 }
                 catch (Exception ex)
                 {

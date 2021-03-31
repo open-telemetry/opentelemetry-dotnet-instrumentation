@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Datadog.Trace.Agent.MessagePack;
 using Datadog.Trace.Agent.Transports;
+using Datadog.Trace.Propagation;
 using Xunit;
 
 namespace Datadog.Trace.Tests
@@ -29,7 +30,7 @@ namespace Datadog.Trace.Tests
             Assert.NotNull(message);
             Assert.Equal(".NET", message.Headers.GetValues(AgentHttpHeaderNames.Language).First());
             Assert.Equal(TracerConstants.AssemblyVersion, message.Headers.GetValues(AgentHttpHeaderNames.TracerVersion).First());
-            Assert.Equal("false", message.Headers.GetValues(HttpHeaderNames.TracingEnabled).First());
+            Assert.Equal("false", message.Headers.GetValues(CommonHttpHeaderNames.TracingEnabled).First());
             Assert.Equal("World", message.Headers.GetValues("Hello").First());
         }
 

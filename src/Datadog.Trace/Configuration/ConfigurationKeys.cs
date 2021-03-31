@@ -294,6 +294,13 @@ namespace Datadog.Trace.Configuration
         public const string Convention = "OTEL_CONVENTION";
 
         /// <summary>
+        /// Configuration key for the propagator logic to be used.
+        /// Default is <c>Datadog</c>.
+        /// <seealso cref="TracerSettings.Propagator"/>
+        /// </summary>
+        public const string Propagators = "OTEL_PROPAGATORS";
+
+        /// <summary>
         /// Configuration key for setting the API key, used by the Agent.
         /// This key is here for troubleshooting purposes.
         /// </summary>

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Datadog.Trace.Propagation;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -58,7 +59,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
             using (var httpClient = new HttpClient())
             {
                 // disable tracing for this HttpClient request
-                httpClient.DefaultRequestHeaders.Add(HttpHeaderNames.TracingEnabled, "false");
+                httpClient.DefaultRequestHeaders.Add(CommonHttpHeaderNames.TracingEnabled, "false");
 
                 var response = await httpClient.GetAsync($"http://localhost:{_iisFixture.HttpPort}" + "/Database/Elasticsearch");
                 var content = await response.Content.ReadAsStringAsync();

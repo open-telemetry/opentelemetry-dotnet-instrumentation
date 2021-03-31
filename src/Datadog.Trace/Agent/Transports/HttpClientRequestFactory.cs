@@ -1,6 +1,7 @@
 #if NETCOREAPP
 using System;
 using System.Net.Http;
+using Datadog.Trace.Propagation;
 
 namespace Datadog.Trace.Agent.Transports
 {

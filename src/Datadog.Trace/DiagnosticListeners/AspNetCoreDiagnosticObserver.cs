@@ -8,6 +8,7 @@ using Datadog.Trace.DuckTyping;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Headers;
 using Datadog.Trace.Logging;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.Tagging;
 using Datadog.Trace.Util;
 using Microsoft.AspNetCore.Http;
@@ -210,7 +211,7 @@ namespace Datadog.Trace.DiagnosticListeners
             return $"{request.Scheme}://{NoHostSpecified}{request.PathBase.Value}{request.Path.Value}";
         }
 
-        private static SpanContext ExtractPropagatedContext(HttpRequest request)
+        private static SpanContext ExtractPropagatedContext(IPropagator propagator, HttpRequest request)
         {
             try
             {
@@ -219,7 +220,7 @@ namespace Datadog.Trace.DiagnosticListeners
 
                 if (requestHeaders != null)
                 {
-                    return SpanContextPropagator.Instance.Extract(new HeadersCollectionAdapter(requestHeaders));
+                    return propagator.Extract(new HeadersCollectionAdapter(requestHeaders));
                 }
             }
             catch (Exception ex)
@@ -243,7 +244,7 @@ namespace Datadog.Trace.DiagnosticListeners
 
                     if (requestHeaders != null)
                     {
-                        return SpanContextPropagator.Instance.ExtractHeaderTags(new HeadersCollectionAdapter(requestHeaders), settings.HeaderTags);
+                        return new HeadersCollectionAdapter(requestHeaders).ExtractHeaderTags(settings.HeaderTags);
                     }
                 }
                 catch (Exception ex)
@@ -283,7 +284,8 @@ namespace Datadog.Trace.DiagnosticListeners
 
                 string resourceName = $"{httpMethod} {resourceUrl}";
 
-                SpanContext propagatedContext = ExtractPropagatedContext(request);
+                IPropagator propagator = tracer.Propagator;
+                SpanContext propagatedContext = ExtractPropagatedContext(propagator, request);
                 var tagsFromHeaders = ExtractHeaderTags(request, tracer);
 
                 var tags = new AspNetCoreTags();

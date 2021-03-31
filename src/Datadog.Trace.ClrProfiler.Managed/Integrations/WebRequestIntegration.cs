@@ -6,6 +6,7 @@ using Datadog.Trace.ClrProfiler.Emit;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Logging;
+using Datadog.Trace.Propagation;
 
 namespace Datadog.Trace.ClrProfiler.Integrations
 {
@@ -90,7 +91,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                     // The expected sequence of calls is GetRequestStream -> GetResponse. Headers can't be modified after calling GetRequestStream.
                     // At the same time, we don't want to set an active scope now, because it's possible that GetResponse will never be called.
                     // Instead, we generate a spancontext and inject it in the headers. GetResponse will fetch them and create an active scope with the right id.
-                    SpanContextPropagator.Instance.Inject(spanContext, request.Headers.Wrap());
+                    tracer.Propagator.Inject(spanContext, request.Headers.Wrap());
                 }
             }
 
@@ -159,16 +160,17 @@ namespace Datadog.Trace.ClrProfiler.Integrations
             }
 
             // Check if any headers were injected by a previous call to GetRequestStream
-            var spanContext = SpanContextPropagator.Instance.Extract(request.Headers.Wrap());
+            var tracer = Tracer.Instance;
+            var spanContext = tracer.Propagator.Extract(request.Headers.Wrap());
 
-            using (var scope = ScopeFactory.CreateOutboundHttpScope(Tracer.Instance, request.Method, request.RequestUri, IntegrationId, out var tags, spanContext?.SpanId))
+            using (var scope = ScopeFactory.CreateOutboundHttpScope(tracer, request.Method, request.RequestUri, IntegrationId, out var tags, spanContext?.SpanId))
             {
                 try
                 {
                     if (scope != null)
                     {
                         // add distributed tracing headers to the HTTP request
-                        SpanContextPropagator.Instance.Inject(scope.Span.Context, request.Headers.Wrap());
+                        tracer.Propagator.Inject(scope.Span.Context, request.Headers.Wrap());
                     }
 
                     WebResponse response = callGetResponse(webRequest);
@@ -246,14 +248,16 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                 return await originalMethod(webRequest).ConfigureAwait(false);
             }
 
-            using (var scope = ScopeFactory.CreateOutboundHttpScope(Tracer.Instance, webRequest.Method, webRequest.RequestUri, IntegrationId, out var tags))
+            Tracer tracer = Tracer.Instance;
+
+            using (var scope = ScopeFactory.CreateOutboundHttpScope(tracer, webRequest.Method, webRequest.RequestUri, IntegrationId, out var tags))
             {
                 try
                 {
                     if (scope != null)
                     {
                         // add distributed tracing headers to the HTTP request
-                        SpanContextPropagator.Instance.Inject(scope.Span.Context, webRequest.Headers.Wrap());
+                        tracer.Propagator.Inject(scope.Span.Context, webRequest.Headers.Wrap());
                     }
 
                     WebResponse response = await originalMethod(webRequest).ConfigureAwait(false);
@@ -276,7 +280,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
         private static bool IsTracingEnabled(WebRequest request)
         {
             // check if tracing is disabled for this request via http header
-            string value = request.Headers[HttpHeaderNames.TracingEnabled];
+            string value = request.Headers[CommonHttpHeaderNames.TracingEnabled];
             return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
         }
     }
