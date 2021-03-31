@@ -43,13 +43,13 @@ namespace Datadog.Trace.Agent.Jaeger
         public static JaegerOptions FromTracerSettings(TracerSettings settings)
         {
             var agentHost = settings.ConfigurationSource?.GetString(ConfigurationKeys.JaegerExporterAgentHost) ?? "localhost";
-            var agentPort = settings.ConfigurationSource?.GetInt32(ConfigurationKeys.AgentPort) ?? 6831;
-            var agentUri = new Uri(settings.ConfigurationSource?.GetString(ConfigurationKeys.AgentUri) ?? $"http://{agentHost}:{agentPort}");
+            var agentPort = settings.ConfigurationSource?.GetInt32(ConfigurationKeys.JaegerExporterAgentPort) ?? 6831;
+            var exporterEndpoint = new Uri(settings.ConfigurationSource?.GetString(ConfigurationKeys.JaegerExporterEndpoint) ?? $"http://{agentHost}:{agentPort}");
 
             return new JaegerOptions
             {
-                Host = agentUri.Host,
-                Port = agentUri.Port,
+                Host = exporterEndpoint.Host,
+                Port = exporterEndpoint.Port,
                 ServiceName = settings.ServiceName
             };
         }
