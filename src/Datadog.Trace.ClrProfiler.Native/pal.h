@@ -56,10 +56,10 @@ inline WSTRING DatadogLogFilePath(const std::string& file_name_suffix) {
   }
 
   return ToWSTRING(program_data +
-                   R"(\OpenTelemetry .NET AutoInstrumentation\logs\dotnet-tracer-native.log)" + 
+                   R"(\OpenTelemetry .NET AutoInstrumentation\logs\dotnet-tracer-native)" + 
                    file_name_suffix + ".log");
 #else
-  return ToWSTRING("/var/log/opentelemetry/dotnet/dotnet-tracer-native.log" +
+  return ToWSTRING("/var/log/opentelemetry/dotnet/dotnet-tracer-native" +
                    file_name_suffix + ".log");
 #endif
 }
