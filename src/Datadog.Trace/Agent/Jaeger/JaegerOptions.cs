@@ -1,4 +1,3 @@
-using System;
 using Datadog.Trace.Configuration;
 
 namespace Datadog.Trace.Agent.Jaeger
@@ -44,15 +43,11 @@ namespace Datadog.Trace.Agent.Jaeger
         {
             var agentHost = settings.ConfigurationSource?.GetString(ConfigurationKeys.JaegerExporterAgentHost) ?? "localhost";
             var agentPort = settings.ConfigurationSource?.GetInt32(ConfigurationKeys.JaegerExporterAgentPort) ?? 6831;
-            var exporterEndpointString = settings.ConfigurationSource?.GetString(ConfigurationKeys.JaegerExporterEndpoint);
-            var exporterEndpoint = exporterEndpointString != null
-                                       ? new Uri(exporterEndpointString)
-                                       : null;
 
             return new JaegerOptions
             {
-                Host = exporterEndpoint?.Host ?? agentHost,
-                Port = exporterEndpoint?.Port ?? agentPort,
+                Host = agentHost,
+                Port = agentPort,
                 ServiceName = settings.ServiceName
             };
         }
