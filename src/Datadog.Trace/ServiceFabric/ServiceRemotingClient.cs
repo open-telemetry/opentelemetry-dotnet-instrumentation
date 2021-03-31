@@ -59,7 +59,7 @@ namespace Datadog.Trace.ServiceFabric
                     // inject propagation context into message headers for distributed tracing
                     if (messageHeaders != null)
                     {
-                        SpanContextPropagator.Instance.Inject(
+                        tracer.Propagator.Inject(
                             span.Context,
                             messageHeaders,
                             (headers, headerName, headerValue) => headers.TryAddHeader(headerName, headerValue));

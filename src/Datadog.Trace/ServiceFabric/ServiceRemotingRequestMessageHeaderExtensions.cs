@@ -1,6 +1,5 @@
 #nullable enable
 
-using System;
 using System.Text;
 
 namespace Datadog.Trace.ServiceFabric
@@ -19,16 +18,14 @@ namespace Datadog.Trace.ServiceFabric
             return false;
         }
 
-        public static bool TryGetHeaderValueString(this IServiceRemotingRequestMessageHeader headers, string headerName, out string? headerValue)
+        public static string? TryGetHeaderValueString(this IServiceRemotingRequestMessageHeader headers, string headerName)
         {
             if (headers.TryGetHeaderValue(headerName, out var bytes) && bytes is not null)
             {
-                headerValue = Encoding.UTF8.GetString(bytes);
-                return true;
+                return Encoding.UTF8.GetString(bytes);
             }
 
-            headerValue = default;
-            return false;
+            return null;
         }
     }
 }

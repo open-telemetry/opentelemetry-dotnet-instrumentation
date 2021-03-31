@@ -57,7 +57,7 @@ namespace Datadog.Trace.ServiceFabric
                 // extract propagation context from message headers for distributed tracing
                 if (messageHeaders != null)
                 {
-                    spanContext = SpanContextPropagator.Instance.Extract(messageHeaders, GetHeaders);
+                    spanContext = tracer.Propagator.Extract(messageHeaders, GetHeaders);
                 }
             }
             catch (Exception ex)
@@ -93,9 +93,10 @@ namespace Datadog.Trace.ServiceFabric
             ServiceRemotingHelpers.FinishSpan(e, SpanKinds.Server);
         }
 
-        private static IEnumerable<string?> GetHeaders(IServiceRemotingRequestMessageHeader headers, string headerName)
+        private static IEnumerable<string> GetHeaders(IServiceRemotingRequestMessageHeader headers, string headerName)
         {
-            if (headers.TryGetHeaderValueString(headerName, out var headerValue))
+            var headerValue = headers.TryGetHeaderValueString(headerName);
+            if (headerValue != null)
             {
                 yield return headerValue;
             }
