@@ -19,26 +19,7 @@ namespace Datadog.Trace.Tests.Headers
 
         [Theory]
         [MemberData(nameof(GetHeaderCollectionImplementations))]
-        internal void HttpRequestMessage_InjectExtract_Identity(IHeadersCollection headers)
-        {
-            var traceId = TraceId.CreateFromString("52686470458518446744073709551615");
-            const int spanId = 7;
-            const SamplingPriority samplingPriority = SamplingPriority.UserKeep;
-
-            var context = new SpanContext(traceId, spanId, samplingPriority);
-
-            _propagator.Inject(context, headers);
-            var resultContext = _propagator.Extract(headers);
-
-            Assert.NotNull(resultContext);
-            Assert.Equal(context.SpanId, resultContext.SpanId);
-            Assert.Equal(context.TraceId, resultContext.TraceId);
-            Assert.Equal(context.SamplingPriority, resultContext.SamplingPriority);
-        }
-
-        [Theory]
-        [MemberData(nameof(GetHeaderCollectionImplementations))]
-        internal void WebRequest_InjectExtract_Identity(IHeadersCollection headers)
+        internal void InjectExtract_Identity(IHeadersCollection headers)
         {
             var traceId = TraceId.CreateFromString("52686470458518446744073709551615");
             const int spanId = 7;
