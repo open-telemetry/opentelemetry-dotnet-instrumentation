@@ -99,9 +99,9 @@ profiles:
           - "{{ linuxEndpoint }}"
         environmentVariables:
           COR_PROFILER: "{918728DD-259F-4A6A-AC2B-B85E1B658318}"
-          COR_PROFILER_PATH: "{{ linuxProfilerPath }}/Datadog.Trace.ClrProfiler.Native.so"
+          COR_PROFILER_PATH: "{{ linuxProfilerPath }}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so"
           CORECLR_PROFILER: "{918728DD-259F-4A6A-AC2B-B85E1B658318}"
-          CORECLR_PROFILER_PATH: "{{ linuxProfilerPath }}/Datadog.Trace.ClrProfiler.Native.so"
+          CORECLR_PROFILER_PATH: "{{ linuxProfilerPath }}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so"
           OTEL_DOTNET_TRACER_HOME: "{{ linuxProfilerPath }}"
           OTEL_INTEGRATIONS: "{{ linuxProfilerPath }}/integrations.json"
           OTEL_AGENT_HOST: "{{ controllerIp }}"
@@ -110,7 +110,7 @@ profiles:
           requiredOperatingSystem: linux
           buildFiles:
           - "../../integrations.json;{{ linuxProfilerPath }}"
-          - "../../Datadog.Trace.ClrProfiler.Native.so;{{ linuxProfilerPath }}"
+          - "../../OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so;{{ linuxProfilerPath }}"
       load:
         endpoints:
           - http://localhost:5010
