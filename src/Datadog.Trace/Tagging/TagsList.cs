@@ -271,7 +271,7 @@ namespace Datadog.Trace.Tagging
         protected virtual IProperty<double?>[] GetAdditionalMetrics() => ArrayHelper.Empty<IProperty<double?>>();
 
         protected virtual IList<KeyValuePair<string, string>> GetCustomTags() => Volatile.Read(ref _tags);
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void WriteMetric(ref byte[] bytes, ref int offset, string key, double value)
         {
