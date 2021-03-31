@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Datadog.Trace;
+using Datadog.Trace.Propagation;
 
 namespace Samples.WebRequest
 {
@@ -22,7 +23,7 @@ namespace Samples.WebRequest
 
                 if (tracingDisabled)
                 {
-                    webClient.Headers.Add(HttpHeaderNames.TracingEnabled, "false");
+                    webClient.Headers.Add(CommonHttpHeaderNames.TracingEnabled, "false");
                 }
 
                 using (Tracer.Instance.StartActive("WebClient"))
@@ -321,7 +322,7 @@ namespace Samples.WebRequest
                     HttpWebRequest request = (HttpWebRequest)System.Net.WebRequest.Create(GetUrlForTest("GetResponse", url));
                     if (tracingDisabled)
                     {
-                        request.Headers.Add(HttpHeaderNames.TracingEnabled, "false");
+                        request.Headers.Add(CommonHttpHeaderNames.TracingEnabled, "false");
                     }
 
                     request.GetResponse().Close();
@@ -334,7 +335,7 @@ namespace Samples.WebRequest
                     HttpWebRequest request = (HttpWebRequest)System.Net.WebRequest.Create(GetUrlForTest("GetResponseAsync", url));
                     if (tracingDisabled)
                     {
-                        request.Headers.Add(HttpHeaderNames.TracingEnabled, "false");
+                        request.Headers.Add(CommonHttpHeaderNames.TracingEnabled, "false");
                     }
 
                     (await request.GetResponseAsync()).Close();
@@ -349,7 +350,7 @@ namespace Samples.WebRequest
 
                     if (tracingDisabled)
                     {
-                        request.Headers.Add(HttpHeaderNames.TracingEnabled, "false");
+                        request.Headers.Add(CommonHttpHeaderNames.TracingEnabled, "false");
                     }
 
                     var stream = request.GetRequestStream();

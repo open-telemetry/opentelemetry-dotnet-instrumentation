@@ -1,10 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Datadog.Core.Tools;
 using Datadog.Trace.ClrProfiler.IntegrationTests.Helpers;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.TestHelpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -89,8 +89,8 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
                 }
 
                 var firstSpan = spans.First();
-                var traceId = StringUtil.GetHeader(processResult.StandardOutput, HttpHeaderNames.TraceId);
-                var parentSpanId = StringUtil.GetHeader(processResult.StandardOutput, HttpHeaderNames.ParentId);
+                var traceId = StringUtil.GetHeader(processResult.StandardOutput, DDHttpHeaderNames.TraceId);
+                var parentSpanId = StringUtil.GetHeader(processResult.StandardOutput, DDHttpHeaderNames.ParentId);
 
                 Assert.Equal(firstSpan.TraceId.ToString(), traceId);
                 Assert.Equal(firstSpan.SpanId.ToString(CultureInfo.InvariantCulture), parentSpanId);
@@ -118,9 +118,9 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
                 var spans = agent.WaitForSpans(1, 2000, operationName: expectedOperationName);
                 Assert.Equal(0, spans.Count);
 
-                var traceId = StringUtil.GetHeader(processResult.StandardOutput, HttpHeaderNames.TraceId);
-                var parentSpanId = StringUtil.GetHeader(processResult.StandardOutput, HttpHeaderNames.ParentId);
-                var tracingEnabled = StringUtil.GetHeader(processResult.StandardOutput, HttpHeaderNames.TracingEnabled);
+                var traceId = StringUtil.GetHeader(processResult.StandardOutput, DDHttpHeaderNames.TraceId);
+                var parentSpanId = StringUtil.GetHeader(processResult.StandardOutput, DDHttpHeaderNames.ParentId);
+                var tracingEnabled = StringUtil.GetHeader(processResult.StandardOutput, CommonHttpHeaderNames.TracingEnabled);
 
                 Assert.Null(traceId);
                 Assert.Null(parentSpanId);

@@ -1,6 +1,7 @@
 using System.Net;
 using Datadog.Trace.ClrProfiler.CallTarget;
 using Datadog.Trace.ExtensionMethods;
+using Datadog.Trace.Propagation;
 
 namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.WebRequest
 {
@@ -49,7 +50,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.WebRequest
                         // The expected sequence of calls is GetRequestStream -> GetResponse. Headers can't be modified after calling GetRequestStream.
                         // At the same time, we don't want to set an active scope now, because it's possible that GetResponse will never be called.
                         // Instead, we generate a spancontext and inject it in the headers. GetResponse will fetch them and create an active scope with the right id.
-                        SpanContextPropagator.Instance.Inject(spanContext, request.Headers.Wrap());
+                        tracer.Propagator.Inject(spanContext, request.Headers.Wrap());
                     }
                 }
             }
