@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
 using Datadog.Trace.ClrProfiler.Helpers;
+using Datadog.Trace.Conventions;
 using Datadog.Trace.Headers;
 using Datadog.Trace.Propagation;
 using Datadog.Trace.TestHelpers;
@@ -11,7 +12,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
 {
     public class ReflectionHttpHeadersCollectionTests
     {
-        private readonly DDSpanContextPropagator _propagator = new DDSpanContextPropagator();
+        private readonly DDSpanContextPropagator _propagator = new DDSpanContextPropagator(new DatadogTraceIdConvention());
 
         public static IEnumerable<object[]> GetInvalidIds() => HeadersCollectionTestHelpers.GetInvalidIds();
 
