@@ -1,4 +1,3 @@
-using System;
 using Xunit;
 
 namespace Datadog.Trace.OpenTracing.Tests
@@ -15,7 +14,7 @@ namespace Datadog.Trace.OpenTracing.Tests
         [Fact]
         public void Extract_ValidParentAndTraceId_ProperSpanContext()
         {
-            const ulong traceId = 10;
+            var traceId = TraceId.CreateFromInt(10);
             const ulong parentId = 120;
 
             var headers = new MockTextMap();
@@ -32,7 +31,7 @@ namespace Datadog.Trace.OpenTracing.Tests
         [Fact]
         public void Extract_WrongHeaderCase_ExtractionStillWorks()
         {
-            const ulong traceId = 10;
+            var traceId = TraceId.CreateFromInt(10);
             const ulong parentId = 120;
             const SamplingPriority samplingPriority = SamplingPriority.UserKeep;
 
@@ -52,7 +51,7 @@ namespace Datadog.Trace.OpenTracing.Tests
         public void Inject_SpanContext_HeadersWithCorrectInfo()
         {
             const ulong spanId = 10;
-            const ulong traceId = 7;
+            var traceId = TraceId.CreateFromInt(7);
             const SamplingPriority samplingPriority = SamplingPriority.UserKeep;
 
             var ddSpanContext = new SpanContext(traceId, spanId, samplingPriority);

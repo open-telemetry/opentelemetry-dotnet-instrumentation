@@ -45,7 +45,7 @@ namespace Datadog.Trace.OpenTracing.Tests
             Assert.NotNull(ddSpanContext);
             Assert.Null(ddSpanContext.ParentId);
             Assert.NotEqual<ulong>(0, ddSpanContext.SpanId);
-            Assert.NotEqual<ulong>(0, ddSpanContext.TraceId);
+            Assert.NotEqual(TraceId.Zero, ddSpanContext.TraceId);
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace Datadog.Trace.OpenTracing.Tests
 
             Assert.Null(root.DDSpan.Context.ParentId);
             Assert.NotEqual<ulong>(0, root.DDSpan.Context.SpanId);
-            Assert.NotEqual<ulong>(0, root.DDSpan.Context.TraceId);
+            Assert.NotEqual(TraceId.Zero, root.DDSpan.Context.TraceId);
             Assert.Equal(root.DDSpan.Context.SpanId, child.DDSpan.Context.ParentId);
             Assert.Equal(root.DDSpan.Context.TraceId, child.DDSpan.Context.TraceId);
             Assert.NotEqual<ulong>(0, child.DDSpan.Context.SpanId);
@@ -74,7 +74,7 @@ namespace Datadog.Trace.OpenTracing.Tests
 
             Assert.Null(root.DDSpan.Context.ParentId);
             Assert.NotEqual<ulong>(0, root.DDSpan.Context.SpanId);
-            Assert.NotEqual<ulong>(0, root.DDSpan.Context.TraceId);
+            Assert.NotEqual(TraceId.Zero, root.DDSpan.Context.TraceId);
             Assert.Equal(root.DDSpan.Context.SpanId, child.DDSpan.Context.ParentId);
             Assert.Equal(root.DDSpan.Context.TraceId, child.DDSpan.Context.TraceId);
             Assert.NotEqual<ulong>(0, child.DDSpan.Context.SpanId);
@@ -90,7 +90,7 @@ namespace Datadog.Trace.OpenTracing.Tests
 
             Assert.Null(root.DDSpan.Context.ParentId);
             Assert.NotEqual<ulong>(0, root.DDSpan.Context.SpanId);
-            Assert.NotEqual<ulong>(0, root.DDSpan.Context.TraceId);
+            Assert.NotEqual(TraceId.Zero, root.DDSpan.Context.TraceId);
             Assert.Equal(root.DDSpan.Context.SpanId, child.DDSpan.Context.ParentId);
             Assert.Equal(root.DDSpan.Context.TraceId, child.DDSpan.Context.TraceId);
             Assert.NotEqual<ulong>(0, child.DDSpan.Context.SpanId);

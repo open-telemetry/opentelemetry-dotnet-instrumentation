@@ -216,14 +216,14 @@ namespace Datadog.Trace.ServiceFabric
 
         private static void InjectContext(PropagationContext context, IServiceRemotingRequestMessageHeader messageHeaders)
         {
-            if (context.TraceId == 0 || context.ParentSpanId == 0)
+            if (context.TraceId == TraceId.Zero || context.ParentSpanId == 0)
             {
                 return;
             }
 
             try
             {
-                messageHeaders.TryAddHeader(HttpHeaderNames.TraceId, context, ctx => BitConverter.GetBytes(ctx.TraceId));
+                messageHeaders.TryAddHeader(HttpHeaderNames.TraceId, context, ctx => BitConverter.GetBytes(ctx.TraceId.Lower));
 
                 messageHeaders.TryAddHeader(HttpHeaderNames.ParentId, context, ctx => BitConverter.GetBytes(ctx.ParentSpanId));
 
@@ -247,9 +247,12 @@ namespace Datadog.Trace.ServiceFabric
         {
             try
             {
-                ulong traceId = messageHeaders.TryGetHeaderValueUInt64(HttpHeaderNames.TraceId) ?? 0;
+                var traceIdAsString = messageHeaders.TryGetHeaderValueString(HttpHeaderNames.TraceId);
+                var traceId = traceIdAsString == null
+                                  ? TraceId.Zero
+                                  : Tracer.Instance.TraceIdConvention.CreateFromString(traceIdAsString);
 
-                if (traceId > 0)
+                if (traceId != TraceId.Zero)
                 {
                     ulong parentSpanId = messageHeaders.TryGetHeaderValueUInt64(HttpHeaderNames.ParentId) ?? 0;
 

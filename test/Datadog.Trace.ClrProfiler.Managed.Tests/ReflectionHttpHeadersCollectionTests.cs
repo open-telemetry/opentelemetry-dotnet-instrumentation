@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using Datadog.Trace.ClrProfiler.Helpers;
 using Datadog.Trace.Headers;
 using Datadog.Trace.TestHelpers;
@@ -85,7 +84,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             var request = new HttpRequestMessage();
             var headers = new ReflectionHttpHeadersCollection(request.Headers);
 
-            const int traceId = 9;
+            var traceId = TraceId.CreateFromInt(9);
             const int spanId = 7;
             const SamplingPriority samplingPriority = SamplingPriority.UserKeep;
             const string origin = "synthetics";
@@ -128,13 +127,13 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             var request = new HttpRequestMessage();
             var headers = new ReflectionHttpHeadersCollection(request.Headers);
 
-            const ulong traceId = 9;
+            var traceId = TraceId.CreateFromInt(9);
             const SamplingPriority samplingPriority = SamplingPriority.UserKeep;
             const string origin = "synthetics";
 
             InjectContext(
                 headers,
-                traceId.ToString(CultureInfo.InvariantCulture),
+                traceId.ToString(),
                 spanId,
                 ((int)samplingPriority).ToString(CultureInfo.InvariantCulture),
                 origin);
@@ -156,13 +155,13 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             var request = new HttpRequestMessage();
             var headers = new ReflectionHttpHeadersCollection(request.Headers);
 
-            const ulong traceId = 9;
+            var traceId = TraceId.CreateFromInt(9);
             const ulong spanId = 7;
             const string origin = "synthetics";
 
             InjectContext(
                 headers,
-                traceId.ToString(CultureInfo.InvariantCulture),
+                traceId.ToString(),
                 spanId.ToString(CultureInfo.InvariantCulture),
                 samplingPriority,
                 origin);

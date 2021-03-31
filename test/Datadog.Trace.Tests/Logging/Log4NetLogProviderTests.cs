@@ -116,7 +116,7 @@ namespace Datadog.Trace.Tests.Logging
             LogEventContains(logEvent, service, version, env, scope.Span.TraceId, scope.Span.SpanId);
         }
 
-        internal static void LogEventContains(log4net.Core.LoggingEvent logEvent, string service, string version, string env, ulong traceId, ulong spanId)
+        internal static void LogEventContains(log4net.Core.LoggingEvent logEvent, string service, string version, string env, TraceId traceId, ulong spanId)
         {
             Assert.Contains(CorrelationIdentifier.ServiceKey, logEvent.Properties.GetKeys());
             Assert.Equal(service, logEvent.Properties[CorrelationIdentifier.ServiceKey].ToString());
@@ -128,7 +128,7 @@ namespace Datadog.Trace.Tests.Logging
             Assert.Equal(env, logEvent.Properties[CorrelationIdentifier.EnvKey].ToString());
 
             Assert.Contains(CorrelationIdentifier.TraceIdKey, logEvent.Properties.GetKeys());
-            Assert.Equal(traceId, ulong.Parse(logEvent.Properties[CorrelationIdentifier.TraceIdKey].ToString()));
+            Assert.Equal(traceId, TraceId.CreateDataDogCompatibleFromDecimalString(logEvent.Properties[CorrelationIdentifier.TraceIdKey].ToString()));
 
             Assert.Contains(CorrelationIdentifier.SpanIdKey, logEvent.Properties.GetKeys());
             Assert.Equal(spanId, ulong.Parse(logEvent.Properties[CorrelationIdentifier.SpanIdKey].ToString()));

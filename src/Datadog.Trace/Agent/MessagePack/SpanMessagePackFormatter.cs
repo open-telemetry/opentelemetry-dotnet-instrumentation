@@ -30,7 +30,7 @@ namespace Datadog.Trace.Agent.MessagePack
             offset += MessagePackBinary.WriteMapHeader(ref bytes, offset, len);
 
             offset += MessagePackBinary.WriteString(ref bytes, offset, "trace_id");
-            offset += MessagePackBinary.WriteUInt64(ref bytes, offset, value.Context.TraceId);
+            offset += MessagePackBinary.WriteUInt64(ref bytes, offset, (ulong)value.Context.TraceId.Lower);
 
             offset += MessagePackBinary.WriteString(ref bytes, offset, "span_id");
             offset += MessagePackBinary.WriteUInt64(ref bytes, offset, value.Context.SpanId);

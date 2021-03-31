@@ -1,3 +1,5 @@
+using Datadog.Trace.Abstractions;
+
 namespace Datadog.Trace
 {
     /// <summary>
@@ -8,7 +10,7 @@ namespace Datadog.Trace
         /// <summary>
         /// Gets the trace identifier.
         /// </summary>
-        ulong TraceId { get; }
+        TraceId TraceId { get; }
 
         /// <summary>
         /// Gets the span identifier.
