@@ -9,7 +9,7 @@ namespace Datadog.Trace.ServiceFabric.Propagators
     {
         public void InjectContext(PropagationContext context, IServiceRemotingRequestMessageHeader messageHeaders)
         {
-            messageHeaders.TryAddHeader(DDHttpHeaderNames.TraceId, context, ctx => BitConverter.GetBytes(ctx.TraceId));
+            messageHeaders.TryAddHeader(DDHttpHeaderNames.TraceId, context, ctx => Encoding.UTF8.GetBytes(ctx.TraceId.ToString()));
             messageHeaders.TryAddHeader(DDHttpHeaderNames.ParentId, context, ctx => BitConverter.GetBytes(ctx.ParentSpanId));
 
             if (context.SamplingPriority != null)
@@ -25,9 +25,9 @@ namespace Datadog.Trace.ServiceFabric.Propagators
 
         public PropagationContext? ExtractContext(IServiceRemotingRequestMessageHeader messageHeaders)
         {
-            ulong traceId = messageHeaders.TryGetHeaderValueUInt64(DDHttpHeaderNames.TraceId) ?? 0;
+            TraceId traceId = messageHeaders.TryGetHeaderValueTraceId(DDHttpHeaderNames.TraceId);
 
-            if (traceId > 0)
+            if (traceId != TraceId.Zero)
             {
                 ulong parentSpanId = messageHeaders.TryGetHeaderValueUInt64(DDHttpHeaderNames.ParentId) ?? 0;
 

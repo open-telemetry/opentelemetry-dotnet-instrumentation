@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Datadog.Trace.Conventions;
 using Datadog.Trace.Logging;
 
 namespace Datadog.Trace.Propagation
@@ -17,6 +18,13 @@ namespace Datadog.Trace.Propagation
         private static readonly string UserKeep = ((int)SamplingPriority.UserKeep).ToString(InvariantCulture);
         private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor<B3SpanContextPropagator>();
 
+        private readonly ITraceIdConvention _traceIdConvention;
+
+        public B3SpanContextPropagator(ITraceIdConvention traceIdConvention)
+        {
+            _traceIdConvention = traceIdConvention;
+        }
+
         public void Inject<T>(SpanContext context, T carrier, Action<T, string, string> setter)
         {
             if (context == null) { throw new ArgumentNullException(nameof(context)); }
@@ -28,7 +36,7 @@ namespace Datadog.Trace.Propagation
             // lock sampling priority when span propagates.
             context.TraceContext?.LockSamplingPriority();
 
-            setter(carrier, B3HttpHeaderNames.B3TraceId, context.TraceId.ToString("x16", InvariantCulture));
+            setter(carrier, B3HttpHeaderNames.B3TraceId, context.TraceId.ToString());
             setter(carrier, B3HttpHeaderNames.B3SpanId, context.SpanId.ToString("x16", InvariantCulture));
 
             if (context.ParentId != null)
@@ -49,9 +57,9 @@ namespace Datadog.Trace.Propagation
 
             if (getter == null) { throw new ArgumentNullException(nameof(getter)); }
 
-            var traceId = ParseHexUInt64(carrier, getter, B3HttpHeaderNames.B3TraceId);
+            var traceId = PropagationHelpers.ParseTraceId(carrier, getter, B3HttpHeaderNames.B3TraceId, _traceIdConvention, Log);
 
-            if (traceId == 0)
+            if (traceId == TraceId.Zero)
             {
                 // a valid traceId is required to use distributed tracing
                 return null;

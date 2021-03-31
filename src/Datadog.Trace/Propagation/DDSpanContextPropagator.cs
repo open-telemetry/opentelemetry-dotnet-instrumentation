@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Datadog.Trace.Conventions;
 using Datadog.Trace.Headers;
 using Datadog.Trace.Logging;
 
@@ -21,9 +22,16 @@ namespace Datadog.Trace.Propagation
 
         private static readonly int[] SamplingPriorities;
 
+        private readonly ITraceIdConvention _traceIdConvention;
+
         static DDSpanContextPropagator()
         {
             SamplingPriorities = Enum.GetValues(typeof(SamplingPriority)).Cast<int>().ToArray();
+        }
+
+        public DDSpanContextPropagator(ITraceIdConvention traceIdConvention)
+        {
+            _traceIdConvention = traceIdConvention;
         }
 
         /// <summary>
@@ -45,7 +53,7 @@ namespace Datadog.Trace.Propagation
             // lock sampling priority when span propagates.
             context.TraceContext?.LockSamplingPriority();
 
-            setter(carrier, DDHttpHeaderNames.TraceId, context.TraceId.ToString(InvariantCulture));
+            setter(carrier, DDHttpHeaderNames.TraceId, context.TraceId.ToString());
             setter(carrier, DDHttpHeaderNames.ParentId, context.SpanId.ToString(InvariantCulture));
 
             // avoid writing origin header if not set, keeping the previous behavior.
@@ -72,9 +80,9 @@ namespace Datadog.Trace.Propagation
 
             if (getter == null) { throw new ArgumentNullException(nameof(getter)); }
 
-            var traceId = ParseUInt64(carrier, getter, DDHttpHeaderNames.TraceId);
+            var traceId = PropagationHelpers.ParseTraceId(carrier, getter, DDHttpHeaderNames.TraceId, _traceIdConvention, Log);
 
-            if (traceId == 0)
+            if (traceId == TraceId.Zero)
             {
                 // a valid traceId is required to use distributed tracing
                 return null;

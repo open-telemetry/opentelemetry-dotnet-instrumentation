@@ -1,4 +1,5 @@
 using System.Globalization;
+using Datadog.Trace.Conventions;
 using Datadog.Trace.Headers;
 using Datadog.Trace.Propagation;
 using Datadog.Trace.TestHelpers;
@@ -14,13 +15,13 @@ namespace Datadog.Trace.Tests.Headers
     // - B3SpanContextPropagator.Extract()
     public class B3HeadersCollectionTests : HeadersCollectionTestBase
     {
-        private readonly B3SpanContextPropagator _propagator = new B3SpanContextPropagator();
+        private readonly B3SpanContextPropagator _propagator = new B3SpanContextPropagator(new OtelTraceIdConvention());
 
         [Theory]
         [MemberData(nameof(GetHeaderCollectionImplementations))]
         internal void HttpRequestMessage_InjectExtract_Identity(IHeadersCollection headers)
         {
-            const int traceId = 9;
+            var traceId = TraceId.CreateFromString("52686470458518446744073709551615");
             const int spanId = 7;
             const SamplingPriority samplingPriority = SamplingPriority.UserKeep;
 
@@ -39,7 +40,7 @@ namespace Datadog.Trace.Tests.Headers
         [MemberData(nameof(GetHeaderCollectionImplementations))]
         internal void WebRequest_InjectExtract_Identity(IHeadersCollection headers)
         {
-            const int traceId = 9;
+            var traceId = TraceId.CreateFromString("52686470458518446744073709551615");
             const int spanId = 7;
             const SamplingPriority samplingPriority = SamplingPriority.UserKeep;
 
@@ -73,12 +74,12 @@ namespace Datadog.Trace.Tests.Headers
         [MemberData(nameof(GetHeadersInvalidIdsCartesianProduct))]
         internal void Extract_InvalidSpanId(IHeadersCollection headers, string spanId)
         {
-            const ulong traceId = 9;
+            var traceId = TraceId.CreateFromString("52686470458518446744073709551615");
             const SamplingPriority samplingPriority = SamplingPriority.UserKeep;
 
             InjectContext(
                 headers,
-                traceId.ToString(CultureInfo.InvariantCulture),
+                traceId.ToString(),
                 spanId,
                 ((int)samplingPriority).ToString(CultureInfo.InvariantCulture));
 
@@ -94,12 +95,12 @@ namespace Datadog.Trace.Tests.Headers
         [MemberData(nameof(GetHeadersInvalidSamplingPrioritiesCartesianProduct))]
         internal void Extract_InvalidSamplingPriority(IHeadersCollection headers, string samplingPriority)
         {
-            const ulong traceId = 9;
+            var traceId = TraceId.CreateFromString("52686470458518446744073709551615");
             const ulong spanId = 7;
 
             InjectContext(
                 headers,
-                traceId.ToString("x16", CultureInfo.InvariantCulture),
+                traceId.ToString(),
                 spanId.ToString("x16", CultureInfo.InvariantCulture),
                 samplingPriority);
 

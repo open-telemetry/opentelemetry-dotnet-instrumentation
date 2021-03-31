@@ -107,17 +107,19 @@ namespace Datadog.Trace
             {
                 case ConventionType.OpenTelemetry:
                     OutboundHttpConvention = new OtelOutboundHttpConvention(this);
+                    TraceIdConvention = new OtelTraceIdConvention();
                     break;
                 case ConventionType.Datadog:
                 default:
                     OutboundHttpConvention = new DatadogOutboundHttpConvention(this);
+                    TraceIdConvention = new DatadogTraceIdConvention();
                     break;
             }
 
             _scopeManager = scopeManager ?? new AsyncLocalScopeManager();
             Sampler = sampler ?? new RuleBasedSampler(new RateLimiter(Settings.MaxTracesSubmittedPerSecond));
 
-            _propagator = ContextPropagatorBuilder.BuildPropagator(Settings.Propagator);
+            _propagator = ContextPropagatorBuilder.BuildPropagator(Settings.Propagator, TraceIdConvention);
 
             if (!string.IsNullOrWhiteSpace(Settings.CustomSamplingRules))
             {
@@ -258,6 +260,8 @@ namespace Datadog.Trace
         internal IDogStatsd Statsd { get; private set; }
 
         internal IOutboundHttpConvention OutboundHttpConvention { get; }
+
+        internal ITraceIdConvention TraceIdConvention { get; }
 
         internal IPropagator Propagator => _propagator;
 

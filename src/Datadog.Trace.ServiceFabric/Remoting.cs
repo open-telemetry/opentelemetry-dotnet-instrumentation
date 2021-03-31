@@ -220,7 +220,7 @@ namespace Datadog.Trace.ServiceFabric
 
         private static void InjectContext(PropagationContext context, IServiceRemotingRequestMessageHeader messageHeaders)
         {
-            if (context.TraceId == 0 || context.ParentSpanId == 0)
+            if (context.TraceId == TraceId.Zero || context.ParentSpanId == 0)
             {
                 return;
             }

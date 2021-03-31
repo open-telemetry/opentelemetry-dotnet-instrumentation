@@ -6,6 +6,7 @@
     <Title>OpenTelemetry AutoInstrumentation</Title>
     <Description>OpenTelemetry autoinstrumentation library</Description>
     <AssemblyName>OpenTelemetry.AutoInstrumentation</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.0' AND '$(TargetFramework)' != 'netcoreapp3.1' ">
@@ -23,6 +24,7 @@
 
   <ItemGroup>
     <PackageReference Include="LibLog" Version="5.0.6" PrivateAssets="All" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.1" />
   </ItemGroup>
 
   <!-- Below this point is reserved for vendor items -->

@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Datadog.Trace.Agent;
 using Datadog.Trace.Configuration;
+using Datadog.Trace.Conventions;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Headers;
 using Datadog.Trace.Propagation;
@@ -136,7 +137,7 @@ namespace Datadog.Trace.Tests
         [Fact]
         public void StartActive_SetParentManuallyFromExternalContext_ParentIsSet()
         {
-            const ulong traceId = 11;
+            var traceId = TraceId.CreateFromInt(11);
             const ulong parentId = 7;
             const SamplingPriority samplingPriority = SamplingPriority.UserKeep;
 
@@ -332,7 +333,7 @@ namespace Datadog.Trace.Tests
         [Fact]
         public void OriginHeader_RootSpanTag()
         {
-            const ulong traceId = 9;
+            var traceId = TraceId.CreateFromInt(9);
             const ulong spanId = 7;
             const SamplingPriority samplingPriority = SamplingPriority.UserKeep;
             const string origin = "synthetics";
@@ -354,13 +355,13 @@ namespace Datadog.Trace.Tests
         [Fact]
         public void OriginHeader_InjectFromChildSpan()
         {
-            const ulong traceId = 9;
+            var traceId = TraceId.CreateFromInt(9);
             const ulong spanId = 7;
             const SamplingPriority samplingPriority = SamplingPriority.UserKeep;
             const string origin = "synthetics";
 
             var propagatedContext = new SpanContext(traceId, spanId, samplingPriority, null, origin);
-            var propagator = new DDSpanContextPropagator();
+            var propagator = new DDSpanContextPropagator(new DatadogTraceIdConvention());
 
             using var firstSpan = _tracer.StartActive("First Span", propagatedContext);
             using var secondSpan = _tracer.StartActive("Child", firstSpan.Span.Context);

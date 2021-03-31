@@ -1,4 +1,3 @@
-using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Logging;
 using Datadog.Trace.Util;
 
@@ -20,7 +19,7 @@ namespace Datadog.Trace
         /// <param name="spanId">The propagated span id.</param>
         /// <param name="samplingPriority">The propagated sampling priority.</param>
         /// <param name="serviceName">The service name to propagate to child spans.</param>
-        public SpanContext(ulong? traceId, ulong spanId, SamplingPriority? samplingPriority = null, string serviceName = null)
+        public SpanContext(TraceId? traceId, ulong spanId, SamplingPriority? samplingPriority = null, string serviceName = null)
             : this(traceId, serviceName)
         {
             SpanId = spanId;
@@ -37,7 +36,7 @@ namespace Datadog.Trace
         /// <param name="samplingPriority">The propagated sampling priority.</param>
         /// <param name="serviceName">The service name to propagate to child spans.</param>
         /// <param name="origin">The propagated origin of the trace.</param>
-        internal SpanContext(ulong? traceId, ulong spanId, SamplingPriority? samplingPriority, string serviceName, string origin)
+        internal SpanContext(TraceId? traceId, ulong spanId, SamplingPriority? samplingPriority, string serviceName, string origin)
             : this(traceId, serviceName)
         {
             SpanId = spanId;
@@ -65,12 +64,9 @@ namespace Datadog.Trace
             }
         }
 
-        private SpanContext(ulong? traceId, string serviceName)
+        private SpanContext(TraceId? traceId, string serviceName)
         {
-            TraceId = traceId > 0
-                          ? traceId.Value
-                          : SpanIdGenerator.ThreadInstance.CreateNew();
-
+            TraceId = traceId ?? Tracer.Instance.TraceIdConvention.GenerateNewTraceId();
             ServiceName = serviceName;
         }
 
@@ -82,7 +78,7 @@ namespace Datadog.Trace
         /// <summary>
         /// Gets the trace id
         /// </summary>
-        public ulong TraceId { get; }
+        public TraceId TraceId { get; }
 
         /// <summary>
         /// Gets the span id of the parent span

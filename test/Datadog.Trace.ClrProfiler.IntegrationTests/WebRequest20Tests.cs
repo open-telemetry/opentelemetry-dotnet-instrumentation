@@ -59,7 +59,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
                 var traceId = StringUtil.GetHeader(processResult.StandardOutput, DDHttpHeaderNames.TraceId);
                 var parentSpanId = StringUtil.GetHeader(processResult.StandardOutput, DDHttpHeaderNames.ParentId);
 
-                Assert.Equal(firstSpan.TraceId.ToString(CultureInfo.InvariantCulture), traceId);
+                Assert.Equal(firstSpan.TraceId.ToString(), traceId);
                 Assert.Equal(firstSpan.SpanId.ToString(CultureInfo.InvariantCulture), parentSpanId);
             }
         }

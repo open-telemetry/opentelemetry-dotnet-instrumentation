@@ -138,7 +138,7 @@ namespace Datadog.Trace.Tests.Logging
                 nLogString.Contains(string.Format(NLogExpectedStringFormat, CorrelationIdentifier.SpanIdKey, 0)) ||
                 !nLogString.Contains($"\"{CorrelationIdentifier.SpanIdKey}\""));
             Assert.True(
-                nLogString.Contains(string.Format(NLogExpectedStringFormat, CorrelationIdentifier.TraceIdKey, 0)) ||
+                nLogString.Contains(string.Format(NLogExpectedStringFormat, CorrelationIdentifier.TraceIdKey, TraceId.Zero)) ||
                 !nLogString.Contains($"\"{CorrelationIdentifier.TraceIdKey}\""));
         }
     }

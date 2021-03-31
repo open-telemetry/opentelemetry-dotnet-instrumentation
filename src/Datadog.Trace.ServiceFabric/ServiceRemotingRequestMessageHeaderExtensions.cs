@@ -18,6 +18,15 @@ namespace Datadog.Trace.ServiceFabric
             return false;
         }
 
+        public static TraceId TryGetHeaderValueTraceId(this IServiceRemotingRequestMessageHeader headers, string headerName)
+        {
+            var traceIdAsString = headers.TryGetHeaderValueString(headerName);
+
+            return traceIdAsString == null
+                ? TraceId.Zero
+                : Tracer.Instance.TraceIdConvention.CreateFromString(traceIdAsString);
+        }
+
         public static int? TryGetHeaderValueInt32(this IServiceRemotingRequestMessageHeader headers, string headerName)
         {
             if (headers.TryGetHeaderValue(headerName, out byte[] bytes) && bytes?.Length == sizeof(int))

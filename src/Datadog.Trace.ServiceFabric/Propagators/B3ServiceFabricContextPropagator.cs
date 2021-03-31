@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using Datadog.Trace.Propagation;
 using Microsoft.ServiceFabric.Services.Remoting.V2;
 
@@ -9,7 +10,7 @@ namespace Datadog.Trace.ServiceFabric.Propagators
     {
         public void InjectContext(PropagationContext context, IServiceRemotingRequestMessageHeader messageHeaders)
         {
-            messageHeaders.TryAddHeader(B3HttpHeaderNames.B3TraceId, context, ctx => BitConverter.GetBytes(ctx.TraceId));
+            messageHeaders.TryAddHeader(B3HttpHeaderNames.B3TraceId, context, ctx => Encoding.UTF8.GetBytes(ctx.TraceId.ToString()));
             messageHeaders.TryAddHeader(B3HttpHeaderNames.B3ParentId, context, ctx => BitConverter.GetBytes(ctx.ParentSpanId));
 
             var samplingHeader = GetSamplingHeader(context);
@@ -21,9 +22,9 @@ namespace Datadog.Trace.ServiceFabric.Propagators
 
         public PropagationContext? ExtractContext(IServiceRemotingRequestMessageHeader messageHeaders)
         {
-            ulong traceId = messageHeaders.TryGetHeaderValueUInt64(B3HttpHeaderNames.B3TraceId) ?? 0;
+            TraceId traceId = messageHeaders.TryGetHeaderValueTraceId(B3HttpHeaderNames.B3TraceId);
 
-            if (traceId > 0)
+            if (traceId != TraceId.Zero)
             {
                 ulong parentSpanId = messageHeaders.TryGetHeaderValueUInt64(B3HttpHeaderNames.B3ParentId) ?? 0;
 

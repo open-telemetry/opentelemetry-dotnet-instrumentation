@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Globalization;
+using Datadog.Trace.Conventions;
 using Datadog.Trace.Headers;
 using Datadog.Trace.Propagation;
 using Datadog.Trace.TestHelpers;
@@ -15,7 +16,7 @@ namespace Datadog.Trace.Tests.Headers
     // - SpanContextPropagator.Extract()
     public class DDHeadersCollectionTests : HeadersCollectionTestBase
     {
-        private readonly DDSpanContextPropagator _propagator = new DDSpanContextPropagator();
+        private readonly DDSpanContextPropagator _propagator = new DDSpanContextPropagator(new DatadogTraceIdConvention());
 
         [Theory]
         [MemberData(nameof(GetHeaderCollectionImplementations))]
@@ -74,7 +75,7 @@ namespace Datadog.Trace.Tests.Headers
         [MemberData(nameof(GetHeaderCollectionImplementations))]
         internal void InjectExtract_Identity(IHeadersCollection headers)
         {
-            const int traceId = 9;
+            var traceId = TraceId.CreateFromInt(9);
             const int spanId = 7;
             const SamplingPriority samplingPriority = SamplingPriority.UserKeep;
             const string origin = "synthetics";
@@ -109,13 +110,13 @@ namespace Datadog.Trace.Tests.Headers
         [MemberData(nameof(GetHeadersInvalidIdsCartesianProduct))]
         internal void Extract_InvalidSpanId(IHeadersCollection headers, string spanId)
         {
-            const ulong traceId = 9;
+            var traceId = TraceId.CreateFromInt(9);
             const SamplingPriority samplingPriority = SamplingPriority.UserKeep;
             const string origin = "synthetics";
 
             InjectContext(
                 headers,
-                traceId.ToString(CultureInfo.InvariantCulture),
+                traceId.ToString(),
                 spanId,
                 ((int)samplingPriority).ToString(CultureInfo.InvariantCulture),
                 origin);
@@ -133,13 +134,13 @@ namespace Datadog.Trace.Tests.Headers
         [MemberData(nameof(GetHeadersInvalidSamplingPrioritiesCartesianProduct))]
         internal void Extract_InvalidSamplingPriority(IHeadersCollection headers, string samplingPriority)
         {
-            const ulong traceId = 9;
+            var traceId = TraceId.CreateFromInt(9);
             const ulong spanId = 7;
             const string origin = "synthetics";
 
             InjectContext(
                 headers,
-                traceId.ToString(CultureInfo.InvariantCulture),
+                traceId.ToString(),
                 spanId.ToString(CultureInfo.InvariantCulture),
                 samplingPriority,
                 origin);
