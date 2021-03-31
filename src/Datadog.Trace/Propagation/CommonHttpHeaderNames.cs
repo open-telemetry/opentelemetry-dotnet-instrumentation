@@ -9,6 +9,6 @@ namespace Datadog.Trace.Propagation
         /// If header is set to "false", tracing is disabled for that http request.
         /// Tracing is enabled by default.
         /// </summary>
-        public const string TracingEnabled = "otel-tracing-enabled";
+        public const string TracingEnabled = "x-datadog-tracing-enabled";
     }
 }

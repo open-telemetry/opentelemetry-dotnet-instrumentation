@@ -32,7 +32,7 @@ namespace Samples.WebRequest
 
                 if (tracingDisabled)
                 {
-                    webClient.Headers.Add("otel-tracing-enabled", "false");
+                    webClient.Headers.Add("x-datadog-tracing-enabled", "false");
                 }
 
                 // WebClient
@@ -224,7 +224,7 @@ namespace Samples.WebRequest
             HttpWebRequest request = (HttpWebRequest)System.Net.WebRequest.Create(url);
             if (tracingDisabled)
             {
-                request.Headers.Add("otel-tracing-enabled", "false");
+                request.Headers.Add("x-datadog-tracing-enabled", "false");
             }
 
             request.GetResponse().Close();
