@@ -14,7 +14,7 @@ namespace Datadog.Trace.OpenTracing
             Context = context;
         }
 
-        public string TraceId => Context.TraceId.ToString(CultureInfo.InvariantCulture);
+        public string TraceId => Context.TraceId.ToString();
 
         public string SpanId => Context.SpanId.ToString(CultureInfo.InvariantCulture);
 

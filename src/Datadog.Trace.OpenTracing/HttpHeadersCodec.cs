@@ -42,7 +42,7 @@ namespace Datadog.Trace.OpenTracing
             else
             {
                 // any other OpenTracing.ISpanContext
-                headers.Set(HttpHeaderNames.TraceId, context.TraceId.ToString(InvariantCulture));
+                headers.Set(HttpHeaderNames.TraceId, context.TraceId);
                 headers.Set(HttpHeaderNames.ParentId, context.SpanId.ToString(InvariantCulture));
             }
         }

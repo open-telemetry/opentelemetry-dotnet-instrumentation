@@ -9,7 +9,7 @@ namespace Datadog.Trace.Tests
         {
             var tracer = new Tracer();
 
-            ulong traceId;
+            TraceId traceId;
             ulong parentSpanId;
             string samplingPriorityText = null;
             var expectedSamplingPriority = (int)SamplingPriority.UserKeep;

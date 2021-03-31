@@ -37,8 +37,8 @@ namespace Benchmarks.Trace
 
             for (int i = 0; i < SpanCount; i++)
             {
-                Spans[i] = new Span(new SpanContext((ulong)i, (ulong)i, SamplingPriority.UserReject, "Benchmark", null), now);
-                EnrichedSpans[i] = new Span(new SpanContext((ulong)i, (ulong)i, SamplingPriority.UserReject, "Benchmark", null), now);
+                Spans[i] = new Span(new SpanContext(TraceId.CreateFromInt(i), (ulong)i, SamplingPriority.UserReject, "Benchmark", null), now);
+                EnrichedSpans[i] = new Span(new SpanContext(TraceId.CreateFromInt(i), (ulong)i, SamplingPriority.UserReject, "Benchmark", null), now);
                 EnrichedSpans[i].SetTag(Tags.Env, "Benchmark");
                 EnrichedSpans[i].SetMetric(Metrics.SamplingRuleDecision, 1.0);
             }

@@ -29,7 +29,7 @@ namespace StartDistributedTrace
                 span.SetTag(Tags.HttpUrl, url);
 
                 // Set distributed tracing headers
-                client.DefaultRequestHeaders.Add(HttpHeaderNames.TraceId, span.TraceId.ToString(CultureInfo.InvariantCulture));
+                client.DefaultRequestHeaders.Add(HttpHeaderNames.TraceId, span.TraceId.ToString());
                 client.DefaultRequestHeaders.Add(HttpHeaderNames.ParentId, span.SpanId.ToString(CultureInfo.InvariantCulture));
                 client.DefaultRequestHeaders.Add("upstream-service", nameof(StartDistributedTrace));
 

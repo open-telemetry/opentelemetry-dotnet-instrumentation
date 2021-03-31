@@ -88,7 +88,7 @@ namespace Datadog.Trace.Tests.Sampling
                 0.05f);
         }
 
-        private static Span GetMyServiceSpan(ulong traceId)
+        private static Span GetMyServiceSpan(TraceId traceId)
         {
             var span = new Span(new SpanContext(traceId, spanId: 1, null, serviceName: ServiceName), DateTimeOffset.Now) { OperationName = OperationName };
             span.SetTag(Tags.Env, Env);
@@ -108,7 +108,7 @@ namespace Datadog.Trace.Tests.Sampling
 
             while (sampleSize-- > 0)
             {
-                var traceId = idGenerator.CreateNew();
+                var traceId = TraceId.CreateRandom();
                 var span = GetMyServiceSpan(traceId);
                 var priority = sampler.GetSamplingPriority(span);
                 if (priority == SamplingPriority.AutoKeep)
