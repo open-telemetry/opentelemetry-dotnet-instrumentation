@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using System.Threading;
 using Datadog.Trace.Configuration;
-using Datadog.Trace.ServiceFabric.Propagators;
+using Datadog.Trace.Propagation;
 using Microsoft.ServiceFabric.Services.Remoting.V2;
 using Microsoft.ServiceFabric.Services.Remoting.V2.Client;
 using Microsoft.ServiceFabric.Services.Remoting.V2.Runtime;
@@ -24,7 +24,7 @@ namespace Datadog.Trace.ServiceFabric
         private static bool _initialized;
         private static string? _clientAnalyticsSampleRate;
         private static string? _serverAnalyticsSampleRate;
-        private static IServiceFabricContextPropagator? _contextPropagator;
+        private static IPropagator? _propagator;
 
         /// <summary>
         /// Start tracing Service Remoting requests.
@@ -39,7 +39,7 @@ namespace Datadog.Trace.ServiceFabric
                 _serverAnalyticsSampleRate = GetAnalyticsSampleRate(Tracer.Instance, enabledWithGlobalSetting: true)?.ToString(CultureInfo.InvariantCulture);
 
                 // Propagator
-                _contextPropagator = GetContextPropagator(Tracer.Instance);
+                _propagator = Tracer.Instance.Propagator;
 
                 // client events
                 ServiceRemotingClientEvents.SendRequest += ServiceRemotingClientEvents_SendRequest;
@@ -80,7 +80,7 @@ namespace Datadog.Trace.ServiceFabric
                     {
                         SamplingPriority? samplingPriority = span.Context.TraceContext?.SamplingPriority ?? span.Context.SamplingPriority;
                         string? origin = span.GetTag(Tags.Origin);
-                        var context = new PropagationContext(span.TraceId, span.SpanId, samplingPriority, origin);
+                        var context = new SpanContext(span.TraceId, span.SpanId, samplingPriority, null, origin);
 
                         InjectContext(context, messageHeaders);
                     }
@@ -128,7 +128,6 @@ namespace Datadog.Trace.ServiceFabric
             }
 
             GetMessageHeaders(e, out var eventArgs, out var messageHeaders);
-            PropagationContext? propagationContext = null;
             SpanContext? spanContext = null;
 
             try
@@ -136,12 +135,7 @@ namespace Datadog.Trace.ServiceFabric
                 // extract propagation context from message headers for distributed tracing
                 if (messageHeaders != null)
                 {
-                    propagationContext = ExtractContext(messageHeaders);
-
-                    if (propagationContext != null)
-                    {
-                        spanContext = new SpanContext(propagationContext.Value.TraceId, propagationContext.Value.ParentSpanId, propagationContext.Value.SamplingPriority);
-                    }
+                    spanContext = ExtractContext(messageHeaders);
                 }
             }
             catch (Exception ex)
@@ -156,7 +150,7 @@ namespace Datadog.Trace.ServiceFabric
 
                 try
                 {
-                    string? origin = propagationContext?.Origin;
+                    string? origin = spanContext?.Origin;
 
                     if (!string.IsNullOrEmpty(origin))
                     {
@@ -218,16 +212,16 @@ namespace Datadog.Trace.ServiceFabric
             }
         }
 
-        private static void InjectContext(PropagationContext context, IServiceRemotingRequestMessageHeader messageHeaders)
+        private static void InjectContext(SpanContext context, IServiceRemotingRequestMessageHeader messageHeaders)
         {
-            if (context.TraceId == TraceId.Zero || context.ParentSpanId == 0)
+            if (context.TraceId == TraceId.Zero || context.SpanId == 0)
             {
                 return;
             }
 
             try
             {
-                _contextPropagator?.InjectContext(context, messageHeaders);
+                _propagator?.Inject(context, messageHeaders);
             }
             catch (Exception ex)
             {
@@ -235,11 +229,11 @@ namespace Datadog.Trace.ServiceFabric
             }
         }
 
-        private static PropagationContext? ExtractContext(IServiceRemotingRequestMessageHeader messageHeaders)
+        private static SpanContext? ExtractContext(IServiceRemotingRequestMessageHeader messageHeaders)
         {
             try
             {
-                return _contextPropagator?.ExtractContext(messageHeaders);
+                return _propagator?.Extract(messageHeaders);
             }
             catch (Exception ex)
             {
@@ -365,20 +359,6 @@ namespace Datadog.Trace.ServiceFabric
             IntegrationSettings integrationSettings = tracer.Settings.Integrations[IntegrationId];
             bool analyticsEnabled = integrationSettings.AnalyticsEnabled ?? (enabledWithGlobalSetting && tracer.Settings.AnalyticsEnabled);
             return analyticsEnabled ? integrationSettings.AnalyticsSampleRate : (double?)null;
-        }
-
-        private static IServiceFabricContextPropagator GetContextPropagator(Tracer instance)
-        {
-            switch (instance.Settings.Propagator)
-            {
-                case PropagatorType.Default:
-                case PropagatorType.Datadog:
-                    return new DDServiceFabricContextPropagator();
-                case PropagatorType.B3:
-                    return new B3ServiceFabricContextPropagator();
-                default:
-                    throw new InvalidOperationException($"Could not create service fabric context propagator for '{instance.Settings.Propagator}'");
-            }
         }
     }
 }

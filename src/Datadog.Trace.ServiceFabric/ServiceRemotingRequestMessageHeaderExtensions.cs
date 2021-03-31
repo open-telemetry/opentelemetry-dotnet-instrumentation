@@ -6,45 +6,15 @@ namespace Datadog.Trace.ServiceFabric
 {
     internal static class ServiceRemotingRequestMessageHeaderExtensions
     {
-        public static bool TryAddHeader(this IServiceRemotingRequestMessageHeader headers, string headerName, PropagationContext context, Func<PropagationContext, byte[]> headerValue)
+        public static bool TryAddHeader(this IServiceRemotingRequestMessageHeader headers, string headerName, string headerValue, Func<string, byte[]> serializer)
         {
             if (!headers.TryGetHeaderValue(headerName, out _))
             {
-                byte[] bytes = headerValue(context);
-                headers.AddHeader(headerName, bytes);
+                headers.AddHeader(headerName, serializer(headerValue));
                 return true;
             }
 
             return false;
-        }
-
-        public static TraceId TryGetHeaderValueTraceId(this IServiceRemotingRequestMessageHeader headers, string headerName)
-        {
-            var traceIdAsString = headers.TryGetHeaderValueString(headerName);
-
-            return traceIdAsString == null
-                ? TraceId.Zero
-                : Tracer.Instance.TraceIdConvention.CreateFromString(traceIdAsString);
-        }
-
-        public static int? TryGetHeaderValueInt32(this IServiceRemotingRequestMessageHeader headers, string headerName)
-        {
-            if (headers.TryGetHeaderValue(headerName, out byte[] bytes) && bytes?.Length == sizeof(int))
-            {
-                return BitConverter.ToInt32(bytes, 0);
-            }
-
-            return null;
-        }
-
-        public static ulong? TryGetHeaderValueUInt64(this IServiceRemotingRequestMessageHeader headers, string headerName)
-        {
-            if (headers.TryGetHeaderValue(headerName, out byte[] bytes) && bytes?.Length == sizeof(ulong))
-            {
-                return BitConverter.ToUInt64(bytes, 0);
-            }
-
-            return null;
         }
 
         public static string? TryGetHeaderValueString(this IServiceRemotingRequestMessageHeader headers, string headerName)
