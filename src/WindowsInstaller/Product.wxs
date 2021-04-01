@@ -14,9 +14,9 @@
              InstallScope="perMachine"
              Description="$(var.ProductName)" />
 
-    <Icon Id="opentelemetry.ico" SourceFile="opentelemetry-icon.ico"/>
+    <Icon Id="product.ico" SourceFile="product-icon.ico"/>
     <PropertyRef Id="WIX_IS_NETFRAMEWORK_461_OR_LATER_INSTALLED" />
-    <Property Id="ARPPRODUCTICON">opentelemetry.ico</Property>
+    <Property Id="ARPPRODUCTICON">product.ico</Property>
     <Property Id="ARPURLINFOABOUT">https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/</Property>
     <Property Id="ARPHELPLINK">https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/tree/main/docs/</Property>
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER"/>
