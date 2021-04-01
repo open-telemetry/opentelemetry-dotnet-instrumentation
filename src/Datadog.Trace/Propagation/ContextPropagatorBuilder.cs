@@ -7,22 +7,31 @@ namespace Datadog.Trace.Propagation
 {
     internal static class ContextPropagatorBuilder
     {
-        private static readonly IReadOnlyDictionary<PropagatorType, Func<ITraceIdConvention, IPropagator>> _propagatorSelector =
+        private static readonly IReadOnlyDictionary<PropagatorType, Func<ITraceIdConvention, IPropagator>> PropagatorSelector =
             new Dictionary<PropagatorType, Func<ITraceIdConvention, IPropagator>>()
             {
-                { PropagatorType.B3, (convention) => new B3SpanContextPropagator(convention) },
-                { PropagatorType.Datadog, (convention) => new DDSpanContextPropagator(convention) },
-                { PropagatorType.Default, (convention) => new DDSpanContextPropagator(convention) },
+                { PropagatorType.W3C, convention => new W3CSpanContextPropagator(convention) },
+                { PropagatorType.B3, convention => new B3SpanContextPropagator(convention) },
+                { PropagatorType.Datadog, convention => new DDSpanContextPropagator(convention) },
+                { PropagatorType.Default, convention => new DDSpanContextPropagator(convention) },
             };
 
         public static IPropagator BuildPropagator(PropagatorType propagator, ITraceIdConvention traceIdConvention)
         {
-            if (_propagatorSelector.TryGetValue(propagator, out Func<ITraceIdConvention, IPropagator> getter))
+            if (PropagatorSelector.TryGetValue(propagator, out Func<ITraceIdConvention, IPropagator> getter))
             {
-                return getter(traceIdConvention);
+                // W3C propagator requires Otel TraceId convention as it's specification clearly states lengths of traceId and spanId values in the header.
+                return IsW3CButNotOtelTraceId(propagator, traceIdConvention)
+                           ? PropagatorSelector[PropagatorType.Default](traceIdConvention)
+                           : getter(traceIdConvention);
             }
 
             throw new InvalidOperationException($"There is no propagator registered for type '{propagator}'");
+        }
+
+        private static bool IsW3CButNotOtelTraceId(PropagatorType propagator, ITraceIdConvention traceIdConvention)
+        {
+            return propagator is PropagatorType.W3C && traceIdConvention.GetType() != typeof(OtelTraceIdConvention);
         }
     }
 }
