@@ -25,10 +25,5 @@ namespace Datadog.Trace.Propagation
 
             throw new InvalidOperationException($"There is no propagator registered for type '{propagator}'");
         }
-
-        private static bool IsW3CButNotOtelTraceId(PropagatorType propagator, ITraceIdConvention traceIdConvention)
-        {
-            return propagator is PropagatorType.W3C && traceIdConvention.GetType() != typeof(OtelTraceIdConvention);
-        }
     }
 }
