@@ -370,12 +370,12 @@ namespace Datadog.Trace.Configuration
             /// additional features on `aspnet_core.request` spans.
             /// </summary>
             /// <seealso cref="TracerSettings.RouteTemplateResourceNamesEnabled"/>
-            public const string RouteTemplateResourceNamesEnabled = "DD_TRACE_ROUTE_TEMPLATE_RESOURCE_NAMES_ENABLED";
+            public const string RouteTemplateResourceNamesEnabled = "OTEL_TRACE_ROUTE_TEMPLATE_RESOURCE_NAMES_ENABLED";
 
             /// <summary>
             /// Feature Flag: enables instrumenting calls to netstandard.dll (only applies to CallSite instrumentation)
             /// </summary>
-            public const string NetStandardEnabled = "DD_TRACE_NETSTANDARD_ENABLED";
+            public const string NetStandardEnabled = "OTEL_TRACE_NETSTANDARD_ENABLED";
         }
     }
 }
