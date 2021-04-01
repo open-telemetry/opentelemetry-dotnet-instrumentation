@@ -46,7 +46,7 @@
   <ItemGroup>
     <Content Include="banner.bmp" />
     <Content Include="build.ps1" />
-    <Content Include="opentelemetry-icon.ico" />
+    <Content Include="product-icon.ico" />
     <Content Include="dialog.bmp" />
     <Content Include="Config.wxi" />
     <Content Include="license.rtf" />

@@ -70,9 +70,9 @@ BEGIN
             VALUE "FileDescription", "Datadog CLR Profiler"
             VALUE "FileVersion", "1.24.0.0"
             VALUE "InternalName", "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.DLL"
-            VALUE "LegalCopyright", "Copyright 2017 Datadog, Inc."
+            VALUE "LegalCopyright", "Copyright 2021 OpenTelemetry, Inc."
             VALUE "OriginalFilename", "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.DLL"
-            VALUE "ProductName", "Datadog .NET Tracer"
+            VALUE "ProductName", "OpenTelemetry .NET AutoInstrumentation"
             VALUE "ProductVersion", "1.24.0"
         END
     END
