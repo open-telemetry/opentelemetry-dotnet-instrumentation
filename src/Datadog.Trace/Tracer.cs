@@ -119,6 +119,12 @@ namespace Datadog.Trace
             _scopeManager = scopeManager ?? new AsyncLocalScopeManager();
             Sampler = sampler ?? new RuleBasedSampler(new RateLimiter(Settings.MaxTracesSubmittedPerSecond));
 
+            // W3C propagator requires Otel TraceId convention as it's specification clearly states lengths of traceId and spanId values in the header.
+            if (Settings.Propagator == PropagatorType.W3C && Settings.Convention != ConventionType.OpenTelemetry)
+            {
+                throw new NotSupportedException($"'{PropagatorType.W3C}' propagator requires '{ConventionType.OpenTelemetry}' convention to be set");
+            }
+
             _propagator = ContextPropagatorBuilder.BuildPropagator(Settings.Propagator, TraceIdConvention);
 
             if (!string.IsNullOrWhiteSpace(Settings.CustomSamplingRules))

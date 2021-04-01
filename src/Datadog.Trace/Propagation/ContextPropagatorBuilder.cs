@@ -20,10 +20,7 @@ namespace Datadog.Trace.Propagation
         {
             if (PropagatorSelector.TryGetValue(propagator, out Func<ITraceIdConvention, IPropagator> getter))
             {
-                // W3C propagator requires Otel TraceId convention as it's specification clearly states lengths of traceId and spanId values in the header.
-                return IsW3CButNotOtelTraceId(propagator, traceIdConvention)
-                           ? PropagatorSelector[PropagatorType.Default](traceIdConvention)
-                           : getter(traceIdConvention);
+                return getter(traceIdConvention);
             }
 
             throw new InvalidOperationException($"There is no propagator registered for type '{propagator}'");
