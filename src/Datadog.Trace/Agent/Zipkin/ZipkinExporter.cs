@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 using Datadog.Trace.Logging;
+using Datadog.Trace.Propagation;
 
 namespace Datadog.Trace.Agent.Zipkin
 {
@@ -39,7 +40,7 @@ namespace Datadog.Trace.Agent.Zipkin
                 request.ContentType = "application/json";
 
                 // Disable automatic instrumentation for Zipkin exporter
-                request.Headers.Add(HttpHeaderNames.TracingEnabled, "false");
+                request.Headers.Add(CommonHttpHeaderNames.TracingEnabled, "false");
 
                 using (var requestStream = await request.GetRequestStreamAsync().ConfigureAwait(false))
                 {

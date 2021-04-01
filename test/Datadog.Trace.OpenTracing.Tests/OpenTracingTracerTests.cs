@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Datadog.Trace.Agent;
 using Datadog.Trace.Configuration;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.Sampling;
 using Datadog.Trace.TestHelpers;
 using Moq;
@@ -144,8 +145,8 @@ namespace Datadog.Trace.OpenTracing.Tests
 
             _tracer.Inject(span.Context, BuiltinFormats.HttpHeaders, headers);
 
-            Assert.Equal(span.DDSpan.Context.TraceId.ToString(), headers.Get(HttpHeaderNames.TraceId));
-            Assert.Equal(span.DDSpan.Context.SpanId.ToString(), headers.Get(HttpHeaderNames.ParentId));
+            Assert.Equal(span.DDSpan.Context.TraceId.ToString(), headers.Get(DDHttpHeaderNames.TraceId));
+            Assert.Equal(span.DDSpan.Context.SpanId.ToString(), headers.Get(DDHttpHeaderNames.ParentId));
         }
 
         [Fact]
@@ -156,8 +157,8 @@ namespace Datadog.Trace.OpenTracing.Tests
 
             _tracer.Inject(span.Context, BuiltinFormats.TextMap, headers);
 
-            Assert.Equal(span.DDSpan.Context.TraceId.ToString(), headers.Get(HttpHeaderNames.TraceId));
-            Assert.Equal(span.DDSpan.Context.SpanId.ToString(), headers.Get(HttpHeaderNames.ParentId));
+            Assert.Equal(span.DDSpan.Context.TraceId.ToString(), headers.Get(DDHttpHeaderNames.TraceId));
+            Assert.Equal(span.DDSpan.Context.SpanId.ToString(), headers.Get(DDHttpHeaderNames.ParentId));
         }
 
         [Fact]
@@ -176,8 +177,8 @@ namespace Datadog.Trace.OpenTracing.Tests
             const ulong parentId = 10;
             var traceId = TraceId.CreateFromInt(42);
             var headers = new MockTextMap();
-            headers.Set(HttpHeaderNames.ParentId, parentId.ToString());
-            headers.Set(HttpHeaderNames.TraceId, traceId.ToString());
+            headers.Set(DDHttpHeaderNames.ParentId, parentId.ToString());
+            headers.Set(DDHttpHeaderNames.TraceId, traceId.ToString());
 
             var otSpanContext = (OpenTracingSpanContext)_tracer.Extract(BuiltinFormats.HttpHeaders, headers);
 
@@ -191,8 +192,8 @@ namespace Datadog.Trace.OpenTracing.Tests
             const ulong parentId = 10;
             var traceId = TraceId.CreateFromInt(42);
             var headers = new MockTextMap();
-            headers.Set(HttpHeaderNames.ParentId, parentId.ToString());
-            headers.Set(HttpHeaderNames.TraceId, traceId.ToString());
+            headers.Set(DDHttpHeaderNames.ParentId, parentId.ToString());
+            headers.Set(DDHttpHeaderNames.TraceId, traceId.ToString());
 
             var otSpanContext = (OpenTracingSpanContext)_tracer.Extract(BuiltinFormats.TextMap, headers);
 
@@ -206,8 +207,8 @@ namespace Datadog.Trace.OpenTracing.Tests
             const ulong parentId = 10;
             var traceId = TraceId.CreateFromInt(42);
             var headers = new MockTextMap();
-            headers.Set(HttpHeaderNames.ParentId, parentId.ToString());
-            headers.Set(HttpHeaderNames.TraceId, traceId.ToString());
+            headers.Set(DDHttpHeaderNames.ParentId, parentId.ToString());
+            headers.Set(DDHttpHeaderNames.TraceId, traceId.ToString());
             var mockFormat = new Mock<IFormat<ITextMap>>();
 
             Assert.Throws<NotSupportedException>(() => _tracer.Extract(mockFormat.Object, headers));

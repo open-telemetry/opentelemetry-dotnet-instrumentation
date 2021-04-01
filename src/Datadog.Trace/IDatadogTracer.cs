@@ -1,5 +1,6 @@
 using System;
 using Datadog.Trace.Configuration;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.Sampling;
 
 namespace Datadog.Trace
@@ -11,6 +12,8 @@ namespace Datadog.Trace
         IScopeManager ScopeManager { get; }
 
         ISampler Sampler { get; }
+
+        IPropagator Propagator { get; }
 
         TracerSettings Settings { get; }
 

@@ -1,15 +1,12 @@
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Globalization;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using Datadog.Trace.ExtensionMethods;
+using Datadog.Trace.Conventions;
 using Datadog.Trace.Headers;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.TestHelpers;
 using Xunit;
 
-namespace Datadog.Trace.Tests
+namespace Datadog.Trace.Tests.Headers
 {
     // TODO: for now, these tests cover all of this,
     // but we should probably split them up into actual *unit* tests for:
@@ -17,34 +14,15 @@ namespace Datadog.Trace.Tests
     // - NameValueHeadersCollection wrapper over NameValueCollection (Get, Set, Add, Remove)
     // - SpanContextPropagator.Inject()
     // - SpanContextPropagator.Extract()
-    public class HeadersCollectionTests
+    public class DDHeadersCollectionTests : HeadersCollectionTestBase
     {
-        public static IEnumerable<object[]> GetHeaderCollectionImplementations()
-        {
-            yield return new object[] { WebRequest.CreateHttp("http://localhost").Headers.Wrap() };
-            yield return new object[] { new NameValueCollection().Wrap() };
-            yield return new object[] { new DictionaryHeadersCollection() };
-        }
-
-        public static IEnumerable<object[]> GetHeadersInvalidIdsCartesianProduct()
-        {
-            return from header in GetHeaderCollectionImplementations().SelectMany(i => i)
-                   from invalidId in HeadersCollectionTestHelpers.GetInvalidIds().SelectMany(i => i)
-                   select new[] { header, invalidId };
-        }
-
-        public static IEnumerable<object[]> GetHeadersInvalidSamplingPrioritiesCartesianProduct()
-        {
-            return from header in GetHeaderCollectionImplementations().SelectMany(i => i)
-                   from invalidSamplingPriority in HeadersCollectionTestHelpers.GetInvalidSamplingPriorities().SelectMany(i => i)
-                   select new[] { header, invalidSamplingPriority };
-        }
+        private readonly DDSpanContextPropagator _propagator = new DDSpanContextPropagator(new DatadogTraceIdConvention());
 
         [Theory]
         [MemberData(nameof(GetHeaderCollectionImplementations))]
         internal void ExtractHeaderTags_EmptyHeadersReturnsEmptyTagsList(IHeadersCollection headers)
         {
-            var tagsFromHeader = SpanContextPropagator.Instance.ExtractHeaderTags(headers, new Dictionary<string, string>());
+            var tagsFromHeader = headers.ExtractHeaderTags(new Dictionary<string, string>());
 
             Assert.NotNull(tagsFromHeader);
             Assert.Empty(tagsFromHeader);
@@ -78,7 +56,7 @@ namespace Datadog.Trace.Tests
             expectedResults.Add(customHeader2TagName, customHeader2Value);
 
             // Test
-            var tagsFromHeader = SpanContextPropagator.Instance.ExtractHeaderTags(headers, headerToTagMap);
+            var tagsFromHeader = headers.ExtractHeaderTags(headerToTagMap);
 
             // Assert
             Assert.NotNull(tagsFromHeader);
@@ -89,7 +67,7 @@ namespace Datadog.Trace.Tests
         [MemberData(nameof(GetHeaderCollectionImplementations))]
         internal void Extract_EmptyHeadersReturnsNull(IHeadersCollection headers)
         {
-            var resultContext = SpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
             Assert.Null(resultContext);
         }
 
@@ -103,8 +81,8 @@ namespace Datadog.Trace.Tests
             const string origin = "synthetics";
 
             var context = new SpanContext(traceId, spanId, samplingPriority, null, origin);
-            SpanContextPropagator.Instance.Inject(context, headers);
-            var resultContext = SpanContextPropagator.Instance.Extract(headers);
+            _propagator.Inject(context, headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(context.SpanId, resultContext.SpanId);
@@ -122,7 +100,7 @@ namespace Datadog.Trace.Tests
             const string origin = "synthetics";
 
             InjectContext(headers, traceId, spanId, samplingPriority, origin);
-            var resultContext = SpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             // invalid traceId should return a null context even if other values are set
             Assert.Null(resultContext);
@@ -143,7 +121,7 @@ namespace Datadog.Trace.Tests
                 ((int)samplingPriority).ToString(CultureInfo.InvariantCulture),
                 origin);
 
-            var resultContext = SpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(traceId, resultContext.TraceId);
@@ -167,7 +145,7 @@ namespace Datadog.Trace.Tests
                 samplingPriority,
                 origin);
 
-            var resultContext = SpanContextPropagator.Instance.Extract(headers);
+            var resultContext = _propagator.Extract(headers);
 
             Assert.NotNull(resultContext);
             Assert.Equal(traceId, resultContext.TraceId);
@@ -178,10 +156,10 @@ namespace Datadog.Trace.Tests
 
         private static void InjectContext(IHeadersCollection headers, string traceId, string spanId, string samplingPriority, string origin)
         {
-            headers.Add(HttpHeaderNames.TraceId, traceId);
-            headers.Add(HttpHeaderNames.ParentId, spanId);
-            headers.Add(HttpHeaderNames.SamplingPriority, samplingPriority);
-            headers.Add(HttpHeaderNames.Origin, origin);
+            headers.Add(DDHttpHeaderNames.TraceId, traceId);
+            headers.Add(DDHttpHeaderNames.ParentId, spanId);
+            headers.Add(DDHttpHeaderNames.SamplingPriority, samplingPriority);
+            headers.Add(DDHttpHeaderNames.Origin, origin);
         }
     }
 }

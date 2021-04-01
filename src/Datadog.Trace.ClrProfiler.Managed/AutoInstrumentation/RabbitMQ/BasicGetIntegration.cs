@@ -54,6 +54,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.RabbitMQ
             string queue = (string)state.State;
             DateTimeOffset? startTime = state.StartTime;
 
+            Tracer tracer = Tracer.Instance;
             SpanContext propagatedContext = null;
             string messageSize = null;
 
@@ -67,7 +68,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.RabbitMQ
                 {
                     try
                     {
-                        propagatedContext = SpanContextPropagator.Instance.Extract(basicPropertiesHeaders, ContextPropagation.HeadersGetter);
+                        propagatedContext = tracer.Propagator.Extract(basicPropertiesHeaders, ContextPropagation.HeadersGetter);
                     }
                     catch (Exception ex)
                     {
@@ -76,7 +77,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.RabbitMQ
                 }
             }
 
-            using (var scope = RabbitMQIntegration.CreateScope(Tracer.Instance, out RabbitMQTags tags, Command, parentContext: propagatedContext, spanKind: SpanKinds.Consumer, queue: queue, startTime: startTime))
+            using (var scope = RabbitMQIntegration.CreateScope(tracer, out RabbitMQTags tags, Command, parentContext: propagatedContext, spanKind: SpanKinds.Consumer, queue: queue, startTime: startTime))
             {
                 if (scope != null)
                 {

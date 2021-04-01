@@ -4,6 +4,7 @@ using System.Threading;
 using Datadog.Trace.ClrProfiler.CallTarget;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.Tagging;
 
 namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.HttpClient
@@ -15,13 +16,14 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.HttpClient
         {
             if (requestMessage.Instance is not null && IsTracingEnabled(requestMessage.Headers, isTracingEnableFunc))
             {
-                Scope scope = ScopeFactory.CreateOutboundHttpScope(Tracer.Instance, requestMessage.Method.Method, requestMessage.RequestUri, integrationId, out HttpTags tags);
+                Tracer tracer = Tracer.Instance;
+                Scope scope = ScopeFactory.CreateOutboundHttpScope(tracer, requestMessage.Method.Method, requestMessage.RequestUri, integrationId, out HttpTags tags);
                 if (scope != null)
                 {
                     tags.HttpClientHandlerType = instance.GetType().FullName;
 
                     // add distributed tracing headers to the HTTP request
-                    SpanContextPropagator.Instance.Inject(scope.Span.Context, new HttpHeadersCollection(requestMessage.Headers));
+                    tracer.Propagator.Inject(scope.Span.Context, new HttpHeadersCollection(requestMessage.Headers));
 
                     return new CallTargetState(scope);
                 }
@@ -67,7 +69,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.HttpClient
                 return false;
             }
 
-            if (headers.TryGetValues(HttpHeaderNames.TracingEnabled, out var headerValues))
+            if (headers.TryGetValues(CommonHttpHeaderNames.TracingEnabled, out var headerValues))
             {
                 if (headerValues is string[] arrayValues)
                 {

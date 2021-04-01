@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using Datadog.Trace.Propagation;
 
 namespace Datadog.Trace.Agent.Transports
 {
@@ -17,7 +18,7 @@ namespace Datadog.Trace.Agent.Transports
             _request.Headers.Add(AgentHttpHeaderNames.TracerVersion, TracerConstants.AssemblyVersion);
 
             // don't add automatic instrumentation to requests from this HttpClient
-            _request.Headers.Add(HttpHeaderNames.TracingEnabled, "false");
+            _request.Headers.Add(CommonHttpHeaderNames.TracingEnabled, "false");
         }
 
         public void AddHeader(string name, string value)

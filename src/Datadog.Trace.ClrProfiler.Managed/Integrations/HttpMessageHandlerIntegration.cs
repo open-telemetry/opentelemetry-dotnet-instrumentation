@@ -10,6 +10,7 @@ using Datadog.Trace.DuckTyping;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Headers;
 using Datadog.Trace.Logging;
+using Datadog.Trace.Propagation;
 
 namespace Datadog.Trace.ClrProfiler.Integrations
 {
@@ -413,8 +414,9 @@ namespace Datadog.Trace.ClrProfiler.Integrations
         {
             var httpMethod = requestValue.Method.Method;
             var requestUri = requestValue.RequestUri;
+            var tracer = Tracer.Instance;
 
-            using (var scope = ScopeFactory.CreateOutboundHttpScope(Tracer.Instance, httpMethod, requestUri, IntegrationId, out var tags))
+            using (var scope = ScopeFactory.CreateOutboundHttpScope(tracer, httpMethod, requestUri, IntegrationId, out var tags))
             {
                 try
                 {
@@ -423,7 +425,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                         tags.HttpClientHandlerType = reportedType.FullName;
 
                         // add distributed tracing headers to the HTTP request
-                        SpanContextPropagator.Instance.Inject(scope.Span.Context, new HttpHeadersCollection(requestValue.Headers));
+                        tracer.Propagator.Inject(scope.Span.Context, new HttpHeadersCollection(requestValue.Headers));
                     }
 
                     var task = (Task)sendAsync(handler, request, cancellationToken);
@@ -459,8 +461,9 @@ namespace Datadog.Trace.ClrProfiler.Integrations
         {
             var httpMethod = requestValue.Method.Method;
             var requestUri = requestValue.RequestUri;
+            var tracer = Tracer.Instance;
 
-            using (var scope = ScopeFactory.CreateOutboundHttpScope(Tracer.Instance, httpMethod, requestUri, IntegrationId, out var tags))
+            using (var scope = ScopeFactory.CreateOutboundHttpScope(tracer, httpMethod, requestUri, IntegrationId, out var tags))
             {
                 try
                 {
@@ -469,7 +472,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                         tags.HttpClientHandlerType = reportedType.FullName;
 
                         // add distributed tracing headers to the HTTP request
-                        SpanContextPropagator.Instance.Inject(scope.Span.Context, new HttpHeadersCollection(requestValue.Headers));
+                        tracer.Propagator.Inject(scope.Span.Context, new HttpHeadersCollection(requestValue.Headers));
                     }
 
                     var response = send(handler, request, cancellationToken);
@@ -500,7 +503,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
 
         private static bool IsTracingEnabled(IRequestHeaders headers)
         {
-            if (headers.TryGetValues(HttpHeaderNames.TracingEnabled, out var headerValues))
+            if (headers.TryGetValues(CommonHttpHeaderNames.TracingEnabled, out var headerValues))
             {
                 if (headerValues is string[] arrayValues)
                 {
