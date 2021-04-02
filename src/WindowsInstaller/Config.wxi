@@ -4,7 +4,7 @@
   <?define BaseProductName = ".NET AutoInstrumentation" ?>
   <?define ArpManufacturer = "OpenTelemetry" ?>
   <?define Company = "OpenTelemetry" ?>
-  <?define ProductNamePlatformAgnostic = "Datadog $(var.BaseProductName)" ?>
+  <?define ProductNamePlatformAgnostic = "OpenTelemetry $(var.BaseProductName)" ?>
   <?define ProfilerCLSID = "{918728DD-259F-4A6A-AC2B-B85E1B658318}" ?>
 
   <?if $(var.Platform) = x64 ?>
