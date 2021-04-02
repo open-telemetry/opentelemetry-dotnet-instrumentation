@@ -45,6 +45,10 @@ namespace Datadog.Trace.Propagation
             context.TraceContext?.LockSamplingPriority();
 
             setter(carrier, W3CHeaderNames.TraceParent, string.Format(TraceParentFormat, context.TraceId.ToString(), context.SpanId.ToString("x16")));
+            if (!string.IsNullOrEmpty(context.TraceState))
+            {
+                setter(carrier, W3CHeaderNames.TraceState, context.TraceState);
+            }
         }
 
         public SpanContext Extract<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
@@ -58,6 +62,8 @@ namespace Datadog.Trace.Propagation
             {
                 throw new ArgumentNullException(nameof(getter));
             }
+
+            var traceState = getter(carrier, W3CHeaderNames.TraceState).FirstOrDefault();
 
             var traceParentValues = getter(carrier, W3CHeaderNames.TraceParent).ToList();
             if (traceParentValues.Count != 1)
@@ -78,7 +84,7 @@ namespace Datadog.Trace.Propagation
             var spanIdString = traceParentHeader.Substring(VersionAndTraceIdLength, SpanIdLength);
             if (ulong.TryParse(spanIdString, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var spanId))
             {
-                return spanId == 0 ? null : new SpanContext(traceId, spanId);
+                return spanId == 0 ? null : new SpanContext(traceId, spanId, traceState);
             }
 
             Log.Warning("Could not parse {HeaderName} headers: {HeaderValues}", W3CHeaderNames.TraceParent, string.Join(",", traceParentValues));

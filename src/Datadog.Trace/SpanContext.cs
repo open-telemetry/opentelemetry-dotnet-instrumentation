@@ -30,6 +30,22 @@ namespace Datadog.Trace
         /// Initializes a new instance of the <see cref="SpanContext"/> class
         /// from a propagated context. <see cref="Parent"/> will be null
         /// since this is a root context locally.
+        /// This constructor is used by W3C propagation.
+        /// </summary>
+        /// <param name="traceId">The propagated trace id.</param>
+        /// <param name="spanId">The propagated span id.</param>
+        /// <param name="traceState">The W3C tracestate.</param>
+        public SpanContext(TraceId? traceId, ulong spanId, string traceState)
+            : this(traceId, serviceName: null)
+        {
+            SpanId = spanId;
+            TraceState = traceState;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SpanContext"/> class
+        /// from a propagated context. <see cref="Parent"/> will be null
+        /// since this is a root context locally.
         /// </summary>
         /// <param name="traceId">The propagated trace id.</param>
         /// <param name="spanId">The propagated span id.</param>
@@ -99,6 +115,11 @@ namespace Datadog.Trace
         /// Gets the origin of the trace
         /// </summary>
         internal string Origin { get; }
+
+        /// <summary>
+        /// Gets the trace state for W3C propagation
+        /// </summary>
+        internal string TraceState { get; }
 
         /// <summary>
         /// Gets the trace context.
