@@ -20,6 +20,12 @@ namespace Datadog.Trace.Propagation
         {
             if (PropagatorSelector.TryGetValue(propagator, out Func<ITraceIdConvention, IPropagator> getter))
             {
+                // W3C propagator requires Otel TraceId convention as it's specification clearly states lengths of traceId and spanId values in the header.
+                if (propagator == PropagatorType.W3C && traceIdConvention is not OtelTraceIdConvention)
+                {
+                    throw new NotSupportedException($"'{PropagatorType.W3C}' propagator requires '{ConventionType.OpenTelemetry}' convention to be set");
+                }
+
                 return getter(traceIdConvention);
             }
 
