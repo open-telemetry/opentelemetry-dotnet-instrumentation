@@ -14,4 +14,4 @@ Datadog.Trace.ClrProfiler.Native,https://github.com/gabime/spdlog,MIT,Copyright 
 Datadog.Trace.ClrProfiler.Native,https://github.com/fmtlib/fmt,MIT,"Copyright (c) 2012 - present, Victor Zverovich"
 Datadog.Trace.OpenTracing,https://github.com/opentracing/opentracing-csharp,MIT,Copyright 2016-2017 The OpenTracing Authors
 Datadog.Trace.OpenTracing,https://github.com/opentracing-contrib/csharp-netcore,Apache-2.0,
-(all),https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation,Apache-2.0,
+(all),https://github.com/DataDog/dd-trace-dotnet,Apache-2.0,
