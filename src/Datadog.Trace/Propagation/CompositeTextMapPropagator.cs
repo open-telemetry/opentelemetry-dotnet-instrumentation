@@ -4,8 +4,8 @@ using System.Collections.Generic;
 namespace Datadog.Trace.Propagation
 {
     /// <summary>
-    /// Composite Propagator
-    /// See more details <see href="https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/context/api-propagators.md#composite-propagator">here</see>
+    /// Composite Propagator.
+    /// See more details <see href="https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/context/api-propagators.md#composite-propagator">here</see>.
     /// </summary>
     internal class CompositeTextMapPropagator : IPropagator
     {
