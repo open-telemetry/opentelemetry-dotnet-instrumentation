@@ -13,17 +13,17 @@ namespace Datadog.Trace.Propagation
     {
         private const string TraceParentFormat = "00-{0}-{1}-01";
 
+        // The following length limits are from Trace Context v1 https://www.w3.org/TR/trace-context-1/#key
+        private const int TraceStateKeyMaxLength = 256;
+        private const int TraceStateKeyTenantMaxLength = 241;
+        private const int TraceStateKeyVendorMaxLength = 14;
+        private const int TraceStateValueMaxLength = 256;
+
         private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor<W3CSpanContextPropagator>();
         private static readonly int VersionPrefixIdLength = "00-".Length;
         private static readonly int TraceIdLength = "0af7651916cd43dd8448eb211c80319c".Length;
         private static readonly int VersionAndTraceIdLength = "00-0af7651916cd43dd8448eb211c80319c-".Length;
         private static readonly int SpanIdLength = "00f067aa0ba902b7".Length;
-
-        // The following length limits are from Trace Context v1 https://www.w3.org/TR/trace-context-1/#key
-        private static readonly int TraceStateKeyMaxLength = 256;
-        private static readonly int TraceStateKeyTenantMaxLength = 241;
-        private static readonly int TraceStateKeyVendorMaxLength = 14;
-        private static readonly int TraceStateValueMaxLength = 256;
 
         private readonly ITraceIdConvention _traceIdConvention;
 
@@ -34,21 +34,6 @@ namespace Datadog.Trace.Propagation
 
         public void Inject<T>(SpanContext context, T carrier, Action<T, string, string> setter)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            if (carrier == null)
-            {
-                throw new ArgumentNullException(nameof(carrier));
-            }
-
-            if (setter == null)
-            {
-                throw new ArgumentNullException(nameof(setter));
-            }
-
             // lock sampling priority when span propagates.
             context.TraceContext?.LockSamplingPriority();
 
@@ -61,16 +46,6 @@ namespace Datadog.Trace.Propagation
 
         public SpanContext Extract<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
         {
-            if (carrier == null)
-            {
-                throw new ArgumentNullException(nameof(carrier));
-            }
-
-            if (getter == null)
-            {
-                throw new ArgumentNullException(nameof(getter));
-            }
-
             var traceStateCollection = getter(carrier, W3CHeaderNames.TraceState);
             var traceState = ExtractTraceState(traceStateCollection);
 
