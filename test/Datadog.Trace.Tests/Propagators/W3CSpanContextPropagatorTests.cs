@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Datadog.Trace.Conventions;
 using Datadog.Trace.Headers;
@@ -83,11 +84,11 @@ namespace Datadog.Trace.Tests.Propagators
         {
             var propagator = new W3CSpanContextPropagator(new OtelTraceIdConvention());
             headers.Set(W3CHeaderNames.TraceParent, "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01");
-            headers.Set(W3CHeaderNames.TraceState, "state");
+            headers.Set(W3CHeaderNames.TraceState, "state=2,am=dsa");
 
             var spanContext = propagator.Extract(headers);
 
-            spanContext.TraceState.Should().Be("state");
+            spanContext.TraceState.Should().Be("state=2,am=dsa");
         }
 
         [Theory]
@@ -96,6 +97,45 @@ namespace Datadog.Trace.Tests.Propagators
         {
             var propagator = new W3CSpanContextPropagator(new OtelTraceIdConvention());
             headers.Set(W3CHeaderNames.TraceParent, "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01");
+
+            var spanContext = propagator.Extract(headers);
+
+            spanContext.TraceState.Should().BeNullOrEmpty();
+        }
+
+        [Theory]
+        [MemberData(nameof(GetHeaderCollectionImplementations))]
+        internal void Extract_OmitsTraceStateWithIncorrectValue(IHeadersCollection headers)
+        {
+            var propagator = new W3CSpanContextPropagator(new OtelTraceIdConvention());
+            headers.Set(W3CHeaderNames.TraceParent, "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01");
+            headers.Set(W3CHeaderNames.TraceState, "state=,arn=2");
+
+            var spanContext = propagator.Extract(headers);
+
+            spanContext.TraceState.Should().BeNullOrEmpty();
+        }
+
+        [Theory]
+        [MemberData(nameof(GetHeaderCollectionImplementations))]
+        internal void Extract_OmitsTraceStateWithIncorrectKey(IHeadersCollection headers)
+        {
+            var propagator = new W3CSpanContextPropagator(new OtelTraceIdConvention());
+            headers.Set(W3CHeaderNames.TraceParent, "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01");
+            headers.Set(W3CHeaderNames.TraceState, "statDSAe=3,arn=2");
+
+            var spanContext = propagator.Extract(headers);
+
+            spanContext.TraceState.Should().BeNullOrEmpty();
+        }
+
+        [Theory]
+        [MemberData(nameof(GetHeaderCollectionImplementations))]
+        internal void Extract_OmitsEmptyTraceState(IHeadersCollection headers)
+        {
+            var propagator = new W3CSpanContextPropagator(new OtelTraceIdConvention());
+            headers.Set(W3CHeaderNames.TraceParent, "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01");
+            headers.Set(W3CHeaderNames.TraceState, string.Empty);
 
             var spanContext = propagator.Extract(headers);
 
