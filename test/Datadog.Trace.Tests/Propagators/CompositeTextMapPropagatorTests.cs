@@ -8,13 +8,13 @@ using Xunit;
 
 namespace Datadog.Trace.Tests.Propagators
 {
-    public class MultiplexSpanContextPropagatorTests : HeadersCollectionTestBase
+    public class CompositeTextMapPropagatorTests : HeadersCollectionTestBase
     {
         private readonly IPropagator _multiplexer;
 
-        public MultiplexSpanContextPropagatorTests()
+        public CompositeTextMapPropagatorTests()
         {
-            _multiplexer = new MultiplexSpanContextPropagator(
+            _multiplexer = new CompositeTextMapPropagator(
                 new[]
                 {
                     new ExamplePropagatorStub("propagator-1", "propagation-1", canExtract: false),

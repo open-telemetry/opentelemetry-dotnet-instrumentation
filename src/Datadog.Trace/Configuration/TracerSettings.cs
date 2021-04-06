@@ -162,7 +162,7 @@ namespace Datadog.Trace.Configuration
 
             Exporter = source.GetTypedValue<ExporterType>(ConfigurationKeys.Exporter);
             Convention = source.GetTypedValue<ConventionType>(ConfigurationKeys.Convention);
-            Propagators = source.GetTypedValues<PropagatorType>(ConfigurationKeys.Propagators);
+            Propagators = GetPropagators(source);
 
             var httpServerErrorStatusCodes = source?.GetString(ConfigurationKeys.HttpServerErrorStatusCodes) ??
                                            // Default value
@@ -584,6 +584,20 @@ namespace Datadog.Trace.Configuration
         internal string GetServiceName(Tracer tracer, string serviceName)
         {
             return ServiceNameMappings.GetServiceName(tracer.DefaultServiceName, serviceName);
+        }
+
+        private static HashSet<PropagatorType> GetPropagators(IConfigurationSource source)
+        {
+            var propagators = source.GetTypedValues<PropagatorType>(ConfigurationKeys.Propagators);
+
+            if (!propagators.Any())
+            {
+                // TODO: Default to W3C (be aware of integration tests)
+                // see more: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/context/api-propagators.md#global-propagators
+                return new HashSet<PropagatorType>() { PropagatorType.Datadog };
+            }
+
+            return new HashSet<PropagatorType>(propagators);
         }
     }
 }

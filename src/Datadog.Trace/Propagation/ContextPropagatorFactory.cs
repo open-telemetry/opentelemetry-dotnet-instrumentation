@@ -6,7 +6,7 @@ using Datadog.Trace.Conventions;
 
 namespace Datadog.Trace.Propagation
 {
-    internal static class ContextPropagatorBuilder
+    internal static class ContextPropagatorFactory
     {
         private static readonly IReadOnlyDictionary<PropagatorType, Func<ITraceIdConvention, IPropagator>> PropagatorSelector =
             new Dictionary<PropagatorType, Func<ITraceIdConvention, IPropagator>>()

@@ -35,8 +35,8 @@ namespace Datadog.Trace.Tests.Configuration
 
         public static IEnumerable<object[]> GetEnumsData()
         {
-            yield return new object[] { new NameValueCollection { { "example1", "value1" } }, "example2", new[] { default(TestEnum) } };
-            yield return new object[] { new NameValueCollection { { "example1", "value1" } }, "example1", new[] { default(TestEnum) } };
+            yield return new object[] { new NameValueCollection { { "example1", "value1" } }, "example2", Enumerable.Empty<TestEnum>() };
+            yield return new object[] { new NameValueCollection { { "example1", "value1" } }, "example1", Enumerable.Empty<TestEnum>() };
             yield return new object[] { new NameValueCollection { { "example1", "TestValue2;TestValue3;;" } }, "example1", new[] { TestEnum.TestValue2, TestEnum.TestValue3 } };
         }
 
@@ -100,8 +100,7 @@ namespace Datadog.Trace.Tests.Configuration
         {
             var result = ConfigurationSourceExtensions.GetTypedValues<TestEnum>(null, "example2");
 
-            Assert.True(result.Count == 1);
-            Assert.Contains(result, (item) => item == default(TestEnum));
+            Assert.True(result.Count() == 0);
         }
 
         [Theory]
