@@ -7,7 +7,7 @@ buildConfiguration=${buildConfiguration:-Debug}
 publishTargetFramework=${publishTargetFramework:-netcoreapp3.1}
 
 mkdir -p /var/log/opentelemetry/dotnet
-touch /var/log/opentelemetry/dotnet/dotnet-tracer-native.logog
+touch /var/log/opentelemetry/dotnet/dotnet-tracer-native.log
 
 dotnet vstest test/Datadog.Trace.IntegrationTests/bin/$buildConfiguration/$publishTargetFramework/publish/Datadog.Trace.IntegrationTests.dll --logger:trx --ResultsDirectory:test/Datadog.Trace.IntegrationTests/results
 

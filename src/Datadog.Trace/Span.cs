@@ -32,7 +32,6 @@ namespace Datadog.Trace
         {
             Tags = tags ?? new CommonTags();
             Context = context;
-            ServiceName = context.ServiceName;
             StartTime = start ?? Context.TraceContext.UtcNow;
 
             Log.Debug(
@@ -93,7 +92,9 @@ namespace Datadog.Trace
 
         internal bool IsFinished { get; private set; }
 
-        internal bool IsRootSpan => Context?.TraceContext?.RootSpan == this;
+        internal bool IsRootSpan => Context.TraceContext?.RootSpan == this;
+
+        internal bool IsTopLevel => Context.Parent == null || Context.Parent.ServiceName != ServiceName;
 
         /// <summary>
         /// Returns a <see cref="string" /> that represents this instance.
