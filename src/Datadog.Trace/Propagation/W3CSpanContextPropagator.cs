@@ -91,13 +91,13 @@ namespace Datadog.Trace.Propagation
             }
 
             var spanIdString = traceParentHeader.Substring(VersionAndTraceIdLength, SpanIdLength);
-            if (ulong.TryParse(spanIdString, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var spanId))
+            if (!ulong.TryParse(spanIdString, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var spanId))
             {
-                return spanId == 0 ? null : new SpanContext(traceId, spanId, traceState);
+                Log.Warning("Could not parse {HeaderName} headers: {HeaderValues}", W3CHeaderNames.TraceParent, string.Join(",", traceParentValues));
+                return null;
             }
 
-            Log.Warning("Could not parse {HeaderName} headers: {HeaderValues}", W3CHeaderNames.TraceParent, string.Join(",", traceParentValues));
-            return null;
+            return spanId == 0 ? null : new SpanContext(traceId, spanId, traceState);
         }
 
         private static string ExtractTraceState(IEnumerable<string> traceStateCollection)
