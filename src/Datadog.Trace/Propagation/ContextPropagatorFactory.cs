@@ -22,7 +22,7 @@ namespace Datadog.Trace.Propagation
             return propagatorTypes.Select(type => BuildPropagator(type, traceIdConvention)).ToList();
         }
 
-        public static IPropagator BuildPropagator(PropagatorType propagatorType, ITraceIdConvention traceIdConvention)
+        private static IPropagator BuildPropagator(PropagatorType propagatorType, ITraceIdConvention traceIdConvention)
         {
             if (PropagatorSelector.TryGetValue(propagatorType, out Func<ITraceIdConvention, IPropagator> getter))
             {
