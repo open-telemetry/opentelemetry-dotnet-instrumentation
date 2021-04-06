@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using Datadog.Trace.Configuration;
+using Datadog.Trace.Util;
 using Xunit;
 
 namespace Datadog.Trace.Tests.Configuration
@@ -35,8 +36,8 @@ namespace Datadog.Trace.Tests.Configuration
 
         public static IEnumerable<object[]> GetEnumsData()
         {
-            yield return new object[] { new NameValueCollection { { "example1", "value1" } }, "example2", Enumerable.Empty<TestEnum>() };
-            yield return new object[] { new NameValueCollection { { "example1", "value1" } }, "example1", Enumerable.Empty<TestEnum>() };
+            yield return new object[] { new NameValueCollection { { "example1", "value1" } }, "example2", ArrayHelper.Empty<TestEnum>() };
+            yield return new object[] { new NameValueCollection { { "example1", "value1" } }, "example1", ArrayHelper.Empty<TestEnum>() };
             yield return new object[] { new NameValueCollection { { "example1", "TestValue2;TestValue3;;" } }, "example1", new[] { TestEnum.TestValue2, TestEnum.TestValue3 } };
         }
 
