@@ -1,3 +1,5 @@
+using Datadog.Trace.Configuration;
+
 namespace Datadog.Trace.Agent.Jaeger
 {
     /// <summary>
@@ -31,5 +33,23 @@ namespace Datadog.Trace.Agent.Jaeger
         /// Gets or sets the network stack exporter. Default exporter: JaegerUdpClient.
         /// </summary>
         internal IJaegerClient TransportClient { get; set; } = new JaegerUdpClient();
+
+        /// <summary>
+        /// Creates an instance of <see cref="JaegerOptions"/> based on passed <see cref="FromTracerSettings"/>.
+        /// </summary>
+        /// <param name="settings"><see cref="TracerSettings"/> to read configuration from</param>
+        /// <returns>New instance of <see cref="JaegerOptions"/></returns>
+        public static JaegerOptions FromTracerSettings(TracerSettings settings)
+        {
+            var agentHost = settings.ConfigurationSource?.GetString(ConfigurationKeys.JaegerExporterAgentHost) ?? "localhost";
+            var agentPort = settings.ConfigurationSource?.GetInt32(ConfigurationKeys.JaegerExporterAgentPort) ?? 6831;
+
+            return new JaegerOptions
+            {
+                Host = agentHost,
+                Port = agentPort,
+                ServiceName = settings.ServiceName
+            };
+        }
     }
 }
