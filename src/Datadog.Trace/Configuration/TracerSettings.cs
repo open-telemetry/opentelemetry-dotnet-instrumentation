@@ -58,11 +58,9 @@ namespace Datadog.Trace.Configuration
                 TraceEnabled = false;
             }
 
-            var disabledIntegrationNames = source.GetStrings(ConfigurationKeys.DisabledIntegrations);
-            DisabledIntegrationNames = new HashSet<string>(disabledIntegrationNames, StringComparer.OrdinalIgnoreCase);
+            DisabledIntegrationNames = new HashSet<string>(source.GetStrings(ConfigurationKeys.DisabledIntegrations), StringComparer.OrdinalIgnoreCase);
 
-            var adonetExcludedTypes = source.GetStrings(ConfigurationKeys.AdoNetExcludedTypes);
-            AdoNetExcludedTypes = new HashSet<string>(adonetExcludedTypes, StringComparer.OrdinalIgnoreCase);
+            AdoNetExcludedTypes = new HashSet<string>(source.GetStrings(ConfigurationKeys.AdoNetExcludedTypes), StringComparer.OrdinalIgnoreCase);
 
             Integrations = new IntegrationSettingsCollection(source);
 
@@ -161,7 +159,9 @@ namespace Datadog.Trace.Configuration
                                           true;
 
             Exporter = source.GetTypedValue<ExporterType>(ConfigurationKeys.Exporter);
+
             Convention = source.GetTypedValue<ConventionType>(ConfigurationKeys.Convention);
+
             Propagators = GetPropagators(source);
 
             var httpServerErrorStatusCodes = source?.GetString(ConfigurationKeys.HttpServerErrorStatusCodes) ??
