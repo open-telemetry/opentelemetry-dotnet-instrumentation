@@ -14,7 +14,7 @@ namespace Datadog.Trace.ServiceFabric
         private static readonly Logging.IDatadogLogger Log = Logging.DatadogLogging.GetLoggerFor(typeof(ServiceRemotingService));
 
         private static int _firstInitialization = 1;
-        private static bool _initialized;
+        private static volatile bool _initialized;
 
         /// <summary>
         /// Start tracing ServiceRemotingServiceEvents.
