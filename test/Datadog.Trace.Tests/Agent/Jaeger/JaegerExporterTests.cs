@@ -62,7 +62,7 @@ namespace Datadog.Trace.Tests.Agent.Jaeger
                 .Setup(x => x.Send(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>()))
                 .Returns<byte[], int, int>((buffer, offset, count) => count);
 
-            var options = new JaegerOptions()
+            var options = new JaegerOptions
             {
                 TransportClient = clientMock.Object
             };
