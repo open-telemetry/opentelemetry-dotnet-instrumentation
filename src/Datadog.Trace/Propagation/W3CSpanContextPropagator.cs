@@ -46,31 +46,31 @@ namespace Datadog.Trace.Propagation
 
         public SpanContext Extract<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
         {
-            var traceStateCollection = getter(carrier, W3CHeaderNames.TraceState);
-            var traceState = ExtractTraceState(traceStateCollection);
-
-            var traceParentValues = getter(carrier, W3CHeaderNames.TraceParent).ToList();
-            if (traceParentValues.Count != 1)
+            var traceParentCollection = getter(carrier, W3CHeaderNames.TraceParent).ToList();
+            if (traceParentCollection.Count != 1)
             {
                 Log.Warning("Header {HeaderName} needs exactly 1 value", W3CHeaderNames.TraceParent);
                 return null;
             }
 
-            var traceParentHeader = traceParentValues[index: 0];
+            var traceParentHeader = traceParentCollection.First();
             var traceIdString = traceParentHeader.Substring(VersionPrefixIdLength, TraceIdLength);
             var traceId = _traceIdConvention.CreateFromString(traceIdString);
             if (traceId == TraceId.Zero)
             {
-                Log.Warning("Could not parse {HeaderName} headers: {HeaderValues}", W3CHeaderNames.TraceParent, string.Join(",", traceParentValues));
+                Log.Warning("Could not parse {HeaderName} headers: {HeaderValues}", W3CHeaderNames.TraceParent, string.Join(",", traceParentCollection));
                 return null;
             }
 
             var spanIdString = traceParentHeader.Substring(VersionAndTraceIdLength, SpanIdLength);
             if (!ulong.TryParse(spanIdString, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var spanId))
             {
-                Log.Warning("Could not parse {HeaderName} headers: {HeaderValues}", W3CHeaderNames.TraceParent, string.Join(",", traceParentValues));
+                Log.Warning("Could not parse {HeaderName} headers: {HeaderValues}", W3CHeaderNames.TraceParent, string.Join(",", traceParentCollection));
                 return null;
             }
+
+            var traceStateCollection = getter(carrier, W3CHeaderNames.TraceState);
+            var traceState = ExtractTraceState(traceStateCollection);
 
             return spanId == 0 ? null : new SpanContext(traceId, spanId, traceState);
         }
