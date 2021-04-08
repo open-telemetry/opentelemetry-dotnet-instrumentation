@@ -19,6 +19,11 @@ namespace Datadog.Trace.Configuration
         /// <summary>
         /// The B3 propagator
         /// </summary>
-        B3
+        B3,
+
+        /// <summary>
+        /// The W3C propagator
+        /// </summary>
+        W3C
     }
 }
