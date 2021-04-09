@@ -1,4 +1,7 @@
 steps:
+- powershell: Remove-Item $env:APPDATA\NuGet\NuGet.Config
+  displayName: Remove empty nuget config from user appdata
+  
 - task: UseDotNet@2
   displayName: install dotnet core runtime 2.1
   inputs:
