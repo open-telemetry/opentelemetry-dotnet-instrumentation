@@ -8,14 +8,14 @@ namespace Datadog.Trace.Tests.Agent.Jaeger
     public class JaegerExporterTests
     {
         [Fact]
-        public void JaegerTraceExporter_ctor_NullServiceNameAllowed()
+        public void Ctor_NullServiceNameAllowed()
         {
             var jaegerTraceExporter = BuildExporter();
             Assert.NotNull(jaegerTraceExporter);
         }
 
         [Fact]
-        public void JaegerTraceExporter_SetResource_UpdatesServiceName()
+        public void SetResource_UpdatesServiceName()
         {
             var jaegerTraceExporter = BuildExporter();
             var process = jaegerTraceExporter.Process;
@@ -36,7 +36,7 @@ namespace Datadog.Trace.Tests.Agent.Jaeger
         }
 
         [Fact]
-        public void JaegerTraceExporter_BuildBatchesToTransmit_FlushedBatch()
+        public void BuildBatchesToTransmit_FlushedBatch()
         {
             // Arrange
             var jaegerExporter = BuildExporter(175);
