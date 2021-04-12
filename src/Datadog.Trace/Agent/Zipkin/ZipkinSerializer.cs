@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
 using Datadog.Trace.ExtensionMethods;
@@ -37,8 +36,6 @@ namespace Datadog.Trace.Agent
         [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy), ItemNullValueHandling = NullValueHandling.Ignore)]
         internal class ZipkinSpan
         {
-            private static readonly IDictionary<string, string> EmptyTags = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
-
             private readonly Span _span;
             private readonly IDictionary<string, string> _tags;
 
@@ -105,11 +102,6 @@ namespace Datadog.Trace.Agent
             private static IDictionary<string, string> BuildTags(Span span)
             {
                 var spanTags = span?.Tags?.GetAllTags();
-                if (spanTags == null || spanTags.Count == 0)
-                {
-                    return EmptyTags;
-                }
-
                 var tags = new Dictionary<string, string>(spanTags.Count);
                 foreach (var entry in spanTags)
                 {
@@ -117,6 +109,17 @@ namespace Datadog.Trace.Agent
                     {
                         tags[entry.Key] = entry.Value;
                     }
+                }
+
+                switch (span?.Status.StatusCode)
+                {
+                    case StatusCode.Ok:
+                        tags["otel.status_code"] = "OK";
+                        break;
+                    case StatusCode.Error:
+                        tags["otel.status_code"] = "ERROR";
+                        tags["error"] = span.Status.Description ?? string.Empty;
+                        break;
                 }
 
                 return tags;
