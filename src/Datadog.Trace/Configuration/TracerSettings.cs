@@ -58,17 +58,9 @@ namespace Datadog.Trace.Configuration
                 TraceEnabled = false;
             }
 
-            var disabledIntegrationNames = source?.GetString(ConfigurationKeys.DisabledIntegrations)
-                                                 ?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries) ??
-                                           Enumerable.Empty<string>();
+            DisabledIntegrationNames = new HashSet<string>(source.GetStrings(ConfigurationKeys.DisabledIntegrations), StringComparer.OrdinalIgnoreCase);
 
-            DisabledIntegrationNames = new HashSet<string>(disabledIntegrationNames, StringComparer.OrdinalIgnoreCase);
-
-            var adonetExcludedTypes = source?.GetString(ConfigurationKeys.AdoNetExcludedTypes)
-                                                 ?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries) ??
-                                           Enumerable.Empty<string>();
-
-            AdoNetExcludedTypes = new HashSet<string>(adonetExcludedTypes, StringComparer.OrdinalIgnoreCase);
+            AdoNetExcludedTypes = new HashSet<string>(source.GetStrings(ConfigurationKeys.AdoNetExcludedTypes), StringComparer.OrdinalIgnoreCase);
 
             Integrations = new IntegrationSettingsCollection(source);
 
@@ -166,15 +158,11 @@ namespace Datadog.Trace.Configuration
                                           // default value
                                           true;
 
-            Enum.TryParse(source?.GetString(ConfigurationKeys.Exporter) ?? "default", ignoreCase: true, out ExporterType exporterType);
-            Exporter = exporterType;
+            Exporter = source.GetTypedValue<ExporterType>(ConfigurationKeys.Exporter);
 
-            Enum.TryParse(source?.GetString(ConfigurationKeys.Convention) ?? "default", ignoreCase: true, out ConventionType conventionType);
-            Convention = conventionType;
+            Convention = source.GetTypedValue<ConventionType>(ConfigurationKeys.Convention);
 
-            // Todo: Add support for multiple propagators
-            Enum.TryParse(source?.GetString(ConfigurationKeys.Propagators) ?? "default", ignoreCase: true, out PropagatorType propagatorType);
-            Propagator = propagatorType;
+            Propagators = GetPropagators(source);
 
             var httpServerErrorStatusCodes = source?.GetString(ConfigurationKeys.HttpServerErrorStatusCodes) ??
                                            // Default value
@@ -364,11 +352,11 @@ namespace Datadog.Trace.Configuration
         public ConventionType Convention { get; set; }
 
         /// <summary>
-        /// Gets or sets the propagator logic to be used.
+        /// Gets or sets the propagators be used.
         /// Default is <c>Datadog</c>
         /// <seealso cref="ConfigurationKeys.Propagators"/>
         /// </summary>
-        public PropagatorType Propagator { get; set; }
+        public HashSet<PropagatorType> Propagators { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether runtime metrics
@@ -596,6 +584,20 @@ namespace Datadog.Trace.Configuration
         internal string GetServiceName(Tracer tracer, string serviceName)
         {
             return ServiceNameMappings.GetServiceName(tracer.DefaultServiceName, serviceName);
+        }
+
+        private static HashSet<PropagatorType> GetPropagators(IConfigurationSource source)
+        {
+            var propagators = source.GetTypedValues<PropagatorType>(ConfigurationKeys.Propagators);
+
+            if (!propagators.Any())
+            {
+                // TODO: Default to W3C (be aware of integration tests)
+                // see more: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/context/api-propagators.md#global-propagators
+                return new HashSet<PropagatorType>() { PropagatorType.Datadog };
+            }
+
+            return new HashSet<PropagatorType>(propagators);
         }
     }
 }
