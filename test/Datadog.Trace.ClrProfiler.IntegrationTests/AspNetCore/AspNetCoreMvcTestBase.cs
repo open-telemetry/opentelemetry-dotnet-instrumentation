@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Datadog.Core.Tools;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.TestHelpers;
 using Xunit.Abstractions;
 
@@ -254,12 +255,12 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests.AspNetCore
 
             // For successful requests, assert that a header tag is present in both the request and response, with the prefixes "http.request.headers" and "http.response.headers", respectively
             _ = HeaderName2.TryConvertToNormalizedHeaderTagName(out string normalizedHeaderTagName2);
-            expectation.RegisterTagExpectation($"{SpanContextPropagator.HttpRequestHeadersTagPrefix}.{normalizedHeaderTagName2}", HeaderValue2);
-            expectation.RegisterTagExpectation($"{SpanContextPropagator.HttpResponseHeadersTagPrefix}.{normalizedHeaderTagName2}", HeaderValue2, when: (span) => span.Resource != "GET /not-found" && span.Resource != "GET bad-request");
+            expectation.RegisterTagExpectation($"{PropagationExtensions.HttpRequestHeadersTagPrefix}.{normalizedHeaderTagName2}", HeaderValue2);
+            expectation.RegisterTagExpectation($"{PropagationExtensions.HttpResponseHeadersTagPrefix}.{normalizedHeaderTagName2}", HeaderValue2, when: (span) => span.Resource != "GET /not-found" && span.Resource != "GET bad-request");
 
             // Assert that a response header tag is set on successful requests and failing requests
             _ = HeaderName3.TryConvertToNormalizedHeaderTagName(out string normalizedHeaderTagName3);
-            expectation.RegisterTagExpectation($"{SpanContextPropagator.HttpResponseHeadersTagPrefix}.{normalizedHeaderTagName3}", HeaderValue3, when: (span) => span.Resource != "GET bad-request");
+            expectation.RegisterTagExpectation($"{PropagationExtensions.HttpResponseHeadersTagPrefix}.{normalizedHeaderTagName3}", HeaderValue3, when: (span) => span.Resource != "GET bad-request");
 
             Expectations.Add(expectation);
         }

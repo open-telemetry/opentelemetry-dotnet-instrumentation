@@ -48,13 +48,13 @@ namespace Datadog.Trace.Tests
 
             void AddAndCloseSpan()
             {
-                var span = new Span(new SpanContext(42, SpanIdGenerator.ThreadInstance.CreateNew()), DateTimeOffset.UtcNow);
+                var span = new Span(new SpanContext(TraceId.CreateFromInt(42), SpanIdGenerator.ThreadInstance.CreateNew()), DateTimeOffset.UtcNow);
 
                 traceContext.AddSpan(span);
                 traceContext.CloseSpan(span);
             }
 
-            var rootSpan = new Span(new SpanContext(42, SpanIdGenerator.ThreadInstance.CreateNew()), DateTimeOffset.UtcNow);
+            var rootSpan = new Span(new SpanContext(TraceId.CreateFromInt(42), SpanIdGenerator.ThreadInstance.CreateNew()), DateTimeOffset.UtcNow);
 
             traceContext.AddSpan(rootSpan);
 
