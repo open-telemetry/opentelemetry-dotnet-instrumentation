@@ -111,6 +111,7 @@ namespace Datadog.Trace.Agent
                     }
                 }
 
+                // report span status according to https://github.com/open-telemetry/opentelemetry-specification/blob/59bbfb781bb403902e7be79966a6576c47eb704b/specification/trace/sdk_exporters/zipkin.md#status
                 switch (span?.Status.StatusCode)
                 {
                     case StatusCode.Ok:

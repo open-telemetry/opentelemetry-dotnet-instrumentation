@@ -57,6 +57,20 @@ namespace Datadog.Trace.Agent.Jaeger
                 PooledList<JaegerTag>.Add(ref list, ToJaegerTag(new KeyValuePair<string, object>(item.Key, item.Value)));
             }
 
+            // report span status according to https://github.com/open-telemetry/opentelemetry-specification/blob/59bbfb781bb403902e7be79966a6576c47eb704b/specification/trace/sdk_exporters/jaeger.md#status
+            switch (span.Status.StatusCode)
+            {
+                case StatusCode.Ok:
+                    PooledList<JaegerTag>.Add(ref list, new JaegerTag("otel.status_code", JaegerTagType.STRING, vStr: "OK"));
+                    break;
+                case StatusCode.Error:
+                    PooledList<JaegerTag>.Add(ref list, new JaegerTag("error", JaegerTagType.BOOL, vBool: true));
+                    PooledList<JaegerTag>.Add(ref list, new JaegerTag("otel.status_code", JaegerTagType.STRING, vStr: "ERROR"));
+                    var description = span.Status.Description ?? string.Empty;
+                    PooledList<JaegerTag>.Add(ref list, new JaegerTag("otel.status_description", JaegerTagType.STRING, vStr: description));
+                    break;
+            }
+
             return list;
         }
 
