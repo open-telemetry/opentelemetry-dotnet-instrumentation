@@ -166,8 +166,13 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                     // some fields aren't set till after execution, so populate anything missing
                     UpdateSpan(controllerContext, scope.Span, tags, Enumerable.Empty<KeyValuePair<string, string>>());
 
-                    var statusCode = responseMessage.GetProperty("StatusCode");
-                    scope.Span.SetHttpStatusCode((int)statusCode.Value, isServer: true);
+                    var httpContext = System.Web.HttpContext.Current;
+                    if (httpContext != null)
+                    {
+                        scope.Span.SetHeaderTags(httpContext.Response.Headers.Wrap(), Tracer.Instance.Settings.HeaderTags, PropagationExtensions.HttpResponseHeadersTagPrefix);
+                    }
+
+                    scope.Span.SetHttpStatusCode(responseMessage.DuckCast<HttpResponseMessageStruct>().StatusCode, isServer: true);
                     scope.Dispose();
                 }
 
@@ -230,7 +235,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                         var headersCollection = new HttpHeadersCollection(headers);
 
                         propagatedContext = tracer.Propagator.Extract(headersCollection);
-                        tagsFromHeaders = headersCollection.ExtractHeaderTags(tracer.Settings.HeaderTags);
+                        tagsFromHeaders = headersCollection.ExtractHeaderTags(tracer.Settings.HeaderTags, PropagationExtensions.HttpRequestHeadersTagPrefix);
                     }
                     catch (Exception ex)
                     {
@@ -343,6 +348,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
 
         private static void OnRequestCompleted(System.Web.HttpContext httpContext, Scope scope, DateTimeOffset finishTime)
         {
+            scope.Span.SetHeaderTags(httpContext.Response.Headers.Wrap(), Tracer.Instance.Settings.HeaderTags, PropagationExtensions.HttpResponseHeadersTagPrefix);
             scope.Span.SetHttpStatusCode(httpContext.Response.StatusCode, isServer: true);
             scope.Span.Finish(finishTime);
             scope.Dispose();

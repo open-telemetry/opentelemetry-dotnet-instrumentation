@@ -6,6 +6,7 @@ using Datadog.Trace.Abstractions;
 using Datadog.Trace.Agent.MessagePack;
 using Datadog.Trace.DogStatsd;
 using Datadog.Trace.Logging;
+using Datadog.Trace.Tagging;
 using Datadog.Trace.Util;
 
 namespace Datadog.Trace.Agent
@@ -36,6 +37,7 @@ namespace Datadog.Trace.Agent
         private readonly ManualResetEventSlim _serializationMutex = new ManualResetEventSlim(initialState: false, spinCount: 0);
 
         private readonly int _batchInterval;
+        private readonly IKeepRateCalculator _traceKeepRateCalculator;
 
         /// <summary>
         /// The currently active buffer.
@@ -54,10 +56,16 @@ namespace Datadog.Trace.Agent
         }
 
         public AgentWriter(IApi api, IMetrics metrics, bool automaticFlush = true, int maxBufferSize = 1024 * 1024 * 10, int batchInterval = 100)
+        : this(api, metrics, MovingAverageKeepRateCalculator.CreateDefaultKeepRateCalculator(), automaticFlush, maxBufferSize, batchInterval)
+        {
+        }
+
+        internal AgentWriter(IApi api, IMetrics metrics, IKeepRateCalculator traceKeepRateCalculator, bool automaticFlush, int maxBufferSize, int batchInterval)
         {
             _api = api;
             _metrics = metrics;
             _batchInterval = batchInterval;
+            _traceKeepRateCalculator = traceKeepRateCalculator;
 
             var formatterResolver = SpanFormatterResolver.Instance;
 
@@ -122,6 +130,7 @@ namespace Datadog.Trace.Agent
             var completedTask = await Task.WhenAny(_serializationTask, delay)
                 .ConfigureAwait(false);
 
+            _traceKeepRateCalculator.CancelUpdates();
             if (completedTask != delay)
             {
                 await Task.WhenAny(_flushTask, Task.Delay(TimeSpan.FromSeconds(20)))
@@ -258,12 +267,22 @@ namespace Datadog.Trace.Agent
 
                 if (buffer.TraceCount > 0)
                 {
-                    await _api.SendTracesAsync(buffer.Data, buffer.TraceCount).ConfigureAwait(false);
+                    var success = await _api.SendTracesAsync(buffer.Data, buffer.TraceCount).ConfigureAwait(false);
+
+                    if (success)
+                    {
+                        _traceKeepRateCalculator.IncrementKeeps(buffer.TraceCount);
+                    }
+                    else
+                    {
+                        _traceKeepRateCalculator.IncrementDrops(buffer.TraceCount);
+                    }
                 }
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "An unhandled error occurred while flushing a buffer");
+                _traceKeepRateCalculator.IncrementDrops(buffer.TraceCount);
             }
             finally
             {
@@ -297,6 +316,21 @@ namespace Datadog.Trace.Agent
                 return null;
             }
 
+            // Add the current keep rate to the root span
+            var rootSpan = trace[0].Context.TraceContext?.RootSpan;
+            if (rootSpan is not null)
+            {
+                var currentKeepRate = _traceKeepRateCalculator.GetKeepRate();
+                if (rootSpan.Tags is CommonTags commonTags)
+                {
+                    commonTags.TracesKeepRate = currentKeepRate;
+                }
+                else
+                {
+                    rootSpan.Tags.SetMetric(Metrics.TracesKeepRate, currentKeepRate);
+                }
+            }
+
             // We use a double-buffering mechanism
             // This allows the serialization thread to keep doing its job while a buffer is being flushed
             var buffer = _activeBuffer;
@@ -324,6 +358,7 @@ namespace Datadog.Trace.Agent
 
             // All the buffers are full :( drop the trace
             Log.Warning("Trace buffer is full. Dropping a trace.");
+            _traceKeepRateCalculator.IncrementDrops(1);
 
             _metrics.Increment(TracerMetricNames.Queue.DroppedTraces);
             _metrics.Increment(TracerMetricNames.Queue.DroppedSpans, trace.Length);

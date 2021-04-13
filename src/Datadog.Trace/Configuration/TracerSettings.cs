@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.PlatformHelpers;
 using Datadog.Trace.Util;
 using Datadog.Trace.Vendors.Serilog;
@@ -23,6 +24,8 @@ namespace Datadog.Trace.Configuration
         /// The default port value for <see cref="AgentUri"/>.
         /// </summary>
         public const int DefaultAgentPort = 8126;
+
+        private int _partialFlushMinSpans;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TracerSettings"/> class with default values.
@@ -133,13 +136,12 @@ namespace Datadog.Trace.Configuration
             GlobalTags = GlobalTags.Where(kvp => !string.IsNullOrWhiteSpace(kvp.Key) && !string.IsNullOrWhiteSpace(kvp.Value))
                                    .ToDictionary(kvp => kvp.Key.Trim(), kvp => kvp.Value.Trim());
 
-            HeaderTags = source?.GetDictionary(ConfigurationKeys.HeaderTags) ??
+            var inputHeaderTags = source?.GetDictionary(ConfigurationKeys.HeaderTags, allowOptionalMappings: true) ??
                          // default value (empty)
-                         new ConcurrentDictionary<string, string>();
+                         new Dictionary<string, string>();
 
             // Filter out tags with empty keys or empty values, and trim whitespace
-            HeaderTags = HeaderTags.Where(kvp => !string.IsNullOrWhiteSpace(kvp.Key) && !string.IsNullOrWhiteSpace(kvp.Value))
-                                   .ToDictionary(kvp => kvp.Key.Trim(), kvp => kvp.Value.Trim());
+            HeaderTags = InitializeHeaderTags(inputHeaderTags);
 
             var serviceNameMappings = source?.GetDictionary(ConfigurationKeys.ServiceNameMappings)
                                       ?.Where(kvp => !string.IsNullOrWhiteSpace(kvp.Key) && !string.IsNullOrWhiteSpace(kvp.Value))
@@ -194,6 +196,17 @@ namespace Datadog.Trace.Configuration
 
             RouteTemplateResourceNamesEnabled = source?.GetBool(ConfigurationKeys.FeatureFlags.RouteTemplateResourceNamesEnabled)
                                                    ?? false;
+
+            PartialFlushEnabled = source?.GetBool(ConfigurationKeys.PartialFlushEnabled)
+                // default value
+                ?? false;
+
+            var partialFlushMinSpans = source?.GetInt32(ConfigurationKeys.PartialFlushMinSpans);
+
+            if ((partialFlushMinSpans ?? 0) <= 0)
+            {
+                PartialFlushMinSpans = 500;
+            }
         }
 
         /// <summary>
@@ -393,6 +406,28 @@ namespace Datadog.Trace.Configuration
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether partial flush is enabled
+        /// </summary>
+        public bool PartialFlushEnabled { get; set; }
+
+        /// <summary>
+        /// Gets or sets the minimum number of closed spans in a trace before it's partially flushed
+        /// </summary>
+        public int PartialFlushMinSpans
+        {
+            get => _partialFlushMinSpans;
+            set
+            {
+                if (value <= 0)
+                {
+                    throw new ArgumentException("The value must be strictly greater than 0", nameof(PartialFlushMinSpans));
+                }
+
+                _partialFlushMinSpans = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the diagnostic log at startup is enabled
         /// </summary>
         public bool StartupDiagnosticLogEnabled { get; set; }
@@ -536,9 +571,28 @@ namespace Datadog.Trace.Configuration
 
         internal bool IsNetStandardFeatureFlagEnabled()
         {
-            var value = EnvironmentHelpers.GetEnvironmentVariable("OTEL_TRACE_NETSTANDARD_ENABLED", string.Empty);
+            var value = EnvironmentHelpers.GetEnvironmentVariable(ConfigurationKeys.FeatureFlags.NetStandardEnabled, string.Empty);
 
             return value == "1" || value == "true";
+        }
+
+        internal IDictionary<string, string> InitializeHeaderTags(IDictionary<string, string> configurationDictionary)
+        {
+            var headerTags = new Dictionary<string, string>();
+
+            foreach (KeyValuePair<string, string> kvp in configurationDictionary)
+            {
+                if (!string.IsNullOrWhiteSpace(kvp.Key) && string.IsNullOrWhiteSpace(kvp.Value))
+                {
+                    headerTags.Add(kvp.Key.Trim(), string.Empty);
+                }
+                else if (!string.IsNullOrWhiteSpace(kvp.Key) && kvp.Value.TryConvertToNormalizedHeaderTagName(out string result))
+                {
+                    headerTags.Add(kvp.Key.Trim(), result);
+                }
+            }
+
+            return headerTags;
         }
 
         internal bool[] ParseHttpCodesToArray(string httpStatusErrorCodes)

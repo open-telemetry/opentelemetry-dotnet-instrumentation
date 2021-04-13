@@ -37,7 +37,7 @@ function Set-MachineEnvironmentVariable {
 
 Set-MachineEnvironmentVariable 'OTEL_DOTNET_TRACER_HOME' $OTEL_DOTNET_TRACER_HOME
 Set-MachineEnvironmentVariable 'OTEL_INTEGRATIONS' "$OTEL_DOTNET_TRACER_HOME\integrations.json"
-Set-MachineEnvironmentVariable 'OTEL_TRACE_LOG_PATH' "$LOGS_PATH\dotnet-tracer-native.log"
+Set-MachineEnvironmentVariable 'OTEL_TRACE_LOG_DIRECTORY' "$LOGS_PATH"
 
 # Set-MachineEnvironmentVariable'COR_ENABLE_PROFILING' '0' # Enable per app
 Set-MachineEnvironmentVariable 'COR_PROFILER' '{918728DD-259F-4A6A-AC2B-B85E1B658318}'

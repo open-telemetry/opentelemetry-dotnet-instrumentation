@@ -16,13 +16,14 @@ namespace Datadog.Trace.Tests.Headers
     // - SpanContextPropagator.Extract()
     public class DDHeadersCollectionTests : HeadersCollectionTestBase
     {
+        private const string TestPrefix = "test.prefix";
         private readonly DDSpanContextPropagator _propagator = new DDSpanContextPropagator(new DatadogTraceIdConvention());
 
         [Theory]
         [MemberData(nameof(GetHeaderCollectionImplementations))]
         internal void ExtractHeaderTags_EmptyHeadersReturnsEmptyTagsList(IHeadersCollection headers)
         {
-            var tagsFromHeader = headers.ExtractHeaderTags(new Dictionary<string, string>());
+            var tagsFromHeader = headers.ExtractHeaderTags(new Dictionary<string, string>(), TestPrefix);
 
             Assert.NotNull(tagsFromHeader);
             Assert.Empty(tagsFromHeader);
@@ -47,16 +48,87 @@ namespace Datadog.Trace.Tests.Headers
             headers.Add(customHeader2Name, customHeader2Value);
 
             // Initialize header-tag arguments and expectations
-            var headerToTagMap = new Dictionary<string, string>();
-            headerToTagMap.Add(customHeader1Name, customHeader1TagName);
-            headerToTagMap.Add(customHeader2LowercaseHeaderName, customHeader2TagName);
+            var headerTags = new Dictionary<string, string>();
+            headerTags.Add(customHeader1Name, customHeader1TagName);
+            headerTags.Add(customHeader2LowercaseHeaderName, customHeader2TagName);
 
             var expectedResults = new Dictionary<string, string>();
             expectedResults.Add(customHeader1TagName, customHeader1Value);
             expectedResults.Add(customHeader2TagName, customHeader2Value);
 
             // Test
-            var tagsFromHeader = headers.ExtractHeaderTags(headerToTagMap);
+            var tagsFromHeader = headers.ExtractHeaderTags(headerTags, TestPrefix);
+
+            // Assert
+            Assert.NotNull(tagsFromHeader);
+            Assert.Equal(expectedResults, tagsFromHeader);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetHeaderCollectionImplementations))]
+        internal void ExtractHeaderTags_EmptyHeaders_AddsNoTags(IHeadersCollection headers)
+        {
+            // Do not add headers
+
+            // Initialize header-tag arguments and expectations
+            var headerTags = new Dictionary<string, string>();
+            headerTags.Add("x-header-test-runner", "test-runner");
+
+            var expectedResults = new Dictionary<string, string>();
+
+            // Test
+            var tagsFromHeader = headers.ExtractHeaderTags(headerTags, TestPrefix);
+
+            // Assert
+            Assert.NotNull(tagsFromHeader);
+            Assert.Equal(expectedResults, tagsFromHeader);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetHeaderCollectionImplementations))]
+        internal void ExtractHeaderTags_EmptyHeaderTags_AddsNoTags(IHeadersCollection headers)
+        {
+            // Add headers
+            headers.Add("x-header-test-runner", "xunit");
+
+            // Initialize header-tag arguments and expectations
+            var headerToTagMap = new Dictionary<string, string>();
+            var expectedResults = new Dictionary<string, string>();
+
+            // Test
+            var tagsFromHeader = headers.ExtractHeaderTags(headerToTagMap, TestPrefix);
+
+            // Assert
+            Assert.NotNull(tagsFromHeader);
+            Assert.Equal(expectedResults, tagsFromHeader);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetHeaderCollectionImplementations))]
+        internal void ExtractHeaderTags_ForEmptyStringMappings_CreatesNormalizedTagWithPrefix(IHeadersCollection headers)
+        {
+            string invalidCharacterSequence = "*|&#$%&^`.";
+            string normalizedReplacementSequence = new string('_', invalidCharacterSequence.Length);
+
+            // Add headers
+            headers.Add("x-header-test-runner", "xunit");
+            headers.Add($"x-header-1DATADOG-{invalidCharacterSequence}", "true");
+
+            // Initialize header-tag arguments and expectations
+            var headerToTagMap = new Dictionary<string, string>
+            {
+                { "x-header-test-runner", string.Empty },
+                { $"x-header-1DATADOG-{invalidCharacterSequence}", string.Empty },
+            };
+
+            var expectedResults = new Dictionary<string, string>
+            {
+                { TestPrefix + "." + "x-header-test-runner", "xunit" },
+                { TestPrefix + "." + $"x-header-1datadog-{normalizedReplacementSequence}", "true" }
+            };
+
+            // Test
+            var tagsFromHeader = headers.ExtractHeaderTags(headerToTagMap, TestPrefix);
 
             // Assert
             Assert.NotNull(tagsFromHeader);

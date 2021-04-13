@@ -114,7 +114,7 @@ namespace Datadog.Trace.AspNet
                         // extract propagated http headers
                         var headers = httpRequest.Headers.Wrap();
                         propagatedContext = propagator.Extract(headers);
-                        tagsFromHeaders = headers.ExtractHeaderTags(tracer.Settings.HeaderTags);
+                        tagsFromHeaders = headers.ExtractHeaderTags(tracer.Settings.HeaderTags, PropagationExtensions.HttpRequestHeadersTagPrefix);
                     }
                     catch (Exception ex)
                     {
@@ -161,6 +161,7 @@ namespace Datadog.Trace.AspNet
                 if (sender is HttpApplication app &&
                     app.Context.Items[_httpContextScopeKey] is Scope scope)
                 {
+                    scope.Span.SetHeaderTags(app.Context.Response.Headers.Wrap(), Tracer.Instance.Settings.HeaderTags, PropagationExtensions.HttpResponseHeadersTagPrefix);
                     scope.Span.SetHttpStatusCode(app.Context.Response.StatusCode, isServer: true);
 
                     if (app.Context.Items[SharedConstants.HttpContextPropagatedResourceNameKey] is string resourceName
@@ -194,9 +195,14 @@ namespace Datadog.Trace.AspNet
                 var httpException = exception as HttpException;
                 var is404 = httpException?.GetHttpCode() == 404;
 
-                if (exception != null && !is404 && httpContext.Items[_httpContextScopeKey] is Scope scope)
+                if (httpContext.Items[_httpContextScopeKey] is Scope scope)
                 {
-                    scope.Span.SetException(exception);
+                    scope.Span.SetHeaderTags(httpContext.Response.Headers.Wrap(), Tracer.Instance.Settings.HeaderTags, PropagationExtensions.HttpResponseHeadersTagPrefix);
+
+                    if (exception != null && !is404)
+                    {
+                        scope.Span.SetException(exception);
+                    }
                 }
             }
             catch (Exception ex)

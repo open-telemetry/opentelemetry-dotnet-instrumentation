@@ -139,7 +139,7 @@ namespace Datadog.Trace.ClrProfiler.Integrations
                         {
                             var headers = webHeaderCollection.Wrap();
                             propagatedContext = tracer.Propagator.Extract(headers);
-                            tagsFromHeaders = headers.ExtractHeaderTags(tracer.Settings.HeaderTags);
+                            tagsFromHeaders = headers.ExtractHeaderTags(tracer.Settings.HeaderTags, PropagationExtensions.HttpRequestHeadersTagPrefix);
                         }
                         catch (Exception ex)
                         {

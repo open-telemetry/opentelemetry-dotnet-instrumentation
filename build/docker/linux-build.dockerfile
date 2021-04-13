@@ -68,7 +68,6 @@ COPY --from=build-managed ${WORKSPACE} ${WORKSPACE}
 WORKDIR ${WORKSPACE}/src/Datadog.Trace.ClrProfiler.Native/build
 RUN cmake .. && make && cp -f ./bin/Datadog.Trace.ClrProfiler.Native.so ${PUBLISH_FOLDER}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so
 RUN mkdir -p /var/log/opentelemetry/dotnet
-RUN touch /var/log/opentelemetry/dotnet/dotnet-tracer-native.log
 WORKDIR ${PUBLISH_FOLDER}
 RUN echo "#!/bin/bash\n set -euxo pipefail\n export CORECLR_ENABLE_PROFILING=\"1\"\n export CORECLR_PROFILER=\"{918728DD-259F-4A6A-AC2B-B85E1B658318}\"\n export OTEL_DOTNET_TRACER_HOME=\"${TRACER_HOME}\"\n export CORECLR_PROFILER_PATH=\"\${OTEL_DOTNET_TRACER_HOME}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so\"\n export OTEL_INTEGRATIONS=\"\${OTEL_DOTNET_TRACER_HOME}/integrations.json\"\n eval \"\$@\"\n" > dd-trace.bash
 RUN chmod +x dd-trace.bash
