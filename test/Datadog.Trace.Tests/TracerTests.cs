@@ -9,15 +9,18 @@ using System.Security;
 using System.Security.Permissions;
 using System.Security.Policy;
 #endif
+using System.Threading;
 using System.Threading.Tasks;
 using Datadog.Trace.Agent;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.Conventions;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.Headers;
+using Datadog.Trace.Logging;
 using Datadog.Trace.Propagation;
 using Datadog.Trace.Sampling;
 using Datadog.Trace.TestHelpers;
+using FluentAssertions;
 using Moq;
 using Xunit;
 
