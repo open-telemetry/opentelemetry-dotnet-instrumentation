@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-      - master
+      - main
       - refs/tags/*
     exclude:
       - refs/pull/*/head
