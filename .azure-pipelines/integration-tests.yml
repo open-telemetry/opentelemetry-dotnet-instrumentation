@@ -115,7 +115,7 @@ jobs:
       dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) -e publishTargetFramework=$(publishTargetFramework) IntegrationTests
 
   - publish: build_data
-    artifact: $(Agent.JobName)_profiler-logs
+    artifact: $(Agent.JobName)_profiler-logs-$(System.JobAttempt)
     condition: succeededOrFailed()
 
   - task: PublishTestResults@2
@@ -237,7 +237,7 @@ jobs:
       dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) IntegrationTests.Alpine.Core50
 
   - publish: build_data
-    artifact: $(Agent.JobName)_profiler-logs
+    artifact: $(Agent.JobName)_profiler-logs-$(System.JobAttempt)
     condition: succeededOrFailed()
 
   - task: PublishTestResults@2
@@ -459,7 +459,7 @@ jobs:
     inputs:
       solution: test/test-applications/aspnet/samples-iis.sln
       configuration: '$(buildConfiguration)'
-      msbuildArguments: '/p:DeployOnBuild=true /p:PublishProfile=FolderProfile.pubxml'
+      msbuildArguments: '/p:DeployOnBuild=true /p:PublishProfile=$(System.DefaultWorkingDirectory)/test/test-applications/aspnet/PublishProfiles/FolderProfile.pubxml'
       maximumCpuCount: true
 
   - task: DockerCompose@0
@@ -499,4 +499,90 @@ jobs:
     inputs:
       containerregistrytype: Container Registry
       dockerComposeCommand: down
+    condition: succeededOrFailed()
+
+- job: build_linux_profiler_arm64
+  pool: Arm64
+  workspace:
+    clean: all
+
+  steps:
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader
+    inputs:
+      command: build
+      projects: src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
+      arguments: --configuration $(buildConfiguration) /nowarn:netsdk1138
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet publish OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed 2.0
+    inputs:
+      command: publish
+      publishWebProjects: false
+      modifyOutputPath: false
+      zipAfterPublish: false
+      projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
+      arguments: --configuration $(buildConfiguration) --framework netstandard2.0 --output $(publishOutput)/netstandard2.0
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet publish OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed 3.1
+    inputs:
+      command: publish
+      publishWebProjects: false
+      modifyOutputPath: false
+      zipAfterPublish: false
+      projects: src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj
+      arguments: --configuration $(buildConfiguration) --framework netcoreapp3.1 --output $(publishOutput)/netcoreapp3.1
+
+  - task: DockerCompose@0
+    displayName: docker-compose run Profiler
+    inputs:
+      containerregistrytype: Container Registry
+      dockerComposeCommand: run -e buildConfiguration=$(buildConfiguration) Profiler
+
+  - publish: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin/$(buildConfiguration)/x64
+    artifact: linux-tracer-home_arm
+
+- job: Linux_arm64
+  pool: Arm64
+  workspace:
+    clean: all
+
+  dependsOn: build_linux_profiler_arm64
+  condition: succeeded()
+
+  variables:
+    TestAllPackageVersions: true
+
+  steps:
+  - download: current
+    artifact: linux-tracer-home_arm
+
+  - task: CopyFiles@2
+    inputs:
+      sourceFolder: $(Pipeline.Workspace)/linux-tracer-home_arm
+      targetFolder: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.ClrProfiler.Native/bin/$(buildConfiguration)/arm64
+
+  - task: DockerCompose@0
+    displayName: docker-compose run build.arm64
+    inputs:
+      containerregistrytype: Container Registry
+      dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) -e publishTargetFramework=net5.0 build.arm64
+
+  - task: DockerCompose@0
+    displayName: docker-compose run IntegrationTests.ARM64.Core50
+    inputs:
+      containerregistrytype: Container Registry
+      dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) IntegrationTests.ARM64.Core50
+
+  - publish: build_data
+    artifact: $(Agent.JobName)_profiler-logs-$(System.JobAttempt)
+    condition: succeededOrFailed()
+
+  - task: PublishTestResults@2
+    displayName: publish test results
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: test/**/*.trx
     condition: succeededOrFailed()

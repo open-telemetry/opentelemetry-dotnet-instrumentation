@@ -5,16 +5,16 @@
     <AssemblyName>OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed</AssemblyName>
 
     <!-- NuGet -->
-    <Version>1.24.0</Version>
+    <Version>1.26.1</Version>
     <Title>Datadog APM - ClrProfiler</Title>
     <PackageDescription>
-DEPRECATED. This package exists only for backwards compatibility. If your project references this package ("Datadog.Trace.ClrProfiler.Managed") or "Datadog.Trace.AspNet", you can remove them both.
+      DEPRECATED. This package exists only for backwards compatibility. If your project references this package ("Datadog.Trace.ClrProfiler.Managed") or "Datadog.Trace.AspNet", you can remove them both.
 
-.NET Core applications no longer require any NuGet package to enable automatic instrumentation.
+      .NET Core applications no longer require any NuGet package to enable automatic instrumentation.
 
-Automatic instrumentation for both ASP.NET and ASP.NET Core is now automatically enabled.
+      Automatic instrumentation for both ASP.NET and ASP.NET Core is now automatically enabled.
 
-Users who need manual instrumentation should reference the "Datadog.Trace" package.
+      Users who need manual instrumentation should reference the "Datadog.Trace" package.
     </PackageDescription>
 
     <!-- Remove the OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.dll assembly from the output and hide inapplicable warning (https://docs.microsoft.com/en-us/nuget/reference/errors-and-warnings/nu5128) -->

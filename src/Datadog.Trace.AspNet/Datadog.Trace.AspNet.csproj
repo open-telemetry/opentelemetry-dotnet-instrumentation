@@ -4,17 +4,17 @@
     <TargetFrameworks>net45</TargetFrameworks>
 
     <!-- NuGet -->
-    <Version>1.24.0</Version>
+    <Version>1.26.1</Version>
     <Title>OpenTelemetry AutoInstrumentation for ASP.NET</Title>
     <AssemblyName>OpenTelemetry.AutoInstrumentation.AspNet</AssemblyName>
     <PackageDescription>
-DEPRECATED. This package exists only for backwards compatibility. If your project references this package ("OpenTelemetry.AutoInstrumentation.AspNet") or "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed", you can remove them both.
+      DEPRECATED. This package exists only for backwards compatibility. If your project references this package ("OpenTelemetry.AutoInstrumentation.AspNet") or "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed", you can remove them both.
 
-.NET Core applications no longer require any NuGet package to enable automatic instrumentation.
+      .NET Core applications no longer require any NuGet package to enable automatic instrumentation.
 
-Automatic instrumentation for both ASP.NET and ASP.NET Core is now automatically enabled.
+      Automatic instrumentation for both ASP.NET and ASP.NET Core is now automatically enabled.
 
-Users who need manual instrumentation should reference the "OpenTelemetry.AutoInstrumentation" package.
+      Users who need manual instrumentation should reference the "OpenTelemetry.AutoInstrumentation" package.
     </PackageDescription>
     <!-- Allow the GenerateAssemblyInfo task in the .NET SDK to generate all
          assembly attributes except for the AssemblyVersionAttribute. This will

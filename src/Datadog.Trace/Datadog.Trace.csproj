@@ -2,11 +2,15 @@
 
   <PropertyGroup>
     <!-- NuGet -->
-    <Version>1.24.0</Version>
+    <Version>1.26.1</Version>
     <Title>OpenTelemetry AutoInstrumentation</Title>
     <Description>OpenTelemetry autoinstrumentation library</Description>
     <AssemblyName>OpenTelemetry.AutoInstrumentation</AssemblyName>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.0' AND '$(TargetFramework)' != 'netcoreapp3.1' ">
@@ -25,6 +29,7 @@
 
   <ItemGroup>
     <PackageReference Include="LibLog" Version="5.0.6" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
   </ItemGroup>
 
   <!-- Below this point is reserved for vendor items -->

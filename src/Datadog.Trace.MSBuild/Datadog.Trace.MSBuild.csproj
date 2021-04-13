@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>1.24.0</Version>
-    <AssemblyName>OpenTelemetry.AutoInstrumentation.MSBuild</AssemblyName>
+    <Version>1.26.1</Version>
   </PropertyGroup>
 
   <!-- For VS testing purposes only, copy all implementation assemblies to the
