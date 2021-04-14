@@ -40,6 +40,7 @@ Approvers ([@open-telemetry/dotnet-instrumentation-approvers](https://github.com
 - [Kevin Gosse](https://github.com/kevingosse), Datadog
 - [Lucas Pimentel-Ordyna](https://github.com/lucaspimentel), Datadog
 - [Mike Goldsmith](https://github.com/MikeGoldsmith), HoneyComb
+- [Robert Pajak](https://github.com/pellared), Splunk
 - [Tony Redondo](https://github.com/tonyredondo), Datadog
 
 Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/main/community-membership.md).
