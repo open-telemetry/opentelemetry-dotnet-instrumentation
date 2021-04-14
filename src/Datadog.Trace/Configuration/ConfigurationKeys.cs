@@ -337,6 +337,18 @@ namespace Datadog.Trace.Configuration
         public const string JaegerExporterAgentPort = "OTEL_EXPORTER_JAEGER_AGENT_PORT";
 
         /// <summary>
+        /// Configuration key to enable sending partial traces to the agent
+        /// </summary>
+        /// <seealso cref="TracerSettings.PartialFlushEnabled"/>
+        public const string PartialFlushEnabled = "OTEL_TRACE_PARTIAL_FLUSH_ENABLED";
+
+        /// <summary>
+        /// Configuration key to set the minimum number of closed spans in a trace before it's partially flushed
+        /// </summary>
+        /// <seealso cref="TracerSettings.PartialFlushMinSpans"/>
+        public const string PartialFlushMinSpans = "OTEL_TRACE_PARTIAL_FLUSH_MIN_SPANS";
+
+        /// <summary>
         /// String format patterns used to match integration-specific configuration keys.
         /// </summary>
         public static class Integrations
@@ -377,7 +389,7 @@ namespace Datadog.Trace.Configuration
         {
             /// <summary>
             /// Feature Flag: enables updated resource names on `aspnet.request`, `aspnet-mvc.request`,
-            /// `aspnet-webapi.request`, and `aspnet_core.request` spans. Enables `aspnet_core.mvc` spans and
+            /// `aspnet-webapi.request`, and `aspnet_core.request` spans. Enables `aspnet_core_mvc.request` spans and
             /// additional features on `aspnet_core.request` spans.
             /// </summary>
             /// <seealso cref="TracerSettings.RouteTemplateResourceNamesEnabled"/>

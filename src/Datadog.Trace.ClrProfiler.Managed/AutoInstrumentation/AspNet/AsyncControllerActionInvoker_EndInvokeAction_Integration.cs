@@ -5,6 +5,7 @@ using Datadog.Trace.ClrProfiler.CallTarget;
 using Datadog.Trace.ClrProfiler.Integrations;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.Vendors.Serilog;
 
 namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.AspNet
@@ -69,6 +70,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.AspNet
                 }
                 else
                 {
+                    scope.Span.SetHeaderTags(httpContext.Response.Headers.Wrap(), Tracer.Instance.Settings.HeaderTags, PropagationExtensions.HttpResponseHeadersTagPrefix);
                     scope.Span.SetHttpStatusCode(httpContext.Response.StatusCode, isServer: true);
                     scope.Dispose();
                 }
@@ -79,6 +81,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.AspNet
 
         private static void OnRequestCompleted(HttpContext httpContext, Scope scope, DateTimeOffset finishTime)
         {
+            scope.Span.SetHeaderTags(httpContext.Response.Headers.Wrap(), Tracer.Instance.Settings.HeaderTags, PropagationExtensions.HttpResponseHeadersTagPrefix);
             scope.Span.SetHttpStatusCode(httpContext.Response.StatusCode, isServer: true);
             scope.Span.Finish(finishTime);
             scope.Dispose();
