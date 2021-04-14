@@ -69,39 +69,6 @@ namespace Datadog.Trace.Tests.Tagging
         }
 
         [Fact]
-        public void GetTag_GetMetric_ReturnUpdatedValues()
-        {
-            var tags = new CommonTags();
-            var span = new Span(new SpanContext(TraceId.CreateFromInt(42), 41), DateTimeOffset.UtcNow, tags);
-
-            tags.Environment = "Test";
-            tags.SamplingLimitDecision = 0.5;
-
-            // Override the properties
-            span.SetTag(Tags.Env, "Overridden Environment");
-            span.SetMetric(Metrics.SamplingLimitDecision, 0.75);
-
-            for (int i = 0; i < 15; i++)
-            {
-                span.SetTag(i.ToString(), i.ToString());
-            }
-
-            for (int i = 0; i < 15; i++)
-            {
-                span.SetMetric(i.ToString(), i);
-            }
-
-            Assert.Equal("Overridden Environment", span.GetTag(Tags.Env));
-            Assert.Equal(0.75, span.GetMetric(Metrics.SamplingLimitDecision));
-
-            for (int i = 0; i < 15; i++)
-            {
-                Assert.Equal(i.ToString(), span.GetTag(i.ToString()));
-                Assert.Equal((double)i, span.GetMetric(i.ToString()));
-            }
-        }
-
-        [Fact]
         public void CheckProperties()
         {
             var assemblies = new[] { typeof(TagsList).Assembly, typeof(SqlTags).Assembly };
@@ -153,10 +120,6 @@ namespace Datadog.Trace.Tests.Tagging
             tags.Environment = "Test";
             tags.SamplingLimitDecision = 0.5;
 
-            // Override the properties
-            span.SetTag(Tags.Env, "Overridden Environment");
-            span.SetMetric(Metrics.SamplingLimitDecision, 0.75);
-
             for (int i = 0; i < 15; i++)
             {
                 span.SetTag(i.ToString(), i.ToString());
@@ -179,8 +142,8 @@ namespace Datadog.Trace.Tests.Tagging
             // For top-level spans, there is one metric added during serialization
             Assert.Equal(topLevelSpan ? 17 : 16, deserializedSpan.Metrics.Count);
 
-            Assert.Equal("Overridden Environment", deserializedSpan.Tags[Tags.Env]);
-            Assert.Equal(0.75, deserializedSpan.Metrics[Metrics.SamplingLimitDecision]);
+            Assert.Equal("Test", deserializedSpan.Tags[Tags.Env]);
+            Assert.Equal(0.5, deserializedSpan.Metrics[Metrics.SamplingLimitDecision]);
 
             for (int i = 0; i < 15; i++)
             {
