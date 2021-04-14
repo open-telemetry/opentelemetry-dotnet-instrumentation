@@ -294,9 +294,10 @@ namespace Datadog.Trace.Configuration
         public const string Convention = "OTEL_CONVENTION";
 
         /// <summary>
-        /// Configuration key for the propagator logic to be used.
+        /// Configuration key for the propagators to be used.
         /// Default is <c>Datadog</c>.
-        /// <seealso cref="TracerSettings.Propagator"/>
+        /// Supports multiple values separated with semi-colons.
+        /// <seealso cref="TracerSettings.Propagators"/>
         /// </summary>
         public const string Propagators = "OTEL_PROPAGATORS";
 
