@@ -13,7 +13,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests.Helpers
             var ddTraceId = StringUtil.GetHeader(processResult.StandardOutput, DDHttpHeaderNames.TraceId);
             var ddParentSpanId = StringUtil.GetHeader(processResult.StandardOutput, DDHttpHeaderNames.ParentId);
 
-            Assert.Equal(expectedSpan.TraceId.ToString(CultureInfo.InvariantCulture), ddTraceId);
+            Assert.Equal(expectedSpan.TraceId.ToString(), ddTraceId);
             Assert.Equal(expectedSpan.SpanId.ToString(CultureInfo.InvariantCulture), ddParentSpanId);
 
             // Verify B3 headers
@@ -21,7 +21,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests.Helpers
             var b3SpanId = StringUtil.GetHeader(processResult.StandardOutput, B3HttpHeaderNames.B3SpanId);
             var b3ParentSpanId = StringUtil.GetHeader(processResult.StandardOutput, B3HttpHeaderNames.B3ParentId);
 
-            Assert.Equal(expectedSpan.TraceId.ToString("x16", CultureInfo.InvariantCulture), b3TraceId);
+            Assert.Equal(expectedSpan.TraceId.ToString(), b3TraceId); // TODO: With DD Trace ID Convention, it will be in DD Trace ID format
             Assert.Equal(expectedSpan.SpanId.ToString("x16", CultureInfo.InvariantCulture), b3SpanId);
             Assert.Equal(expectedSpan.ParentId.Value.ToString("x16", CultureInfo.InvariantCulture), b3ParentSpanId);
         }
