@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -119,7 +120,11 @@ namespace Datadog.Trace
             _scopeManager = scopeManager ?? new AsyncLocalScopeManager();
             Sampler = sampler ?? new RuleBasedSampler(new RateLimiter(Settings.MaxTracesSubmittedPerSecond));
 
-            var propagators = ContextPropagatorFactory.BuildPropagators(Settings.Propagators, TraceIdConvention);
+            var propagators = GlobalSettings.Source.FactoryConfigurator
+               .GetPropagatorFactory()
+               .GetPropagators(Settings.Propagators, TraceIdConvention)
+               .ToList();
+
             _propagator = new CompositeTextMapPropagator(propagators);
 
             if (!string.IsNullOrWhiteSpace(Settings.CustomSamplingRules))

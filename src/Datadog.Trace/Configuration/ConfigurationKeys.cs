@@ -349,6 +349,11 @@ namespace Datadog.Trace.Configuration
         public const string PartialFlushMinSpans = "OTEL_TRACE_PARTIAL_FLUSH_MIN_SPANS";
 
         /// <summary>
+        /// Configuration key for specifing vendor plugin path
+        /// </summary>
+        public const string VendorPluginName = "OTEL_VENDOR_PLUGIN";
+
+        /// <summary>
         /// String format patterns used to match integration-specific configuration keys.
         /// </summary>
         public static class Integrations
