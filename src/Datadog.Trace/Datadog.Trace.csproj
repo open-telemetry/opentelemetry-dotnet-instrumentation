@@ -25,7 +25,6 @@
 
   <ItemGroup>
     <PackageReference Include="LibLog" Version="5.0.6" PrivateAssets="All" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.1" />
   </ItemGroup>
 
   <!-- Below this point is reserved for vendor items -->

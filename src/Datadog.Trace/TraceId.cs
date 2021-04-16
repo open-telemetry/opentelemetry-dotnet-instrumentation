@@ -1,6 +1,5 @@
 using System;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 
 namespace Datadog.Trace
 {
@@ -72,15 +71,9 @@ namespace Datadog.Trace
         /// <returns>Instance of randomly generated <see cref="TraceId"/>.</returns>
         public static TraceId CreateRandom()
         {
-            var higherBytes = new byte[8];
-            var lowerBytes = new byte[8];
-
             var randomNumberGenerator = RandomNumberGenerator.Current;
-            Unsafe.WriteUnaligned(ref higherBytes[0],  randomNumberGenerator.Next());
-            Unsafe.WriteUnaligned(ref lowerBytes[0], randomNumberGenerator.Next());
-
-            var higher = BitConverter.ToInt64(higherBytes, startIndex: 0) & 0x7FFFFFFFFFFFFFFF;
-            var lower = BitConverter.ToInt64(lowerBytes, startIndex: 0) & 0x7FFFFFFFFFFFFFFF;
+            var higher = randomNumberGenerator.Next() & 0x7FFFFFFFFFFFFFFF;
+            var lower = randomNumberGenerator.Next() & 0x7FFFFFFFFFFFFFFF;
 
             return new TraceId(higher, lower);
         }
@@ -91,12 +84,8 @@ namespace Datadog.Trace
         /// <returns>Instance of randomly generated <see cref="TraceId"/>.</returns>
         public static TraceId CreateRandomDataDogCompatible()
         {
-            var lowerBytes = new byte[8];
-
             var randomNumberGenerator = RandomNumberGenerator.Current;
-            Unsafe.WriteUnaligned(ref lowerBytes[0], randomNumberGenerator.Next());
-
-            var lower = (ulong)BitConverter.ToInt64(lowerBytes, startIndex: 0) & 0x7FFFFFFFFFFFFFFF;
+            var lower = (ulong)randomNumberGenerator.Next() & 0x7FFFFFFFFFFFFFFF;
 
             return new TraceId(lower);
         }
