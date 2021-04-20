@@ -12,7 +12,8 @@
           "CORECLR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll",
   
           "OTEL_DOTNET_TRACER_HOME": "$(ProjectDir)$(OutputPath)profiler-lib",
-          "OTEL_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json"
+          "OTEL_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json",
+          "OTEL_PROPAGATORS": "datadog;b3"
         },
         "nativeDebugging": true
       }

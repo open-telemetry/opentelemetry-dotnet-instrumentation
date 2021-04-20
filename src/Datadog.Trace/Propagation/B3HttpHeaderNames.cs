@@ -1,6 +1,9 @@
 namespace Datadog.Trace.Propagation
 {
-    internal static class B3HttpHeaderNames
+    /// <summary>
+    /// Names of HTTP headers that can be used tracing inbound or outbound HTTP requests.
+    /// </summary>
+    public static class B3HttpHeaderNames
     {
         /// <summary>
         /// ID of a distributed trace.

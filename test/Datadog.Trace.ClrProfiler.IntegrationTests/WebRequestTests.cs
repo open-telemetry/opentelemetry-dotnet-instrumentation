@@ -1,8 +1,6 @@
-using System.Globalization;
 using System.Linq;
 using Datadog.Core.Tools;
 using Datadog.Trace.ClrProfiler.IntegrationTests.Helpers;
-using Datadog.Trace.Propagation;
 using Datadog.Trace.TestHelpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -17,6 +15,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
             : base("WebRequest", output)
         {
             SetServiceVersion("1.0.0");
+            SetEnvironmentVariable("OTEL_PROPAGATORS", "datadog;b3");
         }
 
         [Theory]
@@ -59,12 +58,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
                     Assert.False(span.Tags?.ContainsKey(Tags.Version), "External service span should not have service version tag.");
                 }
 
-                var firstSpan = spans.First();
-                var traceId = StringUtil.GetHeader(processResult.StandardOutput, DDHttpHeaderNames.TraceId);
-                var parentSpanId = StringUtil.GetHeader(processResult.StandardOutput, DDHttpHeaderNames.ParentId);
-
-                Assert.Equal(firstSpan.TraceId.ToString(), traceId);
-                Assert.Equal(firstSpan.SpanId.ToString(CultureInfo.InvariantCulture), parentSpanId);
+                PropagationTestHelpers.AssertPropagationEnabled(spans.First(), processResult);
             }
         }
 
@@ -91,13 +85,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
                 var spans = agent.WaitForSpans(1, 3000, operationName: expectedOperationName);
                 Assert.Equal(0, spans.Count);
 
-                var traceId = StringUtil.GetHeader(processResult.StandardOutput, DDHttpHeaderNames.TraceId);
-                var parentSpanId = StringUtil.GetHeader(processResult.StandardOutput, DDHttpHeaderNames.ParentId);
-                var tracingEnabled = StringUtil.GetHeader(processResult.StandardOutput, CommonHttpHeaderNames.TracingEnabled);
-
-                Assert.Null(traceId);
-                Assert.Null(parentSpanId);
-                Assert.Equal("false", tracingEnabled);
+                PropagationTestHelpers.AssertPropagationDisabled(processResult);
             }
         }
     }
