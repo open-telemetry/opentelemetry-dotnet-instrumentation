@@ -9,7 +9,10 @@ using Datadog.Trace.Logging;
 
 namespace Datadog.Trace.Propagation
 {
-    internal class W3CSpanContextPropagator : IPropagator
+    /// <summary>
+    /// Class that handles W3C style context propagation.
+    /// </summary>
+    public class W3CSpanContextPropagator : IPropagator
     {
         private const string TraceParentFormat = "00-{0}-{1}-01";
 
@@ -27,12 +30,17 @@ namespace Datadog.Trace.Propagation
 
         private readonly ITraceIdConvention _traceIdConvention;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="W3CSpanContextPropagator"/> class.
+        /// </summary>
+        /// <param name="traceIdConvention">Trace id convention</param>
         public W3CSpanContextPropagator(ITraceIdConvention traceIdConvention)
         {
             _traceIdConvention = traceIdConvention;
         }
 
-        public void Inject<T>(SpanContext context, T carrier, Action<T, string, string> setter)
+        /// <inheritdoc cref="IPropagator"/>
+        public virtual void Inject<T>(SpanContext context, T carrier, Action<T, string, string> setter)
         {
             // lock sampling priority when span propagates.
             context.TraceContext?.LockSamplingPriority();
@@ -44,7 +52,8 @@ namespace Datadog.Trace.Propagation
             }
         }
 
-        public SpanContext Extract<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
+        /// <inheritdoc cref="IPropagator"/>
+        public virtual SpanContext Extract<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
         {
             var traceParentCollection = getter(carrier, W3CHeaderNames.TraceParent).ToList();
             if (traceParentCollection.Count != 1)

@@ -15,6 +15,7 @@ using Datadog.Trace.DiagnosticListeners;
 using Datadog.Trace.DogStatsd;
 using Datadog.Trace.Logging;
 using Datadog.Trace.PlatformHelpers;
+using Datadog.Trace.Plugins;
 using Datadog.Trace.Propagation;
 using Datadog.Trace.RuntimeMetrics;
 using Datadog.Trace.Sampling;
@@ -120,8 +121,9 @@ namespace Datadog.Trace
             _scopeManager = scopeManager ?? new AsyncLocalScopeManager();
             Sampler = sampler ?? new RuleBasedSampler(new RateLimiter(Settings.MaxTracesSubmittedPerSecond));
 
-            var propagators = GlobalSettings.Source.FactoryConfigurator
-               .GetPropagatorFactory()
+            var propagators = new CompositePropagatorsProvider()
+               .RegisterProvider(new OTelPropagatorsProvider())
+               .RegisterProviderFromPlugins(PluginManager.Loaded)
                .GetPropagators(Settings.Propagators, TraceIdConvention)
                .ToList();
 

@@ -13,6 +13,11 @@ namespace Datadog.Trace.Configuration
         public const string ConfigurationFileName = "OTEL_TRACE_CONFIG_FILE";
 
         /// <summary>
+        /// Configuration key for the path to the plugins configuration file.
+        /// </summary>
+        public const string PluginConfigurationFileName = "OTEL_DOTNET_TRACER_PLUGINS_FILE";
+
+        /// <summary>
         /// Configuration key for the application's environment. Sets the "env" tag on every <see cref="Span"/>.
         /// </summary>
         /// <seealso cref="TracerSettings.Environment"/>
@@ -347,11 +352,6 @@ namespace Datadog.Trace.Configuration
         /// </summary>
         /// <seealso cref="TracerSettings.PartialFlushMinSpans"/>
         public const string PartialFlushMinSpans = "OTEL_TRACE_PARTIAL_FLUSH_MIN_SPANS";
-
-        /// <summary>
-        /// Configuration key for specifing vendor plugin path
-        /// </summary>
-        public const string VendorPluginName = "OTEL_VENDOR_PLUGIN";
 
         /// <summary>
         /// String format patterns used to match integration-specific configuration keys.

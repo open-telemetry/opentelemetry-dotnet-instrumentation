@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using System.Threading;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.DiagnosticListeners;
 using Datadog.Trace.Logging;
+using Datadog.Trace.Plugins;
 using Datadog.Trace.ServiceFabric;
 
 namespace Datadog.Trace.ClrProfiler
@@ -61,7 +60,7 @@ namespace Datadog.Trace.ClrProfiler
 
             try
             {
-                TryLoadVendorPlugin();
+                PluginManager.TryLoadPlugins(GlobalSettings.Source.PluginsConfiguration);
 
                 // ensure global instance is created if it's not already
                 _ = Tracer.Instance;
@@ -130,37 +129,5 @@ namespace Datadog.Trace.ClrProfiler
             DiagnosticManager.Instance = diagnosticManager;
         }
 #endif
-
-        private static void TryLoadVendorPlugin()
-        {
-            string pluginName = GlobalSettings.Source.VendorPluginName;
-            if (!string.IsNullOrWhiteSpace(pluginName))
-            {
-                string pluginPath = Path.Combine(
-                    Path.GetDirectoryName(typeof(Instrumentation).Assembly.Location),
-                    pluginName);
-
-                if (File.Exists(pluginPath))
-                {
-                    try
-                    {
-                        Assembly pluginAssembly = Assembly.LoadFrom(pluginPath);
-
-                        GlobalSettings.SetVendorPlugin(pluginAssembly);
-
-                        Log.Information("Vendor plugin assembly loaded '{0}'.", pluginAssembly.FullName);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warning(ex, "Plugin assembly could not be loaded.");
-                        Log.Information("Skipping vendor plugin load");
-                    }
-                }
-                else
-                {
-                    Log.Warning("Plugin path is defined but could not find the path '{0}'.", pluginPath);
-                }
-            }
-        }
     }
 }

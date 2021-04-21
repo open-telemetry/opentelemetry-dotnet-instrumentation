@@ -5,7 +5,7 @@ using Datadog.Trace;
 using Datadog.Trace.Conventions;
 using Datadog.Trace.Propagation;
 
-namespace Samples.Vendoring.Propagators
+namespace Samples.Vendoring.Propagation
 {
     internal class VendorSpanContextPropagator : IPropagator
     {

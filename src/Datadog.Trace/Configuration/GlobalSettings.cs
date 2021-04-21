@@ -1,7 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using Datadog.Trace.Logging;
 using Datadog.Trace.Vendors.Serilog.Events;
 
@@ -35,10 +33,10 @@ namespace Datadog.Trace.Configuration
                                       // default value
                                       true;
 
-            VendorPluginName = source?.GetString(ConfigurationKeys.VendorPluginName);
-
-            // Sets initial / fallback configuration
-            FactoryConfigurator = new DefaultFactoryConfigurator();
+            if (TryLoadPluginJsonConfigurationFile(source, out JsonConfigurationSource jsonConfigurationSource))
+            {
+                PluginsConfiguration = jsonConfigurationSource;
+            }
         }
 
         /// <summary>
@@ -48,21 +46,6 @@ namespace Datadog.Trace.Configuration
         /// </summary>
         /// <seealso cref="ConfigurationKeys.DebugEnabled"/>
         public bool DebugEnabled { get; private set; }
-
-        /// <summary>
-        /// Gets the vendor plugin path.
-        /// </summary>
-        public string VendorPluginName { get; private set; }
-
-        /// <summary>
-        /// Gets a value indicating whether vendor plugin is loaded.
-        /// </summary>
-        public bool VendorPluginLoaded { get; private set; }
-
-        /// <summary>
-        /// Gets the vendor plugin assembly.
-        /// </summary>
-        public Assembly VendorPlugin { get; private set; }
 
         /// <summary>
         /// Gets or sets the global settings instance.
@@ -78,9 +61,9 @@ namespace Datadog.Trace.Configuration
         internal bool DiagnosticSourceEnabled { get; }
 
         /// <summary>
-        /// Gets the factory configurator.
+        /// Gets the plugins configuration.
         /// </summary>
-        internal IFactoryConfigurator FactoryConfigurator { get; private set; }
+        internal JsonConfigurationSource PluginsConfiguration { get; }
 
         /// <summary>
         /// Set whether debug mode is enabled.
@@ -99,18 +82,6 @@ namespace Datadog.Trace.Configuration
             {
                 DatadogLogging.UseDefaultLevel();
             }
-        }
-
-        /// <summary>
-        /// Sets a vendor plugin on successful load.
-        /// </summary>
-        /// <param name="assembly">Loaded plugin assembly</param>
-        public static void SetVendorPlugin(Assembly assembly)
-        {
-            Source.VendorPluginLoaded = true;
-            Source.VendorPlugin = assembly;
-
-            LoadVendorFactoryConfigurator();
         }
 
         /// <summary>
@@ -160,15 +131,28 @@ namespace Datadog.Trace.Configuration
             return configurationSource;
         }
 
-        private static bool TryLoadJsonConfigurationFile(IConfigurationSource configurationSource, out IConfigurationSource jsonConfigurationSource)
+        internal static bool TryLoadPluginJsonConfigurationFile(IConfigurationSource configurationSource, out JsonConfigurationSource jsonConfigurationSource)
+        {
+            var configurationFileName = configurationSource.GetString(ConfigurationKeys.PluginConfigurationFileName) ??
+                                        Path.Combine(GetCurrentDirectory(), "plugins.json");
+
+            return TryLoadJsonConfigurationFile(configurationFileName, out jsonConfigurationSource);
+        }
+
+        private static bool TryLoadJsonConfigurationFile(IConfigurationSource configurationSource, out JsonConfigurationSource jsonConfigurationSource)
+        {
+            // if environment variable is not set, look for default file name in the current directory
+            var configurationFileName = configurationSource.GetString(ConfigurationKeys.ConfigurationFileName) ??
+                                        configurationSource.GetString("OTEL_DOTNET_TRACER_CONFIG_FILE") ??
+                                        Path.Combine(GetCurrentDirectory(), "datadog.json");
+
+            return TryLoadJsonConfigurationFile(configurationFileName, out jsonConfigurationSource);
+        }
+
+        private static bool TryLoadJsonConfigurationFile(string configurationFileName, out JsonConfigurationSource jsonConfigurationSource)
         {
             try
             {
-                // if environment variable is not set, look for default file name in the current directory
-                var configurationFileName = configurationSource.GetString(ConfigurationKeys.ConfigurationFileName) ??
-                                            configurationSource.GetString("OTEL_DOTNET_TRACER_CONFIG_FILE") ??
-                                            Path.Combine(GetCurrentDirectory(), "datadog.json");
-
                 if (string.Equals(Path.GetExtension(configurationFileName), ".JSON", StringComparison.OrdinalIgnoreCase) &&
                     File.Exists(configurationFileName))
                 {
@@ -222,22 +206,6 @@ namespace Datadog.Trace.Configuration
 #endif
             hostingPath = default;
             return false;
-        }
-
-        private static void LoadVendorFactoryConfigurator()
-        {
-            if (Source.VendorPluginLoaded)
-            {
-                var factoryInterface = typeof(IFactoryConfigurator);
-                var factoryType = Source.VendorPlugin
-                    .GetTypes()
-                    .FirstOrDefault(x => factoryInterface.IsAssignableFrom(x));
-
-                if (factoryType != null)
-                {
-                    Source.FactoryConfigurator = (IFactoryConfigurator)Activator.CreateInstance(factoryType);
-                }
-            }
         }
     }
 }
