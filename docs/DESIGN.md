@@ -8,7 +8,7 @@
 - **Reliability**: stable and performant under different loads. Well-behaved under extreme load, with predictable, low resource consumption.
 - **Visibility**: users should be able to generate telemetry data that provides deep and detailed visibility into their applications. Such telemetry must allow users to identify and solve application-related issues in production.
 - **Useful out-of-the-box**: after install users should be able to get telemetry data from targeted libraries with none or minimal configuration (good selection of defaults).
-- **Extensible**: key components can be chosen either at build time.
+- **Extensible**: key components can be chosen via configuration and plugins.
 
 ## Constraints
 
