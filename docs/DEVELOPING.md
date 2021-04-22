@@ -124,7 +124,7 @@ docker-compose run IntegrationTests
 
 The [`dev/docker-compose.yaml`](../dev/docker-compose.yaml) contains configuration for running OTel Collector and Jaeger.
 
-You can run the services using from by:
+You can run the services using:
 
 ```sh
 docker-compose -f dev/docker-compose.yaml up
