@@ -12,7 +12,14 @@
 
 ## Constraints
 
-- No compliance to Common Language Specification (CLS). More: [#131](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/131).
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",
+"NOT RECOMMENDED", "MAY", and "OPTIONAL"  are to be interpreted as described in 
+[BCP 14](https://tools.ietf.org/html/bcp14), [[RFC2119](https://tools.ietf.org/html/rfc2119)], [[RFC8174](https://tools.ietf.org/html/rfc8174)]
+when, and only when, they appear in all capitals, as shown here.
+
+- MUST NOT reference external libraries to prevent instrumented applications from breaking or behaving unexpectedly.
+- Compliance to [Common Language Specification (CLS)](https://docs.microsoft.com/en-us/dotnet/standard/language-independence-and-language-independent-components)
+is OPTIONAL. More: [#131](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/131).
 
 ## Plans
 
