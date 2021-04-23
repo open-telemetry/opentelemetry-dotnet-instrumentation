@@ -1,8 +1,5 @@
 name: Build artifacts
-on:
-  push:
-    branches:
-      - main
+on: [ push, pull_request ]
 
 jobs:
   alpine_build:
@@ -19,12 +16,10 @@ jobs:
     - run: docker-compose run package.alpine
       env:
         buildConfiguration: Release
-    - run: mkdir artifacts
-    - run: cp -a deploy/linux/. artifacts/
     - uses: actions/upload-artifact@v2
       with:
         name: artifacts
-        path: artifacts
+        path: deploy/linux
 
   linux_build:
     name: Linux Build
@@ -40,12 +35,10 @@ jobs:
     - run: docker-compose run package
       env:
         buildConfiguration: Release
-    - run: mkdir artifacts
-    - run: cp -a deploy/linux/. artifacts/
     - uses: actions/upload-artifact@v2
       with:
         name: artifacts
-        path: artifacts
+        path: deploy/linux
 
   windows_build:
     name: Windows Build
@@ -61,13 +54,7 @@ jobs:
         env:
           buildConfiguration: Release
         shell: cmd
-      - run: mkdir artifacts
-        shell: cmd
-      - run: cp -r src/WindowsInstaller/bin/Release/x64/en-us/* artifacts
-        shell: cmd
-      - run: cp -r src/WindowsInstaller/bin/Release/x86/en-us/* artifacts
-        shell: cmd
       - uses: actions/upload-artifact@v2
         with:
           name: artifacts
-          path: artifacts
+          path: src/WindowsInstaller/bin/Release/*/en-us
