@@ -1,4 +1,4 @@
-# OpenTelemetry .NET Auto-Instrumentation for Java
+# OpenTelemetry .NET Auto-Instrumentation for .NET
 
 [![Slack](https://img.shields.io/badge/slack-@cncf/otel--dotnet--auto--instr-brightgreen.svg?logo=slack)](https://cloud-native.slack.com/archives/C01NR1YLSE7)
 
