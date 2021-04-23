@@ -14,7 +14,12 @@
     * Run unit tests, commit any needed fixes, repeat until passing unit tests
     * Update versions and integrations json by running: ` cd \build\tools\PrepareRelease && dotnet run -- versions integrations` (remember to revert wcf and other windows-only frameworks if you are using different platform)
     * Run integration tests, commit any needed fixes, until passing integrations tests
-    * Run `docker-compose run build`, `docker-compose run Profiler` and `docker-compose run package` to verify `.sh` files are valid after the merge.
+    * Run each of the following commands and commit any needed fixes, until it passes:
+       - `docker-compose run --rm build`
+       - `docker-compose run --rm Profiler`
+       - `docker-compose run --rm IntegrationTests`
+       - `docker-compose run --rm package`
+
 6. If squashing cherry-pick from upstream to pass CLA check:
     * `git rebase -i <squash_sha>^`
     * Select top one as "pick" all coming from upstream as "squash" and let the ones that you made to fix build and test as "pick" so it is easier to review them separately.
