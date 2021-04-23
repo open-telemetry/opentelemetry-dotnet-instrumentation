@@ -39,7 +39,7 @@ namespace Samples.AspNetMvc5.Controllers
                         span.ServiceName,
                         span.OperationName,
                         span.ResourceName,
-                        span.TraceId,
+                        (ulong)span.TraceId.Lower, // TODO: Add support for 128bit
                         span.SpanId);
                 }
 

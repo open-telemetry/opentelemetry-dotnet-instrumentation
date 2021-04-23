@@ -1,4 +1,4 @@
-# opentelemetry-dotnet-instrumentation
+# OpenTelemetry .NET Auto-Instrumentation for .NET
 
 [![Slack](https://img.shields.io/badge/slack-@cncf/otel--dotnet--auto--instr-brightgreen.svg?logo=slack)](https://cloud-native.slack.com/archives/C01NR1YLSE7)
 
@@ -6,24 +6,13 @@ This project provides a .NET tracer that leverages the .NET profiling APIs to su
 
 ## Status
 
-This project is in the early stages of development starting with an initial seeding of code from the [.NET Tracer for Datadog APM](https://github.com/DataDog/dd-trace-dotnet). Our current goal is to take the seeded tracer and update it to both listen to and generate OpenTelemetry tracing data. To accomplish this our current priorities are to:
-1. Define System.Diagnostics.DiagnosticSource wrappers to generate and consume [.NET Activities](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.activity?view=net-5.0)
-2. Validate that the performance of this wrapping approach will be acceptable.
+This project is in the early stages of development starting with an initial seeding of code from the [.NET Tracer for Datadog APM](https://github.com/DataDog/dd-trace-dotnet). Our current goal is to take the seeded tracer and update it to both listen to and generate OpenTelemetry tracing data.
 
-For more details about the preliminary roadmap refer to the [Preliminary Roadmap Google doc](https://docs.google.com/document/d/10BiAfYDURrk8PQxjT65bEc0ydVngWLoWk8IGo4xDKko/edit?usp=sharing).
+For more details about the design and roadmap see [DESIGN.md](DESIGN.md).
 
 ## Contributing
 
-We meet weekly, visit the [OpenTelemetry community
-calendar](https://calendar.google.com/calendar/embed?src=google.com_b79e3e90j7bbsa2n2p5an5lf60%40group.calendar.google.com)
-, for an up-to-date schedule.
-
-Meetings take place via [Zoom video conference](https://zoom.us/j/8287234601). The passcode is _77777_.
-
-Meeting notes are available as a public [Google
-doc](https://docs.google.com/document/d/1XedN2D8_PH4YLej-maT8sp4RKogfuhFpccRi3QpUcoI/edit?usp=sharing).
-For edit access, get in touch on
-[Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Community Roles
 
