@@ -8,24 +8,61 @@
 
 Use these environment variables to configure the tracing library:
 
-| Environment variable | Default value | Description |
+| Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_SERVICE_NAME` |  | The name of the service. |
-| `OTEL_ENV` |  | The value for the `environment` tag added to every span. This determines the environment in which the service is available in OTEL µAPM.  |
-| `OTEL_TRACE_ENABLED` | `true` | Enable to activate the tracer. |
-| `OTEL_TRACE_DEBUG` | `false` | Enable to activate debugging mode for the tracer. |
-| `OTEL_TRACE_AGENT_URL` | `http://localhost:9080/v1/trace` | The hostname and port for a OTEL Smart Agent or OpenTelemetry Collector. |
-| `OTEL_TRACE_GLOBAL_TAGS` |  | Comma-separated list of key-value pairs to specify global span tags. For example: `"key1:val1,key2:val2"` |
-| `OTEL_LOGS_INJECTION` | `false` | Enable to inject trace IDs, span IDs, service name and environment into logs. This requires a compatible logger or manual configuration. |
-| `OTEL_MAX_LOGFILE_SIZE` | `10 MB` | The maximum size for tracer log files, in bytes. |
-| `OTEL_TRACE_LOG_PATH` | Linux: `/var/log/OTEL/dotnet/dotnet-profiler.log`<br>Windows: `%ProgramData%"\OTEL .NET Tracing\logs\dotnet-profiler.log` | The path of the profiler log file. |
-| `OTEL_DIAGNOSTIC_SOURCE_ENABLED` | `true` | Enable to generate troubleshooting logs with the `System.Diagnostics.DiagnosticSource` class. |
-| `OTEL_DISABLED_INTEGRATIONS` |  | The integrations you want to disable, if any, separated by a semi-colon. These are the supported integrations: AspNetMvc, AspNetWebApi2, DbCommand, ElasticsearchNet5, ElasticsearchNet6, GraphQL, HttpMessageHandler, IDbCommand, MongoDb, NpgsqlCommand, OpenTracing, ServiceStackRedis, SqlCommand, StackExchangeRedis, Wcf, WebRequest |
-| `OTEL_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION` | `false` |  Sets whether to intercept method calls when the caller method is inside a domain-neutral assembly. This is recommended when instrumenting IIS applications. |
-| `OTEL_PROFILER_PROCESSES` |  | Sets the filename of executables the profiler can attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with semi-colons, for example: `MyApp.exe;dotnet.exe` |
-| `OTEL_PROFILER_EXCLUDE_PROCESSES` |  | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with semi-colons, for example: `MyApp.exe;dotnet.exe` |
-| `OTEL_CONVENTION` | `Datadog` | Sets the outbound http and trace id convention for tracer. Available values are: `Datadog` (64bit trace id), `OpenTelemetry` (128 bit trace id). |
-| `OTEL_PROPAGATOR` | `Datadog` | Sets the propagator for tracer. Available values are: `Datadog`, `B3`, `W3C`. |
+| `OTEL_TRACE_CONFIG_FILE` | The path to the configuration file. | `%CurrenctDIR%/datadog.json` |
+| `OTEL_VERSION` | The application's version that will populate `version` tag on spans. |  |
+| `OTEL_TRACE_ADONET_EXCLUDED_TYPES` | Comma-separated list of AdoNet types that will be excluded from automatic instrumentation. |  |
+| `OTEL_AGENT_HOST` | The host name of the targeted SatsD server. |  |
+| `OTEL_TRACE_AGENT_PORT` | The Agent port where the Tracer can send traces | `localhost` |
+| `OTEL_TRACE_PIPE_NAME` | The named pipe where the Tracer can send traces. |  |
+| `OTEL_TRACE_PIPE_TIMEOUT_MS` | The timeout in milliseconds for named pipes communication. | `100` |
+| `OTEL_DOGSTATSD_PIPE_NAME` | The named pipe that DogStatsD binds to. |  |
+| `OTEL_APM_RECEIVER_PORT` | The port for Trace Agent binding. | `8126` |
+| `OTEL_TRACE_ANALYTICS_ENABLED` | Enable to activate default Analytics. | `false` |
+| `OTEL_TRACE_HEADER_TAGS` | Comma-separated map of header keys to tag name, that will be automatically applied as tags on traces. | `"key1:val1,key2:val2"` |
+| `OTEL_TRACE_SERVICE_MAPPING` | Comma-separated map of services to rename. | `"key1:val1,key2:val2"` |
+| `OTEL_TRACE_BUFFER_SIZE` | The size in bytes of the trace buffer. | `1024 * 1024 * 10 (10MB)` |
+| `OTEL_TRACE_BATCH_INTERVAL` | The batch interval in milliseconds for the serialization queue. | `100` |
+| `OTEL_MAX_TRACES_PER_SECOND` | The number of traces allowed to be submitted per second. | `100` |
+| `OTEL_TRACE_STARTUP_LOGS` | Enable to activate diagnostic log at stratup. | `true` |
+| `OTEL_TRACE_SAMPLING_RULES` | Semi-colon separated list of sampling rules taht enabled custom sampling rules based on regular expressions. The rule is matched in order of specification. The first match in a list is used. The item "sample_rate" is required in decimal format. The item "service" is optional in regular expression format, to match on service name. The item "name" is optional in regular expression format, to match on operation name. | `'[{"sample_rate":0.5, "service":"cart.*"}];[{"sample_rate":0.2, "name":"http.request"}]'` |
+| `OTEL_TRACE_SAMPLE_RATE` | The global rate for the sampler. |  |
+| `OTEL_DOGSTATSD_PORT` | The port of the targeted StatsD server. | `8125` |
+| `OTEL_TRACE_METRICS_ENABLED` | Enable to activate internal metrics sent to DogStatsD. | `false` |
+| `OTEL_RUNTIME_METRICS_ENABLED` | Enable to activate internal runtime metrics sent to DogStatsD. | `false` |
+| `OTEL_TRACE_LOGGING_RATE` | The number of seconds between identical log messages for Tracer log files. Setting to 0 disables rate limiting. | `60` |
+| `OTEL_TRACE_LOG_DIRECTORY` | The directory of the .NET Tracer logs. Overrides the value in `OTEL_TRACE_LOG_PATH` if present. | Linux: `/var/log/OTEL/dotnet/`<br>Windows: `%ProgramData%"\OTEL .NET Tracing\logs\` |
+| `OTEL_TRACE_AGENT_PATH` | The Trace Agent path for when a standalone instance needs to be started. |  |
+| `OTEL_TRACE_AGENT_ARGS` | Comma-separated list of arguments to be passed to the Trace Agent process. |  |
+| `OTEL_DOGSTATSD_PATH` | The DogStatsD path for when a standalone instance needs to be started. |  |
+| `OTEL_DOGSTATSD_ARGS` | Comma-separated list of arguments to be passed to the DogStatsD pricess. |  |
+| `OTEL_API_KEY` | The API key used by the Agent. |  |
+| `OTEL_TRACE_TRANSPORT` | Overrides the transport to use for communicating with the trace agent. Available values are: `datagod-tcp`, `datadog-named-pipes`. | `null` |
+| `OTEL_HTTP_SERVER_ERROR_STATUSES` | The application's server http statuses to set spans as errors by. | `500-599` |
+| `OTEL_HTTP_CLIENT_ERROR_STATUSES` | The application's client http statuses to set spans as errors by. | `400-499` |
+| `OTEL_EXPORTER_JAEGER_AGENT_HOST` | Hostname for the Jaeger agent. | `localhost` |
+| `OTEL_EXPORTER_JAEGER_AGENT_PORT` | Port for the Jaeger agent. | `6831` |
+| `OTEL_TRACE_PARTIAL_FLUSH_ENABLED` | Enable to activate sending partial traces to the agent. | `false` |
+| `OTEL_TRACE_PARTIAL_FLUSH_MIN_SPANS` | The minimum number of closed spans in a trace before it's partially flushed. `OTEL_TRACE_PARTIAL_FLUSH_ENABLED` has to be enabled for this to take effect. | `500` |
+| `OTEL_SERVICE` | Application's default service name. |  |
+| `OTEL_ENV` | The value for the `environment` tag added to every span. This determines the environment in which the service is available in OTEL µAPM.  |  |
+| `OTEL_TRACE_ENABLED` | Enable to activate the tracer. | `true` | 
+| `OTEL_TRACE_DEBUG` | Enable to activate debugging mode for the tracer. | `false` | 
+| `OTEL_TRACE_AGENT_URL` | The full address of a OTEL Smart Agent or OpenTelemetry Collector endpoint. | `http://localhost:9080/v1/trace` | 
+| `OTEL_TAGS` | Comma-separated list of key-value pairs to specify global span tags. For example: `"key1:val1,key2:val2"` |  |
+| `OTEL_LOGS_INJECTION` | Enable to inject trace IDs, span IDs, service name and environment into logs. This requires a compatible logger or manual configuration. | `false` | `OTEL_EXPORTER` | The exporter to be used. The Tracer uses it to encode and dispatch traces. Available values are: `DatadogAgent`, `Zipkin`, `Jeager`. | `DatadogAgent` |
+| ` 
+| `OTEL_MAX_LOGFILE_SIZE` | The maximum size for tracer log files, in bytes. | `10 MB` |
+| `OTEL_TRACE_LOG_PATH` | The path of the profiler log file. | Linux: `/var/log/OTEL/dotnet/dotnet-profiler.log`<br>Windows: `%ProgramData%"\OTEL .NET Tracing\logs\dotnet-profiler.log` |
+| `OTEL_DIAGNOSTIC_SOURCE_ENABLED` | Enable to generate troubleshooting logs with the `System.Diagnostics.DiagnosticSource` class. | `true` |
+| `OTEL_DISABLED_INTEGRATIONS` | The integrations you want to disable, if any, separated by a semi-colon. These are the supported integrations: AspNetMvc, AspNetWebApi2, DbCommand, ElasticsearchNet5, ElasticsearchNet6, GraphQL, HttpMessageHandler, IDbCommand, MongoDb, NpgsqlCommand, OpenTracing, ServiceStackRedis, SqlCommand, StackExchangeRedis, Wcf, WebRequest |  |
+| `OTEL_CONVENTION` | Sets the outbound http and trace id convention for tracer. Available values are: `Datadog` (64bit trace id), `OpenTelemetry` (128 bit trace id). |  `Datadog` |
+| `OTEL_PROPAGATORS` | Semicollon-separated list of the propagators for tracer. Available propagators are: `Datadog`, `B3`, `W3C`. | `Datadog` |
+| `OTEL_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION` |  Sets whether to intercept method calls when the caller method is inside a domain-neutral assembly. This is recommended when instrumenting IIS applications. | `false` |
+| `OTEL_PROFILER_PROCESSES` | Sets the filename of executables the profiler can attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with semi-colons, for example: `MyApp.exe;dotnet.exe` |  |
+| `OTEL_PROFILER_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with semi-colons, for example: `MyApp.exe;dotnet.exe` |  |
+
 
 ### Linux
 
@@ -54,7 +91,7 @@ manager:
     ```
 2. Set the service name:
     ```bash
-    $ export OTEL_SERVICE_NAME='MyCoreService'
+    $ export OTEL_SERVICE='MyCoreService'
     ```
 3. Set Zipkin exporter:
     ```bash
@@ -103,7 +140,7 @@ you're instrumenting.
    ```
 3. Set the "service name" that better describes your application:
    ```batch
-   setx OTEL_SERVICE_NAME MyServiceName /m
+   setx OTEL_SERVICE MyServiceName /m
    ```
 4. Set the endpoint of a Smart Agent or OpenTelemetry Collector that will forward
 the trace data:
