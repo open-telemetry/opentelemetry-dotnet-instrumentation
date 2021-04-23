@@ -7,12 +7,18 @@ on:
 jobs:
   alpine_build:
     name: Alpine Build
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
     - run: docker-compose run build
+      env:
+        buildConfiguration: Release
     - run: docker-compose run Profiler.Alpine
+      env:
+        buildConfiguration: Release
     - run: docker-compose run package.alpine
+      env:
+        buildConfiguration: Release
     - run: mkdir artifacts
     - run: cp -a deploy/linux/. artifacts/
     - uses: actions/upload-artifact@v2
@@ -22,12 +28,18 @@ jobs:
 
   linux_build:
     name: Linux Build
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
     - run: docker-compose run build
+      env:
+        buildConfiguration: Release
     - run: docker-compose run Profiler
+      env:
+        buildConfiguration: Release
     - run: docker-compose run package
+      env:
+        buildConfiguration: Release
     - run: mkdir artifacts
     - run: cp -a deploy/linux/. artifacts/
     - uses: actions/upload-artifact@v2
@@ -45,25 +57,9 @@ jobs:
         shell: cmd
       - run: choco install wixtoolset
         shell: cmd
-      - run: nuget restore Datadog.Trace.sln
-        shell: cmd
-      - run: nuget restore src\OpenTelemetry.DynamicActivityBinding\OpenTelemetry.DynamicActivityBinding.sln
-        shell: cmd
-      - run: msbuild Datadog.Trace.proj /t:BuildCsharp /p:Configuration=Release
-        shell: cmd
-      - run: dotnet pack -c Release -o src\bin\SignalFx.Tracing src\Datadog.Trace\Datadog.Trace.csproj
-        shell: cmd
-      - run: dotnet pack -c Release -o src\bin\SignalFx.Tracing.OpenTracing src\Datadog.Trace.OpenTracing\Datadog.Trace.OpenTracing.csproj
-        shell: cmd
-      - run: msbuild Datadog.Trace.proj /t:BuildCpp /p:Configuration=Release;Platform=x64
-        shell: cmd
-      - run: msbuild Datadog.Trace.proj /t:BuildCpp /p:Configuration=Release;Platform=x86
-        shell: cmd
-      - run: msbuild Datadog.Trace.proj /t:msi /p:Configuration=Release;Platform=x64
-        shell: cmd
-      - run: msbuild Datadog.Trace.proj /t:msi /p:Configuration=Release;Platform=x86
-        shell: cmd
-      - run: msbuild Datadog.Trace.proj /t:CreateHomeDirectory /p:Configuration=Release;Platform=x64
+      - run: .\build\build.cmd
+        env:
+          buildConfiguration: Release
         shell: cmd
       - run: mkdir artifacts
         shell: cmd

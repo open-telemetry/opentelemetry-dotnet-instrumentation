@@ -129,6 +129,7 @@ services:
       dockerfile: ./build/docker/package.dockerfile
     image: datadog-package
     environment:
+    - buildConfiguration=${buildConfiguration}
     - PKGTYPES=deb rpm tar
     command: /project/build/docker/package.sh
     volumes:
@@ -140,6 +141,7 @@ services:
       dockerfile: ./build/docker/package.alpine.dockerfile
     image: datadog-package-alpine
     environment:
+    - buildConfiguration=${buildConfiguration}
     - PKGTYPES=tar
     - MUSL=true
     command: /project/build/docker/package.sh
