@@ -46,10 +46,10 @@ Use these environment variables to configure the tracing library:
 | `OTEL_TRACE_PARTIAL_FLUSH_ENABLED` | Enable to activate sending partial traces to the agent. | `false` |
 | `OTEL_TRACE_PARTIAL_FLUSH_MIN_SPANS` | The minimum number of closed spans in a trace before it's partially flushed. `OTEL_TRACE_PARTIAL_FLUSH_ENABLED` has to be enabled for this to take effect. | `500` |
 | `OTEL_SERVICE` | Application's default service name. |  |
-| `OTEL_ENV` | The value for the `environment` tag added to every span. This determines the environment in which the service is available in OTEL µAPM.  |  |
+| `OTEL_ENV` | The value for the `environment` tag added to every span. |  |
 | `OTEL_TRACE_ENABLED` | Enable to activate the tracer. | `true` | 
 | `OTEL_TRACE_DEBUG` | Enable to activate debugging mode for the tracer. | `false` | 
-| `OTEL_TRACE_AGENT_URL` | The full address of a OTEL Smart Agent or OpenTelemetry Collector endpoint. | `http://localhost:9080/v1/trace` | 
+| `OTEL_TRACE_AGENT_URL` | The URL to where send the traces. | `http://localhost:9080/v1/trace` | 
 | `OTEL_TAGS` | Comma-separated list of key-value pairs to specify global span tags. For example: `"key1:val1,key2:val2"` |  |
 | `OTEL_LOGS_INJECTION` | Enable to inject trace IDs, span IDs, service name and environment into logs. This requires a compatible logger or manual configuration. | `false` | `OTEL_EXPORTER` | The exporter to be used. The Tracer uses it to encode and dispatch traces. Available values are: `DatadogAgent`, `Zipkin`, `Jeager`. | `DatadogAgent` |
 | ` 
@@ -58,7 +58,7 @@ Use these environment variables to configure the tracing library:
 | `OTEL_DIAGNOSTIC_SOURCE_ENABLED` | Enable to generate troubleshooting logs with the `System.Diagnostics.DiagnosticSource` class. | `true` |
 | `OTEL_DISABLED_INTEGRATIONS` | The integrations you want to disable, if any, separated by a semi-colon. These are the supported integrations: AspNetMvc, AspNetWebApi2, DbCommand, ElasticsearchNet5, ElasticsearchNet6, GraphQL, HttpMessageHandler, IDbCommand, MongoDb, NpgsqlCommand, OpenTracing, ServiceStackRedis, SqlCommand, StackExchangeRedis, Wcf, WebRequest |  |
 | `OTEL_CONVENTION` | Sets the outbound http and trace id convention for tracer. Available values are: `Datadog` (64bit trace id), `OpenTelemetry` (128 bit trace id). |  `Datadog` |
-| `OTEL_PROPAGATORS` | Semicollon-separated list of the propagators for tracer. Available propagators are: `Datadog`, `B3`, `W3C`. | `Datadog` |
+| `OTEL_PROPAGATORS` | Semicollon-separated list of the propagators for tracer. Available propagators are: `Datadog`, `B3`, `W3C`. The Tracer will try to execute extraction in the passed order. | `Datadog` |
 | `OTEL_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION` |  Sets whether to intercept method calls when the caller method is inside a domain-neutral assembly. This is recommended when instrumenting IIS applications. | `false` |
 | `OTEL_PROFILER_PROCESSES` | Sets the filename of executables the profiler can attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with semi-colons, for example: `MyApp.exe;dotnet.exe` |  |
 | `OTEL_PROFILER_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with semi-colons, for example: `MyApp.exe;dotnet.exe` |  |
