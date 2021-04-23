@@ -101,9 +101,9 @@ manager:
     ```bash
     $ export OTEL_CONVENTION='OpenTelemetry'
     ```
-5. Set the endpoint of a Smart Agent or OpenTelemetry Collector:
+5. Set the endpoint, e.g. OpenTelemetry Collector:
     ```bash
-    $ export OTEL_TRACE_AGENT_URL='http://<YourSmartAgentOrCollector>:9080/v1/trace'
+    $ export OTEL_TRACE_AGENT_URL='http://<YourCollector>:9080/v1/trace'
     ```
 6. Optionally, enable trace injection in logs:
     ```bash
@@ -142,7 +142,7 @@ you're instrumenting.
    ```batch
    setx OTEL_SERVICE MyServiceName /m
    ```
-4. Set the endpoint of a Smart Agent or OpenTelemetry Collector that will forward
+4. Set the endpoint, e.g. OpenTelemetry Collector that will forward
 the trace data:
    ```batch
    setx OTEL_TRACE_AGENT_URL http://localhost:9080/v1/trace /m
