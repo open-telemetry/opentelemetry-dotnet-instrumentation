@@ -4,7 +4,7 @@
 
 We'd love your help!
 
-Please join our weekly [SIG meeting](https://github.com/open-telemetry/community#special-interest-groups)or get in touch on [Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
+Please join our weekly [SIG meeting](https://github.com/open-telemetry/community#special-interest-groups) or get in touch on [Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
 
 Meeting notes are available as a public [Google
 doc](https://docs.google.com/document/d/1XedN2D8_PH4YLej-maT8sp4RKogfuhFpccRi3QpUcoI/edit?usp=sharing).
