@@ -13,7 +13,6 @@
     * Old profiler ID: 846F5F1C-F9AE-4B07-969E-05C26BC060D8 (happens in launch.settings for new apps).
     * Run unit tests, commit any needed fixes, repeat until passing unit tests
     * Update versions and integrations json by running: ` cd \build\tools\PrepareRelease && dotnet run -- versions integrations` (remember to revert wcf and other windows-only frameworks if you are using different platform)
-    * Run integration tests, commit any needed fixes, until passing integrations tests
     * Run each of the following commands and commit any needed fixes, until it passes:
        - `docker-compose run --rm build`
        - `docker-compose run --rm Profiler`
