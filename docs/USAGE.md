@@ -151,11 +151,8 @@ the trace data:
    ```batch
    setx OTEL_LOGS_INJECTION true /m
    ```
-6. Optionally, if instrumenting IIS applications add the following environmet variable set to `true`:
-    ```batch
-    setx OTEL_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION true /m
-    ```
-7. Enable instrumentation for the targeted application by setting
+
+1. Enable instrumentation for the targeted application by setting
 the appropriate __CLR enable profiling__ environment variable.
 You can enable instrumentation at these levels:
  - For current command session
@@ -252,11 +249,6 @@ automatically become child spans of any existing spans in the same context:
 ## Troubleshooting
 
 Check if you are not hitting one of the issues listed below.
-
-### IIS applications not instrumenting expected services
-
-Set the environment variable `OTEL_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION` to `true` - without it
-the CLR profiler can't instrument many libraries/frameworks under IIS.
 
 ### Linux instrumentation not working
 
