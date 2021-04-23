@@ -1,11 +1,5 @@
 # Development
 
-## Components
-
-**[Datadog Agent](https://github.com/DataDog/datadog-agent)**: A service that runs on your application servers, accepting trace data from the Datadog Tracer and sending it to Datadog. The Agent is not part of this repo; it's the same Agent to which all Datadog tracers (e.g. Go, Python, Java, Ruby) send data.
-
-**[Datadog .NET Tracer](https://github.com/DataDog/dd-trace-dotnet)**: This repository. A set of .NET libraries that let you trace any piece of your .NET code. Supports manual instrumentation and can automatically instrument supported libraries out-of-the-box.
-
 ## Windows
 
 ### Minimum requirements
@@ -64,7 +58,7 @@ rem Valid values for property `Platform` are `x64`, `x86`, and `All`.
 msbuild Datadog.Trace.proj /t:CreateHomeDirectory /p:Configuration=Release;Platform=All
 ```
 
-## Linux
+## Linux and MacOS
 
 ### Minimum requirements
 
@@ -75,21 +69,14 @@ To build C# projects and NuGet packages only
 - Optional: [.NET Core 2.1 Runtime](https://dotnet.microsoft.com/download/dotnet-core/2.1) to test in .NET Core 2.1 locally.
 
 To build everything and run integration tests
+- [Docker](https://docs.docker.com/engine/install/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
-### Building and running tests with Docker Compose
+### Building
 
-You can use [Docker Compose](https://docs.docker.com/compose/) with Linux containers to build Linux binaries and run the test suites. This works on both Linux and Windows hosts.
-
-```bash
-# build C# projects
-docker-compose run build
-
-# build C++ project
-docker-compose run Profiler
-
-# run integration tests
-docker-compose run IntegrationTests
+```sh
+QUICK_BUILD=1 ./build/docker/build.sh
+./build/docker/Datadog.Trace.ClrProfiler.Native.sh
 ```
 
 ## Visual Studio Code
@@ -108,7 +95,7 @@ There may be a lot of errors, because some projects target .NET Framework. Switc
 
 If for whatever reason you need to use `Datadog.Trace.sln` you can run `for i in **/*.csproj; do dotnet build $i; done` to decrease the number of errors.
 
-### Development Container
+## Development Container
 
 The repository also contains configuration for developing inside a Container ([installation steps](https://code.visualstudio.com/docs/remote/containers#_installation)) using [Visual Studio Code Remote - Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) located under `.devcontainer.example`. You can copy it to `.devcontainer`.
 
@@ -118,23 +105,51 @@ cp -r .devcontainer.example .devcontainer
 
 The Development Container configuration mixes [Docker in Docker](https://github.com/microsoft/vscode-dev-containers/tree/master/containers/docker-in-docker) and [C# (.NET)](https://github.com/microsoft/vscode-dev-containers/tree/master/containers/dotnet) definitions. Thanks to it you can use `docker` and `docker-compose` inside the container.
 
+## Integration tests
 
-## Further Reading
+You can use [Docker Compose](https://docs.docker.com/compose/) with Linux containers to build Linux binaries and run the test suites. This works on both Windows, Linux and MacOS hosts.
 
-Datadog APM
-- [Datadog APM](https://docs.datadoghq.com/tracing/)
-- [Datadog APM - Tracing .NET Core and .NET 5 Applications](https://docs.datadoghq.com/tracing/setup_overview/setup/dotnet-core)
-- [Datadog APM - Tracing .NET Framework Applications](https://docs.datadoghq.com/tracing/setup_overview/setup/dotnet-framework)
+```bash
+# build C# projects
+docker-compose run build
 
-Microsoft .NET Profiling APIs
-- [Profiling API](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
-- [Metadata API](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/metadata/)
-- [The Book of the Runtime - Profiling](https://github.com/dotnet/coreclr/blob/master/Documentation/botr/profiling.md)
+# build C++ project
+docker-compose run Profiler
 
-OpenTracing
-- [OpenTracing documentation](https://github.com/opentracing/opentracing-csharp)
-- [OpenTracing terminology](https://github.com/opentracing/specification/blob/master/specification.md)
+# run integration tests
+docker-compose run IntegrationTests
+```
 
-## Get in touch
+## Testing environment
 
-If you have questions, feedback, or feature requests, reach our [support](https://docs.datadoghq.com/help).
+The [`dev/docker-compose.yaml`](../dev/docker-compose.yaml) contains configuration for running OTel Collector and Jaeger.
+
+You can run the services using:
+
+```sh
+docker-compose -f dev/docker-compose.yaml up
+```
+
+The following Web UI endpoints are exposed:
+- http://localhost:16686/search - collected traces,
+- http://localhost:8889/metrics - collected metrics,
+- http://localhost:13133 - collector's health.
+
+## Instrumentation Scripts
+
+> *Caution:* Make sure that before usage you have build the tracer.
+
+[`dev/instrument.sh`](../dev/instrument.sh) helps to run a command with .NET instrumentation in your shell (e.g. bash, zsh, git bash) .
+
+Example usage:
+
+```sh
+./dev/instrument.sh dotnet run -f netcoreapp3.1 -p ./samples/ConsoleApp/ConsoleApp.csproj
+```
+
+ [`dev/envvars.sh`](../dev/envvars.sh) can be used to export profiler environmental variables to your current shell session. **It has to be executed from the root of this repository**. Example usage:
+
+ ```sh
+ source ./dev/envvars.sh
+ ./samples/ConsoleApp/bin/Debug/netcoreapp3.1/ConsoleApp
+ ```
