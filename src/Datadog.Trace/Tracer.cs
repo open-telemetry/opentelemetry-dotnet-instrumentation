@@ -775,7 +775,7 @@ namespace Datadog.Trace
         {
             try
             {
-                _agentWriter.FlushAndCloseAsync().Wait();
+                _traceWriter.FlushAndCloseAsync().Wait();
             }
             catch (Exception ex)
             {
