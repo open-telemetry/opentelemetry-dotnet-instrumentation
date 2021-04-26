@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <Version>1.26.1</Version>
+    <AssemblyName>OpenTelemetry.AutoInstrumentation.MSBuild</AssemblyName>
   </PropertyGroup>
 
   <!-- For VS testing purposes only, copy all implementation assemblies to the
