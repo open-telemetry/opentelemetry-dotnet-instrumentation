@@ -1,8 +1,5 @@
 name: Build artifacts
-on:
-  push:
-    branches:
-      - main
+on: [ push ]
 
 jobs:
   alpine_build:
