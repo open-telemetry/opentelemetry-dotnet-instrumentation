@@ -2,17 +2,22 @@
 
   <PropertyGroup>
     <!-- NuGet -->
-    <Version>1.24.0</Version>
+    <Version>1.26.1</Version>
     <Title>OpenTelemetry Instrumentation - OpenTracing</Title>
     <Description>Provides OpenTracing support for OpenTelemetry AutoInstrumentation</Description>
+	  <AssemblyName>OpenTelemetry.AutoInstrumentation.OpenTracing</AssemblyName>
     <PackageTags>$(PackageTags);OpenTracing</PackageTags>
-    <AssemblyName>OpenTelemetry.AutoInstrumentation.OpenTracing</AssemblyName>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Datadog.Trace\Datadog.Trace.csproj" />
 
-    <PackageReference Include="OpenTracing" Version="0.12.0" />
+    <PackageReference Include="OpenTracing" Version="0.12.1" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netcoreapp3.1' ">

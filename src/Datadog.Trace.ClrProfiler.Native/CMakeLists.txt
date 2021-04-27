@@ -1,11 +1,11 @@
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.8..3.19)
 cmake_policy(SET CMP0015 NEW)
 
 # ******************************************************
 # Project definition
 # ******************************************************
 
-project("Datadog.Trace.ClrProfiler.Native" VERSION 1.24.0)
+project("Datadog.Trace.ClrProfiler.Native" VERSION 1.26.1)
 
 # ******************************************************
 # Environment detection

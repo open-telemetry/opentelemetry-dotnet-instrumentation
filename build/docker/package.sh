@@ -2,7 +2,7 @@
 set -euxo pipefail
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-VERSION=1.24.0
+VERSION=1.26.1
 BUILD_TYPE=${buildConfiguration:-Debug}
 
 mkdir -p $DIR/../../deploy/linux
@@ -10,6 +10,15 @@ for target in integrations.json defaults.env LICENSE NOTICE ; do
     cp $DIR/../../$target $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64/
 done
 cp $DIR/../../build/artifacts/createLogPath.sh $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64/
+
+# If running the unified pipeline, copy managed assets now instead of in the profiler build step
+if [ -n "${UNIFIED_PIPELINE-}" ]; then
+  mkdir -p $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64/netstandard2.0
+  cp $DIR/../../src/bin/windows-tracer-home/netstandard2.0/*.dll $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64/netstandard2.0/
+
+  mkdir -p $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64/netcoreapp3.1
+  cp $DIR/../../src/bin/windows-tracer-home/netcoreapp3.1/*.dll $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64/netcoreapp3.1/
+fi
 
 cd $DIR/../../deploy/linux
 for pkgtype in $PKGTYPES ; do
