@@ -32,7 +32,7 @@ namespace Datadog.Trace.Propagation
         /// <param name="propagatorId">Propagator id.</param>
         /// <param name="traceIdConvention">Trace id convention.</param>
         /// <returns>Context propagator.</returns>
-        public virtual IPropagator GetPropagator(string propagatorId, ITraceIdConvention traceIdConvention)
+        public IPropagator GetPropagator(string propagatorId, ITraceIdConvention traceIdConvention)
         {
             if (PropagatorSelector.TryGetValue(propagatorId, out Func<ITraceIdConvention, IPropagator> getter))
             {

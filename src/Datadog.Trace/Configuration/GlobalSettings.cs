@@ -131,7 +131,7 @@ namespace Datadog.Trace.Configuration
             return configurationSource;
         }
 
-        internal static bool TryLoadPluginJsonConfigurationFile(IConfigurationSource configurationSource, out JsonConfigurationSource jsonConfigurationSource)
+        private static bool TryLoadPluginJsonConfigurationFile(IConfigurationSource configurationSource, out JsonConfigurationSource jsonConfigurationSource)
         {
             var configurationFileName = configurationSource.GetString(ConfigurationKeys.PluginConfigurationFileName) ??
                                         Path.Combine(GetCurrentDirectory(), "plugins.json");

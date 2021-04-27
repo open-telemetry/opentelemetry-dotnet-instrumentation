@@ -3,7 +3,7 @@ using Datadog.Trace.Propagation;
 namespace Datadog.Trace.Plugins
 {
     /// <summary>
-    /// Provides extendibility points for tracer
+    /// Provides extendibility points for tracer.
     /// </summary>
     public interface IOTelPlugin
     {

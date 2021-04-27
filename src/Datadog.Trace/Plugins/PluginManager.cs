@@ -71,7 +71,9 @@ namespace Datadog.Trace.Plugins
                             Log.Warning("Could not load {0} from '{1}'.", nameof(IOTelPlugin), pluginAssembly.FullName);
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (
+                        ExceptionUtil.IsAssemblyLoadException(ex) ||
+                        ExceptionUtil.IsDynamicInvocationException(ex))
                     {
                         Log.Warning(ex, "Plugin assembly could not be loaded.");
                         Log.Information("Skipping vendor plugin load.");
