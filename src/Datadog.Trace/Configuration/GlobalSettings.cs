@@ -133,7 +133,7 @@ namespace Datadog.Trace.Configuration
 
         private static bool TryLoadPluginJsonConfigurationFile(IConfigurationSource configurationSource, out JsonConfigurationSource jsonConfigurationSource)
         {
-            var configurationFileName = configurationSource.GetString(ConfigurationKeys.PluginConfigurationFileName) ??
+            var configurationFileName = configurationSource?.GetString(ConfigurationKeys.PluginConfigurationFileName) ??
                                         Path.Combine(GetCurrentDirectory(), "plugins.json");
 
             return TryLoadJsonConfigurationFile(configurationFileName, out jsonConfigurationSource);
