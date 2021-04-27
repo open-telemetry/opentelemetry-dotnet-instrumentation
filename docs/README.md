@@ -4,6 +4,10 @@
 
 This project provides a .NET tracer that leverages the .NET profiling APIs to support .NET instrumentation and auto-instrumentation without requiring code changes to an application.
 
+## Usage
+
+See [USAGE.md](USAGE.md) for installation, usage and configuration instructions.
+
 ## Status
 
 This project is in the early stages of development starting with an initial seeding of code from the [.NET Tracer for Datadog APM](https://github.com/DataDog/dd-trace-dotnet). Our current goal is to take the seeded tracer and update it to both listen to and generate OpenTelemetry tracing data.
