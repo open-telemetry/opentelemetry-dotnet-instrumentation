@@ -1,5 +1,5 @@
 name: Build artifacts
-on: [ push ]
+on: [ push, pull_request ]
 
 jobs:
   alpine_build:
