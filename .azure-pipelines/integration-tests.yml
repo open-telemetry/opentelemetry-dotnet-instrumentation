@@ -115,7 +115,7 @@ jobs:
       dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) -e publishTargetFramework=$(publishTargetFramework) IntegrationTests
 
   - publish: build_data
-    artifact: $(Agent.JobName)_profiler-logs
+    artifact: $(Agent.JobName)_profiler-logs-$(System.JobAttempt)
     condition: succeededOrFailed()
 
   - task: PublishTestResults@2
@@ -237,7 +237,7 @@ jobs:
       dockerComposeCommand: run -e TestAllPackageVersions=true -e buildConfiguration=$(buildConfiguration) IntegrationTests.Alpine.Core50
 
   - publish: build_data
-    artifact: $(Agent.JobName)_profiler-logs
+    artifact: $(Agent.JobName)_profiler-logs-$(System.JobAttempt)
     condition: succeededOrFailed()
 
   - task: PublishTestResults@2
@@ -459,7 +459,7 @@ jobs:
     inputs:
       solution: test/test-applications/aspnet/samples-iis.sln
       configuration: '$(buildConfiguration)'
-      msbuildArguments: '/p:DeployOnBuild=true /p:PublishProfile=FolderProfile.pubxml'
+      msbuildArguments: '/p:DeployOnBuild=true /p:PublishProfile=$(System.DefaultWorkingDirectory)/test/test-applications/aspnet/PublishProfiles/FolderProfile.pubxml'
       maximumCpuCount: true
 
   - task: DockerCompose@0
