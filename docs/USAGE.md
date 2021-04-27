@@ -126,8 +126,8 @@ for finer control of which processes will be instrumented, which are set in the 
 command session.
 
 1. Install the CLR Profiler using an installer file (`.msi` file) from the latest release.
-Choose the installer (x64 or x86) according to the architecture of the application
-you're instrumenting.
+Choose the installer (x64 or x86) according to the architecture of the operating
+system where it will be running.
 2. Configure the required environment variables to enable the CLR Profiler:
     - For .NET Framework applications:
     ```batch
