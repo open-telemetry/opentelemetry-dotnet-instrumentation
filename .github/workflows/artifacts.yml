@@ -58,3 +58,18 @@ jobs:
         with:
           name: artifacts
           path: src/WindowsInstaller/bin/Release/*/en-us
+
+  macos_build:
+    name: MacOS Build
+    runs-on: macos-10.15
+    steps:
+      - uses: actions/checkout@v2
+      - run: brew install make
+      - run: ./build/build_mac.sh
+        env:
+          buildConfiguration: Release
+      - run: tar --create --verbose --file=otel-dotnet-autoinstrumentation-macos.tar deploy/macos
+      - uses: actions/upload-artifact@v2
+        with:
+          name: artifacts
+          path: otel-dotnet-autoinstrumentation-macos.tar
