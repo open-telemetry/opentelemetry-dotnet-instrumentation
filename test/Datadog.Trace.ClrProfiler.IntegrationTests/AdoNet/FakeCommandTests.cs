@@ -70,7 +70,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
             const string dbType = "fake";
             const string expectedOperationName = dbType + ".query";
 
-            SetEnvironmentVariable(ConfigurationKeys.AdoNetExcludedTypes, "Samples.FakeDbCommand.FakeCommand;System.Data.Common.DbCommand;System.Data.SqlClient.SqlCommand;Microsoft.Data.SqlClient.SqlCommand;MySql.Data.MySqlClient.MySqlCommand;Npgsql.NpgsqlCommand");
+            SetEnvironmentVariable(ConfigurationKeys.AdoNetExcludedTypes, "Samples.FakeDbCommand.FakeCommand,System.Data.Common.DbCommand,System.Data.SqlClient.SqlCommand,Microsoft.Data.SqlClient.SqlCommand,MySql.Data.MySqlClient.MySqlCommand,Npgsql.NpgsqlCommand");
 
             int agentPort = TcpPortProvider.GetOpenPort();
 

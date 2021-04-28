@@ -1,4 +1,4 @@
-﻿#if !NET452
+#if !NET452
 using System.Collections.Generic;
 using System.Linq;
 using Datadog.Core.Tools;
@@ -73,7 +73,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
             const string dbType = "sql-server";
             const string expectedOperationName = dbType + ".query";
 
-            SetEnvironmentVariable(ConfigurationKeys.AdoNetExcludedTypes, "System.Data.SQLite.SQLiteCommand;Microsoft.Data.Sqlite.SqliteCommand");
+            SetEnvironmentVariable(ConfigurationKeys.AdoNetExcludedTypes, "System.Data.SQLite.SQLiteCommand,Microsoft.Data.Sqlite.SqliteCommand");
 
             int agentPort = TcpPortProvider.GetOpenPort();
 
