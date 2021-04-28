@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <!-- NuGet -->
-    <Version>1.26.1</Version>
+    <Version>0.0.1</Version>
     <Title>OpenTelemetry AutoInstrumentation</Title>
     <Description>OpenTelemetry autoinstrumentation library</Description>
     <AssemblyName>OpenTelemetry.AutoInstrumentation</AssemblyName>

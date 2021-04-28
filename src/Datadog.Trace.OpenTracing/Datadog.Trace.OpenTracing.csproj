@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <!-- NuGet -->
-    <Version>1.26.1</Version>
+    <Version>0.0.1</Version>
     <Title>OpenTelemetry Instrumentation - OpenTracing</Title>
     <Description>Provides OpenTracing support for OpenTelemetry AutoInstrumentation</Description>
 	  <AssemblyName>OpenTelemetry.AutoInstrumentation.OpenTracing</AssemblyName>

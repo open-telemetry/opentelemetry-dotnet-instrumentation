@@ -5,7 +5,7 @@
     <AssemblyName>OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Core</AssemblyName>
 
     <!-- NuGet -->
-    <Version>1.26.1</Version>
+    <Version>0.0.1</Version>
     <IsPackable>false</IsPackable>
 
     <!-- Allow the GenerateAssemblyInfo task in the .NET SDK to generate all
