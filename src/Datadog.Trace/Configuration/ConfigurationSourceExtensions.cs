@@ -6,7 +6,7 @@ namespace Datadog.Trace.Configuration
 {
     internal static class ConfigurationSourceExtensions
     {
-        private const char Separator = ';';
+        private const char Separator = ',';
 
         public static IEnumerable<string> GetStrings(this IConfigurationSource source, string key)
         {
