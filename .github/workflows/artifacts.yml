@@ -1,0 +1,75 @@
+name: Build artifacts
+on: [ push, pull_request ]
+
+jobs:
+  alpine_build:
+    name: Alpine Build
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - run: docker-compose run build
+      env:
+        buildConfiguration: Release
+    - run: docker-compose run Profiler.Alpine
+      env:
+        buildConfiguration: Release
+    - run: docker-compose run package.alpine
+      env:
+        buildConfiguration: Release
+    - uses: actions/upload-artifact@v2
+      with:
+        name: artifacts
+        path: deploy/linux
+
+  linux_build:
+    name: Linux Build
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - run: docker-compose run build
+      env:
+        buildConfiguration: Release
+    - run: docker-compose run Profiler
+      env:
+        buildConfiguration: Release
+    - run: docker-compose run package
+      env:
+        buildConfiguration: Release
+    - uses: actions/upload-artifact@v2
+      with:
+        name: artifacts
+        path: deploy/linux
+
+  windows_build:
+    name: Windows Build
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v2
+      - uses: microsoft/setup-msbuild@v1.0.2
+      - run: dotnet --list-sdks
+        shell: cmd
+      - run: choco install wixtoolset
+        shell: cmd
+      - run: .\build\build.cmd
+        env:
+          buildConfiguration: Release
+        shell: cmd
+      - uses: actions/upload-artifact@v2
+        with:
+          name: artifacts
+          path: src/WindowsInstaller/bin/Release/*/en-us
+
+  macos_build:
+    name: MacOS Build
+    runs-on: macos-10.15
+    steps:
+      - uses: actions/checkout@v2
+      - run: brew install make
+      - run: ./build/build_mac.sh
+        env:
+          buildConfiguration: Release
+      - run: tar --create --verbose --file=otel-dotnet-autoinstrumentation-macos.tar deploy/macos
+      - uses: actions/upload-artifact@v2
+        with:
+          name: artifacts
+          path: otel-dotnet-autoinstrumentation-macos.tar
