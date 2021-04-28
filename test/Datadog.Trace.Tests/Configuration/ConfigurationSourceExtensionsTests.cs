@@ -38,7 +38,7 @@ namespace Datadog.Trace.Tests.Configuration
         {
             yield return new object[] { new NameValueCollection { { "example1", "value1" } }, "example2", ArrayHelper.Empty<TestEnum>() };
             yield return new object[] { new NameValueCollection { { "example1", "value1" } }, "example1", ArrayHelper.Empty<TestEnum>() };
-            yield return new object[] { new NameValueCollection { { "example1", "TestValue2;TestValue3;;" } }, "example1", new[] { TestEnum.TestValue2, TestEnum.TestValue3 } };
+            yield return new object[] { new NameValueCollection { { "example1", "TestValue2,TestValue3,," } }, "example1", new[] { TestEnum.TestValue2, TestEnum.TestValue3 } };
         }
 
         [Fact]
@@ -68,7 +68,7 @@ namespace Datadog.Trace.Tests.Configuration
         {
             var collection = new NameValueCollection
             {
-                { "example1", "value1;value2;;" }
+                { "example1", "value1,value2,," }
             };
             var cs = new NameValueConfigurationSource(collection);
             var result = ConfigurationSourceExtensions.GetStrings(cs, "example1");
