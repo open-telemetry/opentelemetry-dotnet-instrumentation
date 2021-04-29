@@ -1,4 +1,3 @@
-WindowsInstaller.wixproj
 REM SET SOLUTION_DIR=C:\Github\otel-trace-dotnet
 
 SET TOOL_BUILD_CONFIG=Release
