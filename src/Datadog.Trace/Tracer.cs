@@ -121,13 +121,7 @@ namespace Datadog.Trace
             _scopeManager = scopeManager ?? new AsyncLocalScopeManager();
             Sampler = sampler ?? new RuleBasedSampler(new RateLimiter(Settings.MaxTracesSubmittedPerSecond));
 
-            var propagators = new CompositePropagatorsProvider()
-               .RegisterProvider(new OTelPropagatorsProvider())
-               .RegisterProviderFromPlugins(PluginManager.Loaded)
-               .GetPropagators(Settings.Propagators, TraceIdConvention)
-               .ToList();
-
-            _propagator = new CompositeTextMapPropagator(propagators);
+            _propagator = CreateCompositePropagator(Settings, TraceIdConvention);
 
             if (!string.IsNullOrWhiteSpace(Settings.CustomSamplingRules))
             {
@@ -750,6 +744,17 @@ namespace Datadog.Trace
                 default:
                     return new AgentWriter(new Api(settings.AgentUri, TransportStrategy.Get(settings), statsd), metrics, maxBufferSize: settings.TraceBufferSize);
             }
+        }
+
+        private static CompositeTextMapPropagator CreateCompositePropagator(TracerSettings settings, ITraceIdConvention traceIdConvention)
+        {
+            var propagators = new CompositePropagatorsProvider()
+               .RegisterProvider(new OTelPropagatorsProvider())
+               .RegisterProviderFromPlugins(PluginManager.Loaded)
+               .GetPropagators(settings.Propagators, traceIdConvention)
+               .ToList();
+
+            return new CompositeTextMapPropagator(propagators);
         }
 
         private void InitializeLibLogScopeEventSubscriber(IScopeManager scopeManager, string defaultServiceName, string version, string env)

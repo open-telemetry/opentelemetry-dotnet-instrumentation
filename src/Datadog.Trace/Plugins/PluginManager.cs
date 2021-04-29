@@ -92,11 +92,19 @@ namespace Datadog.Trace.Plugins
         {
             var pluginType = typeof(IOTelPlugin);
 
-            var pluginInstance = assembly
+            var pluginTypes = assembly
                 .GetTypes()
                 .Where(p => pluginType.IsAssignableFrom(p))
+                .ToList();
+
+            var pluginInstance = pluginTypes
                 .Select(p => (IOTelPlugin)Activator.CreateInstance(p))
                 .FirstOrDefault();
+
+            if (pluginTypes.Count > 1)
+            {
+                Log.Warning("Detected {0} plugins in the assembly '{1}'. Loading only the first type '{2}'.", pluginTypes.Count, assembly.FullName, pluginInstance.GetType().FullName);
+            }
 
             return pluginInstance;
         }

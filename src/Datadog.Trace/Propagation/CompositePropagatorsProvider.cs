@@ -2,12 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Datadog.Trace.Conventions;
+using Datadog.Trace.Logging;
 using Datadog.Trace.Plugins;
 
 namespace Datadog.Trace.Propagation
 {
-    internal class CompositePropagatorsProvider : IPropagatorsProvider
+    internal class CompositePropagatorsProvider
     {
+        private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor<CompositePropagatorsProvider>();
+
         private readonly ICollection<IPropagatorsProvider> _providers;
 
         public CompositePropagatorsProvider()
@@ -37,12 +40,7 @@ namespace Datadog.Trace.Propagation
             return propagatorIds.Select(type => GetPropagator(type, traceIdConvention)).ToList();
         }
 
-        public bool CanProvide(string propagatorId, ITraceIdConvention traceIdConvention)
-        {
-            return _providers.Any(p => p.CanProvide(propagatorId, traceIdConvention));
-        }
-
-        public IPropagator GetPropagator(string propagatorId, ITraceIdConvention traceIdConvention)
+        private IPropagator GetPropagator(string propagatorId, ITraceIdConvention traceIdConvention)
         {
             var propagator = _providers
                 .Where(x => x.CanProvide(propagatorId, traceIdConvention))
@@ -51,7 +49,11 @@ namespace Datadog.Trace.Propagation
 
             if (propagator == null)
             {
-                throw new InvalidOperationException($"There is no propagator registered for type '{propagatorId}'.");
+                string msg = $"There is no propagator registered for type '{propagatorId}'.";
+
+                Log.Error(msg);
+
+                throw new InvalidOperationException(msg);
             }
 
             return propagator;
