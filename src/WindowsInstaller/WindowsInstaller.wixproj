@@ -17,7 +17,7 @@
     <IntermediateOutputPath>obj\$(Configuration)\$(Platform)\</IntermediateOutputPath>
     <SuppressPdbOutput>True</SuppressPdbOutput>
     <DefineSolutionProperties>false</DefineSolutionProperties>
-    <OutputName>opentelemetry-dotnet-autoinstrumentation-1.26.1-$(Platform)</OutputName>
+    <OutputName>opentelemetry-dotnet-autoinstrumentation-0.0.1-$(Platform)</OutputName>
     <TracerHomeDirectory Condition="'$(TracerHomeDirectory)' == ''">$(MSBuildThisFileDirectory)..\bin\windows-tracer-home</TracerHomeDirectory>
     <DefineConstants>InstallerVersion=0.0.1;TracerHomeDirectory=$(TracerHomeDirectory)</DefineConstants>
   </PropertyGroup>

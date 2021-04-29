@@ -179,8 +179,8 @@ namespace PrepareRelease
         {
             text = Regex.Replace(
                 text,
-                $"<OutputName>datadog-dotnet-apm-{VersionPattern(withPrereleasePostfix: true)}-\\$\\(Platform\\)</OutputName>",
-                $"<OutputName>datadog-dotnet-apm-{VersionString(withPrereleasePostfix: true)}-$(Platform)</OutputName>",
+                $"<OutputName>opentelemetry-dotnet-autoinstrumentation-{VersionPattern(withPrereleasePostfix: true)}-\\$\\(Platform\\)</OutputName>",
+                $"<OutputName>opentelemetry-dotnet-autoinstrumentation-{VersionString(withPrereleasePostfix: true)}-$(Platform)</OutputName>",
                 RegexOptions.Singleline);
 
             text = Regex.Replace(

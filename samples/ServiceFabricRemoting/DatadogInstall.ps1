@@ -1,6 +1,6 @@
 # allow overriding defaults using environment variables
 if (Test-Path env:SvcFabDir) { $SvcFabDir = $env:SvcFabDir } else { $SvcFabDir = 'D:\SvcFab' }
-if (Test-Path env:OTEL_TRACER_VERSION) { $OTEL_TRACER_VERSION = $env:OTEL_TRACER_VERSION } else { $OTEL_TRACER_VERSION = '1.24.0' }
+if (Test-Path env:OTEL_TRACER_VERSION) { $OTEL_TRACER_VERSION = $env:OTEL_TRACER_VERSION } else { $OTEL_TRACER_VERSION = '0.0.1' }
 if (Test-Path env:OTEL_TRACER_URL) { $OTEL_TRACER_URL = $env:OTEL_TRACER_URL } else { $OTEL_TRACER_URL = "https://github.com/DataDog/dd-trace-dotnet/releases/download/v$OTEL_TRACER_VERSION/windows-tracer-home.zip" }
 if (Test-Path env:OTEL_DOTNET_TRACER_HOME) { $OTEL_DOTNET_TRACER_HOME = $env:OTEL_DOTNET_TRACER_HOME } else { $OTEL_DOTNET_TRACER_HOME = "$SvcFabDir\datadog-dotnet-tracer\v$OTEL_TRACER_VERSION" }
 
