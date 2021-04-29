@@ -14,8 +14,8 @@ const WSTRING tracing_enabled = WStr("OTEL_TRACE_ENABLED");
 const WSTRING debug_enabled = WStr("OTEL_TRACE_DEBUG");
 
 // Sets the paths to integration definition JSON files.
-// Supports multiple values separated with semi-colons, for example:
-// "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\integrations.json;D:\temp\test_integrations.json"
+// Supports multiple values separated with comma, for example:
+// "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\integrations.json,D:\temp\test_integrations.json"
 const WSTRING integrations_path = WStr("OTEL_INTEGRATIONS");
 
 // Sets the path to the profiler's home directory, for example:
@@ -24,14 +24,14 @@ const WSTRING profiler_home_path = WStr("OTEL_DOTNET_TRACER_HOME");
 
 // Sets the filename of executables the profiler can attach to.
 // If not defined (default), the profiler will attach to any process.
-// Supports multiple values separated with semi-colons, for example:
-// "MyApp.exe;dotnet.exe"
+// Supports multiple values separated with comma, for example:
+// "MyApp.exe,dotnet.exe"
 const WSTRING include_process_names = WStr("OTEL_PROFILER_PROCESSES");
 
 // Sets the filename of executables the profiler cannot attach to.
 // If not defined (default), the profiler will attach to any process.
-// Supports multiple values separated with semi-colons, for example:
-// "MyApp.exe;dotnet.exe"
+// Supports multiple values separated with comma, for example:
+// "MyApp.exe,dotnet.exe"
 const WSTRING exclude_process_names = WStr("OTEL_PROFILER_EXCLUDE_PROCESSES");
 
 // Sets the Agent's host. Default is localhost.
@@ -53,8 +53,8 @@ const WSTRING service_version = WStr("OTEL_VERSION");
 
 // Sets a list of integrations to disable. All other integrations will remain
 // enabled. If not set (default), all integrations are enabled. Supports
-// multiple values separated with semi-colons, for example:
-// "ElasticsearchNet;AspNetWebApi2"
+// multiple values separated with comma, for example:
+// "ElasticsearchNet,AspNetWebApi2"
 const WSTRING disabled_integrations = WStr("OTEL_DISABLED_INTEGRATIONS");
 
 // Sets the path for the profiler's log file.

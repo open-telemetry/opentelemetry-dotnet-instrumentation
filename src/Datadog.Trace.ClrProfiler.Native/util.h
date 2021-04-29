@@ -32,7 +32,7 @@ WSTRING GetEnvironmentValue(const WSTRING &name);
 std::vector<WSTRING> GetEnvironmentValues(const WSTRING &name,
                                           const wchar_t delim);
 
-// GetEnvironmentValues calls GetEnvironmentValues with a semicolon delimiter.
+// GetEnvironmentValues calls GetEnvironmentValues with a comma delimiter.
 std::vector<WSTRING> GetEnvironmentValues(const WSTRING &name);
 
 // Convert Hex to string

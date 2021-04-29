@@ -79,7 +79,7 @@ std::vector<WSTRING> GetEnvironmentValues(const WSTRING &name,
 }
 
 std::vector<WSTRING> GetEnvironmentValues(const WSTRING &name) {
-  return GetEnvironmentValues(name, L';');
+  return GetEnvironmentValues(name, L',');
 }
 
 constexpr char HexMap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
