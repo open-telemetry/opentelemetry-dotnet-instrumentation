@@ -75,8 +75,7 @@ namespace Datadog.Trace.Plugins
                         ExceptionUtil.IsAssemblyLoadException(ex) ||
                         ExceptionUtil.IsDynamicInvocationException(ex))
                     {
-                        Log.Warning(ex, "Plugin assembly could not be loaded.");
-                        Log.Information("Skipping vendor plugin load.");
+                        Log.Warning(ex, "Plugin assembly could not be loaded. Skipping vendor plugin load.");
                     }
                 }
                 else
