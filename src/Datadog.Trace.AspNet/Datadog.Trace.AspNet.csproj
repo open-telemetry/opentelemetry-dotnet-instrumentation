@@ -4,7 +4,7 @@
     <TargetFrameworks>net45</TargetFrameworks>
 
     <!-- NuGet -->
-    <Version>1.26.1</Version>
+    <Version>0.0.1</Version>
     <Title>OpenTelemetry AutoInstrumentation for ASP.NET</Title>
     <AssemblyName>OpenTelemetry.AutoInstrumentation.AspNet</AssemblyName>
     <PackageDescription>
