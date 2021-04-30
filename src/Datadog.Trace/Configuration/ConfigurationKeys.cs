@@ -49,7 +49,7 @@ namespace Datadog.Trace.Configuration
         /// <summary>
         /// Configuration key for a list of integrations to disable. All other integrations remain enabled.
         /// Default is empty (all integrations are enabled).
-        /// Supports multiple values separated with semi-colons.
+        /// Supports multiple values separated with comma.
         /// </summary>
         /// <seealso cref="TracerSettings.DisabledIntegrationNames"/>
         public const string DisabledIntegrations = "OTEL_DISABLED_INTEGRATIONS";
@@ -57,7 +57,7 @@ namespace Datadog.Trace.Configuration
         /// <summary>
         /// Configuration key for a list of AdoNet types that will be excluded from automatic instrumentation.
         /// Default is empty (all AdoNet types are included in automatic instrumentation).
-        /// Supports multiple values separated with semi-colons.
+        /// Supports multiple values separated with comma.
         /// </summary>
         /// <seealso cref="TracerSettings.AdoNetExcludedTypes"/>
         public const string AdoNetExcludedTypes = "OTEL_TRACE_ADONET_EXCLUDED_TYPES";
@@ -171,7 +171,7 @@ namespace Datadog.Trace.Configuration
 
         /// <summary>
         /// Configuration key for setting custom sampling rules based on regular expressions.
-        /// Semi-colon separated list of sampling rules.
+        /// Comma separated list of sampling rules.
         /// The rule is matched in order of specification. The first match in a list is used.
         ///
         /// Per entry:
@@ -191,7 +191,7 @@ namespace Datadog.Trace.Configuration
         /// To give a rate of 10% to all traces
         ///   '[{"sample_rate":0.1}]'
         ///
-        /// To configure multiple rules, separate by semi-colon and order from most specific to least specific:
+        /// To configure multiple rules, separate by comma and order from most specific to least specific:
         ///   '[{"sample_rate":0.5, "service":"cart.*"}, {"sample_rate":0.2, "name":"http.request"}, {"sample_rate":1.0, "service":"background", "name":"sql.query"}, {"sample_rate":0.1}]'
         ///
         /// If no rules are specified, or none match, default internal sampling logic will be used.
@@ -296,7 +296,7 @@ namespace Datadog.Trace.Configuration
         /// <summary>
         /// Configuration key for the propagators to be used.
         /// Default is <c>Datadog</c>.
-        /// Supports multiple values separated with semi-colons.
+        /// Supports multiple values separated with comma.
         /// <seealso cref="TracerSettings.Propagators"/>
         /// </summary>
         public const string Propagators = "OTEL_PROPAGATORS";

@@ -14,7 +14,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
             : base("WebRequest.NetFramework20", output)
         {
             SetServiceVersion("1.0.0");
-            SetEnvironmentVariable("OTEL_PROPAGATORS", "datadog;b3");
+            SetEnvironmentVariable("OTEL_PROPAGATORS", "datadog,b3");
         }
 
         [Theory]

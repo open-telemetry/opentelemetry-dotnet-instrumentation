@@ -26,7 +26,7 @@ Use these environment variables to configure the tracing library:
 | `OTEL_TRACE_BATCH_INTERVAL` | The batch interval in milliseconds for the serialization queue. | `100` |
 | `OTEL_MAX_TRACES_PER_SECOND` | The number of traces allowed to be submitted per second. | `100` |
 | `OTEL_TRACE_STARTUP_LOGS` | Enable to activate diagnostic log at stratup. | `true` |
-| `OTEL_TRACE_SAMPLING_RULES` | Semi-colon separated list of sampling rules taht enabled custom sampling rules based on regular expressions. The rule is matched in order of specification. The first match in a list is used. The item "sample_rate" is required in decimal format. The item "service" is optional in regular expression format, to match on service name. The item "name" is optional in regular expression format, to match on operation name. | `'[{"sample_rate":0.5, "service":"cart.*"}];[{"sample_rate":0.2, "name":"http.request"}]'` |
+| `OTEL_TRACE_SAMPLING_RULES` | Comma separated list of sampling rules taht enabled custom sampling rules based on regular expressions. The rule is matched in order of specification. The first match in a list is used. The item "sample_rate" is required in decimal format. The item "service" is optional in regular expression format, to match on service name. The item "name" is optional in regular expression format, to match on operation name. | `'[{"sample_rate":0.5, "service":"cart.*"}],[{"sample_rate":0.2, "name":"http.request"}]'` |
 | `OTEL_TRACE_SAMPLE_RATE` | The global rate for the sampler. |  |
 | `OTEL_DOGSTATSD_PORT` | The port of the targeted StatsD server. | `8125` |
 | `OTEL_TRACE_METRICS_ENABLED` | Enable to activate internal metrics sent to DogStatsD. | `false` |
@@ -55,12 +55,12 @@ Use these environment variables to configure the tracing library:
 | `OTEL_MAX_LOGFILE_SIZE` | The maximum size for tracer log files, in bytes. | `10 MB` |
 | `OTEL_TRACE_LOG_PATH` | The path of the profiler log file. | Linux: `/var/log/OTEL/dotnet/dotnet-profiler.log`<br>Windows: `%ProgramData%"\OTEL .NET Tracing\logs\dotnet-profiler.log` |
 | `OTEL_DIAGNOSTIC_SOURCE_ENABLED` | Enable to generate troubleshooting logs with the `System.Diagnostics.DiagnosticSource` class. | `true` |
-| `OTEL_DISABLED_INTEGRATIONS` | The integrations you want to disable, if any, separated by a semi-colon. These are the supported integrations: AspNetMvc, AspNetWebApi2, DbCommand, ElasticsearchNet5, ElasticsearchNet6, GraphQL, HttpMessageHandler, IDbCommand, MongoDb, NpgsqlCommand, OpenTracing, ServiceStackRedis, SqlCommand, StackExchangeRedis, Wcf, WebRequest |  |
+| `OTEL_DISABLED_INTEGRATIONS` | The integrations you want to disable, if any, separated by a comma. These are the supported integrations: AspNetMvc, AspNetWebApi2, DbCommand, ElasticsearchNet5, ElasticsearchNet6, GraphQL, HttpMessageHandler, IDbCommand, MongoDb, NpgsqlCommand, OpenTracing, ServiceStackRedis, SqlCommand, StackExchangeRedis, Wcf, WebRequest |  |
 | `OTEL_CONVENTION` | Sets the semantic and trace id conventions for the tracer. Available values are: `Datadog` (64bit trace id), `OpenTelemetry` (128 bit trace id). |  `Datadog` |
-| `OTEL_PROPAGATORS` | Semicolon separated list of the propagators for the tracer. Available propagators are: `Datadog`, `B3`, `W3C`. The Tracer will try to execute extraction in the given order. | `Datadog` |
+| `OTEL_PROPAGATORS` | Comma separated list of the propagators for the tracer. Available propagators are: `Datadog`, `B3`, `W3C`. The Tracer will try to execute extraction in the given order. | `Datadog` |
 | `OTEL_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION` |  Sets whether to intercept method calls when the caller method is inside a domain-neutral assembly. This is recommended when instrumenting IIS applications. | `false` |
-| `OTEL_PROFILER_PROCESSES` | Sets the filename of executables the profiler can attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with semi-colons, for example: `MyApp.exe;dotnet.exe` |  |
-| `OTEL_PROFILER_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with semi-colons, for example: `MyApp.exe;dotnet.exe` |  |
+| `OTEL_PROFILER_PROCESSES` | Sets the filename of executables the profiler can attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
+| `OTEL_PROFILER_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
 
 
 ### Linux

@@ -12,7 +12,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
             : base("WebRequest", output)
         {
             SetEnvironmentVariable("OTEL_TRACE_SERVICE_MAPPING", "some-trace:not-used,http-client:my-custom-client");
-            SetEnvironmentVariable("OTEL_PROPAGATORS", "datadog;b3");
+            SetEnvironmentVariable("OTEL_PROPAGATORS", "datadog,b3");
             SetServiceVersion("1.0.0");
         }
 

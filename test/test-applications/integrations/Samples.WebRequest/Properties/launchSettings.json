@@ -13,7 +13,7 @@
   
           "OTEL_DOTNET_TRACER_HOME": "$(ProjectDir)$(OutputPath)profiler-lib",
           "OTEL_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json",
-          "OTEL_PROPAGATORS": "datadog;b3"
+          "OTEL_PROPAGATORS": "datadog,b3"
         },
         "nativeDebugging": true
       }
