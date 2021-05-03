@@ -61,10 +61,10 @@ namespace Datadog.Trace.ClrProfiler
             try
             {
                 // Creates GlobalSettings instance and loads plugins
-                PluginManager.TryLoadPlugins(GlobalSettings.Source.PluginsConfiguration);
+                var plugins = PluginManager.TryLoadPlugins(GlobalSettings.Source.PluginsConfiguration);
 
                 // First call to create Tracer instace
-                _ = Tracer.Instance;
+                Tracer.Instance = new Tracer(plugins);
             }
             catch
             {

@@ -16,11 +16,11 @@ namespace Datadog.Trace.Plugins
 
         public static IReadOnlyCollection<IOTelPlugin> Loaded { get; private set; } = ArrayHelper.Empty<IOTelPlugin>();
 
-        internal static void TryLoadPlugins(JsonConfigurationSource pluginsConfig)
+        internal static IReadOnlyCollection<IOTelPlugin> TryLoadPlugins(JsonConfigurationSource pluginsConfig)
         {
             if (pluginsConfig == null)
             {
-                return;
+                return Loaded;
             }
 
             var runtimeName = GetPluginsRuntimeName();
@@ -35,14 +35,14 @@ namespace Datadog.Trace.Plugins
             {
                 Log.Information("Skipping plugins load. Could not find any plugins for '{0}' runtime.", runtimeName);
 
-                return;
+                return Loaded;
             }
 
             var loadedPlugins = TryLoadPlugins(pluginFiles);
 
             Log.Information("Successfully loaded '{0}' plugin(s).", property: loadedPlugins.Count);
 
-            Loaded = loadedPlugins;
+            return Loaded = loadedPlugins;
         }
 
         private static IReadOnlyCollection<IOTelPlugin> TryLoadPlugins(string[] pluginFiles)

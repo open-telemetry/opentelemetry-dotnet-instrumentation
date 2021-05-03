@@ -68,7 +68,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             var settings = new TracerSettings();
             var writerMock = new Mock<ITraceWriter>();
             var samplerMock = new Mock<ISampler>();
-            var tracer = new Tracer(settings, writerMock.Object, samplerMock.Object, scopeManager: null, statsd: null);
+            var tracer = new Tracer(settings, plugins: null, writerMock.Object, samplerMock.Object, scopeManager: null, statsd: null);
 
             using (var automaticScope = ScopeFactory.CreateOutboundHttpScope(tracer, method, new Uri(uri), new IntegrationInfo((int)IntegrationIds.HttpMessageHandler), out _))
             {
@@ -93,7 +93,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             var settings = new TracerSettings();
             var writerMock = new Mock<ITraceWriter>();
             var samplerMock = new Mock<ISampler>();
-            var tracer = new Tracer(settings, writerMock.Object, samplerMock.Object, scopeManager: null, statsd: null);
+            var tracer = new Tracer(settings, plugins: null, writerMock.Object, samplerMock.Object, scopeManager: null, statsd: null);
 
             const string method = "GET";
 
@@ -113,7 +113,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             var settings = new TracerSettings();
             var writerMock = new Mock<ITraceWriter>();
             var samplerMock = new Mock<ISampler>();
-            var tracer = new Tracer(settings, writerMock.Object, samplerMock.Object, scopeManager: null, statsd: null);
+            var tracer = new Tracer(settings, plugins: null, writerMock.Object, samplerMock.Object, scopeManager: null, statsd: null);
 
             const string method = "GET";
             const string url = "http://www.contoso.com";

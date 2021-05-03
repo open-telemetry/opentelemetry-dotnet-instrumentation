@@ -24,7 +24,7 @@ namespace Datadog.Trace.IntegrationTests
             var api = new Api(endpoint, apiRequestFactory: null, statsd: null);
             var agentWriter = new AgentWriter(api, new NullMetrics());
 
-            _tracer = new Tracer(settings, agentWriter, sampler: null, scopeManager: null, statsd: null);
+            _tracer = new Tracer(settings, plugins: null, agentWriter, sampler: null, scopeManager: null, statsd: null);
         }
 
         [Fact(Skip = "Run manually")]

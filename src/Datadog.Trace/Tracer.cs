@@ -69,7 +69,17 @@ namespace Datadog.Trace
         /// Initializes a new instance of the <see cref="Tracer"/> class with default settings.
         /// </summary>
         public Tracer()
-            : this(settings: null, traceWriter: null, sampler: null, scopeManager: null, statsd: null)
+            : this(settings: null, plugins: null, traceWriter: null, sampler: null, scopeManager: null, statsd: null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Tracer"/> class and extends
+        /// implementation with plugins
+        /// </summary>
+        /// <param name="plugins">Plugins to extend with</param>
+        public Tracer(IReadOnlyCollection<IOTelPlugin> plugins)
+            : this(settings: null, plugins: plugins, traceWriter: null, sampler: null, scopeManager: null, statsd: null)
         {
         }
 
@@ -82,11 +92,11 @@ namespace Datadog.Trace
         /// or null to use the default configuration sources.
         /// </param>
         public Tracer(TracerSettings settings)
-            : this(settings, traceWriter: null, sampler: null, scopeManager: null, statsd: null)
+            : this(settings, plugins: null, traceWriter: null, sampler: null, scopeManager: null, statsd: null)
         {
         }
 
-        internal Tracer(TracerSettings settings, ITraceWriter traceWriter, ISampler sampler, IScopeManager scopeManager, IDogStatsd statsd)
+        internal Tracer(TracerSettings settings, IReadOnlyCollection<IOTelPlugin> plugins, ITraceWriter traceWriter, ISampler sampler, IScopeManager scopeManager, IDogStatsd statsd)
         {
             // update the count of Tracer instances
             Interlocked.Increment(ref _liveTracerCount);
@@ -121,7 +131,7 @@ namespace Datadog.Trace
             _scopeManager = scopeManager ?? new AsyncLocalScopeManager();
             Sampler = sampler ?? new RuleBasedSampler(new RateLimiter(Settings.MaxTracesSubmittedPerSecond));
 
-            _propagator = CreateCompositePropagator(Settings, TraceIdConvention);
+            _propagator = CreateCompositePropagator(Settings, TraceIdConvention, plugins);
 
             if (!string.IsNullOrWhiteSpace(Settings.CustomSamplingRules))
             {
@@ -746,11 +756,11 @@ namespace Datadog.Trace
             }
         }
 
-        private static CompositeTextMapPropagator CreateCompositePropagator(TracerSettings settings, ITraceIdConvention traceIdConvention)
+        private static CompositeTextMapPropagator CreateCompositePropagator(TracerSettings settings, ITraceIdConvention traceIdConvention, IReadOnlyCollection<IOTelPlugin> plugins)
         {
             var propagators = new CompositePropagatorsProvider()
                .RegisterProvider(new OTelPropagatorsProvider())
-               .RegisterProviderFromPlugins(PluginManager.Loaded)
+               .RegisterProviderFromPlugins(plugins ?? ArrayHelper.Empty<IOTelPlugin>())
                .GetPropagators(settings.Propagators, traceIdConvention)
                .ToList();
 

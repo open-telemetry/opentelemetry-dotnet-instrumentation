@@ -1,10 +1,6 @@
 using System;
 using System.Reflection;
-using Datadog.Trace.Agent;
 using Datadog.Trace.Configuration;
-using Datadog.Trace.Sampling;
-using Datadog.Trace.TestHelpers;
-using Moq;
 using Xunit;
 using Xunit.Sdk;
 
