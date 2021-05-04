@@ -10,30 +10,28 @@ namespace Datadog.Trace.Util
     {
         public static bool IsAssemblyLoadException(Exception ex)
         {
-            return
-                ex is ArgumentNullException ||
-                ex is FileNotFoundException ||
-                ex is FileLoadException ||
-                ex is BadImageFormatException ||
-                ex is SecurityException ||
-                ex is ArgumentException ||
-                ex is PathTooLongException;
+            return ex is ArgumentNullException
+                or FileNotFoundException
+                or FileLoadException
+                or BadImageFormatException
+                or SecurityException
+                or ArgumentException
+                or PathTooLongException;
         }
 
         public static bool IsDynamicInvocationException(Exception ex)
         {
-            return
-                ex is ReflectionTypeLoadException ||
-                ex is ArgumentNullException ||
-                ex is ArgumentException ||
-                ex is NotSupportedException ||
-                ex is TargetInvocationException ||
-                ex is MethodAccessException ||
-                ex is MemberAccessException ||
-                ex is InvalidComObjectException ||
-                ex is MissingMethodException ||
-                ex is COMException ||
-                ex is TypeLoadException;
+            return ex is ReflectionTypeLoadException
+                or ArgumentNullException
+                or ArgumentException
+                or NotSupportedException
+                or TargetInvocationException
+                or MethodAccessException
+                or MemberAccessException
+                or InvalidComObjectException
+                or MissingMethodException
+                or COMException
+                or TypeLoadException;
         }
     }
 }

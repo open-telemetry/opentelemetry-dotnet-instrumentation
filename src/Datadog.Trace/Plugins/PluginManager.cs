@@ -27,7 +27,7 @@ namespace Datadog.Trace.Plugins
             Log.Information("Trying to load plugins for '{0}' runtime.", runtimeName);
 
             // TODO: Detect if objects instead of path
-            var pluginFiles = pluginsConfig?.GetValue<JToken>($"['{runtimeName}']").ToObject<string[]>();
+            var pluginFiles = pluginsConfig.GetValue<JToken>($"['{runtimeName}']").ToObject<string[]>();
 
             if (pluginFiles == null || !pluginFiles.Any())
             {
