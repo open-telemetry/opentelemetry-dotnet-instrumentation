@@ -10,7 +10,7 @@ Use these environment variables to configure the tracing library:
 
 | Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_TRACE_CONFIG_FILE` | The path to the configuration file. | `%CurrenctDIR%/datadog.json` |
+| `OTEL_TRACE_CONFIG_FILE` | Loads the json configuration file with configuration values. Overloaded value must be set via Environment variable. | ```{Environment.CurrentDirectory}/datadog.json``` |
 | `OTEL_VERSION` | The application's version that will populate `version` tag on spans. |  |
 | `OTEL_TRACE_ADONET_EXCLUDED_TYPES` | Comma-separated list of AdoNet types that will be excluded from automatic instrumentation. |  |
 | `OTEL_AGENT_HOST` | The host name of the targeted SatsD server. |  |
@@ -62,6 +62,45 @@ Use these environment variables to configure the tracing library:
 | `OTEL_PROFILER_PROCESSES` | Sets the filename of executables the profiler can attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
 | `OTEL_PROFILER_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
 
+## Ways to configure
+
+There are 3 ways to apply configuration values (Priority is from first to last):
+
+1. Environment Variables
+2. Web.config / App.config
+3. Json configuration file
+
+### Environment variables
+
+Environment variables are the main way to configure values. After setting up environment variable, it can't be overridden by lower priority configuration option. 
+
+### Web.config and app.config
+
+When your application is running on .NET Framework (Does not work with .NET Core or later), all unset configuration values can be set via web configuration file (web.config) or application configuration file (app.config).
+
+See example with `OTEL_SERVICE` overload.
+
+```xml
+<configuration>
+  <appSettings>
+    <add key="OTEL_SERVICE" value="my-service-name" />
+  </appSettings>
+</configuration>
+```
+
+### Json configuration file
+
+Json configuration file has the least priority. To use this option, all values that need to be overridden must be unset at first. By default if `OTEL_TRACE_CONFIG_FILE` is unset, the application is searching for `datadog.json` in current working directory (acquired by `Environment.CurrentDirectory`).
+
+See example with `OTEL_SERVICE` overload.
+
+```json
+{
+    "OTEL_SERVICE": "my-service-name"
+}
+```
+
+## Setup
 
 ### Linux
 
