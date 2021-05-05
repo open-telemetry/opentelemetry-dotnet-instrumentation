@@ -1,10 +1,8 @@
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
+using System.Runtime.Versioning;
 using Datadog.Trace.Logging;
-using Microsoft.Win32;
 
 namespace Datadog.Trace
 {
@@ -29,6 +27,15 @@ namespace Datadog.Trace
             Tuple.Create(378389, "4.5"),
         };
 
+        private static readonly IReadOnlyDictionary<string, string> TargetFrameworkMapping = new Dictionary<string, string>()
+        {
+            { ".NETFramework,Version=v4.5", "net45" },
+            { ".NETFramework,Version=v4.6.1", "net461" },
+            { ".NETStandard,Version=v2.0", "netstandard2.0" },
+            { ".NETCoreApp,Version=v3.1", "netcoreapp3.1" },
+            { ".NETCoreApp,Version=v5.0", "net50" }
+        };
+
         private FrameworkDescription(
             string name,
             string productVersion,
@@ -41,6 +48,7 @@ namespace Datadog.Trace
             OSPlatform = osPlatform;
             OSArchitecture = osArchitecture;
             ProcessArchitecture = processArchitecture;
+            TargetFramework = GetTargetFramework();
         }
 
         public string Name { get; }
@@ -53,12 +61,28 @@ namespace Datadog.Trace
 
         public string ProcessArchitecture { get; }
 
+        public string TargetFramework { get; }
+
         public override string ToString()
         {
             // examples:
             // .NET Framework 4.8 x86 on Windows x64
             // .NET Core 3.0.0 x64 on Linux x64
             return $"{Name} {ProductVersion} {ProcessArchitecture} on {OSPlatform} {OSArchitecture}";
+        }
+
+        private static string GetTargetFramework()
+        {
+            var framework = typeof(FrameworkDescription).Assembly
+                .GetCustomAttribute<TargetFrameworkAttribute>()?
+                .FrameworkName;
+
+            if (!TargetFrameworkMapping.TryGetValue(framework, out string targetFramework))
+            {
+                throw new InvalidOperationException($"Target framework mapping is not defined for '{framework}'");
+            }
+
+            return targetFramework;
         }
 
         private static string GetVersionFromAssemblyAttributes()

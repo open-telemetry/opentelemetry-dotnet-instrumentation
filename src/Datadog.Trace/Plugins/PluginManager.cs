@@ -21,17 +21,17 @@ namespace Datadog.Trace.Plugins
                 return ArrayHelper.Empty<IOTelExtension>();
             }
 
-            var runtimeName = GetTracerRuntimeDirectory();
+            var targetFramework = FrameworkDescription.Instance.TargetFramework;
 
             Log.Debug("Executing plugins configuration: {0}", pluginsConfig);
-            Log.Information("Trying to load plugins for '{0}' runtime.", runtimeName);
+            Log.Information("Trying to load plugins with target framework '{0}'.", targetFramework);
 
             // TODO: Detect if objects instead of path
-            var pluginFiles = pluginsConfig.GetValue<JToken>($"['{runtimeName}']").ToObject<string[]>();
+            var pluginFiles = pluginsConfig.GetValue<JToken>($"['{targetFramework}']").ToObject<string[]>();
 
             if (pluginFiles == null || !pluginFiles.Any())
             {
-                Log.Information("Skipping plugins load. Could not find any plugins for '{0}' runtime.", runtimeName);
+                Log.Information("Skipping plugins load. Could not find any plugins with target framework '{0}'.", targetFramework);
 
                 return ArrayHelper.Empty<IOTelExtension>();
             }
@@ -94,12 +94,6 @@ namespace Datadog.Trace.Plugins
                 .Where(p => extensionType.IsAssignableFrom(p))
                 .Select(p => (IOTelExtension)Activator.CreateInstance(p))
                 .ToList();
-        }
-
-        private static string GetTracerRuntimeDirectory()
-        {
-            // returns the runtime directory of the current running tracer
-            return Directory.GetParent(typeof(PluginManager).Assembly.Location).Name;
         }
     }
 }
