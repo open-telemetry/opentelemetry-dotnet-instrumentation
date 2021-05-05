@@ -4,7 +4,7 @@ using Samples.Vendoring.Propagation;
 
 namespace Samples.Vendoring
 {
-    public class VendorPlugin : IOTelPlugin
+    public class VendorPlugin : IExtendPropagators
     {
         private IPropagatorsProvider _propagatorsProvider;
 

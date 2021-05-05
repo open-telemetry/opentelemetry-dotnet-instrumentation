@@ -14,14 +14,14 @@ namespace Datadog.Trace.Plugins
     {
         private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor(typeof(PluginManager));
 
-        internal static IReadOnlyCollection<IOTelPlugin> TryLoadPlugins(JsonConfigurationSource pluginsConfig)
+        internal static IReadOnlyCollection<IOTelExtension> TryLoadPlugins(JsonConfigurationSource pluginsConfig)
         {
             if (pluginsConfig == null)
             {
-                return ArrayHelper.Empty<IOTelPlugin>();
+                return ArrayHelper.Empty<IOTelExtension>();
             }
 
-            var runtimeName = GetPluginsRuntimeName();
+            var runtimeName = GetTracerRuntimeDirectory();
 
             Log.Debug("Executing plugins configuration: {0}", pluginsConfig);
             Log.Information("Trying to load plugins for '{0}' runtime.", runtimeName);
@@ -33,7 +33,7 @@ namespace Datadog.Trace.Plugins
             {
                 Log.Information("Skipping plugins load. Could not find any plugins for '{0}' runtime.", runtimeName);
 
-                return ArrayHelper.Empty<IOTelPlugin>();
+                return ArrayHelper.Empty<IOTelExtension>();
             }
 
             var loadedPlugins = TryLoadPlugins(pluginFiles);
@@ -43,9 +43,9 @@ namespace Datadog.Trace.Plugins
             return loadedPlugins;
         }
 
-        private static IReadOnlyCollection<IOTelPlugin> TryLoadPlugins(string[] pluginFiles)
+        private static IReadOnlyCollection<IOTelExtension> TryLoadPlugins(string[] pluginFiles)
         {
-            var loaded = new List<IOTelPlugin>();
+            var loaded = new List<IOTelExtension>();
 
             foreach (string file in pluginFiles)
             {
@@ -56,17 +56,17 @@ namespace Datadog.Trace.Plugins
                     try
                     {
                         Assembly pluginAssembly = Assembly.LoadFrom(fullPath);
-                        IOTelPlugin plugin = ConvertToPlugin(pluginAssembly);
+                        ICollection<IOTelExtension> extensions = GetExtensions(pluginAssembly);
 
-                        if (plugin != null)
+                        if (extensions != null && extensions.Any())
                         {
-                            loaded.Add(plugin);
+                            loaded.AddRange(extensions);
 
                             Log.Information("Plugin assembly loaded '{0}'.", pluginAssembly.FullName);
                         }
                         else
                         {
-                            Log.Warning("Could not load {0} from '{1}'.", nameof(IOTelPlugin), pluginAssembly.FullName);
+                            Log.Warning("Could not load {0} from '{1}'.", nameof(IOTelExtension), pluginAssembly.FullName);
                         }
                     }
                     catch (Exception ex) when (
@@ -85,28 +85,18 @@ namespace Datadog.Trace.Plugins
             return loaded;
         }
 
-        private static IOTelPlugin ConvertToPlugin(Assembly assembly)
+        private static ICollection<IOTelExtension> GetExtensions(Assembly assembly)
         {
-            var pluginType = typeof(IOTelPlugin);
+            var extensionType = typeof(IOTelExtension);
 
-            var pluginTypes = assembly
+            return assembly
                 .GetTypes()
-                .Where(p => pluginType.IsAssignableFrom(p))
+                .Where(p => extensionType.IsAssignableFrom(p))
+                .Select(p => (IOTelExtension)Activator.CreateInstance(p))
                 .ToList();
-
-            var pluginInstance = pluginTypes
-                .Select(p => (IOTelPlugin)Activator.CreateInstance(p))
-                .FirstOrDefault();
-
-            if (pluginTypes.Count > 1)
-            {
-                Log.Warning("Detected {0} plugins in the assembly '{1}'. Loading only the first type '{2}'.", pluginTypes.Count, assembly.FullName, pluginInstance.GetType().FullName);
-            }
-
-            return pluginInstance;
         }
 
-        private static string GetPluginsRuntimeName()
+        private static string GetTracerRuntimeDirectory()
         {
             // returns the runtime directory of the current running tracer
             return Directory.GetParent(typeof(PluginManager).Assembly.Location).Name;

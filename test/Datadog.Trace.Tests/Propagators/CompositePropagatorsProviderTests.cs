@@ -47,8 +47,8 @@ namespace Datadog.Trace.Tests.Propagators
         [Fact]
         public void CompositePropagatorsProvider_GetPropagators_When_RegisteringFromPlugins()
         {
-            var mockPlugin1 = Mock.Of<IOTelPlugin>(m => m.GetPropagatorsProvider() == new ProviderStub(Propagator1));
-            var mockPlugin2 = Mock.Of<IOTelPlugin>(m => m.GetPropagatorsProvider() == new ProviderStub(Propagator2));
+            var mockPlugin1 = Mock.Of<IExtendPropagators>(m => m.GetPropagatorsProvider() == new ProviderStub(Propagator1));
+            var mockPlugin2 = Mock.Of<IExtendPropagators>(m => m.GetPropagatorsProvider() == new ProviderStub(Propagator2));
             var plugins = new[] { mockPlugin1, mockPlugin2 };
             var provider = new CompositePropagatorsProvider()
                 .RegisterProviderFromPlugins(plugins);

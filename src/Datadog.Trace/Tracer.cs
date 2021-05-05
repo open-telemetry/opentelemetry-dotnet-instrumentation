@@ -78,7 +78,7 @@ namespace Datadog.Trace
         /// implementation with plugins
         /// </summary>
         /// <param name="plugins">Plugins to extend with</param>
-        public Tracer(IReadOnlyCollection<IOTelPlugin> plugins)
+        public Tracer(IReadOnlyCollection<IOTelExtension> plugins)
             : this(settings: null, plugins: plugins, traceWriter: null, sampler: null, scopeManager: null, statsd: null)
         {
         }
@@ -96,7 +96,7 @@ namespace Datadog.Trace
         {
         }
 
-        internal Tracer(TracerSettings settings, IReadOnlyCollection<IOTelPlugin> plugins, ITraceWriter traceWriter, ISampler sampler, IScopeManager scopeManager, IDogStatsd statsd)
+        internal Tracer(TracerSettings settings, IReadOnlyCollection<IOTelExtension> plugins, ITraceWriter traceWriter, ISampler sampler, IScopeManager scopeManager, IDogStatsd statsd)
         {
             // update the count of Tracer instances
             Interlocked.Increment(ref _liveTracerCount);
@@ -756,11 +756,11 @@ namespace Datadog.Trace
             }
         }
 
-        private static CompositeTextMapPropagator CreateCompositePropagator(TracerSettings settings, ITraceIdConvention traceIdConvention, IReadOnlyCollection<IOTelPlugin> plugins)
+        private static CompositeTextMapPropagator CreateCompositePropagator(TracerSettings settings, ITraceIdConvention traceIdConvention, IReadOnlyCollection<IOTelExtension> plugins)
         {
             var propagators = new CompositePropagatorsProvider()
                .RegisterProvider(new OTelPropagatorsProvider())
-               .RegisterProviderFromPlugins(plugins ?? ArrayHelper.Empty<IOTelPlugin>())
+               .RegisterProviderFromPlugins(plugins ?? ArrayHelper.Empty<IOTelExtension>())
                .GetPropagators(settings.Propagators, traceIdConvention)
                .ToList();
 
