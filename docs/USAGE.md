@@ -76,7 +76,7 @@ Environment variables are the main way to configure values.  A setting configure
 
 ### Web.config and app.config
 
-When your application is running on .NET Framework (Does not work with .NET Core or later), all unset configuration values can be set via web configuration file (web.config) or application configuration file (app.config).
+For an application running on .NET Framework, web configuration file (`web.config`) or application configuration file (`app.config`) can be used to configure settings.
 
 See example with `OTEL_SERVICE` overload.
 
