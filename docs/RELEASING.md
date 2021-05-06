@@ -10,4 +10,4 @@ To change the version the following steps have to be executed:
 
 ## Release
 
-To create GitHub release the git tag with correct version number has to be pushed (v\\d.\\d.\\d). The release will be created automatically by the GitHub Actions workflow, but the realese notes have to be added manually.
+To create GitHub release the git tag with correct version number has to be pushed (format is `v\d.\d.\d`, it must match the version prepared in Pre-Release steps). The release will be created automatically by the GitHub Actions workflow, but the realese notes have to be added manually.
