@@ -74,7 +74,7 @@ There are 3 ways to apply configuration values (Priority is from first to last):
 
 Environment variables are the main way to configure values.  A setting configured via an environment variable cannot be overridden.
 
-### Web.config and app.config
+### web.config and app.config
 
 For an application running on .NET Framework, web configuration file (`web.config`) or application configuration file (`app.config`) can be used to configure settings.
 
