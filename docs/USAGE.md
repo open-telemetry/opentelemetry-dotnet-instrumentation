@@ -90,7 +90,7 @@ See example with `OTEL_SERVICE` overload.
 
 ### Json configuration file
 
-Json configuration file has the least priority. To use this option, all values that need to be overridden must be unset at first. By default if `OTEL_TRACE_CONFIG_FILE` is unset, the application is searching for `datadog.json` in current working directory (acquired by `Environment.CurrentDirectory`).
+By default, if `OTEL_TRACE_CONFIG_FILE` is unset, the application is searching for `datadog.json` in the current working directory (acquired by [`Environment.CurrentDirectory`](https://docs.microsoft.com/en-us/dotnet/api/system.environment.currentdirectory?view=net-5.0)).
 
 See example with `OTEL_SERVICE` overload.
 
