@@ -10,7 +10,7 @@ Use these environment variables to configure the tracing library:
 
 | Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_TRACE_CONFIG_FILE` | Loads the json configuration file with configuration values. Overloaded value must be set via Environment variable. | ```{Environment.CurrentDirectory}/datadog.json``` |
+| `OTEL_TRACE_CONFIG_FILE` | The file path of a JSON configuration file that will be loaded. | ```%WorkingDirectory%/datadog.json``` |
 | `OTEL_VERSION` | The application's version that will populate `version` tag on spans. |  |
 | `OTEL_TRACE_ADONET_EXCLUDED_TYPES` | Comma-separated list of AdoNet types that will be excluded from automatic instrumentation. |  |
 | `OTEL_AGENT_HOST` | The host name of the targeted SatsD server. |  |
