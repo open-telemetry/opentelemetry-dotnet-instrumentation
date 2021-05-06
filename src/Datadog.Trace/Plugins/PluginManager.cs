@@ -26,8 +26,20 @@ namespace Datadog.Trace.Plugins
             Log.Debug("Executing plugins configuration: {0}", pluginsConfig);
             Log.Information("Trying to load plugins with target framework '{0}'.", targetFramework);
 
-            // TODO: Detect if objects instead of path
-            var pluginFiles = pluginsConfig.GetValue<JToken>($"['{targetFramework}']").ToObject<string[]>();
+            string[] pluginFiles;
+
+            try
+            {
+                // TODO: Here additional metadata could be loaded (eg: for security and integrity)
+                // instead of just string path
+                pluginFiles = pluginsConfig.GetValue<JToken>($"['{targetFramework}']").ToObject<string[]>();
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Could not parse list of plugin paths. Invalid plugin configuration provided.");
+
+                return ArrayHelper.Empty<IOTelExtension>();
+            }
 
             if (pluginFiles == null || !pluginFiles.Any())
             {
