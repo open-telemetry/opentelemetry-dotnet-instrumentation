@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Datadog.Trace.Conventions;
 using Datadog.Trace.Logging;
-using Datadog.Trace.Plugins;
 
 namespace Datadog.Trace.Propagation
 {
@@ -18,24 +17,9 @@ namespace Datadog.Trace.Propagation
             _providers = new List<IPropagatorsProvider>();
         }
 
-        public CompositePropagatorsProvider RegisterProvider(IPropagatorsProvider provider)
+        public void RegisterProvider(IPropagatorsProvider provider)
         {
             _providers.Add(provider);
-
-            return this;
-        }
-
-        public CompositePropagatorsProvider RegisterProviderFromExtensions(IEnumerable<IOTelExtension> extensions)
-        {
-            foreach (var extension in extensions)
-            {
-                if (extension is IPropagatorsProvider propagatorsProvider)
-                {
-                    _providers.Add(propagatorsProvider);
-                }
-            }
-
-            return this;
         }
 
         public IEnumerable<IPropagator> GetPropagators(IEnumerable<string> propagatorIds, ITraceIdConvention traceIdConvention)

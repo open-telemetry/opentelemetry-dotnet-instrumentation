@@ -131,7 +131,7 @@ namespace Datadog.Trace
             _scopeManager = scopeManager ?? new AsyncLocalScopeManager();
             Sampler = sampler ?? new RuleBasedSampler(new RateLimiter(Settings.MaxTracesSubmittedPerSecond));
 
-            _propagator = CreateCompositePropagator(Settings, TraceIdConvention, plugins);
+            _propagator = CreateCompositePropagator(Settings, TraceIdConvention, plugins ?? ArrayHelper.Empty<IOTelExtension>());
 
             if (!string.IsNullOrWhiteSpace(Settings.CustomSamplingRules))
             {
@@ -756,11 +756,20 @@ namespace Datadog.Trace
             }
         }
 
-        private static CompositeTextMapPropagator CreateCompositePropagator(TracerSettings settings, ITraceIdConvention traceIdConvention, IReadOnlyCollection<IOTelExtension> plugins)
+        private static CompositeTextMapPropagator CreateCompositePropagator(TracerSettings settings, ITraceIdConvention traceIdConvention, IReadOnlyCollection<IOTelExtension> extensions)
         {
-            var propagators = new CompositePropagatorsProvider()
-               .RegisterProvider(new OTelPropagatorsProvider())
-               .RegisterProviderFromExtensions(plugins ?? ArrayHelper.Empty<IOTelExtension>())
+            var compositeProvider = new CompositePropagatorsProvider();
+            compositeProvider.RegisterProvider(new OTelPropagatorsProvider());
+
+            foreach (var extension in extensions)
+            {
+                if (extension is IPropagatorsProvider provider)
+                {
+                    compositeProvider.RegisterProvider(provider);
+                }
+            }
+
+            var propagators = compositeProvider
                .GetPropagators(settings.Propagators, traceIdConvention)
                .ToList();
 

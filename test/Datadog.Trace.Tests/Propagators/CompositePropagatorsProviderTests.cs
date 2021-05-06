@@ -16,9 +16,9 @@ namespace Datadog.Trace.Tests.Propagators
         [Fact]
         public void CompositePropagatorsProvider_GetPropagators()
         {
-            var provider = new CompositePropagatorsProvider()
-                .RegisterProvider(new ProviderStub(Propagator1))
-                .RegisterProvider(new ProviderStub(Propagator3));
+            var provider = new CompositePropagatorsProvider();
+            provider.RegisterProvider(new ProviderStub(Propagator1));
+            provider.RegisterProvider(new ProviderStub(Propagator3));
 
             var propagators = provider
                 .GetPropagators(new[] { Propagator1, Propagator3 }, null)
@@ -33,29 +33,13 @@ namespace Datadog.Trace.Tests.Propagators
         [Fact]
         public void CompositePropagatorsProvider_GetPropagators_When_NoProvider()
         {
-            var provider = new CompositePropagatorsProvider()
-                .RegisterProvider(new ProviderStub(Propagator1));
+            var provider = new CompositePropagatorsProvider();
+            provider.RegisterProvider(new ProviderStub(Propagator1));
 
             Assert.Throws<InvalidOperationException>(() => provider
                 .GetPropagators(new[] { Propagator2 }, null)
                 .Cast<PropagatorStub>()
                 .ToList());
-        }
-
-        [Fact]
-        public void CompositePropagatorsProvider_GetPropagators_When_RegisteringFromPlugins()
-        {
-            var extensions = new[] { new ProviderStub(Propagator1), new ProviderStub(Propagator2) };
-            var provider = new CompositePropagatorsProvider()
-                .RegisterProviderFromExtensions(extensions);
-
-            var propagators = provider.GetPropagators(new[] { Propagator1, Propagator2 }, null)
-                .Cast<PropagatorStub>()
-                .ToList();
-
-            Assert.Equal(2, propagators.Count());
-            Assert.Equal(Propagator1, propagators[0].Id);
-            Assert.Equal(Propagator2, propagators[1].Id);
         }
 
         private class ProviderStub : IPropagatorsProvider
