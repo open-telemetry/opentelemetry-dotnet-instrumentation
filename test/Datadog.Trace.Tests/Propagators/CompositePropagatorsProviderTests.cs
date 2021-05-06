@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Datadog.Trace.Conventions;
-using Datadog.Trace.Plugins;
 using Datadog.Trace.Propagation;
-using Moq;
 using Xunit;
 
 namespace Datadog.Trace.Tests.Propagators
@@ -47,11 +45,9 @@ namespace Datadog.Trace.Tests.Propagators
         [Fact]
         public void CompositePropagatorsProvider_GetPropagators_When_RegisteringFromPlugins()
         {
-            var mockPlugin1 = Mock.Of<IExtendPropagators>(m => m.GetPropagatorsProvider() == new ProviderStub(Propagator1));
-            var mockPlugin2 = Mock.Of<IExtendPropagators>(m => m.GetPropagatorsProvider() == new ProviderStub(Propagator2));
-            var plugins = new[] { mockPlugin1, mockPlugin2 };
+            var extensions = new[] { new ProviderStub(Propagator1), new ProviderStub(Propagator2) };
             var provider = new CompositePropagatorsProvider()
-                .RegisterProviderFromPlugins(plugins);
+                .RegisterProviderFromExtensions(extensions);
 
             var propagators = provider.GetPropagators(new[] { Propagator1, Propagator2 }, null)
                 .Cast<PropagatorStub>()

@@ -25,13 +25,13 @@ namespace Datadog.Trace.Propagation
             return this;
         }
 
-        public CompositePropagatorsProvider RegisterProviderFromPlugins(IEnumerable<IOTelExtension> plugins)
+        public CompositePropagatorsProvider RegisterProviderFromExtensions(IEnumerable<IOTelExtension> extensions)
         {
-            foreach (var plugin in plugins)
+            foreach (var extension in extensions)
             {
-                if (plugin is IExtendPropagators propagatorsExtension)
+                if (extension is IPropagatorsProvider propagatorsProvider)
                 {
-                    _providers.Add(propagatorsExtension.GetPropagatorsProvider());
+                    _providers.Add(propagatorsProvider);
                 }
             }
 

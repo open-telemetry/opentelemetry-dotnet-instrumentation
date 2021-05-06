@@ -760,7 +760,7 @@ namespace Datadog.Trace
         {
             var propagators = new CompositePropagatorsProvider()
                .RegisterProvider(new OTelPropagatorsProvider())
-               .RegisterProviderFromPlugins(plugins ?? ArrayHelper.Empty<IOTelExtension>())
+               .RegisterProviderFromExtensions(plugins ?? ArrayHelper.Empty<IOTelExtension>())
                .GetPropagators(settings.Propagators, traceIdConvention)
                .ToList();
 
