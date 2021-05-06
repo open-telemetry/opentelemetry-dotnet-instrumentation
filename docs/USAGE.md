@@ -64,11 +64,11 @@ Use these environment variables to configure the tracing library:
 
 ## Ways to configure
 
-There are 3 ways to apply configuration values (Priority is from first to last):
+There are following ways to apply configuration settings (priority is from first to last):
 
-1. Environment Variables
-2. Web.config / App.config
-3. Json configuration file
+1. [Environment variables)(#environment-variables)
+2. [`web.config` or `app.config` file](#web.config-and-app.config)
+3. [JSON configuration file](#json-configuration-file)
 
 ### Environment variables
 
