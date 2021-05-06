@@ -72,7 +72,7 @@ There are 3 ways to apply configuration values (Priority is from first to last):
 
 ### Environment variables
 
-Environment variables are the main way to configure values. After setting up environment variable, it can't be overridden by lower priority configuration option. 
+Environment variables are the main way to configure values.  A setting configured via an environment variable cannot be overridden.
 
 ### Web.config and app.config
 
