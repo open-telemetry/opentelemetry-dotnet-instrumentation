@@ -89,7 +89,7 @@ namespace Datadog.Trace.Tests.DiagnosticListeners
             var writerMock = new Mock<ITraceWriter>();
             var samplerMock = new Mock<ISampler>();
 
-            return new Tracer(settings, writerMock.Object, samplerMock.Object, scopeManager: null, statsd: null);
+            return new Tracer(settings, plugins: null, writerMock.Object, samplerMock.Object, scopeManager: null, statsd: null);
         }
 
         private static HttpContext GetHttpContext()

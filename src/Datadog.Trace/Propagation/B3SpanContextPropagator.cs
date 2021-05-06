@@ -10,7 +10,7 @@ namespace Datadog.Trace.Propagation
     /// <summary>
     /// Class that handles B3 style context propagation.
     /// </summary>
-    internal class B3SpanContextPropagator : IPropagator
+    public class B3SpanContextPropagator : IPropagator
     {
         private const NumberStyles NumberStyle = NumberStyles.HexNumber;
 
@@ -20,12 +20,17 @@ namespace Datadog.Trace.Propagation
 
         private readonly ITraceIdConvention _traceIdConvention;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="B3SpanContextPropagator"/> class.
+        /// </summary>
+        /// <param name="traceIdConvention">Trace id convention</param>
         public B3SpanContextPropagator(ITraceIdConvention traceIdConvention)
         {
             _traceIdConvention = traceIdConvention;
         }
 
-        public void Inject<T>(SpanContext context, T carrier, Action<T, string, string> setter)
+        /// <inheritdoc cref="IPropagator"/>
+        public virtual void Inject<T>(SpanContext context, T carrier, Action<T, string, string> setter)
         {
             if (context == null) { throw new ArgumentNullException(nameof(context)); }
 
@@ -51,7 +56,8 @@ namespace Datadog.Trace.Propagation
             }
         }
 
-        public SpanContext Extract<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
+        /// <inheritdoc cref="IPropagator"/>
+        public virtual SpanContext Extract<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
         {
             if (carrier == null) { throw new ArgumentNullException(nameof(carrier)); }
 

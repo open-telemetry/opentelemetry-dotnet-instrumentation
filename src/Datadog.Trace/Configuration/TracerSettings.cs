@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Datadog.Trace.Configuration.Types;
 using Datadog.Trace.ExtensionMethods;
 using Datadog.Trace.PlatformHelpers;
 using Datadog.Trace.Util;
@@ -369,7 +370,7 @@ namespace Datadog.Trace.Configuration
         /// Default is <c>Datadog</c>
         /// <seealso cref="ConfigurationKeys.Propagators"/>
         /// </summary>
-        public HashSet<PropagatorType> Propagators { get; set; }
+        public HashSet<string> Propagators { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether runtime metrics
@@ -640,18 +641,18 @@ namespace Datadog.Trace.Configuration
             return ServiceNameMappings.GetServiceName(tracer.DefaultServiceName, serviceName);
         }
 
-        private static HashSet<PropagatorType> GetPropagators(IConfigurationSource source)
+        private static HashSet<string> GetPropagators(IConfigurationSource source)
         {
-            var propagators = source.GetTypedValues<PropagatorType>(ConfigurationKeys.Propagators);
+            var propagators = source.GetStrings(ConfigurationKeys.Propagators);
 
             if (!propagators.Any())
             {
                 // TODO: Default to W3C (be aware of integration tests)
                 // see more: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/context/api-propagators.md#global-propagators
-                return new HashSet<PropagatorType>() { PropagatorType.Datadog };
+                return new HashSet<string>() { PropagatorTypes.Datadog };
             }
 
-            return new HashSet<PropagatorType>(propagators);
+            return new HashSet<string>(propagators);
         }
     }
 }
