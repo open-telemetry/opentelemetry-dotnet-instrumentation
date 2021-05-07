@@ -97,7 +97,7 @@ jobs:
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v}
       - name: Extract release notes
         run: awk '/## \[${{ steps.get_version.outputs.VERSION }}\]/,0' docs/CHANGELOG.md >> notes.md
-      - run: gh release create v${{ steps.get_version.outputs.VERSION }} -F notes.md artifacts/netcoreapp3.1/Test.dll artifacts/netcoreapp3.1/Test.runtimeconfig*
+      - run: gh release create v${{ steps.get_version.outputs.VERSION }} -F notes.md artifacts/otel* artifacts/x64/en-us/opentelemetry* artifacts/x86/en-us/opentelemetry*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
