@@ -84,7 +84,7 @@ jobs:
   create_release:
     runs-on: ubuntu-20.04
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') # only trigger if the current event is for a tag push
-    needs: [build]
+    needs: [alpine_build, linux_build, windows_build, macos_build]
     permissions:
       contents: write
     steps:
