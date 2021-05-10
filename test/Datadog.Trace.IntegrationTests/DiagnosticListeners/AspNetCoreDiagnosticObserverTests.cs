@@ -261,7 +261,7 @@ namespace Datadog.Trace.IntegrationTests.DiagnosticListeners
             var agentWriter = writer ?? new Mock<ITraceWriter>().Object;
             var samplerMock = new Mock<ISampler>();
 
-            return new Tracer(settings, agentWriter, samplerMock.Object, scopeManager: null, statsd: null);
+            return new Tracer(settings, plugins: null, agentWriter, samplerMock.Object, scopeManager: null, statsd: null);
         }
 
         private class AgentWriterStub : ITraceWriter

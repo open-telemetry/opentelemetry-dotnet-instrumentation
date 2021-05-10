@@ -16,7 +16,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
         {
             var settings = new TracerSettings();
             settings.Convention = ConventionType.OpenTelemetry;
-            var tracer = new Tracer(settings, Mock.Of<ITraceWriter>(), Mock.Of<ISampler>(), scopeManager: null, statsd: null);
+            var tracer = new Tracer(settings, plugins: null, Mock.Of<ITraceWriter>(), Mock.Of<ISampler>(), scopeManager: null, statsd: null);
 
             using (var scope = ScopeFactory.CreateOutboundHttpScope(tracer, input.Method, new Uri(input.Uri), new IntegrationInfo((int)IntegrationIds.HttpMessageHandler), out var tags))
             {

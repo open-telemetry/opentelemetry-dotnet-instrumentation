@@ -3,10 +3,13 @@ using System.Collections.Generic;
 
 namespace Datadog.Trace.Propagation
 {
-    internal interface IPropagator
+    /// <summary>
+    /// Specifies interface for span context propagator.
+    /// </summary>
+    public interface IPropagator
     {
         /// <summary>
-        /// Propagates the specified context by adding new headers to a carrier
+        /// Propagates the specified context by adding new headers to a carrier.
         /// This locks the sampling priority for <paramref name="context"/>.
         /// </summary>
         /// <param name="context">A <see cref="SpanContext"/> value that will be propagated into <paramref name="carrier"/> instance.</param>

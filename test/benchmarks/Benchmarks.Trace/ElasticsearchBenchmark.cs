@@ -33,7 +33,7 @@ namespace Benchmarks.Trace
                 StartupDiagnosticLogEnabled = false
             };
 
-            Tracer.Instance = new Tracer(settings, new DummyAgentWriter(), null, null, null);
+            Tracer.Instance = new Tracer(settings, null, new DummyAgentWriter(), null, null, null);
 
             var methodInfo = typeof(RequestPipeline).GetMethod("CallElasticsearchAsync", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
 
