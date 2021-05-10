@@ -145,6 +145,15 @@ namespace Datadog.Trace.Configuration
             return GetDictionaryInternal(key, allowOptionalMappings);
         }
 
+        /// <summary>
+        /// Gets the string representation of json config.
+        /// </summary>
+        /// <returns>String format.</returns>
+        public override string ToString()
+        {
+            return _configuration.ToString();
+        }
+
         private IDictionary<string, string> GetDictionaryInternal(string key, bool allowOptionalMappings)
         {
             var token = _configuration.SelectToken(key, errorWhenNoMatch: false);

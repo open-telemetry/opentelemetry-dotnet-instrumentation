@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ using Datadog.Trace.DiagnosticListeners;
 using Datadog.Trace.DogStatsd;
 using Datadog.Trace.Logging;
 using Datadog.Trace.PlatformHelpers;
+using Datadog.Trace.Plugins;
 using Datadog.Trace.Propagation;
 using Datadog.Trace.RuntimeMetrics;
 using Datadog.Trace.Sampling;
@@ -67,7 +69,17 @@ namespace Datadog.Trace
         /// Initializes a new instance of the <see cref="Tracer"/> class with default settings.
         /// </summary>
         public Tracer()
-            : this(settings: null, traceWriter: null, sampler: null, scopeManager: null, statsd: null)
+            : this(settings: null, plugins: null, traceWriter: null, sampler: null, scopeManager: null, statsd: null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Tracer"/> class and extends
+        /// implementation with plugins
+        /// </summary>
+        /// <param name="plugins">Plugins to extend with</param>
+        public Tracer(IReadOnlyCollection<IOTelExtension> plugins)
+            : this(settings: null, plugins: plugins, traceWriter: null, sampler: null, scopeManager: null, statsd: null)
         {
         }
 
@@ -80,11 +92,11 @@ namespace Datadog.Trace
         /// or null to use the default configuration sources.
         /// </param>
         public Tracer(TracerSettings settings)
-            : this(settings, traceWriter: null, sampler: null, scopeManager: null, statsd: null)
+            : this(settings, plugins: null, traceWriter: null, sampler: null, scopeManager: null, statsd: null)
         {
         }
 
-        internal Tracer(TracerSettings settings, ITraceWriter traceWriter, ISampler sampler, IScopeManager scopeManager, IDogStatsd statsd)
+        internal Tracer(TracerSettings settings, IReadOnlyCollection<IOTelExtension> plugins, ITraceWriter traceWriter, ISampler sampler, IScopeManager scopeManager, IDogStatsd statsd)
         {
             // update the count of Tracer instances
             Interlocked.Increment(ref _liveTracerCount);
@@ -119,8 +131,7 @@ namespace Datadog.Trace
             _scopeManager = scopeManager ?? new AsyncLocalScopeManager();
             Sampler = sampler ?? new RuleBasedSampler(new RateLimiter(Settings.MaxTracesSubmittedPerSecond));
 
-            var propagators = ContextPropagatorFactory.BuildPropagators(Settings.Propagators, TraceIdConvention);
-            _propagator = new CompositeTextMapPropagator(propagators);
+            _propagator = CreateCompositePropagator(Settings, TraceIdConvention, plugins ?? ArrayHelper.Empty<IOTelExtension>());
 
             if (!string.IsNullOrWhiteSpace(Settings.CustomSamplingRules))
             {
@@ -743,6 +754,26 @@ namespace Datadog.Trace
                 default:
                     return new AgentWriter(new Api(settings.AgentUri, TransportStrategy.Get(settings), statsd), metrics, maxBufferSize: settings.TraceBufferSize);
             }
+        }
+
+        private static CompositeTextMapPropagator CreateCompositePropagator(TracerSettings settings, ITraceIdConvention traceIdConvention, IReadOnlyCollection<IOTelExtension> extensions)
+        {
+            var compositeProvider = new CompositePropagatorsProvider();
+            compositeProvider.RegisterProvider(new OTelPropagatorsProvider());
+
+            foreach (var extension in extensions)
+            {
+                if (extension is IPropagatorsProvider provider)
+                {
+                    compositeProvider.RegisterProvider(provider);
+                }
+            }
+
+            var propagators = compositeProvider
+               .GetPropagators(settings.Propagators, traceIdConvention)
+               .ToList();
+
+            return new CompositeTextMapPropagator(propagators);
         }
 
         private void InitializeLibLogScopeEventSubscriber(IScopeManager scopeManager, string defaultServiceName, string version, string env)

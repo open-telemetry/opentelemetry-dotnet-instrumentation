@@ -1,14 +1,9 @@
 using System;
-using System.Globalization;
-using System.IO;
-using System.Text;
 using Datadog.Trace.Agent;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.Logging;
 using Datadog.Trace.Sampling;
 using Moq;
-using Serilog.Formatting.Display;
-using Xunit;
 
 namespace Datadog.Trace.Tests.Logging
 {
@@ -28,7 +23,7 @@ namespace Datadog.Trace.Tests.Logging
             settings.ServiceVersion = "custom-version";
             settings.Environment = "custom-env";
 
-            return new Tracer(settings, writerMock.Object, samplerMock.Object, scopeManager: null, statsd: null);
+            return new Tracer(settings, plugins: null, writerMock.Object, samplerMock.Object, scopeManager: null, statsd: null);
         }
 
         internal static void LogInSpanWithServiceName(Tracer tracer, ILog logger, Func<string, object, bool, IDisposable> openMappedContext, string service, out Scope scope)

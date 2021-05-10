@@ -10,7 +10,7 @@ Use these environment variables to configure the tracing library:
 
 | Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_TRACE_CONFIG_FILE` | The path to the configuration file. | `%CurrenctDIR%/datadog.json` |
+| `OTEL_TRACE_CONFIG_FILE` | The file path of a JSON configuration file that will be loaded. | ```%WorkingDirectory%/datadog.json``` |
 | `OTEL_VERSION` | The application's version that will populate `version` tag on spans. |  |
 | `OTEL_TRACE_ADONET_EXCLUDED_TYPES` | Comma-separated list of AdoNet types that will be excluded from automatic instrumentation. |  |
 | `OTEL_AGENT_HOST` | The host name of the targeted SatsD server. |  |
@@ -62,6 +62,45 @@ Use these environment variables to configure the tracing library:
 | `OTEL_PROFILER_PROCESSES` | Sets the filename of executables the profiler can attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
 | `OTEL_PROFILER_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
 
+## Ways to configure
+
+There are following ways to apply configuration settings (priority is from first to last):
+
+1. [Environment variables)(#environment-variables)
+2. [`web.config` or `app.config` file](#web.config-and-app.config)
+3. [JSON configuration file](#json-configuration-file)
+
+### Environment variables
+
+Environment variables are the main way to configure values.  A setting configured via an environment variable cannot be overridden.
+
+### web.config and app.config
+
+For an application running on .NET Framework, web configuration file (`web.config`) or application configuration file (`app.config`) can be used to configure settings.
+
+See example with `OTEL_SERVICE` overload.
+
+```xml
+<configuration>
+  <appSettings>
+    <add key="OTEL_SERVICE" value="my-service-name" />
+  </appSettings>
+</configuration>
+```
+
+### JSON configuration file
+
+By default, if `OTEL_TRACE_CONFIG_FILE` is unset, the application is searching for `datadog.json` in the current working directory (acquired by [`Environment.CurrentDirectory`](https://docs.microsoft.com/en-us/dotnet/api/system.environment.currentdirectory?view=net-5.0)).
+
+See example with `OTEL_SERVICE` overload.
+
+```json
+{
+    "OTEL_SERVICE": "my-service-name"
+}
+```
+
+## Setup
 
 ### Linux
 

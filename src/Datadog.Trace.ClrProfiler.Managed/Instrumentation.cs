@@ -4,6 +4,7 @@ using System.Threading;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.DiagnosticListeners;
 using Datadog.Trace.Logging;
+using Datadog.Trace.Plugins;
 using Datadog.Trace.ServiceFabric;
 
 namespace Datadog.Trace.ClrProfiler
@@ -59,8 +60,11 @@ namespace Datadog.Trace.ClrProfiler
 
             try
             {
-                // ensure global instance is created if it's not already
-                _ = Tracer.Instance;
+                // Creates GlobalSettings instance and loads plugins
+                var plugins = PluginManager.TryLoadPlugins(GlobalSettings.Source.PluginsConfiguration);
+
+                // First call to create Tracer instace
+                Tracer.Instance = new Tracer(plugins);
             }
             catch
             {

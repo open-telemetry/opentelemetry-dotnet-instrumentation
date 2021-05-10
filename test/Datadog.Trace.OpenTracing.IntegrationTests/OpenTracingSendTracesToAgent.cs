@@ -23,7 +23,7 @@ namespace Datadog.Trace.OpenTracing.IntegrationTests
             var api = new Api(endpoint, apiRequestFactory: null, statsd: null);
             var agentWriter = new AgentWriter(api, new NullMetrics());
 
-            var tracer = new Tracer(settings, agentWriter, sampler: null, scopeManager: null, statsd: null);
+            var tracer = new Tracer(settings, plugins: null, agentWriter, sampler: null, scopeManager: null, statsd: null);
             _tracer = new OpenTracingTracer(tracer);
         }
 
