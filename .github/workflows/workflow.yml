@@ -2,6 +2,8 @@ name: Build artifacts
 on: 
   push: 
     branches: [ main ]
+    tags:
+      - 'v*.*.*'
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -78,3 +80,25 @@ jobs:
         with:
           name: artifacts
           path: otel-dotnet-autoinstrumentation-macos.tar
+
+  create_release:
+    runs-on: ubuntu-20.04
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') # only trigger if the current event is for a tag push
+    needs: [alpine_build, linux_build, windows_build, macos_build]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          path: .
+      - name: Extract tag name
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v}
+      - name: Extract release notes
+        run: awk '/## \[${{ steps.get_version.outputs.VERSION }}\]/,0' docs/CHANGELOG.md >> notes.md
+      - run: gh release create v${{ steps.get_version.outputs.VERSION }} -F notes.md artifacts/otel* artifacts/x64/en-us/opentelemetry* artifacts/x86/en-us/opentelemetry*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
