@@ -10,7 +10,7 @@ Use these environment variables to configure the tracing library:
 
 | Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_TRACE_CONFIG_FILE` | The file path of a JSON configuration file that will be loaded. | ```%WorkingDirectory%/datadog.json``` |
+| `OTEL_TRACE_CONFIG_FILE` | The file path of a JSON configuration file that will be loaded. |  |
 | `OTEL_VERSION` | The application's version that will populate `version` tag on spans. |  |
 | `OTEL_TRACE_ADONET_EXCLUDED_TYPES` | Comma-separated list of AdoNet types that will be excluded from automatic instrumentation. |  |
 | `OTEL_AGENT_HOST` | The host name of the targeted SatsD server. |  |
@@ -72,7 +72,7 @@ There are following ways to apply configuration settings (priority is from first
 
 ### Environment variables
 
-Environment variables are the main way to configure values.  A setting configured via an environment variable cannot be overridden.
+Environment variables are the main way to configure values. A setting configured via an environment variable cannot be overridden.
 
 ### web.config and app.config
 
@@ -90,7 +90,7 @@ See example with `OTEL_SERVICE` overload.
 
 ### JSON configuration file
 
-By default, if `OTEL_TRACE_CONFIG_FILE` is unset, the application is searching for `datadog.json` in the current working directory (acquired by [`Environment.CurrentDirectory`](https://docs.microsoft.com/en-us/dotnet/api/system.environment.currentdirectory?view=net-5.0)).
+Use environment variable `OTEL_TRACE_CONFIG_FILE` or `web.config` / `app.config` to set configuration file path . This cannot be set via JSON configuration file.
 
 See example with `OTEL_SERVICE` overload.
 
