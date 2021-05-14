@@ -29,7 +29,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Datadog.Trace\Datadog.Trace.csproj" />
 
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Web" />
   </ItemGroup>
 

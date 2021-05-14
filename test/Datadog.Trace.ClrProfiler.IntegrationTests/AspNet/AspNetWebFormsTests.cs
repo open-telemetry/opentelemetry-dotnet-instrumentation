@@ -27,7 +27,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
             _iisFixture.TryStartIis(this);
         }
 
-        [Theory(Skip = "This example does not use MVC or WebApi, so we will not generate traces until AspNet is invoked via automatic instrumentation.")]
+        [Theory]
         [Trait("Category", "EndToEnd")]
         [Trait("RunOnWindows", "True")]
         [Trait("LoadFromGAC", "True")]
@@ -37,7 +37,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
             string expectedResourceName,
             bool isError)
         {
-            await AssertWebServerSpan(
+            await AssertAspNetSpanOnly(
                 path,
                 _iisFixture.Agent,
                 _iisFixture.HttpPort,
@@ -46,7 +46,6 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
                 expectedErrorType: null,
                 expectedErrorMessage: null,
                 SpanTypes.Web,
-                "aspnet.request",
                 expectedResourceName,
                 "1.0.0");
         }
