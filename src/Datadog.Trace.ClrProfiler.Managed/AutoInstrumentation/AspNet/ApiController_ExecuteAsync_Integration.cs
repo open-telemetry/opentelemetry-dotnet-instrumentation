@@ -11,8 +11,8 @@ using Datadog.Trace.ClrProfiler.Integrations.AspNet;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.DuckTyping;
 using Datadog.Trace.ExtensionMethods;
-using Datadog.Trace.Propagation;
 using Datadog.Trace.Headers;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.Tagging;
 
 namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.AspNet
