@@ -16,6 +16,11 @@ namespace ConsoleApp
             await regularHttpClient.GetAsync("default-handler");
             Console.WriteLine("Called regularHttpClient.GetAsync");
 
+            var client = new HttpClient();
+            Console.WriteLine("Calling client.GetAsync");
+            await regularHttpClient.GetAsync("http://127.0.0.1:8080");
+            Console.WriteLine("Called client.GetAsync");
+
             return 0;
         }
     }
