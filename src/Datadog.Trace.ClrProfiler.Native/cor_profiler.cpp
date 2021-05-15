@@ -275,7 +275,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
     return S_OK;
   }
 
-  const auto is_instrumentation_assembly = assembly_info.name == WStr("Datadog.Trace.ClrProfiler.Managed");
+  const auto is_instrumentation_assembly = assembly_info.name == WStr("OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed");
 
   if (is_instrumentation_assembly || debug_logging_enabled) {
     if (debug_logging_enabled) {
