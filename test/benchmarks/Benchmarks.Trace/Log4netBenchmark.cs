@@ -30,7 +30,7 @@ namespace Benchmarks.Trace
                 ServiceVersion = "version"
             };
 
-            LogInjectionTracer = new Tracer(logInjectionSettings, new DummyAgentWriter(), null, null, null);
+            LogInjectionTracer = new Tracer(logInjectionSettings, null, new DummyAgentWriter(), null, null, null);
             Tracer.Instance = LogInjectionTracer;
 
             var baselineSettings = new TracerSettings
@@ -41,7 +41,7 @@ namespace Benchmarks.Trace
                 ServiceVersion = "version"
             };
 
-            BaselineTracer = new Tracer(baselineSettings, new DummyAgentWriter(), null, null, null);
+            BaselineTracer = new Tracer(baselineSettings, null, new DummyAgentWriter(), null, null, null);
 
             var repository = (Hierarchy)log4net.LogManager.GetRepository();
             var patternLayout = new PatternLayout { ConversionPattern = "%date [%thread] %-5level %logger {dd.env=%property{dd.env}, dd.service=%property{dd.service}, dd.version=%property{dd.version}, dd.trace_id=%property{dd.trace_id}, dd.span_id=%property{dd.span_id}} - %message%newline" };

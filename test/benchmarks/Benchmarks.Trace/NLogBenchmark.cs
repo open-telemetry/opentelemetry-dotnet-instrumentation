@@ -29,7 +29,7 @@ namespace Benchmarks.Trace
                 ServiceVersion = "version"
             };
 
-            LogInjectionTracer = new Tracer(logInjectionSettings, new DummyAgentWriter(), null, null, null);
+            LogInjectionTracer = new Tracer(logInjectionSettings, null, new DummyAgentWriter(), null, null, null);
             Tracer.Instance = LogInjectionTracer;
 
             var baselineSettings = new TracerSettings
@@ -40,7 +40,7 @@ namespace Benchmarks.Trace
                 ServiceVersion = "version"
             };
 
-            BaselineTracer = new Tracer(baselineSettings, new DummyAgentWriter(), null, null, null);
+            BaselineTracer = new Tracer(baselineSettings, null, new DummyAgentWriter(), null, null, null);
 
             var config = new LoggingConfiguration();
 

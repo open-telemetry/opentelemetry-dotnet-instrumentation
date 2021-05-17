@@ -40,7 +40,7 @@ namespace Benchmarks.Trace
                 ServiceVersion = "version"
             };
 
-            BaselineTracer = new Tracer(baselineSettings, new DummyAgentWriter(), null, null, null);
+            BaselineTracer = new Tracer(baselineSettings, null, new DummyAgentWriter(), null, null, null);
             var formatter = new MessageTemplateTextFormatter("{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}{Properties}{NewLine}", null);
 
             Logger = new LoggerConfiguration()
