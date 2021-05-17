@@ -21,7 +21,8 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
         {
             foreach (object[] item in PackageVersions.MySqlData)
             {
-                if (!((string)item[0]).StartsWith("8"))
+                var version = (string)item[0];
+                if (version != string.Empty && !version.StartsWith("8"))
                 {
                     continue;
                 }
@@ -35,7 +36,8 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
         {
             foreach (object[] item in PackageVersions.MySqlData)
             {
-                if (((string)item[0]).StartsWith("8"))
+                var version = (string)item[0];
+                if (version != string.Empty && version.StartsWith("8"))
                 {
                     continue;
                 }
