@@ -29,20 +29,7 @@ docker run -d --rm --name jaeger \
 
 # instrument and run HTTP server app in background
 ASPNETCORE_URLS="http://127.0.0.1:8080/" ./dev/instrument.sh dotnet run --no-launch-profile -f $publishTargetFramework -p ./test/test-applications/integrations/Samples.AspNetCoreMvc31/Samples.AspNetCoreMvc31.csproj &
-
-serverPort() {
-  netstat -ano | grep 8080
-}
-
-waitForServer() {
-  while [ "" ==  "$(serverPort)" ]; do   
-    sleep 0.5
-  done
-} &> /dev/null
-
-echo "Waiting server to launch on 8080..."
-time $(waitForServer) 
-echo "Server launched"
+./dev/wait-local-port.sh 8080
 
 # instrument and run HTTP client app
 time ./dev/instrument.sh dotnet run --no-launch-profile -f $consoleAppTargetFramework -p ./samples/ConsoleApp/ConsoleApp.csproj
