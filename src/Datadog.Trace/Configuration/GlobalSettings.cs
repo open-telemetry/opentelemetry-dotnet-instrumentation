@@ -133,8 +133,7 @@ namespace Datadog.Trace.Configuration
 
         private static bool TryLoadPluginJsonConfigurationFile(IConfigurationSource configurationSource, out JsonConfigurationSource jsonConfigurationSource)
         {
-            var configurationFileName = configurationSource?.GetString(ConfigurationKeys.PluginConfigurationFileName) ??
-                                        Path.Combine(GetCurrentDirectory(), "plugins.json");
+            var configurationFileName = configurationSource?.GetString(ConfigurationKeys.PluginConfigurationFileName);
 
             return TryLoadJsonConfigurationFile(configurationFileName, out jsonConfigurationSource);
         }
@@ -143,8 +142,7 @@ namespace Datadog.Trace.Configuration
         {
             // if environment variable is not set, look for default file name in the current directory
             var configurationFileName = configurationSource.GetString(ConfigurationKeys.ConfigurationFileName) ??
-                                        configurationSource.GetString("OTEL_DOTNET_TRACER_CONFIG_FILE") ??
-                                        Path.Combine(GetCurrentDirectory(), "datadog.json");
+                                        configurationSource.GetString("OTEL_DOTNET_TRACER_CONFIG_FILE");
 
             return TryLoadJsonConfigurationFile(configurationFileName, out jsonConfigurationSource);
         }
@@ -153,7 +151,8 @@ namespace Datadog.Trace.Configuration
         {
             try
             {
-                if (string.Equals(Path.GetExtension(configurationFileName), ".JSON", StringComparison.OrdinalIgnoreCase) &&
+                if (!string.IsNullOrWhiteSpace(configurationFileName) &&
+                    string.Equals(Path.GetExtension(configurationFileName), ".JSON", StringComparison.OrdinalIgnoreCase) &&
                     File.Exists(configurationFileName))
                 {
                     jsonConfigurationSource = JsonConfigurationSource.FromFile(configurationFileName);

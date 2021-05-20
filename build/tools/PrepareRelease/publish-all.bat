@@ -5,8 +5,4 @@ SET INTEGRATIONS_PROJ=%SOLUTION_DIR%\src\Datadog.Trace.ClrProfiler.Managed\Datad
 SET OUTPUT_DIR=%SOLUTION_DIR%\build\tools\PrepareRelease\bin\tracer-home
 
 RMDIR "%OUTPUT_DIR%" /S /Q
-
-dotnet publish %INTEGRATIONS_PROJ% -c %TOOL_BUILD_CONFIG% -f net45 -o "%OUTPUT_DIR%\net45"
-dotnet publish %INTEGRATIONS_PROJ% -c %TOOL_BUILD_CONFIG% -f net461 -o "%OUTPUT_DIR%\net461"
-dotnet publish %INTEGRATIONS_PROJ% -c %TOOL_BUILD_CONFIG% -f netstandard2.0 -o "%OUTPUT_DIR%\netstandard2.0"
-dotnet publish %INTEGRATIONS_PROJ% -c %TOOL_BUILD_CONFIG% -f netcoreapp3.1 -o "%OUTPUT_DIR%\netcoreapp3.1"
+dotnet msbuild "%SOLUTION_DIR%\Datadog.Trace.proj" /t:PublishManagedProfilerOnDisk /p:Configuration=Release;TracerHomeDirectory=%OUTPUT_DIR%

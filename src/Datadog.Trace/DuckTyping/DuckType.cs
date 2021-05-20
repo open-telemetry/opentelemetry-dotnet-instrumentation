@@ -131,7 +131,7 @@ namespace Datadog.Trace.DuckTyping
                     }
 
                     // Gets the module builder
-                    var moduleBuilder = GetModuleBuilder(targetType, targetType.IsVisible && proxyDefinitionType.IsVisible);
+                    var moduleBuilder = GetModuleBuilder(targetType, (targetType.IsPublic || targetType.IsNestedPublic) && (proxyDefinitionType.IsPublic || proxyDefinitionType.IsNestedPublic));
 
                     // Ensure visibility
                     EnsureTypeVisibility(moduleBuilder, targetType);
@@ -666,6 +666,16 @@ namespace Datadog.Trace.DuckTyping
         /// <typeparam name="T">Type of proxy definition</typeparam>
         public static class CreateCache<T>
         {
+            /// <summary>
+            /// Gets the type of T
+            /// </summary>
+            public static readonly Type Type = typeof(T);
+
+            /// <summary>
+            /// Gets if the T type is visible
+            /// </summary>
+            public static readonly bool IsVisible = Type.IsPublic || Type.IsNestedPublic;
+
             private static CreateTypeResult _fastPath = default;
 
             /// <summary>
@@ -729,14 +739,13 @@ namespace Datadog.Trace.DuckTyping
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             private static CreateTypeResult GetProxySlow(Type targetType)
             {
-                Type proxyTypeDefinition = typeof(T);
 #if NET45
-                if (!proxyTypeDefinition.IsValueType && !UseDirectAccessTo(proxyTypeDefinition))
+                if (!Type.IsValueType && !IsVisible)
                 {
-                    DuckTypeTypeIsNotPublicException.Throw(proxyTypeDefinition, nameof(proxyTypeDefinition));
+                    DuckTypeTypeIsNotPublicException.Throw(Type, nameof(Type));
                 }
 #endif
-                return GetOrCreateProxyType(proxyTypeDefinition, targetType);
+                return GetOrCreateProxyType(Type, targetType);
             }
         }
     }
