@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euxo pipefail
 
-publishTargetFramework=${publishTargetFramework:-netcoreapp3.1}
+aspNetAppTargetFramework=${aspNetAppTargetFramework:-netcoreapp3.1}
 consoleAppTargetFramework=${consoleAppTargetFramework:-netcoreapp3.1}
 
 function finish {
@@ -27,7 +27,7 @@ docker run -d --rm --name jaeger \
   jaegertracing/all-in-one:1.22
 
 # instrument and run HTTP server app in background
-ASPNETCORE_URLS="http://127.0.0.1:8080/" ./dev/instrument.sh dotnet run --no-launch-profile -f $publishTargetFramework -p ./test/test-applications/integrations/Samples.AspNetCoreMvc31/Samples.AspNetCoreMvc31.csproj &
+ASPNETCORE_URLS="http://127.0.0.1:8080/" ./dev/instrument.sh dotnet run --no-launch-profile -f $aspNetAppTargetFramework -p ./test/test-applications/integrations/Samples.AspNetCoreMvc31/Samples.AspNetCoreMvc31.csproj &
 ./dev/wait-local-port.sh 8080
 
 # instrument and run HTTP client app

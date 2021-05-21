@@ -59,7 +59,7 @@ It would be good to have a checkpoint here where the instrumented application is
 
 ## Testing
 
-### Additional steps for Windows
+### Additional setup for Windows
 
 Add `msbuild` to your `PATH`. You can do it by adding to `~/.bashrc` something more or less like bellow:
 
@@ -91,5 +91,11 @@ For .NET Core 3.1 run:
 For .NET 5.0 run:
 
 ```sh
-publishTargetFramework=net5.0 ./poc.sh
+aspNetAppTargetFramework=net5.0 consoleAppTargetFramework=net5.0 ./poc.sh
+```
+
+For .NET Framework run:
+
+```sh
+consoleAppTargetFramework=net46 ./poc.sh
 ```
