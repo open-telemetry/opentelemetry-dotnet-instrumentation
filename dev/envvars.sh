@@ -23,7 +23,7 @@ native_sufix() {
 
 SUFIX=$(native_sufix)
 
-if [[ -z "${CURDIR}" ]]; then
+if [[ -z "${CURDIR:-}" ]]; then
   CURDIR=${PWD}
 fi
 
