@@ -28,13 +28,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: microsoft/setup-msbuild@v1.0.2
-      - run: dotnet build -c $buildConfiguration src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
+      - run: dotnet build -c %buildConfiguration% src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
         shell: cmd
         env:
           buildConfiguration: Release
       - run: nuget restore src\Datadog.Trace.ClrProfiler.Native\Datadog.Trace.ClrProfiler.Native.vcxproj -SolutionDirectory .
         shell: cmd
-      - run: msbuild.exe Datadog.Trace.proj -t:BuildCpp -p:Configuration=${buildConfiguration} -p:Platform=x64
+      - run: msbuild.exe Datadog.Trace.proj -t:BuildCpp -p:Configuration=%buildConfiguration% -p:Platform=x64
         shell: cmd
         env:
           buildConfiguration: Release
