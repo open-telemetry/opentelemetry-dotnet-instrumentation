@@ -1,51 +1,26 @@
 name: Build artifacts
 on: 
   push: 
-    branches: [ main ]
+    branches: [ poc-otel-sdk ]
     tags:
       - 'v*.*.*'
   pull_request:
-    branches: [ main ]
+    branches: [ poc-otel-sdk ]
   workflow_dispatch:
 
 jobs:
-  alpine_build:
-    name: Alpine Build
-    runs-on: ubuntu-20.04
-    steps:
-    - uses: actions/checkout@v2
-    - run: docker-compose run build
-      env:
-        buildConfiguration: Release
-    - run: docker-compose run Profiler.Alpine
-      env:
-        buildConfiguration: Release
-    - run: docker-compose run package.alpine
-      env:
-        buildConfiguration: Release
-    - uses: actions/upload-artifact@v2
-      with:
-        name: artifacts
-        path: deploy/linux
 
   linux_build:
     name: Linux Build
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
-    - run: docker-compose run build
+    - run: ./build/docker/build.sh
       env:
         buildConfiguration: Release
-    - run: docker-compose run Profiler
+    - run: ./build/docker/Datadog.Trace.ClrProfiler.Native.sh
       env:
         buildConfiguration: Release
-    - run: docker-compose run package
-      env:
-        buildConfiguration: Release
-    - uses: actions/upload-artifact@v2
-      with:
-        name: artifacts
-        path: deploy/linux
 
   windows_build:
     name: Windows Build
@@ -53,52 +28,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: microsoft/setup-msbuild@v1.0.2
-      - run: dotnet --list-sdks
+      - run: dotnet build -c %buildConfiguration% src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
         shell: cmd
-      - run: choco install wixtoolset
-        shell: cmd
-      - run: .\build\build.cmd
         env:
           buildConfiguration: Release
+      - run: nuget restore src\Datadog.Trace.ClrProfiler.Native\Datadog.Trace.ClrProfiler.Native.vcxproj -SolutionDirectory .
         shell: cmd
-      - uses: actions/upload-artifact@v2
-        with:
-          name: artifacts
-          path: src/WindowsInstaller/bin/Release/*/en-us
-
-  macos_build:
-    name: MacOS Build
-    runs-on: macos-10.15
-    steps:
-      - uses: actions/checkout@v2
-      - run: brew install make
-      - run: ./build/build_mac.sh
+      - run: msbuild.exe Datadog.Trace.proj -t:BuildCpp -p:Configuration=%buildConfiguration% -p:Platform=x64
+        shell: cmd
         env:
           buildConfiguration: Release
-      - run: tar --create --verbose --file=otel-dotnet-autoinstrumentation-macos.tar deploy/macos
-      - uses: actions/upload-artifact@v2
-        with:
-          name: artifacts
-          path: otel-dotnet-autoinstrumentation-macos.tar
-
-  create_release:
-    runs-on: ubuntu-20.04
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') # only trigger if the current event is for a tag push
-    needs: [alpine_build, linux_build, windows_build, macos_build]
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        with:
-          path: .
-      - name: Extract tag name
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v}
-      - name: Extract release notes
-        run: awk '/## \[${{ steps.get_version.outputs.VERSION }}\]/,0' docs/CHANGELOG.md >> notes.md
-      - run: gh release create v${{ steps.get_version.outputs.VERSION }} -F notes.md artifacts/otel* artifacts/x64/en-us/opentelemetry* artifacts/x86/en-us/opentelemetry*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
