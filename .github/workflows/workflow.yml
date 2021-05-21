@@ -1,3 +1,4 @@
+name: workflow
 on: 
   push: 
     branches: [ poc-otel-sdk ]
