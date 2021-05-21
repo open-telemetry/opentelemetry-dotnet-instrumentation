@@ -1,1 +1,0 @@
-https://github.com/serilog/serilog-sinks-file/archive/v4.1.0.zip

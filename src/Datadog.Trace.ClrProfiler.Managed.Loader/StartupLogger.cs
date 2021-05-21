@@ -27,17 +27,17 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
 
                         return;
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore
+                        Console.Error.WriteLine($"Log: Exception creating FileSink {ex}");
                     }
                 }
 
                 Console.Error.WriteLine(message, args);
             }
-            catch
+            catch (Exception ex)
             {
-                // ignore
+                Console.Error.WriteLine($"Log: Global exception: {ex}");
             }
         }
 

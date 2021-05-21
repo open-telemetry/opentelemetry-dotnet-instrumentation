@@ -1,1 +1,0 @@
-https://github.com/serilog/serilog/archive/v2.10.0.zip

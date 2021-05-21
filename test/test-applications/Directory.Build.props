@@ -24,11 +24,6 @@
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(ExcludeManagedProfiler)' != 'true' and
-                        '$(LoadManagedProfilerFromProfilerDirectory)' != 'true' ">
-    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\..\src\Datadog.Trace.ClrProfiler.Managed\Datadog.Trace.ClrProfiler.Managed.csproj" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(ExcludeNativeProfiler)' != 'true'">
     <None Include="$(ProfilerOutputDirectory)\*.dll;$(ProfilerOutputDirectory)\*.so;$(ProfilerOutputDirectory)\*.pdb"
           CopyToOutputDirectory="Always"
