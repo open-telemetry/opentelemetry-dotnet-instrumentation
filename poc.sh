@@ -11,7 +11,7 @@ function finish {
 trap finish EXIT
 
 # build managed and native code
-./build/build.sh
+./build.sh
 
 # start Jaeger
 docker run -d --rm --name jaeger \

@@ -75,7 +75,14 @@ To build everything and run integration tests
 ### Building
 
 ```sh
-./build/build.sh
+./build.sh
+```
+
+For Windows make sure to add `msbuild` to your `PATH`.
+You can do it by adding to `~/.bashrc` something more or less like bellow:
+
+```sh
+PATH="$PATH:/c/Program Files (x86)/Microsoft Visual Studio/2019/Professional/MSBuild/Current/Bin"
 ```
 
 ## Visual Studio Code

@@ -18,6 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		build.sh = build.sh
 		Datadog.Trace.proj = Datadog.Trace.proj
 		Directory.Build.props = Directory.Build.props
 		GlobalSuppressions.cs = GlobalSuppressions.cs
@@ -47,8 +48,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{5D8E1F81
 		tools\GlobalSuppressions.cs = tools\GlobalSuppressions.cs
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeneratePackageVersions", "build\tools\GeneratePackageVersions\GeneratePackageVersions.csproj", "{24B0357D-B0C8-46C7-96F6-006E3F66662A}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Datadog.Trace.ClrProfiler.Managed.Loader", "src\Datadog.Trace.ClrProfiler.Managed.Loader\Datadog.Trace.ClrProfiler.Managed.Loader.csproj", "{AB8596C1-CFDA-4A5E-9E9C-74A3DF9AED77}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".azure-pipelines", ".azure-pipelines", "{C52D6695-4E05-4930-88F8-0EFF8056A967}"
@@ -77,17 +76,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "integrations", "integration
 	ProjectSection(SolutionItems) = preProject
 		test\test-applications\integrations\Directory.Build.props = test\test-applications\integrations\Directory.Build.props
 	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{A0C5FBBB-CFB2-4FB9-B8F0-55676E9DCF06}"
-	ProjectSection(SolutionItems) = preProject
-		build\build.sh = build\build.sh
-		build\Directory.Build.props = build\Directory.Build.props
-		build\PackageVersionsComprehensive.g.props = build\PackageVersionsComprehensive.g.props
-		build\PackageVersionsGeneratorDefinitions.json = build\PackageVersionsGeneratorDefinitions.json
-		build\PackageVersionsLatestMinors.g.props = build\PackageVersionsLatestMinors.g.props
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{C70D6696-23F0-4C3D-9C2A-94C4868D5249}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -119,18 +107,6 @@ Global
 		{C0C8D381-D6B9-4C76-9428-F40F2FA93A9A}.Release|x64.Build.0 = Release|x64
 		{C0C8D381-D6B9-4C76-9428-F40F2FA93A9A}.Release|x86.ActiveCfg = Release|Win32
 		{C0C8D381-D6B9-4C76-9428-F40F2FA93A9A}.Release|x86.Build.0 = Release|Win32
-		{24B0357D-B0C8-46C7-96F6-006E3F66662A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{24B0357D-B0C8-46C7-96F6-006E3F66662A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{24B0357D-B0C8-46C7-96F6-006E3F66662A}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{24B0357D-B0C8-46C7-96F6-006E3F66662A}.Debug|x64.Build.0 = Debug|Any CPU
-		{24B0357D-B0C8-46C7-96F6-006E3F66662A}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{24B0357D-B0C8-46C7-96F6-006E3F66662A}.Debug|x86.Build.0 = Debug|Any CPU
-		{24B0357D-B0C8-46C7-96F6-006E3F66662A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{24B0357D-B0C8-46C7-96F6-006E3F66662A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{24B0357D-B0C8-46C7-96F6-006E3F66662A}.Release|x64.ActiveCfg = Release|Any CPU
-		{24B0357D-B0C8-46C7-96F6-006E3F66662A}.Release|x64.Build.0 = Release|Any CPU
-		{24B0357D-B0C8-46C7-96F6-006E3F66662A}.Release|x86.ActiveCfg = Release|Any CPU
-		{24B0357D-B0C8-46C7-96F6-006E3F66662A}.Release|x86.Build.0 = Release|Any CPU
 		{AB8596C1-CFDA-4A5E-9E9C-74A3DF9AED77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AB8596C1-CFDA-4A5E-9E9C-74A3DF9AED77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB8596C1-CFDA-4A5E-9E9C-74A3DF9AED77}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -182,7 +158,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{91B6272F-5780-4C94-8071-DBBA7B4F67F3} = {9E5F0022-0A50-40BF-AC6A-C3078585ECAB}
 		{C0C8D381-D6B9-4C76-9428-F40F2FA93A9A} = {9E5F0022-0A50-40BF-AC6A-C3078585ECAB}
-		{24B0357D-B0C8-46C7-96F6-006E3F66662A} = {C70D6696-23F0-4C3D-9C2A-94C4868D5249}
 		{AB8596C1-CFDA-4A5E-9E9C-74A3DF9AED77} = {9E5F0022-0A50-40BF-AC6A-C3078585ECAB}
 		{C52D6695-4E05-4930-88F8-0EFF8056A967} = {FEBCE7DC-9FD1-48A6-B911-71ABB240A030}
 		{3BEACB10-89FE-4F74-8022-1A52F223CE82} = {5D8E1F81-B820-4736-B797-271B0FE787EE}
@@ -190,7 +165,6 @@ Global
 		{D141BD06-DD95-4CAF-85CD-657116E0DAD4} = {BAF8F246-3645-42AD-B1D0-0F7EAFBAB34A}
 		{9518425A-36A5-4B8F-B0B8-6137DB88441D} = {8CEC2042-F11C-49F5-A674-2355793B600A}
 		{BAF8F246-3645-42AD-B1D0-0F7EAFBAB34A} = {9518425A-36A5-4B8F-B0B8-6137DB88441D}
-		{C70D6696-23F0-4C3D-9C2A-94C4868D5249} = {A0C5FBBB-CFB2-4FB9-B8F0-55676E9DCF06}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}

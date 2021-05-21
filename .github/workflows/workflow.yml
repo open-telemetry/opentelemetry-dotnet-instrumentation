@@ -22,4 +22,4 @@ jobs:
       env:
         buildConfiguration: Release
       shell: bash
-      run: ./build/build.sh
+      run: ./build.sh
