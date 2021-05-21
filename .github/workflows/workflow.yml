@@ -1,16 +1,28 @@
-name: Build artifacts
+name: Build
 on: 
   push: 
     branches: [ poc-otel-sdk ]
     tags:
       - 'v*.*.*'
   pull_request:
-    branches: [ poc-otel-sdk ]
   workflow_dispatch:
 
 jobs:
 
-  linux_build:
+  macos:
+    name: MacOS Build
+    runs-on: macos-10.15
+    steps:
+    - uses: actions/checkout@v2
+    - run: brew install make
+    - run: ./build/docker/build.sh
+      env:
+        buildConfiguration: Release
+    - run: ./build/docker/Datadog.Trace.ClrProfiler.Native.sh
+      env:
+        buildConfiguration: Release
+
+  linux:
     name: Linux Build
     runs-on: ubuntu-20.04
     steps:
@@ -22,7 +34,7 @@ jobs:
       env:
         buildConfiguration: Release
 
-  windows_build:
+  windows:
     name: Windows Build
     runs-on: windows-2019
     steps:
