@@ -6,47 +6,21 @@ on:
       - 'v*.*.*'
   pull_request:
   workflow_dispatch:
-
 jobs:
-
-  macos:
-    name: MacOS Build
-    runs-on: macos-10.15
+  build:
+    strategy:
+      matrix:
+        os: [ windows-2019, ubuntu-20.04, macos-10.15 ]
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
+    - uses: microsoft/setup-msbuild@v1.0.2
+      if: ${{ runner.os == 'Windows' }}
     - run: brew install make
-    - run: ./build/docker/build.sh
+      if: ${{ runner.os == 'macOS' }}
+    - name: Build Managed and Native
       env:
         buildConfiguration: Release
-    - run: ./build/docker/Datadog.Trace.ClrProfiler.Native.sh
-      env:
-        buildConfiguration: Release
-
-  linux:
-    name: Linux Build
-    runs-on: ubuntu-20.04
-    steps:
-    - uses: actions/checkout@v2
-    - run: ./build/docker/build.sh
-      env:
-        buildConfiguration: Release
-    - run: ./build/docker/Datadog.Trace.ClrProfiler.Native.sh
-      env:
-        buildConfiguration: Release
-
-  windows:
-    name: Windows Build
-    runs-on: windows-2019
-    steps:
-      - uses: actions/checkout@v2
-      - uses: microsoft/setup-msbuild@v1.0.2
-      - run: dotnet build -c %buildConfiguration% src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
-        shell: cmd
-        env:
-          buildConfiguration: Release
-      - run: nuget restore src\Datadog.Trace.ClrProfiler.Native\Datadog.Trace.ClrProfiler.Native.vcxproj -SolutionDirectory .
-        shell: cmd
-      - run: msbuild.exe Datadog.Trace.proj -t:BuildCpp -p:Configuration=%buildConfiguration% -p:Platform=x64
-        shell: cmd
-        env:
-          buildConfiguration: Release
+      run: |
+        ./build/docker/build.sh
+        ./build/docker/Datadog.Trace.ClrProfiler.Native.sh
