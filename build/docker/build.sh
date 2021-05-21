@@ -1,6 +1,16 @@
 #!/bin/bash
 set -euxo pipefail
 
+uname_os() {
+    os=$(uname -s | tr '[:upper:]' '[:lower:]')
+    case "$os" in
+        cygwin_nt*) echo "windows" ;;
+        mingw*) echo "windows" ;;
+        msys_nt*) echo "windows" ;;
+        *) echo "$os" ;;
+    esac
+}
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
 cd "$DIR/../.."
@@ -8,19 +18,35 @@ cd "$DIR/../.."
 buildConfiguration=${buildConfiguration:-Debug}
 publishTargetFramework=${publishTargetFramework:-netcoreapp3.1}
 PUBLISH_OUTPUT="$( pwd )/src/bin/managed-publish"
+os=$(uname_os)
 
 mkdir -p "$PUBLISH_OUTPUT/netstandard2.0"
 mkdir -p "$PUBLISH_OUTPUT/netcoreapp3.1"
+if [ "$os" == "windows" ]
+then
+    mkdir -p "$PUBLISH_OUTPUT/net45"
+    mkdir -p "$PUBLISH_OUTPUT/net461"
+fi
 
 dotnet build -c $buildConfiguration src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
 
 for proj in Datadog.Trace Datadog.Trace.OpenTracing ; do
     dotnet publish -f netstandard2.0 -c $buildConfiguration src/$proj/$proj.csproj
     dotnet publish -f netcoreapp3.1 -c $buildConfiguration src/$proj/$proj.csproj
+    if [ "$os" == "windows" ]
+    then
+        dotnet publish -f net45 -c $buildConfiguration src/$proj/$proj.csproj
+        dotnet publish -f net461 -c $buildConfiguration src/$proj/$proj.csproj
+    fi
 done
 
 dotnet publish -f netstandard2.0 -c $buildConfiguration src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj -o "$PUBLISH_OUTPUT/netstandard2.0"
 dotnet publish -f netcoreapp3.1 -c $buildConfiguration src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj -o "$PUBLISH_OUTPUT/netcoreapp3.1"
+if [ "$os" == "windows" ]
+then
+    dotnet publish -f net45 -c $buildConfiguration src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj -o "$PUBLISH_OUTPUT/net45"
+    dotnet publish -f net461 -c $buildConfiguration src/Datadog.Trace.ClrProfiler.Managed/Datadog.Trace.ClrProfiler.Managed.csproj -o "$PUBLISH_OUTPUT/net461"
+fi
 
 # Exit if QUICK_BUILD env var is not empty
 if [ -n "${QUICK_BUILD-}" ]
