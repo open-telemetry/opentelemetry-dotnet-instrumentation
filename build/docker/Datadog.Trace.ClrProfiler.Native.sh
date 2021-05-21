@@ -27,18 +27,11 @@ cd "$DIR/../.."
 BUILD_TYPE=${buildConfiguration:-Debug}
 OUTDIR="$( pwd )/src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64"
 
-# If running the unified pipeline, do not copy managed assets yet. Do so during the package build step
-if [ -z "${UNIFIED_PIPELINE-}" ]; then
-  PUBLISH_OUTPUT_MANAGED="$( pwd )/src/bin/managed-publish"
-
-  mkdir -p ${OUTDIR}/
-  cp -fr ${PUBLISH_OUTPUT_MANAGED}/* ${OUTDIR}/
-fi
-
 os=$(uname_os)
 case "$os" in
  windows*)
-    msbuild.exe Datadog.Trace.proj -t:BuildCpp -p:TracerHomeDirectory=${OUTDIR} -p:Configuration=${BUILD_TYPE} -p:Platform=x64
+    nuget restore "src\Datadog.Trace.ClrProfiler.Native\Datadog.Trace.ClrProfiler.Native.vcxproj" -SolutionDirectory .
+    msbuild.exe Datadog.Trace.proj -t:BuildCpp -p:Configuration=${BUILD_TYPE} -p:Platform=x64
     ;;
 
  *)

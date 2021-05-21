@@ -1,1 +1,0 @@
-﻿https://github.com/JamesNK/Newtonsoft.Json/archive/12.0.1.zip
