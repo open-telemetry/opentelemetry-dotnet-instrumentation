@@ -1,6 +1,9 @@
 #!/bin/bash
 set -euxo pipefail
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+cd $DIR
+
 aspNetAppTargetFramework=${aspNetAppTargetFramework:-netcoreapp3.1}
 consoleAppTargetFramework=${consoleAppTargetFramework:-netcoreapp3.1}
 
