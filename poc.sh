@@ -10,7 +10,7 @@ function finish {
 trap finish EXIT
 
 # build  projects
-QUICK_BUILD=1 ./build/docker/build.sh 
+./build/docker/build.sh 
 ./build/docker/Datadog.Trace.ClrProfiler.Native.sh # probably this can be commented out if we do not touch it
 
 # start Jaeger

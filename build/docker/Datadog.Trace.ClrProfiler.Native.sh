@@ -30,7 +30,7 @@ OUTDIR="$( pwd )/src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64"
 os=$(uname_os)
 case "$os" in
  windows*)
-    nuget restore "C:\otel.net.instr\src\Datadog.Trace.ClrProfiler.Native\Datadog.Trace.ClrProfiler.Native.vcxproj" -SolutionDirectory .
+    nuget restore "src\Datadog.Trace.ClrProfiler.Native\Datadog.Trace.ClrProfiler.Native.vcxproj" -SolutionDirectory .
     msbuild.exe Datadog.Trace.proj -t:BuildCpp -p:Configuration=${BUILD_TYPE} -p:Platform=x64
     ;;
 
