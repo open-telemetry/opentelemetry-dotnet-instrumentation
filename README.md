@@ -73,6 +73,13 @@ PATH="$PATH:/c/Program Files (x86)/Microsoft Visual Studio/2019/Professional/MSB
 export CURDIR='C:\repos\opentelemetry-dotnet-instrumentation'
 ```
 
+### Additional setup for Linux and MacOS
+
+```sh
+sudo mkdir -p /var/log/opentelemetry/dotnet
+sudo chmod a+rwx /var/log/opentelemetry/dotnet
+```
+
 ### Usage
 
 For .NET Core 3.1 run:

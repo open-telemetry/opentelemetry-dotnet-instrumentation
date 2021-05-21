@@ -10,9 +10,8 @@ function finish {
 }
 trap finish EXIT
 
-# build  projects
-./build/docker/build.sh 
-./build/docker/Datadog.Trace.ClrProfiler.Native.sh # probably this can be commented out if we do not touch it
+# build managed and native code
+./build/build.sh
 
 # start Jaeger
 docker run -d --rm --name jaeger \

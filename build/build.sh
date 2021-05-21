@@ -22,11 +22,14 @@ native_sufix() {
 }
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-cd "$DIR/../.."
+cd "$DIR/.."
 
 BUILD_TYPE=${buildConfiguration:-Debug}
-OUTDIR="$( pwd )/src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64"
 
+# build Loader
+dotnet build -c $BUILD_TYPE src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
+
+# build Native
 os=$(uname_os)
 case "$os" in
  windows*)
@@ -35,12 +38,14 @@ case "$os" in
     ;;
 
  *)
+    OUTDIR="$( pwd )/src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64"
     cd src/Datadog.Trace.ClrProfiler.Native
 
     mkdir -p build
-    (cd build && cmake ../ -DCMAKE_BUILD_TYPE=${BUILD_TYPE}  && make)
+    (cd build && cmake ../ -DCMAKE_BUILD_TYPE=${BUILD_TYPE} && make)
 
+    OUTDIR="bin/${BUILD_TYPE}/x64"
     SUFIX=$(native_sufix)
-    mkdir -p bin/${BUILD_TYPE}/x64
+    mkdir -p ${OUTDIR}
     cp -f build/bin/Datadog.Trace.ClrProfiler.Native.${SUFIX} ${OUTDIR}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.${SUFIX}
 esac

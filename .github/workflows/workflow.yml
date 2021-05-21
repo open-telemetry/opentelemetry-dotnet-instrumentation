@@ -22,6 +22,4 @@ jobs:
       env:
         buildConfiguration: Release
       shell: bash
-      run: |
-        ./build/docker/build.sh
-        ./build/docker/Datadog.Trace.ClrProfiler.Native.sh
+      run: ./build/build.sh

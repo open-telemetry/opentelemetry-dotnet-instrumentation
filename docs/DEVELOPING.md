@@ -75,8 +75,7 @@ To build everything and run integration tests
 ### Building
 
 ```sh
-QUICK_BUILD=1 ./build/docker/build.sh
-./build/docker/Datadog.Trace.ClrProfiler.Native.sh
+./build/build.sh
 ```
 
 ## Visual Studio Code
