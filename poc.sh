@@ -1,7 +1,10 @@
 #!/bin/bash
 set -euxo pipefail
 
-publishTargetFramework=${publishTargetFramework:-netcoreapp3.1}
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+cd $DIR
+
+aspNetAppTargetFramework=${aspNetAppTargetFramework:-netcoreapp3.1}
 consoleAppTargetFramework=${consoleAppTargetFramework:-netcoreapp3.1}
 
 function finish {
@@ -10,9 +13,8 @@ function finish {
 }
 trap finish EXIT
 
-# build  projects
-./build/docker/build.sh 
-./build/docker/Datadog.Trace.ClrProfiler.Native.sh # probably this can be commented out if we do not touch it
+# build managed and native code
+./build.sh
 
 # start Jaeger
 docker run -d --rm --name jaeger \
@@ -28,7 +30,7 @@ docker run -d --rm --name jaeger \
   jaegertracing/all-in-one:1.22
 
 # instrument and run HTTP server app in background
-ASPNETCORE_URLS="http://127.0.0.1:8080/" ./dev/instrument.sh dotnet run --no-launch-profile -f $publishTargetFramework -p ./test/test-applications/integrations/Samples.AspNetCoreMvc31/Samples.AspNetCoreMvc31.csproj &
+ASPNETCORE_URLS="http://127.0.0.1:8080/" ./dev/instrument.sh dotnet run --no-launch-profile -f $aspNetAppTargetFramework -p ./samples/Samples.AspNetCoreMvc31/Samples.AspNetCoreMvc31.csproj &
 ./dev/wait-local-port.sh 8080
 
 # instrument and run HTTP client app

@@ -6,34 +6,22 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <CsharpProject Include="src\**\*.csproj" Exclude="src/Datadog.Trace.Tools.Runner/*.csproj" />
-    <CsharpTestProject Include="test\*\*.csproj" Exclude="test\Datadog.Trace.ClrProfiler.IntegrationTests\*.csproj" />
+    <CsharpProject Include="src\**\*.csproj" />
     <CppProject Include="src\**\*.vcxproj"/>
-    <CppTestProject Include="test\**\*.vcxproj"/>
-    <SampleProject Include="test\test-applications\**\*.csproj" Exclude="test\test-applications\integrations\dependency-libs\**\*.csproj" />
-    <SampleLibProject Include="test\test-applications\integrations\dependency-libs\**\*.csproj" Exclude="test\test-applications\integrations\dependency-libs\**\Samples.MultiDomainHost.App.*.csproj" />
-    <WindowsInstallerProject Include="src\**\*.wixproj"/>
+    <SampleProject Include="test\test-applications\**\*.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <FrameworkReproduction Include="test\test-applications\regression\EntityFramework6x.MdTokenLookupFailure\EntityFramework6x.MdTokenLookupFailure.csproj" />
-    <FrameworkReproduction Include="test\test-applications\regression\StackExchange.Redis.AssemblyConflict.LegacyProject\StackExchange.Redis.AssemblyConflict.LegacyProject.csproj" />
-  </ItemGroup>
-
-  <Import Condition="'$(PerformComprehensiveTesting)'=='true'" Project="build\PackageVersionsComprehensive.g.props" />
-  <Import Condition="'$(PerformComprehensiveTesting)'!='true'" Project="build\PackageVersionsLatestMinors.g.props" />
 
   <Target Name="Restore">
-    <MSBuild Targets="Restore" Projects="@(CsharpProject);@(CsharpTestProject);@(CppProject);@(CppTestProject);@(SampleProject)"/>
+    <MSBuild Targets="Restore" Projects="@(CsharpProject);@(CppProject);@(SampleProject)"/>
   </Target>
 
   <Target Name="Clean">
-    <MSBuild Targets="Clean" Projects="@(CsharpProject);@(CsharpTestProject);@(CppProject);@(CppTestProject);@(SampleProject);@(WindowsInstallerProject)"/>
+    <MSBuild Targets="Clean" Projects="@(CsharpProject);@(CppProject);@(SampleProject)"/>
   </Target>
 
   <!-- default target -->
   <Target Name="Build">
-    <MSBuild Targets="Build" Projects="@(CsharpProject);@(CsharpTestProject);@(CppProject);@(CppTestProject)">
+    <MSBuild Targets="Build" Projects="@(CsharpProject);@(CppProject)">
       <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
     </MSBuild>
   </Target>
@@ -54,28 +42,12 @@
     </MSBuild>
   </Target>
 
-  <Target Name="BuildCsharpTests">
-    <MSBuild Targets="Restore" Projects="@(CsharpTestProject)" Properties="Platform=AnyCPU">
-      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
-    </MSBuild>
-
-    <MSBuild Targets="Build" Projects="@(CsharpTestProject)">
-      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
-    </MSBuild>
-  </Target>
-
   <Target Name="BuildCpp">
     <MSBuild Targets="Build" Projects="@(CppProject)" Condition="'$(Platform)' == 'x64' OR '$(Platform)' == 'All'" Properties="Platform=x64">
       <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
     </MSBuild>
 
     <MSBuild Targets="Build" Projects="@(CppProject)" Condition="'$(Platform)' == 'x86' OR '$(Platform)' == 'All' OR '$(Buildx86Profiler)' == 'true'" Properties="Platform=x86">
-      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
-    </MSBuild>
-  </Target>
-
-  <Target Name="BuildCppTests">
-    <MSBuild Targets="Build" Projects="@(CppTestProject)">
       <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
     </MSBuild>
   </Target>
@@ -88,14 +60,6 @@
       <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
     </MSBuild>
     <MSBuild Targets="Build" Projects="@(CsharpProject)" BuildInParallel="false" RemoveProperties="TargetFramework;Platform">
-      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
-    </MSBuild>
-
-    <!-- Build the sample-libs projects next in case any sample projects rely on them -->
-    <MSBuild Targets="Restore" Projects="@(SampleLibProject)" BuildInParallel="false" RemoveProperties="TargetFramework">
-      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
-    </MSBuild>
-    <MSBuild Targets="Build" Projects="@(SampleLibProject)" BuildInParallel="false" RemoveProperties="TargetFramework">
       <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
     </MSBuild>
 
@@ -190,16 +154,6 @@
   </Target>
 
   <Target Name="Msi" DependsOnTargets="SetMsiProperties;CreateHomeDirectory;MsiOnly">
-  </Target>
-
-  <Target Name="MsiOnly" DependsOnTargets="SetMsiProperties">
-    <MSBuild Targets="Build" Projects="@(WindowsInstallerProject)" Condition="'$(Platform)' == 'x64' OR '$(Platform)' == 'All'" Properties="Platform=x64">
-      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
-    </MSBuild>
-
-    <MSBuild Targets="Build" Projects="@(WindowsInstallerProject)" Condition="'$(Platform)' == 'x86' OR '$(Platform)' == 'All'" Properties="Platform=x86">
-      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
-    </MSBuild>
   </Target>
 
   <Target Name="CreateHomeDirectory" DependsOnTargets="PublishNativeProfilerOnDisk;PublishManagedProfilerOnDisk;PublishBuildLoggerOnDisk">

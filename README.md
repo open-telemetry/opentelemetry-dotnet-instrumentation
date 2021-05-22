@@ -59,7 +59,7 @@ It would be good to have a checkpoint here where the instrumented application is
 
 ## Testing
 
-### Additional steps for Windows
+### Additional setup for Windows
 
 Add `msbuild` to your `PATH`. You can do it by adding to `~/.bashrc` something more or less like bellow:
 
@@ -73,6 +73,13 @@ PATH="$PATH:/c/Program Files (x86)/Microsoft Visual Studio/2019/Professional/MSB
 export CURDIR='C:\repos\opentelemetry-dotnet-instrumentation'
 ```
 
+### Additional setup for Linux and MacOS
+
+```sh
+sudo mkdir -p /var/log/opentelemetry/dotnet
+sudo chmod a+rwx /var/log/opentelemetry/dotnet
+```
+
 ### Usage
 
 For .NET Core 3.1 run:
@@ -84,5 +91,11 @@ For .NET Core 3.1 run:
 For .NET 5.0 run:
 
 ```sh
-publishTargetFramework=net5.0 ./poc.sh
+aspNetAppTargetFramework=net5.0 consoleAppTargetFramework=net5.0 ./poc.sh
+```
+
+For .NET Framework run:
+
+```sh
+consoleAppTargetFramework=net46 ./poc.sh
 ```
