@@ -14,7 +14,7 @@ uname_os() {
 port=$1
 
 serverPort() {
-  netstat -ano | grep $port
+  netstat -ano | grep 127.0.0.1:$port
 }
 
 waitForServer() {
