@@ -38,7 +38,6 @@ case "$os" in
     ;;
 
  *)
-    OUTDIR="$( pwd )/src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64"
     cd src/Datadog.Trace.ClrProfiler.Native
 
     mkdir -p build
@@ -49,3 +48,13 @@ case "$os" in
     mkdir -p ${OUTDIR}
     cp -f build/bin/Datadog.Trace.ClrProfiler.Native.${SUFIX} ${OUTDIR}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.${SUFIX}
 esac
+
+# build Managed
+cd $DIR
+OUTDIR="$( pwd )/src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64"
+
+mkdir -p "$OUTDIR/netstandard2.0"
+mkdir -p "$OUTDIR/netcoreapp3.1"
+
+dotnet publish -f netstandard2.0 -c ${BUILD_TYPE} src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.csproj -o "$OUTDIR/netstandard2.0"
+dotnet publish -f netcoreapp3.1 -c ${BUILD_TYPE} src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.csproj -o "$OUTDIR/netcoreapp3.1"
