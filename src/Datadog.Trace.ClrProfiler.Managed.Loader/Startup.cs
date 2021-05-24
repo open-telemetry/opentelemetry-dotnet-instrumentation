@@ -33,6 +33,23 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
         private static void TryLoadManagedAssembly()
         {
             StartupLogger.Log("Managed Loader TryLoadManagedAssembly()");
+
+            try
+            {
+                var assembly = Assembly.Load("OpenTelemetry.Instrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429");
+
+                if (assembly != null)
+                {
+                    // call method Datadog.Trace.ClrProfiler.Instrumentation.Initialize()
+                    var type = assembly.GetType("OpenTelemetry.Instrumentation.ClrProfiler.Managed.Instrumentation", throwOnError: false);
+                    var method = type?.GetRuntimeMethod("Initialize", new Type[0]);
+                    method?.Invoke(obj: null, parameters: null);
+                }
+            }
+            catch (Exception ex)
+            {
+                StartupLogger.Log(ex, "Error when loading managed assemblies.");
+            }
         }
 
         private static string ReadEnvironmentVariable(string key)
