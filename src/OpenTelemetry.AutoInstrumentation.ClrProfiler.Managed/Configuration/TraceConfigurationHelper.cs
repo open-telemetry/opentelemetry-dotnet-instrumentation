@@ -12,12 +12,14 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                           .SetExporter(settings);
         }
 
-        public static TracerProviderBuilder AddAspNetInstrumentation(this TracerProviderBuilder builder)
+        public static TracerProviderBuilder AddSdkAspNetInstrumentation(this TracerProviderBuilder builder)
         {
-#if NETFRAMEWORK
+#if NET452 || NET461
             return builder.AddAspNetInstrumentation();
-#else
+#elif NETCOREAPP3_1_OR_GREATER
             return builder.AddAspNetCoreInstrumentation();
+#else
+            return builder;
 #endif
         }
 
