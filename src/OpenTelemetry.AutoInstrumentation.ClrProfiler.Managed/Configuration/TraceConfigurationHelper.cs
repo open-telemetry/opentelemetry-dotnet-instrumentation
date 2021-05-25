@@ -1,3 +1,7 @@
+#if NET452
+using System;
+#endif
+using System;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -7,8 +11,11 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
     {
         public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, Settings settings)
         {
-            return builder.SetResourceBuilder(ResourceBuilder.CreateDefault()
-                                                             .AddService(settings.ServiceName, serviceVersion: settings.ServiceVersion))
+            var resourceBuilder = ResourceBuilder
+                                 .CreateDefault()
+                                 .AddService(settings.ServiceName ?? "UNKNOWN_SERVICE_NAME", serviceVersion: settings.ServiceVersion);
+
+            return builder.SetResourceBuilder(resourceBuilder)
                           .SetExporter(settings);
         }
 
@@ -30,7 +37,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                 case "zipkin":
                     builder.AddZipkinExporter(options =>
                     {
-                        options.Endpoint = settings.AgentUri;
+                        options.Endpoint = settings.ZipkinEndpoint;
                     });
 
                     break;
@@ -48,6 +55,8 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                     });
 
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException("The exporter name is not recognised");
 #endif
             }
 

@@ -17,8 +17,8 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
             ServiceVersion = Environment.GetEnvironmentVariable(ConfigurationKeys.ServiceVersion);
             Exporter = Environment.GetEnvironmentVariable(ConfigurationKeys.Exporter);
 
-            var agentUri = Environment.GetEnvironmentVariable(ConfigurationKeys.AgentUri) ?? $"http://localhost:8126";
-            AgentUri = new Uri(agentUri);
+            var zipkinEndpoint = Environment.GetEnvironmentVariable(ConfigurationKeys.ZipkinEndpoint) ?? $"http://localhost:8126";
+            ZipkinEndpoint = new Uri(zipkinEndpoint);
 
             JaegerExporterAgentHost = Environment.GetEnvironmentVariable(ConfigurationKeys.JaegerExporterAgentHost) ?? "localhost";
             JaegerExporterAgentPort = int.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.JaegerExporterAgentPort), out var port) ? port : 6831;
@@ -54,7 +54,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         /// <summary>
         /// Gets agent uri.
         /// </summary>
-        public Uri AgentUri { get; }
+        public Uri ZipkinEndpoint { get; }
 
         /// <summary>
         /// Gets jaeger exporter agent host.

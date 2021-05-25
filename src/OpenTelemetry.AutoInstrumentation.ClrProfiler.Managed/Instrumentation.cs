@@ -47,6 +47,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed
             catch (Exception)
             {
                 // TODO: Should we have our own logger like datadog has?
+                throw;
             }
         }
     }

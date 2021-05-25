@@ -40,7 +40,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
 
                 if (assembly != null)
                 {
-                    // call method Datadog.Trace.ClrProfiler.Instrumentation.Initialize()
+                    // call method OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Instrumentation.Initialize()
                     var type = assembly.GetType("OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Instrumentation", throwOnError: false);
                     var method = type?.GetRuntimeMethod("Initialize", new Type[0]);
                     method?.Invoke(obj: null, parameters: null);

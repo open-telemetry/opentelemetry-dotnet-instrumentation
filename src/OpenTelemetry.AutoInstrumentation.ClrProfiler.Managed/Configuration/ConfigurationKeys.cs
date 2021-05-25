@@ -33,7 +33,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         /// Configuration key for the Agent URL where the Tracer can send traces.
         /// Default value is "http://localhost:8126".
         /// </summary>
-        public const string AgentUri = "OTEL_TRACE_AGENT_URL";
+        public const string ZipkinEndpoint = "OTEL_EXPORTER_ZIPKIN_ENDPOINT";
 
         /// <summary>
         /// Configuration key for hostname for the Jaeger agent.
