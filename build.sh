@@ -33,11 +33,13 @@ dotnet build -c $BUILD_TYPE src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog
 os=$(uname_os)
 case "$os" in
  windows*)
+    SDK_TARGET_FRAMEWORKS="net452 net461 netstandard2.0 netcoreapp3.1"
     nuget restore "src\Datadog.Trace.ClrProfiler.Native\Datadog.Trace.ClrProfiler.Native.vcxproj" -SolutionDirectory .
     msbuild.exe Datadog.Trace.proj -t:BuildCpp -p:Configuration=${BUILD_TYPE} -p:Platform=x64
     ;;
 
  *)
+    SDK_TARGET_FRAMEWORKS="netstandard2.0 netcoreapp3.1"
     cd src/Datadog.Trace.ClrProfiler.Native
 
     mkdir -p build
@@ -53,8 +55,7 @@ esac
 cd $DIR
 OUTDIR="$( pwd )/src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64"
 
-mkdir -p "$OUTDIR/netstandard2.0"
-mkdir -p "$OUTDIR/netcoreapp3.1"
-
-dotnet publish -f netstandard2.0 -c ${BUILD_TYPE} src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.csproj -o "$OUTDIR/netstandard2.0"
-dotnet publish -f netcoreapp3.1 -c ${BUILD_TYPE} src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.csproj -o "$OUTDIR/netcoreapp3.1"
+for framework in ${SDK_TARGET_FRAMEWORKS} ; do
+    mkdir -p "$OUTDIR/$framework"
+    dotnet publish -f $framework -c ${BUILD_TYPE} src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.csproj -o "$OUTDIR/$framework"
+done
