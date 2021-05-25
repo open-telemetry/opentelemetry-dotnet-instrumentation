@@ -1,6 +1,3 @@
-#if NET452
-using System;
-#endif
 using System;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
