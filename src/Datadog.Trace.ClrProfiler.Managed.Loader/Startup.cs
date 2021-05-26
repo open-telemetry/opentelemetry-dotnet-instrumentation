@@ -49,13 +49,13 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
                     throw new TypeLoadException("The type OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Instrumentation could not be loaded");
                 }
 
-                var method = type?.GetRuntimeMethod("Initialize", new Type[0]);
+                var method = type.GetRuntimeMethod("Initialize", new Type[0]);
                 if (method == null)
                 {
                     throw new MissingMethodException("The method OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Instrumentation.Initialize could not be loaded");
                 }
 
-                method?.Invoke(obj: null, parameters: null);
+                method.Invoke(obj: null, parameters: null);
             }
             catch (Exception ex)
             {
