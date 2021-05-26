@@ -21,11 +21,16 @@ native_sufix() {
     esac
 }
 
-SUFIX=$(native_sufix)
+current_dir() {
+    os=$(uname_os)
+    case "$os" in
+        windows*) pwd -W ;;
+        *) pwd ;;
+    esac
+}
 
-if [[ -z "${CURDIR:-}" ]]; then
-  CURDIR=${PWD}
-fi
+CURDIR=$(current_dir)
+SUFIX=$(native_sufix)
 
 # Enable .NET Framework Profiling API
 export COR_ENABLE_PROFILING="1"

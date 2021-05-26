@@ -67,12 +67,6 @@ Add `msbuild` to your `PATH`. You can do it by adding to `~/.bashrc` something m
 PATH="$PATH:/c/Program Files (x86)/Microsoft Visual Studio/2019/Professional/MSBuild/Current/Bin"
 ```
 
-`CURDIR` env var must be set (becasue Windows does not understand `/c/my/path`). You can do it by:
-
-```sh
-export CURDIR='C:\repos\opentelemetry-dotnet-instrumentation'
-```
-
 ### Additional setup for Linux and MacOS
 
 ```sh
