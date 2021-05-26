@@ -39,6 +39,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                     builder.AddZipkinExporter(options =>
                     {
                         options.Endpoint = settings.ZipkinEndpoint;
+                        options.ExportProcessorType = ExportProcessorType.Simple; // for PoC
                     });
 
                     break;
@@ -53,6 +54,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                     {
                         options.AgentHost = agentHost;
                         options.AgentPort = agentPort;
+                        options.ExportProcessorType = ExportProcessorType.Simple; // for PoC
                     });
                     break;
                 case "":

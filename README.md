@@ -55,7 +55,15 @@ It would be good to have a checkpoint here where the instrumented application is
 - https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#activity-source
 - https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/examples/Console/TestHttpClient.cs
 
-## Results
+## Findings
+
+### Required reference to System.Diagnostics.DiagnosticSource
+
+The instrumented application has to include:
+
+```xml
+<PackageReference Include="System.Diagnostics.DiagnosticSource" Version="5.0.1" />
+```
 
 ## Testing
 

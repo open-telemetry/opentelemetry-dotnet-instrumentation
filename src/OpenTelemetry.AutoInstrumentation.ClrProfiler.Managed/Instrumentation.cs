@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration;
 using OpenTelemetry.Trace;
@@ -20,6 +20,8 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed
         /// </summary>
         public static void Initialize()
         {
+            var p = Process.GetCurrentProcess();
+            Console.WriteLine($">>>>>>>>>>>>>>>>>>>>>>> Process: {p.ProcessName}({p.Id}), starting");
             if (Interlocked.Exchange(ref _firstInitialization, value: 0) != 1)
             {
                 // Initialize() was already called before
@@ -29,7 +31,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed
             try
             {
                 var settings = Settings.Instance;
-
                 if (settings.LoadTracerAtStartup)
                 {
                     var builder = Sdk
@@ -42,6 +43,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed
                         .AddSource("OpenTelemetry.AutoInstrumentation.*");
 
                     _tracerProvider = builder.Build();
+                    Console.WriteLine($">>>>>>>>>>>>>>>>>>>>>>> Process: {p.ProcessName}({p.Id}), initialized");
                 }
             }
             catch (Exception)
