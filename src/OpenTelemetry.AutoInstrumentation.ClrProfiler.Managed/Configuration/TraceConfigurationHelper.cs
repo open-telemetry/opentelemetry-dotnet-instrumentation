@@ -30,6 +30,9 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 
         private static TracerProviderBuilder SetExporter(this TracerProviderBuilder builder, Settings settings)
         {
+            // TODO for PoC we always want the console exporter to be present -- remove later
+            builder.AddConsoleExporter();
+
             switch (settings.Exporter)
             {
                 case "zipkin":
