@@ -9,11 +9,12 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, Settings settings)
         {
             var resourceBuilder = ResourceBuilder
-                                 .CreateDefault()
-                                 .AddService(settings.ServiceName ?? "UNKNOWN_SERVICE_NAME", serviceVersion: settings.ServiceVersion);
+                .CreateDefault()
+                .AddService(settings.ServiceName ?? "UNKNOWN_SERVICE_NAME", serviceVersion: settings.ServiceVersion);
 
-            return builder.SetResourceBuilder(resourceBuilder)
-                          .SetExporter(settings);
+            return builder
+                .SetResourceBuilder(resourceBuilder)
+                .SetExporter(settings);
         }
 
         public static TracerProviderBuilder AddSdkAspNetInstrumentation(this TracerProviderBuilder builder)
@@ -50,7 +51,8 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                         options.AgentHost = agentHost;
                         options.AgentPort = agentPort;
                     });
-
+                    break;
+                case "":
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("The exporter name is not recognised");
