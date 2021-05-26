@@ -55,7 +55,15 @@ It would be good to have a checkpoint here where the instrumented application is
 - https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#activity-source
 - https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/examples/Console/TestHttpClient.cs
 
-## Results
+## Findings
+
+### Required reference to System.Diagnostics.DiagnosticSource
+
+The instrumented application has to include:
+
+```xml
+<PackageReference Include="System.Diagnostics.DiagnosticSource" Version="5.0.1" />
+```
 
 ## Testing
 
@@ -65,12 +73,6 @@ Add `msbuild` to your `PATH`. You can do it by adding to `~/.bashrc` something m
 
 ```sh
 PATH="$PATH:/c/Program Files (x86)/Microsoft Visual Studio/2019/Professional/MSBuild/Current/Bin"
-```
-
-`CURDIR` env var must be set (becasue Windows does not understand `/c/my/path`). You can do it by:
-
-```sh
-export CURDIR='C:\repos\opentelemetry-dotnet-instrumentation'
 ```
 
 ### Additional setup for Linux and MacOS

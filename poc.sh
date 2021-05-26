@@ -30,11 +30,11 @@ docker run -d --rm --name jaeger \
   jaegertracing/all-in-one:1.22
 
 # instrument and run HTTP server app in background
-ASPNETCORE_URLS="http://127.0.0.1:8080/" ./dev/instrument.sh dotnet run --no-launch-profile -f $aspNetAppTargetFramework -p ./samples/Samples.AspNetCoreMvc31/Samples.AspNetCoreMvc31.csproj &
+./dev/instrument.sh ASPNETCORE_URLS="http://127.0.0.1:8080/" OTEL_SERVICE="aspnet-server" dotnet run --no-launch-profile -f $aspNetAppTargetFramework -p ./samples/Samples.AspNetCoreMvc31/Samples.AspNetCoreMvc31.csproj &
 ./dev/wait-local-port.sh 8080
 
 # instrument and run HTTP client app
-time ./dev/instrument.sh dotnet run --no-launch-profile -f $consoleAppTargetFramework -p ./samples/ConsoleApp/ConsoleApp.csproj
+time ./dev/instrument.sh OTEL_SERVICE="http-client" dotnet run --no-launch-profile -f $consoleAppTargetFramework -p ./samples/ConsoleApp/ConsoleApp.csproj
 
 # verify if it works
 read -p "Check traces under: http://localhost:16686/search. Press enter to continue"

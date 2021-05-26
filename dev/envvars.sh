@@ -21,11 +21,16 @@ native_sufix() {
     esac
 }
 
-SUFIX=$(native_sufix)
+current_dir() {
+    os=$(uname_os)
+    case "$os" in
+        windows*) pwd -W ;;
+        *) pwd ;;
+    esac
+}
 
-if [[ -z "${CURDIR:-}" ]]; then
-  CURDIR=${PWD}
-fi
+CURDIR=$(current_dir)
+SUFIX=$(native_sufix)
 
 # Enable .NET Framework Profiling API
 export COR_ENABLE_PROFILING="1"
@@ -41,11 +46,10 @@ export CORECLR_PROFILER_PATH="${CURDIR}/src/Datadog.Trace.ClrProfiler.Native/bin
 export OTEL_DOTNET_TRACER_HOME="${CURDIR}/src/Datadog.Trace.ClrProfiler.Native/bin/Debug/x64"
 export OTEL_INTEGRATIONS="${CURDIR}/integrations.json"
 export OTEL_VERSION="1.0.0"
-export OTEL_TRACE_AGENT_URL="http://localhost:9411/api/v2/spans"
+export OTEL_EXPORTER_ZIPKIN_ENDPOINT="http://localhost:9411/api/v2/spans"
 export OTEL_TRACE_DEBUG="1"
-export OTEL_EXPORTER="jaeger"
+export OTEL_EXPORTER="zipkin"
 export OTEL_DUMP_ILREWRITE_ENABLED="0"
 export OTEL_TRACE_CALLTARGET_ENABLED="1"
 export OTEL_CLR_ENABLE_INLINING="1"
-export OTEL_CONVENTION="OpenTelemetry"
 export OTEL_PROFILER_EXCLUDE_PROCESSES="dotnet.exe,dotnet"
