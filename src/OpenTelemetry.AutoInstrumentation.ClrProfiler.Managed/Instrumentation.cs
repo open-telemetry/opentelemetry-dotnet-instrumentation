@@ -32,14 +32,14 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed
 
                 if (settings.LoadTracerAtStartup)
                 {
-                    var builder = Sdk.CreateTracerProviderBuilder()
-                                     .UseEnvironmentVariables(settings)
-                                     .AddSdkAspNetInstrumentation()
-                                     .AddHttpClientInstrumentation()
-                                     .AddSqlClientInstrumentation()
-                                     .SetSampler(new AlwaysOnSampler())
-                                     .AddSource("OpenTelemetry.AutoInstrumentation.*")
-                                     .AddConsoleExporter();
+                    var builder = Sdk
+                        .CreateTracerProviderBuilder()
+                        .UseEnvironmentVariables(settings)
+                        .AddSdkAspNetInstrumentation()
+                        .AddHttpClientInstrumentation()
+                        .AddSqlClientInstrumentation()
+                        .SetSampler(new AlwaysOnSampler())
+                        .AddSource("OpenTelemetry.AutoInstrumentation.*");
 
                     _tracerProvider = builder.Build();
                 }
