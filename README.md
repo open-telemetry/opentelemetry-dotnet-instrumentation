@@ -105,3 +105,5 @@ consoleAppTargetFramework=net46 ./poc.sh
 ### Configuration
 
 A new environment configuration variable has been added: `OTEL_DOTNET_TRACER_LOAD_AT_STARTUP`. It defines whether the tracer is created by the auto instrumentation library or not. The default value is `true`. For applications with manual instrumentation in place and tracer being initialized in the app this should be changed to `false`. Please see the [code](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/842ff2043bf1ad9921fcd963e3c915d4cace4845/src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed/Instrumentation.cs#L36) for reference on what sources have to be set for auto instrumentation to work.
+
+The environment variabl `OTEL_TRACE_AGENT_URL` has been replaced with `OTEL_EXPORTER_ZIPKIN_ENDPOINT` to better match its purpose.
