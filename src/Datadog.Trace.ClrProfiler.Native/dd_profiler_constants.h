@@ -10,6 +10,7 @@ namespace trace {
 
   inline WSTRING env_vars_to_display[]{
     environment::tracing_enabled,
+    environment::tracing_force,
     environment::debug_enabled,
     environment::calltarget_enabled,
     environment::profiler_home_path,

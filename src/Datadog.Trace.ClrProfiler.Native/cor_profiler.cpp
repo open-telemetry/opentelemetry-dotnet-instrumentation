@@ -117,7 +117,7 @@ CorProfiler::Initialize(IUnknown* cor_profiler_info_unknown) {
   // get path to integration definition JSON files
   const WSTRING integrations_paths = GetEnvironmentValue(environment::integrations_path);
 
-  if (integrations_paths.empty()) {
+  if (!IsTracingForced() && integrations_paths.empty()) {
     Warn("DATADOG TRACER DIAGNOSTICS - Profiler disabled: ", environment::integrations_path,
          " environment variable not set.");
     return E_FAIL;
@@ -150,8 +150,8 @@ CorProfiler::Initialize(IUnknown* cor_profiler_info_unknown) {
   integration_methods_ =
       FlattenIntegrations(integrations, is_calltarget_enabled);
 
-    // check if there are any enabled integrations left
-  if (integration_methods_.empty()) {
+  // check if there are any enabled integrations left
+  if (!IsTracingForced() && integration_methods_.empty()) {
     Warn("DATADOG TRACER DIAGNOSTICS - Profiler disabled: no enabled integrations found.");
     return E_FAIL;
   } else {

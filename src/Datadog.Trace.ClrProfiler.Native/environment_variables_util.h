@@ -62,6 +62,11 @@ bool IsTracingDisabled() {
   CheckIfFalse(GetEnvironmentValue(environment::tracing_enabled));
 }
 
+bool IsTracingForced() {
+  ToBooleanWithDefault(GetEnvironmentValue(environment::tracing_force),
+    true);
+}
+
 bool IsAzureAppServices() {
   CheckIfTrue(GetEnvironmentValue(environment::azure_app_services));
 }
