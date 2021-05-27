@@ -47,9 +47,10 @@ Use these environment variables to configure the tracing library:
 | `OTEL_TRACE_PARTIAL_FLUSH_MIN_SPANS` | The minimum number of closed spans in a trace before it's partially flushed. `OTEL_TRACE_PARTIAL_FLUSH_ENABLED` has to be enabled for this to take effect. | `500` |
 | `OTEL_SERVICE` | Application's default service name. |  |
 | `OTEL_ENV` | The value for the `environment` tag added to every span. |  |
-| `OTEL_TRACE_ENABLED` | Enable to activate the tracer. | `true` | 
-| `OTEL_TRACE_DEBUG` | Enable to activate debugging mode for the tracer. | `false` | 
-| `OTEL_TRACE_AGENT_URL` | The URL to where send the traces for `Zipkin` and `DatadogAgent` exporters (see: `OTEL_EXPORTER`). | `http://localhost:8126` | 
+| `OTEL_TRACE_ENABLED` | Enable to activate the tracer. | `true` |
+| `OTEL_DOTNET_TRACER_FORCE` | Enable the tracer even if no integrations is set using `OTEL_INTEGRATIONS`. | `true` |
+| `OTEL_TRACE_DEBUG` | Enable to activate debugging mode for the tracer. | `false` |
+| `OTEL_TRACE_AGENT_URL` | The URL to where send the traces for `Zipkin` and `DatadogAgent` exporters (see: `OTEL_EXPORTER`). | `http://localhost:8126` |
 | `OTEL_TAGS` | Comma-separated list of key-value pairs to specify global span tags. For example: `"key1:val1,key2:val2"` |  |
 | `OTEL_LOGS_INJECTION` | Enable to inject trace IDs, span IDs, service name and environment into logs. This requires a compatible logger or manual configuration. | `false` | `OTEL_EXPORTER` | The exporter to be used. The Tracer uses it to encode and dispatch traces. Available values are: `DatadogAgent`, `Zipkin`, `Jeager`. | `DatadogAgent` |
 | `OTEL_MAX_LOGFILE_SIZE` | The maximum size for tracer log files, in bytes. | `10 MB` |

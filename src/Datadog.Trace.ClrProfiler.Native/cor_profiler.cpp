@@ -117,7 +117,7 @@ CorProfiler::Initialize(IUnknown* cor_profiler_info_unknown) {
   // get path to integration definition JSON files
   const WSTRING integrations_paths = GetEnvironmentValue(environment::integrations_path);
 
-  if (integrations_paths.empty()) {
+  if (!IsTracingForced() && integrations_paths.empty()) {
     Warn("DATADOG TRACER DIAGNOSTICS - Profiler disabled: ", environment::integrations_path,
          " environment variable not set.");
     return E_FAIL;
@@ -150,8 +150,8 @@ CorProfiler::Initialize(IUnknown* cor_profiler_info_unknown) {
   integration_methods_ =
       FlattenIntegrations(integrations, is_calltarget_enabled);
 
-    // check if there are any enabled integrations left
-  if (integration_methods_.empty()) {
+  // check if there are any enabled integrations left
+  if (!IsTracingForced() && integration_methods_.empty()) {
     Warn("DATADOG TRACER DIAGNOSTICS - Profiler disabled: no enabled integrations found.");
     return E_FAIL;
   } else {
@@ -439,7 +439,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id,
   std::vector<IntegrationMethod> filtered_integrations = IsCallTargetEnabled() ?
       integration_methods_ : FilterIntegrationsByCaller(integration_methods_, module_info.assembly);
 
-  if (filtered_integrations.empty()) {
+  if (!IsTracingForced() && filtered_integrations.empty()) {
     // we don't need to instrument anything in this module, skip it
     Debug("ModuleLoadFinished skipping module (filtered by caller): ", module_id, " ", module_info.assembly.name);
     return S_OK;
@@ -687,8 +687,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(
 
     first_jit_compilation_app_domains.insert(module_metadata->app_domain_id);
 
-    hr = RunILStartupHook(module_metadata->metadata_emit, module_id,
-                          function_token);
+    hr = RunILStartupHook(module_id, function_token);
 
     if (FAILED(hr)) {
       Warn("JITCompilationStarted: Call to RunILStartupHook() failed for ", module_id, " ", function_token);
@@ -1654,9 +1653,7 @@ std::string CorProfiler::GetILCodes(const std::string& title, ILRewriter* rewrit
 //
 // Startup methods
 //
-HRESULT CorProfiler::RunILStartupHook(
-    const ComPtr<IMetaDataEmit2>& metadata_emit, const ModuleID module_id,
-    const mdToken function_token) {
+HRESULT CorProfiler::RunILStartupHook(const ModuleID module_id, const mdToken function_token) {
   mdMethodDef ret_method_token;
   auto hr = GenerateVoidILStartupMethod(module_id, &ret_method_token);
 
