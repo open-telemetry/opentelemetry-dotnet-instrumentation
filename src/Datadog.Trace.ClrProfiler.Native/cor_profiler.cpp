@@ -439,7 +439,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id,
   std::vector<IntegrationMethod> filtered_integrations = IsCallTargetEnabled() ?
       integration_methods_ : FilterIntegrationsByCaller(integration_methods_, module_info.assembly);
 
-  if (filtered_integrations.empty()) {
+  if (!IsTracingForced() && filtered_integrations.empty()) {
     // we don't need to instrument anything in this module, skip it
     Debug("ModuleLoadFinished skipping module (filtered by caller): ", module_id, " ", module_info.assembly.name);
     return S_OK;
