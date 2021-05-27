@@ -687,8 +687,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(
 
     first_jit_compilation_app_domains.insert(module_metadata->app_domain_id);
 
-    hr = RunILStartupHook(module_metadata->metadata_emit, module_id,
-                          function_token);
+    hr = RunILStartupHook(module_id, function_token);
 
     if (FAILED(hr)) {
       Warn("JITCompilationStarted: Call to RunILStartupHook() failed for ", module_id, " ", function_token);
@@ -1654,9 +1653,7 @@ std::string CorProfiler::GetILCodes(const std::string& title, ILRewriter* rewrit
 //
 // Startup methods
 //
-HRESULT CorProfiler::RunILStartupHook(
-    const ComPtr<IMetaDataEmit2>& metadata_emit, const ModuleID module_id,
-    const mdToken function_token) {
+HRESULT CorProfiler::RunILStartupHook(const ModuleID module_id, const mdToken function_token) {
   mdMethodDef ret_method_token;
   auto hr = GenerateVoidILStartupMethod(module_id, &ret_method_token);
 
