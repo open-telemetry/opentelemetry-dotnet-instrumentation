@@ -1,7 +1,9 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Threading;
 using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration;
+using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Trace;
+using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Trace.Abstractions;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Shims.OpenTracing;
 using OpenTelemetry.Trace;
@@ -18,6 +20,10 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed
 
         private static TracerProvider _tracerProvider;
 
+        internal static IScopeManager ScopeManager { get; } = new AsyncLocalScopeManager();
+
+        internal static Settings TracerSettings { get; } = Settings.FromDefaultSources();
+
         /// <summary>
         /// Initialize the OpenTelemetry SDK with a pre-defined set of exporters, shims, and
         /// instrumentations.
@@ -32,12 +38,11 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed
 
             try
             {
-                var settings = Settings.Instance;
-                if (settings.LoadTracerAtStartup)
+                if (TracerSettings.LoadTracerAtStartup)
                 {
                     var builder = Sdk
                         .CreateTracerProviderBuilder()
-                        .UseEnvironmentVariables(settings)
+                        .UseEnvironmentVariables(TracerSettings)
                         .AddSdkAspNetInstrumentation()
                         .AddHttpClientInstrumentation()
                         .AddSqlClientInstrumentation()

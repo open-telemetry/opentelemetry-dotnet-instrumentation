@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFrameworks>net452;net461;netstandard2.0;netcoreapp3.1</TargetFrameworks>
-        <Version>0.0.1</Version>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net452;net461;netstandard2.0;netcoreapp3.1</TargetFrameworks>
+    <Version>0.0.1</Version>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="OpenTelemetry" Version="1.1.0-beta2" />
@@ -16,6 +16,22 @@
     <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.0.0-rc4" />
     <PackageReference Include="OpenTelemetry.Shims.OpenTracing" Version="1.0.0-rc3" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="5.0.1" />
+  </ItemGroup>
+
+  <!--DuckTyping-->
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
+    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.0' AND '$(TargetFramework)' != 'netcoreapp3.1' ">
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Core\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Core.csproj" />
   </ItemGroup>
 
 </Project>

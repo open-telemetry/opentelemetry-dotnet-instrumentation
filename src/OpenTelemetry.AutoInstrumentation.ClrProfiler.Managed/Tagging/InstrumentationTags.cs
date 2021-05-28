@@ -1,0 +1,16 @@
+using System.Diagnostics;
+using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Util;
+
+namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Tagging
+{
+    internal abstract class InstrumentationTags : CommonTags
+    {
+        protected static readonly IProperty<string>[] InstrumentationTagsProperties =
+            CommonTagsProperties.Concat(
+                new ReadOnlyProperty<InstrumentationTags, string>(Trace.Tags.SpanKind, t => t.Kind.ToString()));
+
+        public abstract ActivityKind Kind { get; }
+
+        protected override IProperty<string>[] GetAdditionalTags() => InstrumentationTagsProperties;
+    }
+}
