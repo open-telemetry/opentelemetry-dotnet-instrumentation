@@ -49,6 +49,7 @@ Use these environment variables to configure the tracing library:
 | `OTEL_ENV` | The value for the `environment` tag added to every span. |  |
 | `OTEL_TRACE_ENABLED` | Enable to activate the tracer. | `true` | 
 | `OTEL_TRACE_DEBUG` | Enable to activate debugging mode for the tracer. | `false` | 
+| `OTEL_DOTNET_TRACER_FORCE` | Enable the tracer even if no integrations is set using `OTEL_INTEGRATIONS`. | `true` |
 | `OTEL_EXPORTER_ZIPKIN_ENDPOINT` | The URL to where send the traces for `Zipkin` and `DatadogAgent` exporters (see: `OTEL_EXPORTER`). | `http://localhost:8126` | 
 | `OTEL_TAGS` | Comma-separated list of key-value pairs to specify global span tags. For example: `"key1:val1,key2:val2"` |  |
 | `OTEL_LOGS_INJECTION` | Enable to inject trace IDs, span IDs, service name and environment into logs. This requires a compatible logger or manual configuration. | `false` | `OTEL_EXPORTER` | The exporter to be used. The Tracer uses it to encode and dispatch traces. Available values are: `DatadogAgent`, `Zipkin`, `Jeager`. | `DatadogAgent` |

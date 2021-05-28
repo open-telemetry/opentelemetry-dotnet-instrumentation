@@ -83,9 +83,8 @@ class CorProfiler : public CorProfilerBase {
   //
   // Startup methods
   //
-  HRESULT RunILStartupHook(const ComPtr<IMetaDataEmit2>&,
-                             const ModuleID module_id,
-                             const mdToken function_token);
+  HRESULT RunILStartupHook(const ModuleID module_id,
+                           const mdToken function_token);
   HRESULT GenerateVoidILStartupMethod(const ModuleID module_id,
                            mdMethodDef* ret_method_token);
   HRESULT AddIISPreStartInitFlags(const ModuleID module_id,

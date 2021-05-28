@@ -47,7 +47,8 @@ bool EnableInlining(bool defaultValue) {
 }
 
 bool IsCallTargetEnabled() {
-  CheckIfTrue(GetEnvironmentValue(environment::calltarget_enabled));
+  ToBooleanWithDefault(GetEnvironmentValue(environment::calltarget_enabled),
+    true);
 }
 
 bool IsDebugEnabled() {
@@ -60,6 +61,11 @@ bool IsDumpILRewriteEnabled() {
 
 bool IsTracingDisabled() {
   CheckIfFalse(GetEnvironmentValue(environment::tracing_enabled));
+}
+
+bool IsTracingForced() {
+  ToBooleanWithDefault(GetEnvironmentValue(environment::tracing_force),
+    true);
 }
 
 bool IsAzureAppServices() {

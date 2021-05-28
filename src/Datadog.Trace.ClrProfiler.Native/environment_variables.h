@@ -13,6 +13,11 @@ const WSTRING tracing_enabled = WStr("OTEL_TRACE_ENABLED");
 // Sets whether debug mode is enabled. Default is false.
 const WSTRING debug_enabled = WStr("OTEL_TRACE_DEBUG");
 
+// Sets whether we force the instrumentation
+// even if nothing is supposed to be instrumented according to integration definition JSON files.
+// Default is true.
+const WSTRING tracing_force = WStr("OTEL_DOTNET_TRACER_FORCE");
+
 // Sets the paths to integration definition JSON files.
 // Supports multiple values separated with comma, for example:
 // "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\integrations.json,D:\temp\test_integrations.json"
