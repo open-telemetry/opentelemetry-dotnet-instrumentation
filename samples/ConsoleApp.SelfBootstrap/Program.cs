@@ -9,7 +9,7 @@ namespace ConsoleApp.SelfBootstrap
 {
     internal class Program
     {
-        private static readonly ActivitySource MyActivitySource = new ActivitySource("OpenTelemetry.AutoInstrumentation.ConsoleApp");
+        private static readonly ActivitySource MyActivitySource = new ActivitySource("ConsoleApp");
         private static TracerProvider _tracerProvider;
 
         private static async Task<int> Main()
@@ -19,7 +19,7 @@ namespace ConsoleApp.SelfBootstrap
                 .AddHttpClientInstrumentation()
                 .AddSqlClientInstrumentation()
                 .SetSampler(new AlwaysOnSampler())
-                .AddSource("OpenTelemetry.AutoInstrumentation.*")
+                .AddSource("OpenTelemetry.AutoInstrumentation.*", "ConsoleApp")
                 .AddConsoleExporter()
                 .AddZipkinExporter(options =>
                 {

@@ -113,7 +113,7 @@ var builder = Sdk
    .AddHttpClientInstrumentation()
    .AddSqlClientInstrumentation()
    .SetSampler(new AlwaysOnSampler())
-   .AddSource("OpenTelemetry.AutoInstrumentation.*")
+   .AddSource("OpenTelemetry.AutoInstrumentation.*") // Add OpenTelemetry source for autoinstrumentation to work
    .AddZipkinExporter(options =>
       {
          options.Endpoint = "http://localhost:9411/api/v2/spans";
