@@ -47,10 +47,10 @@ Use these environment variables to configure the tracing library:
 | `OTEL_TRACE_PARTIAL_FLUSH_MIN_SPANS` | The minimum number of closed spans in a trace before it's partially flushed. `OTEL_TRACE_PARTIAL_FLUSH_ENABLED` has to be enabled for this to take effect. | `500` |
 | `OTEL_SERVICE` | Application's default service name. |  |
 | `OTEL_ENV` | The value for the `environment` tag added to every span. |  |
-| `OTEL_TRACE_ENABLED` | Enable to activate the tracer. | `true` |
+| `OTEL_TRACE_ENABLED` | Enable to activate the tracer. | `true` | 
+| `OTEL_TRACE_DEBUG` | Enable to activate debugging mode for the tracer. | `false` | 
 | `OTEL_DOTNET_TRACER_FORCE` | Enable the tracer even if no integrations is set using `OTEL_INTEGRATIONS`. | `true` |
-| `OTEL_TRACE_DEBUG` | Enable to activate debugging mode for the tracer. | `false` |
-| `OTEL_TRACE_AGENT_URL` | The URL to where send the traces for `Zipkin` and `DatadogAgent` exporters (see: `OTEL_EXPORTER`). | `http://localhost:8126` |
+| `OTEL_EXPORTER_ZIPKIN_ENDPOINT` | The URL to where send the traces for `Zipkin` and `DatadogAgent` exporters (see: `OTEL_EXPORTER`). | `http://localhost:8126` | 
 | `OTEL_TAGS` | Comma-separated list of key-value pairs to specify global span tags. For example: `"key1:val1,key2:val2"` |  |
 | `OTEL_LOGS_INJECTION` | Enable to inject trace IDs, span IDs, service name and environment into logs. This requires a compatible logger or manual configuration. | `false` | `OTEL_EXPORTER` | The exporter to be used. The Tracer uses it to encode and dispatch traces. Available values are: `DatadogAgent`, `Zipkin`, `Jeager`. | `DatadogAgent` |
 | `OTEL_MAX_LOGFILE_SIZE` | The maximum size for tracer log files, in bytes. | `10 MB` |
@@ -62,6 +62,7 @@ Use these environment variables to configure the tracing library:
 | `OTEL_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION` |  Sets whether to intercept method calls when the caller method is inside a domain-neutral assembly. This is recommended when instrumenting IIS applications. | `false` |
 | `OTEL_PROFILER_PROCESSES` | Sets the filename of executables the profiler can attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
 | `OTEL_PROFILER_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
+| `OTEL_DOTNET_TRACER_LOAD_AT_STARTUP` | Defines whether the tracer is created by the auto instrumentation library or not. The default value is `true`. For applications with manual instrumentation in place and tracer being initialized in the app this should be changed to `false`. Note that if this is disabled, the application code will be in charge of setting up the exporters and any other desired instrumentation, e.g. AddAspNetInstrumentation (see [custom instrumentation section](#configure-custom-instrumentation)). | `true` | 
 
 ## Ways to configure
 
@@ -237,53 +238,25 @@ Enable instrumentation for a specific user:
 
 ## Configure custom instrumentation
 
-You can build upon the provided tracing functionality by modifying and adding
-to automatically generated traces. The OpenTelemetry Tracing library for .NET
-provides and registers an [OpenTracing-compatible](https://github.com/opentracing/opentracing-csharp)
-global tracer you can use.
+For adding manual instrumentation the variable `OTEL_DOTNET_TRACER_LOAD_AT_STARTUP` should be set to `false` and the tracer should be initialized by the application itself. Here is an example of creating the tracer:
 
-OpenTracing versions 0.11.0+ are supported and the provided tracer offers a
-complete implementation of the OpenTracing API.
+```csharp
+var builder = Sdk
+   .CreateTracerProviderBuilder()
+   .AddAspNetCoreInstrumentation();
+   .AddHttpClientInstrumentation()
+   .AddSqlClientInstrumentation()
+   .SetSampler(new AlwaysOnSampler())
+   .AddSource("OpenTelemetry.AutoInstrumentation.*") // Add OpenTelemetry source for autoinstrumentation to work
+   .AddZipkinExporter(options =>
+      {
+         options.Endpoint = "http://localhost:9411/api/v2/spans";
+      });
 
-The auto-instrumentation provides a base you can build on by adding your own
-custom instrumentation. By using both instrumentation approaches, you'll be
-able to present a more detailed representation of the logic and functionality
-of your application, clients, and framework.
+builder.Build();
+```
 
-1. Add the OpenTracing dependency to your project:
-    ```xml
-    <PackageReference Include="OpenTracing" Version="0.12.1" />
-    ```
-2. Obtain the `OpenTracing.Util.GlobalTracer` instance and create spans that
-automatically become child spans of any existing spans in the same context:
-    ```csharp
-    using OpenTracing;
-    using OpenTracing.Util;
-
-    namespace MyProject
-    {
-        public class MyClass
-        {
-            public static async void MyMethod()
-            {
-                // Obtain the automatically registered OpenTracing.Util.GlobalTracer instance
-                var tracer = GlobalTracer.Instance;
-
-                // Create an active span that will be automatically parented by any existing span in this context
-                using (IScope scope = tracer.BuildSpan("MyTracedFunctionality").StartActive(finishSpanOnDispose: true))
-                {
-                    var span = scope.Span;
-                    span.SetTag("MyImportantTag", "MyImportantValue");
-                    span.Log("My Important Log Statement");
-
-                    var ret = await MyAppFunctionality();
-
-                    span.SetTag("FunctionalityReturned", ret.ToString());
-                }
-            }
-        }
-    }
-    ```
+See [here](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry.Api/README.md#instrumenting-a-libraryapplication-with-net-activity-api) for maunual instrumentation code examples.
 
 ## Troubleshooting
 
