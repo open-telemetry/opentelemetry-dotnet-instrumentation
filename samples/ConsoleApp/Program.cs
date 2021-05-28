@@ -13,7 +13,7 @@ namespace ConsoleApp
             var regularHttpClient = new HttpClient { BaseAddress = baseAddress };
 
             Console.WriteLine("Calling regularHttpClient.GetAsync");
-            await regularHttpClient.GetAsync("default-handler");
+            await regularHttpClient.GetAsync("handler");
             Console.WriteLine("Called regularHttpClient.GetAsync");
 
             return 0;
