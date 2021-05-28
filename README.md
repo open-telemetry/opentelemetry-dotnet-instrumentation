@@ -101,25 +101,3 @@ For .NET Framework run:
 ```sh
 consoleAppTargetFramework=net46 ./poc.sh
 ```
-
-### Configuration
-
-A new environment configuration variable has been added: `OTEL_DOTNET_TRACER_LOAD_AT_STARTUP`. It defines whether the tracer is created by the auto instrumentation library or not. The default value is `true`. For applications with manual instrumentation in place and tracer being initialized in the app this should be changed to `false`. Note that if this is disabled, the application code will be in charge of setting up the exporters and any other desired instrumentation, e.g. AddAspNetInstrumentation. Here is the exapmple code of tracer creation:
-
-```csharp
-var builder = Sdk
-   .CreateTracerProviderBuilder()
-   .AddAspNetCoreInstrumentation();
-   .AddHttpClientInstrumentation()
-   .AddSqlClientInstrumentation()
-   .SetSampler(new AlwaysOnSampler())
-   .AddSource("OpenTelemetry.AutoInstrumentation.*") // Add OpenTelemetry source for autoinstrumentation to work
-   .AddZipkinExporter(options =>
-      {
-         options.Endpoint = "http://localhost:9411/api/v2/spans";
-      });
-
-builder.Build();
-```
-
-The environment variabl `OTEL_TRACE_AGENT_URL` has been replaced with `OTEL_EXPORTER_ZIPKIN_ENDPOINT` to better match its purpose.
