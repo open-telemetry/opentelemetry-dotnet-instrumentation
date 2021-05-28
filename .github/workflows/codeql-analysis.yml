@@ -1,4 +1,5 @@
 name: "CodeQL Analysis"
+
 on:
   push:
     branches: [ main ]
@@ -11,24 +12,22 @@ on:
 jobs:
   analyze:
     name: Analyze
+    permissions:
+      security-events: write
+      actions: read
     runs-on: ubuntu-latest
-
     strategy:
       fail-fast: false
       matrix:
-        language: ['csharp']
-        
+        language: ['csharp'] 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
       with:
         languages: ${{ matrix.language }}
-
     - name: Autobuild
       uses: github/codeql-action/autobuild@v1
-
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
