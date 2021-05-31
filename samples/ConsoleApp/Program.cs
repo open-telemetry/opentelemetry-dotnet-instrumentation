@@ -14,18 +14,18 @@ namespace ConsoleApp
             using (var activity = MyActivitySource.StartActivity("Main"))
             {
 #if OpenTracingWrapper
-                OpenTracingLibrary.Wrapper.WithOpenTracingSpan("client", async () => await Run());
+                await OpenTracingLibrary.Wrapper.WithOpenTracingSpanAsync("client", RunAsync);
 #else
-                await Run();
+                await RunAsync();
 #endif
             }
 
             return 0;
         }
 
-        private static async Task Run()
+        private static async Task RunAsync()
         {
-            using (var activity = MyActivitySource.StartActivity("Run"))
+            using (var activity = MyActivitySource.StartActivity("RunAsync"))
             {
                 activity?.SetTag("foo", "bar");
 

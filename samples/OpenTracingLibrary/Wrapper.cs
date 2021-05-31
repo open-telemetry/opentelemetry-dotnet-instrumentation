@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using OpenTracing.Util;
 
 namespace OpenTracingLibrary
 {
     public static class Wrapper
     {
-        public static void WithOpenTracingSpan(string spanKind, Action action)
+        public static async Task WithOpenTracingSpanAsync(string spanKind, Func<Task> wrapped)
         {
             var tracer = GlobalTracer.Instance;
             Console.WriteLine($">>>>>>>>>>>>>>>>>>>>>>> OpenTracing.{tracer}");
@@ -16,7 +17,7 @@ namespace OpenTracingLibrary
             {
                 try
                 {
-                    action();
+                    await wrapped();
                     scope.Span.Log("action success");
                     scope.Span.SetTag("action.success", true);
                 }
