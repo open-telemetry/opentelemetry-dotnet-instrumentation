@@ -46,17 +46,22 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         public const string JaegerExporterAgentPort = "OTEL_EXPORTER_JAEGER_AGENT_PORT";
 
         /// <summary>
-        /// A
+        /// Configuration key for whether the console exporter is enabled.
+        /// </summary>
+        public const string EnableConsoleExporter = "OTEL_CONSOLE_EXPORTER_ENABLED";
+
+        /// <summary>
+        /// Configuration key for whether the HttpClient instrumentation is enabled.
         /// </summary>
         public const string EnableHttpClientInstrumentation = "OTEL_INSTRUMENTATION_HTTPCLIENT_ENABLED";
 
         /// <summary>
-        /// B
+        /// Configuration key for whether the ASP.NET instrumentation is enabled.
         /// </summary>
         public const string EnableAspNetInstrumentation = "OTEL_INSTRUMENTATION_ASPNET_ENABLED";
 
         /// <summary>
-        /// C
+        /// Configuration key for whether the SqlClient instrumentation is enabled.
         /// </summary>
         public const string EnableSqlClientInstrumentation = "OTEL_INSTRUMENTATION_SQLCLIENT_ENABLED";
     }
