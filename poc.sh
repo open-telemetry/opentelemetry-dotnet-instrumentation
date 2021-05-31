@@ -6,6 +6,7 @@ cd $DIR
 
 aspNetAppTargetFramework=${aspNetAppTargetFramework:-netcoreapp3.1}
 consoleAppTargetFramework=${consoleAppTargetFramework:-netcoreapp3.1}
+OpenTracingWrapper=${OpenTracingWrapper:-false}
 
 function finish {
   docker stop jaeger # stop Jaeger

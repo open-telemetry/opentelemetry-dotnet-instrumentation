@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net452;net46;net461;netcoreapp2.1;netcoreapp3.1;net5.0</TargetFrameworks>
+    <DefineConstants Condition="'$(OpenTracingWrapper)' == 'true'">$(DefinedConstants);OpenTracingWrapper</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
@@ -11,6 +12,10 @@
 
   <ItemGroup>
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="5.0.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(OpenTracingWrapper)' == 'true'">
+    <ProjectReference Include="..\OpenTracingLibrary\OpenTracingLibrary.csproj" />
   </ItemGroup>
 
 </Project>
