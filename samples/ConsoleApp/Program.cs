@@ -13,7 +13,7 @@ namespace ConsoleApp
         {
             using (var activity = MyActivitySource.StartActivity("Main"))
             {
-#if OpenTracingWrapper
+#if openTracingWrapper
                 await OpenTracingLibrary.Wrapper.WithOpenTracingSpanAsync("client", RunAsync);
 #else
                 await RunAsync();
