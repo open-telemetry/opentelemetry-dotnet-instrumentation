@@ -370,7 +370,7 @@ namespace Datadog.Trace.Configuration
         /// Default value is <c>true</c> (enabled).
         /// </summary>
         /// <seealso cref="TracerSettings.KafkaCreateConsumerScopeEnabled"/>
-        public const string KafkaCreateConsumerScopeEnabled = "DD_TRACE_KAFKA_CREATE_CONSUMER_SCOPE_ENABLED";
+        public const string KafkaCreateConsumerScopeEnabled = "OTEL_TRACE_KAFKA_CREATE_CONSUMER_SCOPE_ENABLED";
 
         /// <summary>
         /// String format patterns used to match integration-specific configuration keys.

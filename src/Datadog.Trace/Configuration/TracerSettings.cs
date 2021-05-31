@@ -171,7 +171,7 @@ namespace Datadog.Trace.Configuration
             Convention = source.GetTypedValue<ConventionType>(ConfigurationKeys.Convention);
 
             Propagators = GetPropagators(source);
-            
+
             var urlSubstringSkips = source?.GetString(ConfigurationKeys.HttpClientExcludedUrlSubstrings) ??
                                     // default value
                                     (AzureAppServices.Metadata.IsRelevant ? AzureAppServices.Metadata.DefaultHttpClientExclusions : null);

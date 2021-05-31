@@ -10,10 +10,10 @@
     * Resolve each conflict and `git cherry-pick --continue` every time that one is resolved
 5. Build and fix any integration issues:
     * New usages of env vars, reg ex: ^[^#].*[^A-Z]DD_
-    * Old profiler ID: 846F5F1C-F9AE-4B07-969E-05C26BC060D8 (happens in launch.settings for new apps).
+    * Old profiler ID: `918728DD-259F-4A6A-AC2B-B85E1B658318` (happens in launch.settings for new apps) use `918728DD-259F-4A6A-AC2B-B85E1B658318` instead.
     * Run unit tests, commit any needed fixes, repeat until passing unit tests
     * Update version in [TracerVersion.cs](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/tools/Datadog.Core.Tools/TracerVersion.cs) if the upstream bumped it.
-    * Update versions and integrations json by running: ` cd \build\tools\PrepareRelease && dotnet run -- versions integrations` (remember to revert wcf and other windows-only frameworks if you are using different platform)
+    * Update versions and integrations json by running: `cd \build\tools\PrepareRelease && dotnet run -- versions integrations` (remember to revert wcf and other windows-only frameworks if you are using different platform)
     * Run each of the following commands and commit any needed fixes, until it passes:
        - `docker-compose run --rm build`
        - `docker-compose run --rm Profiler`

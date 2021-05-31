@@ -216,7 +216,7 @@ namespace Datadog.Trace.TestHelpers
             }
 
             // set consistent env name (can be overwritten by custom environment variable)
-            environmentVariables["DD_ENV"] = "integration_tests";
+            environmentVariables["OTEL_ENV"] = "integration_tests";
 
             foreach (var key in CustomEnvironmentVariables.Keys)
             {

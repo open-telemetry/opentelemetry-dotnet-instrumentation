@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Datadog.Trace;
+using Datadog.Trace.Propagation;
 
 namespace StartDistributedTrace
 {
@@ -34,8 +35,8 @@ namespace StartDistributedTrace
                 span.SetTag(Tags.HttpUrl, url);
 
                 // Set distributed tracing headers
-                client.DefaultRequestHeaders.Add(HttpHeaderNames.TraceId, span.TraceId.ToString());
-                client.DefaultRequestHeaders.Add(HttpHeaderNames.ParentId, span.SpanId.ToString(CultureInfo.InvariantCulture));
+                client.DefaultRequestHeaders.Add(DDHttpHeaderNames.TraceId, span.TraceId.ToString());
+                client.DefaultRequestHeaders.Add(DDHttpHeaderNames.ParentId, span.SpanId.ToString(CultureInfo.InvariantCulture));
                 client.DefaultRequestHeaders.Add("upstream-service", nameof(StartDistributedTrace));
 
                 // Send HTTP request

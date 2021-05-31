@@ -36,8 +36,8 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests.CI
             try
             {
                 SetCallTargetSettings(true);
-                SetEnvironmentVariable("DD_TRACE_DEBUG", "1");
-                SetEnvironmentVariable("DD_DUMP_ILREWRITE_ENABLED", "1");
+                SetEnvironmentVariable("OTEL_TRACE_DEBUG", "1");
+                SetEnvironmentVariable("OTEL_DUMP_ILREWRITE_ENABLED", "1");
 
                 int agentPort = TcpPortProvider.GetOpenPort();
 

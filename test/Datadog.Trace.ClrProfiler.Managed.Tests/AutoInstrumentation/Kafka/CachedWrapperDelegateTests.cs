@@ -62,10 +62,10 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests.AutoInstrumentation.Kafka
         private static Tracer GetTracer()
         {
             var settings = new TracerSettings();
-            var writerMock = new Mock<IAgentWriter>();
+            var writerMock = new Mock<ITraceWriter>();
             var samplerMock = new Mock<ISampler>();
 
-            return new Tracer(settings, writerMock.Object, samplerMock.Object, scopeManager: null, statsd: null);
+            return new Tracer(settings, null, writerMock.Object, samplerMock.Object, scopeManager: null, statsd: null);
         }
     }
 }

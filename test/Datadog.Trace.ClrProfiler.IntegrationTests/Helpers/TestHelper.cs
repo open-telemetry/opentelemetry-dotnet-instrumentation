@@ -329,7 +329,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
             using var httpClient = new HttpClient();
 
             // disable tracing for this HttpClient request
-            httpClient.DefaultRequestHeaders.Add(HttpHeaderNames.TracingEnabled, "false");
+            httpClient.DefaultRequestHeaders.Add(CommonHttpHeaderNames.TracingEnabled, "false");
             var testStart = DateTime.UtcNow;
             var response = await httpClient.GetAsync($"http://localhost:{httpPort}" + path);
             var content = await response.Content.ReadAsStringAsync();

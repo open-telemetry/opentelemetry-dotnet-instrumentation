@@ -24,7 +24,7 @@ namespace Dotnet.WindowsContainer.Example.Pages
             TracerAssemblyLocation = Type.GetType("Datadog.Trace.Tracer, Datadog.Trace")?.Assembly.Location;
             ClrProfilerAssemblyLocation = instrumentationType?.Assembly.Location;
 
-            var prefixes = new[] { "COR_", "CORECLR_", "DD_", "DATADOG_" };
+            var prefixes = new[] { "COR_", "CORECLR_", "OTEL_", "DATADOG_" };
 
             EnvVars = from envVar in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>()
                       from prefix in prefixes

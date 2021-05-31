@@ -89,8 +89,8 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.MsTestV2
                                 case UnitTestOutcome.Error:
                                 case UnitTestOutcome.Failed:
                                 case UnitTestOutcome.Timeout:
+                                    scope.Span.Status = SpanStatus.Error.WithDescription(errorMessage);
                                     scope.Span.SetTag(TestTags.Status, TestTags.StatusFail);
-                                    scope.Span.Error = true;
                                     scope.Span.SetTag(Tags.ErrorMsg, errorMessage);
                                     scope.Span.SetTag(Tags.ErrorStack, errorStackTrace);
                                     break;

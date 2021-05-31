@@ -125,14 +125,14 @@ profiles:
         endpoints:
           - "{{ linuxArm64Endpoint }}"
         environmentVariables:
-          COR_PROFILER: "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}"
+          COR_PROFILER: "{918728DD-259F-4A6A-AC2B-B85E1B658318}"
           COR_PROFILER_PATH: "{{ linuxArm64ProfilerPath }}/Datadog.Trace.ClrProfiler.Native.so"
-          CORECLR_PROFILER: "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}"
+          CORECLR_PROFILER: "{918728DD-259F-4A6A-AC2B-B85E1B658318}"
           CORECLR_PROFILER_PATH: "{{ linuxArm64ProfilerPath }}/Datadog.Trace.ClrProfiler.Native.so"
-          DD_DOTNET_TRACER_HOME: "{{ linuxArm64ProfilerPath }}"
-          DD_INTEGRATIONS: "{{ linuxArm64ProfilerPath }}/integrations.json"
-          DD_AGENT_HOST: "{{ controllerIp }}"
-          DD_TRACE_DEBUG: 0
+          OTEL_DOTNET_TRACER_HOME: "{{ linuxArm64ProfilerPath }}"
+          OTEL_INTEGRATIONS: "{{ linuxArm64ProfilerPath }}/integrations.json"
+          OTEL_AGENT_HOST: "{{ controllerIp }}"
+          OTEL_TRACE_DEBUG: 0
         options:
           requiredOperatingSystem: linux
           requiredArchitecture: arm64

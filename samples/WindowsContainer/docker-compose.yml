@@ -7,9 +7,9 @@ services:
     depends_on:
       - datadog-agent
     environment:
-      DD_ENV: "apm-docker-samples"
-      DD_AGENT_HOST: "datadog-agent"
-      DD_TRACE_DEBUG: "true"
+      OTEL_ENV: "apm-docker-samples"
+      OTEL_AGENT_HOST: "datadog-agent"
+      OTEL_TRACE_DEBUG: "true"
       ASPNETCORE_ENVIRONMENT: Production
 
   datadog-agent:
