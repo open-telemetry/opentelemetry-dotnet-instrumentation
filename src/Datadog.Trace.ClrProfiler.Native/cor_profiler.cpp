@@ -128,8 +128,7 @@ CorProfiler::Initialize(IUnknown* cor_profiler_info_unknown) {
   // Initialize ReJIT handler and define the Rewriter Callback
   if (is_calltarget_enabled) {
       rejit_handler = new RejitHandler(this->info_, [this](RejitHandlerModule* mod, RejitHandlerModuleMethod* method) {
-          return S_OK;
-          // return this->CallTarget_RewriterCallback(mod, method);
+           return this->CallTarget_RewriterCallback(mod, method);
       });
   } else {
       rejit_handler = nullptr;
