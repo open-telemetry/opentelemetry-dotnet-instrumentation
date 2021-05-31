@@ -1,3 +1,8 @@
+// <copyright file="RequestPipeline_CallElasticsearchAsync_Integration.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using System.Threading;
 using Datadog.Trace.ClrProfiler.CallTarget;
@@ -49,7 +54,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Elasticsearch.V6
         /// <returns>A response value, in an async scenario will be T of Task of T</returns>
         public static TExecutionResult OnAsyncMethodEnd<TTarget, TExecutionResult>(TTarget instance, TExecutionResult executionResult, Exception exception, CallTargetState state)
         {
-            state.Scope?.DisposeWithException(exception);
+            state.Scope.DisposeWithException(exception);
 
             return executionResult;
         }

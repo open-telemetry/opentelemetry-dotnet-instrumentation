@@ -1,13 +1,24 @@
+// <copyright file="XUnitIntegration.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Datadog.Trace.Ci;
+using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
 
 namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.XUnit
 {
     internal static class XUnitIntegration
     {
+        internal const string IntegrationName = nameof(IntegrationIds.XUnit);
+        internal static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(IntegrationName);
+
+        internal static bool IsEnabled => Common.TestTracer.Settings.IsIntegrationEnabled(IntegrationId);
+
         internal static Scope CreateScope(ref TestRunnerStruct runnerInstance, Type targetType)
         {
             string testSuite = runnerInstance.TestClass.ToString();
@@ -17,12 +28,13 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.XUnit
 
             string testFramework = "xUnit " + testInvokerAssemblyName.Version.ToString();
 
-            Scope scope = Common.TestTracer.StartActive("xunit.test", serviceName: Common.ServiceName);
+            Scope scope = Common.TestTracer.StartActive("xunit.test", serviceName: Common.TestTracer.DefaultServiceName);
             Span span = scope.Span;
 
             span.Type = SpanTypes.Test;
             span.SetTraceSamplingPriority(SamplingPriority.AutoKeep);
             span.ResourceName = $"{testSuite}.{testName}";
+            span.SetTag(Tags.Origin, TestTags.CIAppTestOriginName);
             span.SetTag(TestTags.Suite, testSuite);
             span.SetTag(TestTags.Name, testName);
             span.SetTag(TestTags.Framework, testFramework);

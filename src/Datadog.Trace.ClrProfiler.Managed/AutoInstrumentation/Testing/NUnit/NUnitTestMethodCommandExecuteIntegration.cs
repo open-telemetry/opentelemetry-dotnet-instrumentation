@@ -1,6 +1,10 @@
+// <copyright file="NUnitTestMethodCommandExecuteIntegration.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using Datadog.Trace.ClrProfiler.CallTarget;
-using Datadog.Trace.Configuration;
 
 namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.NUnit
 {
@@ -15,12 +19,9 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.NUnit
         ParameterTypeNames = new[] { "NUnit.Framework.Internal.TestExecutionContext" },
         MinimumVersion = "3.0.0",
         MaximumVersion = "3.*.*",
-        IntegrationName = IntegrationName)]
+        IntegrationName = NUnitIntegration.IntegrationName)]
     public class NUnitTestMethodCommandExecuteIntegration
     {
-        private const string IntegrationName = nameof(IntegrationIds.NUnit);
-        private static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(IntegrationName);
-
         /// <summary>
         /// OnMethodBegin callback
         /// </summary>
@@ -32,12 +33,12 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.NUnit
         public static CallTargetState OnMethodBegin<TTarget, TContext>(TTarget instance, TContext executionContext)
             where TContext : ITestExecutionContext
         {
-            if (!Common.TestTracer.Settings.IsIntegrationEnabled(IntegrationId))
+            if (!NUnitIntegration.IsEnabled)
             {
                 return CallTargetState.GetDefault();
             }
 
-            return new CallTargetState(NUnitIntegration.CreateScope(executionContext, typeof(TTarget)));
+            return new CallTargetState(NUnitIntegration.CreateScope(executionContext.CurrentTest, typeof(TTarget)));
         }
 
         /// <summary>

@@ -1,18 +1,29 @@
+// <copyright file="NUnitIntegration.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using Datadog.Trace.Ci;
+using Datadog.Trace.Configuration;
 using Datadog.Trace.ExtensionMethods;
+using Datadog.Trace.Logging;
 
 namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.NUnit
 {
     internal static class NUnitIntegration
     {
-        internal static Scope CreateScope<TContext>(TContext executionContext, Type targetType)
-            where TContext : ITestExecutionContext
+        internal const string IntegrationName = nameof(IntegrationIds.NUnit);
+        internal static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(IntegrationName);
+        internal static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor(typeof(NUnitIntegration));
+
+        internal static bool IsEnabled => Common.TestTracer.Settings.IsIntegrationEnabled(IntegrationId);
+
+        internal static Scope CreateScope(ITest currentTest, Type targetType)
         {
-            ITest currentTest = executionContext.CurrentTest;
             MethodInfo testMethod = currentTest.Method.MethodInfo;
             object[] testMethodArguments = currentTest.Arguments;
             IPropertyBag testMethodProperties = currentTest.Properties;
@@ -27,12 +38,13 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.NUnit
             string testName = testMethod.Name;
             string skipReason = null;
 
-            Scope scope = Common.TestTracer.StartActive("nunit.test", serviceName: Common.ServiceName);
+            Scope scope = Common.TestTracer.StartActive("nunit.test", serviceName: Common.TestTracer.DefaultServiceName);
             Span span = scope.Span;
 
             span.Type = SpanTypes.Test;
             span.SetTraceSamplingPriority(SamplingPriority.AutoKeep);
             span.ResourceName = $"{testSuite}.{testName}";
+            span.SetTag(Tags.Origin, TestTags.CIAppTestOriginName);
             span.SetTag(TestTags.Suite, testSuite);
             span.SetTag(TestTags.Name, testName);
             span.SetTag(TestTags.Framework, testFramework);
@@ -79,7 +91,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.NUnit
                 skipReason = (string)testMethodProperties.Get("_SKIPREASON");
                 foreach (var key in testMethodProperties.Keys)
                 {
-                    if (key == "_SKIPREASON")
+                    if (key == "_SKIPREASON" || key == "_JOINTYPE")
                     {
                         continue;
                     }
@@ -114,10 +126,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.NUnit
 
             if (skipReason != null)
             {
-                span.SetTag(TestTags.Status, TestTags.StatusSkip);
-                span.SetTag(TestTags.SkipReason, skipReason);
-                span.Finish(new TimeSpan(10));
-                scope.Dispose();
+                FinishSkippedScope(scope, skipReason);
                 scope = null;
             }
 
@@ -155,6 +164,18 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.NUnit
             else
             {
                 scope.Span.SetTag(TestTags.Status, TestTags.StatusPass);
+            }
+        }
+
+        internal static void FinishSkippedScope(Scope scope, string skipReason)
+        {
+            var span = scope?.Span;
+            if (span != null)
+            {
+                span.SetTag(TestTags.Status, TestTags.StatusSkip);
+                span.SetTag(TestTags.SkipReason, skipReason ?? string.Empty);
+                span.Finish(new TimeSpan(10));
+                scope.Dispose();
             }
         }
     }

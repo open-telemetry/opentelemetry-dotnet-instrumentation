@@ -1,8 +1,12 @@
+// <copyright file="Log4NetLogProviderTests.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Datadog.Trace.Logging;
-using Datadog.Trace.Logging.LogProviders;
 using log4net.Appender;
 using log4net.Config;
 using log4net.Core;
@@ -26,7 +30,7 @@ namespace Datadog.Trace.Tests.Logging
             var repository = log4net.LogManager.GetRepository(Assembly.GetAssembly(typeof(log4net.LogManager)));
             BasicConfigurator.Configure(repository, _memoryAppender);
 
-            _logProvider = new Log4NetLogProvider();
+            _logProvider = new CustomLog4NetLogProvider();
             LogProvider.SetCurrentLogProvider(_logProvider);
             _logger = new LoggerExecutionWrapper(_logProvider.GetLogger("Test"));
         }
@@ -35,7 +39,7 @@ namespace Datadog.Trace.Tests.Logging
         public void LogsInjectionEnabledAddsParentCorrelationIdentifiers()
         {
             // Assert that the Log4Net log provider is correctly being used
-            Assert.IsType<Log4NetLogProvider>(LogProvider.CurrentLogProvider);
+            Assert.IsType<CustomLog4NetLogProvider>(LogProvider.CurrentLogProvider);
 
             // Instantiate a tracer for this test with default settings and set LogsInjectionEnabled to TRUE
             var tracer = LoggingProviderTestHelpers.InitializeTracer(enableLogsInjection: true);
@@ -51,7 +55,7 @@ namespace Datadog.Trace.Tests.Logging
         public void LogsInjectionEnabledAddsChildCorrelationIdentifiers()
         {
             // Assert that the Log4Net log provider is correctly being used
-            Assert.IsType<Log4NetLogProvider>(LogProvider.CurrentLogProvider);
+            Assert.IsType<CustomLog4NetLogProvider>(LogProvider.CurrentLogProvider);
 
             // Instantiate a tracer for this test with default settings and set LogsInjectionEnabled to TRUE
             var tracer = LoggingProviderTestHelpers.InitializeTracer(enableLogsInjection: true);
@@ -67,7 +71,7 @@ namespace Datadog.Trace.Tests.Logging
         public void LogsInjectionEnabledDoesNotAddCorrelationIdentifiersOutsideSpans()
         {
             // Assert that the Log4Net log provider is correctly being used
-            Assert.IsType<Log4NetLogProvider>(LogProvider.CurrentLogProvider);
+            Assert.IsType<CustomLog4NetLogProvider>(LogProvider.CurrentLogProvider);
 
             // Instantiate a tracer for this test with default settings and set LogsInjectionEnabled to TRUE
             var tracer = LoggingProviderTestHelpers.InitializeTracer(enableLogsInjection: true);
@@ -83,7 +87,7 @@ namespace Datadog.Trace.Tests.Logging
         public void LogsInjectionEnabledUsesTracerServiceName()
         {
             // Assert that the Log4Net log provider is correctly being used
-            Assert.IsType<Log4NetLogProvider>(LogProvider.CurrentLogProvider);
+            Assert.IsType<CustomLog4NetLogProvider>(LogProvider.CurrentLogProvider);
 
             // Instantiate a tracer for this test with default settings and set LogsInjectionEnabled to TRUE
             var tracer = LoggingProviderTestHelpers.InitializeTracer(enableLogsInjection: true);
@@ -99,7 +103,7 @@ namespace Datadog.Trace.Tests.Logging
         public void DisabledLibLogSubscriberDoesNotAddCorrelationIdentifiers()
         {
             // Assert that the Log4Net log provider is correctly being used
-            Assert.IsType<Log4NetLogProvider>(LogProvider.CurrentLogProvider);
+            Assert.IsType<CustomLog4NetLogProvider>(LogProvider.CurrentLogProvider);
 
             // Instantiate a tracer for this test with default settings and set LogsInjectionEnabled to TRUE
             var tracer = LoggingProviderTestHelpers.InitializeTracer(enableLogsInjection: false);

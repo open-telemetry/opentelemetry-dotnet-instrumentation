@@ -1,3 +1,8 @@
+// <copyright file="SpanContext.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using Datadog.Trace.Logging;
 using Datadog.Trace.Util;
 
@@ -112,9 +117,9 @@ namespace Datadog.Trace
         public string ServiceName { get; set; }
 
         /// <summary>
-        /// Gets the origin of the trace
+        /// Gets or sets the origin of the trace
         /// </summary>
-        internal string Origin { get; }
+        internal string Origin { get; set; }
 
         /// <summary>
         /// Gets the trace state for W3C propagation

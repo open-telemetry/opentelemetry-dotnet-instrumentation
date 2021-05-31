@@ -1,3 +1,8 @@
+// <copyright file="AzureAppServices.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using System.Collections;
 using Datadog.Trace.ExtensionMethods;
@@ -177,6 +182,8 @@ namespace Datadog.Trace.PlatformHelpers
         public string OperatingSystem { get; }
 
         public string Runtime { get; }
+
+        public string DefaultHttpClientExclusions { get; } = "logs.datadoghq, services.visualstudio, applicationinsights.azure, blob.core.windows.net/azure-webjobs, azurewebsites.net/admin".ToUpperInvariant();
 
         private string CompileResourceId()
         {

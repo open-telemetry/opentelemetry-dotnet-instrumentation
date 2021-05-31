@@ -1,3 +1,8 @@
+// <copyright file="TagsList.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -9,6 +14,10 @@ namespace Datadog.Trace.Tagging
 {
     internal abstract class TagsList : ITags
     {
+        private static byte[] _metaBytes = StringEncoding.UTF8.GetBytes("meta");
+        private static byte[] _metricsBytes = StringEncoding.UTF8.GetBytes("metrics");
+        private static byte[] _originBytes = StringEncoding.UTF8.GetBytes(Trace.Tags.Origin);
+
         private List<KeyValuePair<string, double>> _metrics;
         private List<KeyValuePair<string, string>> _tags;
 
@@ -207,7 +216,7 @@ namespace Datadog.Trace.Tagging
         {
             int originalOffset = offset;
 
-            offset += WriteTags(ref bytes, offset);
+            offset += WriteTags(ref bytes, offset, span);
             offset += WriteMetrics(ref bytes, offset, span);
 
             return offset - originalOffset;
@@ -286,11 +295,11 @@ namespace Datadog.Trace.Tagging
             offset += MessagePackBinary.WriteDouble(ref bytes, offset, value);
         }
 
-        private int WriteTags(ref byte[] bytes, int offset)
+        private int WriteTags(ref byte[] bytes, int offset, Span span)
         {
             int originalOffset = offset;
 
-            offset += MessagePackBinary.WriteString(ref bytes, offset, "meta");
+            offset += MessagePackBinary.WriteStringBytes(ref bytes, offset, _metaBytes);
 
             int count = 0;
 
@@ -299,6 +308,8 @@ namespace Datadog.Trace.Tagging
             offset += MessagePackBinary.WriteMapHeaderForceMap32Block(ref bytes, offset, 0);
 
             var tags = GetCustomTags();
+
+            bool isOriginWritten = false;
 
             if (tags != null)
             {
@@ -319,9 +330,22 @@ namespace Datadog.Trace.Tagging
 
                 if (value != null)
                 {
+                    if (property.Key == Trace.Tags.Origin)
+                    {
+                        isOriginWritten = true;
+                    }
+
                     count++;
                     WriteTag(ref bytes, ref offset, property.Key, value);
                 }
+            }
+
+            string origin = span.Context.Origin;
+            if (!isOriginWritten && !string.IsNullOrEmpty(origin))
+            {
+                count++;
+                offset += MessagePackBinary.WriteStringBytes(ref bytes, offset, _originBytes);
+                offset += MessagePackBinary.WriteString(ref bytes, offset, origin);
             }
 
             if (count > 0)
@@ -337,7 +361,7 @@ namespace Datadog.Trace.Tagging
         {
             int originalOffset = offset;
 
-            offset += MessagePackBinary.WriteString(ref bytes, offset, "metrics");
+            offset += MessagePackBinary.WriteStringBytes(ref bytes, offset, _metricsBytes);
 
             int count = 0;
 

@@ -1,3 +1,8 @@
+// <copyright file="DuckType.Methods.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,10 +68,15 @@ namespace Datadog.Trace.DuckTyping
                 {
                     // Avoid proxying object methods like ToString(), GetHashCode()
                     // or the Finalize() that creates problems by keeping alive the object to another collection.
-                    // You can still proxy those methods if they are defined in an interface.
+                    // You can still proxy those methods if they are defined in an interface, or if you add the DuckInclude attribute.
                     if (method.DeclaringType == typeof(object))
                     {
-                        continue;
+                        bool include = method.GetCustomAttribute<DuckIncludeAttribute>(true) is not null;
+
+                        if (!include)
+                        {
+                            continue;
+                        }
                     }
 
                     if (method.IsSpecialName || method.IsFinal || method.IsPrivate)
@@ -84,7 +94,18 @@ namespace Datadog.Trace.DuckTyping
 
         private static void CreateMethods(TypeBuilder proxyTypeBuilder, Type proxyType, Type targetType, FieldInfo instanceField)
         {
-            List<MethodInfo> proxyMethodsDefinitions = GetMethods(proxyType);
+            var proxyMethodsDefinitions = GetMethods(proxyType);
+
+            var targetMethodsDefinitions = GetMethods(targetType);
+
+            foreach (var method in targetMethodsDefinitions)
+            {
+                if (method.GetCustomAttribute<DuckIncludeAttribute>(true) is not null)
+                {
+                    proxyMethodsDefinitions.Add(method);
+                }
+            }
+
             foreach (MethodInfo proxyMethodDefinition in proxyMethodsDefinitions)
             {
                 // Ignore the method marked with `DuckIgnore` attribute
@@ -366,7 +387,7 @@ namespace Datadog.Trace.DuckTyping
                     if (targetMethod.IsPublic)
                     {
                         // We can emit a normal call if we have a public instance with a public target method.
-                        il.EmitCall(targetMethod.IsStatic ? OpCodes.Call : OpCodes.Callvirt, targetMethod, null);
+                        il.EmitCall(targetMethod.IsStatic || targetMethod.DeclaringType.IsValueType ? OpCodes.Call : OpCodes.Callvirt, targetMethod, null);
                     }
                     else
                     {
@@ -411,7 +432,7 @@ namespace Datadog.Trace.DuckTyping
                     // Check if we can emit a normal Call/CallVirt to the target method
                     if (!targetMethod.ContainsGenericParameters)
                     {
-                        dynIL.EmitCall(targetMethod.IsStatic ? OpCodes.Call : OpCodes.Callvirt, targetMethod, null);
+                        dynIL.EmitCall(targetMethod.IsStatic || targetMethod.DeclaringType.IsValueType ? OpCodes.Call : OpCodes.Callvirt, targetMethod, null);
                     }
                     else
                     {

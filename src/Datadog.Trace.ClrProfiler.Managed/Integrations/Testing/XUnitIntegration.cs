@@ -1,3 +1,8 @@
+// <copyright file="XUnitIntegration.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -398,12 +403,13 @@ namespace Datadog.Trace.ClrProfiler.Integrations.Testing
 
                 string testFramework = "xUnit " + testInvokerAssemblyName.Version.ToString();
 
-                scope = Common.TestTracer.StartActive("xunit.test", serviceName: Common.ServiceName);
+                scope = Common.TestTracer.StartActive("xunit.test", serviceName: Common.TestTracer.DefaultServiceName);
                 Span span = scope.Span;
 
                 span.Type = SpanTypes.Test;
                 span.SetTraceSamplingPriority(SamplingPriority.AutoKeep);
                 span.ResourceName = $"{testSuite}.{testName}";
+                span.SetTag(Tags.Origin, TestTags.CIAppTestOriginName);
                 span.SetTag(TestTags.Suite, testSuite);
                 span.SetTag(TestTags.Name, testName);
                 span.SetTag(TestTags.Framework, testFramework);

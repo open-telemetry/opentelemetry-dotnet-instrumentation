@@ -1,3 +1,8 @@
+// <copyright file="ScopeFactoryTests.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -73,6 +78,21 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             using (var automaticScope = ScopeFactory.CreateOutboundHttpScope(tracer, method, new Uri(uri), new IntegrationInfo((int)IntegrationIds.HttpMessageHandler), out _))
             {
                 Assert.Equal(expected, automaticScope.Span.ResourceName);
+            }
+        }
+
+        [Fact]
+        public void CreateOutboundHttpScope_Null_ResourceUri()
+        {
+            // Set up Tracer
+            var settings = new TracerSettings();
+            var writerMock = new Mock<IAgentWriter>();
+            var samplerMock = new Mock<ISampler>();
+            var tracer = new Tracer(settings, writerMock.Object, samplerMock.Object, scopeManager: null, statsd: null);
+
+            using (var automaticScope = ScopeFactory.CreateOutboundHttpScope(tracer, "GET", null, new IntegrationInfo((int)IntegrationIds.HttpMessageHandler), out _))
+            {
+                Assert.Equal(expected: "GET ",  actual: automaticScope.Span.ResourceName);
             }
         }
 

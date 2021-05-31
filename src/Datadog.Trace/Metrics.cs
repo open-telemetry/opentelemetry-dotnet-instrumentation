@@ -1,3 +1,8 @@
+// <copyright file="Metrics.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 namespace Datadog.Trace
 {
     internal static class Metrics
@@ -21,6 +26,11 @@ namespace Datadog.Trace
         /// Read: Rate Limiter Priority Sample Rate
         /// </summary>
         public const string SamplingLimitDecision = "_dd.limit_psr";
+
+        /// <summary>
+        /// The length of time a record has been on the queue
+        /// </summary>
+        public const string MessageQueueTimeMs = "message.queue_time_ms";
 
         /// <summary>
         /// Identifies top-level spans.

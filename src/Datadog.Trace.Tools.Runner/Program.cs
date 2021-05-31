@@ -1,3 +1,8 @@
+// <copyright file="Program.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -75,6 +80,10 @@ namespace Datadog.Trace.Tools.Runner
             // Start logic
 
             Dictionary<string, string> profilerEnvironmentVariables = Utils.GetProfilerEnvironmentVariables(RunnerFolder, Platform, options);
+            if (profilerEnvironmentVariables is null)
+            {
+                return 1;
+            }
 
             if (options.SetEnvironmentVariables)
             {

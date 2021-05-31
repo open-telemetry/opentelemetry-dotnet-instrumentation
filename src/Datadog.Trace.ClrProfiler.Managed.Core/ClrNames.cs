@@ -1,3 +1,8 @@
+// <copyright file="ClrNames.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 namespace Datadog.Trace.ClrProfiler
 {
     internal static class ClrNames
@@ -19,6 +24,8 @@ namespace Datadog.Trace.ClrProfiler
         public const string UInt16 = "System.UInt16";
         public const string UInt32 = "System.UInt32";
         public const string UInt64 = "System.UInt64";
+
+        public const string TimeSpan = "System.TimeSpan";
 
         public const string Stream = "System.IO.Stream";
 
