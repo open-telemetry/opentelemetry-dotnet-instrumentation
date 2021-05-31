@@ -44,5 +44,20 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         /// Configuration key for port for the Jaeger agent.
         /// </summary>
         public const string JaegerExporterAgentPort = "OTEL_EXPORTER_JAEGER_AGENT_PORT";
+
+        /// <summary>
+        /// A
+        /// </summary>
+        public const string EnableHttpClientInstrumentation = "OTEL_INSTRUMENTATION_HTTPCLIENT_ENABLED";
+
+        /// <summary>
+        /// B
+        /// </summary>
+        public const string EnableAspNetInstrumentation = "OTEL_INSTRUMENTATION_ASPNET_ENABLED";
+
+        /// <summary>
+        /// C
+        /// </summary>
+        public const string EnableSqlClientInstrumentation = "OTEL_INSTRUMENTATION_SQLCLIENT_ENABLED";
     }
 }
