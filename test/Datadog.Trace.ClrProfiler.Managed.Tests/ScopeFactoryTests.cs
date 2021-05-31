@@ -81,21 +81,6 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             }
         }
 
-        [Fact]
-        public void CreateOutboundHttpScope_Null_ResourceUri()
-        {
-            // Set up Tracer
-            var settings = new TracerSettings();
-            var writerMock = new Mock<ITraceWriter>();
-            var samplerMock = new Mock<ISampler>();
-            var tracer = new Tracer(settings, null, writerMock.Object, samplerMock.Object, scopeManager: null, statsd: null);
-
-            using (var automaticScope = ScopeFactory.CreateOutboundHttpScope(tracer, "GET", null, new IntegrationInfo((int)IntegrationIds.HttpMessageHandler), out _))
-            {
-                Assert.Equal(expected: "GET ",  actual: automaticScope.Span.ResourceName);
-            }
-        }
-
         [Theory]
         [InlineData("https://username:password@example.com/path/to/file.aspx?query=1#fragment", "https://example.com/path/to/file.aspx")]
         [InlineData("https://username@example.com/path/to/file.aspx", "https://example.com/path/to/file.aspx")]
