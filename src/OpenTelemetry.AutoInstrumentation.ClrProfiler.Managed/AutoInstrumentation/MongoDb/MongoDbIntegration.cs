@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using OpenTelemetry.AutoInstrumentation.ClrProfiler.Emit;
 using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration;
 using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Logging;
+using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Tagging;
 using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Trace;
 using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Trace.Abstractions;
 using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Util;

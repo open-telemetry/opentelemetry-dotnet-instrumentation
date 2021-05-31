@@ -4,7 +4,7 @@ using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 {
-    internal static class TraceConfigurationHelper
+    internal static class EnvironmentConfigurationHelper
     {
         public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, Settings settings)
         {

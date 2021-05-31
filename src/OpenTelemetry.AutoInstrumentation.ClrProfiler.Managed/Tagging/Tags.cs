@@ -1,7 +1,8 @@
 using System;
 using System.Diagnostics;
+using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Trace;
 
-namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Trace
+namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Tagging
 {
     /// <summary>
     /// Standard span tags used by integrations.

@@ -7,7 +7,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Tagging
     {
         protected static readonly IProperty<string>[] InstrumentationTagsProperties =
             CommonTagsProperties.Concat(
-                new ReadOnlyProperty<InstrumentationTags, string>(Trace.Tags.SpanKind, t => t.Kind.ToString()));
+                new ReadOnlyProperty<InstrumentationTags, string>(Tags.SpanKind, t => t.Kind.ToString()));
 
         public abstract ActivityKind Kind { get; }
 

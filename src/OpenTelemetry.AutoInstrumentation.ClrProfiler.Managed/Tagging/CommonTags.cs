@@ -4,8 +4,8 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Tagging
     {
         protected static readonly IProperty<string>[] CommonTagsProperties =
         {
-            new Property<CommonTags, string>(Trace.Tags.Env, t => t.Environment, (t, v) => t.Environment = v),
-            new Property<CommonTags, string>(Trace.Tags.Version, t => t.Version, (t, v) => t.Version = v)
+            new Property<CommonTags, string>(Tags.Env, t => t.Environment, (t, v) => t.Environment = v),
+            new Property<CommonTags, string>(Tags.Version, t => t.Version, (t, v) => t.Version = v)
         };
 
         public string Environment { get; set; }
