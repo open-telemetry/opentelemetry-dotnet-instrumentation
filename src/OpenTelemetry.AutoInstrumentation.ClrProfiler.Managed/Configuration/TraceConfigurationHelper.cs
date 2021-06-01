@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -27,6 +28,11 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
             foreach (var enabledInstrumentation in settings.EnabledInstrumentations)
             {
                 AddInstrumentation[enabledInstrumentation](builder);
+            }
+
+            if (settings.AdditionalSources.Any())
+            {
+                builder.AddSource(settings.AdditionalSources.ToArray());
             }
 
             return builder;

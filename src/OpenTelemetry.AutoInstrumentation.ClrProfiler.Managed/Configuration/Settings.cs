@@ -36,7 +36,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
             }
             else
             {
-                EnabledInstrumentations = new List<InstrumentationType>();
                 foreach (var instrumentation in enabledInstrumentations.Split(','))
                 {
                     if (Enum.TryParse(instrumentation, out InstrumentationType parsedType))
@@ -48,6 +47,15 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                         // TODO replace with proper logging
                         Console.WriteLine($"Could not parse instrumentation \"{instrumentation}\". Skipping...");
                     }
+                }
+            }
+
+            var additionalSources = Environment.GetEnvironmentVariable(ConfigurationKeys.AdditionalSources);
+            if (additionalSources != null)
+            {
+                foreach (var sourceName in additionalSources.Split(','))
+                {
+                    AdditionalSources.Add(sourceName);
                 }
             }
         }
@@ -100,7 +108,12 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         /// <summary>
         /// Gets the list of enabled instrumentations.
         /// </summary>
-        public IList<InstrumentationType> EnabledInstrumentations { get; }
+        public IList<InstrumentationType> EnabledInstrumentations { get; } = new List<InstrumentationType>();
+
+        /// <summary>
+        /// Gets the list of additional activitysources to be added to the tracer at the startup.
+        /// </summary>
+        public IList<string> AdditionalSources { get; } = new List<string>();
 
         private static Settings Create()
         {

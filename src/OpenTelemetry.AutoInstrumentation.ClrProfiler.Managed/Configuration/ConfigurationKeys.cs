@@ -54,5 +54,10 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         /// Configuration key for comma separated list of enabled instrumentations.
         /// </summary>
         public const string EnabledInstrumentations = "OTEL_ENABLED_INSTRUMENTATIONS";
+
+        /// <summary>
+        /// Configuration key for additional activitysource names to be added to the tracer at the startup.
+        /// </summary>
+        public const string AdditionalSources = "OTEL_ADDITIONAL_SOURCES";
     }
 }
