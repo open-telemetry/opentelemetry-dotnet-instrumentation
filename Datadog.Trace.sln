@@ -49,9 +49,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{BAF8
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "samples\ConsoleApp\ConsoleApp.csproj", "{2A172931-3439-4563-A6E5-525924DC2F76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed", "src\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.csproj", "{6690361C-CCD8-42C4-A5CF-82D554B03A3D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed", "src\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.csproj", "{6690361C-CCD8-42C4-A5CF-82D554B03A3D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp.SelfBootstrap", "samples\ConsoleApp.SelfBootstrap\ConsoleApp.SelfBootstrap.csproj", "{7EA51D34-8E0E-4548-8A7F-5C6F9C3533AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp.SelfBootstrap", "samples\ConsoleApp.SelfBootstrap\ConsoleApp.SelfBootstrap.csproj", "{7EA51D34-8E0E-4548-8A7F-5C6F9C3533AF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTracingLibrary", "samples\OpenTracingLibrary\OpenTracingLibrary.csproj", "{7220BDBB-084D-40B3-A710-19E3C7147185}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -155,6 +157,18 @@ Global
 		{7EA51D34-8E0E-4548-8A7F-5C6F9C3533AF}.Release|x64.Build.0 = Release|Any CPU
 		{7EA51D34-8E0E-4548-8A7F-5C6F9C3533AF}.Release|x86.ActiveCfg = Release|Any CPU
 		{7EA51D34-8E0E-4548-8A7F-5C6F9C3533AF}.Release|x86.Build.0 = Release|Any CPU
+		{7220BDBB-084D-40B3-A710-19E3C7147185}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7220BDBB-084D-40B3-A710-19E3C7147185}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7220BDBB-084D-40B3-A710-19E3C7147185}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7220BDBB-084D-40B3-A710-19E3C7147185}.Debug|x64.Build.0 = Debug|Any CPU
+		{7220BDBB-084D-40B3-A710-19E3C7147185}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7220BDBB-084D-40B3-A710-19E3C7147185}.Debug|x86.Build.0 = Debug|Any CPU
+		{7220BDBB-084D-40B3-A710-19E3C7147185}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7220BDBB-084D-40B3-A710-19E3C7147185}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7220BDBB-084D-40B3-A710-19E3C7147185}.Release|x64.ActiveCfg = Release|Any CPU
+		{7220BDBB-084D-40B3-A710-19E3C7147185}.Release|x64.Build.0 = Release|Any CPU
+		{7220BDBB-084D-40B3-A710-19E3C7147185}.Release|x86.ActiveCfg = Release|Any CPU
+		{7220BDBB-084D-40B3-A710-19E3C7147185}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -168,6 +182,7 @@ Global
 		{2A172931-3439-4563-A6E5-525924DC2F76} = {BAF8F246-3645-42AD-B1D0-0F7EAFBAB34A}
 		{6690361C-CCD8-42C4-A5CF-82D554B03A3D} = {9E5F0022-0A50-40BF-AC6A-C3078585ECAB}
 		{7EA51D34-8E0E-4548-8A7F-5C6F9C3533AF} = {BAF8F246-3645-42AD-B1D0-0F7EAFBAB34A}
+		{7220BDBB-084D-40B3-A710-19E3C7147185} = {BAF8F246-3645-42AD-B1D0-0F7EAFBAB34A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}
