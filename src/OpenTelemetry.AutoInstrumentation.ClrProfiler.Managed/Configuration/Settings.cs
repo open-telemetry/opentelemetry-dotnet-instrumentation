@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 {
@@ -24,6 +26,30 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
             JaegerExporterAgentPort = int.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.JaegerExporterAgentPort), out var port) ? port : 6831;
 
             LoadTracerAtStartup = bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.LoadTracerAtStartup), out var loadTracerAtStartup) ? loadTracerAtStartup : true;
+
+            ConsoleExporterEnabled = bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.ConsoleExporterEnabled), out var consoleExporterEnabled) ? consoleExporterEnabled : true;
+
+            var enabledInstrumentations = Environment.GetEnvironmentVariable(ConfigurationKeys.EnabledInstrumentations);
+            if (enabledInstrumentations == null)
+            {
+                EnabledInstrumentations = Enum.GetValues(typeof(InstrumentationType)).Cast<InstrumentationType>().ToList();
+            }
+            else
+            {
+                EnabledInstrumentations = new List<InstrumentationType>();
+                foreach (var instrumentation in enabledInstrumentations.Split(','))
+                {
+                    if (Enum.TryParse(instrumentation, out InstrumentationType parsedType))
+                    {
+                        EnabledInstrumentations.Add(parsedType);
+                    }
+                    else
+                    {
+                        // TODO replace with proper logging
+                        Console.WriteLine($"Could not parse instrumentation \"{instrumentation}\". Skipping...");
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -65,6 +91,16 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         /// Gets jaeger exporter agent port.
         /// </summary>
         public int JaegerExporterAgentPort { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the console exporter is enabled.
+        /// </summary>
+        public bool ConsoleExporterEnabled { get; }
+
+        /// <summary>
+        /// Gets the list of enabled instrumentations.
+        /// </summary>
+        public IList<InstrumentationType> EnabledInstrumentations { get; }
 
         private static Settings Create()
         {

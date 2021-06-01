@@ -48,21 +48,11 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         /// <summary>
         /// Configuration key for whether the console exporter is enabled.
         /// </summary>
-        public const string EnableConsoleExporter = "OTEL_CONSOLE_EXPORTER_ENABLED";
+        public const string ConsoleExporterEnabled = "OTEL_CONSOLE_EXPORTER_ENABLED";
 
         /// <summary>
-        /// Configuration key for whether the HttpClient instrumentation is enabled.
+        /// Configuration key for comma separated list of enabled instrumentations.
         /// </summary>
-        public const string EnableHttpClientInstrumentation = "OTEL_INSTRUMENTATION_HTTPCLIENT_ENABLED";
-
-        /// <summary>
-        /// Configuration key for whether the ASP.NET instrumentation is enabled.
-        /// </summary>
-        public const string EnableAspNetInstrumentation = "OTEL_INSTRUMENTATION_ASPNET_ENABLED";
-
-        /// <summary>
-        /// Configuration key for whether the SqlClient instrumentation is enabled.
-        /// </summary>
-        public const string EnableSqlClientInstrumentation = "OTEL_INSTRUMENTATION_SQLCLIENT_ENABLED";
+        public const string EnabledInstrumentations = "OTEL_ENABLED_INSTRUMENTATIONS";
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -6,15 +7,29 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 {
     internal static class TraceConfigurationHelper
     {
+        private static readonly Dictionary<InstrumentationType, Action<TracerProviderBuilder>> AddInstrumentation = new()
+        {
+            [InstrumentationType.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
+            [InstrumentationType.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
+            [InstrumentationType.SqlClient] = builder => builder.AddSqlClientInstrumentation()
+        };
+
         public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, Settings settings)
         {
             var resourceBuilder = ResourceBuilder
                 .CreateDefault()
                 .AddService(settings.ServiceName ?? "UNKNOWN_SERVICE_NAME", serviceVersion: settings.ServiceVersion);
 
-            return builder
+            builder
                 .SetResourceBuilder(resourceBuilder)
                 .SetExporter(settings);
+
+            foreach (var enabledInstrumentation in settings.EnabledInstrumentations)
+            {
+                AddInstrumentation[enabledInstrumentation](builder);
+            }
+
+            return builder;
         }
 
         public static TracerProviderBuilder AddSdkAspNetInstrumentation(this TracerProviderBuilder builder)
@@ -30,8 +45,10 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 
         private static TracerProviderBuilder SetExporter(this TracerProviderBuilder builder, Settings settings)
         {
-            // TODO for PoC we always want the console exporter to be present -- remove later
-            builder.AddConsoleExporter();
+            if (settings.ConsoleExporterEnabled)
+            {
+                builder.AddConsoleExporter();
+            }
 
             switch (settings.Exporter)
             {
