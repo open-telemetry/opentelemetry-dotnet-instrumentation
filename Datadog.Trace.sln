@@ -57,8 +57,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTracingLibrary", "sampl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Core", "src\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Core\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Core.csproj", "{8BA1CCCC-B07C-46DD-9D54-0B98B3001100}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Samples.MongoDb", "samples\Samples.MongoDb\Samples.MongoDb.csproj", "{6AFC7B3D-DD3A-4EB1-97D9-D59F0D29C6B8}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -185,18 +183,6 @@ Global
 		{8BA1CCCC-B07C-46DD-9D54-0B98B3001100}.Release|x64.Build.0 = Release|Any CPU
 		{8BA1CCCC-B07C-46DD-9D54-0B98B3001100}.Release|x86.ActiveCfg = Release|Any CPU
 		{8BA1CCCC-B07C-46DD-9D54-0B98B3001100}.Release|x86.Build.0 = Release|Any CPU
-		{6AFC7B3D-DD3A-4EB1-97D9-D59F0D29C6B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6AFC7B3D-DD3A-4EB1-97D9-D59F0D29C6B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6AFC7B3D-DD3A-4EB1-97D9-D59F0D29C6B8}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{6AFC7B3D-DD3A-4EB1-97D9-D59F0D29C6B8}.Debug|x64.Build.0 = Debug|Any CPU
-		{6AFC7B3D-DD3A-4EB1-97D9-D59F0D29C6B8}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{6AFC7B3D-DD3A-4EB1-97D9-D59F0D29C6B8}.Debug|x86.Build.0 = Debug|Any CPU
-		{6AFC7B3D-DD3A-4EB1-97D9-D59F0D29C6B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6AFC7B3D-DD3A-4EB1-97D9-D59F0D29C6B8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6AFC7B3D-DD3A-4EB1-97D9-D59F0D29C6B8}.Release|x64.ActiveCfg = Release|Any CPU
-		{6AFC7B3D-DD3A-4EB1-97D9-D59F0D29C6B8}.Release|x64.Build.0 = Release|Any CPU
-		{6AFC7B3D-DD3A-4EB1-97D9-D59F0D29C6B8}.Release|x86.ActiveCfg = Release|Any CPU
-		{6AFC7B3D-DD3A-4EB1-97D9-D59F0D29C6B8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
