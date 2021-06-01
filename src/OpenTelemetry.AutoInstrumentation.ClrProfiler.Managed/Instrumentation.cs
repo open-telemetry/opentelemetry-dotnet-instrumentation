@@ -45,7 +45,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed
                         .AddSource("OpenTelemetry.AutoInstrumentation.*");
 
                     _tracerProvider = builder.Build();
-                    Log("OpenTelemetry SDK loaded.");
+                    Log("OpenTelemetry tracer initialized.");
                 }
             }
             catch (Exception ex)
