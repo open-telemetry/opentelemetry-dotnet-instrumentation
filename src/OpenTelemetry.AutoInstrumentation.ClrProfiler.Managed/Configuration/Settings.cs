@@ -55,7 +55,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
             {
                 foreach (var sourceName in additionalSources.Split(','))
                 {
-                    AdditionalSources.Add(sourceName);
+                    ActivitySources.Add(sourceName);
                 }
             }
         }
@@ -111,9 +111,9 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         public IList<InstrumentationType> EnabledInstrumentations { get; } = new List<InstrumentationType>();
 
         /// <summary>
-        /// Gets the list of additional activitysources to be added to the tracer at the startup.
+        /// Gets the list of activitysources to be added to the tracer at the startup.
         /// </summary>
-        public IList<string> AdditionalSources { get; } = new List<string>();
+        public IList<string> ActivitySources { get; } = new List<string> { "OpenTelemetry.AutoInstrumentation.*" };
 
         private static Settings Create()
         {

@@ -30,10 +30,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                 AddInstrumentation[enabledInstrumentation](builder);
             }
 
-            if (settings.AdditionalSources.Any())
-            {
-                builder.AddSource(settings.AdditionalSources.ToArray());
-            }
+            builder.AddSource(settings.ActivitySources.ToArray());
 
             return builder;
         }

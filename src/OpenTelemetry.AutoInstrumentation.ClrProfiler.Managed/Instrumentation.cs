@@ -36,8 +36,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed
                     var builder = Sdk
                         .CreateTracerProviderBuilder()
                         .UseEnvironmentVariables(settings)
-                        .SetSampler(new AlwaysOnSampler())
-                        .AddSource("OpenTelemetry.AutoInstrumentation.*");
+                        .SetSampler(new AlwaysOnSampler());
 
                     _tracerProvider = builder.Build();
                     Console.WriteLine($">>>>>>>>>>>>>>>>>>>>>>> Process: {p.ProcessName}({p.Id}), initialized");
