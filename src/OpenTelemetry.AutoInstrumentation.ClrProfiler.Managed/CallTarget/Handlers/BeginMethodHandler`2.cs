@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 #pragma warning disable SA1649 // File name must match first type name
@@ -37,7 +38,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.CallTarget.Handlers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static CallTargetState Invoke(TTarget instance, TArg1 arg1, TArg2 arg2)
         {
-            return new CallTargetState(Managed.Instrumentation.ScopeManager.Active, _invokeDelegate(instance, arg1, arg2));
+            return new CallTargetState(Activity.Current, _invokeDelegate(instance, arg1, arg2));
         }
     }
 }

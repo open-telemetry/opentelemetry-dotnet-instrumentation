@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Tagging;
-using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Trace;
+using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Util
 {
@@ -24,25 +24,18 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Util
                     exception = aggregateException.InnerExceptions[0];
                 }
 
-                activity.SetTag(Tags.Status, ActivityStatus.Error.WithDescription(exception.Message));
+                activity.SetTag(Tags.Status, Status.Error.WithDescription(exception.Message));
                 activity.SetTag(Tags.ErrorMsg, exception.Message);
                 activity.SetTag(Tags.ErrorStack, exception.ToString());
                 activity.SetTag(Tags.ErrorType, exception.GetType().ToString());
             }
             else
             {
-                activity.SetTag(Tags.Status, ActivityStatus.Error);
+                activity.SetTag(Tags.Status, Status.Error);
             }
         }
 
-        public static Scope StartActivityWithTags(this ActivitySource activitySource, string operationName, string serviceName = null, DateTimeOffset? startTime = null, bool ignoreActiveScope = false, bool finishOnClose = true, ITags tags = null, ulong? spanId = null)
-        {
-            var scopeManager = Instrumentation.ScopeManager;
-            var activity = StartActivity(activitySource, operationName, tags, serviceName, startTime, ignoreActiveScope, spanId);
-            return scopeManager.Activate(activity, finishOnClose);
-        }
-
-        private static Activity StartActivity(ActivitySource activitySource, string operationName, ITags tags, string serviceName = null, DateTimeOffset? startTime = null, bool ignoreActiveScope = false, ulong? spanId = null)
+        public static Activity StartActivityWithTags(this ActivitySource activitySource, string operationName, string serviceName = null, ITags tags = null)
         {
             var settings = Instrumentation.TracerSettings;
             var activity = activitySource.StartActivity(operationName);
@@ -80,6 +73,24 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Util
             }
 
             return activity;
+        }
+
+        internal static void DisposeWithException(this Activity activity, Exception exception)
+        {
+            if (activity != null)
+            {
+                try
+                {
+                    if (exception != null)
+                    {
+                        activity?.SetException(exception);
+                    }
+                }
+                finally
+                {
+                    activity.Dispose();
+                }
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Util;
@@ -38,7 +39,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.CallTarget.Handlers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static CallTargetState Invoke(TTarget instance)
         {
-            return new CallTargetState(Managed.Instrumentation.ScopeManager.Active, _invokeDelegate(instance));
+            return new CallTargetState(Activity.Current, _invokeDelegate(instance));
         }
     }
 }

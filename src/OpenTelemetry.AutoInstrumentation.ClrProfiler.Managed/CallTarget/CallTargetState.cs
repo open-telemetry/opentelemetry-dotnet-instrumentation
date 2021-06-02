@@ -1,6 +1,6 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.CallTarget
 {
@@ -9,19 +9,19 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.CallTarget
     /// </summary>
     public readonly struct CallTargetState
     {
-        private readonly Scope _previousScope;
-        private readonly Scope _scope;
+        private readonly Activity _previousActivity;
+        private readonly Activity _activity;
         private readonly object _state;
         private readonly DateTimeOffset? _startTime;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CallTargetState"/> struct.
         /// </summary>
-        /// <param name="scope">Scope instance</param>
-        public CallTargetState(Scope scope)
+        /// <param name="activity">Activity instance</param>
+        public CallTargetState(Activity activity)
         {
-            _previousScope = null;
-            _scope = scope;
+            _previousActivity = null;
+            _activity = activity;
             _state = null;
             _startTime = null;
         }
@@ -29,12 +29,12 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.CallTarget
         /// <summary>
         /// Initializes a new instance of the <see cref="CallTargetState"/> struct.
         /// </summary>
-        /// <param name="scope">Scope instance</param>
+        /// <param name="activity">Activity instance</param>
         /// <param name="state">Object state instance</param>
-        public CallTargetState(Scope scope, object state)
+        public CallTargetState(Activity activity, object state)
         {
-            _previousScope = null;
-            _scope = scope;
+            _previousActivity = null;
+            _activity = activity;
             _state = state;
             _startTime = null;
         }
@@ -42,29 +42,29 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.CallTarget
         /// <summary>
         /// Initializes a new instance of the <see cref="CallTargetState"/> struct.
         /// </summary>
-        /// <param name="scope">Scope instance</param>
+        /// <param name="activity">Activity instance</param>
         /// <param name="state">Object state instance</param>
-        /// <param name="startTime">The intended start time of the scope, intended for scopes created in the OnMethodEnd handler</param>
-        public CallTargetState(Scope scope, object state, DateTimeOffset? startTime)
+        /// <param name="startTime">The intended start time of the activity, intended for activities created in the OnMethodEnd handler</param>
+        public CallTargetState(Activity activity, object state, DateTimeOffset? startTime)
         {
-            _previousScope = null;
-            _scope = scope;
+            _previousActivity = null;
+            _activity = activity;
             _state = state;
             _startTime = startTime;
         }
 
-        internal CallTargetState(Scope previousScope, CallTargetState state)
+        internal CallTargetState(Activity previousActivity, CallTargetState state)
         {
-            _previousScope = previousScope;
-            _scope = state._scope;
+            _previousActivity = previousActivity;
+            _activity = state._activity;
             _state = state._state;
             _startTime = state._startTime;
         }
 
         /// <summary>
-        /// Gets the CallTarget BeginMethod scope
+        /// Gets the CallTarget BeginMethod activity
         /// </summary>
-        public Scope Scope => _scope;
+        public Activity Activity => _activity;
 
         /// <summary>
         /// Gets the CallTarget BeginMethod state
@@ -76,7 +76,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.CallTarget
         /// </summary>
         public DateTimeOffset? StartTime => _startTime;
 
-        internal Scope PreviousScope => _previousScope;
+        internal Activity PreviousActivity => _previousActivity;
 
         /// <summary>
         /// Gets the default call target state (used by the native side to initialize the locals)
@@ -94,7 +94,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.CallTarget
         /// <returns>String value</returns>
         public override string ToString()
         {
-            return $"{typeof(CallTargetState).FullName}({_previousScope}, {_scope}, {_state})";
+            return $"{typeof(CallTargetState).FullName}({_previousActivity}, {_activity}, {_state})";
         }
     }
 }

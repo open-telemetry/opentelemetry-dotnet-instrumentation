@@ -1,9 +1,9 @@
 using System;
+using System.Diagnostics;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using OpenTelemetry.AutoInstrumentation.ClrProfiler.CallTarget.Handlers.Continuations;
-using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Trace.Abstractions;
 
 #pragma warning disable SA1649 // File name must match first type name
 
@@ -74,10 +74,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.CallTarget.Handlers
 
                 // Restore previous scope if there is a continuation
                 // This is used to mimic the ExecutionContext copy from the StateMachine
-                if (Managed.Instrumentation.ScopeManager is IScopeRawAccess rawAccess)
-                {
-                    rawAccess.Active = state.PreviousScope;
-                }
+                Activity.Current = state.PreviousActivity;
             }
 
             if (_invokeDelegate != null)

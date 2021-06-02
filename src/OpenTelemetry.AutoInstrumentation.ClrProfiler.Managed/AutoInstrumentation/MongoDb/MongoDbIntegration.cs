@@ -8,8 +8,6 @@ using OpenTelemetry.AutoInstrumentation.ClrProfiler.Emit;
 using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration;
 using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Logging;
 using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Tagging;
-using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Trace;
-using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Trace.Abstractions;
 using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.MongoDb
@@ -93,7 +91,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
                 throw;
             }
 
-            using (var scope = CreateScope(wireProtocol, connection))
+            using (var activity = CreateActivity(wireProtocol, connection))
             {
                 try
                 {
@@ -101,7 +99,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
                 }
                 catch (Exception ex)
                 {
-                    scope?.Activity.SetException(ex);
+                    activity?.SetException(ex);
                     throw;
                 }
             }
@@ -163,7 +161,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
                 throw;
             }
 
-            using (var scope = CreateScope(wireProtocol, connection))
+            using (var activity = CreateActivity(wireProtocol, connection))
             {
                 try
                 {
@@ -171,7 +169,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
                 }
                 catch (Exception ex)
                 {
-                    scope?.Activity.SetException(ex);
+                    activity?.SetException(ex);
                     throw;
                 }
             }
@@ -304,10 +302,9 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
                 executeAsync);
         }
 
-        internal static Scope CreateScope(object wireProtocol, object connection)
+        internal static Activity CreateActivity(object wireProtocol, object connection)
         {
             var settings = Managed.Instrumentation.TracerSettings;
-            var scopeManager = Managed.Instrumentation.ScopeManager;
 
             if (!settings.IsIntegrationEnabled(IntegrationId))
             {
@@ -315,7 +312,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
                 return null;
             }
 
-            if (GetActiveMongoDbScope(scopeManager) != null)
+            if (GetActiveMongoDbScope() != null)
             {
                 // There is already a parent MongoDb span (nested calls)
                 return null;
@@ -389,7 +386,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
                 Log.Warning(ex, "Unable to access IWireProtocol.Command properties.");
             }
 
-            Scope scope = null;
+            Activity activity = null;
 
             try
             {
@@ -402,29 +399,26 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
                     Port = port
                 };
 
-                scope = ActivitySource.StartActivityWithTags(OperationName, serviceName: settings.ServiceName, tags: tags);
-                var span = scope.Activity;
-                span.SetCustomProperty("ResourceName", resourceName);
+                activity = ActivitySource.StartActivityWithTags(OperationName, serviceName: settings.ServiceName, tags: tags);
+                activity.SetCustomProperty("ResourceName", resourceName);
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error creating or populating scope.");
             }
 
-            return scope;
+            return activity;
         }
 
-        private static Scope GetActiveMongoDbScope(IScopeManager scopeManager)
+        private static Activity GetActiveMongoDbScope()
         {
-            var scope = scopeManager.Active;
-
-            var parent = scope?.Activity;
+            var parent = Activity.Current;
 
             if (parent != null &&
                 parent.Source == ActivitySource &&
                 parent.Tags.Any(x => x.Key == Tags.InstrumentationName))
             {
-                return scope;
+                return parent;
             }
 
             return null;
@@ -466,7 +460,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
             CancellationToken cancellationToken,
             Func<object, object, CancellationToken, object> originalMethod)
         {
-            using (var scope = CreateScope(wireProtocol, connection))
+            using (var activity = CreateActivity(wireProtocol, connection))
             {
                 try
                 {
@@ -481,7 +475,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
                 }
                 catch (Exception ex)
                 {
-                    scope?.Activity.SetException(ex);
+                    activity?.SetException(ex);
                     throw;
                 }
             }
@@ -493,7 +487,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
             CancellationToken cancellationToken,
             Func<object, object, CancellationToken, object> originalMethod)
         {
-            using (var scope = CreateScope(wireProtocol, connection))
+            using (var activity = CreateActivity(wireProtocol, connection))
             {
                 try
                 {
@@ -503,7 +497,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
                 }
                 catch (Exception ex)
                 {
-                    scope?.Activity.SetException(ex);
+                    activity?.SetException(ex);
                     throw;
                 }
             }

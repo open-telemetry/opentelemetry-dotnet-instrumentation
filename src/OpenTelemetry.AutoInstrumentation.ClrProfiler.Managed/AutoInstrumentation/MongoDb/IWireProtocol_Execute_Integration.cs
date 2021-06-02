@@ -24,9 +24,9 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
         /// <returns>Calltarget state value</returns>
         public static CallTargetState OnMethodBegin<TTarget>(TTarget instance, object connection, CancellationToken cancellationToken)
         {
-            var scope = MongoDbIntegration.CreateScope(instance, connection);
+            var activity = MongoDbIntegration.CreateActivity(instance, connection);
 
-            return new CallTargetState(scope);
+            return new CallTargetState(activity);
         }
 
         /// <summary>
@@ -39,9 +39,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
         /// <returns>A response value, in an async scenario will be T of Task of T</returns>
         public static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception exception, CallTargetState state)
         {
-            var scope = state.Scope;
-
-            scope.DisposeWithException(exception);
+            state.Activity.DisposeWithException(exception);
 
             return CallTargetReturn.GetDefault();
         }
