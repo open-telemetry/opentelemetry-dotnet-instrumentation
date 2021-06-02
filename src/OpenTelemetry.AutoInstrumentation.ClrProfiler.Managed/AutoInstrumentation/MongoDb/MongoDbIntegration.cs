@@ -19,7 +19,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
     /// </summary>
     public static class MongoDbIntegration
     {
-        internal const string IntegrationName = "MongoDb";
+        internal const string IntegrationName = nameof(IntegrationIds.MongoDb);
 
         internal const string Major2 = "2";
         internal const string Major2Minor1 = "2.1";

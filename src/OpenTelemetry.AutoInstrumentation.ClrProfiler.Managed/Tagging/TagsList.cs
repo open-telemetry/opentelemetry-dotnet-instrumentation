@@ -7,10 +7,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Tagging
 {
     internal abstract class TagsList : ITags
     {
-        private List<KeyValuePair<string, double>> _metrics;
         private List<KeyValuePair<string, string>> _tags;
-
-        public List<KeyValuePair<string, double>> Metrics => Volatile.Read(ref _metrics);
 
         public List<KeyValuePair<string, string>> GetAllTags()
         {
@@ -78,37 +75,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Tagging
             return null;
         }
 
-        public double? GetMetric(string key)
-        {
-            foreach (var property in GetAdditionalMetrics())
-            {
-                if (property.Key == key)
-                {
-                    return property.Getter(this);
-                }
-            }
-
-            var metrics = Metrics;
-
-            if (metrics == null)
-            {
-                return null;
-            }
-
-            lock (metrics)
-            {
-                for (int i = 0; i < metrics.Count; i++)
-                {
-                    if (metrics[i].Key == key)
-                    {
-                        return metrics[i].Value;
-                    }
-                }
-            }
-
-            return null;
-        }
-
         public void SetTag(string key, string value)
         {
             foreach (var property in GetAdditionalTags())
@@ -155,52 +121,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Tagging
             }
         }
 
-        public void SetMetric(string key, double? value)
-        {
-            foreach (var property in GetAdditionalMetrics())
-            {
-                if (property.Key == key)
-                {
-                    property.Setter(this, value);
-                    return;
-                }
-            }
-
-            var metrics = Metrics;
-
-            if (metrics == null)
-            {
-                var newMetrics = new List<KeyValuePair<string, double>>();
-                metrics = Interlocked.CompareExchange(ref _metrics, newMetrics, null) ?? newMetrics;
-            }
-
-            lock (metrics)
-            {
-                for (int i = 0; i < metrics.Count; i++)
-                {
-                    if (metrics[i].Key == key)
-                    {
-                        if (value == null)
-                        {
-                            metrics.RemoveAt(i);
-                        }
-                        else
-                        {
-                            metrics[i] = new KeyValuePair<string, double>(key, value.Value);
-                        }
-
-                        return;
-                    }
-                }
-
-                // If we get there, the tag wasn't in the collection
-                if (value != null)
-                {
-                    metrics.Add(new KeyValuePair<string, double>(key, value.Value));
-                }
-            }
-        }
-
         public override string ToString()
         {
             var sb = new StringBuilder();
@@ -218,19 +138,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Tagging
                 }
             }
 
-            var metrics = Metrics;
-
-            if (metrics != null)
-            {
-                lock (metrics)
-                {
-                    foreach (var pair in metrics)
-                    {
-                        sb.Append($"{pair.Key} (metric):{pair.Value}");
-                    }
-                }
-            }
-
             foreach (var property in GetAdditionalTags())
             {
                 var value = property.Getter(this);
@@ -241,22 +148,10 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Tagging
                 }
             }
 
-            foreach (var property in GetAdditionalMetrics())
-            {
-                var value = property.Getter(this);
-
-                if (value != null)
-                {
-                    sb.Append($"{property.Key} (metric):{value.Value},");
-                }
-            }
-
             return sb.ToString();
         }
 
         protected virtual IProperty<string>[] GetAdditionalTags() => ArrayHelper.Empty<IProperty<string>>();
-
-        protected virtual IProperty<double?>[] GetAdditionalMetrics() => ArrayHelper.Empty<IProperty<double?>>();
 
         protected virtual IList<KeyValuePair<string, string>> GetCustomTags() => Volatile.Read(ref _tags);
     }
