@@ -26,7 +26,7 @@ namespace Datadog.Trace.IntegrationTests
             _tracer = new Tracer(settings, plugins: null, traceWriter: agentWriter, sampler: null, scopeManager: null, statsd: null);
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/191")]
         public void NormalSpan()
         {
             var scope = _tracer.StartActive("Operation");
@@ -38,7 +38,7 @@ namespace Datadog.Trace.IntegrationTests
             Assert.False(metaDictio.ContainsKey(Tags.Origin));
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/191")]
         public void NormalOriginSpan()
         {
             const string originValue = "ciapp-test";
@@ -55,7 +55,7 @@ namespace Datadog.Trace.IntegrationTests
             Assert.Equal(originValue, metaDictio[Tags.Origin]);
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/191")]
         public void OriginInMultipleSpans()
         {
             const string originValue = "ciapp-test";
@@ -85,7 +85,7 @@ namespace Datadog.Trace.IntegrationTests
             }
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/191")]
         public void MultipleOriginsSpans()
         {
             const string originValue = "ciapp-test_";
