@@ -13,4 +13,8 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="5.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\OpenTracingLibrary\OpenTracingLibrary.csproj" />
+  </ItemGroup>
+
 </Project>

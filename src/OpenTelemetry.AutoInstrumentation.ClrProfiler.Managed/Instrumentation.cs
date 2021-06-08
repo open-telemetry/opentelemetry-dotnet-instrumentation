@@ -1,7 +1,9 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Threading;
 using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration;
+using OpenTelemetry.Context.Propagation;
+using OpenTelemetry.Shims.OpenTracing;
 using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed
@@ -11,17 +13,19 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed
     /// </summary>
     public static class Instrumentation
     {
+        private static readonly Process _process = Process.GetCurrentProcess();
         private static int _firstInitialization = 1;
 
         private static TracerProvider _tracerProvider;
 
+        internal static Settings TracerSettings { get; } = Settings.FromDefaultSources();
+
         /// <summary>
-        /// Initialize
+        /// Initialize the OpenTelemetry SDK with a pre-defined set of exporters, shims, and
+        /// instrumentations.
         /// </summary>
         public static void Initialize()
         {
-            var p = Process.GetCurrentProcess();
-            Console.WriteLine($">>>>>>>>>>>>>>>>>>>>>>> Process: {p.ProcessName}({p.Id}), starting");
             if (Interlocked.Exchange(ref _firstInitialization, value: 0) != 1)
             {
                 // Initialize() was already called before
@@ -30,23 +34,46 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed
 
             try
             {
-                var settings = Settings.Instance;
-                if (settings.LoadTracerAtStartup)
+                if (TracerSettings.LoadTracerAtStartup)
                 {
                     var builder = Sdk
                         .CreateTracerProviderBuilder()
-                        .UseEnvironmentVariables(settings)
+                        .UseEnvironmentVariables(TracerSettings)
                         .SetSampler(new AlwaysOnSampler());
 
                     _tracerProvider = builder.Build();
-                    Console.WriteLine($">>>>>>>>>>>>>>>>>>>>>>> Process: {p.ProcessName}({p.Id}), initialized");
+                    Log("OpenTelemetry tracer initialized.");
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // TODO: Should we have our own logger like datadog has?
+                Log($"OpenTelemetry SDK load exception: {ex}");
                 throw;
             }
+
+            try
+            {
+                // Instantiate the OpenTracing shim. The underlying OpenTelemetry tracer will create
+                // spans using the "OpenTelemetry.AutoInstrumentation.OpenTracingShim" source.
+                var openTracingShim = new TracerShim(
+                    _tracerProvider.GetTracer("OpenTelemetry.AutoInstrumentation.OpenTracingShim"),
+                    Propagators.DefaultTextMapPropagator);
+
+                // This registration must occur prior to any reference to the OpenTracing tracer:
+                // otherwise the no-op tracer is going to be used by OpenTracing instead.
+                OpenTracing.Util.GlobalTracer.Register(openTracingShim);
+                Log("OpenTracingShim loaded.");
+            }
+            catch (Exception ex)
+            {
+                Log($"OpenTracingShim exception: {ex}");
+                throw;
+            }
+        }
+
+        private static void Log(string message)
+        {
+            Console.WriteLine($">>>>>>>>>>>>>>>>>>>>>>> Process: {_process.ProcessName}({_process.Id}): {message}");
         }
     }
 }

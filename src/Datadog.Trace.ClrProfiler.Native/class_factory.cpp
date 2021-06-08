@@ -45,7 +45,7 @@ HRESULT STDMETHODCALLTYPE ClassFactory::CreateInstance(IUnknown* pUnkOuter,
     return CLASS_E_NOAGGREGATION;
   }
 
-  trace::Info("Datadog CLR Profiler ", PROFILER_VERSION,
+  trace::Info("OpenTelemetry CLR Profiler ", PROFILER_VERSION,
               " on",
 
 #ifdef _WIN32

@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
@@ -11,32 +13,41 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
     /// </summary>
     public class Settings
     {
-        private static readonly Lazy<Settings> LazyInstance = new(Create);
-
-        private Settings()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Settings"/> class
+        /// using the specified <see cref="IConfigurationSource"/> to initialize values.
+        /// </summary>
+        /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
+        private Settings(IConfigurationSource source)
         {
-            ServiceName = Environment.GetEnvironmentVariable(ConfigurationKeys.ServiceName);
-            ServiceVersion = Environment.GetEnvironmentVariable(ConfigurationKeys.ServiceVersion);
-            Exporter = Environment.GetEnvironmentVariable(ConfigurationKeys.Exporter);
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
 
-            var zipkinEndpoint = Environment.GetEnvironmentVariable(ConfigurationKeys.ZipkinEndpoint) ?? $"http://localhost:8126";
-            ZipkinEndpoint = new Uri(zipkinEndpoint);
+            Environment = source.GetString(ConfigurationKeys.Environment);
 
-            JaegerExporterAgentHost = Environment.GetEnvironmentVariable(ConfigurationKeys.JaegerExporterAgentHost) ?? "localhost";
-            JaegerExporterAgentPort = int.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.JaegerExporterAgentPort), out var port) ? port : 6831;
+            ServiceName = source.GetString(ConfigurationKeys.ServiceName);
+            ServiceVersion = source.GetString(ConfigurationKeys.ServiceVersion);
+            Exporter = source.GetString(ConfigurationKeys.Exporter);
 
-            LoadTracerAtStartup = bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.LoadTracerAtStartup), out var loadTracerAtStartup) ? loadTracerAtStartup : true;
+            ZipkinEndpoint = new Uri(source.GetString(ConfigurationKeys.ZipkinEndpoint) ?? "http://localhost:8126");
 
-            ConsoleExporterEnabled = bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.ConsoleExporterEnabled), out var consoleExporterEnabled) ? consoleExporterEnabled : true;
+            JaegerExporterAgentHost = source.GetString(ConfigurationKeys.JaegerExporterAgentHost) ?? "localhost";
+            JaegerExporterAgentPort = source.GetInt32(ConfigurationKeys.JaegerExporterAgentPort) ?? 6831;
 
-            var enabledInstrumentations = Environment.GetEnvironmentVariable(ConfigurationKeys.EnabledInstrumentations);
+            LoadTracerAtStartup = source.GetBool(ConfigurationKeys.LoadTracerAtStartup) ?? true;
+
+            ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? true;
+
+            var enabledInstrumentations = source.GetString(ConfigurationKeys.EnabledInstrumentations);
             if (enabledInstrumentations == null)
             {
                 EnabledInstrumentations = Enum.GetValues(typeof(InstrumentationType)).Cast<InstrumentationType>().ToList();
             }
             else
             {
-                foreach (var instrumentation in enabledInstrumentations.Split(','))
+                foreach (var instrumentation in enabledInstrumentations.Split(separator: ','))
                 {
                     if (Enum.TryParse(instrumentation, out InstrumentationType parsedType))
                     {
@@ -50,20 +61,37 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                 }
             }
 
-            var additionalSources = Environment.GetEnvironmentVariable(ConfigurationKeys.AdditionalSources);
+            var additionalSources = source.GetString(ConfigurationKeys.AdditionalSources);
             if (additionalSources != null)
             {
-                foreach (var sourceName in additionalSources.Split(','))
+                foreach (var sourceName in additionalSources.Split(separator: ','))
                 {
                     ActivitySources.Add(sourceName);
                 }
             }
+
+            TraceEnabled = source.GetBool(ConfigurationKeys.TraceEnabled) ?? true;
+            LoadTracerAtStartup = source.GetBool(ConfigurationKeys.LoadTracerAtStartup) ?? true;
+
+            Integrations = new IntegrationSettingsCollection(source);
+
+            GlobalTags = source.GetDictionary(ConfigurationKeys.GlobalTags) ??
+             // default value (empty)
+             new ConcurrentDictionary<string, string>();
         }
 
         /// <summary>
-        /// Gets the settings instance.
+        /// Gets or sets the default environment name applied to all spans.
         /// </summary>
-        public static Settings Instance => LazyInstance.Value;
+        /// <seealso cref="ConfigurationKeys.Environment"/>
+        public string Environment { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether tracing is enabled.
+        /// Default is <c>true</c>.
+        /// </summary>
+        /// <seealso cref="ConfigurationKeys.TraceEnabled"/>
+        public bool TraceEnabled { get; set; }
 
         /// <summary>
         /// Gets the name of the service.
@@ -115,9 +143,30 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         /// </summary>
         public IList<string> ActivitySources { get; } = new List<string> { "OpenTelemetry.AutoInstrumentation.*" };
 
-        private static Settings Create()
+        /// <summary>
+        /// Gets a collection of <see cref="Integrations"/> keyed by integration name.
+        /// </summary>
+        public IntegrationSettingsCollection Integrations { get; }
+
+        /// <summary>
+        /// Gets or sets the global tags, which are applied to all <see cref="Activity"/>s.
+        /// </summary>
+        public IDictionary<string, string> GlobalTags { get; set; }
+
+        internal static Settings FromDefaultSources()
         {
-            return new();
+            // env > AppSettings > datadog.json
+            var configurationSource = new CompositeConfigurationSource
+            {
+                new EnvironmentConfigurationSource(),
+
+#if NETFRAMEWORK
+                // on .NET Framework only, also read from app.config/web.config
+                new NameValueConfigurationSource(System.Configuration.ConfigurationManager.AppSettings)
+#endif
+            };
+
+            return new Settings(configurationSource);
         }
     }
 }

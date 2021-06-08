@@ -13,6 +13,16 @@ namespace ConsoleApp
         {
             using (var activity = MyActivitySource.StartActivity("Main"))
             {
+                await OpenTracingLibrary.Wrapper.WithOpenTracingSpanAsync("client", RunAsync);
+            }
+
+            return 0;
+        }
+
+        private static async Task RunAsync()
+        {
+            using (var activity = MyActivitySource.StartActivity("RunAsync"))
+            {
                 activity?.SetTag("foo", "bar");
 
                 var baseAddress = new Uri("https://www.example.com/");
@@ -24,10 +34,8 @@ namespace ConsoleApp
 
                 var client = new HttpClient();
                 Console.WriteLine("Calling client.GetAsync");
-                await regularHttpClient.GetAsync("http://127.0.0.1:8080");
+                await client.GetAsync("http://127.0.0.1:8080");
                 Console.WriteLine("Called client.GetAsync");
-
-                return 0;
             }
         }
     }

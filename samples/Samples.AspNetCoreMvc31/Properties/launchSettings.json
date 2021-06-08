@@ -39,7 +39,12 @@
         "OTEL_DOTNET_TRACER_HOME": "$(ProjectDir)$(OutputPath)profiler-lib",
         "OTEL_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json",
         "OTEL_VERSION": "1.0.0",
-        "OTEL_TRACE_HEADER_TAGS": "sample.correlation.identifier, Server"
+        "OTEL_SERVICE": "Samples.AspNetCoreMvc31",
+        "OTEL_TRACE_HEADER_TAGS": "sample.correlation.identifier, Server",
+
+        "OTEL_EXPORTER": "jaeger",
+        "OTEL_EXPORTER_JAEGER_AGENT_HOST": "localhost",
+        "OTEL_EXPORTER_JAEGER_AGENT_PORT": "6831"
       },
       "nativeDebugging": true,
       "applicationUrl": "http://localhost:54568"

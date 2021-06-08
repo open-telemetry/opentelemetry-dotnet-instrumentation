@@ -6,7 +6,7 @@ using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 {
-    internal static class TraceConfigurationHelper
+    internal static class EnvironmentConfigurationHelper
     {
         private static readonly Dictionary<InstrumentationType, Action<TracerProviderBuilder>> AddInstrumentation = new()
         {
