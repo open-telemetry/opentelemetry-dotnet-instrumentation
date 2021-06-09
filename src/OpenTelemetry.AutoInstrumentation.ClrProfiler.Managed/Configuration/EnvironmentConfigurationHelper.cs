@@ -31,6 +31,10 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
             }
 
             builder.AddSource(settings.ActivitySources.ToArray());
+            foreach (var legacySource in settings.LegacySources)
+            {
+                builder.AddLegacySource(legacySource);
+            }
 
             return builder;
         }

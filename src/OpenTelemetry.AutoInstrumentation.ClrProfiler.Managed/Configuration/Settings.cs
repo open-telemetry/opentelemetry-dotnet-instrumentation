@@ -67,6 +67,15 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                 }
             }
 
+            var legacySources = source.GetString(ConfigurationKeys.LegacySources);
+            if (legacySources != null)
+            {
+                foreach (var sourceName in legacySources.Split(separator: ','))
+                {
+                    LegacySources.Add(sourceName);
+                }
+            }
+
             TraceEnabled = source.GetBool(ConfigurationKeys.TraceEnabled) ?? true;
             LoadTracerAtStartup = source.GetBool(ConfigurationKeys.LoadTracerAtStartup) ?? true;
 
@@ -139,6 +148,11 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         /// Gets the list of activitysources to be added to the tracer at the startup.
         /// </summary>
         public IList<string> ActivitySources { get; } = new List<string> { "OpenTelemetry.AutoInstrumentation.*" };
+
+        /// <summary>
+        /// Gets the list of legacy sources to be added to the tracer at the startup.
+        /// </summary>
+        public IList<string> LegacySources { get; } = new List<string>();
 
         /// <summary>
         /// Gets a collection of <see cref="Integrations"/> keyed by integration name.

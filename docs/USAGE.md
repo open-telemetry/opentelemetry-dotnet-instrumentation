@@ -67,6 +67,8 @@ Use these environment variables to configure the tracing library:
 | `OTEL_DOTNET_TRACER_LOAD_AT_STARTUP` | Defines whether the tracer is created by the auto instrumentation library or not. The default value is `true`. For applications with manual instrumentation in place and tracer being initialized in the app this should be changed to `false`. Note that if this is disabled, the application code will be in charge of setting up the exporters and any other desired instrumentation, e.g. AddAspNetInstrumentation (see [custom instrumentation section](#configure-custom-instrumentation)). | `true` | 
 | `OTEL_DISABLED_INSTRUMENTATIONS` | Comma separated list of disabled instrumentation. The available values are: `HttpClient`, `AspNet`, `SqlClient`. |  |
 | `OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES` | Comma separated list of additional activitysource names to be added to the tracer at the startup. |  |
+| `OTEL_DOTNET_TRACER_LEGACY_SOURCES` | Comma separated list of additional legacy source names to be added to the tracer at the startup. |  |
+
 
 ## Ways to configure
 
