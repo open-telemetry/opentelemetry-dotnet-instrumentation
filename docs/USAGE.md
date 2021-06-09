@@ -65,7 +65,7 @@ Use these environment variables to configure the tracing library:
 | `OTEL_PROFILER_PROCESSES` | Sets the filename of executables the profiler can attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
 | `OTEL_PROFILER_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
 | `OTEL_DOTNET_TRACER_LOAD_AT_STARTUP` | Defines whether the tracer is created by the auto instrumentation library or not. The default value is `true`. For applications with manual instrumentation in place and tracer being initialized in the app this should be changed to `false`. Note that if this is disabled, the application code will be in charge of setting up the exporters and any other desired instrumentation, e.g. AddAspNetInstrumentation (see [custom instrumentation section](#configure-custom-instrumentation)). | `true` | 
-| `OTEL_ENABLED_INSTRUMENTATIONS` | Comma separated list of enabled instrumentation. The available values are: `HttpClient`, `AspNet`, `SqlClient`. By default all are enabled. | `HttpClient,AspNet,SqlClient` |
+| `OTEL_DISABLED_INSTRUMENTATIONS` | Comma separated list of disabled instrumentation. The available values are: `HttpClient`, `AspNet`, `SqlClient`. |  |
 | `OTEL_ADDITIONAL_SOURCES` | Comma separated list of additional activitysource names to be added to the tracer at the startup. |  |
 
 ## Ways to configure

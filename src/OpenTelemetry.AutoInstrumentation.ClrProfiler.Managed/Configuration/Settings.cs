@@ -40,18 +40,15 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 
             ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? true;
 
-            var enabledInstrumentations = source.GetString(ConfigurationKeys.EnabledInstrumentations);
-            if (enabledInstrumentations == null)
+            EnabledInstrumentations = Enum.GetValues(typeof(InstrumentationType)).Cast<InstrumentationType>().ToList();
+            var disabledConfigurations = source.GetString(ConfigurationKeys.EnabledInstrumentations);
+            if (disabledConfigurations != null)
             {
-                EnabledInstrumentations = Enum.GetValues(typeof(InstrumentationType)).Cast<InstrumentationType>().ToList();
-            }
-            else
-            {
-                foreach (var instrumentation in enabledInstrumentations.Split(separator: ','))
+                foreach (var instrumentation in disabledConfigurations.Split(separator: ','))
                 {
                     if (Enum.TryParse(instrumentation, out InstrumentationType parsedType))
                     {
-                        EnabledInstrumentations.Add(parsedType);
+                        EnabledInstrumentations.Remove(parsedType);
                     }
                     else
                     {
