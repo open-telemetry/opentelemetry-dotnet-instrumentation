@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 {
@@ -13,6 +14,8 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
     /// </summary>
     public class Settings
     {
+        private ILogger _logger = new ConsoleLogger(nameof(Settings));
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Settings"/> class
         /// using the specified <see cref="IConfigurationSource"/> to initialize values.
@@ -53,7 +56,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                     else
                     {
                         // TODO replace with proper logging
-                        Console.WriteLine($"Could not parse instrumentation \"{instrumentation}\". Skipping...");
+                        _logger.Warning($"Could not parse instrumentation \"{instrumentation}\". Skipping...");
                     }
                 }
             }
