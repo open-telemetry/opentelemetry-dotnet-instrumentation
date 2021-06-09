@@ -22,7 +22,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
             SetServiceVersion("1.0.0");
         }
 
-        [Theory]
+        [Theory(Skip="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/192")]
         [InlineData(true)]
         [Trait("Category", "EndToEnd")]
         [Trait("RunOnWindows", "True")]
@@ -61,7 +61,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
             }
         }
 
-        [Theory]
+        [Theory(Skip="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/192")]
         [InlineData(false)]
         [InlineData(true)]
         [Trait("Category", "EndToEnd")]
