@@ -34,7 +34,7 @@ namespace ConsoleApp
 
                 var client = new HttpClient();
                 Console.WriteLine("Calling client.GetAsync");
-                await client.GetAsync("http://127.0.0.1:8080");
+                await client.GetAsync("http://127.0.0.1:8080/api/mongo");
                 Console.WriteLine("Called client.GetAsync");
             }
         }
