@@ -25,7 +25,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                 .SetResourceBuilder(resourceBuilder)
                 .SetExporter(settings);
 
-            foreach (var enabledInstrumentation in settings.EnabledInstrumentations)
+            foreach (var enabledInstrumentation in settings.EnabledIntegrations)
             {
                 if (AddInstrumentation.ContainsKey(enabledInstrumentation))
                 {

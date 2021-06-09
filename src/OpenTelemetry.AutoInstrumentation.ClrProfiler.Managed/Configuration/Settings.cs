@@ -43,15 +43,15 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 
             ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? true;
 
-            EnabledInstrumentations = Enum.GetValues(typeof(IntegrationIds)).Cast<IntegrationIds>().ToList();
-            var disabledConfigurations = source.GetString(ConfigurationKeys.DisabledInstrumentations);
-            if (disabledConfigurations != null)
+            EnabledIntegrations = Enum.GetValues(typeof(IntegrationIds)).Cast<IntegrationIds>().ToList();
+            var disabledIntegrations = source.GetString(ConfigurationKeys.DisabledIntegrations);
+            if (disabledIntegrations != null)
             {
-                foreach (var instrumentation in disabledConfigurations.Split(separator: ','))
+                foreach (var instrumentation in disabledIntegrations.Split(separator: ','))
                 {
                     if (Enum.TryParse(instrumentation, out IntegrationIds parsedType))
                     {
-                        EnabledInstrumentations.Remove(parsedType);
+                        EnabledIntegrations.Remove(parsedType);
                     }
                     else
                     {
@@ -145,7 +145,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         /// <summary>
         /// Gets the list of enabled instrumentations.
         /// </summary>
-        public IList<IntegrationIds> EnabledInstrumentations { get; }
+        public IList<IntegrationIds> EnabledIntegrations { get; }
 
         /// <summary>
         /// Gets the list of activitysources to be added to the tracer at the startup.
