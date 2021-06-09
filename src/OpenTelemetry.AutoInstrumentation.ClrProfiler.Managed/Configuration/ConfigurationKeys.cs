@@ -78,7 +78,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         /// <summary>
         /// Configuration key for legacy source names to be added to the tracer at the startup.
         /// </summary>
-        public static string LegacySources = "OTEL_DOTNET_TRACER_LEGACY_SOURCES";
+        public const string LegacySources = "OTEL_DOTNET_TRACER_LEGACY_SOURCES";
 
         /// <summary>
         /// Configuration key for a list of tags to be applied globally to spans.
