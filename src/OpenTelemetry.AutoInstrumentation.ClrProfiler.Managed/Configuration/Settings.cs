@@ -41,7 +41,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
             ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? true;
 
             EnabledInstrumentations = Enum.GetValues(typeof(InstrumentationType)).Cast<InstrumentationType>().ToList();
-            var disabledConfigurations = source.GetString(ConfigurationKeys.EnabledInstrumentations);
+            var disabledConfigurations = source.GetString(ConfigurationKeys.DisabledInstrumentations);
             if (disabledConfigurations != null)
             {
                 foreach (var instrumentation in disabledConfigurations.Split(separator: ','))

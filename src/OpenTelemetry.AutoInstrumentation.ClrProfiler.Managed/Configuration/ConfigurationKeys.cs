@@ -63,17 +63,17 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         /// <summary>
         /// Configuration key for whether the console exporter is enabled.
         /// </summary>
-        public const string ConsoleExporterEnabled = "OTEL_CONSOLE_EXPORTER_ENABLED";
+        public const string ConsoleExporterEnabled = "OTEL_DOTNET_TRACER_CONSOLE_EXPORTER_ENABLED";
 
         /// <summary>
         /// Configuration key for comma separated list of disabled instrumentations.
         /// </summary>
-        public const string EnabledInstrumentations = "OTEL_DISABLED_INSTRUMENTATIONS";
+        public const string DisabledInstrumentations = "OTEL_DOTNET_TRACER_DISABLED_INSTRUMENTATIONS";
 
         /// <summary>
         /// Configuration key for additional activitysource names to be added to the tracer at the startup.
         /// </summary>
-        public const string AdditionalSources = "OTEL_ADDITIONAL_SOURCES";
+        public const string AdditionalSources = "OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES";
 
         /// <summary>
         /// Configuration key for a list of tags to be applied globally to spans.
