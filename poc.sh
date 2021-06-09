@@ -9,12 +9,18 @@ consoleAppTargetFramework=${consoleAppTargetFramework:-netcoreapp3.1}
 
 function finish {
   docker stop jaeger # stop Jaeger
+  docker stop mongo # stop MongoDb
   kill 0 # kill background processes
 }
 trap finish EXIT
 
 # build managed and native code
 ./build.sh
+
+# start mongodb
+docker run -d --rm --name mongo \
+  -p 27017:27017 \
+  mongo:4.4.6
 
 # start Jaeger
 docker run -d --rm --name jaeger \
