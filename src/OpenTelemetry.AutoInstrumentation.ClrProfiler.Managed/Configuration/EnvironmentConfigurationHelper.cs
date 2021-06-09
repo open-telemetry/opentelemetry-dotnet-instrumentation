@@ -8,11 +8,11 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 {
     internal static class EnvironmentConfigurationHelper
     {
-        private static readonly Dictionary<InstrumentationType, Action<TracerProviderBuilder>> AddInstrumentation = new()
+        private static readonly Dictionary<IntegrationIds, Action<TracerProviderBuilder>> AddInstrumentation = new()
         {
-            [InstrumentationType.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
-            [InstrumentationType.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
-            [InstrumentationType.SqlClient] = builder => builder.AddSqlClientInstrumentation()
+            [IntegrationIds.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
+            [IntegrationIds.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
+            [IntegrationIds.SqlClient] = builder => builder.AddSqlClientInstrumentation()
         };
 
         public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, Settings settings)
@@ -27,7 +27,10 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 
             foreach (var enabledInstrumentation in settings.EnabledInstrumentations)
             {
-                AddInstrumentation[enabledInstrumentation](builder);
+                if (AddInstrumentation.ContainsKey(enabledInstrumentation))
+                {
+                    AddInstrumentation[enabledInstrumentation](builder);
+                }
             }
 
             builder.AddSource(settings.ActivitySources.ToArray());
