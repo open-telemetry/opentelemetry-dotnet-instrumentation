@@ -43,20 +43,19 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 
             ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? true;
 
-            EnabledIntegrations = Enum.GetValues(typeof(IntegrationIds)).Cast<IntegrationIds>().ToList();
-            var disabledIntegrations = source.GetString(ConfigurationKeys.DisabledIntegrations);
-            if (disabledIntegrations != null)
+            EnabledInstrumentations = Enum.GetValues(typeof(IntegrationIds)).Cast<IntegrationIds>().ToList();
+            var disabledInstrumentations = source.GetString(ConfigurationKeys.DisabledInstrumentations);
+            if (disabledInstrumentations != null)
             {
-                foreach (var instrumentation in disabledIntegrations.Split(separator: ','))
+                foreach (var instrumentation in disabledInstrumentations.Split(separator: ','))
                 {
                     if (Enum.TryParse(instrumentation, out IntegrationIds parsedType))
                     {
-                        EnabledIntegrations.Remove(parsedType);
+                        EnabledInstrumentations.Remove(parsedType);
                     }
                     else
                     {
-                        // TODO replace with proper logging
-                        _logger.Warning($"Could not parse instrumentation \"{instrumentation}\". Skipping...");
+                        throw new ArgumentOutOfRangeException($"The \"{instrumentation}\" is not recognized as supported instrumentation and cannot be disabled");
                     }
                 }
             }
@@ -145,7 +144,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         /// <summary>
         /// Gets the list of enabled instrumentations.
         /// </summary>
-        public IList<IntegrationIds> EnabledIntegrations { get; }
+        public IList<IntegrationIds> EnabledInstrumentations { get; }
 
         /// <summary>
         /// Gets the list of activitysources to be added to the tracer at the startup.

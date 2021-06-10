@@ -60,7 +60,7 @@ const WSTRING service_version = WStr("OTEL_VERSION");
 // enabled. If not set (default), all integrations are enabled. Supports
 // multiple values separated with comma, for example:
 // "ElasticsearchNet,AspNetWebApi2"
-const WSTRING disabled_integrations = WStr("OTEL_DOTNET_TRACER_DISABLED_INTEGRATIONS");
+const WSTRING disabled_integrations = WStr("OTEL_DOTNET_TRACER_DISABLED_INSTRUMENTATIONS");
 
 // Sets the path for the profiler's log file.
 // Environment variable OTEL_TRACE_LOG_DIRECTORY takes precedence over this setting, if set.
