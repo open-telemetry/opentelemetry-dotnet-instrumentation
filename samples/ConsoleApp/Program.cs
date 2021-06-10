@@ -11,6 +11,9 @@ namespace ConsoleApp
 
         private static async Task<int> Main()
         {
+            Console.WriteLine("Ensure right version of DiagnosticSource is installed");
+            Console.WriteLine(typeof(ActivitySource).Assembly.FullName);
+
             using (var activity = MyActivitySource.StartActivity("Main"))
             {
                 await OpenTracingLibrary.Wrapper.WithOpenTracingSpanAsync("client", RunAsync);
