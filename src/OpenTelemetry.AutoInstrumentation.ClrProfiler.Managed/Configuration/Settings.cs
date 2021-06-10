@@ -14,8 +14,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
     /// </summary>
     public class Settings
     {
-        private ILogger _logger = new ConsoleLogger(nameof(Settings));
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Settings"/> class
         /// using the specified <see cref="IConfigurationSource"/> to initialize values.
