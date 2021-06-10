@@ -8,7 +8,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 {
     internal static class EnvironmentConfigurationHelper
     {
-        private static readonly Dictionary<IntegrationIds, Action<TracerProviderBuilder>> AddInstrumentation = new()
+        private static readonly Dictionary<IntegrationIds, Action<TracerProviderBuilder>> AddIntegration = new()
         {
             [IntegrationIds.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
             [IntegrationIds.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
@@ -25,11 +25,15 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                 .SetResourceBuilder(resourceBuilder)
                 .SetExporter(settings);
 
-            foreach (var enabledInstrumentation in settings.EnabledIntegrations)
+            foreach (var enabledIntegration in settings.EnabledIntegrations)
             {
-                if (AddInstrumentation.ContainsKey(enabledInstrumentation))
+                if (AddIntegration.TryGetValue(enabledIntegration, out var addIntegration))
                 {
-                    AddInstrumentation[enabledInstrumentation](builder);
+                    addIntegration(builder);
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException($"The \"{enabledIntegration}\" is not recognized as supported integration and cannot be disabled");
                 }
             }
 
