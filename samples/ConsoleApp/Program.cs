@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Diagnostics;
+using System.Text;
 using System.Threading.Tasks;
+using OpenTracing.Propagation;
+using OpenTracing.Util;
 
 namespace ConsoleApp
 {
@@ -24,6 +28,7 @@ namespace ConsoleApp
 
         private static async Task RunAsync()
         {
+            using var client = new HttpClient();
             using (var activity = MyActivitySource.StartActivity("RunAsync"))
             {
                 activity?.SetTag("foo", "bar");
@@ -34,11 +39,46 @@ namespace ConsoleApp
                 Console.WriteLine("Calling regularHttpClient.GetAsync");
                 await regularHttpClient.GetAsync("default-handler");
                 Console.WriteLine("Called regularHttpClient.GetAsync");
-
-                var client = new HttpClient();
+                
                 Console.WriteLine("Calling client.GetAsync");
                 await client.GetAsync("http://127.0.0.1:8080/api/mongo");
                 Console.WriteLine("Called client.GetAsync");
+            }
+            
+            var request = new HttpRequestMessage { RequestUri = new Uri("https://www.example.com/"), Method = HttpMethod.Post, Content = new StringContent(string.Empty, Encoding.UTF8), };
+
+            var tracer = GlobalTracer.Instance;
+            using (var scope = tracer.BuildSpan("Client POST " + request.RequestUri)
+                                     .WithTag("span.kind", "client")
+                                     .StartActive())
+            {
+                var contextPropagationHeaders = new Dictionary<string, string>();
+                var contextCarrier = new TextMapInjectAdapter(contextPropagationHeaders);
+                tracer.Inject(scope.Span.Context, BuiltinFormats.TextMap, contextCarrier);
+                foreach (var kvp in contextPropagationHeaders)
+                {
+                    request.Headers.Add(kvp.Key, kvp.Value);
+                }
+
+                using var response = await client.SendAsync(request);
+
+                scope.Span.SetTag("http.status_code", (int)response.StatusCode);
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+                scope.Span.SetTag("response.content", responseContent);
+                scope.Span.SetTag("response.length", responseContent.Length);
+
+                foreach (var header in response.Headers)
+                {
+                    if (header.Value is IEnumerable<object> enumerable)
+                    {
+                        scope.Span.SetTag($"http.header.{header.Key}", string.Join(",", enumerable));
+                    }
+                    else
+                    {
+                        scope.Span.SetTag($"http.header.{header.Key}", header.Value.ToString());
+                    }
+                }
             }
         }
     }
