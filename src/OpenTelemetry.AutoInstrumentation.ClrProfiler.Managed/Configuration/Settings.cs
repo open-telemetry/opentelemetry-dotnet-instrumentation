@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 {
@@ -17,7 +18,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         /// using the specified <see cref="IConfigurationSource"/> to initialize values.
         /// </summary>
         /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
-        public Settings(IConfigurationSource source)
+        private Settings(IConfigurationSource source)
         {
             if (source == null)
             {
@@ -35,12 +36,51 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
             JaegerExporterAgentHost = source.GetString(ConfigurationKeys.JaegerExporterAgentHost) ?? "localhost";
             JaegerExporterAgentPort = source.GetInt32(ConfigurationKeys.JaegerExporterAgentPort) ?? 6831;
 
+            LoadTracerAtStartup = source.GetBool(ConfigurationKeys.LoadTracerAtStartup) ?? true;
+
+            ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? true;
+
+            EnabledInstrumentations = Enum.GetValues(typeof(Instrumentation)).Cast<Instrumentation>().ToList();
+            var disabledInstrumentations = source.GetString(ConfigurationKeys.DisabledInstrumentations);
+            if (disabledInstrumentations != null)
+            {
+                foreach (var instrumentation in disabledInstrumentations.Split(separator: ','))
+                {
+                    if (Enum.TryParse(instrumentation, out Instrumentation parsedType))
+                    {
+                        EnabledInstrumentations.Remove(parsedType);
+                    }
+                    else
+                    {
+                        throw new ArgumentException($"The \"{instrumentation}\" is not recognized as supported instrumentation and cannot be disabled");
+                    }
+                }
+            }
+
+            var additionalSources = source.GetString(ConfigurationKeys.AdditionalSources);
+            if (additionalSources != null)
+            {
+                foreach (var sourceName in additionalSources.Split(separator: ','))
+                {
+                    ActivitySources.Add(sourceName);
+                }
+            }
+
+            var legacySources = source.GetString(ConfigurationKeys.LegacySources);
+            if (legacySources != null)
+            {
+                foreach (var sourceName in legacySources.Split(separator: ','))
+                {
+                    LegacySources.Add(sourceName);
+                }
+            }
+
             TraceEnabled = source.GetBool(ConfigurationKeys.TraceEnabled) ?? true;
             LoadTracerAtStartup = source.GetBool(ConfigurationKeys.LoadTracerAtStartup) ?? true;
 
             Integrations = new IntegrationSettingsCollection(source);
 
-            GlobalTags = source?.GetDictionary(ConfigurationKeys.GlobalTags) ??
+            GlobalTags = source.GetDictionary(ConfigurationKeys.GlobalTags) ??
              // default value (empty)
              new ConcurrentDictionary<string, string>();
         }
@@ -92,6 +132,26 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         /// Gets jaeger exporter agent port.
         /// </summary>
         public int JaegerExporterAgentPort { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the console exporter is enabled.
+        /// </summary>
+        public bool ConsoleExporterEnabled { get; }
+
+        /// <summary>
+        /// Gets the list of enabled instrumentations.
+        /// </summary>
+        public IList<Instrumentation> EnabledInstrumentations { get; }
+
+        /// <summary>
+        /// Gets the list of activitysources to be added to the tracer at the startup.
+        /// </summary>
+        public IList<string> ActivitySources { get; } = new List<string> { "OpenTelemetry.AutoInstrumentation.*" };
+
+        /// <summary>
+        /// Gets the list of legacy sources to be added to the tracer at the startup.
+        /// </summary>
+        public IList<string> LegacySources { get; } = new List<string>();
 
         /// <summary>
         /// Gets a collection of <see cref="Integrations"/> keyed by integration name.

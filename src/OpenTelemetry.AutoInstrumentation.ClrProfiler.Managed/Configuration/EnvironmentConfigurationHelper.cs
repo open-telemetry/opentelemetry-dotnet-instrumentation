@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -6,15 +8,38 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 {
     internal static class EnvironmentConfigurationHelper
     {
+        private static readonly Dictionary<Instrumentation, Action<TracerProviderBuilder>> AddInstrumentation = new()
+        {
+            [Instrumentation.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
+            [Instrumentation.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
+            [Instrumentation.SqlClient] = builder => builder.AddSqlClientInstrumentation()
+        };
+
         public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, Settings settings)
         {
             var resourceBuilder = ResourceBuilder
                 .CreateDefault()
                 .AddService(settings.ServiceName ?? "UNKNOWN_SERVICE_NAME", serviceVersion: settings.ServiceVersion);
 
-            return builder
+            builder
                 .SetResourceBuilder(resourceBuilder)
                 .SetExporter(settings);
+
+            foreach (var enabledInstrumentation in settings.EnabledInstrumentations)
+            {
+                if (AddInstrumentation.TryGetValue(enabledInstrumentation, out var addInstrumentation))
+                {
+                    addInstrumentation(builder);
+                }
+            }
+
+            builder.AddSource(settings.ActivitySources.ToArray());
+            foreach (var legacySource in settings.LegacySources)
+            {
+                builder.AddLegacySource(legacySource);
+            }
+
+            return builder;
         }
 
         public static TracerProviderBuilder AddSdkAspNetInstrumentation(this TracerProviderBuilder builder)
@@ -30,8 +55,10 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 
         private static TracerProviderBuilder SetExporter(this TracerProviderBuilder builder, Settings settings)
         {
-            // TODO for PoC we always want the console exporter to be present -- remove later
-            builder.AddConsoleExporter();
+            if (settings.ConsoleExporterEnabled)
+            {
+                builder.AddConsoleExporter();
+            }
 
             switch (settings.Exporter)
             {

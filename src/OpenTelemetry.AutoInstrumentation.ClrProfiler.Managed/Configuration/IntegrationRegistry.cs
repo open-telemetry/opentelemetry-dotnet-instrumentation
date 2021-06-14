@@ -12,12 +12,12 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 
         static IntegrationRegistry()
         {
-            var values = Enum.GetValues(typeof(IntegrationIds));
+            var values = Enum.GetValues(typeof(Instrumentation));
             var ids = new Dictionary<string, int>(values.Length);
 
             Names = new string[values.Cast<int>().Max() + 1];
 
-            foreach (IntegrationIds value in values)
+            foreach (Instrumentation value in values)
             {
                 var name = value.ToString();
 
