@@ -39,11 +39,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed
                     var builder = Sdk
                         .CreateTracerProviderBuilder()
                         .UseEnvironmentVariables(TracerSettings)
-                        .AddSdkAspNetInstrumentation()
-                        .AddHttpClientInstrumentation()
-                        .AddSqlClientInstrumentation()
-                        .SetSampler(new AlwaysOnSampler())
-                        .AddSource("OpenTelemetry.AutoInstrumentation.*");
+                        .SetSampler(new AlwaysOnSampler());
 
                     _tracerProvider = builder.Build();
                     Log("OpenTelemetry tracer initialized.");

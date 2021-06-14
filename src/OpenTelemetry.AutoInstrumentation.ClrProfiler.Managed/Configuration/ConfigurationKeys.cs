@@ -61,6 +61,26 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         public const string JaegerExporterAgentPort = "OTEL_EXPORTER_JAEGER_AGENT_PORT";
 
         /// <summary>
+        /// Configuration key for whether the console exporter is enabled.
+        /// </summary>
+        public const string ConsoleExporterEnabled = "OTEL_DOTNET_TRACER_CONSOLE_EXPORTER_ENABLED";
+
+        /// <summary>
+        /// Configuration key for comma separated list of disabled instrumentations.
+        /// </summary>
+        public const string DisabledInstrumentations = "OTEL_DOTNET_TRACER_DISABLED_INSTRUMENTATIONS";
+
+        /// <summary>
+        /// Configuration key for additional <see cref="ActivitySource"/> names to be added to the tracer at the startup.
+        /// </summary>
+        public const string AdditionalSources = "OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES";
+
+        /// <summary>
+        /// Configuration key for legacy source names to be added to the tracer at the startup.
+        /// </summary>
+        public const string LegacySources = "OTEL_DOTNET_TRACER_LEGACY_SOURCES";
+
+        /// <summary>
         /// Configuration key for a list of tags to be applied globally to spans.
         /// </summary>
         /// <seealso cref="Settings.GlobalTags"/>
