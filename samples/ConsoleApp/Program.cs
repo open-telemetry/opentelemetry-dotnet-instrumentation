@@ -11,6 +11,9 @@ namespace ConsoleApp
 
         private static async Task<int> Main()
         {
+            Console.WriteLine("Ensure right version of DiagnosticSource is installed");
+            Console.WriteLine(typeof(ActivitySource).Assembly.FullName);
+
             using (var activity = MyActivitySource.StartActivity("Main"))
             {
                 await OpenTracingLibrary.Wrapper.WithOpenTracingSpanAsync("client", RunAsync);
@@ -34,7 +37,7 @@ namespace ConsoleApp
 
                 var client = new HttpClient();
                 Console.WriteLine("Calling client.GetAsync");
-                await client.GetAsync("http://127.0.0.1:8080");
+                await client.GetAsync("http://127.0.0.1:8080/api/mongo");
                 Console.WriteLine("Called client.GetAsync");
             }
         }
