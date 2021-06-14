@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 {
@@ -53,7 +52,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                     }
                     else
                     {
-                        throw new ArgumentOutOfRangeException($"The \"{instrumentation}\" is not recognized as supported instrumentation and cannot be disabled");
+                        throw new ArgumentException($"The \"{instrumentation}\" is not recognized as supported instrumentation and cannot be disabled");
                     }
                 }
             }
