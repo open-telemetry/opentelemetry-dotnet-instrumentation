@@ -8,11 +8,11 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 {
     internal static class EnvironmentConfigurationHelper
     {
-        private static readonly Dictionary<IntegrationIds, Action<TracerProviderBuilder>> AddInstrumentation = new()
+        private static readonly Dictionary<Instrumentation, Action<TracerProviderBuilder>> AddInstrumentation = new()
         {
-            [IntegrationIds.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
-            [IntegrationIds.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
-            [IntegrationIds.SqlClient] = builder => builder.AddSqlClientInstrumentation()
+            [Instrumentation.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
+            [Instrumentation.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
+            [Instrumentation.SqlClient] = builder => builder.AddSqlClientInstrumentation()
         };
 
         public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, Settings settings)

@@ -2,9 +2,9 @@
 namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 {
     /// <summary>
-    /// Enum representing supported integrations.
+    /// Enum representing supported instrumentations.
     /// </summary>
-    public enum IntegrationIds
+    public enum Instrumentation
     {
         /// <summary>
         /// HttpClient instrumentation.
