@@ -70,7 +70,6 @@ namespace ConsoleApp
                 scope.Span.SetTag("http.status_code", (int)response.StatusCode);
 
                 var responseContent = await response.Content.ReadAsStringAsync();
-                scope.Span.SetTag("response.content", responseContent);
                 scope.Span.SetTag("response.length", responseContent.Length);
             }
         }
