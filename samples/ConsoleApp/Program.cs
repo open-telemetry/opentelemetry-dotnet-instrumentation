@@ -45,7 +45,12 @@ namespace ConsoleApp
                 Console.WriteLine("Called client.GetAsync");
             }
             
-            var request = new HttpRequestMessage { RequestUri = new Uri("https://www.example.com/"), Method = HttpMethod.Post, Content = new StringContent(string.Empty, Encoding.UTF8), };
+            var request = new HttpRequestMessage
+            {
+                RequestUri = new Uri("https://www.example.com/"),
+                Method = HttpMethod.Post,
+                Content = new StringContent(string.Empty, Encoding.UTF8),
+            };
 
             var tracer = GlobalTracer.Instance;
             using (var scope = tracer.BuildSpan("Client POST " + request.RequestUri)
@@ -67,18 +72,6 @@ namespace ConsoleApp
                 var responseContent = await response.Content.ReadAsStringAsync();
                 scope.Span.SetTag("response.content", responseContent);
                 scope.Span.SetTag("response.length", responseContent.Length);
-
-                foreach (var header in response.Headers)
-                {
-                    if (header.Value is IEnumerable<object> enumerable)
-                    {
-                        scope.Span.SetTag($"http.header.{header.Key}", string.Join(",", enumerable));
-                    }
-                    else
-                    {
-                        scope.Span.SetTag($"http.header.{header.Key}", header.Value.ToString());
-                    }
-                }
             }
         }
     }
