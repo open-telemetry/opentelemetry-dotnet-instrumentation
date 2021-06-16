@@ -6,7 +6,7 @@
 ARG BUILD_CONFIGURATION=Release
 ARG WORKSPACE=/workspace
 ARG PUBLISH_FOLDER=/workspace/publish
-ARG TRACER_HOME=/otel-tracer-dotnet
+ARG TRACER_HOME=/dd-tracer-dotnet
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build-managed-base
 # Instructions to install .NET Core runtimes from
@@ -66,10 +66,10 @@ ARG PUBLISH_FOLDER
 ARG TRACER_HOME
 COPY --from=build-managed ${WORKSPACE} ${WORKSPACE}
 WORKDIR ${WORKSPACE}/src/Datadog.Trace.ClrProfiler.Native/build
-RUN cmake .. && make && cp -f ./bin/Datadog.Trace.ClrProfiler.Native.so ${PUBLISH_FOLDER}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so
-RUN mkdir -p /var/log/opentelemetry/dotnet
+RUN cmake .. && make && cp -f ./bin/Datadog.Trace.ClrProfiler.Native.so ${PUBLISH_FOLDER}/
+RUN mkdir -p /var/log/datadog/dotnet
 WORKDIR ${PUBLISH_FOLDER}
-RUN echo "#!/bin/bash\n set -euxo pipefail\n export CORECLR_ENABLE_PROFILING=\"1\"\n export CORECLR_PROFILER=\"{918728DD-259F-4A6A-AC2B-B85E1B658318}\"\n export OTEL_DOTNET_TRACER_HOME=\"${TRACER_HOME}\"\n export CORECLR_PROFILER_PATH=\"\${OTEL_DOTNET_TRACER_HOME}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so\"\n export OTEL_INTEGRATIONS=\"\${OTEL_DOTNET_TRACER_HOME}/integrations.json\"\n eval \"\$@\"\n" > dd-trace.bash
+RUN echo "#!/bin/bash\n set -euxo pipefail\n export CORECLR_ENABLE_PROFILING=\"1\"\n export CORECLR_PROFILER=\"{846F5F1C-F9AE-4B07-969E-05C26BC060D8}\"\n export DD_DOTNET_TRACER_HOME=\"${TRACER_HOME}\"\n export CORECLR_PROFILER_PATH=\"\${DD_DOTNET_TRACER_HOME}/Datadog.Trace.ClrProfiler.Native.so\"\n export DD_INTEGRATIONS=\"\${DD_DOTNET_TRACER_HOME}/integrations.json\"\n eval \"\$@\"\n" > dd-trace.bash
 RUN chmod +x dd-trace.bash
 
 
@@ -82,8 +82,8 @@ COPY --from=build-native /var/log/datadog/ /var/log/datadog/
 
 FROM build-native as native-linux-binary
 ARG PUBLISH_FOLDER
-COPY --from=build-native ${PUBLISH_FOLDER}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so
-CMD cp -f OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so /home/linux-x64/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so
+COPY --from=build-native ${PUBLISH_FOLDER}/Datadog.Trace.ClrProfiler.Native.so Datadog.Trace.ClrProfiler.Native.so
+CMD cp -f Datadog.Trace.ClrProfiler.Native.so /home/linux-x64/Datadog.Trace.ClrProfiler.Native.so
 
 
 FROM build-managed-base as dotnet-sdk-with-dd-tracer

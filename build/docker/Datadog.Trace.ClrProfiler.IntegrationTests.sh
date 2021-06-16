@@ -6,7 +6,7 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"/../../
 buildConfiguration=${buildConfiguration:-Debug}
 publishTargetFramework=${publishTargetFramework:-netcoreapp3.1}
 
-mkdir -p /var/log/opentelemetry/dotnet
+mkdir -p /var/log/datadog/dotnet
 
 #https://docs.microsoft.com/en-us/dotnet/core/diagnostics/dumps#collecting-dumps-on-crash
 export COMPlus_DbgEnableMiniDump=1
@@ -17,7 +17,7 @@ cleanup() {
     # Collect run data
     mkdir /project/build_data
 
-    cp /var/log/opentelemetry/dotnet/* /project/build_data/
+    cp /var/log/datadog/dotnet/* /project/build_data/
     cp /tmp/coredump* /project/build_data/ 2>/dev/null || :
 }
 

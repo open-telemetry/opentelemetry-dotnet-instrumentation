@@ -264,13 +264,13 @@
 
   <Target Name="PublishNativeProfilerOnDisk" DependsOnTargets="BuildLoader;BuildCpp">
     <Copy Condition="'$(Platform)' == 'x64' OR '$(Platform)' == 'All'"
-        SourceFiles="$(MSBuildThisFileDirectory)src\Datadog.Trace.ClrProfiler.Native\bin\$(Configuration)\x64\OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll"
+        SourceFiles="$(MSBuildThisFileDirectory)src\Datadog.Trace.ClrProfiler.Native\bin\$(Configuration)\x64\Datadog.Trace.ClrProfiler.Native.dll"
         DestinationFolder="$(TracerHomeDirectory)\win-x64"
         SkipUnchangedFiles="true"
         Retries="3"
         RetryDelayMilliseconds="300"/>
     <Copy Condition="'$(Platform)' == 'x86' OR '$(Platform)' == 'All' OR '$(Buildx86Profiler)' == 'true'"
-        SourceFiles="$(MSBuildThisFileDirectory)src\Datadog.Trace.ClrProfiler.Native\bin\$(Configuration)\x86\OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll"
+        SourceFiles="$(MSBuildThisFileDirectory)src\Datadog.Trace.ClrProfiler.Native\bin\$(Configuration)\x86\Datadog.Trace.ClrProfiler.Native.dll"
         DestinationFolder="$(TracerHomeDirectory)\win-x86"
         SkipUnchangedFiles="true"
         Retries="3"

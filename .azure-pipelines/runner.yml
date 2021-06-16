@@ -3,6 +3,20 @@ pr: none
 
 variables:
   publishOutput: $(System.DefaultWorkingDirectory)/src/bin/managed-publish
+  dotnetCoreSdk5Version: 5.0.103
+  ddApiKey: $(DD_API_KEY)
+  DD_DOTNET_TRACER_MSBUILD:
+
+# Declare the datadog agent as a resource to be used as a pipeline service
+resources:
+  containers:
+  - container: dd_agent
+    image: datadog/agent
+    ports:
+    - 8126:8126
+    env:
+      DD_API_KEY: $(ddApiKey)
+      DD_INSIDE_CI: true
 
 jobs:
 
@@ -13,7 +27,7 @@ jobs:
     displayName: install dotnet core sdk 5.0
     inputs:
       packageType: sdk
-      version: 5.0.x
+      version: $(dotnetCoreSdk5Version)
       includePreviewVersions: true
 
   - task: DotNetCoreCLI@2
@@ -112,7 +126,7 @@ jobs:
     displayName: install dotnet core sdk 5.0
     inputs:
       packageType: sdk
-      version: 5.0.x
+      version: $(dotnetCoreSdk5Version)
 
   - task: DotNetCoreCLI@2
     displayName: dotnet build
@@ -142,6 +156,10 @@ jobs:
 
   pool:
     vmImage: windows-2019
+
+  # Enable the Datadog Agent service for this job
+  services:
+    dd_agent: dd_agent
 
   steps:
   - download: current
@@ -203,22 +221,22 @@ jobs:
     displayName: install dotnet core sdk 5.0
     inputs:
       packageType: sdk
-      version: 5.0.x
+      version: $(dotnetCoreSdk5Version)
       includePreviewVersions: true
 
   - task: DotNetCoreCLI@2
     displayName: dotnet build
     inputs:
       command: build
-      configuration: $(buildConfiguration)
-      arguments: -l:DatadogLogger,"$(OTEL_DOTNET_TRACER_MSBUILD)"
+      configuration: Release
+      arguments: -l:DatadogLogger,"$(DD_DOTNET_TRACER_MSBUILD)"
       projects: |
         src/**/*.csproj
         test/**/*.Tests.csproj
         benchmarks/**/*.csproj
         !src/Datadog.Trace.Tools.Runner/*.csproj
     env:
-      OTEL_SERVICE_NAME: dd-tracer-dotnet
+      DD_SERVICE: dd-trace-dotnet
 
   - task: NuGetToolInstaller@1
     displayName: install nuget
@@ -233,19 +251,19 @@ jobs:
     displayName: tool build
     inputs:
       solution: src/Datadog.Trace.Tools.Runner/Datadog.Trace.Tools.Runner.proj
-      msbuildArguments: /t:BuildTool /l:DatadogLogger,"$(OTEL_DOTNET_TRACER_MSBUILD)"
+      msbuildArguments: /t:BuildTool /l:DatadogLogger,"$(DD_DOTNET_TRACER_MSBUILD)"
       maximumCpuCount: true
     env:
-      OTEL_SERVICE_NAME: dd-tracer-dotnet-runner-tool
+      DD_SERVICE: dd-trace-dotnet-runner-tool
 
   - task: MSBuild@1
     displayName: standalone build
     inputs:
       solution: src/Datadog.Trace.Tools.Runner/Datadog.Trace.Tools.Runner.proj
-      msbuildArguments: /t:BuildStandalone /l:DatadogLogger,"$(OTEL_DOTNET_TRACER_MSBUILD)"
+      msbuildArguments: /t:BuildStandalone /l:DatadogLogger,"$(DD_DOTNET_TRACER_MSBUILD)"
       maximumCpuCount: true
     env:
-      OTEL_SERVICE_NAME: dd-tracer-dotnet-runner-tool
+      DD_SERVICE: dd-trace-dotnet-runner-tool
 
   - task: DeleteFiles@1
     displayName: 'Remove unneeded files'

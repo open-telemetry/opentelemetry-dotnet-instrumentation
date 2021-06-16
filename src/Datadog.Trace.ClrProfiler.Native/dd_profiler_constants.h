@@ -6,34 +6,34 @@
 #include "environment_variables.h"
 #include "logging.h"
 
-namespace trace {
+namespace trace
+{
 
-  inline WSTRING env_vars_to_display[]{
-    environment::tracing_enabled,
-    environment::debug_enabled,
-    environment::calltarget_enabled,
-    environment::profiler_home_path,
-    environment::integrations_path,
-    environment::include_process_names,
-    environment::exclude_process_names,
-    environment::agent_host,
-    environment::agent_port,
-    environment::env,
-    environment::service_name,
-    environment::service_version,
-    environment::disabled_integrations,
-    environment::log_path,
-    environment::log_directory,
-    environment::clr_disable_optimizations,
-    environment::clr_enable_inlining,
-    environment::domain_neutral_instrumentation,
-    environment::dump_il_rewrite_enabled,
-    environment::netstandard_enabled,
-    environment::azure_app_services,
-    environment::azure_app_services_app_pool_id,
-    environment::azure_app_services_cli_telemetry_profile_value};
+const WSTRING env_vars_to_display[]{environment::tracing_enabled,
+                                    environment::debug_enabled,
+                                    environment::calltarget_enabled,
+                                    environment::profiler_home_path,
+                                    environment::integrations_path,
+                                    environment::include_process_names,
+                                    environment::exclude_process_names,
+                                    environment::agent_host,
+                                    environment::agent_port,
+                                    environment::env,
+                                    environment::service_name,
+                                    environment::service_version,
+                                    environment::disabled_integrations,
+                                    environment::log_path,
+                                    environment::log_directory,
+                                    environment::clr_disable_optimizations,
+                                    environment::clr_enable_inlining,
+                                    environment::domain_neutral_instrumentation,
+                                    environment::dump_il_rewrite_enabled,
+                                    environment::netstandard_enabled,
+                                    environment::azure_app_services,
+                                    environment::azure_app_services_app_pool_id,
+                                    environment::azure_app_services_cli_telemetry_profile_value};
 
-  inline WSTRING skip_assembly_prefixes[]{
+const WSTRING skip_assembly_prefixes[]{
     WStr("Datadog.Trace"),
     WStr("OpenTelemetry.AutoInstrumentation"),
     WStr("MessagePack"),
@@ -57,22 +57,21 @@ namespace trace {
     WStr("System.Threading"),
     WStr("System.Xml"),
     WStr("Newtonsoft"),
-  };
+};
 
-  inline WSTRING skip_assemblies[]{
-      WStr("mscorlib"),
-      WStr("netstandard"),
-      WStr("System.Configuration"),
-      WStr("Microsoft.AspNetCore.Razor.Language"),
-      WStr("Microsoft.AspNetCore.Mvc.RazorPages"),
-      WStr("Anonymously Hosted DynamicMethods Assembly"),
-      WStr("ISymWrapper")
-  };
+const WSTRING skip_assemblies[]{WStr("mscorlib"),
+                                WStr("netstandard"),
+                                WStr("System.Configuration"),
+                                WStr("Microsoft.AspNetCore.Razor.Language"),
+                                WStr("Microsoft.AspNetCore.Mvc.RazorPages"),
+                                WStr("Anonymously Hosted DynamicMethods Assembly"),
+                                WStr("ISymWrapper")};
 
-  inline WSTRING managed_profiler_full_assembly_version = WStr("OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429");
+inline WSTRING managed_profiler_full_assembly_version =
+    WStr("OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429");
 
-  inline WSTRING calltarget_modification_action = WStr("CallTargetModification");
+const WSTRING calltarget_modification_action = WStr("CallTargetModification");
 
-}  // namespace trace
+} // namespace trace
 
-#endif  // DD_PROFILER_CONSTANTS_H
+#endif // DD_PROFILER_CONSTANTS_H

@@ -39,6 +39,8 @@ namespace Datadog.Trace
         private const string UnknownServiceName = "UnknownService";
         private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor<Tracer>();
 
+        private static string _runtimeId;
+
         /// <summary>
         /// The number of Tracer instances that have been created and not yet destroyed.
         /// This is used in the heartbeat metrics to estimate the number of
@@ -286,10 +288,7 @@ namespace Datadog.Trace
         /// </summary>
         ISampler IDatadogTracer.Sampler => Sampler;
 
-        /// <summary>
-        /// Gets the propagator logic <see cref="TracerSettings.Propagators"/>.
-        /// </summary>
-        IPropagator IDatadogTracer.Propagator => _propagator;
+        internal static string RuntimeId => LazyInitializer.EnsureInitialized(ref _runtimeId, () => Guid.NewGuid().ToString());
 
         internal IDiagnosticManager DiagnosticManager { get; set; }
 
@@ -605,6 +604,9 @@ namespace Datadog.Trace
                     writer.WritePropertyName("partialflush_minspans");
                     writer.WriteValue(Settings.PartialFlushMinSpans);
 
+                    writer.WritePropertyName("runtime_id");
+                    writer.WriteValue(RuntimeId);
+
                     writer.WritePropertyName("agent_reachable");
                     writer.WriteValue(agentError == null);
 
@@ -699,15 +701,9 @@ namespace Datadog.Trace
                                        $"lang_interpreter:{FrameworkDescription.Instance.Name}",
                                        $"lang_version:{FrameworkDescription.Instance.ProductVersion}",
                                        $"tracer_version:{TracerConstants.AssemblyVersion}",
-                                       $"service:{settings.ServiceName}"
+                                       $"service:{settings.ServiceName}",
+                                       $"{Tags.RuntimeId}:{RuntimeId}"
                                    };
-
-                var containerId = ContainerMetadata.GetContainerId();
-
-                if (containerId != null)
-                {
-                    constantTags.Add($"runtime-id:{containerId}");
-                }
 
                 if (settings.Environment != null)
                 {

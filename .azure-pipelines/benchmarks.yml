@@ -3,20 +3,36 @@ pr: none
 
 variables:
   buildConfiguration: release
+  dotnetCoreSdkVersion: 5.0.103
+  ddApiKey: $(DD_API_KEY)
   publishOutput: $(Build.SourcesDirectory)/src/bin/managed-publish
+
+# Declare the datadog agent as a resource to be used as a pipeline service
+resources:
+  containers:
+  - container: dd_agent
+    image: datadog/agent
+    ports:
+    - 8126:8126
+    env:
+      DD_API_KEY: $(ddApiKey)
+      DD_INSIDE_CI: true
 
 stages:
 - stage: build
   jobs:
 
-  #### Windows 
+  #### Windows
 
   - job: Windows
     pool: Benchmarks
-    
+
     workspace:
       clean: all
 
+    # Enable the Datadog Agent service for this job
+    services:
+      dd_agent: dd_agent
     variables:
       tracerHomeName: windows-tracer-home
       tracerHome: $(System.DefaultWorkingDirectory)/src/bin/$(tracerHomeName)
@@ -29,7 +45,7 @@ stages:
       displayName: install dotnet core sdk
       inputs:
         packageType: sdk
-        version: 5.0.x
+        version: $(dotnetCoreSdkVersion)
 
     - task: NuGetToolInstaller@1
       displayName: install nuget
@@ -52,10 +68,10 @@ stages:
       inputs:
         command: 'run'
         projects: '$(System.DefaultWorkingDirectory)/test/benchmarks/Benchmarks.Trace/Benchmarks.Trace.csproj'
-        arguments: '-c Release -f netcoreapp3.1 -- -r net472 netcoreapp3.1 -m -f * --iterationTime 1500'
+        arguments: '-c Release -f netcoreapp3.1 -- -r net472 netcoreapp3.1 -m -f * --iterationTime 2000'
       env:
-        OTEL_ENV: CI
-        OTEL_SERVICE: dd-trace-dotnet
+        DD_ENV: CI
+        DD_SERVICE: dd-trace-dotnet
 
     - task: PowerShell@2
       inputs:

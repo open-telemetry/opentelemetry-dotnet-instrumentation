@@ -3,7 +3,6 @@ pr: none
 
 jobs:
 
-
 - job: windows_profiler
   pool:
     vmImage: windows-2019
@@ -188,4 +187,4 @@ jobs:
       chmod +x ./run.sh
       ./run.sh
     env:
-      OTEL_SERVICE: dd-trace-dotnet
+      DD_SERVICE: dd-trace-dotnet

@@ -3,6 +3,7 @@ pr: none
 
 variables:
   buildConfiguration: release
+  dotnetCoreSdkVersion: 5.0.103
   publishOutput: $(Build.SourcesDirectory)/src/bin/managed-publish
 
 stages:
@@ -26,7 +27,7 @@ stages:
       displayName: install dotnet core sdk 5.0
       inputs:
         packageType: sdk
-        version: 5.0.x
+        version: $(dotnetCoreSdkVersion)
 
     - task: NuGetToolInstaller@1
       displayName: install nuget
@@ -82,7 +83,7 @@ stages:
     - task: UseDotNet@2
       displayName: install dotnet core sdk
       inputs:
-        version: 5.0.x
+        version: $(dotnetCoreSdkVersion)
 
     - task: DotNetCoreCLI@2
       displayName: dotnet build Datadog.Trace.ClrProfiler.Managed.Loader
@@ -136,7 +137,7 @@ stages:
     - task: UseDotNet@2
       displayName: install dotnet core sdk
       inputs:
-        version: 5.0.x
+        version: $(dotnetCoreSdkVersion)
 
     - task: DotNetCoreCLI@2
       displayName: dotnet build Datadog.Trace.ClrProfiler.Managed.Loader
@@ -299,11 +300,11 @@ stages:
       env:
         SECRET: $(AWS_SECRET_ACCESS_KEY)
 
-    # by default, run this step on main branch only.
+    # by default, run this step on master branch only.
     # use "push_artifacts_to_s3" to override:
     #   "true": run this step
     #   "false": do NOT run this step
-    #   else: run this stage if branch is main
+    #   else: run this stage if branch is master
 
     - script: aws s3 cp s3_upload s3://datadog-reliability-env/dotnet/ --recursive
       displayName: Upload deb, MSI, index.txt to s3
@@ -313,6 +314,6 @@ stages:
           ne(variables['push_artifacts_to_s3'], 'false'),
           or(
             eq(variables['push_artifacts_to_s3'], 'true'),
-            eq(variables['Build.SourceBranch'], 'refs/heads/main')
+            eq(variables['Build.SourceBranch'], 'refs/heads/master')
           )
         )

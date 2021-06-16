@@ -5,15 +5,13 @@
 
 using System;
 using System.Data;
-using System.Threading;
 using Datadog.Trace.ClrProfiler.CallTarget;
 
 namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.AdoNet
 {
     /// <summary>
     /// CallTarget instrumentation for:
-    /// Task[*DataReader] [Command].ExecuteReaderAsync(CommandBehavior, CancellationToken)
-    /// Task[DbDataReader] [Command].ExecuteDbDataReaderAsync(CommandBehavior, CancellationToken)
+    /// Task[*DataReader] [Command].ExecuteReaderAsync(CommandBehavior)
     /// </summary>
     public class CommandExecuteReaderWithBehaviorAsyncIntegration
     {
@@ -24,9 +22,8 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.AdoNet
         /// <typeparam name="TBehavior">Command Behavior type</typeparam>
         /// <param name="instance">Instance value, aka `this` of the instrumented method.</param>
         /// <param name="commandBehavior">Command behavior</param>
-        /// <param name="cancellationToken">CancellationToken value</param>
         /// <returns>Calltarget state value</returns>
-        public static CallTargetState OnMethodBegin<TTarget, TBehavior>(TTarget instance, TBehavior commandBehavior, CancellationToken cancellationToken)
+        public static CallTargetState OnMethodBegin<TTarget, TBehavior>(TTarget instance, TBehavior commandBehavior)
         {
             return new CallTargetState(ScopeDBFactory<TTarget>.CreateDbCommandScope(Tracer.Instance, (IDbCommand)instance));
         }

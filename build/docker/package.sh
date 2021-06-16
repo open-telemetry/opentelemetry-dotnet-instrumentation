@@ -2,14 +2,12 @@
 set -euxo pipefail
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-VERSION=0.0.1
+VERSION=1.27.1
 BUILD_TYPE=${buildConfiguration:-Debug}
 ARCH=${ARCHITECTURE:-x64}
 
 mkdir -p $DIR/../../deploy/linux
-for target in integrations.json defaults.env LICENSE NOTICE ; do
-    cp $DIR/../../$target $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64/
-done
+cp $DIR/../../integrations.json $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64/
 cp $DIR/../../build/artifacts/createLogPath.sh $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64/
 
 # If running the unified pipeline, copy managed assets now instead of in the profiler build step
@@ -27,35 +25,29 @@ for pkgtype in $PKGTYPES ; do
         -f \
         -s dir \
         -t $pkgtype \
-        -n otel-dotnet-autoinstrumentation \
-        --license "Apache License, Version 2.0" \
-        --provides otel-dotnet-autoinstrumentation \
-        --vendor OpenTelemetry \
+        -n datadog-dotnet-apm \
         -v $VERSION \
-        $(if [ $pkgtype != 'tar' ] ; then echo --prefix /opt/otel-dotnet-autoinstrumentation ; fi) \
+        $(if [ $pkgtype != 'tar' ] ; then echo --prefix /opt/datadog ; fi) \
         --chdir $DIR/../../src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64 \
         netstandard2.0/ \
         netcoreapp3.1/ \
-        OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so \
+        Datadog.Trace.ClrProfiler.Native.so \
         integrations.json \
-        createLogPath.sh \
-        defaults.env \
-        LICENSE \
-        NOTICE
+        createLogPath.sh
 done
 
-gzip -f otel-dotnet-autoinstrumentation.tar
+gzip -f datadog-dotnet-apm.tar
 
 if [ -z "${MUSL-}" ]; then
   if [ "$ARCH" == "x64" ]; then
-    mv otel-dotnet-autoinstrumentation.tar.gz otel-dotnet-autoinstrumentation-$VERSION.tar.gz
+    mv datadog-dotnet-apm.tar.gz datadog-dotnet-apm-$VERSION.tar.gz
   else
-    mv otel-dotnet-autoinstrumentation.tar.gz otel-dotnet-autoinstrumentation-$VERSION.$ARCH.tar.gz
+    mv datadog-dotnet-apm.tar.gz datadog-dotnet-apm-$VERSION.$ARCH.tar.gz
   fi
 else
   if [ "$ARCH" == "x64" ]; then
-    mv otel-dotnet-autoinstrumentation.tar.gz otel-dotnet-autoinstrumentation-$VERSION-musl.tar.gz
+    mv datadog-dotnet-apm.tar.gz datadog-dotnet-apm-$VERSION-musl.tar.gz
   else
-    mv otel-dotnet-autoinstrumentation.tar.gz otel-dotnet-autoinstrumentation-$VERSION-musl.$ARCH.tar.gz
+    mv datadog-dotnet-apm.tar.gz datadog-dotnet-apm-$VERSION-musl.$ARCH.tar.gz
   fi
 fi
