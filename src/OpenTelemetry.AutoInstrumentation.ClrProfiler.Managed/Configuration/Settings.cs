@@ -153,7 +153,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         public IList<Instrumentation> EnabledInstrumentations { get; }
 
         /// <summary>
-        /// Gets the list of plugins' repesented by <see cref="Type.AssemblyQualifiedName"/>.
+        /// Gets the list of plugins repesented by <see cref="Type.AssemblyQualifiedName"/>.
         /// </summary>
         public IList<string> TracerPlugins { get; } = new List<string>();
 
