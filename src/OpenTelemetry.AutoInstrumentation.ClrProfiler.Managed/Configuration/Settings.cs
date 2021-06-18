@@ -57,6 +57,15 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                 }
             }
 
+            var providerPlugins = source.GetString(ConfigurationKeys.ProviderPlugins);
+            if (providerPlugins != null)
+            {
+                foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(':'))
+                {
+                    TracerPlugins.Add(pluginAssemblyQualifiedName);
+                }
+            }
+
             var additionalSources = source.GetString(ConfigurationKeys.AdditionalSources);
             if (additionalSources != null)
             {
@@ -142,6 +151,11 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         /// Gets the list of enabled instrumentations.
         /// </summary>
         public IList<Instrumentation> EnabledInstrumentations { get; }
+
+        /// <summary>
+        /// Gets the list of plugins' repesented by <see cref="Type.AssemblyQualifiedName"/>.
+        /// </summary>
+        public IList<string> TracerPlugins { get; } = new List<string>();
 
         /// <summary>
         /// Gets the list of activitysources to be added to the tracer at the startup.
