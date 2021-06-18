@@ -36,13 +36,15 @@ docker run -d --rm --name jaeger \
   jaegertracing/all-in-one:1.22
 
 # instrument and run HTTP server app in background
-export OTEL_DOTNET_TRACER_PROVIDER_PLUGINS="Samples.AspNetCoreMvc.OtelSdkPlugin, Samples.AspNetCoreMvc31, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
+export OTEL_DOTNET_TRACER_PROVIDER_PLUGINS="Samples.AspNetCoreMvc.OtelSdkPlugin, Samples.AspNetCoreMvc31, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null:Vendor.Plugin.Plugin, Vendor.Plugin, Version=0.0.1.0, Culture=neutral, PublicKeyToken=null"
 ./dev/instrument.sh ASPNETCORE_URLS="http://127.0.0.1:8080/" OTEL_SERVICE="aspnet-server" dotnet run --no-launch-profile -f $aspNetAppTargetFramework -p ./samples/Samples.AspNetCoreMvc31/Samples.AspNetCoreMvc31.csproj &
 unset OTEL_DOTNET_TRACER_PROVIDER_PLUGINS
 ./dev/wait-local-port.sh 8080
 
 # instrument and run HTTP client app
+export OTEL_DOTNET_TRACER_PROVIDER_PLUGINS="Vendor.Plugin.Plugin, Vendor.Plugin, Version=0.0.1.0, Culture=neutral, PublicKeyToken=null"
 time ./dev/instrument.sh OTEL_SERVICE="http-client" dotnet run --no-launch-profile -f $consoleAppTargetFramework -p ./samples/ConsoleApp/ConsoleApp.csproj
+unset OTEL_DOTNET_TRACER_PROVIDER_PLUGINS
 
 # verify if it works
 read -p "Check traces under: http://localhost:16686/search. Press enter to continue"
