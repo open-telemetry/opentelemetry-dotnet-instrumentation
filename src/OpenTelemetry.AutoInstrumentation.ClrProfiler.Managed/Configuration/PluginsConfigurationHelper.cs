@@ -18,11 +18,13 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 
         private static TracerProviderBuilder InvokePlugin(this TracerProviderBuilder builder, string pluginAssemblyQualifiedName)
         {
+            // get the type and method
             var t = Type.GetType(pluginAssemblyQualifiedName);
             var mi = t.GetMethod("ConfigureTracerProvider", new Type[] { typeof(TracerProviderBuilder) });
 
+            // execute
             var obj = Activator.CreateInstance(t);
-            var result = mi.Invoke(obj, new object[] { builder }); // execute with builder is an input
+            var result = mi.Invoke(obj, new object[] { builder });
             return (TracerProviderBuilder)result;
         }
     }
