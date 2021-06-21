@@ -9,6 +9,7 @@ consoleAppTargetFramework=${consoleAppTargetFramework:-netcoreapp3.1}
 
 function finish {
   docker stop jaeger # stop Jaeger
+  docker stop redis # stop Redis
   docker stop mongo # stop MongoDb
   kill 0 # kill background processes
 }
@@ -21,6 +22,11 @@ trap finish EXIT
 docker run -d --rm --name mongo \
   -p 27017:27017 \
   mongo:4.4.6
+
+# start redis
+docker run -d --rm --name redis \
+  -p 6379:6379 \
+  redis:6.2.4
 
 # start Jaeger
 docker run -d --rm --name jaeger \

@@ -1,5 +1,6 @@
 using System;
 using OpenTelemetry.Trace;
+using Samples.AspNetCoreMvc.Controllers;
 
 namespace Samples.AspNetCoreMvc
 {
@@ -9,7 +10,7 @@ namespace Samples.AspNetCoreMvc
         {
             var typeName = this.ToString();
             Console.WriteLine($"Hello from {typeName}");
-            return builder;
+            return builder.AddRedisInstrumentation(RedisController.Connection);
         }
     }
 }

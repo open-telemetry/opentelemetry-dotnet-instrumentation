@@ -33,16 +33,9 @@ namespace ConsoleApp
             {
                 activity?.SetTag("foo", "bar");
 
-                var baseAddress = new Uri("https://www.example.com/");
-                var regularHttpClient = new HttpClient { BaseAddress = baseAddress };
-
-                Console.WriteLine("Calling regularHttpClient.GetAsync");
-                await regularHttpClient.GetAsync("default-handler");
-                Console.WriteLine("Called regularHttpClient.GetAsync");
-                
-                Console.WriteLine("Calling client.GetAsync");
-                await client.GetAsync("http://127.0.0.1:8080/api/mongo");
-                Console.WriteLine("Called client.GetAsync");
+                await HttpGet("https://www.example.com/default-handler");
+                await HttpGet("http://127.0.0.1:8080/api/mongo");
+                await HttpGet("http://127.0.0.1:8080/api/redis");
             }
             
             var request = new HttpRequestMessage
@@ -72,6 +65,14 @@ namespace ConsoleApp
                 var responseContent = await response.Content.ReadAsStringAsync();
                 scope.Span.SetTag("response.length", responseContent.Length);
             }
+        }
+
+        private static async Task HttpGet(string url)
+        {
+            using var client = new HttpClient();
+            Console.WriteLine($"Calling {url}");
+            await client.GetAsync(url);
+            Console.WriteLine($"Called {url}");
         }
     }
 }
