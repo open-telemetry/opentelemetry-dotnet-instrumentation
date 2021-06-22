@@ -1,7 +1,5 @@
 #if NETCOREAPP
-
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
@@ -14,7 +12,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
     {
         internal static System.Runtime.Loader.AssemblyLoadContext DependencyLoadContext { get; } = new ManagedProfilerAssemblyLoadContext();
 
-        private static IEnumerable<string> ResolveManagedProfilerDirectory()
+        private static string ResolveManagedProfilerDirectory()
         {
             string tracerFrameworkDirectory = "netstandard2.0";
 
@@ -27,16 +25,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
             }
 
             var tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_TRACER_HOME") ?? string.Empty;
-            yield return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
-
-            var additionalDirectories = (ReadEnvironmentVariable("OTEL_DOTNET_TRACER_ADDITIONAL_ASSEMBLIES_DIRECTORIES"))?.Split(Path.PathSeparator);
-            if (additionalDirectories != null)
-            {
-                foreach (var path in additionalDirectories)
-                {
-                    yield return Path.Combine(path, tracerFrameworkDirectory);
-                }
-            }
+            return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
         }
 
         private static Assembly AssemblyResolve_ManagedProfilerDependencies(object sender, ResolveEventArgs args)
@@ -55,29 +44,26 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
                 return null;
             }
 
-            foreach (var directory in ManagedProfilerDirectories)
-            {
-                var path = Path.Combine(directory, $"{assemblyName.Name}.dll");
+            var path = Path.Combine(ManagedProfilerDirectory, $"{assemblyName.Name}.dll");
 
-                // Only load the main profiler into the default Assembly Load Context.
-                // If Datadog.Trace or other libraries are provided by the NuGet package their loads are handled in the following two ways.
-                // 1) The AssemblyVersion is greater than or equal to the version used by OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, the assembly
-                //    will load successfully and will not invoke this resolve event.
-                // 2) The AssemblyVersion is lower than the version used by OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, the assembly will fail to load
-                //    and invoke this resolve event. It must be loaded in a separate AssemblyLoadContext since the application will only
-                //    load the originally referenced version
-                if (assemblyName.Name.StartsWith("OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed", StringComparison.OrdinalIgnoreCase)
-                && assemblyName.FullName.IndexOf("PublicKeyToken=34b8972644a12429", StringComparison.OrdinalIgnoreCase) >= 0
-                && File.Exists(path))
-                {
-                    StartupLogger.Debug("Loading {0} with Assembly.LoadFrom", path);
-                    return Assembly.LoadFrom(path);
-                }
-                else if (File.Exists(path))
-                {
-                    StartupLogger.Debug("Loading {0} with DependencyLoadContext.LoadFromAssemblyPath", path);
-                    return DependencyLoadContext.LoadFromAssemblyPath(path); // Load unresolved framework and third-party dependencies into a custom Assembly Load Context
-                }
+            // Only load the main profiler into the default Assembly Load Context.
+            // If Datadog.Trace or other libraries are provided by the NuGet package their loads are handled in the following two ways.
+            // 1) The AssemblyVersion is greater than or equal to the version used by OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, the assembly
+            //    will load successfully and will not invoke this resolve event.
+            // 2) The AssemblyVersion is lower than the version used by OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, the assembly will fail to load
+            //    and invoke this resolve event. It must be loaded in a separate AssemblyLoadContext since the application will only
+            //    load the originally referenced version
+            if (assemblyName.Name.StartsWith("OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed", StringComparison.OrdinalIgnoreCase)
+             && assemblyName.FullName.IndexOf("PublicKeyToken=34b8972644a12429", StringComparison.OrdinalIgnoreCase) >= 0
+             && File.Exists(path))
+            {
+                StartupLogger.Debug("Loading {0} with Assembly.LoadFrom", path);
+                return Assembly.LoadFrom(path);
+            }
+            else if (File.Exists(path))
+            {
+                StartupLogger.Debug("Loading {0} with DependencyLoadContext.LoadFromAssemblyPath", path);
+                return DependencyLoadContext.LoadFromAssemblyPath(path); // Load unresolved framework and third-party dependencies into a custom Assembly Load Context
             }
 
             return null;

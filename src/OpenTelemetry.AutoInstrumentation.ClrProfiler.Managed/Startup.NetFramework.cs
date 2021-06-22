@@ -1,19 +1,20 @@
 #if NETFRAMEWORK
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
-namespace Datadog.Trace.ClrProfiler.Managed.Loader
+namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed
 {
     /// <summary>
     /// A class that attempts to load the OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed .NET assembly.
     /// </summary>
     public partial class Startup
     {
-        private static string ResolveManagedProfilerDirectory()
+        private static IEnumerable<string> ResolveManagedProfilerDirectory()
         {
-            // We currently build two assemblies targeting .NET Framework.
+           // We currently build two assemblies targeting .NET Framework.
             // If we're running on the .NET Framework, load the highest-compatible assembly
             string corlibFileVersionString = ((AssemblyFileVersionAttribute)typeof(object).Assembly.GetCustomAttribute(typeof(AssemblyFileVersionAttribute))).Version;
             string corlib461FileVersionString = "4.6.1055.0";
@@ -24,8 +25,14 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
             var corlib461Version = new Version(corlib461FileVersionString);
             var tracerFrameworkDirectory = corlibVersion < corlib461Version ? "net452" : "net461";
 
-            var tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_TRACER_HOME") ?? string.Empty;
-            return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
+            var additionalDirectories = Environment.GetEnvironmentVariable("OTEL_DOTNET_TRACER_ADDITIONAL_ASSEMBLIES_DIRECTORIES")?.Split(Path.PathSeparator);
+            if (additionalDirectories != null)
+            {
+                foreach (var path in additionalDirectories)
+                {
+                    yield return Path.Combine(path, tracerFrameworkDirectory);
+                }
+            }
         }
 
         private static Assembly AssemblyResolve_ManagedProfilerDependencies(object sender, ResolveEventArgs args)
@@ -42,11 +49,13 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
                 return null;
             }
 
-            var path = Path.Combine(ManagedProfilerDirectory, $"{assemblyName}.dll");
-            if (File.Exists(path))
+            foreach (var directory in ManagedProfilerDirectories)
             {
-                StartupLogger.Debug("Loading {0}", path);
-                return Assembly.LoadFrom(path);
+                var path = Path.Combine(directory, $"{assemblyName}.dll");
+                if (File.Exists(path))
+                {
+                    return Assembly.LoadFrom(path);
+                }
             }
 
             return null;

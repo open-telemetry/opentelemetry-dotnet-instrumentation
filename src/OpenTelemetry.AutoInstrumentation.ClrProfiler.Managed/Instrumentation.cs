@@ -32,6 +32,8 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed
                 return;
             }
 
+            Startup.SetupResolver();
+
             try
             {
                 if (TracerSettings.LoadTracerAtStartup)

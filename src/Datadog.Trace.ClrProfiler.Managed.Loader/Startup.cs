@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 
 namespace Datadog.Trace.ClrProfiler.Managed.Loader
@@ -16,7 +15,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
         /// </summary>
         static Startup()
         {
-            ManagedProfilerDirectories = ResolveManagedProfilerDirectory().ToArray();
+            ManagedProfilerDirectory = ResolveManagedProfilerDirectory();
 
             try
             {
@@ -30,7 +29,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Loader
             TryLoadManagedAssembly();
         }
 
-        internal static string[] ManagedProfilerDirectories { get; }
+        internal static string ManagedProfilerDirectory { get; }
 
         private static void TryLoadManagedAssembly()
         {
