@@ -47,10 +47,10 @@ Use these environment variables to configure the tracing library:
 | `OTEL_TRACE_PARTIAL_FLUSH_MIN_SPANS` | The minimum number of closed spans in a trace before it's partially flushed. `OTEL_TRACE_PARTIAL_FLUSH_ENABLED` has to be enabled for this to take effect. | `500` |
 | `OTEL_SERVICE` | Application's default service name. |  |
 | `OTEL_ENV` | The value for the `environment` tag added to every span. |  |
-| `OTEL_TRACE_ENABLED` | Enable to activate the tracer. | `true` | 
-| `OTEL_TRACE_DEBUG` | Enable to activate debugging mode for the tracer. | `false` | 
+| `OTEL_TRACE_ENABLED` | Enable to activate the tracer. | `true` |
+| `OTEL_TRACE_DEBUG` | Enable to activate debugging mode for the tracer. | `false` |
 | `OTEL_DOTNET_TRACER_FORCE` | Enable the tracer even if no integrations is set using `OTEL_INTEGRATIONS`. | `true` |
-| `OTEL_EXPORTER_ZIPKIN_ENDPOINT` | The URL to where send the traces for `Zipkin` and `DatadogAgent` exporters (see: `OTEL_EXPORTER`). | `http://localhost:8126` | 
+| `OTEL_EXPORTER_ZIPKIN_ENDPOINT` | The URL to where send the traces for `Zipkin` and `DatadogAgent` exporters (see: `OTEL_EXPORTER`). | `http://localhost:8126` |
 | `OTEL_TAGS` | Comma-separated list of key-value pairs to specify global span tags. For example: `"key1:val1,key2:val2"` |  |
 | `OTEL_LOGS_INJECTION` | Enable to inject trace IDs, span IDs, service name and environment into logs. This requires a compatible logger or manual configuration. | `false` |
 | `OTEL_EXPORTER` | The exporter to be used. The Tracer uses it to encode and dispatch traces. Available values are: `zipkin`, `jeager`. | |
@@ -64,10 +64,10 @@ Use these environment variables to configure the tracing library:
 | `OTEL_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION` |  Sets whether to intercept method calls when the caller method is inside a domain-neutral assembly. This is recommended when instrumenting IIS applications. | `false` |
 | `OTEL_PROFILER_PROCESSES` | Sets the filename of executables the profiler can attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
 | `OTEL_PROFILER_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
-| `OTEL_DOTNET_TRACER_LOAD_AT_STARTUP` | Defines whether the tracer is created by the auto instrumentation library or not. The default value is `true`. For applications with manual instrumentation in place and tracer being initialized in the app this should be changed to `false`. Note that if this is disabled, the application code will be in charge of setting up the exporters and any other desired instrumentation, e.g. AddAspNetInstrumentation (see [custom instrumentation section](#configure-custom-instrumentation)). | `true` | 
+| `OTEL_DOTNET_TRACER_LOAD_AT_STARTUP` | Defines whether the tracer is created by the auto instrumentation library or not. The default value is `true`. For applications with manual instrumentation in place and tracer being initialized in the app this should be changed to `false`. Note that if this is disabled, the application code will be in charge of setting up the exporters and any other desired instrumentation, e.g. AddAspNetInstrumentation (see [custom instrumentation section](#configure-custom-instrumentation)). | `true` |
 | `OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES` | Comma separated list of additional `ActivitySource` names to be added to the tracer at the startup. |  |
 | `OTEL_DOTNET_TRACER_LEGACY_SOURCES` | Comma separated list of additional legacy source names to be added to the tracer at the startup. |  |
-
+| `OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS` | Colon (:) separated list of OTel SDK instrumentation plugins represented by `System.Type.AssemblyQualifiedName`. See more in dedicated section. |
 
 ## Ways to configure
 
@@ -106,6 +106,18 @@ See example with `OTEL_SERVICE` overload.
     "OTEL_SERVICE": "my-service-name"
 }
 ```
+
+### `OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS`
+
+The configuration can be use to extent the configuration of the the OpenTelemetry .NET SDK Tracer.
+
+A plugin must be a non-static, non-abstract class which has a default constructor and a method with following signature:
+
+```csharp
+public OpenTelemetry.Trace.TracerProviderBuilder ConfigureTracerProvider(OpenTelemetry.Trace.TracerProviderBuilder builder)
+```
+
+The plugin must use the same version of the `OpenTelemetry` as the OpenTelemetry .NET AutoInstrumentation. Current version is `1.1.0-beta2`.
 
 ## Setup
 

@@ -71,6 +71,11 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         public const string DisabledInstrumentations = "OTEL_DOTNET_TRACER_DISABLED_INSTRUMENTATIONS";
 
         /// <summary>
+        /// Configuration key for colon (:) separated list of plugins repesented by <see cref="System.Type.AssemblyQualifiedName"/>.
+        /// </summary>
+        public const string ProviderPlugins = "OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS";
+
+        /// <summary>
         /// Configuration key for additional <see cref="ActivitySource"/> names to be added to the tracer at the startup.
         /// </summary>
         public const string AdditionalSources = "OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES";
