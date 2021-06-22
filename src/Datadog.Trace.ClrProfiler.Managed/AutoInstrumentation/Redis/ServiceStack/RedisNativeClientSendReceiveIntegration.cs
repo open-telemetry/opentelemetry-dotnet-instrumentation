@@ -1,3 +1,8 @@
+// <copyright file="RedisNativeClientSendReceiveIntegration.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using System.Globalization;
 using System.Linq;
@@ -61,7 +66,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Redis.ServiceStack
         /// <returns>A response value, in an async scenario will be T of Task of T</returns>
         public static CallTargetReturn<TResponse> OnMethodEnd<TTarget, TResponse>(TTarget instance, TResponse response, Exception exception, CallTargetState state)
         {
-            state.Scope?.DisposeWithException(exception);
+            state.Scope.DisposeWithException(exception);
             return new CallTargetReturn<TResponse>(response);
         }
 

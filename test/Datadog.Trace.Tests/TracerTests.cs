@@ -1,3 +1,8 @@
+// <copyright file="TracerTests.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using System.Linq;
 using System.Net;
@@ -351,7 +356,7 @@ namespace Datadog.Trace.Tests
             using var secondSpan = _tracer.StartActive("Child", firstSpan.Span.Context);
             Assert.False(secondSpan.Span.IsRootSpan);
             Assert.Equal(origin, secondSpan.Span.Context.Origin);
-            Assert.Null(secondSpan.Span.GetTag(Tags.Origin));
+            Assert.Equal(origin, secondSpan.Span.GetTag(Tags.Origin));
         }
 
         [Fact]

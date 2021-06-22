@@ -1,3 +1,8 @@
+// <copyright file="SystemDataSqliteTests.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 #if !NET452
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +22,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
             SetServiceVersion("1.0.0");
         }
 
-        [Theory]
+        [Theory(Skip="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/192")]
         [InlineData(true)]
         [Trait("Category", "EndToEnd")]
         [Trait("RunOnWindows", "True")]
@@ -56,7 +61,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
             }
         }
 
-        [Theory]
+        [Theory(Skip="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/192")]
         [InlineData(false)]
         [InlineData(true)]
         [Trait("Category", "EndToEnd")]

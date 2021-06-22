@@ -1,0 +1,20 @@
+{
+  "profiles": {
+    "Samples.Msmq": {
+      "commandName": "Project",
+      "commandLineArgs": "5 5",
+      "environmentVariables": {
+        "OTEL_DOTNET_TRACER_HOME": "$(ProjectDir)$(OutputPath)profiler-lib",
+        "COR_ENABLE_PROFILING": "1",
+        "CORECLR_ENABLE_PROFILING": "1",
+        "COR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\Datadog.Trace.ClrProfiler.Native.dll",
+        "CORECLR_PROFILER": "{918728DD-259F-4A6A-AC2B-B85E1B658318}",
+        "OTEL_TRACE_CALLTARGET_ENABLED": "1",
+        "OTEL_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json",
+        "CORECLR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\Datadog.Trace.ClrProfiler.Native.dll",
+        "COR_PROFILER": "{918728DD-259F-4A6A-AC2B-B85E1B658318}"
+      },
+      "nativeDebugging": true
+    }
+  }
+}

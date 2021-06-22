@@ -51,6 +51,7 @@ jobs:
     name: Windows Build
     runs-on: windows-2019
     steps:
+      - run: git config --system core.longpaths true
       - uses: actions/checkout@v2
       - uses: microsoft/setup-msbuild@v1.0.2
       - run: dotnet --list-sdks

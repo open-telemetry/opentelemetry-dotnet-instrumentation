@@ -1,3 +1,8 @@
+// <copyright file="ConfigurationKeys.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 namespace Datadog.Trace.Configuration
 {
     /// <summary>
@@ -320,6 +325,12 @@ namespace Datadog.Trace.Configuration
         public const string TracesTransport = "OTEL_TRACE_TRANSPORT";
 
         /// <summary>
+        /// Configuration key for overriding which URLs are skipped by the tracer.
+        /// </summary>
+        /// <seealso cref="TracerSettings.HttpClientExcludedUrlSubstrings"/>
+        public const string HttpClientExcludedUrlSubstrings = "OTEL_TRACE_HTTP_CLIENT_EXCLUDED_URL_SUBSTRINGS";
+
+        /// <summary>
         /// Configuration key for the application's server http statuses to set spans as errors by.
         /// </summary>
         /// <seealso cref="TracerSettings.HttpServerErrorStatusCodes"/>
@@ -352,6 +363,14 @@ namespace Datadog.Trace.Configuration
         /// </summary>
         /// <seealso cref="TracerSettings.PartialFlushMinSpans"/>
         public const string PartialFlushMinSpans = "OTEL_TRACE_PARTIAL_FLUSH_MIN_SPANS";
+
+        /// <summary>
+        /// Configuration key to enable or disable the creation of a span context on exiting a successful Kafka
+        /// Consumer.Consume() call, and closing the scope on entering Consumer.Consume().
+        /// Default value is <c>true</c> (enabled).
+        /// </summary>
+        /// <seealso cref="TracerSettings.KafkaCreateConsumerScopeEnabled"/>
+        public const string KafkaCreateConsumerScopeEnabled = "OTEL_TRACE_KAFKA_CREATE_CONSUMER_SCOPE_ENABLED";
 
         /// <summary>
         /// String format patterns used to match integration-specific configuration keys.

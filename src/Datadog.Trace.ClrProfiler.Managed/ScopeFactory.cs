@@ -1,6 +1,12 @@
+// <copyright file="ScopeFactory.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using System.Data;
 using System.Linq;
+using Datadog.Trace.ClrProfiler.Helpers;
 using Datadog.Trace.ClrProfiler.Integrations.AdoNet;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.Conventions;
@@ -84,7 +90,7 @@ namespace Datadog.Trace.ClrProfiler
         {
             tags = null;
 
-            if (!tracer.Settings.IsIntegrationEnabled(integrationId))
+            if (!tracer.Settings.IsIntegrationEnabled(integrationId) || HttpBypassHelper.UriContainsAnyOf(requestUri, tracer.Settings.HttpClientExcludedUrlSubstrings))
             {
                 // integration disabled, don't create a scope, skip this trace
                 return null;

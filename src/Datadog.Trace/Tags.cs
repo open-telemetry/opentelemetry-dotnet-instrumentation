@@ -1,3 +1,8 @@
+// <copyright file="Tags.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 
 namespace Datadog.Trace
@@ -215,6 +220,21 @@ namespace Datadog.Trace
         public const string MessageSize = "message.size";
 
         /// <summary>
+        /// The partition associated with a record
+        /// </summary>
+        public const string KafkaPartition = "kafka.partition";
+
+        /// <summary>
+        /// The offset inside a partition associated with a record
+        /// </summary>
+        public const string KafkaOffset = "kafka.offset";
+
+        /// <summary>
+        /// Whether the record was a "tombstone" record
+        /// </summary>
+        public const string KafkaTombstone = "kafka.tombstone";
+
+        /// <summary>
         /// The sampling priority for the entire trace.
         /// </summary>
         public const string SamplingPriority = "sampling.priority";
@@ -317,6 +337,26 @@ namespace Datadog.Trace
         /// Configures the measured metric for a span.
         /// </summary>
         public const string Measured = "_dd.measured";
+
+        /// <summary>
+        /// The name of the Msmq command the message was published to.
+        /// </summary>
+        public const string MsmqCommand = "msmq.command";
+
+        /// <summary>
+        /// Is the msmq queue supporting transactional messages
+        /// </summary>
+        public const string MsmqIsTransactionalQueue = "msmq.queue.transactional";
+
+        /// <summary>
+        /// The name of the Msmq queue the message was published to, containing host name and path.
+        /// </summary>
+        public const string MsmqQueuePath = "msmq.queue.path";
+
+        /// <summary>
+        /// A boolean indicating if it's part of a transaction.
+        /// </summary>
+        public const string MsmqMessageWithTransaction = "msmq.message.transactional";
 
         internal const string ElasticsearchAction = "elasticsearch.action";
 

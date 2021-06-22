@@ -1,3 +1,8 @@
+// <copyright file="TypeNameTests.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -38,7 +43,8 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
             yield return new object[] { ClrNames.GenericParameterTask, "System.Threading.Tasks.Task`1<T>" };
             yield return new object[] { ClrNames.ObjectTask, "System.Threading.Tasks.Task`1<System.Object>" };
             yield return new object[] { ClrNames.Int32Task, "System.Threading.Tasks.Task`1<System.Int32>" };
-    }
+            yield return new object[] { ClrNames.TimeSpan, "System.TimeSpan" };
+        }
 
         [Fact]
         public void EveryMemberOfTypeNamesIsRepresented()

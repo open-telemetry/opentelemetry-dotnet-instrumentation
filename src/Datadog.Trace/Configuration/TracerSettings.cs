@@ -1,3 +1,8 @@
+// <copyright file="TracerSettings.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -167,9 +172,19 @@ namespace Datadog.Trace.Configuration
 
             Propagators = GetPropagators(source);
 
+            var urlSubstringSkips = source?.GetString(ConfigurationKeys.HttpClientExcludedUrlSubstrings) ??
+                                    // default value
+                                    (AzureAppServices.Metadata.IsRelevant ? AzureAppServices.Metadata.DefaultHttpClientExclusions : null);
+
+            if (urlSubstringSkips != null)
+            {
+                HttpClientExcludedUrlSubstrings = TrimSplitString(urlSubstringSkips.ToUpperInvariant(), ',').ToArray();
+            }
+
             var httpServerErrorStatusCodes = source?.GetString(ConfigurationKeys.HttpServerErrorStatusCodes) ??
                                            // Default value
                                            "500-599";
+
             HttpServerErrorStatusCodes = ParseHttpCodesToArray(httpServerErrorStatusCodes);
 
             var httpClientErrorStatusCodes = source?.GetString(ConfigurationKeys.HttpClientErrorStatusCodes) ??
@@ -196,6 +211,9 @@ namespace Datadog.Trace.Configuration
             {
                 PartialFlushMinSpans = 500;
             }
+
+            KafkaCreateConsumerScopeEnabled = source?.GetBool(ConfigurationKeys.KafkaCreateConsumerScopeEnabled)
+                                           ?? true; // default
         }
 
         /// <summary>
@@ -417,9 +435,22 @@ namespace Datadog.Trace.Configuration
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether a span context should be created on exiting a successful Kafka
+        /// Consumer.Consume() call, and closed on entering Consumer.Consume().
+        /// </summary>
+        /// <seealso cref="ConfigurationKeys.KafkaCreateConsumerScopeEnabled"/>
+        public bool KafkaCreateConsumerScopeEnabled { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the diagnostic log at startup is enabled
         /// </summary>
         public bool StartupDiagnosticLogEnabled { get; set; }
+
+        /// <summary>
+        /// Gets or sets the comma separated list of url patterns to skip tracing.
+        /// </summary>
+        /// <seealso cref="ConfigurationKeys.HttpClientExcludedUrlSubstrings"/>
+        internal string[] HttpClientExcludedUrlSubstrings { get; set; }
 
         /// <summary>
         /// Gets or sets the HTTP status code that should be marked as errors for server integrations.
@@ -582,6 +613,19 @@ namespace Datadog.Trace.Configuration
             }
 
             return headerTags;
+        }
+
+        internal IEnumerable<string> TrimSplitString(string textValues, char separator)
+        {
+            var values = textValues.Split(separator);
+
+            for (var i = 0; i < values.Length; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(values[i]))
+                {
+                    yield return values[i].Trim();
+                }
+            }
         }
 
         internal bool[] ParseHttpCodesToArray(string httpStatusErrorCodes)

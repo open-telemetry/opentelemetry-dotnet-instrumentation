@@ -1,9 +1,15 @@
+// <copyright file="Utils.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Datadog.Trace.Tools.Runner
@@ -15,10 +21,10 @@ namespace Datadog.Trace.Tools.Runner
         public static Dictionary<string, string> GetProfilerEnvironmentVariables(string runnerFolder, Platform platform, Options options)
         {
             // In the current nuspec structure RunnerFolder has the following format:
-            //  C:\Users\[user]\.dotnet\tools\.store\datadog.trace.tools.runner\1.19.3\datadog.trace.tools.runner\1.19.3\tools\netcoreapp3.1\any
-            //  C:\Users\[user]\.dotnet\tools\.store\datadog.trace.tools.runner\1.19.3\datadog.trace.tools.runner\1.19.3\tools\netcoreapp2.1\any
+            //  C:\Users\[user]\.dotnet\tools\.store\datadog.trace.tools.runner\[version]\datadog.trace.tools.runner\[version]\tools\netcoreapp3.1\any
+            //  C:\Users\[user]\.dotnet\tools\.store\datadog.trace.tools.runner\[version]\datadog.trace.tools.runner\[version]\tools\netcoreapp2.1\any
             // And the Home folder is:
-            //  C:\Users\[user]\.dotnet\tools\.store\datadog.trace.tools.runner\1.19.3\datadog.trace.tools.runner\1.19.3\home
+            //  C:\Users\[user]\.dotnet\tools\.store\datadog.trace.tools.runner\[version]\datadog.trace.tools.runner\[version]\home
             // So we have to go up 3 folders.
             string tracerHome = null;
             if (!string.IsNullOrEmpty(options.TracerHomeFolder))
@@ -48,6 +54,44 @@ namespace Datadog.Trace.Tools.Runner
             else if (platform == Platform.MacOS)
             {
                 tracerProfiler64 = FileExists(Path.Combine(tracerHome, "osx-x64", "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dylib"));
+                if (RuntimeInformation.OSArchitecture == Architecture.X64 || RuntimeInformation.OSArchitecture == Architecture.X86)
+                {
+                    tracerProfiler32 = FileExists(Path.Combine(tracerHome, "win-x86", "OpenTelemetry.AutoInstrumentation.Native.dll"));
+                    tracerProfiler64 = FileExists(Path.Combine(tracerHome, "win-x64", "OpenTelemetry.AutoInstrumentation.Native.dll"));
+                }
+                else
+                {
+                    Console.Error.WriteLine($"ERROR: Windows {RuntimeInformation.OSArchitecture} architecture is not supported.");
+                    return null;
+                }
+            }
+            else if (platform == Platform.Linux)
+            {
+                if (RuntimeInformation.OSArchitecture == Architecture.X64)
+                {
+                    tracerProfiler64 = FileExists(Path.Combine(tracerHome, "linux-x64", "OpenTelemetry.AutoInstrumentation.Native.so"));
+                }
+                else if (RuntimeInformation.OSArchitecture == Architecture.Arm64)
+                {
+                    tracerProfiler64 = FileExists(Path.Combine(tracerHome, "linux-arm64", "OpenTelemetry.AutoInstrumentation.Native.so"));
+                }
+                else
+                {
+                    Console.Error.WriteLine($"ERROR: Linux {RuntimeInformation.OSArchitecture} architecture is not supported.");
+                    return null;
+                }
+            }
+            else if (platform == Platform.MacOS)
+            {
+                if (RuntimeInformation.OSArchitecture == Architecture.X64)
+                {
+                    tracerProfiler64 = FileExists(Path.Combine(tracerHome, "osx-x64", "OpenTelemetry.AutoInstrumentation.Native.dylib"));
+                }
+                else
+                {
+                    Console.Error.WriteLine($"ERROR: macOS {RuntimeInformation.OSArchitecture} architecture is not supported.");
+                    return null;
+                }
             }
 
             var envVars = new Dictionary<string, string>

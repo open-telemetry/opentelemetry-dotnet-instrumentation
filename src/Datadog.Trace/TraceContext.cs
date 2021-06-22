@@ -1,3 +1,8 @@
+// <copyright file="TraceContext.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -173,12 +178,6 @@ namespace Datadog.Trace
                 span.SetTag(Tags.AzureAppServicesOperatingSystem, AzureAppServices.Metadata.OperatingSystem);
                 span.SetTag(Tags.AzureAppServicesRuntime, AzureAppServices.Metadata.Runtime);
                 span.SetTag(Tags.AzureAppServicesExtensionVersion, AzureAppServices.Metadata.SiteExtensionVersion);
-            }
-
-            // set the origin tag to the root span of each trace/subtrace
-            if (span.Context.Origin != null)
-            {
-                span.SetTag(Tags.Origin, span.Context.Origin);
             }
         }
     }

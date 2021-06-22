@@ -4,6 +4,7 @@ set -euxo pipefail
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 VERSION=0.0.1
 BUILD_TYPE=${buildConfiguration:-Debug}
+ARCH=${ARCHITECTURE:-x64}
 
 mkdir -p $DIR/../../deploy/linux
 for target in integrations.json defaults.env LICENSE NOTICE ; do
@@ -46,7 +47,15 @@ done
 gzip -f otel-dotnet-autoinstrumentation.tar
 
 if [ -z "${MUSL-}" ]; then
-  mv otel-dotnet-autoinstrumentation.tar.gz otel-dotnet-autoinstrumentation-$VERSION.tar.gz
+  if [ "$ARCH" == "x64" ]; then
+    mv otel-dotnet-autoinstrumentation.tar.gz otel-dotnet-autoinstrumentation-$VERSION.tar.gz
+  else
+    mv otel-dotnet-autoinstrumentation.tar.gz otel-dotnet-autoinstrumentation-$VERSION.$ARCH.tar.gz
+  fi
 else
-  mv otel-dotnet-autoinstrumentation.tar.gz otel-dotnet-autoinstrumentation-$VERSION-musl.tar.gz
+  if [ "$ARCH" == "x64" ]; then
+    mv otel-dotnet-autoinstrumentation.tar.gz otel-dotnet-autoinstrumentation-$VERSION-musl.tar.gz
+  else
+    mv otel-dotnet-autoinstrumentation.tar.gz otel-dotnet-autoinstrumentation-$VERSION-musl.$ARCH.tar.gz
+  fi
 fi

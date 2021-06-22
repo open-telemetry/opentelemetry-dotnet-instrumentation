@@ -1,3 +1,8 @@
+// <copyright file="TracerSettingsTests.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -97,6 +102,19 @@ namespace Datadog.Trace.Tests
             var tracerSettings = new TracerSettings(new NameValueConfigurationSource(settings));
 
             Assert.Equal(expected, tracerSettings.AgentUri.ToString());
+        }
+
+        [Theory]
+        [InlineData("a,b,c,d,,f", new[] { "a", "b", "c", "d", "f" })]
+        [InlineData(" a, b ,c, ,,f ", new[] { "a", "b", "c", "f" })]
+        [InlineData("a,b, c ,d,      e      ,f  ", new[] { "a", "b", "c", "d", "e", "f" })]
+        [InlineData("a,b,c,d,e,f", new[] { "a", "b", "c", "d", "e", "f" })]
+        [InlineData("", new string[0])]
+        public void ParseStringArraySplit(string input, string[] expected)
+        {
+            var tracerSettings = new TracerSettings();
+            var result = tracerSettings.TrimSplitString(input, ',').ToArray();
+            Assert.Equal(expected: expected, actual: result);
         }
 
         [Theory]

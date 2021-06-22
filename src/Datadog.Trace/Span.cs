@@ -1,3 +1,8 @@
+// <copyright file="Span.cs" company="Datadog">
+// Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
+// </copyright>
+
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -108,6 +113,7 @@ namespace Datadog.Trace
             sb.AppendLine($"TraceId: {Context.TraceId}");
             sb.AppendLine($"ParentId: {Context.ParentId}");
             sb.AppendLine($"SpanId: {Context.SpanId}");
+            sb.AppendLine($"Origin: {Context.Origin}");
             sb.AppendLine($"ServiceName: {ServiceName}");
             sb.AppendLine($"OperationName: {OperationName}");
             sb.AppendLine($"Resource: {ResourceName}");
@@ -137,6 +143,9 @@ namespace Datadog.Trace
             // some tags have special meaning
             switch (key)
             {
+                case Trace.Tags.Origin:
+                    Context.Origin = value;
+                    break;
                 case Trace.Tags.SamplingPriority:
                     if (Enum.TryParse(value, out SamplingPriority samplingPriority) &&
                         Enum.IsDefined(typeof(SamplingPriority), samplingPriority))
@@ -312,6 +321,8 @@ namespace Datadog.Trace
             {
                 case Trace.Tags.SamplingPriority:
                     return ((int?)(Context.TraceContext?.SamplingPriority ?? Context.SamplingPriority))?.ToString();
+                case Trace.Tags.Origin:
+                    return Context.Origin;
                 default:
                     return Tags.GetTag(key);
             }
