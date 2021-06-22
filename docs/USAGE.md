@@ -68,6 +68,7 @@ Use these environment variables to configure the tracing library:
 | `OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES` | Comma separated list of additional `ActivitySource` names to be added to the tracer at the startup. |  |
 | `OTEL_DOTNET_TRACER_LEGACY_SOURCES` | Comma separated list of additional legacy source names to be added to the tracer at the startup. |  |
 | `OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS` | Colon (:) separated list of OTel SDK instrumentation plugins represented by `System.Type.AssemblyQualifiedName`. See more in dedicated section. |
+| `OTEL_DOTNET_TRACER_ADDITIONAL_ASSEMBLIES_DIRECTORIES` | Colon (:) for *nix and semicolon (;) for Windows separated list paths with assemblies that can be resolved by the tracer. See more in dedicated section. |
 
 ## Ways to configure
 
@@ -118,6 +119,11 @@ public OpenTelemetry.Trace.TracerProviderBuilder ConfigureTracerProvider(OpenTel
 ```
 
 The plugin must use the same version of the `OpenTelemetry` as the OpenTelemetry .NET AutoInstrumentation. Current version is `1.1.0-beta2`.
+
+### `OTEL_DOTNET_TRACER_ADDITIONAL_ASSEMBLIES_DIRECTORIES`
+
+The configuration can be used to specify additional directories from where the assemblies can be loaded/resolved.
+The mechanism requires having a dedicated directory per framework.
 
 ## Setup
 

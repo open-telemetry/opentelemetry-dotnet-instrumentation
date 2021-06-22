@@ -41,6 +41,10 @@ docker run -d --rm --name jaeger \
   -p 9411:9411 \
   jaegertracing/all-in-one:1.22
 
+# setup plugin dirs
+export OTEL_DOTNET_TRACER_ADDITIONAL_ASSEMBLIES_DIRECTORIES="$( pwd )/bin/plugins"
+echo $OTEL_DOTNET_TRACER_ADDITIONAL_ASSEMBLIES_DIRECTORIES
+
 # instrument and run HTTP server app in background
 export OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS="Samples.AspNetCoreMvc.OtelSdkPlugin, Samples.AspNetCoreMvc31, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null:Vendor.Distro.Plugin, Vendor.Distro, Version=0.0.1.0, Culture=neutral, PublicKeyToken=null"
 ./dev/instrument.sh ASPNETCORE_URLS="http://127.0.0.1:8080/" OTEL_SERVICE="aspnet-server" dotnet run --no-launch-profile -f $aspNetAppTargetFramework -p ./samples/Samples.AspNetCoreMvc31/Samples.AspNetCoreMvc31.csproj &

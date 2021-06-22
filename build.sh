@@ -58,5 +58,10 @@ cd $DIR
 for framework in ${SDK_TARGET_FRAMEWORKS} ; do
     mkdir -p "$OUTDIR/$framework"
     dotnet publish -f $framework -c ${BUILD_TYPE} src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.csproj -o "$OUTDIR/$framework"
-    dotnet publish -f $framework -c ${BUILD_TYPE} samples/Vendor.Distro/Vendor.Distro.csproj -o "$OUTDIR/$framework"
+done
+
+PLUGIN_OUTDIR="$( pwd )/bin/plugins"
+for framework in ${SDK_TARGET_FRAMEWORKS} ; do
+    mkdir -p "$PLUGIN_OUTDIR/$framework"
+    dotnet publish -f $framework -c ${BUILD_TYPE} samples/Vendor.Distro/Vendor.Distro.csproj -o "$PLUGIN_OUTDIR/$framework"
 done
