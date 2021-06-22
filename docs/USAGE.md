@@ -67,7 +67,7 @@ Use these environment variables to configure the tracing library:
 | `OTEL_DOTNET_TRACER_LOAD_AT_STARTUP` | Defines whether the tracer is created by the auto instrumentation library or not. The default value is `true`. For applications with manual instrumentation in place and tracer being initialized in the app this should be changed to `false`. Note that if this is disabled, the application code will be in charge of setting up the exporters and any other desired instrumentation, e.g. AddAspNetInstrumentation (see [custom instrumentation section](#configure-custom-instrumentation)). | `true` |
 | `OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES` | Comma separated list of additional `ActivitySource` names to be added to the tracer at the startup. |  |
 | `OTEL_DOTNET_TRACER_LEGACY_SOURCES` | Comma separated list of additional legacy source names to be added to the tracer at the startup. |  |
-| `OTEL_DOTNET_TRACER_PROVIDER_PLUGINS` | Colon (:) separated list of OTel SDK tracer plugins repesented by `System.Type.AssemblyQualifiedName`. See more in dedicated section. |
+| `OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS` | Colon (:) separated list of OTel SDK instrumentation plugins represented by `System.Type.AssemblyQualifiedName`. See more in dedicated section. |
 
 ## Ways to configure
 
@@ -107,9 +107,9 @@ See example with `OTEL_SERVICE` overload.
 }
 ```
 
-### `OTEL_DOTNET_TRACER_PROVIDER_PLUGINS`
+### `OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS`
 
-The configuration can be use to extent the configuration of the the OTel SDK Tracer.
+The configuration can be use to extent the configuration of the the OpenTelemetry .NET SDK Tracer.
 
 A plugin must be a non-static, non-abstract class which has a default constructor and a method with following signature:
 
