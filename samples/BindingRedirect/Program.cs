@@ -8,7 +8,6 @@ namespace BindingRedirect
         public static async Task Main(string[] args)
         {
             await InstrumentedHttpCall.Get("https://www.google.com");
-
         }
     }
 }
