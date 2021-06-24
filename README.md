@@ -55,24 +55,6 @@ It would be good to have a checkpoint here where the instrumented application is
 - https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#activity-source
 - https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/examples/Console/TestHttpClient.cs
 
-## Findings
-
-### Required reference to System.Diagnostics.DiagnosticSource
-
-The instrumented application has to include same version of the `System.Diagnostics.DiagnosticSource` as the SDK. Current version is `5.0.1`.
-
-Include package reference directly into `.csproj`:
-
-```xml
-<PackageReference Include="System.Diagnostics.DiagnosticSource" Version="5.0.1" />
-```
-
-... or use Package Manager Console to install package:
-
-```powershell
-Install-Package System.Diagnostics.DiagnosticSource -Version 5.0.1 -ProjectName MyProjectName
-```
-
 ## Testing
 
 ### Additional setup for Windows
