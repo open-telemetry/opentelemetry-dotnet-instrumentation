@@ -300,6 +300,23 @@ Use the environment variables `OTEL_PROFILER_EXCLUDE_PROCESSES` and `OTEL_PROFIL
 to include/exclude applications from the tracing auto-instrumentation.
 These are ";" delimited lists that control the inclusion/exclusion of processes.
 
+### No proper relatioship between spans
+
+On .NET Framework strong name signing can force multiple versions of the same assembly being loaded on the same process. This causes a separate hierarchy of Activity objects. If you are referencing packages in your application that use different version of the `System.Diagnostics.DiagnosticSource` than the `OpenTelemetry.Api` (`5.0.0.1`) you have to explicitly reference the `System.Diagnostics.DiagnosticSource` package in the correct version in your application. This will cause automatic binding redirection to occur resolving the issue. You can also manually add binding redirection to the `app.config` file:
+
+```xml
+<configuration>
+  <runtime>
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <dependentAssembly>
+        <assemblyIdentity name="System.Diagnostics.DiagnosticSource" publicKeyToken="cc7b13ffcd" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-5.0.0.0" newVersion="5.0.0.1" />
+      </dependentAssembly>
+    </assemblyBinding>
+  </runtime>
+</configuration>
+```
+
 ### Investigating other issues
 
 If none of the suggestions above solves your issue, detailed logs are necessary.
