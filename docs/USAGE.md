@@ -316,7 +316,7 @@ These are ";" delimited lists that control the inclusion/exclusion of processes.
 
 ### No proper relatioship between spans
 
-On .NET Framework strong name signing can force multiple versions of the same assembly being loaded on the same process. This causes a separate hierarchy of Activity objects. If you are referencing packages in your application that use different version of the `System.Diagnostics.DiagnosticSource` than the `OpenTelemetry.Api` used by autoinstrumentation (`5.0.1`) you have to explicitly reference the `System.Diagnostics.DiagnosticSource` package in the correct version in your application (see [custom instrumentation section](#configure-custom-instrumentation)). This will cause automatic binding redirection to occur resolving the issue. You can also manually add binding redirection to the `App.config` file:
+On .NET Framework strong name signing can force multiple versions of the same assembly being loaded on the same process. This causes a separate hierarchy of Activity objects. If you are referencing packages in your application that use different version of the `System.Diagnostics.DiagnosticSource` than the `OpenTelemetry.Api` used by autoinstrumentation (`5.0.1`) you have to explicitly reference the `System.Diagnostics.DiagnosticSource` package in the correct version in your application (see [custom instrumentation section](#configure-custom-instrumentation)). This will cause automatic binding redirection to occur resolving the issue. If automatic binding redirection is [disabled](https://docs.microsoft.com/en-us/dotnet/framework/configure-apps/how-to-enable-and-disable-automatic-binding-redirection) you can also manually add binding redirection to the `App.config` file:
 
 ```xml
 <configuration>

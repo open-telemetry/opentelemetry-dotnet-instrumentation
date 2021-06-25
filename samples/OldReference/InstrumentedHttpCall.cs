@@ -10,7 +10,7 @@ namespace OldReference
     {
         private static readonly ActivitySource MyActivitySource = new("OpenTelemetry.AutoInstrumentation.BindingRedirect");
 
-        public static async Task Get(string url)
+        public static async Task GetAsync(string url)
         {
             Console.WriteLine(">>>>>>>>>>>>>>>>>>>>>>> System.Diagnostics.DiagnosticSource assemblies loaded:");
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
