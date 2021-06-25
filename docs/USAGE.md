@@ -255,6 +255,20 @@ Enable instrumentation for a specific user:
 
 ## Configure custom instrumentation
 
+The instrumented application has to include same version of the `System.Diagnostics.DiagnosticSource` as the SDK. Current version is `5.0.1`.
+
+Include package reference directly into `.csproj`:
+
+```xml
+<PackageReference Include="System.Diagnostics.DiagnosticSource" Version="5.0.1" />
+```
+
+... or use Package Manager Console to install package:
+
+```powershell
+Install-Package System.Diagnostics.DiagnosticSource -Version 5.0.1 -ProjectName MyProjectName
+```
+
 For adding manual instrumentation the variable `OTEL_DOTNET_TRACER_LOAD_AT_STARTUP` should be set to `false` and the tracer should be initialized by the application itself. Here is an example of creating the tracer:
 
 ```csharp
@@ -299,6 +313,23 @@ In the typical scenarios (dedicated VMs or containers), this is not a problem.
 Use the environment variables `OTEL_PROFILER_EXCLUDE_PROCESSES` and `OTEL_PROFILER_PROCESSES`
 to include/exclude applications from the tracing auto-instrumentation.
 These are ";" delimited lists that control the inclusion/exclusion of processes.
+
+### No proper relatioship between spans
+
+On .NET Framework strong name signing can force multiple versions of the same assembly being loaded on the same process. This causes a separate hierarchy of Activity objects. If you are referencing packages in your application that use different version of the `System.Diagnostics.DiagnosticSource` than the `OpenTelemetry.Api` used by autoinstrumentation (`5.0.1`) you have to explicitly reference the `System.Diagnostics.DiagnosticSource` package in the correct version in your application (see [custom instrumentation section](#configure-custom-instrumentation)). This will cause automatic binding redirection to occur resolving the issue. If automatic binding redirection is [disabled](https://docs.microsoft.com/en-us/dotnet/framework/configure-apps/how-to-enable-and-disable-automatic-binding-redirection) you can also manually add binding redirection to the `App.config` file:
+
+```xml
+<configuration>
+  <runtime>
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <dependentAssembly>
+        <assemblyIdentity name="System.Diagnostics.DiagnosticSource" publicKeyToken="cc7b13ffcd" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-5.0.0.0" newVersion="5.0.0.1" />
+      </dependentAssembly>
+    </assemblyBinding>
+  </runtime>
+</configuration>
+```
 
 ### Investigating other issues
 
