@@ -57,9 +57,23 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTracingLibrary", "sampl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Core", "src\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Core\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Core.csproj", "{8BA1CCCC-B07C-46DD-9D54-0B98B3001100}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BindingRedirect", "samples\BindingRedirect\BindingRedirect.csproj", "{94089CFF-FD2A-45EF-A496-874569882E81}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BindingRedirect", "samples\BindingRedirect\BindingRedirect.csproj", "{94089CFF-FD2A-45EF-A496-874569882E81}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OldReference", "samples\OldReference\OldReference.csproj", "{4C10E5C1-E212-4744-B92E-49A3AFC314FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OldReference", "samples\OldReference\OldReference.csproj", "{4C10E5C1-E212-4744-B92E-49A3AFC314FC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{67941CB3-DC46-4E26-B7BF-8B27A298A2E8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Datadog.Trace.ClrProfiler.Native.Tests", "test\Datadog.Trace.ClrProfiler.Native.Tests\Datadog.Trace.ClrProfiler.Native.Tests.vcxproj", "{5728056A-51AA-4FF5-AD0C-E86E44E36102}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test-applications", "test-applications", "{7A9D19CA-E5FF-4FB1-A89A-B1C92BEC8982}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "integrations", "integrations", "{A96E5223-FECF-4FEB-BB8E-B529D0D8B293}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dependency-libs", "dependency-libs", "{82A3CE96-0935-45E5-A9AA-A93A5B63500B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.ExampleLibrary", "test\test-applications\integrations\dependency-libs\Samples.ExampleLibrary\Samples.ExampleLibrary.csproj", "{EFAE6960-9425-462E-BFFB-4C9A038DD8C0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.ExampleLibraryTracer", "test\test-applications\integrations\dependency-libs\Samples.ExampleLibraryTracer\Samples.ExampleLibraryTracer.csproj", "{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -211,6 +225,40 @@ Global
 		{4C10E5C1-E212-4744-B92E-49A3AFC314FC}.Release|x64.Build.0 = Release|Any CPU
 		{4C10E5C1-E212-4744-B92E-49A3AFC314FC}.Release|x86.ActiveCfg = Release|Any CPU
 		{4C10E5C1-E212-4744-B92E-49A3AFC314FC}.Release|x86.Build.0 = Release|Any CPU
+		{5728056A-51AA-4FF5-AD0C-E86E44E36102}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{5728056A-51AA-4FF5-AD0C-E86E44E36102}.Debug|x64.ActiveCfg = Debug|x64
+		{5728056A-51AA-4FF5-AD0C-E86E44E36102}.Debug|x64.Build.0 = Debug|x64
+		{5728056A-51AA-4FF5-AD0C-E86E44E36102}.Debug|x86.ActiveCfg = Debug|Win32
+		{5728056A-51AA-4FF5-AD0C-E86E44E36102}.Debug|x86.Build.0 = Debug|Win32
+		{5728056A-51AA-4FF5-AD0C-E86E44E36102}.Release|Any CPU.ActiveCfg = Release|Win32
+		{5728056A-51AA-4FF5-AD0C-E86E44E36102}.Release|x64.ActiveCfg = Release|x64
+		{5728056A-51AA-4FF5-AD0C-E86E44E36102}.Release|x64.Build.0 = Release|x64
+		{5728056A-51AA-4FF5-AD0C-E86E44E36102}.Release|x86.ActiveCfg = Release|Win32
+		{5728056A-51AA-4FF5-AD0C-E86E44E36102}.Release|x86.Build.0 = Release|Win32
+		{EFAE6960-9425-462E-BFFB-4C9A038DD8C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFAE6960-9425-462E-BFFB-4C9A038DD8C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFAE6960-9425-462E-BFFB-4C9A038DD8C0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EFAE6960-9425-462E-BFFB-4C9A038DD8C0}.Debug|x64.Build.0 = Debug|Any CPU
+		{EFAE6960-9425-462E-BFFB-4C9A038DD8C0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EFAE6960-9425-462E-BFFB-4C9A038DD8C0}.Debug|x86.Build.0 = Debug|Any CPU
+		{EFAE6960-9425-462E-BFFB-4C9A038DD8C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFAE6960-9425-462E-BFFB-4C9A038DD8C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFAE6960-9425-462E-BFFB-4C9A038DD8C0}.Release|x64.ActiveCfg = Release|Any CPU
+		{EFAE6960-9425-462E-BFFB-4C9A038DD8C0}.Release|x64.Build.0 = Release|Any CPU
+		{EFAE6960-9425-462E-BFFB-4C9A038DD8C0}.Release|x86.ActiveCfg = Release|Any CPU
+		{EFAE6960-9425-462E-BFFB-4C9A038DD8C0}.Release|x86.Build.0 = Release|Any CPU
+		{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24}.Debug|x64.Build.0 = Debug|Any CPU
+		{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24}.Debug|x86.Build.0 = Debug|Any CPU
+		{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24}.Release|x64.ActiveCfg = Release|Any CPU
+		{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24}.Release|x64.Build.0 = Release|Any CPU
+		{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24}.Release|x86.ActiveCfg = Release|Any CPU
+		{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -228,6 +276,12 @@ Global
 		{8BA1CCCC-B07C-46DD-9D54-0B98B3001100} = {9E5F0022-0A50-40BF-AC6A-C3078585ECAB}
 		{94089CFF-FD2A-45EF-A496-874569882E81} = {BAF8F246-3645-42AD-B1D0-0F7EAFBAB34A}
 		{4C10E5C1-E212-4744-B92E-49A3AFC314FC} = {BAF8F246-3645-42AD-B1D0-0F7EAFBAB34A}
+		{5728056A-51AA-4FF5-AD0C-E86E44E36102} = {67941CB3-DC46-4E26-B7BF-8B27A298A2E8}
+		{7A9D19CA-E5FF-4FB1-A89A-B1C92BEC8982} = {67941CB3-DC46-4E26-B7BF-8B27A298A2E8}
+		{A96E5223-FECF-4FEB-BB8E-B529D0D8B293} = {7A9D19CA-E5FF-4FB1-A89A-B1C92BEC8982}
+		{82A3CE96-0935-45E5-A9AA-A93A5B63500B} = {A96E5223-FECF-4FEB-BB8E-B529D0D8B293}
+		{EFAE6960-9425-462E-BFFB-4C9A038DD8C0} = {82A3CE96-0935-45E5-A9AA-A93A5B63500B}
+		{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24} = {82A3CE96-0935-45E5-A9AA-A93A5B63500B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}
