@@ -1,13 +1,20 @@
 using System.IO;
 using System.Linq;
 using Nuke.Common;
+using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.IO;
 using Nuke.Common.Tools.MSBuild;
 using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 
-//[CheckBuildProjectConfigurations]
+[GitHubActions("ci",
+    GitHubActionsImage.WindowsLatest,
+    AutoGenerate = true,
+    OnPushBranches = new[] { "main", "refs/tags/*" },
+    OnPushExcludePaths = new[] { "docs/*" },
+    OnPullRequestBranches = new[] { "*" },
+    InvokedTargets = new[] { nameof(BuildTracerHome), nameof(BuildAndRunNativeUnitTests) })]
 partial class Build : NukeBuild
 {
     /// Support plugins are available for:

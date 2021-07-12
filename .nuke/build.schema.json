@@ -99,17 +99,21 @@
               "Clean",
               "CompileManagedSrc",
               "CompileNativeSrc",
+              "CompileNativeSrcLinux",
               "CompileNativeSrcWindows",
               "CompileNativeTests",
+              "CompileNativeTestsLinux",
               "CompileNativeTestsWindows",
               "CopyIntegrationsJson",
               "CreateDdTracerHome",
               "CreateRequiredDirectories",
               "PublishManagedProfiler",
               "PublishNativeProfiler",
+              "PublishNativeProfilerLinux",
               "PublishNativeProfilerWindows",
               "Restore",
               "RunNativeTests",
+              "RunNativeTestsLinux",
               "RunNativeTestsWindows"
             ]
           }
@@ -129,17 +133,21 @@
               "Clean",
               "CompileManagedSrc",
               "CompileNativeSrc",
+              "CompileNativeSrcLinux",
               "CompileNativeSrcWindows",
               "CompileNativeTests",
+              "CompileNativeTestsLinux",
               "CompileNativeTestsWindows",
               "CopyIntegrationsJson",
               "CreateDdTracerHome",
               "CreateRequiredDirectories",
               "PublishManagedProfiler",
               "PublishNativeProfiler",
+              "PublishNativeProfilerLinux",
               "PublishNativeProfilerWindows",
               "Restore",
               "RunNativeTests",
+              "RunNativeTestsLinux",
               "RunNativeTestsWindows"
             ]
           }
