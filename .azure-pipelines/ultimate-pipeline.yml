@@ -40,6 +40,8 @@ variables:
   relativeNugetPackageDirectory: packages
   # For scheduled builds, only run benchmarks and crank (and deps).
   isScheduledBuild: ${{ eq(variables['Build.Reason'], 'Schedule') }} # only works if you have a main branch
+  # Allow forcing a benchmark/throughput run using run_benchmarks_only=true
+  dotnetToolTag: build-dotnet-tool
 
 # Declare the datadog agent as a resource to be used as a pipeline service
 resources:
@@ -200,7 +202,7 @@ stages:
       - template: steps/install-dotnet.yml
       - template: steps/restore-working-directory.yml
 
-      - script: build.cmd BuildAndRunManagedUnitTests
+      - script: build.cmd BuildAndRunManagedUnitTests --code-coverage
         displayName: Build and Test
 
       - publish: build_data
@@ -241,7 +243,7 @@ stages:
         parameters:
           artifact: build-macos-working-directory
 
-      - script: ./build.sh BuildAndRunManagedUnitTests
+      - script: ./build.sh BuildAndRunManagedUnitTests --code-coverage
         displayName: Build and Test
 
       - publish: build_data
@@ -254,6 +256,8 @@ stages:
           testResultsFormat: VSTest
           testResultsFiles: build_data/results/**/*.trx
         condition: succeededOrFailed()
+
+
 
 - stage: unit_tests_linux
   condition: and(succeeded(), eq(variables['isScheduledBuild'], 'False'))
@@ -278,7 +282,7 @@ stages:
       parameters:
         build: true
         baseImage: $(baseImage)
-        command: "BuildAndRunManagedUnitTests"
+        command: "BuildAndRunManagedUnitTests --code-coverage"
 
     - publish: build_data
       artifact: profiler-logs_unit_tests_linux_$(Agent.JobName)_$(System.JobAttempt)
@@ -290,6 +294,11 @@ stages:
         testResultsFormat: VSTest
         testResultsFiles: build_data/results/**/*.trx
       condition: succeededOrFailed()
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: 'build_data/results/'
+      continueOnError: true
 
 - stage: unit_tests_arm64
   condition: and(succeeded(), eq(variables['isScheduledBuild'], 'False'))
@@ -332,10 +341,22 @@ stages:
     timeoutInMinutes: 100
     strategy:
       matrix:
-        x64:
+        x64_integration:
           platform: x64
-        x86:
+          target: BuildAndRunWindowsIntegrationTests
+          requiresCosmos: true
+        x86_interation:
           platform: x86
+          target: BuildAndRunWindowsIntegrationTests
+          requiresCosmos: true
+        x64_regression:
+          platform: x64
+          target: BuildAndRunWindowsRegressionTests
+          requiresCosmos: false
+        x86_regression:
+          platform: x86
+          target: BuildAndRunWindowsRegressionTests
+          requiresCosmos: false
 
     steps:
     - template: steps/install-dotnet-sdks.yml
@@ -348,9 +369,10 @@ stages:
         Import-Module "C:/Program Files/Azure Cosmos DB Emulator/PSModules/Microsoft.Azure.CosmosDB.Emulator"
         Start-CosmosDbEmulator -Timeout 300
       displayName: 'Start CosmosDB Emulator'
+      condition: eq(variables.requiresCosmos, true)
       workingDirectory: $(Pipeline.Workspace)
 
-    - script: build.cmd BuildAndRunWindowsIntegrationTests --PrintDriveSpace
+    - script: build.cmd $(target) --PrintDriveSpace --code-coverage
       displayName: Run integration tests
 
     - task: PublishTestResults@2
@@ -359,6 +381,11 @@ stages:
         testResultsFormat: VSTest
         testResultsFiles: build_data/results/**/*.trx
       condition: succeededOrFailed()
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: 'build_data/results/'
+      continueOnError: true
 
 - stage: integration_tests_windows_iis
   condition: and(succeeded(), eq(variables['isScheduledBuild'], 'False'))
@@ -400,21 +427,15 @@ stages:
       displayName: docker-compose build IIS containers
       inputs:
         containerregistrytype: Container Registry
-        dockerComposeCommand: build --build-arg dotnet_tracer_msi=.$(relativeMsiOutputDirectory)/*.msi --build-arg ENABLE_32_BIT=$(enable32bit) IntegrationTests.IIS.LoaderOptimizationRegKey
+        dockerComposeCommand: build --build-arg dotnet_tracer_msi=.$(relativeMsiOutputDirectory)/*.msi --build-arg ENABLE_32_BIT=$(enable32bit) IntegrationTests.IIS
 
     - task: DockerCompose@0
       displayName: docker-compose start IIS containers
       inputs:
         containerregistrytype: Container Registry
-        dockerComposeCommand: up -d IntegrationTests.IIS.LoaderOptimizationRegKey
+        dockerComposeCommand: up -d IntegrationTests.IIS
 
-    - powershell: |
-        [System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")
-        $publish = New-Object System.EnterpriseServices.Internal.Publish
-        Get-ChildItem $(tracerHome)/net45 -Filter *.dll | Foreach-Object { $publish.GacInstall($_.FullName) }
-      displayName: Add net45 Datadog.Trace.ClrProfiler.Managed assets to the GAC
-
-    - script: build.cmd RunWindowsIisIntegrationTests
+    - script: build.cmd RunWindowsIisIntegrationTests --code-coverage
       displayName: RunWindowsIisIntegrationTests
 
     - task: PublishTestResults@2
@@ -423,6 +444,11 @@ stages:
         testResultsFormat: VSTest
         testResultsFiles: build_data/results/**/*.trx
       condition: succeededOrFailed()
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: 'build_data/results/'
+      continueOnError: true
 
     - task: DockerCompose@0
       displayName: docker-compose stop services
@@ -491,10 +517,10 @@ stages:
         command: "BuildLinuxIntegrationTests --framework $(publishTargetFramework)"
 
     - task: DockerCompose@0
-      displayName: docker-compose build NukeIntegrationTests
+      displayName: docker-compose build IntegrationTests
       inputs:
         containerregistrytype: Container Registry
-        dockerComposeCommand: build --build-arg baseImage=$(baseImage) --build-arg framework=$(publishTargetFramework) NukeIntegrationTests
+        dockerComposeCommand: build --build-arg baseImage=$(baseImage) --build-arg framework=$(publishTargetFramework) IntegrationTests
 
     - task: DockerCompose@0
       displayName: docker-compose start dependencies
@@ -503,13 +529,13 @@ stages:
         dockerComposeCommand: run --rm StartDependencies
 
     - task: DockerCompose@0
-      displayName: docker-compose run NukeIntegrationTests
+      displayName: docker-compose run IntegrationTests
       inputs:
         containerregistrytype: Container Registry
         dockerComposeFileArgs: |
           baseImage=$(baseImage)
           framework=$(publishTargetFramework)
-        dockerComposeCommand: run --rm -e baseImage=$(baseImage) -e framework=$(publishTargetFramework) NukeIntegrationTests
+        dockerComposeCommand: run --rm -e baseImage=$(baseImage) -e framework=$(publishTargetFramework) IntegrationTests
 
     - task: DockerCompose@0
       displayName: docker-compose stop services
@@ -564,10 +590,10 @@ stages:
             command: "BuildLinuxIntegrationTests --framework $(publishTargetFramework)"
 
         - task: DockerCompose@0
-          displayName: docker-compose build NukeIntegrationTests
+          displayName: docker-compose build IntegrationTests
           inputs:
             containerregistrytype: Container Registry
-            dockerComposeCommand: build --build-arg baseImage=$(baseImage) --build-arg framework=$(publishTargetFramework) NukeIntegrationTests.ARM64
+            dockerComposeCommand: build --build-arg baseImage=$(baseImage) --build-arg framework=$(publishTargetFramework) IntegrationTests.ARM64
 
         - task: DockerCompose@0
           displayName: docker-compose start dependencies
@@ -576,13 +602,13 @@ stages:
             dockerComposeCommand: run --rm StartDependencies.ARM64
 
         - task: DockerCompose@0
-          displayName: docker-compose run NukeIntegrationTests
+          displayName: docker-compose run IntegrationTests
           inputs:
             containerregistrytype: Container Registry
             dockerComposeFileArgs: |
               baseImage=$(baseImage)
               framework=$(publishTargetFramework)
-            dockerComposeCommand: run --rm -e baseImage=$(baseImage) -e framework=$(publishTargetFramework) NukeIntegrationTests.ARM64
+            dockerComposeCommand: run --rm -e baseImage=$(baseImage) -e framework=$(publishTargetFramework) IntegrationTests.ARM64
 
         - task: DockerCompose@0
           displayName: docker-compose stop services
@@ -603,7 +629,7 @@ stages:
           condition: succeededOrFailed()
 
 - stage: benchmarks
-  dependsOn: build_windows
+  dependsOn: build_windows  
   jobs:
 
   #### Windows
@@ -622,6 +648,7 @@ stages:
     - template: steps/restore-working-directory.yml
 
     - script: build.cmd RunBenchmarks
+      continueOnError: true
       displayName: RunBenchmarks
 
     ## Is this really necessary?
@@ -734,6 +761,10 @@ stages:
     - publish: $(System.DefaultWorkingDirectory)/src/Datadog.Trace.Tools.Runner/bin/$(buildConfiguration)/Console/publish/osx-x64
       displayName: Uploading runner standalone osx-x64 artifact
       artifact: runner-standalone-osx-x64
+
+    - powershell: |
+        echo "##vso[build.addbuildtag]$(dotnetToolTag)"
+      displayName: Add $(dotnetToolTag) build tag
 
 - stage: upload_to_s3
   condition: and(succeeded(), eq(variables['isScheduledBuild'], 'False'))
@@ -891,7 +922,7 @@ stages:
         - publish: "$(Build.ArtifactStagingDirectory)"
           displayName: Publish release artifacts
           artifact: $(tracer_version)-release-artifacts
-        
+
         # We don't include the MSI artifacts as they're not signed
 
 - stage: throughput
@@ -932,3 +963,33 @@ stages:
       displayName: Crank
       env:
         DD_SERVICE: dd-trace-dotnet
+- stage: coverage
+  condition: and(succeeded(), eq(variables['isScheduledBuild'], 'False'))
+  dependsOn: [integration_tests_windows, integration_tests_windows_iis, integration_tests_linux, unit_tests_linux, unit_tests_macos, unit_tests_windows]
+  jobs:
+    - job: Windows
+      timeoutInMinutes: 30
+
+      pool:
+        vmImage: windows-2019
+
+      steps:
+      - template: steps/restore-working-directory.yml
+
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          patterns: '**/coverage.cobertura.xml'
+          path: $(Build.SourcesDirectory)/cover
+
+      - task: reportgenerator@4
+        inputs:
+          reports: '$(Build.SourcesDirectory)\cover\**\coverage.cobertura.xml'
+          targetdir: '$(Build.SourcesDirectory)\coveragereport'
+          sourcedirs: '$(Build.SourcesDirectory);..'
+          reporttypes: 'Cobertura'
+
+      - task: PublishCodeCoverageResults@1
+        inputs:
+          codeCoverageTool: 'Cobertura'
+          summaryFileLocation: '$(Build.SourcesDirectory)/coveragereport/Cobertura.xml'
+          pathToSources: '$(Build.SourcesDirectory)'

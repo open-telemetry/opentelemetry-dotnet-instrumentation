@@ -57,32 +57,32 @@ partial class Build
 
     IEnumerable<MSBuildTargetPlatform> ArchitecturesForPlatform =>
         Equals(Platform, MSBuildTargetPlatform.x64)
-            ? new[] {MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86}
-            : new[] {MSBuildTargetPlatform.x86};
+            ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
+            : new[] { MSBuildTargetPlatform.x86 };
 
     bool IsArm64 => RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
     string LinuxArchitectureIdentifier => IsArm64 ? "arm64" : Platform.ToString();
 
-    IEnumerable<string> LinuxPackageTypes => IsAlpine ? new[] {"tar"} : new[] {"deb", "rpm", "tar"};
+    IEnumerable<string> LinuxPackageTypes => IsAlpine ? new[] { "tar" } : new[] { "deb", "rpm", "tar" };
 
-    IEnumerable<Project> ProjectsToPack => new []
+    IEnumerable<Project> ProjectsToPack => new[]
     {
         Solution.GetProject(Projects.DatadogTrace),
         Solution.GetProject(Projects.DatadogTraceOpenTracing),
     };
 
-    Project[] ParallelIntegrationTests => new []
+    Project[] ParallelIntegrationTests => new[]
     {
         Solution.GetProject(Projects.TraceIntegrationTests),
         Solution.GetProject(Projects.OpenTracingIntegrationTests),
     };
 
-    Project[] ClrProfilerIntegrationTests => new []
+    Project[] ClrProfilerIntegrationTests => new[]
     {
         Solution.GetProject(Projects.ClrProfilerIntegrationTests)
     };
 
-    readonly IEnumerable<TargetFramework> TargetFrameworks = new []
+    readonly IEnumerable<TargetFramework> TargetFrameworks = new[]
     {
         TargetFramework.NET45,
         TargetFramework.NET461,
@@ -430,23 +430,19 @@ partial class Build
                 var gzip = GZip.Value;
                 var packageName = "datadog-dotnet-apm";
 
-                var suffix = RuntimeInformation.ProcessArchitecture == Architecture.X64
-                    ? string.Empty
-                    : RuntimeInformation.ProcessArchitecture.ToString().ToLower();
-
                 var workingDirectory = ArtifactsDirectory / $"linux-{LinuxArchitectureIdentifier}";
                 EnsureCleanDirectory(workingDirectory);
 
                 foreach (var packageType in LinuxPackageTypes)
                 {
-                    var args = new []
+                    var args = new[]
                     {
                         "-f",
                         "-s dir",
                         $"-t {packageType}",
                         $"-n {packageName}",
                         $"-v {Version}",
-                        packageType == "tar" ? "--prefix /opt/datadog" : "",
+                        packageType == "tar" ? "" : "--prefix /opt/datadog",
                         $"--chdir {TracerHomeDirectory}",
                         "netstandard2.0/",
                         "netcoreapp3.1/",
@@ -459,6 +455,11 @@ partial class Build
                 }
 
                 gzip($"-f {packageName}.tar", workingDirectory: workingDirectory);
+
+
+                var suffix = RuntimeInformation.ProcessArchitecture == Architecture.X64
+                    ? string.Empty
+                    : $".{RuntimeInformation.ProcessArchitecture.ToString().ToLower()}";
 
                 var versionedName = IsAlpine
                     ? $"{packageName}-{Version}-musl{suffix}.tar.gz"
@@ -522,6 +523,7 @@ partial class Build
                     .SetTargetPlatformAnyCPU()
                     .SetDDEnvironmentVariables("dd-tracer-dotnet")
                     .EnableMemoryDumps()
+                    .When(CodeCoverage, ConfigureCodeCoverage)
                     .CombineWith(testProjects, (x, project) => x
                         .EnableTrxLogOutput(GetResultsDirectory(project))
                         .SetProjectFile(project)));
@@ -623,18 +625,18 @@ partial class Build
                             && !x.Contains("StackExchange.Redis.AssemblyConflict.LegacyProject")
                             && !x.Contains("dependency-libs"));
 
-             // Allow restore here, otherwise things go wonky with runtime identifiers
-             // in some target frameworks. No, I don't know why
-             DotNetBuild(x => x
-                 // .EnableNoRestore()
-                 .EnableNoDependencies()
-                 .SetConfiguration(BuildConfiguration)
-                 .SetTargetPlatform(Platform)
-                 .SetNoWarnDotNetCore3()
-                 .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                     o.SetPackageDirectory(NugetPackageDirectory))
-                 .CombineWith(regressionLibs, (x, project) => x
-                     .SetProjectFile(project)));
+            // Allow restore here, otherwise things go wonky with runtime identifiers
+            // in some target frameworks. No, I don't know why
+            DotNetBuild(x => x
+                // .EnableNoRestore()
+                .EnableNoDependencies()
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatform(Platform)
+                .SetNoWarnDotNetCore3()
+                .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
+                    o.SetPackageDirectory(NugetPackageDirectory))
+                .CombineWith(regressionLibs, (x, project) => x
+                    .SetProjectFile(project)));
         });
 
     Target CompileFrameworkReproductions => _ => _
@@ -734,7 +736,7 @@ partial class Build
                 .SetProperty("DeployOnBuild", true)
                 .SetProperty("PublishProfile", publishProfile)
                 .SetMaxCpuCount(null)
-                .CombineWith(aspnetProjects, (c, project ) => c
+                .CombineWith(aspnetProjects, (c, project) => c
                     .SetTargetPath(project))
             );
         });
@@ -745,6 +747,7 @@ partial class Build
         .After(CompileIntegrationTests)
         .After(CompileSamples)
         .After(CompileFrameworkReproductions)
+        .After(BuildWindowsIntegrationTests)
         .Requires(() => IsWin)
         .Executes(() =>
         {
@@ -760,6 +763,7 @@ partial class Build
                     .EnableNoRestore()
                     .EnableNoBuild()
                     .When(!string.IsNullOrEmpty(Filter), c => c.SetFilter(Filter))
+                    .When(CodeCoverage, ConfigureCodeCoverage)
                     .CombineWith(ParallelIntegrationTests, (s, project) => s
                         .EnableTrxLogOutput(GetResultsDirectory(project))
                         .SetProjectFile(project)), degreeOfParallelism: 4);
@@ -773,7 +777,39 @@ partial class Build
                     .SetTargetPlatform(Platform)
                     .EnableNoRestore()
                     .EnableNoBuild()
-                    .SetFilter(Filter ?? "(RunOnWindows=True|Category=Smoke)&LoadFromGAC!=True&IIS!=True")
+                    .SetFilter(Filter ?? "RunOnWindows=True&LoadFromGAC!=True&IIS!=True")
+                    .When(CodeCoverage, ConfigureCodeCoverage)
+                    .CombineWith(ClrProfilerIntegrationTests, (s, project) => s
+                        .EnableTrxLogOutput(GetResultsDirectory(project))
+                        .SetProjectFile(project)));
+            }
+            finally
+            {
+                MoveLogsToBuildData();
+            }
+        });
+
+    Target RunWindowsRegressionTests => _ => _
+        .Unlisted()
+        .After(BuildTracerHome)
+        .After(CompileIntegrationTests)
+        .After(CompileRegressionSamples)
+        .After(CompileFrameworkReproductions)
+        .Requires(() => IsWin)
+        .Executes(() =>
+        {
+            ClrProfilerIntegrationTests.ForEach(EnsureResultsDirectory);
+
+            try
+            {
+                DotNetTest(config => config
+                    .SetDotnetPath(Platform)
+                    .SetConfiguration(BuildConfiguration)
+                    .SetTargetPlatform(Platform)
+                    .EnableNoRestore()
+                    .EnableNoBuild()
+                    .SetFilter(Filter ?? "Category=Smoke&LoadFromGAC!=True")
+                    .When(CodeCoverage, ConfigureCodeCoverage)
                     .CombineWith(ClrProfilerIntegrationTests, (s, project) => s
                         .EnableTrxLogOutput(GetResultsDirectory(project))
                         .SetProjectFile(project)));
@@ -801,9 +837,11 @@ partial class Build
                     .SetDotnetPath(Platform)
                     .SetConfiguration(BuildConfiguration)
                     .SetTargetPlatform(Platform)
+                    .When(Framework != null, o => o.SetFramework(Framework))
                     .EnableNoRestore()
                     .EnableNoBuild()
-                    .SetFilter(Filter ?? "(RunOnWindows=True|Category=Smoke)&LoadFromGAC=True")
+                    .SetFilter(Filter ?? "(RunOnWindows=True)&LoadFromGAC=True")
+                    .When(CodeCoverage, ConfigureCodeCoverage)
                     .CombineWith(ClrProfilerIntegrationTests, (s, project) => s
                         .EnableTrxLogOutput(GetResultsDirectory(project))
                         .SetProjectFile(project)));
@@ -903,6 +941,8 @@ partial class Build
                     .SetFramework(Framework)
                     // .SetTargetPlatform(Platform)
                     .SetNoWarnDotNetCore3()
+                    .SetProperty("ExcludeManagedProfiler", "true")
+                    .SetProperty("ExcludeNativeProfiler", "true")
                     .SetProperty("ManagedProfilerOutputDirectory", TracerHomeDirectory)
                     .When(TestAllPackageVersions, o => o.SetProperty("TestAllPackageVersions", "true"))
                     .When(!string.IsNullOrEmpty(NugetPackageDirectory), o => o.SetPackageDirectory(NugetPackageDirectory))
@@ -939,7 +979,7 @@ partial class Build
         {
             // Build and restore for all versions
             // Annoyingly this rebuilds everything again and again.
-            var targets = new [] { "RestoreSamplesForPackageVersionsOnly", "RestoreAndBuildSamplesForPackageVersionsOnly" };
+            var targets = new[] { "RestoreSamplesForPackageVersionsOnly", "RestoreAndBuildSamplesForPackageVersionsOnly" };
 
             // /nowarn:NU1701 - Package 'x' was restored using '.NETFramework,Version=v4.6.1' instead of the project target framework '.NETCoreApp,Version=v2.1'.
             DotNetMSBuild(x => x
@@ -949,6 +989,8 @@ partial class Build
                 .SetProperty("TargetFramework", Framework.ToString())
                 .SetProperty("ManagedProfilerOutputDirectory", TracerHomeDirectory)
                 .SetProperty("BuildInParallel", "true")
+                .SetProperty("ExcludeManagedProfiler", "true")
+                .SetProperty("ExcludeNativeProfiler", "true")
                 .SetProcessArgumentConfigurator(arg => arg.Add("/nowarn:NU1701"))
                 .AddProcessEnvironmentVariable("TestAllPackageVersions", "true")
                 .When(TestAllPackageVersions, o => o.SetProperty("TestAllPackageVersions", "true"))
@@ -1013,7 +1055,7 @@ partial class Build
             var filter = (string.IsNullOrEmpty(Filter), IsArm64) switch
             {
                 (true, false) => "Category!=LinuxUnsupported",
-                (true, true) => "(Category!=ArmUnsupported)&(Category!=LinuxUnsupported",
+                (true, true) => "(Category!=ArmUnsupported)&(Category!=LinuxUnsupported)",
                 _ => Filter
             };
 
@@ -1031,6 +1073,7 @@ partial class Build
                         .SetFilter(filter)
                         .When(TestAllPackageVersions, o => o
                             .SetProcessEnvironmentVariable("TestAllPackageVersions", "true"))
+                        .When(CodeCoverage, ConfigureCodeCoverage)
                         .CombineWith(ParallelIntegrationTests, (s, project) => s
                             .EnableTrxLogOutput(GetResultsDirectory(project))
                             .SetProjectFile(project)),
@@ -1047,6 +1090,7 @@ partial class Build
                     .SetFilter(filter)
                     .When(TestAllPackageVersions, o => o
                         .SetProcessEnvironmentVariable("TestAllPackageVersions", "true"))
+                    .When(CodeCoverage, ConfigureCodeCoverage)
                     .CombineWith(ClrProfilerIntegrationTests, (s, project) => s
                         .EnableTrxLogOutput(GetResultsDirectory(project))
                         .SetProjectFile(project))
@@ -1079,6 +1123,22 @@ partial class Build
         }
     }
 
+    private DotNetTestSettings ConfigureCodeCoverage(DotNetTestSettings settings)
+    {
+        var strongNameKeyPath = Solution.Directory / "Datadog.Trace.snk";
+
+        return settings.SetDataCollector("XPlat Code Coverage")
+                .SetProcessArgumentConfigurator(
+                     args =>
+                         args.Add("--")
+                             .Add("RunConfiguration.DisableAppDomain=true") // https://github.com/coverlet-coverage/coverlet/issues/347
+                             .Add("DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.SkipAutoProps=true")
+                             .Add("DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura")
+                             .Add($"DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.StrongNameKey=\"{strongNameKeyPath}\"")
+                             .Add("DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude=\"[*]Datadog.Trace.Vendors.*,[Datadog.Trace]System.*,[Datadog.Trace]Mono.*\",")
+                             .Add("DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Include=\"[Datadog.Trace.ClrProfiler.*]*,[Datadog.Trace]*,[Datadog.Trace.AspNet]*\""));
+    }
+
     protected override void OnTargetStart(string target)
     {
         if (PrintDriveSpace)
@@ -1092,7 +1152,7 @@ partial class Build
 
         static string PrettyPrint(long bytes)
         {
-            var power = Math.Min((int) Math.Log(bytes, 1000), 4);
+            var power = Math.Min((int)Math.Log(bytes, 1000), 4);
             var normalised = bytes / Math.Pow(1000, power);
             return power switch
             {

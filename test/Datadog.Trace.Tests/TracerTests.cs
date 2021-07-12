@@ -25,6 +25,7 @@ using Datadog.Trace.Logging;
 using Datadog.Trace.Propagation;
 using Datadog.Trace.Sampling;
 using Datadog.Trace.TestHelpers;
+using Datadog.Trace.Vendors.StatsdClient;
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -413,6 +414,23 @@ namespace Datadog.Trace.Tests
 
             // Runtime id should be a UUID
             Guid.TryParse(runtimeId, out _).Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task ForceFlush()
+        {
+            var agent = new Mock<IAgentWriter>();
+
+            var settings = new TracerSettings
+            {
+                StartupDiagnosticLogEnabled = false
+            };
+
+            var tracer = new Tracer(settings, agent.Object, Mock.Of<ISampler>(), Mock.Of<IScopeManager>(), Mock.Of<IDogStatsd>());
+
+            await tracer.ForceFlushAsync();
+
+            agent.Verify(a => a.FlushTracesAsync(), Times.Once);
         }
 
 #if NET452

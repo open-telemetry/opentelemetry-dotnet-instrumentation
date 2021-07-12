@@ -9,9 +9,6 @@ namespace Samples.AspNetCoreSimpleController
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(typeof(Datadog.Trace.ClrProfiler.Instrumentation).Assembly.FullName);
-            Console.WriteLine();
-
             if (Environment.GetEnvironmentVariable("COR_ENABLE_PROFILING") == "1" ||
                 Environment.GetEnvironmentVariable("CORECLR_ENABLE_PROFILING") == "1")
             {
@@ -41,7 +38,7 @@ namespace Samples.AspNetCoreSimpleController
                     webBuilder.UseStartup<Startup>();
                 });
 
-        public static bool IsProfilerAttached()
+        private static bool IsProfilerAttached()
         {
             Assembly managedAssembly = typeof(Datadog.Trace.ClrProfiler.Instrumentation).Assembly;
             Type nativeMethodsType = managedAssembly.GetType("Datadog.Trace.ClrProfiler.NativeMethods");

@@ -5,8 +5,9 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Datadog.Core.Tools;
+using Datadog.Trace;
 using Datadog.Trace.Propagation;
+using Datadog.Trace.TestHelpers;
 
 namespace Samples.WebRequest
 {

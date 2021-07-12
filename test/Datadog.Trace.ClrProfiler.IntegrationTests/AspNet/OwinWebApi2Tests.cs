@@ -15,7 +15,6 @@ using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Datadog.Core.Tools;
 using Datadog.Trace.Configuration;
 using Datadog.Trace.TestHelpers;
 using VerifyXunit;
@@ -81,8 +80,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
             _output = output;
             _testName = nameof(OwinWebApi2Tests)
                       + (enableCallTarget ? ".CallSite" : ".CallTarget")
-                      + (enableRouteTemplateResourceNames ? ".NoFF" : ".WithFF")
-                      + (RuntimeInformation.ProcessArchitecture == Architecture.X64 ? ".X64" : ".X86"); // assume that arm is the same
+                      + (enableRouteTemplateResourceNames ? ".NoFF" : ".WithFF");
         }
 
         public static TheoryData<string, int> Data() => new()
@@ -176,6 +174,8 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
                         {
                             if (!_process.HasExited)
                             {
+                                SubmitRequest(null, "/shutdown").GetAwaiter().GetResult();
+
                                 _process.Kill();
                             }
                         }
@@ -268,14 +268,14 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
                     return true;
                 }
 
-                return !url.Contains("alive-check");
+                return !url.Contains("alive-check") && !url.Contains("shutdown");
             }
 
             private async Task<HttpStatusCode> SubmitRequest(ITestOutputHelper output, string path)
             {
                 HttpResponseMessage response = await _httpClient.GetAsync($"http://localhost:{HttpPort}{path}");
                 string responseText = await response.Content.ReadAsStringAsync();
-                output.WriteLine($"[http] {response.StatusCode} {responseText}");
+                output?.WriteLine($"[http] {response.StatusCode} {responseText}");
                 return response.StatusCode;
             }
         }

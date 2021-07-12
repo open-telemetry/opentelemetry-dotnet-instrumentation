@@ -10,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
-using Datadog.Core.Tools;
 using Datadog.Trace.TestHelpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -155,7 +154,14 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
 
                 if (!process.HasExited)
                 {
-                    process.Kill();
+                    // Try shutting down gracefully
+                    var shutdownRequest = new RequestInfo() { HttpMethod = "GET", Url = "/shutdown" };
+                    SubmitRequest(aspNetCorePort, shutdownRequest);
+
+                    if (!process.WaitForExit(5000))
+                    {
+                        process.Kill();
+                    }
                 }
 
                 var spans = graphQLValidateSpans.Concat(graphQLExecuteSpans).ToList();

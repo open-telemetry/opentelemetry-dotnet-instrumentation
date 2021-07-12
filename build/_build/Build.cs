@@ -50,14 +50,20 @@ partial class Build : NukeBuild
     [Parameter("Is the build running on Alpine linux? Default is 'false'")]
     readonly bool IsAlpine = false;
 
-    [Parameter("The build version (for packaging purposes). Default is latest")]
-    readonly string Version = "1.27.1";
+    [Parameter("The build version. Default is latest")]
+    readonly string Version = "1.28.1";
+
+    [Parameter("Whether the build version is a prerelease(for packaging purposes). Default is latest")]
+    readonly bool IsPrerelease = true;
 
     [Parameter("Prints the available drive space before executing each target. Defaults to false")]
     readonly bool PrintDriveSpace = false;
 
     [Parameter("Override the default test filters for integration tests. (Optional)")]
     readonly string Filter;
+
+    [Parameter("Enables code coverage")]
+    readonly bool CodeCoverage;
 
     Target Info => _ => _
         .Description("Describes the current configuration")
@@ -156,11 +162,19 @@ partial class Build : NukeBuild
         .DependsOn(CompileDependencyLibs)
         .DependsOn(CompileManagedTestHelpers)
         .DependsOn(CreatePlatformlessSymlinks)
+        .DependsOn(CompileSamples)
+        .DependsOn(PublishIisSamples)
+        .DependsOn(CompileIntegrationTests);
+
+    Target BuildWindowsRegressionIntegrationTests => _ => _
+        .Unlisted()
+        .Requires(() => IsWin)
+        .Description("Builds the integration tests for Windows")
+        .DependsOn(CompileManagedTestHelpers)
+        .DependsOn(CreatePlatformlessSymlinks)
         .DependsOn(CompileRegressionDependencyLibs)
         .DependsOn(CompileRegressionSamples)
         .DependsOn(CompileFrameworkReproductions)
-        .DependsOn(CompileSamples)
-        .DependsOn(PublishIisSamples)
         .DependsOn(CompileIntegrationTests);
 
     Target BuildAndRunWindowsIntegrationTests => _ => _
@@ -168,6 +182,12 @@ partial class Build : NukeBuild
         .Description("Builds and runs the Windows (non-IIS) integration tests")
         .DependsOn(BuildWindowsIntegrationTests)
         .DependsOn(RunWindowsIntegrationTests);
+
+    Target BuildAndRunWindowsRegressionTests => _ => _
+        .Requires(() => IsWin)
+        .Description("Builds and runs the Windows regression tests")
+        .DependsOn(BuildWindowsRegressionIntegrationTests)
+        .DependsOn(RunWindowsRegressionTests);
 
     Target BuildAndRunWindowsIisIntegrationTests => _ => _
         .Requires(() => IsWin)

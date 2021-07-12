@@ -9,9 +9,26 @@ using Datadog.Trace.Logging.LogProviders;
 
 namespace Datadog.Trace.Logging
 {
+    /// <summary>
+    /// <para>
+    /// Log provider that performs more efficient logs injection by adding a custom type
+    /// into the NLog MDC which can later be rendered with the properties of the active
+    /// Datadog scope.
+    /// </para>
+    ///
+    /// <para>
+    /// Note: This logger is intended to be used when the application uses NLog &gt;= 4.1.
+    /// When the application uses NLog versions older than 4.1, use
+    /// <see cref="FallbackNLogLogProvider"/> which utilizes the original
+    /// Set(string, string) API to perform logs injection.
+    /// </para>
+    /// </summary>
     internal class CustomNLogLogProvider : NLogLogProvider, ILogProviderWithEnricher
     {
         public ILogEnricher CreateEnricher() => new LogEnricher(this);
+
+        internal static new bool IsLoggerAvailable() =>
+            NLogLogProvider.IsLoggerAvailable() && IsSetObjectAvailable();
 
         protected override OpenMdc GetOpenMdcMethod()
         {
@@ -60,6 +77,12 @@ namespace Datadog.Trace.Logging
                 set(key, value);
                 return new DisposableAction(() => remove(key));
             };
+        }
+
+        private static bool IsSetObjectAvailable()
+        {
+            var mdcContextType = FindType("NLog.MappedDiagnosticsContext", "NLog");
+            return mdcContextType?.GetMethod("Set", typeof(string), typeof(object)) != null;
         }
     }
 }

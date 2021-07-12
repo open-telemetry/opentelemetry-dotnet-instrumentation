@@ -129,6 +129,21 @@ namespace Datadog.Trace.Tools.Runner
                 envVars["OTEL_TRACE_AGENT_URL"] = options.AgentUrl;
             }
 
+            if (!string.IsNullOrWhiteSpace(options.EnvironmentValues))
+            {
+                foreach (var keyValue in options.EnvironmentValues.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    if (!string.IsNullOrWhiteSpace(keyValue?.Trim()))
+                    {
+                        var kvArray = keyValue.Split('=');
+                        if (kvArray.Length == 2)
+                        {
+                            envVars[kvArray[0]] = kvArray[1];
+                        }
+                    }
+                }
+            }
+
             return envVars;
         }
 
@@ -228,7 +243,7 @@ namespace Datadog.Trace.Tools.Runner
                     }))
                     {
                         childProcess.WaitForExit();
-                        return cancellationToken.IsCancellationRequested ? -1 : childProcess.ExitCode;
+                        return cancellationToken.IsCancellationRequested ? 1 : childProcess.ExitCode;
                     }
                 }
             }
@@ -237,7 +252,7 @@ namespace Datadog.Trace.Tools.Runner
                 Console.WriteLine(ex);
             }
 
-            return -1;
+            return 1;
         }
 
         public static string[] SplitArgs(string command, bool keepQuote = false)

@@ -15,6 +15,8 @@
 namespace trace
 {
 
+extern bool dump_il_rewrite_enabled;
+
 template <typename Out>
 void Split(const WSTRING& s, wchar_t delim, Out result);
 
@@ -97,6 +99,36 @@ public:
         {
             std::lock_guard<std::mutex> guard(mutex_);
             queue_.push(item);
+        }
+        condition_.notify_one();
+    }
+};
+
+template <typename T>
+class UniqueBlockingQueue : public UnCopyable
+{
+private:
+    std::queue<std::unique_ptr<T>> queue_;
+    mutable std::mutex mutex_;
+    std::condition_variable condition_;
+
+public:
+    std::unique_ptr<T> pop()
+    {
+        std::unique_lock<std::mutex> mlock(mutex_);
+        while (queue_.empty())
+        {
+            condition_.wait(mlock);
+        }
+        std::unique_ptr<T> value = std::move(queue_.front());
+        queue_.pop();
+        return value;
+    }
+    void push(std::unique_ptr<T>&& item)
+    {
+        {
+            std::lock_guard<std::mutex> guard(mutex_);
+            queue_.push(std::move(item));
         }
         condition_.notify_one();
     }

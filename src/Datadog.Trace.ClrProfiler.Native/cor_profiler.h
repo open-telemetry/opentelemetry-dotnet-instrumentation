@@ -62,6 +62,7 @@ private:
     //
     // Helper methods
     //
+    WSTRING GetCoreCLRProfilerPath();
     bool GetWrapperMethodRef(ModuleMetadata* module_metadata, ModuleID module_id,
                              const MethodReplacement& method_replacement, mdMemberRef& wrapper_method_ref,
                              mdTypeRef& wrapper_type_ref);
@@ -109,6 +110,8 @@ public:
 
     HRESULT STDMETHODCALLTYPE JITCompilationStarted(FunctionID function_id, BOOL is_safe_to_block) override;
 
+    HRESULT STDMETHODCALLTYPE AppDomainShutdownFinished(AppDomainID appDomainId, HRESULT hrStatus) override;
+
     HRESULT STDMETHODCALLTYPE Shutdown() override;
 
     HRESULT STDMETHODCALLTYPE ProfilerDetachSucceeded() override;
@@ -129,6 +132,8 @@ public:
 
     HRESULT STDMETHODCALLTYPE ReJITError(ModuleID moduleId, mdMethodDef methodId, FunctionID functionId,
                                          HRESULT hrStatus) override;
+
+    HRESULT STDMETHODCALLTYPE JITCachedFunctionSearchStarted(FunctionID functionId, BOOL* pbUseCachedFunction) override;
 
     //
     // ICorProfilerCallback6 methods
