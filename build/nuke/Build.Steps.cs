@@ -32,6 +32,8 @@ partial class Build
     Project NativeProfilerProject => Solution.GetProject(Projects.ClrProfilerNative);
 
     [LazyPathExecutable(name: "cmd")] readonly Lazy<Tool> Cmd;
+    [LazyPathExecutable(name: "cmake")] readonly Lazy<Tool> CMake;
+    [LazyPathExecutable(name: "make")] readonly Lazy<Tool> Make;
 
     IEnumerable<MSBuildTargetPlatform> ArchitecturesForPlatform =>
         Equals(Platform, MSBuildTargetPlatform.x64)
@@ -104,15 +106,16 @@ partial class Build
     Target CompileNativeSrc => _ => _
         .Unlisted()
         .Description("Compiles the native loader")
-        .DependsOn(CompileNativeSrcWindows);
-        //.DependsOn(CompileNativeSrcMacOs) // TODO: Add Mac OS
-        //.DependsOn(CompileNativeSrcLinux); // TODO: Add Linux
+        .DependsOn(CompileNativeSrcWindows)
+        .DependsOn(CompileNativeSrcLinux);
+        //.DependsOn(CompileNativeSrcMacOs); // TODO: Add Mac OS
+
 
     Target CompileNativeTests => _ => _
         .Unlisted()
         .Description("Compiles the native loader unit tests")
-        .DependsOn(CompileNativeTestsWindows);
-        //.DependsOn(CompileNativeTestsLinux); // TODO: Add linux
+        .DependsOn(CompileNativeTestsWindows)
+        .DependsOn(CompileNativeTestsLinux);
 
     Target PublishManagedProfiler => _ => _
         .Unlisted()
@@ -136,8 +139,8 @@ partial class Build
 
     Target PublishNativeProfiler => _ => _
         .Unlisted()
-        .DependsOn(PublishNativeProfilerWindows);
-        //.DependsOn(PublishNativeProfilerLinux) // TODO: Add linux
+        .DependsOn(PublishNativeProfilerWindows)
+        .DependsOn(PublishNativeProfilerLinux);
         //.DependsOn(PublishNativeProfilerMacOs); // TODO: Add Mac OS
 
     Target CopyIntegrationsJson => _ => _
@@ -181,6 +184,6 @@ partial class Build
 
     Target RunNativeTests => _ => _
         .Unlisted()
-        .DependsOn(RunNativeTestsWindows);
-        //.DependsOn(RunNativeTestsLinux); // TODO: Add linux
+        .DependsOn(RunNativeTestsWindows)
+        .DependsOn(RunNativeTestsLinux);
 }
