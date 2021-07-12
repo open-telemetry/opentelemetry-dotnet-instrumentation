@@ -27,9 +27,9 @@ namespace Samples.ExampleLibrary.FakeClient
         }
 
         public void Sit(
-            string message, 
-            int howManyTimes, 
-            byte[] whatEvenIs = null, 
+            string message,
+            int howManyTimes,
+            byte[] whatEvenIs = null,
             Guid[][] whatEvenIsThis = null,
             T1[][][] whatEvenIsThisT = null,
             List<byte[][]> evenMoreWhatIsThis = null,

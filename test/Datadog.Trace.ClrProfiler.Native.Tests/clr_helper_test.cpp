@@ -9,6 +9,8 @@ class CLRHelperTest : public ::CLRHelperTestBase {};
 
 TEST_F(CLRHelperTest, EnumeratesTypeDefs) {
   std::vector<std::wstring> expected_types = {
+      L"Microsoft.CodeAnalysis.EmbeddedAttribute",
+      L"System.Runtime.CompilerServices.IsReadOnlyAttribute", 
       L"Samples.ExampleLibrary.Class1",
       L"Samples.ExampleLibrary.GenericTests.ComprehensiveCaller`2",
       L"Samples.ExampleLibrary.GenericTests.GenericTarget`2",
@@ -200,6 +202,8 @@ TEST_F(CLRHelperTest, FiltersFlattenedIntegrationMethodsByTarget) {
 
 TEST_F(CLRHelperTest, GetsTypeInfoFromTypeDefs) {
   std::set<std::wstring> expected = {
+      L"Microsoft.CodeAnalysis.EmbeddedAttribute",
+      L"System.Runtime.CompilerServices.IsReadOnlyAttribute",
       L"<>c",
       L"<StayAndLayDown>d__4`2",
       L"Cookie",
@@ -229,6 +233,7 @@ TEST_F(CLRHelperTest, GetsTypeInfoFromTypeRefs) {
       L"DebuggingModes",
       L"Enumerator",
       L"System.Array",
+      L"System.Attribute",
       L"System.Collections.DictionaryEntry",
       L"System.Collections.Generic.Dictionary`2",
       L"System.Collections.Generic.IList`1",
@@ -293,6 +298,8 @@ TEST_F(CLRHelperTest, GetsTypeInfoFromModuleRefs) {
 
 TEST_F(CLRHelperTest, GetsTypeInfoFromMethods) {
   std::set<std::wstring> expected = {
+      L"Microsoft.CodeAnalysis.EmbeddedAttribute",
+      L"System.Runtime.CompilerServices.IsReadOnlyAttribute", 
       L"<>c",
       L"<StayAndLayDown>d__4`2",
       L"Cookie",

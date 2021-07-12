@@ -2,12 +2,13 @@ namespace Samples.ExampleLibrary.GenericTests
 {
     public struct PointStruct
     {
-        public int x, y;
+        public int X;
+        public int Y;
 
         public PointStruct(int x, int y)
         {
-            this.x = x;
-            this.y = y;
+            X = x;
+            Y = y;
         }
     }
 }
