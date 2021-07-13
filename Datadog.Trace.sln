@@ -80,6 +80,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{36004B32
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\nuke\_build.csproj", "{4DDEEB10-A6B5-4A46-96C1-1B7276B61E08}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artifacts", "artifacts", "{7A95C636-A6E9-4156-B18E-28C1BE065A1A}"
+	ProjectSection(SolutionItems) = preProject
+		build\artifacts\createLogPath.sh = build\artifacts\createLogPath.sh
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -300,6 +305,7 @@ Global
 		{EFAE6960-9425-462E-BFFB-4C9A038DD8C0} = {82A3CE96-0935-45E5-A9AA-A93A5B63500B}
 		{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24} = {82A3CE96-0935-45E5-A9AA-A93A5B63500B}
 		{4DDEEB10-A6B5-4A46-96C1-1B7276B61E08} = {36004B32-55EB-4591-B6D2-B99DE373D0B8}
+		{7A95C636-A6E9-4156-B18E-28C1BE065A1A} = {36004B32-55EB-4591-B6D2-B99DE373D0B8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}
