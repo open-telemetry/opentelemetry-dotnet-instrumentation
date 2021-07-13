@@ -30,7 +30,7 @@ partial class Build
 
             // Create home directory
             CopyFileToDirectory(
-            NativeProfilerProject.Directory / "bin" / "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dylib",
+            NativeProfilerProject.Directory / "bin" / $"{NativeProfilerProject.Name}.dylib",
             TracerHomeDirectory,
             FileExistsPolicy.Overwrite);
         });
