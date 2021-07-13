@@ -173,7 +173,7 @@ partial class Build
             // Move the native file to the architecture-specific folder
             var (architecture, fileName) = IsOsx
                 ? ("osx-x64", "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dylib")
-                : ($"linux-{LinuxArchitectureIdentifier}", "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so");
+                : ($"linux-{LinuxArchitectureIdentifier}", $"{NativeProfilerProject.Name}.so");
 
             var outputDir = DDTracerHomeDirectory / architecture;
             EnsureCleanDirectory(outputDir);

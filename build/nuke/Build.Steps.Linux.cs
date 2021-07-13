@@ -44,7 +44,7 @@ partial class Build
 
                 // Copy Native file
                 CopyFileToDirectory(
-                NativeProfilerProject.Directory / "build" / "bin" / "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so",
+                NativeProfilerProject.Directory / "build" / "bin" / $"{NativeProfilerProject.Name}.so",
                 TracerHomeDirectory,
                 FileExistsPolicy.Overwrite);
         });
