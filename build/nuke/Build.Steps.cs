@@ -107,8 +107,8 @@ partial class Build
         .Unlisted()
         .Description("Compiles the native loader")
         .DependsOn(CompileNativeSrcWindows)
-        .DependsOn(CompileNativeSrcLinux);
-        //.DependsOn(CompileNativeSrcMacOs); // TODO: Add Mac OS
+        .DependsOn(CompileNativeSrcLinux)
+        .DependsOn(CompileNativeSrcMacOs);
 
 
     Target CompileNativeTests => _ => _
@@ -140,8 +140,8 @@ partial class Build
     Target PublishNativeProfiler => _ => _
         .Unlisted()
         .DependsOn(PublishNativeProfilerWindows)
-        .DependsOn(PublishNativeProfilerLinux);
-        //.DependsOn(PublishNativeProfilerMacOs); // TODO: Add Mac OS
+        .DependsOn(PublishNativeProfilerLinux)
+        .DependsOn(PublishNativeProfilerMacOs);
 
     Target CopyIntegrationsJson => _ => _
         .Unlisted()
