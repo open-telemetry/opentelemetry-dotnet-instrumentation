@@ -18,6 +18,11 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Tagging
         public const string Version = "version";
 
         /// <summary>
+        /// Language tag, applied to root spans that are .NET runtime (e.g., ASP.NET)
+        /// </summary>
+        public const string Language = "language";
+
+        /// <summary>
         /// The name of the integration that generated the span.
         /// Use OpenTracing tag "component"
         /// </summary>
@@ -60,18 +65,45 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Tagging
         public const string OutPort = "out.port";
 
         /// <summary>
-        /// A MongoDB query.
+        /// MongoDB specific tags
         /// </summary>
-        public const string MongoDbQuery = "mongodb.query";
+        public static class MongoDb
+        {
+            /// <summary>
+            /// A MongoDB query.
+            /// </summary>
+            public const string Query = "mongodb.query";
+
+            /// <summary>
+            /// A MongoDB database name.
+            /// </summary>
+            public const string Name = "mongodb.name";
+
+            /// <summary>
+            /// A MongoDB collection name.
+            /// </summary>
+            public const string Collection = "mongodb.collection";
+        }
 
         /// <summary>
-        /// A MongoDB database name.
+        /// GraphQL specific tags
         /// </summary>
-        public const string MongoDbName = "mongodb.name";
+        public static class GraphQL
+        {
+            /// <summary>
+            /// The operation name of the GraphQL request.
+            /// </summary>
+            public const string OperationName = "graphql.operation.name";
 
-        /// <summary>
-        /// A MongoDB collection name.
-        /// </summary>
-        public const string MongoDbCollection = "mongodb.collection";
+            /// <summary>
+            /// The operation type of the GraphQL request.
+            /// </summary>
+            public const string OperationType = "graphql.operation.type";
+
+            /// <summary>
+            /// The source defining the GraphQL request.
+            /// </summary>
+            public const string Source = "graphql.source";
+        }
     }
 }
