@@ -25,39 +25,6 @@
 
 Microsoft provides [evaluation developer VMs](https://developer.microsoft.com/en-us/windows/downloads/virtual-machines) with Windows 10 and Visual Studio pre-installed.
 
-### Building from a command line
-
-From a _Developer Command Prompt for VS 2019_:
-
-```cmd
-rem Restore NuGet packages
-rem nuget.exe is required for command line restore because msbuild doesn't support packages.config
-rem (see https://github.com/NuGet/Home/issues/7386)
-nuget restore Datadog.Trace.sln
-
-rem Build C# projects (Platform: always AnyCPU)
-msbuild Datadog.Trace.proj /t:BuildCsharp /p:Configuration=Release
-
-rem Build NuGet packages
-dotnet pack src\Datadog.Trace\Datadog.Trace.csproj
-dotnet pack src\Datadog.Trace.OpenTracing\Datadog.Trace.OpenTracing.csproj
-
-rem Build C++ projects
-rem The native profiler depends on the Datadog.Trace.ClrProfiler.Managed.Loader C# project so be sure that is built first
-msbuild Datadog.Trace.proj /t:BuildCpp /p:Configuration=Release;Platform=x64
-msbuild Datadog.Trace.proj /t:BuildCpp /p:Configuration=Release;Platform=x86
-
-rem Build MSI installer for Windows x64 (supports both x64 and x86 apps)
-msbuild Datadog.Trace.proj /t:msi /p:Configuration=Release;Platform=x64
-
-rem Build MSI installer for Windows x86 (supports x86 apps only)
-msbuild Datadog.Trace.proj /t:msi /p:Configuration=Release;Platform=x86
-
-rem Build tracer home directory for Windows.
-rem Valid values for property `Platform` are `x64`, `x86`, and `All`.
-msbuild Datadog.Trace.proj /t:CreateHomeDirectory /p:Configuration=Release;Platform=All
-```
-
 ## Linux and MacOS
 
 ### Minimum requirements
@@ -71,19 +38,6 @@ To build C# projects and NuGet packages only
 To build everything and run integration tests
 - [Docker](https://docs.docker.com/engine/install/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
-
-### Building
-
-```sh
-./build.sh
-```
-
-For Windows make sure to add `msbuild` to your `PATH`.
-You can do it by adding to `~/.bashrc` something more or less like bellow:
-
-```sh
-PATH="$PATH:/c/Program Files (x86)/Microsoft Visual Studio/2019/Professional/MSBuild/Current/Bin"
-```
 
 ## Visual Studio Code
 
@@ -110,6 +64,34 @@ cp -r .devcontainer.example .devcontainer
 ```
 
 The Development Container configuration mixes [Docker in Docker](https://github.com/microsoft/vscode-dev-containers/tree/master/containers/docker-in-docker) and [C# (.NET)](https://github.com/microsoft/vscode-dev-containers/tree/master/containers/dotnet) definitions. Thanks to it you can use `docker` and `docker-compose` inside the container.
+
+## Building from a command line
+
+This repository uses [Nuke](https://nuke.build/) for build automation.
+
+Restore dotnet tools to prepare build tools for solution. This will install dotnet nuke tool locally.
+
+```cmd
+dotnet tool restore
+```
+
+To see a list of possible targets and configurations run:
+
+```cmd
+dotnet nuke --help
+```
+
+To build using default target run:
+
+```cmd
+dotnet nuke
+```
+
+To build using specific target run:
+
+```cmd
+dotnet nuke --target TargetNameHere
+```
 
 ## Integration tests
 

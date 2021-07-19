@@ -55,41 +55,6 @@ It would be good to have a checkpoint here where the instrumented application is
 - https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#activity-source
 - https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/examples/Console/TestHttpClient.cs
 
-## Building from a command line
-
-This repository uses [Nuke](https://nuke.build/) for build automation.
-
-Restore dotnet tools to prepare build tools for solution. This will install dotnet nuke tool locally.
-
-```cmd
-dotnet tool restore
-```
-
-To see a list of possible targets and configurations run:
-
-```cmd
-dotnet nuke --help
-```
-
-To build using default target run:
-
-```cmd
-dotnet nuke
-```
-
-To build using specific target run:
-
-```cmd
-dotnet nuke --target TargetNameHere
-```
-
-Possible public targets and descriptions: 
-
-| Target name | Description |
-| ----------- | ----------- |
-| BuildTracerHome | Builds the native and managed src, and publishes the tracer home directory |
-| BuildAndRunNativeUnitTests | Builds the native unit tests and runs them |
-
 ## Testing
 
 ### Additional setup for Windows
