@@ -69,6 +69,12 @@ The Development Container configuration mixes [Docker in Docker](https://github.
 
 This repository uses [Nuke](https://nuke.build/) for build automation.
 
+Support plugins are available for:
+   - JetBrains ReSharper        https://nuke.build/resharper
+   - JetBrains Rider            https://nuke.build/rider
+   - Microsoft VisualStudio     https://nuke.build/visualstudio
+   - Microsoft VSCode           https://nuke.build/vscode
+
 Restore dotnet tools to prepare build tools for solution. This will install dotnet nuke tool locally.
 
 ```cmd
