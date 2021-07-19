@@ -282,3 +282,6 @@ src/Datadog.Trace.ClrProfiler.Native/build/
 
 # ignore blog folder from upstream
 blog/
+
+# ignore nuke config
+.nuke/
