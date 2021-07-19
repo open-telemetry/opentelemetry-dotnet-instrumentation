@@ -40,5 +40,5 @@ jobs:
             .nuke/temp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
-      - name: Run './build.cmd BuildTracerHome BuildAndRunNativeUnitTests'
-        run: ./build.cmd BuildTracerHome BuildAndRunNativeUnitTests
+      - name: Run './build.cmd Workflow'
+        run: ./build.cmd Workflow

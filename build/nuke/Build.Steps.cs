@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
@@ -24,7 +23,6 @@ partial class Build
     AbsolutePath TestsDirectory => RootDirectory / "test";
 
     AbsolutePath TracerHomeDirectory => TracerHome ?? (OutputDirectory / "tracer-home");
-    AbsolutePath DDTracerHomeDirectory => DDTracerHome ?? (OutputDirectory / "dd-tracer-home");
     AbsolutePath ArtifactsDirectory => Artifacts ?? (OutputDirectory / "artifacts");
     AbsolutePath WindowsTracerHomeZip => ArtifactsDirectory / "windows-tracer-home.zip";
     AbsolutePath BuildDataDirectory => RootDirectory / "build_data";
@@ -48,16 +46,12 @@ partial class Build
         TargetFramework.NETCOREAPP3_1,
     };
 
-    bool IsArm64 => RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
-    string LinuxArchitectureIdentifier => IsArm64 ? "arm64" : Platform.ToString();
-
     Target CreateRequiredDirectories => _ => _
         .Unlisted()
         .Executes(() =>
         {
             EnsureExistingDirectory(TracerHomeDirectory);
             EnsureExistingDirectory(ArtifactsDirectory);
-            EnsureExistingDirectory(DDTracerHomeDirectory);
             EnsureExistingDirectory(BuildDataDirectory);
         });
 
@@ -154,32 +148,6 @@ partial class Build
 
             Logger.Info($"Copying '{source}' to '{dest}'");
             CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
-        });
-
-    Target CreateDdTracerHome => _ => _
-        .Unlisted()
-        .After(PublishNativeProfiler, CopyIntegrationsJson, PublishManagedProfiler)
-        .Executes(() =>
-        {
-            // start by copying everything from the tracer home dir
-            CopyDirectoryRecursively(TracerHomeDirectory, DDTracerHomeDirectory, DirectoryExistsPolicy.Merge, FileExistsPolicy.Overwrite);
-
-            if (IsWin)
-            {
-                // windows already has the expected layout
-                return;
-            }
-
-            // Move the native file to the architecture-specific folder
-            var (architecture, fileName) = IsOsx
-                ? ("osx-x64", $"{NativeProfilerProject.Name}.dylib")
-                : ($"linux-{LinuxArchitectureIdentifier}", $"{NativeProfilerProject.Name}.so");
-
-            var outputDir = DDTracerHomeDirectory / architecture;
-            EnsureCleanDirectory(outputDir);
-            MoveFile(
-                DDTracerHomeDirectory / fileName,
-                outputDir / fileName);
         });
 
     Target RunNativeTests => _ => _

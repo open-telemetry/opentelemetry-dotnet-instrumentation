@@ -14,7 +14,7 @@ using static Nuke.Common.IO.FileSystemTasks;
     OnPushBranches = new[] { "main", "refs/tags/*" },
     OnPushExcludePaths = new[] { "docs/*" },
     OnPullRequestBranches = new[] { "*" },
-    InvokedTargets = new[] { nameof(BuildTracerHome), nameof(BuildAndRunNativeUnitTests) })]
+    InvokedTargets = new[] { nameof(Workflow) })]
 partial class Build : NukeBuild
 {
     /// Support plugins are available for:
@@ -23,7 +23,7 @@ partial class Build : NukeBuild
     ///   - Microsoft VisualStudio     https://nuke.build/visualstudio
     ///   - Microsoft VSCode           https://nuke.build/vscode
 
-    public static int Main () => Execute<Build>(x => x.BuildTracerHome);
+    public static int Main () => Execute<Build>(x => x.BuildTracer);
 
     [Parameter("Configuration to build - Default is 'Release'")]
     readonly Configuration BuildConfiguration = Configuration.Release;
@@ -33,8 +33,6 @@ partial class Build : NukeBuild
 
     [Parameter("The location to create the tracer home directory. Default is ./bin/tracer-home ")]
     readonly AbsolutePath TracerHome;
-    [Parameter("The location to create the dd-trace home directory. Default is ./bin/dd-tracer-home ")]
-    readonly AbsolutePath DDTracerHome;
     [Parameter("The location to place NuGet packages and other packages. Default is ./bin/artifacts ")]
     readonly AbsolutePath Artifacts;
 
@@ -56,7 +54,6 @@ partial class Build : NukeBuild
             TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x => DeleteDirectory(x));
             EnsureCleanDirectory(OutputDirectory);
             EnsureCleanDirectory(TracerHomeDirectory);
-            EnsureCleanDirectory(DDTracerHomeDirectory);
             EnsureCleanDirectory(ArtifactsDirectory);
             EnsureCleanDirectory(NativeProfilerProject.Directory / "build");
             EnsureCleanDirectory(NativeProfilerProject.Directory / "deps");
@@ -72,7 +69,13 @@ partial class Build : NukeBuild
             }
         });
 
-    Target BuildTracerHome => _ => _
+    Target Workflow => _ => _
+        .Description("GitHub workflow entry point")
+        .After(Clean)
+        .DependsOn(BuildTracer)
+        .DependsOn(NativeTests);
+
+    Target BuildTracer => _ => _
         .Description("Builds the native and managed src, and publishes the tracer home directory")
         .After(Clean)
         .DependsOn(CreateRequiredDirectories)
@@ -81,12 +84,11 @@ partial class Build : NukeBuild
         .DependsOn(PublishManagedProfiler)
         .DependsOn(CompileNativeSrc)
         .DependsOn(PublishNativeProfiler)
-        .DependsOn(CopyIntegrationsJson)
-        .DependsOn(CreateDdTracerHome);
+        .DependsOn(CopyIntegrationsJson);
 
-    Target BuildAndRunNativeUnitTests => _ => _
+    Target NativeTests => _ => _
         .Description("Builds the native unit tests and runs them")
-        .After(Clean, BuildTracerHome)
+        .After(Clean, BuildTracer)
         .DependsOn(CreateRequiredDirectories)
         .DependsOn(CompileNativeTests)
         .DependsOn(RunNativeTests);
