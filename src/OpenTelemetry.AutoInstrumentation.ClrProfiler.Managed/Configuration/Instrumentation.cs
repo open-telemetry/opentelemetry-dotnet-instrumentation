@@ -24,6 +24,11 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         /// <summary>
         /// MongoDb instrumentation.
         /// </summary>
-        MongoDb
+        MongoDb,
+
+        /// <summary>
+        /// GraphQL instrumentation.
+        /// </summary>
+        GraphQL,
     }
 }

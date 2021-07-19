@@ -9,9 +9,9 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
         protected static readonly IProperty<string>[] MongoDbTagsProperties =
             InstrumentationTagsProperties.Concat(
                 new ReadOnlyProperty<MongoDbTags, string>(Tags.InstrumentationName, t => t.InstrumentationName),
-                new Property<MongoDbTags, string>(Tags.MongoDbName, t => t.DbName, (t, v) => t.DbName = v),
-                new Property<MongoDbTags, string>(Tags.MongoDbQuery, t => t.Query, (t, v) => t.Query = v),
-                new Property<MongoDbTags, string>(Tags.MongoDbCollection, t => t.Collection, (t, v) => t.Collection = v),
+                new Property<MongoDbTags, string>(Tags.MongoDb.Name, t => t.DbName, (t, v) => t.DbName = v),
+                new Property<MongoDbTags, string>(Tags.MongoDb.Query, t => t.Query, (t, v) => t.Query = v),
+                new Property<MongoDbTags, string>(Tags.MongoDb.Collection, t => t.Collection, (t, v) => t.Collection = v),
                 new Property<MongoDbTags, string>(Tags.OutHost, t => t.Host, (t, v) => t.Host = v),
                 new Property<MongoDbTags, string>(Tags.OutPort, t => t.Port, (t, v) => t.Port = v));
 
