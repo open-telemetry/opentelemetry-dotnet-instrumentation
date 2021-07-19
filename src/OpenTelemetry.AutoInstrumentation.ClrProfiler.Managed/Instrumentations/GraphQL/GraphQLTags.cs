@@ -19,7 +19,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Instrumentations
 
         public string InstrumentationName => GraphQLCommon.IntegrationName;
 
-        public string Language => Constants.Language;
+        public string Language => TracerConstants.Language;
 
         public string Source { get; set; }
 

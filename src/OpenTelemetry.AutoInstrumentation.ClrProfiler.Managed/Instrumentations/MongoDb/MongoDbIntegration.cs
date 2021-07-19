@@ -400,7 +400,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
                 };
 
                 activity = ActivitySource.StartActivityWithTags(OperationName, serviceName: settings.ServiceName, tags: tags);
-                activity.SetCustomProperty("ResourceName", resourceName);
+                activity.SetResourceName(resourceName);
             }
             catch (Exception ex)
             {

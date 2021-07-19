@@ -48,8 +48,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Instrumentations
                 string serviceName = GetServiceName();
                 activity = ActivitySource.StartActivityWithTags(ValidateOperationName, serviceName: serviceName, tags: tags);
 
-                // activity.Type = SpanTypes.GraphQL;
-                activity.SetCustomProperty("Source", document.OriginalQuery);
+                tags.Source = document.OriginalQuery;
             }
             catch (Exception ex)
             {
@@ -80,9 +79,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Instrumentations
                 var tags = new GraphQLTags();
                 string serviceName = GetServiceName();
                 activity = ActivitySource.StartActivityWithTags(ExecuteOperationName, serviceName: serviceName, tags: tags);
-
-                // activity.Type = SpanTypes.GraphQL; // TODO: Set a SpanType for activity
-                activity.SetCustomProperty("ResourceName", $"{operationType} {operationName ?? "operation"}");
+                activity.SetResourceName($"{operationType} {operationName ?? "operation"}");
 
                 tags.Source = source;
                 tags.OperationName = operationName;

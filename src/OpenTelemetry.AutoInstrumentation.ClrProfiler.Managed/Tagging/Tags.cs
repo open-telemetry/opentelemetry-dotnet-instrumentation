@@ -29,6 +29,11 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Tagging
         public const string InstrumentationName = "component";
 
         /// <summary>
+        /// The span.Resource for span encoding without applicable field.
+        /// </summary>
+        public const string ResourceName = "resource.name";
+
+        /// <summary>
         /// The kind of span (e.g. client, server).
         /// </summary>
         /// <seealso cref="Activity.Kind"/>

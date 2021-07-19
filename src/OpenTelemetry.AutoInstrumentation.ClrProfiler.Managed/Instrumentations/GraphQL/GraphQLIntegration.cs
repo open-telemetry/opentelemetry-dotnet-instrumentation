@@ -264,7 +264,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Instrumentations
             {
                 var tags = new GraphQLTags();
                 activity = GraphQLCommon.ActivitySource.StartActivityWithTags(GraphQLCommon.ExecuteOperationName, serviceName: serviceName, tags: tags);
-                activity.SetCustomProperty("ResourceName", $"{operationType} {operationName ?? "operation"}");
+                activity.SetResourceName($"{operationType} {operationName ?? "operation"}");
 
                 tags.Source = source;
                 tags.OperationName = operationName;
