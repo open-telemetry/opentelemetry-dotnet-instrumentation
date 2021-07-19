@@ -24,7 +24,6 @@ partial class Build
                 MSBuild(s => s
                 .SetTargetPath(MsBuildProject)
                 .SetConfiguration(BuildConfiguration)
-                .SetMSBuildPath()
                 .SetTargets("BuildCpp")
                 .DisableRestore()
                 .SetMaxCpuCount(null)
@@ -48,7 +47,6 @@ partial class Build
                 MSBuild(s => s
                     .SetTargetPath(MsBuildProject)
                     .SetConfiguration(BuildConfiguration)
-                    .SetMSBuildPath()
                     .SetTargets("BuildCppTests")
                     .DisableRestore()
                     .SetMaxCpuCount(null)
