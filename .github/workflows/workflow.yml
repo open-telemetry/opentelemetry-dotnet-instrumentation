@@ -22,4 +22,4 @@ jobs:
       env:
         buildConfiguration: Release
       shell: bash
-      run: ./build.sh
+      run: ./build_poc.sh

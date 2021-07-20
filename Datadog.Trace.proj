@@ -8,6 +8,7 @@
   <ItemGroup>
     <CsharpProject Include="src\**\*.csproj" />
     <CppProject Include="src\**\*.vcxproj"/>
+    <CppTestProject Include="test\**\*.vcxproj"/>
     <SampleProject Include="test\test-applications\**\*.csproj" />
   </ItemGroup>
 
@@ -48,6 +49,12 @@
     </MSBuild>
 
     <MSBuild Targets="Build" Projects="@(CppProject)" Condition="'$(Platform)' == 'x86' OR '$(Platform)' == 'All' OR '$(Buildx86Profiler)' == 'true'" Properties="Platform=x86">
+      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
+    </MSBuild>
+  </Target>
+
+  <Target Name="BuildCppTests">
+    <MSBuild Targets="Build" Projects="@(CppTestProject)">
       <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
     </MSBuild>
   </Target>
