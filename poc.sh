@@ -16,7 +16,7 @@ function finish {
 trap finish EXIT
 
 # build managed and native code
-./build.sh
+./build_poc.sh
 
 # start mongodb
 docker run -d --rm --name mongo \

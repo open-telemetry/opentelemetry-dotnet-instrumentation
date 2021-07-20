@@ -284,4 +284,7 @@ src/Datadog.Trace.ClrProfiler.Native/build/
 blog/
 
 # ignore nuke config
-.nuke/
+.nuke/*
+
+# exception to the ignore rule
+!/**/.gitkeep
