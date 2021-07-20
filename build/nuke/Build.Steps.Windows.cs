@@ -14,14 +14,14 @@ partial class Build
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
-                // If we're building for x64, build for x86 too
-                var platforms =
-                Equals(Platform, MSBuildTargetPlatform.x64)
-                    ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
-                    : new[] { MSBuildTargetPlatform.x86 };
+            // If we're building for x64, build for x86 too
+            var platforms =
+            Equals(Platform, MSBuildTargetPlatform.x64)
+                ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
+                : new[] { MSBuildTargetPlatform.x86 };
 
-                // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
-                MSBuild(s => s
+            // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
+            MSBuild(s => s
                 .SetTargetPath(MsBuildProject)
                 .SetConfiguration(BuildConfiguration)
                 .SetTargets("BuildCpp")
@@ -37,21 +37,21 @@ partial class Build
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
-                // If we're building for x64, build for x86 too
-                var platforms =
-                Equals(Platform, MSBuildTargetPlatform.x64)
-                    ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
-                    : new[] { MSBuildTargetPlatform.x86 };
+            // If we're building for x64, build for x86 too
+            var platforms =
+            Equals(Platform, MSBuildTargetPlatform.x64)
+                ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
+                : new[] { MSBuildTargetPlatform.x86 };
 
-                // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
-                MSBuild(s => s
-                    .SetTargetPath(MsBuildProject)
-                    .SetConfiguration(BuildConfiguration)
-                    .SetTargets("BuildCppTests")
-                    .DisableRestore()
-                    .SetMaxCpuCount(null)
-                    .CombineWith(platforms, (m, platform) => m
-                        .SetTargetPlatform(platform)));
+            // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
+            MSBuild(s => s
+                .SetTargetPath(MsBuildProject)
+                .SetConfiguration(BuildConfiguration)
+                .SetTargets("BuildCppTests")
+                .DisableRestore()
+                .SetMaxCpuCount(null)
+                .CombineWith(platforms, (m, platform) => m
+                    .SetTargetPlatform(platform)));
         });
 
     Target PublishNativeProfilerWindows => _ => _
@@ -65,7 +65,9 @@ partial class Build
                 var source = NativeProfilerProject.Directory / "bin" / BuildConfiguration / architecture.ToString() /
                              "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll";
                 var dest = TracerHomeDirectory / $"win-{architecture}";
+
                 Logger.Info($"Copying '{source}' to '{dest}'");
+
                 CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
             }
         });
@@ -80,6 +82,7 @@ partial class Build
             var workingDirectory = TestsDirectory / "Datadog.Trace.ClrProfiler.Native.Tests" / "bin" / BuildConfiguration.ToString() / Platform.ToString();
             var exePath = workingDirectory / "Datadog.Trace.ClrProfiler.Native.Tests.exe";
             var testExe = ToolResolver.GetLocalTool(exePath);
+
             testExe("--gtest_output=xml", workingDirectory: workingDirectory);
         });
 }

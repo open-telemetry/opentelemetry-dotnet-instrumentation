@@ -24,14 +24,14 @@ partial class Build
         {
             // copy createLogPath.sh
             CopyFileToDirectory(
-            RootDirectory / "build" / "artifacts" / "createLogPath.sh",
-            TracerHomeDirectory,
-            FileExistsPolicy.Overwrite);
+                RootDirectory / "build" / "artifacts" / "createLogPath.sh",
+                TracerHomeDirectory,
+                FileExistsPolicy.Overwrite);
 
             // Create home directory
             CopyFileToDirectory(
-            NativeProfilerProject.Directory / "bin" / $"{NativeProfilerProject.Name}.dylib",
-            TracerHomeDirectory,
-            FileExistsPolicy.Overwrite);
+                NativeProfilerProject.Directory / "bin" / $"{NativeProfilerProject.Name}.dylib",
+                TracerHomeDirectory,
+                FileExistsPolicy.Overwrite);
         });
 }
