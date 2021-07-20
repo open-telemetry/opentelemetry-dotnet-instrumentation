@@ -13,11 +13,11 @@ using Nuke.Common.ValueInjection;
 /// </summary>
 /// <example>
 ///     <code>
-/// [PathExecutable] readonly Tool Echo;
+/// [LazyPathExecutable(name: "echo")] readonly Lazy<Tool> Echo;
 /// Target FooBar => _ => _
 ///     .Executes(() =>
 ///     {
-///         var output = Echo.Value("test");
+///         var output = Echo.Value(arguments: "test");
 ///     });
 ///     </code>
 /// </example>
