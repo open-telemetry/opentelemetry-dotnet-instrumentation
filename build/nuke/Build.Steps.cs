@@ -15,8 +15,8 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build
 {
-    [Solution("Datadog.Trace.sln")] readonly Solution Solution;
-    AbsolutePath MsBuildProject => RootDirectory / "Datadog.Trace.proj";
+    [Solution("OpenTelemetry.AutoInstrumentation.sln")] readonly Solution Solution;
+    AbsolutePath MsBuildProject => RootDirectory / "OpenTelemetry.AutoInstrumentation.proj";
 
     AbsolutePath OutputDirectory => RootDirectory / "bin";
     AbsolutePath SourceDirectory => RootDirectory / "src";

@@ -28,7 +28,7 @@ BUILD_TYPE=${buildConfiguration:-Debug}
 OUTDIR="$( pwd )/src/Datadog.Trace.ClrProfiler.Native/bin/${BUILD_TYPE}/x64"
 
 # build Loader
-dotnet build -c $BUILD_TYPE src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog.Trace.ClrProfiler.Managed.Loader.csproj
+dotnet build -c $BUILD_TYPE src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.csproj
 
 # build Native
 os=$(uname_os)
@@ -36,7 +36,7 @@ case "$os" in
  windows*)
     SDK_TARGET_FRAMEWORKS="net452 net461 netstandard2.0 netcoreapp3.1"
     nuget restore "src\Datadog.Trace.ClrProfiler.Native\Datadog.Trace.ClrProfiler.Native.vcxproj" -SolutionDirectory .
-    msbuild.exe Datadog.Trace.proj -t:BuildCpp -p:Configuration=${BUILD_TYPE} -p:Platform=x64
+    msbuild.exe OpenTelemetry.AutoInstrumentation.proj -t:BuildCpp -p:Configuration=${BUILD_TYPE} -p:Platform=x64
     ;;
 
  *)
@@ -49,7 +49,7 @@ case "$os" in
     cd $DIR
     SUFIX=$(native_sufix)
     mkdir -p ${OUTDIR}
-    cp -f src/Datadog.Trace.ClrProfiler.Native/build/bin/Datadog.Trace.ClrProfiler.Native.${SUFIX} ${OUTDIR}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.${SUFIX}
+    cp -f src/Datadog.Trace.ClrProfiler.Native/build/bin/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.${SUFIX} ${OUTDIR}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.${SUFIX}
 esac
 
 # build Managed

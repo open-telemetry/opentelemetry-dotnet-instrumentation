@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace Datadog.Trace.ClrProfiler.Managed.Loader
+namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader
 {
     internal static class StartupLogger
     {

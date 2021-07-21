@@ -7,7 +7,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace Datadog.Trace.ClrProfiler.Managed.Loader
+namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader
 {
     internal sealed class FileSink : IDisposable
     {

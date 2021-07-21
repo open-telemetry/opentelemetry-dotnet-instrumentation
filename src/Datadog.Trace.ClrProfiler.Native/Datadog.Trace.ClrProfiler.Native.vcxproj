@@ -24,7 +24,7 @@
     <RootNamespace>ClrProfiler</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <CORECLR_PATH>lib\coreclr</CORECLR_PATH>
-    <ProjectName>Datadog.Trace.ClrProfiler.Native</ProjectName>
+    <ProjectName>OpenTelemetry.AutoInstrumentation.ClrProfiler.Native</ProjectName>
     <LIB_PATH>lib\</LIB_PATH>
     <LIB_PLATFORM Condition="'$(Platform)'=='x64'">x64</LIB_PLATFORM>
     <LIB_PLATFORM Condition="'$(Platform)'=='Win32' OR '$(Platform)'=='x86'">x86</LIB_PLATFORM>

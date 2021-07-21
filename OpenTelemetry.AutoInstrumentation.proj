@@ -1,0 +1,62 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <BuildInParallel Condition="'$(BuildInParallel)' == ''">true</BuildInParallel>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <TracerHomeDirectory Condition="'$(TracerHomeDirectory)' == ''">$(MSBuildThisFileDirectory)src\bin\windows-tracer-home</TracerHomeDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <CsharpProject Include="src\**\*.csproj" />
+    <CppProject Include="src\**\*.vcxproj"/>
+    <CppTestProject Include="test\**\*.vcxproj"/>
+    <SampleProject Include="test\test-applications\**\*.csproj" />
+  </ItemGroup>
+
+  <Target Name="Restore">
+    <MSBuild Targets="Restore" Projects="@(CsharpProject);@(CppProject);@(SampleProject)"/>
+  </Target>
+
+  <Target Name="Clean">
+    <MSBuild Targets="Clean" Projects="@(CsharpProject);@(CppProject);@(SampleProject)"/>
+  </Target>
+
+  <!-- default target -->
+  <Target Name="Build">
+    <MSBuild Targets="Build" Projects="@(CsharpProject);@(CppProject)">
+      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
+    </MSBuild>
+  </Target>
+
+  <Target Name="BuildFrameworkReproductions">
+    <MSBuild Targets="Build" Projects="@(FrameworkReproduction)">
+      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
+    </MSBuild>
+  </Target>
+
+  <Target Name="BuildCsharp">
+    <MSBuild Targets="Restore" Projects="@(CsharpProject)" Properties="Platform=AnyCPU">
+      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
+    </MSBuild>
+
+    <MSBuild Targets="Build" Projects="@(CsharpProject)" Properties="Platform=AnyCPU">
+      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
+    </MSBuild>
+  </Target>
+
+  <Target Name="BuildCpp">
+    <MSBuild Targets="Build" Projects="@(CppProject)" Condition="'$(Platform)' == 'x64' OR '$(Platform)' == 'All'" Properties="Platform=x64">
+      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
+    </MSBuild>
+
+    <MSBuild Targets="Build" Projects="@(CppProject)" Condition="'$(Platform)' == 'x86' OR '$(Platform)' == 'All' OR '$(Buildx86Profiler)' == 'true'" Properties="Platform=x86">
+      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
+    </MSBuild>
+  </Target>
+
+  <Target Name="BuildCppTests">
+    <MSBuild Targets="Build" Projects="@(CppTestProject)">
+      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
+    </MSBuild>
+  </Target>
+
+</Project>

@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using System.Reflection;
 
-namespace Datadog.Trace.ClrProfiler.Managed.Loader
+namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader
 {
     /// <summary>
     /// A class that attempts to load the OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed .NET assembly.
