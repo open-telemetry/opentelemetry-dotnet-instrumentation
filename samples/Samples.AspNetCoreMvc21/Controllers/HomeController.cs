@@ -16,7 +16,7 @@ namespace Samples.AspNetCoreMvc.Controllers
 
         public IActionResult Index()
         {
-            var instrumentationType = Type.GetType("Datadog.Trace.ClrProfiler.Instrumentation, OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed");
+            var instrumentationType = Type.GetType("OpenTelemetry.AutoInstrumentation.ClrProfiler.Instrumentation, OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed");
             ViewBag.ProfilerAttached = instrumentationType?.GetProperty("ProfilerAttached", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) ?? false;
             ViewBag.TracerAssemblyLocation = Type.GetType("Datadog.Trace.Tracer, OpenTelemetry.AutoInstrumentation")?.Assembly.Location;
             ViewBag.ClrProfilerAssemblyLocation = instrumentationType?.Assembly.Location;

@@ -5,7 +5,7 @@
       "usingDirectivesPlacement": "outsideNamespace"
     },
     "documentationRules": {
-      "companyName": "Datadog",
+      "companyName": "OpenTelemetry",
       "documentExposedElements": true,
 
       // TODO: document everything and remove this exclusions

@@ -287,10 +287,10 @@ blog/
 !/**/.gitkeep
 
 # profiler build files
-src/Datadog.Trace.ClrProfiler.Native/build/
-src/Datadog.Trace.ClrProfiler.Native/deps/
-src/Datadog.Trace.ClrProfiler.Native/CMakeFiles/
-src/Datadog.Trace.ClrProfiler.Native/tmp.*
-src/Datadog.Trace.ClrProfiler.Native/Makefile
-src/Datadog.Trace.ClrProfiler.Native/CMakeCache.txt
-src/Datadog.Trace.ClrProfiler.Native/cmake_install.cmake
+src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/build/
+src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/deps/
+src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/CMakeFiles/
+src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/tmp.*
+src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/Makefile
+src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/CMakeCache.txt
+src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/cmake_install.cmake

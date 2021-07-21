@@ -33,7 +33,7 @@ It would be good to have some automation here to test without doing to much stuf
 
 1. Remove `Datadog.Trace.Tracer` and a lot of related code.
    We can just keep the AutoInstrumentation integration boilerplate for HTTP Client and ASP.NET.
-1. Change the `Datadog.Trace.ClrProfiler.Instrumentation.Initialize()` method
+1. Change the `OpenTelemetry.AutoInstrumentation.ClrProfiler.Instrumentation.Initialize()` method
    so that it will be the place where the global OTel trace provider will be configured. 
 
 It would be good to have a checkpoint here where the instrumented application is NOOP-instrumented.
@@ -45,7 +45,7 @@ It would be good to have a checkpoint here where the instrumented application is
    [question](https://cloud-native.slack.com/archives/C01N3BC2W7Q/p1620994235161800)
 1. Add manual instrumentation to the applications.
 1. Try auto-instrumentation using ActivitySource
-   e.g. in `Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.HttpClient.HttpMessageHandlerCommon`.
+   e.g. in `OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Http.HttpClient.HttpMessageHandlerCommon`.
 1. Test with different versions of OTel SDK in runtime.
 1. Try using `AppDomain.CurrentDomain.AssemblyResolve +=` to add a fallback 
    if the instrumented app does not reference the OTel SDK.

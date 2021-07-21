@@ -179,7 +179,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 
         internal static Settings FromDefaultSources()
         {
-            // env > AppSettings > datadog.json
             var configurationSource = new CompositeConfigurationSource
             {
                 new EnvironmentConfigurationSource(),

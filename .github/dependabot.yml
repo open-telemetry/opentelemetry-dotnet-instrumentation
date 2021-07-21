@@ -13,14 +13,14 @@ updates:
     open-pull-requests-limit: 0 # disable version updates
   # Src libraries
   - package-ecosystem: "nuget"
-    directory: "/src/Datadog.Trace"
+    directory: "/src/OpenTelemetry.AutoInstrumentation"
     schedule:
       interval: "daily"
     labels:
       - "dependencies"
       - "area:tracer"
     ignore:
-      ### Start Datadog.Trace.csproj ignored dependencies
+      ### Start OpenTelemetry.AutoInstrumentation.csproj ignored dependencies
       # DiagnosticSource is kept at the lowest supported version for widest compatibility
       - dependency-name: "System.Diagnostics.DiagnosticSource"
 
@@ -32,17 +32,17 @@ updates:
       # DuckTyping libraries are kept at the lowest supported version for compatibility on netstandard2.0
       - dependency-name: "System.Reflection.Emit"
       - dependency-name: "System.Reflection.Emit.Lightweight"
-      ### End Datadog.Trace.csproj ignored dependencies
+      ### End OpenTelemetry.AutoInstrumentation.csproj ignored dependencies
     open-pull-requests-limit: 0 # disable version updates
   - package-ecosystem: "nuget"
-    directory: "/src/Datadog.Trace.ClrProfiler.Managed"
+    directory: "/src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed"
     schedule:
       interval: "daily"
     labels:
       - "dependencies"
       - "area:integrations"
     ignore:
-      ### Start Datadog.Trace.csproj ignored dependencies
+      ### Start OpenTelemetry.AutoInstrumentation.csproj ignored dependencies
       # DiagnosticSource is kept at the lowest supported version for widest compatibility
       - dependency-name: "System.Diagnostics.DiagnosticSource"
 
@@ -54,19 +54,19 @@ updates:
       # DuckTyping libraries are kept at the lowest supported version for compatibility on netstandard2.0
       - dependency-name: "System.Reflection.Emit"
       - dependency-name: "System.Reflection.Emit.Lightweight"
-      ### End Datadog.Trace.csproj ignored dependencies
+      ### End OpenTelemetry.AutoInstrumentation.csproj ignored dependencies
       # Lock Microsoft.Build.Framework for widest compatibility when instrumenting builds
       - dependency-name: "Microsoft.Build.Framework"
     open-pull-requests-limit: 0 # disable version updates
   - package-ecosystem: "nuget"
-    directory: "/src/Datadog.Trace.OpenTracing"
+    directory: "/src/OpenTelemetry.AutoInstrumentation.OpenTracing"
     schedule:
       interval: "daily"
     labels:
       - "dependencies"
       - "area:opentracing"
     ignore:
-      ### Start Datadog.Trace.csproj ignored dependencies
+      ### Start OpenTelemetry.AutoInstrumentation.csproj ignored dependencies
       # DiagnosticSource is kept at the lowest supported version for widest compatibility
       - dependency-name: "System.Diagnostics.DiagnosticSource"
 
@@ -78,17 +78,17 @@ updates:
       # DuckTyping libraries are kept at the lowest supported version for compatibility on netstandard2.0
       - dependency-name: "System.Reflection.Emit"
       - dependency-name: "System.Reflection.Emit.Lightweight"
-      ### End Datadog.Trace.csproj ignored dependencies
+      ### End OpenTelemetry.AutoInstrumentation.csproj ignored dependencies
     open-pull-requests-limit: 0 # disable version updates
   - package-ecosystem: "nuget"
-    directory: "/src/Datadog.Trace.BenchmarkDotNet"
+    directory: "/src/OpenTelemetry.AutoInstrumentation.BenchmarkDotNet"
     schedule:
       interval: "daily"
     labels:
       - "dependencies"
       - "area:benchmarks"
     ignore:
-      ### Start Datadog.Trace.csproj ignored dependencies
+      ### Start OpenTelemetry.AutoInstrumentation.csproj ignored dependencies
       # DiagnosticSource is kept at the lowest supported version for widest compatibility
       - dependency-name: "System.Diagnostics.DiagnosticSource"
 
@@ -100,5 +100,5 @@ updates:
       # DuckTyping libraries are kept at the lowest supported version for compatibility on netstandard2.0
       - dependency-name: "System.Reflection.Emit"
       - dependency-name: "System.Reflection.Emit.Lightweight"
-      ### End Datadog.Trace.csproj ignored dependencies
+      ### End OpenTelemetry.AutoInstrumentation.csproj ignored dependencies
     open-pull-requests-limit: 0 # disable version updates
