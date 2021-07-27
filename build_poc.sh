@@ -34,7 +34,7 @@ dotnet build -c $BUILD_TYPE src/Datadog.Trace.ClrProfiler.Managed.Loader/Datadog
 os=$(uname_os)
 case "$os" in
  windows*)
-    SDK_TARGET_FRAMEWORKS="net452 net461 netstandard2.0 netcoreapp3.1"
+    SDK_TARGET_FRAMEWORKS="net461 netstandard2.0 netcoreapp3.1"
     nuget restore "src\Datadog.Trace.ClrProfiler.Native\Datadog.Trace.ClrProfiler.Native.vcxproj" -SolutionDirectory .
     msbuild.exe Datadog.Trace.proj -t:BuildCpp -p:Configuration=${BUILD_TYPE} -p:Platform=x64
     ;;

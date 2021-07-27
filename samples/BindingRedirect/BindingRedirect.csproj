@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.TelemetryCorrelation" Version="1.0.8" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="5.0.1" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0-preview.6.21352.12" />
   </ItemGroup>
 
   <ItemGroup>

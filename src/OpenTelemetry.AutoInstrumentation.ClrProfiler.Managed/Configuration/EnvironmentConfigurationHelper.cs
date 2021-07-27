@@ -44,7 +44,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 
         public static TracerProviderBuilder AddSdkAspNetInstrumentation(this TracerProviderBuilder builder)
         {
-#if NET452 || NET461
+#if NET461
             return builder.AddAspNetInstrumentation();
 #elif NETCOREAPP3_1_OR_GREATER
             return builder.AddAspNetCoreInstrumentation();
@@ -71,9 +71,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 
                     break;
                 case "jaeger":
-#if NET452
-                    throw new NotSupportedException();
-#else
                     var agentHost = settings.JaegerExporterAgentHost;
                     var agentPort = settings.JaegerExporterAgentPort;
 
@@ -88,7 +85,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("The exporter name is not recognised");
-#endif
             }
 
             return builder;
