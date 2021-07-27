@@ -70,7 +70,7 @@ namespace trace {
       WStr("ISymWrapper")
   };
 
-  inline WSTRING managed_profiler_full_assembly_version = WStr("OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429");
+  inline WSTRING managed_profiler_full_assembly_version = WStr("OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed");
 
   inline WSTRING calltarget_modification_action = WStr("CallTargetModification");
 
