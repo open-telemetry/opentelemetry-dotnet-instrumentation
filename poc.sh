@@ -5,7 +5,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 cd $DIR
 
 aspNetAppTargetFramework=${aspNetAppTargetFramework:-netcoreapp3.1}
-consoleAppTargetFramework=${consoleAppTargetFramework:-netcoreapp3.1}
+sampleAppTargetFramework=${sampleAppTargetFramework:-netcoreapp3.1}
+sampleApp=${sampleApp:-ConsoleApp}
 
 function finish {
   docker stop jaeger # stop Jaeger
@@ -49,7 +50,7 @@ unset OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS
 
 # instrument and run HTTP client app
 export OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS="Vendor.Distro.Plugin, Vendor.Distro, Version=0.0.1.0, Culture=neutral, PublicKeyToken=null"
-time ./dev/instrument.sh OTEL_SERVICE="http-client" dotnet run --no-launch-profile -f $consoleAppTargetFramework -p ./samples/ConsoleApp/ConsoleApp.csproj
+time ./dev/instrument.sh OTEL_SERVICE="http-client" dotnet run --no-launch-profile -f $sampleAppTargetFramework -p ./samples/${sampleApp}/${sampleApp}.csproj
 unset OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS
 
 # verify if it works
