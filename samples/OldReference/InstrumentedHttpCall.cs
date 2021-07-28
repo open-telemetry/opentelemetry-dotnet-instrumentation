@@ -8,7 +8,6 @@ namespace OldReference
 {
     public static class InstrumentedHttpCall
     {
-        private static readonly ActivitySource MyActivitySource = new("OpenTelemetry.AutoInstrumentation.BindingRedirect");
 
         public static async Task GetAsync(string url)
         {
@@ -20,14 +19,20 @@ namespace OldReference
             
             Console.WriteLine(string.Join("\n", loaded));
 
-            using (var activity = MyActivitySource.StartActivity("RunAsync"))
+            var activity = new Activity("RunAsync");
+            try
             {
-                activity?.SetTag("foo", "bar");
+                activity.Start();
+                activity.AddTag("foo", "bar");
 
                 using var client = new HttpClient();
                 Console.WriteLine($"Calling {url}");
                 await client.GetAsync(url);
                 Console.WriteLine($"Called {url}");
+            }
+            finally
+            {
+                activity.Stop();
             }
         }
     }
