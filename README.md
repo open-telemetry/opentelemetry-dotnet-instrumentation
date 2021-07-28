@@ -97,5 +97,5 @@ sampleAppTargetFramework=net46 ./poc.sh
 To instrument the .NET BindingRedirect sample application run:
 
 ```sh
- sampleAppTargetFramework=net472 sampleApp=BindingRedirect ./poc.sh
+sampleAppTargetFramework=net472 sampleApp=BindingRedirect ./poc.sh
 ```
