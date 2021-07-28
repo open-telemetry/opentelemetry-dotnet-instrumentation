@@ -40,15 +40,15 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 
             ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? true;
 
-            EnabledInstrumentations = Enum.GetValues(typeof(Instrumentation)).Cast<Instrumentation>().ToList();
-            var disabledInstrumentations = source.GetString(ConfigurationKeys.DisabledInstrumentations);
-            if (disabledInstrumentations != null)
+            var instrumentations = new Dictionary<string, Instrumentation>();
+            var enabledInstrumentations = source.GetString(ConfigurationKeys.Instrumentations);
+            if (enabledInstrumentations != null)
             {
-                foreach (var instrumentation in disabledInstrumentations.Split(separator: ','))
+                foreach (var instrumentation in enabledInstrumentations.Split(separator: ','))
                 {
                     if (Enum.TryParse(instrumentation, out Instrumentation parsedType))
                     {
-                        EnabledInstrumentations.Remove(parsedType);
+                        instrumentations[instrumentation] = parsedType;
                     }
                     else
                     {
@@ -56,6 +56,17 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                     }
                 }
             }
+
+            var disabledInstrumentations = source.GetString(ConfigurationKeys.DisabledInstrumentations);
+            if (disabledInstrumentations != null)
+            {
+                foreach (var instrumentation in disabledInstrumentations.Split(separator: ','))
+                {
+                    instrumentations.Remove(instrumentation);
+                }
+            }
+
+            EnabledInstrumentations = instrumentations.Values.ToList();
 
             var providerPlugins = source.GetString(ConfigurationKeys.ProviderPlugins);
             if (providerPlugins != null)

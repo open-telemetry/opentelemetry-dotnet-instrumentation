@@ -47,12 +47,12 @@ docker run -d --rm --name jaeger \
 
 # instrument and run HTTP server app in background
 export OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS="Samples.AspNetCoreMvc.OtelSdkPlugin, Samples.AspNetCoreMvc31, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null:Vendor.Distro.Plugin, Vendor.Distro, Version=0.0.1.0, Culture=neutral, PublicKeyToken=null"
-./dev/instrument.sh ASPNETCORE_URLS="http://127.0.0.1:8080/" OTEL_SERVICE="aspnet-server" dotnet run --no-launch-profile -f $aspNetAppTargetFramework -p ./samples/Samples.AspNetCoreMvc31/Samples.AspNetCoreMvc31.csproj &
+./dev/instrument.sh OTEL_DOTNET_TRACER_INSTRUMENTATIONS="AspNet,SqlClient,MongoDb" OTEL_SERVICE="aspnet-server" ASPNETCORE_URLS="http://127.0.0.1:8080/" dotnet run --no-launch-profile -f $aspNetAppTargetFramework -p ./samples/Samples.AspNetCoreMvc31/Samples.AspNetCoreMvc31.csproj &
 unset OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS
 ./dev/wait-local-port.sh 8080
 
 # instrument and run HTTP client app
-time ./dev/instrument.sh OTEL_SERVICE="http-client" dotnet run --no-launch-profile -f $sampleAppTargetFramework -p ./samples/${sampleApp}/${sampleApp}.csproj
+time ./dev/instrument.sh OTEL_DOTNET_TRACER_INSTRUMENTATIONS="HttpClient" OTEL_SERVICE="http-client" dotnet run --no-launch-profile -f $sampleAppTargetFramework -p ./samples/${sampleApp}/${sampleApp}.csproj
 
 # verify if it works
 read -p "Check traces under: http://localhost:16686/search. Press enter to continue"

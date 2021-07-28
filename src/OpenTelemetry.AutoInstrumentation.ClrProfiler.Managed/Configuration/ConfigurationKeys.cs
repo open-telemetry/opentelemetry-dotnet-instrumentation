@@ -66,6 +66,11 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         public const string ConsoleExporterEnabled = "OTEL_DOTNET_TRACER_CONSOLE_EXPORTER_ENABLED";
 
         /// <summary>
+        /// Configuration key for comma separated list of enabled instrumentations.
+        /// </summary>
+        public const string Instrumentations = "OTEL_DOTNET_TRACER_INSTRUMENTATIONS";
+
+        /// <summary>
         /// Configuration key for comma separated list of disabled instrumentations.
         /// </summary>
         public const string DisabledInstrumentations = "OTEL_DOTNET_TRACER_DISABLED_INSTRUMENTATIONS";
