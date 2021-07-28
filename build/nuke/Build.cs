@@ -10,6 +10,8 @@ using static Nuke.Common.IO.FileSystemTasks;
 
 [GitHubActions("ci",
     GitHubActionsImage.WindowsLatest,
+    GitHubActionsImage.UbuntuLatest,
+    GitHubActionsImage.MacOsLatest,
     AutoGenerate = true,
     OnPushBranches = new[] { "main", "refs/tags/*" },
     OnPushExcludePaths = new[] { "docs/*" },
