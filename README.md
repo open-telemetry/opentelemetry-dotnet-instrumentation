@@ -74,7 +74,7 @@ sudo chmod a+rwx /var/log/opentelemetry/dotnet
 
 ### Usage
 
-> Make sure to run `dotnet nuke` before running the PoC smoke test.
+> Make sure to run `dotnet nuke Clean BuildTracer` before running the PoC smoke test.
 
 For .NET Core 3.1 run:
 
