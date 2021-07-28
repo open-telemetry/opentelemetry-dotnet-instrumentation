@@ -33,9 +33,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 
             ZipkinEndpoint = new Uri(source.GetString(ConfigurationKeys.ZipkinEndpoint) ?? "http://localhost:8126");
 
-            JaegerExporterAgentHost = source.GetString(ConfigurationKeys.JaegerExporterAgentHost) ?? "localhost";
-            JaegerExporterAgentPort = source.GetInt32(ConfigurationKeys.JaegerExporterAgentPort) ?? 6831;
-
             LoadTracerAtStartup = source.GetBool(ConfigurationKeys.LoadTracerAtStartup) ?? true;
 
             ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? true;

@@ -68,16 +68,10 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                         options.Endpoint = settings.ZipkinEndpoint;
                         options.ExportProcessorType = ExportProcessorType.Simple; // for PoC
                     });
-
                     break;
                 case "jaeger":
-                    var agentHost = settings.JaegerExporterAgentHost;
-                    var agentPort = settings.JaegerExporterAgentPort;
-
                     builder.AddJaegerExporter(options =>
                     {
-                        options.AgentHost = agentHost;
-                        options.AgentPort = agentPort;
                         options.ExportProcessorType = ExportProcessorType.Simple; // for PoC
                     });
                     break;

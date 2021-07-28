@@ -51,16 +51,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
         public const string ZipkinEndpoint = "OTEL_EXPORTER_ZIPKIN_ENDPOINT";
 
         /// <summary>
-        /// Configuration key for hostname for the Jaeger agent.
-        /// </summary>
-        public const string JaegerExporterAgentHost = "OTEL_EXPORTER_JAEGER_AGENT_HOST";
-
-        /// <summary>
-        /// Configuration key for port for the Jaeger agent.
-        /// </summary>
-        public const string JaegerExporterAgentPort = "OTEL_EXPORTER_JAEGER_AGENT_PORT";
-
-        /// <summary>
         /// Configuration key for whether the console exporter is enabled.
         /// </summary>
         public const string ConsoleExporterEnabled = "OTEL_DOTNET_TRACER_CONSOLE_EXPORTER_ENABLED";
