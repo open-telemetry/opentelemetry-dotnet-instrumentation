@@ -16,8 +16,11 @@ function finish {
 }
 trap finish EXIT
 
-# build managed and native code
-./build_poc.sh
+# copy profiler to good location
+cp bin/tracer-home/win-x64/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll bin/tracer-home/
+
+# build plugin for HTTP server app
+dotnet publish -f $aspNetAppTargetFramework samples/Vendor.Distro/Vendor.Distro.csproj -o bin/tracer-home/$aspNetAppTargetFramework
 
 # start mongodb
 docker run -d --rm --name mongo \
@@ -49,9 +52,7 @@ unset OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS
 ./dev/wait-local-port.sh 8080
 
 # instrument and run HTTP client app
-export OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS="Vendor.Distro.Plugin, Vendor.Distro, Version=0.0.1.0, Culture=neutral, PublicKeyToken=null"
 time ./dev/instrument.sh OTEL_SERVICE="http-client" dotnet run --no-launch-profile -f $sampleAppTargetFramework -p ./samples/${sampleApp}/${sampleApp}.csproj
-unset OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS
 
 # verify if it works
 read -p "Check traces under: http://localhost:16686/search. Press enter to continue"
