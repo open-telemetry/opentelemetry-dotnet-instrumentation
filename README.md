@@ -74,6 +74,8 @@ sudo chmod a+rwx /var/log/opentelemetry/dotnet
 
 ### Usage
 
+> Make sure to run `dotnet nuke Clean BuildTracer` before running the PoC smoke test.
+
 For .NET Core 3.1 run:
 
 ```sh
@@ -93,6 +95,7 @@ sampleAppTargetFramework=net46 ./poc.sh
 ```
 
 To instrument the .NET BindingRedirect sample application run:
+
 ```sh
- sampleAppTargetFramework=net472 sampleApp=BindingRedirect ./poc.sh
+sampleAppTargetFramework=net472 sampleApp=BindingRedirect ./poc.sh
 ```

@@ -32,6 +32,17 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
         private const string IWireProtocol = "MongoDB.Driver.Core.WireProtocol.IWireProtocol";
         private const string IWireProtocolGeneric = "MongoDB.Driver.Core.WireProtocol.IWireProtocol`1";
 
+        /// <summary>
+        /// Operation to get the role of the "mongod" instance, see
+        /// https://www.docs4dev.com/docs/en/mongodb/v3.6/reference/reference-command-isMaster.html
+        /// </summary>
+        private const string IsMasterOperation = "isMaster";
+
+        /// <summary>
+        /// The MongoDB database that stores system and authorization information.
+        /// </summary>
+        private const string AdminDatabaseName = "admin";
+
         private static readonly ILogger Log = ConsoleLogger.Create(typeof(MongoDbIntegration));
 
         private static readonly ActivitySource ActivitySource = new ActivitySource(
@@ -368,7 +379,12 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.AutoInstrumentation.Mong
                     // and its value is the collection name
                     if (command.TryCallMethod("GetElement", 0, out object firstElement) && firstElement != null)
                     {
-                        firstElement.TryGetPropertyValue("Name", out operationName);
+                        if (firstElement.TryGetPropertyValue("Name", out operationName) &&
+                            operationName == IsMasterOperation && databaseName == AdminDatabaseName)
+                        {
+                            // Assume that this is the driver doing "Heartbeat" or "RoundTripTimeMonitor", don't create an activity for it.
+                            return null;
+                        }
 
                         if (firstElement.TryGetPropertyValue("Value", out object collectionNameObj) && collectionNameObj != null)
                         {

@@ -7,10 +7,10 @@
 
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="2.12.3" />
-    <PackageReference Include="OpenTelemetry" Version="1.1.0-beta2" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc4" />
+    <PackageReference Include="OpenTelemetry" Version="1.2.0-alpha1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc7" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.4" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="5.0.1" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0-preview.6.21352.12" />
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
   </ItemGroup>
 
