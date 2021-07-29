@@ -84,11 +84,28 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                         options.ExportProcessorType = ExportProcessorType.Simple; // for PoC
                     });
                     break;
+#endif
+                case "OTLP":
+#if NET452
+                    throw new NotSupportedException();
+#else
+
+                    builder.AddOtlpExporter(
+                        options =>
+                        {
+                            // TODO remove when sdk version with env vars support is released
+                            var endpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
+                            if (!string.IsNullOrEmpty(endpoint))
+                            {
+                                options.Endpoint = new Uri(endpoint);
+                            }
+                        });
+                    break;
+#endif
                 case "":
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("The exporter name is not recognised");
-#endif
             }
 
             return builder;
