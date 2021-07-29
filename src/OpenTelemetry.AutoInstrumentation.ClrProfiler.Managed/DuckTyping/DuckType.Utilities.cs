@@ -27,13 +27,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.DuckTyping
             {
                 DuckTypeTargetObjectInstanceIsNull.Throw();
             }
-
-#if NET452
-            if (!proxyType.IsVisible)
-            {
-                DuckTypeTypeIsNotPublicException.Throw(proxyType, nameof(proxyType));
-            }
-#endif
         }
 
         /// <summary>
@@ -84,9 +77,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.DuckTyping
         /// <returns>true for direct method; otherwise, false.</returns>
         private static bool UseDirectAccessTo(ModuleBuilder builder, Type targetType)
         {
-#if NET452
-            return targetType.IsVisible;
-#else
             if (builder == null)
             {
                 return targetType.IsVisible;
@@ -94,7 +84,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.DuckTyping
 
             EnsureTypeVisibility(builder, targetType);
             return true;
-#endif
         }
 
         /// <summary>

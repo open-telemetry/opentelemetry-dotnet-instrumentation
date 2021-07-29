@@ -44,7 +44,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 
         public static TracerProviderBuilder AddSdkAspNetInstrumentation(this TracerProviderBuilder builder)
         {
-#if NET452 || NET461
+#if NET461
             return builder.AddAspNetInstrumentation();
 #elif NETCOREAPP3_1_OR_GREATER
             return builder.AddAspNetCoreInstrumentation();
@@ -68,19 +68,10 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                         options.Endpoint = settings.ZipkinEndpoint;
                         options.ExportProcessorType = ExportProcessorType.Simple; // for PoC
                     });
-
                     break;
                 case "jaeger":
-#if NET452
-                    throw new NotSupportedException();
-#else
-                    var agentHost = settings.JaegerExporterAgentHost;
-                    var agentPort = settings.JaegerExporterAgentPort;
-
                     builder.AddJaegerExporter(options =>
                     {
-                        options.AgentHost = agentHost;
-                        options.AgentPort = agentPort;
                         options.ExportProcessorType = ExportProcessorType.Simple; // for PoC
                     });
                     break;
@@ -88,7 +79,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("The exporter name is not recognised");
-#endif
             }
 
             return builder;
