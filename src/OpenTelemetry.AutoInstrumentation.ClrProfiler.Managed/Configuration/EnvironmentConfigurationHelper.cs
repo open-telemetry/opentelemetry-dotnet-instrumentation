@@ -89,7 +89,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 #if NET452
                     throw new NotSupportedException();
 #else
-
                     builder.AddOtlpExporter(
                         options =>
                         {
