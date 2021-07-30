@@ -75,6 +75,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                         options.ExportProcessorType = ExportProcessorType.Simple; // for PoC
                     });
                     break;
+                case "otlp":
                 case "OTLP":
                     builder.AddOtlpExporter(
                         options =>
