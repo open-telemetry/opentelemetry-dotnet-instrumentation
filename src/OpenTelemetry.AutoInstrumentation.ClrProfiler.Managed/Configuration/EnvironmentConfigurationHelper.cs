@@ -76,7 +76,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                     });
                     break;
                 case "otlp":
-                case "OTLP":
                     builder.AddOtlpExporter(
                         options =>
                         {
