@@ -75,6 +75,18 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                         options.ExportProcessorType = ExportProcessorType.Simple; // for PoC
                     });
                     break;
+                case "otlp":
+                    builder.AddOtlpExporter(
+                        options =>
+                        {
+                            // TODO remove when sdk version with env vars support is released
+                            var endpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
+                            if (!string.IsNullOrEmpty(endpoint))
+                            {
+                                options.Endpoint = new Uri(endpoint);
+                            }
+                        });
+                    break;
                 case "":
                     break;
                 default:
