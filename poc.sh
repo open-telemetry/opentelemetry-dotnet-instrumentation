@@ -16,9 +16,6 @@ function finish {
 }
 trap finish EXIT
 
-# copy profiler to good location
-cp bin/tracer-home/win-x64/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll bin/tracer-home/
-
 # build plugin for HTTP server app
 dotnet publish -f $aspNetAppTargetFramework samples/Vendor.Distro/Vendor.Distro.csproj -o bin/tracer-home/$aspNetAppTargetFramework
 
