@@ -116,7 +116,7 @@ applications, the workaround is to manipulate the deps.json file. For the PoC, w
 planning to automate any of these workarounds, bur we are manually validating them.
 
 ### .NET Framework Binding Redirects
-The [sample/BindingRedirect](./sample/BindingRedirect/BindingRecirec.csproj) app shows how
+The [samples/BindingRedirect](./samples/BindingRedirect/) app shows how
 to use the `app.config` to solve the version conflicts. As configured in the PoC branch,
 the BindingRedirect sample can only run successfully under the instrumentation since the
 binding redirect makes the application dependent on a version of `System.Diagnostics.DiagnosticSource`
@@ -129,5 +129,6 @@ references using the required version and use the respective `deps.json` file to
 are needed.
 
 To experiment with modifying the `deps.json` file, add a reference to the required version OpenTelemetry
-package to the sample/CoreAppOldReference sample and rebuild the application. Save the generated `deps.json`
-file, remove the package reference and rebuild the sample app. Compare the files to understand the changes.
+package to the [samples/CoreAppOldReference](./samples/CoreAppOldReference/) sample and rebuild the
+application. Save the generated `deps.json` file, remove the package reference and rebuild the
+sample app. Compare the files to understand the changes.
