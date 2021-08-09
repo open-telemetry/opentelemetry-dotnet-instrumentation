@@ -31,16 +31,29 @@ current_dir() {
 
 CURDIR=$(current_dir)
 SUFIX=$(native_sufix)
+OS=$(uname_os)
 
 # Enable .NET Framework Profiling API
 export COR_ENABLE_PROFILING="1"
 export COR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
 export COR_PROFILER_PATH="${CURDIR}/bin/tracer-home/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.${SUFIX}"
+if [ "$OS" == "windows" ]
+then
+    # Set paths for both bitness on Windows, see https://docs.microsoft.com/en-us/dotnet/core/run-time-config/debugging-profiling#profiler-location
+    export COR_PROFILER_PATH_64="${CURDIR}/bin/tracer-home/win-x64/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.${SUFIX}"
+    export COR_PROFILER_PATH_32="${CURDIR}/bin/tracer-home/win-x86/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.${SUFIX}"
+fi
 
 # Enable .NET Core Profiling API
 export CORECLR_ENABLE_PROFILING="1"
 export CORECLR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
 export CORECLR_PROFILER_PATH="${CURDIR}/bin/tracer-home/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.${SUFIX}"
+if [ "$OS" == "windows" ]
+then
+    # Set paths for both bitness on Windows, see https://docs.microsoft.com/en-us/dotnet/core/run-time-config/debugging-profiling#profiler-location
+    export CORECLR_PROFILER_PATH_64="${CURDIR}/bin/tracer-home/win-x64/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.${SUFIX}"
+    export CORECLR_PROFILER_PATH_32="${CURDIR}/bin/tracer-home/win-x86/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.${SUFIX}"
+fi
 
 # Configure OpenTelemetry Tracer 
 export OTEL_DOTNET_TRACER_HOME="${CURDIR}/bin/tracer-home"
