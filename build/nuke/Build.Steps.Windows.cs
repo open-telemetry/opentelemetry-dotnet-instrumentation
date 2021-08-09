@@ -63,7 +63,7 @@ partial class Build
             foreach (var architecture in ArchitecturesForPlatform)
             {
                 var source = NativeProfilerProject.Directory / "bin" / BuildConfiguration / architecture.ToString() /
-                             "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll";
+                             $"{ArtifactNames.NativeProfiler}.dll";
                 var dest = TracerHomeDirectory / $"win-{architecture}";
 
                 Logger.Info($"Copying '{source}' to '{dest}'");
