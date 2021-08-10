@@ -270,4 +270,4 @@ endif()
 set_target_properties(${TARGET_NAME} PROPERTIES PREFIX "")
 
 # Define linker libraries
-target_link_libraries(${TARGET_NAME} "Datadog.Trace.ClrProfiler.Native.static")
+target_link_libraries(${TARGET_NAME} "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.static")
