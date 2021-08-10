@@ -44,7 +44,7 @@ partial class Build
 
             // Copy Native file
             CopyFileToDirectory(
-                NativeProfilerProject.Directory / "build" / "bin" / $"{NativeProfilerProject.Name}.so",
+                NativeProfilerProject.Directory / "build" / "bin" / $"{ArtifactNames.NativeProfiler}.so",
                 TracerHomeDirectory,
                 FileExistsPolicy.Overwrite);
         });

@@ -37,7 +37,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader
 
             try
             {
-                var assembly = Assembly.Load("OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429");
+                var assembly = Assembly.Load("OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed");
                 if (assembly == null)
                 {
                     throw new FileNotFoundException("The assembly OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed could not be loaded");

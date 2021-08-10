@@ -53,12 +53,14 @@ Use these environment variables to configure the tracing library:
 | `OTEL_EXPORTER_ZIPKIN_ENDPOINT` | The URL to where send the traces for `Zipkin` and `DatadogAgent` exporters (see: `OTEL_EXPORTER`). | `http://localhost:8126` |
 | `OTEL_TAGS` | Comma-separated list of key-value pairs to specify global span tags. For example: `"key1:val1,key2:val2"` |  |
 | `OTEL_LOGS_INJECTION` | Enable to inject trace IDs, span IDs, service name and environment into logs. This requires a compatible logger or manual configuration. | `false` |
-| `OTEL_EXPORTER` | The exporter to be used. The Tracer uses it to encode and dispatch traces. Available values are: `zipkin`, `jeager`. | |
+| `OTEL_EXPORTER` | The exporter to be used. The Tracer uses it to encode and dispatch traces. Available values are: `zipkin`, `jeager`, `otlp`. | |
 | `OTEL_DOTNET_TRACER_CONSOLE_EXPORTER_ENABLED` | Defines whether the console exporter is enabled or not. | `true` |
 | `OTEL_MAX_LOGFILE_SIZE` | The maximum size for tracer log files, in bytes. | `10 MB` |
 | `OTEL_TRACE_LOG_PATH` | The path of the profiler log file. | Linux: `/var/log/OTEL/dotnet/dotnet-profiler.log`<br>Windows: `%ProgramData%"\OTEL .NET Tracing\logs\dotnet-profiler.log` |
 | `OTEL_DIAGNOSTIC_SOURCE_ENABLED` | Enable to generate troubleshooting logs with the `System.Diagnostics.DiagnosticSource` class. | `true` |
-| `OTEL_DOTNET_TRACER_DISABLED_INSTRUMENTATIONS` | The instrumentations you want to disable, if any, separated by a comma. These are the supported integrations: `AspNet`, `HttpClient`, `SqlClient`, `MongoDb` |  |
+| `OTEL_INTEGRATIONS` | The file path of IL-rewrite instrumentations JSON configuration file. | `%ProfilerDirectory%/integrations.json` |
+| `OTEL_DOTNET_TRACER_INSTRUMENTATIONS` | The instrumentations you want to enable, separated by a comma. Supported values: `AspNet`, `HttpClient`, `SqlClient`, `MongoDb`. |  |
+| `OTEL_DOTNET_TRACER_DISABLED_INSTRUMENTATIONS` | The instrumentations set via `OTEL_DOTNET_TRACER_INSTRUMENTATIONS` value and `OTEL_INTEGRATIONS` configuration file you want to disable, separated by a comma. | |
 | `OTEL_CONVENTION` | Sets the semantic and trace id conventions for the tracer. Available values are: `Datadog` (64bit trace id), `OpenTelemetry` (128 bit trace id). |  `Datadog` |
 | `OTEL_PROPAGATORS` | Comma separated list of the propagators for the tracer. Available propagators are: `Datadog`, `B3`, `W3C`. The Tracer will try to execute extraction in the given order. | `Datadog` |
 | `OTEL_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION` |  Sets whether to intercept method calls when the caller method is inside a domain-neutral assembly. This is recommended when instrumenting IIS applications. | `false` |
@@ -117,7 +119,7 @@ A plugin must be a non-static, non-abstract class which has a default constructo
 public OpenTelemetry.Trace.TracerProviderBuilder ConfigureTracerProvider(OpenTelemetry.Trace.TracerProviderBuilder builder)
 ```
 
-The plugin must use the same version of the `OpenTelemetry` as the OpenTelemetry .NET AutoInstrumentation. Current version is `1.1.0-beta2`.
+The plugin must use the same version of the `OpenTelemetry` as the OpenTelemetry .NET AutoInstrumentation. Current version is `1.2.0-alpha1`.
 
 ## Setup
 
@@ -255,18 +257,18 @@ Enable instrumentation for a specific user:
 
 ## Configure custom instrumentation
 
-The instrumented application has to include same version of the `System.Diagnostics.DiagnosticSource` as the SDK. Current version is `5.0.1`.
+The instrumented application has to include same version of the `System.Diagnostics.DiagnosticSource` as the SDK. Current version is `6.0.0-preview.6.21352.12`.
 
 Include package reference directly into `.csproj`:
 
 ```xml
-<PackageReference Include="System.Diagnostics.DiagnosticSource" Version="5.0.1" />
+<PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0-preview.6.21352.12" />
 ```
 
 ... or use Package Manager Console to install package:
 
 ```powershell
-Install-Package System.Diagnostics.DiagnosticSource -Version 5.0.1 -ProjectName MyProjectName
+Install-Package System.Diagnostics.DiagnosticSource -Version 6.0.0-preview.6.21352.12 -ProjectName MyProjectName
 ```
 
 For adding manual instrumentation the variable `OTEL_DOTNET_TRACER_LOAD_AT_STARTUP` should be set to `false` and the tracer should be initialized by the application itself. Here is an example of creating the tracer:
@@ -316,20 +318,15 @@ These are ";" delimited lists that control the inclusion/exclusion of processes.
 
 ### No proper relatioship between spans
 
-On .NET Framework strong name signing can force multiple versions of the same assembly being loaded on the same process. This causes a separate hierarchy of Activity objects. If you are referencing packages in your application that use different version of the `System.Diagnostics.DiagnosticSource` than the `OpenTelemetry.Api` used by autoinstrumentation (`5.0.1`) you have to explicitly reference the `System.Diagnostics.DiagnosticSource` package in the correct version in your application (see [custom instrumentation section](#configure-custom-instrumentation)). This will cause automatic binding redirection to occur resolving the issue. If automatic binding redirection is [disabled](https://docs.microsoft.com/en-us/dotnet/framework/configure-apps/how-to-enable-and-disable-automatic-binding-redirection) you can also manually add binding redirection to the `App.config` file:
+On .NET Framework strong name signing can force multiple versions of the same assembly being loaded on the same process.
+This causes a separate hierarchy of Activity objects. If you are referencing packages in your application that use
+different version of the `System.Diagnostics.DiagnosticSource` than the `OpenTelemetry.Api` used by autoinstrumentation
+(`6.0.0-preview.6.21352.12`) you have to explicitly reference the `System.Diagnostics.DiagnosticSource` package in the correct version
+in your application (see [custom instrumentation section](#configure-custom-instrumentation)).
+This will cause automatic binding redirection to occur resolving the issue.
 
-```xml
-<configuration>
-  <runtime>
-    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
-      <dependentAssembly>
-        <assemblyIdentity name="System.Diagnostics.DiagnosticSource" publicKeyToken="cc7b13ffcd" culture="neutral" />
-        <bindingRedirect oldVersion="0.0.0.0-5.0.0.0" newVersion="5.0.0.1" />
-      </dependentAssembly>
-    </assemblyBinding>
-  </runtime>
-</configuration>
-```
+If automatic binding redirection is [disabled](https://docs.microsoft.com/en-us/dotnet/framework/configure-apps/how-to-enable-and-disable-automatic-binding-redirection)
+you can also manually add binding redirection to [the `App.config` file](../samples/BindingRedirect/App.config).
 
 ### Investigating other issues
 

@@ -30,7 +30,7 @@ partial class Build
 
             // Create home directory
             CopyFileToDirectory(
-                NativeProfilerProject.Directory / "bin" / $"{NativeProfilerProject.Name}.dylib",
+                NativeProfilerProject.Directory / "bin" / $"{ArtifactNames.NativeProfiler}.dylib",
                 TracerHomeDirectory,
                 FileExistsPolicy.Overwrite);
         });

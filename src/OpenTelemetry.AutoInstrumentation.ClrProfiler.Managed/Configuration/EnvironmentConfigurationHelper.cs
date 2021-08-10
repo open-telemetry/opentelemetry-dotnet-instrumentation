@@ -44,7 +44,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
 
         public static TracerProviderBuilder AddSdkAspNetInstrumentation(this TracerProviderBuilder builder)
         {
-#if NET452 || NET461
+#if NET461
             return builder.AddAspNetInstrumentation();
 #elif NETCOREAPP3_1_OR_GREATER
             return builder.AddAspNetCoreInstrumentation();
@@ -68,27 +68,29 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                         options.Endpoint = settings.ZipkinEndpoint;
                         options.ExportProcessorType = ExportProcessorType.Simple; // for PoC
                     });
-
                     break;
                 case "jaeger":
-#if NET452
-                    throw new NotSupportedException();
-#else
-                    var agentHost = settings.JaegerExporterAgentHost;
-                    var agentPort = settings.JaegerExporterAgentPort;
-
                     builder.AddJaegerExporter(options =>
                     {
-                        options.AgentHost = agentHost;
-                        options.AgentPort = agentPort;
                         options.ExportProcessorType = ExportProcessorType.Simple; // for PoC
                     });
+                    break;
+                case "otlp":
+                    builder.AddOtlpExporter(
+                        options =>
+                        {
+                            // TODO remove when sdk version with env vars support is released
+                            var endpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
+                            if (!string.IsNullOrEmpty(endpoint))
+                            {
+                                options.Endpoint = new Uri(endpoint);
+                            }
+                        });
                     break;
                 case "":
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("The exporter name is not recognised");
-#endif
             }
 
             return builder;

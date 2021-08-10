@@ -730,12 +730,6 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.DuckTyping
             private static CreateTypeResult GetProxySlow(Type targetType)
             {
                 Type proxyTypeDefinition = typeof(T);
-#if NET452
-                if (!proxyTypeDefinition.IsValueType && !UseDirectAccessTo(proxyTypeDefinition))
-                {
-                    DuckTypeTypeIsNotPublicException.Throw(proxyTypeDefinition, nameof(proxyTypeDefinition));
-                }
-#endif
                 return GetOrCreateProxyType(proxyTypeDefinition, targetType);
             }
         }
