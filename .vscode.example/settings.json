@@ -1,4 +1,4 @@
 {
     "razor.disabled": true,
-    "omnisharp.defaultLaunchSolution": "Datadog.Trace.Minimal.sln"
+    "omnisharp.defaultLaunchSolution": "OpenTelemetry.AutoInstrumentation.sln"
 }

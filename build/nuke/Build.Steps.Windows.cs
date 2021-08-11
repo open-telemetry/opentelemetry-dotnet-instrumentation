@@ -63,7 +63,7 @@ partial class Build
             foreach (var architecture in ArchitecturesForPlatform)
             {
                 var source = NativeProfilerProject.Directory / "bin" / BuildConfiguration / architecture.ToString() /
-                             $"{ArtifactNames.NativeProfiler}.dll";
+                             $"{NativeProfilerProject.Name}.dll";
                 var dest = TracerHomeDirectory / $"win-{architecture}";
 
                 Logger.Info($"Copying '{source}' to '{dest}'");
@@ -79,8 +79,9 @@ partial class Build
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
-            var workingDirectory = TestsDirectory / "Datadog.Trace.ClrProfiler.Native.Tests" / "bin" / BuildConfiguration.ToString() / Platform.ToString();
-            var exePath = workingDirectory / "Datadog.Trace.ClrProfiler.Native.Tests.exe";
+            var project = Solution.GetProject(Projects.Tests.ClrProfilerNativeTests);
+            var workingDirectory = project.Directory / "bin" / BuildConfiguration.ToString() / Platform.ToString();
+            var exePath = workingDirectory / $"{project.Name}.exe";
             var testExe = ToolResolver.GetLocalTool(exePath);
 
             testExe("--gtest_output=xml", workingDirectory: workingDirectory);

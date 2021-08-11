@@ -277,9 +277,6 @@ deploy/AzureAppServices/
 # macOS temporal files
 .DS_Store
 
-# profiler output files
-src/Datadog.Trace.ClrProfiler.Native/build/
-
 # ignore blog folder from upstream
 blog/
 
@@ -288,3 +285,12 @@ blog/
 
 # exception to the ignore rule
 !/**/.gitkeep
+
+# profiler build files
+src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/build/
+src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/deps/
+src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/CMakeFiles/
+src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/tmp.*
+src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/Makefile
+src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/CMakeCache.txt
+src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native/cmake_install.cmake
