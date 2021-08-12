@@ -8,6 +8,19 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Util
     internal static class ActivityHelper
     {
         /// <summary>
+        /// Set span (activity) resource name.
+        /// </summary>
+        /// <param name="activity">The activity to include resource name.</param>
+        /// <param name="resourceName">The resource name</param>
+        public static void SetResourceName(this Activity activity, string resourceName)
+        {
+            if (!string.IsNullOrWhiteSpace(resourceName))
+            {
+                activity.SetTag(Tags.ResourceName, resourceName);
+            }
+        }
+
+        /// <summary>
         /// Add the StackTrace and other exception metadata to the span
         /// </summary>
         /// <param name="activity">The activity to include exception info.</param>
