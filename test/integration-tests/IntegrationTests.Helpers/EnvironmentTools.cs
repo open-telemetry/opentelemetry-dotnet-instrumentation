@@ -26,7 +26,7 @@ namespace IntegrationTests.Helpers
             {
                 var startDirectory = Environment.CurrentDirectory;
                 var currentDirectory = Directory.GetParent(startDirectory);
-                const string searchItem = @"Datadog.Trace.sln";
+                const string searchItem = @"OpenTelemetry.AutoInstrumentation.sln";
 
                 while (true)
                 {
