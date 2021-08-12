@@ -48,10 +48,7 @@ TEST_F(CLRHelperTest, EnumeratesTypeDefs) {
 
 TEST_F(CLRHelperTest, EnumeratesAssemblyRefs) {
   std::vector<std::wstring> expected_assemblies = {
-      L"System.Runtime",
-      L"System.Collections",
-      L"System.Threading.Tasks",
-      L"System.Diagnostics.Debug"};
+      L"netstandard"};
   std::vector<std::wstring> actual_assemblies;
   for (auto& ref : EnumAssemblyRefs(assembly_import_)) {
     auto name = GetReferencedAssemblyMetadata(assembly_import_, ref).name;
@@ -129,7 +126,7 @@ TEST_F(CLRHelperTest, FiltersIntegrationsByTarget) {
         {}}}};
   Integration i3 = {
       L"integration-3",
-      {{{}, {L"System.Runtime", L"", L"", L"ReplaceTargetMethod", min_ver_, max_ver_, {}, empty_sig_type_}, {}}}};
+      {{{}, {L"netstandard", L"", L"", L"ReplaceTargetMethod", min_ver_, max_ver_, {}, empty_sig_type_}, {}}}};
   auto all = FlattenIntegrations({i1, i2, i3}, false);
   auto expected = FlattenIntegrations({i1, i3}, false);
   auto actual = FilterIntegrationsByTarget(all, assembly_import_);
