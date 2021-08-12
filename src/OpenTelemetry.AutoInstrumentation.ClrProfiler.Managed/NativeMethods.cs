@@ -21,14 +21,14 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed
         // and optional on .NET Core
         private static class Windows
         {
-            [DllImport("Datadog.Trace.ClrProfiler.Native.dll")]
+            [DllImport("OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll")]
             public static extern bool IsProfilerAttached();
         }
 
         // assume .NET Core if not running on Windows
         private static class NonWindows
         {
-            [DllImport("Datadog.Trace.ClrProfiler.Native")]
+            [DllImport("OpenTelemetry.AutoInstrumentation.ClrProfiler.Native")]
             public static extern bool IsProfilerAttached();
         }
     }
