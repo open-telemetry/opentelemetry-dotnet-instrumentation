@@ -124,10 +124,11 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Configuration
                 return Assembly.GetEntryAssembly()?.GetName().Name ??
                        Process.GetCurrentProcess().ProcessName;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Console.WriteLine("ERROR >> Error creating default service name.");
-                return null;
+                // TODO: Log service name creation error
+                Console.WriteLine($">>>>>>>>>>>>>>>>>>>>>>> Error: Could not get service name. Message: {ex.Message}");
+                throw;
             }
         }
     }
