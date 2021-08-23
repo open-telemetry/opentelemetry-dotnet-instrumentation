@@ -122,7 +122,7 @@ namespace OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Instrumentations
 
             try
             {
-                var tab = "    ";
+                const string tab = "    ";
                 builder.AppendLine("errors: [");
 
                 for (int i = 0; i < executionErrors.Count; i++)
