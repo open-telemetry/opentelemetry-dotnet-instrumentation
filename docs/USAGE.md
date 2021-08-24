@@ -271,7 +271,8 @@ Include package reference directly into `.csproj`:
 Install-Package System.Diagnostics.DiagnosticSource -Version 6.0.0-preview.6.21352.12 -ProjectName MyProjectName
 ```
 
-For adding manual instrumentation the variable `OTEL_DOTNET_TRACER_LOAD_AT_STARTUP` should be set to `false` and the tracer should be initialized by the application itself. Here is an example of creating the tracer:
+For manually bootstrapping the OpenTelemetry .NET SDK the variable `OTEL_DOTNET_TRACER_LOAD_AT_STARTUP` should be set to `false`
+and the tracer should be initialized by the application itself. Here is an example of creating the tracer:
 
 ```csharp
 var builder = Sdk
