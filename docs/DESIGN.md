@@ -52,7 +52,7 @@ can properly inject them at runtime. Some examples:
   * [MongoDB Instrumentation](../src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed/Instrumentations/MongoDB)
   * [GraphQL](../src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed/Instrumentations/GraphQL)
 
-![Overview](images/architecture-overview.png)
+![Overview](./images/architecture-overview.png)
 
 ### Injecting the OpenTelemetry .NET SDK and Instrumentations
 
