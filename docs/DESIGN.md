@@ -135,7 +135,7 @@ In the future, to simplify this process, we plan to create a NuGet package insta
 
 If changing the application build is not an option to add or update the necessary package versions, it is
 still possible to address the conflicts via the methods described at
-[Handling of Assembly version Conflicts](./USAGE.md#handling-of-assembly-version-conflicts).
+[Handling of Assembly version Conflicts](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/poc-otel-sdk/docs/USAGE.md#handling-of-assembly-version-conflicts).
 
 ## Plans
 
