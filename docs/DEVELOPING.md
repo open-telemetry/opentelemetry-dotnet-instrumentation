@@ -51,9 +51,9 @@ cp -r .vscode.example .vscode
 
 Because of [Mono missing features](https://github.com/OmniSharp/omnisharp-vscode#note-about-using-net-5-sdks), `omnisharp.useGlobalMono` has to be set to `never`. Go to `File` -> `Preferences` -> `Settings` -> `Extensions` -> `C# Configuration` -> Change `Omnisharp: Use Global Mono` (you can search for it if the menu is too long) to `never`. Afterwards, you have restart OmniSharp: `F1` -> `OmniSharp: Restart OmniSharp`.
 
-There may be a lot of errors, because some projects target .NET Framework. Switch to `OpenTelemetry.AutoInstrumentation.sln` using `F1` -> `OmniSharp: Select Project` in Visual Studio Code to load a subset of projects which work without any issues. You can also try building the projects which have errors as it sometimes helps.
+There may be a lot of errors, because some projects target .NET Framework. Switch to `OpenTelemetry.ClrProfiler.sln` using `F1` -> `OmniSharp: Select Project` in Visual Studio Code to load a subset of projects which work without any issues. You can also try building the projects which have errors as it sometimes helps.
 
-If for whatever reason you need to use `OpenTelemetry.AutoInstrumentation.sln` you can run `for i in **/*.csproj; do dotnet build $i; done` to decrease the number of errors.
+If for whatever reason you need to use `OpenTelemetry.ClrProfiler.sln` you can run `for i in **/*.csproj; do dotnet build $i; done` to decrease the number of errors.
 
 ## Development Container
 
