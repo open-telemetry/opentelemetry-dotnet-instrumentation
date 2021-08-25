@@ -11,7 +11,7 @@ namespace ConsoleApp
 {
     internal class Program
     {
-        private static readonly ActivitySource MyActivitySource = new ActivitySource("OpenTelemetry.AutoInstrumentation.ConsoleApp");
+        private static readonly ActivitySource MyActivitySource = new ActivitySource("OpenTelemetry.ClrProfiler.ConsoleApp");
 
         private static async Task<int> Main()
         {

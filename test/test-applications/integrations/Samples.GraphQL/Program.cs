@@ -6,7 +6,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed;
+using OpenTelemetry.ClrProfiler.Managed;
 
 namespace Samples.GraphQL
 {
