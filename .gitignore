@@ -294,3 +294,6 @@ src/OpenTelemetry.ClrProfiler.Native/tmp.*
 src/OpenTelemetry.ClrProfiler.Native/Makefile
 src/OpenTelemetry.ClrProfiler.Native/CMakeCache.txt
 src/OpenTelemetry.ClrProfiler.Native/cmake_install.cmake
+
+# exception for native profiler dependencies
+!src/OpenTelemetry.ClrProfiler.Native/lib/**
