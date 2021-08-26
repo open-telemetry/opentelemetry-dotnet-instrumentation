@@ -95,6 +95,20 @@ partial class Build
             );
         });
 
+    Target CompileManagedTests => _ => _
+        .Unlisted()
+        .Description("Compiles the managed code in the test directory")
+        .After(CompileManagedSrc)
+        .Executes(() =>
+        {
+            DotNetMSBuild(x => x
+                .SetTargetPath(MsBuildProject)
+                .SetTargetPlatform(Platform)
+                .SetConfiguration(BuildConfiguration)
+                .DisableRestore()
+                .SetTargets("BuildCsharpTest"));
+        });
+
     Target CompileNativeSrc => _ => _
         .Unlisted()
         .Description("Compiles the native loader")
@@ -152,4 +166,28 @@ partial class Build
         .Unlisted()
         .DependsOn(RunNativeTestsWindows)
         .DependsOn(RunNativeTestsLinux);
+
+    Target RunManagedTests => _ => _
+        .Unlisted()
+        .After(BuildTracer)
+        .After(CompileManagedTests)
+        .Executes(() =>
+        {
+            Project[] integrationTests = Solution
+                .GetProjects("IntegrationTests.*")
+                .ToArray();
+
+            DotNetTest(config => config
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatform(Platform)
+                // TODO: Remove if NetFX works
+                .SetFramework(TargetFramework.NETCOREAPP3_1)
+                .EnableNoRestore()
+                .EnableNoBuild()
+                .CombineWith(integrationTests, (s, project) => s
+                    .EnableTrxLogOutput(GetResultsDirectory(project))
+                    .SetProjectFile(project)), degreeOfParallelism: 4);
+        });
+
+    private AbsolutePath GetResultsDirectory(Project proj) => BuildDataDirectory / "results" / proj.Name;
 }

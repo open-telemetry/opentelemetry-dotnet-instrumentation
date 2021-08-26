@@ -17,6 +17,20 @@ internal static class DotNetSettingsExtensions
             : settings.SetProperty("Platform", GetTargetPlatform(platform));
     }
 
+    public static DotNetTestSettings SetTargetPlatform(this DotNetTestSettings settings, MSBuildTargetPlatform platform)
+    {
+        return platform is null
+            ? settings
+            : settings.SetProperty("Platform", GetTargetPlatform(platform));
+    }
+
+    public static DotNetTestSettings EnableTrxLogOutput(this DotNetTestSettings settings, string resultsDirectory)
+    {
+        return settings
+            .SetLogger("trx")
+            .SetResultsDirectory(resultsDirectory);
+    }
+
     private static string GetTargetPlatform(MSBuildTargetPlatform platform) =>
         platform == MSBuildTargetPlatform.MSIL ? "AnyCPU" : platform.ToString();
 }
