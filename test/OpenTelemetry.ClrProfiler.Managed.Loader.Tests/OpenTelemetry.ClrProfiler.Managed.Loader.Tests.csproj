@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.csproj" />
+    <ProjectReference Include="..\..\src\OpenTelemetry.ClrProfiler.Managed.Loader\OpenTelemetry.ClrProfiler.Managed.Loader.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,10 +34,19 @@
     <None Update="Profiler\net461\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Profiler\net461\OpenTelemetry.ClrProfiler.Managed.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Profiler\netcoreapp3.1\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Profiler\netcoreapp3.1\OpenTelemetry.ClrProfiler.Managed.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Profiler\netstandard2.0\OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Profiler\netstandard2.0\OpenTelemetry.ClrProfiler.Managed.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -1,4 +1,4 @@
 {
     "razor.disabled": true,
-    "omnisharp.defaultLaunchSolution": "OpenTelemetry.AutoInstrumentation.sln"
+    "omnisharp.defaultLaunchSolution": "OpenTelemetry.ClrProfiler.sln"
 }

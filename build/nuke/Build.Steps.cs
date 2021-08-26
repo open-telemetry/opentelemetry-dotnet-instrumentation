@@ -15,8 +15,8 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build
 {
-    [Solution("OpenTelemetry.AutoInstrumentation.sln")] readonly Solution Solution;
-    AbsolutePath MsBuildProject => RootDirectory / "OpenTelemetry.AutoInstrumentation.proj";
+    [Solution("OpenTelemetry.ClrProfiler.sln")] readonly Solution Solution;
+    AbsolutePath MsBuildProject => RootDirectory / "OpenTelemetry.ClrProfiler.proj";
 
     AbsolutePath OutputDirectory => RootDirectory / "bin";
     AbsolutePath SourceDirectory => RootDirectory / "src";

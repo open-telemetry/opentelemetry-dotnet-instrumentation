@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader;
 using Xunit;
 
 namespace OpenTelemetry.ClrProfiler.Managed.Loader.Tests
