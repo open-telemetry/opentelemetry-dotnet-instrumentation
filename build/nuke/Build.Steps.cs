@@ -109,6 +109,20 @@ partial class Build
         .DependsOn(CompileNativeTestsWindows)
         .DependsOn(CompileNativeTestsLinux);
 
+    Target CompileManagedTests => _ => _
+        .Unlisted()
+        .Description("Compile the managed code unit tests")
+        .After(CompileNativeSrc)
+        .Executes(() =>
+        {
+            // Always AnyCPU
+            DotNetBuild(x => x
+                .SetProjectFile(Solution.GetProject(Projects.Tests.ClrProfilerManagedLoaderTests))
+                .SetConfiguration(BuildConfiguration)
+                .SetNoRestore(true)
+            );
+        });
+
     Target PublishManagedProfiler => _ => _
         .Unlisted()
         .After(CompileManagedSrc)
@@ -152,4 +166,16 @@ partial class Build
         .Unlisted()
         .DependsOn(RunNativeTestsWindows)
         .DependsOn(RunNativeTestsLinux);
+
+    Target RunManagedTests => _ => _
+        .Unlisted()
+        .After(CompileManagedTests)
+        .Executes(() =>
+        {
+            DotNetTest(s => s
+                .SetNoBuild(true)
+                .SetNoRestore(true)
+                .SetConfiguration(BuildConfiguration)
+                .SetProjectFile(Solution.GetProject(Projects.Tests.ClrProfilerManagedLoaderTests)));
+        });
 }
