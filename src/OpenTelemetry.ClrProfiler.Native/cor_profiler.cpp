@@ -2585,11 +2585,11 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(
 }
 
 #ifdef LINUX
-extern uint8_t dll_start[] asm("_binary_OpenTelemetry_AutoInstrumentation_ClrProfiler_Managed_Loader_dll_start");
-extern uint8_t dll_end[] asm("_binary_OpenTelemetry_AutoInstrumentation_ClrProfiler_Managed_Loader_dll_end");
+extern uint8_t dll_start[] asm("_binary_OpenTelemetry_ClrProfiler_Managed_Loader_dll_start");
+extern uint8_t dll_end[] asm("_binary_OpenTelemetry_ClrProfiler_Managed_Loader_dll_end");
 
-extern uint8_t pdb_start[] asm("_binary_OpenTelemetry_AutoInstrumentation_ClrProfiler_Managed_Loader_pdb_start");
-extern uint8_t pdb_end[] asm("_binary_OpenTelemetry_AutoInstrumentation_ClrProfiler_Managed_Loader_pdb_end");
+extern uint8_t pdb_start[] asm("_binary_OpenTelemetry_ClrProfiler_Managed_Loader_pdb_start");
+extern uint8_t pdb_end[] asm("_binary_OpenTelemetry_ClrProfiler_Managed_Loader_pdb_end");
 #endif
 
 void CorProfiler::GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray, int* assemblySize, BYTE** pSymbolsArray, int* symbolsSize) const {
