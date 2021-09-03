@@ -354,50 +354,27 @@ namespace IntegrationTests.Helpers
             return projectDir;
         }
 
-        public string GetSampleApplicationOutputDirectory(string packageVersion = "", string framework = "", bool usePublishFolder = true)
+        public string GetSampleApplicationOutputDirectory(string packageVersion = "", string framework = "")
         {
             var targetFramework = string.IsNullOrEmpty(framework) ? GetTargetFramework() : framework;
             var binDir = Path.Combine(
                 GetSampleProjectDirectory(),
                 "bin");
 
-            string outputDir;
-
             if (_samplesDirectory.Contains("aspnet"))
             {
-                outputDir = Path.Combine(
+                return Path.Combine(
                     binDir,
                     EnvironmentTools.GetBuildConfiguration(),
                     "publish");
-            }
-            else if (EnvironmentTools.GetOS() == "win")
-            {
-                outputDir = Path.Combine(
-                    binDir,
-                    packageVersion,
-                    EnvironmentTools.GetPlatform(),
-                    EnvironmentTools.GetBuildConfiguration(),
-                    targetFramework);
-            }
-            else if (usePublishFolder)
-            {
-                outputDir = Path.Combine(
-                    binDir,
-                    packageVersion,
-                    EnvironmentTools.GetBuildConfiguration(),
-                    targetFramework,
-                    "publish");
-            }
-            else
-            {
-                outputDir = Path.Combine(
-                    binDir,
-                    packageVersion,
-                    EnvironmentTools.GetBuildConfiguration(),
-                    targetFramework);
             }
 
-            return outputDir;
+            return Path.Combine(
+                binDir,
+                packageVersion,
+                EnvironmentTools.GetPlatform().ToLowerInvariant(),
+                EnvironmentTools.GetBuildConfiguration(),
+                targetFramework);
         }
 
         public string GetTargetFramework()
