@@ -22,7 +22,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.IWireProtocol_ExecuteAsync_Integration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_ExecuteAsync_Integration",
           "action": "CallTargetModification"
         }
       },
@@ -46,7 +46,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.IWireProtocol_ExecuteAsync_Integration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_ExecuteAsync_Integration",
           "action": "CallTargetModification"
         }
       },
@@ -70,7 +70,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.IWireProtocol_ExecuteAsync_Integration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_ExecuteAsync_Integration",
           "action": "CallTargetModification"
         }
       },
@@ -94,7 +94,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.IWireProtocol_ExecuteAsync_Integration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_ExecuteAsync_Integration",
           "action": "CallTargetModification"
         }
       },
@@ -118,7 +118,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.IWireProtocol_ExecuteAsync_Integration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_ExecuteAsync_Integration",
           "action": "CallTargetModification"
         }
       },
@@ -142,7 +142,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.IWireProtocol_ExecuteAsync_Integration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_ExecuteAsync_Integration",
           "action": "CallTargetModification"
         }
       },
@@ -166,7 +166,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.IWireProtocol_ExecuteAsync_Integration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_ExecuteAsync_Integration",
           "action": "CallTargetModification"
         }
       },
@@ -190,7 +190,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.IWireProtocol_Execute_Integration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_Execute_Integration",
           "action": "CallTargetModification"
         }
       },
@@ -214,7 +214,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.IWireProtocol_Generic_Execute_Integration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_Generic_Execute_Integration",
           "action": "CallTargetModification"
         }
       },
@@ -238,7 +238,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.IWireProtocol_Generic_Execute_Integration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_Generic_Execute_Integration",
           "action": "CallTargetModification"
         }
       },
@@ -262,7 +262,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.IWireProtocol_Generic_Execute_Integration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_Generic_Execute_Integration",
           "action": "CallTargetModification"
         }
       },
@@ -286,7 +286,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.IWireProtocol_Generic_Execute_Integration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_Generic_Execute_Integration",
           "action": "CallTargetModification"
         }
       },
@@ -310,7 +310,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.IWireProtocol_Generic_Execute_Integration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_Generic_Execute_Integration",
           "action": "CallTargetModification"
         }
       },
@@ -334,7 +334,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.IWireProtocol_Generic_Execute_Integration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_Generic_Execute_Integration",
           "action": "CallTargetModification"
         }
       }
@@ -363,7 +363,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.MongoDbIntegration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.MongoDbIntegration",
           "method": "Execute",
           "signature": "00 06 01 1C 1C 1C 08 08 0A",
           "action": "ReplaceTargetMethod"
@@ -389,7 +389,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.MongoDbIntegration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.MongoDbIntegration",
           "method": "ExecuteGeneric",
           "signature": "00 06 1C 1C 1C 1C 08 08 0A",
           "action": "ReplaceTargetMethod"
@@ -415,7 +415,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.MongoDbIntegration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.MongoDbIntegration",
           "method": "ExecuteAsync",
           "signature": "00 06 1C 1C 1C 1C 08 08 0A",
           "action": "ReplaceTargetMethod"
@@ -441,7 +441,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.ClrProfiler.Managed",
-          "type": "OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb.MongoDbIntegration",
+          "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.MongoDbIntegration",
           "method": "ExecuteAsyncGeneric",
           "signature": "00 06 1C 1C 1C 1C 08 08 0A",
           "action": "ReplaceTargetMethod"
