@@ -25,6 +25,7 @@ partial class Build
     AbsolutePath TracerHomeDirectory => TracerHome ?? (OutputDirectory / "tracer-home");
     AbsolutePath ArtifactsDirectory => Artifacts ?? (OutputDirectory / "artifacts");
     AbsolutePath BuildDataDirectory => RootDirectory / "build_data";
+    AbsolutePath ProfilerTestLogs => BuildDataDirectory / "profiler-logs";
 
     Project NativeProfilerProject => Solution.GetProject(Projects.ClrProfilerNative);
 
@@ -51,6 +52,7 @@ partial class Build
             EnsureExistingDirectory(TracerHomeDirectory);
             EnsureExistingDirectory(ArtifactsDirectory);
             EnsureExistingDirectory(BuildDataDirectory);
+            EnsureExistingDirectory(ProfilerTestLogs);
         });
 
     Target Restore => _ => _
