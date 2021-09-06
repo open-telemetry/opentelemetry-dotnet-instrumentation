@@ -16,6 +16,7 @@ using static Nuke.Common.IO.FileSystemTasks;
     OnPushBranches = new[] { "main", "refs/tags/*" },
     OnPushExcludePaths = new[] { "docs/*" },
     OnPullRequestBranches = new[] { "*" },
+    PublishArtifacts = true,
     InvokedTargets = new[] { nameof(Workflow) })]
 partial class Build : NukeBuild
 {

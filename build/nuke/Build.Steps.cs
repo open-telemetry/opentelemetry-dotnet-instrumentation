@@ -169,6 +169,7 @@ partial class Build
 
     Target RunManagedTests => _ => _
         .Unlisted()
+        .Produces(BuildDataDirectory / "profiler-logs" / "*")
         .After(BuildTracer)
         .After(CompileManagedTests)
         .Executes(() =>

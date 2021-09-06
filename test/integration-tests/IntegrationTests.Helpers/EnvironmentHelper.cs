@@ -62,7 +62,7 @@ namespace IntegrationTests.Helpers
                           : string.Empty;
         }
 
-        public bool DebugModeEnabled { get; set; }
+        public bool DebugModeEnabled { get; set; } = true;
 
         public Dictionary<string, string> CustomEnvironmentVariables { get; set; } = new Dictionary<string, string>();
 
@@ -168,6 +168,7 @@ namespace IntegrationTests.Helpers
             if (DebugModeEnabled)
             {
                 environmentVariables["OTEL_TRACE_DEBUG"] = "1";
+                environmentVariables["OTEL_TRACE_LOG_DIRECTORY"] = Path.Combine(EnvironmentTools.GetSolutionDirectory(), "build_data", "profiler-logs");
             }
 
             if (!string.IsNullOrEmpty(processToProfile))
