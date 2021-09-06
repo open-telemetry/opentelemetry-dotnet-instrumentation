@@ -43,6 +43,7 @@ jobs:
       - name: Run './build.cmd Workflow'
         run: ./build.cmd Workflow
       - uses: actions/upload-artifact@v1
+        if: always()
         with:
           name: profiler-logs
           path: build_data/profiler-logs
@@ -61,6 +62,7 @@ jobs:
       - name: Run './build.cmd Workflow'
         run: ./build.cmd Workflow
       - uses: actions/upload-artifact@v1
+        if: always()
         with:
           name: profiler-logs
           path: build_data/profiler-logs
@@ -79,6 +81,7 @@ jobs:
       - name: Run './build.cmd Workflow'
         run: ./build.cmd Workflow
       - uses: actions/upload-artifact@v1
+        if: always()
         with:
           name: profiler-logs
           path: build_data/profiler-logs
