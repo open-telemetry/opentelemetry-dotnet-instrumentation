@@ -10,16 +10,20 @@ using System.Threading;
 using IntegrationTests.Helpers.Mocks;
 using IntegrationTests.Helpers.Models;
 using Newtonsoft.Json;
+using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers
 {
     public class MockZipkinCollector : IDisposable
     {
+        private readonly ITestOutputHelper _output;
         private readonly HttpListener _listener;
         private readonly Thread _listenerThread;
 
-        public MockZipkinCollector(int port = 9080, int retries = 5)
+        public MockZipkinCollector(ITestOutputHelper output, int port = 9080, int retries = 5)
         {
+            _output = output;
+
             // try up to 5 consecutive ports before giving up
             while (true)
             {
@@ -40,6 +44,8 @@ namespace IntegrationTests.Helpers
                     _listenerThread = new Thread(HandleHttpRequests);
                     _listenerThread.Start();
 
+                    WriteOutput($"Running on port '{Port}'");
+
                     return;
                 }
                 catch (HttpListenerException) when (retries > 0)
@@ -52,6 +58,8 @@ namespace IntegrationTests.Helpers
                 // always close listener if exception is thrown,
                 // whether it was caught or not
                 listener.Close();
+
+                WriteOutput("Listener shut down. Could not find available port.");
             }
         }
 
@@ -130,6 +138,7 @@ namespace IntegrationTests.Helpers
 
         public void Dispose()
         {
+            WriteOutput($"Shutting down. Total spans received: '{Spans.Count}'");
             _listener?.Stop();
         }
 
@@ -219,6 +228,13 @@ namespace IntegrationTests.Helpers
                     // we don't care about any exception when listener is stopped
                 }
             }
+        }
+
+        private void WriteOutput(string msg)
+        {
+            const string name = nameof(MockZipkinCollector);
+
+            _output.WriteLine($"[{name}]: {msg}");
         }
     }
 }
