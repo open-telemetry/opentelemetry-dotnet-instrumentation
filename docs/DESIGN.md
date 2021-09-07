@@ -10,6 +10,25 @@ These are the high-level goals defining the long-term vision for the project tha
 - **Useful out-of-the-box**: after install users should be able to get telemetry data from targeted libraries with none or minimal configuration (good selection of defaults).
 - **Extensible**: key components can be chosen via configuration and plugins.
 
+## Supported and Non-Supported Scenarios
+
+Supported Scenarios:
+
+- ** Zero-touch source code instrummentation**: applications can be instrumented without source code changes,
+although build changes may be required via the addition of specific NuGet packages.
+- ** Custom SDK support **: the instrumentation can initialize the OpenTelemetry .NET SDK, but
+what OpenTelemetry SDK implementation is used and its initialization can also be delegated
+to the application code.
+
+Non-Supported Scenarios:
+
+- ** Applications using Ahead of Time (AOT) compilation **: the current implementation relies on the
+[CLR Profiler APIs](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
+and as such doesn't support AOT.
+- ** Side by side usage with other CLR Profiler based tools **: various tools for .NET
+are also implemented using a CLR Profiler, however, only a single CLR Profiler can be used when running
+the application.
+
 ## Architecture
 
 To instrument a .NET application without requiring source code changes, the OpenTelemetry .NET Instrumentation uses the
@@ -37,7 +56,7 @@ setting-up the OpenTelemetry .NET SDK can be left to the application by setting 
 environment variable `OTEL_DOTNET_TRACER_FORCE` to `false`.
 
 - **Source Instrumentations**: instrumentations created on top of API hooks/callbacks provided
-directly by the library/framework being instrumented. This type of instrumentatio depends on the
+directly by the library/framework being instrumented. This type of instrumentation depends on the
 OpenTelemetry API and the specific library/framework that they instrument. Some examples:
 
   * [ASP.NET Core Instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.AspNetCore)
@@ -113,7 +132,7 @@ to access objects from the APIs being instrumented.
 The injection of the OpenTelemetry .NET SDK and any source instrumentation brings
 the risk of assembly version conflicts.
 This issue is more likely with the [NuGet package System.Diagnostic.DiagnosticSource](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/)
-since it contains the [Activity type](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.activity?view=net-5.0)
+and its dependencies since it contains the [Activity type](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.activity?view=net-5.0)
 used by the OpenTelemetry .NET API to represent a span.
 This package, previously released by Microsoft, is already used by various applications.
 Two issues can arise from incorrect versioning:
