@@ -16,7 +16,7 @@ namespace Samples.AspNetCoreMvc.Controllers
 
         public IActionResult Index()
         {
-            var instrumentationType = Type.GetType("OpenTelemetry.AutoInstrumentation.ClrProfiler.Instrumentation, OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed");
+            var instrumentationType = Type.GetType("OpenTelemetry.ClrProfiler.Instrumentation, OpenTelemetry.ClrProfiler.Managed");
             ViewBag.ProfilerAttached = instrumentationType?.GetProperty("ProfilerAttached", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) ?? false;
             ViewBag.TracerAssemblyLocation = Type.GetType("OpenTelemetry.Trace.Tracer, OpenTelemetry.Api")?.Assembly.Location;
             ViewBag.ClrProfilerAssemblyLocation = instrumentationType?.Assembly.Location;

@@ -229,7 +229,7 @@ namespace IntegrationTests.Helpers
                     _ => throw new PlatformNotSupportedException()
                 };
 
-                string fileName = $"OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.{extension}";
+                string fileName = $"OpenTelemetry.ClrProfiler.Native.{extension}";
 
                 var directory = GetSampleApplicationOutputDirectory();
 
@@ -428,7 +428,7 @@ namespace IntegrationTests.Helpers
             return Path.Combine(
                 EnvironmentTools.GetSolutionDirectory(),
                 "src",
-                "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native",
+                "OpenTelemetry.ClrProfiler.Native",
                 "bin",
                 EnvironmentTools.GetBuildConfiguration(),
                 EnvironmentTools.GetPlatform().ToLower());

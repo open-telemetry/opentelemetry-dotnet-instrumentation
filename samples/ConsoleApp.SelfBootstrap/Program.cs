@@ -19,7 +19,7 @@ namespace ConsoleApp.SelfBootstrap
                 .AddHttpClientInstrumentation()
                 .AddSqlClientInstrumentation()
                 .SetSampler(new AlwaysOnSampler())
-                .AddSource("OpenTelemetry.AutoInstrumentation.*", "ConsoleApp")
+                .AddSource("OpenTelemetry.ClrProfiler.*", "ConsoleApp")
                 .AddConsoleExporter()
                 .AddZipkinExporter(options =>
                 {

@@ -19,7 +19,7 @@ updates:
       interval: weekly
 
   - package-ecosystem: nuget
-    directory: /src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed
+    directory: /src/OpenTelemetry.ClrProfiler.Managed
     labels:
       - dependencies
     ignore:
