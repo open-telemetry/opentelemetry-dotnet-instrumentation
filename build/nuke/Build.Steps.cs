@@ -170,6 +170,7 @@ partial class Build
     Target RunManagedTests => _ => _
         .Unlisted()
         .After(CompileManagedTests)
+        .After(PublishMocks)
         .Executes(() =>
         {
             DotNetTest(s => s
@@ -177,5 +178,38 @@ partial class Build
                 .SetNoRestore(true)
                 .SetConfiguration(BuildConfiguration)
                 .SetProjectFile(Solution.GetProject(Projects.Tests.ClrProfilerManagedLoaderTests)));
+        });
+
+    Target PublishMocks => _ => _
+        .Unlisted()
+        .After(CompileMocks)
+        .After(CompileManagedTests)
+        .Executes(() =>
+        {
+            // publish ClrProfilerManaged moc
+            var targetFrameworks = IsWin
+                ? TargetFrameworks
+                : TargetFrameworks.Where(framework => !framework.ToString().StartsWith("net4"));
+
+            DotNetPublish(s => s
+                .SetProject(Solution.GetProject(Projects.Mocks.ClrProfilerManagedMock))
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatformAnyCPU()
+                .EnableNoBuild()
+                .EnableNoRestore()
+                .CombineWith(targetFrameworks, (p, framework) => p
+                    .SetFramework(framework)
+                    .SetOutput(TestsDirectory / Projects.Tests.ClrProfilerManagedLoaderTests / "bin" / BuildConfiguration / framework / "Profiler" / framework)));
+        });
+
+    Target CompileMocks => _ => _
+        .Unlisted()
+        .Executes(() =>
+        {
+            DotNetBuild(x => x
+                .SetProjectFile(Solution.GetProject(Projects.Mocks.ClrProfilerManagedMock))
+                .SetConfiguration(BuildConfiguration)
+                .SetNoRestore(true)
+            );
         });
 }

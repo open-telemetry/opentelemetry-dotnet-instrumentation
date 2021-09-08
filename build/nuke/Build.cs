@@ -93,5 +93,7 @@ partial class Build : NukeBuild
         .Description("Builds the managed unit tests and runs them")
         .After(Clean, BuildTracer)
         .DependsOn(CompileManagedTests)
+        .DependsOn(CompileMocks)
+        .DependsOn(PublishMocks)
         .DependsOn(RunManagedTests);
 }

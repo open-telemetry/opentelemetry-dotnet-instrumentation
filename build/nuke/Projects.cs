@@ -9,4 +9,9 @@ public static class Projects
         public const string ClrProfilerNativeTests = "OpenTelemetry.ClrProfiler.Native.Tests";
         public const string ClrProfilerManagedLoaderTests = "OpenTelemetry.ClrProfiler.Managed.Loader.Tests";
     }
+
+    public static class Mocks
+    {
+        public const string ClrProfilerManagedMock = "OpenTelemetry.ClrProfiler.Managed.Mock";
+    }
 }
