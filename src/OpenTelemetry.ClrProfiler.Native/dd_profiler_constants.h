@@ -93,9 +93,6 @@ const WSTRING managed_profiler_name = WStr("OpenTelemetry.ClrProfiler.Managed");
 
 const WSTRING nonwindows_nativemethods_type = WStr("OpenTelemetry.ClrProfiler.Managed.NativeMethods+NonWindows");
 
-// TODO: Enable if defined
-// const WSTRING appsec_nonwindows_nativemethods_type = WStr("OpenTelemetry.ClrProfiler.Managed.AppSec.Waf.NativeBindings.NativeLibrary+NonWindows");
-
 const WSTRING calltarget_modification_action = WStr("CallTargetModification");
 
 } // namespace trace

@@ -758,9 +758,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
     {
         Logger::Info("ModuleLoadFinished: ", managed_profiler_name, " - Fix PInvoke maps");
         RewritingPInvokeMaps(metadata_interfaces, module_metadata, nonwindows_nativemethods_type);
-        
-        // TODO: Enable if defined
-        // RewritingPInvokeMaps(metadata_interfaces, module_metadata, appsec_nonwindows_nativemethods_type);
     }
 #endif
 
