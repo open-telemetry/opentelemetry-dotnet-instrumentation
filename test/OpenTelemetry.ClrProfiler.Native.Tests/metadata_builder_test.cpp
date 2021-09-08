@@ -9,7 +9,6 @@ class MetadataBuilderTest : public ::testing::Test {
  protected:
   ModuleMetadata* module_metadata_ = nullptr;
   MetadataBuilder* metadata_builder_ = nullptr;
-  ICLRStrongName* strong_name_ = nullptr;
   IMetaDataDispenser* metadata_dispenser_ = nullptr;
   std::vector<WSTRING> empty_sig_type_;
 
@@ -36,10 +35,6 @@ class MetadataBuilderTest : public ::testing::Test {
                              (void**)&metadata_dispenser_);
     ASSERT_TRUE(SUCCEEDED(hr));
 
-    hr = latest->GetInterface(CLSID_CLRStrongName, IID_ICLRStrongName,
-                              (void**)&strong_name_);
-    ASSERT_TRUE(SUCCEEDED(hr));
-
     ComPtr<IUnknown> metadataInterfaces;
     hr = metadata_dispenser_->OpenScope(L"Samples.ExampleLibrary.dll",
                                         ofReadWriteMask, IID_IMetaDataImport2,
@@ -64,8 +59,8 @@ class MetadataBuilderTest : public ::testing::Test {
 
     const std::vector<IntegrationMethod> integrations;
     module_metadata_ =
-        new ModuleMetadata(metadataImport, metadataEmit, assemblyImport, assemblyEmit,
-                           assemblyName, app_domain_id, module_version_id, integrations, NULL);
+        new ModuleMetadata(metadataImport, metadataEmit, assemblyImport, assemblyEmit, assemblyName, app_domain_id,
+                           module_version_id, std::make_unique<std::vector<IntegrationMethod>>(integrations), NULL);
 
     mdModule module;
     hr = metadataImport->GetModuleFromScope(&module);

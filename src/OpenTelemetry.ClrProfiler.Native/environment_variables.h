@@ -14,8 +14,8 @@ const WSTRING tracing_enabled = WStr("OTEL_TRACE_ENABLED");
 const WSTRING debug_enabled = WStr("OTEL_TRACE_DEBUG");
 
 // Sets whether we force the instrumentation
-// even if nothing is supposed to be instrumented according to integration definition JSON files.
-// Default is true.
+// even if nothing is supposed to be instrumented according to integration
+// definition JSON files. Default is true.
 const WSTRING tracing_force = WStr("OTEL_DOTNET_TRACER_FORCE");
 
 // Sets the paths to integration definition JSON files.
@@ -24,7 +24,7 @@ const WSTRING tracing_force = WStr("OTEL_DOTNET_TRACER_FORCE");
 const WSTRING integrations_path = WStr("OTEL_INTEGRATIONS");
 
 // Sets the path to the profiler's home directory, for example:
-// "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\" or "/opt/datadog/"
+// "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\" or "/opt/opentelemetry/"
 const WSTRING profiler_home_path = WStr("OTEL_DOTNET_TRACER_HOME");
 
 // Sets the filename of executables the profiler can attach to.
@@ -53,14 +53,16 @@ const WSTRING env = WStr("OTEL_ENV");
 // from application name (e.g. entry assembly or IIS application name).
 const WSTRING service_name = WStr("OTEL_SERVICE");
 
-// Sets the "service_version" tag for every span that belong to the root service (and not an external service).
+// Sets the "service_version" tag for every span that belong to the root service
+// (and not an external service).
 const WSTRING service_version = WStr("OTEL_VERSION");
 
 // Sets a list of integrations to disable. All other integrations will remain
 // enabled. If not set (default), all integrations are enabled. Supports
 // multiple values separated with comma, for example:
 // "ElasticsearchNet,AspNetWebApi2"
-const WSTRING disabled_integrations = WStr("OTEL_DOTNET_TRACER_DISABLED_INSTRUMENTATIONS");
+const WSTRING disabled_integrations =
+    WStr("OTEL_DOTNET_TRACER_DISABLED_INSTRUMENTATIONS");
 
 // Sets the path for the profiler's log file.
 // Environment variable OTEL_TRACE_LOG_DIRECTORY takes precedence over this setting, if set.
@@ -94,7 +96,8 @@ const WSTRING azure_app_services = WStr("OTEL_AZURE_APP_SERVICES");
 const WSTRING azure_app_services_app_pool_id = WStr("APP_POOL_ID");
 
 // The DOTNET_CLI_TELEMETRY_PROFILE in the context of azure app services
-const WSTRING azure_app_services_cli_telemetry_profile_value = WStr("DOTNET_CLI_TELEMETRY_PROFILE");
+const WSTRING azure_app_services_cli_telemetry_profile_value =
+    WStr("DOTNET_CLI_TELEMETRY_PROFILE");
 
 // Determine whether to instrument calls into netstandard.dll.
 // Default to false for now to avoid the unexpected overhead of additional spans.
@@ -108,6 +111,13 @@ const WSTRING clr_enable_inlining = WStr("OTEL_CLR_ENABLE_INLINING");
 
 // Sets whether to enable the CallTarget instrumentation mode
 const WSTRING calltarget_enabled = WStr("OTEL_TRACE_CALLTARGET_ENABLED");
+
+// Custom internal tracer profiler path
+const WSTRING internal_trace_profiler_path =
+    WStr("OTEL_INTERNAL_TRACE_NATIVE_ENGINE_PATH");
+
+// Sets whether to enable NGEN images.
+const WSTRING clr_enable_ngen = WStr("OTEL_CLR_ENABLE_NGEN");
 
 }  // namespace environment
 }  // namespace trace

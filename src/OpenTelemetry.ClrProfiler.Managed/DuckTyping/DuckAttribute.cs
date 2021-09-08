@@ -54,5 +54,10 @@ namespace OpenTelemetry.ClrProfiler.DuckTyping
         /// Gets or sets the parameter type names of the target method (optional / used to disambiguation)
         /// </summary>
         public string[] ParameterTypeNames { get; set; }
+
+        /// <summary>
+        /// Gets or sets the explicit interface type name
+        /// </summary>
+        public string ExplicitInterfaceTypeName { get; set; }
     }
 }

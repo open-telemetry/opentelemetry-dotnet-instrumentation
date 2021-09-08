@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.ClrProfiler.CallTarget.Handlers;
 
@@ -7,6 +8,8 @@ namespace OpenTelemetry.ClrProfiler.CallTarget
     /// <summary>
     /// CallTarget Invoker
     /// </summary>
+    [Browsable(false)]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class CallTargetInvoker
     {
         /// <summary>

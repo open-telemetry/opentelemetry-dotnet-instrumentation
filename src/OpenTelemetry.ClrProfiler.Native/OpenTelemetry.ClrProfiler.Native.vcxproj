@@ -62,7 +62,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\packages\nlohmann.json.3.9.1\build\native\nlohmann.json.targets" Condition="Exists('..\..\packages\nlohmann.json.3.9.1\build\native\nlohmann.json.targets')" />
+    <Import Project="..\..\packages\nlohmann.json.3.5.0\build\native\nlohmann.json.targets" Condition="Exists('..\..\packages\nlohmann.json.3.5.0\build\native\nlohmann.json.targets')" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -95,7 +95,7 @@
       <ConformanceMode>true</ConformanceMode>
       <SDLCheck>true</SDLCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>SPDLOG_FMT_EXTERNAL;BIT64;HOST_64BIT;AMD64;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;BIT64;HOST_64BIT;AMD64;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Lib>
@@ -116,7 +116,7 @@
       <ConformanceMode>true</ConformanceMode>
       <SDLCheck>true</SDLCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>SPDLOG_FMT_EXTERNAL;_UNICODE;UNICODE;X86;HOST_X86;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;_UNICODE;UNICODE;X86;HOST_X86;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Lib>
@@ -142,7 +142,7 @@
       <ConformanceMode>true</ConformanceMode>
       <SDLCheck>true</SDLCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>SPDLOG_FMT_EXTERNAL;_TARGET_64BIT;BIT64;HOST_64BIT;AMD64;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;_TARGET_64BIT;BIT64;HOST_64BIT;AMD64;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Lib>
@@ -167,7 +167,7 @@
       <ConformanceMode>true</ConformanceMode>
       <SDLCheck>true</SDLCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>SPDLOG_FMT_EXTERNAL;_UNICODE;UNICODE;X86;HOST_X86;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;_UNICODE;UNICODE;X86;HOST_X86;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Lib>
@@ -193,7 +193,8 @@
     <ClInclude Include="integration.h" />
     <ClInclude Include="integration_loader.h" />
     <ClInclude Include="clr_helpers.h" />
-    <ClInclude Include="logging.h" />
+    <ClInclude Include="logger.h" />
+    <ClInclude Include="logger_impl.h" />
     <ClInclude Include="macros.h" />
     <ClInclude Include="metadata_builder.h" />
     <ClInclude Include="miniutf.hpp" />
@@ -217,7 +218,7 @@
     <ClCompile Include="il_rewriter_wrapper.cpp" />
     <ClCompile Include="integration.cpp" />
     <ClCompile Include="integration_loader.cpp" />
-    <ClCompile Include="logging.cpp" />
+    <ClCompile Include="lib\spdlog\src\spdlog.cpp" />
     <ClCompile Include="metadata_builder.cpp" />
     <ClCompile Include="miniutf.cpp" />
     <ClCompile Include="rejit_handler.cpp" />
@@ -233,6 +234,6 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\nlohmann.json.3.9.1\build\native\nlohmann.json.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\nlohmann.json.3.9.1\build\native\nlohmann.json.targets'))" />
+    <Error Condition="!Exists('..\..\packages\nlohmann.json.3.5.0\build\native\nlohmann.json.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\nlohmann.json.3.5.0\build\native\nlohmann.json.targets'))" />
   </Target>
 </Project>

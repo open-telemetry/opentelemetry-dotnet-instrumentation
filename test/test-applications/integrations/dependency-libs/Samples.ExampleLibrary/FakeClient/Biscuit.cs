@@ -26,4 +26,14 @@ namespace Samples.ExampleLibrary.FakeClient
             }
         }
     }
+
+    public struct StructBiscuit
+    {
+        public Guid Id { get; set; }
+
+        public struct Cookie
+        {
+            public bool IsYummy { get; set; }
+        }
+    }
 }
