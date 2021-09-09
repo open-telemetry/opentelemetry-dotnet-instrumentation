@@ -109,6 +109,20 @@ partial class Build
         .DependsOn(CompileNativeTestsWindows)
         .DependsOn(CompileNativeTestsLinux);
 
+    Target CompileManagedTests => _ => _
+        .Unlisted()
+        .Description("Compile the managed code unit tests")
+        .After(CompileNativeSrc)
+        .Executes(() =>
+        {
+            // Always AnyCPU
+            DotNetBuild(x => x
+                .SetProjectFile(Solution.GetProject(Projects.Tests.ClrProfilerManagedLoaderTests))
+                .SetConfiguration(BuildConfiguration)
+                .SetNoRestore(true)
+            );
+        });
+
     Target PublishManagedProfiler => _ => _
         .Unlisted()
         .After(CompileManagedSrc)
@@ -152,4 +166,50 @@ partial class Build
         .Unlisted()
         .DependsOn(RunNativeTestsWindows)
         .DependsOn(RunNativeTestsLinux);
+
+    Target RunManagedTests => _ => _
+        .Unlisted()
+        .After(CompileManagedTests)
+        .After(PublishMocks)
+        .Executes(() =>
+        {
+            DotNetTest(s => s
+                .SetNoBuild(true)
+                .SetNoRestore(true)
+                .SetConfiguration(BuildConfiguration)
+                .SetProjectFile(Solution.GetProject(Projects.Tests.ClrProfilerManagedLoaderTests)));
+        });
+
+    Target PublishMocks => _ => _
+        .Unlisted()
+        .After(CompileMocks)
+        .After(CompileManagedTests)
+        .Executes(() =>
+        {
+            // publish ClrProfilerManaged moc
+            var targetFrameworks = IsWin
+                ? TargetFrameworks
+                : TargetFrameworks.Where(framework => !framework.ToString().StartsWith("net4"));
+
+            DotNetPublish(s => s
+                .SetProject(Solution.GetProject(Projects.Mocks.ClrProfilerManagedMock))
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatformAnyCPU()
+                .EnableNoBuild()
+                .EnableNoRestore()
+                .CombineWith(targetFrameworks, (p, framework) => p
+                    .SetFramework(framework)
+                    .SetOutput(TestsDirectory / Projects.Tests.ClrProfilerManagedLoaderTests / "bin" / BuildConfiguration / framework / "Profiler" / framework)));
+        });
+
+    Target CompileMocks => _ => _
+        .Unlisted()
+        .Executes(() =>
+        {
+            DotNetBuild(x => x
+                .SetProjectFile(Solution.GetProject(Projects.Mocks.ClrProfilerManagedMock))
+                .SetConfiguration(BuildConfiguration)
+                .SetNoRestore(true)
+            );
+        });
 }
