@@ -23,7 +23,7 @@ partial class Build : NukeBuild
     public static int Main() => Execute<Build>(x => x.BuildTracer);
 
     [Parameter("Configuration to build - Default is 'Release'")]
-    readonly Configuration BuildConfiguration = Configuration.Release;
+    readonly Configuration BuildConfiguration = Configuration.Debug;
 
     [Parameter("Platform to build - x86 or x64. Default is x64")]
     readonly MSBuildTargetPlatform Platform = MSBuildTargetPlatform.x64;
