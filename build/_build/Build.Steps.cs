@@ -1125,7 +1125,7 @@ partial class Build
 
     private DotNetTestSettings ConfigureCodeCoverage(DotNetTestSettings settings)
     {
-        var strongNameKeyPath = Solution.Directory / "Datadog.Trace.snk";
+        var strongNameKeyPath = Solution.Directory / "OpenTelemetry.AutoInstrumentation.snk";
 
         return settings.SetDataCollector("XPlat Code Coverage")
                 .SetProcessArgumentConfigurator(
