@@ -33,9 +33,11 @@ namespace Datadog.Trace.Agent
             return _exporter.SendTracesAsync(ArrayHelper.Empty<Span[]>());
         }
 
-        public void WriteTrace(Span[] trace)
+        public void WriteTrace(ArraySegment<Span> trace)
         {
-            var success = _tracesBuffer.Push(trace);
+            // TODO: Simple solution when pulling from upstream: copy the segment contents
+            // to an array. Review this code and optimize as appropriate.
+            var success = _tracesBuffer.Push(trace.ToArray());
 
             if (!success)
             {
@@ -43,12 +45,12 @@ namespace Datadog.Trace.Agent
             }
 
             _metrics.Increment(TracerMetricNames.Queue.EnqueuedTraces);
-            _metrics.Increment(TracerMetricNames.Queue.EnqueuedSpans, trace.Length);
+            _metrics.Increment(TracerMetricNames.Queue.EnqueuedSpans, trace.Count);
 
             if (!success)
             {
                 _metrics.Increment(TracerMetricNames.Queue.DroppedTraces);
-                _metrics.Increment(TracerMetricNames.Queue.DroppedSpans, trace.Length);
+                _metrics.Increment(TracerMetricNames.Queue.DroppedSpans, trace.Count);
             }
         }
 
