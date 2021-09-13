@@ -62,7 +62,7 @@ namespace Datadog.Trace.ServiceFabric
                 // extract propagation context from message headers for distributed tracing
                 if (messageHeaders != null)
                 {
-                    spanContext = tracer.Propagator.Extract(messageHeaders, GetHeaders);
+                    spanContext = ((IDatadogTracer)tracer).Propagator.Extract(messageHeaders, GetHeaders);
                 }
             }
             catch (Exception ex)
