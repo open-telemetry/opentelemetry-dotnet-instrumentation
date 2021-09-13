@@ -8,11 +8,16 @@ using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 
+/**
+ * To trigger manual generation invoke: 
+ * nuke --generate-configuration GitHubActions_ci --host GitHubActions
+ * Automatic generation disabled due artifacts upload (even if Nuke step fails)
+ */
 [GitHubActions("ci",
     GitHubActionsImage.WindowsLatest,
     GitHubActionsImage.UbuntuLatest,
     GitHubActionsImage.MacOsLatest,
-    AutoGenerate = true,
+    AutoGenerate = false,
     OnPushBranches = new[] { "main", "refs/tags/*" },
     OnPushExcludePaths = new[] { "docs/*" },
     OnPullRequestBranches = new[] { "*" },
@@ -23,7 +28,7 @@ partial class Build : NukeBuild
     public static int Main() => Execute<Build>(x => x.BuildTracer);
 
     [Parameter("Configuration to build - Default is 'Release'")]
-    readonly Configuration BuildConfiguration = Configuration.Debug;
+    readonly Configuration BuildConfiguration = Configuration.Release;
 
     [Parameter("Platform to build - x86 or x64. Default is x64")]
     readonly MSBuildTargetPlatform Platform = MSBuildTargetPlatform.x64;
@@ -91,9 +96,11 @@ partial class Build : NukeBuild
         .DependsOn(RunNativeTests);
 
     Target ManagedTests => _ => _
-        .Description("Builds the managed tests and runs them")
+        .Description("Builds the managed unit / integration tests and runs them")
         .After(Clean, BuildTracer)
         .DependsOn(CreateRequiredDirectories)
         .DependsOn(CompileManagedTests)
+        .DependsOn(CompileMocks)
+        .DependsOn(PublishMocks)
         .DependsOn(RunManagedTests);
 }

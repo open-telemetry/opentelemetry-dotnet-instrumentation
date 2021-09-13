@@ -6,6 +6,9 @@ internal static class DotNetSettingsExtensions
     public static DotNetPublishSettings SetTargetPlatformAnyCPU(this DotNetPublishSettings settings)
         => settings.SetTargetPlatform(MSBuildTargetPlatform.MSIL);
 
+    public static DotNetTestSettings SetTargetPlatformAnyCPU(this DotNetTestSettings settings)
+        => settings.SetTargetPlatform(MSBuildTargetPlatform.MSIL);
+
     public static T SetTargetPlatformAnyCPU<T>(this T settings)
         where T : MSBuildSettings
         => settings.SetTargetPlatform(MSBuildTargetPlatform.MSIL);

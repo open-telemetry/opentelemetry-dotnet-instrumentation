@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>OpenTelemetry.ClrProfiler.Managed</AssemblyName>
+    <RootNamespace>OpenTelemetry.ClrProfiler.Managed</RootNamespace>
+    <Platforms>AnyCPU</Platforms>
+    <ApplicationIcon />
+    <OutputType>Library</OutputType>
+    <StartupObject />
+  </PropertyGroup>
+
+</Project>

@@ -9,7 +9,7 @@
     <CsharpProject Include="src\**\*.csproj" />
     <CppProject Include="src\**\*.vcxproj"/>
     <CppTestProject Include="test\**\*.vcxproj"/>
-    <SampleProject Include="test\test-applications\**\*.csproj" />
+    <SampleProject Include="test\test-applications\integrations\**\*.csproj" />
     <IntegrationProject Include="test\integration-tests\**\*.csproj" />
   </ItemGroup>
 
