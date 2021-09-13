@@ -68,7 +68,8 @@ partial class Build : NukeBuild
         .Description("GitHub workflow entry point")
         .DependsOn(Clean)
         .DependsOn(BuildTracer)
-        .DependsOn(NativeTests);
+        .DependsOn(NativeTests)
+        .DependsOn(ManagedTests);
 
     Target BuildTracer => _ => _
         .Description("Builds the native and managed src, and publishes the tracer home directory")
@@ -87,4 +88,12 @@ partial class Build : NukeBuild
         .DependsOn(CreateRequiredDirectories)
         .DependsOn(CompileNativeTests)
         .DependsOn(RunNativeTests);
+
+    Target ManagedTests => _ => _
+        .Description("Builds the managed unit tests and runs them")
+        .After(Clean, BuildTracer)
+        .DependsOn(CompileManagedTests)
+        .DependsOn(CompileMocks)
+        .DependsOn(PublishMocks)
+        .DependsOn(RunManagedTests);
 }

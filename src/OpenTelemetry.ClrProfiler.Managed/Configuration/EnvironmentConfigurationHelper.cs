@@ -71,7 +71,6 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                 case "zipkin":
                     builder.AddZipkinExporter(options =>
                     {
-                        options.Endpoint = settings.ZipkinEndpoint;
                         options.ExportProcessorType = ExportProcessorType.Simple; // for PoC
                     });
                     break;
@@ -88,16 +87,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                     // See: https://docs.microsoft.com/aspnet/core/grpc/troubleshoot#call-insecure-grpc-services-with-net-core-client
                     AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 #endif
-                    builder.AddOtlpExporter(
-                        options =>
-                        {
-                            // TODO remove when sdk version with env vars support is released
-                            var endpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
-                            if (!string.IsNullOrEmpty(endpoint))
-                            {
-                                options.Endpoint = new Uri(endpoint);
-                            }
-                        });
+                    builder.AddOtlpExporter();
                     break;
                 case "":
                     break;

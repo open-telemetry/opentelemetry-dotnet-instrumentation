@@ -45,12 +45,6 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         public const string Exporter = "OTEL_EXPORTER";
 
         /// <summary>
-        /// Configuration key for the Agent URL where the Tracer can send traces.
-        /// Default value is "http://localhost:8126".
-        /// </summary>
-        public const string ZipkinEndpoint = "OTEL_EXPORTER_ZIPKIN_ENDPOINT";
-
-        /// <summary>
         /// Configuration key for whether the console exporter is enabled.
         /// </summary>
         public const string ConsoleExporterEnabled = "OTEL_DOTNET_TRACER_CONSOLE_EXPORTER_ENABLED";
