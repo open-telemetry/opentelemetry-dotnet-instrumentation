@@ -1,29 +1,5 @@
-trigger:
-  branches:
-    include:
-      - main
-  paths:
-    exclude:
-      - docs/*
-      - .github/*
-pr:
-  branches:
-    include:
-      - main
-      - release/*
-  paths:
-    exclude:
-      - docs/*
-      - .github/*
-
-schedules:
-- cron: "0 4 * * *"
-  displayName: Daily 4am (UTC) build
-  branches:
-    include:
-    - main
-    - benchmarks/*
-  always: true
+trigger: none
+pr: none
 
 jobs:
 

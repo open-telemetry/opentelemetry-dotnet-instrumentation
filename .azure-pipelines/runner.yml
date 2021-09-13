@@ -1,14 +1,5 @@
-trigger:
-  branches:
-    include:
-      - main
-      - refs/tags/*
-    exclude:
-      - refs/pull/*/head
-  paths:
-    exclude:
-      - docs/*
-      - .github/*
+trigger: none
+pr: none
 
 variables:
   publishOutput: $(System.DefaultWorkingDirectory)/src/bin/managed-publish
@@ -109,6 +100,7 @@ jobs:
   pool:
     vmImage: macOS-10.15
   steps:
+  - template: steps/downgrade-macos-cmake.yml
 
   - task: UseDotNet@2
     displayName: install dotnet core runtime 3.1
@@ -144,6 +136,7 @@ jobs:
 - job: build_runner_tool_and_standalone
   dependsOn:
   - build_linux_profiler
+  - build_linux_profiler_arm64
   - macos_profiler
   condition: succeeded()
 

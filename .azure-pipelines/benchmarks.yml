@@ -1,17 +1,5 @@
-trigger:
-  branches:
-    include:
-      - main
-      - refs/tags/*
-
-schedules:
-- cron: "0 3 * * *"
-  displayName: Daily 3am (UTC) build
-  branches:
-    include:
-    - main
-    - benchmarks/*
-  always: true
+trigger: none
+pr: none
 
 variables:
   buildConfiguration: release
