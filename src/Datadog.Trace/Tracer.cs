@@ -288,6 +288,11 @@ namespace Datadog.Trace
         /// </summary>
         ISampler IDatadogTracer.Sampler => Sampler;
 
+        /// <summary>
+        /// Gets the propagator logic <see cref="TracerSettings.Propagators"/>.
+        /// </summary>
+        IPropagator IDatadogTracer.Propagator => _propagator;
+
         internal static string RuntimeId => LazyInitializer.EnsureInitialized(ref _runtimeId, () => Guid.NewGuid().ToString());
 
         internal IDiagnosticManager DiagnosticManager { get; set; }
@@ -299,8 +304,6 @@ namespace Datadog.Trace
         internal IOutboundHttpConvention OutboundHttpConvention { get; }
 
         internal ITraceIdConvention TraceIdConvention { get; }
-
-        internal IPropagator Propagator => _propagator;
 
         /// <summary>
         /// Create a new Tracer with the given parameters
