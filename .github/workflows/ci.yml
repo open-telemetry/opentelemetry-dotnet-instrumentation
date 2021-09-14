@@ -71,6 +71,11 @@ jobs:
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v1
+      - name: Downgrade CMake
+        run: ./build/artifacts/downgrade-cmake-macos.sh
+      - name: Update GitHub PATH
+        run: |
+          echo "/Applications/CMake.app/Contents/bin" >> $GITHUB_PATH
       - name: Cache .nuke/temp, ~/.nuget/packages
         uses: actions/cache@v2
         with:
