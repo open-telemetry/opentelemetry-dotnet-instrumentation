@@ -107,6 +107,12 @@ namespace Datadog.Trace.Agent
                 {
                     Log.Error(ex, "An unhandled error occurred during the flushing task");
                 }
+
+                // TODO: Quick change to pass ThreadAbortAnalyzer, investigate to check practical result.
+                if (_processExit.Task.IsCompleted)
+                {
+                    return;
+                }
             }
         }
     }
