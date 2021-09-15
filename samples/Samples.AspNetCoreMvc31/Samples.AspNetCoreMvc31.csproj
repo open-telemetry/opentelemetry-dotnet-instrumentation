@@ -14,12 +14,4 @@
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
   </ItemGroup>
 
-  <!--Files shared with AspNetCoreMvc21 -->
-  <ItemGroup>
-    <Compile Include="..\Samples.AspNetCoreMvc21\OtelSdkPlugin.cs" Link="OtelSdkPlugin.cs" />
-    <Compile Include="..\Samples.AspNetCoreMvc21\Controllers\**\*.*" Link="Controllers\%(RecursiveDir)%(Filename)%(Extension)" />
-    <Compile Include="..\Samples.AspNetCoreMvc21\Shared\**\*.*" Link="Shared\%(RecursiveDir)%(Filename)%(Extension)" />
-    <Content Include="..\Samples.AspNetCoreMvc21\Views\**\*.*" Link="Views\%(RecursiveDir)%(Filename)%(Extension)" />
-  </ItemGroup>
-
 </Project>
