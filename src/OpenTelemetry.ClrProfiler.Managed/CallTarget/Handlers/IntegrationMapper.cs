@@ -504,7 +504,7 @@ namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers
             return callMethod;
         }
 
-        internal static DynamicMethod CreateAsyncEndMethodDelegate(Type integrationType, Type targetType, Type returnType)
+        internal static CreateAsyncEndMethodResult CreateAsyncEndMethodDelegate(Type integrationType, Type targetType, Type returnType)
         {
             /*
              * OnAsyncMethodEnd signatures with 3 or 4 parameters with 1 or 2 generics:
@@ -522,7 +522,7 @@ namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers
             if (onAsyncMethodEndMethodInfo is null)
             {
                 Log.Warning($"Couldn't find the method: {EndAsyncMethodName} in type: {integrationType.FullName}");
-                return null;
+                return default;
             }
 
             if (!onAsyncMethodEndMethodInfo.ReturnType.IsGenericParameter && onAsyncMethodEndMethodInfo.ReturnType != returnType)
@@ -555,6 +555,8 @@ namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers
             {
                 throw new ArgumentException($"The CallTargetState type parameter of the method: {EndAsyncMethodName} in type: {integrationType.FullName} is missing.");
             }
+
+            bool preserveContext = onAsyncMethodEndMethodInfo.GetCustomAttribute<PreserveContextAttribute>() != null;
 
             List<Type> callGenericTypes = new List<Type>();
 
@@ -645,7 +647,7 @@ namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers
             ilWriter.Emit(OpCodes.Ret);
 
             Log.Debug($"Created AsyncEndMethod Dynamic Method for '{integrationType.FullName}' integration. [Target={targetType.FullName}, ReturnType={returnType.FullName}]");
-            return callMethod;
+            return new CreateAsyncEndMethodResult(callMethod, preserveContext);
         }
 
         private static void WriteCreateNewProxyInstance(ILGenerator ilWriter, Type proxyType, Type targetType)

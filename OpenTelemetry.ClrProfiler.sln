@@ -90,11 +90,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests.Helpers", "test\integration-tests\IntegrationTests.Helpers\IntegrationTests.Helpers.csproj", "{20B74D4B-B777-4E33-AE1F-7D536DFA6BE6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test-applications", "test-applications", "{91A299AD-6C09-4B7F-BD8B-A705D9BFC672}"
-	ProjectSection(SolutionItems) = preProject
-		test\test-applications\Directory.Build.props = test\test-applications\Directory.Build.props
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "integrations", "integrations", "{E409ADD3-9574-465C-AB09-4324D205CC7C}"
+	ProjectSection(SolutionItems) = preProject
+		test\test-applications\integrations\Directory.Build.props = test\test-applications\integrations\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.GraphQL", "test\test-applications\integrations\Samples.GraphQL\Samples.GraphQL.csproj", "{63FD1231-345F-461E-A9C2-237ED305ED11}"
 EndProject
@@ -102,7 +102,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.ClrProfiler.M
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mocks", "mocks", "{E3ABDF7D-4592-4923-907C-D351DDF1CBE9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.ClrProfiler.Managed.Mock", "mocks\OpenTelemetry.ClrProfiler.Managed.Mock\OpenTelemetry.ClrProfiler.Managed.Mock.csproj", "{F0A045FD-AC09-4D33-92B8-E03E728B7F95}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.ClrProfiler.Managed.Mock", "test\test-applications\mocks\OpenTelemetry.ClrProfiler.Managed.Mock\OpenTelemetry.ClrProfiler.Managed.Mock.csproj", "{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -336,18 +336,18 @@ Global
 		{735434B9-6555-4DEE-97FC-786C763CA1F1}.Release|x64.Build.0 = Release|Any CPU
 		{735434B9-6555-4DEE-97FC-786C763CA1F1}.Release|x86.ActiveCfg = Release|Any CPU
 		{735434B9-6555-4DEE-97FC-786C763CA1F1}.Release|x86.Build.0 = Release|Any CPU
-		{F0A045FD-AC09-4D33-92B8-E03E728B7F95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F0A045FD-AC09-4D33-92B8-E03E728B7F95}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F0A045FD-AC09-4D33-92B8-E03E728B7F95}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{F0A045FD-AC09-4D33-92B8-E03E728B7F95}.Debug|x64.Build.0 = Debug|Any CPU
-		{F0A045FD-AC09-4D33-92B8-E03E728B7F95}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{F0A045FD-AC09-4D33-92B8-E03E728B7F95}.Debug|x86.Build.0 = Debug|Any CPU
-		{F0A045FD-AC09-4D33-92B8-E03E728B7F95}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F0A045FD-AC09-4D33-92B8-E03E728B7F95}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F0A045FD-AC09-4D33-92B8-E03E728B7F95}.Release|x64.ActiveCfg = Release|Any CPU
-		{F0A045FD-AC09-4D33-92B8-E03E728B7F95}.Release|x64.Build.0 = Release|Any CPU
-		{F0A045FD-AC09-4D33-92B8-E03E728B7F95}.Release|x86.ActiveCfg = Release|Any CPU
-		{F0A045FD-AC09-4D33-92B8-E03E728B7F95}.Release|x86.Build.0 = Release|Any CPU
+		{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}.Debug|x64.Build.0 = Debug|Any CPU
+		{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}.Debug|x86.Build.0 = Debug|Any CPU
+		{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}.Release|x64.ActiveCfg = Release|Any CPU
+		{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}.Release|x64.Build.0 = Release|Any CPU
+		{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}.Release|x86.ActiveCfg = Release|Any CPU
+		{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -377,7 +377,8 @@ Global
 		{E409ADD3-9574-465C-AB09-4324D205CC7C} = {91A299AD-6C09-4B7F-BD8B-A705D9BFC672}
 		{63FD1231-345F-461E-A9C2-237ED305ED11} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{735434B9-6555-4DEE-97FC-786C763CA1F1} = {5C915382-C886-457D-8641-9E766D8E5A17}
-		{F0A045FD-AC09-4D33-92B8-E03E728B7F95} = {E3ABDF7D-4592-4923-907C-D351DDF1CBE9}
+		{E3ABDF7D-4592-4923-907C-D351DDF1CBE9} = {91A299AD-6C09-4B7F-BD8B-A705D9BFC672}
+		{CF5EFBA1-A852-4D11-968D-CE6A9A46B299} = {E3ABDF7D-4592-4923-907C-D351DDF1CBE9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}

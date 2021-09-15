@@ -46,9 +46,23 @@ bool EnableInlining(bool defaultValue) {
                        defaultValue);
 }
 
-bool IsCallTargetEnabled() {
+bool IsCallTargetEnabled(bool defaultValue) {
+#if defined(ARM64) || defined(ARM)
+  //
+  // If the architecture is ARM64 or ARM, we enable CallTarget instrumentation
+  // by default
+  //
   ToBooleanWithDefault(GetEnvironmentValue(environment::calltarget_enabled),
-    true);
+                       true);
+#else
+  ToBooleanWithDefault(GetEnvironmentValue(environment::calltarget_enabled),
+                       defaultValue);
+#endif
+}
+
+bool IsNGENEnabled() {
+  ToBooleanWithDefault(GetEnvironmentValue(environment::clr_enable_ngen),
+                       false);
 }
 
 bool IsDebugEnabled() {
@@ -61,11 +75,6 @@ bool IsDumpILRewriteEnabled() {
 
 bool IsTracingDisabled() {
   CheckIfFalse(GetEnvironmentValue(environment::tracing_enabled));
-}
-
-bool IsTracingForced() {
-  ToBooleanWithDefault(GetEnvironmentValue(environment::tracing_force),
-    true);
 }
 
 bool IsAzureAppServices() {

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace OpenTelemetry.ClrProfiler.CallTarget
@@ -6,6 +7,8 @@ namespace OpenTelemetry.ClrProfiler.CallTarget
     /// Call target return value
     /// </summary>
     /// <typeparam name="T">Type of the return value</typeparam>
+    [Browsable(false)]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public readonly struct CallTargetReturn<T>
     {
         private readonly T _returnValue;
@@ -49,6 +52,8 @@ namespace OpenTelemetry.ClrProfiler.CallTarget
     /// <summary>
     /// Call target return value
     /// </summary>
+    [Browsable(false)]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public readonly struct CallTargetReturn
     {
         /// <summary>

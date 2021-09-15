@@ -2,9 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full
 // license information.
 
-#include <corhlpr.cpp>
-
 #include "il_rewriter.h"
+#include <corhlpr.cpp>
 
 #undef IfFailRet
 #define IfFailRet(EXPR)  \
@@ -100,8 +99,8 @@ static int k_rgnStackPushes[] = {
 #undef PushRef
 #undef VarPush
 #undef OPDEF
-    0, // CEE_COUNT
-    0  // CEE_SWITCH_ARG
+    0,  // CEE_COUNT
+    0   // CEE_SWITCH_ARG
 };
 
 ILRewriter::ILRewriter(
@@ -160,6 +159,12 @@ unsigned ILRewriter::GetEHCount() { return m_nEH; }
 EHClause* ILRewriter::GetEHPointer() { return m_pEH; }
 
 void ILRewriter::SetEHClause(EHClause* ehPointer, unsigned ehLength) {
+  if (m_pEH != nullptr) {
+    // Delete previous array
+    m_nEH = 0;
+    delete[] m_pEH;
+  }
+
   m_nEH = ehLength;
   m_pEH = ehPointer;
 }
@@ -310,8 +315,7 @@ HRESULT ILRewriter::ImportIL(LPCBYTE pIL) {
 }
 
 HRESULT ILRewriter::ImportEH(const COR_ILMETHOD_SECT_EH* pILEH, unsigned nEH) {
-  if(m_pEH != nullptr)
-  {
+  if (m_pEH != nullptr) {
     return COR_E_INVALIDOPERATION;
   }
 
@@ -336,13 +340,15 @@ HRESULT ILRewriter::ImportEH(const COR_ILMETHOD_SECT_EH* pILEH, unsigned nEH) {
     IfFailRet(GetInstrFromOffset(ehInfo->GetTryOffset(), &pInstr));
     clause->m_pTryBegin = pInstr;
 
-    IfFailRet(GetInstrFromOffset(ehInfo->GetTryOffset() + ehInfo->GetTryLength(), &pInstr));
+    IfFailRet(GetInstrFromOffset(
+        ehInfo->GetTryOffset() + ehInfo->GetTryLength(), &pInstr));
     clause->m_pTryEnd = pInstr;
 
     IfFailRet(GetInstrFromOffset(ehInfo->GetHandlerOffset(), &pInstr));
     clause->m_pHandlerBegin = pInstr;
 
-    IfFailRet(GetInstrFromOffset(ehInfo->GetHandlerOffset() + ehInfo->GetHandlerLength(), &pInstr));
+    IfFailRet(GetInstrFromOffset(
+        ehInfo->GetHandlerOffset() + ehInfo->GetHandlerLength(), &pInstr));
     clause->m_pHandlerEnd = pInstr->m_pPrev;
 
     if ((clause->m_Flags & COR_ILEXCEPTION_CLAUSE_FILTER) == 0) {
@@ -365,7 +371,7 @@ HRESULT ILRewriter::GetInstrFromOffset(unsigned offset, ILInstr** ppInstr) {
   if (offset <= m_CodeSize) {
     ILInstr* result = m_pOffsetToInstr[offset];
 
-    if(result != nullptr) {
+    if (result != nullptr) {
       *ppInstr = result;
       return S_OK;
     }
@@ -417,9 +423,7 @@ again:
   // Go over all instructions and produce code for them
   for (ILInstr* pInstr = m_IL.m_pNext; pInstr != &m_IL;
        pInstr = pInstr->m_pNext) {
-
-    if(offset >= maxSize)
-    {
+    if (offset >= maxSize) {
       return COR_E_INDEXOUTOFRANGE;
     }
 
@@ -438,8 +442,7 @@ again:
       m_pOutputBuffer[offset++] = (opcode & 0xFF);
     }
 
-    if (pInstr->m_opcode >= (sizeof(s_OpCodeFlags) / sizeof(BYTE)))
-    {
+    if (pInstr->m_opcode >= (sizeof(s_OpCodeFlags) / sizeof(BYTE))) {
       return COR_E_INVALIDPROGRAM;
     }
 
@@ -511,15 +514,14 @@ again:
               if (opcode == CEE_LEAVE_S) {
                 pInstr->m_opcode = CEE_LEAVE;
               } else {
-                if(!(opcode >= CEE_BR_S && opcode <= CEE_BLT_UN_S))
-                {
+                if (!(opcode >= CEE_BR_S && opcode <= CEE_BLT_UN_S)) {
                   return COR_E_INVALIDPROGRAM;
                 }
 
                 pInstr->m_opcode = opcode - CEE_BR_S + CEE_BR;
 
-                if(!(pInstr->m_opcode >= CEE_BR && pInstr->m_opcode <= CEE_BLT_UN))
-                {
+                if (!(pInstr->m_opcode >= CEE_BR &&
+                      pInstr->m_opcode <= CEE_BLT_UN)) {
                   return COR_E_INVALIDPROGRAM;
                 }
               }

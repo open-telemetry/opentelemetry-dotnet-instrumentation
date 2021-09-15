@@ -63,10 +63,15 @@ namespace OpenTelemetry.ClrProfiler.DuckTyping
                 {
                     // Avoid proxying object methods like ToString(), GetHashCode()
                     // or the Finalize() that creates problems by keeping alive the object to another collection.
-                    // You can still proxy those methods if they are defined in an interface.
+                    // You can still proxy those methods if they are defined in an interface, or if you add the DuckInclude attribute.
                     if (method.DeclaringType == typeof(object))
                     {
-                        continue;
+                        bool include = method.GetCustomAttribute<DuckIncludeAttribute>(true) is not null;
+
+                        if (!include)
+                        {
+                            continue;
+                        }
                     }
 
                     if (method.IsSpecialName || method.IsFinal || method.IsPrivate)
@@ -84,7 +89,18 @@ namespace OpenTelemetry.ClrProfiler.DuckTyping
 
         private static void CreateMethods(TypeBuilder proxyTypeBuilder, Type proxyType, Type targetType, FieldInfo instanceField)
         {
-            List<MethodInfo> proxyMethodsDefinitions = GetMethods(proxyType);
+            var proxyMethodsDefinitions = GetMethods(proxyType);
+
+            var targetMethodsDefinitions = GetMethods(targetType);
+
+            foreach (var method in targetMethodsDefinitions)
+            {
+                if (method.GetCustomAttribute<DuckIncludeAttribute>(true) is not null)
+                {
+                    proxyMethodsDefinitions.Add(method);
+                }
+            }
+
             foreach (MethodInfo proxyMethodDefinition in proxyMethodsDefinitions)
             {
                 // Ignore the method marked with `DuckIgnore` attribute
@@ -363,10 +379,11 @@ namespace OpenTelemetry.ClrProfiler.DuckTyping
                     }
 
                     // Method call
-                    if (targetMethod.IsPublic)
+                    // A generic method cannot be called using calli (throws System.InvalidOperationException)
+                    if (targetMethod.IsPublic || targetMethod.IsGenericMethod)
                     {
                         // We can emit a normal call if we have a public instance with a public target method.
-                        il.EmitCall(targetMethod.IsStatic ? OpCodes.Call : OpCodes.Callvirt, targetMethod, null);
+                        il.EmitCall(targetMethod.IsStatic || targetMethod.DeclaringType.IsValueType ? OpCodes.Call : OpCodes.Callvirt, targetMethod, null);
                     }
                     else
                     {
@@ -411,7 +428,7 @@ namespace OpenTelemetry.ClrProfiler.DuckTyping
                     // Check if we can emit a normal Call/CallVirt to the target method
                     if (!targetMethod.ContainsGenericParameters)
                     {
-                        dynIL.EmitCall(targetMethod.IsStatic ? OpCodes.Call : OpCodes.Callvirt, targetMethod, null);
+                        dynIL.EmitCall(targetMethod.IsStatic || targetMethod.DeclaringType.IsValueType ? OpCodes.Call : OpCodes.Callvirt, targetMethod, null);
                     }
                     else
                     {
@@ -533,10 +550,35 @@ namespace OpenTelemetry.ClrProfiler.DuckTyping
             MethodInfo[] allTargetMethods = targetType.GetMethods(DuckAttribute.DefaultFlags);
             foreach (MethodInfo candidateMethod in allTargetMethods)
             {
-                // We omit target methods with different names.
-                if (candidateMethod.Name != proxyMethodDuckAttribute.Name)
+                string name = proxyMethodDuckAttribute.Name;
+                bool useRelaxedNameComparison = false;
+
+                // If there is an explicit interface type name we add it to the name
+                if (!string.IsNullOrEmpty(proxyMethodDuckAttribute.ExplicitInterfaceTypeName))
                 {
-                    continue;
+                    string interfaceTypeName = proxyMethodDuckAttribute.ExplicitInterfaceTypeName;
+
+                    if (interfaceTypeName == "*")
+                    {
+                        // If a wildcard is use, then we relax the name comparison so it can be an implicit or explicity implementation
+                        useRelaxedNameComparison = true;
+                    }
+                    else
+                    {
+                        // Nested types are separated with a "." on explicit implementation.
+                        interfaceTypeName = interfaceTypeName.Replace("+", ".");
+
+                        name = interfaceTypeName + "." + name;
+                    }
+                }
+
+                // We omit target methods with different names.
+                if (candidateMethod.Name != name)
+                {
+                    if (!useRelaxedNameComparison || !candidateMethod.Name.EndsWith("." + name))
+                    {
+                        continue;
+                    }
                 }
 
                 // Check if the candidate method is a reverse mapped method
@@ -619,8 +661,68 @@ namespace OpenTelemetry.ClrProfiler.DuckTyping
                     {
                         if (!candidateParamType.IsAssignableFrom(proxyParamType))
                         {
-                            skip = true;
-                            break;
+                            // Check if the parameter type contains generic types before skipping
+                            if (!candidateParamType.IsGenericType || !proxyParamType.IsGenericType)
+                            {
+                                skip = true;
+                                break;
+                            }
+
+                            // if the string representation of the generic parameter types is not the same we need to analyze the
+                            // GenericTypeArguments array before skipping it
+                            if (candidateParamType.ToString() != proxyParamType.ToString())
+                            {
+                                if (candidateParamType.GenericTypeArguments.Length != proxyParamType.GenericTypeArguments.Length)
+                                {
+                                    skip = true;
+                                    break;
+                                }
+
+                                for (int paramIndex = 0; paramIndex < candidateParamType.GenericTypeArguments.Length; paramIndex++)
+                                {
+                                    Type candidateParamTypeGenericType = candidateParamType.GenericTypeArguments[paramIndex];
+                                    Type proxyParamTypeGenericType = proxyParamType.GenericTypeArguments[paramIndex];
+
+                                    // Both need to have the same element type or byref type signature.
+                                    if (proxyParamTypeGenericType.IsByRef != candidateParamTypeGenericType.IsByRef)
+                                    {
+                                        skip = true;
+                                        break;
+                                    }
+
+                                    // If the parameters are by ref we unwrap them to have the actual type
+                                    proxyParamTypeGenericType = proxyParamTypeGenericType.IsByRef ? proxyParamTypeGenericType.GetElementType() : proxyParamTypeGenericType;
+                                    candidateParamTypeGenericType = candidateParamTypeGenericType.IsByRef ? candidateParamTypeGenericType.GetElementType() : candidateParamTypeGenericType;
+
+                                    // We can't compare generic parameters
+                                    if (candidateParamTypeGenericType.IsGenericParameter)
+                                    {
+                                        continue;
+                                    }
+
+                                    // If the proxy parameter type is a value type (no ducktyping neither a base class) both types must match
+                                    if (proxyParamTypeGenericType.IsValueType && !proxyParamTypeGenericType.IsEnum && proxyParamTypeGenericType != candidateParamTypeGenericType)
+                                    {
+                                        skip = true;
+                                        break;
+                                    }
+
+                                    // If the proxy parameter is a class and not is an abstract class (only interface and abstract class can be used as ducktype base type)
+                                    if (proxyParamTypeGenericType.IsClass && !proxyParamTypeGenericType.IsAbstract && proxyParamTypeGenericType != typeof(object))
+                                    {
+                                        if (!candidateParamTypeGenericType.IsAssignableFrom(proxyParamTypeGenericType))
+                                        {
+                                            skip = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if (skip)
+                                {
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
