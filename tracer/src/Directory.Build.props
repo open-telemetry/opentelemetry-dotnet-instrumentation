@@ -1,0 +1,36 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net45;net461;netstandard2.0;netcoreapp3.1</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- NuGet packages -->
+    <IsPackable>true</IsPackable>
+    <PackageIconUrl>https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/raw/main/opentelemetry-logo-64x64.png</PackageIconUrl>
+    <PackageIcon>packageIcon.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/</PackageProjectUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageReleaseNotes>See release notes at https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases</PackageReleaseNotes>
+    <PackageTags>OpenTelemetry;OTEL;APM;tracing;profiling;instrumentation</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation.git</RepositoryUrl>
+    <Copyright>Copyright 2021 OpenTelemetry, originated from Datadog, Inc.</Copyright>
+    <Company>OpenTelemetry</Company>
+    <Authors>OpenTelemetry</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- NuGet -->
+    <None Include="$(MSBuildThisFileDirectory)\..\..\opentelemetry-logo-256x256.png" Pack="true" Visible="false" PackagePath="packageIcon.png" />
+
+    <!-- StyleCop -->
+    <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" Link="GlobalSuppressions.src.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net45' ">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)Datadog.Trace.Tools.Analyzers\Datadog.Trace.Tools.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+</Project>
