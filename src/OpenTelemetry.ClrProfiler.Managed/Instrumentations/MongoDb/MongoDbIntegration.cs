@@ -10,7 +10,7 @@ using OpenTelemetry.ClrProfiler.Managed.Logging;
 using OpenTelemetry.ClrProfiler.Managed.Tagging;
 using OpenTelemetry.ClrProfiler.Managed.Util;
 
-namespace OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb
+namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb
 {
     /// <summary>
     /// Tracing integration for MongoDB.Driver.Core.

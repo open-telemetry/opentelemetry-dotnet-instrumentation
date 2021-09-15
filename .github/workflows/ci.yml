@@ -42,11 +42,18 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
       - name: Run './build.cmd Workflow'
         run: ./build.cmd Workflow
+      - uses: actions/upload-artifact@v1
+        if: always()
+        with:
+          name: profiler-logs
+          path: build_data/profiler-logs
   ubuntu-latest:
     name: ubuntu-latest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+      - name: Downgrade CMake
+        run: sudo ./build/artifacts/downgrade-cmake-ubuntu.sh
       - name: Cache .nuke/temp, ~/.nuget/packages
         uses: actions/cache@v2
         with:
@@ -56,11 +63,21 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
       - name: Run './build.cmd Workflow'
         run: ./build.cmd Workflow
+      - uses: actions/upload-artifact@v1
+        if: always()
+        with:
+          name: profiler-logs
+          path: build_data/profiler-logs
   macOS-latest:
     name: macOS-latest
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v1
+      - name: Downgrade CMake
+        run: ./build/artifacts/downgrade-cmake-macos.sh
+      - name: Update GitHub PATH
+        run: |
+          echo "/Applications/CMake.app/Contents/bin" >> $GITHUB_PATH
       - name: Cache .nuke/temp, ~/.nuget/packages
         uses: actions/cache@v2
         with:
@@ -70,3 +87,8 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
       - name: Run './build.cmd Workflow'
         run: ./build.cmd Workflow
+      - uses: actions/upload-artifact@v1
+        if: always()
+        with:
+          name: profiler-logs
+          path: build_data/profiler-logs

@@ -3,7 +3,7 @@ using System.Threading;
 using OpenTelemetry.ClrProfiler.CallTarget;
 using OpenTelemetry.ClrProfiler.Managed.Util;
 
-namespace OpenTelemetry.ClrProfiler.AutoInstrumentation.MongoDb
+namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb
 {
     /// <summary>
     /// MongoDB.Driver.Core.WireProtocol.IWireProtocol&lt;TResult&gt; instrumentation

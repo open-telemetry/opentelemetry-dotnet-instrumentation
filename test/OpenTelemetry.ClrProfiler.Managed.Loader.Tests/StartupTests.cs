@@ -13,6 +13,8 @@ namespace OpenTelemetry.ClrProfiler.Managed.Loader.Tests
             var directory = Directory.GetCurrentDirectory();
             Environment.SetEnvironmentVariable("OTEL_DOTNET_TRACER_HOME", $"{directory}/Profiler");
 
+            Console.WriteLine("Setting directory >> " + $"{directory}/Profiler");
+
             var exception = Record.Exception(() => Startup.ManagedProfilerDirectory);
             // That means the assembly was loaded successfully and Initialize method was called.
             Assert.Null(exception);

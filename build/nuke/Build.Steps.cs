@@ -25,6 +25,7 @@ partial class Build
     AbsolutePath TracerHomeDirectory => TracerHome ?? (OutputDirectory / "tracer-home");
     AbsolutePath ArtifactsDirectory => Artifacts ?? (OutputDirectory / "artifacts");
     AbsolutePath BuildDataDirectory => RootDirectory / "build_data";
+    AbsolutePath ProfilerTestLogs => BuildDataDirectory / "profiler-logs";
 
     Project NativeProfilerProject => Solution.GetProject(Projects.ClrProfilerNative);
 
@@ -51,6 +52,7 @@ partial class Build
             EnsureExistingDirectory(TracerHomeDirectory);
             EnsureExistingDirectory(ArtifactsDirectory);
             EnsureExistingDirectory(BuildDataDirectory);
+            EnsureExistingDirectory(ProfilerTestLogs);
         });
 
     Target Restore => _ => _
@@ -95,6 +97,26 @@ partial class Build
             );
         });
 
+    Target CompileManagedTests => _ => _
+        .Unlisted()
+        .Description("Compiles the managed code in the test directory")
+        .After(CompileManagedSrc)
+        .Executes(() =>
+        {
+            // Always AnyCPU
+            DotNetBuild(x => x
+                .SetProjectFile(Solution.GetProject(Projects.Tests.ClrProfilerManagedLoaderTests))
+                .SetConfiguration(BuildConfiguration)
+                .SetNoRestore(true));
+
+            DotNetMSBuild(x => x
+                .SetTargetPath(MsBuildProject)
+                .SetTargetPlatform(Platform)
+                .SetConfiguration(BuildConfiguration)
+                .DisableRestore()
+                .SetTargets("BuildCsharpTest"));
+        });
+
     Target CompileNativeSrc => _ => _
         .Unlisted()
         .Description("Compiles the native loader")
@@ -108,20 +130,6 @@ partial class Build
         .Description("Compiles the native loader unit tests")
         .DependsOn(CompileNativeTestsWindows)
         .DependsOn(CompileNativeTestsLinux);
-
-    Target CompileManagedTests => _ => _
-        .Unlisted()
-        .Description("Compile the managed code unit tests")
-        .After(CompileNativeSrc)
-        .Executes(() =>
-        {
-            // Always AnyCPU
-            DotNetBuild(x => x
-                .SetProjectFile(Solution.GetProject(Projects.Tests.ClrProfilerManagedLoaderTests))
-                .SetConfiguration(BuildConfiguration)
-                .SetNoRestore(true)
-            );
-        });
 
     Target PublishManagedProfiler => _ => _
         .Unlisted()
@@ -169,15 +177,14 @@ partial class Build
 
     Target RunManagedTests => _ => _
         .Unlisted()
+        .Produces(BuildDataDirectory / "profiler-logs" / "*")
+        .After(BuildTracer)
         .After(CompileManagedTests)
         .After(PublishMocks)
         .Executes(() =>
         {
-            DotNetTest(s => s
-                .SetNoBuild(true)
-                .SetNoRestore(true)
-                .SetConfiguration(BuildConfiguration)
-                .SetProjectFile(Solution.GetProject(Projects.Tests.ClrProfilerManagedLoaderTests)));
+            RunUnitTests();
+            RunIntegrationTests();
         });
 
     Target PublishMocks => _ => _
@@ -188,8 +195,8 @@ partial class Build
         {
             // publish ClrProfilerManaged moc
             var targetFrameworks = IsWin
-                ? TargetFrameworks
-                : TargetFrameworks.Where(framework => !framework.ToString().StartsWith("net4"));
+                ? new[] { TargetFramework.NET461, TargetFramework.NETCOREAPP3_1 }
+                : new[] { TargetFramework.NETCOREAPP3_1 };
 
             DotNetPublish(s => s
                 .SetProject(Solution.GetProject(Projects.Mocks.ClrProfilerManagedMock))
@@ -212,4 +219,41 @@ partial class Build
                 .SetNoRestore(true)
             );
         });
+
+    private AbsolutePath GetResultsDirectory(Project proj) => BuildDataDirectory / "results" / proj.Name;
+
+    private void RunUnitTests()
+    {
+        Project[] unitTests = new[]
+        {
+                Solution.GetProject(Projects.Tests.ClrProfilerManagedLoaderTests)
+        };
+
+        DotNetTest(config => config
+            .SetConfiguration(BuildConfiguration)
+            .SetTargetPlatformAnyCPU()
+            .EnableNoRestore()
+            .EnableNoBuild()
+            .CombineWith(unitTests, (s, project) => s
+                .EnableTrxLogOutput(GetResultsDirectory(project))
+                .SetProjectFile(project)), degreeOfParallelism: 4);
+    }
+
+    private void RunIntegrationTests()
+    {
+        Project[] integrationTests = Solution
+            .GetProjects("IntegrationTests.*")
+            .ToArray();
+
+        DotNetTest(config => config
+            .SetConfiguration(BuildConfiguration)
+            .SetTargetPlatform(Platform)
+            // TODO: Remove if NetFX works
+            .SetFramework(TargetFramework.NETCOREAPP3_1)
+            .EnableNoRestore()
+            .EnableNoBuild()
+            .CombineWith(integrationTests, (s, project) => s
+                .EnableTrxLogOutput(GetResultsDirectory(project))
+                .SetProjectFile(project)), degreeOfParallelism: 4);
+    }
 }

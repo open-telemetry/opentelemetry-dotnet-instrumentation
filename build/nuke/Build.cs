@@ -8,14 +8,20 @@ using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 
+/**
+ * To trigger manual generation invoke: 
+ * nuke --generate-configuration GitHubActions_ci --host GitHubActions
+ * Automatic generation disabled due artifacts upload (even if Nuke step fails)
+ */
 [GitHubActions("ci",
     GitHubActionsImage.WindowsLatest,
     GitHubActionsImage.UbuntuLatest,
     GitHubActionsImage.MacOsLatest,
-    AutoGenerate = true,
+    AutoGenerate = false,
     OnPushBranches = new[] { "main", "refs/tags/*" },
     OnPushExcludePaths = new[] { "docs/*" },
     OnPullRequestBranches = new[] { "*" },
+    PublishArtifacts = true,
     InvokedTargets = new[] { nameof(Workflow) })]
 partial class Build : NukeBuild
 {
@@ -90,8 +96,9 @@ partial class Build : NukeBuild
         .DependsOn(RunNativeTests);
 
     Target ManagedTests => _ => _
-        .Description("Builds the managed unit tests and runs them")
+        .Description("Builds the managed unit / integration tests and runs them")
         .After(Clean, BuildTracer)
+        .DependsOn(CreateRequiredDirectories)
         .DependsOn(CompileManagedTests)
         .DependsOn(CompileMocks)
         .DependsOn(PublishMocks)
