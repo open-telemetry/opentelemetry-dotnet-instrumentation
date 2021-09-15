@@ -17,17 +17,13 @@ namespace StackExchange.Redis.AssemblyConflict.SdkProject
             }
             finally
             {
-                var instrumentationType = Type.GetType("Datadog.Trace.ClrProfiler.Instrumentation, OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed");
+                var instrumentationType = Type.GetType("Datadog.Trace.ClrProfiler.Instrumentation, OpenTelemetry.AutoInstrumentation");
                 var profilerAttached = instrumentationType?.GetProperty("ProfilerAttached", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) ?? false;
                 var tracerAssemblyLocation = Type.GetType("Datadog.Trace.Tracer, OpenTelemetry.AutoInstrumentation")?.Assembly.Location ?? "(none)";
-                var clrProfilerAssemblyLocation = instrumentationType?.Assembly.Location ?? "(none)";
-                var sigilAssemblyLocation = Type.GetType("Sigil.Local, Sigil")?.Assembly.Location ?? "(none)";
 
                 Console.WriteLine();
                 Console.WriteLine($"Profile attached: {profilerAttached}");
                 Console.WriteLine($"OpenTelemetry.AutoInstrumentation.dll path: {tracerAssemblyLocation}");
-                Console.WriteLine($"OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.dll path: {clrProfilerAssemblyLocation}");
-                Console.WriteLine($"Sigil.dll path: {sigilAssemblyLocation}");
                 Console.WriteLine();
             }
 

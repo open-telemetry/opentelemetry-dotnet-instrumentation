@@ -91,8 +91,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
-          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AdoNet.CommandExecuteReaderWithBehaviorAndCancellationAsyncIntegration",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",          "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AdoNet.CommandExecuteReaderWithBehaviorAndCancellationAsyncIntegration",
           "action": "CallTargetModification"
         }
       },
@@ -277,7 +276,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AWS.SDK.RuntimePipelineInvokeAsyncIntegration",
           "action": "CallTargetModification"
         }
@@ -300,7 +299,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AWS.SDK.RuntimePipelineInvokeSyncIntegration",
           "action": "CallTargetModification"
         }
@@ -329,7 +328,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AWS.SQS.CreateQueueAsyncIntegration",
           "action": "CallTargetModification"
         }
@@ -352,7 +351,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AWS.SQS.CreateQueueIntegration",
           "action": "CallTargetModification"
         }
@@ -376,7 +375,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AWS.SQS.DeleteMessageAsyncIntegration",
           "action": "CallTargetModification"
         }
@@ -400,7 +399,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AWS.SQS.DeleteMessageBatchAsyncIntegration",
           "action": "CallTargetModification"
         }
@@ -423,7 +422,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AWS.SQS.DeleteMessageBatchIntegration",
           "action": "CallTargetModification"
         }
@@ -446,7 +445,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AWS.SQS.DeleteMessageIntegration",
           "action": "CallTargetModification"
         }
@@ -470,7 +469,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AWS.SQS.DeleteQueueAsyncIntegration",
           "action": "CallTargetModification"
         }
@@ -493,7 +492,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AWS.SQS.DeleteQueueIntegration",
           "action": "CallTargetModification"
         }
@@ -517,7 +516,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AWS.SQS.ReceiveMessageAsyncIntegration",
           "action": "CallTargetModification"
         }
@@ -540,7 +539,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AWS.SQS.ReceiveMessageIntegration",
           "action": "CallTargetModification"
         }
@@ -564,7 +563,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AWS.SQS.SendMessageAsyncIntegration",
           "action": "CallTargetModification"
         }
@@ -588,7 +587,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AWS.SQS.SendMessageBatchAsyncIntegration",
           "action": "CallTargetModification"
         }
@@ -611,7 +610,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AWS.SQS.SendMessageBatchIntegration",
           "action": "CallTargetModification"
         }
@@ -634,7 +633,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AWS.SQS.SendMessageIntegration",
           "action": "CallTargetModification"
         }
@@ -664,7 +663,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.CosmosDb.ClientQueryIteratorsIntegrations",
           "action": "CallTargetModification"
         }
@@ -689,7 +688,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.CosmosDb.ClientQueryIteratorsIntegrations",
           "action": "CallTargetModification"
         }
@@ -714,7 +713,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.CosmosDb.ClientQueryIteratorsIntegrations",
           "action": "CallTargetModification"
         }
@@ -739,7 +738,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.CosmosDb.ClientQueryIteratorsIntegrations",
           "action": "CallTargetModification"
         }
@@ -764,7 +763,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.CosmosDb.ContainerQueryIteratorsIntegrations",
           "action": "CallTargetModification"
         }
@@ -789,7 +788,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.CosmosDb.ContainerQueryIteratorsIntegrations",
           "action": "CallTargetModification"
         }
@@ -814,7 +813,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.CosmosDb.ContainerQueryIteratorsIntegrations",
           "action": "CallTargetModification"
         }
@@ -839,7 +838,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.CosmosDb.ContainerQueryIteratorsIntegrations",
           "action": "CallTargetModification"
         }
@@ -864,7 +863,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.CosmosDb.DatabaseQueryIteratorsIntegrations",
           "action": "CallTargetModification"
         }
@@ -889,7 +888,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.CosmosDb.DatabaseQueryIteratorsIntegrations",
           "action": "CallTargetModification"
         }
@@ -914,7 +913,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.CosmosDb.DatabaseQueryIteratorsIntegrations",
           "action": "CallTargetModification"
         }
@@ -939,7 +938,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.CosmosDb.DatabaseQueryIteratorsIntegrations",
           "action": "CallTargetModification"
         }
@@ -964,7 +963,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.CosmosDb.DatabaseQueryIteratorsIntegrations",
           "action": "CallTargetModification"
         }
@@ -989,7 +988,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.CosmosDb.DatabaseQueryIteratorsIntegrations",
           "action": "CallTargetModification"
         }
@@ -3502,7 +3501,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AdoNet.CommandExecuteReaderAsyncIntegration",
           "action": "CallTargetModification"
         }
@@ -3525,7 +3524,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AdoNet.CommandExecuteReaderWithCancellationAsyncIntegration",
           "action": "CallTargetModification"
         }
@@ -3548,7 +3547,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "Datadog.Trace.ClrProfiler.Managed, Version=1.28.1.0, Culture=neutral, PublicKeyToken=def86d061d0d2eeb",
+          "assembly": "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
           "type": "Datadog.Trace.ClrProfiler.AutoInstrumentation.AdoNet.CommandExecuteReaderWithBehaviorAsyncIntegration",
           "action": "CallTargetModification"
         }

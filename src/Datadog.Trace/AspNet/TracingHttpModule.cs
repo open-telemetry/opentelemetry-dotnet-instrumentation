@@ -3,6 +3,8 @@
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
 // </copyright>
 
+#if NETFRAMEWORK
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +27,8 @@ namespace Datadog.Trace.AspNet
         internal static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(nameof(IntegrationIds.AspNet));
 
         private static readonly IDatadogLogger Log = DatadogLogging.GetLoggerFor(typeof(TracingHttpModule));
+
+        private static bool _canReadHttpResponseHeaders = true;
 
         private readonly string _httpContextScopeKey;
         private readonly string _requestOperationName;
@@ -153,10 +157,7 @@ namespace Datadog.Trace.AspNet
                 {
                     try
                     {
-                        if (HttpRuntime.UsingIntegratedPipeline)
-                        {
-                            scope.Span.SetHeaderTags<IHeadersCollection>(app.Context.Response.Headers.Wrap(), Tracer.Instance.Settings.HeaderTags, defaultTagPrefix: PropagationExtensions.HttpResponseHeadersTagPrefix);
-                        }
+                        AddHeaderTagsFromHttpResponse(app.Context, scope);
 
                         scope.Span.SetHttpStatusCode(app.Context.Response.StatusCode, isServer: true);
 
@@ -199,10 +200,7 @@ namespace Datadog.Trace.AspNet
 
                 if (httpContext.Items[_httpContextScopeKey] is Scope scope)
                 {
-                    if (HttpRuntime.UsingIntegratedPipeline)
-                    {
-                        scope.Span.SetHeaderTags<IHeadersCollection>(httpContext.Response.Headers.Wrap(), Tracer.Instance.Settings.HeaderTags, defaultTagPrefix: PropagationExtensions.HttpResponseHeadersTagPrefix);
-                    }
+                    AddHeaderTagsFromHttpResponse(httpContext, scope);
 
                     if (exception != null && !is404)
                     {
@@ -227,5 +225,28 @@ namespace Datadog.Trace.AspNet
                 Log.Error(ex, "Error while clearing the HttpContext");
             }
         }
+
+        private void AddHeaderTagsFromHttpResponse(System.Web.HttpContext httpContext, Scope scope)
+        {
+            if (httpContext != null && HttpRuntime.UsingIntegratedPipeline && _canReadHttpResponseHeaders && !Tracer.Instance.Settings.HeaderTags.IsNullOrEmpty())
+            {
+                try
+                {
+                    scope.Span.SetHeaderTags<IHeadersCollection>(httpContext.Response.Headers.Wrap(), Tracer.Instance.Settings.HeaderTags, defaultTagPrefix: SpanContextPropagator.HttpResponseHeadersTagPrefix);
+                }
+                catch (PlatformNotSupportedException ex)
+                {
+                    // Despite the HttpRuntime.UsingIntegratedPipeline check, we can still fail to access response headers, for example when using Sitefinity: "This operation requires IIS integrated pipeline mode"
+                    Log.Error(ex, "Unable to access response headers when creating header tags. Disabling for the rest of the application lifetime.");
+                    _canReadHttpResponseHeaders = false;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error extracting HTTP headers to create header tags.");
+                }
+            }
+        }
     }
 }
+
+#endif

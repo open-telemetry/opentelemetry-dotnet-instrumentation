@@ -305,6 +305,8 @@ namespace Datadog.Trace
 
         internal ITraceIdConvention TraceIdConvention { get; }
 
+        internal IPropagator Propagator => _propagator;
+
         /// <summary>
         /// Create a new Tracer with the given parameters
         /// </summary>

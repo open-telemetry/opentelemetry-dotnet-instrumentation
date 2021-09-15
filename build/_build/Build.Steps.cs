@@ -262,8 +262,9 @@ partial class Build
                 ? TargetFrameworks
                 : TargetFrameworks.Where(framework => !framework.ToString().StartsWith("net4"));
 
+            // Publish Datadog.Trace.MSBuild which includes Datadog.Trace and Datadog.Trace.AspNet
             DotNetPublish(s => s
-                .SetProject(Solution.GetProject(Projects.ClrProfilerManaged))
+                .SetProject(Solution.GetProject(Projects.DatadogTraceMsBuild))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
@@ -623,6 +624,7 @@ partial class Build
                 .Where(x => !x.Contains("EntityFramework6x.MdTokenLookupFailure")
                             && !x.Contains("ExpenseItDemo")
                             && !x.Contains("StackExchange.Redis.AssemblyConflict.LegacyProject")
+                            && !x.Contains("MismatchedTracerVersions")
                             && !x.Contains("dependency-libs"));
 
             // Allow restore here, otherwise things go wonky with runtime identifiers
@@ -698,7 +700,8 @@ partial class Build
                 {
                     _ when exclude.Contains(projectPath) => false,
                     _ when projectPath.ToString().Contains("Samples.OracleMDA") => false,
-                    _ => true,
+                    _ when !string.IsNullOrWhiteSpace(SampleName) => projectPath.ToString().Contains(SampleName),
+                     _ => true,
                 }
             );
 
@@ -887,6 +890,7 @@ partial class Build
                 "NLog10LogsInjection.NullReferenceException",
                 "Sandbox.ManualTracing",
                 "StackExchange.Redis.AssemblyConflict.LegacyProject",
+                "MismatchedTracerVersions"
             };
 
             // These sample projects are built using RestoreAndBuildSamplesForPackageVersions
@@ -927,6 +931,7 @@ partial class Build
                         "Samples.AspNetCoreMvc31" => Framework == TargetFramework.NETCOREAPP3_1,
                         var name when projectsToSkip.Contains(name) => false,
                         var name when multiApiProjects.Contains(name) => false,
+                        _ when !string.IsNullOrWhiteSpace(SampleName) => project?.Name?.Contains(SampleName) ?? false,
                         _ => true,
                     };
                 });

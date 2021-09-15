@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------------------
-// Exports that managed code from OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.dll will
+// Exports that managed code from OpenTelemetry.AutoInstrumentation.Trace.dll will
 // P/Invoke into
 //
 // NOTE: Must keep these signatures in sync with the DllImports in
