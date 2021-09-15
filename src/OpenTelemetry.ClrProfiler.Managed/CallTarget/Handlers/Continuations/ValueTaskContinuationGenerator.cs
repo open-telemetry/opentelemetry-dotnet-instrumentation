@@ -1,5 +1,4 @@
 using System;
-using System.Reflection.Emit;
 using System.Threading.Tasks;
 
 namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers.Continuations
@@ -8,13 +7,15 @@ namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers.Continuations
     internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn> : ContinuationGenerator<TTarget, TReturn>
     {
         private static readonly Func<TTarget, object, Exception, CallTargetState, object> _continuation;
+        private static readonly bool _preserveContext;
 
         static ValueTaskContinuationGenerator()
         {
-            DynamicMethod continuationMethod = IntegrationMapper.CreateAsyncEndMethodDelegate(typeof(TIntegration), typeof(TTarget), typeof(object));
-            if (continuationMethod != null)
+            var result = IntegrationMapper.CreateAsyncEndMethodDelegate(typeof(TIntegration), typeof(TTarget), typeof(object));
+            if (result.Method != null)
             {
-                _continuation = (Func<TTarget, object, Exception, CallTargetState, object>)continuationMethod.CreateDelegate(typeof(Func<TTarget, object, Exception, CallTargetState, object>));
+                _continuation = (Func<TTarget, object, Exception, CallTargetState, object>)result.Method.CreateDelegate(typeof(Func<TTarget, object, Exception, CallTargetState, object>));
+                _preserveContext = result.PreserveContext;
             }
         }
 
@@ -39,15 +40,36 @@ namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers.Continuations
             {
                 try
                 {
-                    await previousValueTask;
+                    await previousValueTask.ConfigureAwait(_preserveContext);
                 }
                 catch (Exception ex)
                 {
-                    _continuation(instance, default, ex, state);
+                    try
+                    {
+                        // *
+                        // Calls the CallTarget integration continuation, exceptions here should never bubble up to the application
+                        // *
+                        _continuation(instance, default, ex, state);
+                    }
+                    catch (Exception contEx)
+                    {
+                        IntegrationOptions<TIntegration, TTarget>.LogException(contEx, "Exception occurred when calling the CallTarget integration continuation.");
+                    }
+
                     throw;
                 }
 
-                _continuation(instance, default, default, state);
+                try
+                {
+                    // *
+                    // Calls the CallTarget integration continuation, exceptions here should never bubble up to the application
+                    // *
+                    _continuation(instance, default, default, state);
+                }
+                catch (Exception contEx)
+                {
+                    IntegrationOptions<TIntegration, TTarget>.LogException(contEx, "Exception occurred when calling the CallTarget integration continuation.");
+                }
             }
         }
     }
