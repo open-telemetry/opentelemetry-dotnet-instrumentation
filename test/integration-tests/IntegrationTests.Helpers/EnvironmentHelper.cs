@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -61,7 +62,7 @@ namespace IntegrationTests.Helpers
                           : string.Empty;
         }
 
-        public bool DebugModeEnabled { get; set; }
+        public bool DebugModeEnabled { get; set; } = true;
 
         public Dictionary<string, string> CustomEnvironmentVariables { get; set; } = new Dictionary<string, string>();
 
@@ -111,6 +112,30 @@ namespace IntegrationTests.Helpers
             }
         }
 
+        public static IEnumerable<string> GetProfilerPathCandidates(string sampleApplicationOutputDirectory)
+        {
+            string extension = EnvironmentTools.GetOS() switch
+            {
+                "win" => "dll",
+                "linux" => "so",
+                "osx" => "dylib",
+                _ => throw new PlatformNotSupportedException()
+            };
+
+            string fileName = $"OpenTelemetry.ClrProfiler.Native.{extension}";
+
+            var relativePath = Path.Combine("profiler-lib", fileName);
+
+            if (sampleApplicationOutputDirectory != null)
+            {
+                yield return Path.Combine(sampleApplicationOutputDirectory, relativePath);
+            }
+
+            yield return Path.Combine(GetExecutingProjectBin(), relativePath);
+            yield return Path.Combine(GetProfilerProjectBin(), fileName);
+            yield return Path.Combine(GetNukeBuildOutput(), fileName);
+        }
+
         public void SetEnvironmentVariables(
             int agentPort,
             int aspNetCorePort,
@@ -143,6 +168,7 @@ namespace IntegrationTests.Helpers
             if (DebugModeEnabled)
             {
                 environmentVariables["OTEL_TRACE_DEBUG"] = "1";
+                environmentVariables["OTEL_TRACE_LOG_DIRECTORY"] = Path.Combine(EnvironmentTools.GetSolutionDirectory(), "build_data", "profiler-logs");
             }
 
             if (!string.IsNullOrEmpty(processToProfile))
@@ -221,52 +247,19 @@ namespace IntegrationTests.Helpers
         {
             if (_profilerFileLocation == null)
             {
-                string extension = EnvironmentTools.GetOS() switch
+                var paths = GetProfilerPathCandidates(GetSampleApplicationOutputDirectory()).ToArray();
+
+                foreach (var candidate in paths)
                 {
-                    "win" => "dll",
-                    "linux" => "so",
-                    "osx" => "dylib",
-                    _ => throw new PlatformNotSupportedException()
-                };
-
-                string fileName = $"OpenTelemetry.ClrProfiler.Native.{extension}";
-
-                var directory = GetSampleApplicationOutputDirectory();
-
-                var relativePath = Path.Combine(
-                    "profiler-lib",
-                    fileName);
-
-                _profilerFileLocation = Path.Combine(
-                    directory,
-                    relativePath);
-
-                // TODO: get rid of the fallback options when we have a consistent convention
-
-                if (!File.Exists(_profilerFileLocation))
-                {
-                    _output?.WriteLine($"Attempt 1: Unable to find profiler at {_profilerFileLocation}.");
-                    // Let's try the executing directory, as dotnet publish ignores the Copy attributes we currently use
-                    _profilerFileLocation = Path.Combine(
-                        GetExecutingProjectBin(),
-                        relativePath);
+                    if (File.Exists(candidate))
+                    {
+                        _profilerFileLocation = candidate;
+                        _output?.WriteLine($"Found profiler at {_profilerFileLocation}.");
+                        return candidate;
+                    }
                 }
 
-                if (!File.Exists(_profilerFileLocation))
-                {
-                    _output?.WriteLine($"Attempt 2: Unable to find profiler at {_profilerFileLocation}.");
-                    // One last attempt at the actual native project directory
-                    _profilerFileLocation = Path.Combine(
-                        GetProfilerProjectBin(),
-                        fileName);
-                }
-
-                if (!File.Exists(_profilerFileLocation))
-                {
-                    throw new Exception($"Attempt 3: Unable to find profiler at {_profilerFileLocation}");
-                }
-
-                _output?.WriteLine($"Found profiler at {_profilerFileLocation}.");
+                throw new Exception($"Unable to find profiler in any of the paths: {string.Join("; ", paths)}");
             }
 
             return _profilerFileLocation;
@@ -362,50 +355,27 @@ namespace IntegrationTests.Helpers
             return projectDir;
         }
 
-        public string GetSampleApplicationOutputDirectory(string packageVersion = "", string framework = "", bool usePublishFolder = true)
+        public string GetSampleApplicationOutputDirectory(string packageVersion = "", string framework = "")
         {
             var targetFramework = string.IsNullOrEmpty(framework) ? GetTargetFramework() : framework;
             var binDir = Path.Combine(
                 GetSampleProjectDirectory(),
                 "bin");
 
-            string outputDir;
-
             if (_samplesDirectory.Contains("aspnet"))
             {
-                outputDir = Path.Combine(
+                return Path.Combine(
                     binDir,
                     EnvironmentTools.GetBuildConfiguration(),
                     "publish");
-            }
-            else if (EnvironmentTools.GetOS() == "win")
-            {
-                outputDir = Path.Combine(
-                    binDir,
-                    packageVersion,
-                    EnvironmentTools.GetPlatform(),
-                    EnvironmentTools.GetBuildConfiguration(),
-                    targetFramework);
-            }
-            else if (usePublishFolder)
-            {
-                outputDir = Path.Combine(
-                    binDir,
-                    packageVersion,
-                    EnvironmentTools.GetBuildConfiguration(),
-                    targetFramework,
-                    "publish");
-            }
-            else
-            {
-                outputDir = Path.Combine(
-                    binDir,
-                    packageVersion,
-                    EnvironmentTools.GetBuildConfiguration(),
-                    targetFramework);
             }
 
-            return outputDir;
+            return Path.Combine(
+                binDir,
+                packageVersion,
+                EnvironmentTools.GetPlatform().ToLowerInvariant(),
+                EnvironmentTools.GetBuildConfiguration(),
+                targetFramework);
         }
 
         public string GetTargetFramework()
@@ -423,20 +393,46 @@ namespace IntegrationTests.Helpers
             return $"net{_major}{_minor}{_patch ?? string.Empty}";
         }
 
-        private string GetProfilerProjectBin()
+        private static string GetProfilerProjectBin()
         {
+            string projectBinPath = Path.Combine(
+                    EnvironmentTools.GetSolutionDirectory(),
+                    "src",
+                    "OpenTelemetry.ClrProfiler.Native",
+                    "bin");
+
+            if (!EnvironmentTools.IsWindows())
+            {
+                // Check CMake output from CMakeLists.txt
+                return projectBinPath;
+            }
+
             return Path.Combine(
-                EnvironmentTools.GetSolutionDirectory(),
-                "src",
-                "OpenTelemetry.ClrProfiler.Native",
-                "bin",
+                projectBinPath,
                 EnvironmentTools.GetBuildConfiguration(),
                 EnvironmentTools.GetPlatform().ToLower());
         }
 
-        private string GetExecutingProjectBin()
+        private static string GetExecutingProjectBin()
         {
             return Path.GetDirectoryName(ExecutingAssembly.Location);
+        }
+
+        private static string GetNukeBuildOutput()
+        {
+            string nukeOutputPath = Path.Combine(
+                EnvironmentTools.GetSolutionDirectory(),
+                "bin",
+                "tracer-home");
+
+            if (!EnvironmentTools.IsWindows())
+            {
+                return nukeOutputPath;
+            }
+
+            return Path.Combine(
+                nukeOutputPath,
+                $"win-{EnvironmentTools.GetPlatform().ToLower()}");
         }
     }
 }

@@ -9,15 +9,16 @@
     <CsharpProject Include="src\**\*.csproj" />
     <CppProject Include="src\**\*.vcxproj"/>
     <CppTestProject Include="test\**\*.vcxproj"/>
-    <SampleProject Include="test\test-applications\**\*.csproj" />
+    <SampleProject Include="test\test-applications\integrations\**\*.csproj" />
+    <IntegrationProject Include="test\integration-tests\**\*.csproj" />
   </ItemGroup>
 
   <Target Name="Restore">
-    <MSBuild Targets="Restore" Projects="@(CsharpProject);@(CppProject);@(SampleProject)"/>
+    <MSBuild Targets="Restore" Projects="@(CsharpProject);@(CppProject);@(SampleProject);@(IntegrationProject)"/>
   </Target>
 
   <Target Name="Clean">
-    <MSBuild Targets="Clean" Projects="@(CsharpProject);@(CppProject);@(SampleProject)"/>
+    <MSBuild Targets="Clean" Projects="@(CsharpProject);@(CppProject);@(SampleProject);@(IntegrationProject)"/>
   </Target>
 
   <!-- default target -->
@@ -39,6 +40,16 @@
     </MSBuild>
 
     <MSBuild Targets="Build" Projects="@(CsharpProject)" Properties="Platform=AnyCPU">
+      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
+    </MSBuild>
+  </Target>
+
+  <Target Name="BuildCsharpTest">
+    <MSBuild Targets="Restore" Projects="@(SampleProject);@(IntegrationProject)">
+      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
+    </MSBuild>
+
+    <MSBuild Targets="Build" Projects="@(SampleProject);@(IntegrationProject)">
       <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
     </MSBuild>
   </Target>

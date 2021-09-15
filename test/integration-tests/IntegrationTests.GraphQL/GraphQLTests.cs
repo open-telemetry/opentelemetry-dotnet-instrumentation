@@ -72,7 +72,7 @@ namespace IntegrationTests.GraphQL
             int agentPort = TcpPortProvider.GetOpenPort();
             int aspNetCorePort = TcpPortProvider.GetOpenPort();
 
-            using (var agent = new MockZipkinCollector(agentPort))
+            using (var agent = new MockZipkinCollector(Output, agentPort))
             using (Process process = StartSample(agent.Port, arguments: null, packageVersion: string.Empty, aspNetCorePort: aspNetCorePort))
             {
                 var wh = new EventWaitHandle(false, EventResetMode.AutoReset);

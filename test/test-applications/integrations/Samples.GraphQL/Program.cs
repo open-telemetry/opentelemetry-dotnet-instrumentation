@@ -23,7 +23,6 @@ namespace Samples.GraphQL
                     serverOptions.AllowSynchronousIO = true
                 )
                 .UseContentRoot(directory)
-                .UseIISIntegration()
                 .UseStartup<Startup>()
                 .Build();
 
