@@ -47,7 +47,7 @@ namespace Datadog.Trace.Tests
         public TracerTests()
         {
             var settings = new TracerSettings();
-            var writerMock = new Mock<ITraceWriter>();
+            var writerMock = new Mock<IAgentWriter>();
             var samplerMock = new Mock<ISampler>();
 
             _tracer = new Tracer(settings, plugins: null, writerMock.Object, samplerMock.Object, scopeManager: null, statsd: null);
@@ -426,7 +426,7 @@ namespace Datadog.Trace.Tests
                 StartupDiagnosticLogEnabled = false
             };
 
-            var tracer = new Tracer(settings, agent.Object, Mock.Of<ISampler>(), Mock.Of<IScopeManager>(), Mock.Of<IDogStatsd>());
+            var tracer = new Tracer(settings, null, agent.Object, Mock.Of<ISampler>(), Mock.Of<IScopeManager>(), Mock.Of<IDogStatsd>());
 
             await tracer.ForceFlushAsync();
 

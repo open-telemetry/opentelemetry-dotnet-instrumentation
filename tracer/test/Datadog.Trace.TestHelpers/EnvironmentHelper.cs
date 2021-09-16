@@ -144,7 +144,7 @@ namespace Datadog.Trace.TestHelpers
                 "OTEL_DISABLED_INTEGRATIONS",
                 "OTEL_SERVICE",
                 "OTEL_VERSION",
-                "OTEL_TAGS"
+                "OTEL_TAGS",
                 "OTEL_APPSEC_ENABLED",
                 "OTEL_TRACE_CALLTARGET_ENABLED"
             };

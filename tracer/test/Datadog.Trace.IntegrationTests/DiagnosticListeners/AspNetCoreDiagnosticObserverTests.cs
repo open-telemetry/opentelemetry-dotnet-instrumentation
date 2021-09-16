@@ -261,16 +261,16 @@ namespace Datadog.Trace.IntegrationTests.DiagnosticListeners
             span.GetTag(tagName).Should().Be(expected, $"'{tagName}' should have correct value");
         }
 
-        private static Tracer GetTracer(ITraceWriter writer = null, IConfigurationSource configSource = null)
+        private static Tracer GetTracer(IAgentWriter writer = null, IConfigurationSource configSource = null)
         {
             var settings = new TracerSettings(configSource);
-            var agentWriter = writer ?? new Mock<ITraceWriter>().Object;
+            var agentWriter = writer ?? new Mock<IAgentWriter>().Object;
             var samplerMock = new Mock<ISampler>();
 
             return new Tracer(settings, plugins: null, agentWriter, samplerMock.Object, scopeManager: null, statsd: null);
         }
 
-        private class AgentWriterStub : ITraceWriter
+        private class AgentWriterStub : IAgentWriter
         {
             public List<ArraySegment<Span>> Traces { get; } = new();
 

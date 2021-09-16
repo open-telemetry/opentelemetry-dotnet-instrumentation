@@ -1,4 +1,4 @@
-﻿// <copyright file="DatadogLoggingScopeTests.cs" company="Datadog">
+// <copyright file="DatadogLoggingScopeTests.cs" company="Datadog">
 // Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
 // </copyright>
@@ -25,7 +25,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests.AutoInstrumentation.Logging.IL
                 Environment = "test"
             };
 
-            var tracer = new Tracer(settings, new Mock<IAgentWriter>().Object, null, null, new NoOpStatsd());
+            var tracer = new Tracer(settings, null, new Mock<IAgentWriter>().Object, null, null, new NoOpStatsd());
 
             var scope = new DatadogLoggingScope(tracer);
 
@@ -44,7 +44,7 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests.AutoInstrumentation.Logging.IL
                 Environment = "test"
             };
 
-            var tracer = new Tracer(settings, new Mock<IAgentWriter>().Object, null, null, new NoOpStatsd());
+            var tracer = new Tracer(settings, null, new Mock<IAgentWriter>().Object, null, null, new NoOpStatsd());
             using var spanScope = tracer.StartActive("test");
             var scope = new DatadogLoggingScope(tracer);
 

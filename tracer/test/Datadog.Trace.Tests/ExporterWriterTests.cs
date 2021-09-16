@@ -30,12 +30,12 @@ namespace Datadog.Trace.Tests
         public async Task WriteTrace_2Traces_SendToApi()
         {
             // TODO:bertrand it is too complicated to setup such a simple test
-            var trace = new[] { new Span(_spanContext, start: null) };
+            var trace = new ArraySegment<Span>(new[] { new Span(_spanContext, start: null) });
             _exporterWriter.WriteTrace(trace);
             await _exporterWriter.FlushTracesAsync(); // Force a flush to make sure the trace is written to the API
             _exporter.Verify(x => x.SendTracesAsync(It.Is<Span[][]>(y => y.Single().Equals(trace))), Times.Once);
 
-            trace = new[] { new Span(_spanContext, start: null) };
+            trace = new ArraySegment<Span>(new[] { new Span(_spanContext, start: null) });
             _exporterWriter.WriteTrace(trace);
             await _exporterWriter.FlushTracesAsync(); // Force a flush to make sure the trace is written to the API
             _exporter.Verify(x => x.SendTracesAsync(It.Is<Span[][]>(y => y.Single().Equals(trace))), Times.Once);

@@ -16,6 +16,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Datadog.Trace.Configuration;
+using Datadog.Trace.Propagation;
 using Datadog.Trace.TestHelpers;
 using VerifyXunit;
 using Xunit;
@@ -134,7 +135,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
             public OwinFixture()
             {
                 _httpClient = new HttpClient();
-                _httpClient.DefaultRequestHeaders.Add(HttpHeaderNames.TracingEnabled, "false");
+                _httpClient.DefaultRequestHeaders.Add(CommonHttpHeaderNames.TracingEnabled, "false");
             }
 
             public MockTracerAgent Agent { get; private set; }

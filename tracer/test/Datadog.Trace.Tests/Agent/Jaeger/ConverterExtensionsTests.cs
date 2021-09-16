@@ -19,8 +19,8 @@ namespace Datadog.Trace.Tests.Agent.Jaeger
 
             Assert.Equal("TestOperation", jaegerSpan.OperationName);
 
-            Assert.Equal(span.TraceId.Higher, jaegerSpan.TraceIdHigh);
-            Assert.Equal(span.TraceId.Lower, jaegerSpan.TraceIdLow);
+            Assert.Equal(span.TraceId.Higher, (ulong)jaegerSpan.TraceIdHigh);
+            Assert.Equal(span.TraceId.Lower, (ulong)jaegerSpan.TraceIdLow);
             Assert.Equal((long)span.SpanId, jaegerSpan.SpanId);
             Assert.Equal((long)span.Context.ParentId, jaegerSpan.ParentSpanId);
 

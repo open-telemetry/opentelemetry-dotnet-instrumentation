@@ -307,7 +307,7 @@ namespace Datadog.Trace.Tests
         public void AgentWriterEnqueueFlushTasks()
         {
             var api = new Mock<IApi>();
-            var agentWriter = new AgentWriter(api.Object, statsd: null, automaticFlush: false);
+            var agentWriter = new AgentWriter(api.Object, metrics: null, automaticFlush: false);
             var flushTcs = new TaskCompletionSource<bool>();
             int invocation = 0;
 
@@ -323,7 +323,7 @@ namespace Datadog.Trace.Tests
                     return Task.FromResult(true);
                 });
 
-            var trace = new ArraySegment<Span>(new[] { new Span(new SpanContext(1, 1), DateTimeOffset.UtcNow) });
+            var trace = new ArraySegment<Span>(new[] { new Span(new SpanContext(TraceId.CreateFromInt(1), 1), DateTimeOffset.UtcNow) });
 
             // Write trace to the front buffer
             agentWriter.WriteTrace(trace);

@@ -18,7 +18,7 @@ namespace Benchmarks.Trace
     {
         private const int SpanCount = 1000;
 
-        private static readonly ITraceWriter AgentWriter;
+        private static readonly IAgentWriter AgentWriter;
         private static readonly ArraySegment<Span> EnrichedSpans;
 
         static AgentWriterBenchmark()

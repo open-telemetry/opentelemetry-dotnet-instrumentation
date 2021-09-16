@@ -5,7 +5,7 @@ using Datadog.Trace.Agent;
 
 namespace Benchmarks.Trace
 {
-    class DummyAgentWriter : ITraceWriter
+    class DummyAgentWriter : IAgentWriter
     {
         private static readonly Task<bool> PingTask = Task.FromResult(true);
 

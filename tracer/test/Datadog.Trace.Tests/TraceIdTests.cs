@@ -61,7 +61,7 @@ namespace Datadog.Trace.Tests
         {
             var traceId = TraceId.CreateRandom();
 
-            traceId.Lower.Should().Be(Convert.ToInt64(traceId.ToString().Substring(startIndex: 16, length: 16), fromBase: 16));
+            traceId.Lower.Should().Be(Convert.ToUInt64(traceId.ToString().Substring(startIndex: 16, length: 16), fromBase: 16));
         }
 
         [Fact]

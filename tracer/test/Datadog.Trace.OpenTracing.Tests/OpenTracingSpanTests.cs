@@ -20,7 +20,7 @@ namespace Datadog.Trace.OpenTracing.Tests
         public OpenTracingSpanTests()
         {
             var settings = new TracerSettings();
-            var writerMock = new Mock<ITraceWriter>();
+            var writerMock = new Mock<IAgentWriter>();
             var samplerMock = new Mock<ISampler>();
 
             var datadogTracer = new Tracer(settings, plugins: null, writerMock.Object, samplerMock.Object, scopeManager: null, statsd: null);
