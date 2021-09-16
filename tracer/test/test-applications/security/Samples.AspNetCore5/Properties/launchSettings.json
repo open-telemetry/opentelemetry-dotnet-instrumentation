@@ -18,7 +18,7 @@
         "CORECLR_ENABLE_PROFILING": "1",
         "CORECLR_PROFILER": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}",
         "OTEL_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json",
-        "CORECLR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\Datadog.Trace.ClrProfiler.Native.dll",
+        "CORECLR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll",
         "OTEL_VERSION": "1.0.0",
         "OTEL_TRACE_HEADER_TAGS": "sample.correlation.identifier, Server"
       },
@@ -37,7 +37,7 @@
         "CORECLR_PROFILER": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}",
         "OTEL_TRACE_CALLTARGET_ENABLED": "1",
         "OTEL_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json",
-        "CORECLR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\Datadog.Trace.ClrProfiler.Native.dll",
+        "CORECLR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll",
         "OTEL_VERSION": "1.0.0",
         "OTEL_TRACE_HEADER_TAGS": "sample.correlation.identifier, Server",
         "OTEL_TRACE_DEBUG": "0"
@@ -64,7 +64,7 @@
         "CORECLR_PROFILER": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}",
         "DD_TRACE_CALLTARGET_ENABLED": "1",
         "DD_INTEGRATIONS": "/mnt/c/Repositories/dd-trace-dotnet/test/test-applications/security/Samples.AspNetCore5/bin/x64/Debug/net5.0/profiler-lib/integrations.json",
-        "CORECLR_PROFILER_PATH": "/mnt/c/Repositories/dd-trace-dotnet/test/test-applications/security/Samples.AspNetCore5/bin/x64/Debug/net5.0/profiler-lib/Datadog.Trace.ClrProfiler.Native.so",
+        "CORECLR_PROFILER_PATH": "/mnt/c/Repositories/dd-trace-dotnet/test/test-applications/security/Samples.AspNetCore5/bin/x64/Debug/net5.0/profiler-lib/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so",
         "DD_VERSION": "1.0.0",
         "DD_TRACE_HEADER_TAGS": "sample.correlation.identifier, Server",
         "DD_TRACE_DEBUG": "1"

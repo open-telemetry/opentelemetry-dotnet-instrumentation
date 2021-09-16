@@ -63,7 +63,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.NUnit
                                 {
                                     var testResult = item2.DuckCast<IWorkItem>().Result;
                                     Scope scope = NUnitIntegration.CreateScope(testResult.Test, typeof(TTarget));
-                                    scope.Span.Error = true;
+                                    scope.Span.Status = SpanStatus.Error.WithDescription(compositeWorkItem.Result.Message);
                                     scope.Span.SetTag(Tags.ErrorMsg, compositeWorkItem.Result.Message);
                                     scope.Span.SetTag(Tags.ErrorStack, compositeWorkItem.Result.StackTrace);
                                     scope.Span.SetTag(Tags.ErrorType, "SetUpException");
@@ -79,7 +79,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Testing.NUnit
                             {
                                 var testResult = item.DuckCast<IWorkItem>().Result;
                                 Scope scope = NUnitIntegration.CreateScope(testResult.Test, typeof(TTarget));
-                                scope.Span.Error = true;
+                                scope.Span.Status = SpanStatus.Error.WithDescription(compositeWorkItem.Result.Message);
                                 scope.Span.SetTag(Tags.ErrorMsg, compositeWorkItem.Result.Message);
                                 scope.Span.SetTag(Tags.ErrorStack, compositeWorkItem.Result.StackTrace);
                                 scope.Span.SetTag(Tags.ErrorType, "SetUpException");

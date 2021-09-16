@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Datadog.Trace.Agent
 {
-    internal interface ITraceWriter
+    internal interface IAgentWriter
     {
         void WriteTrace(ArraySegment<Span> trace);
 

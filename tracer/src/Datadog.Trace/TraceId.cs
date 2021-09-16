@@ -15,8 +15,8 @@ namespace Datadog.Trace
         private TraceId(long higher, long lower)
         {
             _isDataDogCompatible = false;
-            Higher = higher;
-            Lower = lower;
+            Higher = (ulong)higher;
+            Lower = (ulong)lower;
             _string = $"{Higher:x16}{Lower:x16}";
         }
 
@@ -24,7 +24,7 @@ namespace Datadog.Trace
         {
             _isDataDogCompatible = true;
             Higher = 0;
-            Lower = (long)lower;
+            Lower = lower;
             _string = Lower.ToString(CultureInfo.InvariantCulture);
         }
 
@@ -36,12 +36,12 @@ namespace Datadog.Trace
         /// <summary>
         /// Gets higher 64 bits of 128 bit traceID.
         /// </summary>
-        public long Higher { get; }
+        public ulong Higher { get; }
 
         /// <summary>
         /// Gets lower 64 bits of 128 bit traceID.
         /// </summary>
-        public long Lower { get; }
+        public ulong Lower { get; }
 
         /// <summary>
         /// Indicates if two specified instances of TraceId are not equal.

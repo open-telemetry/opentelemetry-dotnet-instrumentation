@@ -23,7 +23,7 @@ namespace Datadog.Trace.IntegrationTests
             var settings = new TracerSettings();
             _testApi = new TestApi();
             var agentWriter = new AgentWriter(_testApi, null);
-            _tracer = new Tracer(settings, plugins: null, traceWriter: agentWriter, sampler: null, scopeManager: null, statsd: null);
+            _tracer = new Tracer(settings, plugins: null, agentWriter: agentWriter, sampler: null, scopeManager: null, statsd: null);
         }
 
         [Fact(Skip="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/191")]

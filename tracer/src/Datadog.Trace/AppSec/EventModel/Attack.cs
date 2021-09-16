@@ -65,7 +65,7 @@ namespace Datadog.Trace.AppSec.EventModel
             if (span != null)
             {
                 attack.Context.Span = new Span { Id = span.SpanId };
-                attack.Context.Trace = new Span { Id = span.TraceId };
+                attack.Context.Trace = new Span { Id = span.TraceId.Lower };
                 attack.Context.Service = new Service { Name = span.ServiceName };
             }
 

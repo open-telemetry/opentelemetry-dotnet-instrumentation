@@ -27,8 +27,8 @@ namespace Datadog.Trace.Agent.Jaeger
         public static JaegerSpan ToJaegerSpan(this Span span)
         {
             return new JaegerSpan(
-                traceIdLow: span.TraceId.Lower,
-                traceIdHigh: span.TraceId.Higher,
+                traceIdLow: (long)span.TraceId.Lower,
+                traceIdHigh: (long)span.TraceId.Higher,
                 spanId: (long)span.SpanId,
                 parentSpanId: (long)(span.Context.ParentId ?? default),
                 operationName: span.OperationName,

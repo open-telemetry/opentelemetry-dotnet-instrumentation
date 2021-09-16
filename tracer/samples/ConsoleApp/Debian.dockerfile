@@ -23,7 +23,7 @@ RUN dpkg -i ./datadog-dotnet-apm_${TRACER_VERSION}_amd64.deb
 
 ENV CORECLR_ENABLE_PROFILING=1
 ENV CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
-ENV CORECLR_PROFILER_PATH=/opt/datadog/Datadog.Trace.ClrProfiler.Native.so
+ENV CORECLR_PROFILER_PATH=/opt/datadog/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so
 ENV OTEL_INTEGRATIONS=/opt/datadog/integrations.json
 ENV OTEL_DOTNET_TRACER_HOME=/opt/datadog
 

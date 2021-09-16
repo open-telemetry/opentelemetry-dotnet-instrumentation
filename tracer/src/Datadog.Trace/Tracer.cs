@@ -63,7 +63,7 @@ namespace Datadog.Trace
         private readonly IScopeManager _scopeManager;
         private readonly Timer _heartbeatTimer;
 
-        private readonly ITraceWriter _traceWriter;
+        private readonly IAgentWriter _agentWriter;
         private readonly IPropagator _propagator;
 
         private string _agentVersion;
@@ -77,7 +77,7 @@ namespace Datadog.Trace
         /// Initializes a new instance of the <see cref="Tracer"/> class with default settings.
         /// </summary>
         public Tracer()
-            : this(settings: null, plugins: null, traceWriter: null, sampler: null, scopeManager: null, statsd: null)
+            : this(settings: null, plugins: null, agentWriter: null, sampler: null, scopeManager: null, statsd: null)
         {
         }
 
@@ -87,7 +87,7 @@ namespace Datadog.Trace
         /// </summary>
         /// <param name="plugins">Plugins to extend with</param>
         public Tracer(IReadOnlyCollection<IOTelExtension> plugins)
-            : this(settings: null, plugins: plugins, traceWriter: null, sampler: null, scopeManager: null, statsd: null)
+            : this(settings: null, plugins: plugins, agentWriter: null, sampler: null, scopeManager: null, statsd: null)
         {
         }
 
@@ -100,11 +100,11 @@ namespace Datadog.Trace
         /// or null to use the default configuration sources.
         /// </param>
         public Tracer(TracerSettings settings)
-            : this(settings, plugins: null, traceWriter: null, sampler: null, scopeManager: null, statsd: null)
+            : this(settings, plugins: null, agentWriter: null, sampler: null, scopeManager: null, statsd: null)
         {
         }
 
-        internal Tracer(TracerSettings settings, IReadOnlyCollection<IOTelExtension> plugins, ITraceWriter traceWriter, ISampler sampler, IScopeManager scopeManager, IDogStatsd statsd)
+        internal Tracer(TracerSettings settings, IReadOnlyCollection<IOTelExtension> plugins, IAgentWriter agentWriter, ISampler sampler, IScopeManager scopeManager, IDogStatsd statsd)
         {
             // update the count of Tracer instances
             Interlocked.Increment(ref _liveTracerCount);
@@ -121,7 +121,7 @@ namespace Datadog.Trace
                 Statsd = statsd ?? CreateDogStatsdClient(Settings, Settings.DogStatsdPort);
             }
 
-            _traceWriter = traceWriter ?? CreateTraceWriter(Settings, Statsd);
+            _agentWriter = agentWriter ?? CreateTraceWriter(Settings, Statsd);
 
             switch (Settings.Convention)
             {
@@ -423,7 +423,7 @@ namespace Datadog.Trace
         {
             if (Settings.TraceEnabled)
             {
-                _traceWriter.WriteTrace(trace);
+                _agentWriter.WriteTrace(trace);
             }
         }
 
@@ -499,7 +499,7 @@ namespace Datadog.Trace
 
         internal Task FlushAsync()
         {
-            return _traceWriter.FlushTracesAsync();
+            return _agentWriter.FlushTracesAsync();
         }
 
         internal async Task WriteDiagnosticLog()
@@ -512,7 +512,7 @@ namespace Datadog.Trace
             {
                 try
                 {
-                    var success = await _traceWriter.Ping().ConfigureAwait(false);
+                    var success = await _agentWriter.Ping().ConfigureAwait(false);
 
                     if (!success)
                     {
@@ -766,7 +766,7 @@ namespace Datadog.Trace
             }
         }
 
-        private static ITraceWriter CreateTraceWriter(TracerSettings settings, IDogStatsd statsd)
+        private static IAgentWriter CreateTraceWriter(TracerSettings settings, IDogStatsd statsd)
         {
             IMetrics metrics = statsd != null
                 ? new DogStatsdMetrics(statsd)
@@ -833,7 +833,7 @@ namespace Datadog.Trace
         {
             try
             {
-                _traceWriter.FlushAndCloseAsync().Wait();
+                _agentWriter.FlushAndCloseAsync().Wait();
             }
             catch (Exception ex)
             {

@@ -27,18 +27,18 @@ $LogPath = Resolve-Path $LogPath
 
 if ($IsWindows) {
     Write-Host 'Setting environment variables for Windows'
-    $TracerPath32 = Join-Path $TracerHome 'win-x86\Datadog.Trace.ClrProfiler.Native.dll' -Resolve
-    $TracerPath64 = Join-Path $TracerHome 'win-x64\Datadog.Trace.ClrProfiler.Native.dll' -Resolve
+    $TracerPath32 = Join-Path $TracerHome 'win-x86\OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll' -Resolve
+    $TracerPath64 = Join-Path $TracerHome 'win-x64\OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll' -Resolve
 }
 
 if ($IsLinux) {
     Write-Host 'Setting environment variables for Linux'
-    $TracerPath64 = Join-Path $TracerHome 'Datadog.Trace.ClrProfiler.Native.so' -Resolve
+    $TracerPath64 = Join-Path $TracerHome 'OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so' -Resolve
 }
 
 if ($IsMacOS) {
     Write-Host 'Setting environment variables for macOS'
-    $TracerPath64 = Join-Path $TracerHome 'Datadog.Trace.ClrProfiler.Native.dylib' -Resolve
+    $TracerPath64 = Join-Path $TracerHome 'OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dylib' -Resolve
 }
 
 function Set-EnvironmentVariable {

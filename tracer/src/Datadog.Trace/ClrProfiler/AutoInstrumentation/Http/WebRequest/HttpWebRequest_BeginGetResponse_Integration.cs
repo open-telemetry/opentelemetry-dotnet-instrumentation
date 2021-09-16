@@ -1,4 +1,4 @@
-﻿// <copyright file="HttpWebRequest_BeginGetResponse_Integration.cs" company="Datadog">
+// <copyright file="HttpWebRequest_BeginGetResponse_Integration.cs" company="Datadog">
 // Unless explicitly stated otherwise all files in this repository are licensed under the Apache 2 License.
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2017 Datadog, Inc.
 // </copyright>
@@ -46,7 +46,9 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.WebRequest
                 var tracer = Tracer.Instance;
 
                 // We may have already set headers
-                if (request.Headers.Get(HttpHeaderNames.TraceId) is null)
+                var propagator = tracer.Propagator;
+                var requestContext = propagator.Extract(request.Headers, (headers, key) => headers.GetValues(key));
+                if (requestContext is null || requestContext.TraceId == TraceId.Zero)
                 {
                     var spanContext = ScopeFactory.CreateHttpSpanContext(tracer, WebRequestCommon.IntegrationId);
 
@@ -55,7 +57,7 @@ namespace Datadog.Trace.ClrProfiler.AutoInstrumentation.Http.WebRequest
                         // Add distributed tracing headers to the HTTP request.
                         // We don't want to set an active scope now, because it's possible that EndGetResponse will never be called.
                         // Instead, we generate a spancontext and inject it in the headers. EndGetResponse will fetch them and create an active scope with the right id.
-                        SpanContextPropagator.Instance.Inject(spanContext, request.Headers.Wrap());
+                        propagator.Inject(spanContext, request.Headers, (headers, key, value) => headers.Set(key, value));
                     }
                 }
             }

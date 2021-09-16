@@ -16,7 +16,7 @@ using Datadog.Trace.Util;
 
 namespace Datadog.Trace.Agent
 {
-    internal class AgentWriter : ITraceWriter
+    internal class AgentWriter : IAgentWriter
     {
 #if NET45
         private const TaskCreationOptions TaskOptions = TaskCreationOptions.None;

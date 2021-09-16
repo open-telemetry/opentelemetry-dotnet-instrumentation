@@ -72,7 +72,7 @@ public:
 
 #if _WINDOWS
 const std::string TestDynamicInstanceFilePath = "..\\..\\src\\Datadog.Trace.ClrProfiler.Native\\bin\\Debug\\" +
-                                                CurrentArch + "\\Datadog.Trace.ClrProfiler.Native.dll";
+                                                CurrentArch + "\\OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll";
 #else
 const std::string TestDynamicInstanceFilePath = "Test";
 #endif

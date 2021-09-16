@@ -244,7 +244,7 @@ namespace Datadog.Trace.AspNet
             {
                 try
                 {
-                    scope.Span.SetHeaderTags<IHeadersCollection>(httpContext.Response.Headers.Wrap(), Tracer.Instance.Settings.HeaderTags, defaultTagPrefix: SpanContextPropagator.HttpResponseHeadersTagPrefix);
+                    scope.Span.SetHeaderTags<IHeadersCollection>(httpContext.Response.Headers.Wrap(), Tracer.Instance.Settings.HeaderTags, defaultTagPrefix: PropagationExtensions.HttpResponseHeadersTagPrefix);
                 }
                 catch (PlatformNotSupportedException ex)
                 {

@@ -59,6 +59,8 @@ partial class Build
 
     Project NativeProfilerProject => Solution.GetProject(Projects.ClrProfilerNative);
 
+    string NativeProfilerDll => "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll";
+
     [LazyPathExecutable(name: "cmake")] readonly Lazy<Tool> CMake;
     [LazyPathExecutable(name: "make")] readonly Lazy<Tool> Make;
     [LazyPathExecutable(name: "fpm")] readonly Lazy<Tool> Fpm;
@@ -356,7 +358,7 @@ partial class Build
             foreach (var architecture in ArchitecturesForPlatform)
             {
                 var source = NativeProfilerProject.Directory / "bin" / BuildConfiguration / architecture.ToString() /
-                             $"{NativeProfilerProject.Name}.dll";
+                             NativeProfilerDll;
                 var dest = TracerHomeDirectory / $"win-{architecture}";
                 Logger.Info($"Copying '{source}' to '{dest}'");
                 CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
@@ -556,7 +558,7 @@ partial class Build
                         $"--chdir {TracerHomeDirectory}",
                         "netstandard2.0/",
                         "netcoreapp3.1/",
-                        "Datadog.Trace.ClrProfiler.Native.so",
+                        "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so",
                         "integrations.json",
                         "createLogPath.sh",
                     };

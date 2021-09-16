@@ -9,7 +9,7 @@
   <PropertyGroup>
     <!-- Strong name signature -->
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>$(ProjectDir../)../../../../OpenTelemetry.AutoInstrumentation.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>$(ProjectDir)../../../../../OpenTelemetry.AutoInstrumentation.snk</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
   </PropertyGroup>
 
