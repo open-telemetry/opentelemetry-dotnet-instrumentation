@@ -23,7 +23,7 @@ namespace Datadog.Logging.Composition
     /// </summary>
     internal static class LogComposer
     {
-        private const string IsDebugLoggingEnabledEnvVarName = "DD_TRACE_DEBUG";
+        private const string IsDebugLoggingEnabledEnvVarName = "OTEL_TRACE_DEBUG";
 
         private static bool s_isDebugLoggingEnabled = true;
 

@@ -96,8 +96,8 @@ partial class Build
             envVars["COR_PROFILER"] = "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}";
             envVars["COR_PROFILER_PATH_64"] = TracerHomeDirectory / "win-x64" / "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll";
             envVars["COR_PROFILER_PATH_32"] = TracerHomeDirectory / "win-x86" / "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll";
-            envVars["DD_INTEGRATIONS"] = TracerHomeDirectory / "integrations.json";
-            envVars["DD_DOTNET_TRACER_HOME"] = TracerHomeDirectory;
+            envVars["OTEL_INTEGRATIONS"] = TracerHomeDirectory / "integrations.json";
+            envVars["OTEL_DOTNET_TRACER_HOME"] = TracerHomeDirectory;
 
             if (ExtraEnvVars?.Length > 0)
             {
@@ -128,8 +128,8 @@ partial class Build
                 {"COR_PROFILER_PATH_64", TracerHomeDirectory / "win-x64" / "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll"},
                 {"CORECLR_ENABLE_PROFILING", "1"},
                 {"CORECLR_PROFILER", "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}"},
-                {"DD_INTEGRATIONS", TracerHomeDirectory / "integrations.json" },
-                {"DD_DOTNET_TRACER_HOME", TracerHomeDirectory },
+                {"OTEL_INTEGRATIONS", TracerHomeDirectory / "integrations.json" },
+                {"OTEL_DOTNET_TRACER_HOME", TracerHomeDirectory },
                 {"ASPNETCORE_URLS", "https://*:5003" },
             };
 

@@ -302,8 +302,8 @@ partial class Build : NukeBuild
                 .EnableNoRestore()
                 .EnableNoBuild()
                 .SetApplicationArguments("-r net472 netcoreapp3.1 -m -f * --iterationTime 2000")
-                .SetProcessEnvironmentVariable("DD_SERVICE", "dd-trace-dotnet")
-                .SetProcessEnvironmentVariable("DD_ENV", "CI")
+                .SetProcessEnvironmentVariable("OTEL_SERVICE", "otel-trace-dotnet")
+                .SetProcessEnvironmentVariable("OTEL_ENV", "CI")
                 .When(!string.IsNullOrEmpty(NugetPackageDirectory), o => o.SetPackageDirectory(NugetPackageDirectory))
             );
         });

@@ -248,17 +248,17 @@ namespace Datadog.Trace.Ci
             // **********
             // Custom environment variables.
             // **********
-            Branch = GetEnvironmentVariableIfIsNotEmpty("DD_GIT_BRANCH", Branch);
-            Tag = GetEnvironmentVariableIfIsNotEmpty("DD_GIT_TAG", Tag);
-            Repository = GetEnvironmentVariableIfIsNotEmpty("DD_GIT_REPOSITORY_URL", Repository);
-            Commit = GetEnvironmentVariableIfIsNotEmpty("DD_GIT_COMMIT_SHA", Commit);
-            Message = GetEnvironmentVariableIfIsNotEmpty("DD_GIT_COMMIT_MESSAGE", Message);
-            AuthorName = GetEnvironmentVariableIfIsNotEmpty("DD_GIT_COMMIT_AUTHOR_NAME", AuthorName);
-            AuthorEmail = GetEnvironmentVariableIfIsNotEmpty("DD_GIT_COMMIT_AUTHOR_EMAIL", AuthorEmail);
-            AuthorDate = GetDateTimeOffsetEnvironmentVariableIfIsNotEmpty("DD_GIT_COMMIT_AUTHOR_DATE", AuthorDate);
-            CommitterName = GetEnvironmentVariableIfIsNotEmpty("DD_GIT_COMMIT_COMMITTER_NAME", CommitterName);
-            CommitterEmail = GetEnvironmentVariableIfIsNotEmpty("DD_GIT_COMMIT_COMMITTER_EMAIL", CommitterEmail);
-            CommitterDate = GetDateTimeOffsetEnvironmentVariableIfIsNotEmpty("DD_GIT_COMMIT_COMMITTER_DATE", CommitterDate);
+            Branch = GetEnvironmentVariableIfIsNotEmpty("OTEL_GIT_BRANCH", Branch);
+            Tag = GetEnvironmentVariableIfIsNotEmpty("OTEL_GIT_TAG", Tag);
+            Repository = GetEnvironmentVariableIfIsNotEmpty("OTEL_GIT_REPOSITORY_URL", Repository);
+            Commit = GetEnvironmentVariableIfIsNotEmpty("OTEL_GIT_COMMIT_SHA", Commit);
+            Message = GetEnvironmentVariableIfIsNotEmpty("OTEL_GIT_COMMIT_MESSAGE", Message);
+            AuthorName = GetEnvironmentVariableIfIsNotEmpty("OTEL_GIT_COMMIT_AUTHOR_NAME", AuthorName);
+            AuthorEmail = GetEnvironmentVariableIfIsNotEmpty("OTEL_GIT_COMMIT_AUTHOR_EMAIL", AuthorEmail);
+            AuthorDate = GetDateTimeOffsetEnvironmentVariableIfIsNotEmpty("OTEL_GIT_COMMIT_AUTHOR_DATE", AuthorDate);
+            CommitterName = GetEnvironmentVariableIfIsNotEmpty("OTEL_GIT_COMMIT_COMMITTER_NAME", CommitterName);
+            CommitterEmail = GetEnvironmentVariableIfIsNotEmpty("OTEL_GIT_COMMIT_COMMITTER_EMAIL", CommitterEmail);
+            CommitterDate = GetDateTimeOffsetEnvironmentVariableIfIsNotEmpty("OTEL_GIT_COMMIT_COMMITTER_DATE", CommitterDate);
         }
 
         private static string GetEnvironmentVariableIfIsNotEmpty(string key, string defaultValue)

@@ -1,7 +1,7 @@
 # Agent configuration
 The `docker-compose.yml` file automatically starts the Datadog agent container image when running the applications.
-- `DD_API_KEY` (required)
-- `DD_ENV` (optional)
+- `OTEL_API_KEY` (required)
+- `OTEL_ENV` (optional)
 
 # Running samples
 From this directory, run the docker-compose service for the corresponding container you want to test.

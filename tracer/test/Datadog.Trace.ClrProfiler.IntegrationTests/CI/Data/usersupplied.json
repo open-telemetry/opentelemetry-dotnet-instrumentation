@@ -1,16 +1,16 @@
 ﻿[
   [
     {
-      "DD_GIT_BRANCH": "feature",
-      "DD_GIT_REPOSITORY_URL": "usersupplied-repo",
-      "DD_GIT_COMMIT_SHA": "usersupplied-commit",
-      "DD_GIT_COMMIT_MESSAGE": "usersupplied-message",
-      "DD_GIT_COMMIT_AUTHOR_NAME": "usersupplied-authorname",
-      "DD_GIT_COMMIT_AUTHOR_EMAIL": "usersupplied-authoremail",
-      "DD_GIT_COMMIT_AUTHOR_DATE": "usersupplied-authordate",
-      "DD_GIT_COMMIT_COMMITTER_NAME": "usersupplied-comittername",
-      "DD_GIT_COMMIT_COMMITTER_EMAIL": "usersupplied-comitteremail",
-      "DD_GIT_COMMIT_COMMITTER_DATE": "usersupplied-comitterdate"
+      "OTEL_GIT_BRANCH": "feature",
+      "OTEL_GIT_REPOSITORY_URL": "usersupplied-repo",
+      "OTEL_GIT_COMMIT_SHA": "usersupplied-commit",
+      "OTEL_GIT_COMMIT_MESSAGE": "usersupplied-message",
+      "OTEL_GIT_COMMIT_AUTHOR_NAME": "usersupplied-authorname",
+      "OTEL_GIT_COMMIT_AUTHOR_EMAIL": "usersupplied-authoremail",
+      "OTEL_GIT_COMMIT_AUTHOR_DATE": "usersupplied-authordate",
+      "OTEL_GIT_COMMIT_COMMITTER_NAME": "usersupplied-comittername",
+      "OTEL_GIT_COMMIT_COMMITTER_EMAIL": "usersupplied-comitteremail",
+      "OTEL_GIT_COMMIT_COMMITTER_DATE": "usersupplied-comitterdate"
     },
     {
       "git.branch": "feature",
@@ -27,16 +27,16 @@
   ],
   [
     {
-      "DD_GIT_TAG": "0.1.0",
-      "DD_GIT_REPOSITORY_URL": "usersupplied-repo",
-      "DD_GIT_COMMIT_SHA": "usersupplied-commit",
-      "DD_GIT_COMMIT_MESSAGE": "usersupplied-message",
-      "DD_GIT_COMMIT_AUTHOR_NAME": "usersupplied-authorname",
-      "DD_GIT_COMMIT_AUTHOR_EMAIL": "usersupplied-authoremail",
-      "DD_GIT_COMMIT_AUTHOR_DATE": "usersupplied-authordate",
-      "DD_GIT_COMMIT_COMMITTER_NAME": "usersupplied-comittername",
-      "DD_GIT_COMMIT_COMMITTER_EMAIL": "usersupplied-comitteremail",
-      "DD_GIT_COMMIT_COMMITTER_DATE": "usersupplied-comitterdate"
+      "OTEL_GIT_TAG": "0.1.0",
+      "OTEL_GIT_REPOSITORY_URL": "usersupplied-repo",
+      "OTEL_GIT_COMMIT_SHA": "usersupplied-commit",
+      "OTEL_GIT_COMMIT_MESSAGE": "usersupplied-message",
+      "OTEL_GIT_COMMIT_AUTHOR_NAME": "usersupplied-authorname",
+      "OTEL_GIT_COMMIT_AUTHOR_EMAIL": "usersupplied-authoremail",
+      "OTEL_GIT_COMMIT_AUTHOR_DATE": "usersupplied-authordate",
+      "OTEL_GIT_COMMIT_COMMITTER_NAME": "usersupplied-comittername",
+      "OTEL_GIT_COMMIT_COMMITTER_EMAIL": "usersupplied-comitteremail",
+      "OTEL_GIT_COMMIT_COMMITTER_DATE": "usersupplied-comitterdate"
     },
     {
       "git.tag": "0.1.0",
@@ -60,15 +60,15 @@
       "GITHUB_RUN_NUMBER": "ghactions-pipeline-number",
       "GITHUB_REPOSITORY": "ghactions-repo",
       "GITHUB_SHA": "ghactions-commit",
-      "DD_GIT_REPOSITORY_URL": "usersupplied-repo",
-      "DD_GIT_COMMIT_SHA": "usersupplied-commit",
-      "DD_GIT_COMMIT_MESSAGE": "usersupplied-message",
-      "DD_GIT_COMMIT_AUTHOR_NAME": "usersupplied-authorname",
-      "DD_GIT_COMMIT_AUTHOR_EMAIL": "usersupplied-authoremail",
-      "DD_GIT_COMMIT_AUTHOR_DATE": "usersupplied-authordate",
-      "DD_GIT_COMMIT_COMMITTER_NAME": "usersupplied-comittername",
-      "DD_GIT_COMMIT_COMMITTER_EMAIL": "usersupplied-comitteremail",
-      "DD_GIT_COMMIT_COMMITTER_DATE": "usersupplied-comitterdate"
+      "OTEL_GIT_REPOSITORY_URL": "usersupplied-repo",
+      "OTEL_GIT_COMMIT_SHA": "usersupplied-commit",
+      "OTEL_GIT_COMMIT_MESSAGE": "usersupplied-message",
+      "OTEL_GIT_COMMIT_AUTHOR_NAME": "usersupplied-authorname",
+      "OTEL_GIT_COMMIT_AUTHOR_EMAIL": "usersupplied-authoremail",
+      "OTEL_GIT_COMMIT_AUTHOR_DATE": "usersupplied-authordate",
+      "OTEL_GIT_COMMIT_COMMITTER_NAME": "usersupplied-comittername",
+      "OTEL_GIT_COMMIT_COMMITTER_EMAIL": "usersupplied-comitteremail",
+      "OTEL_GIT_COMMIT_COMMITTER_DATE": "usersupplied-comitterdate"
     },
     {
       "ci.workspace_path": "/foo/bar",

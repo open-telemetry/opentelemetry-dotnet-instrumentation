@@ -108,10 +108,10 @@ namespace environment {
     const WSTRING calltarget_enabled = WStr("OTEL_TRACE_CALLTARGET_ENABLED");
 
     // Custom internal tracer profiler path
-    const WSTRING internal_trace_profiler_path = WStr("DD_INTERNAL_TRACE_NATIVE_ENGINE_PATH");
+    const WSTRING internal_trace_profiler_path = WStr("OTEL_INTERNAL_TRACE_NATIVE_ENGINE_PATH");
 
     // Sets whether to enable NGEN images.
-    const WSTRING clr_enable_ngen = WStr("DD_CLR_ENABLE_NGEN");
+    const WSTRING clr_enable_ngen = WStr("OTEL_CLR_ENABLE_NGEN");
 
 } // namespace environment
 } // namespace trace

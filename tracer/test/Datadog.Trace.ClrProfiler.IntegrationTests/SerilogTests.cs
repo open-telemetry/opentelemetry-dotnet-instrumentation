@@ -57,7 +57,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
         [Trait("Category", "LinuxUnsupported")]
         public void InjectsLogsWhenEnabled(string packageVersion)
         {
-            SetEnvironmentVariable("DD_LOGS_INJECTION", "true");
+            SetEnvironmentVariable("OTEL_LOGS_INJECTION", "true");
 
             int agentPort = TcpPortProvider.GetOpenPort();
             using (var agent = new MockTracerAgent(agentPort))
@@ -87,7 +87,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
         [Trait("Category", "LinuxUnsupported")]
         public void DoesNotInjectLogsWhenDisabled(string packageVersion)
         {
-            SetEnvironmentVariable("DD_LOGS_INJECTION", "false");
+            SetEnvironmentVariable("OTEL_LOGS_INJECTION", "false");
 
             int agentPort = TcpPortProvider.GetOpenPort();
             using (var agent = new MockTracerAgent(agentPort))

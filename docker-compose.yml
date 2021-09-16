@@ -266,7 +266,7 @@ services:
     ports:
     - "8080:80"
     environment:
-      - DD_CLR_ENABLE_NGEN=${DD_CLR_ENABLE_NGEN:-0}
+      - OTEL_CLR_ENABLE_NGEN=${OTEL_CLR_ENABLE_NGEN:-0}
 
   IntegrationTests:
     build:
@@ -284,7 +284,7 @@ services:
       - artifacts=/project/${relativeArtifacts:-src/bin/artifacts}
       - framework=${framework:-netcoreapp3.1}
       - baseImage=${baseImage:-default}
-      - DD_CLR_ENABLE_NGEN=${DD_CLR_ENABLE_NGEN:-0}
+      - OTEL_CLR_ENABLE_NGEN=${OTEL_CLR_ENABLE_NGEN:-0}
       - MONGO_HOST=mongo
       - SERVICESTACK_REDIS_HOST=servicestackredis:6379
       - STACKEXCHANGE_REDIS_HOST=stackexchangeredis:6379
@@ -353,7 +353,7 @@ services:
       - artifacts=/project/${relativeArtifacts:-src/bin/artifacts}
       - framework=${framework:-netcoreapp3.1}
       - baseImage=${baseImage:-debian}
-      - DD_CLR_ENABLE_NGEN=${DD_CLR_ENABLE_NGEN:-0}
+      - OTEL_CLR_ENABLE_NGEN=${OTEL_CLR_ENABLE_NGEN:-0}
       - MONGO_HOST=mongo_arm64
       - SERVICESTACK_REDIS_HOST=servicestackredis_arm64:6379
       - STACKEXCHANGE_REDIS_HOST=stackexchangeredis_arm64:6379

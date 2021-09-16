@@ -194,7 +194,7 @@ namespace Datadog.Trace.TestHelpers
 
             if (callTargetEnabled)
             {
-                environmentVariables["DD_TRACE_CALLTARGET_ENABLED"] = "1";
+                environmentVariables["OTEL_TRACE_CALLTARGET_ENABLED"] = "1";
             }
 
             if (!string.IsNullOrEmpty(processToProfile))
@@ -238,7 +238,7 @@ namespace Datadog.Trace.TestHelpers
             environmentVariables["OTEL_ENV"] = "integration_tests";
 
             // Don't attach the profiler to these processes
-            environmentVariables["DD_PROFILER_EXCLUDE_PROCESSES"] =
+            environmentVariables["OTEL_PROFILER_EXCLUDE_PROCESSES"] =
                 "devenv.exe;Microsoft.ServiceHub.Controller.exe;ServiceHub.Host.CLR.exe;ServiceHub.TestWindowStoreHost.exe;" +
                 "ServiceHub.DataWarehouseHost.exe;sqlservr.exe;VBCSCompiler.exe;iisexpresstray.exe;msvsmon.exe;PerfWatson2.exe;" +
                 "ServiceHub.IdentityHost.exe;ServiceHub.VSDetouredHost.exe;ServiceHub.SettingsHost.exe;ServiceHub.Host.CLR.x86.exe;" +

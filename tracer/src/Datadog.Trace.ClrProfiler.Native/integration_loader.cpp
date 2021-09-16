@@ -174,7 +174,7 @@ namespace
                 // temporarily skip the calls into netstandard.dll that were added in
                 // https://github.com/DataDog/dd-trace-dotnet/pull/753.
                 // users can opt-in to the additional instrumentation by setting environment
-                // variable DD_TRACE_NETSTANDARD_ENABLED
+                // variable OTEL_TRACE_NETSTANDARD_ENABLED
                 if (!isNetstandardEnabled && target.assembly.name == WStr("netstandard"))
                 {
                     return;

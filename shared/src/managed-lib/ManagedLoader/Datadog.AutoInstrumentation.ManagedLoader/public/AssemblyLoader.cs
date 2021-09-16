@@ -18,7 +18,7 @@ namespace Datadog.AutoInstrumentation.ManagedLoader
     /// If the specified assemblies do not contain such an entry point, they will be loaded, but nothing will be executed.
     ///
     /// This class sets up a basic AppDomain.AssemblyResolve handler to look for the assemblies in a framework-specific subdirectory
-    /// of the product home directory in addition to the normal probing paths (e.g. DD_DOTNET_TRACER_HOME for the Tracer).
+    /// of the product home directory in addition to the normal probing paths (e.g. OTEL_DOTNET_TRACER_HOME for the Tracer).
     /// It also allows for some SxS loading using custom Assembly Load Context.
     ///
     /// If a target assembly needs additional AssemblyResolve event logic to satisfy its dependencies,
@@ -394,7 +394,7 @@ namespace Datadog.AutoInstrumentation.ManagedLoader
             //  - c:\Program Files\Datadog\.NET Tracer\netcoreapp3.1\
             //  - ...
 
-            string tracerHomeDirectory = ReadEnvironmentVariable("DD_DOTNET_TRACER_HOME");
+            string tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_TRACER_HOME");
 
             if (String.IsNullOrWhiteSpace(tracerHomeDirectory))
             {

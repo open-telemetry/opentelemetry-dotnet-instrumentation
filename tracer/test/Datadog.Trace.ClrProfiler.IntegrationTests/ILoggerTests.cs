@@ -30,7 +30,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
             : base(output, "LogsInjection.ILogger")
         {
             SetServiceVersion("1.0.0");
-            SetEnvironmentVariable("DD_LOGS_INJECTION", "true");
+            SetEnvironmentVariable("OTEL_LOGS_INJECTION", "true");
             SetCallTargetSettings(true);
         }
 

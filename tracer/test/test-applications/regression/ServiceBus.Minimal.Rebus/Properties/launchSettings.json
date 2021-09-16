@@ -11,9 +11,9 @@
         "CORECLR_PROFILER": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}",
         "CORECLR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll",
 
-        "DD_DOTNET_TRACER_HOME": "$(ProjectDir)$(OutputPath)profiler-lib",
-        "DD_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json",
-        "DD_VERSION": "1.0.0"
+        "OTEL_DOTNET_TRACER_HOME": "$(ProjectDir)$(OutputPath)profiler-lib",
+        "OTEL_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json",
+        "OTEL_VERSION": "1.0.0"
       }
     }
   }

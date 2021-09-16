@@ -13,15 +13,15 @@
     {
       "name": "CallTarget\u002BInlining",
       "environmentVariables": {
-        "DD_CLR_ENABLE_INLINING": "true",
-        "DD_CLR_ENABLE_NGEN": "false"
+        "OTEL_CLR_ENABLE_INLINING": "true",
+        "OTEL_CLR_ENABLE_NGEN": "false"
       }
     },
     {
       "name": "CallTarget\u002BInlining\u002BNGEN",
       "environmentVariables": {
-        "DD_CLR_ENABLE_INLINING": "true",
-        "DD_CLR_ENABLE_NGEN": "true"
+        "OTEL_CLR_ENABLE_INLINING": "true",
+        "OTEL_CLR_ENABLE_NGEN": "true"
       }
     }
   ],
@@ -30,12 +30,12 @@
   "processTimeout": 15,
   "workingDirectory": "$(CWD)\\..\\..\\..\\test\\test-applications\\integrations\\Samples.FakeDbCommand\\bin\\Release\\net461",
   "environmentVariables": {
-    "DD_TRACE_CALLTARGET_ENABLED": "true",
+    "OTEL_TRACE_CALLTARGET_ENABLED": "true",
     "CORECLR_ENABLE_PROFILING": "1",
     "CORECLR_PROFILER": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}",
     "CORECLR_PROFILER_PATH": "$(CWD)\\..\\..\\..\\bin\\tracer-home\\win-x64\\OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll",
-    "DD_DOTNET_TRACER_HOME": "$(CWD)\\..\\..\\..\\bin\\tracer-home",
-    "DD_INTEGRATIONS": "$(CWD)\\..\\..\\..\\bin\\tracer-home\\integrations.json",
+    "OTEL_DOTNET_TRACER_HOME": "$(CWD)\\..\\..\\..\\bin\\tracer-home",
+    "OTEL_INTEGRATIONS": "$(CWD)\\..\\..\\..\\bin\\tracer-home\\integrations.json",
     "COR_ENABLE_PROFILING": "1",
     "COR_PROFILER": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}",
     "COR_PROFILER_PATH": "$(CWD)\\..\\..\\..\\bin\\tracer-home\\win-x64\\OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll"

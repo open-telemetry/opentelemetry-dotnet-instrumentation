@@ -64,7 +64,7 @@ internal static partial class DotNetSettingsExtensions
     public static T SetDDEnvironmentVariables<T>(this T settings, string serviceName)
         where T: ToolSettings
     {
-        return settings.SetProcessEnvironmentVariable("DD_SERVICE_NAME", serviceName);
+        return settings.SetProcessEnvironmentVariable("OTEL_SERVICE_NAME", serviceName);
     }
     
     public static T SetProcessEnvironmentVariables<T>(this T settings, IEnumerable<KeyValuePair<string, string>> variables)

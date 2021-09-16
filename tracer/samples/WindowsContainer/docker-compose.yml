@@ -15,6 +15,6 @@ services:
   datadog-agent:
     image: "gcr.io/datadoghq/agent:7"
     environment:
-      DD_API_KEY: ${DD_API_KEY}
-      DD_APM_ENABLED: "true"
-      DD_APM_NON_LOCAL_TRAFFIC: "true"
+      OTEL_API_KEY: ${OTEL_API_KEY}
+      OTEL_APM_ENABLED: "true"
+      OTEL_APM_NON_LOCAL_TRAFFIC: "true"

@@ -78,7 +78,7 @@ namespace Datadog.Logging.Composition
         private const string WindowsDefaultLogDirectory = @"Datadog-APM\logs\";    // relative to Environment.SpecialFolder.CommonApplicationData
         private const string NixDefaultLogDirectory = @"/var/log/datadog/";        // global path
 
-        private const string DdTraceLogDirectoryEnvVarName = "DD_TRACE_LOG_DIRECTORY";
+        private const string DdTraceLogDirectoryEnvVarName = "OTEL_TRACE_LOG_DIRECTORY";
 
         private static string s_processNameString = null;
 

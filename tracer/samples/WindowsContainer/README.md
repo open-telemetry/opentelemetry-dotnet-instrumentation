@@ -6,7 +6,7 @@ This repo contains an example of setting up Datadog .NET automatic tracing for a
 ### How to use: 
 
 - Clone/download this repository
-- Update the `docker-compose.yml` by replacing the value for `DD_API_KEY`
+- Update the `docker-compose.yml` by replacing the value for `OTEL_API_KEY`
 - Run `docker-compose up` & navigate to `http://localhost:8000` 
 
 #### Resulting .NET 5 APM traces within Datadog: 

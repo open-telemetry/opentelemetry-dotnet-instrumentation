@@ -7,15 +7,15 @@ namespace shared {
 	namespace environment {
 
 		// Sets the path for the profiler's log file.
-		// Environment variable DD_TRACE_LOG_DIRECTORY takes precedence over this setting, if set.
-		const WSTRING log_path = WStr("DD_TRACE_LOG_PATH");
+		// Environment variable OTEL_TRACE_LOG_DIRECTORY takes precedence over this setting, if set.
+		const WSTRING log_path = WStr("OTEL_TRACE_LOG_PATH");
 
 		// Sets the directory for the profiler's log file.
-		// If set, this setting takes precedence over environment variable DD_TRACE_LOG_PATH.
+		// If set, this setting takes precedence over environment variable OTEL_TRACE_LOG_PATH.
 		// If not set, default is
 		// "%ProgramData%"\Datadog .NET Tracer\logs\" on Windows or
 		// "/var/log/datadog/dotnet/" on Linux.
-		const WSTRING log_directory = WStr("DD_TRACE_LOG_DIRECTORY");
+		const WSTRING log_directory = WStr("OTEL_TRACE_LOG_DIRECTORY");
 
 	}  // namespace environment
 }  // namespace shared

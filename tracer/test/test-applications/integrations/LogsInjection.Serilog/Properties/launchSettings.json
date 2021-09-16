@@ -3,7 +3,7 @@
     "LogsInjection.Serilog": {
       "commandName": "Project",
       "environmentVariables": {
-        "DD_LOGS_INJECTION": "true"
+        "OTEL_LOGS_INJECTION": "true"
       }
     }
   }
