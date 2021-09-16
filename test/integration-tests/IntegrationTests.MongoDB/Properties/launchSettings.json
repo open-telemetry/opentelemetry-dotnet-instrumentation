@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "IntegrationTests.MongoDB": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}

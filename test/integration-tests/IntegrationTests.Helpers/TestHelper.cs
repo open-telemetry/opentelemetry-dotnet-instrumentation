@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using IntegrationTests.Helpers.Models;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers
@@ -54,6 +55,36 @@ namespace IntegrationTests.Helpers
                 statsdPort: statsdPort,
                 aspNetCorePort: aspNetCorePort,
                 processToProfile: executable);
+        }
+
+        public ProcessResult RunSampleAndWaitForExit(int traceAgentPort, int? statsdPort = null, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000)
+        {
+            var process = StartSample(traceAgentPort, arguments, packageVersion, aspNetCorePort: aspNetCorePort, statsdPort: statsdPort, framework: framework);
+
+            using var helper = new ProcessHelper(process);
+
+            process.WaitForExit();
+            helper.Drain();
+            var exitCode = process.ExitCode;
+
+            Output.WriteLine($"ProcessId: " + process.Id);
+            Output.WriteLine($"Exit Code: " + exitCode);
+
+            var standardOutput = helper.StandardOutput;
+
+            if (!string.IsNullOrWhiteSpace(standardOutput))
+            {
+                Output.WriteLine($"StandardOutput:{Environment.NewLine}{standardOutput}");
+            }
+
+            var standardError = helper.ErrorOutput;
+
+            if (!string.IsNullOrWhiteSpace(standardError))
+            {
+                Output.WriteLine($"StandardError:{Environment.NewLine}{standardError}");
+            }
+
+            return new ProcessResult(process, standardOutput, standardError, exitCode);
         }
 
         protected void EnableDebugMode()
