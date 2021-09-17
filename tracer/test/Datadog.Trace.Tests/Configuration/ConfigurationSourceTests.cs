@@ -80,7 +80,7 @@ namespace Datadog.Trace.Tests.Configuration
             yield return new object[] { ConfigurationKeys.ServiceName, "web-service", CreateFunc(s => s.ServiceName), "web-service" };
             yield return new object[] { "OTEL_SERVICE_NAME", "web-service", CreateFunc(s => s.ServiceName), "web-service" };
 
-            yield return new object[] { ConfigurationKeys.DisabledIntegrations, "integration1;integration2;;INTEGRATION2", CreateFunc(s => s.DisabledIntegrationNames.Count), 2 };
+            yield return new object[] { ConfigurationKeys.DisabledIntegrations, "integration1,integration2,,INTEGRATION2", CreateFunc(s => s.DisabledIntegrationNames.Count), 2 };
 
             yield return new object[] { ConfigurationKeys.AdoNetExcludedTypes, "System.Data.SqlClient.SqlCommand,SYSTEM.DATA.SQLCLIENT.SQLCOMMAND,,System.Data.SqlClient.SqlConnection", CreateFunc(s => s.AdoNetExcludedTypes.Count), 2 };
 
