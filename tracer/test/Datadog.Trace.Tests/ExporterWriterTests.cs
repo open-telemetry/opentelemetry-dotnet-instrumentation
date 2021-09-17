@@ -33,12 +33,12 @@ namespace Datadog.Trace.Tests
             var trace = new ArraySegment<Span>(new[] { new Span(_spanContext, start: null) });
             _exporterWriter.WriteTrace(trace);
             await _exporterWriter.FlushTracesAsync(); // Force a flush to make sure the trace is written to the API
-            _exporter.Verify(x => x.SendTracesAsync(It.Is<Span[][]>(y => y.Single().Equals(trace))), Times.Once);
+            _exporter.Verify(x => x.SendTracesAsync(It.Is<Span[][]>(y => y.Single().Single().Equals(trace.Single()))), Times.Once);
 
             trace = new ArraySegment<Span>(new[] { new Span(_spanContext, start: null) });
             _exporterWriter.WriteTrace(trace);
             await _exporterWriter.FlushTracesAsync(); // Force a flush to make sure the trace is written to the API
-            _exporter.Verify(x => x.SendTracesAsync(It.Is<Span[][]>(y => y.Single().Equals(trace))), Times.Once);
+            _exporter.Verify(x => x.SendTracesAsync(It.Is<Span[][]>(y => y.Single().Single().Equals(trace.Single()))), Times.Once);
         }
 
         [Fact]
