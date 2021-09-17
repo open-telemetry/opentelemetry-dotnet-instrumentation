@@ -26,6 +26,12 @@ namespace Datadog.Trace.Propagation
         public const string SamplingPriority = "x-datadog-sampling-priority";
 
         /// <summary>
+        /// If header is set to "false", tracing is disabled for that http request.
+        /// Tracing is enabled by default.
+        /// </summary>
+        public const string TracingEnabled = "x-datadog-tracing-enabled";
+
+        /// <summary>
         /// Origin of the distributed trace.
         /// </summary>
         public const string Origin = "x-datadog-origin";
