@@ -84,13 +84,13 @@ namespace Datadog.Trace.AppSec.Waf.NativeBindings
 
         private static class NonWindows
         {
-            [DllImport("Datadog.Trace.ClrProfiler.Native")]
+            [DllImport("OpenTelemetry.AutoInstrumentation.ClrProfiler.Native")]
             internal static extern IntPtr dddlopen(string fileName, int flags);
 
-            [DllImport("Datadog.Trace.ClrProfiler.Native")]
+            [DllImport("OpenTelemetry.AutoInstrumentation.ClrProfiler.Native")]
             internal static extern IntPtr dddlerror();
 
-            [DllImport("Datadog.Trace.ClrProfiler.Native")]
+            [DllImport("OpenTelemetry.AutoInstrumentation.ClrProfiler.Native")]
             internal static extern IntPtr dddlsym(IntPtr hModule, string lpProcName);
         }
     }
