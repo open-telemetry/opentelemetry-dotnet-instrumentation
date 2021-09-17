@@ -181,7 +181,7 @@ TEST(IntegrationLoaderTest, LoadsFromEnvironment)
     )TEXT";
     f.close();
 
-    auto name = tmpname1.wstring() + L"," + tmpname2.wstring();
+    auto name = tmpname1.wstring() + L";" + tmpname2.wstring();
 
     SetEnvironmentVariableW(trace::environment::integrations_path.data(), name.data());
 
