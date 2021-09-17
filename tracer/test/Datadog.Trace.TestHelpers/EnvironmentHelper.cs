@@ -108,7 +108,7 @@ namespace Datadog.Trace.TestHelpers
                 _ => throw new PlatformNotSupportedException()
             };
 
-            string fileName = $"Datadog.Trace.ClrProfiler.Native.{extension}";
+            string fileName = $"OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.{extension}";
 
             var relativePath = Path.Combine("profiler-lib", fileName);
 
@@ -495,7 +495,7 @@ namespace Datadog.Trace.TestHelpers
             return Path.Combine(
                 EnvironmentTools.GetSolutionDirectory(),
                 "src",
-                "Datadog.Trace.ClrProfiler.Native",
+                "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native",
                 "bin",
                 EnvironmentTools.GetBuildConfiguration(),
                 EnvironmentTools.GetPlatform().ToLower());
