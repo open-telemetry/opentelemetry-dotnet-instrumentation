@@ -4,7 +4,6 @@ namespace Datadog.Trace.Agent
 {
     internal class ExporterWriterBuffer<T>
     {
-        private readonly Random _random = new Random();
         private readonly T[] _items;
 
         private int _count;
