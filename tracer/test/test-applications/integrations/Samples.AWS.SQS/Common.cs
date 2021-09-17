@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Amazon.SQS.Model;
 using Datadog.Trace;
+using Datadog.Trace.Propagation;
 using Newtonsoft.Json;
 
 namespace Samples.AWS.SQS
@@ -22,11 +23,11 @@ namespace Samples.AWS.SQS
                     dictSpanContext = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonSpanContext);
                 }
 
-                if (dictSpanContext[HttpHeaderNames.ParentId] is null ||
-                    !ulong.TryParse(dictSpanContext[HttpHeaderNames.TraceId], out ulong result) ||
-                    result != Tracer.Instance.ActiveScope.Span.TraceId)
+                if (dictSpanContext[DDHttpHeaderNames.ParentId] is null ||
+                    !ulong.TryParse(dictSpanContext[DDHttpHeaderNames.TraceId], out ulong result) ||
+                    result != Tracer.Instance.ActiveScope.Span.TraceId.Lower)
                 {
-                    throw new Exception($"The span context was not injected into the message properly. parent-id: {dictSpanContext[HttpHeaderNames.ParentId]}, trace-id: {dictSpanContext[HttpHeaderNames.TraceId]}, active trace-id: {Tracer.Instance.ActiveScope.Span.TraceId}");
+                    throw new Exception($"The span context was not injected into the message properly. parent-id: {dictSpanContext[DDHttpHeaderNames.ParentId]}, trace-id: {dictSpanContext[DDHttpHeaderNames.TraceId]}, active trace-id: {Tracer.Instance.ActiveScope.Span.TraceId}");
                 }
             }
         }

@@ -370,7 +370,7 @@ namespace Samples.WebRequest
 
                     if (tracingDisabled)
                     {
-                        request.Headers.Add(HttpHeaderNames.TracingEnabled, "false");
+                        request.Headers.Add(DDHttpHeaderNames.TracingEnabled, "false");
                     }
 
                     request.BeginGetRequestStream(
@@ -396,7 +396,7 @@ namespace Samples.WebRequest
                     HttpWebRequest request = (HttpWebRequest)System.Net.WebRequest.Create(GetUrlForTest("BeginGetResponseAsync", url));
                     if (tracingDisabled)
                     {
-                        request.Headers.Add(HttpHeaderNames.TracingEnabled, "false");
+                        request.Headers.Add(DDHttpHeaderNames.TracingEnabled, "false");
                     }
 
                     request.BeginGetResponse(
@@ -420,7 +420,7 @@ namespace Samples.WebRequest
                     HttpWebRequest request = (HttpWebRequest)System.Net.WebRequest.Create(GetUrlForTest("TaskFactoryFromAsync", url));
                     if (tracingDisabled)
                     {
-                        request.Headers.Add(HttpHeaderNames.TracingEnabled, "false");
+                        request.Headers.Add(DDHttpHeaderNames.TracingEnabled, "false");
                     }
 
                     await Task.Factory.FromAsync(
