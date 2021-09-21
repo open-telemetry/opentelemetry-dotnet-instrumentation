@@ -16,7 +16,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests.SmokeTests
         {
         }
 
-        [Fact]
+        [Fact(Skip = "No previous version was created yet")]
         [Trait("Category", "Smoke")]
         public void NoExceptions()
         {
