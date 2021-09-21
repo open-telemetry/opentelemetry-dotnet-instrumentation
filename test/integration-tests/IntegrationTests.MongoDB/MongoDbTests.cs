@@ -14,12 +14,17 @@ using IntegrationTests.Helpers.Comptability;
 
 namespace IntegrationTests.MongoDB
 {
+    [Collection(MongoDbCollection.Name)]
     public class MongoDbTests : TestHelper
     {
-        public MongoDbTests(ITestOutputHelper output)
+        private readonly MongoDbFixture _mongoDb;
+
+        public MongoDbTests(ITestOutputHelper output, MongoDbFixture mongoDb)
             : base("MongoDB", output)
         {
             SetServiceVersion("1.0.0");
+
+            _mongoDb = mongoDb;
         }
 
         [Theory]
@@ -33,7 +38,7 @@ namespace IntegrationTests.MongoDB
             int agentPort = TcpPortProvider.GetOpenPort();
 
             using (var agent = new MockZipkinCollector(Output, agentPort))
-            using (var processResult = RunSampleAndWaitForExit(agent.Port))
+            using (var processResult = RunSampleAndWaitForExit(agent.Port, arguments: $"--mongo-db {_mongoDb.Port}"))
             {
                 Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
 

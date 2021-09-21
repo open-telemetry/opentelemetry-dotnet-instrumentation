@@ -23,9 +23,11 @@ namespace Samples.MongoDB
 
         public static void Main(string[] args)
         {
+            Console.WriteLine($"Command line: {string.Join(";", args)}");
             Console.WriteLine($"Profiler attached: {IsProfilerAttached()}");
             Console.WriteLine($"Platform: {(Environment.Is64BitProcess ? "x64" : "x32")}");
 
+            var mongoPort = args[1];
             var newDocument = new BsonDocument
             {
                 { "name", "MongoDB" },
@@ -40,10 +42,9 @@ namespace Samples.MongoDB
                 }
             };
 
-
             using (var mainScope = ActivitySource.StartActivity("Main()"))
             {
-                var connectionString = $"mongodb://{Host()}:27017";
+                var connectionString = $"mongodb://{Host()}:{mongoPort}";
                 var client = new MongoClient(connectionString);
                 var database = client.GetDatabase("test-db");
                 var collection = database.GetCollection<BsonDocument>("employees");
@@ -56,7 +57,6 @@ namespace Samples.MongoDB
 #endif
             }
         }
-
 
         public static void Run(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
         {
