@@ -15,32 +15,56 @@ namespace IntegrationTests.MongoDB
 
     public class MongoDbFixture : IDisposable
     {
+        private const int MongoDbPort = 27017;
+
         private TestcontainersContainer _container;
 
         public MongoDbFixture()
         {
-            Port = TcpPortProvider.GetOpenPort();
+            bool hasRunningMongoDb = !TcpPortProvider.IsPortOpen(MongoDbPort);
 
-            var waitOS = EnvironmentTools.IsWindows()
-                ? Wait.ForWindowsContainer()
-                : Wait.ForUnixContainer();
+            Port = hasRunningMongoDb
+                ? MongoDbPort
+                : TcpPortProvider.GetOpenPort();
 
-            var mongoContainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
-              .WithImage("mongo")
-              .WithName($"mongo-db-{Port}")
-              .WithPortBinding(Port, 27017)
-              .WithWaitStrategy(waitOS.UntilPortIsAvailable(27017));
-
-            _container = mongoContainersBuilder.Build();
-            _container.StartAsync().Wait();
+            if (!hasRunningMongoDb)
+            {
+                _container = LaunchMongoContainer(Port);
+            }
         }
 
         public int Port { get; }
 
         public void Dispose()
         {
-            _container.CleanUpAsync().Wait();
-            _container.DisposeAsync().AsTask().Wait();
+            if (_container != null)
+            {
+                ShutDownMongoContainer(_container);
+            }
+        }
+
+        private TestcontainersContainer LaunchMongoContainer(int port)
+        {
+            var waitOS = EnvironmentTools.IsWindows()
+                ? Wait.ForWindowsContainer()
+                : Wait.ForUnixContainer();
+
+            var mongoContainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
+              .WithImage("mongo")
+              .WithName($"mongo-db-{port}")
+              .WithPortBinding(port, MongoDbPort)
+              .WithWaitStrategy(waitOS.UntilPortIsAvailable(MongoDbPort));
+
+            var container = mongoContainersBuilder.Build();
+            container.StartAsync().Wait();
+
+            return container;
+        }
+
+        private void ShutDownMongoContainer(TestcontainersContainer container)
+        {
+            container.CleanUpAsync().Wait();
+            container.DisposeAsync().AsTask().Wait();
         }
     }
 }

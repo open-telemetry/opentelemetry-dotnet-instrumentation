@@ -10,6 +10,23 @@ namespace IntegrationTests.Helpers
     /// </summary>
     public static class TcpPortProvider
     {
+        public static bool IsPortOpen(int port)
+        {
+            using (TcpClient tcpClient = new TcpClient())
+            {
+                try
+                {
+                    tcpClient.Connect(IPAddress.Loopback, port);
+
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+
         public static int GetOpenPort()
         {
             TcpListener tcpListener = null;
