@@ -5,7 +5,7 @@ cmake_policy(SET CMP0015 NEW)
 # Project definition
 # ******************************************************
 
-project("Datadog.Trace.ClrProfiler.Native" VERSION 0.0.1)
+project("OpenTelemetry.AutoInstrumentation.ClrProfiler.Native" VERSION 0.0.1)
 
 # ******************************************************
 # Environment detection
@@ -73,9 +73,9 @@ else()
 endif()
 
 if (NOT EXISTS ${CMAKE_SOURCE_DIR}/../bin/ProfilerResources/netcoreapp2.0)
-    message(FATAL_ERROR "Datadog.Trace.ClrProfiler.Loader must be built first.")
+    message(FATAL_ERROR "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader must be built first.")
 else()
-    message(STATUS "Datadog.Trace.ClrProfiler.Loader was found")
+    message(STATUS "OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader was found")
 endif()
 
 # ******************************************************
@@ -129,34 +129,34 @@ SET(MANAGED_LOADER_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin/ProfilerResources/netcor
 # Set specific custom commands to embed the loader
 if (ISMACOS)
     add_custom_command(
-            OUTPUT ${OUTPUT_TMP_DIR}/Datadog.Trace.ClrProfiler.Managed.Loader.dll.o
-            COMMAND touch stub.c && gcc -o stub.o -c stub.c && cp ${MANAGED_LOADER_DIRECTORY}/Datadog.Trace.ClrProfiler.Managed.Loader.dll Datadog.Trace.ClrProfiler.Managed.Loader.dll && ld -r -o Datadog.Trace.ClrProfiler.Managed.Loader.dll.o -sectcreate binary dll Datadog.Trace.ClrProfiler.Managed.Loader.dll stub.o
-            DEPENDS ${MANAGED_LOADER_DIRECTORY}/Datadog.Trace.ClrProfiler.Managed.Loader.dll ${OUTPUT_DEPS_DIR}/json ${OUTPUT_DEPS_DIR}/re2 ${OUTPUT_DEPS_DIR}/fmt
+            OUTPUT ${OUTPUT_TMP_DIR}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.dll.o
+            COMMAND touch stub.c && gcc -o stub.o -c stub.c && cp ${MANAGED_LOADER_DIRECTORY}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.dll OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.dll && ld -r -o OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.dll.o -sectcreate binary dll OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.dll stub.o
+            DEPENDS ${MANAGED_LOADER_DIRECTORY}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.dll ${OUTPUT_DEPS_DIR}/json ${OUTPUT_DEPS_DIR}/re2 ${OUTPUT_DEPS_DIR}/fmt
             WORKING_DIRECTORY ${OUTPUT_TMP_DIR}
     )
     add_custom_command(
-            OUTPUT ${OUTPUT_TMP_DIR}/Datadog.Trace.ClrProfiler.Managed.Loader.pdb.o
-            COMMAND touch stub.c && gcc -o stub.o -c stub.c && cp "${MANAGED_LOADER_DIRECTORY}/Datadog.Trace.ClrProfiler.Managed.Loader.pdb" Datadog.Trace.ClrProfiler.Managed.Loader.pdb && ld -r -o Datadog.Trace.ClrProfiler.Managed.Loader.pdb.o -sectcreate binary pdb Datadog.Trace.ClrProfiler.Managed.Loader.pdb stub.o
-            DEPENDS ${MANAGED_LOADER_DIRECTORY}/Datadog.Trace.ClrProfiler.Managed.Loader.pdb ${OUTPUT_DEPS_DIR}/json ${OUTPUT_DEPS_DIR}/re2 ${OUTPUT_DEPS_DIR}/fmt
+            OUTPUT ${OUTPUT_TMP_DIR}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.pdb.o
+            COMMAND touch stub.c && gcc -o stub.o -c stub.c && cp "${MANAGED_LOADER_DIRECTORY}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.pdb" OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.pdb && ld -r -o OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.pdb.o -sectcreate binary pdb OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.pdb stub.o
+            DEPENDS ${MANAGED_LOADER_DIRECTORY}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.pdb ${OUTPUT_DEPS_DIR}/json ${OUTPUT_DEPS_DIR}/re2 ${OUTPUT_DEPS_DIR}/fmt
             WORKING_DIRECTORY ${OUTPUT_TMP_DIR}
     )
 elseif(ISLINUX)
     add_custom_command(
-            OUTPUT ${OUTPUT_TMP_DIR}/Datadog.Trace.ClrProfiler.Managed.Loader.dll.o
-            COMMAND cp "${MANAGED_LOADER_DIRECTORY}/Datadog.Trace.ClrProfiler.Managed.Loader.dll" Datadog.Trace.ClrProfiler.Managed.Loader.dll && ld -r -b binary -o Datadog.Trace.ClrProfiler.Managed.Loader.dll.o Datadog.Trace.ClrProfiler.Managed.Loader.dll
-            DEPENDS ${MANAGED_LOADER_DIRECTORY}/Datadog.Trace.ClrProfiler.Managed.Loader.dll ${OUTPUT_DEPS_DIR}/json ${OUTPUT_DEPS_DIR}/re2 ${OUTPUT_DEPS_DIR}/fmt
+            OUTPUT ${OUTPUT_TMP_DIR}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.dll.o
+            COMMAND cp "${MANAGED_LOADER_DIRECTORY}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.dll" OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.dll && ld -r -b binary -o OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.dll.o OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.dll
+            DEPENDS ${MANAGED_LOADER_DIRECTORY}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.dll ${OUTPUT_DEPS_DIR}/json ${OUTPUT_DEPS_DIR}/re2 ${OUTPUT_DEPS_DIR}/fmt
             WORKING_DIRECTORY ${OUTPUT_TMP_DIR}
     )
     add_custom_command(
-            OUTPUT ${OUTPUT_TMP_DIR}/Datadog.Trace.ClrProfiler.Managed.Loader.pdb.o
-            COMMAND cp "${MANAGED_LOADER_DIRECTORY}/Datadog.Trace.ClrProfiler.Managed.Loader.pdb" Datadog.Trace.ClrProfiler.Managed.Loader.pdb && ld -r -b binary -o Datadog.Trace.ClrProfiler.Managed.Loader.pdb.o Datadog.Trace.ClrProfiler.Managed.Loader.pdb
-            DEPENDS ${MANAGED_LOADER_DIRECTORY}/Datadog.Trace.ClrProfiler.Managed.Loader.pdb ${OUTPUT_DEPS_DIR}/json ${OUTPUT_DEPS_DIR}/re2 ${OUTPUT_DEPS_DIR}/fmt
+            OUTPUT ${OUTPUT_TMP_DIR}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.pdb.o
+            COMMAND cp "${MANAGED_LOADER_DIRECTORY}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.pdb" OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.pdb && ld -r -b binary -o OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.pdb.o OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.pdb
+            DEPENDS ${MANAGED_LOADER_DIRECTORY}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.pdb ${OUTPUT_DEPS_DIR}/json ${OUTPUT_DEPS_DIR}/re2 ${OUTPUT_DEPS_DIR}/fmt
             WORKING_DIRECTORY ${OUTPUT_TMP_DIR}
     )
 endif()
 SET(GENERATED_OBJ_FILES
-        ${OUTPUT_TMP_DIR}/Datadog.Trace.ClrProfiler.Managed.Loader.dll.o
-        ${OUTPUT_TMP_DIR}/Datadog.Trace.ClrProfiler.Managed.Loader.pdb.o
+        ${OUTPUT_TMP_DIR}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.dll.o
+        ${OUTPUT_TMP_DIR}/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader.pdb.o
 )
 SET_SOURCE_FILES_PROPERTIES(
         ${GENERATED_OBJ_FILES}
@@ -214,7 +214,7 @@ endif()
 # ******************************************************
 # Define static target
 # ******************************************************
-add_library("Datadog.Trace.ClrProfiler.Native.static" STATIC
+add_library("OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.static" STATIC
         class_factory.cpp
         clr_helpers.cpp
         cor_profiler_base.cpp
@@ -234,10 +234,10 @@ add_library("Datadog.Trace.ClrProfiler.Native.static" STATIC
         ${GENERATED_OBJ_FILES}
 )
 
-set_target_properties("Datadog.Trace.ClrProfiler.Native.static" PROPERTIES PREFIX "")
+set_target_properties("OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.static" PROPERTIES PREFIX "")
 
 # Define directories includes
-target_include_directories("Datadog.Trace.ClrProfiler.Native.static"
+target_include_directories("OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.static"
         PUBLIC lib/coreclr/src/pal/inc/rt
         PUBLIC lib/coreclr/src/pal/prebuilt/inc
         PUBLIC lib/coreclr/src/pal/inc
@@ -250,13 +250,13 @@ target_include_directories("Datadog.Trace.ClrProfiler.Native.static"
 
 # Define linker libraries
 if (ISMACOS)
-    target_link_libraries("Datadog.Trace.ClrProfiler.Native.static"
+    target_link_libraries("OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.static"
         ${OUTPUT_DEPS_DIR}/re2/obj/libre2.a
         ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
         ${CMAKE_DL_LIBS}
     )
 elseif(ISLINUX)
-    target_link_libraries("Datadog.Trace.ClrProfiler.Native.static"
+    target_link_libraries("OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.static"
         ${OUTPUT_DEPS_DIR}/re2/obj/libre2.a
         ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
         ${CMAKE_DL_LIBS}
@@ -268,20 +268,22 @@ endif()
 # ******************************************************
 # Define shared target
 # ******************************************************
+SET(TARGET_NAME "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native")
+
 if (ISMACOS)
-    add_library("Datadog.Trace.ClrProfiler.Native" SHARED
+    add_library(${TARGET_NAME} SHARED
         dllmain.cpp
         interop.cpp
         ${GENERATED_OBJ_FILES}
     )
 else()
-    add_library("Datadog.Trace.ClrProfiler.Native" SHARED
+    add_library(${TARGET_NAME} SHARED
         dllmain.cpp
         interop.cpp
     )
 endif()
 
-set_target_properties("Datadog.Trace.ClrProfiler.Native" PROPERTIES PREFIX "")
+set_target_properties(${TARGET_NAME} PROPERTIES PREFIX "")
 
 # Define linker libraries
-target_link_libraries("Datadog.Trace.ClrProfiler.Native" "Datadog.Trace.ClrProfiler.Native.static")
+target_link_libraries(${TARGET_NAME} "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.static")
