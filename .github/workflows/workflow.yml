@@ -82,25 +82,10 @@ jobs:
           name: artifacts
           path: tracer/bin/artifacts/*/en-us
 
-  macos_build:
-    name: MacOS Build
-    runs-on: macos-10.15
-    steps:
-      - uses: actions/checkout@v2
-      - run: brew install make
-      - run: ./build/build_mac.sh
-        env:
-          buildConfiguration: Release
-      - run: tar --create --verbose --file=otel-dotnet-autoinstrumentation-macos.tar deploy/macos
-      - uses: actions/upload-artifact@v2
-        with:
-          name: artifacts
-          path: otel-dotnet-autoinstrumentation-macos.tar
-
   create_release:
     runs-on: ubuntu-20.04
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') # only trigger if the current event is for a tag push
-    needs: [alpine_build, linux_build, windows_build, macos_build]
+    needs: [linux_build, windows_build]
     permissions:
       contents: write
     steps:
