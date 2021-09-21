@@ -21,7 +21,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_ExecuteAsync_Integration",
           "action": "CallTargetModification"
         }
@@ -45,7 +45,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_ExecuteAsync_Integration",
           "action": "CallTargetModification"
         }
@@ -69,7 +69,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_ExecuteAsync_Integration",
           "action": "CallTargetModification"
         }
@@ -93,7 +93,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_ExecuteAsync_Integration",
           "action": "CallTargetModification"
         }
@@ -117,7 +117,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_ExecuteAsync_Integration",
           "action": "CallTargetModification"
         }
@@ -141,7 +141,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_ExecuteAsync_Integration",
           "action": "CallTargetModification"
         }
@@ -165,7 +165,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_ExecuteAsync_Integration",
           "action": "CallTargetModification"
         }
@@ -189,7 +189,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_Execute_Integration",
           "action": "CallTargetModification"
         }
@@ -213,7 +213,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_Generic_Execute_Integration",
           "action": "CallTargetModification"
         }
@@ -237,7 +237,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_Generic_Execute_Integration",
           "action": "CallTargetModification"
         }
@@ -261,7 +261,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_Generic_Execute_Integration",
           "action": "CallTargetModification"
         }
@@ -285,7 +285,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_Generic_Execute_Integration",
           "action": "CallTargetModification"
         }
@@ -309,7 +309,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_Generic_Execute_Integration",
           "action": "CallTargetModification"
         }
@@ -333,7 +333,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.IWireProtocol_Generic_Execute_Integration",
           "action": "CallTargetModification"
         }
@@ -362,7 +362,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.MongoDbIntegration",
           "method": "Execute",
           "signature": "00 06 01 1C 1C 1C 08 08 0A",
@@ -388,7 +388,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.MongoDbIntegration",
           "method": "ExecuteGeneric",
           "signature": "00 06 1C 1C 1C 1C 08 08 0A",
@@ -414,7 +414,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.MongoDbIntegration",
           "method": "ExecuteAsync",
           "signature": "00 06 1C 1C 1C 1C 08 08 0A",
@@ -440,7 +440,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb.MongoDbIntegration",
           "method": "ExecuteAsyncGeneric",
           "signature": "00 06 1C 1C 1C 1C 08 08 0A",
@@ -470,7 +470,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL.ExecuteAsyncIntegration",
           "action": "CallTargetModification"
         }
@@ -493,7 +493,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL.ExecuteAsyncIntegration",
           "action": "CallTargetModification"
         }
@@ -521,7 +521,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL.ValidateIntegration",
           "action": "CallTargetModification"
         }
@@ -554,7 +554,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL.GraphQLIntegration",
           "method": "Validate",
           "signature": "00 0A 1C 1C 1C 1C 1C 1C 1C 1C 08 08 0A",
@@ -579,7 +579,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL.GraphQLIntegration",
           "method": "ExecuteAsync",
           "signature": "00 05 1C 1C 1C 08 08 0A",
