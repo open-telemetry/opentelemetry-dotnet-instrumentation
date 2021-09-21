@@ -59,7 +59,7 @@ partial class Build
 
     Project NativeProfilerProject => Solution.GetProject(Projects.ClrProfilerNative);
 
-    string NativeProfilerDll => "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll";
+    string NativeProfilerModule => "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native";
 
     [LazyPathExecutable(name: "cmake")] readonly Lazy<Tool> CMake;
     [LazyPathExecutable(name: "make")] readonly Lazy<Tool> Make;
@@ -342,7 +342,7 @@ partial class Build
            foreach (var architecture in ArchitecturesForPlatform)
            {
                var source = NativeProfilerProject.Directory / "bin" / BuildConfiguration / architecture.ToString() /
-                            $"{NativeProfilerProject.Name}.pdb";
+                            $"{NativeProfilerModule}.pdb";
                var dest = SymbolsDirectory / $"win-{architecture}";
                Logger.Info($"Copying '{source}' to '{dest}'");
                CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
@@ -358,7 +358,7 @@ partial class Build
             foreach (var architecture in ArchitecturesForPlatform)
             {
                 var source = NativeProfilerProject.Directory / "bin" / BuildConfiguration / architecture.ToString() /
-                             NativeProfilerDll;
+                             $"{NativeProfilerModule}.dll";
                 var dest = TracerHomeDirectory / $"win-{architecture}";
                 Logger.Info($"Copying '{source}' to '{dest}'");
                 CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
@@ -379,7 +379,7 @@ partial class Build
 
             // Copy Native file
             CopyFileToDirectory(
-                NativeProfilerProject.Directory / "build" / "bin" / $"{NativeProfilerProject.Name}.so",
+                NativeProfilerProject.Directory / "build" / "bin" / $"{NativeProfilerModule}.so",
                 TracerHomeDirectory,
                 FileExistsPolicy.Overwrite);
         });
@@ -398,7 +398,7 @@ partial class Build
 
             // Create home directory
             CopyFileToDirectory(
-                NativeProfilerProject.Directory / "bin" / $"{NativeProfilerProject.Name}.dylib",
+                NativeProfilerProject.Directory / "bin" / $"{NativeProfilerModule}.dylib",
                 TracerHomeDirectory,
                 FileExistsPolicy.Overwrite);
         });
@@ -426,7 +426,7 @@ partial class Build
            // Move the native file to the architecture-specific folder
            var (architecture, ext) = GetUnixArchitectureAndExtention();
 
-           var profilerFileName = $"{NativeProfilerProject.Name}.{ext}";
+           var profilerFileName = $"{NativeProfilerModule}.{ext}";
            var ddwafFileName = $"libddwaf.{ext}";
 
            var outputDir = DDTracerHomeDirectory / architecture;
@@ -558,7 +558,7 @@ partial class Build
                         $"--chdir {TracerHomeDirectory}",
                         "netstandard2.0/",
                         "netcoreapp3.1/",
-                        "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so",
+                        $"{NativeProfilerModule}.so",
                         "integrations.json",
                         "createLogPath.sh",
                     };
