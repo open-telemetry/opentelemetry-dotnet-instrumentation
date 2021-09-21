@@ -58,14 +58,14 @@ jobs:
         shell: cmd
       - run: choco install wixtoolset
         shell: cmd
-      - run: .\build\build.cmd
-        env:
-          buildConfiguration: Release
+      - run: tracer\build.cmd BuildTracerHome
+        shell: cmd
+      - run: tracer\build.cmd PackageTracerHome
         shell: cmd
       - uses: actions/upload-artifact@v2
         with:
           name: artifacts
-          path: src/WindowsInstaller/bin/Release/*/en-us
+          path: tracer/bin/artifacts/*/en-us
 
   macos_build:
     name: MacOS Build
