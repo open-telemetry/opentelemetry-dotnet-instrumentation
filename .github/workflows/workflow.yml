@@ -9,28 +9,43 @@ on:
   workflow_dispatch:
 
 jobs:
-  alpine_build:
-    name: Alpine Build
-    runs-on: ubuntu-20.04
+  linux:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        baseImage: [alpine, debian]
+
+    env:
+      baseImage: ${{ matrix.baseImage }}
+      dotnetCoreSdk5Version: 5.0.103
     steps:
     - uses: actions/checkout@v2
-    - run: docker-compose run build
-      env:
-        buildConfiguration: Release
-    - run: docker-compose run Profiler.Alpine
-      env:
-        buildConfiguration: Release
-    - run: docker-compose run package.alpine
-      env:
-        buildConfiguration: Release
+    - name: Build Docker image
+      run: |
+        docker build \
+          --build-arg DOTNETSDK_VERSION=${dotnetCoreSdk5Version} \
+          --tag dd-trace-dotnet/${baseImage}-builder \
+          --target builder \
+          --file "./tracer/build/_build/docker/${baseImage}.dockerfile" \
+          "./tracer/build/_build"
+    - name: Run 'Clean BuildTracerHome ZipTracerHome' in Docker
+      run: |
+        docker run --rm \
+          --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project \
+          --env NugetPackageDirectory=/project/packages \
+          --env tracerHome=/project/tracer/bin/tracer-home \
+          --env artifacts=/project/tracer/src/bin/artifacts \
+          --env OTEL_CLR_ENABLE_NGEN=${OTEL_CLR_ENABLE_NGEN} \
+          dd-trace-dotnet/${baseImage}-builder \
+          dotnet /build/bin/Debug/_build.dll Clean BuildTracerHome ZipTracerHome
     - uses: actions/upload-artifact@v2
       with:
         name: artifacts
-        path: deploy/linux
+        path: ./tracer/src/bin/artifacts/linux-x64
 
   linux_build:
     name: Linux Build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
     - run: docker-compose run build
