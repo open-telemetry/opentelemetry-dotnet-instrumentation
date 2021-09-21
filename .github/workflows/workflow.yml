@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  linux:
+  linux_build:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
@@ -42,25 +42,6 @@ jobs:
       with:
         name: artifacts
         path: ./tracer/src/bin/artifacts/linux-x64
-
-  linux_build:
-    name: Linux Build
-    runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@v2
-    - run: docker-compose run build
-      env:
-        buildConfiguration: Release
-    - run: docker-compose run Profiler
-      env:
-        buildConfiguration: Release
-    - run: docker-compose run package
-      env:
-        buildConfiguration: Release
-    - uses: actions/upload-artifact@v2
-      with:
-        name: artifacts
-        path: deploy/linux
 
   windows_build:
     name: Windows Build
