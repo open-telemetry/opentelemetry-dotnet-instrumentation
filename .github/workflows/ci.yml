@@ -31,8 +31,6 @@ jobs:
   windows-latest:
     name: windows-latest
     runs-on: windows-latest
-    env:
-        INTEGRATIONS_ENVIRONMENT: CI
     steps:
       - uses: actions/checkout@v1
       - name: Cache .nuke/temp, ~/.nuget/packages
@@ -52,8 +50,6 @@ jobs:
   ubuntu-latest:
     name: ubuntu-latest
     runs-on: ubuntu-latest
-    env:
-        INTEGRATIONS_ENVIRONMENT: CI
     steps:
       - uses: actions/checkout@v1
       - name: Downgrade CMake
@@ -75,8 +71,6 @@ jobs:
   macOS-latest:
     name: macOS-latest
     runs-on: macos-latest
-    env:
-        INTEGRATIONS_ENVIRONMENT: CI
     steps:
       - uses: actions/checkout@v1
       - name: Downgrade CMake

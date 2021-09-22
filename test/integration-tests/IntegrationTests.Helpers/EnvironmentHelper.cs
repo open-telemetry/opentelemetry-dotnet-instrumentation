@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using IntegrationTests.Helpers.Enums;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers
@@ -114,12 +113,13 @@ namespace IntegrationTests.Helpers
             }
         }
 
-        public static IntegrationsEnvironment GetIntegrationsEnvironment()
+        public static bool IsRunningOnCI()
         {
-            string env = Environment.GetEnvironmentVariable("INTEGRATIONS_ENVIRONMENT");
+            // https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
+            // Github sets CI environment variable
 
-            Enum.TryParse(env, ignoreCase: true, out IntegrationsEnvironment envValue);
-            return envValue;
+            string env = Environment.GetEnvironmentVariable("CI");
+            return !string.IsNullOrEmpty(env);
         }
 
         public static IEnumerable<string> GetProfilerPathCandidates(string sampleApplicationOutputDirectory)

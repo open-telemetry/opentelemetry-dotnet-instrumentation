@@ -3,7 +3,6 @@ using DotNet.Testcontainers.Containers.Builders;
 using DotNet.Testcontainers.Containers.Modules;
 using DotNet.Testcontainers.Containers.WaitStrategies;
 using IntegrationTests.Helpers;
-using IntegrationTests.Helpers.Enums;
 using Xunit;
 
 namespace IntegrationTests.MongoDB
@@ -46,9 +45,7 @@ namespace IntegrationTests.MongoDB
 
         private bool ShouldLaunchContainer()
         {
-            var environment = EnvironmentHelper.GetIntegrationsEnvironment();
-
-            if (environment == IntegrationsEnvironment.CI)
+            if (EnvironmentHelper.IsRunningOnCI())
             {
                 if (EnvironmentTools.IsWindows() ||
                     EnvironmentTools.IsMacOS())
