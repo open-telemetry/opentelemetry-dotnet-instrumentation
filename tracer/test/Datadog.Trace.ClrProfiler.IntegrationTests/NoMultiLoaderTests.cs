@@ -29,7 +29,7 @@ namespace Datadog.Trace.ClrProfiler.IntegrationTests
             SetEnvironmentVariable("OTEL_TRACE_LOG_PATH", tmpFile);
             using ProcessResult processResult = RunSampleAndWaitForExit(9696);
             string[] logFileContent = File.ReadAllLines(tmpFile);
-            int numOfLoadersLoad = logFileContent.Count(line => line.Contains("Datadog.Trace.ClrProfiler.Managed.Loader loaded"));
+            int numOfLoadersLoad = logFileContent.Count(line => line.Contains("OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader loaded"));
             Assert.Equal(1, numOfLoadersLoad);
         }
     }
