@@ -12,7 +12,7 @@ Param (
 
 $ErrorActionPreference = 'Stop'
 
-$TracerGuid = '{846F5F1C-F9AE-4B07-969E-05C26BC060D8}'
+$TracerGuid = '{918728DD-259F-4A6A-AC2B-B85E1B658318}'
 $TracerPath32 = ''
 $TracerPath64 = ''
 $TracerHome = Resolve-Path $TracerHome

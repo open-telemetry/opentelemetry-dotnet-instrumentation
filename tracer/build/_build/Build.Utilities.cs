@@ -93,7 +93,7 @@ partial class Build
 
             // Override environment variables
             envVars["COR_ENABLE_PROFILING"] = "1";
-            envVars["COR_PROFILER"] = "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}";
+            envVars["COR_PROFILER"] = "{918728DD-259F-4A6A-AC2B-B85E1B658318}";
             envVars["COR_PROFILER_PATH_64"] = TracerHomeDirectory / "win-x64" / "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll";
             envVars["COR_PROFILER_PATH_32"] = TracerHomeDirectory / "win-x86" / "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll";
             envVars["OTEL_INTEGRATIONS"] = TracerHomeDirectory / "integrations.json";
@@ -123,11 +123,11 @@ partial class Build
             var envVars = new Dictionary<string,string>()
             {
                 {"COR_ENABLE_PROFILING", "1"},
-                {"COR_PROFILER", "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}"},
+                {"COR_PROFILER", "{918728DD-259F-4A6A-AC2B-B85E1B658318}"},
                 {"COR_PROFILER_PATH_32", TracerHomeDirectory / "win-x86" / "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll"},
                 {"COR_PROFILER_PATH_64", TracerHomeDirectory / "win-x64" / "OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.dll"},
                 {"CORECLR_ENABLE_PROFILING", "1"},
-                {"CORECLR_PROFILER", "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}"},
+                {"CORECLR_PROFILER", "{918728DD-259F-4A6A-AC2B-B85E1B658318}"},
                 {"OTEL_INTEGRATIONS", TracerHomeDirectory / "integrations.json" },
                 {"OTEL_DOTNET_TRACER_HOME", TracerHomeDirectory },
                 {"ASPNETCORE_URLS", "https://*:5003" },
