@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using IntegrationTests.Helpers.Enums;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers
@@ -111,6 +112,14 @@ namespace IntegrationTests.Helpers
             {
                 Environment.SetEnvironmentVariable(variable, null);
             }
+        }
+
+        public static IntegrationsEnvironment GetIntegrationsEnvironment()
+        {
+            string env = Environment.GetEnvironmentVariable("INTEGRATIONS_ENVIRONMENT");
+
+            Enum.TryParse(env, ignoreCase: true, out IntegrationsEnvironment envValue);
+            return envValue;
         }
 
         public static IEnumerable<string> GetProfilerPathCandidates(string sampleApplicationOutputDirectory)

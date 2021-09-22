@@ -3,6 +3,7 @@ using DotNet.Testcontainers.Containers.Builders;
 using DotNet.Testcontainers.Containers.Modules;
 using DotNet.Testcontainers.Containers.WaitStrategies;
 using IntegrationTests.Helpers;
+using IntegrationTests.Helpers.Enums;
 using Xunit;
 
 namespace IntegrationTests.MongoDB
@@ -21,13 +22,13 @@ namespace IntegrationTests.MongoDB
 
         public MongoDbFixture()
         {
-            bool hasRunningMongoDb = !TcpPortProvider.IsPortOpen(MongoDbPort);
+            bool launchContainer = ShouldLaunchContainer();
 
-            Port = hasRunningMongoDb
-                ? MongoDbPort
-                : TcpPortProvider.GetOpenPort();
+            Port = launchContainer
+                ? TcpPortProvider.GetOpenPort()
+                : MongoDbPort;
 
-            if (!hasRunningMongoDb)
+            if (launchContainer)
             {
                 _container = LaunchMongoContainer(Port);
             }
@@ -41,6 +42,26 @@ namespace IntegrationTests.MongoDB
             {
                 ShutDownMongoContainer(_container);
             }
+        }
+
+        private bool ShouldLaunchContainer()
+        {
+            var environment = EnvironmentHelper.GetIntegrationsEnvironment();
+
+            if (environment == IntegrationsEnvironment.CI)
+            {
+                if (EnvironmentTools.IsWindows() ||
+                    EnvironmentTools.IsMacOS())
+                {
+                    return false;
+                }
+                else if (EnvironmentTools.IsLinux())
+                {
+                    return true;
+                }
+            }
+
+            return true;
         }
 
         private TestcontainersContainer LaunchMongoContainer(int port)
