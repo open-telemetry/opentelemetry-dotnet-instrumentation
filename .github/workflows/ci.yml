@@ -84,10 +84,9 @@ jobs:
       - name: Update GitHub PATH
         run: |
           echo "/Applications/CMake.app/Contents/bin" >> $GITHUB_PATH
-      - name: Install MongoDB
+      - name: Start MongoDB service
         run: |
-          brew tap mongodb/brew
-          brew install mongodb-community
+            brew services start mongodb
       - name: Cache .nuke/temp, ~/.nuget/packages
         uses: actions/cache@v2
         with:
