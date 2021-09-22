@@ -75,22 +75,38 @@ namespace OpenTelemetry.ClrProfiler.Managed
 
             try
             {
-                // Instantiate the OpenTracing shim. The underlying OpenTelemetry tracer will create
-                // spans using the "OpenTelemetry.ClrProfiler.OpenTracingShim" source.
-                var openTracingShim = new TracerShim(
-                    _tracerProvider.GetTracer("OpenTelemetry.ClrProfiler.OpenTracingShim"),
-                    Propagators.DefaultTextMapPropagator);
+                if (_tracerProvider is not null)
+                {
+                    // Instantiate the OpenTracing shim. The underlying OpenTelemetry tracer will create
+                    // spans using the "OpenTelemetry.ClrProfiler.OpenTracingShim" source.
+                    var openTracingShim = new TracerShim(
+                        _tracerProvider.GetTracer("OpenTelemetry.ClrProfiler.OpenTracingShim"),
+                        Propagators.DefaultTextMapPropagator);
 
-                // This registration must occur prior to any reference to the OpenTracing tracer:
-                // otherwise the no-op tracer is going to be used by OpenTracing instead.
-                OpenTracing.Util.GlobalTracer.Register(openTracingShim);
-                Log("OpenTracingShim loaded.");
+                    // This registration must occur prior to any reference to the OpenTracing tracer:
+                    // otherwise the no-op tracer is going to be used by OpenTracing instead.
+                    OpenTracing.Util.GlobalTracer.RegisterIfAbsent(openTracingShim);
+                    Log("OpenTracingShim loaded.");
+                }
+                else
+                {
+                    Log("OpenTracingShim was not loaded as the provider is not initialized.");
+                }
             }
             catch (Exception ex)
             {
                 Log($"OpenTracingShim exception: {ex}");
                 throw;
             }
+        }
+
+        /// <summary>
+        /// ??
+        /// </summary>
+        public static void DisposeTracerProvider()
+        {
+            _tracerProvider?.Dispose();
+            _firstInitialization = 1;
         }
 
         private static void Log(string message)
