@@ -86,7 +86,7 @@ jobs:
           echo "/Applications/CMake.app/Contents/bin" >> $GITHUB_PATH
       - name: Start MongoDB service
         run: |
-            brew services start mongodb
+            brew services start mongodb-community
       - name: Cache .nuke/temp, ~/.nuget/packages
         uses: actions/cache@v2
         with:
