@@ -10,6 +10,8 @@ namespace IntegrationTests.Helpers
     /// </summary>
     public class ProcessHelper : IDisposable
     {
+        private const int DefaultTimeoutMinutes = 30;
+
         private readonly ManualResetEventSlim _errorMutex = new();
         private readonly ManualResetEventSlim _outputMutex = new();
         private readonly StringBuilder _outputBuffer = new();
@@ -28,13 +30,13 @@ namespace IntegrationTests.Helpers
 
         public string ErrorOutput => _errorBuffer.ToString();
 
-        public bool Drain(int timeout = Timeout.Infinite)
+        public bool Drain()
         {
-            if (timeout != Timeout.Infinite)
-            {
-                timeout /= 2;
-            }
+            return Drain(TimeSpan.FromMinutes(DefaultTimeoutMinutes));
+        }
 
+        public bool Drain(TimeSpan timeout)
+        {
             return _outputMutex.Wait(timeout) && _errorMutex.Wait(timeout);
         }
 
@@ -46,14 +48,14 @@ namespace IntegrationTests.Helpers
 
         private static void DrainOutput(DataReceivedEventArgs e, StringBuilder buffer, ManualResetEventSlim mutex)
         {
-            if (e.Data == null)
+            string data = e.Data;
+            if (data == null)
             {
                 mutex.Set();
+                return;
             }
-            else
-            {
-                buffer.AppendLine(e.Data);
-            }
+
+            buffer.AppendLine(data);
         }
     }
 }

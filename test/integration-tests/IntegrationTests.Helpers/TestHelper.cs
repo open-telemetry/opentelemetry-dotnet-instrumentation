@@ -10,6 +10,8 @@ namespace IntegrationTests.Helpers
 {
     public abstract class TestHelper
     {
+        private const int DefaultProcessTimeoutMs = 60 * 60 * 1000;
+
         protected TestHelper(string sampleAppName, ITestOutputHelper output)
             : this(new EnvironmentHelper(sampleAppName, typeof(TestHelper), output), output)
         {
@@ -63,7 +65,7 @@ namespace IntegrationTests.Helpers
 
             using var helper = new ProcessHelper(process);
 
-            process.WaitForExit();
+            process.WaitForExit(DefaultProcessTimeoutMs);
             helper.Drain();
             var exitCode = process.ExitCode;
 
