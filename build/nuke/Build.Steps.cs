@@ -109,6 +109,11 @@ partial class Build
                 .SetConfiguration(BuildConfiguration)
                 .SetNoRestore(true));
 
+            DotNetBuild(x => x
+                .SetProjectFile(Solution.GetProject(Projects.Tests.ClrProfilerManagedBootstrappingTests))
+                .SetConfiguration(BuildConfiguration)
+                .SetNoRestore(true));
+
             DotNetMSBuild(x => x
                 .SetTargetPath(MsBuildProject)
                 .SetTargetPlatform(Platform)
@@ -220,13 +225,15 @@ partial class Build
             );
         });
 
-    private AbsolutePath GetResultsDirectory(Project proj) => BuildDataDirectory / "results" / proj.Name;
+    AbsolutePath GetResultsDirectory(Project proj) => BuildDataDirectory / "results" / proj.Name;
 
-    private void RunUnitTests()
+    void RunUnitTests()
     {
-        Project[] unitTests = new[]
+        RunBootstrappingTests();
+
+        var unitTestProjects = new[]
         {
-                Solution.GetProject(Projects.Tests.ClrProfilerManagedLoaderTests)
+            Solution.GetProject(Projects.Tests.ClrProfilerManagedLoaderTests)
         };
 
         DotNetTest(config => config
@@ -234,12 +241,41 @@ partial class Build
             .SetTargetPlatformAnyCPU()
             .EnableNoRestore()
             .EnableNoBuild()
-            .CombineWith(unitTests, (s, project) => s
+            .CombineWith(unitTestProjects, (s, project) => s
                 .EnableTrxLogOutput(GetResultsDirectory(project))
                 .SetProjectFile(project)), degreeOfParallelism: 4);
     }
 
-    private void RunIntegrationTests()
+    /// <summary>
+    /// Bootstrapping tests require every single test to be run in a separate process
+    /// so the tracer can be created from scratch for each of them.
+    /// </summary>
+    void RunBootstrappingTests()
+    {
+        var project = Solution.GetProject(Projects.Tests.ClrProfilerManagedBootstrappingTests);
+
+        const string testPrefix = "OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests.InstrumentationTests";
+        var testNames = new[] {
+            "Initialize_WithDisabledFlag_DoesNotCreateTracerProvider",
+            "Initialize_WithDefaultFlag_CreatesTracerProvider",
+            "Initialize_WithEnabledFlag_CreatesTracerProvider",
+            "Initialize_WithPreviouslyCreatedTracerProvider_WorksCorrectly"
+        }.Select(name => $"{testPrefix}.{name}");
+
+        foreach (var testName in testNames)
+        {
+            DotNetTest(config => config
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatformAnyCPU()
+                .EnableNoRestore()
+                .EnableNoBuild()
+                .EnableTrxLogOutput(GetResultsDirectory(project))
+                .SetProjectFile(project)
+                .SetFilter(testName));
+        }
+    }
+
+    void RunIntegrationTests()
     {
         Project[] integrationTests = Solution
             .GetProjects("IntegrationTests.*")
