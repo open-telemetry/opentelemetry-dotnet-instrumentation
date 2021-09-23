@@ -11,7 +11,7 @@ namespace IntegrationTests.Helpers
     public abstract class TestHelper
     {
         // Warning: Long timeouts can cause integer overflow!
-        private static readonly TimeSpan DefaultProcessTimeout = TimeSpan.FromMinutes(60);
+        private static readonly TimeSpan DefaultProcessTimeout = TimeSpan.FromMinutes(5);
 
         protected TestHelper(string sampleAppName, ITestOutputHelper output)
             : this(new EnvironmentHelper(sampleAppName, typeof(TestHelper), output), output)

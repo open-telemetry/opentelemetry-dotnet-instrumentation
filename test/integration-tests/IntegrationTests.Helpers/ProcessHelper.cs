@@ -10,7 +10,7 @@ namespace IntegrationTests.Helpers
     /// </summary>
     public class ProcessHelper : IDisposable
     {
-        private const int DefaultTimeoutMinutes = 30;
+        private static readonly TimeSpan DefaultTimeout = TimeSpan.FromMinutes(5);
 
         private readonly ManualResetEventSlim _outputMutex = new();
         private readonly StringBuilder _outputBuffer = new();
@@ -37,7 +37,7 @@ namespace IntegrationTests.Helpers
 
         public bool Drain()
         {
-            return Drain(TimeSpan.FromMinutes(DefaultTimeoutMinutes));
+            return Drain(DefaultTimeout);
         }
 
         public bool Drain(TimeSpan timeout)
