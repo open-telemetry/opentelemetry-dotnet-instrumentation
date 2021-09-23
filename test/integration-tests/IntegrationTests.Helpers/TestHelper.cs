@@ -10,7 +10,8 @@ namespace IntegrationTests.Helpers
 {
     public abstract class TestHelper
     {
-        private const int DefaultProcessTimeoutMs = 60 * 60 * 1000;
+        // Warning: Long timeouts can cause integer overflow!
+        private static readonly TimeSpan DefaultProcessTimeout = TimeSpan.FromMinutes(60);
 
         protected TestHelper(string sampleAppName, ITestOutputHelper output)
             : this(new EnvironmentHelper(sampleAppName, typeof(TestHelper), output), output)
@@ -62,13 +63,20 @@ namespace IntegrationTests.Helpers
         public ProcessResult RunSampleAndWaitForExit(int traceAgentPort, int? statsdPort = null, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000)
         {
             var process = StartSample(traceAgentPort, arguments, packageVersion, aspNetCorePort: aspNetCorePort, statsdPort: statsdPort, framework: framework);
+            var name = process.ProcessName;
 
             using var helper = new ProcessHelper(process);
 
-            process.WaitForExit(DefaultProcessTimeoutMs);
+            bool processTimeout = !process.WaitForExit((int)DefaultProcessTimeout.TotalMilliseconds);
+            if (processTimeout)
+            {
+                process.Kill();
+            }
+
             helper.Drain();
             var exitCode = process.ExitCode;
 
+            Output.WriteLine($"ProcessName: " + name);
             Output.WriteLine($"ProcessId: " + process.Id);
             Output.WriteLine($"Exit Code: " + exitCode);
 
@@ -84,6 +92,11 @@ namespace IntegrationTests.Helpers
             if (!string.IsNullOrWhiteSpace(standardError))
             {
                 Output.WriteLine($"StandardError:{Environment.NewLine}{standardError}");
+            }
+
+            if (processTimeout)
+            {
+                throw new TimeoutException($"{name} ({process.Id}) did not exit within {DefaultProcessTimeout.TotalSeconds} sec");
             }
 
             return new ProcessResult(process, standardOutput, standardError, exitCode);
