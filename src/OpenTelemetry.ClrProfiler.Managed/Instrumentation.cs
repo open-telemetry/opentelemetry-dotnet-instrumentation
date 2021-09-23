@@ -100,15 +100,6 @@ namespace OpenTelemetry.ClrProfiler.Managed
             }
         }
 
-        /// <summary>
-        /// ??
-        /// </summary>
-        public static void DisposeTracerProvider()
-        {
-            _tracerProvider?.Dispose();
-            _firstInitialization = 1;
-        }
-
         private static void Log(string message)
         {
             Console.WriteLine($">>>>>>>>>>>>>>>>>>>>>>> Process: {_process.ProcessName}({_process.Id}): {message}");
