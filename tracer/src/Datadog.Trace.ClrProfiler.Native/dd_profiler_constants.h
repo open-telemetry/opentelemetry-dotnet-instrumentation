@@ -80,7 +80,7 @@ const WSTRING skip_assemblies[]{WStr("mscorlib"),
 
 const WSTRING mscorlib_assemblyName = WStr("mscorlib");
 const WSTRING system_private_corelib_assemblyName = WStr("System.Private.CoreLib");
-const WSTRING datadog_trace_clrprofiler_managed_loader_assemblyName = WStr("Datadog.Trace.ClrProfiler.Managed.Loader");
+const WSTRING datadog_trace_clrprofiler_managed_loader_assemblyName = WStr("OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed.Loader");
 
 const WSTRING microsoft_aspnetcore_hosting_assemblyName = WStr("Microsoft.AspNetCore.Hosting");
 const WSTRING dapper_assemblyName = WStr("Dapper");
