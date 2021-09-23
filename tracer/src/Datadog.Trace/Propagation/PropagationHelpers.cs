@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Datadog.Trace.Conventions;
 using Datadog.Trace.Logging;
 
@@ -9,7 +10,7 @@ namespace Datadog.Trace.Propagation
     {
         public static TraceId ParseTraceId<T>(T carrier, Func<T, string, IEnumerable<string>> getter, string headerName, ITraceIdConvention traceIdConvention, IDatadogLogger logger)
         {
-            var headerValues = getter(carrier, headerName);
+            var headerValues = getter(carrier, headerName) ?? Enumerable.Empty<string>();
 
             foreach (var headerValue in headerValues)
             {
@@ -28,7 +29,7 @@ namespace Datadog.Trace.Propagation
 
         public static string ParseString<T>(T carrier, Func<T, string, IEnumerable<string>> getter, string headerName)
         {
-            var headerValues = getter(carrier, headerName);
+            var headerValues = getter(carrier, headerName) ?? Enumerable.Empty<string>();
 
             foreach (var headerValue in headerValues)
             {
