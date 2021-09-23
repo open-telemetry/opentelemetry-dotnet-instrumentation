@@ -12,15 +12,18 @@ namespace IntegrationTests.Helpers
     {
         private const int DefaultTimeoutMinutes = 30;
 
-        private readonly ManualResetEventSlim _errorMutex = new();
         private readonly ManualResetEventSlim _outputMutex = new();
         private readonly StringBuilder _outputBuffer = new();
         private readonly StringBuilder _errorBuffer = new();
 
+        private bool _isStdOutputDrained;
+        private bool _isErrOutputDrained;
+        private object _outputLock = new object();
+
         public ProcessHelper(Process process)
         {
-            process.OutputDataReceived += (_, e) => DrainOutput(e, _outputBuffer, _outputMutex);
-            process.ErrorDataReceived += (_, e) => DrainOutput(e, _errorBuffer, _errorMutex);
+            process.OutputDataReceived += (_, e) => DrainOutput(e.Data, _outputBuffer, isErrorStream: false);
+            process.ErrorDataReceived += (_, e) => DrainOutput(e.Data, _errorBuffer, isErrorStream: true);
 
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
@@ -37,25 +40,38 @@ namespace IntegrationTests.Helpers
 
         public bool Drain(TimeSpan timeout)
         {
-            return _outputMutex.Wait(timeout) && _errorMutex.Wait(timeout);
+            return _outputMutex.Wait(timeout);
         }
 
         public void Dispose()
         {
-            _errorMutex.Dispose();
             _outputMutex.Dispose();
         }
 
-        private static void DrainOutput(DataReceivedEventArgs e, StringBuilder buffer, ManualResetEventSlim mutex)
+        private void DrainOutput(string data, StringBuilder buffer, bool isErrorStream)
         {
-            string data = e.Data;
-            if (data == null)
+            if (data != null)
             {
-                mutex.Set();
+                buffer.AppendLine(data);
                 return;
             }
 
-            buffer.AppendLine(data);
+            lock (_outputLock)
+            {
+                if (isErrorStream)
+                {
+                    _isErrOutputDrained = true;
+                }
+                else
+                {
+                    _isStdOutputDrained = true;
+                }
+
+                if (_isStdOutputDrained && _isErrOutputDrained)
+                {
+                    _outputMutex.Set();
+                }
+            }
         }
     }
 }
