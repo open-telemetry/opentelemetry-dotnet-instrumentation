@@ -1111,8 +1111,7 @@ partial class Build
                 .SetProperty("ExcludeManagedProfiler", "true")
                 .SetProperty("ExcludeNativeProfiler", "true")
                 .SetProcessArgumentConfigurator(arg => arg.Add("/nowarn:NU1701"))
-                .AddProcessEnvironmentVariable("TestAllPackageVersions", "true")
-                .When(TestAllPackageVersions, o => o.SetProperty("TestAllPackageVersions", "true"))
+                .When(TestAllPackageVersions, o => o.SetProcessEnvironmentVariable("TestAllPackageVersions", "true"))
                 .CombineWith(targets, (c, target) => c.SetTargets(target))
             );
         });
@@ -1139,9 +1138,8 @@ partial class Build
                     // .SetTargetPlatform(Platform)
                     .SetNoWarnDotNetCore3()
                     .When(TestAllPackageVersions, o => o
-                        .SetProperty("TestAllPackageVersions", "true"))
-                    .AddProcessEnvironmentVariable("TestAllPackageVersions", "true")
-                    .AddProcessEnvironmentVariable("ManagedProfilerOutputDirectory", TracerHomeDirectory)
+                        .SetProcessEnvironmentVariable("TestAllPackageVersions", "true"))
+                    .SetProcessEnvironmentVariable("ManagedProfilerOutputDirectory", TracerHomeDirectory)
                     .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
                         o.SetPackageDirectory(NugetPackageDirectory))
                     .CombineWith(integrationTestProjects, (c, project) => c
