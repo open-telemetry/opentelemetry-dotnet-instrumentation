@@ -15,6 +15,7 @@ namespace IntegrationTests.Helpers
         private readonly ManualResetEventSlim _outputMutex = new();
         private readonly StringBuilder _outputBuffer = new();
         private readonly StringBuilder _errorBuffer = new();
+        private readonly Process _process;
 
         private bool _isStdOutputDrained;
         private bool _isErrOutputDrained;
@@ -22,16 +23,17 @@ namespace IntegrationTests.Helpers
 
         public ProcessHelper(Process process)
         {
-            process.OutputDataReceived += (_, e) => DrainOutput(e.Data, _outputBuffer, isErrorStream: false);
-            process.ErrorDataReceived += (_, e) => DrainOutput(e.Data, _errorBuffer, isErrorStream: true);
+            _process = process;
+            _process.OutputDataReceived += (_, e) => DrainOutput(e.Data, _outputBuffer, isErrorStream: false);
+            _process.ErrorDataReceived += (_, e) => DrainOutput(e.Data, _errorBuffer, isErrorStream: true);
 
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
+            _process.BeginOutputReadLine();
+            _process.BeginErrorReadLine();
         }
 
-        public string StandardOutput => _outputBuffer.ToString();
+        public string StandardOutput => CompleteOutput(_outputBuffer);
 
-        public string ErrorOutput => _errorBuffer.ToString();
+        public string ErrorOutput => CompleteOutput(_errorBuffer);
 
         public bool Drain()
         {
@@ -72,6 +74,16 @@ namespace IntegrationTests.Helpers
                     _outputMutex.Set();
                 }
             }
+        }
+
+        private string CompleteOutput(StringBuilder builder)
+        {
+            if (_process.HasExited)
+            {
+                return builder.ToString();
+            }
+
+            throw new InvalidOperationException("Process is still running and not ready to be drained.");
         }
     }
 }

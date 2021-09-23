@@ -80,15 +80,13 @@ namespace IntegrationTests.Helpers
             Output.WriteLine($"ProcessId: " + process.Id);
             Output.WriteLine($"Exit Code: " + exitCode);
 
-            var standardOutput = helper.StandardOutput;
-
+            string standardOutput = helper.StandardOutput;
             if (!string.IsNullOrWhiteSpace(standardOutput))
             {
                 Output.WriteLine($"StandardOutput:{Environment.NewLine}{standardOutput}");
             }
 
-            var standardError = helper.ErrorOutput;
-
+            string standardError = helper.ErrorOutput;
             if (!string.IsNullOrWhiteSpace(standardError))
             {
                 Output.WriteLine($"StandardError:{Environment.NewLine}{standardError}");
