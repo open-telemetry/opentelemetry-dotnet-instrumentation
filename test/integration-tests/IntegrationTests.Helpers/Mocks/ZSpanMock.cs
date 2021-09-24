@@ -69,13 +69,16 @@ namespace IntegrationTests.Helpers.Mocks
         {
             get
             {
-                var annotations = _zipkinData["annotations"].ToObject<List<Dictionary<string, object>>>();
                 var logs = new Dictionary<DateTimeOffset, Dictionary<string, string>>();
-                foreach (var item in annotations)
+
+                if (_zipkinData.TryGetValue("annotations", out JToken annotations))
                 {
-                    DateTimeOffset timestamp = ((long)item["timestamp"]).UnixMicrosecondsToDateTimeOffset();
-                    Dictionary<string, string> fields = JsonConvert.DeserializeObject<Dictionary<string, string>>(item["value"].ToString());
-                    logs[timestamp] = fields;
+                    foreach (var item in annotations.ToObject<List<Dictionary<string, object>>>())
+                    {
+                        DateTimeOffset timestamp = ((long)item["timestamp"]).UnixMicrosecondsToDateTimeOffset();
+                        Dictionary<string, string> fields = JsonConvert.DeserializeObject<Dictionary<string, string>>(item["value"].ToString());
+                        logs[timestamp] = fields;
+                    }
                 }
 
                 return logs;

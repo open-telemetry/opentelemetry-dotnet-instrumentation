@@ -470,7 +470,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL.ExecuteAsyncIntegration",
           "action": "CallTargetModification"
         }
@@ -493,7 +493,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL.ExecuteAsyncIntegration",
           "action": "CallTargetModification"
         }
@@ -521,7 +521,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL.ValidateIntegration",
           "action": "CallTargetModification"
         }
@@ -554,7 +554,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL.GraphQLIntegration",
           "method": "Validate",
           "signature": "00 0A 1C 1C 1C 1C 1C 1C 1C 1C 08 08 0A",
@@ -579,7 +579,7 @@
           "maximum_patch": 65535
         },
         "wrapper": {
-          "assembly": "OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429",
+          "assembly": "OpenTelemetry.ClrProfiler.Managed",
           "type": "OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL.GraphQLIntegration",
           "method": "ExecuteAsync",
           "signature": "00 05 1C 1C 1C 08 08 0A",

@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Threading;
 using OpenTelemetry.ClrProfiler.CallTarget;
 using OpenTelemetry.ClrProfiler.Managed.Util;
@@ -27,6 +28,8 @@ namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb
         typeName: "MongoDB.Driver.Core.WireProtocol.WriteWireProtocolBase`1",
         isGeneric: true)]
     // ReSharper disable once InconsistentNaming
+    [Browsable(false)]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public class IWireProtocol_Generic_Execute_Integration
     {
         /// <summary>

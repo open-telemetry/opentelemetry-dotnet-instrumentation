@@ -70,7 +70,7 @@ jobs:
           path: build_data/profiler-logs
   macOS-latest:
     name: macOS-latest
-    runs-on: macOS-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v1
       - name: Downgrade CMake
@@ -78,6 +78,9 @@ jobs:
       - name: Update GitHub PATH
         run: |
           echo "/Applications/CMake.app/Contents/bin" >> $GITHUB_PATH
+      - name: Start MongoDB service
+        run: |
+            brew services start mongodb-community
       - name: Cache .nuke/temp, ~/.nuget/packages
         uses: actions/cache@v2
         with:
