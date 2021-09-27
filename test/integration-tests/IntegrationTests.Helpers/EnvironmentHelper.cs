@@ -378,7 +378,7 @@ namespace IntegrationTests.Helpers
                 return Path.Combine(
                     binDir,
                     EnvironmentTools.GetBuildConfiguration(),
-                    "publish");
+                    "app.publish");
             }
 
             return Path.Combine(

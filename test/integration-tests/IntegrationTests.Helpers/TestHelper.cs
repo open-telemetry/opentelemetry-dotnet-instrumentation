@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using DotNet.Testcontainers.Containers.Builders;
+using DotNet.Testcontainers.Containers.Modules;
+using DotNet.Testcontainers.Containers.WaitStrategies;
+using DotNet.Testcontainers.Images.Builders;
 using IntegrationTests.Helpers.Models;
 using Xunit.Abstractions;
 
@@ -33,6 +37,37 @@ namespace IntegrationTests.Helpers
         protected EnvironmentHelper EnvironmentHelper { get; }
 
         protected ITestOutputHelper Output { get; }
+
+        public Container StartContainer(int traceAgentPort, int webPort)
+        {
+            // get path to sample app that the profiler will attach to
+            string sampleAppDir = EnvironmentHelper.GetSampleProjectDirectory();
+            string sampleName = $"sample-{EnvironmentHelper.SampleName.ToLowerInvariant()}";
+
+            var waitOS = EnvironmentTools.IsWindows()
+                ? Wait.ForWindowsContainer()
+                : Wait.ForUnixContainer();
+
+            new ImageFromDockerfileBuilder()
+              .WithDockerfile("Dockerfile")
+              .WithDockerfileDirectory(sampleAppDir)
+              .WithDeleteIfExists(true)
+              .WithName(sampleName)
+              .Build()
+              .Wait();
+
+            var builder = new TestcontainersBuilder<TestcontainersContainer>()
+              .WithImage(sampleName)
+              .WithName($"{sampleName}-{traceAgentPort}-{webPort}")
+              .WithPortBinding(webPort, 80)
+              .WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", $"http://192.168.1.212:{traceAgentPort}")
+              .WithWaitStrategy(waitOS.UntilPortIsAvailable(80));
+
+            var container = builder.Build();
+            container.StartAsync().Wait(TimeSpan.FromMinutes(1));
+
+            return new Container(container);
+        }
 
         public Process StartSample(int traceAgentPort, string arguments, string packageVersion, int aspNetCorePort, int? statsdPort = null, string framework = "")
         {
