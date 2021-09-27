@@ -5,10 +5,13 @@ using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.MSBuild;
+using Nuke.Common.Tools.Docker;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.MSBuild.MSBuildTasks;
+using static Nuke.Common.Tools.Docker.DockerTasks;
+using System.IO;
 
 partial class Build
 {
@@ -95,6 +98,7 @@ partial class Build
         .Unlisted()
         .After(CompileManagedTests)
         .OnlyWhenStatic(() => IsWin)
+        .Triggers(PublishIisSamples)
         .Executes(() =>
         {
             // Compile .NET Framework projects
@@ -108,9 +112,41 @@ partial class Build
             );
         });
 
+    Target PublishIisSamples => _ => _
+        .Unlisted()
+        .After(CompileManagedTestsWindows)
+        .OnlyWhenStatic(() => IsWin)
+        .Executes(() =>
+        {
+            var aspnetFolder = TestsDirectory / "test-applications" / "integrations" / "aspnet";
+            var aspnetProjects = aspnetFolder.GlobFiles("**/*.csproj");
+
+            MSBuild(x => x
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatform(Platform)
+                .SetProperty("DeployOnBuild", true)
+                .SetMaxCpuCount(null)
+                .CombineWith(aspnetProjects, (c, project) => c
+                    .SetProperty("PublishProfile", project.Parent / "Properties" / "PublishProfiles" / $"FolderProfile.{BuildConfiguration}.pubxml")
+                    .SetTargetPath(project)));
+
+            foreach (var proj in aspnetProjects)
+            {
+                DockerBuild(x => x
+                    .SetPath(".")
+                    .SetBuildArg($"configuration={BuildConfiguration.ToString().ToLowerInvariant()}")
+                    .SetRm(true)
+                    .SetTag(Path.GetFileNameWithoutExtension(proj).Replace(".", "-").ToLowerInvariant())
+                    .SetProcessWorkingDirectory(proj.Parent)
+                );
+            }
+        });
+
     Target RunManagedTestsWindows => _ => _
         .Unlisted()
         .After(RunManagedTests)
+        .DependsOn(CompileManagedTestsWindows)
+        .DependsOn(PublishIisSamples)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {

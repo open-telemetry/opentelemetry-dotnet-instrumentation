@@ -6,7 +6,6 @@ using System.Linq;
 using DotNet.Testcontainers.Containers.Builders;
 using DotNet.Testcontainers.Containers.Modules;
 using DotNet.Testcontainers.Containers.WaitStrategies;
-using DotNet.Testcontainers.Images.Builders;
 using IntegrationTests.Helpers.Models;
 using Xunit.Abstractions;
 
@@ -41,20 +40,11 @@ namespace IntegrationTests.Helpers
         public Container StartContainer(int traceAgentPort, int webPort)
         {
             // get path to sample app that the profiler will attach to
-            string sampleAppDir = EnvironmentHelper.GetSampleProjectDirectory();
-            string sampleName = $"sample-{EnvironmentHelper.SampleName.ToLowerInvariant()}";
+            string sampleName = $"samples-{EnvironmentHelper.SampleName.ToLowerInvariant()}";
 
             var waitOS = EnvironmentTools.IsWindows()
                 ? Wait.ForWindowsContainer()
                 : Wait.ForUnixContainer();
-
-            new ImageFromDockerfileBuilder()
-              .WithDockerfile("Dockerfile")
-              .WithDockerfileDirectory(sampleAppDir)
-              .WithDeleteIfExists(true)
-              .WithName(sampleName)
-              .Build()
-              .Wait();
 
             var builder = new TestcontainersBuilder<TestcontainersContainer>()
               .WithImage(sampleName)

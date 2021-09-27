@@ -14,8 +14,10 @@ namespace IntegrationTests.Helpers.Models
 
         public void Dispose()
         {
-            _container.CleanUpAsync().Wait();
-            _container.DisposeAsync().AsTask().Wait();
+            _container
+                .DisposeAsync()
+                .AsTask()
+                .Wait(TimeSpan.FromMinutes(5));
         }
     }
 }
