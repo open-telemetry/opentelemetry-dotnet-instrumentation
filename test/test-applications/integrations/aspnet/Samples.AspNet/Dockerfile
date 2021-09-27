@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-20H2
+FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2019
 ARG configuration=debug
 ENV COR_ENABLE_PROFILING=1 \
     COR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318} \
