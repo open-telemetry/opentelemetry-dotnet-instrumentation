@@ -1,10 +1,97 @@
 ﻿<div class="page">
     <h1>ASP.NET</h1>
     <p>This is a sample ASP.NET (.NET Framework) application for integration tests</p>
-    <p>Is Profiler attached: @ViewBag.ProfilerAttached</p>
-    <p>Configuration >></p>
-    @foreach (var item in ViewBag.EnvVars)
-    {
-        <p>@item.Key = @item.Value</p>
-    }
+
+    <table class="table table-striped table-hover">
+        <tbody>
+            <tr>
+                <th scope="row">Process name</th>
+                <td>@(System.Diagnostics.Process.GetCurrentProcess().ProcessName)</td>
+            </tr>
+            <tr>
+                <th scope="row">Runtime</th>
+                <td>@(System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription)</td>
+            </tr>
+            <tr>
+                <th scope="row">Process architecture</th>
+                <td>@(System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture)</td>
+            </tr>
+            <tr>
+                <th scope="row">Profiler attached</th>
+                <td>@ViewBag.ProfilerAttached</td>
+            </tr>
+            <tr>
+                <th scope="row">*.Tracing.ClrProfiler.Managed.dll path</th>
+                <td>@(ViewBag.TracerAssemblyLocation ?? "(not found)")</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <br />
+
+    <div>Environment Variables:</div>
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (ViewBag.HasEnvVars)
+            {
+                foreach (var envVar in ViewBag.EnvVars)
+                {
+                    <tr>
+                        <th scope="row">@envVar.Key</th>
+                        <td>@envVar.Value</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="2">(empty)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <br />
+
+    <div>Loaded tracer assemblies:</div>
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var assembly in ViewBag.TracerAssemblies)
+            {
+                <tr>
+                    <th scope="row">@assembly</th>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <br />
+
+    <div>All loaded assemblies:</div>
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var assembly in ViewBag.AllAssemblies)
+            {
+                <tr>
+                    <th scope="row">@assembly</th>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>

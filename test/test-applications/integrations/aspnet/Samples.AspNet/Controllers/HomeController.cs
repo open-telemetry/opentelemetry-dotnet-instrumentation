@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web.Mvc;
+using Samples.AspNet.Helpers;
 
 namespace Samples.AspNet.Controllers
 {
@@ -22,10 +23,13 @@ namespace Samples.AspNet.Controllers
                           select new KeyValuePair<string, string>(key, value);
 
             var instrumentationType = Type.GetType("OpenTelemetry.ClrProfiler.Managed.Instrumentation, OpenTelemetry.ClrProfiler.Managed");
-            var profilerAttached = instrumentationType?.GetProperty("ProfilerAttached", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) ?? false;
 
             ViewBag.EnvVars = envVars;
-            ViewBag.ProfilerAttached = profilerAttached;
+            ViewBag.HasEnvVars = envVars.Any();
+            ViewBag.ProfilerAttached = instrumentationType?.GetProperty("ProfilerAttached", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) ?? false;
+            ViewBag.TracerAssemblyLocation = instrumentationType.Assembly.Location;
+            ViewBag.TracerAssemblies = AssembliesHelper.GetLoadedTracesAssemblies();
+            ViewBag.AllAssemblies = AssembliesHelper.GetLoadedAssemblies();
 
             return View();
         }
