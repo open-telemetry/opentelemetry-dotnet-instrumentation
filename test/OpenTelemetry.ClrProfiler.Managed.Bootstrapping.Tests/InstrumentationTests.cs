@@ -10,12 +10,6 @@ namespace OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests
         private readonly ActivitySource _otelActivitySource = new("OpenTelemetry.ClrProfiler.*");
         private readonly ActivitySource _customActivitySource = new("Custom");
 
-        public InstrumentationTests()
-        {
-            // Exporter should always be set to a valid value
-            Environment.SetEnvironmentVariable("OTEL_EXPORTER", "zipkin");
-        }
-
         [Fact]
         public void Initialize_WithDisabledFlag_DoesNotCreateTracerProvider()
         {
