@@ -72,7 +72,7 @@ partial class Build
             else
             {
                 DotNetRestore(s => s
-                    .SetProjectFile(Solution)
+                    .SetProjectFile(MsBuildProject)
                     .SetVerbosity(DotNetVerbosity.Normal)
                     // .SetTargetPlatform(Platform) // necessary to ensure we restore every project
                     .SetProperty("configuration", BuildConfiguration.ToString())

@@ -9,19 +9,21 @@
     <CsharpProject Include="src\**\*.csproj" />
     <CppProject Include="src\**\*.vcxproj"/>
     <CppTestProject Include="test\**\*.vcxproj"/>
+    <UnitTestProject Include="test\*\*.csproj" />
     <SampleProject Include="test\test-applications\integrations\*\*.csproj" />
     <SampleProject Include="test\test-applications\integrations\dependency-libs\*\*.csproj" />
     <SampleProjectFX Include="test\test-applications\integrations\aspnet\*\*.csproj" Condition="'$(OS)' == 'Windows_NT'" />
+    <MockProject Include="test\test-applications\mocks\*\*.csproj" />
     <IntegrationProject Include="test\integration-tests\*\*.csproj" />
     <IntegrationProjectFX Include="test\integration-tests\aspnet\*\*.csproj" Condition="'$(OS)' == 'Windows_NT'" />
   </ItemGroup>
 
   <Target Name="Restore">
-    <MSBuild Targets="Restore" Projects="@(CsharpProject);@(CppProject);@(SampleProject);@(IntegrationProject)"/>
+    <MSBuild Targets="Restore" Projects="@(CsharpProject);@(UnitTestProject);@(SampleProject);@(IntegrationProject);@(MockProject)"/>
   </Target>
 
   <Target Name="Clean">
-    <MSBuild Targets="Clean" Projects="@(CsharpProject);@(CppProject);@(SampleProject);@(IntegrationProject)"/>
+    <MSBuild Targets="Clean" Projects="@(CsharpProject);@(UnitTestProject);@(SampleProject);@(IntegrationProject);@(MockProject)"/>
   </Target>
 
   <!-- default target -->
