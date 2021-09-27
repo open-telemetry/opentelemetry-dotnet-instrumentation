@@ -19,7 +19,7 @@ namespace OpenTelemetry.ClrProfiler.Managed
         private static TracerProvider _tracerProvider;
 
         /// <summary>
-        /// Gets a value indicating whether Datadog's profiler is attached to the current process.
+        /// Gets a value indicating whether OpenTelemetry's profiler is attached to the current process.
         /// </summary>
         /// <value>
         ///   <c>true</c> if the profiler is currently attached; <c>false</c> otherwise.

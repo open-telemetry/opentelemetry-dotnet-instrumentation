@@ -96,20 +96,30 @@ namespace IntegrationTests.Helpers
                 "COR_PROFILER",
                 "COR_PROFILER_PATH",
 
-                // Datadog
+                // OpenTelemetry
                 "OTEL_PROFILER_PROCESSES",
                 "OTEL_DOTNET_TRACER_HOME",
                 "OTEL_INTEGRATIONS",
                 "OTEL_DISABLED_INTEGRATIONS",
                 "OTEL_SERVICE",
                 "OTEL_VERSION",
-                "OTEL_TAGS"
+                "OTEL_TAGS",
+                "OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES"
             };
 
             foreach (string variable in environmentVariables)
             {
                 Environment.SetEnvironmentVariable(variable, null);
             }
+        }
+
+        public static bool IsRunningOnCI()
+        {
+            // https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
+            // Github sets CI environment variable
+
+            string env = Environment.GetEnvironmentVariable("CI");
+            return !string.IsNullOrEmpty(env);
         }
 
         public static IEnumerable<string> GetProfilerPathCandidates(string sampleApplicationOutputDirectory)
@@ -186,6 +196,7 @@ namespace IntegrationTests.Helpers
 
             // set consistent env name (can be overwritten by custom environment variable)
             environmentVariables["OTEL_ENV"] = "integration_tests";
+            environmentVariables["OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES"] = "Samples.*";
 
             foreach (var key in CustomEnvironmentVariables.Keys)
             {

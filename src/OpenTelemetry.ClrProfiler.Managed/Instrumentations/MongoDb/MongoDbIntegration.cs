@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -15,9 +16,11 @@ namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb
     /// <summary>
     /// Tracing integration for MongoDB.Driver.Core.
     /// </summary>
+    [Browsable(false)]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static class MongoDbIntegration
     {
-        internal const string IntegrationName = nameof(Managed.Configuration.Instrumentation.MongoDb);
+        internal const string IntegrationName = nameof(Configuration.Instrumentation.MongoDb);
 
         internal const string Major2 = "2";
         internal const string Major2Minor1 = "2.1";
@@ -31,17 +34,6 @@ namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb
 
         private const string IWireProtocol = "MongoDB.Driver.Core.WireProtocol.IWireProtocol";
         private const string IWireProtocolGeneric = "MongoDB.Driver.Core.WireProtocol.IWireProtocol`1";
-
-        /// <summary>
-        /// Operation to get the role of the "mongod" instance, see
-        /// https://www.docs4dev.com/docs/en/mongodb/v3.6/reference/reference-command-isMaster.html
-        /// </summary>
-        private const string IsMasterOperation = "isMaster";
-
-        /// <summary>
-        /// The MongoDB database that stores system and authorization information.
-        /// </summary>
-        private const string AdminDatabaseName = "admin";
 
         private static readonly ILogger Log = ConsoleLogger.Create(typeof(MongoDbIntegration));
 
@@ -315,7 +307,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb
 
         internal static Activity CreateActivity(object wireProtocol, object connection)
         {
-            var settings = Managed.Instrumentation.TracerSettings;
+            var settings = Instrumentation.TracerSettings;
 
             if (!settings.IsIntegrationEnabled(IntegrationId))
             {
@@ -379,12 +371,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb
                     // and its value is the collection name
                     if (command.TryCallMethod("GetElement", 0, out object firstElement) && firstElement != null)
                     {
-                        if (firstElement.TryGetPropertyValue("Name", out operationName) &&
-                            operationName == IsMasterOperation && databaseName == AdminDatabaseName)
-                        {
-                            // Assume that this is the driver doing "Heartbeat" or "RoundTripTimeMonitor", don't create an activity for it.
-                            return null;
-                        }
+                        firstElement.TryGetPropertyValue("Name", out operationName);
 
                         if (firstElement.TryGetPropertyValue("Value", out object collectionNameObj) && collectionNameObj != null)
                         {

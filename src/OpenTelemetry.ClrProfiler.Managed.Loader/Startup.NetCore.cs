@@ -47,15 +47,13 @@ namespace OpenTelemetry.ClrProfiler.Managed.Loader
             var path = Path.Combine(ManagedProfilerDirectory, $"{assemblyName.Name}.dll");
 
             // Only load the main profiler into the default Assembly Load Context.
-            // If Datadog.Trace or other libraries are provided by the NuGet package their loads are handled in the following two ways.
+            // If OpenTelemetry.ClrProfiler or other libraries are provided by the NuGet package their loads are handled in the following two ways.
             // 1) The AssemblyVersion is greater than or equal to the version used by OpenTelemetry.ClrProfiler.Managed, the assembly
             //    will load successfully and will not invoke this resolve event.
             // 2) The AssemblyVersion is lower than the version used by OpenTelemetry.ClrProfiler.Managed, the assembly will fail to load
             //    and invoke this resolve event. It must be loaded in a separate AssemblyLoadContext since the application will only
             //    load the originally referenced version
-            if (assemblyName.Name.StartsWith("OpenTelemetry.ClrProfiler.Managed", StringComparison.OrdinalIgnoreCase)
-             && assemblyName.FullName.IndexOf("PublicKeyToken=34b8972644a12429", StringComparison.OrdinalIgnoreCase) >= 0
-             && File.Exists(path))
+            if (assemblyName.Name.StartsWith("OpenTelemetry.ClrProfiler.Managed", StringComparison.OrdinalIgnoreCase) && File.Exists(path))
             {
                 StartupLogger.Debug("Loading {0} with Assembly.LoadFrom", path);
                 return Assembly.LoadFrom(path);

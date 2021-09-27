@@ -3,12 +3,16 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using IntegrationTests.Helpers.Models;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers
 {
     public abstract class TestHelper
     {
+        // Warning: Long timeouts can cause integer overflow!
+        private static readonly TimeSpan DefaultProcessTimeout = TimeSpan.FromMinutes(5);
+
         protected TestHelper(string sampleAppName, ITestOutputHelper output)
             : this(new EnvironmentHelper(sampleAppName, typeof(TestHelper), output), output)
         {
@@ -54,6 +58,46 @@ namespace IntegrationTests.Helpers
                 statsdPort: statsdPort,
                 aspNetCorePort: aspNetCorePort,
                 processToProfile: executable);
+        }
+
+        public ProcessResult RunSampleAndWaitForExit(int traceAgentPort, int? statsdPort = null, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000)
+        {
+            var process = StartSample(traceAgentPort, arguments, packageVersion, aspNetCorePort: aspNetCorePort, statsdPort: statsdPort, framework: framework);
+            var name = process.ProcessName;
+
+            using var helper = new ProcessHelper(process);
+
+            bool processTimeout = !process.WaitForExit((int)DefaultProcessTimeout.TotalMilliseconds);
+            if (processTimeout)
+            {
+                process.Kill();
+            }
+
+            helper.Drain();
+            var exitCode = process.ExitCode;
+
+            Output.WriteLine($"ProcessName: " + name);
+            Output.WriteLine($"ProcessId: " + process.Id);
+            Output.WriteLine($"Exit Code: " + exitCode);
+
+            string standardOutput = helper.StandardOutput;
+            if (!string.IsNullOrWhiteSpace(standardOutput))
+            {
+                Output.WriteLine($"StandardOutput:{Environment.NewLine}{standardOutput}");
+            }
+
+            string standardError = helper.ErrorOutput;
+            if (!string.IsNullOrWhiteSpace(standardError))
+            {
+                Output.WriteLine($"StandardError:{Environment.NewLine}{standardError}");
+            }
+
+            if (processTimeout)
+            {
+                throw new TimeoutException($"{name} ({process.Id}) did not exit within {DefaultProcessTimeout.TotalSeconds} sec");
+            }
+
+            return new ProcessResult(process, standardOutput, standardError, exitCode);
         }
 
         protected void EnableDebugMode()
