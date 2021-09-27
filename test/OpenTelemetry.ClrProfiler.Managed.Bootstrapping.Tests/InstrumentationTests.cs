@@ -5,6 +5,10 @@ using Xunit;
 
 namespace OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests
 {
+    /// <summary>
+    /// When you add a new tests or change the name of one of the existing ones please remember to reflect the changes
+    /// in the build project, by updating the list in RunBootstrappingTests method of Build.Steps.cs.
+    /// </summary>
     public class InstrumentationTests
     {
         private readonly ActivitySource _otelActivitySource = new("OpenTelemetry.ClrProfiler.*");
