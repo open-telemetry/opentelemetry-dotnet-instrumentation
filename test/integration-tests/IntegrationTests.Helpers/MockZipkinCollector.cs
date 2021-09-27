@@ -34,8 +34,7 @@ namespace IntegrationTests.Helpers
                 try
                 {
                     listener.Start();
-                    listener.Prefixes.Add($"http://127.0.0.1:{port}/");
-                    listener.Prefixes.Add($"http://localhost:{port}/");
+                    listener.Prefixes.Add($"http://*:{port}/"); // Warning: Requires admin access
 
                     // successfully listening
                     Port = port;

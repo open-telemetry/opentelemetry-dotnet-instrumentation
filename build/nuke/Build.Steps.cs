@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Extensions;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
@@ -101,6 +102,7 @@ partial class Build
         .Unlisted()
         .Description("Compiles the managed code in the test directory")
         .After(CompileManagedSrc)
+        .Triggers(CompileManagedTestsWindows)
         .Executes(() =>
         {
             // Always AnyCPU
@@ -181,6 +183,7 @@ partial class Build
         .After(BuildTracer)
         .After(CompileManagedTests)
         .After(PublishMocks)
+        .Triggers(RunManagedTestsWindows)
         .Executes(() =>
         {
             RunUnitTests();
@@ -241,9 +244,9 @@ partial class Build
 
     private void RunIntegrationTests()
     {
-        Project[] integrationTests = Solution
-            .GetProjects("IntegrationTests.*")
-            .ToArray();
+        Project[] integrationTests = Solution.GetIntegrationTests();
+
+        string filter = IsWin ? null : "WindowsOnly=true";
 
         DotNetTest(config => config
             .SetConfiguration(BuildConfiguration)
@@ -252,6 +255,7 @@ partial class Build
             .SetFramework(TargetFramework.NETCOREAPP3_1)
             .EnableNoRestore()
             .EnableNoBuild()
+            .SetFilter(filter)
             .CombineWith(integrationTests, (s, project) => s
                 .EnableTrxLogOutput(GetResultsDirectory(project))
                 .SetProjectFile(project)), degreeOfParallelism: 4);

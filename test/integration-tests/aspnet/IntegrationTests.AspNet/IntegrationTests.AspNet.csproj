@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\IntegrationTests.Helpers\IntegrationTests.Helpers.csproj" />
+    <ProjectReference Include="..\..\IntegrationTests.Helpers\IntegrationTests.Helpers.csproj" />
   </ItemGroup>
 
 </Project>
