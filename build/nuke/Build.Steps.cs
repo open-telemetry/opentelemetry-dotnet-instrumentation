@@ -225,9 +225,9 @@ partial class Build
             );
         });
 
-    AbsolutePath GetResultsDirectory(Project proj) => BuildDataDirectory / "results" / proj.Name;
+    private AbsolutePath GetResultsDirectory(Project proj) => BuildDataDirectory / "results" / proj.Name;
 
-    void RunUnitTests()
+    private void RunUnitTests()
     {
         RunBootstrappingTests();
 
@@ -250,7 +250,7 @@ partial class Build
     /// Bootstrapping tests require every single test to be run in a separate process
     /// so the tracer can be created from scratch for each of them.
     /// </summary>
-    void RunBootstrappingTests()
+    private void RunBootstrappingTests()
     {
         var project = Solution.GetProject(Projects.Tests.ClrProfilerManagedBootstrappingTests);
 
@@ -275,7 +275,7 @@ partial class Build
         }
     }
 
-    void RunIntegrationTests()
+    private void RunIntegrationTests()
     {
         Project[] integrationTests = Solution
             .GetProjects("IntegrationTests.*")
