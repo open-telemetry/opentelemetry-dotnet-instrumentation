@@ -90,6 +90,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                     builder.AddOtlpExporter();
                     break;
                 case "":
+                case null:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("The exporter name is not recognised");
