@@ -134,7 +134,7 @@ partial class Build
             {
                 DockerBuild(x => x
                     .SetPath(".")
-                    .SetBuildArg($"configuration={BuildConfiguration.ToString().ToLowerInvariant()}")
+                    .SetBuildArg($"configuration={BuildConfiguration}")
                     .SetRm(true)
                     .SetTag(Path.GetFileNameWithoutExtension(proj).Replace(".", "-").ToLowerInvariant())
                     .SetProcessWorkingDirectory(proj.Parent)
