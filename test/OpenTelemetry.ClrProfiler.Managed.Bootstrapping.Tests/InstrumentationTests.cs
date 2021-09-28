@@ -8,13 +8,15 @@ namespace OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests
     /// <summary>
     /// When you add a new tests or change the name of one of the existing ones please remember to reflect the changes
     /// in the build project, by updating the list in RunBootstrappingTests method of Build.Steps.cs.
+    /// Take notice that each test should be executed as a seperate process. Because of that, the tests require
+    /// BOOSTRAPPING_TESTS environmental variable to be set, to mitigate the risk of running all of the tests at once.
     /// </summary>
     public class InstrumentationTests
     {
         private readonly ActivitySource _otelActivitySource = new("OpenTelemetry.ClrProfiler.*");
         private readonly ActivitySource _customActivitySource = new("Custom");
 
-        [Fact]
+        [FactRequiringEnvVar]
         public void Initialize_WithDisabledFlag_DoesNotCreateTracerProvider()
         {
             Environment.SetEnvironmentVariable("OTEL_DOTNET_TRACER_LOAD_AT_STARTUP", "false");
@@ -27,7 +29,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests
             Assert.Null(customActivity);
         }
 
-        [Fact]
+        [FactRequiringEnvVar]
         public void Initialize_WithDefaultFlag_CreatesTracerProvider()
         {
             Instrumentation.Initialize();
@@ -40,7 +42,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests
             Assert.Null(customActivity);
         }
 
-        [Fact]
+        [FactRequiringEnvVar]
         public void Initialize_WithEnabledFlag_CreatesTracerProvider()
         {
             Environment.SetEnvironmentVariable("OTEL_DOTNET_TRACER_LOAD_AT_STARTUP", "true");
@@ -53,7 +55,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests
             Assert.Null(customActivity);
         }
 
-        [Fact]
+        [FactRequiringEnvVar]
         public void Initialize_WithPreviouslyCreatedTracerProvider_WorksCorrectly()
         {
             Environment.SetEnvironmentVariable("OTEL_DOTNET_TRACER_LOAD_AT_STARTUP", "false");
@@ -68,6 +70,19 @@ namespace OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests
 
             Assert.Null(otelActivity);
             Assert.NotNull(customActivity);
+        }
+
+        public sealed class FactRequiringEnvVarAttribute : FactAttribute
+        {
+            private const string EnvVar = "BOOSTRAPPING_TESTS";
+
+            public FactRequiringEnvVarAttribute()
+            {
+                if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(EnvVar)))
+                {
+                    Skip = $"Ignore as {EnvVar} is not set";
+                }
+            }
         }
     }
 }

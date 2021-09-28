@@ -271,7 +271,8 @@ partial class Build
                 .EnableNoBuild()
                 .EnableTrxLogOutput(GetResultsDirectory(project))
                 .SetProjectFile(project)
-                .SetFilter(testName));
+                .SetFilter(testName)
+                .SetProcessEnvironmentVariable("BOOSTRAPPING_TESTS", "true"));
         }
     }
 
