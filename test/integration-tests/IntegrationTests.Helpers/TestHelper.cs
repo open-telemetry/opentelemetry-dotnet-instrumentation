@@ -50,7 +50,7 @@ namespace IntegrationTests.Helpers
               .WithImage(sampleName)
               .WithName($"{sampleName}-{traceAgentPort}-{webPort}")
               .WithPortBinding(webPort, 80)
-              .WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", $"http://host.docker.internal:{traceAgentPort}")
+              .WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", $"http://host.docker.internal:{traceAgentPort}/api/v2/spans")
               .WithWaitStrategy(waitOS.UntilPortIsAvailable(80));
 
             var container = builder.Build();
