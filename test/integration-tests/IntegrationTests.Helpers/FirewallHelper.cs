@@ -35,6 +35,7 @@ namespace IntegrationTests.Helpers
             Process process = new Process();
             process.StartInfo = startInfo;
             process.Start();
+            process.WaitForExit();
         }
     }
 }
