@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using DotNet.Testcontainers.Containers.Builders;
 using DotNet.Testcontainers.Containers.Modules;
 using DotNet.Testcontainers.Containers.OutputConsumers;
@@ -49,7 +47,8 @@ namespace IntegrationTests.Helpers
                 ? Wait.ForWindowsContainer()
                 : Wait.ForUnixContainer();
 
-            string zipkinEndpoint = $"http://{GetHostEndpoint()}:{traceAgentPort}/api/v2/spans";
+            string zipkinEndpoint = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{traceAgentPort}/api/v2/spans";
+            string networkId = DockerNetworkHelper.SetupIntegrationTestsNetwork();
 
             Output.WriteLine($"Zipkin Endpoint: {zipkinEndpoint}");
 
@@ -58,6 +57,7 @@ namespace IntegrationTests.Helpers
                   .WithCleanUp(cleanUp: true)
                   .WithOutputConsumer(Consume.RedirectStdoutAndStderrToConsole())
                   .WithName($"{sampleName}-{traceAgentPort}-{webPort}")
+                  .WithNetwork(networkId, DockerNetworkHelper.IntegrationTestsNetworkName)
                   .WithPortBinding(webPort, 80)
                   .WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", zipkinEndpoint)
                   .WithWaitStrategy(waitOS.UntilPortIsAvailable(80));
@@ -152,22 +152,6 @@ namespace IntegrationTests.Helpers
         protected void SetCallTargetSettings(bool enableCallTarget)
         {
             SetEnvironmentVariable("OTEL_TRACE_CALLTARGET_ENABLED", enableCallTarget ? "true" : "false");
-        }
-
-        private string GetHostEndpoint()
-        {
-            // Hack to make host connection
-            // Use host.docker.internal if it's fixed in windows containers
-
-            string hostName = EnvironmentHelper.IsRunningOnCI()
-                ? Dns.GetHostName()
-                : "host.docker.internal";
-
-            var hostEndpoint = Dns.GetHostEntry(hostName)
-                .AddressList
-                .FirstOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork);
-
-            return hostEndpoint.ToString();
         }
     }
 }
