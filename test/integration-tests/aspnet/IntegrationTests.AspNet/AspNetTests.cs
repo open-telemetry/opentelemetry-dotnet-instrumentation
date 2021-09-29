@@ -23,7 +23,7 @@ namespace IntegrationTests.AspNet
             int agentPort = TcpPortProvider.GetOpenPort();
             int webPort = TcpPortProvider.GetOpenPort();
 
-            using (var fwPort = FirewallHelper.OpenWinPort(agentPort))
+            using (var fwPort = FirewallHelper.OpenWinPort(agentPort, Output))
             using (var agent = new MockZipkinCollector(Output, agentPort))
             using (var container = StartContainer(agentPort, webPort))
             {

@@ -1,28 +1,29 @@
 using System.Diagnostics;
 using IntegrationTests.Helpers.Models;
+using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers
 {
     public static class FirewallHelper
     {
-        public static FirewallPort OpenWinPort(int port)
+        public static FirewallPort OpenWinPort(int port, ITestOutputHelper output)
         {
             string ruleName = $"TraceAgent-{port}";
             string psCommand = $"New-NetFirewallRule -DisplayName '{ruleName}' -Direction Inbound -LocalPort {port} -Protocol TCP -Action Allow";
 
-            RunPowershell(psCommand);
+            RunPowershell(output, psCommand);
 
-            return new FirewallPort(port, ruleName);
+            return new FirewallPort(port, ruleName, output);
         }
 
-        public static void CloseWinPort(string ruleName)
+        public static void CloseWinPort(string ruleName, ITestOutputHelper output)
         {
             string psCommand = $"Remove-NetFirewallRule -DisplayName {ruleName}";
 
-            RunPowershell(psCommand);
+            RunPowershell(output, psCommand);
         }
 
-        private static void RunPowershell(string psCommand)
+        private static void RunPowershell(ITestOutputHelper outputHelper, string psCommand)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.FileName = @"powershell.exe";
@@ -32,10 +33,12 @@ namespace IntegrationTests.Helpers
             startInfo.UseShellExecute = false;
             startInfo.CreateNoWindow = true;
             startInfo.Verb = "runas";
-            Process process = new Process();
-            process.StartInfo = startInfo;
-            process.Start();
+
+            Process process = Process.Start(startInfo);
+            ProcessHelper helper = new ProcessHelper(process);
             process.WaitForExit();
+
+            outputHelper.WriteResult(helper);
         }
     }
 }

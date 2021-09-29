@@ -107,31 +107,19 @@ namespace IntegrationTests.Helpers
                 process.Kill();
             }
 
-            helper.Drain();
             var exitCode = process.ExitCode;
 
             Output.WriteLine($"ProcessName: " + name);
             Output.WriteLine($"ProcessId: " + process.Id);
             Output.WriteLine($"Exit Code: " + exitCode);
-
-            string standardOutput = helper.StandardOutput;
-            if (!string.IsNullOrWhiteSpace(standardOutput))
-            {
-                Output.WriteLine($"StandardOutput:{Environment.NewLine}{standardOutput}");
-            }
-
-            string standardError = helper.ErrorOutput;
-            if (!string.IsNullOrWhiteSpace(standardError))
-            {
-                Output.WriteLine($"StandardError:{Environment.NewLine}{standardError}");
-            }
+            Output.WriteResult(helper);
 
             if (processTimeout)
             {
                 throw new TimeoutException($"{name} ({process.Id}) did not exit within {DefaultProcessTimeout.TotalSeconds} sec");
             }
 
-            return new ProcessResult(process, standardOutput, standardError, exitCode);
+            return new ProcessResult(process, helper.StandardOutput, helper.ErrorOutput, exitCode);
         }
 
         protected void EnableDebugMode()
