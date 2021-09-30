@@ -10,7 +10,7 @@ namespace IntegrationTests.Helpers
             string ruleName = $"TraceAgent-{port}";
             string psCommand = $"New-NetFirewallRule -DisplayName '{ruleName}' -Direction Inbound -LocalPort {port} -Protocol TCP -Action Allow";
 
-            PowershellHelper.RunCommand(output, psCommand);
+            PowershellHelper.RunCommand(psCommand, output);
 
             return new FirewallPort(port, ruleName, output);
         }
@@ -19,7 +19,7 @@ namespace IntegrationTests.Helpers
         {
             string psCommand = $"Remove-NetFirewallRule -DisplayName {ruleName}";
 
-            PowershellHelper.RunCommand(output, psCommand);
+            PowershellHelper.RunCommand(psCommand, output);
         }
     }
 }

@@ -52,7 +52,7 @@ namespace IntegrationTests.Helpers
             string networkId = DockerNetworkHelper.SetupIntegrationTestsNetwork();
 
             // Do gateway test
-            PowershellHelper.RunCommand(Output, $"Invoke-WebRequest -Uri {gatewayEndpoint}/health-check -UseBasicParsing | Select-Object Content");
+            PowershellHelper.RunCommand($"Invoke-WebRequest -Uri {gatewayEndpoint}/health-check -UseBasicParsing | Select-Object Content", Output);
 
             Output.WriteLine($"Zipkin Endpoint: {zipkinEndpoint}");
 
@@ -68,6 +68,9 @@ namespace IntegrationTests.Helpers
 
             var container = builder.Build();
             container.StartAsync().Wait(TimeSpan.FromMinutes(1));
+
+            // Get network info
+            PowershellHelper.RunCommand($"docker network inspect {DockerNetworkHelper.IntegrationTestsNetworkName}", Output);
 
             return new Container(container);
         }
