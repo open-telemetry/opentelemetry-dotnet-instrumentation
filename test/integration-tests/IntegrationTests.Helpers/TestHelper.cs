@@ -47,8 +47,12 @@ namespace IntegrationTests.Helpers
                 ? Wait.ForWindowsContainer()
                 : Wait.ForUnixContainer();
 
-            string zipkinEndpoint = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{traceAgentPort}/api/v2/spans";
+            string gatewayEndpoint = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{traceAgentPort}";
+            string zipkinEndpoint = $"{gatewayEndpoint}/api/v2/spans";
             string networkId = DockerNetworkHelper.SetupIntegrationTestsNetwork();
+
+            // Do gateway test
+            PowershellHelper.RunCommand(Output, $"Invoke-WebRequest -Uri {gatewayEndpoint}/health-check -UseBasicParsing | Select-Object Content");
 
             Output.WriteLine($"Zipkin Endpoint: {zipkinEndpoint}");
 
