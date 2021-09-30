@@ -15,8 +15,6 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
 
         "DOTNET_STARTUP_HOOKS": "$(StartupHookOutputDirectory)\\netcoreapp3.1\\OpenTelemetry.Instrumentation.StartupHook.dll",
-        // "DOTNET_STARTUP_HOOKS": "D:\\opentelemetry-dotnet-instrumentation\\src\\OpenTelemetry.StartupHook\\bin\\Debug\\netcoreapp3.1\\OpenTelemetry.Instrumentation.StartupHook.dll",
-        // "OTEL_MANAGED_PROFILER_PATH": "D:\\opentelemetry-dotnet-instrumentation\\src\\OpenTelemetry.ClrProfiler.Managed\\bin\\Debug\\netcoreapp3.1",
         "OTEL_MANAGED_PROFILER_PATH": "$(ManagedProfilerOutputDirectory)\\netcoreapp3.1",
 
         "OTEL_VERSION": "1.0.0",
@@ -36,8 +34,6 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
 
         "DOTNET_STARTUP_HOOKS": "$(StartupHookOutputDirectory)\\netcoreapp3.1\\OpenTelemetry.Instrumentation.StartupHook.dll",
-        // "DOTNET_STARTUP_HOOKS": "D:\\opentelemetry-dotnet-instrumentation\\src\\OpenTelemetry.StartupHook\\bin\\Debug\\netcoreapp3.1\\OpenTelemetry.Instrumentation.StartupHook.dll",
-        // "OTEL_MANAGED_PROFILER_PATH": "D:\\opentelemetry-dotnet-instrumentation\\src\\OpenTelemetry.ClrProfiler.Managed\\bin\\Debug\\netcoreapp3.1",
         "OTEL_MANAGED_PROFILER_PATH": "$(ManagedProfilerOutputDirectory)\\netcoreapp3.1",
 
         "OTEL_VERSION": "1.0.0",
