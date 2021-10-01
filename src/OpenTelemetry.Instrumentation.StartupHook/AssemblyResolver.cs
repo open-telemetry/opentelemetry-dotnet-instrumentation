@@ -7,7 +7,7 @@ namespace OpenTelemetry.Instrumentation.StartupHook
 {
     internal class AssemblyResolver
     {
-        internal static string OtelManagedProfilerPath => Environment.GetEnvironmentVariable("OTEL_MANAGED_PROFILER_PATH");
+        internal static string OtelManagedProfilerPath => Environment.GetEnvironmentVariable("OTEL_DOTNET_TRACER_HOME");
 
         public static Assembly LoadAssemblyFromSharedLocation(AssemblyLoadContext context, AssemblyName assemblyName)
         {
