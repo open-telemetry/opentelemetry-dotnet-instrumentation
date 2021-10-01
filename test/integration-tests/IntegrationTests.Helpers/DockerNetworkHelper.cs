@@ -9,7 +9,7 @@ namespace IntegrationTests.Helpers
     internal static class DockerNetworkHelper
     {
         public const string IntegrationTestsNetworkName = "integration-tests";
-        public const string IntegrationTestsGateway = "192.168.0.1";
+        public const string IntegrationTestsGateway = "10.1.1.1";
 
         internal static string SetupIntegrationTestsNetwork()
         {
@@ -19,6 +19,11 @@ namespace IntegrationTests.Helpers
 
             if (network != null)
             {
+                if (network.IPAM.Config[0].Gateway != IntegrationTestsGateway)
+                {
+                    client.Networks.DeleteNetworkAsync(network.ID).Wait();
+                }
+
                 return network.ID;
             }
 
@@ -35,7 +40,7 @@ namespace IntegrationTests.Helpers
             networkParams.IPAM.Config.Add(new IPAMConfig()
             {
                 Gateway = IntegrationTestsGateway,
-                Subnet = "192.168.0.0/24"
+                Subnet = "10.1.1.0/24"
             });
 
             var result = client.Networks.CreateNetworkAsync(networkParams).Result;
