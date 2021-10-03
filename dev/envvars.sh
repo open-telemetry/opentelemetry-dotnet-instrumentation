@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 uname_os() {
     os=$(uname -s | tr '[:upper:]' '[:lower:]')
