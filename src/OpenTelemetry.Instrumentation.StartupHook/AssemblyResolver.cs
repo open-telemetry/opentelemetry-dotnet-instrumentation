@@ -3,12 +3,10 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
-namespace OpenTelemetry.Instrumentation.StartupHook
+namespace OpenTelemetry.Instrumentation.DotnetStartupHook
 {
     internal class AssemblyResolver
     {
-        internal static string OtelManagedProfilerPath => Environment.GetEnvironmentVariable("OTEL_DOTNET_TRACER_HOME");
-
         public static Assembly LoadAssemblyFromSharedLocation(AssemblyLoadContext context, AssemblyName assemblyName)
         {
             string sharedAssemblyPath = null;
@@ -16,7 +14,7 @@ namespace OpenTelemetry.Instrumentation.StartupHook
             {
                 // TODO: If dotnet does not like the provided assembly, it will retry this event in a loop.
                 // Add a logic to avoid cyclic loop.
-                sharedAssemblyPath = Path.Combine(OtelManagedProfilerPath, $"{assemblyName.Name}.dll");
+                sharedAssemblyPath = Path.Combine(StartupHook.StartupAssemblyLocation, $"{assemblyName.Name}.dll");
                 if (File.Exists(sharedAssemblyPath))
                 {
                     var assembly = Assembly.LoadFrom(sharedAssemblyPath);

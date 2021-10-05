@@ -14,8 +14,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
 
-        "DOTNET_STARTUP_HOOKS": "$(StartupHookOutputDirectory)\\netcoreapp3.1\\OpenTelemetry.Instrumentation.StartupHook.dll",
-        "OTEL_DOTNET_TRACER_HOME": "$(ManagedProfilerOutputDirectory)\\netcoreapp3.1",
+        "DOTNET_STARTUP_HOOKS": "$(ProjectDir)$(OutputPath)profiler-lib\\OpenTelemetry.Instrumentation.DotnetStartupHook.dll",
 
         "OTEL_VERSION": "1.0.0",
         "OTEL_SERVICE": "Samples.StartupHook.AspNetCoreMvc31",
@@ -33,8 +32,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
 
-        "DOTNET_STARTUP_HOOKS": "$(StartupHookOutputDirectory)\\netcoreapp3.1\\OpenTelemetry.Instrumentation.StartupHook.dll",
-        "OTEL_DOTNET_TRACER_HOME": "$(ManagedProfilerOutputDirectory)\\netcoreapp3.1",
+        "DOTNET_STARTUP_HOOKS": "$(ProjectDir)$(OutputPath)profiler-lib\\OpenTelemetry.Instrumentation.DotnetStartupHook.dll",
 
         "OTEL_VERSION": "1.0.0",
         "OTEL_SERVICE": "Samples.StartupHook.AspNetCoreMvc31",

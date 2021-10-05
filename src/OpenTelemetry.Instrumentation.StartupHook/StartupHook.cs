@@ -2,13 +2,17 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
-using OpenTelemetry.Instrumentation.StartupHook;
+using OpenTelemetry.Instrumentation.DotnetStartupHook;
 
 /// <summary>
 /// Dotnet StartupHook
 /// </summary>
 public class StartupHook
 {
+#pragma warning disable SA1401 // Fields should be private
+    internal static string StartupAssemblyLocation = GetStartupAssemblyLocation();
+#pragma warning restore SA1401 // Fields should be private
+
     /// <summary>
     /// Load and initialize OpenTelemetry.ClrProfiler.Managed assembly to bring OpenTelemetry SDK
     /// with a pre-defined set of exporters, shims, and instrumentations.
@@ -24,7 +28,7 @@ public class StartupHook
         try
         {
             // Load OpenTelemetry.ClrProfiler.Managed assembly
-            string otelManagedProfilerFilePath = Path.Combine(AssemblyResolver.OtelManagedProfilerPath, "OpenTelemetry.ClrProfiler.Managed.dll");
+            string otelManagedProfilerFilePath = Path.Combine(StartupAssemblyLocation, "OpenTelemetry.ClrProfiler.Managed.dll");
             Assembly otelManagedProfilerAssembly = Assembly.LoadFrom(otelManagedProfilerFilePath);
 
             // Call Instrumentation.Initialize()
@@ -44,7 +48,27 @@ public class StartupHook
         }
         catch (Exception ex)
         {
-            StartupHookEventSource.Log.Error($"Error in StartupHook initialization: ProfilerFolderLocation: {AssemblyResolver.OtelManagedProfilerPath}, Error: {ex}");
+            StartupHookEventSource.Log.Error($"Error in StartupHook initialization: ProfilerFolderLocation: {StartupAssemblyLocation}, Error: {ex}");
+        }
+    }
+
+    private static string GetStartupAssemblyLocation()
+    {
+        try
+        {
+            var startupAssemblyFilePath = Assembly.GetExecutingAssembly().Location;
+            if (startupAssemblyFilePath.StartsWith(@"\\?\"))
+            {
+                startupAssemblyFilePath = startupAssemblyFilePath.Substring(4); // This will only be used in case the local path exceeds max_path size limit
+            }
+
+            var startupAssemblyDirectoryPath = Path.GetDirectoryName(startupAssemblyFilePath);
+            return startupAssemblyDirectoryPath;
+        }
+        catch (Exception ex)
+        {
+            StartupHookEventSource.Log.Error($"Error getting startup folder location: {ex}");
+            return null;
         }
     }
 }
