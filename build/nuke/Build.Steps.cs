@@ -154,6 +154,15 @@ partial class Build
                 .CombineWith(targetFrameworks, (p, framework) => p
                     .SetFramework(framework)
                     .SetOutput(TracerHomeDirectory / framework)));
+
+            DotNetPublish(s => s
+                .SetProject(Solution.GetProject(Projects.DotnetStartupHook))
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatformAnyCPU()
+                .EnableNoBuild()
+                .EnableNoRestore()
+                .SetFramework(TargetFramework.NETCOREAPP3_1)
+                .SetOutput(TracerHomeDirectory / TargetFramework.NETCOREAPP3_1));
         });
 
     Target PublishNativeProfiler => _ => _
