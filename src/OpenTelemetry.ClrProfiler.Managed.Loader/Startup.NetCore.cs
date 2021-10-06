@@ -19,9 +19,13 @@ namespace OpenTelemetry.ClrProfiler.Managed.Loader
             var version = Environment.Version;
 
             // Old versions of .net core have a major version of 4
-            if ((version.Major == 3 && version.Minor >= 1) || version.Major >= 5)
+            if ((version.Major == 3 && version.Minor >= 1))
             {
                 tracerFrameworkDirectory = "netcoreapp3.1";
+            }
+            else if (version.Major >= 5)
+            {
+                tracerFrameworkDirectory = $"net{version.Major}.{version.Minor}";
             }
 
             var tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_TRACER_HOME") ?? string.Empty;

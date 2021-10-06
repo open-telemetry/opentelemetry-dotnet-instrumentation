@@ -43,6 +43,7 @@ partial class Build
         TargetFramework.NET461,
         TargetFramework.NETSTANDARD2_0,
         TargetFramework.NETCOREAPP3_1,
+        TargetFramework.NET5_0
     };
 
     Target CreateRequiredDirectories => _ => _
@@ -200,8 +201,8 @@ partial class Build
         {
             // publish ClrProfilerManaged moc
             var targetFrameworks = IsWin
-                ? new[] { TargetFramework.NET461, TargetFramework.NETCOREAPP3_1 }
-                : new[] { TargetFramework.NETCOREAPP3_1 };
+                ? new[] { TargetFramework.NET461, TargetFramework.NETCOREAPP3_1, TargetFramework.NET5_0 }
+                : new[] { TargetFramework.NETCOREAPP3_1, TargetFramework.NET5_0 };
 
             DotNetPublish(s => s
                 .SetProject(Solution.GetProject(Projects.Mocks.ClrProfilerManagedMock))
@@ -282,13 +283,16 @@ partial class Build
             .GetProjects("IntegrationTests.*")
             .ToArray();
 
+        TargetFramework[] targetFrameworks = new[] { TargetFramework.NETCOREAPP3_1, TargetFramework.NET5_0 };
+
         DotNetTest(config => config
             .SetConfiguration(BuildConfiguration)
             .SetTargetPlatform(Platform)
-            // TODO: Remove if NetFX works
-            .SetFramework(TargetFramework.NETCOREAPP3_1)
             .EnableNoRestore()
             .EnableNoBuild()
+            .CombineWith(targetFrameworks, (s, fx) => s
+                .SetFramework(fx)
+            )
             .CombineWith(integrationTests, (s, project) => s
                 .EnableTrxLogOutput(GetResultsDirectory(project))
                 .SetProjectFile(project)), degreeOfParallelism: 4);
