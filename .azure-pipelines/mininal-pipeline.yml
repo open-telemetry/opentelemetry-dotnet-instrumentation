@@ -557,7 +557,3 @@ stages:
     - publish: $(System.DefaultWorkingDirectory)/tracer/src/Datadog.Trace.Tools.Runner/bin/$(buildConfiguration)/Console/publish/osx-x64
       displayName: Uploading runner standalone osx-x64 artifact
       artifact: runner-standalone-osx-x64
-
-    - powershell: |
-        echo "##vso[build.addbuildtag]$(dotnetToolTag)"
-      displayName: Add $(dotnetToolTag) build tag
