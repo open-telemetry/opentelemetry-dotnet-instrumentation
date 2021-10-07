@@ -37,6 +37,7 @@ internal class StartupHook
         catch (Exception ex)
         {
             StartupHookEventSource.Log.Error($"Error in StartupHook initialization: LoaderFolderLocation: {loaderAssemblyLocation}, Error: {ex}");
+            throw;
         }
     }
 
