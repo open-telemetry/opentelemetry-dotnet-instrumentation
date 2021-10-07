@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Extensions;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
@@ -38,13 +39,17 @@ partial class Build
             ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
             : new[] { MSBuildTargetPlatform.x86 };
 
-    readonly IEnumerable<TargetFramework> TargetFrameworks = new[]
+    private static readonly IEnumerable<TargetFramework> TargetFrameworks = new[]
     {
         TargetFramework.NET461,
         TargetFramework.NETSTANDARD2_0,
-        TargetFramework.NETCOREAPP3_1,
-        TargetFramework.NET5_0
+        TargetFramework.NETCOREAPP3_1
     };
+
+    private static readonly IEnumerable<TargetFramework> TestFrameworks = TargetFrameworks
+        .Concat(new[] {
+            TargetFramework.NET5_0
+        });
 
     Target CreateRequiredDirectories => _ => _
         .Unlisted()
@@ -200,9 +205,10 @@ partial class Build
         .Executes(() =>
         {
             // publish ClrProfilerManaged moc
-            var targetFrameworks = IsWin
-                ? new[] { TargetFramework.NET461, TargetFramework.NETCOREAPP3_1, TargetFramework.NET5_0 }
-                : new[] { TargetFramework.NETCOREAPP3_1, TargetFramework.NET5_0 };
+            var targetFrameworks = (IsWin
+                ? TargetFrameworks
+                : TargetFrameworks.FilterWindowsOnly())
+                .FilterNetStandard();
 
             DotNetPublish(s => s
                 .SetProject(Solution.GetProject(Projects.Mocks.ClrProfilerManagedMock))
@@ -212,7 +218,7 @@ partial class Build
                 .EnableNoRestore()
                 .CombineWith(targetFrameworks, (p, framework) => p
                     .SetFramework(framework)
-                    .SetOutput(TestsDirectory / Projects.Tests.ClrProfilerManagedLoaderTests / "bin" / BuildConfiguration / framework / "Profiler" / framework)));
+                    .SetOutput(TestsDirectory / Projects.Tests.ClrProfilerManagedLoaderTests / "bin" / BuildConfiguration / "Profiler" / framework)));
         });
 
     Target CompileMocks => _ => _
@@ -283,7 +289,7 @@ partial class Build
             .GetProjects("IntegrationTests.*")
             .ToArray();
 
-        TargetFramework[] targetFrameworks = new[] { TargetFramework.NETCOREAPP3_1, TargetFramework.NET5_0 };
+        var targetFrameworks = TestFrameworks.CrossPlatformTestable();
 
         DotNetTest(config => config
             .SetConfiguration(BuildConfiguration)

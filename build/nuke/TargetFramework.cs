@@ -9,11 +9,21 @@ using Nuke.Common.Tooling;
 [TypeConverter(typeof(TargetFrameworkTypeConverter))]
 public class TargetFramework : Enumeration
 {
-    public static TargetFramework NET461 = new TargetFramework { Value = "net461" };
-    public static TargetFramework NETSTANDARD2_0 = new TargetFramework { Value = "netstandard2.0" };
-    public static TargetFramework NETCOREAPP2_1 = new TargetFramework { Value = "netcoreapp2.1" };
-    public static TargetFramework NETCOREAPP3_1 = new TargetFramework { Value = "netcoreapp3.1" };
-    public static TargetFramework NET5_0 = new TargetFramework { Value = "net5.0" };
+    public static readonly TargetFramework NET461 = new TargetFramework { Value = "net461" };
+    public static readonly TargetFramework NETSTANDARD2_0 = new TargetFramework { Value = "netstandard2.0" };
+    public static readonly TargetFramework NETCOREAPP2_1 = new TargetFramework { Value = "netcoreapp2.1" };
+    public static readonly TargetFramework NETCOREAPP3_1 = new TargetFramework { Value = "netcoreapp3.1" };
+    public static readonly TargetFramework NET5_0 = new TargetFramework { Value = "net5.0" };
+
+    public static readonly TargetFramework[] NetStandard = new[]
+    {
+        NETSTANDARD2_0
+    };
+
+    public static readonly TargetFramework[] WindowsOnly = new[]
+    {
+        NET461
+    };
 
     public static implicit operator string(TargetFramework framework)
     {
