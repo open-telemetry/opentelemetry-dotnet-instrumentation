@@ -21,9 +21,11 @@ internal class StartupHook
             // Check Instrumentation is already initialized with native profiler.
             Type profilerType = Type.GetType("OpenTelemetry.ClrProfiler.Managed.Instrumentation, OpenTelemetry.ClrProfiler.Managed");
 
-            if (profilerType == null && loaderAssemblyLocation != null)
+            if (profilerType == null)
             {
-                // Load OpenTelemetry.ClrProfiler.Managed.Loader and create an instance.
+                // Instrumentation is not initialized.
+                // Creating an instance of OpenTelemetry.ClrProfiler.Managed.Loader.Startup
+                // will initialize Instrumentation through its static constructor.
                 string loaderFilePath = Path.Combine(loaderAssemblyLocation, "OpenTelemetry.ClrProfiler.Managed.Loader.dll");
                 Assembly loaderAssembly = Assembly.LoadFrom(loaderFilePath);
                 loaderAssembly.CreateInstance("OpenTelemetry.ClrProfiler.Managed.Loader.Startup");
@@ -53,13 +55,14 @@ internal class StartupHook
             }
 
             // StartupHook and Loader assemblies are in the same path
-            var startupAssemblyDirectoryPath = Path.GetDirectoryName(startupAssemblyFilePath);
+            var startupAssemblyDirectoryPath = Path.GetDirectoryName(startupAssemblyFilePath) ??
+                                               throw new NullReferenceException("StartupAssemblyFilePath is NULL");
             return startupAssemblyDirectoryPath;
         }
         catch (Exception ex)
         {
             StartupHookEventSource.Log.Error($"Error getting loader directory location: {ex}");
-            return null;
+            throw;
         }
     }
 }
