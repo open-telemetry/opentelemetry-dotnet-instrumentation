@@ -1,58 +1,49 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Runtime.Loader;
-using OpenTelemetry.Instrumentation.DotnetStartupHook;
+using OpenTelemetry.Instrumentation.StartupHook;
 
 /// <summary>
 /// Dotnet StartupHook
 /// </summary>
-public class StartupHook
+internal class StartupHook
 {
-#pragma warning disable SA1401 // Fields should be private
-    internal static string StartupAssemblyLocation = GetStartupAssemblyLocation();
-#pragma warning restore SA1401 // Fields should be private
-
     /// <summary>
     /// Load and initialize OpenTelemetry.ClrProfiler.Managed assembly to bring OpenTelemetry SDK
     /// with a pre-defined set of exporters, shims, and instrumentations.
     /// </summary>
     public static void Initialize()
     {
-        AssemblyLoadContext.Default.Resolving += AssemblyResolver.LoadAssemblyFromSharedLocation;
-        InitializeInstrumentation();
-    }
+        string loaderAssemblyLocation = GetLoaderAssemblyLocation();
 
-    private static void InitializeInstrumentation()
-    {
         try
         {
-            // Load OpenTelemetry.ClrProfiler.Managed assembly
-            string otelManagedProfilerFilePath = Path.Combine(StartupAssemblyLocation, "OpenTelemetry.ClrProfiler.Managed.dll");
-            Assembly otelManagedProfilerAssembly = Assembly.LoadFrom(otelManagedProfilerFilePath);
+            // Check Instrumentation is already initialized with native profiler.
+            Type profilerType = Type.GetType("OpenTelemetry.ClrProfiler.Managed.Instrumentation, OpenTelemetry.ClrProfiler.Managed");
 
-            // Call Instrumentation.Initialize()
-            Type otelProfilerInstrumentationType = otelManagedProfilerAssembly?.GetType("OpenTelemetry.ClrProfiler.Managed.Instrumentation");
-            MethodInfo otelProfilerInitializeMethodInfo = otelProfilerInstrumentationType?.GetMethod("Initialize");
-
-            otelProfilerInitializeMethodInfo?.Invoke(null, null);
-
-            if (otelProfilerInitializeMethodInfo != null)
+            if (profilerType == null)
             {
+                // Instrumentation is not initialized.
+                // Creating an instance of OpenTelemetry.ClrProfiler.Managed.Loader.Startup
+                // will initialize Instrumentation through its static constructor.
+                string loaderFilePath = Path.Combine(loaderAssemblyLocation, "OpenTelemetry.ClrProfiler.Managed.Loader.dll");
+                Assembly loaderAssembly = Assembly.LoadFrom(loaderFilePath);
+                loaderAssembly.CreateInstance("OpenTelemetry.ClrProfiler.Managed.Loader.Startup");
                 StartupHookEventSource.Log.Trace("StartupHook initialized successfully!");
             }
             else
             {
-                StartupHookEventSource.Log.Error("StartupHook initialization has failed!");
+                StartupHookEventSource.Log.Trace("OpenTelemetry.ClrProfiler.Managed.Instrumentation initialized before startup hook");
             }
         }
         catch (Exception ex)
         {
-            StartupHookEventSource.Log.Error($"Error in StartupHook initialization: ProfilerFolderLocation: {StartupAssemblyLocation}, Error: {ex}");
+            StartupHookEventSource.Log.Error($"Error in StartupHook initialization: LoaderFolderLocation: {loaderAssemblyLocation}, Error: {ex}");
+            throw;
         }
     }
 
-    private static string GetStartupAssemblyLocation()
+    private static string GetLoaderAssemblyLocation()
     {
         try
         {
@@ -63,13 +54,15 @@ public class StartupHook
                 startupAssemblyFilePath = startupAssemblyFilePath.Substring(4);
             }
 
-            var startupAssemblyDirectoryPath = Path.GetDirectoryName(startupAssemblyFilePath);
+            // StartupHook and Loader assemblies are in the same path
+            var startupAssemblyDirectoryPath = Path.GetDirectoryName(startupAssemblyFilePath) ??
+                                               throw new NullReferenceException("StartupAssemblyFilePath is NULL");
             return startupAssemblyDirectoryPath;
         }
         catch (Exception ex)
         {
-            StartupHookEventSource.Log.Error($"Error getting startup folder location: {ex}");
-            return null;
+            StartupHookEventSource.Log.Error($"Error getting loader directory location: {ex}");
+            throw;
         }
     }
 }

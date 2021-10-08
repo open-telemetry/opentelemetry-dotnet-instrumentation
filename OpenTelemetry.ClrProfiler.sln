@@ -110,7 +110,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.MongoDB", "test\tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests", "test\OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests\OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests.csproj", "{35AB65D8-D76E-40C6-B10C-501A6D44C9E0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.Instrumentation.DotnetStartupHook", "src\OpenTelemetry.Instrumentation.StartupHook\OpenTelemetry.Instrumentation.DotnetStartupHook.csproj", "{E04DA938-E153-4A0D-9CB0-EAC38210FAF2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.Instrumentation.StartupHook", "src\OpenTelemetry.Instrumentation.StartupHook\OpenTelemetry.Instrumentation.StartupHook.csproj", "{E04DA938-E153-4A0D-9CB0-EAC38210FAF2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.StartupHook.AspNetCoreMvc31", "samples\Samples.StartupHook.AspNetCoreMvc31\Samples.StartupHook.AspNetCoreMvc31.csproj", "{B25F7404-A6F0-4071-A0CC-139AAB3B0A91}"
 EndProject
