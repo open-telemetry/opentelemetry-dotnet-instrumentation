@@ -160,8 +160,20 @@ partial class Build
                     .SetFramework(framework)
                     .SetOutput(TracerHomeDirectory / framework)));
 
+            // StartupHook is supported starting .Net Core 3.1.
+            // We need to emit StartupHook and ClrProfilerManagedLoader assemblies only for .NET Core 3.1 target framework.
             DotNetPublish(s => s
-                .SetProject(Solution.GetProject(Projects.DotnetStartupHook))
+                .SetProject(Solution.GetProject(Projects.StartupHook))
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatformAnyCPU()
+                .EnableNoBuild()
+                .EnableNoRestore()
+                .SetFramework(TargetFramework.NETCOREAPP3_1)
+                .SetOutput(TracerHomeDirectory / TargetFramework.NETCOREAPP3_1));
+
+            // ClrProfilerManagedLoader publish is needed only for .Net Core 3.1 to support load from StartupHook.
+            DotNetPublish(s => s
+                .SetProject(Solution.GetProject(Projects.ClrProfilerManagedLoader))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
