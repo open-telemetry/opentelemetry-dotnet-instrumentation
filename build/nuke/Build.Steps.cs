@@ -42,7 +42,6 @@ partial class Build
     private static readonly IEnumerable<TargetFramework> TargetFrameworks = new[]
     {
         TargetFramework.NET461,
-        TargetFramework.NETSTANDARD2_0,
         TargetFramework.NETCOREAPP3_1
     };
 
@@ -214,10 +213,9 @@ partial class Build
         .Executes(() =>
         {
             // publish ClrProfilerManaged moc
-            var targetFrameworks = (IsWin
+            var targetFrameworks = IsWin
                 ? TargetFrameworks
-                : TargetFrameworks.FilterWindowsOnly())
-                .FilterNetStandard();
+                : TargetFrameworks.ExceptNetFramework();
 
             DotNetPublish(s => s
                 .SetProject(Solution.GetProject(Projects.Mocks.ClrProfilerManagedMock))
@@ -298,14 +296,12 @@ partial class Build
             .GetProjects("IntegrationTests.*")
             .ToArray();
 
-        var targetFrameworks = TestFrameworks.CrossPlatformTestable();
-
         DotNetTest(config => config
             .SetConfiguration(BuildConfiguration)
             .SetTargetPlatform(Platform)
             .EnableNoRestore()
             .EnableNoBuild()
-            .CombineWith(targetFrameworks, (s, fx) => s
+            .CombineWith(TestFrameworks.ExceptNetFramework(), (s, fx) => s
                 .SetFramework(fx)
             )
             .CombineWith(integrationTests, (s, project) => s
