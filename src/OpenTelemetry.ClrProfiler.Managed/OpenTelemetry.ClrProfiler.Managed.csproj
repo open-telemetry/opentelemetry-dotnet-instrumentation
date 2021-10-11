@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageReference Include="OpenTelemetry" Version="1.2.0-alpha2" />
     <PackageReference Include="OpenTelemetry.Api" Version="1.2.0-alpha2" />
-    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.2.0-alpha2" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.2.0-beta1" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc7" />
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.0.0-rc7" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNet" Version="1.0.0-rc7" Condition="'$(TargetFramework)' == 'net461'" />
