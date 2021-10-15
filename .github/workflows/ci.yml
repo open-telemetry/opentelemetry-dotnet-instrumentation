@@ -52,8 +52,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Downgrade CMake
-        run: sudo ./build/artifacts/downgrade-cmake-ubuntu.sh
       - name: Cache .nuke/temp, ~/.nuget/packages
         uses: actions/cache@v2
         with:
