@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+
+    <OutputType>Exe</OutputType>
+    <Platforms>x64;x86</Platforms>
+    <PlatformTarget>$(Platform)</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+
+  </PropertyGroup>
+
+</Project>

@@ -151,12 +151,18 @@ namespace IntegrationTests.Helpers
             int aspNetCorePort,
             int? statsdPort,
             StringDictionary environmentVariables,
-            string processToProfile = null)
+            string processToProfile = null,
+            bool isStartupHook = false)
         {
             string profilerEnabled = _requiresProfiling ? "1" : "0";
             string profilerPath;
 
-            if (IsCoreClr())
+            if (isStartupHook)
+            {
+                environmentVariables["DOTNET_STARTUP_HOOKS"] = GetStartupHookOutputPath();
+                environmentVariables["OTEL_DOTNET_TRACER_INSTRUMENTATIONS"] = "AspNet,HttpClient";
+            }
+            else if (IsCoreClr())
             {
                 environmentVariables["CORECLR_ENABLE_PROFILING"] = profilerEnabled;
                 environmentVariables["CORECLR_PROFILER"] = EnvironmentTools.ProfilerClsId;
@@ -444,6 +450,18 @@ namespace IntegrationTests.Helpers
             return Path.Combine(
                 nukeOutputPath,
                 $"win-{EnvironmentTools.GetPlatform().ToLower()}");
+        }
+
+        private static string GetStartupHookOutputPath()
+        {
+            string startupHookOutputPath = Path.Combine(
+                EnvironmentTools.GetSolutionDirectory(),
+                "bin",
+                "tracer-home",
+                "netcoreapp3.1",
+                "OpenTelemetry.Instrumentation.StartupHook.dll");
+
+            return startupHookOutputPath;
         }
     }
 }

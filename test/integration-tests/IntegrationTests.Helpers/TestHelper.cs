@@ -34,7 +34,7 @@ namespace IntegrationTests.Helpers
 
         protected ITestOutputHelper Output { get; }
 
-        public Process StartSample(int traceAgentPort, string arguments, string packageVersion, int aspNetCorePort, int? statsdPort = null, string framework = "")
+        public Process StartSample(int traceAgentPort, string arguments, string packageVersion, int aspNetCorePort, int? statsdPort = null, string framework = "", bool startupHook = false)
         {
             // get path to sample app that the profiler will attach to
             string sampleAppPath = EnvironmentHelper.GetSampleApplicationPath(packageVersion, framework);
@@ -50,14 +50,28 @@ namespace IntegrationTests.Helpers
             var executable = EnvironmentHelper.IsCoreClr() ? EnvironmentHelper.GetSampleExecutionSource() : sampleAppPath;
             var args = EnvironmentHelper.IsCoreClr() ? $"{sampleAppPath} {arguments ?? string.Empty}" : arguments;
 
-            return ProfilerHelper.StartProcessWithProfiler(
-                executable,
-                EnvironmentHelper,
-                args,
-                traceAgentPort: traceAgentPort,
-                statsdPort: statsdPort,
-                aspNetCorePort: aspNetCorePort,
-                processToProfile: executable);
+            if (startupHook)
+            {
+                return StartupHookHelper.StartProcessWithStartupHook(
+                    executable,
+                    EnvironmentHelper,
+                    args,
+                    traceAgentPort: traceAgentPort,
+                    statsdPort: statsdPort,
+                    aspNetCorePort: aspNetCorePort,
+                    processToProfile: executable);
+            }
+            else
+            {
+                return ProfilerHelper.StartProcessWithProfiler(
+                    executable,
+                    EnvironmentHelper,
+                    args,
+                    traceAgentPort: traceAgentPort,
+                    statsdPort: statsdPort,
+                    aspNetCorePort: aspNetCorePort,
+                    processToProfile: executable);
+            }
         }
 
         public ProcessResult RunSampleAndWaitForExit(int traceAgentPort, int? statsdPort = null, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000)
