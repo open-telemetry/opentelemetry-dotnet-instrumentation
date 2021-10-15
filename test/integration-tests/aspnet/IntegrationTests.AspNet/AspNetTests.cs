@@ -32,6 +32,9 @@ namespace IntegrationTests.AspNet
                 var response = client.GetAsync($"http://localhost:{webPort}").Result;
                 var content = response.Content.ReadAsStringAsync().Result;
 
+                Output.WriteLine("Sample response:");
+                Output.WriteLine(content);
+
                 var spans = agent.WaitForSpans(1);
 
                 Assert.True(spans.Count >= 1, $"Expecting at least 1 span, only received {spans.Count}");
