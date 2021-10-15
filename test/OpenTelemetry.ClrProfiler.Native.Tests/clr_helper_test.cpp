@@ -50,7 +50,7 @@ TEST_F(CLRHelperTest, EnumeratesTypeDefs) {
 }
 
 TEST_F(CLRHelperTest, EnumeratesAssemblyRefs) {
-  std::vector<std::wstring> expected_assemblies = {L"netstandard"};
+  std::vector<std::wstring> expected_assemblies = {L"mscorlib"};
   std::vector<std::wstring> actual_assemblies;
   for (auto& ref : EnumAssemblyRefs(assembly_import_)) {
     auto name = GetReferencedAssemblyMetadata(assembly_import_, ref).name;
@@ -123,7 +123,7 @@ TEST_F(CLRHelperTest, FiltersIntegrationsByTarget) {
 
   IntegrationMethod i3 = {
       L"integration-3",
-      {{}, {L"netstandard", L"", L"", L"ReplaceTargetMethod", min_ver_, max_ver_, {}, empty_sig_type_}, {}}};
+      {{}, {L"mscorlib", L"", L"", L"ReplaceTargetMethod", min_ver_, max_ver_, {}, empty_sig_type_}, {}}};
 
   std::vector<IntegrationMethod> all = {i1, i2, i3};
   std::vector<IntegrationMethod> expected = {i1, i3};

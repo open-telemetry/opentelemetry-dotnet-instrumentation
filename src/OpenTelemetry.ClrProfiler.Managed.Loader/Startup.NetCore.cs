@@ -14,17 +14,9 @@ namespace OpenTelemetry.ClrProfiler.Managed.Loader
 
         private static string ResolveManagedProfilerDirectory()
         {
-            string tracerFrameworkDirectory = "netstandard2.0";
+            string tracerFrameworkDirectory = "netcoreapp3.1";
+            string tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_TRACER_HOME") ?? string.Empty;
 
-            var version = Environment.Version;
-
-            // Old versions of .net core have a major version of 4
-            if ((version.Major == 3 && version.Minor >= 1) || version.Major >= 5)
-            {
-                tracerFrameworkDirectory = "netcoreapp3.1";
-            }
-
-            var tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_TRACER_HOME") ?? string.Empty;
             return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
         }
 

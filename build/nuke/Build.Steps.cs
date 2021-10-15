@@ -39,12 +39,16 @@ partial class Build
             ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
             : new[] { MSBuildTargetPlatform.x86 };
 
-    readonly IEnumerable<TargetFramework> TargetFrameworks = new[]
+    private static readonly IEnumerable<TargetFramework> TargetFrameworks = new[]
     {
         TargetFramework.NET461,
-        TargetFramework.NETSTANDARD2_0,
-        TargetFramework.NETCOREAPP3_1,
+        TargetFramework.NETCOREAPP3_1
     };
+
+    private static readonly IEnumerable<TargetFramework> TestFrameworks = TargetFrameworks
+        .Concat(new[] {
+            TargetFramework.NET5_0
+        });
 
     Target CreateRequiredDirectories => _ => _
         .Unlisted()
@@ -156,6 +160,27 @@ partial class Build
                 .CombineWith(targetFrameworks, (p, framework) => p
                     .SetFramework(framework)
                     .SetOutput(TracerHomeDirectory / framework)));
+
+            // StartupHook is supported starting .Net Core 3.1.
+            // We need to emit StartupHook and ClrProfilerManagedLoader assemblies only for .NET Core 3.1 target framework.
+            DotNetPublish(s => s
+                .SetProject(Solution.GetProject(Projects.StartupHook))
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatformAnyCPU()
+                .EnableNoBuild()
+                .EnableNoRestore()
+                .SetFramework(TargetFramework.NETCOREAPP3_1)
+                .SetOutput(TracerHomeDirectory / TargetFramework.NETCOREAPP3_1));
+
+            // ClrProfilerManagedLoader publish is needed only for .Net Core 3.1 to support load from StartupHook.
+            DotNetPublish(s => s
+                .SetProject(Solution.GetProject(Projects.ClrProfilerManagedLoader))
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatformAnyCPU()
+                .EnableNoBuild()
+                .EnableNoRestore()
+                .SetFramework(TargetFramework.NETCOREAPP3_1)
+                .SetOutput(TracerHomeDirectory / TargetFramework.NETCOREAPP3_1));
         });
 
     Target PublishNativeProfiler => _ => _
@@ -203,8 +228,8 @@ partial class Build
         {
             // publish ClrProfilerManaged moc
             var targetFrameworks = IsWin
-                ? new[] { TargetFramework.NET461, TargetFramework.NETCOREAPP3_1 }
-                : new[] { TargetFramework.NETCOREAPP3_1 };
+                ? TargetFrameworks
+                : TargetFrameworks.ExceptNetFramework();
 
             DotNetPublish(s => s
                 .SetProject(Solution.GetProject(Projects.Mocks.ClrProfilerManagedMock))
@@ -214,7 +239,7 @@ partial class Build
                 .EnableNoRestore()
                 .CombineWith(targetFrameworks, (p, framework) => p
                     .SetFramework(framework)
-                    .SetOutput(TestsDirectory / Projects.Tests.ClrProfilerManagedLoaderTests / "bin" / BuildConfiguration / framework / "Profiler" / framework)));
+                    .SetOutput(TestsDirectory / Projects.Tests.ClrProfilerManagedLoaderTests / "bin" / BuildConfiguration / "Profiler" / framework)));
         });
 
     Target CompileMocks => _ => _
@@ -288,11 +313,12 @@ partial class Build
         DotNetTest(config => config
             .SetConfiguration(BuildConfiguration)
             .SetTargetPlatform(Platform)
-            // TODO: Remove if NetFX works
-            .SetFramework(TargetFramework.NETCOREAPP3_1)
             .EnableNoRestore()
             .EnableNoBuild()
             .SetFilter(filter)
+            .CombineWith(TestFrameworks.ExceptNetFramework(), (s, fx) => s
+                .SetFramework(fx)
+            )
             .CombineWith(integrationTests, (s, project) => s
                 .EnableTrxLogOutput(GetResultsDirectory(project))
                 .SetProjectFile(project)), degreeOfParallelism: 4);
