@@ -67,7 +67,9 @@ namespace IntegrationTests.Helpers
                   .WithWaitStrategy(waitOS.UntilPortIsAvailable(80));
 
             var container = builder.Build();
-            container.StartAsync().Wait(TimeSpan.FromMinutes(1));
+            var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
+
+            Output.WriteLine($"Container was started successfully: {wasStarted}");
 
             // Get network info
             PowershellHelper.RunCommand($"docker network inspect {DockerNetworkHelper.IntegrationTestsNetworkName}", Output);
