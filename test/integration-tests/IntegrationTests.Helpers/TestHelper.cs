@@ -58,6 +58,12 @@ namespace IntegrationTests.Helpers
 
             Output.WriteLine($"Zipkin Endpoint: {zipkinEndpoint}");
 
+            string logPath = EnvironmentHelper.IsRunningOnCI()
+                ? Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "build_data", "profiler-logs")
+                : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OpenTelemetry .NET AutoInstrumentation", "logs");
+
+            Directory.CreateDirectory(logPath);
+
             var builder = new TestcontainersBuilder<TestcontainersContainer>()
                   .WithImage(sampleName)
                   .WithCleanUp(cleanUp: true)
@@ -66,6 +72,7 @@ namespace IntegrationTests.Helpers
                   .WithNetwork(networkId, networkName)
                   .WithPortBinding(webPort, 80)
                   .WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", zipkinEndpoint)
+                  .WithMount(logPath, "c:/inetpub/wwwroot/logs")
                   .WithWaitStrategy(waitOS.UntilPortIsAvailable(80));
 
             var container = builder.Build();
