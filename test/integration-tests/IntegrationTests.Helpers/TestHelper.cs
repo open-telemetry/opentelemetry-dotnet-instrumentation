@@ -48,11 +48,13 @@ namespace IntegrationTests.Helpers
                 : Wait.ForUnixContainer();
 
             string gatewayEndpoint = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{traceAgentPort}";
+            string healthCheckEndpoint = $"{gatewayEndpoint}/health-check";
             string zipkinEndpoint = $"{gatewayEndpoint}/api/v2/spans";
+            string networkName = DockerNetworkHelper.IntegrationTestsNetworkName;
             string networkId = DockerNetworkHelper.SetupIntegrationTestsNetwork();
 
             // Do gateway test
-            PowershellHelper.RunCommand($"Invoke-WebRequest -Uri {gatewayEndpoint}/health-check -UseBasicParsing | Select-Object Content", Output);
+            PowershellHelper.RunCommand($"Invoke-WebRequest -Uri {healthCheckEndpoint} -UseBasicParsing | Select-Object Content", Output);
 
             Output.WriteLine($"Zipkin Endpoint: {zipkinEndpoint}");
 
@@ -61,7 +63,7 @@ namespace IntegrationTests.Helpers
                   .WithCleanUp(cleanUp: true)
                   .WithOutputConsumer(Consume.RedirectStdoutAndStderrToConsole())
                   .WithName($"{sampleName}-{traceAgentPort}-{webPort}")
-                  .WithNetwork(networkId, DockerNetworkHelper.IntegrationTestsNetworkName)
+                  .WithNetwork(networkId, networkName)
                   .WithPortBinding(webPort, 80)
                   .WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", zipkinEndpoint)
                   .WithWaitStrategy(waitOS.UntilPortIsAvailable(80));
@@ -70,6 +72,11 @@ namespace IntegrationTests.Helpers
             var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
 
             Output.WriteLine($"Container was started successfully: {wasStarted}");
+
+            if (wasStarted)
+            {
+                PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {healthCheckEndpoint}", Output);
+            }
 
             // Get network info
             PowershellHelper.RunCommand($"docker network inspect {DockerNetworkHelper.IntegrationTestsNetworkName}", Output);
