@@ -8,7 +8,7 @@ namespace IntegrationTests.Helpers
         public static FirewallPort OpenWinPort(int port, ITestOutputHelper output)
         {
             string ruleName = $"TraceAgent-{port}";
-            string psCommand = $"New-NetFirewallRule -DisplayName '{ruleName}' -Direction Inbound -LocalPort {port} -Protocol TCP -Action Allow";
+            string psCommand = $"New-NetFirewallRule -DisplayName '{ruleName}' -Direction Inbound -LocalPort {port} -Protocol TCP -Action Allow -Profile Any";
 
             PowershellHelper.RunCommand(psCommand, output);
 
