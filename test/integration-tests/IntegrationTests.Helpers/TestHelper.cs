@@ -64,6 +64,8 @@ namespace IntegrationTests.Helpers
 
             Directory.CreateDirectory(logPath);
 
+            Output.WriteLine("Collecting docker logs to: " + logPath);
+
             var builder = new TestcontainersBuilder<TestcontainersContainer>()
                   .WithImage(sampleName)
                   .WithCleanUp(cleanUp: true)

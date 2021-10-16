@@ -44,11 +44,11 @@ jobs:
         run: docker pull mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2019
       - name: Run './build.cmd Workflow'
         run: ./build.cmd Workflow
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         if: always()
         with:
           name: profiler-logs
-          path: build_data/profiler-logs
+          path: build_data/profiler-logs/**/*
   ubuntu-latest:
     name: ubuntu-latest
     runs-on: ubuntu-latest
@@ -65,11 +65,11 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
       - name: Run './build.cmd Workflow'
         run: ./build.cmd Workflow
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         if: always()
         with:
           name: profiler-logs
-          path: build_data/profiler-logs
+          path: build_data/profiler-logs/**/*
   macOS-latest:
     name: macOS-latest
     runs-on: macos-latest
@@ -92,8 +92,8 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
       - name: Run './build.cmd Workflow'
         run: ./build.cmd Workflow
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         if: always()
         with:
           name: profiler-logs
-          path: build_data/profiler-logs
+          path: build_data/profiler-logs/**/*
