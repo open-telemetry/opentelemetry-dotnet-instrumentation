@@ -90,6 +90,7 @@ namespace IntegrationTests.Helpers
                 "CORECLR_PROFILER_PATH",
                 "CORECLR_PROFILER_PATH_32",
                 "CORECLR_PROFILER_PATH_64",
+                "DOTNET_STARTUP_HOOKS",
 
                 // .NET Framework
                 "COR_ENABLE_PROFILING",
@@ -104,7 +105,7 @@ namespace IntegrationTests.Helpers
                 "OTEL_SERVICE",
                 "OTEL_VERSION",
                 "OTEL_TAGS",
-                "OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES"
+                "OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES",
             };
 
             foreach (string variable in environmentVariables)
@@ -160,7 +161,7 @@ namespace IntegrationTests.Helpers
             if (isStartupHook)
             {
                 environmentVariables["DOTNET_STARTUP_HOOKS"] = GetStartupHookOutputPath();
-                environmentVariables["OTEL_DOTNET_TRACER_INSTRUMENTATIONS"] = "AspNet,HttpClient";
+                environmentVariables["OTEL_DOTNET_TRACER_INSTRUMENTATIONS"] = "HttpClient";
             }
             else if (IsCoreClr())
             {

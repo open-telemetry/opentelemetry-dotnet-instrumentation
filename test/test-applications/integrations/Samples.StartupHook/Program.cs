@@ -1,44 +1,23 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using System.Diagnostics;
+using System.Net.Http;
 
 namespace Samples.StartupHook
 {
-    public class Program
+    class Program
     {
-        public static void Main(string[] args)
+        private static readonly ActivitySource MyActivitySource = new ActivitySource("Samples.StartupHook", "1.0.0");
+
+        static void Main(string[] args)
         {
-            var host = CreateHostBuilder(args).Build();
-
-            var logger = host.Services.GetRequiredService<ILogger<Program>>();
-
-            var prefixes = new[] { "COR_", "CORECLR_", "OTEL_" };
-            var envVars = from envVar in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>()
-                          from prefix in prefixes
-                          let key = (envVar.Key as string)?.ToUpperInvariant()
-                          let value = envVar.Value as string
-                          where key.StartsWith(prefix)
-                          orderby key
-                          select new KeyValuePair<string, string>(key, value);
-
-            foreach (var kvp in envVars)
+            using (var activity = MyActivitySource.StartActivity("SayHello"))
             {
-                logger.LogInformation($"{kvp.Key} = {kvp.Value}");
+                activity?.SetTag("foo", 1);
+                activity?.SetTag("bar", "Hello, World!");
+                activity?.SetTag("baz", new int[] { 1, 2, 3 });
             }
 
-            host.Run();
+            var client = new HttpClient();
+            client.GetStringAsync("http://httpstat.us/200").Wait();
         }
-
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
     }
 }

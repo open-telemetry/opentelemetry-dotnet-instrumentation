@@ -2,6 +2,7 @@
   <PropertyGroup>
 
     <OutputType>Exe</OutputType>
+    <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
     <Platforms>x64;x86</Platforms>
     <PlatformTarget>$(Platform)</PlatformTarget>
     <LangVersion>latest</LangVersion>
