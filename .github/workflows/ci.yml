@@ -71,8 +71,6 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Downgrade CMake
-        run: ./build/artifacts/downgrade-cmake-macos.sh
       - name: Update GitHub PATH
         run: |
           echo "/Applications/CMake.app/Contents/bin" >> $GITHUB_PATH
