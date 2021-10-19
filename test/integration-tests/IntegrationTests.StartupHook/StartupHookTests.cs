@@ -21,14 +21,10 @@ namespace IntegrationTests.StartupHook
             _expectations.Add(new WebServerSpanExpectation("Samples.StartupHook", null, "HTTP GET", "HTTP GET", null, "GET"));
         }
 
-        [Theory]
+        [Fact]
         [Trait("Category", "EndToEnd")]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void SubmitsTraces(bool enableCallTarget)
+        public void SubmitsTraces()
         {
-            SetCallTargetSettings(enableCallTarget);
-
             int agentPort = TcpPortProvider.GetOpenPort();
 
             using (var agent = new MockZipkinCollector(Output, agentPort))
