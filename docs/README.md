@@ -10,7 +10,7 @@ See [USAGE.md](USAGE.md) for installation, usage and configuration instructions.
 
 ## Status
 
-This project is in the early stages of development starting with an initial seeding of code from the [.NET Tracer for Datadog APM](https://github.com/DataDog/dd-trace-dotnet). Our current goal is to take the seeded tracer and update it to both listen to and generate OpenTelemetry tracing data.
+This project is in the early stages of development starting with an initial seeding of code from the [.NET Tracer for Datadog APM](https://github.com/DataDog/dd-trace-dotnet). There is a [project board](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/projects/1) showing the current work in progress and the backlog.
 
 For more details about the design and roadmap see [DESIGN.md](DESIGN.md).
 
