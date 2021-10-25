@@ -40,8 +40,6 @@ jobs:
             .nuke/temp
             ~/.nuget/packages
           key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
-      - name: pull and cache large docker images
-        run: docker pull mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2019
       - name: Run './build.cmd Workflow'
         run: ./build.cmd Workflow
       - uses: actions/upload-artifact@v2
