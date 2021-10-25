@@ -6,8 +6,8 @@
 
   <PropertyGroup>
     <ApiVersion Condition="'$(ApiVersion)' == ''">2.13.1</ApiVersion>
-    <DefineConstants Condition="'$(ApiVersion)'>='2.7.0'">$(DefineConstants);MONGODB_2_7</DefineConstants>
-    <DefineConstants Condition="'$(ApiVersion)'>='2.2.0'">$(DefineConstants);MONGODB_2_2</DefineConstants>
+    <DefineConstants Condition="'$(ApiVersion)'&gt;='2.7.0'">$(DefineConstants);MONGODB_2_7</DefineConstants>
+    <DefineConstants Condition="'$(ApiVersion)'&gt;='2.2.0'">$(DefineConstants);MONGODB_2_2</DefineConstants>
 
     <!-- Required to build multiple projects with the same Configuration|Platform -->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="$(ApiVersion)" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0-preview.7.21377.19" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0-rc.2.21480.5" />
   </ItemGroup>
 
 </Project>
