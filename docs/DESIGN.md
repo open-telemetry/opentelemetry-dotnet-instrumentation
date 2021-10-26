@@ -31,7 +31,7 @@ the application.
 
 ## Error Handling
 
-An initialization error, usually caused by improper configuration, is logged and crashes the application.
+An initialization error, usually caused by invalid configuration, is logged and crashes the application.
 
 Any errors occurring at application run-time are logged and should never crash the application.
 
