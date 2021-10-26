@@ -29,6 +29,12 @@ and as such doesn't support AOT.
 are also implemented using a CLR Profiler, however, only a single CLR Profiler can be used when running
 the application.
 
+## Error Handling
+
+An initialization error, usually caused by improper configuration, is logged and crashes the application.
+
+Any errors occurring at application run-time are logged and should never crash the application.
+
 ## Architecture
 
 To instrument a .NET application without requiring source code changes, the OpenTelemetry .NET Instrumentation uses the
