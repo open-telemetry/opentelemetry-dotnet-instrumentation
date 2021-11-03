@@ -12,7 +12,6 @@ namespace IntegrationTests.Helpers
             bool redirectStandardInput = false,
             int traceAgentPort = 9696,
             int aspNetCorePort = 5000,
-            int? statsdPort = null,
             string processToProfile = null)
         {
             if (environmentHelper == null)
@@ -25,7 +24,7 @@ namespace IntegrationTests.Helpers
 
             var startInfo = new ProcessStartInfo(executable, $"{arguments ?? string.Empty}");
 
-            environmentHelper.SetEnvironmentVariables(traceAgentPort, aspNetCorePort, statsdPort, startInfo.EnvironmentVariables, processToProfile);
+            environmentHelper.SetEnvironmentVariables(traceAgentPort, aspNetCorePort, startInfo.EnvironmentVariables, processToProfile);
 
             startInfo.UseShellExecute = false;
             startInfo.CreateNoWindow = true;

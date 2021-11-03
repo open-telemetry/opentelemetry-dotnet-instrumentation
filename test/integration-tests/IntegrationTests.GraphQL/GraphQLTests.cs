@@ -75,6 +75,11 @@ namespace IntegrationTests.GraphQL
             using (var agent = new MockZipkinCollector(Output, agentPort))
             using (Process process = StartSample(agent.Port, arguments: null, packageVersion: string.Empty, aspNetCorePort: aspNetCorePort))
             {
+                if (process.HasExited)
+                {
+                    throw new InvalidOperationException($"Sample has exited with code: {process.ExitCode}");
+                }
+
                 var wh = new EventWaitHandle(false, EventResetMode.AutoReset);
 
                 process.OutputDataReceived += (sender, args) =>
