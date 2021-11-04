@@ -1,10 +1,11 @@
 FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2019
 ARG configuration=debug
+ARG platform=x64
 ENV COR_ENABLE_PROFILING=1 \
     COR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318} \
-    COR_PROFILER_PATH=C:\\inetpub\\wwwroot\\bin\\profiler-lib\\OpenTelemetry.ClrProfiler.Native.dll \
-    OTEL_DOTNET_TRACER_HOME=C:\\inetpub\\wwwroot\\bin\\profiler-lib\\ \
-    OTEL_INTEGRATIONS=C:\\inetpub\\wwwroot\\bin\\profiler-lib\\integrations.json \
+    COR_PROFILER_PATH=C:\\opentelemetry\\win-${platform}\\OpenTelemetry.ClrProfiler.Native.dll \
+    OTEL_DOTNET_TRACER_HOME=C:\\opentelemetry\\ \
+    OTEL_INTEGRATIONS=C:\\opentelemetry\\integrations.json \
     OTEL_EXPORTER=zipkin \
     OTEL_ENV=integration_tests \
     OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES=Samples.* \

@@ -1,4 +1,3 @@
-using System.Web.Mvc;
 using System.Web.Routing;
 
 namespace Samples.AspNet
@@ -7,7 +6,6 @@ namespace Samples.AspNet
     {
         protected void Application_Start()
         {
-            FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
         }
     }

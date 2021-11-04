@@ -27,7 +27,7 @@ namespace Samples.MongoDB
             Console.WriteLine($"Profiler attached: {IsProfilerAttached()}");
             Console.WriteLine($"Platform: {(Environment.Is64BitProcess ? "x64" : "x32")}");
 
-            var mongoPort = args[1];
+            var mongoPort = GetMongoPort(args);
             var newDocument = new BsonDocument
             {
                 { "name", "MongoDB" },
@@ -56,6 +56,16 @@ namespace Samples.MongoDB
                 WireProtocolExecuteIntegrationTest(client);
 #endif
             }
+        }
+
+        private static string GetMongoPort(string[] args)
+        {
+            if (args.Length > 0)
+            {
+                return args[1];
+            }
+
+            return "27017";
         }
 
         public static void Run(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
@@ -149,13 +159,13 @@ namespace Samples.MongoDB
         }
 #endif
 
-        private static bool IsProfilerAttached()
+        private static bool? IsProfilerAttached()
         {
-            var instrumentationType = Type.GetType("OpenTelemetry.ClrProfiler.Instrumentation", throwOnError: false);
+            var instrumentationType = Type.GetType("OpenTelemetry.ClrProfiler.Managed.Instrumentation, OpenTelemetry.ClrProfiler.Managed", throwOnError: false);
 
             if (instrumentationType == null)
             {
-                return false;
+                return null;
             }
 
             var property = instrumentationType.GetProperty("ProfilerAttached");

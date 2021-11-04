@@ -27,7 +27,7 @@ namespace Samples.AspNet.Controllers
             ViewBag.EnvVars = envVars;
             ViewBag.HasEnvVars = envVars.Any();
             ViewBag.ProfilerAttached = instrumentationType?.GetProperty("ProfilerAttached", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) ?? false;
-            ViewBag.TracerAssemblyLocation = instrumentationType.Assembly.Location;
+            ViewBag.TracerAssemblyLocation = instrumentationType?.Assembly.Location;
             ViewBag.TracerAssemblies = AssembliesHelper.GetLoadedTracesAssemblies();
             ViewBag.AllAssemblies = AssembliesHelper.GetLoadedAssemblies();
 

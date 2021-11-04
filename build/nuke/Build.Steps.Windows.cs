@@ -150,8 +150,6 @@ partial class Build
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
-            string filter = IsWin ? null : "WindowsOnly=true";
-
             Project[] aspNetTests = Solution
                 .GetProjects("IntegrationTests.AspNet")
                 .ToArray();
@@ -162,7 +160,7 @@ partial class Build
                 .SetFramework(TargetFramework.NET461)
                 .EnableNoRestore()
                 .EnableNoBuild()
-                .SetFilter(filter)
+                .SetFilter("WindowsOnly=true")
                 .CombineWith(aspNetTests, (s, project) => s
                     .EnableTrxLogOutput(GetResultsDirectory(project))
                     .SetProjectFile(project)), degreeOfParallelism: 4);

@@ -6,7 +6,6 @@ using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OpenTelemetry.ClrProfiler.Managed;
 
 namespace Samples.GraphQL
 {
@@ -27,7 +26,7 @@ namespace Samples.GraphQL
                 .Build();
 
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
-            logger.LogInformation($"Instrumentation.ProfilerAttached = {Instrumentation.ProfilerAttached}");
+            logger.LogInformation($"Instrumentation.ProfilerAttached = {IsProfilerAttached()}");
 
             var prefixes = new[] { "COR_", "CORECLR_", "OTEL_" };
             var envVars = from envVar in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>()
@@ -44,6 +43,22 @@ namespace Samples.GraphQL
             }
 
             host.Run();
+        }
+
+        private static bool? IsProfilerAttached()
+        {
+            var instrumentationType = Type.GetType("OpenTelemetry.ClrProfiler.Managed.Instrumentation, OpenTelemetry.ClrProfiler.Managed", throwOnError: false);
+
+            if (instrumentationType == null)
+            {
+                return null;
+            }
+
+            var property = instrumentationType.GetProperty("ProfilerAttached");
+
+            var isAttached = property?.GetValue(null) as bool?;
+
+            return isAttached ?? false;
         }
     }
 }

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -14,6 +13,7 @@ namespace IntegrationTests.Helpers
     {
         private static readonly Assembly ExecutingAssembly = Assembly.GetExecutingAssembly();
         private static readonly string RuntimeFrameworkDescription = RuntimeInformation.FrameworkDescription.ToLower();
+        private static string _nukeOutputLocation;
 
         private readonly ITestOutputHelper _output;
         private readonly int _major;
@@ -114,6 +114,23 @@ namespace IntegrationTests.Helpers
             }
         }
 
+        public static string GetNukeBuildOutput()
+        {
+            string nukeOutputPath = Path.Combine(
+                EnvironmentTools.GetSolutionDirectory(),
+                "bin",
+                "tracer-home");
+
+            if (Directory.Exists(nukeOutputPath))
+            {
+                _nukeOutputLocation = nukeOutputPath;
+
+                return _nukeOutputLocation;
+            }
+
+            throw new Exception($"Unable to find Nuke output at: {nukeOutputPath}. Ensure Nuke has run first.");
+        }
+
         public static bool IsRunningOnCI()
         {
             // https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
@@ -123,63 +140,38 @@ namespace IntegrationTests.Helpers
             return !string.IsNullOrEmpty(env);
         }
 
-        public static IEnumerable<string> GetProfilerPathCandidates(string sampleApplicationOutputDirectory)
-        {
-            string extension = EnvironmentTools.GetOS() switch
-            {
-                "win" => "dll",
-                "linux" => "so",
-                "osx" => "dylib",
-                _ => throw new PlatformNotSupportedException()
-            };
-
-            string fileName = $"OpenTelemetry.ClrProfiler.Native.{extension}";
-
-            var relativePath = Path.Combine("profiler-lib", fileName);
-
-            if (sampleApplicationOutputDirectory != null)
-            {
-                yield return Path.Combine(sampleApplicationOutputDirectory, relativePath);
-            }
-
-            yield return Path.Combine(GetExecutingProjectBin(), relativePath);
-            yield return Path.Combine(GetProfilerProjectBin(), fileName);
-            yield return Path.Combine(GetNukeBuildOutput(), fileName);
-        }
-
         public void SetEnvironmentVariables(
             int agentPort,
             int aspNetCorePort,
-            int? statsdPort,
             StringDictionary environmentVariables,
             string processToProfile = null,
             bool isStartupHook = false)
         {
             string profilerEnabled = _requiresProfiling ? "1" : "0";
-            string profilerPath;
 
             if (isStartupHook)
             {
-                environmentVariables["DOTNET_STARTUP_HOOKS"] = GetStartupHookOutputPath();
-                environmentVariables["OTEL_DOTNET_TRACER_INSTRUMENTATIONS"] = "HttpClient";
-            }
-            else if (IsCoreClr())
-            {
-                environmentVariables["CORECLR_ENABLE_PROFILING"] = profilerEnabled;
-                environmentVariables["CORECLR_PROFILER"] = EnvironmentTools.ProfilerClsId;
+                string hookPath = GetStartupHookOutputPath();
 
-                profilerPath = GetProfilerPath();
-                environmentVariables["CORECLR_PROFILER_PATH"] = profilerPath;
-                environmentVariables["OTEL_DOTNET_TRACER_HOME"] = Path.GetDirectoryName(profilerPath);
+                environmentVariables["DOTNET_STARTUP_HOOKS"] = hookPath;
+                environmentVariables["OTEL_DOTNET_TRACER_INSTRUMENTATIONS"] = "HttpClient";
             }
             else
             {
-                environmentVariables["COR_ENABLE_PROFILING"] = profilerEnabled;
-                environmentVariables["COR_PROFILER"] = EnvironmentTools.ProfilerClsId;
+                string profilerPath = GetProfilerPath();
 
-                profilerPath = GetProfilerPath();
-                environmentVariables["COR_PROFILER_PATH"] = profilerPath;
-                environmentVariables["OTEL_DOTNET_TRACER_HOME"] = Path.GetDirectoryName(profilerPath);
+                if (IsCoreClr())
+                {
+                    environmentVariables["CORECLR_ENABLE_PROFILING"] = profilerEnabled;
+                    environmentVariables["CORECLR_PROFILER"] = EnvironmentTools.ProfilerClsId;
+                    environmentVariables["CORECLR_PROFILER_PATH"] = profilerPath;
+                }
+                else
+                {
+                    environmentVariables["COR_ENABLE_PROFILING"] = profilerEnabled;
+                    environmentVariables["COR_PROFILER"] = EnvironmentTools.ProfilerClsId;
+                    environmentVariables["COR_PROFILER_PATH"] = profilerPath;
+                }
             }
 
             if (DebugModeEnabled)
@@ -193,7 +185,8 @@ namespace IntegrationTests.Helpers
                 environmentVariables["OTEL_PROFILER_PROCESSES"] = Path.GetFileName(processToProfile);
             }
 
-            string integrations = string.Join(";", GetIntegrationsFilePaths());
+            string integrations = GetIntegrationsPath();
+            environmentVariables["OTEL_DOTNET_TRACER_HOME"] = GetNukeBuildOutput();
             environmentVariables["OTEL_INTEGRATIONS"] = integrations;
             environmentVariables["OTEL_EXPORTER_ZIPKIN_ENDPOINT"] = $"http://127.0.0.1:{agentPort}";
             environmentVariables["OTEL_EXPORTER"] = "zipkin";
@@ -211,76 +204,55 @@ namespace IntegrationTests.Helpers
             }
         }
 
-        public string[] GetIntegrationsFilePaths()
-        {
-            if (_integrationsFileLocation == null)
-            {
-                string fileName = "integrations.json";
-
-                var directory = GetSampleApplicationOutputDirectory();
-
-                var relativePath = Path.Combine(
-                    "profiler-lib",
-                    fileName);
-
-                _integrationsFileLocation = Path.Combine(
-                    directory,
-                    relativePath);
-
-                // TODO: get rid of the fallback options when we have a consistent convention
-
-                if (!File.Exists(_integrationsFileLocation))
-                {
-                    _output?.WriteLine($"Attempt 1: Unable to find integrations at {_integrationsFileLocation}.");
-                    // Let's try the executing directory, as dotnet publish ignores the Copy attributes we currently use
-                    _integrationsFileLocation = Path.Combine(
-                        GetExecutingProjectBin(),
-                        relativePath);
-                }
-
-                if (!File.Exists(_integrationsFileLocation))
-                {
-                    _output?.WriteLine($"Attempt 2: Unable to find integrations at {_integrationsFileLocation}.");
-                    // One last attempt at the solution root
-                    _integrationsFileLocation = Path.Combine(
-                        EnvironmentTools.GetSolutionDirectory(),
-                        fileName);
-                }
-
-                if (!File.Exists(_integrationsFileLocation))
-                {
-                    throw new Exception($"Attempt 3: Unable to find integrations at {_integrationsFileLocation}");
-                }
-
-                _output?.WriteLine($"Found integrations at {_integrationsFileLocation}.");
-            }
-
-            return new[]
-            {
-                _integrationsFileLocation
-            };
-        }
-
         public string GetProfilerPath()
         {
-            if (_profilerFileLocation == null)
+            if (_profilerFileLocation != null)
             {
-                var paths = GetProfilerPathCandidates(GetSampleApplicationOutputDirectory()).ToArray();
-
-                foreach (var candidate in paths)
-                {
-                    if (File.Exists(candidate))
-                    {
-                        _profilerFileLocation = candidate;
-                        _output?.WriteLine($"Found profiler at {_profilerFileLocation}.");
-                        return candidate;
-                    }
-                }
-
-                throw new Exception($"Unable to find profiler in any of the paths: {string.Join("; ", paths)}");
+                return _profilerFileLocation;
             }
 
-            return _profilerFileLocation;
+            string extension = EnvironmentTools.GetOS() switch
+            {
+                "win" => "dll",
+                "linux" => "so",
+                "osx" => "dylib",
+                _ => throw new PlatformNotSupportedException()
+            };
+
+            string fileName = $"OpenTelemetry.ClrProfiler.Native.{extension}";
+            string nukeOutput = GetNukeBuildOutput();
+            string profilerPath = EnvironmentTools.IsWindows()
+                ? Path.Combine(nukeOutput, $"win-{EnvironmentTools.GetPlatform().ToLower()}", fileName)
+                : Path.Combine(nukeOutput, fileName);
+
+            if (File.Exists(profilerPath))
+            {
+                _profilerFileLocation = profilerPath;
+                _output?.WriteLine($"Found profiler at {_profilerFileLocation}.");
+                return _profilerFileLocation;
+            }
+
+            throw new Exception($"Unable to find profiler at: {profilerPath}");
+        }
+
+        public string GetIntegrationsPath()
+        {
+            if (_integrationsFileLocation != null)
+            {
+                return _integrationsFileLocation;
+            }
+
+            string fileName = $"integrations.json";
+            string integrationsPath = Path.Combine(GetNukeBuildOutput(), fileName);
+
+            if (File.Exists(integrationsPath))
+            {
+                _integrationsFileLocation = integrationsPath;
+                _output?.WriteLine($"Found integrations at {_profilerFileLocation}.");
+                return _integrationsFileLocation;
+            }
+
+            throw new Exception($"Unable to find integrations at: {integrationsPath}");
         }
 
         public string GetSampleApplicationPath(string packageVersion = "", string framework = "")
@@ -411,54 +383,10 @@ namespace IntegrationTests.Helpers
             return $"net{_major}{_minor}{_patch ?? string.Empty}";
         }
 
-        private static string GetProfilerProjectBin()
-        {
-            string projectBinPath = Path.Combine(
-                    EnvironmentTools.GetSolutionDirectory(),
-                    "src",
-                    "OpenTelemetry.ClrProfiler.Native",
-                    "bin");
-
-            if (!EnvironmentTools.IsWindows())
-            {
-                // Check CMake output from CMakeLists.txt
-                return projectBinPath;
-            }
-
-            return Path.Combine(
-                projectBinPath,
-                EnvironmentTools.GetBuildConfiguration(),
-                EnvironmentTools.GetPlatform().ToLower());
-        }
-
-        private static string GetExecutingProjectBin()
-        {
-            return Path.GetDirectoryName(ExecutingAssembly.Location);
-        }
-
-        private static string GetNukeBuildOutput()
-        {
-            string nukeOutputPath = Path.Combine(
-                EnvironmentTools.GetSolutionDirectory(),
-                "bin",
-                "tracer-home");
-
-            if (!EnvironmentTools.IsWindows())
-            {
-                return nukeOutputPath;
-            }
-
-            return Path.Combine(
-                nukeOutputPath,
-                $"win-{EnvironmentTools.GetPlatform().ToLower()}");
-        }
-
         private static string GetStartupHookOutputPath()
         {
             string startupHookOutputPath = Path.Combine(
-                EnvironmentTools.GetSolutionDirectory(),
-                "bin",
-                "tracer-home",
+                GetNukeBuildOutput(),
                 "netcoreapp3.1",
                 "OpenTelemetry.Instrumentation.StartupHook.dll");
 

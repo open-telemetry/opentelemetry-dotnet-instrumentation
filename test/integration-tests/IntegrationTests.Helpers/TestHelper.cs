@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -75,6 +74,7 @@ namespace IntegrationTests.Helpers
                   .WithPortBinding(webPort, 80)
                   .WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", zipkinEndpoint)
                   .WithMount(logPath, "c:/inetpub/wwwroot/logs")
+                  .WithMount(EnvironmentHelper.GetNukeBuildOutput(), "c:/opentelemetry")
                   .WithWaitStrategy(waitOS.UntilPortIsAvailable(80));
 
             var container = builder.Build();
@@ -93,7 +93,7 @@ namespace IntegrationTests.Helpers
             return new Container(container);
         }
 
-        public Process StartSample(int traceAgentPort, string arguments, string packageVersion, int aspNetCorePort, int? statsdPort = null, string framework = "", bool startupHook = false)
+        public Process StartSample(int traceAgentPort, string arguments, string packageVersion, int aspNetCorePort, string framework = "", bool startupHook = false)
         {
             // get path to sample app that the profiler will attach to
             string sampleAppPath = EnvironmentHelper.GetSampleApplicationPath(packageVersion, framework);
@@ -101,9 +101,6 @@ namespace IntegrationTests.Helpers
             {
                 throw new Exception($"application not found: {sampleAppPath}");
             }
-
-            // get full paths to integration definitions
-            IEnumerable<string> integrationPaths = Directory.EnumerateFiles(".", "*integrations.json").Select(Path.GetFullPath);
 
             Output.WriteLine($"Starting Application: {sampleAppPath}");
             var executable = EnvironmentHelper.IsCoreClr() ? EnvironmentHelper.GetSampleExecutionSource() : sampleAppPath;
@@ -116,7 +113,6 @@ namespace IntegrationTests.Helpers
                     EnvironmentHelper,
                     args,
                     traceAgentPort: traceAgentPort,
-                    statsdPort: statsdPort,
                     aspNetCorePort: aspNetCorePort,
                     processToProfile: executable);
             }
@@ -127,15 +123,14 @@ namespace IntegrationTests.Helpers
                     EnvironmentHelper,
                     args,
                     traceAgentPort: traceAgentPort,
-                    statsdPort: statsdPort,
                     aspNetCorePort: aspNetCorePort,
                     processToProfile: executable);
             }
         }
 
-        public ProcessResult RunSampleAndWaitForExit(int traceAgentPort, int? statsdPort = null, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000, bool startupHook = false)
+        public ProcessResult RunSampleAndWaitForExit(int traceAgentPort, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000, bool startupHook = false)
         {
-            var process = StartSample(traceAgentPort, arguments, packageVersion, aspNetCorePort: aspNetCorePort, statsdPort: statsdPort, framework: framework, startupHook: startupHook);
+            var process = StartSample(traceAgentPort, arguments, packageVersion, aspNetCorePort: aspNetCorePort, framework: framework, startupHook: startupHook);
             var name = process.ProcessName;
 
             using var helper = new ProcessHelper(process);
