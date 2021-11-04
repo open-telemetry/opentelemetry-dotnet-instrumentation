@@ -2,8 +2,7 @@
 
 ## Vision
 
-These are the high-level goals defining the long-term vision for the project
-that will guide daily activities, its design, and feature acceptance.
+These are the high-level goals defining the long-term vision for the project that will guide daily activities, its design, and feature acceptance.
 
 - **High performance**: auto-instrumentation performance impact should not be a concern for its users.
 - **Reliability**: stable and performant under different loads. Well-behaved under extreme load, with predictable, low resource consumption.
