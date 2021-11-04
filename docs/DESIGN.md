@@ -14,18 +14,18 @@ These are the high-level goals defining the long-term vision for the project tha
 
 Supported Scenarios:
 
-- ** Zero-touch source code instrummentation**: applications can be instrumented without source code changes,
+- **Zero-touch source code instrummentation**: applications can be instrumented without source code changes,
 although build changes may be required via the addition of specific NuGet packages.
-- ** Custom SDK support **: the instrumentation can initialize the OpenTelemetry .NET SDK, but
+- **Custom SDK support**: the instrumentation can initialize the OpenTelemetry .NET SDK, but
 what OpenTelemetry SDK implementation is used and its initialization can also be delegated
 to the application code.
 
 Non-Supported Scenarios:
 
-- ** Applications using Ahead of Time (AOT) compilation **: the current implementation relies on the
+- **Applications using Ahead of Time (AOT) compilation**: the current implementation relies on the
 [CLR Profiler APIs](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
 and as such doesn't support AOT.
-- ** Side by side usage with other CLR Profiler based tools **: various tools for .NET
+- **Side by side usage with other CLR Profiler based tools**: various tools for .NET
 are also implemented using a CLR Profiler, however, only a single CLR Profiler can be used when running
 the application.
 
