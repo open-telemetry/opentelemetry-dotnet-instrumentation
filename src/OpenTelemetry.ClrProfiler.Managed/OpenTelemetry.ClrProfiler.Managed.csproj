@@ -19,17 +19,10 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0-rc.2.21480.5" />
   </ItemGroup>
 
-  <!--DuckTyping-->
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
-    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.0' AND '$(TargetFramework)' != 'netcoreapp3.1' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web" />
   </ItemGroup>
-
 
   <ItemGroup>
     <ProjectReference Include="..\OpenTelemetry.ClrProfiler.Managed.Core\OpenTelemetry.ClrProfiler.Managed.Core.csproj" />

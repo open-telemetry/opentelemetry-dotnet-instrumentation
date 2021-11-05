@@ -19,12 +19,14 @@ namespace IntegrationTests.Helpers
 
             if (network != null)
             {
-                if (network.IPAM.Config[0].Gateway != IntegrationTestsGateway)
+                if (network.IPAM.Config[0].Gateway == IntegrationTestsGateway)
+                {
+                    return network.ID;
+                }
+                else
                 {
                     client.Networks.DeleteNetworkAsync(network.ID).Wait();
                 }
-
-                return network.ID;
             }
 
             var networkParams = new NetworksCreateParameters()
