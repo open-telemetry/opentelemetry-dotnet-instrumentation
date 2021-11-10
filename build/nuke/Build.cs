@@ -1,28 +1,12 @@
 using System.IO;
 using System.Linq;
 using Nuke.Common;
-using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.IO;
 using Nuke.Common.Tools.MSBuild;
 using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 
-/**
- * To trigger manual generation invoke: 
- * nuke --generate-configuration GitHubActions_ci --host GitHubActions
- * Automatic generation disabled due artifacts upload (even if Nuke step fails)
- */
-[GitHubActions("ci",
-    GitHubActionsImage.WindowsLatest,
-    GitHubActionsImage.UbuntuLatest,
-    GitHubActionsImage.MacOsLatest,
-    AutoGenerate = false,
-    OnPushBranches = new[] { "main", "refs/tags/*" },
-    OnPushExcludePaths = new[] { "docs/*" },
-    OnPullRequestBranches = new[] { "*" },
-    PublishArtifacts = true,
-    InvokedTargets = new[] { nameof(Workflow) })]
 partial class Build : NukeBuild
 {
     public static int Main() => Execute<Build>(x => x.BuildTracer);
