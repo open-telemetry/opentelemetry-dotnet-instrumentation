@@ -6,7 +6,9 @@ This project provides a .NET tracer that leverages the .NET profiling APIs to su
 
 ## Usage
 
-See [USAGE.md](USAGE.md) for installation, usage and configuration instructions.
+See [DEVELOPING.md](DEVELOPING.md) for build and running instructions.
+
+See [USAGE.md](USAGE.md) for configuration instructions.
 
 ## Status
 

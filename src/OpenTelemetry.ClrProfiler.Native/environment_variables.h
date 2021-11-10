@@ -39,12 +39,6 @@ const WSTRING include_process_names = WStr("OTEL_PROFILER_PROCESSES");
 // "MyApp.exe,dotnet.exe"
 const WSTRING exclude_process_names = WStr("OTEL_PROFILER_EXCLUDE_PROCESSES");
 
-// Sets the Agent's host. Default is localhost.
-const WSTRING agent_host = WStr("OTEL_AGENT_HOST");
-
-// Sets the Agent's port. Default is 8126.
-const WSTRING agent_port = WStr("OTEL_TRACE_AGENT_PORT");
-
 // Sets the "env" tag for every span.
 const WSTRING env = WStr("OTEL_ENV");
 
