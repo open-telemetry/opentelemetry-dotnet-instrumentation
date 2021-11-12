@@ -169,8 +169,7 @@ namespace IntegrationTests.Helpers
             }
 
             string integrations = GetIntegrationsPath();
-            var tracerHomePath = GetNukeBuildOutput();
-            environmentVariables["OTEL_DOTNET_TRACER_HOME"] = tracerHomePath;
+            environmentVariables["OTEL_DOTNET_TRACER_HOME"] = GetNukeBuildOutput();
             environmentVariables["OTEL_INTEGRATIONS"] = integrations;
             environmentVariables["OTEL_EXPORTER_ZIPKIN_ENDPOINT"] = $"http://127.0.0.1:{agentPort}";
             environmentVariables["OTEL_EXPORTER"] = "zipkin";
@@ -181,9 +180,6 @@ namespace IntegrationTests.Helpers
             // set consistent env name (can be overwritten by custom environment variable)
             environmentVariables["OTEL_ENV"] = "integration_tests";
             environmentVariables["OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES"] = "Samples.*";
-
-            environmentVariables["DOTNET_ADDITIONAL_DEPS"] = $"{tracerHomePath}\\AdditionalDeps";
-            environmentVariables["DOTNET_SHARED_STORE"] = $"{tracerHomePath}\\store";
 
             foreach (var key in CustomEnvironmentVariables.Keys)
             {
