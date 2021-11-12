@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Extensions;
 using Nuke.Common;
 using Nuke.Common.IO;
@@ -9,6 +11,7 @@ using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.MSBuild;
 using Nuke.Common.Tools.NuGet;
+using Nuke.Common.Utilities.Collections;
 using static DotNetMSBuildTasks;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
@@ -27,6 +30,7 @@ partial class Build
     AbsolutePath ArtifactsDirectory => Artifacts ?? (OutputDirectory / "artifacts");
     AbsolutePath BuildDataDirectory => RootDirectory / "build_data";
     AbsolutePath ProfilerTestLogs => BuildDataDirectory / "profiler-logs";
+    AbsolutePath AdditionalDepsDirectory => TracerHomeDirectory / TargetFramework.NETCOREAPP3_1 / "AdditionalDeps";
 
     Project NativeProfilerProject => Solution.GetProject(Projects.ClrProfilerNative);
 
@@ -144,6 +148,7 @@ partial class Build
     Target PublishManagedProfiler => _ => _
         .Unlisted()
         .After(CompileManagedSrc)
+        .DependsOn(CopyAdditionalDeps)
         .Executes(() =>
         {
             var targetFrameworks = IsWin
@@ -249,6 +254,36 @@ partial class Build
                 .SetConfiguration(BuildConfiguration)
                 .SetNoRestore(true)
             );
+        });
+
+    Target CopyAdditionalDeps => _ => _
+        .Unlisted()
+        .Description("Creates AdditionalDeps and shared store in tracer-home")
+        .After(CompileManagedSrc)
+        .Executes(() =>
+        {
+            DotNetPack(s => s
+                .SetProject(Solution.GetProject(Projects.AdditionalDeps))
+                .SetConfiguration(BuildConfiguration)
+                .EnableNoBuild()
+                .EnableNoRestore()
+                .SetOutputDirectory(AdditionalDepsDirectory));
+
+            DotNetPublish(s => s
+                .SetProject(Solution.GetProject(Projects.AdditionalDeps))
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatformAnyCPU()
+                .SetProperty("TracerHomePath", (TracerHomeDirectory / TargetFramework.NETCOREAPP3_1).ToString())
+                .EnableNoBuild()
+                .EnableNoRestore()
+                .CombineWith(TestFrameworks.ExceptNetFramework(), (p, framework) => p
+                    .SetFramework(framework)
+                    .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString()[^3..] + ".0")));
+
+            AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml", "**/*.nupkg").ForEach(DeleteFile);
+            AdditionalDepsDirectory.GlobFiles("**/*deps.json")
+                                   .ForEach(file => 
+                                        File.WriteAllText(file, Regex.Replace(File.ReadAllText(file), $"{Projects.AdditionalDeps}.dll", $"lib/{TargetFramework.NETCOREAPP3_1}/{Projects.AdditionalDeps}.dll")));
         });
 
     private AbsolutePath GetResultsDirectory(Project proj) => BuildDataDirectory / "results" / proj.Name;
