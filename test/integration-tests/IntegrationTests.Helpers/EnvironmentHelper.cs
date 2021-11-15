@@ -106,6 +106,7 @@ namespace IntegrationTests.Helpers
                 "OTEL_VERSION",
                 "OTEL_TAGS",
                 "OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES",
+                "OTEL_PROFILER_EXCLUDE_PROCESSES"
             };
 
             foreach (string variable in environmentVariables)
