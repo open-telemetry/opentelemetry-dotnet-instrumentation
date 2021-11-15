@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using OpenTelemetry.Instrumentation.StartupHook;
@@ -14,6 +16,17 @@ internal class StartupHook
     /// </summary>
     public static void Initialize()
     {
+        var applicationName = GetApplicationName();
+        StartupHookEventSource.Log.Trace($"StartupHook loaded for application with name {applicationName}.");
+
+        if (IsApplicationInExcludeList(applicationName))
+        {
+            StartupHookEventSource.Log.Trace("Application is in the exclusion list. Skipping initialization.");
+            return;
+        }
+
+        StartupHookEventSource.Log.Trace("Attempting initialization.");
+
         string loaderAssemblyLocation = GetLoaderAssemblyLocation();
 
         try
@@ -64,5 +77,47 @@ internal class StartupHook
             StartupHookEventSource.Log.Error($"Error getting loader directory location: {ex}");
             throw;
         }
+    }
+
+    private static string GetApplicationName()
+    {
+        var applicationName = string.Empty;
+        try
+        {
+            applicationName = AppDomain.CurrentDomain.FriendlyName;
+        }
+        catch (Exception ex)
+        {
+            StartupHookEventSource.Log.Error($"Error getting AppDomain.CurrentDomain.FriendlyName: {ex}");
+        }
+
+        return applicationName;
+    }
+
+    private static bool IsApplicationInExcludeList(string applicationName)
+    {
+        return GetExcludedApplicationNames().Contains(applicationName);
+    }
+
+    private static IList<string> GetExcludedApplicationNames()
+    {
+        var excludedProcesses = new List<string>();
+
+        var environmentValue = Environment.GetEnvironmentVariable("OTEL_PROFILER_EXCLUDE_PROCESSES");
+
+        if (environmentValue == null)
+        {
+            return excludedProcesses;
+        }
+
+        foreach (var processName in environmentValue.Split(','))
+        {
+            if (!string.IsNullOrWhiteSpace(processName))
+            {
+                excludedProcesses.Add(processName.Trim());
+            }
+        }
+
+        return excludedProcesses;
     }
 }
