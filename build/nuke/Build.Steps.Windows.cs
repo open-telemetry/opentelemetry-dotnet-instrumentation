@@ -1,17 +1,17 @@
-using System.Linq;
+using System.IO;
+using Extensions;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
+using Nuke.Common.Tools.Docker;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.MSBuild;
-using Nuke.Common.Tools.Docker;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
+using static Nuke.Common.Tools.Docker.DockerTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.MSBuild.MSBuildTasks;
-using static Nuke.Common.Tools.Docker.DockerTasks;
-using System.IO;
 
 partial class Build
 {
@@ -150,9 +150,7 @@ partial class Build
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
-            Project[] aspNetTests = Solution
-                .GetProjects("IntegrationTests.AspNet")
-                .ToArray();
+            Project[] aspNetTests = Solution.GetWindowsOnlyIntegrationTests();
 
             DotNetTest(config => config
                 .SetConfiguration(BuildConfiguration)
@@ -160,7 +158,6 @@ partial class Build
                 .SetFramework(TargetFramework.NET461)
                 .EnableNoRestore()
                 .EnableNoBuild()
-                .SetFilter("WindowsOnly=true")
                 .CombineWith(aspNetTests, (s, project) => s
                     .EnableTrxLogOutput(GetResultsDirectory(project))
                     .SetProjectFile(project)), degreeOfParallelism: 4);

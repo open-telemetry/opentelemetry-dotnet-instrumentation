@@ -113,6 +113,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Samples.AspNet", "test\test-applications\integrations\aspnet\Samples.AspNet\Samples.AspNet.csproj", "{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "aspnet", "aspnet", "{A0B40A84-EF97-47DB-8455-796A9BCA1097}"
+	ProjectSection(SolutionItems) = preProject
+		test\integration-tests\aspnet\Directory.Build.props = test\integration-tests\aspnet\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests.AspNet", "test\integration-tests\aspnet\IntegrationTests.AspNet\IntegrationTests.AspNet.csproj", "{EE65928D-15C8-45E5-A94C-7094381E7ACF}"
 EndProject

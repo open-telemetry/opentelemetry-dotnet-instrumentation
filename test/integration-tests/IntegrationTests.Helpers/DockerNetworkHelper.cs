@@ -6,11 +6,19 @@ using Docker.DotNet.Models;
 
 namespace IntegrationTests.Helpers
 {
+    /// <summary>
+    /// Helper to call Docker network API
+    /// </summary>
     internal static class DockerNetworkHelper
     {
         public const string IntegrationTestsNetworkName = "integration-tests";
         public const string IntegrationTestsGateway = "10.1.1.1";
 
+        /// <summary>
+        /// Creates a new Docker network with fixed name and gateway.
+        /// if named network exists with specified fixed gateway address, gets the existing one.
+        /// </summary>
+        /// <returns>Docker network ID</returns>
         internal static string SetupIntegrationTestsNetwork()
         {
             var client = new DockerClientConfiguration().CreateClient();
