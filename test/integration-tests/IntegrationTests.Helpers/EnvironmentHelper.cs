@@ -114,6 +114,23 @@ namespace IntegrationTests.Helpers
             }
         }
 
+        public static string GetNukeBuildOutput()
+        {
+            string nukeOutputPath = Path.Combine(
+                EnvironmentTools.GetSolutionDirectory(),
+                "bin",
+                "tracer-home");
+
+            if (Directory.Exists(nukeOutputPath))
+            {
+                _nukeOutputLocation = nukeOutputPath;
+
+                return _nukeOutputLocation;
+            }
+
+            throw new Exception($"Unable to find Nuke output at: {nukeOutputPath}. Ensure Nuke has run first.");
+        }
+
         public static bool IsRunningOnCI()
         {
             // https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
@@ -340,7 +357,7 @@ namespace IntegrationTests.Helpers
                 return Path.Combine(
                     binDir,
                     EnvironmentTools.GetBuildConfiguration(),
-                    "publish");
+                    "app.publish");
             }
 
             return Path.Combine(
@@ -364,23 +381,6 @@ namespace IntegrationTests.Helpers
             }
 
             return $"net{_major}{_minor}{_patch ?? string.Empty}";
-        }
-
-        private static string GetNukeBuildOutput()
-        {
-            string nukeOutputPath = Path.Combine(
-                EnvironmentTools.GetSolutionDirectory(),
-                "bin",
-                "tracer-home");
-
-            if (Directory.Exists(nukeOutputPath))
-            {
-                _nukeOutputLocation = nukeOutputPath;
-
-                return _nukeOutputLocation;
-            }
-
-            throw new Exception($"Unable to find Nuke output at: {nukeOutputPath}. Ensure Nuke has run first.");
         }
 
         private static string GetStartupHookOutputPath()

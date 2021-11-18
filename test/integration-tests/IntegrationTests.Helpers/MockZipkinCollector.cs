@@ -34,8 +34,7 @@ namespace IntegrationTests.Helpers
                 try
                 {
                     listener.Start();
-                    listener.Prefixes.Add($"http://127.0.0.1:{port}/");
-                    listener.Prefixes.Add($"http://localhost:{port}/");
+                    listener.Prefixes.Add($"http://*:{port}/"); // Warning: Requires admin access
 
                     // successfully listening
                     Port = port;
@@ -179,6 +178,13 @@ namespace IntegrationTests.Helpers
                     var ctx = _listener.GetContext();
                     OnRequestReceived(ctx);
 
+                    if (ctx.Request.RawUrl.Equals("/health-check", StringComparison.OrdinalIgnoreCase))
+                    {
+                        CreateHealthResponse(ctx);
+
+                        continue;
+                    }
+
                     if (ShouldDeserializeTraces)
                     {
                         using (var reader = new StreamReader(ctx.Request.InputStream))
@@ -235,6 +241,16 @@ namespace IntegrationTests.Helpers
             const string name = nameof(MockZipkinCollector);
 
             _output.WriteLine($"[{name}]: {msg}");
+        }
+
+        private void CreateHealthResponse(HttpListenerContext ctx)
+        {
+            ctx.Response.ContentType = "text/plain";
+            var buffer = Encoding.UTF8.GetBytes("OK");
+            ctx.Response.ContentLength64 = buffer.LongLength;
+            ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
+            ctx.Response.StatusCode = (int)HttpStatusCode.OK;
+            ctx.Response.Close();
         }
     }
 }
