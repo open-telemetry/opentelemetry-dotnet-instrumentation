@@ -16,6 +16,7 @@ namespace IntegrationTests.MongoDB
     public class MongoDbFixture : IDisposable
     {
         private const int MongoDbPort = 27017;
+        private const string MongoDbImage = "mongo:5.0.4";
 
         private TestcontainersContainer _container;
 
@@ -47,12 +48,12 @@ namespace IntegrationTests.MongoDB
         {
             if (EnvironmentHelper.IsRunningOnCI())
             {
-                if (EnvironmentTools.IsWindows() ||
-                    EnvironmentTools.IsMacOS())
+                if (EnvironmentTools.IsMacOS())
                 {
                     return false;
                 }
-                else if (EnvironmentTools.IsLinux())
+                else if (EnvironmentTools.IsWindows() ||
+                         EnvironmentTools.IsLinux())
                 {
                     return true;
                 }
@@ -68,7 +69,7 @@ namespace IntegrationTests.MongoDB
                 : Wait.ForUnixContainer();
 
             var mongoContainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
-              .WithImage("mongo")
+              .WithImage(MongoDbImage)
               .WithName($"mongo-db-{port}")
               .WithPortBinding(port, MongoDbPort)
               .WithWaitStrategy(waitOS.UntilPortIsAvailable(MongoDbPort));
