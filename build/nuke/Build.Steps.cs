@@ -76,7 +76,7 @@ partial class Build
             else
             {
                 DotNetRestore(s => s
-                    .SetProjectFile(Solution)
+                    .SetProjectFile(MsBuildProject)
                     .SetVerbosity(DotNetVerbosity.Normal)
                     // .SetTargetPlatform(Platform) // necessary to ensure we restore every project
                     .SetProperty("configuration", BuildConfiguration.ToString())
@@ -106,6 +106,7 @@ partial class Build
         .Unlisted()
         .Description("Compiles the managed code in the test directory")
         .After(CompileManagedSrc)
+        .Triggers(CompileManagedTestsWindows)
         .Executes(() =>
         {
             // Always AnyCPU
@@ -212,11 +213,10 @@ partial class Build
         .After(BuildTracer)
         .After(CompileManagedTests)
         .After(PublishMocks)
-        .Executes(() =>
-        {
-            RunUnitTests();
-            RunIntegrationTests();
-        });
+        .Triggers(RunManagedUnitTests)
+        .Triggers(RunManagedIntegrationTests)
+        .Triggers(RunManagedTestsWindows)
+        .Executes(() => { });
 
     Target PublishMocks => _ => _
         .Unlisted()
@@ -251,26 +251,50 @@ partial class Build
             );
         });
 
-    private AbsolutePath GetResultsDirectory(Project proj) => BuildDataDirectory / "results" / proj.Name;
-
-    private void RunUnitTests()
-    {
-        RunBootstrappingTests();
-
-        var unitTestProjects = new[]
+    Target RunManagedUnitTests => _ => _
+        .Unlisted()
+        .Executes(() =>
         {
-            Solution.GetProject(Projects.Tests.ClrProfilerManagedLoaderTests)
-        };
+            RunBootstrappingTests();
 
-        DotNetTest(config => config
-            .SetConfiguration(BuildConfiguration)
-            .SetTargetPlatformAnyCPU()
-            .EnableNoRestore()
-            .EnableNoBuild()
-            .CombineWith(unitTestProjects, (s, project) => s
-                .EnableTrxLogOutput(GetResultsDirectory(project))
-                .SetProjectFile(project)), degreeOfParallelism: 4);
-    }
+            var unitTestProjects = new[]
+            {
+                Solution.GetProject(Projects.Tests.ClrProfilerManagedLoaderTests)
+            };
+
+            DotNetTest(config => config
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatformAnyCPU()
+                .EnableNoRestore()
+                .EnableNoBuild()
+                .CombineWith(unitTestProjects, (s, project) => s
+                    .EnableTrxLogOutput(GetResultsDirectory(project))
+                    .SetProjectFile(project)), degreeOfParallelism: 4);
+        });
+
+    Target RunManagedIntegrationTests => _ => _
+        .Unlisted()
+        .Executes(() =>
+        {
+            Project[] integrationTests = Solution.GetCrossPlatformIntegrationTests();
+
+            string filter = IsWin ? null : "WindowsOnly!=true";
+
+            DotNetTest(config => config
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatform(Platform)
+                .EnableNoRestore()
+                .EnableNoBuild()
+                .SetFilter(filter)
+                .CombineWith(TestFrameworks.ExceptNetFramework(), (s, fx) => s
+                    .SetFramework(fx)
+                )
+                .CombineWith(integrationTests, (s, project) => s
+                    .EnableTrxLogOutput(GetResultsDirectory(project))
+                    .SetProjectFile(project)), degreeOfParallelism: 4);
+        });
+
+    private AbsolutePath GetResultsDirectory(Project proj) => BuildDataDirectory / "results" / proj.Name;
 
     /// <summary>
     /// Bootstrapping tests require every single test to be run in a separate process
@@ -300,24 +324,5 @@ partial class Build
                 .SetFilter(testName)
                 .SetProcessEnvironmentVariable("BOOSTRAPPING_TESTS", "true"));
         }
-    }
-
-    private void RunIntegrationTests()
-    {
-        Project[] integrationTests = Solution
-            .GetProjects("IntegrationTests.*")
-            .ToArray();
-
-        DotNetTest(config => config
-            .SetConfiguration(BuildConfiguration)
-            .SetTargetPlatform(Platform)
-            .EnableNoRestore()
-            .EnableNoBuild()
-            .CombineWith(TestFrameworks.ExceptNetFramework(), (s, fx) => s
-                .SetFramework(fx)
-            )
-            .CombineWith(integrationTests, (s, project) => s
-                .EnableTrxLogOutput(GetResultsDirectory(project))
-                .SetProjectFile(project)), degreeOfParallelism: 4);
     }
 }

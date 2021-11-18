@@ -18,12 +18,11 @@
     <PackageReference Include="OpenTelemetry.Shims.OpenTracing" Version="1.0.0-rc8" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0-rc.2.21480.5" />
   </ItemGroup>
-  
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web" />
   </ItemGroup>
-
 
   <ItemGroup>
     <ProjectReference Include="..\OpenTelemetry.ClrProfiler.Managed.Core\OpenTelemetry.ClrProfiler.Managed.Core.csproj" />
