@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <WindowsOnly>true</WindowsOnly>
+  </PropertyGroup>
+</Project>

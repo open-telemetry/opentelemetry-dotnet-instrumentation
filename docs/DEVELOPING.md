@@ -103,7 +103,7 @@ The following Web UI endpoints are exposed:
 Example usage:
 
 ```sh
-./dev/instrument.sh dotnet run -f netcoreapp3.1 -p ./samples/ConsoleApp/ConsoleApp.csproj
+./dev/instrument.sh dotnet run -f netcoreapp3.1 --project ./samples/ConsoleApp/ConsoleApp.csproj
 ```
 
  [`dev/envvars.sh`](../dev/envvars.sh) can be used to export profiler environmental variables to your current shell session.

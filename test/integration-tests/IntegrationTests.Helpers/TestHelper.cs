@@ -1,6 +1,11 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using DotNet.Testcontainers.Containers.Builders;
+using DotNet.Testcontainers.Containers.Modules;
+using DotNet.Testcontainers.Containers.OutputConsumers;
+using DotNet.Testcontainers.Containers.WaitStrategies;
 using IntegrationTests.Helpers.Models;
 using Xunit.Abstractions;
 
@@ -31,6 +36,56 @@ namespace IntegrationTests.Helpers
         protected EnvironmentHelper EnvironmentHelper { get; }
 
         protected ITestOutputHelper Output { get; }
+
+        public Container StartContainer(int traceAgentPort, int webPort)
+        {
+            // get path to sample app that the profiler will attach to
+            string sampleName = $"samples-{EnvironmentHelper.SampleName.ToLowerInvariant()}";
+
+            var waitOS = EnvironmentTools.IsWindows()
+                ? Wait.ForWindowsContainer()
+                : Wait.ForUnixContainer();
+
+            string agentBaseUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{traceAgentPort}";
+            string healthCheckEndpoint = $"{agentBaseUrl}/health-check";
+            string zipkinEndpoint = $"{agentBaseUrl}/api/v2/spans";
+            string networkName = DockerNetworkHelper.IntegrationTestsNetworkName;
+            string networkId = DockerNetworkHelper.SetupIntegrationTestsNetwork();
+
+            Output.WriteLine($"Zipkin Endpoint: {zipkinEndpoint}");
+
+            string logPath = EnvironmentHelper.IsRunningOnCI()
+                ? Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "build_data", "profiler-logs")
+                : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OpenTelemetry .NET AutoInstrumentation", "logs");
+
+            Directory.CreateDirectory(logPath);
+
+            Output.WriteLine("Collecting docker logs to: " + logPath);
+
+            var builder = new TestcontainersBuilder<TestcontainersContainer>()
+                  .WithImage(sampleName)
+                  .WithCleanUp(cleanUp: true)
+                  .WithOutputConsumer(Consume.RedirectStdoutAndStderrToConsole())
+                  .WithName($"{sampleName}-{traceAgentPort}-{webPort}")
+                  .WithNetwork(networkId, networkName)
+                  .WithPortBinding(webPort, 80)
+                  .WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", zipkinEndpoint)
+                  .WithMount(logPath, "c:/inetpub/wwwroot/logs")
+                  .WithMount(EnvironmentHelper.GetNukeBuildOutput(), "c:/opentelemetry")
+                  .WithWaitStrategy(waitOS.UntilPortIsAvailable(80));
+
+            var container = builder.Build();
+            var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
+
+            Output.WriteLine($"Container was started successfully: {wasStarted}");
+
+            if (wasStarted)
+            {
+                PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {healthCheckEndpoint}", Output);
+            }
+
+            return new Container(container);
+        }
 
         public Process StartSample(int traceAgentPort, string arguments, string packageVersion, int aspNetCorePort, string framework = "", bool startupHook = false)
         {
@@ -80,31 +135,19 @@ namespace IntegrationTests.Helpers
                 process.Kill();
             }
 
-            helper.Drain();
             var exitCode = process.ExitCode;
 
             Output.WriteLine($"ProcessName: " + name);
             Output.WriteLine($"ProcessId: " + process.Id);
             Output.WriteLine($"Exit Code: " + exitCode);
-
-            string standardOutput = helper.StandardOutput;
-            if (!string.IsNullOrWhiteSpace(standardOutput))
-            {
-                Output.WriteLine($"StandardOutput:{Environment.NewLine}{standardOutput}");
-            }
-
-            string standardError = helper.ErrorOutput;
-            if (!string.IsNullOrWhiteSpace(standardError))
-            {
-                Output.WriteLine($"StandardError:{Environment.NewLine}{standardError}");
-            }
+            Output.WriteResult(helper);
 
             if (processTimeout)
             {
                 throw new TimeoutException($"{name} ({process.Id}) did not exit within {DefaultProcessTimeout.TotalSeconds} sec");
             }
 
-            return new ProcessResult(process, standardOutput, standardError, exitCode);
+            return new ProcessResult(process, helper.StandardOutput, helper.ErrorOutput, exitCode);
         }
 
         protected void EnableDebugMode()
