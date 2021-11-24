@@ -22,7 +22,7 @@ except for versions lower than `.NET Framework 4.6.1`.
 ### Supported OSes
 
 OpenTelemetry .NET Auto-Instrumentation should work on all operating systems
-that given .NET version support.
+that given .NET version supports.
 
 ## Usage
 
