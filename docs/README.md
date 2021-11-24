@@ -21,8 +21,8 @@ except for versions lower than `.NET Framework 4.6.1`.
 
 ### Supported OSes
 
-OpenTelemetry .NET Auto-Instrumentation is tested against Windows and Ubuntu.
-MacOS is not supported.
+OpenTelemetry .NET Auto-Instrumentation should work on all operating systems
+that given .NET version support.
 
 ## Usage
 
