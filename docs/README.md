@@ -27,6 +27,8 @@ The following operating systems are currently supported:
 - MacOS,
 - Ubuntu.
 
+However, it should be possible to build and use it on all Linux OSes that are supported by .NET.
+
 ## Usage
 
 See [DEVELOPING.md](DEVELOPING.md) for build and running instructions.
