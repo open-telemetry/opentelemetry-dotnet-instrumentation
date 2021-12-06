@@ -69,16 +69,10 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
             switch (settings.Exporter)
             {
                 case "zipkin":
-                    builder.AddZipkinExporter(options =>
-                    {
-                        options.ExportProcessorType = ExportProcessorType.Simple; // for PoC
-                    });
+                    builder.AddZipkinExporter();
                     break;
                 case "jaeger":
-                    builder.AddJaegerExporter(options =>
-                    {
-                        options.ExportProcessorType = ExportProcessorType.Simple; // for PoC
-                    });
+                    builder.AddJaegerExporter();
                     break;
                 case "otlp":
 #if NETCOREAPP3_1

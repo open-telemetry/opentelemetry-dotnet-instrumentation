@@ -8,14 +8,25 @@
 
 | Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_SERVICE` | Application's default service name. |  |
-| `OTEL_ENV` | The value for the `environment` tag added to every span. |  |
-| `OTEL_VERSION` | The application's version that will populate `version` tag on spans. |  |
-| `OTEL_TAGS` | Comma-separated list of key-value pairs to specify global span tags. For example: `"key1:val1,key2:val2"` |  |
 | `OTEL_TRACE_ENABLED` | Enable to activate the tracer. | `true` |
 | `OTEL_DOTNET_TRACER_FORCE` | Enable the tracer even if no integrations is set using `OTEL_INTEGRATIONS`. | `true` |
 | `OTEL_PROFILER_PROCESSES` | Sets the filename of executables the profiler can attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
 | `OTEL_PROFILER_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
+
+## Resource
+
+Resource is the immutable representation of the entity producing the telemetry.
+See [Resource semantic conventions](https://github.com/open-telemetry/opentelemetry-specification/tree/main/specification/resource/semantic_conventions)
+for more details.
+
+| Environment variable | Description | Default |
+|-|-|-|
+| `OTEL_RESOURCE_ATTRIBUTES` | Key-value pairs to be used as resource attributes. See [Resource SDK](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/sdk.md#specifying-resource-information-via-an-environment-variable) for more details. | See [Resource semantic conventions](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#semantic-attributes-with-sdk-provided-default-value) for details. |
+| `OTEL_SERVICE_NAME` | Sets the value of the [`service.name`](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#service) resource attribute | | If `service.name` is also provided in `OTEL_RESOURCE_ATTRIBUTES`, then `OTEL_SERVICE_NAME` takes precedence. |
+| `OTEL_SERVICE` | Application's default service name. **Deprected.** |  |
+| `OTEL_ENV` | The value for the `environment` tag added to every span. **Deprected.**  |  |
+| `OTEL_VERSION` | The application's version that will populate `version` tag on spans. **Deprected.** |  |
+| `OTEL_TAGS` | Comma-separated list of key-value pairs to specify global span tags. For example: `"key1:val1,key2:val2"`. **Deprected.** |  |
 
 ## Instrumentations
 
@@ -30,7 +41,6 @@
 
 | Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_EXPORTER` | The exporter to be used. The Tracer uses it to encode and dispatch traces. Available values are: `zipkin`, `jeager`, `otlp`. | |
 | `OTEL_TRACE_LOG_DIRECTORY` | The directory of the .NET Tracer logs. Overrides the value in `OTEL_TRACE_LOG_PATH` if present. | _see below_ |
 | `OTEL_TRACE_LOG_PATH` | The path of the profiler log file. | _see below_ |
 | `OTEL_TRACE_DEBUG` | Enable to activate debugging mode for the tracer. | `false` |
@@ -43,11 +53,29 @@ Default logs directory paths are:
 
 ### Exporters
 
+The exporter is used to output the telemetry.
+
 | Environment variable | Description | Default |
 |-|-|-|
+| `OTEL_EXPORTER` | The exporter to be used. The Tracer uses it to encode and dispatch traces. Available values are: `zipkin`, `jeager`, `otlp`. | |
 | `OTEL_EXPORTER_JAEGER_AGENT_HOST` | Hostname for the Jaeger agent. | `localhost` |
 | `OTEL_EXPORTER_JAEGER_AGENT_PORT` | Port for the Jaeger agent. | `6831` |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Target endpoint for OTLP exporter. More details [here](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md). | `http://localhost:4318` |
+| `OTEL_EXPORTER_OTLP_HEADERS` | Key-value pairs to be used as headers associated with gRPC or HTTP requests. More details [here](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md). | |
+| `OTEL_EXPORTER_OTLP_TIMEOUT` | Maximum time the OTLP exporter will wait for each batch export. | `1000` (ms) |
+| `OTEL_EXPORTER_OTLP_PROTOCOL` | The transport protocol. Supported values: `grpc`, `http/protobuf`. | `grpc` |
 | `OTEL_EXPORTER_ZIPKIN_ENDPOINT` | Zipkin URL. | `http://localhost:8126` |
+
+### Batch Span Processor
+
+The Batch Span Processor batches of finished spans before they are send by the exporter.
+
+| Environment variable | Description | Default |
+|-|-|-|
+| `OTEL_BSP_SCHEDULE_DELAY` | Delay interval between two consecutive exports. | `5000` (ms) |
+| `OTEL_BSP_EXPORT_TIMEOUT` | Maximum allowed time to export data. | `30000` (ms) |
+| `OTEL_BSP_MAX_QUEUE_SIZE` | Maximum queue size. | `2048` |
+| `OTEL_BSP_MAX_EXPORT_BATCH_SIZE` | Maximum batch size. Must be less than or equal to `OTEL_BSP_MAX_QUEUE_SIZE`. | `512` (ms) |
 
 ### Customization
 
