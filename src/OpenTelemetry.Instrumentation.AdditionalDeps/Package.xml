@@ -5,11 +5,6 @@
 
   <ItemGroup>
     <PackageReference Condition="'$(TracerHomePath)' != ''" Include="OpenTelemetry.Instrumentation.AdditionalDeps" Version="*" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <Target Name="_ResolveTargetingPackAssetsForStore"

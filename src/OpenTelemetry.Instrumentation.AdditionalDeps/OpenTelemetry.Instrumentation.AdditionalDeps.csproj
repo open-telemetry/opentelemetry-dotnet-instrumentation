@@ -4,10 +4,6 @@
     <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
-  </ItemGroup>
-
   <Target Name="CallComposeStore" AfterTargets="Publish">
     <PropertyGroup>
       <AdditionalDepsPath>$(OutputDir)\AdditionalDeps</AdditionalDepsPath>
@@ -18,11 +14,11 @@
 
     <ItemGroup>
       <StoreRuntime Include="x86">
-        <PlatformTargetForStore>x86</PlatformTargetForStore>
+        <Platform>x86</Platform>
         <StorePath>$(StoreOutputBasePath)</StorePath>
       </StoreRuntime>
       <StoreRuntime Include="x64">
-        <PlatformTargetForStore>x64</PlatformTargetForStore>
+        <Platform>x64</Platform>
         <StorePath>$(StoreOutputBasePath)</StorePath>
       </StoreRuntime>
     </ItemGroup>
@@ -31,7 +27,7 @@
     
     <ItemGroup>
       <ProjectsToBuild Include="Package.xml">
-        <Properties>TargetFramework=$(TargetFramework);PlatformTarget=%(StoreRuntime.PlatformTargetForStore);RuntimeIdentifier=%(StoreRuntime.Identity);SkipOptimization=true;ComposeDir=%(StoreRuntime.StorePath);CreateProfilingSymbols=false;Version=$(SemanticVersion4parts);NuGetPackageRootOriginal=$(NuGetPackageRoot);Environment=$(Environment)</Properties>
+        <Properties>TargetFramework=$(TargetFramework);PlatformTarget=%(StoreRuntime.Platform);RuntimeIdentifier=%(StoreRuntime.Identity);SkipOptimization=true;ComposeDir=%(StoreRuntime.StorePath);CreateProfilingSymbols=false;Version=$(SemanticVersion4parts);NuGetPackageRootOriginal=$(NuGetPackageRoot);Environment=$(Environment)</Properties>
       </ProjectsToBuild>
     </ItemGroup>
     <MSBuild Projects="@(ProjectsToBuild)" Targets="ComposeStore" />

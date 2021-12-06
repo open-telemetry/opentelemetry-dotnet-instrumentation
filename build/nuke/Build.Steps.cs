@@ -30,7 +30,7 @@ partial class Build
     AbsolutePath ArtifactsDirectory => Artifacts ?? (OutputDirectory / "artifacts");
     AbsolutePath BuildDataDirectory => RootDirectory / "build_data";
     AbsolutePath ProfilerTestLogs => BuildDataDirectory / "profiler-logs";
-    AbsolutePath AdditionalDepsDirectory => TracerHomeDirectory / TargetFramework.NETCOREAPP3_1 / "AdditionalDeps";
+    AbsolutePath AdditionalDepsDirectory => TracerHomeDirectory / "AdditionalDeps";
 
     Project NativeProfilerProject => Solution.GetProject(Projects.ClrProfilerNative);
 
@@ -305,6 +305,8 @@ partial class Build
         .After(CompileManagedSrc)
         .Executes(() =>
         {
+            AdditionalDepsDirectory.GlobFiles("**/*deps.json").ForEach(DeleteFile);
+
             DotNetPack(s => s
                 .SetProject(Solution.GetProject(Projects.AdditionalDeps))
                 .SetConfiguration(BuildConfiguration)
@@ -316,12 +318,15 @@ partial class Build
                 .SetProject(Solution.GetProject(Projects.AdditionalDeps))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
-                .SetProperty("TracerHomePath", (TracerHomeDirectory / TargetFramework.NETCOREAPP3_1).ToString())
+                .SetProperty("TracerHomePath", TracerHomeDirectory)
                 .EnableNoBuild()
                 .EnableNoRestore()
                 .CombineWith(TestFrameworks.ExceptNetFramework(), (p, framework) => p
                     .SetFramework(framework)
-                    .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString()[^3..] + ".0")));
+                    // Additional-deps probes the directory using SemVer format.
+                    // Example: For netcoreapp3.1 framework, additional-deps uses 3.1.0 or 3.1.1 and so on.
+                    // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
+                    .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
 
             AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml", "**/*.nupkg").ForEach(DeleteFile);
             AdditionalDepsDirectory.GlobFiles("**/*deps.json")
