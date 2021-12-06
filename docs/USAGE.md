@@ -4,7 +4,7 @@
 
 ## Configuration
 
-## General
+### General
 
 | Environment variable | Description | Default |
 |-|-|-|
@@ -13,7 +13,7 @@
 | `OTEL_PROFILER_PROCESSES` | Sets the filename of executables the profiler can attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
 | `OTEL_PROFILER_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
 
-## Resource
+### Resource
 
 Resource is the immutable representation of the entity producing the telemetry.
 See [Resource semantic conventions](https://github.com/open-telemetry/opentelemetry-specification/tree/main/specification/resource/semantic_conventions)
@@ -28,7 +28,7 @@ for more details.
 | `OTEL_VERSION` | The application's version that will populate `version` tag on spans. **Deprected.** |  |
 | `OTEL_TAGS` | Comma-separated list of key-value pairs to specify global span tags. For example: `"key1:val1,key2:val2"`. **Deprected.** |  |
 
-## Instrumentations
+### Instrumentations
 
 | Environment variable | Description | Default |
 |-|-|-|
@@ -39,17 +39,17 @@ for more details.
 
 ### Logging
 
-| Environment variable | Description | Default |
-|-|-|-|
-| `OTEL_TRACE_LOG_DIRECTORY` | The directory of the .NET Tracer logs. Overrides the value in `OTEL_TRACE_LOG_PATH` if present. | _see below_ |
-| `OTEL_TRACE_LOG_PATH` | The path of the profiler log file. | _see below_ |
-| `OTEL_TRACE_DEBUG` | Enable to activate debugging mode for the tracer. | `false` |
-| `OTEL_DOTNET_TRACER_CONSOLE_EXPORTER_ENABLED` | Defines whether the console exporter is enabled or not. | `true` |
-
 Default logs directory paths are:
 
 - Windows: `%ProgramData%\OpenTelemetry .NET AutoInstrumentation\logs`
 - Linux: `/var/log/opentelemetry/dotnet`
+
+| Environment variable | Description | Default |
+|-|-|-|
+| `OTEL_TRACE_LOG_DIRECTORY` | The directory of the .NET Tracer logs. Overrides the value in `OTEL_TRACE_LOG_PATH` if present. | _see above_ |
+| `OTEL_TRACE_LOG_PATH` | The path of the profiler log file. | _see above_ |
+| `OTEL_TRACE_DEBUG` | Enable to activate debugging mode for the tracer. | `false` |
+| `OTEL_DOTNET_TRACER_CONSOLE_EXPORTER_ENABLED` | Defines whether the console exporter is enabled or not. | `true` |
 
 ### Exporters
 
