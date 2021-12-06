@@ -97,7 +97,7 @@ internal class StartupHook
         return GetExcludedApplicationNames().Contains(applicationName);
     }
 
-    private static IList<string> GetExcludedApplicationNames()
+    private static List<string> GetExcludedApplicationNames()
     {
         var excludedProcesses = new List<string>();
 
