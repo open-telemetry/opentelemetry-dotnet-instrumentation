@@ -12,22 +12,17 @@ For more details about the design and roadmap see [DESIGN.md](DESIGN.md).
 
 ## Compatibility
 
-### Supported .NET versions
-
 OpenTelemetry .NET Auto-Instrumentation attempts to work with all officially
-supported versions of [.NET Core](https://dotnet.microsoft.com/download/dotnet-core),
+supported operating systems and versions of
+[.NET (Core)](https://dotnet.microsoft.com/download/dotnet-core),
 and [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework)
 except for versions lower than `.NET Framework 4.6.1`.
 
-### Supported OSes
+The code is automatically tested against following operating systems:
 
-The following operating systems are currently supported:
-
-- Windows,
-- MacOS,
-- Ubuntu.
-
-However, it should be possible to build and use it on all Linux OSes that are supported by .NET.
+- Microsoft Windows Server 2019,
+- macOS Catalina 10.15,
+- Ubuntu 20.04 LTS.
 
 ## Usage
 
