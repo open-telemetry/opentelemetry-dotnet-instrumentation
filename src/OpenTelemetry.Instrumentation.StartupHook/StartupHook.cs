@@ -81,17 +81,15 @@ internal class StartupHook
 
     private static string GetApplicationName()
     {
-        var applicationName = string.Empty;
         try
         {
-            applicationName = AppDomain.CurrentDomain.FriendlyName;
+            return AppDomain.CurrentDomain.FriendlyName;
         }
         catch (Exception ex)
         {
             StartupHookEventSource.Log.Error($"Error getting AppDomain.CurrentDomain.FriendlyName: {ex}");
+            return string.Empty;
         }
-
-        return applicationName;
     }
 
     private static bool IsApplicationInExcludeList(string applicationName)
