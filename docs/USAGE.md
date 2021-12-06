@@ -23,10 +23,6 @@ for more details.
 |-|-|-|
 | `OTEL_RESOURCE_ATTRIBUTES` | Key-value pairs to be used as resource attributes. See [Resource SDK](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/sdk.md#specifying-resource-information-via-an-environment-variable) for more details. | See [Resource semantic conventions](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#semantic-attributes-with-sdk-provided-default-value) for details. |
 | `OTEL_SERVICE_NAME` | Sets the value of the [`service.name`](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#service) resource attribute | | If `service.name` is also provided in `OTEL_RESOURCE_ATTRIBUTES`, then `OTEL_SERVICE_NAME` takes precedence. |
-| `OTEL_SERVICE` | Application's default service name. **Deprected.** |  |
-| `OTEL_ENV` | The value for the `environment` tag added to every span. **Deprected.**  |  |
-| `OTEL_VERSION` | The application's version that will populate `version` tag on spans. **Deprected.** |  |
-| `OTEL_TAGS` | Comma-separated list of key-value pairs to specify global span tags. For example: `"key1:val1,key2:val2"`. **Deprected.** |  |
 
 ### Instrumentations
 
