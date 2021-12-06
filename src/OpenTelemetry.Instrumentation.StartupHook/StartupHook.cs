@@ -101,7 +101,7 @@ internal class StartupHook
     {
         var excludedProcesses = new List<string>();
 
-        var environmentValue = Environment.GetEnvironmentVariable("OTEL_PROFILER_EXCLUDE_PROCESSES");
+        var environmentValue = GetEnvironmentVariable("OTEL_PROFILER_EXCLUDE_PROCESSES");
 
         if (environmentValue == null)
         {
@@ -117,5 +117,18 @@ internal class StartupHook
         }
 
         return excludedProcesses;
+    }
+
+    private static string GetEnvironmentVariable(string variableName)
+    {
+        try
+        {
+            return Environment.GetEnvironmentVariable(variableName);
+        }
+        catch (Exception ex)
+        {
+            StartupHookEventSource.Log.Error($"Error getting environment variable {variableName}: {ex}");
+            return null;
+        }
     }
 }
