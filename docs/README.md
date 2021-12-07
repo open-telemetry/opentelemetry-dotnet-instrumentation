@@ -49,6 +49,8 @@ Approvers ([@open-telemetry/dotnet-instrumentation-approvers](https://github.com
 - [Kevin Gosse](https://github.com/kevingosse), Datadog
 - [Lucas Pimentel-Ordyna](https://github.com/lucaspimentel), Datadog
 - [Mike Goldsmith](https://github.com/MikeGoldsmith), HoneyComb
+- [Rajkumar Rangaraj](https://github.com/rajkumar-rangaraj), Microsoft
+- [Rasmus Kuusmann](https://github.com/RassK), Splunk
 - [Robert Pajak](https://github.com/pellared), Splunk
 - [Tony Redondo](https://github.com/tonyredondo), Datadog
 
