@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <Target Name="CallComposeStore" AfterTargets="Publish">
+    <PropertyGroup>
+      <AdditionalDepsPath>$(OutputDir)\AdditionalDeps</AdditionalDepsPath>
+      <StoreOutputBasePath>$(OutputDir)\store\</StoreOutputBasePath>
+      <AdditionalDepsPath Condition="'$(TracerHomePath)' != ''">$(TracerHomePath)\AdditionalDeps</AdditionalDepsPath>
+      <StoreOutputBasePath Condition="'$(TracerHomePath)' != ''">$(TracerHomePath)\store</StoreOutputBasePath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <StoreRuntime Include="x86">
+        <Platform>x86</Platform>
+        <StorePath>$(StoreOutputBasePath)</StorePath>
+      </StoreRuntime>
+      <StoreRuntime Include="x64">
+        <Platform>x64</Platform>
+        <StorePath>$(StoreOutputBasePath)</StorePath>
+      </StoreRuntime>
+    </ItemGroup>
+    
+    <Message Text="Calling ComposeStore for TargetFramework='$(TargetFramework)'" Importance="high" />
+    
+    <ItemGroup>
+      <ProjectsToBuild Include="Package.xml">
+        <Properties>TargetFramework=$(TargetFramework);PlatformTarget=%(StoreRuntime.Platform);RuntimeIdentifier=%(StoreRuntime.Identity);SkipOptimization=true;ComposeDir=%(StoreRuntime.StorePath);CreateProfilingSymbols=false;Version=$(SemanticVersion4parts);NuGetPackageRootOriginal=$(NuGetPackageRoot);Environment=$(Environment)</Properties>
+      </ProjectsToBuild>
+    </ItemGroup>
+    <MSBuild Projects="@(ProjectsToBuild)" Targets="ComposeStore" />
+  </Target>
+
+</Project>
