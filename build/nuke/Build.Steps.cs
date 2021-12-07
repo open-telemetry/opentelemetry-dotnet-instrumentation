@@ -30,7 +30,7 @@ partial class Build
     AbsolutePath ArtifactsDirectory => Artifacts ?? (OutputDirectory / "artifacts");
     AbsolutePath BuildDataDirectory => RootDirectory / "build_data";
     AbsolutePath ProfilerTestLogs => BuildDataDirectory / "profiler-logs";
-    AbsolutePath AdditionalDepsDirectory => TracerHomeDirectory / "AdditionalDeps";
+    AbsolutePath AdditionalDepsDirectory => TracerHomeDirectory / "additionalDeps";
 
     Project NativeProfilerProject => Solution.GetProject(Projects.ClrProfilerNative);
 
