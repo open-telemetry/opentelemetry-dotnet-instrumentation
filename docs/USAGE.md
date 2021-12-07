@@ -26,6 +26,13 @@
 | `OTEL_DOTNET_TRACER_DISABLED_INSTRUMENTATIONS` | The instrumentations set via `OTEL_DOTNET_TRACER_INSTRUMENTATIONS` value and `OTEL_INTEGRATIONS` configuration file you want to disable, separated by a comma. | |
 | `OTEL_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION` |  Sets whether to intercept method calls when the caller method is inside a domain-neutral assembly. This is recommended when instrumenting IIS applications. | `false` |
 
+### ASP.NET (.NET Framework) Instrumentation
+
+ASP.NET instrumentation on .NET Framework requires installing the
+[`OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule/)
+NuGet package on the instrumented project.
+More info [here](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.AspNet#step-2-modify-webconfig).
+
 ### Logging
 
 | Environment variable | Description | Default |
