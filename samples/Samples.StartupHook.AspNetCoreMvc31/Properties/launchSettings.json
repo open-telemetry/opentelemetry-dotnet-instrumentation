@@ -16,7 +16,7 @@
 
         "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.Instrumentation.StartupHook.dll",
 
-        "DOTNET_ADDITIONAL_DEPS": "$(SolutionDir)bin\\tracer-home\\additionalDeps",
+        "DOTNET_ADDITIONAL_DEPS": "$(SolutionDir)bin\\tracer-home\\AdditionalDeps",
         "DOTNET_SHARED_STORE": "$(SolutionDir)bin\\tracer-home\\store",
 
         "OTEL_VERSION": "1.0.0",
@@ -37,7 +37,7 @@
 
         "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.Instrumentation.StartupHook.dll",
 
-        "DOTNET_ADDITIONAL_DEPS": "$(SolutionDir)bin\\tracer-home\\additionalDeps",
+        "DOTNET_ADDITIONAL_DEPS": "$(SolutionDir)bin\\tracer-home\\AdditionalDeps",
         "DOTNET_SHARED_STORE": "$(SolutionDir)bin\\tracer-home\\store",
 
         "OTEL_VERSION": "1.0.0",
