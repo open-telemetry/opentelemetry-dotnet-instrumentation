@@ -28,22 +28,10 @@
 
 ### ASP.NET (.NET Framework) Instrumentation
 
-ASP.NET instrumentation on .NET Framework requires adding an additional HttpModule
-to your web server. This additional HttpModule is shipped as part of
-[`OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule/).
-The following shows changes required to your `Web.config` when using IIS web server.
-
-```xml
-<system.webServer>
-    <modules>
-        <add
-            name="TelemetryHttpModule"
-            type="OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule,
-                OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"
-            preCondition="integratedMode,managedHandler" />
-    </modules>
-</system.webServer>
-```
+ASP.NET instrumentation on .NET Framework requires installing the
+[`OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule/)
+NuGet package on the instrumented project.
+More info [here](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.AspNet#step-2-modify-webconfig).
 
 ### Logging
 
