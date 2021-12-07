@@ -4,17 +4,31 @@
 
 This project provides a .NET tracer that leverages the .NET profiling APIs to support .NET instrumentation and auto-instrumentation without requiring code changes to an application.
 
-## Usage
-
-See [DEVELOPING.md](DEVELOPING.md) for build and running instructions.
-
-See [USAGE.md](USAGE.md) for configuration instructions.
-
 ## Status
 
 This project is in the early stages of development starting with an initial seeding of code from the [.NET Tracer for Datadog APM](https://github.com/DataDog/dd-trace-dotnet). There is a [project board](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/projects/1) showing the current work in progress and the backlog.
 
 For more details about the design and roadmap see [DESIGN.md](DESIGN.md).
+
+## Compatibility
+
+OpenTelemetry .NET Auto-Instrumentation attempts to work with all officially
+supported operating systems and versions of
+[.NET (Core)](https://dotnet.microsoft.com/download/dotnet),
+and [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework)
+except for versions lower than `.NET Framework 4.6.1`.
+
+The code is automatically tested against following operating systems:
+
+- Microsoft Windows Server 2019,
+- macOS Catalina 10.15,
+- Ubuntu 20.04 LTS.
+
+## Usage
+
+See [DEVELOPING.md](DEVELOPING.md) for build and running instructions.
+
+See [USAGE.md](USAGE.md) for configuration instructions.
 
 ## Contributing
 
@@ -35,6 +49,8 @@ Approvers ([@open-telemetry/dotnet-instrumentation-approvers](https://github.com
 - [Kevin Gosse](https://github.com/kevingosse), Datadog
 - [Lucas Pimentel-Ordyna](https://github.com/lucaspimentel), Datadog
 - [Mike Goldsmith](https://github.com/MikeGoldsmith), HoneyComb
+- [Rajkumar Rangaraj](https://github.com/rajkumar-rangaraj), Microsoft
+- [Rasmus Kuusmann](https://github.com/RassK), Splunk
 - [Robert Pajak](https://github.com/pellared), Splunk
 - [Tony Redondo](https://github.com/tonyredondo), Datadog
 
