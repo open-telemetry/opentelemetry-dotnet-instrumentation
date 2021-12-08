@@ -25,6 +25,30 @@ namespace IntegrationTests.StartupHook
         [Trait("Category", "EndToEnd")]
         public void SubmitsTraces()
         {
+            RunTestAndValidateResults(2);
+        }
+
+        [Theory]
+        [Trait("Category", "EndToEnd")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ApplicationIsExcluded(bool excludeApplication)
+        {
+            string applicationNameToExclude = string.Empty;
+            int expectedSpanCount = 2;
+            if (excludeApplication)
+            {
+                applicationNameToExclude = EnvironmentHelper.FullSampleName;
+                expectedSpanCount = 0;
+            }
+
+            SetEnvironmentVariable("OTEL_PROFILER_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,{applicationNameToExclude}");
+
+            RunTestAndValidateResults(expectedSpanCount);
+        }
+
+        private void RunTestAndValidateResults(int expectedSpanCount)
+        {
             int agentPort = TcpPortProvider.GetOpenPort();
 
             using (var agent = new MockZipkinCollector(Output, agentPort))
@@ -33,11 +57,14 @@ namespace IntegrationTests.StartupHook
                 Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
                 var span = agent.WaitForSpans(2, 500);
 
-                Assert.True(span.Count() == 2, $"Expecting 2 spans, received {span.Count()}");
-                Assert.Single(span.Select(s => s.Service).Distinct());
+                Assert.True(span.Count() == expectedSpanCount, $"Expecting {expectedSpanCount} spans, received {span.Count()}");
+                if (expectedSpanCount > 0)
+                {
+                    Assert.Single(span.Select(s => s.Service).Distinct());
 
-                var spanList = span.ToList();
-                this.AssertExpectationsMet(_expectations, spanList);
+                    var spanList = span.ToList();
+                    AssertExpectationsMet(_expectations, spanList);
+                }
             }
         }
 
