@@ -5,6 +5,7 @@ public static class Projects
     public const string ClrProfilerManagedLoader = "OpenTelemetry.ClrProfiler.Managed.Loader";
     public const string ClrProfilerNative = "OpenTelemetry.ClrProfiler.Native";
     public const string StartupHook = "OpenTelemetry.Instrumentation.StartupHook";
+    public const string AdditionalDeps = "OpenTelemetry.Instrumentation.AdditionalDeps";
 
     public static class Tests
     {

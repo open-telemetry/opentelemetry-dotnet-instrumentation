@@ -71,13 +71,13 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                 case "zipkin":
                     builder.AddZipkinExporter(options =>
                     {
-                        options.ExportProcessorType = ExportProcessorType.Simple; // for PoC
+                        options.ExportProcessorType = ExportProcessorType.Simple; // workaround for https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/290
                     });
                     break;
                 case "jaeger":
                     builder.AddJaegerExporter(options =>
                     {
-                        options.ExportProcessorType = ExportProcessorType.Simple; // for PoC
+                        options.ExportProcessorType = ExportProcessorType.Simple; // workaround for https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/290
                     });
                     break;
                 case "otlp":
@@ -87,7 +87,10 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                     // See: https://docs.microsoft.com/aspnet/core/grpc/troubleshoot#call-insecure-grpc-services-with-net-core-client
                     AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 #endif
-                    builder.AddOtlpExporter();
+                    builder.AddOtlpExporter(options =>
+                    {
+                        options.ExportProcessorType = ExportProcessorType.Simple; // workaround for https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/290
+                    });
                     break;
                 case "":
                 case null:
