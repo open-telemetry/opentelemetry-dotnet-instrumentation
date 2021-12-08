@@ -113,13 +113,9 @@ namespace OpenTelemetry.ClrProfiler.Managed
                 return;
             }
 
-            if (_tracerProvider is not null)
-            {
-                _tracerProvider.Dispose();
-                _tracerProvider = null;
+            _tracerProvider.Dispose();
 
-                Log("OpenTelemetry tracer exit.");
-            }
+            Log("OpenTelemetry tracer exit.");
         }
 
         private static void Log(string message)
