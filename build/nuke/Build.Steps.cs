@@ -328,7 +328,8 @@ partial class Build
                                        // Remove OpenTelemetry.Instrumentation.AdditionalDeps entry from target section.
                                        depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+)AdditionalDeps.dll(.+?)},\r\n(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
                                        // Remove OpenTelemetry.Instrumentation.AdditionalDeps entry from library section and write to file.
-                                       File.WriteAllText(file, Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+?)},\r\n(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline));
+                                       depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+?)},\r\n(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                                       File.WriteAllText(file, depsJsonContent);
                                    });
         });
 
