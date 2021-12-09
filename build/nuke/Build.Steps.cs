@@ -307,13 +307,6 @@ partial class Build
         {
             AdditionalDepsDirectory.GlobFiles("**/*deps.json").ForEach(DeleteFile);
 
-            DotNetPack(s => s
-                .SetProject(Solution.GetProject(Projects.AdditionalDeps))
-                .SetConfiguration(BuildConfiguration)
-                .EnableNoBuild()
-                .EnableNoRestore()
-                .SetOutputDirectory(AdditionalDepsDirectory));
-
             DotNetPublish(s => s
                 .SetProject(Solution.GetProject(Projects.AdditionalDeps))
                 .SetConfiguration(BuildConfiguration)
@@ -328,10 +321,15 @@ partial class Build
                     // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
                     .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
 
-            AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml", "**/*.nupkg").ForEach(DeleteFile);
+            AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml").ForEach(DeleteFile);
             AdditionalDepsDirectory.GlobFiles("**/*deps.json")
-                                   .ForEach(file =>
-                                        File.WriteAllText(file, Regex.Replace(File.ReadAllText(file), $"{Projects.AdditionalDeps}.dll", $"lib/{TargetFramework.NETCOREAPP3_1}/{Projects.AdditionalDeps}.dll")));
+                                   .ForEach(file => {
+                                       string depsJsonContent = File.ReadAllText(file);
+                                       // Remove OpenTelemetry.Instrumentation.AdditionalDeps entry from target section.
+                                       depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+)AdditionalDeps.dll(.+?)},\r\n(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                                       // Remove OpenTelemetry.Instrumentation.AdditionalDeps entry from library section and write to file.
+                                       File.WriteAllText(file, Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+?)},\r\n(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline));
+                                   });
         });
 
     private AbsolutePath GetResultsDirectory(Project proj) => BuildDataDirectory / "results" / proj.Name;
