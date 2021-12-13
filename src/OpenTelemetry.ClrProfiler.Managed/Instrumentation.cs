@@ -15,6 +15,7 @@ namespace OpenTelemetry.ClrProfiler.Managed
     {
         private static readonly Process _process = Process.GetCurrentProcess();
         private static int _firstInitialization = 1;
+        private static int _isExiting = 0;
 
         private static TracerProvider _tracerProvider;
 
@@ -65,6 +66,10 @@ namespace OpenTelemetry.ClrProfiler.Managed
 
                     _tracerProvider = builder.Build();
                     Log("OpenTelemetry tracer initialized.");
+
+                    // Register to shutdown events
+                    AppDomain.CurrentDomain.ProcessExit += OnExit;
+                    AppDomain.CurrentDomain.DomainUnload += OnExit;
                 }
             }
             catch (Exception ex)
@@ -98,6 +103,19 @@ namespace OpenTelemetry.ClrProfiler.Managed
                 Log($"OpenTracingShim exception: {ex}");
                 throw;
             }
+        }
+
+        private static void OnExit(object sender, EventArgs e)
+        {
+            if (Interlocked.Exchange(ref _isExiting, value: 1) != 0)
+            {
+                // OnExit() was already called before
+                return;
+            }
+
+            _tracerProvider.Dispose();
+
+            Log("OpenTelemetry tracer exit.");
         }
 
         private static void Log(string message)
