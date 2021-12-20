@@ -41,7 +41,7 @@
       <HintPath>..\..\..\..\..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="OpenTelemetry.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7bd6737fe5b67e3c, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\..\packages\OpenTelemetry.Api.1.2.0-beta1\lib\net461\OpenTelemetry.Api.dll</HintPath>
+      <HintPath>..\..\..\..\..\packages\OpenTelemetry.Api.1.2.0-rc1\lib\net461\OpenTelemetry.Api.dll</HintPath>
     </Reference>
     <Reference Include="OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7bd6737fe5b67e3c, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\..\packages\OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule.1.0.0-rc8\lib\net461\OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule.dll</HintPath>
