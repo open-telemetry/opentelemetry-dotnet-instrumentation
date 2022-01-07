@@ -12,6 +12,7 @@ using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.MSBuild;
 using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Utilities.Collections;
+using Serilog;
 using static DotNetMSBuildTasks;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
@@ -203,7 +204,7 @@ partial class Build
             var source = RootDirectory / "integrations.json";
             var dest = TracerHomeDirectory;
 
-            Logger.Info($"Copying '{source}' to '{dest}'");
+            Log.Information($"Copying '{source}' to '{dest}'");
             CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
         });
 
