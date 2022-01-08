@@ -164,10 +164,5 @@ namespace IntegrationTests.Helpers
         {
             SetEnvironmentVariable("OTEL_VERSION", serviceVersion);
         }
-
-        protected void SetCallTargetSettings(bool enableCallTarget)
-        {
-            SetEnvironmentVariable("OTEL_TRACE_CALLTARGET_ENABLED", enableCallTarget ? "true" : "false");
-        }
     }
 }
