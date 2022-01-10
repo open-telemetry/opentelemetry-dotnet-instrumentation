@@ -86,7 +86,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     const auto exclude_process_names = GetEnvironmentValues(environment::exclude_process_names);
 
     // attach profiler only if this process's name is NOT on the list
-    if (Contains(exclude_process_names, process_name))
+    if (!exclude_process_names.empty() && Contains(exclude_process_names, process_name))
     {
         Logger::Info("OpenTelemetry TRACER DIAGNOSTICS - Profiler disabled: ", process_name, " found in ",
                      environment::exclude_process_names, ".");
@@ -129,7 +129,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     for (auto&& env_var : env_vars_to_display)
     {
         WSTRING env_var_value = GetEnvironmentValue(env_var);
-        if (Logger::IsDebugEnabled() || !env_var_value.empty())
+        if (IsDebugEnabled() || !env_var_value.empty())
         {
             Logger::Info("  ", env_var, "=", env_var_value);
         }
@@ -304,7 +304,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
 
     const auto is_instrumentation_assembly = assembly_info.name == WStr("OpenTelemetry.ClrProfiler.Managed");
 
-    if (is_instrumentation_assembly || Logger::IsDebugEnabled())
+    if (is_instrumentation_assembly)
     {
         if (Logger::IsDebugEnabled())
         {
@@ -502,7 +502,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
     std::lock_guard<std::mutex> guard(module_id_to_info_map_lock_);
 
     // double check if is_attached_ has changed to avoid possible race condition with shutdown function
-    if (!is_attached_)
+    if (!is_attached_ || rejit_handler == nullptr)
     {
         return S_OK;
     }
@@ -511,13 +511,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
     if (!module_info.IsValid())
     {
         return S_OK;
-    }
-
-    if (module_info.IsNGEN() && rejit_handler != nullptr)
-    {
-        // We check if the Module contains NGEN images and added to the
-        // rejit handler list to verify the inlines.
-        rejit_handler->AddNGenModule(module_id);
     }
 
     if (Logger::IsDebugEnabled())
@@ -529,6 +522,12 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
                       " | IsDynamic = ", module_info.IsDynamic(),
                       " | IsResource = ", module_info.IsResource(),
                       std::noboolalpha);
+    }
+
+    if (module_info.IsNGEN()) {
+        // We check if the Module contains NGEN images and added to the
+        // rejit handler list to verify the inlines.
+        rejit_handler->AddNGenModule(module_id);
     }
 
     AppDomainID app_domain_id = module_info.assembly.app_domain_id;
@@ -822,7 +821,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(FunctionID function
     }
 
     // get function info
-    const auto caller = GetFunctionInfo(module_metadata->metadata_import, function_token);
+    const auto& caller = GetFunctionInfo(module_metadata->metadata_import, function_token);
     if (!caller.IsValid())
     {
         return S_OK;
@@ -869,7 +868,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(FunctionID function
         first_jit_compilation_app_domains.insert(module_metadata->app_domain_id);
 
         hr = RunILStartupHook(module_metadata->metadata_emit, module_id, function_token);
-
         if (FAILED(hr))
         {
             Logger::Warn("JITCompilationStarted: Call to RunILStartupHook() failed for ", module_id, " ", function_token);
@@ -879,7 +877,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(FunctionID function
         if (is_desktop_iis)
         {
             hr = AddIISPreStartInitFlags(module_id, function_token);
-
             if (FAILED(hr))
             {
                 Logger::Warn("JITCompilationStarted: Call to AddIISPreStartInitFlags() failed for ", module_id, " ",
@@ -1502,8 +1499,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
 
     // Get a TypeRef for System.Threading.Interlocked
     mdTypeRef interlocked_type_ref;
-    hr =
-        metadata_emit->DefineTypeRefByName(corlib_ref, WStr("System.Threading.Interlocked"), &interlocked_type_ref);
+    hr = metadata_emit->DefineTypeRefByName(corlib_ref, WStr("System.Threading.Interlocked"), &interlocked_type_ref);
     if (FAILED(hr))
     {
         Logger::Warn("GenerateVoidILStartupMethod: DefineTypeRefByName interlocked_type_ref failed");
@@ -2280,8 +2276,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ReJITCompilationStarted(FunctionID functi
     {
         return S_OK;
     }
+
     Logger::Debug("ReJITCompilationStarted: [functionId: ", functionId, ", rejitId: ", rejitId,
                   ", safeToBlock: ", fIsSafeToBlock, "]");
+
     // we notify the reJIT handler of this event
     return rejit_handler->NotifyReJITCompilationStarted(functionId, rejitId);
 }
@@ -2318,26 +2316,24 @@ HRESULT STDMETHODCALLTYPE CorProfiler::GetReJITParameters(ModuleID moduleId, mdM
 HRESULT STDMETHODCALLTYPE CorProfiler::ReJITCompilationFinished(FunctionID functionId, ReJITID rejitId,
                                                                 HRESULT hrStatus, BOOL fIsSafeToBlock)
 {
-    if (!is_attached_)
+    if (is_attached_)
     {
-        return S_OK;
+        Logger::Debug("ReJITCompilationFinished: [functionId: ", functionId, ", rejitId: ", rejitId, ", hrStatus: ", hrStatus,
+                    ", safeToBlock: ", fIsSafeToBlock, "]");
     }
 
-    Logger::Debug("ReJITCompilationFinished: [functionId: ", functionId, ", rejitId: ", rejitId, ", hrStatus: ", hrStatus,
-                  ", safeToBlock: ", fIsSafeToBlock, "]");
     return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CorProfiler::ReJITError(ModuleID moduleId, mdMethodDef methodId, FunctionID functionId,
                                                   HRESULT hrStatus)
 {
-    if (!is_attached_)
+    if (is_attached_)
     {
-        return S_OK;
+        Logger::Warn("ReJITError: [functionId: ", functionId, ", moduleId: ", moduleId, ", methodId: ", methodId,
+                    ", hrStatus: ", hrStatus, "]");
     }
 
-    Logger::Warn("ReJITError: [functionId: ", functionId, ", moduleId: ", moduleId, ", methodId: ", methodId,
-                 ", hrStatus: ", hrStatus, "]");
     return S_OK;
 }
 
@@ -2638,9 +2634,12 @@ HRESULT CorProfiler::CallTarget_RewriterCallback(RejitHandlerModule* moduleHandl
     mdTypeRef wrapper_type_ref = mdTypeRefNil;
     GetWrapperMethodRef(module_metadata, module_id, *method_replacement, wrapper_method_ref, wrapper_type_ref);
 
-    Logger::Debug("*** CallTarget_RewriterCallback() Start: ", caller->type.name, ".", caller->name, "() [IsVoid=", isVoid,
-                  ", IsStatic=", isStatic, ", IntegrationType=", method_replacement->wrapper_method.type_name,
-                  ", Arguments=", numArgs, "]");
+    if (IsDebugEnabled())
+    {
+        Logger::Debug("*** CallTarget_RewriterCallback() Start: ", caller->type.name, ".", caller->name, "() [IsVoid=", isVoid,
+                    ", IsStatic=", isStatic, ", IntegrationType=", method_replacement->wrapper_method.type_name,
+                    ", Arguments=", numArgs, "]");
+    }
 
     // First we check if the managed profiler has not been loaded yet
     if (!ProfilerAssemblyIsLoadedIntoAppDomain(module_metadata->app_domain_id))
@@ -2783,7 +2782,7 @@ HRESULT CorProfiler::CallTarget_RewriterCallback(RejitHandlerModule* moduleHandl
     }
 
     // *** Emit BeginMethod call
-    if (Logger::IsDebugEnabled())
+    if (IsDebugEnabled())
     {
         Logger::Debug("Caller Type.Id: ", HexStr(&caller->type.id, sizeof(mdToken)));
         Logger::Debug("Caller Type.IsGeneric: ", caller->type.isGeneric);
