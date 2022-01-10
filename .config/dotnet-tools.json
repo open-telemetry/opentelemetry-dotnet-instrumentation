@@ -3,7 +3,7 @@
   "isRoot": true,
   "tools": {
     "nuke.globaltool": {
-      "version": "5.2.1",
+      "version": "6.0.0",
       "commands": [
         "nuke"
       ]

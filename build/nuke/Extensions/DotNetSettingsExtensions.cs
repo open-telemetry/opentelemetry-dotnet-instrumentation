@@ -30,7 +30,7 @@ internal static class DotNetSettingsExtensions
     public static DotNetTestSettings EnableTrxLogOutput(this DotNetTestSettings settings, string resultsDirectory)
     {
         return settings
-            .SetLogger("trx")
+            .AddLoggers("trx")
             .SetResultsDirectory(resultsDirectory);
     }
 

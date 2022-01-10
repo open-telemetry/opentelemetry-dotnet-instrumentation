@@ -11,11 +11,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nuke.Common" Version="5.2.1" />
+    <PackageReference Include="Nuke.Common" Version="6.0.0" />
   </ItemGroup>
   
   <ItemGroup>
-    <PackageDownload Include="Nuget.CommandLine" Version="[5.9.1]" />
+    <PackageDownload Include="Nuget.CommandLine" Version="[6.0.0]" />
   </ItemGroup>
 
 </Project>
