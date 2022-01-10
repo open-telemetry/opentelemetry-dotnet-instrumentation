@@ -16,7 +16,7 @@ using namespace trace;
 TEST(IntegrationLoaderTest, HandlesMissingFile)
 {
     std::vector<IntegrationMethod> integrations;
-    LoadIntegrationsFromFile(L"missing-file", integrations, true, false, {});
+    LoadIntegrationsFromFile(L"missing-file", integrations, {});
     EXPECT_EQ(0, integrations.size());
 }
 
@@ -24,7 +24,7 @@ TEST(IntegrationLoaderTest, HandlesInvalidIntegrationNoName)
 {
     std::vector<IntegrationMethod> integrations;
     std::stringstream str("[{}]");
-    LoadIntegrationsFromStream(str, integrations, true, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     // 0 because name is required
     EXPECT_EQ(0, integrations.size());
 }
@@ -33,7 +33,7 @@ TEST(IntegrationLoaderTest, HandlesInvalidIntegrationBadJson)
 {
     std::vector<IntegrationMethod> integrations;
     std::stringstream str("[");
-    LoadIntegrationsFromStream(str, integrations, true, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     EXPECT_EQ(0, integrations.size());
 }
 
@@ -41,7 +41,7 @@ TEST(IntegrationLoaderTest, HandlesInvalidIntegrationNotAnObject)
 {
     std::vector<IntegrationMethod> integrations;
     std::stringstream str("[1,2,3]");
-    LoadIntegrationsFromStream(str, integrations, true, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     EXPECT_EQ(0, integrations.size());
 }
 
@@ -51,7 +51,7 @@ TEST(IntegrationLoaderTest, HandlesInvalidIntegrationNotAnArray)
     std::stringstream str(R"TEXT(
         {"name": "test-integration"}
     )TEXT");
-    LoadIntegrationsFromStream(str, integrations, true, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     EXPECT_EQ(0, integrations.size());
 }
 
@@ -69,7 +69,7 @@ TEST(IntegrationLoaderTest, HandlesSingleIntegrationWithMethodReplacements)
         }]
     )TEXT");
 
-    LoadIntegrationsFromStream(str, integrations, false, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     EXPECT_EQ(1, integrations.size());
     EXPECT_STREQ(L"test-integration", integrations[0].integration_name.c_str());
 }
@@ -88,7 +88,7 @@ TEST(IntegrationLoaderTest, DoesNotCrashWithOutOfRangeVersion)
         }]
     )TEXT");
 
-    LoadIntegrationsFromStream(str, integrations, false, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     EXPECT_EQ(1, integrations.size());
     EXPECT_STREQ(L"test-integration", integrations[0].integration_name.c_str());
 
@@ -118,7 +118,7 @@ TEST(IntegrationLoaderTest, HandlesSingleIntegrationWithMissingCaller)
         }]
     )TEXT");
 
-    LoadIntegrationsFromStream(str, integrations, false, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     EXPECT_EQ(1, integrations.size());
     EXPECT_STREQ(L"test-integration", integrations[0].integration_name.c_str());
 
@@ -155,7 +155,7 @@ TEST(IntegrationLoaderTest, HandlesSingleIntegrationWithInvalidTarget)
         }]
     )TEXT");
 
-    LoadIntegrationsFromStream(str, integrations, false, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     EXPECT_EQ(1, integrations.size());
     EXPECT_STREQ(L"test-integration", integrations[0].integration_name.c_str());
 
@@ -188,7 +188,7 @@ TEST(IntegrationLoaderTest, LoadsFromEnvironment)
     std::vector<std::wstring> expected_names = {L"test-integration-1", L"test-integration-2"};
     std::vector<std::wstring> actual_names;
     std::vector<IntegrationMethod> integrations;
-    LoadIntegrationsFromEnvironment(integrations, false, false, {});
+    LoadIntegrationsFromEnvironment(integrations, {});
     for (auto& integration : integrations)
     {
         actual_names.push_back(integration.integration_name);
@@ -213,7 +213,7 @@ TEST(IntegrationLoaderTest, DeserializesSignatureTypeArray)
         }]
     )TEXT");
 
-    LoadIntegrationsFromStream(str, integrations, false, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     const auto target = integrations[0].replacement.target_method;
     EXPECT_STREQ(L"System.Void", target.signature_types[0].c_str());
     EXPECT_STREQ(L"_", target.signature_types[1].c_str());
