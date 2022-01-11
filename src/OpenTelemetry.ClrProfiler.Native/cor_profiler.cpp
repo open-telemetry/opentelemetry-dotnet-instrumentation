@@ -2104,17 +2104,17 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
     hr = metadata_emit->DefineMemberRef(system_appdomain_type_ref, WStr("SetData"), appdomain_set_data_signature,
                                         sizeof(appdomain_set_data_signature), &appdomain_set_data_member_ref);
 
-    // Define "Datadog_IISPreInitStart" string
+    // Define "OpenTelemetry_IISPreInitStart" string
     // Create a string representing
     // "OpenTelemetry.ClrProfiler.Managed.Loader.Startup" Create OS-specific
     // implementations because on Windows, creating the string via
     // "OpenTelemetry.ClrProfiler.Managed.Loader.Startup"_W.c_str() does not
     // create the proper string for CreateInstance to successfully call
 #ifdef _WIN32
-    LPCWSTR pre_init_start_str = L"Datadog_IISPreInitStart";
+    LPCWSTR pre_init_start_str = L"OpenTelemetry_IISPreInitStart";
     auto pre_init_start_str_size = wcslen(pre_init_start_str);
 #else
-    char16_t pre_init_start_str[] = u"Datadog_IISPreInitStart";
+    char16_t pre_init_start_str[] = u"OpenTelemetry_IISPreInitStart";
     auto pre_init_start_str_size = std::char_traits<char16_t>::length(pre_init_start_str);
 #endif
 
@@ -2140,7 +2140,7 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
     // Call AppDomain.get_CurrentDomain
     rewriter_wrapper.CallMember(appdomain_get_current_domain_member_ref, false);
 
-    // ldstr "Datadog_IISPreInitStart"
+    // ldstr "OpenTelemetry_IISPreInitStart"
     pCurrentInstr = rewriter_wrapper.GetCurrentILInstr();
     pNewInstr = rewriter.NewILInstr();
     pNewInstr->m_opcode = CEE_LDSTR;
@@ -2170,7 +2170,7 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
     pInstr->m_opcode = CEE_CALL;
     pInstr->m_Arg32 = appdomain_get_current_domain_member_ref;
 
-    // ldstr "Datadog_IISPreInitStart"
+    // ldstr "OpenTelemetry_IISPreInitStart"
     pCurrentInstr = rewriter_wrapper.GetCurrentILInstr();
     pNewInstr = rewriter.NewILInstr();
     pNewInstr->m_opcode = CEE_LDSTR;

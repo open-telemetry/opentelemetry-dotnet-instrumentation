@@ -97,38 +97,30 @@ callback the CLR Profiler Dll takes the following actions:
 2. On the [CorProfiler::JITCompilationStarted](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/icorprofilercallback-jitcompilationstarted-method)
 callback the CLR Profiler Dll proceeds in the following steps:
 
-  - If the function module is not in the map of modules to be instrumented, bailout.
   - If this is the first module to be instrumented in the current AppDomain, inject the IL calling the
   Loader `Startup` type constructor. This type of constructor will:
     * Add an event handler to the
     [`AssemblyResolve`](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.assemblyresolve?view=net-5.0)
     so it can add any assembly needed by the SDK itself or any instrumentation.
     * Run, via reflection, the `Initialization` method from the Managed Profiler assembly.
-  - The `Initialization` code will bootstrap the OpenTelemetry .NET SDK (adding configured processors, exporters, etc.)
+      - The `Initialization` code will bootstrap the OpenTelemetry .NET SDK (adding configured processors, exporters, etc.)
   and will also initialize any configured source instrumentations.
-
-3. During the requested JIT recompilation callbacks; the CLR Profiler Dll inject calls
-to the matching bytecode instrumentation that wraps the targeted method.
+  - If the first method observed by JITCompilationStarted is IIS startup code, invoke
+    AppDomain.CurrentDomain.SetData("OpenTelemetry_IISPreInitStart", true) so automatic instrumentation correctly
+    handles IIS startup scenarios
 
 ### Bytecode Instrumentations
 
-Historically, the upstream repository had two types of instrumentation "call site" and "call target".
-The original one was "call site", and it replaced direct calls to the methods to
-be instrumented with calls to the corresponding instrumentation method. The instrumentation method
-was responsible for generating the observability data and calling the original method. The name
-"call site" refers to the fact that the instrumentation IL changes were made at the location
-calling the original method.
+The bytecode instrumentation (referred to as "call target" in this repo) relies on the JIT recompilation 
+capability of the CLR to rewrite the IL for instrumented methods. This adds logic at
+the beginning and end of the instrumented methods to invoke instrumentation written in this repo and
+wraps the calls with try-catch blocks to prevent instrumentation errors from affecting the normal operation
+of the application.
 
-The "call site" mode requires inspecting all JIT compilation
-since all calls to the instrumented methods must be changed. 
-The "call target" mode avoids this problem by relying on the
-JIT recompilation capability of the CLR. This mode wraps
-the beginning and end of the instrumented methods with the code from the instrumentation in try-catch blocks.
-
-Both types of bytecode instrumentations should not have direct dependencies with the libraries that they instrument.
+Bytecode instrumentation methods should not have direct dependencies with the libraries that they instrument.
 This way, they can work with multiple versions of the assemblies being targeted for instrumentation
 and reduce the number of shipped files. 
-When operating with parameters and return values of the targeted methods, the instrumentations must use
+When operating with parameters and return values of the targeted methods, the instrumentation methods must use
 [DuckTyping](../src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed/DuckTyping/README.md) or
 [reflection](https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/reflection)
 to access objects from the APIs being instrumented.
