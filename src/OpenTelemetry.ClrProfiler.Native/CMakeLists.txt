@@ -225,7 +225,6 @@ add_library("OpenTelemetry.ClrProfiler.Native.static" STATIC
         integration.cpp
         metadata_builder.cpp
         miniutf.cpp
-        sig_helpers.cpp
         string.cpp
         util.cpp
         calltarget_tokens.cpp

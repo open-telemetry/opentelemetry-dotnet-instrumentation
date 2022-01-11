@@ -81,22 +81,6 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         public const string GlobalTags = "OTEL_TAGS";
 
         /// <summary>
-        /// String constants for debug configuration keys.
-        /// </summary>
-        internal static class Debug
-        {
-            /// <summary>
-            /// Configuration key for forcing the automatic instrumentation to only use the mdToken method lookup mechanism.
-            /// </summary>
-            public const string ForceMdTokenLookup = "OTEL_TRACE_DEBUG_LOOKUP_MDTOKEN";
-
-            /// <summary>
-            /// Configuration key for forcing the automatic instrumentation to only use the fallback method lookup mechanism.
-            /// </summary>
-            public const string ForceFallbackLookup = "OTEL_TRACE_DEBUG_LOOKUP_FALLBACK";
-        }
-
-        /// <summary>
         /// String format patterns used to match integration-specific configuration keys.
         /// </summary>
         internal static class Integrations

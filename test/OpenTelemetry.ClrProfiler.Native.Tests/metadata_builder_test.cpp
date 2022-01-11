@@ -93,21 +93,15 @@ TEST_F(MetadataBuilderTest, StoresWrapperMemberRef) {
   ASSERT_EQ(S_OK, hr);
 
   mdMemberRef tmp;
-  auto key_failed = module_metadata_->IsFailedWrapperMemberKey(
-      L"[Samples.ExampleLibrary]Class1.Add_vMin_0.0.0.0_vMax_65535.65535.65535.65535");
   auto ok = module_metadata_->TryGetWrapperMemberRef(
       L"[Samples.ExampleLibrary]Class1.Add_vMin_0.0.0.0_vMax_65535.65535.65535.65535", tmp);
   EXPECT_TRUE(ok);
-  EXPECT_FALSE(key_failed);
   EXPECT_NE(tmp, 0);
 
   tmp = 0;
-  key_failed = module_metadata_->IsFailedWrapperMemberKey(
-      L"[Samples.ExampleLibrary]Class2.Add_vMin_0.0.0.0_vMax_65535.65535.65535.65535");
   ok = module_metadata_->TryGetWrapperMemberRef(
       L"[Samples.ExampleLibrary]Class2.Add_vMin_0.0.0.0_vMax_65535.65535.65535.65535", tmp);
   EXPECT_FALSE(ok);
-  EXPECT_FALSE(key_failed);
   EXPECT_EQ(tmp, 0);
 }
 
@@ -124,11 +118,9 @@ TEST_F(MetadataBuilderTest, StoresWrapperMemberRefForSeparateAssembly) {
   ASSERT_EQ(S_OK, hr);
 
   mdMemberRef tmp;
-  auto key_failed = module_metadata_->IsFailedWrapperMemberKey(L"[Samples.ExampleLibraryTracer]Class1.Add_vMin_0.0.0.0_vMax_65535.65535.65535.65535");
   auto ok = module_metadata_->TryGetWrapperMemberRef(
       L"[Samples.ExampleLibraryTracer]Class1.Add_vMin_0.0.0.0_vMax_65535.65535.65535.65535", tmp);
   EXPECT_TRUE(ok);
-  EXPECT_FALSE(key_failed);
   EXPECT_NE(tmp, 0);
 }
 
@@ -143,10 +135,4 @@ TEST_F(MetadataBuilderTest, StoresWrapperMemberRefRecordsFailure) {
   const MethodReplacement mr1(ref1, ref2, ref3);
   auto hr = metadata_builder_->StoreWrapperMethodRef(mr1);
   ASSERT_NE(S_OK, hr);
-
-  auto key_failed = module_metadata_->IsFailedWrapperMemberKey(L"[Samples.ExampleLibraryTracer.AssemblyDoesNotExist]Class1.Add_vMin_0.0.0.0_vMax_65535.65535.65535.65535");
-  EXPECT_TRUE(key_failed);
-
-  key_failed = module_metadata_->IsFailedWrapperMemberKey(L"[Samples.ExampleLibraryTracer]Class1.Add_vMin_0.0.0.0_vMax_65535.65535.65535.65535");
-  EXPECT_FALSE(key_failed);
 }

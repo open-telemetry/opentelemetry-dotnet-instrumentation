@@ -12,21 +12,16 @@ namespace trace
 
 using json = nlohmann::json;
 
-void LoadIntegrationsFromEnvironment(std::vector<IntegrationMethod>& integrationMethods, const bool isCallTargetEnabled,
-                                     const bool isNetstandardEnabled,
-                                     const std::vector<WSTRING>& disabledIntegrationNames)
+void LoadIntegrationsFromEnvironment(std::vector<IntegrationMethod>& integrationMethods, const std::vector<WSTRING>& disabledIntegrationNames)
 {
     for (const WSTRING& filePath : GetEnvironmentValues(environment::integrations_path))
     {
         Logger::Debug("Loading integrations from file: ", filePath);
-        LoadIntegrationsFromFile(filePath, integrationMethods, isCallTargetEnabled, isNetstandardEnabled,
-                                 disabledIntegrationNames);
+        LoadIntegrationsFromFile(filePath, integrationMethods, disabledIntegrationNames);
     }
 }
 
-void LoadIntegrationsFromFile(const WSTRING& file_path, std::vector<IntegrationMethod>& integrationMethods,
-                              const bool isCallTargetEnabled, const bool isNetstandardEnabled,
-                              const std::vector<WSTRING>& disabledIntegrationNames)
+void LoadIntegrationsFromFile(const WSTRING& file_path, std::vector<IntegrationMethod>& integrationMethods, const std::vector<WSTRING>& disabledIntegrationNames)
 {
     try
     {
@@ -34,8 +29,7 @@ void LoadIntegrationsFromFile(const WSTRING& file_path, std::vector<IntegrationM
 
         if (static_cast<bool>(stream))
         {
-            LoadIntegrationsFromStream(stream, integrationMethods, isCallTargetEnabled, isNetstandardEnabled,
-                                       disabledIntegrationNames);
+            LoadIntegrationsFromStream(stream, integrationMethods, disabledIntegrationNames);
         }
         else
         {
@@ -61,9 +55,7 @@ void LoadIntegrationsFromFile(const WSTRING& file_path, std::vector<IntegrationM
     }
 }
 
-void LoadIntegrationsFromStream(std::istream& stream, std::vector<IntegrationMethod>& integrationMethods,
-                                const bool isCallTargetEnabled, const bool isNetstandardEnabled,
-                                const std::vector<WSTRING>& disabledIntegrationNames)
+void LoadIntegrationsFromStream(std::istream& stream, std::vector<IntegrationMethod>& integrationMethods, const std::vector<WSTRING>& disabledIntegrationNames)
 {
     try
     {
@@ -75,8 +67,7 @@ void LoadIntegrationsFromStream(std::istream& stream, std::vector<IntegrationMet
 
         for (const auto& el : j)
         {
-            IntegrationFromJson(el, integrationMethods, isCallTargetEnabled, isNetstandardEnabled,
-                                disabledIntegrationNames);
+            IntegrationFromJson(el, integrationMethods, disabledIntegrationNames);
         }
 
     }
@@ -108,9 +99,7 @@ void LoadIntegrationsFromStream(std::istream& stream, std::vector<IntegrationMet
 namespace
 {
 
-    void IntegrationFromJson(const json::value_type& src, std::vector<IntegrationMethod>& integrationMethods,
-                             const bool isCallTargetEnabled, const bool isNetstandardEnabled,
-                             const std::vector<WSTRING>& disabledIntegrationNames)
+    void IntegrationFromJson(const json::value_type& src, std::vector<IntegrationMethod>& integrationMethods, const std::vector<WSTRING>& disabledIntegrationNames)
     {
         if (!src.is_object())
         {
@@ -139,53 +128,25 @@ namespace
         {
             for (const auto& el : arr)
             {
-                MethodReplacementFromJson(el, name, integrationMethods, isCallTargetEnabled, isNetstandardEnabled);
+                MethodReplacementFromJson(el, name, integrationMethods);
             }
         }
     }
 
-    void MethodReplacementFromJson(const json::value_type& src, const WSTRING& integrationName,
-                                   std::vector<IntegrationMethod>& integrationMethods,
-                                   const bool isCallTargetEnabled, const bool isNetstandardEnabled)
+    void MethodReplacementFromJson(const json::value_type& src, const WSTRING& integrationName, std::vector<IntegrationMethod>& integrationMethods)
     {
         if (src.is_object())
         {
             const MethodReference wrapper = MethodReferenceFromJson(src.value("wrapper", json::object()), false, true);
-
-            if (isCallTargetEnabled)
+            if (wrapper.action != WStr("CallTargetModification"))
             {
-                // Check if is a calltarget integration
-
-                if (wrapper.action != WStr("CallTargetModification"))
-                {
-                    return;
-                }
-
-                const MethodReference target =
-                    MethodReferenceFromJson(src.value("target", json::object()), true, false);
-
-                integrationMethods.push_back({integrationName, {{}, target, wrapper}});
-
+                return;
             }
-            else
-            {
-                const MethodReference target =
-                    MethodReferenceFromJson(src.value("target", json::object()), true, false);
 
-                // temporarily skip the calls into netstandard.dll that were added in
-                // https://github.com/DataDog/dd-trace-dotnet/pull/753.
-                // users can opt-in to the additional instrumentation by setting environment
-                // variable DD_TRACE_NETSTANDARD_ENABLED
-                if (!isNetstandardEnabled && target.assembly.name == WStr("netstandard"))
-                {
-                    return;
-                }
+            const MethodReference target =
+                MethodReferenceFromJson(src.value("target", json::object()), true, false);
 
-                const MethodReference caller =
-                    MethodReferenceFromJson(src.value("caller", json::object()), false, false);
-
-                integrationMethods.push_back({integrationName, {caller, target, wrapper}});
-            }
+            integrationMethods.push_back({integrationName, {{}, target, wrapper}});
         }
     }
 

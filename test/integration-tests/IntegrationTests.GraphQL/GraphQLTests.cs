@@ -60,15 +60,11 @@ namespace IntegrationTests.GraphQL
             SetServiceVersion("1.0.0");
         }
 
-        [Theory]
+        [Fact]
         [Trait("Category", "EndToEnd")]
         [Trait("RunOnWindows", "True")]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void SubmitsTraces(bool enableCallTarget)
+        public void SubmitsTraces()
         {
-            SetCallTargetSettings(enableCallTarget);
-
             int agentPort = TcpPortProvider.GetOpenPort();
             int aspNetCorePort = TcpPortProvider.GetOpenPort();
 

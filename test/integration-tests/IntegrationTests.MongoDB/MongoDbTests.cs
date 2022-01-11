@@ -27,14 +27,10 @@ namespace IntegrationTests.MongoDB
             _mongoDb = mongoDb;
         }
 
-        [Theory]
+        [Fact]
         [Trait("Category", "EndToEnd")]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void SubmitsTraces(bool enableCallTarget)
+        public void SubmitsTraces()
         {
-            SetCallTargetSettings(enableCallTarget);
-
             int agentPort = TcpPortProvider.GetOpenPort();
 
             using (var agent = new MockZipkinCollector(Output, agentPort))
