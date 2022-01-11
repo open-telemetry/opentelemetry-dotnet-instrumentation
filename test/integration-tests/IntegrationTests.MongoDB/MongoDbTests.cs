@@ -25,15 +25,12 @@ namespace IntegrationTests.MongoDB
             _mongoDb = mongoDb;
         }
 
-        [Theory]
+        [Fact]
         [Trait("Category", "EndToEnd")]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void SubmitsTraces(bool enableCallTarget)
+        public void SubmitsTraces()
         {
             const string ServiceName = "Samples.MongoDB";
             SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
-            SetCallTargetSettings(enableCallTarget);
 
             int agentPort = TcpPortProvider.GetOpenPort();
 

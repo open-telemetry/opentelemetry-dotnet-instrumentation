@@ -59,15 +59,12 @@ namespace IntegrationTests.GraphQL
         {
         }
 
-        [Theory]
+        [Fact]
         [Trait("Category", "EndToEnd")]
         [Trait("RunOnWindows", "True")]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void SubmitsTraces(bool enableCallTarget)
+        public void SubmitsTraces()
         {
             SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
-            SetCallTargetSettings(enableCallTarget);
 
             int agentPort = TcpPortProvider.GetOpenPort();
             int aspNetCorePort = TcpPortProvider.GetOpenPort();

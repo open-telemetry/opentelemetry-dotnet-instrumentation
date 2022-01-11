@@ -81,18 +81,11 @@ const WSTRING azure_app_services_app_pool_id = WStr("APP_POOL_ID");
 const WSTRING azure_app_services_cli_telemetry_profile_value =
     WStr("DOTNET_CLI_TELEMETRY_PROFILE");
 
-// Determine whether to instrument calls into netstandard.dll.
-// Default to false for now to avoid the unexpected overhead of additional spans.
-const WSTRING netstandard_enabled = WStr("OTEL_TRACE_NETSTANDARD_ENABLED");
-
 // Enable the profiler to dump the IL original code and modification to the log.
 const WSTRING dump_il_rewrite_enabled = WStr("OTEL_DUMP_ILREWRITE_ENABLED");
 
 // Sets whether to enable JIT inlining
 const WSTRING clr_enable_inlining = WStr("OTEL_CLR_ENABLE_INLINING");
-
-// Sets whether to enable the CallTarget instrumentation mode
-const WSTRING calltarget_enabled = WStr("OTEL_TRACE_CALLTARGET_ENABLED");
 
 // Custom internal tracer profiler path
 const WSTRING internal_trace_profiler_path =

@@ -16,7 +16,7 @@ using namespace trace;
 TEST(IntegrationLoaderTest, HandlesMissingFile)
 {
     std::vector<IntegrationMethod> integrations;
-    LoadIntegrationsFromFile(L"missing-file", integrations, true, false, {});
+    LoadIntegrationsFromFile(L"missing-file", integrations, {});
     EXPECT_EQ(0, integrations.size());
 }
 
@@ -24,7 +24,7 @@ TEST(IntegrationLoaderTest, HandlesInvalidIntegrationNoName)
 {
     std::vector<IntegrationMethod> integrations;
     std::stringstream str("[{}]");
-    LoadIntegrationsFromStream(str, integrations, true, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     // 0 because name is required
     EXPECT_EQ(0, integrations.size());
 }
@@ -33,7 +33,7 @@ TEST(IntegrationLoaderTest, HandlesInvalidIntegrationBadJson)
 {
     std::vector<IntegrationMethod> integrations;
     std::stringstream str("[");
-    LoadIntegrationsFromStream(str, integrations, true, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     EXPECT_EQ(0, integrations.size());
 }
 
@@ -41,7 +41,7 @@ TEST(IntegrationLoaderTest, HandlesInvalidIntegrationNotAnObject)
 {
     std::vector<IntegrationMethod> integrations;
     std::stringstream str("[1,2,3]");
-    LoadIntegrationsFromStream(str, integrations, true, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     EXPECT_EQ(0, integrations.size());
 }
 
@@ -51,7 +51,7 @@ TEST(IntegrationLoaderTest, HandlesInvalidIntegrationNotAnArray)
     std::stringstream str(R"TEXT(
         {"name": "test-integration"}
     )TEXT");
-    LoadIntegrationsFromStream(str, integrations, true, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     EXPECT_EQ(0, integrations.size());
 }
 
@@ -64,12 +64,12 @@ TEST(IntegrationLoaderTest, HandlesSingleIntegrationWithMethodReplacements)
             "method_replacements": [{
                 "caller": { },
                 "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "minimum_major": 0, "minimum_minor": 1, "maximum_major": 10, "maximum_minor": 0 },
-                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28] }
+                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" }
             }]
         }]
     )TEXT");
 
-    LoadIntegrationsFromStream(str, integrations, false, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     EXPECT_EQ(1, integrations.size());
     EXPECT_STREQ(L"test-integration", integrations[0].integration_name.c_str());
 }
@@ -83,12 +83,12 @@ TEST(IntegrationLoaderTest, DoesNotCrashWithOutOfRangeVersion)
             "method_replacements": [{
                 "caller": { },
                 "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "minimum_major": 0, "minimum_minor": 1, "maximum_major": 75555, "maximum_minor": 0 },
-                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28] }
+                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" }
             }]
         }]
     )TEXT");
 
-    LoadIntegrationsFromStream(str, integrations, false, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     EXPECT_EQ(1, integrations.size());
     EXPECT_STREQ(L"test-integration", integrations[0].integration_name.c_str());
 
@@ -113,12 +113,12 @@ TEST(IntegrationLoaderTest, HandlesSingleIntegrationWithMissingCaller)
             "name": "test-integration",
             "method_replacements": [{
                 "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "minimum_major": 1, "minimum_minor": 2, "maximum_major": 10, "maximum_minor": 99 },
-                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28] }
+                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" }
             }]
         }]
     )TEXT");
 
-    LoadIntegrationsFromStream(str, integrations, false, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     EXPECT_EQ(1, integrations.size());
     EXPECT_STREQ(L"test-integration", integrations[0].integration_name.c_str());
 
@@ -150,12 +150,12 @@ TEST(IntegrationLoaderTest, HandlesSingleIntegrationWithInvalidTarget)
             "name": "test-integration",
             "method_replacements": [{
                 "target": 1234,
-                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two" }
+                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "action": "CallTargetModification" }
             }]
         }]
     )TEXT");
 
-    LoadIntegrationsFromStream(str, integrations, false, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     EXPECT_EQ(1, integrations.size());
     EXPECT_STREQ(L"test-integration", integrations[0].integration_name.c_str());
 
@@ -172,12 +172,12 @@ TEST(IntegrationLoaderTest, LoadsFromEnvironment)
     std::ofstream f;
     f.open(tmpname1);
     f << R"TEXT(
-        [{ "name": "test-integration-1", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }]
+        [{ "name": "test-integration-1", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }]
     )TEXT";
     f.close();
     f.open(tmpname2);
     f << R"TEXT(
-        [{ "name": "test-integration-2", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }]
+        [{ "name": "test-integration-2", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }]
     )TEXT";
     f.close();
 
@@ -188,7 +188,7 @@ TEST(IntegrationLoaderTest, LoadsFromEnvironment)
     std::vector<std::wstring> expected_names = {L"test-integration-1", L"test-integration-2"};
     std::vector<std::wstring> actual_names;
     std::vector<IntegrationMethod> integrations;
-    LoadIntegrationsFromEnvironment(integrations, false, false, {});
+    LoadIntegrationsFromEnvironment(integrations, {});
     for (auto& integration : integrations)
     {
         actual_names.push_back(integration.integration_name);
@@ -208,12 +208,12 @@ TEST(IntegrationLoaderTest, DeserializesSignatureTypeArray)
             "method_replacements": [{
                 "caller": { },
                 "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.Pipeline'1<T>"] },
-                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.One", "signature": [0, 1, 1, 28] }
+                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.One", "signature": [0, 1, 1, 28], "action": "CallTargetModification" }
             }]
         }]
     )TEXT");
 
-    LoadIntegrationsFromStream(str, integrations, false, false, {});
+    LoadIntegrationsFromStream(str, integrations, {});
     const auto target = integrations[0].replacement.target_method;
     EXPECT_STREQ(L"System.Void", target.signature_types[0].c_str());
     EXPECT_STREQ(L"_", target.signature_types[1].c_str());

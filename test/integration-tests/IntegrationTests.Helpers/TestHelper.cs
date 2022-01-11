@@ -159,10 +159,5 @@ namespace IntegrationTests.Helpers
         {
             EnvironmentHelper.CustomEnvironmentVariables.Add(key, value);
         }
-
-        protected void SetCallTargetSettings(bool enableCallTarget)
-        {
-            SetEnvironmentVariable("OTEL_TRACE_CALLTARGET_ENABLED", enableCallTarget ? "true" : "false");
-        }
     }
 }
