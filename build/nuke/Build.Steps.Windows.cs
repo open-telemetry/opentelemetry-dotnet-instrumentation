@@ -7,6 +7,7 @@ using Nuke.Common.Tooling;
 using Nuke.Common.Tools.Docker;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.MSBuild;
+using Serilog;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.Docker.DockerTasks;
@@ -73,7 +74,7 @@ partial class Build
                              $"{NativeProfilerProject.Name}.dll";
                 var dest = TracerHomeDirectory / $"win-{architecture}";
 
-                Logger.Info($"Copying '{source}' to '{dest}'");
+                Log.Information($"Copying '{source}' to '{dest}'");
 
                 CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
             }

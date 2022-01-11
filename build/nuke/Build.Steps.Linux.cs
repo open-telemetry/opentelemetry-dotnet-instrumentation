@@ -1,5 +1,6 @@
 using Nuke.Common;
 using Nuke.Common.IO;
+using Serilog;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 
@@ -27,7 +28,7 @@ partial class Build
         .Executes(() =>
         {
             // TODO: Compile Linux native tests
-            Logger.Error("Linux native tests are currently not supported.");
+            Log.Error("Linux native tests are currently not supported.");
         });
 
     Target PublishNativeProfilerLinux => _ => _
@@ -57,6 +58,6 @@ partial class Build
         .Executes(() =>
         {
             // TODO: Run Linux native tests
-            Logger.Error("Linux native tests are currently not supported.");
+            Log.Error("Linux native tests are currently not supported.");
         });
 }
