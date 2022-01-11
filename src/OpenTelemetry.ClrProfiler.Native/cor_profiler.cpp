@@ -108,7 +108,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     // Fail if net46+ not detected
     // TODO: Update this to ICorProfilerInfo7 which corresponds to net461 and make CorProfilerBase.info_ have type ICorProfilerInfo7*
     if (FAILED(hr)) {
-        Logger::Warn("DATADOG TRACER DIAGNOSTICS - Failed to attach profiler: interface ICorProfilerInfo6 not found.");
+        Logger::Warn("OpenTelemetry TRACER DIAGNOSTICS - Failed to attach profiler: interface ICorProfilerInfo6 not found.");
         return E_FAIL;
     }
 
