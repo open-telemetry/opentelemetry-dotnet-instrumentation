@@ -64,7 +64,7 @@ TEST(IntegrationLoaderTest, HandlesSingleIntegrationWithMethodReplacements)
             "method_replacements": [{
                 "caller": { },
                 "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "minimum_major": 0, "minimum_minor": 1, "maximum_major": 10, "maximum_minor": 0 },
-                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28] }
+                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" }
             }]
         }]
     )TEXT");
@@ -83,7 +83,7 @@ TEST(IntegrationLoaderTest, DoesNotCrashWithOutOfRangeVersion)
             "method_replacements": [{
                 "caller": { },
                 "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "minimum_major": 0, "minimum_minor": 1, "maximum_major": 75555, "maximum_minor": 0 },
-                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28] }
+                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" }
             }]
         }]
     )TEXT");
@@ -113,7 +113,7 @@ TEST(IntegrationLoaderTest, HandlesSingleIntegrationWithMissingCaller)
             "name": "test-integration",
             "method_replacements": [{
                 "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "minimum_major": 1, "minimum_minor": 2, "maximum_major": 10, "maximum_minor": 99 },
-                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28] }
+                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" }
             }]
         }]
     )TEXT");
@@ -150,7 +150,7 @@ TEST(IntegrationLoaderTest, HandlesSingleIntegrationWithInvalidTarget)
             "name": "test-integration",
             "method_replacements": [{
                 "target": 1234,
-                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two" }
+                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "action": "CallTargetModification" }
             }]
         }]
     )TEXT");
@@ -172,12 +172,12 @@ TEST(IntegrationLoaderTest, LoadsFromEnvironment)
     std::ofstream f;
     f.open(tmpname1);
     f << R"TEXT(
-        [{ "name": "test-integration-1", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }]
+        [{ "name": "test-integration-1", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }]
     )TEXT";
     f.close();
     f.open(tmpname2);
     f << R"TEXT(
-        [{ "name": "test-integration-2", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }]
+        [{ "name": "test-integration-2", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }]
     )TEXT";
     f.close();
 
@@ -208,7 +208,7 @@ TEST(IntegrationLoaderTest, DeserializesSignatureTypeArray)
             "method_replacements": [{
                 "caller": { },
                 "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.Pipeline'1<T>"] },
-                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.One", "signature": [0, 1, 1, 28] }
+                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.One", "signature": [0, 1, 1, 28], "action": "CallTargetModification" }
             }]
         }]
     )TEXT");
