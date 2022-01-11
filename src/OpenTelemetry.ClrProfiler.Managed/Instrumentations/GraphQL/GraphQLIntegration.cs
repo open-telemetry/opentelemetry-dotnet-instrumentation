@@ -220,14 +220,13 @@ namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL
 
             string source = document.GetProperty<string>("OriginalQuery")
                                     .GetValueOrDefault();
-            string serviceName = GraphQLCommon.GetServiceName();
 
             Activity activity = null;
 
             try
             {
                 var tags = new GraphQLTags();
-                activity = GraphQLCommon.ActivitySource.StartActivityWithTags(GraphQLCommon.ValidateOperationName, serviceName: serviceName, tags: tags);
+                activity = GraphQLCommon.ActivitySource.StartActivityWithTags(GraphQLCommon.ValidateOperationName, tags);
                 tags.Source = source;
             }
             catch (Exception ex)
@@ -256,14 +255,13 @@ namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL
                                                        .GetProperty<Enum>("OperationType")
                                                        .GetValueOrDefault()
                                                        .ToString();
-            string serviceName = GraphQLCommon.GetServiceName();
 
             Activity activity = null;
 
             try
             {
                 var tags = new GraphQLTags();
-                activity = GraphQLCommon.ActivitySource.StartActivityWithTags(GraphQLCommon.ExecuteOperationName, serviceName: serviceName, tags: tags);
+                activity = GraphQLCommon.ActivitySource.StartActivityWithTags(GraphQLCommon.ExecuteOperationName, tags);
                 activity.SetResourceName($"{operationType} {operationName ?? "operation"}");
 
                 tags.Source = source;

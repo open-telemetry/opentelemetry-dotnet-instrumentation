@@ -19,13 +19,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
 
         public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, Settings settings)
         {
-            string serviceName = settings.ServiceName
-                ?? GetApplicationName()
-                ?? "UNKNOWN_SERVICE_NAME";
-
-            var resourceBuilder = ResourceBuilder
-                .CreateDefault()
-                .AddService(serviceName, serviceVersion: settings.ServiceVersion);
+            var resourceBuilder = ResourceBuilder.CreateDefault();
 
             builder
                 .SetResourceBuilder(resourceBuilder)
@@ -94,36 +88,6 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
             }
 
             return builder;
-        }
-
-        /// <summary>
-        /// Gets an "application name" for the executing application by looking at
-        /// the hosted app name (.NET Framework on IIS only), assembly name, and process name.
-        /// </summary>
-        /// <returns>The default service name.</returns>
-        private static string GetApplicationName()
-        {
-            try
-            {
-#if NETFRAMEWORK
-                // System.Web.dll is only available on .NET Framework
-                if (System.Web.Hosting.HostingEnvironment.IsHosted)
-                {
-                    // if this app is an ASP.NET application, return "SiteName/ApplicationVirtualPath".
-                    // note that ApplicationVirtualPath includes a leading slash.
-                    return (System.Web.Hosting.HostingEnvironment.SiteName + System.Web.Hosting.HostingEnvironment.ApplicationVirtualPath).TrimEnd('/');
-                }
-#endif
-
-                return Assembly.GetEntryAssembly()?.GetName().Name ??
-                       Process.GetCurrentProcess().ProcessName;
-            }
-            catch (Exception ex)
-            {
-                // TODO: Log service name creation error
-                Console.WriteLine($">>>>>>>>>>>>>>>>>>>>>>> Error: Could not get service name. Message: {ex.Message}");
-                throw;
-            }
         }
     }
 }

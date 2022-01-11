@@ -16,7 +16,6 @@ namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL
         internal const string Major2 = "2";
         internal const string Major2Minor3 = "2.3";
 
-        internal const string ServiceName = "graphql";
         internal const string ParseOperationName = "graphql.parse"; // Instrumentation not yet implemented
         internal const string ValidateOperationName = "graphql.validate";
         internal const string ExecuteOperationName = "graphql.execute";
@@ -45,8 +44,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL
             try
             {
                 var tags = new GraphQLTags();
-                string serviceName = GetServiceName();
-                activity = ActivitySource.StartActivityWithTags(ValidateOperationName, serviceName: serviceName, tags: tags);
+                activity = ActivitySource.StartActivityWithTags(ValidateOperationName, tags);
 
                 tags.Source = document.OriginalQuery;
             }
@@ -77,8 +75,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL
                 string operationType = executionContext.Operation.OperationType.ToString();
 
                 var tags = new GraphQLTags();
-                string serviceName = GetServiceName();
-                activity = ActivitySource.StartActivityWithTags(ExecuteOperationName, serviceName: serviceName, tags: tags);
+                activity = ActivitySource.StartActivityWithTags(ExecuteOperationName, tags);
                 activity.SetResourceName($"{operationType} {operationName ?? "operation"}");
 
                 tags.Source = source;
@@ -104,11 +101,6 @@ namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL
                 activity.SetTag(Tags.ErrorType, errorType);
                 activity.SetTag(Tags.ErrorStack, ConstructErrorMessage(executionErrors));
             }
-        }
-
-        internal static string GetServiceName()
-        {
-            return $"{Instrumentation.TracerSettings.ServiceName}-{ServiceName}";
         }
 
         private static string ConstructErrorMessage(IExecutionErrors executionErrors)
