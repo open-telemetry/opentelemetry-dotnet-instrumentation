@@ -19,7 +19,11 @@
         "CORECLR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\OpenTelemetry.ClrProfiler.Native.dll",
 
         "OTEL_DOTNET_TRACER_HOME": "$(ProjectDir)$(OutputPath)profiler-lib",
-        "OTEL_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json"
+        "OTEL_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json",
+        "OTEL_SERVICE_NAME": "Samples.AspNetCoreMvc31",
+        "OTEL_EXPORTER": "jaeger",
+        "OTEL_EXPORTER_JAEGER_AGENT_HOST": "localhost",
+        "OTEL_EXPORTER_JAEGER_AGENT_PORT": "6831"
       },
       "use64Bit": true,
       "nativeDebugging": true
@@ -37,6 +41,7 @@
         "OTEL_DOTNET_TRACER_HOME": "$(ProjectDir)$(OutputPath)profiler-lib",
         "OTEL_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json",
 
+        "OTEL_SERVICE_NAME": "Samples.AspNetCoreMvc31",
         "OTEL_EXPORTER": "jaeger",
         "OTEL_EXPORTER_JAEGER_AGENT_HOST": "localhost",
         "OTEL_EXPORTER_JAEGER_AGENT_PORT": "6831"
