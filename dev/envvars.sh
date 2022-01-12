@@ -57,7 +57,6 @@ fi
 # Configure OpenTelemetry Tracer 
 export OTEL_DOTNET_TRACER_HOME="${CURDIR}/bin/tracer-home"
 export OTEL_INTEGRATIONS="${CURDIR}/bin/tracer-home/integrations.json"
-export OTEL_VERSION="1.0.0"
 export OTEL_TRACE_DEBUG="1"
 export OTEL_EXPORTER="jaeger"
 export OTEL_DUMP_ILREWRITE_ENABLED="0"

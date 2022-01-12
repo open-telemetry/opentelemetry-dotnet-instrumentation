@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace OpenTelemetry.ClrProfiler.Managed.Configuration
@@ -25,14 +23,8 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                 throw new ArgumentNullException(nameof(source));
             }
 
-            Environment = source.GetString(ConfigurationKeys.Environment);
-
-            ServiceName = source.GetString(ConfigurationKeys.ServiceName);
-            ServiceVersion = source.GetString(ConfigurationKeys.ServiceVersion);
             Exporter = source.GetString(ConfigurationKeys.Exporter);
-
             LoadTracerAtStartup = source.GetBool(ConfigurationKeys.LoadTracerAtStartup) ?? true;
-
             ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? true;
 
             var instrumentations = new Dictionary<string, Instrumentation>();
@@ -94,17 +86,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
             LoadTracerAtStartup = source.GetBool(ConfigurationKeys.LoadTracerAtStartup) ?? true;
 
             Integrations = new IntegrationSettingsCollection(source);
-
-            GlobalTags = source.GetDictionary(ConfigurationKeys.GlobalTags) ??
-             // default value (empty)
-             new ConcurrentDictionary<string, string>();
         }
-
-        /// <summary>
-        /// Gets or sets the default environment name applied to all spans.
-        /// </summary>
-        /// <seealso cref="ConfigurationKeys.Environment"/>
-        public string Environment { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether tracing is enabled.
@@ -112,11 +94,6 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         /// </summary>
         /// <seealso cref="ConfigurationKeys.TraceEnabled"/>
         public bool TraceEnabled { get; set; }
-
-        /// <summary>
-        /// Gets the name of the service.
-        /// </summary>
-        public string ServiceName { get; }
 
         /// <summary>
         /// Gets the version of the service
@@ -172,11 +149,6 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         /// Gets a collection of <see cref="Integrations"/> keyed by integration name.
         /// </summary>
         public IntegrationSettingsCollection Integrations { get; }
-
-        /// <summary>
-        /// Gets or sets the global tags, which are applied to all <see cref="Activity"/>s.
-        /// </summary>
-        public IDictionary<string, string> GlobalTags { get; set; }
 
         internal static Settings FromDefaultSources()
         {

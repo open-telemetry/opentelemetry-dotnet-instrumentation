@@ -39,18 +39,6 @@ const WSTRING include_process_names = WStr("OTEL_PROFILER_PROCESSES");
 // "MyApp.exe,dotnet.exe"
 const WSTRING exclude_process_names = WStr("OTEL_PROFILER_EXCLUDE_PROCESSES");
 
-// Sets the "env" tag for every span.
-const WSTRING env = WStr("OTEL_ENV");
-
-// Sets the default service name for every span.
-// If not set, Tracer will try to determine service name automatically
-// from application name (e.g. entry assembly or IIS application name).
-const WSTRING service_name = WStr("OTEL_SERVICE");
-
-// Sets the "service_version" tag for every span that belong to the root service
-// (and not an external service).
-const WSTRING service_version = WStr("OTEL_VERSION");
-
 // Sets a list of integrations to disable. All other integrations will remain
 // enabled. If not set (default), all integrations are enabled. Supports
 // multiple values separated with comma, for example:

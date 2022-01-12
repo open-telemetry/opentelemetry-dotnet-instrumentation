@@ -22,8 +22,6 @@ namespace IntegrationTests.MongoDB
         public MongoDbTests(ITestOutputHelper output, MongoDbFixture mongoDb)
             : base("MongoDB", output)
         {
-            SetServiceVersion("1.0.0");
-
             _mongoDb = mongoDb;
         }
 
@@ -31,6 +29,9 @@ namespace IntegrationTests.MongoDB
         [Trait("Category", "EndToEnd")]
         public void SubmitsTraces()
         {
+            const string ServiceName = "Samples.MongoDB";
+            SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
+
             int agentPort = TcpPortProvider.GetOpenPort();
 
             using (var agent = new MockZipkinCollector(Output, agentPort))
@@ -45,7 +46,7 @@ namespace IntegrationTests.MongoDB
 
                 // Check for manual trace
                 Assert.Equal("Main()", rootSpan.Name);
-                Assert.Equal("Samples.MongoDB", rootSpan.Service);
+                Assert.Equal(ServiceName, rootSpan.Service);
                 Assert.Null(rootSpan.Type);
 
                 int spansWithResourceName = 0;
@@ -72,9 +73,10 @@ namespace IntegrationTests.MongoDB
                     else
                     {
                         // These are manual (DiagnosticSource) traces
-                        Assert.Equal("Samples.MongoDB", span.Service);
                         Assert.True("1.0.0" == span.Tags?.GetValueOrDefault("otel.library.version"), span.ToString());
                     }
+
+                    Assert.Equal(ServiceName, span.Service);
                 }
 
                 Assert.False(spansWithResourceName == 0, "Extraction of the command failed on all spans");
