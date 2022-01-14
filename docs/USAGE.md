@@ -32,7 +32,7 @@ for more details.
 | `OTEL_INTEGRATIONS` | The file path of bytecode instrumentations JSON configuration file. | `%ProfilerDirectory%/integrations.json` |
 | `OTEL_DOTNET_TRACER_INSTRUMENTATIONS` | The instrumentations you want to enable, separated by a comma. Supported values: `AspNet`, `HttpClient`, `SqlClient`, `MongoDb`. |  |
 | `OTEL_DOTNET_TRACER_DISABLED_INSTRUMENTATIONS` | The instrumentations set via `OTEL_DOTNET_TRACER_INSTRUMENTATIONS` value and `OTEL_INTEGRATIONS` configuration file you want to disable, separated by a comma. | |
-| `OTEL_TRACE_{0}_ENABLED` | Configuration pattern for enabling or disabling a specific bytecode. For example, in order to disable MongoDb instrumentation, set `SIGNALFX_TRACE_MongoDb_ENABLED=false` | `true` |
+| `OTEL_TRACE_{0}_ENABLED` | Configuration pattern for enabling or disabling a specific bytecode. For example, in order to disable MongoDb instrumentation, set `OTEL_TRACE_MongoDb_ENABLED=false` | `true` |
 | `OTEL_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION` |  Sets whether to intercept method calls when the caller method is inside a domain-neutral assembly. This is recommended when instrumenting IIS applications. | `false` |
 | `OTEL_CLR_DISABLE_OPTIMIZATIONS` |  Set to `true` to disable all JIT optimizations. | `false` |
 | `OTEL_CLR_ENABLE_INLINING` | Set to `false` to disable JIT inlining. | `true` |
