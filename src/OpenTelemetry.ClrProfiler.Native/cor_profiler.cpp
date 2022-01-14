@@ -182,16 +182,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     // load all integrations from JSON files
     LoadIntegrationsFromEnvironment(integration_methods_, GetEnvironmentValues(environment::disabled_integrations));
 
-    // check if there are any enabled integrations left
-    if (integration_methods_.empty())
-    {
-        Logger::Warn("OpenTelemetry TRACER DIAGNOSTICS - Profiler disabled: no enabled integrations found.");
-        return E_FAIL;
-    }
-    else
-    {
-        Logger::Debug("Number of Integrations loaded: ", integration_methods_.size());
-    }
+    Logger::Debug("Number of Integrations loaded: ", integration_methods_.size());
 
     DWORD event_mask = COR_PRF_MONITOR_JIT_COMPILATION | COR_PRF_DISABLE_TRANSPARENCY_CHECKS_UNDER_FULL_TRUST |
                        COR_PRF_MONITOR_MODULE_LOADS | COR_PRF_MONITOR_ASSEMBLY_LOADS | COR_PRF_MONITOR_APPDOMAIN_LOADS;
