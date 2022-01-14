@@ -160,16 +160,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         }
     }
 
-    // get path to integration definition JSON files
-    const WSTRING integrations_paths = GetEnvironmentValue(environment::integrations_path);
-
-    if (integrations_paths.empty())
-    {
-        Logger::Warn("OpenTelemetry TRACER DIAGNOSTICS - Profiler disabled: ", environment::integrations_path,
-                     " environment variable not set.");
-        return E_FAIL;
-    }
-
     // Initialize ReJIT handler and define the Rewriter Callback
     auto callback = [this](RejitHandlerModule* mod, RejitHandlerModuleMethod* method) {
         return this->CallTarget_RewriterCallback(mod, method);
