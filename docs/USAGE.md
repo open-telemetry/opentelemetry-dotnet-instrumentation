@@ -27,7 +27,7 @@ for more details.
 
 | Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_INTEGRATIONS` | The file path of bytecode instrumentations JSON configuration file. | `%ProfilerDirectory%/integrations.json` |
+| `OTEL_INTEGRATIONS` | The file path of bytecode instrumentations JSON configuration file. Usually it should be set to `%ProfilerDirectory%/integrations.json` | |
 | `OTEL_DOTNET_TRACER_INSTRUMENTATIONS` | The instrumentations you want to enable, separated by a comma. Supported values: `AspNet`, `HttpClient`, `SqlClient`, `MongoDb`. |  |
 | `OTEL_DOTNET_TRACER_DISABLED_INSTRUMENTATIONS` | The instrumentations set via `OTEL_DOTNET_TRACER_INSTRUMENTATIONS` value and `OTEL_INTEGRATIONS` configuration file you want to disable, separated by a comma. | |
 | `OTEL_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION` |  Sets whether to intercept method calls when the caller method is inside a domain-neutral assembly. This is recommended when instrumenting IIS applications. | `false` |
