@@ -113,8 +113,8 @@ Example usage:
  source ./dev/envvars.sh
  ./samples/ConsoleApp/bin/Debug/netcoreapp3.1/ConsoleApp
  ```
- 
- ## Debug .NET Runtime on Linux
+
+## Debug .NET Runtime on Linux
 
 - [Requirements](https://github.com/dotnet/runtime/blob/main/docs/workflow/requirements/linux-requirements.md)
 

@@ -26,8 +26,9 @@ exporters:
   logging:
     logLevel: debug
   jaeger:
-    endpoint: jaeger:14250
-    insecure: true
+    endpoint: "${JAEGER_ENDPOINT}"
+    tls:
+      insecure: true
   prometheus:
     endpoint: "0.0.0.0:8889"
     namespace: promexample
@@ -45,5 +46,4 @@ service:
       processors: [batch]
       exporters: [prometheus]
       #exporters: [logging]
-
   extensions: [health_check, pprof, zpages]

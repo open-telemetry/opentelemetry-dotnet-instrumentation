@@ -9,7 +9,6 @@
 | Environment variable | Description | Default |
 |-|-|-|
 | `OTEL_TRACE_ENABLED` | Enable to activate the tracer. | `true` |
-| `OTEL_DOTNET_TRACER_FORCE` | Enable the tracer even if no integrations is set using `OTEL_INTEGRATIONS`. | `true` |
 | `OTEL_PROFILER_PROCESSES` | Sets the filename of executables the profiler can attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
 | `OTEL_PROFILER_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
 | `OTEL_AZURE_APP_SERVICES` | Set to indicate that the profiler is running in the context of Azure App Services. | `false` |
@@ -29,7 +28,7 @@ for more details.
 
 | Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_INTEGRATIONS` | The file path of bytecode instrumentations JSON configuration file. | `%ProfilerDirectory%/integrations.json` |
+| `OTEL_INTEGRATIONS` | The file path of bytecode instrumentations JSON configuration file. Usually it should be set to `%ProfilerDirectory%/integrations.json` | |
 | `OTEL_DOTNET_TRACER_INSTRUMENTATIONS` | The instrumentations you want to enable, separated by a comma. Supported values: `AspNet`, `HttpClient`, `SqlClient`, `MongoDb`. |  |
 | `OTEL_DOTNET_TRACER_DISABLED_INSTRUMENTATIONS` | The instrumentations set via `OTEL_DOTNET_TRACER_INSTRUMENTATIONS` value and `OTEL_INTEGRATIONS` configuration file you want to disable, separated by a comma. | |
 | `OTEL_TRACE_{0}_ENABLED` | Configuration pattern for enabling or disabling a specific bytecode. For example, in order to disable MongoDb instrumentation, set `OTEL_TRACE_MongoDb_ENABLED=false` | `true` |
