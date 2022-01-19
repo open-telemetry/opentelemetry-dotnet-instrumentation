@@ -9,9 +9,10 @@ services:
       - "14250:14250"
 
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.40.0
+    image: otel/opentelemetry-collector-contrib:0.42.0
     volumes:
       - ./otel-config.yaml:/etc/otel/config.yaml
+    command: --config /etc/otel/config.yaml
     environment:
       - JAEGER_ENDPOINT=jaeger:14250
     ports:
