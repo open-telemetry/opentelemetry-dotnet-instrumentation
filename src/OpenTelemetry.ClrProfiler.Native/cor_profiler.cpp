@@ -160,16 +160,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         }
     }
 
-    // get path to integration definition JSON files
-    const WSTRING integrations_paths = GetEnvironmentValue(environment::integrations_path);
-
-    if (integrations_paths.empty())
-    {
-        Logger::Warn("OpenTelemetry TRACER DIAGNOSTICS - Profiler disabled: ", environment::integrations_path,
-                     " environment variable not set.");
-        return E_FAIL;
-    }
-
     // Initialize ReJIT handler and define the Rewriter Callback
     auto callback = [this](RejitHandlerModule* mod, RejitHandlerModuleMethod* method) {
         return this->CallTarget_RewriterCallback(mod, method);
@@ -182,16 +172,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     // load all integrations from JSON files
     LoadIntegrationsFromEnvironment(integration_methods_, GetEnvironmentValues(environment::disabled_integrations));
 
-    // check if there are any enabled integrations left
-    if (integration_methods_.empty())
-    {
-        Logger::Warn("OpenTelemetry TRACER DIAGNOSTICS - Profiler disabled: no enabled integrations found.");
-        return E_FAIL;
-    }
-    else
-    {
-        Logger::Debug("Number of Integrations loaded: ", integration_methods_.size());
-    }
+    Logger::Debug("Number of Integrations loaded: ", integration_methods_.size());
 
     DWORD event_mask = COR_PRF_MONITOR_JIT_COMPILATION | COR_PRF_DISABLE_TRANSPARENCY_CHECKS_UNDER_FULL_TRUST |
                        COR_PRF_MONITOR_MODULE_LOADS | COR_PRF_MONITOR_ASSEMBLY_LOADS | COR_PRF_MONITOR_APPDOMAIN_LOADS;
@@ -488,12 +469,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
 
     if (!is_attached_)
     {
-        return S_OK;
-    }
-
-    if (integration_methods_.empty())
-    {
-        Logger::Debug("ModuleLoadFinished skipping module (no integrations): ", module_id);
         return S_OK;
     }
 
