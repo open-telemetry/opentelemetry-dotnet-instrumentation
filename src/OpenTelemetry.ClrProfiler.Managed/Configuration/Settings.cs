@@ -23,7 +23,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                 throw new ArgumentNullException(nameof(source));
             }
 
-            Exporter = source.GetString(ConfigurationKeys.Exporter);
+            Exporter = source.GetString(ConfigurationKeys.Exporter) ?? "otlp";
             LoadTracerAtStartup = source.GetBool(ConfigurationKeys.LoadTracerAtStartup) ?? true;
             ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? true;
 
