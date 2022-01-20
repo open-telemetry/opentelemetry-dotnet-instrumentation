@@ -120,7 +120,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     {
         Logger::Debug("Interface ICorProfilerInfo10 found.");
         // .NET Core applications should use the dotnet startup hook to bootstrap OpenTelemetry so that the
-        // necessary dependencies will be available. Bootstrapping with the profiling APIs occurs to early
+        // necessary dependencies will be available. Bootstrapping with the profiling APIs occurs too early
         // and the necessary dependencies are not available yet.
         use_dotnet_startuphook_bootstrapper = true;
     }
