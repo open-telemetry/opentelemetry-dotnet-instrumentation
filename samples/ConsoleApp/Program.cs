@@ -34,8 +34,8 @@ namespace ConsoleApp
                 activity?.SetTag("foo", "bar");
 
                 await HttpGet("https://www.example.com/default-handler");
-                await HttpGet("http://127.0.0.1:8080/api/mongo");
-                await HttpGet("http://127.0.0.1:8080/api/redis");
+                await HttpGet("https://www.example.com/test-handler");
+                await HttpGet("https://www.example.com/another-handler");
             }
             
             var request = new HttpRequestMessage
