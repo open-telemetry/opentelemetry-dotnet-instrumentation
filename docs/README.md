@@ -41,6 +41,7 @@ Maintainers ([@open-telemetry/dotnet-instrumentation-maintainers](https://github
 - [Chris Ventura](https://github.com/nrcventura), New Relic
 - [Greg Paperin](https://github.com/macrogreg), Datadog
 - [Paulo Janotti](https://github.com/pjanotti), Splunk
+- [Robert Pajak](https://github.com/pellared), Splunk
 - [Zach Montoya](https://github.com/zacharycmontoya), Datadog
 
 Approvers ([@open-telemetry/dotnet-instrumentation-approvers](https://github.com/orgs/open-telemetry/teams/dotnet-instrumentation-approvers)):
@@ -51,7 +52,6 @@ Approvers ([@open-telemetry/dotnet-instrumentation-approvers](https://github.com
 - [Mike Goldsmith](https://github.com/MikeGoldsmith), HoneyComb
 - [Rajkumar Rangaraj](https://github.com/rajkumar-rangaraj), Microsoft
 - [Rasmus Kuusmann](https://github.com/RassK), Splunk
-- [Robert Pajak](https://github.com/pellared), Splunk
 - [Tony Redondo](https://github.com/tonyredondo), Datadog
 
 Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/main/community-membership.md).

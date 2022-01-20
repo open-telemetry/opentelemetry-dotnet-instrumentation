@@ -146,10 +146,5 @@ namespace IntegrationTests.Helpers
         {
             EnvironmentHelper.CustomEnvironmentVariables.Add(key, value);
         }
-
-        protected void SetServiceVersion(string serviceVersion)
-        {
-            SetEnvironmentVariable("OTEL_VERSION", serviceVersion);
-        }
     }
 }

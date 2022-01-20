@@ -11,21 +11,24 @@ namespace IntegrationTests.StartupHook
 {
     public class StartupHookTests : TestHelper
     {
+        private const string ServiceName = "Samples.MongoDB";
+
         private List<WebServerSpanExpectation> _expectations = new List<WebServerSpanExpectation>();
 
         public StartupHookTests(ITestOutputHelper output)
             : base("StartupHook", output)
         {
-            SetServiceVersion("1.0.0");
             SetEnvironmentVariable("OTEL_DOTNET_TRACER_INSTRUMENTATIONS", "HttpClient");
-            _expectations.Add(new WebServerSpanExpectation("Samples.StartupHook", null, "SayHello", "SayHello", null));
-            _expectations.Add(new WebServerSpanExpectation("Samples.StartupHook", null, "HTTP GET", "HTTP GET", null, "GET"));
+            _expectations.Add(new WebServerSpanExpectation(ServiceName, null, "SayHello", "SayHello", null));
+            _expectations.Add(new WebServerSpanExpectation(ServiceName, null, "HTTP GET", "HTTP GET", null, "GET"));
         }
 
         [Fact]
         [Trait("Category", "EndToEnd")]
         public void SubmitsTraces()
         {
+            SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
+
             RunTestAndValidateResults(2);
         }
 
@@ -43,6 +46,7 @@ namespace IntegrationTests.StartupHook
                 expectedSpanCount = 0;
             }
 
+            SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
             SetEnvironmentVariable("OTEL_PROFILER_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,{applicationNameToExclude}");
 
             RunTestAndValidateResults(expectedSpanCount);

@@ -102,9 +102,6 @@ namespace IntegrationTests.Helpers
                 "OTEL_DOTNET_TRACER_HOME",
                 "OTEL_INTEGRATIONS",
                 "OTEL_DISABLED_INTEGRATIONS",
-                "OTEL_SERVICE",
-                "OTEL_VERSION",
-                "OTEL_TAGS",
                 "OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES",
                 "OTEL_PROFILER_EXCLUDE_PROCESSES"
             };
@@ -185,8 +182,6 @@ namespace IntegrationTests.Helpers
             // for ASP.NET Core sample apps, set the server's port
             environmentVariables["ASPNETCORE_URLS"] = $"http://127.0.0.1:{aspNetCorePort}/";
 
-            // set consistent env name (can be overwritten by custom environment variable)
-            environmentVariables["OTEL_ENV"] = "integration_tests";
             environmentVariables["OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES"] = "Samples.*";
 
             foreach (var key in CustomEnvironmentVariables.Keys)

@@ -14,7 +14,7 @@ namespace IntegrationTests.GraphQL
 {
     public class GraphQLTests : TestHelper
     {
-        private const string ServiceVersion = "1.0.0";
+        private const string ServiceName = "Samples.GraphQL";
 
         private static readonly string _graphQLValidateOperationName = "graphql.validate";
         private static readonly string _graphQLExecuteOperationName = "graphql.execute";
@@ -57,7 +57,6 @@ namespace IntegrationTests.GraphQL
         public GraphQLTests(ITestOutputHelper output)
             : base("GraphQL", output)
         {
-            SetServiceVersion("1.0.0");
         }
 
         [Fact]
@@ -65,6 +64,8 @@ namespace IntegrationTests.GraphQL
         [Trait("RunOnWindows", "True")]
         public void SubmitsTraces()
         {
+            SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
+
             int agentPort = TcpPortProvider.GetOpenPort();
             int aspNetCorePort = TcpPortProvider.GetOpenPort();
 
@@ -176,7 +177,7 @@ namespace IntegrationTests.GraphQL
             });
 
             // Expect a 'validate' span
-            _expectations.Add(new GraphQLSpanExpectation("Samples.GraphQL", _graphQLValidateOperationName, _graphQLValidateOperationName)
+            _expectations.Add(new GraphQLSpanExpectation(ServiceName, _graphQLValidateOperationName, _graphQLValidateOperationName)
             {
                 OriginalUri = url,
                 GraphQLRequestBody = graphQLRequestBody,
@@ -191,7 +192,7 @@ namespace IntegrationTests.GraphQL
             if (failsValidation) { return; }
 
             // Expect an 'execute' span
-            _expectations.Add(new GraphQLSpanExpectation("Samples.GraphQL", _graphQLExecuteOperationName, resourceName)
+            _expectations.Add(new GraphQLSpanExpectation(ServiceName, _graphQLExecuteOperationName, resourceName)
             {
                 OriginalUri = url,
                 GraphQLRequestBody = graphQLRequestBody,

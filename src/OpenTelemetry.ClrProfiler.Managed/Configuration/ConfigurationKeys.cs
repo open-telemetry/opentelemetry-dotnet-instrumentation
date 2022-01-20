@@ -8,29 +8,11 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
     public class ConfigurationKeys
     {
         /// <summary>
-        /// Configuration key for the application's environment. Sets the "env" tag on every <see cref="Activity"/>.
-        /// </summary>
-        /// <seealso cref="Settings.Environment"/>
-        public const string Environment = "OTEL_ENV";
-
-        /// <summary>
         /// Configuration key for enabling or disabling the Tracer.
         /// Default is value is true (enabled).
         /// </summary>
         /// <seealso cref="Settings.TraceEnabled"/>
         public const string TraceEnabled = "OTEL_TRACE_ENABLED";
-
-        /// <summary>
-        /// Configuration key for the application's default service name.
-        /// Used as the service name for top-level spans,
-        /// and used to determine service name of some child spans.
-        /// </summary>
-        public const string ServiceName = "OTEL_SERVICE";
-
-        /// <summary>
-        /// Configuration key for the application's version. Sets the "version" tag on every span.
-        /// </summary>
-        public const string ServiceVersion = "OTEL_VERSION";
 
         /// <summary>
         /// Configuration key for whether the tracer should be initialized by the profiler or not.
@@ -73,12 +55,6 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         /// Configuration key for legacy source names to be added to the tracer at the startup.
         /// </summary>
         public const string LegacySources = "OTEL_DOTNET_TRACER_LEGACY_SOURCES";
-
-        /// <summary>
-        /// Configuration key for a list of tags to be applied globally to spans.
-        /// </summary>
-        /// <seealso cref="Settings.GlobalTags"/>
-        public const string GlobalTags = "OTEL_TAGS";
 
         /// <summary>
         /// String format patterns used to match integration-specific configuration keys.

@@ -128,7 +128,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb
                     Port = port
                 };
 
-                activity = ActivitySource.StartActivityWithTags(OperationName, serviceName: settings.ServiceName, tags: tags);
+                activity = ActivitySource.StartActivityWithTags(OperationName, tags);
                 activity.SetResourceName(resourceName);
             }
             catch (Exception ex)

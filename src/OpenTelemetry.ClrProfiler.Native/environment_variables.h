@@ -13,11 +13,6 @@ const WSTRING tracing_enabled = WStr("OTEL_TRACE_ENABLED");
 // Sets whether debug mode is enabled. Default is false.
 const WSTRING debug_enabled = WStr("OTEL_TRACE_DEBUG");
 
-// Sets whether we force the instrumentation
-// even if nothing is supposed to be instrumented according to integration
-// definition JSON files. Default is true.
-const WSTRING tracing_force = WStr("OTEL_DOTNET_TRACER_FORCE");
-
 // Sets the paths to integration definition JSON files.
 // Supports multiple values separated with comma, for example:
 // "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\integrations.json,D:\temp\test_integrations.json"
@@ -38,18 +33,6 @@ const WSTRING include_process_names = WStr("OTEL_PROFILER_PROCESSES");
 // Supports multiple values separated with comma, for example:
 // "MyApp.exe,dotnet.exe"
 const WSTRING exclude_process_names = WStr("OTEL_PROFILER_EXCLUDE_PROCESSES");
-
-// Sets the "env" tag for every span.
-const WSTRING env = WStr("OTEL_ENV");
-
-// Sets the default service name for every span.
-// If not set, Tracer will try to determine service name automatically
-// from application name (e.g. entry assembly or IIS application name).
-const WSTRING service_name = WStr("OTEL_SERVICE");
-
-// Sets the "service_version" tag for every span that belong to the root service
-// (and not an external service).
-const WSTRING service_version = WStr("OTEL_VERSION");
 
 // Sets a list of integrations to disable. All other integrations will remain
 // enabled. If not set (default), all integrations are enabled. Supports

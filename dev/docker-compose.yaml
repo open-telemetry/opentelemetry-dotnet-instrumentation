@@ -9,9 +9,12 @@ services:
       - "14250:14250"
 
   otel-collector:
-    image: otel/opentelemetry-collector:latest
+    image: otel/opentelemetry-collector-contrib:0.42.0
     volumes:
       - ./otel-config.yaml:/etc/otel/config.yaml
+    command: --config /etc/otel/config.yaml
+    environment:
+      - JAEGER_ENDPOINT=jaeger:14250
     ports:
       - "1777:1777"  # pprof extension
       - "8888:8888"  # Prometheus metrics exposed by the collector
