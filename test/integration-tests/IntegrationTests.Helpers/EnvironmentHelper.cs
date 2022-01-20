@@ -145,34 +145,24 @@ namespace IntegrationTests.Helpers
             int agentPort,
             int aspNetCorePort,
             StringDictionary environmentVariables,
-            string processToProfile = null,
-            bool isStartupHook = false)
+            string processToProfile = null)
         {
             string profilerEnabled = _requiresProfiling ? "1" : "0";
+            string profilerPath = GetProfilerPath();
 
-            if (isStartupHook)
+            if (IsCoreClr())
             {
                 string hookPath = GetStartupHookOutputPath();
-
                 environmentVariables["DOTNET_STARTUP_HOOKS"] = hookPath;
-                environmentVariables["OTEL_DOTNET_TRACER_INSTRUMENTATIONS"] = "HttpClient";
+                environmentVariables["CORECLR_ENABLE_PROFILING"] = profilerEnabled;
+                environmentVariables["CORECLR_PROFILER"] = EnvironmentTools.ProfilerClsId;
+                environmentVariables["CORECLR_PROFILER_PATH"] = profilerPath;
             }
             else
             {
-                string profilerPath = GetProfilerPath();
-
-                if (IsCoreClr())
-                {
-                    environmentVariables["CORECLR_ENABLE_PROFILING"] = profilerEnabled;
-                    environmentVariables["CORECLR_PROFILER"] = EnvironmentTools.ProfilerClsId;
-                    environmentVariables["CORECLR_PROFILER_PATH"] = profilerPath;
-                }
-                else
-                {
-                    environmentVariables["COR_ENABLE_PROFILING"] = profilerEnabled;
-                    environmentVariables["COR_PROFILER"] = EnvironmentTools.ProfilerClsId;
-                    environmentVariables["COR_PROFILER_PATH"] = profilerPath;
-                }
+                environmentVariables["COR_ENABLE_PROFILING"] = profilerEnabled;
+                environmentVariables["COR_PROFILER"] = EnvironmentTools.ProfilerClsId;
+                environmentVariables["COR_PROFILER_PATH"] = profilerPath;
             }
 
             if (DebugModeEnabled)

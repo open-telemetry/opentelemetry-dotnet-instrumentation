@@ -17,6 +17,7 @@ namespace IntegrationTests.StartupHook
             : base("StartupHook", output)
         {
             SetServiceVersion("1.0.0");
+            SetEnvironmentVariable("OTEL_DOTNET_TRACER_INSTRUMENTATIONS", "HttpClient");
             _expectations.Add(new WebServerSpanExpectation("Samples.StartupHook", null, "SayHello", "SayHello", null));
             _expectations.Add(new WebServerSpanExpectation("Samples.StartupHook", null, "HTTP GET", "HTTP GET", null, "GET"));
         }
@@ -52,7 +53,7 @@ namespace IntegrationTests.StartupHook
             int agentPort = TcpPortProvider.GetOpenPort();
 
             using (var agent = new MockZipkinCollector(Output, agentPort))
-            using (var processResult = RunSampleAndWaitForExit(agent.Port, startupHook: true))
+            using (var processResult = RunSampleAndWaitForExit(agent.Port))
             {
                 Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
                 var span = agent.WaitForSpans(2, 500);

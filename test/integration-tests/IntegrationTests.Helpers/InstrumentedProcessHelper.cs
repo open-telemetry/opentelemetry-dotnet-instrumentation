@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 
 namespace IntegrationTests.Helpers
 {
-    public class ProfilerHelper
+    public class InstrumentedProcessHelper
     {
-        public static Process StartProcessWithProfiler(
+        public static Process StartInstrumentedProcess(
             string executable,
             EnvironmentHelper environmentHelper,
             string arguments = null,
