@@ -63,7 +63,7 @@ namespace ConsoleApp
                 {
                     using var response = await client.SendAsync(request);
 
-                    _ = await response.Content.ReadAsStringAsync();
+                    await response.Content.ReadAsStringAsync();
                 }
                 catch (HttpRequestException e)
                 {
