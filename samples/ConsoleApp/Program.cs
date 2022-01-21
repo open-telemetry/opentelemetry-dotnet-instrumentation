@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Diagnostics;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTracing.Propagation;
@@ -60,41 +59,19 @@ namespace ConsoleApp
                     request.Headers.Add(kvp.Key, kvp.Value);
                 }
 
-                int? statusCode;
-                int? responseLength = null;
                 try
                 {
                     using var response = await client.SendAsync(request);
 
-                    statusCode = (int) response.StatusCode;
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    responseLength = responseContent.Length;
+                    _ = await response.Content.ReadAsStringAsync();
                 }
                 catch (HttpRequestException e)
                 {
-                    LogHttpRequestException(requestUrl, e);
-#if NET5_0_OR_GREATER
-                    statusCode = (int?) e.StatusCode;
-#else
-                    statusCode = null;
-#endif
+                    Console.WriteLine($"HttpRequestException occurred while calling {requestUrl}, {e}");
                 }
 
-                if (statusCode.HasValue)
-                {
-                    scope.Span.SetTag("http.status_code", statusCode.Value);
-                }
-
-                if (responseLength.HasValue)
-                {
-                    scope.Span.SetTag("response.length", responseLength.Value);
-                }
+                scope.Span.SetTag("custom.opentracing", "manual span");
             }
-        }
-
-        private static void LogHttpRequestException(string requestUrl, HttpRequestException httpRequestException)
-        {
-            Console.WriteLine($"HttpRequestException occurred while calling {requestUrl}, {httpRequestException}");
         }
 
         private static async Task HttpGet(string url)
@@ -108,7 +85,7 @@ namespace ConsoleApp
             }
             catch (HttpRequestException e)
             {
-                LogHttpRequestException(url, e);
+                Console.WriteLine($"HttpRequestException occurred while calling {url}, {e}");
             }
         }
     }
