@@ -37,10 +37,11 @@ namespace ConsoleApp
                 await HttpGet("http://127.0.0.1:8080/api/mongo");
                 await HttpGet("http://127.0.0.1:8080/api/redis");
             }
-            
+
+            const string requestUrl = "https://www.example.com/";
             var request = new HttpRequestMessage
             {
-                RequestUri = new Uri("https://www.example.com/"),
+                RequestUri = new Uri(requestUrl),
                 Method = HttpMethod.Post,
                 Content = new StringContent(string.Empty, Encoding.UTF8),
             };
@@ -58,21 +59,34 @@ namespace ConsoleApp
                     request.Headers.Add(kvp.Key, kvp.Value);
                 }
 
-                using var response = await client.SendAsync(request);
+                try
+                {
+                    using var response = await client.SendAsync(request);
 
-                scope.Span.SetTag("http.status_code", (int)response.StatusCode);
+                    await response.Content.ReadAsStringAsync();
+                }
+                catch (HttpRequestException e)
+                {
+                    Console.WriteLine($"HttpRequestException occurred while calling {requestUrl}, {e}");
+                }
 
-                var responseContent = await response.Content.ReadAsStringAsync();
-                scope.Span.SetTag("response.length", responseContent.Length);
+                scope.Span.SetTag("custom.opentracing", "manual span");
             }
         }
 
         private static async Task HttpGet(string url)
         {
-            using var client = new HttpClient();
-            Console.WriteLine($"Calling {url}");
-            await client.GetAsync(url);
-            Console.WriteLine($"Called {url}");
+            try
+            {
+                using var client = new HttpClient();
+                Console.WriteLine($"Calling {url}");
+                await client.GetAsync(url);
+                Console.WriteLine($"Called {url}");
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine($"HttpRequestException occurred while calling {url}, {e}");
+            }
         }
     }
 }
