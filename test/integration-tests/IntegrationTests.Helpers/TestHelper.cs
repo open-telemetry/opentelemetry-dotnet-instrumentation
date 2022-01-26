@@ -70,8 +70,7 @@ namespace IntegrationTests.Helpers
                   .WithPortBinding(webPort, 80)
                   .WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", zipkinEndpoint)
                   .WithMount(logPath, "c:/inetpub/wwwroot/logs")
-                  .WithMount(EnvironmentHelper.GetNukeBuildOutput(), "c:/opentelemetry")
-                  .WithWaitStrategy(waitOS.UntilPortIsAvailable(80));
+                  .WithMount(EnvironmentHelper.GetNukeBuildOutput(), "c:/opentelemetry");
 
             var container = builder.Build();
             var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
