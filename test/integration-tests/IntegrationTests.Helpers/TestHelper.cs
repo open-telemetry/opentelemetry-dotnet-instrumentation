@@ -5,6 +5,7 @@ using DotNet.Testcontainers.Containers.Builders;
 using DotNet.Testcontainers.Containers.Modules;
 using DotNet.Testcontainers.Containers.OutputConsumers;
 using DotNet.Testcontainers.Containers.WaitStrategies;
+using FluentAssertions;
 using IntegrationTests.Helpers.Models;
 using Xunit.Abstractions;
 
@@ -74,6 +75,8 @@ namespace IntegrationTests.Helpers
 
             var container = builder.Build();
             var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
+
+            wasStarted.Should().BeTrue($"Container based on {sampleName} has to be operational for the test");
 
             Output.WriteLine($"Container was started successfully: {wasStarted}");
 
