@@ -76,14 +76,15 @@ namespace IntegrationTests.Helpers
             var container = builder.Build();
             var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
 
-            wasStarted.Should().BeTrue($"Container based on {sampleName} has to be operational for the test");
+            wasStarted.Should().BeTrue($"Container based on {sampleName} has to be operational for the test.");
 
-            Output.WriteLine($"Container was started successfully: {wasStarted}");
+            Output.WriteLine($"Container was started successfully.");
 
-            if (wasStarted)
-            {
-                PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {healthCheckEndpoint}", Output);
-            }
+            PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {healthCheckEndpoint}", Output);
+
+            var (standardOutput, _) = PowershellHelper.RunCommand($"Write-Host (Test-NetConnection -ComputerName 'localhost' -Port {webPort}).TcpTestSucceeded", Output);
+
+            standardOutput.Should().Contain("True", $"Test connection to the port number {webPort} failed. On this port container service should be available.");
 
             return new Container(container);
         }
