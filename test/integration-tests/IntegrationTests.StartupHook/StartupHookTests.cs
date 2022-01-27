@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using IntegrationTests.Helpers;
 using IntegrationTests.Helpers.Mocks;
@@ -18,6 +19,7 @@ namespace IntegrationTests.StartupHook
         public StartupHookTests(ITestOutputHelper output)
             : base("StartupHook", output)
         {
+            SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
             SetEnvironmentVariable("OTEL_DOTNET_TRACER_INSTRUMENTATIONS", "HttpClient");
             _expectations.Add(new WebServerSpanExpectation(ServiceName, null, "SayHello", "SayHello", null));
             _expectations.Add(new WebServerSpanExpectation(ServiceName, null, "HTTP GET", "HTTP GET", null, "GET"));
@@ -27,9 +29,22 @@ namespace IntegrationTests.StartupHook
         [Trait("Category", "EndToEnd")]
         public void SubmitsTraces()
         {
-            SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
+            const int expectedSpanCount = 2;
 
-            RunTestAndValidateResults(2);
+            var spans = RunTestApplication(enableStartupHook: true);
+
+            AssertExpectedSpansReceived(expectedSpanCount, spans);
+        }
+
+        [Fact]
+        [Trait("Category", "EndToEnd")]
+        public void InstrumentationNotAvailableWhenStartupHookIsNotEnabled()
+        {
+            const int expectedSpanCount = 0;
+
+            var spans = RunTestApplication(enableStartupHook: false);
+
+            AssertExpectedSpansReceived(expectedSpanCount, spans);
         }
 
         [Theory]
@@ -46,30 +61,34 @@ namespace IntegrationTests.StartupHook
                 expectedSpanCount = 0;
             }
 
-            SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
             SetEnvironmentVariable("OTEL_PROFILER_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,{applicationNameToExclude}");
 
-            RunTestAndValidateResults(expectedSpanCount);
+            var spans = RunTestApplication(enableStartupHook: true);
+
+            AssertExpectedSpansReceived(expectedSpanCount, spans);
         }
 
-        private void RunTestAndValidateResults(int expectedSpanCount)
+        private IImmutableList<IMockSpan> RunTestApplication(bool enableStartupHook)
         {
             int agentPort = TcpPortProvider.GetOpenPort();
 
             using (var agent = new MockZipkinCollector(Output, agentPort))
-            using (var processResult = RunSampleAndWaitForExit(agent.Port))
+            using (var processResult = RunSampleAndWaitForExit(agent.Port, enableStartupHook: enableStartupHook))
             {
                 Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
-                var span = agent.WaitForSpans(2, 500);
+                return agent.WaitForSpans(2, 500);
+            }
+        }
 
-                Assert.True(span.Count() == expectedSpanCount, $"Expecting {expectedSpanCount} spans, received {span.Count()}");
-                if (expectedSpanCount > 0)
-                {
-                    Assert.Single(span.Select(s => s.Service).Distinct());
+        private void AssertExpectedSpansReceived(int expectedSpanCount, IImmutableList<IMockSpan> spans)
+        {
+            Assert.True(spans.Count() == expectedSpanCount, $"Expecting {expectedSpanCount} spans, received {spans.Count()}");
+            if (expectedSpanCount > 0)
+            {
+                Assert.Single(spans.Select(s => s.Service).Distinct());
 
-                    var spanList = span.ToList();
-                    AssertExpectationsMet(_expectations, spanList);
-                }
+                var spanList = spans.ToList();
+                AssertExpectationsMet(_expectations, spanList);
             }
         }
 

@@ -87,7 +87,7 @@ namespace IntegrationTests.Helpers
             return new Container(container);
         }
 
-        public Process StartSample(int traceAgentPort, string arguments, string packageVersion, int aspNetCorePort, string framework = "")
+        public Process StartSample(int traceAgentPort, string arguments, string packageVersion, int aspNetCorePort, string framework = "", bool enableStartupHook = true)
         {
             // get path to sample app that the profiler will attach to
             string sampleAppPath = EnvironmentHelper.GetSampleApplicationPath(packageVersion, framework);
@@ -106,12 +106,13 @@ namespace IntegrationTests.Helpers
                 args,
                 traceAgentPort: traceAgentPort,
                 aspNetCorePort: aspNetCorePort,
-                processToProfile: executable);
+                processToProfile: executable,
+                enableStartupHook: enableStartupHook);
         }
 
-        public ProcessResult RunSampleAndWaitForExit(int traceAgentPort, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000, bool onlyUseStartupHook = false)
+        public ProcessResult RunSampleAndWaitForExit(int traceAgentPort, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000, bool enableStartupHook = true)
         {
-            var process = StartSample(traceAgentPort, arguments, packageVersion, aspNetCorePort: aspNetCorePort, framework: framework);
+            var process = StartSample(traceAgentPort, arguments, packageVersion, aspNetCorePort: aspNetCorePort, framework: framework, enableStartupHook: enableStartupHook);
             var name = process.ProcessName;
 
             using var helper = new ProcessHelper(process);

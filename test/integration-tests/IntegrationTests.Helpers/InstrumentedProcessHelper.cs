@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 
 namespace IntegrationTests.Helpers
@@ -12,7 +12,8 @@ namespace IntegrationTests.Helpers
             bool redirectStandardInput = false,
             int traceAgentPort = 9696,
             int aspNetCorePort = 5000,
-            string processToProfile = null)
+            string processToProfile = null,
+            bool enableStartupHook = true)
         {
             if (environmentHelper == null)
             {
@@ -24,7 +25,7 @@ namespace IntegrationTests.Helpers
 
             var startInfo = new ProcessStartInfo(executable, $"{arguments ?? string.Empty}");
 
-            environmentHelper.SetEnvironmentVariables(traceAgentPort, aspNetCorePort, startInfo.EnvironmentVariables, processToProfile);
+            environmentHelper.SetEnvironmentVariables(traceAgentPort, aspNetCorePort, startInfo.EnvironmentVariables, enableStartupHook, processToProfile);
 
             startInfo.UseShellExecute = false;
             startInfo.CreateNoWindow = true;

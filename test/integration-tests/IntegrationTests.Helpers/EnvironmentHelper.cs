@@ -142,6 +142,7 @@ namespace IntegrationTests.Helpers
             int agentPort,
             int aspNetCorePort,
             StringDictionary environmentVariables,
+            bool enableStartupHook,
             string processToProfile = null)
         {
             string profilerEnabled = _requiresProfiling ? "1" : "0";
@@ -149,8 +150,14 @@ namespace IntegrationTests.Helpers
 
             if (IsCoreClr())
             {
-                string hookPath = GetStartupHookOutputPath();
-                environmentVariables["DOTNET_STARTUP_HOOKS"] = hookPath;
+                // enableStartupHook should be true by default, and the parameter should only be set
+                // to false when testing the case that instrumentation should not be available.
+                if (enableStartupHook)
+                {
+                    string hookPath = GetStartupHookOutputPath();
+                    environmentVariables["DOTNET_STARTUP_HOOKS"] = hookPath;
+                }
+
                 environmentVariables["CORECLR_ENABLE_PROFILING"] = profilerEnabled;
                 environmentVariables["CORECLR_PROFILER"] = EnvironmentTools.ProfilerClsId;
                 environmentVariables["CORECLR_PROFILER_PATH"] = profilerPath;
