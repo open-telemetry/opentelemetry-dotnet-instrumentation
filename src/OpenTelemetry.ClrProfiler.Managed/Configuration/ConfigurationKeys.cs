@@ -65,16 +65,6 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
             /// Configuration key pattern for enabling or disabling an integration.
             /// </summary>
             public const string Enabled = "OTEL_TRACE_{0}_ENABLED";
-
-            /// <summary>
-            /// Configuration key pattern for enabling or disabling Analytics in an integration.
-            /// </summary>
-            public const string AnalyticsEnabled = "OTEL_TRACE_{0}_ANALYTICS_ENABLED";
-
-            /// <summary>
-            /// Configuration key pattern for setting Analytics sampling rate in an integration.
-            /// </summary>
-            public const string AnalyticsSampleRate = "OTEL_TRACE_{0}_ANALYTICS_SAMPLE_RATE";
         }
     }
 }

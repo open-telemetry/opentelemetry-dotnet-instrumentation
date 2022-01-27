@@ -13,16 +13,5 @@ namespace OpenTelemetry.ClrProfiler.Managed.Util
 
             return false;
         }
-
-        internal static bool IsIntegrationEnabled(this Settings settings, string integrationName)
-        {
-            if (settings.TraceEnabled && !DomainMetadata.ShouldAvoidAppDomain())
-            {
-                bool? enabled = settings.Integrations[integrationName].Enabled;
-                return enabled != false;
-            }
-
-            return false;
-        }
     }
 }

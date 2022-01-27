@@ -1,11 +1,11 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using DotNet.Testcontainers.Containers.Builders;
 using DotNet.Testcontainers.Containers.Modules;
 using DotNet.Testcontainers.Containers.OutputConsumers;
 using DotNet.Testcontainers.Containers.WaitStrategies;
+using FluentAssertions;
 using IntegrationTests.Helpers.Models;
 using Xunit.Abstractions;
 
@@ -71,18 +71,20 @@ namespace IntegrationTests.Helpers
                   .WithPortBinding(webPort, 80)
                   .WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", zipkinEndpoint)
                   .WithMount(logPath, "c:/inetpub/wwwroot/logs")
-                  .WithMount(EnvironmentHelper.GetNukeBuildOutput(), "c:/opentelemetry")
-                  .WithWaitStrategy(waitOS.UntilPortIsAvailable(80));
+                  .WithMount(EnvironmentHelper.GetNukeBuildOutput(), "c:/opentelemetry");
 
             var container = builder.Build();
             var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
 
-            Output.WriteLine($"Container was started successfully: {wasStarted}");
+            wasStarted.Should().BeTrue($"Container based on {sampleName} has to be operational for the test.");
 
-            if (wasStarted)
-            {
-                PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {healthCheckEndpoint}", Output);
-            }
+            Output.WriteLine($"Container was started successfully.");
+
+            PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {healthCheckEndpoint}", Output);
+
+            var (standardOutput, _) = PowershellHelper.RunCommand($"Write-Host (Test-NetConnection -ComputerName 'localhost' -Port {webPort}).TcpTestSucceeded", Output);
+
+            standardOutput.Should().Contain("True", $"Test connection to the port number {webPort} failed. On this port container service should be available.");
 
             return new Container(container);
         }

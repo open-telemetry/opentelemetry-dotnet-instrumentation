@@ -5,7 +5,7 @@ namespace IntegrationTests.Helpers
 {
     public static class PowershellHelper
     {
-        public static void RunCommand(string psCommand, ITestOutputHelper outputHelper)
+        public static (string StandardOutput, string ErrorOutput) RunCommand(string psCommand, ITestOutputHelper outputHelper)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.FileName = @"powershell.exe";
@@ -22,6 +22,8 @@ namespace IntegrationTests.Helpers
 
             outputHelper.WriteLine($"PS> {psCommand}");
             outputHelper.WriteResult(helper);
+
+            return (helper.StandardOutput, helper.ErrorOutput);
         }
     }
 }
