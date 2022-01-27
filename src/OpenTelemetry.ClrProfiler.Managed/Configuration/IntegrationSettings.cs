@@ -23,14 +23,6 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
 
             Enabled = source.GetBool(string.Format(ConfigurationKeys.Integrations.Enabled, integrationName)) ??
                       source.GetBool(string.Format("OTEL_{0}_ENABLED", integrationName));
-
-            AnalyticsEnabled = source.GetBool(string.Format(ConfigurationKeys.Integrations.AnalyticsEnabled, integrationName)) ??
-                               source.GetBool(string.Format("OTEL_{0}_ANALYTICS_ENABLED", integrationName));
-
-            AnalyticsSampleRate = source.GetDouble(string.Format(ConfigurationKeys.Integrations.AnalyticsSampleRate, integrationName)) ??
-                                  source.GetDouble(string.Format("OTEL_{0}_ANALYTICS_SAMPLE_RATE", integrationName)) ??
-                                  // default value
-                                  1.0;
         }
 
         /// <summary>
@@ -43,17 +35,5 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         /// this integration is enabled.
         /// </summary>
         public bool? Enabled { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether
-        /// Analytics are enabled for this integration.
-        /// </summary>
-        public bool? AnalyticsEnabled { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value between 0 and 1 (inclusive)
-        /// that determines the sampling rate for this integration.
-        /// </summary>
-        public double AnalyticsSampleRate { get; set; }
     }
 }
