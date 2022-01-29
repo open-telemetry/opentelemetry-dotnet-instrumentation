@@ -17,6 +17,7 @@
 #include "module_metadata.h"
 #include "pal.h"
 #include "resource.h"
+#include "startup_hook.h"
 #include "stats.h"
 #include "util.h"
 #include "version.h"
@@ -136,6 +137,16 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         if (IsDebugEnabled() || !env_var_value.empty())
         {
             Logger::Info("  ", env_var, "=", env_var_value);
+        }
+    }
+
+    if (use_dotnet_startuphook_bootstrapper)
+    {
+        const auto home_path = GetEnvironmentValue(environment::profiler_home_path);
+        const auto startup_hooks = GetEnvironmentValue(environment::dotnet_startup_hooks);
+        if (!IsStartupHookEnabled(startup_hooks, home_path))
+        {
+          Logger::Error("The required startup hook was not configured correctly. No telemetry will be captured.");
         }
     }
 

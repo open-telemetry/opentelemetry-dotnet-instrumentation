@@ -22,6 +22,12 @@
 #include "string.h" // NOLINT
 #include "util.h"
 
+#ifdef _WIN32
+#define DIR_SEPARATOR WStr('\\')
+#else
+#define DIR_SEPARATOR WStr('/')
+#endif
+
 namespace trace
 {
 
@@ -34,13 +40,7 @@ inline WSTRING GetDatadogLogFilePath(const std::string& file_name_suffix)
 
     if (directory.length() > 0)
     {
-        return directory +
-#ifdef _WIN32
-               WStr('\\') +
-#else
-               WStr('/') +
-#endif
-               ToWSTRING(file_name);
+        return directory + DIR_SEPARATOR + ToWSTRING(file_name);
     }
 
     WSTRING path = GetEnvironmentValue(TLoggerPolicy::logging_environment::log_path);
