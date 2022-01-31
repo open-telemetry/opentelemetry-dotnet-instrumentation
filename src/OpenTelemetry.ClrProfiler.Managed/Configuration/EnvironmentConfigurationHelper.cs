@@ -84,7 +84,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                 case null:
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("The exporter name is not recognised");
+                    throw new ArgumentOutOfRangeException("The exporter name is not recognized");
             }
 
             return builder;
