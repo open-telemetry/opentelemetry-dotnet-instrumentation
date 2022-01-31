@@ -22,7 +22,8 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         /// <summary>
         /// Configuration key for the exporter to be used. The Tracer uses it to encode and
         /// dispatch traces.
-        /// Default is <c>"Zipkin"</c>.
+        /// Default is <c>"otlp"</c> for .NET (Core).
+        /// Default is <c>"Zipkin"</c> for .NET Framework.
         /// </summary>
         public const string Exporter = "OTEL_EXPORTER";
 
