@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -17,6 +17,8 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.0.3" />
 
+    <!-- Hack to make the otel exportert working for .NET 5.0 -->
+    <PackageReference Include="Grpc.Net.Client" Version="2.32.0" Condition="'$(TargetFramework)' == 'net5.0'"/>
   </ItemGroup>
 
   <ItemGroup>
