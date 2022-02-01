@@ -16,9 +16,9 @@ inline WSTRING GetExpectedStartupHookPath(WSTRING home_path) {
             WStr("OpenTelemetry.Instrumentation.StartupHook.dll");
 }
 
-inline bool IsStartupHookEnabled(WSTRING startup_hooks, WSTRING home_path)
+inline bool IsStartupHookEnabled(const WSTRING& startup_hooks, const WSTRING& home_path)
 {
-    WSTRING expected_startup_hook = GetExpectedStartupHookPath(home_path);
+    const WSTRING expected_startup_hook = GetExpectedStartupHookPath(home_path);
     auto n = startup_hooks.find(expected_startup_hook);
 
     return n != WSTRING::npos;
