@@ -147,6 +147,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         if (!IsStartupHookEnabled(startup_hooks, home_path))
         {
           Logger::Error("The required startup hook was not configured correctly. No telemetry will be captured.");
+          return E_FAIL;
         }
     }
 
