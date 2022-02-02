@@ -1,5 +1,5 @@
-#ifndef DD_CLR_PROFILER_STARTUP_HOOK_H_
-#define DD_CLR_PROFILER_STARTUP_HOOK_H_
+#ifndef OTEL_CLR_PROFILER_STARTUP_HOOK_H_
+#define OTEL_CLR_PROFILER_STARTUP_HOOK_H_
 
 #include "string.h"  // NOLINT
 #include "pal.h"
@@ -7,12 +7,13 @@
 namespace trace
 {
 
-inline WSTRING GetExpectedStartupHookPath(WSTRING home_path) {
+inline WSTRING GetExpectedStartupHookPath(const WSTRING& home_path) {
+    WSTRING separator = EmptyWStr;
     if (home_path.back() != DIR_SEPARATOR) {
-        home_path.push_back(DIR_SEPARATOR);
+        separator = DIR_SEPARATOR;
     }
 
-    return home_path + WStr("netcoreapp3.1") + DIR_SEPARATOR +
+    return home_path + separator + WStr("netcoreapp3.1") + DIR_SEPARATOR +
             WStr("OpenTelemetry.Instrumentation.StartupHook.dll");
 }
 
@@ -26,4 +27,4 @@ inline bool IsStartupHookEnabled(const WSTRING& startup_hooks, const WSTRING& ho
 
 }  // namespace trace
 
-#endif  // DD_CLR_PROFILER_STARTUP_HOOK_H_
+#endif  // OTEL_CLR_PROFILER_STARTUP_HOOK_H_
