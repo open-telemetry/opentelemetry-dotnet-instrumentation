@@ -16,10 +16,11 @@
 
         "CORECLR_ENABLE_PROFILING": "1",
         "CORECLR_PROFILER": "{918728DD-259F-4A6A-AC2B-B85E1B658318}",
-        "CORECLR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\OpenTelemetry.ClrProfiler.Native.dll",
+        "CORECLR_PROFILER_PATH": "$(SolutionDir)bin\\tracer-home\\win-x64\\OpenTelemetry.ClrProfiler.Native.dll",
+        "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.Instrumentation.StartupHook.dll",
 
-        "OTEL_DOTNET_TRACER_HOME": "$(ProjectDir)$(OutputPath)profiler-lib",
-        "OTEL_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json",
+        "OTEL_DOTNET_TRACER_HOME": "$(SolutionDir)bin\\tracer-home",
+        "OTEL_INTEGRATIONS": "$(SolutionDir)bin\\tracer-home\\integrations.json",
         "OTEL_SERVICE_NAME": "Samples.AspNetCoreMvc31",
         "OTEL_EXPORTER": "jaeger",
         "OTEL_EXPORTER_JAEGER_AGENT_HOST": "localhost",
@@ -36,10 +37,11 @@
 
         "CORECLR_ENABLE_PROFILING": "1",
         "CORECLR_PROFILER": "{918728DD-259F-4A6A-AC2B-B85E1B658318}",
-        "CORECLR_PROFILER_PATH": "$(ProjectDir)$(OutputPath)profiler-lib\\OpenTelemetry.ClrProfiler.Native.dll",
+        "CORECLR_PROFILER_PATH": "$(SolutionDir)bin\\tracer-home$(OutputPath)\\OpenTelemetry.ClrProfiler.Native.dll",
+        "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.Instrumentation.StartupHook.dll",
 
-        "OTEL_DOTNET_TRACER_HOME": "$(ProjectDir)$(OutputPath)profiler-lib",
-        "OTEL_INTEGRATIONS": "$(ProjectDir)$(OutputPath)profiler-lib\\integrations.json",
+        "OTEL_DOTNET_TRACER_HOME": "$(SolutionDir)bin\\tracer-home",
+        "OTEL_INTEGRATIONS": "$(SolutionDir)bin\\tracer-home\\integrations.json",
 
         "OTEL_SERVICE_NAME": "Samples.AspNetCoreMvc31",
         "OTEL_EXPORTER": "jaeger",
