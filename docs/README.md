@@ -2,13 +2,24 @@
 
 [![Slack](https://img.shields.io/badge/slack-@cncf/otel--dotnet--auto--instr-brightgreen.svg?logo=slack)](https://cloud-native.slack.com/archives/C01NR1YLSE7)
 
-This project provides a .NET tracer that leverages the .NET profiling APIs to support .NET instrumentation and auto-instrumentation without requiring code changes to an application.
+This project aims to [add OpenTelemetry Instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/#automatic-instrumentation)
+to .NET applications without requiring any changes to their source code.
+To do that, it must:
+
+1. Inject and setup the [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#opentelemetry-net-sdk) into the application;
+2. Add [OpenTelmetry Instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/) to key packages and APIs used by the application;
+
+Moreover, if a package or API doesn't provide the necessary hooks
+to create a corresponding .NET instrumentation package,
+this project offers the capability to inject instrumentations during the application runtime,
+aka [monkey-patching](https://en.wikipedia.org/wiki/Monkey_patch) instrumentation.
+
+See the [DESIGN.md](DESIGN.md) for an architectural overview of the project.
 
 ## Status
 
-This project is in the early stages of development starting with an initial seeding of code from the [.NET Tracer for Datadog APM](https://github.com/DataDog/dd-trace-dotnet). There is a [project board](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/projects/1) showing the current work in progress and the backlog.
+This project is in the early stages of development, starting with an initial seeding of code from the [.NET Tracer for Datadog APM](https://github.com/DataDog/dd-trace-dotnet). A [project board](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/projects/1) shows the current work in progress and the backlog.
 
-For more details about the design and roadmap see [DESIGN.md](DESIGN.md).
 
 ## Compatibility
 
@@ -18,7 +29,7 @@ supported operating systems and versions of
 and [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework)
 except for versions lower than `.NET Framework 4.6.1`.
 
-The code is automatically tested against following operating systems:
+CI tests run against the following operating systems:
 
 - Microsoft Windows Server 2019,
 - macOS Catalina 10.15,
