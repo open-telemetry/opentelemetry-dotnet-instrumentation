@@ -111,16 +111,6 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         public string Exporter { get; }
 
         /// <summary>
-        /// Gets jaeger exporter agent host.
-        /// </summary>
-        public string JaegerExporterAgentHost { get; }
-
-        /// <summary>
-        /// Gets jaeger exporter agent port.
-        /// </summary>
-        public int JaegerExporterAgentPort { get; }
-
-        /// <summary>
         /// Gets a value indicating whether the console exporter is enabled.
         /// </summary>
         public bool ConsoleExporterEnabled { get; }
