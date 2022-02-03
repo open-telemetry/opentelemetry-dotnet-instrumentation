@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenTelemetry.Exporter;
 
 namespace OpenTelemetry.ClrProfiler.Managed.Configuration
 {
@@ -23,7 +24,10 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                 throw new ArgumentNullException(nameof(source));
             }
 
-            Exporter = source.GetString(ConfigurationKeys.Exporter);
+            Exporter = source.GetString(ConfigurationKeys.Exporter) ?? "otlp";
+            OtlpExportProtocol = GetExporterOtlpProtocol(source);
+            OtlpExportEndpoint = GetExporterOtlpEndpoint(source, OtlpExportProtocol);
+
             LoadTracerAtStartup = source.GetBool(ConfigurationKeys.LoadTracerAtStartup) ?? true;
             ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? true;
 
@@ -111,6 +115,18 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         public string Exporter { get; }
 
         /// <summary>
+        /// Gets the the OTLP transport protocol. Supported values: Grpc and HttpProtobuf.
+        /// </summary>
+        public OtlpExportProtocol OtlpExportProtocol { get; }
+
+        /// <summary>
+        /// Gets the the OTLP exporter endpoint.
+        /// Will be removed when https://github.com/open-telemetry/opentelemetry-dotnet/pull/2868 is released.
+        /// </summary>
+        // TODO: To be removed when https://github.com/open-telemetry/opentelemetry-dotnet/pull/2868 is released.
+        public Uri OtlpExportEndpoint { get; }
+
+        /// <summary>
         /// Gets a value indicating whether the console exporter is enabled.
         /// </summary>
         public bool ConsoleExporterEnabled { get; }
@@ -153,6 +169,33 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
             };
 
             return new Settings(configurationSource);
+        }
+
+        private static OtlpExportProtocol GetExporterOtlpProtocol(IConfigurationSource source)
+        {
+            // the defualt in SDK is grpc. It is oposite that here.
+            var exporterOtlpProtocol = source.GetString(ConfigurationKeys.ExporterOtlpProtocol);
+
+            if (exporterOtlpProtocol == "grpc")
+            {
+                return OtlpExportProtocol.Grpc;
+            }
+
+            return OtlpExportProtocol.HttpProtobuf;
+        }
+
+        private static Uri GetExporterOtlpEndpoint(IConfigurationSource source, OtlpExportProtocol otlpExportProtocol)
+        {
+            var exporterOtlpProtocol = source.GetString(ConfigurationKeys.ExporterOtlpEndpoint);
+
+            if (!string.IsNullOrWhiteSpace(exporterOtlpProtocol))
+            {
+                return new Uri(exporterOtlpProtocol);
+            }
+
+            return otlpExportProtocol == OtlpExportProtocol.Grpc
+                ? new Uri("http://localhost:4317/v1/traces")
+                : new Uri("http://localhost:4318/v1/traces");
         }
     }
 }

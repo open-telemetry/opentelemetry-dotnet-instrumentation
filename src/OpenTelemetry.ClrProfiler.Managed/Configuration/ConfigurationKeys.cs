@@ -22,9 +22,21 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         /// <summary>
         /// Configuration key for the exporter to be used. The Tracer uses it to encode and
         /// dispatch traces.
-        /// Default is <c>"Zipkin"</c>.
+        /// Default is <c>"otlp"</c>.
         /// </summary>
         public const string Exporter = "OTEL_EXPORTER";
+
+        /// <summary>
+        /// Configuration key for the otlp protocol to be used.
+        /// Default is <c>"http/protobuf"</c>.
+        /// </summary>
+        public const string ExporterOtlpProtocol = "OTEL_EXPORTER_OTLP_PROTOCOL";
+
+        /// <summary>
+        /// Configuration key for the otlp protocol to be used.
+        /// Default is <c>"http/protobuf"</c>.
+        /// </summary>
+        public const string ExporterOtlpEndpoint = "OTEL_EXPORTER_OTLP_ENDPOINT";
 
         /// <summary>
         /// Configuration key for whether the console exporter is enabled.

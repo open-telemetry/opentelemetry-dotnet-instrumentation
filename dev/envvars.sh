@@ -59,7 +59,6 @@ export DOTNET_STARTUP_HOOKS="${CURDIR}/bin/tracer-home/netcoreapp3.1/OpenTelemet
 export OTEL_DOTNET_TRACER_HOME="${CURDIR}/bin/tracer-home"
 export OTEL_INTEGRATIONS="${CURDIR}/bin/tracer-home/integrations.json"
 export OTEL_TRACE_DEBUG="1"
-export OTEL_EXPORTER="zipkin"
 export OTEL_DUMP_ILREWRITE_ENABLED="0"
 export OTEL_CLR_ENABLE_INLINING="1"
 export OTEL_PROFILER_EXCLUDE_PROCESSES="dotnet.exe,dotnet"

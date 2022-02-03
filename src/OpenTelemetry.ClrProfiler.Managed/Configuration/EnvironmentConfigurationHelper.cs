@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -68,12 +70,19 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                     break;
                 case "otlp":
 #if NETCOREAPP3_1
-                    // Adding the OtlpExporter creates a GrpcChannel.
-                    // This switch must be set before creating a GrpcChannel/HttpClient when calling an insecure gRPC service.
-                    // See: https://docs.microsoft.com/aspnet/core/grpc/troubleshoot#call-insecure-grpc-services-with-net-core-client
-                    AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+                    if (settings.OtlpExportProtocol == OtlpExportProtocol.Grpc)
+                    {
+                        // Adding the OtlpExporter creates a GrpcChannel.
+                        // This switch must be set before creating a GrpcChannel/HttpClient when calling an insecure gRPC service.
+                        // See: https://docs.microsoft.com/aspnet/core/grpc/troubleshoot#call-insecure-grpc-services-with-net-core-client
+                        AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+                    }
 #endif
-                    builder.AddOtlpExporter();
+                    builder.AddOtlpExporter(options =>
+                    {
+                        options.Protocol = settings.OtlpExportProtocol;
+                        options.Endpoint = settings.OtlpExportEndpoint;
+                    });
                     break;
                 case "":
                 case null:
