@@ -2,9 +2,10 @@
 
 [![Slack](https://img.shields.io/badge/slack-@cncf/otel--dotnet--auto--instr-brightgreen.svg?logo=slack)](https://cloud-native.slack.com/archives/C01NR1YLSE7)
 
-This project aims to add [OpenTelemetry Instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/#automatic-instrumentation)
-to .NET applications without requiring any changes to their source code.
-To do that, it must:
+This project adds [OpenTelemetry instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/#automatic-instrumentation)
+to .NET applications without having to modify their source code.
+
+To auto-instrument applications, the instrumentation:
 
 1. Inject and setup the [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#opentelemetry-net-sdk) into the application;
 2. Add [OpenTelmetry Instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/) to key packages and APIs used by the application;
