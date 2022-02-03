@@ -202,6 +202,7 @@
     <ClInclude Include="module_metadata.h" />
     <ClInclude Include="pal.h" />
     <ClInclude Include="rejit_handler.h" />
+    <ClInclude Include="startup_hook.h" />
     <ClInclude Include="stats.h" />
     <ClInclude Include="string.h" />
     <ClInclude Include="util.h" />
