@@ -78,7 +78,7 @@ const WSTRING system_private_corelib_assemblyName = WStr("System.Private.CoreLib
 const WSTRING opentelemetry_clrprofiler_managed_loader_assemblyName = WStr("OpenTelemetry.ClrProfiler.Managed.Loader");
 
 const WSTRING managed_profiler_full_assembly_version =
-    WStr("OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=34b8972644a12429");
+    WStr("OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=null");
 
 const WSTRING managed_profiler_name = WStr("OpenTelemetry.ClrProfiler.Managed");
 
