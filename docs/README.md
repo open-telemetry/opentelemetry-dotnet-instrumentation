@@ -10,12 +10,12 @@ To auto-instrument applications, the instrumentation:
 1. Injects and configures the [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#opentelemetry-net-sdk) into the application.
 2. Adds [OpenTelemetry Instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/) to key packages and APIs used by the application.
 
-Moreover, if a package or API doesn't provide the necessary hooks
-to create a corresponding .NET instrumentation package,
-this project offers the capability to inject instrumentations during the application runtime,
-aka [monkey-patching](https://en.wikipedia.org/wiki/Monkey_patch) instrumentation.
+The auto-instrumentation is capable of injecting instrumentations at runtime, 
+a technique known as [monkey-patching](https://en.wikipedia.org/wiki/Monkey_patch). 
+This allows to instrument specific packages or APIs that don't provide the necessary hooks
+to generate .NET instrumentation packages.
 
-See the [DESIGN.md](DESIGN.md) for an architectural overview of the project.
+See [DESIGN.md](DESIGN.md) for an architectural overview of the project.
 
 ## Status
 
