@@ -89,6 +89,12 @@ const WSTRING internal_trace_profiler_path =
 // Sets whether to enable NGEN images.
 const WSTRING clr_enable_ngen = WStr("OTEL_CLR_ENABLE_NGEN");
 
+// The list of startup hooks defined for .NET Core 3.1+ applications.
+// This is a .NET runtime environment variable. 
+// See https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md
+// for more information about this environment variable.
+const WSTRING dotnet_startup_hooks = WStr("DOTNET_STARTUP_HOOKS");
+
 }  // namespace environment
 }  // namespace trace
 
