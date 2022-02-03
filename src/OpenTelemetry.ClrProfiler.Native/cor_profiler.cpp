@@ -17,6 +17,7 @@
 #include "module_metadata.h"
 #include "pal.h"
 #include "resource.h"
+#include "startup_hook.h"
 #include "stats.h"
 #include "util.h"
 #include "version.h"
@@ -119,6 +120,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     if (SUCCEEDED(hr))
     {
         Logger::Debug("Interface ICorProfilerInfo10 found.");
+        // .NET Core applications should use the dotnet startup hook to bootstrap OpenTelemetry so that the
+        // necessary dependencies will be available. Bootstrapping with the profiling APIs occurs too early
+        // and the necessary dependencies are not available yet.
+        use_dotnet_startuphook_bootstrapper = true;
     }
     else
     {
@@ -132,6 +137,17 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         if (IsDebugEnabled() || !env_var_value.empty())
         {
             Logger::Info("  ", env_var, "=", env_var_value);
+        }
+    }
+
+    if (use_dotnet_startuphook_bootstrapper)
+    {
+        const auto home_path = GetEnvironmentValue(environment::profiler_home_path);
+        const auto startup_hooks = GetEnvironmentValue(environment::dotnet_startup_hooks);
+        if (!IsStartupHookEnabled(startup_hooks, home_path))
+        {
+          Logger::Error("The required startup hook was not configured correctly. No telemetry will be captured.");
+          return E_FAIL;
         }
     }
 
@@ -742,7 +758,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(FunctionID function
 {
     auto _ = trace::Stats::Instance()->JITCompilationStartedMeasure();
 
-    if (!is_attached_ || !is_safe_to_block)
+    if (!is_attached_ || !is_safe_to_block || use_dotnet_startuphook_bootstrapper)
     {
         return S_OK;
     }

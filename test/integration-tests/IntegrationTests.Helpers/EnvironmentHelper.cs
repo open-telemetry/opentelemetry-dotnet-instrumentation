@@ -142,34 +142,31 @@ namespace IntegrationTests.Helpers
             int agentPort,
             int aspNetCorePort,
             StringDictionary environmentVariables,
-            string processToProfile = null,
-            bool isStartupHook = false)
+            bool enableStartupHook,
+            string processToProfile = null)
         {
             string profilerEnabled = _requiresProfiling ? "1" : "0";
+            string profilerPath = GetProfilerPath();
 
-            if (isStartupHook)
+            if (IsCoreClr())
             {
-                string hookPath = GetStartupHookOutputPath();
+                // enableStartupHook should be true by default, and the parameter should only be set
+                // to false when testing the case that instrumentation should not be available.
+                if (enableStartupHook)
+                {
+                    string hookPath = GetStartupHookOutputPath();
+                    environmentVariables["DOTNET_STARTUP_HOOKS"] = hookPath;
+                }
 
-                environmentVariables["DOTNET_STARTUP_HOOKS"] = hookPath;
-                environmentVariables["OTEL_DOTNET_TRACER_INSTRUMENTATIONS"] = "HttpClient";
+                environmentVariables["CORECLR_ENABLE_PROFILING"] = profilerEnabled;
+                environmentVariables["CORECLR_PROFILER"] = EnvironmentTools.ProfilerClsId;
+                environmentVariables["CORECLR_PROFILER_PATH"] = profilerPath;
             }
             else
             {
-                string profilerPath = GetProfilerPath();
-
-                if (IsCoreClr())
-                {
-                    environmentVariables["CORECLR_ENABLE_PROFILING"] = profilerEnabled;
-                    environmentVariables["CORECLR_PROFILER"] = EnvironmentTools.ProfilerClsId;
-                    environmentVariables["CORECLR_PROFILER_PATH"] = profilerPath;
-                }
-                else
-                {
-                    environmentVariables["COR_ENABLE_PROFILING"] = profilerEnabled;
-                    environmentVariables["COR_PROFILER"] = EnvironmentTools.ProfilerClsId;
-                    environmentVariables["COR_PROFILER_PATH"] = profilerPath;
-                }
+                environmentVariables["COR_ENABLE_PROFILING"] = profilerEnabled;
+                environmentVariables["COR_PROFILER"] = EnvironmentTools.ProfilerClsId;
+                environmentVariables["COR_PROFILER_PATH"] = profilerPath;
             }
 
             if (DebugModeEnabled)

@@ -22,7 +22,7 @@ namespace Samples.AspNetCoreMvc.Controllers
             ViewBag.ClrProfilerAssemblyLocation = instrumentationType?.Assembly.Location;
             ViewBag.StackTrace = StackTraceHelper.GetUsefulStack();
 
-            var prefixes = new[] { "COR_", "CORECLR_", "OTEL_" };
+            var prefixes = new[] { "COR_", "CORECLR_", "DOTNET_", "OTEL_" };
 
             var envVars = from envVar in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>()
                           from prefix in prefixes
