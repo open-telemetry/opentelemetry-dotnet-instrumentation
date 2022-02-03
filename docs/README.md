@@ -7,8 +7,8 @@ to .NET applications without having to modify their source code.
 
 To auto-instrument applications, the instrumentation:
 
-1. Inject and setup the [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#opentelemetry-net-sdk) into the application;
-2. Add [OpenTelmetry Instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/) to key packages and APIs used by the application;
+1. Injects and configures the [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#opentelemetry-net-sdk) into the application.
+2. Adds [OpenTelemetry Instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/) to key packages and APIs used by the application.
 
 Moreover, if a package or API doesn't provide the necessary hooks
 to create a corresponding .NET instrumentation package,
