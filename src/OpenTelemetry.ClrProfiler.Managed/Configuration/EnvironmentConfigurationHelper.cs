@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -75,10 +73,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                     // See: https://docs.microsoft.com/aspnet/core/grpc/troubleshoot#call-insecure-grpc-services-with-net-core-client
                     AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 #endif
-                    builder.AddOtlpExporter(options =>
-                    {
-                        options.ExportProcessorType = ExportProcessorType.Simple; // workaround for https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/290
-                    });
+                    builder.AddOtlpExporter();
                     break;
                 case "":
                 case null:
