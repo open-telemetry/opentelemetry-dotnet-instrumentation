@@ -78,10 +78,10 @@ The exporter is used to output the telemetry.
 
 - On .NET 5 and later, using the `grpc` OTLP exporter protocol requires the application
   to reference [`Grpc.Net.Client`](https://www.nuget.org/packages/Grpc.Net.Client/).
-  E.g. by adding `<PackageReference Include="Grpc.Net.Client" Version="2.23.0" />` to the `.csproj` file.
+  E.g. by adding `<PackageReference Include="Grpc.Net.Client" Version="2.32.0" />` to the `.csproj` file.
 - On .NET Framework, using the `grpc` OTLP exporter protocol requires the application
   to reference [`Grpc`](https://www.nuget.org/packages/Grpc/).
-  E.g. by adding `<PackageReference Include="Grpc.Net.Grpc" Version="2.32.0" />` to the `.csproj` file.
+  E.g. by adding `<PackageReference Include="Grpc.Net.Grpc" Version="2.23.0" />` to the `.csproj` file.
   
 ### Batch Span Processor
 
