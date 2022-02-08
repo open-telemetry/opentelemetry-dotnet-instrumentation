@@ -186,11 +186,11 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
 
         private static Uri GetExporterOtlpEndpoint(IConfigurationSource source, OtlpExportProtocol otlpExportProtocol)
         {
-            var exporterOtlpProtocol = source.GetString(ConfigurationKeys.ExporterOtlpEndpoint);
+            var exporterOtlpEndpoint = source.GetString(ConfigurationKeys.ExporterOtlpEndpoint);
 
-            if (!string.IsNullOrWhiteSpace(exporterOtlpProtocol))
+            if (!string.IsNullOrWhiteSpace(exporterOtlpEndpoint))
             {
-                return new Uri(exporterOtlpProtocol);
+                return new Uri(exporterOtlpEndpoint);
             }
 
             return otlpExportProtocol == OtlpExportProtocol.Grpc
