@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
+#if NETCOREAPP3_1
 using OpenTelemetry.Exporter;
+#endif
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
