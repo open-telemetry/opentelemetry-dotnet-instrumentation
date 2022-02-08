@@ -117,7 +117,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         /// <summary>
         /// Gets the the OTLP transport protocol. Supported values: Grpc and HttpProtobuf.
         /// </summary>
-        public OtlpExportProtocol OtlpExportProtocol { get; }
+        public OtlpExportProtocol? OtlpExportProtocol { get; }
 
         /// <summary>
         /// Gets the the OTLP exporter endpoint.
@@ -171,31 +171,33 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
             return new Settings(configurationSource);
         }
 
-        private static OtlpExportProtocol GetExporterOtlpProtocol(IConfigurationSource source)
+        private static OtlpExportProtocol? GetExporterOtlpProtocol(IConfigurationSource source)
         {
-            // the defualt in SDK is grpc. It is oposite that here.
+            // the defualt in SDK is grpc. http/protobuf should be default for our purposes
             var exporterOtlpProtocol = source.GetString(ConfigurationKeys.ExporterOtlpProtocol);
 
-            if (exporterOtlpProtocol == "grpc")
+            if (string.IsNullOrEmpty(exporterOtlpProtocol) || exporterOtlpProtocol == "http/protobuf")
             {
-                return OtlpExportProtocol.Grpc;
+                // override settings only for http/protobuf
+                // the second part of the condition is needed to override default endpoint as long as https://github.com/open-telemetry/opentelemetry-dotnet/pull/2868 is not fixed
+                return OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
             }
 
-            return OtlpExportProtocol.HttpProtobuf;
+            return null;
         }
 
-        private static Uri GetExporterOtlpEndpoint(IConfigurationSource source, OtlpExportProtocol otlpExportProtocol)
+        private static Uri GetExporterOtlpEndpoint(IConfigurationSource source, OtlpExportProtocol? otlpExportProtocol)
         {
             var exporterOtlpEndpoint = source.GetString(ConfigurationKeys.ExporterOtlpEndpoint);
 
-            if (!string.IsNullOrWhiteSpace(exporterOtlpEndpoint))
+            if (!otlpExportProtocol.HasValue || otlpExportProtocol.Value != OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf || !string.IsNullOrWhiteSpace(exporterOtlpEndpoint))
             {
-                return new Uri(exporterOtlpEndpoint);
+                // it will be handled by OTEL .NET SDK
+                return null;
             }
 
-            return otlpExportProtocol == OtlpExportProtocol.Grpc
-                ? new Uri("http://localhost:4317/v1/traces")
-                : new Uri("http://localhost:4318/v1/traces");
+            // override endpoint only for otlp over http/protobuf
+            return new Uri("http://localhost:4318/v1/traces");
         }
     }
 }

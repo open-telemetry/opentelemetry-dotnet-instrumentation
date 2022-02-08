@@ -71,7 +71,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                     break;
                 case "otlp":
 #if NETCOREAPP3_1
-                    if (settings.OtlpExportProtocol == OtlpExportProtocol.Grpc)
+                    if (!settings.OtlpExportProtocol.HasValue || settings.OtlpExportProtocol != OtlpExportProtocol.HttpProtobuf)
                     {
                         // Adding the OtlpExporter creates a GrpcChannel.
                         // This switch must be set before creating a GrpcChannel/HttpClient when calling an insecure gRPC service.
@@ -81,8 +81,15 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
 #endif
                     builder.AddOtlpExporter(options =>
                     {
-                        options.Protocol = settings.OtlpExportProtocol;
-                        options.Endpoint = settings.OtlpExportEndpoint;
+                        if (settings.OtlpExportProtocol.HasValue)
+                        {
+                            options.Protocol = settings.OtlpExportProtocol.Value;
+                        }
+
+                        if (settings.OtlpExportEndpoint != null)
+                        {
+                            options.Endpoint = settings.OtlpExportEndpoint;
+                        }
                     });
                     break;
                 case "":
