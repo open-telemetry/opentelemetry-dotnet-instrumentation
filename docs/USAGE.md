@@ -71,9 +71,16 @@ The exporter is used to output the telemetry.
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Target endpoint for OTLP exporter. More details [here](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md). | `http://localhost:4318` |
 | `OTEL_EXPORTER_OTLP_HEADERS` | Key-value pairs to be used as headers associated with gRPC or HTTP requests. More details [here](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md). | |
 | `OTEL_EXPORTER_OTLP_TIMEOUT` | Maximum time the OTLP exporter will wait for each batch export. | `1000` (ms) |
-| `OTEL_EXPORTER_OTLP_PROTOCOL` | The transport protocol. Supported values: `grpc`, `http/protobuf`. | `grpc` |
+| `OTEL_EXPORTER_OTLP_PROTOCOL` | The OTLP expoter transport protocol. Supported values: `grpc`, `http/protobuf`. [1] | `grpc` |
 | `OTEL_EXPORTER_ZIPKIN_ENDPOINT` | Zipkin URL. | `http://localhost:8126` |
 
+**[1]**: `OTEL_EXPORTER_OTLP_PROTOCOL` remarks:
+
+- On .NET 5 and later, using the `grpc` OTLP exporter protocol requires the application
+  to reference [`Grpc.Net.Client`](https://www.nuget.org/packages/Grpc.Net.Client/).
+  E.g. by adding `<PackageReference Include="Grpc.Net.Client" Version="2.32.0" />` to the `.csproj` file.
+- On .NET Framework, using the `grpc` OTLP exporter protocol is not supported.
+  
 ### Batch Span Processor
 
 The Batch Span Processor batches of finished spans before they are send by the exporter.
