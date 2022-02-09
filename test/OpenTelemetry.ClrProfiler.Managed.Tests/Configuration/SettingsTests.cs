@@ -56,6 +56,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Tests.Configuration
 
             using (new AssertionScope())
             {
+                // null values for expected data will be handled by OTel .NET SDK
                 settings.OtlpExportProtocol.Should().Be(expectedOtlpExportProtocol);
                 settings.OtlpExportEndpoint.Should().Be(expectedOtlpExportEndpoint != null ? new Uri(expectedOtlpExportEndpoint) : null);
             }
@@ -74,7 +75,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Tests.Configuration
 
             var settings = Settings.FromDefaultSources();
 
-            settings.OtlpExportEndpoint.Should().BeNull();
+            settings.OtlpExportEndpoint.Should().BeNull("leaving as null as SDK will handle it");
         }
 
         private static void ClearEnvVars()
