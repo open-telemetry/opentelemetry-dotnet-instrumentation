@@ -12,6 +12,7 @@ public static class Projects
         public const string ClrProfilerNativeTests = "OpenTelemetry.ClrProfiler.Native.Tests";
         public const string ClrProfilerManagedLoaderTests = "OpenTelemetry.ClrProfiler.Managed.Loader.Tests";
         public const string ClrProfilerManagedBootstrappingTests = "OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests";
+        public const string ClrProfilerManagedTests = "OpenTelemetry.ClrProfiler.Managed.Tests";
 
         public const string IntegrationTestsHelpers = "IntegrationTests.Helpers";
     }
