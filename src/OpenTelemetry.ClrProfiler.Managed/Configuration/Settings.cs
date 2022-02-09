@@ -186,14 +186,14 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         {
             var exporterOtlpEndpoint = source.GetString(ConfigurationKeys.ExporterOtlpEndpoint);
 
-            if (!otlpExportProtocol.HasValue || otlpExportProtocol.Value != OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf || !string.IsNullOrWhiteSpace(exporterOtlpEndpoint))
+            if (otlpExportProtocol == OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf && string.IsNullOrWhiteSpace(exporterOtlpEndpoint))
             {
-                // null value here means that it will be handled by OTEL .NET SDK
-                return null;
+                // override endpoint only for otlp over http/protobuf
+                return new Uri("http://localhost:4318/v1/traces");
             }
 
-            // override endpoint only for otlp over http/protobuf
-            return new Uri("http://localhost:4318/v1/traces");
+            // null value here means that it will be handled by OTEL .NET SDK
+            return null;
         }
     }
 }
