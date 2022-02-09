@@ -93,16 +93,11 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether tracing is enabled.
+        /// Gets a value indicating whether tracing is enabled.
         /// Default is <c>true</c>.
         /// </summary>
         /// <seealso cref="ConfigurationKeys.TraceEnabled"/>
-        public bool TraceEnabled { get; set; }
-
-        /// <summary>
-        /// Gets the version of the service
-        /// </summary>
-        public string ServiceVersion { get; }
+        public bool TraceEnabled { get; }
 
         /// <summary>
         /// Gets a value indicating whether the tracer should be loaded by the profiler. Default is true.
@@ -142,7 +137,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         public IList<string> TracerPlugins { get; } = new List<string>();
 
         /// <summary>
-        /// Gets the list of activitysources to be added to the tracer at the startup.
+        /// Gets the list of activity sources to be added to the tracer at the startup.
         /// </summary>
         public IList<string> ActivitySources { get; } = new List<string> { "OpenTelemetry.ClrProfiler.*" };
 
