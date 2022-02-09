@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28803.452
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenTelemetry.ClrProfiler.Native", "src\OpenTelemetry.ClrProfiler.Native\OpenTelemetry.ClrProfiler.Native.vcxproj", "{91B6272F-5780-4C94-8071-DBBA7B4F67F3}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -129,7 +129,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests.StartupHoo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.StartupHook", "test\test-applications\integrations\Samples.StartupHook\Samples.StartupHook.csproj", "{FF665CC4-6643-4614-A1A0-FA182E3AF37C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.Instrumentation.AdditionalDeps", "src\OpenTelemetry.Instrumentation.AdditionalDeps\OpenTelemetry.Instrumentation.AdditionalDeps.csproj", "{E026D9FA-FBD5-4066-AF6A-FB63DE28521F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.Instrumentation.AdditionalDeps", "src\OpenTelemetry.Instrumentation.AdditionalDeps\OpenTelemetry.Instrumentation.AdditionalDeps.csproj", "{E026D9FA-FBD5-4066-AF6A-FB63DE28521F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.ClrProfiler.Managed.Tests", "test\OpenTelemetry.ClrProfiler.Managed.Tests\OpenTelemetry.ClrProfiler.Managed.Tests.csproj", "{065FEB4E-A99E-4A59-8112-1CB30CF794F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -499,6 +501,18 @@ Global
 		{E026D9FA-FBD5-4066-AF6A-FB63DE28521F}.Release|x64.Build.0 = Release|Any CPU
 		{E026D9FA-FBD5-4066-AF6A-FB63DE28521F}.Release|x86.ActiveCfg = Release|Any CPU
 		{E026D9FA-FBD5-4066-AF6A-FB63DE28521F}.Release|x86.Build.0 = Release|Any CPU
+		{065FEB4E-A99E-4A59-8112-1CB30CF794F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{065FEB4E-A99E-4A59-8112-1CB30CF794F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{065FEB4E-A99E-4A59-8112-1CB30CF794F9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{065FEB4E-A99E-4A59-8112-1CB30CF794F9}.Debug|x64.Build.0 = Debug|Any CPU
+		{065FEB4E-A99E-4A59-8112-1CB30CF794F9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{065FEB4E-A99E-4A59-8112-1CB30CF794F9}.Debug|x86.Build.0 = Debug|Any CPU
+		{065FEB4E-A99E-4A59-8112-1CB30CF794F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{065FEB4E-A99E-4A59-8112-1CB30CF794F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{065FEB4E-A99E-4A59-8112-1CB30CF794F9}.Release|x64.ActiveCfg = Release|Any CPU
+		{065FEB4E-A99E-4A59-8112-1CB30CF794F9}.Release|x64.Build.0 = Release|Any CPU
+		{065FEB4E-A99E-4A59-8112-1CB30CF794F9}.Release|x86.ActiveCfg = Release|Any CPU
+		{065FEB4E-A99E-4A59-8112-1CB30CF794F9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -542,6 +556,7 @@ Global
 		{0584ADC1-956E-49B0-A46F-8405AA2AD207} = {357C3F25-98CA-41C6-BA2C-20968695D026}
 		{FF665CC4-6643-4614-A1A0-FA182E3AF37C} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{E026D9FA-FBD5-4066-AF6A-FB63DE28521F} = {9E5F0022-0A50-40BF-AC6A-C3078585ECAB}
+		{065FEB4E-A99E-4A59-8112-1CB30CF794F9} = {5C915382-C886-457D-8641-9E766D8E5A17}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}
