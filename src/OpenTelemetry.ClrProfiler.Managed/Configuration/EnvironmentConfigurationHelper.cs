@@ -96,7 +96,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                 case null:
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("The exporter name is not recognized");
+                    throw new FormatException($"The exporter name '{settings}' is not recognized");
             }
 
             return builder;
