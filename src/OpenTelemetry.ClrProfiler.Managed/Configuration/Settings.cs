@@ -183,6 +183,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                 return OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
             }
 
+            // null value here means that it will be handled by OTEL .NET SDK
             return null;
         }
 
@@ -192,7 +193,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
 
             if (!otlpExportProtocol.HasValue || otlpExportProtocol.Value != OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf || !string.IsNullOrWhiteSpace(exporterOtlpEndpoint))
             {
-                // it will be handled by OTEL .NET SDK
+                // null value here means that it will be handled by OTEL .NET SDK
                 return null;
             }
 
