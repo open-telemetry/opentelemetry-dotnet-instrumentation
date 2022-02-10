@@ -24,7 +24,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                 throw new ArgumentNullException(nameof(source));
             }
 
-            Exporter = source.GetString(ConfigurationKeys.Exporter) ?? "otlp";
+            TracesExporter = source.GetString(ConfigurationKeys.TracesExporter) ?? "otlp";
             OtlpExportProtocol = GetExporterOtlpProtocol(source);
             OtlpExportEndpoint = GetExporterOtlpEndpoint(source, OtlpExportProtocol);
 
@@ -107,7 +107,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         /// <summary>
         /// Gets the name of the exporter.
         /// </summary>
-        public string Exporter { get; }
+        public string TracesExporter { get; }
 
         /// <summary>
         /// Gets the the OTLP transport protocol. Supported values: Grpc and HttpProtobuf.

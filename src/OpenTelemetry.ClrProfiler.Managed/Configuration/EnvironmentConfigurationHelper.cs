@@ -61,7 +61,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                 builder.AddConsoleExporter();
             }
 
-            switch (settings.Exporter)
+            switch (settings.TracesExporter)
             {
                 case "zipkin":
                     builder.AddZipkinExporter();
@@ -97,7 +97,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                 case null:
                     break;
                 default:
-                    throw new FormatException($"The exporter name '{settings.Exporter}' is not recognized");
+                    throw new FormatException($"The exporter name '{settings.TracesExporter}' is not recognized");
             }
 
             return builder;
