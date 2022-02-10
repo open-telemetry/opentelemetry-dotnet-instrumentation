@@ -125,6 +125,11 @@ partial class Build
                 .SetConfiguration(BuildConfiguration)
                 .SetNoRestore(true));
 
+            DotNetBuild(x => x
+                .SetProjectFile(Solution.GetProject(Projects.Tests.ClrProfilerManagedTests))
+                .SetConfiguration(BuildConfiguration)
+                .SetNoRestore(true));
+
             DotNetMSBuild(x => x
                 .SetTargetPath(MsBuildProject)
                 .SetTargetPlatform(Platform)
@@ -265,7 +270,8 @@ partial class Build
 
             var unitTestProjects = new[]
             {
-                Solution.GetProject(Projects.Tests.ClrProfilerManagedLoaderTests)
+                Solution.GetProject(Projects.Tests.ClrProfilerManagedLoaderTests),
+                Solution.GetProject(Projects.Tests.ClrProfilerManagedTests)
             };
 
             DotNetTest(config => config

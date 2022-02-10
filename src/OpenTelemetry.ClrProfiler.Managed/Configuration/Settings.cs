@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenTelemetry.Exporter;
 
 namespace OpenTelemetry.ClrProfiler.Managed.Configuration
 {
@@ -23,7 +24,10 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                 throw new ArgumentNullException(nameof(source));
             }
 
-            Exporter = source.GetString(ConfigurationKeys.Exporter);
+            Exporter = source.GetString(ConfigurationKeys.Exporter) ?? "otlp";
+            OtlpExportProtocol = GetExporterOtlpProtocol(source);
+            OtlpExportEndpoint = GetExporterOtlpEndpoint(source, OtlpExportProtocol);
+
             LoadTracerAtStartup = source.GetBool(ConfigurationKeys.LoadTracerAtStartup) ?? true;
             ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? true;
 
@@ -89,16 +93,11 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether tracing is enabled.
+        /// Gets a value indicating whether tracing is enabled.
         /// Default is <c>true</c>.
         /// </summary>
         /// <seealso cref="ConfigurationKeys.TraceEnabled"/>
-        public bool TraceEnabled { get; set; }
-
-        /// <summary>
-        /// Gets the version of the service
-        /// </summary>
-        public string ServiceVersion { get; }
+        public bool TraceEnabled { get; }
 
         /// <summary>
         /// Gets a value indicating whether the tracer should be loaded by the profiler. Default is true.
@@ -111,14 +110,16 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         public string Exporter { get; }
 
         /// <summary>
-        /// Gets jaeger exporter agent host.
+        /// Gets the the OTLP transport protocol. Supported values: Grpc and HttpProtobuf.
         /// </summary>
-        public string JaegerExporterAgentHost { get; }
+        public OtlpExportProtocol? OtlpExportProtocol { get; }
 
         /// <summary>
-        /// Gets jaeger exporter agent port.
+        /// Gets the the OTLP exporter endpoint.
+        /// Will be removed when https://github.com/open-telemetry/opentelemetry-dotnet/pull/2868 is released.
         /// </summary>
-        public int JaegerExporterAgentPort { get; }
+        // TODO: To be removed when https://github.com/open-telemetry/opentelemetry-dotnet/pull/2868 is released.
+        public Uri OtlpExportEndpoint { get; }
 
         /// <summary>
         /// Gets a value indicating whether the console exporter is enabled.
@@ -131,12 +132,12 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         public IList<Instrumentation> EnabledInstrumentations { get; }
 
         /// <summary>
-        /// Gets the list of plugins repesented by <see cref="Type.AssemblyQualifiedName"/>.
+        /// Gets the list of plugins represented by <see cref="Type.AssemblyQualifiedName"/>.
         /// </summary>
         public IList<string> TracerPlugins { get; } = new List<string>();
 
         /// <summary>
-        /// Gets the list of activitysources to be added to the tracer at the startup.
+        /// Gets the list of activity sources to be added to the tracer at the startup.
         /// </summary>
         public IList<string> ActivitySources { get; } = new List<string> { "OpenTelemetry.ClrProfiler.*" };
 
@@ -163,6 +164,36 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
             };
 
             return new Settings(configurationSource);
+        }
+
+        private static OtlpExportProtocol? GetExporterOtlpProtocol(IConfigurationSource source)
+        {
+            // the defualt in SDK is grpc. http/protobuf should be default for our purposes
+            var exporterOtlpProtocol = source.GetString(ConfigurationKeys.ExporterOtlpProtocol);
+
+            if (string.IsNullOrEmpty(exporterOtlpProtocol) || exporterOtlpProtocol == "http/protobuf")
+            {
+                // override settings only for http/protobuf
+                // the second part of the condition is needed to override default endpoint as long as https://github.com/open-telemetry/opentelemetry-dotnet/pull/2868 is not fixed
+                return OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
+            }
+
+            // null value here means that it will be handled by OTEL .NET SDK
+            return null;
+        }
+
+        private static Uri GetExporterOtlpEndpoint(IConfigurationSource source, OtlpExportProtocol? otlpExportProtocol)
+        {
+            var exporterOtlpEndpoint = source.GetString(ConfigurationKeys.ExporterOtlpEndpoint);
+
+            if (otlpExportProtocol == OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf && string.IsNullOrWhiteSpace(exporterOtlpEndpoint))
+            {
+                // override endpoint only for otlp over http/protobuf
+                return new Uri("http://localhost:4318/v1/traces");
+            }
+
+            // null value here means that it will be handled by OTEL .NET SDK
+            return null;
         }
     }
 }
