@@ -95,7 +95,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                 case TracesExporter.None:
                     break;
                 default:
-                    throw new InvalidOperationException($"Traces exporter '{settings.TracesExporter}' is incorrect");
+                    throw new ArgumentOutOfRangeException($"Traces exporter '{settings.TracesExporter}' is incorrect");
             }
 
             return builder;
