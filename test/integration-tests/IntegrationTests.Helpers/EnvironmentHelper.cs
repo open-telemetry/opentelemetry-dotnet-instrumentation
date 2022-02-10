@@ -183,8 +183,8 @@ namespace IntegrationTests.Helpers
             string integrations = GetIntegrationsPath();
             environmentVariables["OTEL_DOTNET_TRACER_HOME"] = GetNukeBuildOutput();
             environmentVariables["OTEL_INTEGRATIONS"] = integrations;
+            environmentVariables["OTEL_TRACES_EXPORTER"] = "zipkin";
             environmentVariables["OTEL_EXPORTER_ZIPKIN_ENDPOINT"] = $"http://127.0.0.1:{agentPort}";
-            environmentVariables["OTEL_EXPORTER"] = "zipkin";
 
             // for ASP.NET Core sample apps, set the server's port
             environmentVariables["ASPNETCORE_URLS"] = $"http://127.0.0.1:{aspNetCorePort}/";

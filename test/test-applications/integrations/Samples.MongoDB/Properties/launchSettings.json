@@ -10,7 +10,7 @@
 
         "OTEL_DOTNET_TRACER_HOME": "$(SolutionDir)bin\\tracer-home\\",
         "OTEL_INTEGRATIONS": "$(SolutionDir)bin\\tracer-home\\integrations.json",
-        "OTEL_EXPORTER": "zipkin",
+        "OTEL_TRACES_EXPORTER": "zipkin",
         "OTEL_EXPORTER_ZIPKIN_ENDPOINT": "http://127.0.0.1:9411/api/v2/spans",
         "OTEL_TRACE_DEBUG": "1"
       }

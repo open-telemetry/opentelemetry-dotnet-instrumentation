@@ -21,7 +21,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Tests.Configuration
         }
 
         [Fact]
-        public void FromDefaultSources_DefaultValues()
+        public void DefaultValues()
         {
             var settings = Settings.FromDefaultSources();
 
@@ -29,7 +29,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Tests.Configuration
             {
                 settings.TraceEnabled.Should().BeTrue();
                 settings.LoadTracerAtStartup.Should().BeTrue();
-                settings.Exporter.Should().Be("otlp");
+                settings.TracesExporter.Should().Be(TracesExporter.Otlp);
                 settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
                 settings.OtlpExportEndpoint.Should().Be(new Uri("http://localhost:4318/v1/traces"));
                 settings.ConsoleExporterEnabled.Should().BeTrue();
@@ -42,13 +42,38 @@ namespace OpenTelemetry.ClrProfiler.Managed.Tests.Configuration
         }
 
         [Theory]
+        [InlineData("none", TracesExporter.None)]
+        [InlineData("jaeger", TracesExporter.Jaeger)]
+        [InlineData("otlp", TracesExporter.Otlp)]
+        [InlineData("zipkin", TracesExporter.Zipkin)]
+        public void TracesExporter_SupportedValues(string tracesExporter, TracesExporter expectedTracesExporter)
+        {
+            Environment.SetEnvironmentVariable(ConfigurationKeys.TracesExporter, tracesExporter);
+
+            var settings = Settings.FromDefaultSources();
+
+            settings.TracesExporter.Should().Be(expectedTracesExporter);
+        }
+
+        [Theory]
+        [InlineData("not-existing")]
+        [InlineData("prometheus")]
+        public void TracesExporter_UnsupportedValues(string tracesExporter)
+        {
+            Environment.SetEnvironmentVariable(ConfigurationKeys.TracesExporter, tracesExporter);
+
+            Action act = () => Settings.FromDefaultSources();
+
+            act.Should().Throw<FormatException>();
+        }
+
+        [Theory]
         [InlineData("", OtlpExportProtocol.HttpProtobuf, "http://localhost:4318/v1/traces")]
         [InlineData(null, OtlpExportProtocol.HttpProtobuf, "http://localhost:4318/v1/traces")]
         [InlineData("http/protobuf", OtlpExportProtocol.HttpProtobuf, "http://localhost:4318/v1/traces")]
         [InlineData("grpc", null, null)]
         [InlineData("nonExistingProtocol", null, null)]
-
-        public void FromDefaultSources_OtlpExporterPropertiesDependsOnCorrespondingEnvVariables(string otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol, string expectedOtlpExportEndpoint)
+        public void OtlpExporterProperties_DependsOnCorrespondingEnvVariables(string otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol, string expectedOtlpExportEndpoint)
         {
             Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, otlpProtocol);
 
@@ -68,7 +93,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Tests.Configuration
         [InlineData("http/protobuf")]
         [InlineData("grpc")]
         [InlineData("nonExistingProtocol")]
-        public void FromDefaultSources_OtlpExportEndpointIsNullWhenCorrespondingEnvVarIsSet(string otlpProtocol)
+        public void OtlpExportEndpoint_IsNullWhenCorrespondingEnvVarIsSet(string otlpProtocol)
         {
             Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, otlpProtocol);
             Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpEndpoint, "http://customurl:1234");
@@ -80,6 +105,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Tests.Configuration
 
         private static void ClearEnvVars()
         {
+            Environment.SetEnvironmentVariable(ConfigurationKeys.TracesExporter, null);
             Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, null);
             Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpEndpoint, null);
         }
