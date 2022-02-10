@@ -24,7 +24,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                 throw new ArgumentNullException(nameof(source));
             }
 
-            TracesExporter = source.GetString(ConfigurationKeys.TracesExporter) ?? "otlp";
+            TracesExporter = ParseTracesExporter(source);
             OtlpExportProtocol = GetExporterOtlpProtocol(source);
             OtlpExportEndpoint = GetExporterOtlpEndpoint(source, OtlpExportProtocol);
 
@@ -105,9 +105,9 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         public bool LoadTracerAtStartup { get; }
 
         /// <summary>
-        /// Gets the name of the exporter.
+        /// Gets the traces exporter.
         /// </summary>
-        public string TracesExporter { get; }
+        public TracesExporter TracesExporter { get; }
 
         /// <summary>
         /// Gets the the OTLP transport protocol. Supported values: Grpc and HttpProtobuf.
@@ -180,6 +180,26 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
 
             // null value here means that it will be handled by OTEL .NET SDK
             return null;
+        }
+
+        private static TracesExporter ParseTracesExporter(IConfigurationSource source)
+        {
+            var tracesExporterEnvVar = source.GetString(ConfigurationKeys.TracesExporter) ?? "otlp";
+            switch (tracesExporterEnvVar)
+            {
+                case null:
+                case "":
+                case "otlp":
+                    return TracesExporter.Otlp;
+                case "zipkin":
+                    return TracesExporter.Zipkin;
+                case "jaeger":
+                    return TracesExporter.Jaeger;
+                case "none":
+                    return TracesExporter.None;
+                default:
+                    throw new FormatException($"Traces exporter '{tracesExporterEnvVar}' is not supported");
+            }
         }
 
         private static Uri GetExporterOtlpEndpoint(IConfigurationSource source, OtlpExportProtocol? otlpExportProtocol)

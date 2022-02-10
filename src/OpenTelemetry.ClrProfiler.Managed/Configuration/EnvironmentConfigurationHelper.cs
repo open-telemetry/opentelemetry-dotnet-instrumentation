@@ -63,13 +63,13 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
 
             switch (settings.TracesExporter)
             {
-                case "zipkin":
+                case TracesExporter.Zipkin:
                     builder.AddZipkinExporter();
                     break;
-                case "jaeger":
+                case TracesExporter.Jaeger:
                     builder.AddJaegerExporter();
                     break;
-                case "otlp":
+                case TracesExporter.Otlp:
 #if NETCOREAPP3_1
                     if (!settings.OtlpExportProtocol.HasValue || settings.OtlpExportProtocol != OtlpExportProtocol.HttpProtobuf)
                     {
@@ -92,12 +92,10 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                         }
                     });
                     break;
-                case "none":
-                case "":
-                case null:
+                case TracesExporter.None:
                     break;
                 default:
-                    throw new FormatException($"The exporter name '{settings.TracesExporter}' is not recognized");
+                    throw new InvalidOperationException($"Traces exporter '{settings.TracesExporter}' is incorrect");
             }
 
             return builder;
