@@ -92,6 +92,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                         }
                     });
                     break;
+                case "none":
                 case "":
                 case null:
                     break;
