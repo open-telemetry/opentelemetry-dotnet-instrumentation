@@ -20,11 +20,10 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         public const string LoadTracerAtStartup = "OTEL_DOTNET_TRACER_LOAD_AT_STARTUP";
 
         /// <summary>
-        /// Configuration key for the exporter to be used. The Tracer uses it to encode and
-        /// dispatch traces.
+        /// Configuration key for the trace exporter to be used.
         /// Default is <c>"otlp"</c>.
         /// </summary>
-        public const string Exporter = "OTEL_EXPORTER";
+        public const string Exporter = "OTEL_TRACES_EXPORTER";
 
         /// <summary>
         /// Configuration key for the otlp protocol to be used.

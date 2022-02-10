@@ -23,7 +23,7 @@
 
         "OTEL_DOTNET_TRACER_INSTRUMENTATIONS": "AspNet,HttpClient",
 
-        "OTEL_EXPORTER": "zipkin",
+        "OTEL_TRACES_EXPORTER": "zipkin",
         "OTEL_EXPORTER_ZIPKIN_ENDPOINT": "http://localhost:9411/api/v2/spans"
       }
     },
@@ -43,7 +43,7 @@
 
         "OTEL_DOTNET_TRACER_INSTRUMENTATIONS": "AspNet,HttpClient",
 
-        "OTEL_EXPORTER": "zipkin",
+        "OTEL_TRACES_EXPORTER": "zipkin",
         "OTEL_EXPORTER_ZIPKIN_ENDPOINT": "http://localhost:9411/api/v2/spans"
       }
     }
