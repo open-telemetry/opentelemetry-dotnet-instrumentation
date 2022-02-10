@@ -33,8 +33,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         public const string ExporterOtlpProtocol = "OTEL_EXPORTER_OTLP_PROTOCOL";
 
         /// <summary>
-        /// Configuration key for the otlp protocol to be used.
-        /// Default is <c>"http/protobuf"</c>.
+        /// Configuration key for the otlp exporter endpoint to be used.
         /// </summary>
         public const string ExporterOtlpEndpoint = "OTEL_EXPORTER_OTLP_ENDPOINT";
 
