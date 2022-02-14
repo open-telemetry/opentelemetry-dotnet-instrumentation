@@ -35,7 +35,7 @@ for more details.
 | `OTEL_DOTNET_AUTO_{0}_ENABLED` | Configuration pattern for enabling or disabling a specific bytecode. For example, in order to disable MongoDb instrumentation, set `OTEL_TRACE_MongoDb_ENABLED=false` | `true` |
 | `OTEL_DOTNET_AUTO_DOMAIN_NEUTRAL_INSTRUMENTATION` |  Sets whether to intercept method calls when the caller method is inside a domain-neutral assembly. This is recommended when instrumenting IIS applications. | `false` |
 | `OTEL_DOTNET_AUTO_CLR_DISABLE_OPTIMIZATIONS` |  Set to `true` to disable all JIT optimizations. | `false` |
-| `OTEL_CLR_ENABLE_INLINING` | Set to `false` to disable JIT inlining. | `true` |
+| `OTEL_DOTNET_AUTO_CLR_ENABLE_INLINING` | Set to `false` to disable JIT inlining. | `true` |
 | `OTEL_CLR_ENABLE_NGEN` | Set to `false` to disable NGEN images. | `true` |
 
 ### ASP.NET (.NET Framework) Instrumentation

@@ -80,7 +80,7 @@ const WSTRING azure_app_services_cli_telemetry_profile_value =
 const WSTRING dump_il_rewrite_enabled = WStr("OTEL_DUMP_ILREWRITE_ENABLED");
 
 // Sets whether to enable JIT inlining
-const WSTRING clr_enable_inlining = WStr("OTEL_CLR_ENABLE_INLINING");
+const WSTRING clr_enable_inlining = WStr("OTEL_DOTNET_AUTO_CLR_ENABLE_INLINING");
 
 // Custom internal tracer profiler path
 const WSTRING internal_trace_profiler_path =
