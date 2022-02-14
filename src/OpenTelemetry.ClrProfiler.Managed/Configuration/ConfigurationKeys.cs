@@ -44,7 +44,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         /// <summary>
         /// Configuration key for comma separated list of enabled instrumentations.
         /// </summary>
-        public const string Instrumentations = "OTEL_DOTNET_TRACER_INSTRUMENTATIONS";
+        public const string Instrumentations = "OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS";
 
         /// <summary>
         /// Configuration key for comma separated list of disabled instrumentations.

@@ -20,7 +20,7 @@ namespace IntegrationTests.StartupHook
             : base("StartupHook", output)
         {
             SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
-            SetEnvironmentVariable("OTEL_DOTNET_TRACER_INSTRUMENTATIONS", "HttpClient");
+            SetEnvironmentVariable("OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS", "HttpClient");
             _expectations.Add(new WebServerSpanExpectation(ServiceName, null, "SayHello", "SayHello", null));
             _expectations.Add(new WebServerSpanExpectation(ServiceName, null, "HTTP GET", "HTTP GET", null, "GET"));
         }

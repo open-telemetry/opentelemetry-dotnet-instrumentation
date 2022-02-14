@@ -21,7 +21,7 @@
 
         "OTEL_SERVICE_NAME": "Samples.StartupHook.AspNetCoreMvc31",
 
-        "OTEL_DOTNET_TRACER_INSTRUMENTATIONS": "AspNet,HttpClient",
+        "OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS": "AspNet,HttpClient",
 
         "OTEL_TRACES_EXPORTER": "zipkin",
         "OTEL_EXPORTER_ZIPKIN_ENDPOINT": "http://localhost:9411/api/v2/spans"
@@ -41,7 +41,7 @@
 
         "OTEL_SERVICE_NAME": "Samples.StartupHook.AspNetCoreMvc31",
 
-        "OTEL_DOTNET_TRACER_INSTRUMENTATIONS": "AspNet,HttpClient",
+        "OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS": "AspNet,HttpClient",
 
         "OTEL_TRACES_EXPORTER": "zipkin",
         "OTEL_EXPORTER_ZIPKIN_ENDPOINT": "http://localhost:9411/api/v2/spans"
