@@ -1,9 +1,9 @@
 #include "calltarget_tokens.h"
 
-#include "otel_profiler_constants.h"
 #include "il_rewriter_wrapper.h"
 #include "logger.h"
 #include "module_metadata.h"
+#include "otel_profiler_constants.h"
 
 namespace trace
 {

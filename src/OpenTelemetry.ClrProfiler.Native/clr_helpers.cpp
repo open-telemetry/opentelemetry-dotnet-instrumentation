@@ -2,11 +2,11 @@
 
 #include <cstring>
 
-#include "otel_profiler_constants.h"
 #include "environment_variables.h"
 #include "logger.h"
 #include "macros.h"
 #include "pal.h"
+#include "otel_profiler_constants.h"
 #include <set>
 #include <stack>
 

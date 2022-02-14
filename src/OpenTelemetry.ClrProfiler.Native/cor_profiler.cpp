@@ -5,7 +5,6 @@
 #include <string>
 
 #include "clr_helpers.h"
-#include "otel_profiler_constants.h"
 #include "dllmain.h"
 #include "environment_variables.h"
 #include "environment_variables_util.h"
@@ -15,6 +14,7 @@
 #include "logger.h"
 #include "metadata_builder.h"
 #include "module_metadata.h"
+#include "otel_profiler_constants.h"
 #include "pal.h"
 #include "resource.h"
 #include "startup_hook.h"
