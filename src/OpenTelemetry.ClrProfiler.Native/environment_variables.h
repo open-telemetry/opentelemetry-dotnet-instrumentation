@@ -56,7 +56,7 @@ const WSTRING log_directory = WStr("OTEL_TRACE_LOG_DIRECTORY");
 // Default value is false (do not disable all optimizations).
 // https://github.com/dotnet/coreclr/issues/24676
 // https://github.com/dotnet/coreclr/issues/12468
-const WSTRING clr_disable_optimizations = WStr("OTEL_CLR_DISABLE_OPTIMIZATIONS");
+const WSTRING clr_disable_optimizations = WStr("OTEL_DOTNET_AUTO_CLR_DISABLE_OPTIMIZATIONS");
 
 // Sets whether to intercept method calls when the caller method is inside a
 // domain-neutral assembly. This is dangerous because the integration assembly
