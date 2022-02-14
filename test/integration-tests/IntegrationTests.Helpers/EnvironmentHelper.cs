@@ -98,12 +98,12 @@ namespace IntegrationTests.Helpers
                 "COR_PROFILER_PATH",
 
                 // OpenTelemetry
-                "OTEL_PROFILER_PROCESSES",
-                "OTEL_DOTNET_TRACER_HOME",
-                "OTEL_INTEGRATIONS",
+                "OTEL_DOTNET_AUTO_INCLUDE_PROCESSES",
+                "OTEL_DOTNET_AUTO_HOME",
+                "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE",
                 "OTEL_DISABLED_INTEGRATIONS",
-                "OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES",
-                "OTEL_PROFILER_EXCLUDE_PROCESSES"
+                "OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES",
+                "OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES"
             };
 
             foreach (string variable in environmentVariables)
@@ -171,25 +171,25 @@ namespace IntegrationTests.Helpers
 
             if (DebugModeEnabled)
             {
-                environmentVariables["OTEL_TRACE_DEBUG"] = "1";
-                environmentVariables["OTEL_TRACE_LOG_DIRECTORY"] = Path.Combine(EnvironmentTools.GetSolutionDirectory(), "build_data", "profiler-logs");
+                environmentVariables["OTEL_DOTNET_AUTO_DEBUG"] = "1";
+                environmentVariables["OTEL_DOTNET_AUTO_LOG_DIRECTORY"] = Path.Combine(EnvironmentTools.GetSolutionDirectory(), "build_data", "profiler-logs");
             }
 
             if (!string.IsNullOrEmpty(processToProfile))
             {
-                environmentVariables["OTEL_PROFILER_PROCESSES"] = Path.GetFileName(processToProfile);
+                environmentVariables["OTEL_DOTNET_AUTO_INCLUDE_PROCESSES"] = Path.GetFileName(processToProfile);
             }
 
             string integrations = GetIntegrationsPath();
-            environmentVariables["OTEL_DOTNET_TRACER_HOME"] = GetNukeBuildOutput();
-            environmentVariables["OTEL_INTEGRATIONS"] = integrations;
+            environmentVariables["OTEL_DOTNET_AUTO_HOME"] = GetNukeBuildOutput();
+            environmentVariables["OTEL_DOTNET_AUTO_INTEGRATIONS_FILE"] = integrations;
             environmentVariables["OTEL_TRACES_EXPORTER"] = "zipkin";
             environmentVariables["OTEL_EXPORTER_ZIPKIN_ENDPOINT"] = $"http://127.0.0.1:{agentPort}";
 
             // for ASP.NET Core sample apps, set the server's port
             environmentVariables["ASPNETCORE_URLS"] = $"http://127.0.0.1:{aspNetCorePort}/";
 
-            environmentVariables["OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES"] = "Samples.*";
+            environmentVariables["OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES"] = "Samples.*";
 
             foreach (var key in CustomEnvironmentVariables.Keys)
             {

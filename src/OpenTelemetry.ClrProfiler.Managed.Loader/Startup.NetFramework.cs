@@ -13,7 +13,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Loader
     {
         private static string ResolveManagedProfilerDirectory()
         {
-            var tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_TRACER_HOME") ?? string.Empty;
+            var tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_AUTO_HOME") ?? string.Empty;
             var tracerFrameworkDirectory = "net461";
             return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
         }

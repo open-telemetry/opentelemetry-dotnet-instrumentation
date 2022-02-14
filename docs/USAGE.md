@@ -8,10 +8,11 @@
 
 | Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_TRACE_ENABLED` | Enable to activate the tracer. | `true` |
-| `OTEL_PROFILER_PROCESSES` | Sets the filename of executables the profiler can attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
-| `OTEL_PROFILER_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
-| `OTEL_AZURE_APP_SERVICES` | Set to indicate that the profiler is running in the context of Azure App Services. | `false` |
+| `OTEL_DOTNET_AUTO_HOME` | Installation location. | `true` |
+| `OTEL_DOTNET_AUTO_ENABLED` | Enable to activate the tracer. | `true` |
+| `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES` | Sets the filename of executables the profiler can attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
+| `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
+| `OTEL_DOTNET_AUTO_AZURE_APP_SERVICES` | Set to indicate that the profiler is running in the context of Azure App Services. | `false` |
 
 ### Resource
 
@@ -28,14 +29,14 @@ for more details.
 
 | Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_INTEGRATIONS` | The file path of bytecode instrumentations JSON configuration file. Usually it should be set to `%ProfilerDirectory%/integrations.json` | |
-| `OTEL_DOTNET_TRACER_INSTRUMENTATIONS` | The instrumentations you want to enable, separated by a comma. Supported values: `AspNet`, `HttpClient`, `SqlClient`, `MongoDb`. |  |
-| `OTEL_DOTNET_TRACER_DISABLED_INSTRUMENTATIONS` | The instrumentations set via `OTEL_DOTNET_TRACER_INSTRUMENTATIONS` value and `OTEL_INTEGRATIONS` configuration file you want to disable, separated by a comma. | |
-| `OTEL_TRACE_{0}_ENABLED` | Configuration pattern for enabling or disabling a specific bytecode. For example, in order to disable MongoDb instrumentation, set `OTEL_TRACE_MongoDb_ENABLED=false` | `true` |
-| `OTEL_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION` |  Sets whether to intercept method calls when the caller method is inside a domain-neutral assembly. This is recommended when instrumenting IIS applications. | `false` |
-| `OTEL_CLR_DISABLE_OPTIMIZATIONS` |  Set to `true` to disable all JIT optimizations. | `false` |
-| `OTEL_CLR_ENABLE_INLINING` | Set to `false` to disable JIT inlining. | `true` |
-| `OTEL_CLR_ENABLE_NGEN` | Set to `false` to disable NGEN images. | `true` |
+| `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | The file path of bytecode instrumentations JSON configuration file. Usually it should be set to `%ProfilerDirectory%/integrations.json` | |
+| `OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS` | The instrumentations you want to enable, separated by a comma. Supported values: `AspNet`, `HttpClient`, `SqlClient`, `MongoDb`. |  |
+| `OTEL_DOTNET_AUTO_DISABLED_INSTRUMENTATIONS` | The instrumentations set via `OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS` value and `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` configuration file you want to disable, separated by a comma. | |
+| `OTEL_DOTNET_AUTO_{0}_ENABLED` | Configuration pattern for enabling or disabling a specific bytecode. For example, in order to disable MongoDb instrumentation, set `OTEL_TRACE_MongoDb_ENABLED=false` | `true` |
+| `OTEL_DOTNET_AUTO_DOMAIN_NEUTRAL_INSTRUMENTATION` |  Sets whether to intercept method calls when the caller method is inside a domain-neutral assembly. This is recommended when instrumenting IIS applications. | `false` |
+| `OTEL_DOTNET_AUTO_CLR_DISABLE_OPTIMIZATIONS` |  Set to `true` to disable all JIT optimizations. | `false` |
+| `OTEL_DOTNET_AUTO_CLR_ENABLE_INLINING` | Set to `false` to disable JIT inlining. | `true` |
+| `OTEL_DOTNET_AUTO_CLR_ENABLE_NGEN` | Set to `false` to disable NGEN images. | `true` |
 
 ### ASP.NET (.NET Framework) Instrumentation
 
@@ -53,11 +54,11 @@ Default logs directory paths are:
 
 | Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_TRACE_LOG_DIRECTORY` | The directory of the .NET Tracer logs. Overrides the value in `OTEL_TRACE_LOG_PATH` if present. | _see above_ |
-| `OTEL_TRACE_LOG_PATH` | The path of the profiler log file. | _see above_ |
-| `OTEL_TRACE_DEBUG` | Enable to activate debugging mode for the tracer. | `false` |
-| `OTEL_DOTNET_TRACER_CONSOLE_EXPORTER_ENABLED` | Defines whether the console exporter is enabled or not. | `true` |
-| `OTEL_DUMP_ILREWRITE_ENABLED` | Allows the profiler to dump the IL original code and modification to the log. | `false` |
+| `OTEL_DOTNET_AUTO_LOG_DIRECTORY` | The directory of the .NET Tracer logs. Overrides the value in `OTEL_DOTNET_AUTO_LOG_PATH` if present. | _see above_ |
+| `OTEL_DOTNET_AUTO_LOG_PATH` | The path of the profiler log file. | _see above_ |
+| `OTEL_DOTNET_AUTO_DEBUG` | Enable to activate debugging mode for the tracer. | `false` |
+| `OTEL_DOTNET_AUTO_CONSOLE_EXPORTER_ENABLED` | Defines whether the console exporter is enabled or not. | `true` |
+| `OTEL_DOTNET_AUTO_DUMP_ILREWRITE_ENABLED` | Allows the profiler to dump the IL original code and modification to the log. | `false` |
 
 ### Exporters
 
@@ -96,22 +97,22 @@ The Batch Span Processor batches of finished spans before they are send by the e
 
 | Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_DOTNET_TRACER_LOAD_AT_STARTUP` | Defines whether the tracer is created by the auto instrumentation library or not. | `true` |
-| `OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES` | Comma separated list of additional `ActivitySource` names to be added to the tracer at the startup. |  |
-| `OTEL_DOTNET_TRACER_LEGACY_SOURCES` | Comma separated list of additional legacy source names to be added to the tracer at the startup. |  |
-| `OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS` | Colon (:) separated list of OTel SDK instrumentation plugins represented by `System.Type.AssemblyQualifiedName`. | |
+| `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP` | Defines whether the tracer is created by the auto instrumentation library or not. | `true` |
+| `OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES` | Comma separated list of additional `ActivitySource` names to be added to the tracer at the startup. |  |
+| `OTEL_DOTNET_AUTO_LEGACY_SOURCES` | Comma separated list of additional legacy source names to be added to the tracer at the startup. |  |
+| `OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS` | Colon (:) separated list of OTel SDK instrumentation plugins represented by `System.Type.AssemblyQualifiedName`. | |
 
-`OTEL_DOTNET_TRACER_LOAD_AT_STARTUP` should be set to `false` when application
+`OTEL_DOTNET_AUTO_LOAD_AT_STARTUP` should be set to `false` when application
 initializes OpenTelemetry .NET SDK Tracer on its own. This configuration can be
 used e.g. to just get the bytecode instrumentations.
 
-`OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES` should be used to capture manually
+`OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES` should be used to capture manually
 instrumented spans.
 
-`OTEL_DOTNET_TRACER_LEGACY_SOURCES` can be used to capture `Activity` objects
+`OTEL_DOTNET_AUTO_LEGACY_SOURCES` can be used to capture `Activity` objects
 created without using the `ActivitySource` API.
 
-`OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS` can be used to extend the
+`OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS` can be used to extend the
 configuration of the the OpenTelemetry .NET SDK Tracer. A plugin must be a
 non-static, non-abstract class which has a default constructor and a method
 with following signature:
@@ -180,7 +181,7 @@ cat /proc/version
 
 The default installation of auto-instrumentation enables tracing all .NET processes on the box.
 In the typical scenarios (dedicated VMs or containers), this is not a problem.
-Use the environment variables `OTEL_PROFILER_EXCLUDE_PROCESSES` and `OTEL_PROFILER_PROCESSES`
+Use the environment variables `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` and `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`
 to include/exclude applications from the tracing auto-instrumentation.
 These are ";" delimited lists that control the inclusion/exclusion of processes.
 
@@ -201,10 +202,10 @@ you can also manually add binding redirection to [the `App.config` file](../samp
 If none of the suggestions above solves your issue, detailed logs are necessary.
 Follow the steps below to get the detailed logs from OpenTelemetry AutoInstrumentation for .NET:
 
-Set the environment variable `OTEL_TRACE_DEBUG` to `true` before the instrumented process starts.
+Set the environment variable `OTEL_DOTNET_AUTO_DEBUG` to `true` before the instrumented process starts.
 By default, the library writes the log files under the below predefined locations.
-If needed, change the default location by updating the environment variable `OTEL_TRACE_LOG_PATH` to an appropriate path.
+If needed, change the default location by updating the environment variable `OTEL_DOTNET_AUTO_LOG_PATH` to an appropriate path.
 On Linux, the default log location is `/var/log/opentelemetry/dotnet/`
 On Windows, the default log location is `%ProgramData%\\OpenTelemetry .NET AutoInstrumentation\logs\`
 Compress the whole folder to capture the multiple log files and send the compressed folder to us.
-After obtaining the logs, remember to remove the environment variable `OTEL_TRACE_DEBUG` to avoid unnecessary overhead.
+After obtaining the logs, remember to remove the environment variable `OTEL_DOTNET_AUTO_DEBUG` to avoid unnecessary overhead.

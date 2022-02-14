@@ -15,7 +15,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Loader
         private static string ResolveManagedProfilerDirectory()
         {
             string tracerFrameworkDirectory = "netcoreapp3.1";
-            string tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_TRACER_HOME") ?? string.Empty;
+            string tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_AUTO_HOME") ?? string.Empty;
 
             return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
         }
