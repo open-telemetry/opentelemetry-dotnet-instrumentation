@@ -59,7 +59,7 @@ injected into the application.
 contains the code setting up the OpenTelemtry .NET SDK and configured instrumentations.
 Plus, support code to run and implement bytecode instrumentations. Optionally, the code
 setting-up the OpenTelemetry .NET SDK can be left to the application by setting the
-environment variable `OTEL_DOTNET_TRACER_LOAD_AT_STARTUP` to `false`.
+environment variable `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP` to `false`.
 
 - **Source Instrumentations**: instrumentations created on top of API hooks/callbacks provided
 directly by the library/framework being instrumented. This type of instrumentation depends on the

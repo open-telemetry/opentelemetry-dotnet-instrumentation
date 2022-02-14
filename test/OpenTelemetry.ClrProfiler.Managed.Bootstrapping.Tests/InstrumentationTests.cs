@@ -19,7 +19,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests
         [FactRequiringEnvVar]
         public void Initialize_WithDisabledFlag_DoesNotCreateTracerProvider()
         {
-            Environment.SetEnvironmentVariable("OTEL_DOTNET_TRACER_LOAD_AT_STARTUP", "false");
+            Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOAD_AT_STARTUP", "false");
 
             Instrumentation.Initialize();
             var otelActivity = _otelActivitySource.StartActivity("OtelActivity");
@@ -45,7 +45,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests
         [FactRequiringEnvVar]
         public void Initialize_WithEnabledFlag_CreatesTracerProvider()
         {
-            Environment.SetEnvironmentVariable("OTEL_DOTNET_TRACER_LOAD_AT_STARTUP", "true");
+            Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOAD_AT_STARTUP", "true");
 
             Instrumentation.Initialize();
             var otelActivity = _otelActivitySource.StartActivity("OtelActivity");
@@ -58,7 +58,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests
         [FactRequiringEnvVar]
         public void Initialize_WithPreviouslyCreatedTracerProvider_WorksCorrectly()
         {
-            Environment.SetEnvironmentVariable("OTEL_DOTNET_TRACER_LOAD_AT_STARTUP", "false");
+            Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOAD_AT_STARTUP", "false");
             var tracer = Sdk
                 .CreateTracerProviderBuilder()
                 .AddSource("Custom")

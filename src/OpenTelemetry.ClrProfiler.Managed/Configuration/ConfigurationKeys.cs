@@ -17,7 +17,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         /// <summary>
         /// Configuration key for whether the tracer should be initialized by the profiler or not.
         /// </summary>
-        public const string LoadTracerAtStartup = "OTEL_DOTNET_TRACER_LOAD_AT_STARTUP";
+        public const string LoadTracerAtStartup = "OTEL_DOTNET_AUTO_LOAD_AT_STARTUP";
 
         /// <summary>
         /// Configuration key for the traces exporter to be used.
