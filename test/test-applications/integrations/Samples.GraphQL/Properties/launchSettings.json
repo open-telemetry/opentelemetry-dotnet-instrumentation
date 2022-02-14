@@ -23,7 +23,7 @@
         "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE": "$(SolutionDir)bin\\tracer-home\\integrations.json",
         "OTEL_TRACES_EXPORTER": "zipkin",
         "OTEL_EXPORTER_ZIPKIN_ENDPOINT": "http://127.0.0.1:9411/api/v2/spans",
-        "OTEL_TRACE_DEBUG": "1"
+        "OTEL_DOTNET_AUTO_DEBUG": "1"
       },
       "applicationUrl": "http://localhost:54568/",
       "nativeDebugging": true

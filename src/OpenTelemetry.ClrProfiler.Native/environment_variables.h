@@ -11,7 +11,7 @@ namespace environment {
 const WSTRING tracing_enabled = WStr("OTEL_DOTNET_AUTO_ENABLED");
 
 // Sets whether debug mode is enabled. Default is false.
-const WSTRING debug_enabled = WStr("OTEL_TRACE_DEBUG");
+const WSTRING debug_enabled = WStr("OTEL_DOTNET_AUTO_DEBUG");
 
 // Sets the paths to integration definition JSON files.
 // Supports multiple values separated with comma, for example:
