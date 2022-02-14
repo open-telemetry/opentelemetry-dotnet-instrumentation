@@ -52,7 +52,7 @@ SET OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES=devenv.exe;Microsoft.ServiceHub.Controlle
 
 rem Set dotnet tracer home path
 SET OTEL_DOTNET_AUTO_HOME=%~dp0
-SET OTEL_INTEGRATIONS=%OTEL_DOTNET_AUTO_HOME%\integrations.json
+SET OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%OTEL_DOTNET_AUTO_HOME%\integrations.json
 
 if "%start_visual_studio%" == "true" (
     echo Starting Visual Studio...

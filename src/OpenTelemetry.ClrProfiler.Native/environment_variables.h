@@ -16,7 +16,7 @@ const WSTRING debug_enabled = WStr("OTEL_TRACE_DEBUG");
 // Sets the paths to integration definition JSON files.
 // Supports multiple values separated with comma, for example:
 // "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\integrations.json,D:\temp\test_integrations.json"
-const WSTRING integrations_path = WStr("OTEL_INTEGRATIONS");
+const WSTRING integrations_path = WStr("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE");
 
 // Sets the path to the profiler's home directory, for example:
 // "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\" or "/opt/opentelemetry/"

@@ -20,7 +20,7 @@
         "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.Instrumentation.StartupHook.dll",
 
         "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home",
-        "OTEL_INTEGRATIONS": "$(SolutionDir)bin\\tracer-home\\integrations.json",
+        "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE": "$(SolutionDir)bin\\tracer-home\\integrations.json",
         "OTEL_SERVICE_NAME": "Samples.AspNetCoreMvc31",
         "OTEL_TRACES_EXPORTER": "jaeger",
         "OTEL_EXPORTER_JAEGER_AGENT_HOST": "localhost",
@@ -41,7 +41,7 @@
         "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.Instrumentation.StartupHook.dll",
 
         "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home",
-        "OTEL_INTEGRATIONS": "$(SolutionDir)bin\\tracer-home\\integrations.json",
+        "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE": "$(SolutionDir)bin\\tracer-home\\integrations.json",
 
         "OTEL_SERVICE_NAME": "Samples.AspNetCoreMvc31",
         "OTEL_TRACES_EXPORTER": "jaeger",
