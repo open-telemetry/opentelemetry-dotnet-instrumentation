@@ -49,7 +49,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         /// <summary>
         /// Configuration key for comma separated list of disabled instrumentations.
         /// </summary>
-        public const string DisabledInstrumentations = "OTEL_DOTNET_TRACER_DISABLED_INSTRUMENTATIONS";
+        public const string DisabledInstrumentations = "OTEL_DOTNET_AUTO_DISABLED_INSTRUMENTATIONS";
 
         /// <summary>
         /// Configuration key for colon (:) separated list of plugins represented by <see cref="System.Type.AssemblyQualifiedName"/>.

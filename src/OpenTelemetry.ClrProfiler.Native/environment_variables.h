@@ -39,7 +39,7 @@ const WSTRING exclude_process_names = WStr("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES")
 // multiple values separated with comma, for example:
 // "ElasticsearchNet,AspNetWebApi2"
 const WSTRING disabled_integrations =
-    WStr("OTEL_DOTNET_TRACER_DISABLED_INSTRUMENTATIONS");
+    WStr("OTEL_DOTNET_AUTO_DISABLED_INSTRUMENTATIONS");
 
 // Sets the path for the profiler's log file.
 // Environment variable OTEL_TRACE_LOG_DIRECTORY takes precedence over this setting, if set.
