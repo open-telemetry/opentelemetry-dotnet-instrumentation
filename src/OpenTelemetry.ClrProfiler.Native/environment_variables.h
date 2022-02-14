@@ -26,7 +26,7 @@ const WSTRING profiler_home_path = WStr("OTEL_DOTNET_AUTO_HOME");
 // If not defined (default), the profiler will attach to any process.
 // Supports multiple values separated with comma, for example:
 // "MyApp.exe,dotnet.exe"
-const WSTRING include_process_names = WStr("OTEL_PROFILER_PROCESSES");
+const WSTRING include_process_names = WStr("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES");
 
 // Sets the filename of executables the profiler cannot attach to.
 // If not defined (default), the profiler will attach to any process.

@@ -98,7 +98,7 @@ namespace IntegrationTests.Helpers
                 "COR_PROFILER_PATH",
 
                 // OpenTelemetry
-                "OTEL_PROFILER_PROCESSES",
+                "OTEL_DOTNET_AUTO_INCLUDE_PROCESSES",
                 "OTEL_DOTNET_AUTO_HOME",
                 "OTEL_INTEGRATIONS",
                 "OTEL_DISABLED_INTEGRATIONS",
@@ -177,7 +177,7 @@ namespace IntegrationTests.Helpers
 
             if (!string.IsNullOrEmpty(processToProfile))
             {
-                environmentVariables["OTEL_PROFILER_PROCESSES"] = Path.GetFileName(processToProfile);
+                environmentVariables["OTEL_DOTNET_AUTO_INCLUDE_PROCESSES"] = Path.GetFileName(processToProfile);
             }
 
             string integrations = GetIntegrationsPath();

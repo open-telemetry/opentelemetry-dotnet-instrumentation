@@ -13,6 +13,6 @@ ENV COR_ENABLE_PROFILING=1 \
     OTEL_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION=1 \
     OTEL_TRACE_DEBUG=1 \
     OTEL_TRACE_LOG_DIRECTORY=C:\\inetpub\\wwwroot\\logs \
-    OTEL_PROFILER_PROCESSES=w3wp.exe
+    OTEL_DOTNET_AUTO_INCLUDE_PROCESSES=w3wp.exe
 WORKDIR C:\\inetpub\\wwwroot
 COPY bin/${configuration}/app.publish .
