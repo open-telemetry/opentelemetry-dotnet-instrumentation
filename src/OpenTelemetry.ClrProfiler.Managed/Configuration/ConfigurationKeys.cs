@@ -39,7 +39,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         /// <summary>
         /// Configuration key for whether the console exporter is enabled.
         /// </summary>
-        public const string ConsoleExporterEnabled = "OTEL_DOTNET_TRACER_CONSOLE_EXPORTER_ENABLED";
+        public const string ConsoleExporterEnabled = "OTEL_DOTNET_AUTO_CONSOLE_EXPORTER_ENABLED";
 
         /// <summary>
         /// Configuration key for comma separated list of enabled instrumentations.
