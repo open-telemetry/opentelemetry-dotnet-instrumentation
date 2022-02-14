@@ -54,8 +54,8 @@ Default logs directory paths are:
 
 | Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_DOTNET_AUTO_LOG_DIRECTORY` | The directory of the .NET Tracer logs. Overrides the value in `OTEL_TRACE_LOG_PATH` if present. | _see above_ |
-| `OTEL_TRACE_LOG_PATH` | The path of the profiler log file. | _see above_ |
+| `OTEL_DOTNET_AUTO_LOG_DIRECTORY` | The directory of the .NET Tracer logs. Overrides the value in `OTEL_DOTNET_AUTO_LOG_PATH` if present. | _see above_ |
+| `OTEL_DOTNET_AUTO_LOG_PATH` | The path of the profiler log file. | _see above_ |
 | `OTEL_TRACE_DEBUG` | Enable to activate debugging mode for the tracer. | `false` |
 | `OTEL_DOTNET_TRACER_CONSOLE_EXPORTER_ENABLED` | Defines whether the console exporter is enabled or not. | `true` |
 | `OTEL_DUMP_ILREWRITE_ENABLED` | Allows the profiler to dump the IL original code and modification to the log. | `false` |
@@ -204,7 +204,7 @@ Follow the steps below to get the detailed logs from OpenTelemetry AutoInstrumen
 
 Set the environment variable `OTEL_TRACE_DEBUG` to `true` before the instrumented process starts.
 By default, the library writes the log files under the below predefined locations.
-If needed, change the default location by updating the environment variable `OTEL_TRACE_LOG_PATH` to an appropriate path.
+If needed, change the default location by updating the environment variable `OTEL_DOTNET_AUTO_LOG_PATH` to an appropriate path.
 On Linux, the default log location is `/var/log/opentelemetry/dotnet/`
 On Windows, the default log location is `%ProgramData%\\OpenTelemetry .NET AutoInstrumentation\logs\`
 Compress the whole folder to capture the multiple log files and send the compressed folder to us.
