@@ -63,7 +63,7 @@ const WSTRING clr_disable_optimizations = WStr("OTEL_CLR_DISABLE_OPTIMIZATIONS")
 // the user can guarantee that all Application Pools on the system have at most
 // Default is false. Only used in .NET Framework 4.5 and 4.5.1.
 // https://github.com/DataDog/dd-trace-dotnet/pull/671
-const WSTRING domain_neutral_instrumentation = WStr("OTEL_TRACE_DOMAIN_NEUTRAL_INSTRUMENTATION");
+const WSTRING domain_neutral_instrumentation = WStr("OTEL_DOTNET_AUTO_DOMAIN_NEUTRAL_INSTRUMENTATION");
 
 // Indicates whether the profiler is running in the context
 // of Azure App Services
