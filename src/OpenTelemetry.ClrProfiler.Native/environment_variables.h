@@ -67,7 +67,7 @@ const WSTRING domain_neutral_instrumentation = WStr("OTEL_TRACE_DOMAIN_NEUTRAL_I
 
 // Indicates whether the profiler is running in the context
 // of Azure App Services
-const WSTRING azure_app_services = WStr("OTEL_AZURE_APP_SERVICES");
+const WSTRING azure_app_services = WStr("OTEL_DOTNET_AUTO_AZURE_APP_SERVICES");
 
 // The app_pool_id in the context of azure app services
 const WSTRING azure_app_services_app_pool_id = WStr("APP_POOL_ID");
