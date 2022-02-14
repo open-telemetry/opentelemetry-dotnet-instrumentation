@@ -84,7 +84,7 @@ const WSTRING clr_enable_inlining = WStr("OTEL_DOTNET_AUTO_CLR_ENABLE_INLINING")
 
 // Custom internal tracer profiler path
 const WSTRING internal_trace_profiler_path =
-    WStr("OTEL_INTERNAL_TRACE_NATIVE_ENGINE_PATH");
+    WStr("OTEL_DOTNET_AUTO_INTERNAL_NATIVE_ENGINE_PATH");
 
 // Sets whether to enable NGEN images.
 const WSTRING clr_enable_ngen = WStr("OTEL_DOTNET_AUTO_CLR_ENABLE_NGEN");
