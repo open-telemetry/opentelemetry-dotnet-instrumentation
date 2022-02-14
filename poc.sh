@@ -43,9 +43,9 @@ docker run -d --rm --name jaeger \
   jaegertracing/all-in-one:1.22
 
 # instrument and run HTTP server app in background
-export OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS="Samples.AspNetCoreMvc.OtelSdkPlugin, Samples.AspNetCoreMvc31, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null:Vendor.Distro.Plugin, Vendor.Distro, Version=0.0.1.0, Culture=neutral, PublicKeyToken=null"
+export OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS="Samples.AspNetCoreMvc.OtelSdkPlugin, Samples.AspNetCoreMvc31, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null:Vendor.Distro.Plugin, Vendor.Distro, Version=0.0.1.0, Culture=neutral, PublicKeyToken=null"
 ./dev/instrument.sh OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS="AspNet,SqlClient,MongoDb" OTEL_SERVICE_NAME="aspnet-server" ASPNETCORE_URLS="http://127.0.0.1:8080/" dotnet run --no-launch-profile -f $aspNetAppTargetFramework --project ./samples/Samples.AspNetCoreMvc31/Samples.AspNetCoreMvc31.csproj &
-unset OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS
+unset OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS
 ./dev/wait-local-port.sh 8080
 
 # instrument and run HTTP client app

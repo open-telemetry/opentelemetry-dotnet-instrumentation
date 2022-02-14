@@ -100,7 +100,7 @@ The Batch Span Processor batches of finished spans before they are send by the e
 | `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP` | Defines whether the tracer is created by the auto instrumentation library or not. | `true` |
 | `OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES` | Comma separated list of additional `ActivitySource` names to be added to the tracer at the startup. |  |
 | `OTEL_DOTNET_AUTO_LEGACY_SOURCES` | Comma separated list of additional legacy source names to be added to the tracer at the startup. |  |
-| `OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS` | Colon (:) separated list of OTel SDK instrumentation plugins represented by `System.Type.AssemblyQualifiedName`. | |
+| `OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS` | Colon (:) separated list of OTel SDK instrumentation plugins represented by `System.Type.AssemblyQualifiedName`. | |
 
 `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP` should be set to `false` when application
 initializes OpenTelemetry .NET SDK Tracer on its own. This configuration can be
@@ -112,7 +112,7 @@ instrumented spans.
 `OTEL_DOTNET_AUTO_LEGACY_SOURCES` can be used to capture `Activity` objects
 created without using the `ActivitySource` API.
 
-`OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS` can be used to extend the
+`OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS` can be used to extend the
 configuration of the the OpenTelemetry .NET SDK Tracer. A plugin must be a
 non-static, non-abstract class which has a default constructor and a method
 with following signature:
