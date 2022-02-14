@@ -103,7 +103,7 @@ namespace IntegrationTests.Helpers
                 "OTEL_INTEGRATIONS",
                 "OTEL_DISABLED_INTEGRATIONS",
                 "OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES",
-                "OTEL_PROFILER_EXCLUDE_PROCESSES"
+                "OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES"
             };
 
             foreach (string variable in environmentVariables)

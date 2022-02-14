@@ -32,7 +32,7 @@ const WSTRING include_process_names = WStr("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES")
 // If not defined (default), the profiler will attach to any process.
 // Supports multiple values separated with comma, for example:
 // "MyApp.exe,dotnet.exe"
-const WSTRING exclude_process_names = WStr("OTEL_PROFILER_EXCLUDE_PROCESSES");
+const WSTRING exclude_process_names = WStr("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES");
 
 // Sets a list of integrations to disable. All other integrations will remain
 // enabled. If not set (default), all integrations are enabled. Supports

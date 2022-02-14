@@ -61,7 +61,7 @@ namespace IntegrationTests.StartupHook
                 expectedSpanCount = 0;
             }
 
-            SetEnvironmentVariable("OTEL_PROFILER_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,{applicationNameToExclude}");
+            SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,{applicationNameToExclude}");
 
             var spans = RunTestApplication(enableStartupHook: true);
 

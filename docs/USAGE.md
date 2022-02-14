@@ -11,7 +11,7 @@
 | `OTEL_DOTNET_AUTO_HOME` | Installation location. | `true` |
 | `OTEL_DOTNET_AUTO_ENABLED` | Enable to activate the tracer. | `true` |
 | `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES` | Sets the filename of executables the profiler can attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
-| `OTEL_PROFILER_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
+| `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
 | `OTEL_AZURE_APP_SERVICES` | Set to indicate that the profiler is running in the context of Azure App Services. | `false` |
 
 ### Resource
@@ -181,7 +181,7 @@ cat /proc/version
 
 The default installation of auto-instrumentation enables tracing all .NET processes on the box.
 In the typical scenarios (dedicated VMs or containers), this is not a problem.
-Use the environment variables `OTEL_PROFILER_EXCLUDE_PROCESSES` and `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`
+Use the environment variables `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` and `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`
 to include/exclude applications from the tracing auto-instrumentation.
 These are ";" delimited lists that control the inclusion/exclusion of processes.
 
