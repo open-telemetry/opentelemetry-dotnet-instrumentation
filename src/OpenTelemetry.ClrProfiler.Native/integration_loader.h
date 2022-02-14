@@ -16,7 +16,7 @@ namespace trace
 using json = nlohmann::json;
 
 // LoadIntegrationsFromEnvironment loads integrations from any files specified
-// in the DD_INTEGRATIONS environment variable
+// in the OTEL_DOTNET_AUTO_INTEGRATIONS_FILE environment variable
 void LoadIntegrationsFromEnvironment(std::vector<IntegrationMethod>& integrationMethods, const std::vector<WSTRING>& disabledIntegrationNames);
 
 // LoadIntegrationsFromFile loads the integrations from a file
