@@ -101,7 +101,7 @@ internal class StartupHook
     {
         var excludedProcesses = new List<string>();
 
-        var environmentValue = GetEnvironmentVariable("OTEL_PROFILER_EXCLUDE_PROCESSES");
+        var environmentValue = GetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES");
 
         if (environmentValue == null)
         {

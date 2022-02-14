@@ -21,8 +21,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
                 return;
             }
 
-            Enabled = source.GetBool(string.Format(ConfigurationKeys.Integrations.Enabled, integrationName)) ??
-                      source.GetBool(string.Format("OTEL_{0}_ENABLED", integrationName));
+            Enabled = source.GetBool(string.Format(ConfigurationKeys.Integrations.Enabled, integrationName));
         }
 
         /// <summary>

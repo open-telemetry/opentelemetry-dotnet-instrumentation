@@ -61,11 +61,11 @@ namespace OpenTelemetry.ClrProfiler.Managed.Loader
 
             try
             {
-                logDirectory = Environment.GetEnvironmentVariable("OTEL_TRACE_LOG_DIRECTORY");
+                logDirectory = Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY");
 
                 if (logDirectory == null)
                 {
-                    var nativeLogFile = Environment.GetEnvironmentVariable("OTEL_TRACE_LOG_PATH");
+                    var nativeLogFile = Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_PATH");
 
                     if (!string.IsNullOrEmpty(nativeLogFile))
                     {
@@ -143,7 +143,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Loader
         {
             try
             {
-                var ddTraceDebugValue = Environment.GetEnvironmentVariable("OTEL_TRACE_DEBUG");
+                var ddTraceDebugValue = Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_DEBUG");
 
                 if (ddTraceDebugValue == null)
                 {

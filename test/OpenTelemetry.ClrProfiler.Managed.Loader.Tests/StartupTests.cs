@@ -11,7 +11,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Loader.Tests
         public void Ctor_LoadsManagedAssembly()
         {
             var directory = Directory.GetCurrentDirectory();
-            Environment.SetEnvironmentVariable("OTEL_DOTNET_TRACER_HOME", Path.Combine(directory, "..", "Profiler"));
+            Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", Path.Combine(directory, "..", "Profiler"));
 
             var exception = Record.Exception(() => Startup.ManagedProfilerDirectory);
 
