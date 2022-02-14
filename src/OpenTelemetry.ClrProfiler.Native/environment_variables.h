@@ -42,7 +42,7 @@ const WSTRING disabled_integrations =
     WStr("OTEL_DOTNET_AUTO_DISABLED_INSTRUMENTATIONS");
 
 // Sets the path for the profiler's log file.
-// Environment variable OTEL_TRACE_LOG_DIRECTORY takes precedence over this setting, if set.
+// Environment variable OTEL_DOTNET_AUTO_LOG_DIRECTORY takes precedence over this setting, if set.
 const WSTRING log_path = WStr("OTEL_TRACE_LOG_PATH");
 
 // Sets the directory for the profiler's log file.
@@ -50,7 +50,7 @@ const WSTRING log_path = WStr("OTEL_TRACE_LOG_PATH");
 // If not set, default is
 // "%ProgramData%"\OpenTelemetry .NET AutoInstrumentation\logs\" on Windows or
 // "/var/log/opentelemetry/dotnet/" on Linux.
-const WSTRING log_directory = WStr("OTEL_TRACE_LOG_DIRECTORY");
+const WSTRING log_directory = WStr("OTEL_DOTNET_AUTO_LOG_DIRECTORY");
 
 // Sets whether to disable all JIT optimizations.
 // Default value is false (do not disable all optimizations).

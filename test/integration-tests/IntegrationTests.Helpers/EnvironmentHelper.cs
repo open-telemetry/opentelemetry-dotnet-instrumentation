@@ -172,7 +172,7 @@ namespace IntegrationTests.Helpers
             if (DebugModeEnabled)
             {
                 environmentVariables["OTEL_TRACE_DEBUG"] = "1";
-                environmentVariables["OTEL_TRACE_LOG_DIRECTORY"] = Path.Combine(EnvironmentTools.GetSolutionDirectory(), "build_data", "profiler-logs");
+                environmentVariables["OTEL_DOTNET_AUTO_LOG_DIRECTORY"] = Path.Combine(EnvironmentTools.GetSolutionDirectory(), "build_data", "profiler-logs");
             }
 
             if (!string.IsNullOrEmpty(processToProfile))

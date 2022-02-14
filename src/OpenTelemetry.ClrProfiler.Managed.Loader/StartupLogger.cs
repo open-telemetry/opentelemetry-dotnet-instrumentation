@@ -61,7 +61,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Loader
 
             try
             {
-                logDirectory = Environment.GetEnvironmentVariable("OTEL_TRACE_LOG_DIRECTORY");
+                logDirectory = Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY");
 
                 if (logDirectory == null)
                 {

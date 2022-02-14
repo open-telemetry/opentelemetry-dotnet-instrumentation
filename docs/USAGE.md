@@ -54,7 +54,7 @@ Default logs directory paths are:
 
 | Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_TRACE_LOG_DIRECTORY` | The directory of the .NET Tracer logs. Overrides the value in `OTEL_TRACE_LOG_PATH` if present. | _see above_ |
+| `OTEL_DOTNET_AUTO_LOG_DIRECTORY` | The directory of the .NET Tracer logs. Overrides the value in `OTEL_TRACE_LOG_PATH` if present. | _see above_ |
 | `OTEL_TRACE_LOG_PATH` | The path of the profiler log file. | _see above_ |
 | `OTEL_TRACE_DEBUG` | Enable to activate debugging mode for the tracer. | `false` |
 | `OTEL_DOTNET_TRACER_CONSOLE_EXPORTER_ENABLED` | Defines whether the console exporter is enabled or not. | `true` |
