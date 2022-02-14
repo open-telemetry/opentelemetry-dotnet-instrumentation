@@ -1,5 +1,5 @@
-#ifndef DD_CLR_PROFILER_COR_PROFILER_H_
-#define DD_CLR_PROFILER_COR_PROFILER_H_
+#ifndef OTEL_CLR_PROFILER_COR_PROFILER_H_
+#define OTEL_CLR_PROFILER_COR_PROFILER_H_
 
 #include "cor.h"
 #include "corprof.h"
@@ -148,4 +148,4 @@ extern CorProfiler* profiler; // global reference to callback object
 
 } // namespace trace
 
-#endif // DD_CLR_PROFILER_COR_PROFILER_H_
+#endif // OTEL_CLR_PROFILER_COR_PROFILER_H_

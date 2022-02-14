@@ -1,5 +1,5 @@
-#ifndef DD_CLR_PROFILER_STRING_H_
-#define DD_CLR_PROFILER_STRING_H_
+#ifndef OTEL_CLR_PROFILER_STRING_H_
+#define OTEL_CLR_PROFILER_STRING_H_
 
 #include <corhlpr.h>
 #include <sstream>
@@ -34,4 +34,4 @@ static const WSTRING EmptyWStr = WStr("");
 
 } // namespace trace
 
-#endif // DD_CLR_PROFILER_STRING_H_
+#endif // OTEL_CLR_PROFILER_STRING_H_

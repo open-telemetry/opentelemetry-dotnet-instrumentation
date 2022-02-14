@@ -1,5 +1,5 @@
-#ifndef DD_CLR_PROFILER_PAL_H_
-#define DD_CLR_PROFILER_PAL_H_
+#ifndef OTEL_CLR_PROFILER_PAL_H_
+#define OTEL_CLR_PROFILER_PAL_H_
 
 #ifdef _WIN32
 
@@ -99,4 +99,4 @@ inline int GetPID()
 
 } // namespace trace
 
-#endif // DD_CLR_PROFILER_PAL_H_
+#endif // OTEL_CLR_PROFILER_PAL_H_

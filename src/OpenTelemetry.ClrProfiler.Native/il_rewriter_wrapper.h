@@ -1,5 +1,5 @@
-#ifndef DD_CLR_PROFILER_IL_REWRITER_WRAPPER_H_
-#define DD_CLR_PROFILER_IL_REWRITER_WRAPPER_H_
+#ifndef OTEL_CLR_PROFILER_IL_REWRITER_WRAPPER_H_
+#define OTEL_CLR_PROFILER_IL_REWRITER_WRAPPER_H_
 
 #include "il_rewriter.h"
 #include "module_metadata.h"
@@ -46,4 +46,4 @@ public:
     ILInstr* InitObj(mdTypeRef type_ref) const;
 };
 
-#endif // DD_CLR_PROFILER_IL_REWRITER_WRAPPER_H_
+#endif // OTEL_CLR_PROFILER_IL_REWRITER_WRAPPER_H_

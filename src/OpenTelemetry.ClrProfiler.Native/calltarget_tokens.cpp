@@ -1,6 +1,6 @@
 #include "calltarget_tokens.h"
 
-#include "dd_profiler_constants.h"
+#include "otel_profiler_constants.h"
 #include "il_rewriter_wrapper.h"
 #include "logger.h"
 #include "module_metadata.h"

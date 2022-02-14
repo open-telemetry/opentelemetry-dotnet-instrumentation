@@ -5,7 +5,7 @@
 #include <string>
 
 #include "clr_helpers.h"
-#include "dd_profiler_constants.h"
+#include "otel_profiler_constants.h"
 #include "dllmain.h"
 #include "environment_variables.h"
 #include "environment_variables_util.h"

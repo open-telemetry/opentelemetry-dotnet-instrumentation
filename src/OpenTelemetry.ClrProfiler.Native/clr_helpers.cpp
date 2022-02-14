@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-#include "dd_profiler_constants.h"
+#include "otel_profiler_constants.h"
 #include "environment_variables.h"
 #include "logger.h"
 #include "macros.h"

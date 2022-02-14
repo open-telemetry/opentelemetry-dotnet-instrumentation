@@ -1,5 +1,5 @@
-#ifndef DD_CLR_PROFILER_UTIL_H_
-#define DD_CLR_PROFILER_UTIL_H_
+#ifndef OTEL_CLR_PROFILER_UTIL_H_
+#define OTEL_CLR_PROFILER_UTIL_H_
 
 #include <algorithm>
 #include <condition_variable>
@@ -131,4 +131,4 @@ public:
 
 } // namespace trace
 
-#endif // DD_CLR_PROFILER_UTIL_H_
+#endif // OTEL_CLR_PROFILER_UTIL_H_

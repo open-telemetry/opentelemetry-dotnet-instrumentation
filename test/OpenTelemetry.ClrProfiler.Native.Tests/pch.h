@@ -3,8 +3,8 @@
 // Header for standard system include files.
 //
 
-#ifndef DD_CLR_PROFILER_TESTS_PCH_H_
-#define DD_CLR_PROFILER_TESTS_PCH_H_
+#ifndef OTEL_CLR_PROFILER_TESTS_PCH_H_
+#define OTEL_CLR_PROFILER_TESTS_PCH_H_
 
 #define GTEST_LANG_CXX11 1
 
