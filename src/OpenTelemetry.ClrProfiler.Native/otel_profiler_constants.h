@@ -1,5 +1,5 @@
-#ifndef DD_PROFILER_CONSTANTS_H
-#define DD_PROFILER_CONSTANTS_H
+#ifndef OTEL_PROFILER_CONSTANTS_H
+#define OTEL_PROFILER_CONSTANTS_H
 
 #include <string>
 
@@ -88,4 +88,4 @@ const WSTRING calltarget_modification_action = WStr("CallTargetModification");
 
 } // namespace trace
 
-#endif // DD_PROFILER_CONSTANTS_H
+#endif // OTEL_PROFILER_CONSTANTS_H

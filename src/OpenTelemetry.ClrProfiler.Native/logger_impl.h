@@ -1,5 +1,5 @@
-#ifndef DD_CLR_PROFILER_LOGGER_IMPL_H_
-#define DD_CLR_PROFILER_LOGGER_IMPL_H_
+#ifndef OTEL_CLR_PROFILER_LOGGER_IMPL_H_
+#define OTEL_CLR_PROFILER_LOGGER_IMPL_H_
 #include "util.h"
 #include "environment_variables.h"
 #include "string.h"
@@ -236,4 +236,4 @@ bool LoggerImpl<TLoggerPolicy>::IsDebugEnabled() const
 
 } // namespace shared
 
-#endif // DD_CLR_PROFILER_LOGGER_IMPL_H_
+#endif // OTEL_CLR_PROFILER_LOGGER_IMPL_H_

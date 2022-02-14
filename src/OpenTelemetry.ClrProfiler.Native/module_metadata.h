@@ -1,5 +1,5 @@
-﻿#ifndef DD_CLR_PROFILER_MODULE_METADATA_H_
-#define DD_CLR_PROFILER_MODULE_METADATA_H_
+﻿#ifndef OTEL_CLR_PROFILER_MODULE_METADATA_H_
+#define OTEL_CLR_PROFILER_MODULE_METADATA_H_
 
 #include <corhlpr.h>
 #include <mutex>
@@ -147,4 +147,4 @@ public:
 
 } // namespace trace
 
-#endif // DD_CLR_PROFILER_MODULE_METADATA_H_
+#endif // OTEL_CLR_PROFILER_MODULE_METADATA_H_

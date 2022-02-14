@@ -1,5 +1,5 @@
-#ifndef DD_CLR_PROFILER_STATS_H_
-#define DD_CLR_PROFILER_STATS_H_
+#ifndef OTEL_CLR_PROFILER_STATS_H_
+#define OTEL_CLR_PROFILER_STATS_H_
 
 #include <chrono>
 
@@ -176,4 +176,4 @@ public:
 
 } // namespace trace
 
-#endif // DD_CLR_PROFILER_STATS_H_
+#endif // OTEL_CLR_PROFILER_STATS_H_

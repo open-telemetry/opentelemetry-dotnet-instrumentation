@@ -1,5 +1,5 @@
-#ifndef DD_CLR_PROFILER_MACROS_H_
-#define DD_CLR_PROFILER_MACROS_H_
+#ifndef OTEL_CLR_PROFILER_MACROS_H_
+#define OTEL_CLR_PROFILER_MACROS_H_
 
 #include <corhlpr.h>
 #include <fstream>
@@ -17,4 +17,4 @@
     if ((EXPR) == false) return E_FAIL; \
   } while (0)
 
-#endif  // DD_CLR_PROFILER_MACROS_H_
+#endif  // OTEL_CLR_PROFILER_MACROS_H_

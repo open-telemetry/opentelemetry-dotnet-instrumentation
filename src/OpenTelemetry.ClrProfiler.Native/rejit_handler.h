@@ -1,5 +1,5 @@
-#ifndef DD_CLR_PROFILER_REJIT_HANDLER_H_
-#define DD_CLR_PROFILER_REJIT_HANDLER_H_
+#ifndef OTEL_CLR_PROFILER_REJIT_HANDLER_H_
+#define OTEL_CLR_PROFILER_REJIT_HANDLER_H_
 
 #include <atomic>
 #include <mutex>
@@ -143,4 +143,4 @@ public:
 
 } // namespace trace
 
-#endif // DD_CLR_PROFILER_REJIT_HANDLER_H_
+#endif // OTEL_CLR_PROFILER_REJIT_HANDLER_H_

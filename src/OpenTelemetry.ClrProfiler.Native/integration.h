@@ -1,5 +1,5 @@
-#ifndef DD_CLR_PROFILER_INTEGRATION_H_
-#define DD_CLR_PROFILER_INTEGRATION_H_
+#ifndef OTEL_CLR_PROFILER_INTEGRATION_H_
+#define OTEL_CLR_PROFILER_INTEGRATION_H_
 
 #include <corhlpr.h>
 #include <iomanip>
@@ -341,4 +341,4 @@ namespace
 
 } // namespace trace
 
-#endif // DD_CLR_PROFILER_INTEGRATION_H_
+#endif // OTEL_CLR_PROFILER_INTEGRATION_H_

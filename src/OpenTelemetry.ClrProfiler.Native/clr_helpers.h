@@ -1,5 +1,5 @@
-#ifndef DD_CLR_PROFILER_CLR_HELPERS_H_
-#define DD_CLR_PROFILER_CLR_HELPERS_H_
+#ifndef OTEL_CLR_PROFILER_CLR_HELPERS_H_
+#define OTEL_CLR_PROFILER_CLR_HELPERS_H_
 
 #include <corhlpr.h>
 #include <corprof.h>
@@ -513,4 +513,4 @@ bool FindTypeDefByName(const trace::WSTRING instrumentationTargetMethodTypeName,
                        const ComPtr<IMetaDataImport2>& metadata_import, mdTypeDef& typeDef);
 } // namespace trace
 
-#endif // DD_CLR_PROFILER_CLR_HELPERS_H_
+#endif // OTEL_CLR_PROFILER_CLR_HELPERS_H_

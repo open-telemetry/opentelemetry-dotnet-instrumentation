@@ -1,5 +1,5 @@
-#ifndef DD_CLR_PROFILER_LOGGING_H_
-#define DD_CLR_PROFILER_LOGGING_H_
+#ifndef OTEL_CLR_PROFILER_LOGGING_H_
+#define OTEL_CLR_PROFILER_LOGGING_H_
 #include "util.h"
 
 #include <spdlog/spdlog.h>
@@ -62,4 +62,4 @@ void Warn(const Args... args) {
 
 }  // namespace trace
 
-#endif  // DD_CLR_PROFILER_LOGGING_H_
+#endif  // OTEL_CLR_PROFILER_LOGGING_H_

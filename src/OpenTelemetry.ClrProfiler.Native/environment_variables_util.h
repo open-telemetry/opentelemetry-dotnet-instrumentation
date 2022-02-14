@@ -1,5 +1,5 @@
-#ifndef DD_CLR_PROFILER_ENVIRONMENT_VARIABLES_UTIL_H_
-#define DD_CLR_PROFILER_ENVIRONMENT_VARIABLES_UTIL_H_
+#ifndef OTEL_CLR_PROFILER_ENVIRONMENT_VARIABLES_UTIL_H_
+#define OTEL_CLR_PROFILER_ENVIRONMENT_VARIABLES_UTIL_H_
 
 #include "environment_variables.h"
 #include "string.h"
@@ -72,4 +72,4 @@ bool IsDomainNeutralInstrumentation() {
 
 }  // namespace trace
 
-#endif  // DD_CLR_PROFILER_ENVIRONMENT_VARIABLES_UTIL_H_
+#endif  // OTEL_CLR_PROFILER_ENVIRONMENT_VARIABLES_UTIL_H_

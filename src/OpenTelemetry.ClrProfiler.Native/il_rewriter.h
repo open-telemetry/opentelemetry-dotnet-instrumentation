@@ -1,5 +1,5 @@
-#ifndef DD_CLR_PROFILER_IL_REWRITER_H_
-#define DD_CLR_PROFILER_IL_REWRITER_H_
+#ifndef OTEL_CLR_PROFILER_IL_REWRITER_H_
+#define OTEL_CLR_PROFILER_IL_REWRITER_H_
 
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full
@@ -142,4 +142,4 @@ public:
     unsigned GetMaxStackValue();
 };
 
-#endif // DD_CLR_PROFILER_IL_REWRITER_H_
+#endif // OTEL_CLR_PROFILER_IL_REWRITER_H_
