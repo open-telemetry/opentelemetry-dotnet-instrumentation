@@ -77,7 +77,7 @@ const WSTRING azure_app_services_cli_telemetry_profile_value =
     WStr("DOTNET_CLI_TELEMETRY_PROFILE");
 
 // Enable the profiler to dump the IL original code and modification to the log.
-const WSTRING dump_il_rewrite_enabled = WStr("OTEL_DUMP_ILREWRITE_ENABLED");
+const WSTRING dump_il_rewrite_enabled = WStr("OTEL_DOTNET_AUTO_DUMP_ILREWRITE_ENABLED");
 
 // Sets whether to enable JIT inlining
 const WSTRING clr_enable_inlining = WStr("OTEL_DOTNET_AUTO_CLR_ENABLE_INLINING");

@@ -59,5 +59,5 @@ export DOTNET_STARTUP_HOOKS="${CURDIR}/bin/tracer-home/netcoreapp3.1/OpenTelemet
 export OTEL_DOTNET_AUTO_HOME="${CURDIR}/bin/tracer-home"
 export OTEL_DOTNET_AUTO_INTEGRATIONS_FILE="${CURDIR}/bin/tracer-home/integrations.json"
 export OTEL_DOTNET_AUTO_DEBUG="1"
-export OTEL_DUMP_ILREWRITE_ENABLED="0"
+export OTEL_DOTNET_AUTO_DUMP_ILREWRITE_ENABLED="0"
 export OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES="dotnet.exe,dotnet"

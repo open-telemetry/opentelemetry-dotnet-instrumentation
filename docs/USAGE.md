@@ -58,7 +58,7 @@ Default logs directory paths are:
 | `OTEL_DOTNET_AUTO_LOG_PATH` | The path of the profiler log file. | _see above_ |
 | `OTEL_DOTNET_AUTO_DEBUG` | Enable to activate debugging mode for the tracer. | `false` |
 | `OTEL_DOTNET_AUTO_CONSOLE_EXPORTER_ENABLED` | Defines whether the console exporter is enabled or not. | `true` |
-| `OTEL_DUMP_ILREWRITE_ENABLED` | Allows the profiler to dump the IL original code and modification to the log. | `false` |
+| `OTEL_DOTNET_AUTO_DUMP_ILREWRITE_ENABLED` | Allows the profiler to dump the IL original code and modification to the log. | `false` |
 
 ### Exporters
 
