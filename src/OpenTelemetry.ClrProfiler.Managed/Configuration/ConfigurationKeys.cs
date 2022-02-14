@@ -74,7 +74,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
             /// <summary>
             /// Configuration key pattern for enabling or disabling an integration.
             /// </summary>
-            public const string Enabled = "OTEL_TRACE_{0}_ENABLED";
+            public const string Enabled = "OTEL_DOTNET_AUTO_{0}_ENABLED";
         }
     }
 }
