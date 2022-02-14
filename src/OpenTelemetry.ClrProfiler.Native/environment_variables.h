@@ -20,7 +20,7 @@ const WSTRING integrations_path = WStr("OTEL_INTEGRATIONS");
 
 // Sets the path to the profiler's home directory, for example:
 // "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\" or "/opt/opentelemetry/"
-const WSTRING profiler_home_path = WStr("OTEL_DOTNET_TRACER_HOME");
+const WSTRING profiler_home_path = WStr("OTEL_DOTNET_AUTO_HOME");
 
 // Sets the filename of executables the profiler can attach to.
 // If not defined (default), the profiler will attach to any process.

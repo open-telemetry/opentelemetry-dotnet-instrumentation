@@ -56,7 +56,7 @@ fi
 export DOTNET_STARTUP_HOOKS="${CURDIR}/bin/tracer-home/netcoreapp3.1/OpenTelemetry.Instrumentation.StartupHook.dll"
 
 # Configure OpenTelemetry Tracer 
-export OTEL_DOTNET_TRACER_HOME="${CURDIR}/bin/tracer-home"
+export OTEL_DOTNET_AUTO_HOME="${CURDIR}/bin/tracer-home"
 export OTEL_INTEGRATIONS="${CURDIR}/bin/tracer-home/integrations.json"
 export OTEL_TRACE_DEBUG="1"
 export OTEL_DUMP_ILREWRITE_ENABLED="0"

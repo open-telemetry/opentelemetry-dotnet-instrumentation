@@ -51,8 +51,8 @@ rem Don't attach the profiler to these processes
 SET OTEL_PROFILER_EXCLUDE_PROCESSES=devenv.exe;Microsoft.ServiceHub.Controller.exe;ServiceHub.Host.CLR.exe;ServiceHub.TestWindowStoreHost.exe;ServiceHub.DataWarehouseHost.exe;sqlservr.exe;VBCSCompiler.exe;iisexpresstray.exe;msvsmon.exe;PerfWatson2.exe;ServiceHub.IdentityHost.exe;ServiceHub.VSDetouredHost.exe;ServiceHub.SettingsHost.exe;ServiceHub.Host.CLR.x86.exe;vstest.console.exe;ServiceHub.RoslynCodeAnalysisService32.exe;testhost.x86.exe;MSBuild.exe;ServiceHub.ThreadedWaitDialog.exe
 
 rem Set dotnet tracer home path
-SET OTEL_DOTNET_TRACER_HOME=%~dp0
-SET OTEL_INTEGRATIONS=%OTEL_DOTNET_TRACER_HOME%\integrations.json
+SET OTEL_DOTNET_AUTO_HOME=%~dp0
+SET OTEL_INTEGRATIONS=%OTEL_DOTNET_AUTO_HOME%\integrations.json
 
 if "%start_visual_studio%" == "true" (
     echo Starting Visual Studio...

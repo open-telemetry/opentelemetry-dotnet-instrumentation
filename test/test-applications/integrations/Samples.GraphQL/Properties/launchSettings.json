@@ -19,7 +19,7 @@
         "CORECLR_PROFILER_PATH": "$(SolutionDir)bin\\tracer-home\\win-x64\\OpenTelemetry.ClrProfiler.Native.dll",
         "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.Instrumentation.StartupHook.dll",
 
-        "OTEL_DOTNET_TRACER_HOME": "$(SolutionDir)bin\\tracer-home\\",
+        "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home\\",
         "OTEL_INTEGRATIONS": "$(SolutionDir)bin\\tracer-home\\integrations.json",
         "OTEL_TRACES_EXPORTER": "zipkin",
         "OTEL_EXPORTER_ZIPKIN_ENDPOINT": "http://127.0.0.1:9411/api/v2/spans",

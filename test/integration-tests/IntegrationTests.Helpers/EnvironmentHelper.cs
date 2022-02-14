@@ -99,7 +99,7 @@ namespace IntegrationTests.Helpers
 
                 // OpenTelemetry
                 "OTEL_PROFILER_PROCESSES",
-                "OTEL_DOTNET_TRACER_HOME",
+                "OTEL_DOTNET_AUTO_HOME",
                 "OTEL_INTEGRATIONS",
                 "OTEL_DISABLED_INTEGRATIONS",
                 "OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES",
@@ -181,7 +181,7 @@ namespace IntegrationTests.Helpers
             }
 
             string integrations = GetIntegrationsPath();
-            environmentVariables["OTEL_DOTNET_TRACER_HOME"] = GetNukeBuildOutput();
+            environmentVariables["OTEL_DOTNET_AUTO_HOME"] = GetNukeBuildOutput();
             environmentVariables["OTEL_INTEGRATIONS"] = integrations;
             environmentVariables["OTEL_TRACES_EXPORTER"] = "zipkin";
             environmentVariables["OTEL_EXPORTER_ZIPKIN_ENDPOINT"] = $"http://127.0.0.1:{agentPort}";
