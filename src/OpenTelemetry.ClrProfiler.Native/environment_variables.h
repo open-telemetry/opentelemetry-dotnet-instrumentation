@@ -8,7 +8,7 @@ namespace environment {
 
 // Sets whether the profiler is enabled. Default is true.
 // Setting this to false disabled the profiler entirely.
-const WSTRING tracing_enabled = WStr("OTEL_TRACE_ENABLED");
+const WSTRING tracing_enabled = WStr("OTEL_DOTNET_AUTO_ENABLED");
 
 // Sets whether debug mode is enabled. Default is false.
 const WSTRING debug_enabled = WStr("OTEL_TRACE_DEBUG");

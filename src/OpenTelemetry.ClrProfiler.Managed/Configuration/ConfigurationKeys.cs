@@ -12,7 +12,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         /// Default is value is true (enabled).
         /// </summary>
         /// <seealso cref="Settings.TraceEnabled"/>
-        public const string TraceEnabled = "OTEL_TRACE_ENABLED";
+        public const string TraceEnabled = "OTEL_DOTNET_AUTO_ENABLED";
 
         /// <summary>
         /// Configuration key for whether the tracer should be initialized by the profiler or not.
