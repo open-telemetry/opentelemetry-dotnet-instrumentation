@@ -59,7 +59,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         /// <summary>
         /// Configuration key for additional <see cref="ActivitySource"/> names to be added to the tracer at the startup.
         /// </summary>
-        public const string AdditionalSources = "OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES";
+        public const string AdditionalSources = "OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES";
 
         /// <summary>
         /// Configuration key for legacy source names to be added to the tracer at the startup.

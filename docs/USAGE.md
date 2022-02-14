@@ -98,7 +98,7 @@ The Batch Span Processor batches of finished spans before they are send by the e
 | Environment variable | Description | Default |
 |-|-|-|
 | `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP` | Defines whether the tracer is created by the auto instrumentation library or not. | `true` |
-| `OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES` | Comma separated list of additional `ActivitySource` names to be added to the tracer at the startup. |  |
+| `OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES` | Comma separated list of additional `ActivitySource` names to be added to the tracer at the startup. |  |
 | `OTEL_DOTNET_TRACER_LEGACY_SOURCES` | Comma separated list of additional legacy source names to be added to the tracer at the startup. |  |
 | `OTEL_DOTNET_TRACER_INSTRUMENTATION_PLUGINS` | Colon (:) separated list of OTel SDK instrumentation plugins represented by `System.Type.AssemblyQualifiedName`. | |
 
@@ -106,7 +106,7 @@ The Batch Span Processor batches of finished spans before they are send by the e
 initializes OpenTelemetry .NET SDK Tracer on its own. This configuration can be
 used e.g. to just get the bytecode instrumentations.
 
-`OTEL_DOTNET_TRACER_ADDITIONAL_SOURCES` should be used to capture manually
+`OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES` should be used to capture manually
 instrumented spans.
 
 `OTEL_DOTNET_TRACER_LEGACY_SOURCES` can be used to capture `Activity` objects
