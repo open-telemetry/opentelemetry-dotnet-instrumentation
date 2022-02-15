@@ -40,7 +40,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader
                 var assembly = Assembly.Load("OpenTelemetry.AutoInstrumentation");
                 if (assembly == null)
                 {
-                    throw new FileNotFoundException("The assembly OOpenTelemetry.AutoInstrumentation could not be loaded");
+                    throw new FileNotFoundException("The assembly OpenTelemetry.AutoInstrumentation could not be loaded");
                 }
 
                 var type = assembly.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation", throwOnError: false);

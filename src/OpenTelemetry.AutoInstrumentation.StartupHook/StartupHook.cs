@@ -45,7 +45,7 @@ internal class StartupHook
             }
             else
             {
-                StartupHookEventSource.Log.Trace("OOpenTelemetry.AutoInstrumentation.Instrumentation initialized before startup hook");
+                StartupHookEventSource.Log.Trace("OpenTelemetry.AutoInstrumentation.Instrumentation initialized before startup hook");
             }
         }
         catch (Exception ex)
