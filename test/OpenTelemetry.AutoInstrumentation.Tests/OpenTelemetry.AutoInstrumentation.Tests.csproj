@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\OpenTelemetry.ClrProfiler.Managed\OpenTelemetry.AutoInstrumentation.csproj" />
+    <ProjectReference Include="..\..\src\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.csproj" />
   </ItemGroup>
 
 </Project>

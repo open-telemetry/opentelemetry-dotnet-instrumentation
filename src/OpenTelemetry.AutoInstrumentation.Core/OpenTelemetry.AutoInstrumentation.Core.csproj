@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>OpenTelemetry.ClrProfiler</RootNamespace>
-    <AssemblyName>OpenTelemetry.ClrProfiler.Managed.Core</AssemblyName>
+    <RootNamespace>OpenTelemetry.AutoInstrumentation</RootNamespace>
+    <AssemblyName>OpenTelemetry.AutoInstrumentation.Core</AssemblyName>
 
     <!-- NuGet -->
     <Version>0.0.1</Version>
