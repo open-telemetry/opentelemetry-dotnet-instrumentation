@@ -52,7 +52,8 @@ partial class Build
 
     private static readonly IEnumerable<TargetFramework> TestFrameworks = TargetFrameworks
         .Concat(new[] {
-            TargetFramework.NET5_0
+            TargetFramework.NET5_0,
+            TargetFramework.NET6_0
         });
 
     Target CreateRequiredDirectories => _ => _
