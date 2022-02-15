@@ -142,7 +142,7 @@ Two issues can arise from incorrect versioning:
 
 .NET Core [Framework-dependent deployment](https://docs.microsoft.com/en-us/dotnet/core/deploying/deploy-with-cli#framework-dependent-deployment) apps could use
 [DOTNET_ADDITIONAL_DEPS](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md) and
-[DOTNET_SHARED_STORE](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store) in trace-home to resolve assembly conflicts.
+[DOTNET_SHARED_STORE](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store) from tracer-home directory to resolve these assembly conflicts.
 
 #### Build Time Resolution
 
