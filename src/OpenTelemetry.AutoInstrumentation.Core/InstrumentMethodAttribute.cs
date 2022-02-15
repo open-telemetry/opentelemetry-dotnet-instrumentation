@@ -1,6 +1,6 @@
 using System;
 
-namespace OpenTelemetry.ClrProfiler
+namespace OpenTelemetry.AutoInstrumentation
 {
     /// <summary>
     /// Attribute that indicates that the decorated class is meant to intercept a method

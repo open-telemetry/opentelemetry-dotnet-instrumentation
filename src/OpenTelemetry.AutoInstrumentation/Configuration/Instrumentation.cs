@@ -1,5 +1,5 @@
 // ReSharper disable InconsistentNaming - Name is used for integration names
-namespace OpenTelemetry.ClrProfiler.Managed.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration
 {
     /// <summary>
     /// Enum representing supported instrumentations.

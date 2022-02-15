@@ -1,6 +1,6 @@
 using System;
 
-namespace OpenTelemetry.ClrProfiler.CallTarget
+namespace OpenTelemetry.AutoInstrumentation.CallTarget
 {
     /// <summary>
     /// Apply on a calltarget async callback to indicate that the method

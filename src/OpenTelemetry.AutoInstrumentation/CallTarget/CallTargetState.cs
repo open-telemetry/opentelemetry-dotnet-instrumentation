@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace OpenTelemetry.ClrProfiler.CallTarget
+namespace OpenTelemetry.AutoInstrumentation.CallTarget
 {
     /// <summary>
     /// Call target execution state

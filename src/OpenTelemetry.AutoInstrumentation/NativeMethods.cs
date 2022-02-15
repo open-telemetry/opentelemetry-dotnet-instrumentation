@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace OpenTelemetry.ClrProfiler.Managed
+namespace OpenTelemetry.AutoInstrumentation
 {
     internal static class NativeMethods
     {
@@ -21,14 +21,14 @@ namespace OpenTelemetry.ClrProfiler.Managed
         // and optional on .NET Core
         private static class Windows
         {
-            [DllImport("OpenTelemetry.ClrProfiler.Native.dll")]
+            [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
             public static extern bool IsProfilerAttached();
         }
 
         // assume .NET Core if not running on Windows
         private static class NonWindows
         {
-            [DllImport("OpenTelemetry.ClrProfiler.Native")]
+            [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
             public static extern bool IsProfilerAttached();
         }
     }

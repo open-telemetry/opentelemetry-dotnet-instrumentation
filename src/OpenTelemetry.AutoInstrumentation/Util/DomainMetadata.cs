@@ -1,6 +1,6 @@
 using System;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Util
+namespace OpenTelemetry.AutoInstrumentation.Util
 {
     /// <summary>
     /// Dedicated helper class for consistently referencing Process and AppDomain information.

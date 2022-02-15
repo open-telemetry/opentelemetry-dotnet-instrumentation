@@ -2,10 +2,11 @@ using System;
 using System.Diagnostics;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using OpenTelemetry.ClrProfiler.Managed.Util;
+using OpenTelemetry.AutoInstrumentation.Util;
+
 #pragma warning disable SA1649 // File name must match first type name
 
-namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers
+namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers
 {
     internal static class BeginMethodHandler<TIntegration, TTarget>
     {
@@ -15,7 +16,7 @@ namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers
         {
             try
             {
-                DynamicMethod dynMethod = IntegrationMapper.CreateBeginMethodDelegate(typeof(TIntegration), typeof(TTarget), ArrayHelper.Empty<Type>());
+                DynamicMethod dynMethod = IntegrationMapper.CreateBeginMethodDelegate(typeof(TIntegration), typeof(TTarget), Array.Empty<Type>());
                 if (dynMethod != null)
                 {
                     _invokeDelegate = (InvokeDelegate)dynMethod.CreateDelegate(typeof(InvokeDelegate));

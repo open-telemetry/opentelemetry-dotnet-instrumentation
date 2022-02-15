@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
 
-namespace OpenTelemetry.ClrProfiler.DuckTyping
+namespace OpenTelemetry.AutoInstrumentation.DuckTyping
 {
     /// <summary>
     /// Duck Type

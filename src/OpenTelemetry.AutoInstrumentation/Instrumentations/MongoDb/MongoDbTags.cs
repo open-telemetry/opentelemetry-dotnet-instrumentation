@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using OpenTelemetry.ClrProfiler.Managed.Tagging;
-using OpenTelemetry.ClrProfiler.Managed.Util;
+using OpenTelemetry.AutoInstrumentation.Tagging;
+using OpenTelemetry.AutoInstrumentation.Util;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDb
 {
     internal class MongoDbTags : InstrumentationTags
     {

@@ -1,6 +1,6 @@
 using System;
 
-namespace OpenTelemetry.ClrProfiler.Emit
+namespace OpenTelemetry.AutoInstrumentation.Emit
 {
     internal class DelegateMetadata
     {

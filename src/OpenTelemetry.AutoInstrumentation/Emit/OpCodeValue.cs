@@ -1,4 +1,4 @@
-namespace OpenTelemetry.ClrProfiler.Emit
+namespace OpenTelemetry.AutoInstrumentation.Emit
 {
     internal enum OpCodeValue : short
     {

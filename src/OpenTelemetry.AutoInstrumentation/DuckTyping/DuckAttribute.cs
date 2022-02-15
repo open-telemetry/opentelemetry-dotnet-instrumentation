@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace OpenTelemetry.ClrProfiler.DuckTyping
+namespace OpenTelemetry.AutoInstrumentation.DuckTyping
 {
     /// <summary>
     /// Duck kind

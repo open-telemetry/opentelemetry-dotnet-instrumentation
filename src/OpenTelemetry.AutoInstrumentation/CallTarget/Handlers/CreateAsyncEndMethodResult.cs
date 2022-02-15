@@ -1,6 +1,6 @@
 using System.Reflection.Emit;
 
-namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers
+namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers
 {
     internal readonly struct CreateAsyncEndMethodResult
     {

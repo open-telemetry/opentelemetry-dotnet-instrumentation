@@ -1,8 +1,8 @@
 using System;
 using System.Runtime.CompilerServices;
-using OpenTelemetry.ClrProfiler.Managed.Logging;
+using OpenTelemetry.AutoInstrumentation.Logging;
 
-namespace OpenTelemetry.ClrProfiler.DuckTyping
+namespace OpenTelemetry.AutoInstrumentation.DuckTyping
 {
     /// <summary>
     /// Duck type extensions

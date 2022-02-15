@@ -1,8 +1,9 @@
 using System;
 using System.Threading.Tasks;
+
 #pragma warning disable SA1649 // File name must match first type name
 
-namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers.Continuations
+namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations
 {
 #if NETCOREAPP3_1 || NET5_0
     internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn, TResult> : ContinuationGenerator<TTarget, TReturn>

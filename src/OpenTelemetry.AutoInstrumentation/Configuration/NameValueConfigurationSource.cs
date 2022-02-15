@@ -1,6 +1,6 @@
 using System.Collections.Specialized;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration
 {
     /// <summary>
     /// Represents a configuration source that retrieves

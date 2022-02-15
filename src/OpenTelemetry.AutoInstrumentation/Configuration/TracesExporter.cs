@@ -1,4 +1,4 @@
-namespace OpenTelemetry.ClrProfiler.Managed.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration
 {
     /// <summary>
     /// Enum representing supported trace exporters.

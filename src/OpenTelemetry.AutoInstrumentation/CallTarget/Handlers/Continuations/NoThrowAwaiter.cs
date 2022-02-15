@@ -1,9 +1,10 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+
 #pragma warning disable SA1649 // File name must match first type name
 
-namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers.Continuations
+namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations
 {
     internal struct NoThrowAwaiter : ICriticalNotifyCompletion
     {

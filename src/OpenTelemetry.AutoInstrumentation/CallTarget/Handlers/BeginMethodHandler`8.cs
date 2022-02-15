@@ -2,9 +2,10 @@ using System;
 using System.Diagnostics;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+
 #pragma warning disable SA1649 // File name must match first type name
 
-namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers
+namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers
 {
     internal static class BeginMethodHandler<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8>
     {

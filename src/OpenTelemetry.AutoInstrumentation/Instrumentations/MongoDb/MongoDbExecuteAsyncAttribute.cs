@@ -1,4 +1,4 @@
-namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDb
 {
     internal class MongoDbExecuteAsyncAttribute : MongoDbInstrumentMethodAttribute
     {

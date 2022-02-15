@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration
 {
     /// <summary>
     /// Represents one or more configuration sources.

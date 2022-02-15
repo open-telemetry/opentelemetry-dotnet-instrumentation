@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration
 {
     /// <summary>
     /// A collection of <see cref="IntegrationSettings"/> instances, referenced by name.

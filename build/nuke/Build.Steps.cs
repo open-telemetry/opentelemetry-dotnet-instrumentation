@@ -20,8 +20,8 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build
 {
-    [Solution("OpenTelemetry.ClrProfiler.sln")] readonly Solution Solution;
-    AbsolutePath MsBuildProject => RootDirectory / "OpenTelemetry.ClrProfiler.proj";
+    [Solution("OpenTelemetry.AutoInstrumentation.sln")] readonly Solution Solution;
+    AbsolutePath MsBuildProject => RootDirectory / "OpenTelemetry.AutoInstrumentation.proj";
 
     AbsolutePath OutputDirectory => RootDirectory / "bin";
     AbsolutePath SourceDirectory => RootDirectory / "src";
@@ -350,7 +350,7 @@ partial class Build
     {
         var project = Solution.GetProject(Projects.Tests.ClrProfilerManagedBootstrappingTests);
 
-        const string testPrefix = "OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests.InstrumentationTests";
+        const string testPrefix = "OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests.InstrumentationTests";
         var testNames = new[] {
             "Initialize_WithDisabledFlag_DoesNotCreateTracerProvider",
             "Initialize_WithDefaultFlag_CreatesTracerProvider",

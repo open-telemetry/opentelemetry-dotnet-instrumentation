@@ -2,7 +2,7 @@ using System;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 
-namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers.Continuations
+namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations
 {
     internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn> : ContinuationGenerator<TTarget, TReturn>
     {

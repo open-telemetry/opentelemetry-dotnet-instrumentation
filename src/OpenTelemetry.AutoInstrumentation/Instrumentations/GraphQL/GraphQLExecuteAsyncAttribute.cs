@@ -1,4 +1,4 @@
-namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL
 {
     internal class GraphQLExecuteAsyncAttribute : InstrumentMethodAttribute
     {

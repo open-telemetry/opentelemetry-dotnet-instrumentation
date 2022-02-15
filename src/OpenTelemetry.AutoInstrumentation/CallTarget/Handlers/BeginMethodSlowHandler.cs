@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 
-namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers
+namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers
 {
     internal static class BeginMethodSlowHandler<TIntegration, TTarget>
     {

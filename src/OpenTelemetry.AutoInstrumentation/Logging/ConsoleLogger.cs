@@ -1,12 +1,12 @@
 using System;
 using System.Runtime.CompilerServices;
-using OpenTelemetry.ClrProfiler.Managed.Util;
+using OpenTelemetry.ClrProfiler.Managed.Logging;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Logging
+namespace OpenTelemetry.AutoInstrumentation.Logging
 {
     internal class ConsoleLogger : ILogger
     {
-        private static readonly object[] NoPropertyValues = ArrayHelper.Empty<object>();
+        private static readonly object[] NoPropertyValues = Array.Empty<object>();
 
         private readonly string _name;
 

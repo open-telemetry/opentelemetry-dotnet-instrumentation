@@ -1,7 +1,7 @@
 using System.Diagnostics;
-using OpenTelemetry.ClrProfiler.Managed.Util;
+using OpenTelemetry.AutoInstrumentation.Util;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Tagging
+namespace OpenTelemetry.AutoInstrumentation.Tagging
 {
     internal abstract class InstrumentationTags : CommonTags
     {

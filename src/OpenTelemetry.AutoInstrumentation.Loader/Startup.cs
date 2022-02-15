@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Loader
+namespace OpenTelemetry.AutoInstrumentation.Loader
 {
     /// <summary>
     /// A class that attempts to load the OpenTelemetry.ClrProfiler.Managed .NET assembly.
@@ -37,22 +37,22 @@ namespace OpenTelemetry.ClrProfiler.Managed.Loader
 
             try
             {
-                var assembly = Assembly.Load("OpenTelemetry.ClrProfiler.Managed");
+                var assembly = Assembly.Load("OpenTelemetry.AutoInstrumentation");
                 if (assembly == null)
                 {
                     throw new FileNotFoundException("The assembly OpenTelemetry.ClrProfiler.Managed could not be loaded");
                 }
 
-                var type = assembly.GetType("OpenTelemetry.ClrProfiler.Managed.Instrumentation", throwOnError: false);
+                var type = assembly.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation", throwOnError: false);
                 if (type == null)
                 {
-                    throw new TypeLoadException("The type OpenTelemetry.ClrProfiler.Managed.Instrumentation could not be loaded");
+                    throw new TypeLoadException("The type OpenTelemetry.AutoInstrumentation.Instrumentation could not be loaded");
                 }
 
                 var method = type.GetRuntimeMethod("Initialize", new Type[0]);
                 if (method == null)
                 {
-                    throw new MissingMethodException("The method OpenTelemetry.ClrProfiler.Managed.Instrumentation.Initialize could not be loaded");
+                    throw new MissingMethodException("The method OpenTelemetry.AutoInstrumentation.Instrumentation.Initialize could not be loaded");
                 }
 
                 method.Invoke(obj: null, parameters: null);

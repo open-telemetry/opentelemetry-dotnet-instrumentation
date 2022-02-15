@@ -1,9 +1,9 @@
 using System;
 using System.Diagnostics;
-using OpenTelemetry.ClrProfiler.CallTarget;
-using OpenTelemetry.ClrProfiler.Managed.Util;
+using OpenTelemetry.AutoInstrumentation.CallTarget;
+using OpenTelemetry.AutoInstrumentation.Util;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL
 {
     /// <summary>
     /// GraphQL.Execution.ExecutionStrategy calltarget instrumentation
@@ -29,7 +29,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL
         /// <typeparam name="TContext">Type of the execution context</typeparam>
         /// <param name="instance">Instance value, aka `this` of the instrumented method.</param>
         /// <param name="context">The execution context of the GraphQL operation.</param>
-        /// <returns>Calltarget state value</returns>
+        /// <returns>CallTarget state value</returns>
         public static CallTargetState OnMethodBegin<TTarget, TContext>(TTarget instance, TContext context)
             where TContext : IExecutionContext
         {

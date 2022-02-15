@@ -1,6 +1,6 @@
 using System;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration
 {
     internal readonly struct IntegrationInfo
     {

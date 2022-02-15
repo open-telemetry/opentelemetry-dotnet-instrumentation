@@ -1,10 +1,10 @@
 using System;
 using System.ComponentModel;
 using System.Threading;
-using OpenTelemetry.ClrProfiler.CallTarget;
-using OpenTelemetry.ClrProfiler.Managed.Util;
+using OpenTelemetry.AutoInstrumentation.CallTarget;
+using OpenTelemetry.AutoInstrumentation.Util;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDb
 {
     /// <summary>
     /// MongoDB.Driver.Core.WireProtocol.IWireProtocol&lt;TResult&gt; instrumentation
@@ -42,7 +42,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb
         /// <param name="connection">The MongoDB connection</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <typeparam name="TTarget">Type of the target</typeparam>
-        /// <returns>Calltarget state value</returns>
+        /// <returns>CallTarget state value</returns>
         public static CallTargetState OnMethodBegin<TTarget>(TTarget instance, object connection, CancellationToken cancellationToken)
         {
             var activity = MongoDbIntegration.CreateActivity(instance, connection);

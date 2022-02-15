@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OpenTelemetry.Exporter;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration
 {
     // TODO Move settings to more suitable place?
 
@@ -139,7 +139,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Configuration
         /// <summary>
         /// Gets the list of activity sources to be added to the tracer at the startup.
         /// </summary>
-        public IList<string> ActivitySources { get; } = new List<string> { "OpenTelemetry.ClrProfiler.*" };
+        public IList<string> ActivitySources { get; } = new List<string> { "OpenTelemetry.AutoInstrumentation.*" };
 
         /// <summary>
         /// Gets the list of legacy sources to be added to the tracer at the startup.

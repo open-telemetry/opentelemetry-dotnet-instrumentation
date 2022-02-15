@@ -3,11 +3,11 @@ using System.Diagnostics;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using OpenTelemetry.ClrProfiler.CallTarget.Handlers.Continuations;
+using OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations;
 
 #pragma warning disable SA1649 // File name must match first type name
 
-namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers
+namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers
 {
     internal static class EndMethodHandler<TIntegration, TTarget, TReturn>
     {

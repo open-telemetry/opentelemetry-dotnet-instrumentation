@@ -1,7 +1,8 @@
 using System;
 using System.Runtime.CompilerServices;
+using OpenTelemetry.ClrProfiler.Managed.Logging;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Logging
+namespace OpenTelemetry.AutoInstrumentation.Logging
 {
     internal interface ILogger
     {

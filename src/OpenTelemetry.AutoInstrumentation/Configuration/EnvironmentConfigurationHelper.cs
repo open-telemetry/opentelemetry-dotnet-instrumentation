@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 #if NETCOREAPP3_1
 using OpenTelemetry.Exporter;
 #endif
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration
 {
     internal static class EnvironmentConfigurationHelper
     {

@@ -1,4 +1,4 @@
-namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL
 {
     /// <summary>
     /// GraphQL.Language.AST.Document interface for ducktyping

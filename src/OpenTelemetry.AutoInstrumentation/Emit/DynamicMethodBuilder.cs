@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace OpenTelemetry.ClrProfiler.Emit
+namespace OpenTelemetry.AutoInstrumentation.Emit
 {
     /// <summary>
     /// Helper class to create instances of <see cref="DynamicMethod"/> using <see cref="System.Reflection.Emit"/>.

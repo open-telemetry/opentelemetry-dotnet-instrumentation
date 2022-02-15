@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using OpenTelemetry.ClrProfiler.Managed.Configuration;
+using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.Exporter;
 using Xunit;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Tests.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Tests.Configuration
 {
     public class SettingsTests : IDisposable
     {
@@ -35,7 +35,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Tests.Configuration
                 settings.ConsoleExporterEnabled.Should().BeTrue();
                 settings.EnabledInstrumentations.Should().BeEmpty();
                 settings.TracerPlugins.Should().BeEmpty();
-                settings.ActivitySources.Should().BeEquivalentTo(new List<string> { "OpenTelemetry.ClrProfiler.*" });
+                settings.ActivitySources.Should().BeEquivalentTo(new List<string> { "OpenTelemetry.AutoInstrumentation.*" });
                 settings.LegacySources.Should().BeEmpty();
                 settings.Integrations.Should().NotBeNull();
             }

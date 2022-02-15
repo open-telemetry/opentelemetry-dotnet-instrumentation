@@ -1,10 +1,11 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
+
 #pragma warning disable SA1649 // File name must match first type name
 #pragma warning disable SA1402 // File may only contain a single class
 
-namespace OpenTelemetry.ClrProfiler.DuckTyping
+namespace OpenTelemetry.AutoInstrumentation.DuckTyping
 {
     /// <summary>
     /// DuckType Exception

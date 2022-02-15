@@ -1,4 +1,4 @@
-namespace OpenTelemetry.ClrProfiler
+namespace OpenTelemetry.AutoInstrumentation
 {
     /// <summary>
     /// Specifies a safe version range for an integration.

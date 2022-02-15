@@ -1,4 +1,4 @@
-namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL
 {
     /// <summary>
     /// A proxy enum for GraphQL.Language.AST.OperationType.

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using OpenTelemetry.Trace;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration
 {
     internal static class PluginsConfigurationHelper
     {

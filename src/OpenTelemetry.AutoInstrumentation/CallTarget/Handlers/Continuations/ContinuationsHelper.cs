@@ -2,7 +2,7 @@ using System;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 
-namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers.Continuations
+namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations
 {
     internal static class ContinuationsHelper
     {

@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace OpenTelemetry.ClrProfiler.CallTarget
+namespace OpenTelemetry.AutoInstrumentation.CallTarget
 {
     /// <summary>
     /// Call target return value

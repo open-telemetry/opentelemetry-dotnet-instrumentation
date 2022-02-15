@@ -1,6 +1,6 @@
-using OpenTelemetry.ClrProfiler.DuckTyping;
+using OpenTelemetry.AutoInstrumentation.DuckTyping;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL
 {
     /// <summary>
     /// GraphQL.ErrorLocation interface for ducktyping

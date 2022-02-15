@@ -1,6 +1,6 @@
 using System;
 
-namespace OpenTelemetry.ClrProfiler.Managed
+namespace OpenTelemetry.AutoInstrumentation
 {
     public static class Instrumentation
     {

@@ -1,8 +1,9 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using OpenTelemetry.ClrProfiler.Managed.Loader;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Loader
+namespace OpenTelemetry.AutoInstrumentation.Loader
 {
     internal static class StartupLogger
     {

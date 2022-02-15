@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration
 {
     /// <summary>
     /// Configuration keys

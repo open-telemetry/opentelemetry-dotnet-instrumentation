@@ -1,9 +1,9 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using OpenTelemetry.ClrProfiler.CallTarget.Handlers;
+using OpenTelemetry.AutoInstrumentation.CallTarget.Handlers;
 
-namespace OpenTelemetry.ClrProfiler.CallTarget
+namespace OpenTelemetry.AutoInstrumentation.CallTarget
 {
     /// <summary>
     /// CallTarget Invoker

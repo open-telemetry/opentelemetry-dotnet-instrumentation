@@ -1,9 +1,9 @@
 using System;
 using System.Runtime.CompilerServices;
-using OpenTelemetry.ClrProfiler.DuckTyping;
-using OpenTelemetry.ClrProfiler.Managed.Logging;
+using OpenTelemetry.AutoInstrumentation.DuckTyping;
+using OpenTelemetry.AutoInstrumentation.Logging;
 
-namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers
+namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers
 {
     internal static class IntegrationOptions<TIntegration, TTarget>
     {

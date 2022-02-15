@@ -1,4 +1,4 @@
-namespace OpenTelemetry.ClrProfiler
+namespace OpenTelemetry.AutoInstrumentation
 {
     internal static class ClrNames
     {

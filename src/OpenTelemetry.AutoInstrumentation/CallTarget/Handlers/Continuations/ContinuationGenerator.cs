@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers.Continuations
+namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations
 {
     internal class ContinuationGenerator<TTarget, TReturn>
     {

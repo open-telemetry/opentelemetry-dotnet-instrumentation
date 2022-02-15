@@ -1,4 +1,4 @@
-namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers.Continuations
+namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations
 {
     internal readonly struct ContinuationGeneratorState<TTarget>
     {

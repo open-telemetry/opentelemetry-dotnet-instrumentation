@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Util
+namespace OpenTelemetry.AutoInstrumentation.Util
 {
     internal static class ProcessHelpers
     {

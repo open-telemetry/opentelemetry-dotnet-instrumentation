@@ -1,6 +1,6 @@
 using System;
 
-namespace OpenTelemetry.ClrProfiler.CallTarget
+namespace OpenTelemetry.AutoInstrumentation.CallTarget
 {
     internal class CallTargetInvokerException : Exception
     {

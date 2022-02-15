@@ -3,7 +3,7 @@ using System;
 using System.Linq;
 using Microsoft.Win32;
 
-namespace OpenTelemetry.ClrProfiler.Managed
+namespace OpenTelemetry.AutoInstrumentation
 {
     internal partial class FrameworkDescription
     {

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using OpenTelemetry.ClrProfiler.DuckTyping;
-using OpenTelemetry.ClrProfiler.Managed.Logging;
-using OpenTelemetry.ClrProfiler.Managed.Util;
+using OpenTelemetry.AutoInstrumentation.DuckTyping;
+using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.AutoInstrumentation.Util;
 
-namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers
+namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers
 {
     internal class IntegrationMapper
     {

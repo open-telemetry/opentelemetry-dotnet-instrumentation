@@ -1,8 +1,8 @@
 using System;
 using System.Reflection;
-using OpenTelemetry.ClrProfiler.Managed.Logging;
+using OpenTelemetry.AutoInstrumentation.Logging;
 
-namespace OpenTelemetry.ClrProfiler.Managed
+namespace OpenTelemetry.AutoInstrumentation
 {
     internal partial class FrameworkDescription
     {

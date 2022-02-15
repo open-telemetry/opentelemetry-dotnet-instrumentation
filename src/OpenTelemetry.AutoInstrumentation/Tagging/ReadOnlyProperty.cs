@@ -1,6 +1,6 @@
 using System;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Tagging
+namespace OpenTelemetry.AutoInstrumentation.Tagging
 {
     internal class ReadOnlyProperty<TTags, TResult> : Property<TTags, TResult>
     {

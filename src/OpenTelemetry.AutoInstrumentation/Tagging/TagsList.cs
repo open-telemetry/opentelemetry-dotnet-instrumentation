@@ -1,9 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using OpenTelemetry.ClrProfiler.Managed.Util;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Tagging
+namespace OpenTelemetry.AutoInstrumentation.Tagging
 {
     internal abstract class TagsList : ITags
     {
@@ -151,7 +151,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Tagging
             return sb.ToString();
         }
 
-        protected virtual IProperty<string>[] GetAdditionalTags() => ArrayHelper.Empty<IProperty<string>>();
+        protected virtual IProperty<string>[] GetAdditionalTags() => Array.Empty<IProperty<string>>();
 
         protected virtual IList<KeyValuePair<string, string>> GetCustomTags() => Volatile.Read(ref _tags);
     }

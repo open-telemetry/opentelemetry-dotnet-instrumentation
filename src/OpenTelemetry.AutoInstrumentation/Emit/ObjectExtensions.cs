@@ -2,9 +2,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Reflection.Emit;
-using OpenTelemetry.ClrProfiler.Managed.Util;
+using OpenTelemetry.AutoInstrumentation.Util;
 
-namespace OpenTelemetry.ClrProfiler.Emit
+namespace OpenTelemetry.AutoInstrumentation.Emit
 {
     /// <summary>
     /// Provides helper methods to access object members by emitting IL dynamically.
@@ -21,9 +21,9 @@ namespace OpenTelemetry.ClrProfiler.Emit
         static ObjectExtensions()
         {
 #if NETFRAMEWORK
-            var asm = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName("OpenTelemetry.ClrProfiler.Emit.DynamicAssembly"), AssemblyBuilderAccess.Run);
+            var asm = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName("OpenTelemetry.AutoInstrumentation.Emit.DynamicAssembly"), AssemblyBuilderAccess.Run);
 #else
-            var asm = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("OpenTelemetry.ClrProfiler.Emit.DynamicAssembly"), AssemblyBuilderAccess.Run);
+            var asm = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("OpenTelemetry.AutoInstrumentation.Emit.DynamicAssembly"), AssemblyBuilderAccess.Run);
 #endif
             Module = asm.DefineDynamicModule("DynamicModule");
         }

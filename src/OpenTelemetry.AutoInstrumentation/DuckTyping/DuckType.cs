@@ -6,7 +6,7 @@ using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 
-namespace OpenTelemetry.ClrProfiler.DuckTyping
+namespace OpenTelemetry.AutoInstrumentation.DuckTyping
 {
     /// <summary>
     /// Create struct proxy instance delegate

@@ -1,14 +1,9 @@
 using System;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Util
+namespace OpenTelemetry.AutoInstrumentation.Util
 {
     internal static class ArrayHelper
     {
-        public static T[] Empty<T>()
-        {
-            return Array.Empty<T>();
-        }
-
         public static T[] Concat<T>(this T[] array, params T[] newElements)
         {
             var destination = new T[array.Length + newElements.Length];

@@ -1,9 +1,9 @@
 using System;
 using System.Diagnostics;
-using OpenTelemetry.ClrProfiler.Managed.Tagging;
+using OpenTelemetry.AutoInstrumentation.Tagging;
 using OpenTelemetry.Trace;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Util
+namespace OpenTelemetry.AutoInstrumentation.Util
 {
     internal static class ActivityHelper
     {

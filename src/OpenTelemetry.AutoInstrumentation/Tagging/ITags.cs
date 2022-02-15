@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Tagging
+namespace OpenTelemetry.AutoInstrumentation.Tagging
 {
     internal interface ITags
     {

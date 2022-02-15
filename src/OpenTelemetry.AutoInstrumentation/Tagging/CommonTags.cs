@@ -1,4 +1,4 @@
-namespace OpenTelemetry.ClrProfiler.Managed.Tagging
+namespace OpenTelemetry.AutoInstrumentation.Tagging
 {
     internal class CommonTags : TagsList
     {

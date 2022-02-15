@@ -1,7 +1,7 @@
 using System;
-using OpenTelemetry.ClrProfiler.Managed.Logging;
+using OpenTelemetry.AutoInstrumentation.Logging;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Util
+namespace OpenTelemetry.AutoInstrumentation.Util
 {
     /// <summary>
     /// Helpers to access environment variables

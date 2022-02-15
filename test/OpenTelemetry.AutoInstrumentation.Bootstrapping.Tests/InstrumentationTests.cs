@@ -3,12 +3,12 @@ using System.Diagnostics;
 using OpenTelemetry.Trace;
 using Xunit;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests
+namespace OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests
 {
     /// <summary>
     /// When you add a new tests or change the name of one of the existing ones please remember to reflect the changes
     /// in the build project, by updating the list in RunBootstrappingTests method of Build.Steps.cs.
-    /// Take notice that each test should be executed as a seperate process. Because of that, the tests require
+    /// Take notice that each test should be executed as a separate process. Because of that, the tests require
     /// BOOSTRAPPING_TESTS environmental variable to be set, to mitigate the risk of running all of the tests at once.
     /// </summary>
     public class InstrumentationTests

@@ -3,15 +3,13 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using OpenTelemetry.ClrProfiler.Emit;
-using OpenTelemetry.ClrProfiler.Managed.Configuration;
-using OpenTelemetry.ClrProfiler.Managed.Logging;
-using OpenTelemetry.ClrProfiler.Managed.Tagging;
-using OpenTelemetry.ClrProfiler.Managed.Util;
+using OpenTelemetry.AutoInstrumentation.Configuration;
+using OpenTelemetry.AutoInstrumentation.Emit;
+using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.AutoInstrumentation.Tagging;
+using OpenTelemetry.AutoInstrumentation.Util;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDb
 {
     /// <summary>
     /// Tracing integration for MongoDB.Driver.Core.
@@ -29,7 +27,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb
         private static readonly ILogger Log = ConsoleLogger.Create(typeof(MongoDbIntegration));
 
         private static readonly ActivitySource ActivitySource = new ActivitySource(
-            "OpenTelemetry.ClrProfiler.MongoDB", "0.0.1");
+            "OpenTelemetry.AutoInstrumentation.MongoDB", "0.0.1");
 
         internal static Activity CreateActivity(object wireProtocol, object connection)
         {

@@ -2,7 +2,7 @@ using System;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 
-namespace OpenTelemetry.ClrProfiler.CallTarget.Handlers
+namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers
 {
     internal static class EndMethodHandler<TIntegration, TTarget>
     {

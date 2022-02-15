@@ -1,6 +1,6 @@
-using OpenTelemetry.ClrProfiler.Managed.Configuration;
+using OpenTelemetry.AutoInstrumentation.Configuration;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Util
+namespace OpenTelemetry.AutoInstrumentation.Util
 {
     internal static class SettingsExtensions
     {

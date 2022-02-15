@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using Xunit;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Loader.Tests
+namespace OpenTelemetry.AutoInstrumentation.Loader.Tests
 {
     public class StartupTests
     {
@@ -13,16 +13,16 @@ namespace OpenTelemetry.ClrProfiler.Managed.Loader.Tests
             var directory = Directory.GetCurrentDirectory();
             Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", Path.Combine(directory, "..", "Profiler"));
 
-            var exception = Record.Exception(() => Startup.ManagedProfilerDirectory);
+            var exception = Record.Exception(() => AutoInstrumentation.Loader.Startup.ManagedProfilerDirectory);
 
             // That means the assembly was loaded successfully and Initialize method was called.
             Assert.Null(exception);
 
-            var clrProfilerManagedAssembly = AppDomain.CurrentDomain.GetAssemblies()
+            var openTelemetryAutoInstrumentationAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .Select(a => a.FullName)
-                .FirstOrDefault(n => n.StartsWith("OpenTelemetry.ClrProfiler.Managed,"));
+                .FirstOrDefault(n => n.StartsWith("OpenTelemetry.AutoInstrumentation,"));
 
-            Assert.NotNull(clrProfilerManagedAssembly);
+            Assert.NotNull(openTelemetryAutoInstrumentationAssembly);
         }
     }
 }

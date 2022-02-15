@@ -1,10 +1,10 @@
 using System;
 using System.ComponentModel;
 using System.Threading;
-using OpenTelemetry.ClrProfiler.CallTarget;
-using OpenTelemetry.ClrProfiler.Managed.Util;
+using OpenTelemetry.AutoInstrumentation.CallTarget;
+using OpenTelemetry.AutoInstrumentation.Util;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.MongoDb
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDb
 {
     /// <summary>
     /// MongoDB.Driver.Core.WireProtocol.IWireProtocol instrumentation

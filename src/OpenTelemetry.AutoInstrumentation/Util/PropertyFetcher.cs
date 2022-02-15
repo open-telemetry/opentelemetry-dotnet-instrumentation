@@ -4,7 +4,7 @@ using System;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Util
+namespace OpenTelemetry.AutoInstrumentation.Util
 {
     internal class PropertyFetcher
     {

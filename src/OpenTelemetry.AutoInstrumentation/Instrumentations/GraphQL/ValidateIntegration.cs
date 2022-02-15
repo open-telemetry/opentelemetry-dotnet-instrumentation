@@ -1,9 +1,9 @@
 using System;
 using System.Diagnostics;
-using OpenTelemetry.ClrProfiler.CallTarget;
-using OpenTelemetry.ClrProfiler.Managed.Util;
+using OpenTelemetry.AutoInstrumentation.CallTarget;
+using OpenTelemetry.AutoInstrumentation.Util;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL
 {
     /// <summary>
     /// GraphQL.Validation.DocumentValidator calltarget instrumentation

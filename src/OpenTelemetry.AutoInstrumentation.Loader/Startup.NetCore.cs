@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using System.Reflection;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Loader
+namespace OpenTelemetry.AutoInstrumentation.Loader
 {
     /// <summary>
     /// A class that attempts to load the OpenTelemetry.ClrProfiler.Managed .NET assembly.

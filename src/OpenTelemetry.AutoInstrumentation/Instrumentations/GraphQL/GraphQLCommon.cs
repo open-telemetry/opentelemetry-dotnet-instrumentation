@@ -1,14 +1,14 @@
 using System;
 using System.Diagnostics;
 using System.Text;
-using OpenTelemetry.ClrProfiler.DuckTyping;
-using OpenTelemetry.ClrProfiler.Managed.Configuration;
-using OpenTelemetry.ClrProfiler.Managed.Logging;
-using OpenTelemetry.ClrProfiler.Managed.Tagging;
-using OpenTelemetry.ClrProfiler.Managed.Util;
+using OpenTelemetry.AutoInstrumentation.Configuration;
+using OpenTelemetry.AutoInstrumentation.DuckTyping;
+using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.AutoInstrumentation.Tagging;
+using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.Trace;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL
 {
     internal class GraphQLCommon
     {
@@ -25,7 +25,7 @@ namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL
         internal static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(IntegrationName);
 
         internal static readonly ActivitySource ActivitySource = new ActivitySource(
-            "OpenTelemetry.ClrProfiler.GraphQL", "0.0.1");
+            "OpenTelemetry.AutoInstrumentation.GraphQL", "0.0.1");
 
         private static readonly ILogger Log = ConsoleLogger.Create(typeof(GraphQLCommon));
 

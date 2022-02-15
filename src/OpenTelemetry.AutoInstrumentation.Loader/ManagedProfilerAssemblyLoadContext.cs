@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Runtime.Loader;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Loader
+namespace OpenTelemetry.AutoInstrumentation.Loader
 {
     internal class ManagedProfilerAssemblyLoadContext : AssemblyLoadContext
     {

@@ -1,4 +1,6 @@
-namespace System.Runtime.CompilerServices
+using System;
+
+namespace OpenTelemetry.AutoInstrumentation.DuckTyping
 {
     /// <summary>
     /// This attribute is recognized by the CLR and allow us to disable visibility checks for certain assemblies (only from 4.6+)

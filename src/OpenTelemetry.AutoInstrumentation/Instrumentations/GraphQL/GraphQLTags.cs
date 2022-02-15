@@ -1,9 +1,8 @@
 using System.Diagnostics;
-using System.Linq;
-using OpenTelemetry.ClrProfiler.Managed.Tagging;
-using OpenTelemetry.ClrProfiler.Managed.Util;
+using OpenTelemetry.AutoInstrumentation.Tagging;
+using OpenTelemetry.AutoInstrumentation.Util;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Instrumentations.GraphQL
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL
 {
     internal class GraphQLTags : InstrumentationTags
     {

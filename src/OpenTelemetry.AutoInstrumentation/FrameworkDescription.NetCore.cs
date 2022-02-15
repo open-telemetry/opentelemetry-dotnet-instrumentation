@@ -3,7 +3,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
-namespace OpenTelemetry.ClrProfiler.Managed
+namespace OpenTelemetry.AutoInstrumentation
 {
     internal partial class FrameworkDescription
     {

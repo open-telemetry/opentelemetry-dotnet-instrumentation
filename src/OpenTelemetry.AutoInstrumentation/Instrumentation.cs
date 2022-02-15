@@ -1,12 +1,12 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
-using OpenTelemetry.ClrProfiler.Managed.Configuration;
+using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Shims.OpenTracing;
 using OpenTelemetry.Trace;
 
-namespace OpenTelemetry.ClrProfiler.Managed
+namespace OpenTelemetry.AutoInstrumentation
 {
     /// <summary>
     /// Instrumentation
@@ -83,9 +83,9 @@ namespace OpenTelemetry.ClrProfiler.Managed
                 if (_tracerProvider is not null)
                 {
                     // Instantiate the OpenTracing shim. The underlying OpenTelemetry tracer will create
-                    // spans using the "OpenTelemetry.ClrProfiler.OpenTracingShim" source.
+                    // spans using the "OpenTelemetry.AutoInstrumentation.OpenTracingShim" source.
                     var openTracingShim = new TracerShim(
-                        _tracerProvider.GetTracer("OpenTelemetry.ClrProfiler.OpenTracingShim"),
+                        _tracerProvider.GetTracer("OpenTelemetry.AutoInstrumentation.OpenTracingShim"),
                         Propagators.DefaultTextMapPropagator);
 
                     // This registration must occur prior to any reference to the OpenTracing tracer:
