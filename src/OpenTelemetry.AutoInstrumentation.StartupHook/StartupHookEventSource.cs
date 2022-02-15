@@ -14,7 +14,7 @@ namespace OpenTelemetry.AutoInstrumentation.StartupHook
 
         /// <summary>Logs as Trace level message.</summary>
         /// <param name="message">Message to log.</param>
-        [Event(2, Message = "{0}", Level = EventLevel.Informational)]
+        [Event(1, Message = "{0}", Level = EventLevel.Informational)]
         public void Trace(string message)
         {
             this.WriteEvent(1, message);
