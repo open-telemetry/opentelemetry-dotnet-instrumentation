@@ -68,9 +68,9 @@ BEGIN
             VALUE "CompanyName", "The OpenTelemetry Authors"
             VALUE "FileDescription", "OpenTelemetry CLR Profiler"
             VALUE "FileVersion", "0.0.1.0"
-            VALUE "InternalName", "OpenTelemetry.ClrProfiler.Native.DLL"
+            VALUE "InternalName", "OpenTelemetry.AutoInstrumentation.Native.DLL"
             VALUE "LegalCopyright", "Copyright 2021 The OpenTelemetry Authors"
-            VALUE "OriginalFilename", "OpenTelemetry.ClrProfiler.Native.DLL"
+            VALUE "OriginalFilename", "OpenTelemetry.AutoInstrumentation.Native.DLL"
             VALUE "ProductName", "OpenTelemetry .NET AutoInstrumentation"
             VALUE "ProductVersion", "0.0.1"
         END

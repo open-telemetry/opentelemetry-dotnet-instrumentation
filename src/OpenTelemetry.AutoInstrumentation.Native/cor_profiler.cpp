@@ -299,7 +299,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
         return S_OK;
     }
 
-    const auto is_instrumentation_assembly = assembly_info.name == WStr("OpenTelemetry.ClrProfiler.Managed");
+    const auto is_instrumentation_assembly = assembly_info.name == WStr("OpenTelemetry.AutoInstrumentation");
 
     if (is_instrumentation_assembly)
     {
@@ -354,7 +354,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
             // On .NET Core, allow managed library to be a higher version than the native library.
             if (is_viable_version)
             {
-                Logger::Info("AssemblyLoadFinished: OpenTelemetry.ClrProfiler.Managed.dll v", assembly_version,
+                Logger::Info("AssemblyLoadFinished: OpenTelemetry.AutoInstrumentation.dll v", assembly_version,
                              " matched profiler version v", expected_version);
                 managed_profiler_loaded_app_domains.insert(assembly_info.app_domain_id);
 
@@ -364,18 +364,18 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
                     // managed profiler is loaded shared
                     if (assembly_info.app_domain_id == corlib_app_domain_id)
                     {
-                        Logger::Info("AssemblyLoadFinished: OpenTelemetry.ClrProfiler.Managed.dll was loaded domain-neutral");
+                        Logger::Info("AssemblyLoadFinished: OpenTelemetry.AutoInstrumentation.dll was loaded domain-neutral");
                         managed_profiler_loaded_domain_neutral = true;
                     }
                     else
                     {
-                        Logger::Info("AssemblyLoadFinished: OpenTelemetry.ClrProfiler.Managed.dll was not loaded domain-neutral");
+                        Logger::Info("AssemblyLoadFinished: OpenTelemetry.AutoInstrumentation.dll was not loaded domain-neutral");
                     }
                 }
             }
             else
             {
-                Logger::Warn("AssemblyLoadFinished: OpenTelemetry.ClrProfiler.Managed.dll v", assembly_version,
+                Logger::Warn("AssemblyLoadFinished: OpenTelemetry.AutoInstrumentation.dll v", assembly_version,
                              " did not match profiler version v", expected_version);
             }
         }
@@ -559,12 +559,12 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
     }
 
     // In IIS, the startup hook will be inserted into a method in System.Web (which is domain-neutral)
-    // but the OpenTelemetry.ClrProfiler.Managed.Loader assembly that the startup hook loads from a
+    // but the OpenTelemetry.AutoInstrumentation.Loader assembly that the startup hook loads from a
     // byte array will be loaded into a non-shared AppDomain.
     // In this case, do not insert another startup hook into that non-shared AppDomain
-    if (module_info.assembly.name == opentelemetry_clrprofiler_managed_loader_assemblyName)
+    if (module_info.assembly.name == opentelemetry_autoinstrumentation_loader_assemblyName)
     {
-        Logger::Info("ModuleLoadFinished: OpenTelemetry.ClrProfiler.Managed.Loader loaded into AppDomain ", app_domain_id, " ",
+        Logger::Info("ModuleLoadFinished: OpenTelemetry.AutoInstrumentation.Loader loaded into AppDomain ", app_domain_id, " ",
                      module_info.assembly.app_domain_name);
         first_jit_compilation_app_domains.insert(app_domain_id);
         return S_OK;
@@ -826,7 +826,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(FunctionID function
 
     // IIS: Ensure that the startup hook is inserted into System.Web.Compilation.BuildManager.InvokePreStartInitMethods.
     // This will be the first call-site considered for the startup hook injection,
-    // which correctly loads OpenTelemetry.ClrProfiler.Managed.Loader into the application's
+    // which correctly loads OpenTelemetry.AutoInstrumentation.Loader into the application's
     // own AppDomain because at this point in the code path, the ApplicationImpersonationContext
     // has been started.
     //
@@ -847,7 +847,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(FunctionID function
 
     // The first time a method is JIT compiled in an AppDomain, insert our startup
     // hook, which, at a minimum, must add an AssemblyResolve event so we can find
-    // OpenTelemetry.ClrProfiler.Managed.dll and its dependencies on disk.
+    // OpenTelemetry.AutoInstrumentation.dll and its dependencies on disk.
     if (valid_startup_hook_callsite && !has_loader_injected_in_appdomain)
     {
         bool domain_neutral_assembly = runtime_information_.is_desktop() && corlib_module_loaded &&
@@ -1610,7 +1610,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
     }
 
 #ifdef _WIN32
-    WSTRING native_profiler_file = WStr("OpenTelemetry.ClrProfiler.Native.DLL");
+    WSTRING native_profiler_file = WStr("OpenTelemetry.AutoInstrumentation.Native.DLL");
 #else // _WIN32
     WSTRING native_profiler_file = GetEnvironmentValue(environment::internal_trace_profiler_path);
     Logger::Debug("GenerateVoidILStartupMethod: ", environment::internal_trace_profiler_path,
@@ -1740,15 +1740,15 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
         return hr;
     }
 
-    // Create a string representing "OpenTelemetry.ClrProfiler.Managed.Loader.Startup"
+    // Create a string representing "OpenTelemetry.AutoInstrumentation.Loader.Startup"
     // Create OS-specific implementations because on Windows, creating the string via
-    // "OpenTelemetry.ClrProfiler.Managed.Loader.Startup"_W.c_str() does not create the
+    // "OpenTelemetry.AutoInstrumentation.Loader.Startup"_W.c_str() does not create the
     // proper string for CreateInstance to successfully call
 #ifdef _WIN32
-    LPCWSTR load_helper_str = L"OpenTelemetry.ClrProfiler.Managed.Loader.Startup";
+    LPCWSTR load_helper_str = L"OpenTelemetry.AutoInstrumentation.Loader.Startup";
     auto load_helper_str_size = wcslen(load_helper_str);
 #else
-    char16_t load_helper_str[] = u"OpenTelemetry.ClrProfiler.Managed.Loader.Startup";
+    char16_t load_helper_str[] = u"OpenTelemetry.AutoInstrumentation.Loader.Startup";
     auto load_helper_str_size = std::char_traits<char16_t>::length(load_helper_str);
 #endif
 
@@ -1978,7 +1978,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
     pNewInstr->m_Arg8 = 6;
     rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
 
-    // Step 4) Call instance method Assembly.CreateInstance("OpenTelemetry.ClrProfiler.Managed.Loader.Startup")
+    // Step 4) Call instance method Assembly.CreateInstance("OpenTelemetry.AutoInstrumentation.Loader.Startup")
 
     // ldloc.s 6 : Load the "loadedAssembly" variable (locals index 6) to call Assembly.CreateInstance
     pNewInstr = rewriter_void.NewILInstr();
@@ -1986,7 +1986,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
     pNewInstr->m_Arg8 = 6;
     rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
 
-    // ldstr "OpenTelemetry.ClrProfiler.Managed.Loader.Startup"
+    // ldstr "OpenTelemetry.AutoInstrumentation.Loader.Startup"
     pNewInstr = rewriter_void.NewILInstr();
     pNewInstr->m_opcode = CEE_LDSTR;
     pNewInstr->m_Arg32 = load_helper_token;
@@ -2097,9 +2097,9 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
 
     // Define "OpenTelemetry_IISPreInitStart" string
     // Create a string representing
-    // "OpenTelemetry.ClrProfiler.Managed.Loader.Startup" Create OS-specific
+    // "OpenTelemetry.AutoInstrumentation.Loader.Startup" Create OS-specific
     // implementations because on Windows, creating the string via
-    // "OpenTelemetry.ClrProfiler.Managed.Loader.Startup"_W.c_str() does not
+    // "OpenTelemetry.AutoInstrumentation.Loader.Startup"_W.c_str() does not
     // create the proper string for CreateInstance to successfully call
 #ifdef _WIN32
     LPCWSTR pre_init_start_str = L"OpenTelemetry_IISPreInitStart";
@@ -2189,11 +2189,11 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
 }
 
 #ifdef LINUX
-extern uint8_t dll_start[] asm("_binary_OpenTelemetry_ClrProfiler_Managed_Loader_dll_start");
-extern uint8_t dll_end[] asm("_binary_OpenTelemetry_ClrProfiler_Managed_Loader_dll_end");
+extern uint8_t dll_start[] asm("_binary_OpenTelemetry_AutoInstrumentation_Loader_dll_start");
+extern uint8_t dll_end[] asm("_binary_OpenTelemetry_AutoInstrumentation_Loader_dll_end");
 
-extern uint8_t pdb_start[] asm("_binary_OpenTelemetry_ClrProfiler_Managed_Loader_pdb_start");
-extern uint8_t pdb_end[] asm("_binary_OpenTelemetry_ClrProfiler_Managed_Loader_pdb_end");
+extern uint8_t pdb_start[] asm("_binary_OpenTelemetry_AutoInstrumentation_Loader_pdb_start");
+extern uint8_t pdb_end[] asm("_binary_OpenTelemetry_AutoInstrumentation_Loader_pdb_end");
 #endif
 
 void CorProfiler::GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray, int* assemblySize, BYTE** pSymbolsArray,
@@ -2237,7 +2237,7 @@ void CorProfiler::GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray, int* assembl
     {
         const std::string name = std::string(_dyld_get_image_name(i));
 
-        if (name.rfind("OpenTelemetry.ClrProfiler.Native.dylib") != std::string::npos)
+        if (name.rfind("OpenTelemetry.AutoInstrumentation.Native.dylib") != std::string::npos)
         {
             const mach_header_64* header = (const struct mach_header_64*) _dyld_get_image_header(i);
 

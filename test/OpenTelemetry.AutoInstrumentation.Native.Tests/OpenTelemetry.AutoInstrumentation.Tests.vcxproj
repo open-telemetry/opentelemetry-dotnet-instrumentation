@@ -26,7 +26,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <LIB_PATH>..\..\src\OpenTelemetry.ClrProfiler.Native\lib\</LIB_PATH>
+    <LIB_PATH>..\..\src\OpenTelemetry.AutoInstrumentation.Native\lib\</LIB_PATH>
     <LIB_PLATFORM Condition="'$(Platform)'=='x64'">x64</LIB_PLATFORM>
     <LIB_PLATFORM Condition="'$(Platform)'=='Win32' OR '$(Platform)'=='x86'">x86</LIB_PLATFORM>
     <LIB_INCLUDES>$(LIB_PATH)fmt_$(LIB_PLATFORM)-windows-static\include;$(LIB_PATH)spdlog\include;$(LIB_PATH)coreclr\src\pal\prebuilt\inc</LIB_INCLUDES>
@@ -95,7 +95,7 @@
       <Project>{fdb5c8d0-018d-4ff9-9680-c6a5078f819b}</Project>
       <SetTargetFramework>TargetFramework=net461</SetTargetFramework>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\OpenTelemetry.ClrProfiler.Native\OpenTelemetry.ClrProfiler.Native.vcxproj">
+    <ProjectReference Include="..\..\src\OpenTelemetry.AutoInstrumentation.Native\OpenTelemetry.AutoInstrumentation.Native.vcxproj">
       <Project>{91b6272f-5780-4c94-8071-dbba7b4f67f3}</Project>
     </ProjectReference>
   </ItemGroup>

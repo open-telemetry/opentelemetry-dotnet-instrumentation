@@ -11,7 +11,7 @@ using OpenTelemetry.Instrumentation.StartupHook;
 internal class StartupHook
 {
     /// <summary>
-    /// Load and initialize OpenTelemetry.ClrProfiler.Managed assembly to bring OpenTelemetry SDK
+    /// Load and initialize OpenTelemetry.AutoInstrumentation assembly to bring OpenTelemetry SDK
     /// with a pre-defined set of exporters, shims, and instrumentations.
     /// </summary>
     public static void Initialize()
@@ -32,21 +32,21 @@ internal class StartupHook
         try
         {
             // Check Instrumentation is already initialized with native profiler.
-            Type profilerType = Type.GetType("OpenTelemetry.ClrProfiler.Managed.Instrumentation, OpenTelemetry.ClrProfiler.Managed");
+            Type profilerType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation");
 
             if (profilerType == null)
             {
                 // Instrumentation is not initialized.
-                // Creating an instance of OpenTelemetry.ClrProfiler.Managed.Loader.Startup
+                // Creating an instance of OpenTelemetry.AutoInstrumentation.Loader.Startup
                 // will initialize Instrumentation through its static constructor.
-                string loaderFilePath = Path.Combine(loaderAssemblyLocation, "OpenTelemetry.ClrProfiler.Managed.Loader.dll");
+                string loaderFilePath = Path.Combine(loaderAssemblyLocation, "OpenTelemetry.AutoInstrumentation.Loader.dll");
                 Assembly loaderAssembly = Assembly.LoadFrom(loaderFilePath);
-                loaderAssembly.CreateInstance("OpenTelemetry.ClrProfiler.Managed.Loader.Startup");
+                loaderAssembly.CreateInstance("OpenTelemetry.AutoInstrumentation.Loader.Startup");
                 StartupHookEventSource.Log.Trace("StartupHook initialized successfully!");
             }
             else
             {
-                StartupHookEventSource.Log.Trace("OpenTelemetry.ClrProfiler.Managed.Instrumentation initialized before startup hook");
+                StartupHookEventSource.Log.Trace("OOpenTelemetry.AutoInstrumentation.Instrumentation initialized before startup hook");
             }
         }
         catch (Exception ex)

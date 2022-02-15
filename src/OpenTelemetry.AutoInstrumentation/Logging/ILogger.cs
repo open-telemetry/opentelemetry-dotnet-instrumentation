@@ -1,6 +1,5 @@
 using System;
 using System.Runtime.CompilerServices;
-using OpenTelemetry.ClrProfiler.Managed.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Logging
 {

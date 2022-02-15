@@ -16,7 +16,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace OpenTelemetry.ClrProfiler.Managed.Logging
+namespace OpenTelemetry.AutoInstrumentation.Logging
 {
     /// <summary>
     /// Specifies the meaning and relative importance of a log event.

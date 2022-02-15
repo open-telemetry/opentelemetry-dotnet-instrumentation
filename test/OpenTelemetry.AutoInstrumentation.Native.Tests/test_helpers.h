@@ -1,7 +1,7 @@
 
 #pragma once
-#include "../../src/OpenTelemetry.ClrProfiler.Native/com_ptr.h"
-#include "../../src/OpenTelemetry.ClrProfiler.Native/integration.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/com_ptr.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/integration.h"
 
 namespace trace {
 

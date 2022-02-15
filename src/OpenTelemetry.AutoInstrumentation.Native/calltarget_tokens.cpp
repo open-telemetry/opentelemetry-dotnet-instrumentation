@@ -14,22 +14,22 @@ const int signatureBufferSize = 500;
  * CALLTARGET CONSTANTS
  **/
 
-static const WSTRING managed_profiler_calltarget_type = WStr("OpenTelemetry.ClrProfiler.CallTarget.CallTargetInvoker");
+static const WSTRING managed_profiler_calltarget_type = WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker");
 static const WSTRING managed_profiler_calltarget_beginmethod_name = WStr("BeginMethod");
 static const WSTRING managed_profiler_calltarget_endmethod_name = WStr("EndMethod");
 static const WSTRING managed_profiler_calltarget_logexception_name = WStr("LogException");
 static const WSTRING managed_profiler_calltarget_getdefaultvalue_name = WStr("GetDefaultValue");
 
 static const WSTRING managed_profiler_calltarget_statetype =
-    WStr("OpenTelemetry.ClrProfiler.CallTarget.CallTargetState");
+    WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState");
 static const WSTRING managed_profiler_calltarget_statetype_getdefault_name = WStr("GetDefault");
 
 static const WSTRING managed_profiler_calltarget_returntype =
-    WStr("OpenTelemetry.ClrProfiler.CallTarget.CallTargetReturn");
+    WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn");
 static const WSTRING managed_profiler_calltarget_returntype_getdefault_name = WStr("GetDefault");
 
 static const WSTRING managed_profiler_calltarget_returntype_generics =
-    WStr("OpenTelemetry.ClrProfiler.CallTarget.CallTargetReturn`1");
+    WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn`1");
 static const WSTRING managed_profiler_calltarget_returntype_getreturnvalue_name = WStr("GetReturnValue");
 
 /**

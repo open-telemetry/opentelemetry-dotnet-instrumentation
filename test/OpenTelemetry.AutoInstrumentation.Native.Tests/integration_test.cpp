@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "../../src/OpenTelemetry.ClrProfiler.Native/integration.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/integration.h"
 
 using namespace trace;
 

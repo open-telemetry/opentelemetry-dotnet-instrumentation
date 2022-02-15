@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "../../src/OpenTelemetry.ClrProfiler.Native/startup_hook.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/startup_hook.h"
 
 using namespace trace;
 

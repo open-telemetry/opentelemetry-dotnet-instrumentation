@@ -7,7 +7,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace OpenTelemetry.ClrProfiler.Managed.Loader
+namespace OpenTelemetry.AutoInstrumentation.Loader
 {
     internal sealed class FileSink : IDisposable
     {

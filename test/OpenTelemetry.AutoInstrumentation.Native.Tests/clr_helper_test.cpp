@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "../../src/OpenTelemetry.ClrProfiler.Native/clr_helpers.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/clr_helpers.h"
 #include "test_helpers.h"
 
 #include <vector>

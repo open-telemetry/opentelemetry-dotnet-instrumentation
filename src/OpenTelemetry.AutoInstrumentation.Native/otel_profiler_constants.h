@@ -75,14 +75,14 @@ const WSTRING skip_assemblies[]{WStr("mscorlib"),
 
 const WSTRING mscorlib_assemblyName = WStr("mscorlib");
 const WSTRING system_private_corelib_assemblyName = WStr("System.Private.CoreLib");
-const WSTRING opentelemetry_clrprofiler_managed_loader_assemblyName = WStr("OpenTelemetry.ClrProfiler.Managed.Loader");
+const WSTRING opentelemetry_autoinstrumentation_loader_assemblyName = WStr("OpenTelemetry.AutoInstrumentation.Loader");
 
 const WSTRING managed_profiler_full_assembly_version =
-    WStr("OpenTelemetry.ClrProfiler.Managed, Version=0.0.1.0, Culture=neutral, PublicKeyToken=null");
+    WStr("OpenTelemetry.AutoInstrumentation, Version=0.0.1.0, Culture=neutral, PublicKeyToken=null");
 
-const WSTRING managed_profiler_name = WStr("OpenTelemetry.ClrProfiler.Managed");
+const WSTRING managed_profiler_name = WStr("OpenTelemetry.AutoInstrumentation");
 
-const WSTRING nonwindows_nativemethods_type = WStr("OpenTelemetry.ClrProfiler.Managed.NativeMethods+NonWindows");
+const WSTRING nonwindows_nativemethods_type = WStr("OpenTelemetry.AutoInstrumentation.NativeMethods+NonWindows");
 
 const WSTRING calltarget_modification_action = WStr("CallTargetModification");
 

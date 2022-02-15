@@ -1,7 +1,7 @@
 #include "pch.h"
 
-#include "../../src/OpenTelemetry.ClrProfiler.Native/clr_helpers.h"
-#include "../../src/OpenTelemetry.ClrProfiler.Native/metadata_builder.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/clr_helpers.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/metadata_builder.h"
 
 using namespace trace;
 

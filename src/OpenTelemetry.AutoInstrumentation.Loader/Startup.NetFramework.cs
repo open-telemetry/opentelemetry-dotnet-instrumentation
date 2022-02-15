@@ -7,7 +7,7 @@ using System.Reflection;
 namespace OpenTelemetry.AutoInstrumentation.Loader
 {
     /// <summary>
-    /// A class that attempts to load the OpenTelemetry.ClrProfiler.Managed .NET assembly.
+    /// A class that attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
     /// </summary>
     public partial class Startup
     {

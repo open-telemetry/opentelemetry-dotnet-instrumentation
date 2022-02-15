@@ -5,13 +5,13 @@ using System.Reflection;
 namespace OpenTelemetry.AutoInstrumentation.Loader
 {
     /// <summary>
-    /// A class that attempts to load the OpenTelemetry.ClrProfiler.Managed .NET assembly.
+    /// A class that attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
     /// </summary>
     public partial class Startup
     {
         /// <summary>
         /// Initializes static members of the <see cref="Startup"/> class.
-        /// This method also attempts to load the OpenTelemetry.ClrProfiler.Managed .NET assembly.
+        /// This method also attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
         /// </summary>
         static Startup()
         {
@@ -40,7 +40,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader
                 var assembly = Assembly.Load("OpenTelemetry.AutoInstrumentation");
                 if (assembly == null)
                 {
-                    throw new FileNotFoundException("The assembly OpenTelemetry.ClrProfiler.Managed could not be loaded");
+                    throw new FileNotFoundException("The assembly OOpenTelemetry.AutoInstrumentation could not be loaded");
                 }
 
                 var type = assembly.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation", throwOnError: false);

@@ -35,23 +35,23 @@ OS=$(uname_os)
 # Enable .NET Framework Profiling API
 export COR_ENABLE_PROFILING="1"
 export COR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
-export COR_PROFILER_PATH="${CURDIR}/bin/tracer-home/OpenTelemetry.ClrProfiler.Native.${SUFIX}"
+export COR_PROFILER_PATH="${CURDIR}/bin/tracer-home/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
 if [ "$OS" == "windows" ]
 then
     # Set paths for both bitness on Windows, see https://docs.microsoft.com/en-us/dotnet/core/run-time-config/debugging-profiling#profiler-location
-    export COR_PROFILER_PATH_64="${CURDIR}/bin/tracer-home/win-x64/OpenTelemetry.ClrProfiler.Native.${SUFIX}"
-    export COR_PROFILER_PATH_32="${CURDIR}/bin/tracer-home/win-x86/OpenTelemetry.ClrProfiler.Native.${SUFIX}"
+    export COR_PROFILER_PATH_64="${CURDIR}/bin/tracer-home/win-x64/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
+    export COR_PROFILER_PATH_32="${CURDIR}/bin/tracer-home/win-x86/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
 fi
 
 # Enable .NET Core Profiling API
 export CORECLR_ENABLE_PROFILING="1"
 export CORECLR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
-export CORECLR_PROFILER_PATH="${CURDIR}/bin/tracer-home/OpenTelemetry.ClrProfiler.Native.${SUFIX}"
+export CORECLR_PROFILER_PATH="${CURDIR}/bin/tracer-home/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
 if [ "$OS" == "windows" ]
 then
     # Set paths for both bitness on Windows, see https://docs.microsoft.com/en-us/dotnet/core/run-time-config/debugging-profiling#profiler-location
-    export CORECLR_PROFILER_PATH_64="${CURDIR}/bin/tracer-home/win-x64/OpenTelemetry.ClrProfiler.Native.${SUFIX}"
-    export CORECLR_PROFILER_PATH_32="${CURDIR}/bin/tracer-home/win-x86/OpenTelemetry.ClrProfiler.Native.${SUFIX}"
+    export CORECLR_PROFILER_PATH_64="${CURDIR}/bin/tracer-home/win-x64/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
+    export CORECLR_PROFILER_PATH_32="${CURDIR}/bin/tracer-home/win-x86/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
 fi
 export DOTNET_STARTUP_HOOKS="${CURDIR}/bin/tracer-home/netcoreapp3.1/OpenTelemetry.Instrumentation.StartupHook.dll"
 

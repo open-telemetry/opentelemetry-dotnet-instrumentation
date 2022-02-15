@@ -8,8 +8,8 @@
 #include <string>
 #include <vector>
 
-#include "../../src/OpenTelemetry.ClrProfiler.Native/environment_variables.h"
-#include "../../src/OpenTelemetry.ClrProfiler.Native/integration_loader.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/environment_variables.h"
+#include "../../src/OpenTelemetry.AutoInstrumentation.Native/integration_loader.h"
 
 using namespace trace;
 

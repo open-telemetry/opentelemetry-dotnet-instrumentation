@@ -13,7 +13,7 @@ namespace OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests
     /// </summary>
     public class InstrumentationTests
     {
-        private readonly ActivitySource _otelActivitySource = new("OpenTelemetry.ClrProfiler.*");
+        private readonly ActivitySource _otelActivitySource = new("OpenTelemetry.AutoInstrumentation.*");
         private readonly ActivitySource _customActivitySource = new("Custom");
 
         [FactRequiringEnvVar]

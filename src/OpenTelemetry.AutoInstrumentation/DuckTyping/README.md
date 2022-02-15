@@ -1,4 +1,4 @@
-# OpenTelemetry.ClrProfiler.DuckTyping
+# OpenTelemetry.AutoInstrumentation.DuckTyping
 
 The duck typing library allows us to get and set data from fields and properties and call methods from an object without having the type definition at compile time. This is done by creating a proxy type to an object instance using a proxy definition at runtime.
 

@@ -287,13 +287,13 @@ blog/
 !/**/.gitkeep
 
 # profiler build files
-src/OpenTelemetry.ClrProfiler.Native/build/
-src/OpenTelemetry.ClrProfiler.Native/deps/
-src/OpenTelemetry.ClrProfiler.Native/CMakeFiles/
-src/OpenTelemetry.ClrProfiler.Native/tmp.*
-src/OpenTelemetry.ClrProfiler.Native/Makefile
-src/OpenTelemetry.ClrProfiler.Native/CMakeCache.txt
-src/OpenTelemetry.ClrProfiler.Native/cmake_install.cmake
+src/OpenTelemetry.AutoInstrumentation.Native/build/
+src/OpenTelemetry.AutoInstrumentation.Native/deps/
+src/OpenTelemetry.AutoInstrumentation.Native/CMakeFiles/
+src/OpenTelemetry.AutoInstrumentation.Native/tmp.*
+src/OpenTelemetry.AutoInstrumentation.Native/Makefile
+src/OpenTelemetry.AutoInstrumentation.Native/CMakeCache.txt
+src/OpenTelemetry.AutoInstrumentation.Native/cmake_install.cmake
 
 # exception for native profiler dependencies
-!src/OpenTelemetry.ClrProfiler.Native/lib/**
+!src/OpenTelemetry.AutoInstrumentation.Native/lib/**
