@@ -138,6 +138,12 @@ Two issues can arise from incorrect versioning:
 1. Version required by the OpenTelemetry .NET SDK or the instrumentations not being met.
 2. Multiple versions of the assembly in the same process since these are treated as totally independent by the runtime.
 
+#### Configuration Resolution
+
+.NET Core [Framework-dependent deployment](https://docs.microsoft.com/en-us/dotnet/core/deploying/deploy-with-cli#framework-dependent-deployment) apps could use
+[DOTNET_ADDITIONAL_DEPS](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md) and
+[DOTNET_SHARED_STORE](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store) in trace-home to resolve assembly conflicts.
+
 #### Build Time Resolution
 
 Currently, the path to resolving such conflicts is to *add* or *update* any package reference used by
