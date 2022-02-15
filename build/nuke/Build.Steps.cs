@@ -172,7 +172,7 @@ partial class Build
                     .SetFramework(framework)
                     .SetOutput(TracerHomeDirectory / framework)));
 
-            // AutoInstrumentationStartupHook is supported starting .Net Core 3.1.
+            // StartupHook is supported starting .Net Core 3.1.
             // We need to emit AutoInstrumentationStartupHook and AutoInstrumentationLoader assemblies only for .NET Core 3.1 target framework.
             DotNetPublish(s => s
                 .SetProject(Solution.GetProject(Projects.AutoInstrumentationStartupHook))
