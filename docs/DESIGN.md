@@ -44,18 +44,18 @@ and inject the selected instrumentations into the targeted application.
 
 The main components of the project are:
 
-- [**CLR Profiler Dll**](../src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native):
+- [**CLR Profiler Dll**](../src/OpenTelemetry.AutoInstrumentation.Native):
 a native component that implements a CLR Profiler. The CLR Profiler is used to
 modify the application [IL](https://en.wikipedia.org/wiki/Common_Intermediate_Language),
 including the IL of packages used by the application, to add and collect observability data.
 
-- [**Loader**](../src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Loader):
+- [**Loader**](../src/OpenTelemetry.AutoInstrumentation.Loader):
 a tiny managed library shipped as a resource of the native CLR Profiler.
 Its code is in charge of loading the bootstrap code into the targeted application and extend the assembly
 load paths to include the folders with the OpenTelemetry .NET SDK and the instrumentations to be
 injected into the application.
 
-- [**Managed Profiler**](../src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed):
+- [**Managed Profiler**](../src/OpenTelemetry.AutoInstrumentation):
 contains the code setting up the OpenTelemtry .NET SDK and configured instrumentations.
 Plus, support code to run and implement bytecode instrumentations. Optionally, the code
 setting-up the OpenTelemetry .NET SDK can be left to the application by setting the
@@ -65,17 +65,17 @@ environment variable `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP` to `false`.
 directly by the library/framework being instrumented. This type of instrumentation depends on the
 OpenTelemetry API and the specific library/framework that they instrument. Some examples:
 
-  * [ASP.NET Core Instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.AspNetCore)
-  * [gRPC Client Instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.GrpcNetClient)
-  * [HttpClient and HttpWebRequest Instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.Http)
+  - [ASP.NET Core Instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.AspNetCore)
+  - [gRPC Client Instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.GrpcNetClient)
+  - [HttpClient and HttpWebRequest Instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.Http)
 
 - **Bytecode Instrumentations**: instrumentations created for libraries/frameworks that lack proper
 hooks/callbacks to allow implementation of good observability data. These instrumentations must be
 implemented following the proper attribute annotation so the native CLR Profiler implementation
 can properly inject them at runtime. Some examples:
 
-  * [MongoDB Instrumentation](../src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed/Instrumentations/MongoDB)
-  * [GraphQL](../src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed/Instrumentations/GraphQL)
+  - [MongoDB Instrumentation](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/MongoDB)
+  - [GraphQL](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/GraphQL)
 
 ![Overview](./images/architecture-overview.png)
 
@@ -121,7 +121,7 @@ Bytecode instrumentation methods should not have direct dependencies with the li
 This way, they can work with multiple versions of the assemblies being targeted for instrumentation
 and reduce the number of shipped files. 
 When operating with parameters and return values of the targeted methods, the instrumentation methods must use
-[DuckTyping](../src/OpenTelemetry.AutoInstrumentation.ClrProfiler.Managed/DuckTyping/README.md) or
+[DuckTyping](../src/OpenTelemetry.AutoInstrumentation.Managed/DuckTyping/README.md) or
 [reflection](https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/reflection)
 to access objects from the APIs being instrumented.
 

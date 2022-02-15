@@ -1,7 +1,0 @@
-LIBRARY "OpenTelemetry.ClrProfiler.Native.dll"
-
-EXPORTS
-    DllCanUnloadNow PRIVATE
-    DllGetClassObject PRIVATE
-    IsProfilerAttached
-    GetAssemblyAndSymbolsBytes

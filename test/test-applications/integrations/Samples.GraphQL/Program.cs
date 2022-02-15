@@ -47,7 +47,7 @@ namespace Samples.GraphQL
 
         private static bool? IsProfilerAttached()
         {
-            var instrumentationType = Type.GetType("OpenTelemetry.ClrProfiler.Managed.Instrumentation, OpenTelemetry.ClrProfiler.Managed", throwOnError: false);
+            var instrumentationType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation", throwOnError: false);
 
             if (instrumentationType == null)
             {

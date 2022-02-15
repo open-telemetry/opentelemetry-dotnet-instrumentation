@@ -39,9 +39,9 @@ To build everything and run integration tests:
 
 Because of [Mono missing features](https://github.com/OmniSharp/omnisharp-vscode#note-about-using-net-5-sdks), `omnisharp.useGlobalMono` has to be set to `never`. Go to `File` -> `Preferences` -> `Settings` -> `Extensions` -> `C# Configuration` -> Change `Omnisharp: Use Global Mono` (you can search for it if the menu is too long) to `never`. Afterwards, you have restart OmniSharp: `F1` -> `OmniSharp: Restart OmniSharp`.
 
-There may be a lot of errors, because some projects target .NET Framework. Switch to `OpenTelemetry.ClrProfiler.sln` using `F1` -> `OmniSharp: Select Project` in Visual Studio Code to load a subset of projects which work without any issues. You can also try building the projects which have errors as it sometimes helps.
+There may be a lot of errors, because some projects target .NET Framework. Switch to `OpenTelemetry.AutoInstrumentation.sln` using `F1` -> `OmniSharp: Select Project` in Visual Studio Code to load a subset of projects which work without any issues. You can also try building the projects which have errors as it sometimes helps.
 
-If for whatever reason you need to use `OpenTelemetry.ClrProfiler.sln` you can run `dotnet nuke` to decrease the number of errors.
+If for whatever reason you need to use `OpenTelemetry.AutoInstrumentation.sln` you can run `dotnet nuke` to decrease the number of errors.
 
 ## Build
 
@@ -166,7 +166,7 @@ Example usage:
   1 location added to breakpoint 1
   Process 1905 stopped
   * thread #1, name = 'corerun', stop reason = breakpoint 1.1
-      frame #0: 0x00007ffff7050ed2 libcoreclr.so`EEToProfInterfaceImpl::CreateProfiler(this=0x00005555555f7690, pClsid=0x00007fffffffce88, wszClsid=u"{918728DD-259F-4A6A-AC2B-B85E1B658318}", wszProfileDLL=u"/home/user/repos/opentelemetry-dotnet-instrumentation/bin/tracer-home/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so") at eetoprofinterfaceimpl.cpp:633:5
+      frame #0: 0x00007ffff7050ed2 libcoreclr.so`EEToProfInterfaceImpl::CreateProfiler(this=0x00005555555f7690, pClsid=0x00007fffffffce88, wszClsid=u"{918728DD-259F-4A6A-AC2B-B85E1B658318}", wszProfileDLL=u"/home/user/repos/opentelemetry-dotnet-instrumentation/bin/tracer-home/OpenTelemetry.AutoInstrumentation.Native.so") at eetoprofinterfaceimpl.cpp:633:5
     630      CONTRACTL_END;
     631 
     632      // Always called before Thread created.
@@ -183,7 +183,7 @@ Example usage:
   ```bash
   Process 20148 stopped
   * thread #1, name = 'corerun', stop reason = instruction step over
-      frame #0: 0x00007ffff76166f8 libcoreclr.so`LOADLoadLibraryDirect(libraryNameOrPath="/home/user/repos/opentelemetry-dotnet-instrumentation/bin/tracer-home/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so") at module.cpp:1477:9
+      frame #0: 0x00007ffff76166f8 libcoreclr.so`LOADLoadLibraryDirect(libraryNameOrPath="/home/user/repos/opentelemetry-dotnet-instrumentation/bin/tracer-home/OpenTelemetry.AutoInstrumentation.Native.so") at module.cpp:1477:9
     1474     if (dl_handle == nullptr)
     1475     {
     1476         LPCSTR err_msg = dlerror();
@@ -192,7 +192,7 @@ Example usage:
     1479     }
     1480     else
   (lldb) var
-  (LPCSTR) libraryNameOrPath = 0x00005555555f84c0 "/home/user/repos/opentelemetry-dotnet-instrumentation/bin/tracer-home/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so"
+  (LPCSTR) libraryNameOrPath = 0x00005555555f84c0 "/home/user/repos/opentelemetry-dotnet-instrumentation/bin/tracer-home/OpenTelemetry.AutoInstrumentation.Native.so"
   (NATIVE_LIBRARY_HANDLE) dl_handle = 0x0000000000000000
-  (LPCSTR) err_msg = 0x00005555555f8740 "/home/user/repos/opentelemetry-dotnet-instrumentation/bin/tracer-home/OpenTelemetry.AutoInstrumentation.ClrProfiler.Native.so: undefined symbol: _binary_Datadog_Trace_ClrProfiler_Managed_Loader_pdb_end"  
+  (LPCSTR) err_msg = 0x00005555555f8740 "/home/user/repos/opentelemetry-dotnet-instrumentation/bin/tracer-home/OpenTelemetry.AutoInstrumentation.Native.so: undefined symbol: _binary_Datadog_Trace_ClrProfiler_Managed_Loader_pdb_end"  
   ```
