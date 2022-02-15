@@ -14,7 +14,7 @@ inline WSTRING GetExpectedStartupHookPath(const WSTRING& home_path) {
     }
 
     return home_path + separator + WStr("netcoreapp3.1") + DIR_SEPARATOR +
-            WStr("OpenTelemetry.Instrumentation.StartupHook.dll");
+            WStr("OpenTelemetry.AutoInstrumentation.StartupHook.dll");
 }
 
 inline bool IsStartupHookEnabled(const WSTRING& startup_hooks, const WSTRING& home_path)

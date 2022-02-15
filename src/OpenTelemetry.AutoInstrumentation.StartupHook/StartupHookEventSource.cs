@@ -1,6 +1,6 @@
 using System.Diagnostics.Tracing;
 
-namespace OpenTelemetry.Instrumentation.StartupHook
+namespace OpenTelemetry.AutoInstrumentation.StartupHook
 {
     /// <summary>
     /// EventSource implementation for OpenTelemetry StartupHook implementation.

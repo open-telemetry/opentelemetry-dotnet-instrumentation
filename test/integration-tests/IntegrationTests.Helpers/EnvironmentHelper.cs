@@ -381,7 +381,7 @@ namespace IntegrationTests.Helpers
             string startupHookOutputPath = Path.Combine(
                 GetNukeBuildOutput(),
                 "netcoreapp3.1",
-                "OpenTelemetry.Instrumentation.StartupHook.dll");
+                "OpenTelemetry.AutoInstrumentation.StartupHook.dll");
 
             return startupHookOutputPath;
         }

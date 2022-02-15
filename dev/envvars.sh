@@ -53,7 +53,7 @@ then
     export CORECLR_PROFILER_PATH_64="${CURDIR}/bin/tracer-home/win-x64/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
     export CORECLR_PROFILER_PATH_32="${CURDIR}/bin/tracer-home/win-x86/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
 fi
-export DOTNET_STARTUP_HOOKS="${CURDIR}/bin/tracer-home/netcoreapp3.1/OpenTelemetry.Instrumentation.StartupHook.dll"
+export DOTNET_STARTUP_HOOKS="${CURDIR}/bin/tracer-home/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
 
 # Configure OpenTelemetry Tracer 
 export OTEL_DOTNET_AUTO_HOME="${CURDIR}/bin/tracer-home"

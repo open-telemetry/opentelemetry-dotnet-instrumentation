@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{C0C8D381-D6B9-4C76-9428-F40F2FA93A9A}</ProjectGuid>
-    <RootNamespace>DatadogTraceClrProfilerNativeDLL</RootNamespace>
+    <RootNamespace>OpenTelemetryAutoInstrumentationNativeDLL</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <LIB_PATH>..\..\src\OpenTelemetry.AutoInstrumentation.Native\lib\</LIB_PATH>
     <LIB_PLATFORM Condition="'$(Platform)'=='x64'">x64</LIB_PLATFORM>

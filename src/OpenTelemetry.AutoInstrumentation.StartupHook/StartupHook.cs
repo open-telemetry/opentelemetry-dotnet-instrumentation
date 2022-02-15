@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using OpenTelemetry.Instrumentation.StartupHook;
+using OpenTelemetry.AutoInstrumentation.StartupHook;
 
 /// <summary>
 /// Dotnet StartupHook

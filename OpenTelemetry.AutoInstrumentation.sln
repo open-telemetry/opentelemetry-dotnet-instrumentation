@@ -61,7 +61,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BindingRedirect", "samples\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OldReference", "samples\OldReference\OldReference.csproj", "{4C10E5C1-E212-4744-B92E-49A3AFC314FC}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenTelemetry.AutoInstrumentation.Tests", "test\OpenTelemetry.AutoInstrumentation.Native.Tests\OpenTelemetry.AutoInstrumentation.Native.Tests.vcxproj", "{5728056A-51AA-4FF5-AD0C-E86E44E36102}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenTelemetry.AutoInstrumentation.Native.Tests", "test\OpenTelemetry.AutoInstrumentation.Native.Tests\OpenTelemetry.AutoInstrumentation.Native.Tests.vcxproj", "{5728056A-51AA-4FF5-AD0C-E86E44E36102}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dependency-libs", "dependency-libs", "{82A3CE96-0935-45E5-A9AA-A93A5B63500B}"
 EndProject
@@ -121,7 +121,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests.AspNet", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests", "test\OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests\OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests.csproj", "{35AB65D8-D76E-40C6-B10C-501A6D44C9E0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.StartupHook", "src\OpenTelemetry.Instrumentation.StartupHook\OpenTelemetry.AutoInstrumentation.StartupHook.csproj", "{E04DA938-E153-4A0D-9CB0-EAC38210FAF2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.StartupHook", "src\OpenTelemetry.AutoInstrumentation.StartupHook\OpenTelemetry.AutoInstrumentation.StartupHook.csproj", "{E04DA938-E153-4A0D-9CB0-EAC38210FAF2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.StartupHook.AspNetCoreMvc31", "samples\Samples.StartupHook.AspNetCoreMvc31\Samples.StartupHook.AspNetCoreMvc31.csproj", "{B25F7404-A6F0-4071-A0CC-139AAB3B0A91}"
 EndProject
@@ -129,7 +129,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests.StartupHoo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.StartupHook", "test\test-applications\integrations\Samples.StartupHook\Samples.StartupHook.csproj", "{FF665CC4-6643-4614-A1A0-FA182E3AF37C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.AdditionalDeps", "src\OpenTelemetry.Instrumentation.AdditionalDeps\OpenTelemetry.AutoInstrumentation.AdditionalDeps.csproj", "{E026D9FA-FBD5-4066-AF6A-FB63DE28521F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.AdditionalDeps", "src\OpenTelemetry.AutoInstrumentation.AdditionalDeps\OpenTelemetry.AutoInstrumentation.AdditionalDeps.csproj", "{E026D9FA-FBD5-4066-AF6A-FB63DE28521F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Tests", "test\OpenTelemetry.AutoInstrumentation.Tests\OpenTelemetry.AutoInstrumentation.Tests.csproj", "{065FEB4E-A99E-4A59-8112-1CB30CF794F9}"
 EndProject

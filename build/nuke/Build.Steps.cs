@@ -31,7 +31,7 @@ partial class Build
     AbsolutePath ArtifactsDirectory => Artifacts ?? (OutputDirectory / "artifacts");
     AbsolutePath BuildDataDirectory => RootDirectory / "build_data";
     AbsolutePath ProfilerTestLogs => BuildDataDirectory / "profiler-logs";
-    AbsolutePath AdditionalDepsDirectory => TracerHomeDirectory / "AutoInstrumentationAdditionalDeps";
+    AbsolutePath AdditionalDepsDirectory => TracerHomeDirectory / "AdditionalDeps";
 
     Project NativeProfilerProject => Solution.GetProject(Projects.AutoInstrumentationNative);
 
@@ -308,7 +308,7 @@ partial class Build
 
     Target CopyAdditionalDeps => _ => _
         .Unlisted()
-        .Description("Creates AutoInstrumentationAdditionalDeps and shared store in tracer-home")
+        .Description("Creates AutoInstrumentation.AdditionalDeps and shared store in tracer-home")
         .After(CompileManagedSrc)
         .Executes(() =>
         {
@@ -333,7 +333,7 @@ partial class Build
                                    .ForEach(file => {
                                        string depsJsonContent = File.ReadAllText(file);
                                        // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from target section.
-                                       depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+)AutoInstrumentationAdditionalDeps.dll(.+?)},\r\n(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                                       depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+)AutoInstrumentation.AdditionalDeps.dll(.+?)},\r\n(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
                                        // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from library section and write to file.
                                        depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+?)},\r\n(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
                                        File.WriteAllText(file, depsJsonContent);
