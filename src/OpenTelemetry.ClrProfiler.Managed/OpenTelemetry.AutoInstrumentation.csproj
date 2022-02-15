@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OpenTelemetry.ClrProfiler.Managed.Core\OpenTelemetry.ClrProfiler.Managed.Core.csproj" />
+    <ProjectReference Include="..\OpenTelemetry.ClrProfiler.Managed.Core\OpenTelemetry.AutoInstrumentation.Core.csproj" />
   </ItemGroup>
 
 </Project>

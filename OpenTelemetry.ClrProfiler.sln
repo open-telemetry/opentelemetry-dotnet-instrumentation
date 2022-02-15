@@ -3,12 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenTelemetry.ClrProfiler.Native", "src\OpenTelemetry.ClrProfiler.Native\OpenTelemetry.ClrProfiler.Native.vcxproj", "{91B6272F-5780-4C94-8071-DBBA7B4F67F3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenTelemetry.AutoInstrumentation.Native", "src\OpenTelemetry.ClrProfiler.Native\OpenTelemetry.ClrProfiler.Native.vcxproj", "{91B6272F-5780-4C94-8071-DBBA7B4F67F3}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AB8596C1-CFDA-4A5E-9E9C-74A3DF9AED77} = {AB8596C1-CFDA-4A5E-9E9C-74A3DF9AED77}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenTelemetry.ClrProfiler.Native.DLL", "src\OpenTelemetry.ClrProfiler.Native\OpenTelemetry.ClrProfiler.Native.DLL.vcxproj", "{C0C8D381-D6B9-4C76-9428-F40F2FA93A9A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenTelemetry.AutoInstrumentation.Native.DLL", "src\OpenTelemetry.ClrProfiler.Native\OpenTelemetry.ClrProfiler.Native.DLL.vcxproj", "{C0C8D381-D6B9-4C76-9428-F40F2FA93A9A}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AB8596C1-CFDA-4A5E-9E9C-74A3DF9AED77} = {AB8596C1-CFDA-4A5E-9E9C-74A3DF9AED77}
 	EndProjectSection
@@ -38,7 +38,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9E5F0022-0A5
 		src\GlobalSuppressions.cs = src\GlobalSuppressions.cs
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.ClrProfiler.Managed.Loader", "src\OpenTelemetry.ClrProfiler.Managed.Loader\OpenTelemetry.ClrProfiler.Managed.Loader.csproj", "{AB8596C1-CFDA-4A5E-9E9C-74A3DF9AED77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Loader", "src\OpenTelemetry.ClrProfiler.Managed.Loader\OpenTelemetry.AutoInstrumentation.Loader.csproj", "{AB8596C1-CFDA-4A5E-9E9C-74A3DF9AED77}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.AspNetCoreMvc31", "samples\Samples.AspNetCoreMvc31\Samples.AspNetCoreMvc31.csproj", "{303F8E41-691F-4453-AB7D-88A0036C0465}"
 EndProject
@@ -49,13 +49,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{BAF8
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "samples\ConsoleApp\ConsoleApp.csproj", "{2A172931-3439-4563-A6E5-525924DC2F76}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.ClrProfiler.Managed", "src\OpenTelemetry.ClrProfiler.Managed\OpenTelemetry.ClrProfiler.Managed.csproj", "{6690361C-CCD8-42C4-A5CF-82D554B03A3D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation", "src\OpenTelemetry.ClrProfiler.Managed\OpenTelemetry.AutoInstrumentation.csproj", "{6690361C-CCD8-42C4-A5CF-82D554B03A3D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp.SelfBootstrap", "samples\ConsoleApp.SelfBootstrap\ConsoleApp.SelfBootstrap.csproj", "{7EA51D34-8E0E-4548-8A7F-5C6F9C3533AF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTracingLibrary", "samples\OpenTracingLibrary\OpenTracingLibrary.csproj", "{7220BDBB-084D-40B3-A710-19E3C7147185}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.ClrProfiler.Managed.Core", "src\OpenTelemetry.ClrProfiler.Managed.Core\OpenTelemetry.ClrProfiler.Managed.Core.csproj", "{8BA1CCCC-B07C-46DD-9D54-0B98B3001100}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Core", "src\OpenTelemetry.ClrProfiler.Managed.Core\OpenTelemetry.AutoInstrumentation.Core.csproj", "{8BA1CCCC-B07C-46DD-9D54-0B98B3001100}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BindingRedirect", "samples\BindingRedirect\BindingRedirect.csproj", "{94089CFF-FD2A-45EF-A496-874569882E81}"
 EndProject
@@ -98,7 +98,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "integrations", "integration
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.GraphQL", "test\test-applications\integrations\Samples.GraphQL\Samples.GraphQL.csproj", "{63FD1231-345F-461E-A9C2-237ED305ED11}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.ClrProfiler.Managed.Loader.Tests", "test\OpenTelemetry.ClrProfiler.Managed.Loader.Tests\OpenTelemetry.ClrProfiler.Managed.Loader.Tests.csproj", "{735434B9-6555-4DEE-97FC-786C763CA1F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Loader.Tests", "test\OpenTelemetry.ClrProfiler.Managed.Loader.Tests\OpenTelemetry.AutoInstrumentation.Loader.Tests.csproj", "{735434B9-6555-4DEE-97FC-786C763CA1F1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mocks", "mocks", "{E3ABDF7D-4592-4923-907C-D351DDF1CBE9}"
 EndProject
@@ -119,9 +119,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "aspnet", "aspnet", "{A0B40A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests.AspNet", "test\integration-tests\aspnet\IntegrationTests.AspNet\IntegrationTests.AspNet.csproj", "{EE65928D-15C8-45E5-A94C-7094381E7ACF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests", "test\OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests\OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests.csproj", "{35AB65D8-D76E-40C6-B10C-501A6D44C9E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests", "test\OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests\OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests.csproj", "{35AB65D8-D76E-40C6-B10C-501A6D44C9E0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.Instrumentation.StartupHook", "src\OpenTelemetry.Instrumentation.StartupHook\OpenTelemetry.Instrumentation.StartupHook.csproj", "{E04DA938-E153-4A0D-9CB0-EAC38210FAF2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.StartupHook", "src\OpenTelemetry.Instrumentation.StartupHook\OpenTelemetry.AutoInstrumentation.StartupHook.csproj", "{E04DA938-E153-4A0D-9CB0-EAC38210FAF2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.StartupHook.AspNetCoreMvc31", "samples\Samples.StartupHook.AspNetCoreMvc31\Samples.StartupHook.AspNetCoreMvc31.csproj", "{B25F7404-A6F0-4071-A0CC-139AAB3B0A91}"
 EndProject
@@ -129,9 +129,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests.StartupHoo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.StartupHook", "test\test-applications\integrations\Samples.StartupHook\Samples.StartupHook.csproj", "{FF665CC4-6643-4614-A1A0-FA182E3AF37C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.Instrumentation.AdditionalDeps", "src\OpenTelemetry.Instrumentation.AdditionalDeps\OpenTelemetry.Instrumentation.AdditionalDeps.csproj", "{E026D9FA-FBD5-4066-AF6A-FB63DE28521F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.AdditionalDeps", "src\OpenTelemetry.Instrumentation.AdditionalDeps\OpenTelemetry.AutoInstrumentation.AdditionalDeps.csproj", "{E026D9FA-FBD5-4066-AF6A-FB63DE28521F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.ClrProfiler.Managed.Tests", "test\OpenTelemetry.ClrProfiler.Managed.Tests\OpenTelemetry.ClrProfiler.Managed.Tests.csproj", "{065FEB4E-A99E-4A59-8112-1CB30CF794F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Tests", "test\OpenTelemetry.ClrProfiler.Managed.Tests\OpenTelemetry.AutoInstrumentation.Tests.csproj", "{065FEB4E-A99E-4A59-8112-1CB30CF794F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

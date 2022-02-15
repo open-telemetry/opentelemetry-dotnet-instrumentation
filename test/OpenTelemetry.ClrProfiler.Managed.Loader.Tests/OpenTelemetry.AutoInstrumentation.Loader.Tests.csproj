@@ -1,0 +1,6 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\OpenTelemetry.ClrProfiler.Managed.Loader\OpenTelemetry.AutoInstrumentation.Loader.csproj" />
+  </ItemGroup>
+
+</Project>
