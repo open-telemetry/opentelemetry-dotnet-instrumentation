@@ -3,12 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenTelemetry.AutoInstrumentation.Native", "src\OpenTelemetry.ClrProfiler.Native\OpenTelemetry.ClrProfiler.Native.vcxproj", "{91B6272F-5780-4C94-8071-DBBA7B4F67F3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenTelemetry.AutoInstrumentation.Native", "src\OpenTelemetry.ClrProfiler.Native\OpenTelemetry.AutoInstrumentation.Native.vcxproj", "{91B6272F-5780-4C94-8071-DBBA7B4F67F3}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AB8596C1-CFDA-4A5E-9E9C-74A3DF9AED77} = {AB8596C1-CFDA-4A5E-9E9C-74A3DF9AED77}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenTelemetry.AutoInstrumentation.Native.DLL", "src\OpenTelemetry.ClrProfiler.Native\OpenTelemetry.ClrProfiler.Native.DLL.vcxproj", "{C0C8D381-D6B9-4C76-9428-F40F2FA93A9A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenTelemetry.AutoInstrumentation.Native.DLL", "src\OpenTelemetry.ClrProfiler.Native\OpenTelemetry.AutoInstrumentation.Native.DLL.vcxproj", "{C0C8D381-D6B9-4C76-9428-F40F2FA93A9A}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AB8596C1-CFDA-4A5E-9E9C-74A3DF9AED77} = {AB8596C1-CFDA-4A5E-9E9C-74A3DF9AED77}
 	EndProjectSection
@@ -61,7 +61,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BindingRedirect", "samples\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OldReference", "samples\OldReference\OldReference.csproj", "{4C10E5C1-E212-4744-B92E-49A3AFC314FC}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenTelemetry.ClrProfiler.Native.Tests", "test\OpenTelemetry.ClrProfiler.Native.Tests\OpenTelemetry.ClrProfiler.Native.Tests.vcxproj", "{5728056A-51AA-4FF5-AD0C-E86E44E36102}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenTelemetry.ClrProfiler.Native.Tests", "test\OpenTelemetry.ClrProfiler.Native.Tests\OpenTelemetry.AutoInstrumentation.Native.Tests.vcxproj", "{5728056A-51AA-4FF5-AD0C-E86E44E36102}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dependency-libs", "dependency-libs", "{82A3CE96-0935-45E5-A9AA-A93A5B63500B}"
 EndProject

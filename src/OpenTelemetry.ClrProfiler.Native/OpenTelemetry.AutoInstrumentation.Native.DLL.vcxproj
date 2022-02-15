@@ -23,7 +23,7 @@
     <ProjectGuid>{C0C8D381-D6B9-4C76-9428-F40F2FA93A9A}</ProjectGuid>
     <RootNamespace>DatadogTraceClrProfilerNativeDLL</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <LIB_PATH>..\..\src\OpenTelemetry.ClrProfiler.Native\lib\</LIB_PATH>
+    <LIB_PATH>..\..\src\OpenTelemetry.AutoInstrumentation.Native\lib\</LIB_PATH>
     <LIB_PLATFORM Condition="'$(Platform)'=='x64'">x64</LIB_PLATFORM>
     <LIB_PLATFORM Condition="'$(Platform)'=='Win32' OR '$(Platform)'=='x86'">x86</LIB_PLATFORM>
     <LIB_INCLUDES>$(LIB_PATH)fmt_$(LIB_PLATFORM)-windows-static\include;$(LIB_PATH)spdlog\include;$(LIB_PATH)coreclr\src\pal\prebuilt\inc</LIB_INCLUDES>
@@ -79,25 +79,25 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>bin\$(Configuration)\x86\</OutDir>
     <IntDir>obj\$(Configuration)\x86\</IntDir>
-    <TargetName>OpenTelemetry.ClrProfiler.Native</TargetName>
+    <TargetName>OpenTelemetry.AutoInstrumentation.Native</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>obj\$(Configuration)\$(Platform)\</IntDir>
-    <TargetName>OpenTelemetry.ClrProfiler.Native</TargetName>
+    <TargetName>OpenTelemetry.AutoInstrumentation.Native</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>obj\$(Configuration)\$(Platform)\</IntDir>
-    <TargetName>OpenTelemetry.ClrProfiler.Native</TargetName>
+    <TargetName>OpenTelemetry.AutoInstrumentation.Native</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>bin\$(Configuration)\x86\</OutDir>
     <IntDir>obj\$(Configuration)\x86\</IntDir>
-    <TargetName>OpenTelemetry.ClrProfiler.Native</TargetName>
+    <TargetName>OpenTelemetry.AutoInstrumentation.Native</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -115,7 +115,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>.\OpenTelemetry.ClrProfiler.Native.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>.\OpenTelemetry.AutoInstrumentation.Native.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
       <Command>IF EXIST $(SolutionDir)\pre-build-events-cpp.bat CALL $(SolutionDir)\pre-build-events-cpp.bat  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
@@ -138,7 +138,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>.\OpenTelemetry.ClrProfiler.Native.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>.\OpenTelemetry.AutoInstrumentation.Native.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
       <Command>IF EXIST $(SolutionDir)\pre-build-events-cpp.bat CALL $(SolutionDir)\pre-build-events-cpp.bat  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
@@ -165,7 +165,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ModuleDefinitionFile>.\OpenTelemetry.ClrProfiler.Native.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>.\OpenTelemetry.AutoInstrumentation.Native.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
       <Command>IF EXIST $(SolutionDir)\pre-build-events-cpp.bat CALL $(SolutionDir)\pre-build-events-cpp.bat  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
@@ -192,7 +192,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ModuleDefinitionFile>.\OpenTelemetry.ClrProfiler.Native.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>.\OpenTelemetry.AutoInstrumentation.Native.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
       <Command>IF EXIST $(SolutionDir)\pre-build-events-cpp.bat CALL $(SolutionDir)\pre-build-events-cpp.bat  "$(TargetPath)"  "$(TargetFileName)"  "$(TargetDir)"  "$(TargetName)"</Command>
@@ -200,12 +200,12 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="OpenTelemetry.ClrProfiler.Native.vcxproj">
+    <ProjectReference Include="OpenTelemetry.AutoInstrumentation.Native.vcxproj">
       <Project>{91b6272f-5780-4c94-8071-dbba7b4f67f3}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="OpenTelemetry.ClrProfiler.Native.def" />
+    <None Include="OpenTelemetry.AutoInstrumentation.Native.def" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
