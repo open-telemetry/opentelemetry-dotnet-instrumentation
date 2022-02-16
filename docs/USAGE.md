@@ -140,8 +140,13 @@ possible, there are ways to force the application to use the assembly versions s
 together with the instrumentation.
 
 For .NET Framework applications, the workaround is to use Binding Redirects. For .NET Core
-applications, the workaround is to manipulate the `deps.json`. Currently, we do not
-automate any of these workarounds, but we are manually validating them.
+[Framework-dependent deployment](https://docs.microsoft.com/en-us/dotnet/core/deploying/deploy-with-vs?tabs=vs156#framework-dependent-deployment)
+applications,
+[Additional-deps](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md)
+and [runtime package store](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
+from OpenTelemetry .NET Auto-Instrumentation installation location can be used as workaround.
+For other .NET Core deployment models, the workaround is to manipulate the `deps.json`. Currently,
+we do not automate any of these workarounds, but we are manually validating them.
 
 #### .NET Framework Binding Redirects
 
@@ -159,8 +164,10 @@ and [DOTNET_SHARED_STORE](https://docs.microsoft.com/en-us/dotnet/core/deploying
 
 | Environment variable | Value |
 |-|-|
-| `DOTNET_ADDITIONAL_DEPS` | tracer-home\AdditionalDeps |
-| `DOTNET_SHARED_STORE` | tracer-home\store |
+| `DOTNET_ADDITIONAL_DEPS` | `%InstallationLocation%/AdditionalDeps` |
+| `DOTNET_SHARED_STORE` | `%InstallationLocation%/store` |
+
+Where `%InstallationLocation%` stands for the OpenTelemetry .NET Auto-Instrumentation installation location.
 
 #### .NET Core Dependency File
 
