@@ -1,0 +1,6 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\OpenTelemetry.AutoInstrumentation.Loader\OpenTelemetry.AutoInstrumentation.Loader.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -19,7 +19,7 @@ namespace ConsoleApp.SelfBootstrap
                 .AddHttpClientInstrumentation()
                 .AddSqlClientInstrumentation()
                 .SetSampler(new AlwaysOnSampler())
-                .AddSource("OpenTelemetry.ClrProfiler.*", "ConsoleApp")
+                .AddSource("OpenTelemetry.AutoInstrumentation.*", "ConsoleApp")
                 .AddConsoleExporter()
                 .AddZipkinExporter(options =>
                 {

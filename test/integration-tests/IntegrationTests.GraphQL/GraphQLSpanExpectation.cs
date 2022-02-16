@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using IntegrationTests.Helpers.Mocks;
 using IntegrationTests.Helpers.Models;
-using OpenTelemetry.ClrProfiler.Managed.Tagging;
+using OpenTelemetry.AutoInstrumentation.Tagging;
 
 namespace IntegrationTests.GraphQL
 {

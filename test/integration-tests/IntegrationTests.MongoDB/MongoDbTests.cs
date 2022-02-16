@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 using System.Linq;
 using IntegrationTests.Helpers;
-using OpenTelemetry.ClrProfiler.Managed.Tagging;
+using OpenTelemetry.AutoInstrumentation.Tagging;
 using Xunit;
 using Xunit.Abstractions;
 
