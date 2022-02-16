@@ -20,8 +20,8 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build
 {
-    [Solution("OpenTelemetry.ClrProfiler.sln")] readonly Solution Solution;
-    AbsolutePath MsBuildProject => RootDirectory / "OpenTelemetry.ClrProfiler.proj";
+    [Solution("OpenTelemetry.AutoInstrumentation.sln")] readonly Solution Solution;
+    AbsolutePath MsBuildProject => RootDirectory / "OpenTelemetry.AutoInstrumentation.proj";
 
     AbsolutePath OutputDirectory => RootDirectory / "bin";
     AbsolutePath SourceDirectory => RootDirectory / "src";
@@ -33,7 +33,7 @@ partial class Build
     AbsolutePath ProfilerTestLogs => BuildDataDirectory / "profiler-logs";
     AbsolutePath AdditionalDepsDirectory => TracerHomeDirectory / "AdditionalDeps";
 
-    Project NativeProfilerProject => Solution.GetProject(Projects.ClrProfilerNative);
+    Project NativeProfilerProject => Solution.GetProject(Projects.AutoInstrumentationNative);
 
     [LazyPathExecutable(name: "cmd")] readonly Lazy<Tool> Cmd;
     [LazyPathExecutable(name: "cmake")] readonly Lazy<Tool> CMake;
@@ -117,17 +117,17 @@ partial class Build
         {
             // Always AnyCPU
             DotNetBuild(x => x
-                .SetProjectFile(Solution.GetProject(Projects.Tests.ClrProfilerManagedLoaderTests))
+                .SetProjectFile(Solution.GetProject(Projects.Tests.AutoInstrumentationLoaderTests))
                 .SetConfiguration(BuildConfiguration)
                 .SetNoRestore(true));
 
             DotNetBuild(x => x
-                .SetProjectFile(Solution.GetProject(Projects.Tests.ClrProfilerManagedBootstrappingTests))
+                .SetProjectFile(Solution.GetProject(Projects.Tests.AutoInstrumentationBootstrappingTests))
                 .SetConfiguration(BuildConfiguration)
                 .SetNoRestore(true));
 
             DotNetBuild(x => x
-                .SetProjectFile(Solution.GetProject(Projects.Tests.ClrProfilerManagedTests))
+                .SetProjectFile(Solution.GetProject(Projects.Tests.AutoInstrumentationTests))
                 .SetConfiguration(BuildConfiguration)
                 .SetNoRestore(true));
 
@@ -164,7 +164,7 @@ partial class Build
                 : TargetFrameworks.Where(framework => !framework.ToString().StartsWith("net4"));
 
             DotNetPublish(s => s
-                .SetProject(Solution.GetProject(Projects.ClrProfilerManaged))
+                .SetProject(Solution.GetProject(Projects.AutoInstrumentation))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
@@ -174,9 +174,9 @@ partial class Build
                     .SetOutput(TracerHomeDirectory / framework)));
 
             // StartupHook is supported starting .Net Core 3.1.
-            // We need to emit StartupHook and ClrProfilerManagedLoader assemblies only for .NET Core 3.1 target framework.
+            // We need to emit AutoInstrumentationStartupHook and AutoInstrumentationLoader assemblies only for .NET Core 3.1 target framework.
             DotNetPublish(s => s
-                .SetProject(Solution.GetProject(Projects.StartupHook))
+                .SetProject(Solution.GetProject(Projects.AutoInstrumentationStartupHook))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
@@ -184,9 +184,9 @@ partial class Build
                 .SetFramework(TargetFramework.NETCOREAPP3_1)
                 .SetOutput(TracerHomeDirectory / TargetFramework.NETCOREAPP3_1));
 
-            // ClrProfilerManagedLoader publish is needed only for .Net Core 3.1 to support load from StartupHook.
+            // AutoInstrumentationLoader publish is needed only for .Net Core 3.1 to support load from AutoInstrumentationStartupHook.
             DotNetPublish(s => s
-                .SetProject(Solution.GetProject(Projects.ClrProfilerManagedLoader))
+                .SetProject(Solution.GetProject(Projects.AutoInstrumentationLoader))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
@@ -236,20 +236,20 @@ partial class Build
         .After(CompileManagedTests)
         .Executes(() =>
         {
-            // publish ClrProfilerManaged moc
+            // publish AutoInstrumentation mock
             var targetFrameworks = IsWin
                 ? TargetFrameworks
                 : TargetFrameworks.ExceptNetFramework();
 
             DotNetPublish(s => s
-                .SetProject(Solution.GetProject(Projects.Mocks.ClrProfilerManagedMock))
+                .SetProject(Solution.GetProject(Projects.Mocks.AutoInstrumentationMock))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
                 .EnableNoRestore()
                 .CombineWith(targetFrameworks, (p, framework) => p
                     .SetFramework(framework)
-                    .SetOutput(TestsDirectory / Projects.Tests.ClrProfilerManagedLoaderTests / "bin" / BuildConfiguration / "Profiler" / framework)));
+                    .SetOutput(TestsDirectory / Projects.Tests.AutoInstrumentationLoaderTests / "bin" / BuildConfiguration / "Profiler" / framework)));
         });
 
     Target CompileMocks => _ => _
@@ -257,7 +257,7 @@ partial class Build
         .Executes(() =>
         {
             DotNetBuild(x => x
-                .SetProjectFile(Solution.GetProject(Projects.Mocks.ClrProfilerManagedMock))
+                .SetProjectFile(Solution.GetProject(Projects.Mocks.AutoInstrumentationMock))
                 .SetConfiguration(BuildConfiguration)
                 .SetNoRestore(true)
             );
@@ -271,8 +271,8 @@ partial class Build
 
             var unitTestProjects = new[]
             {
-                Solution.GetProject(Projects.Tests.ClrProfilerManagedLoaderTests),
-                Solution.GetProject(Projects.Tests.ClrProfilerManagedTests)
+                Solution.GetProject(Projects.Tests.AutoInstrumentationLoaderTests),
+                Solution.GetProject(Projects.Tests.AutoInstrumentationTests)
             };
 
             DotNetTest(config => config
@@ -309,14 +309,14 @@ partial class Build
 
     Target CopyAdditionalDeps => _ => _
         .Unlisted()
-        .Description("Creates AdditionalDeps and shared store in tracer-home")
+        .Description("Creates AutoInstrumentation.AdditionalDeps and shared store in tracer-home")
         .After(CompileManagedSrc)
         .Executes(() =>
         {
             AdditionalDepsDirectory.GlobFiles("**/*deps.json").ForEach(DeleteFile);
 
             DotNetPublish(s => s
-                .SetProject(Solution.GetProject(Projects.AdditionalDeps))
+                .SetProject(Solution.GetProject(Projects.AutoInstrumentationAdditionalDeps))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .SetProperty("TracerHomePath", TracerHomeDirectory)
@@ -333,9 +333,9 @@ partial class Build
             AdditionalDepsDirectory.GlobFiles("**/*deps.json")
                                    .ForEach(file => {
                                        string depsJsonContent = File.ReadAllText(file);
-                                       // Remove OpenTelemetry.Instrumentation.AdditionalDeps entry from target section.
-                                       depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+)AdditionalDeps.dll(.+?)},\r\n(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                                       // Remove OpenTelemetry.Instrumentation.AdditionalDeps entry from library section and write to file.
+                                       // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from target section.
+                                       depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+)AutoInstrumentation.AdditionalDeps.dll(.+?)},\r\n(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                                       // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from library section and write to file.
                                        depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+?)},\r\n(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
                                        File.WriteAllText(file, depsJsonContent);
                                    });
@@ -349,9 +349,9 @@ partial class Build
     /// </summary>
     private void RunBootstrappingTests()
     {
-        var project = Solution.GetProject(Projects.Tests.ClrProfilerManagedBootstrappingTests);
+        var project = Solution.GetProject(Projects.Tests.AutoInstrumentationBootstrappingTests);
 
-        const string testPrefix = "OpenTelemetry.ClrProfiler.Managed.Bootstrapping.Tests.InstrumentationTests";
+        const string testPrefix = "OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests.InstrumentationTests";
         var testNames = new[] {
             "Initialize_WithDisabledFlag_DoesNotCreateTracerProvider",
             "Initialize_WithDefaultFlag_CreatesTracerProvider",

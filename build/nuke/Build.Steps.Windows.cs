@@ -87,7 +87,7 @@ partial class Build
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
-            var project = Solution.GetProject(Projects.Tests.ClrProfilerNativeTests);
+            var project = Solution.GetProject(Projects.Tests.AutoInstrumentationNativeTests);
             var workingDirectory = project.Directory / "bin" / BuildConfiguration.ToString() / Platform.ToString();
             var exePath = workingDirectory / $"{project.Name}.exe";
             var testExe = ToolResolver.GetLocalTool(exePath);

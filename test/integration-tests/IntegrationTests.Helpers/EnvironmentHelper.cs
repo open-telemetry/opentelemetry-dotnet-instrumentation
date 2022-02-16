@@ -212,7 +212,7 @@ namespace IntegrationTests.Helpers
                 _ => throw new PlatformNotSupportedException()
             };
 
-            string fileName = $"OpenTelemetry.ClrProfiler.Native.{extension}";
+            string fileName = $"OpenTelemetry.AutoInstrumentation.Native.{extension}";
             string nukeOutput = GetNukeBuildOutput();
             string profilerPath = EnvironmentTools.IsWindows()
                 ? Path.Combine(nukeOutput, $"win-{EnvironmentTools.GetPlatform().ToLower()}", fileName)
@@ -381,7 +381,7 @@ namespace IntegrationTests.Helpers
             string startupHookOutputPath = Path.Combine(
                 GetNukeBuildOutput(),
                 "netcoreapp3.1",
-                "OpenTelemetry.Instrumentation.StartupHook.dll");
+                "OpenTelemetry.AutoInstrumentation.StartupHook.dll");
 
             return startupHookOutputPath;
         }

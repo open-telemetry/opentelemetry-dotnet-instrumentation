@@ -14,7 +14,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
 
-        "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.Instrumentation.StartupHook.dll",
+        "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.StartupHook.dll",
 
         "DOTNET_ADDITIONAL_DEPS": "$(SolutionDir)bin\\tracer-home\\AdditionalDeps",
         "DOTNET_SHARED_STORE": "$(SolutionDir)bin\\tracer-home\\store",
@@ -34,7 +34,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
 
-        "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.Instrumentation.StartupHook.dll",
+        "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.StartupHook.dll",
 
         "DOTNET_ADDITIONAL_DEPS": "$(SolutionDir)bin\\tracer-home\\AdditionalDeps",
         "DOTNET_SHARED_STORE": "$(SolutionDir)bin\\tracer-home\\store",

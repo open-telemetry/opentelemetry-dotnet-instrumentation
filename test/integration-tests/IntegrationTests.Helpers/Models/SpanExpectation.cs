@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using IntegrationTests.Helpers.Mocks;
-using OpenTelemetry.ClrProfiler.Managed;
-using OpenTelemetry.ClrProfiler.Managed.Tagging;
+using OpenTelemetry.AutoInstrumentation;
+using OpenTelemetry.AutoInstrumentation.Tagging;
 
 namespace IntegrationTests.Helpers.Models
 {
