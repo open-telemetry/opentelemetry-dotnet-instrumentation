@@ -26,7 +26,6 @@ const WSTRING env_vars_to_display[]{environment::tracing_enabled,
                                     environment::azure_app_services,
                                     environment::azure_app_services_app_pool_id,
                                     environment::azure_app_services_cli_telemetry_profile_value,
-                                    environment::internal_trace_profiler_path,
                                     environment::dotnet_startup_hooks};
 
 const WSTRING skip_assembly_prefixes[]{
