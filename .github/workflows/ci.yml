@@ -25,8 +25,15 @@ jobs:
         if: ${{ runner.os == 'macOS' }}
         run: brew services start mongodb-community
       - run: ./build.cmd Workflow
-      - uses: actions/upload-artifact@v2.3.1
+      - name: Upload logs
+        uses: actions/upload-artifact@v2.3.1
         if: always()
         with:
-          name: profiler-logs-${{ matrix.machine }}
-          path: build_data/profiler-logs/**/*
+          name: logs-${{ matrix.machine }}
+          path: build_data/profiler-logs/
+      - name: Upload binaries
+        uses: actions/upload-artifact@v2.3.1
+        if: always()
+        with:
+          name: bin-${{ matrix.machine }}
+          path: bin/tracer-home
