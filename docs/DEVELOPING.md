@@ -10,7 +10,7 @@ On all platforms, the minimum requirements are:
 
 ### Windows
 
-- [Visual Studio 2022 (17.1)](https://visualstudio.microsoft.com/downloads/) or newer
+- [Visual Studio 2022 (17.0)](https://visualstudio.microsoft.com/downloads/) or newer
   - Workloads
     - Desktop development with C++
     - .NET desktop development
