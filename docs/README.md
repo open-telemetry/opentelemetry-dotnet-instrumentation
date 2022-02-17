@@ -19,7 +19,9 @@ See [DESIGN.md](DESIGN.md) for an architectural overview of the project.
 
 ## Status
 
-This project is in the early stages of development. A [project board](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/projects/1) shows the current work in progress and the backlog.
+This project is in the early stages of development.
+[The project board](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/projects/1)
+shows the current work in progress.
 
 ## Compatibility
 
@@ -35,11 +37,72 @@ CI tests run against the following operating systems:
 - macOS Catalina 10.15,
 - Ubuntu 20.04 LTS.
 
-## Usage
+## Get Started
 
-See [DEVELOPING.md](DEVELOPING.md) for build and running instructions.
+### Installation
 
-See [USAGE.md](USAGE.md) for configuration instructions.
+You can download the binaries from
+[the artifacts of the `ci` GitHub workflow](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/actions/workflows/ci.yml?query=branch%3Amain).
+
+The location where the binaries are located will be
+refered as `%InstallationLocation%`.
+
+On Linux, after the installation,
+you can optionally create the default log directory:
+
+```sh
+sudo mkdir -p /var/log/opentelemetry/dotnet
+sudo chmod a+rwx /var/log/opentelemetry/dotnet
+```
+
+### Instrument a .NET application on Windows
+
+Before running the application, set the following environment variables:
+
+```env
+COR_ENABLE_PROFILING=1
+COR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
+COR_PROFILER_PATH_64=%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll
+COR_PROFILER_PATH_32=%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll
+CORECLR_ENABLE_PROFILING=1
+CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
+CORECLR_PROFILER_PATH_64=%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll
+CORECLR_PROFILER_PATH_32=%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll
+OTEL_DOTNET_AUTO_HOME=%InstallationLocation%
+OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
+```
+
+### Instrument a .NET application on Linux
+
+Before running the application, set the following environment variables:
+
+```env
+CORECLR_ENABLE_PROFILING=1
+CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
+CORECLR_PROFILER_PATH=%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.so
+OTEL_DOTNET_AUTO_HOME=%InstallationLocation%
+OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
+```
+
+### Instrument a .NET application on MacOS
+
+Before running the application, set the following environment variables:
+
+```env
+CORECLR_ENABLE_PROFILING=1
+CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
+CORECLR_PROFILER_PATH=%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.dylib
+OTEL_DOTNET_AUTO_HOME=%InstallationLocation%
+OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
+```
+
+## Configuration
+
+See [config.md](config.md).
+
+## Troubleshooting
+
+See [troubleshooting.md](troubleshooting.md).
 
 ## Contributing
 

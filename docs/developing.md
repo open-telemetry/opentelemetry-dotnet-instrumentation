@@ -62,7 +62,7 @@ dotnet tool restore
 To see a list of possible targets and configurations run:
 
 ```cmd
-dotnet nuke --help`
+dotnet nuke --help
 ```
 
 To build you can simply run:
@@ -108,7 +108,7 @@ with auto-instrumentation in your shell (e.g. bash, zsh, git bash).
 Example usage:
 
 ```sh
-./dev/instrument.sh dotnet run -f netcoreapp3.1 --project ./samples/ConsoleApp/ConsoleApp.csproj
+./dev/instrument.sh OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS=HttpClient dotnet run -f netcoreapp3.1 --project ./samples/ConsoleApp/ConsoleApp.csproj
 ```
 
 [`dev/envvars.sh`](../dev/envvars.sh) can be used to export profiler environmental variables to your current shell session.
@@ -116,6 +116,7 @@ Example usage:
 
 ```sh
 source ./dev/envvars.sh
+export OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS=HttpClient
 ./samples/ConsoleApp/bin/Debug/netcoreapp3.1/ConsoleApp
 ```
 
