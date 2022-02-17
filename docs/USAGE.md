@@ -67,8 +67,10 @@ The exporter is used to output the telemetry.
 | Environment variable | Description | Default |
 |-|-|-|
 | `OTEL_TRACES_EXPORTER` | The traces exporter to be used. Available values are: `zipkin`, `jeager`, `otlp`, `none`. | `otlp` |
-| `OTEL_EXPORTER_JAEGER_AGENT_HOST` | Hostname for the Jaeger agent. | `localhost` |
-| `OTEL_EXPORTER_JAEGER_AGENT_PORT` | Port for the Jaeger agent. | `6831` |
+| `OTEL_EXPORTER_JAEGER_AGENT_HOST` | Hostname for the Jaeger agent. Used for `UdpCompactThrift` protocol.| `localhost` |
+| `OTEL_EXPORTER_JAEGER_AGENT_PORT` | Port for the Jaeger agent. Used for `UdpCompactThrift` protocol. | `6831` |
+| `OTEL_EXPORTER_JAEGER_ENDPOINT` | The Jaeger Collector HTTP endpoint. Used for `HttpBinaryThrift` protocol. | `http://localhost:14268` |
+| `OTEL_EXPORTER_JAEGER_PROTOCOL` | The protocol to use for Jager exporter. Supported values: `UdpCompactThrift`, `HttpBinaryThrift` | `UdpCompactThrift` |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Target endpoint for OTLP exporter. More details [here](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md). | `http://localhost:4318` for `http/protobuf` protocol, `http://localhost:4317` for `grpc` protocol |
 | `OTEL_EXPORTER_OTLP_HEADERS` | Key-value pairs to be used as headers associated with gRPC or HTTP requests. More details [here](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md). | |
 | `OTEL_EXPORTER_OTLP_TIMEOUT` | Maximum time the OTLP exporter will wait for each batch export. | `1000` (ms) |
