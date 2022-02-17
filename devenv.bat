@@ -8,7 +8,7 @@ rem Set default values
 set profiler_platform=x64
 set profiler_configuration=Debug
 set start_visual_studio=true
-set vs_sln_name=OpenTelemetry.ClrProfiler.sln
+set vs_sln_name=OpenTelemetry.AutoInstrumentation.sln
 
 :next_argument
 set devenv_arg1=%1
@@ -40,12 +40,12 @@ echo Enabling profiler for "%profiler_configuration%/%profiler_platform%".
 rem Enable .NET Framework Profiling API
 SET COR_ENABLE_PROFILING=1
 SET COR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
-SET COR_PROFILER_PATH=%~dp0\src\OpenTelemetry.ClrProfiler.Native\bin\%profiler_configuration%\%profiler_platform%\OpenTelemetry.ClrProfiler.Native.dll
+SET COR_PROFILER_PATH=%~dp0\src\OpenTelemetry.AutoInstrumentation.Native\bin\%profiler_configuration%\%profiler_platform%\OpenTelemetry.AutoInstrumentation.Native.dll
 
 rem Enable .NET Core Profiling API
 SET CORECLR_ENABLE_PROFILING=1
 SET CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
-SET CORECLR_PROFILER_PATH=%~dp0\src\OpenTelemetry.ClrProfiler.Native\bin\%profiler_configuration%\%profiler_platform%\OpenTelemetry.ClrProfiler.Native.dll
+SET CORECLR_PROFILER_PATH=%~dp0\src\OpenTelemetry.AutoInstrumentation.Native\bin\%profiler_configuration%\%profiler_platform%\OpenTelemetry.AutoInstrumentation.Native.dll
 
 rem Don't attach the profiler to these processes
 SET OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES=devenv.exe;Microsoft.ServiceHub.Controller.exe;ServiceHub.Host.CLR.exe;ServiceHub.TestWindowStoreHost.exe;ServiceHub.DataWarehouseHost.exe;sqlservr.exe;VBCSCompiler.exe;iisexpresstray.exe;msvsmon.exe;PerfWatson2.exe;ServiceHub.IdentityHost.exe;ServiceHub.VSDetouredHost.exe;ServiceHub.SettingsHost.exe;ServiceHub.Host.CLR.x86.exe;vstest.console.exe;ServiceHub.RoslynCodeAnalysisService32.exe;testhost.x86.exe;MSBuild.exe;ServiceHub.ThreadedWaitDialog.exe

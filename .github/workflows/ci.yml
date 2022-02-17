@@ -15,6 +15,12 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v2.4.0
+      - uses: actions/setup-dotnet@v1.9.0
+        with:
+          dotnet-version: | 
+            3.1.x
+            5.0.x
+            6.0.x
       - name: Start MongoDB service
         if: ${{ runner.os == 'macOS' }}
         run: brew services start mongodb-community

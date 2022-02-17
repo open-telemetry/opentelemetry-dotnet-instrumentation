@@ -22,7 +22,7 @@ namespace Samples.AspNet.Controllers
                           orderby key
                           select new KeyValuePair<string, string>(key, value);
 
-            var instrumentationType = Type.GetType("OpenTelemetry.ClrProfiler.Managed.Instrumentation, OpenTelemetry.ClrProfiler.Managed");
+            var instrumentationType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation");
 
             ViewBag.EnvVars = envVars;
             ViewBag.HasEnvVars = envVars.Any();

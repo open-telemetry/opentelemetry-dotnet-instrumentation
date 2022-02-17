@@ -19,8 +19,7 @@ See [DESIGN.md](DESIGN.md) for an architectural overview of the project.
 
 ## Status
 
-This project is in the early stages of development, starting with an initial seeding of code from the [.NET Tracer for Datadog APM](https://github.com/DataDog/dd-trace-dotnet). A [project board](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/projects/1) shows the current work in progress and the backlog.
-
+This project is in the early stages of development. A [project board](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/projects/1) shows the current work in progress and the backlog.
 
 ## Compatibility
 
@@ -48,22 +47,28 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Community Roles
 
-Maintainers ([@open-telemetry/dotnet-instrumentation-maintainers](https://github.com/orgs/open-telemetry/teams/dotnet-instrumentation-maintainers)):
+[Maintainers](https://github.com/open-telemetry/community/blob/main/community-membership.md#maintainer)
+([@open-telemetry/dotnet-instrumentation-maintainers](https://github.com/orgs/open-telemetry/teams/dotnet-instrumentation-maintainers)):
 
 - [Chris Ventura](https://github.com/nrcventura), New Relic
-- [Greg Paperin](https://github.com/macrogreg), Datadog
 - [Paulo Janotti](https://github.com/pjanotti), Splunk
-- [Robert Pajak](https://github.com/pellared), Splunk
+- [Robert Paj&#x105;k](https://github.com/pellared), Splunk
 - [Zach Montoya](https://github.com/zacharycmontoya), Datadog
 
-Approvers ([@open-telemetry/dotnet-instrumentation-approvers](https://github.com/orgs/open-telemetry/teams/dotnet-instrumentation-approvers)):
+[Approvers](https://github.com/open-telemetry/community/blob/main/community-membership.md#approver)
+([@open-telemetry/dotnet-instrumentation-approvers](https://github.com/orgs/open-telemetry/teams/dotnet-instrumentation-approvers)):
+
+- [Rajkumar Rangaraj](https://github.com/rajkumar-rangaraj), Microsoft
+- [Rasmus Kuusmann](https://github.com/RassK), Splunk
+
+[Emeritus
+Maintainer/Approver/Triager](https://github.com/open-telemetry/community/blob/main/community-membership.md#emeritus-maintainerapprovertriager):
 
 - [Colin Higgins](https://github.com/colin-higgins), Datadog
+- [Greg Paperin](https://github.com/macrogreg), Datadog
 - [Kevin Gosse](https://github.com/kevingosse), Datadog
 - [Lucas Pimentel-Ordyna](https://github.com/lucaspimentel), Datadog
 - [Mike Goldsmith](https://github.com/MikeGoldsmith), HoneyComb
-- [Rajkumar Rangaraj](https://github.com/rajkumar-rangaraj), Microsoft
-- [Rasmus Kuusmann](https://github.com/RassK), Splunk
 - [Tony Redondo](https://github.com/tonyredondo), Datadog
 
 Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/main/community-membership.md).

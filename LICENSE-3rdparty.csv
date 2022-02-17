@@ -2,11 +2,11 @@ Component,Origin,License,Copyright
 Datadog.Trace,https://github.com/serilog/serilog,Apache-2.0,Copyright (c) 2013-2018 Serilog Contributors
 Datadog.Trace,https://github.com/serilog/serilog-sinks-file,Apache-2.0,Copyright (c) 2016 Serilog Contributors
 Datadog.Trace,https://github.com/JamesNK/Newtonsoft.Json,MIT,Copyright (c) 2007 James Newton-King
-OpenTelemetry.ClrProfiler.Native,https://github.com/dotnet/runtime,MIT,Copyright (c) .NET Foundation and contributors. All rights reserved.
-OpenTelemetry.ClrProfiler.Native,https://github.com/Microsoft/clr-samples,MIT,Copyright (c) .NET Foundation and contributors. All rights reserved.
-OpenTelemetry.ClrProfiler.Native,https://github.com/MicrosoftArchive/clrprofiler,MIT,Copyright (c) Microsoft Corporation.  All rights reserved.
-OpenTelemetry.ClrProfiler.Native,https://github.com/nlohmann/json,MIT,Copyright (c) 2013-2018 Niels Lohmann
-OpenTelemetry.ClrProfiler.Native,https://github.com/dropbox/miniutf,MIT,"Copyright (c) 2013 Dropbox, Inc."
-OpenTelemetry.ClrProfiler.Native,https://github.com/gabime/spdlog,MIT,Copyright (c) 2016 Gabi Melman.
-OpenTelemetry.ClrProfiler.Native,https://github.com/fmtlib/fmt,MIT,"Copyright (c) 2012 - present, Victor Zverovich"
+OpenTelemetry.AutoInstrumentation.Native,https://github.com/dotnet/runtime,MIT,Copyright (c) .NET Foundation and contributors. All rights reserved.
+OpenTelemetry.AutoInstrumentation.Native,https://github.com/Microsoft/clr-samples,MIT,Copyright (c) .NET Foundation and contributors. All rights reserved.
+OpenTelemetry.AutoInstrumentation.Native,https://github.com/MicrosoftArchive/clrprofiler,MIT,Copyright (c) Microsoft Corporation.  All rights reserved.
+OpenTelemetry.AutoInstrumentation.Native,https://github.com/nlohmann/json,MIT,Copyright (c) 2013-2018 Niels Lohmann
+OpenTelemetry.AutoInstrumentation.Native,https://github.com/dropbox/miniutf,MIT,"Copyright (c) 2013 Dropbox, Inc."
+OpenTelemetry.AutoInstrumentation.Native,https://github.com/gabime/spdlog,MIT,Copyright (c) 2016 Gabi Melman.
+OpenTelemetry.AutoInstrumentation.Native,https://github.com/fmtlib/fmt,MIT,"Copyright (c) 2012 - present, Victor Zverovich"
 (all),https://github.com/DataDog/dd-trace-dotnet,Apache-2.0,
