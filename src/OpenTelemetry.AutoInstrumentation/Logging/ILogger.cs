@@ -5,7 +5,7 @@ namespace OpenTelemetry.AutoInstrumentation.Logging
 {
     internal interface ILogger
     {
-        bool IsEnabled(LogEventLevel level);
+        bool IsEnabled(LogLevel level);
 
         void Debug(string messageTemplate, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "");
 
