@@ -44,8 +44,8 @@ CI tests run against the following operating systems:
 You can download the binaries from
 [the artifacts of the `ci` GitHub workflow](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/actions/workflows/ci.yml?query=branch%3Amain).
 
-The location where the binaries are located will be
-refered as `%InstallationLocation%`.
+In the documentation,
+the binaries location is refered as `%InstallationLocation%`.
 
 On Linux, after the installation,
 you can optionally create the default log directory:
