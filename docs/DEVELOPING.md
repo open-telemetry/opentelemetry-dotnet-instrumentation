@@ -1,10 +1,16 @@
 # Development
 
-## Windows
+## Development Environment
 
-Minimum requirements:
+On all platforms, the minimum requirements are:
 
-- [Visual Studio 2019 (16.8)](https://visualstudio.microsoft.com/downloads/) or newer
+- Git client and command line tools
+- [.NET 6.0 SDK](https://dotnet.microsoft.com/download/dotnet/6.0)
+- [.NET Core 3.1 Runtime](https://dotnet.microsoft.com/download/dotnet-core/3.1)
+
+### Windows
+
+- [Visual Studio 2022 (17.1)](https://visualstudio.microsoft.com/downloads/) or newer
   - Workloads
     - Desktop development with C++
     - .NET desktop development
@@ -12,36 +18,29 @@ Minimum requirements:
     - Optional: ASP.NET and web development (to build samples)
   - Individual components
     - .NET Framework 4.7 targeting pack
-- [.NET 5.0 SDK](https://dotnet.microsoft.com/download/dotnet/5.0)
-- [.NET Core 3.1 Runtime](https://dotnet.microsoft.com/download/dotnet-core/3.1)
-- Optional: [nuget.exe CLI](https://www.nuget.org/downloads) v5.3 or newer
-- Optional: [WiX Toolset 3.11.1](http://wixtoolset.org/releases/) or newer to build Windows installer (msi)
-  - Requires .NET Framework 3.5 SP2 (install from Windows Features control panel: `OptionalFeatures.exe`)
-  - [WiX Toolset Visual Studio Extension](https://wixtoolset.org/releases/) to build installer from Visual Studio
-- Optional: [Docker for Windows](https://docs.docker.com/docker-for-windows/) to build Linux binaries and run integration tests on Linux containers. See [section on Docker Compose](#building-and-running-tests-with-docker-compose).
-  - Requires Windows 10 (1607 Anniversary Update, Build 14393 or newer)
+- [Docker for Windows](https://docs.docker.com/docker-for-windows/)
 
-Microsoft provides [evaluation developer VMs](https://developer.microsoft.com/en-us/windows/downloads/virtual-machines) with Windows 10 and Visual Studio pre-installed.
+Microsoft provides
+[evaluation developer VMs](https://developer.microsoft.com/en-us/windows/downloads/virtual-machines)
+with Windows and Visual Studio pre-installed.
 
-## Linux and MacOS
+### Linux and MacOS
 
-Minimum requirements:
-
-- [.NET 5.0 SDK](https://dotnet.microsoft.com/download/dotnet/5.0)
-- [.NET Core 3.1 Runtime](https://dotnet.microsoft.com/download/dotnet-core/3.1)
-
-To build everything and run integration tests:
-
+- cmake, make, gcc, clang, clang++
 - [Docker](https://docs.docker.com/engine/install/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
-### Visual Studio Code - OmniSharp issues
+When using [C# for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp),
+because of [Mono missing features](https://github.com/OmniSharp/omnisharp-vscode#note-about-using-net-6-sdks),
+`omnisharp.useGlobalMono` has to be set to `never`.
+Go to `File` -> `Preferences` -> `Settings` -> `Extensions` -> `C# Configuration` ->
+Change `Omnisharp: Use Global Mono` (you can search for it if the menu is too long) to `never`.
+Afterwards, you have restart OmniSharp: `F1` -> `OmniSharp: Restart OmniSharp`.
 
-Because of [Mono missing features](https://github.com/OmniSharp/omnisharp-vscode#note-about-using-net-5-sdks), `omnisharp.useGlobalMono` has to be set to `never`. Go to `File` -> `Preferences` -> `Settings` -> `Extensions` -> `C# Configuration` -> Change `Omnisharp: Use Global Mono` (you can search for it if the menu is too long) to `never`. Afterwards, you have restart OmniSharp: `F1` -> `OmniSharp: Restart OmniSharp`.
-
-There may be a lot of errors, because some projects target .NET Framework. Switch to `OpenTelemetry.AutoInstrumentation.sln` using `F1` -> `OmniSharp: Select Project` in Visual Studio Code to load a subset of projects which work without any issues. You can also try building the projects which have errors as it sometimes helps.
-
-If for whatever reason you need to use `OpenTelemetry.AutoInstrumentation.sln` you can run `dotnet nuke` to decrease the number of errors.
+There may be a lot of errors, because some projects target .NET Framework.
+You can switch try `F1` -> `OmniSharp: Select Project` in Visual Studio Code
+to load a subset of projects which work without any issues.
+You can also try building the projects which have errors.
 
 ## Build
 
@@ -63,14 +62,16 @@ dotnet tool restore
 To see a list of possible targets and configurations run:
 
 ```cmd
-dotnet nuke --help
+dotnet nuke --help`
 ```
 
-To build the tracer you can simply run:
+To build you can simply run:
 
 ```cmd
 dotnet nuke
 ```
+
+The main build artifacts are located under `bin/tracer-home`.
 
 Clean your repository by running:
 
@@ -78,9 +79,12 @@ Clean your repository by running:
 git clean -fXd
 ```
 
-## Test Environment
+## Manual Testing
 
-The [`dev/docker-compose.yaml`](../dev/docker-compose.yaml) contains configuration for running OTel Collector and Jaeger.
+### Test Environment
+
+The [`dev/docker-compose.yaml`](../dev/docker-compose.yaml) contains
+configuration for running OTel Collector and Jaeger.
 
 You can run the services using:
 
@@ -94,11 +98,12 @@ The following Web UI endpoints are exposed:
 - <http://localhost:8889/metrics> - collected metrics,
 - <http://localhost:13133> - collector's health.
 
-## Instrument applications
+### Instrument an application
 
-> *Caution:* Make sure that before usage you have build the tracer.
+> *Caution:* Make sure to build and prepare the test environment beforehand.
 
-[`dev/instrument.sh`](../dev/instrument.sh) helps to run a command with .NET instrumentation in your shell (e.g. bash, zsh, git bash).
+[`dev/instrument.sh`](../dev/instrument.sh) helps to run a command
+with auto-instrumentation in your shell (e.g. bash, zsh, git bash).
 
 Example usage:
 
@@ -106,13 +111,13 @@ Example usage:
 ./dev/instrument.sh dotnet run -f netcoreapp3.1 --project ./samples/ConsoleApp/ConsoleApp.csproj
 ```
 
- [`dev/envvars.sh`](../dev/envvars.sh) can be used to export profiler environmental variables to your current shell session.
- **It has to be executed from the root of this repository**. Example usage:
+[`dev/envvars.sh`](../dev/envvars.sh) can be used to export profiler environmental variables to your current shell session.
+**It has to be executed from the root of this repository**. Example usage:
 
- ```sh
- source ./dev/envvars.sh
- ./samples/ConsoleApp/bin/Debug/netcoreapp3.1/ConsoleApp
- ```
+```sh
+source ./dev/envvars.sh
+./samples/ConsoleApp/bin/Debug/netcoreapp3.1/ConsoleApp
+```
 
 ## Debug .NET Runtime on Linux
 
