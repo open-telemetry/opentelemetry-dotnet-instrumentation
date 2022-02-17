@@ -6,10 +6,15 @@ namespace OpenTelemetry.AutoInstrumentation.Logging
     internal enum LogLevel
     {
         /// <summary>
-        /// Internal system events that aren't necessarily
-        /// observable from the outside.
+        /// Functionality is unavailable, invariants are broken
+        /// or data is lost.
         /// </summary>
-        Debug,
+        Error,
+
+        /// <summary>
+        /// Service is degraded or endangered.
+        /// </summary>
+        Warning,
 
         /// <summary>
         /// The lifeblood of operational intelligence - things
@@ -18,14 +23,9 @@ namespace OpenTelemetry.AutoInstrumentation.Logging
         Information,
 
         /// <summary>
-        /// Service is degraded or endangered.
+        /// Internal system events that aren't necessarily
+        /// observable from the outside.
         /// </summary>
-        Warning,
-
-        /// <summary>
-        /// Functionality is unavailable, invariants are broken
-        /// or data is lost.
-        /// </summary>
-        Error,
+        Debug,
     }
 }
