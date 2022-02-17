@@ -1,6 +1,6 @@
 # Usage
 
-**WARNING**: Please notice that no official release has been created for this repo yet, so installation instructions below would require you to build the code manually beforehand.
+> :warning: There is no official release yet, so you have to build the code manually beforehand.
 
 ## Configuration
 
@@ -125,6 +125,29 @@ public OpenTelemetry.Trace.TracerProviderBuilder ConfigureTracerProvider(OpenTel
 
 The plugin must use the same version of the `OpenTelemetry` as the
 OpenTelemetry .NET AutoInstrumentation. Current version is `1.2.0-rc2`.
+
+### .NET CLR Profiler
+
+OpenTelemetry .NET Auto-Instrumentation has to be configured
+as .NET CLR Profiler in order to peform bytecode instrumentation.
+Below are the environment variables used by CLR to setup the profiler.
+
+| Environment variable | Description | Value |
+|-|-|-|
+| `CORECLR_ENABLE_PROFILING` | Enable the profiler. | `1` |
+| `CORECLR_PROFILER` | CLSID of the profiler. | `30000` (ms) |
+| `CORECLR_PROFILER_PATH` | Path to the profiler. | `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.so` for Linux, `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.dylib` for MacOS |
+| `CORECLR_PROFILER_PATH_32` | Path to the 32 bit profiler. | `%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
+| `CORECLR_PROFILER_PATH_64` | Path to the 64 bit profiler. | `%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
+
+Remarks:
+
+1. .NET Framework uses `CLR_` prefix instead of `CORECLR_`.
+2. The bitness-specific variables take precedence.
+3. The `*_PROFILER_PATH_*` environment variable is not needed on Windows
+   if the `.dll` is registered.
+
+Reference: [.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/profiling/Profiler%20Loading.md).
 
 ## Troubleshooting
 
