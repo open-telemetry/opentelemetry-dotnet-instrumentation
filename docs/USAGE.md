@@ -142,8 +142,13 @@ possible, there are ways to force the application to use the assembly versions s
 together with the instrumentation.
 
 For .NET Framework applications, the workaround is to use Binding Redirects. For .NET Core
-applications, the workaround is to manipulate the `deps.json`. Currently, we do not
-automate any of these workarounds, but we are manually validating them.
+[Framework-dependent deployment](https://docs.microsoft.com/en-us/dotnet/core/deploying/deploy-with-vs?tabs=vs156#framework-dependent-deployment)
+applications,
+[Additional-deps](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md)
+and [runtime package store](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
+from OpenTelemetry .NET Auto-Instrumentation installation location can be used as workaround.
+For other .NET Core deployment models, the workaround is to manipulate the `deps.json`. Currently,
+we do not automate any of these workarounds, but we are manually validating them.
 
 #### .NET Framework Binding Redirects
 
@@ -152,6 +157,19 @@ to use the `app.config` to solve the version conflicts. As configured in the PoC
 the BindingRedirect sample can only run successfully under the instrumentation since the
 binding redirect makes the application dependent on a version of `System.Diagnostics.DiagnosticSource`
 that is not available during building time.
+
+#### Additional-Deps and Runtime Package Store
+
+To resolve assembly version conflicts in .NET Core, set the environment variables
+[DOTNET_ADDITIONAL_DEPS](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md)
+and [DOTNET_SHARED_STORE](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store) to below value.
+
+| Environment variable | Value |
+|-|-|
+| `DOTNET_ADDITIONAL_DEPS` | `%InstallationLocation%/AdditionalDeps` |
+| `DOTNET_SHARED_STORE` | `%InstallationLocation%/store` |
+
+Where `%InstallationLocation%` stands for the OpenTelemetry .NET Auto-Instrumentation installation location.
 
 #### .NET Core Dependency File
 
