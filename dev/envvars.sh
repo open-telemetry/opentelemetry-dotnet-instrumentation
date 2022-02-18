@@ -53,9 +53,12 @@ then
     export CORECLR_PROFILER_PATH_64="${CURDIR}/bin/tracer-home/win-x64/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
     export CORECLR_PROFILER_PATH_32="${CURDIR}/bin/tracer-home/win-x86/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
 fi
+
+# Configure .NET Core runtime
+export DOTNET_ADDITIONAL_DEPS="${CURDIR}/bin/tracer-home/AdditionalDeps"
 export DOTNET_STARTUP_HOOKS="${CURDIR}/bin/tracer-home/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
 
-# Configure OpenTelemetry Tracer 
+# Configure OpenTelemetry .NET Auto-Instrumentation
 export OTEL_DOTNET_AUTO_HOME="${CURDIR}/bin/tracer-home"
 export OTEL_DOTNET_AUTO_INTEGRATIONS_FILE="${CURDIR}/bin/tracer-home/integrations.json"
 export OTEL_DOTNET_AUTO_DEBUG="1"
