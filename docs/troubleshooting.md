@@ -24,7 +24,7 @@ we do not automate any of these workarounds, but we are manually validating them
 
 ### .NET Framework Binding Redirects
 
-The [samples/BindingRedirect](./samples/BindingRedirect/) app shows how
+The [samples/BindingRedirect](./../samples/BindingRedirect/) app shows how
 to use the `app.config` to solve the version conflicts. As configured in the PoC branch,
 the BindingRedirect sample can only run successfully under the instrumentation since the
 binding redirect makes the application dependent on a version of `System.Diagnostics.DiagnosticSource`
@@ -38,17 +38,22 @@ references using the required version and use the respective `deps.json` file to
 are needed.
 
 To experiment with modifying the `deps.json` file, add a reference to the required version OpenTelemetry
-package to the [samples/CoreAppOldReference](./samples/CoreAppOldReference/) sample and rebuild the
+package to the [samples/CoreAppOldReference](./../samples/CoreAppOldReference/) sample and rebuild the
 application. Save the generated `deps.json` file, remove the package reference and rebuild the
 sample app. Compare the files to understand the changes.
 
 ## No proper relationship between spans
 
-On .NET Framework strong name signing can force multiple versions of the same assembly being loaded on the same process.
-This causes a separate hierarchy of Activity objects. If you are referencing packages in your application that use
-different version of the `System.Diagnostics.DiagnosticSource` than the `OpenTelemetry.Api` used by autoinstrumentation
-(`6.0.0`) you have to explicitly reference the `System.Diagnostics.DiagnosticSource` package in the correct version
-in your application (see [custom instrumentation section](#configure-custom-instrumentation)).
+On .NET Framework strong name signing can force multiple versions
+of the same assembly being loaded on the same process.
+This causes a separate hierarchy of Activity objects.
+If you are referencing packages in your application that use
+different version of the `System.Diagnostics.DiagnosticSource`
+than the `OpenTelemetry.Api` used by
+OpenTelemetry .NET Auto-Instrumentation (`6.0.0`)
+you have to explicitly reference
+the `System.Diagnostics.DiagnosticSource` package in the correct version
+in your application.
 This will cause automatic binding redirection to occur resolving the issue.
 
 If automatic binding redirection is [disabled](https://docs.microsoft.com/en-us/dotnet/framework/configure-apps/how-to-enable-and-disable-automatic-binding-redirection)
@@ -65,13 +70,14 @@ to include/exclude applications from the tracing auto-instrumentation.
 ## Investigating other issues
 
 If none of the suggestions above solves your issue, detailed logs are necessary.
-Follow the steps below to get the detailed logs from OpenTelemetry AutoInstrumentation for .NET
+Follow the steps below to get the detailed logs from
+OpenTelemetry AutoInstrumentation for .NET
 and make sure to add them when creating a GitHub issue.
 
-Set the environment variable `OTEL_DOTNET_AUTO_DEBUG` to `true` before the instrumented process starts.
+Set the environment variable `OTEL_DOTNET_AUTO_DEBUG` to `true`
+before the instrumented process starts.
 By default, the library writes the log files under the below predefined locations.
-If needed, change the default location by updating the environment variable `OTEL_DOTNET_AUTO_LOG_PATH` to an appropriate path.
-On Linux, the default log location is `/var/log/opentelemetry/dotnet/`
-On Windows, the default log location is `%ProgramData%\\OpenTelemetry .NET AutoInstrumentation\logs\`
-Compress the whole folder to capture the multiple log files and send the compressed folder to us.
-After obtaining the logs, remember to remove the environment variable `OTEL_DOTNET_AUTO_DEBUG` to avoid unnecessary overhead.
+If needed, change the default location by updating
+the environment variable `OTEL_DOTNET_AUTO_LOG_DIRECTORY` to an appropriate path.
+After obtaining the logs, remember to remove the environment variable
+`OTEL_DOTNET_AUTO_DEBUG` to avoid unnecessary overhead.
