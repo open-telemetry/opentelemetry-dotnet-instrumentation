@@ -1,15 +1,14 @@
 using System;
 
-namespace OpenTelemetry.AutoInstrumentation.Tagging
+namespace OpenTelemetry.AutoInstrumentation.Tagging;
+
+internal interface IProperty<TResult>
 {
-    internal interface IProperty<TResult>
-    {
-        bool IsReadOnly { get; }
+    bool IsReadOnly { get; }
 
-        string Key { get; }
+    string Key { get; }
 
-        Func<ITags, TResult> Getter { get; }
+    Func<ITags, TResult> Getter { get; }
 
-        Action<ITags, TResult> Setter { get; }
-    }
+    Action<ITags, TResult> Setter { get; }
 }

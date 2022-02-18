@@ -4,47 +4,46 @@ using System.Threading;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.Util;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDb
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDb;
+
+/// <summary>
+/// MongoDB.Driver.Core.WireProtocol.IWireProtocol instrumentation
+/// </summary>
+[MongoDbExecute(
+    typeName: "MongoDB.Driver.Core.WireProtocol.KillCursorsWireProtocol",
+    isGeneric: false)]
+// ReSharper disable once InconsistentNaming
+[Browsable(false)]
+[EditorBrowsable(EditorBrowsableState.Never)]
+public class IWireProtocol_Execute_Integration
 {
     /// <summary>
-    /// MongoDB.Driver.Core.WireProtocol.IWireProtocol instrumentation
+    /// OnMethodBegin callback
     /// </summary>
-    [MongoDbExecute(
-        typeName: "MongoDB.Driver.Core.WireProtocol.KillCursorsWireProtocol",
-        isGeneric: false)]
-    // ReSharper disable once InconsistentNaming
-    [Browsable(false)]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public class IWireProtocol_Execute_Integration
+    /// <param name="instance">Instance value, aka `this` of the instrumented method.</param>
+    /// <param name="connection">The MongoDB connection</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <typeparam name="TTarget">Type of the target</typeparam>
+    /// <returns>Calltarget state value</returns>
+    public static CallTargetState OnMethodBegin<TTarget>(TTarget instance, object connection, CancellationToken cancellationToken)
     {
-        /// <summary>
-        /// OnMethodBegin callback
-        /// </summary>
-        /// <param name="instance">Instance value, aka `this` of the instrumented method.</param>
-        /// <param name="connection">The MongoDB connection</param>
-        /// <param name="cancellationToken">The cancellation token</param>
-        /// <typeparam name="TTarget">Type of the target</typeparam>
-        /// <returns>Calltarget state value</returns>
-        public static CallTargetState OnMethodBegin<TTarget>(TTarget instance, object connection, CancellationToken cancellationToken)
-        {
-            var activity = MongoDbIntegration.CreateActivity(instance, connection);
+        var activity = MongoDbIntegration.CreateActivity(instance, connection);
 
-            return new CallTargetState(activity);
-        }
+        return new CallTargetState(activity);
+    }
 
-        /// <summary>
-        /// OnAsyncMethodEnd callback
-        /// </summary>
-        /// <typeparam name="TTarget">Type of the target</typeparam>
-        /// <param name="instance">Instance value, aka `this` of the instrumented method.</param>
-        /// <param name="exception">Exception instance in case the original code threw an exception.</param>
-        /// <param name="state">Calltarget state value</param>
-        /// <returns>A response value, in an async scenario will be T of Task of T</returns>
-        public static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception exception, CallTargetState state)
-        {
-            state.Activity.DisposeWithException(exception);
+    /// <summary>
+    /// OnAsyncMethodEnd callback
+    /// </summary>
+    /// <typeparam name="TTarget">Type of the target</typeparam>
+    /// <param name="instance">Instance value, aka `this` of the instrumented method.</param>
+    /// <param name="exception">Exception instance in case the original code threw an exception.</param>
+    /// <param name="state">Calltarget state value</param>
+    /// <returns>A response value, in an async scenario will be T of Task of T</returns>
+    public static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception exception, CallTargetState state)
+    {
+        state.Activity.DisposeWithException(exception);
 
-            return CallTargetReturn.GetDefault();
-        }
+        return CallTargetReturn.GetDefault();
     }
 }

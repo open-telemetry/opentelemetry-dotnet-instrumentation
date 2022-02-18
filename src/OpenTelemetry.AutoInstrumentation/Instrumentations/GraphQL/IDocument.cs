@@ -1,13 +1,12 @@
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
+
+/// <summary>
+/// GraphQL.Language.AST.Document interface for ducktyping
+/// </summary>
+public interface IDocument
 {
     /// <summary>
-    /// GraphQL.Language.AST.Document interface for ducktyping
+    /// Gets the original query from the document
     /// </summary>
-    public interface IDocument
-    {
-        /// <summary>
-        /// Gets the original query from the document
-        /// </summary>
-        string OriginalQuery { get; }
-    }
+    string OriginalQuery { get; }
 }

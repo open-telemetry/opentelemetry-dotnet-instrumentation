@@ -8,72 +8,71 @@ using GraphQL.StarWars.Types;
 using GraphQL.Subscription;
 using GraphQL.Types;
 
-namespace Samples.GraphQL.StarWarsExtensions
+namespace Samples.GraphQL.StarWarsExtensions;
+
+/// <example>
+/// This is an example JSON request for a subscription
+/// {
+///   "query": "subscription HumanAddedSub{ humanAdded { name } }",
+/// }
+/// </example>
+public class StarWarsSubscription : ObjectGraphType<object>
 {
-    /// <example>
-    /// This is an example JSON request for a subscription
-    /// {
-    ///   "query": "subscription HumanAddedSub{ humanAdded { name } }",
-    /// }
-    /// </example>
-    public class StarWarsSubscription : ObjectGraphType<object>
+    private readonly StarWarsData _starWarsData;
+
+    private readonly ISubject<Human> _humanStream = new ReplaySubject<Human>(1);
+
+    public StarWarsSubscription(StarWarsData data)
     {
-        private readonly StarWarsData _starWarsData;
+        Name = "Subscription";
+        _starWarsData = data;
 
-        private readonly ISubject<Human> _humanStream = new ReplaySubject<Human>(1);
-
-        public StarWarsSubscription(StarWarsData data)
+        AddField(new EventStreamFieldType
         {
-            Name = "Subscription";
-            _starWarsData = data;
+            Name = "humanAdded",
+            Type = typeof(HumanType),
+            Resolver = new FuncFieldResolver<Human>(ResolveMessage),
+            Subscriber = new EventStreamResolver<Human>(Subscribe)
+        });
+        AddField(new EventStreamFieldType
+        {
+            Name = "throwNotImplementedException",
+            Type = typeof(HumanType),
+            Resolver = new FuncFieldResolver<Human>(ResolveMessage),
+            Subscriber = new EventStreamResolver<Human>(ThrowNotImplementedException)
+        });
+    }
 
-            AddField(new EventStreamFieldType
-            {
-                Name = "humanAdded",
-                Type = typeof(HumanType),
-                Resolver = new FuncFieldResolver<Human>(ResolveMessage),
-                Subscriber = new EventStreamResolver<Human>(Subscribe)
-            });
-            AddField(new EventStreamFieldType
-            {
-                Name = "throwNotImplementedException",
-                Type = typeof(HumanType),
-                Resolver = new FuncFieldResolver<Human>(ResolveMessage),
-                Subscriber = new EventStreamResolver<Human>(ThrowNotImplementedException)
-            });
+    private Human ResolveMessage(ResolveFieldContext context)
+    {
+        return context.Source as Human;
+    }
+
+    private IObservable<Human> Subscribe(ResolveEventStreamContext context)
+    {
+        List<Human> listOfHumans = new List<Human>();
+
+        var task = _starWarsData.GetHumanByIdAsync("1");
+        task.Wait();
+        var result = task.Result;
+        if (result != null)
+        {
+            listOfHumans.Add(task.Result);
         }
 
-        private Human ResolveMessage(ResolveFieldContext context)
+        task = _starWarsData.GetHumanByIdAsync("2");
+        task.Wait();
+        result = task.Result;
+        if (result != null)
         {
-            return context.Source as Human;
+            listOfHumans.Add(task.Result);
         }
 
-        private IObservable<Human> Subscribe(ResolveEventStreamContext context)
-        {
-            List<Human> listOfHumans = new List<Human>();
+        return listOfHumans.ToObservable();
+    }
 
-            var task = _starWarsData.GetHumanByIdAsync("1");
-            task.Wait();
-            var result = task.Result;
-            if (result != null)
-            {
-                listOfHumans.Add(task.Result);
-            }
-
-            task = _starWarsData.GetHumanByIdAsync("2");
-            task.Wait();
-            result = task.Result;
-            if (result != null)
-            {
-                listOfHumans.Add(task.Result);
-            }
-
-            return listOfHumans.ToObservable();
-        }
-
-        private IObservable<Human> ThrowNotImplementedException(ResolveEventStreamContext context)
-        {
-            throw new NotImplementedException("This API purposely throws a NotImplementedException");
-        }
+    private IObservable<Human> ThrowNotImplementedException(ResolveEventStreamContext context)
+    {
+        throw new NotImplementedException("This API purposely throws a NotImplementedException");
     }
 }

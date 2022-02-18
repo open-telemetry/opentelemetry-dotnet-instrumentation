@@ -1,28 +1,27 @@
-namespace OpenTelemetry.AutoInstrumentation.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration;
+
+/// <summary>
+/// Enum representing supported trace exporters.
+/// </summary>
+public enum TracesExporter
 {
     /// <summary>
-    /// Enum representing supported trace exporters.
+    /// None exporter.
     /// </summary>
-    public enum TracesExporter
-    {
-        /// <summary>
-        /// None exporter.
-        /// </summary>
-        None,
+    None,
 
-        /// <summary>
-        /// OTLP exporter.
-        /// </summary>
-        Otlp,
+    /// <summary>
+    /// OTLP exporter.
+    /// </summary>
+    Otlp,
 
-        /// <summary>
-        /// Jaeger exporter.
-        /// </summary>
-        Jaeger,
+    /// <summary>
+    /// Jaeger exporter.
+    /// </summary>
+    Jaeger,
 
-        /// <summary>
-        /// Zipkin exporter.
-        /// </summary>
-        Zipkin,
-    }
+    /// <summary>
+    /// Zipkin exporter.
+    /// </summary>
+    Zipkin,
 }

@@ -8,111 +8,110 @@ using IntegrationTests.Helpers.Models;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace IntegrationTests.StartupHook
+namespace IntegrationTests.StartupHook;
+
+public class StartupHookTests : TestHelper
 {
-    public class StartupHookTests : TestHelper
+    private const string ServiceName = "Samples.MongoDB";
+
+    private List<WebServerSpanExpectation> _expectations = new List<WebServerSpanExpectation>();
+
+    public StartupHookTests(ITestOutputHelper output)
+        : base("StartupHook", output)
     {
-        private const string ServiceName = "Samples.MongoDB";
+        SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS", "HttpClient");
+        _expectations.Add(new WebServerSpanExpectation(ServiceName, null, "SayHello", "SayHello", null));
+        _expectations.Add(new WebServerSpanExpectation(ServiceName, null, "HTTP GET", "HTTP GET", null, "GET"));
+    }
 
-        private List<WebServerSpanExpectation> _expectations = new List<WebServerSpanExpectation>();
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void SubmitsTraces()
+    {
+        const int expectedSpanCount = 2;
 
-        public StartupHookTests(ITestOutputHelper output)
-            : base("StartupHook", output)
+        var spans = RunTestApplication(enableStartupHook: true);
+
+        AssertExpectedSpansReceived(expectedSpanCount, spans);
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void InstrumentationNotAvailableWhenStartupHookIsNotEnabled()
+    {
+        const int expectedSpanCount = 0;
+
+        var spans = RunTestApplication(enableStartupHook: false);
+
+        AssertExpectedSpansReceived(expectedSpanCount, spans);
+    }
+
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ApplicationIsExcluded(bool excludeApplication)
+    {
+        string applicationNameToExclude = string.Empty;
+        int expectedSpanCount = 2;
+        if (excludeApplication)
         {
-            SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
-            SetEnvironmentVariable("OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS", "HttpClient");
-            _expectations.Add(new WebServerSpanExpectation(ServiceName, null, "SayHello", "SayHello", null));
-            _expectations.Add(new WebServerSpanExpectation(ServiceName, null, "HTTP GET", "HTTP GET", null, "GET"));
+            applicationNameToExclude = EnvironmentHelper.FullSampleName;
+            expectedSpanCount = 0;
         }
 
-        [Fact]
-        [Trait("Category", "EndToEnd")]
-        public void SubmitsTraces()
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,{applicationNameToExclude}");
+
+        var spans = RunTestApplication(enableStartupHook: true);
+
+        AssertExpectedSpansReceived(expectedSpanCount, spans);
+    }
+
+    private IImmutableList<IMockSpan> RunTestApplication(bool enableStartupHook)
+    {
+        int agentPort = TcpPortProvider.GetOpenPort();
+
+        using (var agent = new MockZipkinCollector(Output, agentPort))
+        using (var processResult = RunSampleAndWaitForExit(agent.Port, enableStartupHook: enableStartupHook))
         {
-            const int expectedSpanCount = 2;
-
-            var spans = RunTestApplication(enableStartupHook: true);
-
-            AssertExpectedSpansReceived(expectedSpanCount, spans);
+            Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
+            return agent.WaitForSpans(2, 500);
         }
+    }
 
-        [Fact]
-        [Trait("Category", "EndToEnd")]
-        public void InstrumentationNotAvailableWhenStartupHookIsNotEnabled()
+    private void AssertExpectedSpansReceived(int expectedSpanCount, IImmutableList<IMockSpan> spans)
+    {
+        Assert.True(spans.Count() == expectedSpanCount, $"Expecting {expectedSpanCount} spans, received {spans.Count()}");
+        if (expectedSpanCount > 0)
         {
-            const int expectedSpanCount = 0;
+            Assert.Single(spans.Select(s => s.Service).Distinct());
 
-            var spans = RunTestApplication(enableStartupHook: false);
-
-            AssertExpectedSpansReceived(expectedSpanCount, spans);
+            var spanList = spans.ToList();
+            AssertExpectationsMet(_expectations, spanList);
         }
+    }
 
-        [Theory]
-        [Trait("Category", "EndToEnd")]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void ApplicationIsExcluded(bool excludeApplication)
+    private void AssertExpectationsMet(List<WebServerSpanExpectation> expectations, List<IMockSpan> spans)
+    {
+        List<IMockSpan> remainingSpans = spans.Select(s => s).ToList();
+        List<string> failures = new List<string>();
+
+        foreach (SpanExpectation expectation in expectations)
         {
-            string applicationNameToExclude = string.Empty;
-            int expectedSpanCount = 2;
-            if (excludeApplication)
+            List<IMockSpan> possibleSpans =
+                remainingSpans
+                    .Where(s => expectation.Matches(s))
+                    .ToList();
+
+            if (possibleSpans.Count == 0)
             {
-                applicationNameToExclude = EnvironmentHelper.FullSampleName;
-                expectedSpanCount = 0;
-            }
-
-            SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,{applicationNameToExclude}");
-
-            var spans = RunTestApplication(enableStartupHook: true);
-
-            AssertExpectedSpansReceived(expectedSpanCount, spans);
-        }
-
-        private IImmutableList<IMockSpan> RunTestApplication(bool enableStartupHook)
-        {
-            int agentPort = TcpPortProvider.GetOpenPort();
-
-            using (var agent = new MockZipkinCollector(Output, agentPort))
-            using (var processResult = RunSampleAndWaitForExit(agent.Port, enableStartupHook: enableStartupHook))
-            {
-                Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
-                return agent.WaitForSpans(2, 500);
+                failures.Add($"No spans for: {expectation}");
+                continue;
             }
         }
 
-        private void AssertExpectedSpansReceived(int expectedSpanCount, IImmutableList<IMockSpan> spans)
-        {
-            Assert.True(spans.Count() == expectedSpanCount, $"Expecting {expectedSpanCount} spans, received {spans.Count()}");
-            if (expectedSpanCount > 0)
-            {
-                Assert.Single(spans.Select(s => s.Service).Distinct());
-
-                var spanList = spans.ToList();
-                AssertExpectationsMet(_expectations, spanList);
-            }
-        }
-
-        private void AssertExpectationsMet(List<WebServerSpanExpectation> expectations, List<IMockSpan> spans)
-        {
-            List<IMockSpan> remainingSpans = spans.Select(s => s).ToList();
-            List<string> failures = new List<string>();
-
-            foreach (SpanExpectation expectation in expectations)
-            {
-                List<IMockSpan> possibleSpans =
-                    remainingSpans
-                       .Where(s => expectation.Matches(s))
-                       .ToList();
-
-                if (possibleSpans.Count == 0)
-                {
-                    failures.Add($"No spans for: {expectation}");
-                    continue;
-                }
-            }
-
-            string finalMessage = Environment.NewLine + string.Join(Environment.NewLine, failures.Select(f => " - " + f));
-            Assert.True(!failures.Any(), finalMessage);
-        }
+        string finalMessage = Environment.NewLine + string.Join(Environment.NewLine, failures.Select(f => " - " + f));
+        Assert.True(!failures.Any(), finalMessage);
     }
 }

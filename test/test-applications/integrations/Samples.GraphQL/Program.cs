@@ -7,58 +7,57 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Samples.GraphQL
+namespace Samples.GraphQL;
+
+public class Program
 {
-    public class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
+        var directory = Directory.GetCurrentDirectory();
+
+        var host = new WebHostBuilder()
+            .UseKestrel(serverOptions =>
+                // Explicitly set AllowSynchronousIO to true since the default changes
+                // between AspNetCore 2.0 and 3.0
+                serverOptions.AllowSynchronousIO = true
+            )
+            .UseContentRoot(directory)
+            .UseStartup<Startup>()
+            .Build();
+
+        var logger = host.Services.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation($"Instrumentation.ProfilerAttached = {IsProfilerAttached()}");
+
+        var prefixes = new[] { "COR_", "CORECLR_", "DOTNET_", "OTEL_" };
+        var envVars = from envVar in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>()
+            from prefix in prefixes
+            let key = (envVar.Key as string)?.ToUpperInvariant()
+            let value = envVar.Value as string
+            where key.StartsWith(prefix)
+            orderby key
+            select new KeyValuePair<string, string>(key, value);
+
+        foreach (var kvp in envVars)
         {
-            var directory = Directory.GetCurrentDirectory();
-
-            var host = new WebHostBuilder()
-                .UseKestrel(serverOptions =>
-                    // Explicitly set AllowSynchronousIO to true since the default changes
-                    // between AspNetCore 2.0 and 3.0
-                    serverOptions.AllowSynchronousIO = true
-                )
-                .UseContentRoot(directory)
-                .UseStartup<Startup>()
-                .Build();
-
-            var logger = host.Services.GetRequiredService<ILogger<Program>>();
-            logger.LogInformation($"Instrumentation.ProfilerAttached = {IsProfilerAttached()}");
-
-            var prefixes = new[] { "COR_", "CORECLR_", "DOTNET_", "OTEL_" };
-            var envVars = from envVar in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>()
-                          from prefix in prefixes
-                          let key = (envVar.Key as string)?.ToUpperInvariant()
-                          let value = envVar.Value as string
-                          where key.StartsWith(prefix)
-                          orderby key
-                          select new KeyValuePair<string, string>(key, value);
-
-            foreach (var kvp in envVars)
-            {
-                logger.LogInformation($"{kvp.Key} = {kvp.Value}");
-            }
-
-            host.Run();
+            logger.LogInformation($"{kvp.Key} = {kvp.Value}");
         }
 
-        private static bool? IsProfilerAttached()
+        host.Run();
+    }
+
+    private static bool? IsProfilerAttached()
+    {
+        var instrumentationType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation", throwOnError: false);
+
+        if (instrumentationType == null)
         {
-            var instrumentationType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation", throwOnError: false);
-
-            if (instrumentationType == null)
-            {
-                return null;
-            }
-
-            var property = instrumentationType.GetProperty("ProfilerAttached");
-
-            var isAttached = property?.GetValue(null) as bool?;
-
-            return isAttached ?? false;
+            return null;
         }
+
+        var property = instrumentationType.GetProperty("ProfilerAttached");
+
+        var isAttached = property?.GetValue(null) as bool?;
+
+        return isAttached ?? false;
     }
 }

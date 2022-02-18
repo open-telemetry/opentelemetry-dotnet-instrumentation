@@ -1,9 +1,8 @@
 using System.Security.Claims;
 
-namespace Samples.GraphQL
+namespace Samples.GraphQL;
+
+public class GraphQLUserContext
 {
-    public class GraphQLUserContext
-    {
-        public ClaimsPrincipal User { get; set; }
-    }
+    public ClaimsPrincipal User { get; set; }
 }

@@ -1,20 +1,19 @@
 using System;
 
-namespace OpenTelemetry.AutoInstrumentation.DuckTyping
+namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
+
+/// <summary>
+/// Duck type interface
+/// </summary>
+public interface IDuckType
 {
     /// <summary>
-    /// Duck type interface
+    /// Gets instance
     /// </summary>
-    public interface IDuckType
-    {
-        /// <summary>
-        /// Gets instance
-        /// </summary>
-        object Instance { get; }
+    object Instance { get; }
 
-        /// <summary>
-        /// Gets instance Type
-        /// </summary>
-        Type Type { get; }
-    }
+    /// <summary>
+    /// Gets instance Type
+    /// </summary>
+    Type Type { get; }
 }

@@ -9,41 +9,40 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
-namespace Samples.StartupHook.AspNetCoreMvc31.Controllers
+namespace Samples.StartupHook.AspNetCoreMvc31.Controllers;
+
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    private readonly ILogger<HomeController> _logger;
+
+    public HomeController(ILogger<HomeController> logger)
     {
-        private readonly ILogger<HomeController> _logger;
+        _logger = logger;
+    }
 
-        public HomeController(ILogger<HomeController> logger)
+    public IActionResult Index()
+    {
+        var client = new HttpClient();
+        client.GetStringAsync("http://httpstat.us/200").Wait();
+
+        try
         {
-            _logger = logger;
+            client.GetStringAsync("http://httpstat.us/500").Wait();
         }
-
-        public IActionResult Index()
+        catch 
         {
-            var client = new HttpClient();
-            client.GetStringAsync("http://httpstat.us/200").Wait();
-
-            try
-            {
-                client.GetStringAsync("http://httpstat.us/500").Wait();
-            }
-            catch 
-            {
-            }
-            return View();
         }
+        return View();
+    }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+    public IActionResult Privacy()
+    {
+        return View();
+    }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
