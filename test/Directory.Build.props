@@ -1,5 +1,5 @@
 <Project>
-  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+  <Import Project="..\Directory.Build.props" />
 
   <PropertyGroup>
     <!-- only run .NET Framework tests on Windows -->
