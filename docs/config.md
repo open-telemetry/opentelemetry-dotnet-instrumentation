@@ -144,3 +144,16 @@ Remarks:
    if the `.dll` is registered.
 
 Reference: [.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/profiling/Profiler%20Loading.md).
+
+## .NET Runtime Additional-Deps and Package Store
+
+To resolve assembly version conflicts in .NET Core,
+it is advised to set the
+[`DOTNET_ADDITIONAL_DEPS`](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md)
+and [`DOTNET_SHARED_STORE`](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
+environment variables to the values described below.
+
+| Environment variable | Value |
+|-|-|
+| `DOTNET_ADDITIONAL_DEPS` | `%InstallationLocation%/AdditionalDeps` |
+| `DOTNET_SHARED_STORE` | `%InstallationLocation%/store` |
