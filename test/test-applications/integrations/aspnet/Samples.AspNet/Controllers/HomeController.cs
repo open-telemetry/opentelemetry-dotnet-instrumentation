@@ -12,7 +12,7 @@ public class HomeController : Controller
 {
     public ActionResult Index()
     {
-        var prefixes = new[] { "COR_", "CORECLR_", "DOTNET_", "OTEL_" };
+        var prefixes = new[] {"COR_", "CORECLR_", "DOTNET_", "OTEL_"};
 
         var envVars = from envVar in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>()
             from prefix in prefixes
@@ -22,11 +22,14 @@ public class HomeController : Controller
             orderby key
             select new KeyValuePair<string, string>(key, value);
 
-        var instrumentationType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation");
+        var instrumentationType =
+            Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation");
 
         ViewBag.EnvVars = envVars;
         ViewBag.HasEnvVars = envVars.Any();
-        ViewBag.ProfilerAttached = instrumentationType?.GetProperty("ProfilerAttached", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) ?? false;
+        ViewBag.ProfilerAttached =
+            instrumentationType?.GetProperty("ProfilerAttached", BindingFlags.Public | BindingFlags.Static)
+                ?.GetValue(null) ?? false;
         ViewBag.TracerAssemblyLocation = instrumentationType?.Assembly.Location;
         ViewBag.TracerAssemblies = AssembliesHelper.GetLoadedTracesAssemblies();
         ViewBag.AllAssemblies = AssembliesHelper.GetLoadedAssemblies();

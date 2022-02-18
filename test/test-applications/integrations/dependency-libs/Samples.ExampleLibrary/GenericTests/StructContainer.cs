@@ -1,16 +1,17 @@
 using System.Collections.Generic;
 
-namespace Samples.ExampleLibrary.GenericTests;
-
-public struct StructContainer<T>
+namespace Samples.ExampleLibrary.GenericTests
 {
-    public List<T> Items { get; }
-
-    public long Id { get; }
-
-    public StructContainer(long id, List<T> items)
+    public struct StructContainer<T>
     {
-        Id = id;
-        Items = items;
+        public List<T> Items { get; }
+
+        public long Id { get; }
+
+        public StructContainer(long id, List<T> items)
+        {
+            Id = id;
+            Items = items;
+        }
     }
 }

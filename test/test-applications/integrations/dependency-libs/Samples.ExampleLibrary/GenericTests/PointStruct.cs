@@ -1,13 +1,14 @@
-namespace Samples.ExampleLibrary.GenericTests;
-
-public struct PointStruct
+namespace Samples.ExampleLibrary.GenericTests
 {
-    public int X;
-    public int Y;
-
-    public PointStruct(int x, int y)
+    public struct PointStruct
     {
-        X = x;
-        Y = y;
+        public int X;
+        public int Y;
+
+        public PointStruct(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
     }
 }
