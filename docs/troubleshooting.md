@@ -20,7 +20,7 @@ and [runtime package store](https://docs.microsoft.com/en-us/dotnet/core/deployi
 from OpenTelemetry .NET, use the auto-instrumentation installation path.
 For other .NET Core deployment models, edit the `deps.json` file.
 
-### .NET Framework Binding Redirects
+### .NET Framework binding redirects
 
 The [samples/BindingRedirect](./../samples/BindingRedirect/) app shows how
 to use the `app.config` file to solve version conflicts.
@@ -28,7 +28,7 @@ The sample can only run successfully under the instrumentation, as the
 binding redirect makes the application dependent on a version of `System.Diagnostics.DiagnosticSource`
 that is not available at build time.
 
-### .NET Core Dependency File
+### .NET Core dependency file
 
 To fix assembly version conflicts in .NET Core, edit the default `<application>.deps.json` file 
 generated at build for .NET Core applications. Build a .NET Core app with package
