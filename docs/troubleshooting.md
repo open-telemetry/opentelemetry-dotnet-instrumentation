@@ -62,7 +62,7 @@ you can also manually add binding redirection to [the `App.config` file](../samp
 ## High CPU usage
 
 Check if you have not enabled the auto-instrumentation globally
-by setting theenvironment variables on system or user level.
+by setting the environment variables on system or user level.
 
 If it was really intended, `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` and `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`
 to include/exclude applications from the tracing auto-instrumentation.
