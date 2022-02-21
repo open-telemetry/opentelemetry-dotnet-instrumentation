@@ -68,7 +68,7 @@ CORECLR_ENABLE_PROFILING=1
 CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
 CORECLR_PROFILER_PATH_64=%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll
 CORECLR_PROFILER_PATH_32=%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll
-DOTNET_ADDITIONAL_DEPS=%InstallationLocation/AdditionalDeps
+DOTNET_ADDITIONAL_DEPS=%InstallationLocation%/AdditionalDeps
 DOTNET_STARTUP_HOOKS=%InstallationLocation%/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll
 OTEL_DOTNET_AUTO_HOME=%InstallationLocation%
 OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
@@ -82,7 +82,7 @@ Before running the application, set the following environment variables:
 CORECLR_ENABLE_PROFILING=1
 CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
 CORECLR_PROFILER_PATH=%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.so
-DOTNET_ADDITIONAL_DEPS=%InstallationLocation/AdditionalDeps
+DOTNET_ADDITIONAL_DEPS=%InstallationLocation%/AdditionalDeps
 DOTNET_STARTUP_HOOKS=%InstallationLocation%/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll
 OTEL_DOTNET_AUTO_HOME=%InstallationLocation%
 OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
