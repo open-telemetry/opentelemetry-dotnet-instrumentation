@@ -10,7 +10,7 @@
 | `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
 | `OTEL_DOTNET_AUTO_AZURE_APP_SERVICES` | Set to indicate that the profiler is running in the context of Azure App Services. | `false` |
 
-## Resource
+## Resources
 
 Resource is the immutable representation of the entity producing the telemetry.
 See [Resource semantic conventions](https://github.com/open-telemetry/opentelemetry-specification/tree/main/specification/resource/semantic_conventions)
@@ -39,7 +39,7 @@ for more details.
 ASP.NET instrumentation on .NET Framework requires installing the
 [`OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule/)
 NuGet package on the instrumented project.
-More info [here](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.AspNet#step-2-modify-webconfig).
+See [the WebConfig section](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.AspNet#step-2-modify-webconfig) for more information.
 
 ## Logging
 
@@ -82,7 +82,7 @@ The exporter is used to output the telemetry.
   
 ## Batch Span Processor
 
-The Batch Span Processor batches of finished spans before they are send by the exporter.
+The Batch Span Processor batches finished spans before they are sent by the exporter.
 
 | Environment variable | Description | Default |
 |-|-|-|
@@ -124,8 +124,8 @@ OpenTelemetry .NET AutoInstrumentation. Current version is `1.2.0-rc2`.
 
 ## .NET CLR Profiler
 
-OpenTelemetry .NET Auto-Instrumentation has to be configured
-as .NET CLR Profiler in order to peform bytecode instrumentation.
+To perform bytecode instrumentation, configure the OpenTelemetry .NET
+auto-instrumentation as a .NET CLR Profiler.
 Below are the environment variables used by CLR to setup the profiler.
 
 | Environment variable | Description | Value |
@@ -148,10 +148,10 @@ Reference: [.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blo
 ## .NET Runtime Additional-Deps and Package Store
 
 To resolve assembly version conflicts in .NET Core,
-it is advised to set the
+set the
 [`DOTNET_ADDITIONAL_DEPS`](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md)
 and [`DOTNET_SHARED_STORE`](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
-environment variables to the values described below.
+environment variables to the following values:
 
 | Environment variable | Value |
 |-|-|

@@ -41,14 +41,12 @@ CI tests run against the following operating systems:
 
 ### Installation
 
-You can download the binaries from
-[the artifacts of the `ci` GitHub workflow](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/actions/workflows/ci.yml?query=branch%3Amain).
+Download and install the binaries from
+[the `ci` artifacts](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/actions/workflows/ci.yml?query=branch%3Amain). In the docs,
+the binaries location is referred to as `%InstallationLocation%`.
 
-In the documentation,
-the binaries location is refered as `%InstallationLocation%`.
-
-On Linux, after the installation,
-you can optionally create the default log directory:
+On Linux, you can optionally create the default log directory
+after installation by running the following commands:
 
 ```sh
 sudo mkdir -p /var/log/opentelemetry/dotnet
@@ -88,7 +86,7 @@ OTEL_DOTNET_AUTO_HOME=%InstallationLocation%
 OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
 ```
 
-### Instrument a .NET application on MacOS
+### Instrument a .NET application on macOS
 
 Before running the application, set the following environment variables:
 
