@@ -1,6 +1,13 @@
 <Project>
   <Import Project="..\Directory.Build.props" />
   <PropertyGroup>
+    <!--
+      Projects within this folder are build by OpenTelemetry.AutoInstrumentation.Native.Tests.vcxproj.
+      To build this project, build pipeline is using msbuild from VS 2019 installed on windows-2019 virtal environement.
+      The highest supported lang version is 9.0.
+
+      It could be updated to 10.0 when we migrate to windows-2022 with VS 2022.
+     -->
     <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 </Project>
