@@ -3,443 +3,442 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace OpenTelemetry.AutoInstrumentation.DuckTyping
+namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
+
+internal class LazyILGenerator
 {
-    internal class LazyILGenerator
+    private ILGenerator _generator;
+    private List<Action<ILGenerator>> _instructions;
+    private int _offset;
+
+    public LazyILGenerator(ILGenerator generator)
     {
-        private ILGenerator _generator;
-        private List<Action<ILGenerator>> _instructions;
-        private int _offset;
+        _generator = generator;
+        _instructions = new List<Action<ILGenerator>>(16);
+    }
 
-        public LazyILGenerator(ILGenerator generator)
-        {
-            _generator = generator;
-            _instructions = new List<Action<ILGenerator>>(16);
-        }
+    public int Offset => _offset;
 
-        public int Offset => _offset;
+    public int Count => _instructions.Count;
 
-        public int Count => _instructions.Count;
-
-        public void SetOffset(int value)
-        {
-            if (value > _instructions.Count)
-            {
-                _offset = _instructions.Count;
-            }
-            else
-            {
-                _offset = value;
-            }
-        }
-
-        public void ResetOffset()
+    public void SetOffset(int value)
+    {
+        if (value > _instructions.Count)
         {
             _offset = _instructions.Count;
         }
-
-        public void BeginScope()
+        else
         {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.BeginScope());
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.BeginScope());
-            }
+            _offset = value;
+        }
+    }
 
-            _offset++;
+    public void ResetOffset()
+    {
+        _offset = _instructions.Count;
+    }
+
+    public void BeginScope()
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.BeginScope());
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.BeginScope());
         }
 
-        public LocalBuilder DeclareLocal(Type localType, bool pinned)
+        _offset++;
+    }
+
+    public LocalBuilder DeclareLocal(Type localType, bool pinned)
+    {
+        return _generator.DeclareLocal(localType, pinned);
+    }
+
+    public LocalBuilder DeclareLocal(Type localType)
+    {
+        return _generator.DeclareLocal(localType);
+    }
+
+    public Label DefineLabel()
+    {
+        return _generator.DefineLabel();
+    }
+
+    public void Emit(OpCode opcode, string str)
+    {
+        if (_offset == _instructions.Count)
         {
-            return _generator.DeclareLocal(localType, pinned);
+            _instructions.Add(il => il.Emit(opcode, str));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.Emit(opcode, str));
         }
 
-        public LocalBuilder DeclareLocal(Type localType)
+        _offset++;
+    }
+
+    public void Emit(OpCode opcode, FieldInfo field)
+    {
+        if (_offset == _instructions.Count)
         {
-            return _generator.DeclareLocal(localType);
+            _instructions.Add(il => il.Emit(opcode, field));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.Emit(opcode, field));
         }
 
-        public Label DefineLabel()
+        _offset++;
+    }
+
+    public void Emit(OpCode opcode, Label[] labels)
+    {
+        if (_offset == _instructions.Count)
         {
-            return _generator.DefineLabel();
+            _instructions.Add(il => il.Emit(opcode, labels));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.Emit(opcode, labels));
         }
 
-        public void Emit(OpCode opcode, string str)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.Emit(opcode, str));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.Emit(opcode, str));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void Emit(OpCode opcode, Label label)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.Emit(opcode, label));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.Emit(opcode, label));
         }
 
-        public void Emit(OpCode opcode, FieldInfo field)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.Emit(opcode, field));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.Emit(opcode, field));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void Emit(OpCode opcode, LocalBuilder local)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.Emit(opcode, local));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.Emit(opcode, local));
         }
 
-        public void Emit(OpCode opcode, Label[] labels)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.Emit(opcode, labels));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.Emit(opcode, labels));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void Emit(OpCode opcode, float arg)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.Emit(opcode, arg));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.Emit(opcode, arg));
         }
 
-        public void Emit(OpCode opcode, Label label)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.Emit(opcode, label));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.Emit(opcode, label));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void Emit(OpCode opcode, byte arg)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.Emit(opcode, arg));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.Emit(opcode, arg));
         }
 
-        public void Emit(OpCode opcode, LocalBuilder local)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.Emit(opcode, local));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.Emit(opcode, local));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void Emit(OpCode opcode, sbyte arg)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.Emit(opcode, arg));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.Emit(opcode, arg));
         }
 
-        public void Emit(OpCode opcode, float arg)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.Emit(opcode, arg));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.Emit(opcode, arg));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void Emit(OpCode opcode, short arg)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.Emit(opcode, arg));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.Emit(opcode, arg));
         }
 
-        public void Emit(OpCode opcode, byte arg)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.Emit(opcode, arg));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.Emit(opcode, arg));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void Emit(OpCode opcode, double arg)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.Emit(opcode, arg));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.Emit(opcode, arg));
         }
 
-        public void Emit(OpCode opcode, sbyte arg)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.Emit(opcode, arg));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.Emit(opcode, arg));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void Emit(OpCode opcode, MethodInfo meth)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.Emit(opcode, meth));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.Emit(opcode, meth));
         }
 
-        public void Emit(OpCode opcode, short arg)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.Emit(opcode, arg));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.Emit(opcode, arg));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void Emit(OpCode opcode, int arg)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.Emit(opcode, arg));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.Emit(opcode, arg));
         }
 
-        public void Emit(OpCode opcode, double arg)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.Emit(opcode, arg));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.Emit(opcode, arg));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void Emit(OpCode opcode)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.Emit(opcode));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.Emit(opcode));
         }
 
-        public void Emit(OpCode opcode, MethodInfo meth)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.Emit(opcode, meth));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.Emit(opcode, meth));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void Emit(OpCode opcode, long arg)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.Emit(opcode, arg));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.Emit(opcode, arg));
         }
 
-        public void Emit(OpCode opcode, int arg)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.Emit(opcode, arg));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.Emit(opcode, arg));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void Emit(OpCode opcode, Type cls)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.Emit(opcode, cls));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.Emit(opcode, cls));
         }
 
-        public void Emit(OpCode opcode)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.Emit(opcode));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.Emit(opcode));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void Emit(OpCode opcode, SignatureHelper signature)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.Emit(opcode, signature));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.Emit(opcode, signature));
         }
 
-        public void Emit(OpCode opcode, long arg)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.Emit(opcode, arg));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.Emit(opcode, arg));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void Emit(OpCode opcode, ConstructorInfo con)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.Emit(opcode, con));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.Emit(opcode, con));
         }
 
-        public void Emit(OpCode opcode, Type cls)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.Emit(opcode, cls));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.Emit(opcode, cls));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void EmitCall(OpCode opcode, MethodInfo methodInfo, Type[] optionalParameterTypes)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.EmitCall(opcode, methodInfo, optionalParameterTypes));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.EmitCall(opcode, methodInfo, optionalParameterTypes));
         }
 
-        public void Emit(OpCode opcode, SignatureHelper signature)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.Emit(opcode, signature));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.Emit(opcode, signature));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void EmitCalli(OpCode opcode, CallingConventions callingConvention, Type returnType, Type[] parameterTypes, Type[] optionalParameterTypes)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.EmitCalli(opcode, callingConvention, returnType, parameterTypes, optionalParameterTypes));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.EmitCalli(opcode, callingConvention, returnType, parameterTypes, optionalParameterTypes));
         }
 
-        public void Emit(OpCode opcode, ConstructorInfo con)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.Emit(opcode, con));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.Emit(opcode, con));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void EmitWriteLine(string value)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.EmitWriteLine(value));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.EmitWriteLine(value));
         }
 
-        public void EmitCall(OpCode opcode, MethodInfo methodInfo, Type[] optionalParameterTypes)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.EmitCall(opcode, methodInfo, optionalParameterTypes));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.EmitCall(opcode, methodInfo, optionalParameterTypes));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void EmitWriteLine(FieldInfo fld)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.EmitWriteLine(fld));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.EmitWriteLine(fld));
         }
 
-        public void EmitCalli(OpCode opcode, CallingConventions callingConvention, Type returnType, Type[] parameterTypes, Type[] optionalParameterTypes)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.EmitCalli(opcode, callingConvention, returnType, parameterTypes, optionalParameterTypes));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.EmitCalli(opcode, callingConvention, returnType, parameterTypes, optionalParameterTypes));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void EmitWriteLine(LocalBuilder localBuilder)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.EmitWriteLine(localBuilder));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.EmitWriteLine(localBuilder));
         }
 
-        public void EmitWriteLine(string value)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.EmitWriteLine(value));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.EmitWriteLine(value));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void EndScope()
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.EndScope());
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.EndScope());
         }
 
-        public void EmitWriteLine(FieldInfo fld)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.EmitWriteLine(fld));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.EmitWriteLine(fld));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void MarkLabel(Label loc)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.MarkLabel(loc));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.MarkLabel(loc));
         }
 
-        public void EmitWriteLine(LocalBuilder localBuilder)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.EmitWriteLine(localBuilder));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.EmitWriteLine(localBuilder));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void ThrowException(Type excType)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.ThrowException(excType));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.ThrowException(excType));
         }
 
-        public void EndScope()
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.EndScope());
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.EndScope());
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void UsingNamespace(string usingNamespace)
+    {
+        if (_offset == _instructions.Count)
+        {
+            _instructions.Add(il => il.UsingNamespace(usingNamespace));
+        }
+        else
+        {
+            _instructions.Insert(_offset, il => il.UsingNamespace(usingNamespace));
         }
 
-        public void MarkLabel(Label loc)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.MarkLabel(loc));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.MarkLabel(loc));
-            }
+        _offset++;
+    }
 
-            _offset++;
+    public void Flush()
+    {
+        foreach (Action<ILGenerator> instr in _instructions)
+        {
+            instr(_generator);
         }
 
-        public void ThrowException(Type excType)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.ThrowException(excType));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.ThrowException(excType));
-            }
-
-            _offset++;
-        }
-
-        public void UsingNamespace(string usingNamespace)
-        {
-            if (_offset == _instructions.Count)
-            {
-                _instructions.Add(il => il.UsingNamespace(usingNamespace));
-            }
-            else
-            {
-                _instructions.Insert(_offset, il => il.UsingNamespace(usingNamespace));
-            }
-
-            _offset++;
-        }
-
-        public void Flush()
-        {
-            foreach (Action<ILGenerator> instr in _instructions)
-            {
-                instr(_generator);
-            }
-
-            _instructions.Clear();
-            _offset = 0;
-        }
+        _instructions.Clear();
+        _offset = 0;
     }
 }

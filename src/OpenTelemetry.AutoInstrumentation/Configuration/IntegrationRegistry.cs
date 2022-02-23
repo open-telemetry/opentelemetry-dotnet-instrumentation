@@ -2,50 +2,49 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OpenTelemetry.AutoInstrumentation.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration;
+
+internal static class IntegrationRegistry
 {
-    internal static class IntegrationRegistry
+    internal static readonly string[] Names;
+
+    internal static readonly IReadOnlyDictionary<string, int> Ids;
+
+    static IntegrationRegistry()
     {
-        internal static readonly string[] Names;
+        var values = Enum.GetValues(typeof(Instrumentation));
+        var ids = new Dictionary<string, int>(values.Length);
 
-        internal static readonly IReadOnlyDictionary<string, int> Ids;
+        Names = new string[values.Cast<int>().Max() + 1];
 
-        static IntegrationRegistry()
+        foreach (Instrumentation value in values)
         {
-            var values = Enum.GetValues(typeof(Instrumentation));
-            var ids = new Dictionary<string, int>(values.Length);
+            var name = value.ToString();
 
-            Names = new string[values.Cast<int>().Max() + 1];
-
-            foreach (Instrumentation value in values)
-            {
-                var name = value.ToString();
-
-                Names[(int)value] = name;
-                ids.Add(name, (int)value);
-            }
-
-            Ids = ids;
+            Names[(int)value] = name;
+            ids.Add(name, (int)value);
         }
 
-        internal static string GetName(IntegrationInfo integration)
-        {
-            if (integration.Name == null)
-            {
-                return Names[integration.Id];
-            }
+        Ids = ids;
+    }
 
-            return integration.Name;
+    internal static string GetName(IntegrationInfo integration)
+    {
+        if (integration.Name == null)
+        {
+            return Names[integration.Id];
         }
 
-        internal static IntegrationInfo GetIntegrationInfo(string integrationName)
-        {
-            if (Ids.TryGetValue(integrationName, out var id))
-            {
-                return new IntegrationInfo(id);
-            }
+        return integration.Name;
+    }
 
-            return new IntegrationInfo(integrationName);
+    internal static IntegrationInfo GetIntegrationInfo(string integrationName)
+    {
+        if (Ids.TryGetValue(integrationName, out var id))
+        {
+            return new IntegrationInfo(id);
         }
+
+        return new IntegrationInfo(integrationName);
     }
 }

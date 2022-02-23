@@ -1,14 +1,13 @@
 using System;
 
-namespace Samples.AspNetCoreMvc.Shared
+namespace Samples.AspNetCoreMvc.Shared;
+
+public static class StackTraceHelper
 {
-    public static class StackTraceHelper
+    public static string[] GetUsefulStack()
     {
-        public static string[] GetUsefulStack()
-        {
-            var stackTrace = Environment.StackTrace;
-            string[] methods = stackTrace.Split(new[] { " at " }, StringSplitOptions.None);
-            return methods;
-        }
+        var stackTrace = Environment.StackTrace;
+        string[] methods = stackTrace.Split(new[] { " at " }, StringSplitOptions.None);
+        return methods;
     }
 }

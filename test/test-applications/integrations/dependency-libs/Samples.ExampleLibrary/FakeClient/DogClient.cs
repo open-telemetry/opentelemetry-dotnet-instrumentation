@@ -41,13 +41,13 @@ namespace Samples.ExampleLibrary.FakeClient
             {
                 message +=
                     message
-                  + whatEvenIs?.ToString()
-                  + whatEvenIsThis?.ToString()
-                  + whatEvenIsThisT?.ToString()
-                  + evenMoreWhatIsThis?.GetType()
-                  + previousTricks?.GetType()
-                  + tuple?.GetType()
-                  + whatAmIDoing?.GetType();
+                    + whatEvenIs?.ToString()
+                    + whatEvenIsThis?.ToString()
+                    + whatEvenIsThisT?.ToString()
+                    + evenMoreWhatIsThis?.GetType()
+                    + previousTricks?.GetType()
+                    + tuple?.GetType()
+                    + whatAmIDoing?.GetType();
             }
         }
 

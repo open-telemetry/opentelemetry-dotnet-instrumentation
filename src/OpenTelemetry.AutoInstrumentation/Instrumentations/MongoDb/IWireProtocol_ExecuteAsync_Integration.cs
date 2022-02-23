@@ -4,67 +4,66 @@ using System.Threading;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.Util;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDb
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDb;
+
+/// <summary>
+/// MongoDB.Driver.Core.WireProtocol.IWireProtocol&lt;TResult&gt; instrumentation
+/// </summary>
+[MongoDbExecuteAsync(
+    typeName: "MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1",
+    isGeneric: true)]
+[MongoDbExecuteAsync(
+    typeName: "MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1",
+    isGeneric: true)]
+[MongoDbExecuteAsync(
+    typeName: "MongoDB.Driver.Core.WireProtocol.CommandWireProtocol`1",
+    isGeneric: true)]
+[MongoDbExecuteAsync(
+    typeName: "MongoDB.Driver.Core.WireProtocol.GetMoreWireProtocol`1",
+    isGeneric: true)]
+[MongoDbExecuteAsync(
+    typeName: "MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1",
+    isGeneric: true)]
+[MongoDbExecuteAsync(
+    typeName: "MongoDB.Driver.Core.WireProtocol.WriteWireProtocolBase`1",
+    isGeneric: true)]
+[MongoDbExecuteAsync(
+    typeName: "MongoDB.Driver.Core.WireProtocol.KillCursorsWireProtocol",
+    isGeneric: false)]
+// ReSharper disable once InconsistentNaming
+[Browsable(false)]
+[EditorBrowsable(EditorBrowsableState.Never)]
+public class IWireProtocol_ExecuteAsync_Integration
 {
     /// <summary>
-    /// MongoDB.Driver.Core.WireProtocol.IWireProtocol&lt;TResult&gt; instrumentation
+    /// OnMethodBegin callback
     /// </summary>
-    [MongoDbExecuteAsync(
-        typeName: "MongoDB.Driver.Core.WireProtocol.CommandUsingQueryMessageWireProtocol`1",
-        isGeneric: true)]
-    [MongoDbExecuteAsync(
-        typeName: "MongoDB.Driver.Core.WireProtocol.CommandUsingCommandMessageWireProtocol`1",
-        isGeneric: true)]
-    [MongoDbExecuteAsync(
-        typeName: "MongoDB.Driver.Core.WireProtocol.CommandWireProtocol`1",
-        isGeneric: true)]
-    [MongoDbExecuteAsync(
-        typeName: "MongoDB.Driver.Core.WireProtocol.GetMoreWireProtocol`1",
-        isGeneric: true)]
-    [MongoDbExecuteAsync(
-        typeName: "MongoDB.Driver.Core.WireProtocol.QueryWireProtocol`1",
-        isGeneric: true)]
-    [MongoDbExecuteAsync(
-        typeName: "MongoDB.Driver.Core.WireProtocol.WriteWireProtocolBase`1",
-        isGeneric: true)]
-    [MongoDbExecuteAsync(
-        typeName: "MongoDB.Driver.Core.WireProtocol.KillCursorsWireProtocol",
-        isGeneric: false)]
-    // ReSharper disable once InconsistentNaming
-    [Browsable(false)]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public class IWireProtocol_ExecuteAsync_Integration
+    /// <param name="instance">Instance value, aka `this` of the instrumented method.</param>
+    /// <param name="connection">The MongoDB connection</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <typeparam name="TTarget">Type of the target</typeparam>
+    /// <returns>CallTarget state value</returns>
+    public static CallTargetState OnMethodBegin<TTarget>(TTarget instance, object connection, CancellationToken cancellationToken)
     {
-        /// <summary>
-        /// OnMethodBegin callback
-        /// </summary>
-        /// <param name="instance">Instance value, aka `this` of the instrumented method.</param>
-        /// <param name="connection">The MongoDB connection</param>
-        /// <param name="cancellationToken">The cancellation token</param>
-        /// <typeparam name="TTarget">Type of the target</typeparam>
-        /// <returns>CallTarget state value</returns>
-        public static CallTargetState OnMethodBegin<TTarget>(TTarget instance, object connection, CancellationToken cancellationToken)
-        {
-            var activity = MongoDbIntegration.CreateActivity(instance, connection);
+        var activity = MongoDbIntegration.CreateActivity(instance, connection);
 
-            return new CallTargetState(activity);
-        }
+        return new CallTargetState(activity);
+    }
 
-        /// <summary>
-        /// OnAsyncMethodEnd callback
-        /// </summary>
-        /// <typeparam name="TTarget">Type of the target</typeparam>
-        /// <typeparam name="TReturn">Type of the return value</typeparam>
-        /// <param name="instance">Instance value, aka `this` of the instrumented method.</param>
-        /// <param name="returnValue">Return value</param>
-        /// <param name="exception">Exception instance in case the original code threw an exception.</param>
-        /// <param name="state">Calltarget state value</param>
-        /// <returns>A response value, in an async scenario will be T of Task of T</returns>
-        public static TReturn OnAsyncMethodEnd<TTarget, TReturn>(TTarget instance, TReturn returnValue, Exception exception, CallTargetState state)
-        {
-            state.Activity.DisposeWithException(exception);
+    /// <summary>
+    /// OnAsyncMethodEnd callback
+    /// </summary>
+    /// <typeparam name="TTarget">Type of the target</typeparam>
+    /// <typeparam name="TReturn">Type of the return value</typeparam>
+    /// <param name="instance">Instance value, aka `this` of the instrumented method.</param>
+    /// <param name="returnValue">Return value</param>
+    /// <param name="exception">Exception instance in case the original code threw an exception.</param>
+    /// <param name="state">Calltarget state value</param>
+    /// <returns>A response value, in an async scenario will be T of Task of T</returns>
+    public static TReturn OnAsyncMethodEnd<TTarget, TReturn>(TTarget instance, TReturn returnValue, Exception exception, CallTargetState state)
+    {
+        state.Activity.DisposeWithException(exception);
 
-            return returnValue;
-        }
+        return returnValue;
     }
 }

@@ -2,124 +2,123 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace OpenTelemetry.AutoInstrumentation.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration;
+
+/// <summary>
+/// A base <see cref="IConfigurationSource"/> implementation
+/// for string-only configuration sources.
+/// </summary>
+public abstract class StringConfigurationSource : IConfigurationSource
 {
     /// <summary>
-    /// A base <see cref="IConfigurationSource"/> implementation
-    /// for string-only configuration sources.
+    /// Returns a <see cref="IDictionary{TKey, TValue}"/> from parsing
+    /// <paramref name="data"/>.
     /// </summary>
-    public abstract class StringConfigurationSource : IConfigurationSource
+    /// <param name="data">A string containing key-value pairs which are comma-separated, and for which the key and value are colon-separated.</param>
+    /// <returns><see cref="IDictionary{TKey, TValue}"/> of key value pairs.</returns>
+    public static IDictionary<string, string> ParseCustomKeyValues(string data)
     {
-        /// <summary>
-        /// Returns a <see cref="IDictionary{TKey, TValue}"/> from parsing
-        /// <paramref name="data"/>.
-        /// </summary>
-        /// <param name="data">A string containing key-value pairs which are comma-separated, and for which the key and value are colon-separated.</param>
-        /// <returns><see cref="IDictionary{TKey, TValue}"/> of key value pairs.</returns>
-        public static IDictionary<string, string> ParseCustomKeyValues(string data)
+        return ParseCustomKeyValues(data, allowOptionalMappings: false);
+    }
+
+    /// <summary>
+    /// Returns a <see cref="IDictionary{TKey, TValue}"/> from parsing
+    /// <paramref name="data"/>.
+    /// </summary>
+    /// <param name="data">A string containing key-value pairs which are comma-separated, and for which the key and value are colon-separated.</param>
+    /// <param name="allowOptionalMappings">Determines whether to create dictionary entries when the input has no value mapping</param>
+    /// <returns><see cref="IDictionary{TKey, TValue}"/> of key value pairs.</returns>
+    public static IDictionary<string, string> ParseCustomKeyValues(string data, bool allowOptionalMappings)
+    {
+        var dictionary = new ConcurrentDictionary<string, string>();
+
+        // A null return value means the key was not present,
+        // and CompositeConfigurationSource depends on this behavior
+        // (it returns the first non-null value it finds).
+        if (data == null)
         {
-            return ParseCustomKeyValues(data, allowOptionalMappings: false);
+            return null;
         }
 
-        /// <summary>
-        /// Returns a <see cref="IDictionary{TKey, TValue}"/> from parsing
-        /// <paramref name="data"/>.
-        /// </summary>
-        /// <param name="data">A string containing key-value pairs which are comma-separated, and for which the key and value are colon-separated.</param>
-        /// <param name="allowOptionalMappings">Determines whether to create dictionary entries when the input has no value mapping</param>
-        /// <returns><see cref="IDictionary{TKey, TValue}"/> of key value pairs.</returns>
-        public static IDictionary<string, string> ParseCustomKeyValues(string data, bool allowOptionalMappings)
+        if (string.IsNullOrWhiteSpace(data))
         {
-            var dictionary = new ConcurrentDictionary<string, string>();
-
-            // A null return value means the key was not present,
-            // and CompositeConfigurationSource depends on this behavior
-            // (it returns the first non-null value it finds).
-            if (data == null)
-            {
-                return null;
-            }
-
-            if (string.IsNullOrWhiteSpace(data))
-            {
-                return dictionary;
-            }
-
-            var entries = data.Split(',');
-
-            foreach (var e in entries)
-            {
-                var kv = e.Split(':');
-                if (allowOptionalMappings && kv.Length == 1)
-                {
-                    var key = kv[0];
-                    var value = string.Empty;
-                    dictionary[key] = value;
-                }
-                else if (kv.Length != 2)
-                {
-                    continue;
-                }
-                else
-                {
-                    var key = kv[0];
-                    var value = kv[1];
-                    dictionary[key] = value;
-                }
-            }
-
             return dictionary;
         }
 
-        /// <inheritdoc />
-        public abstract string GetString(string key);
+        var entries = data.Split(',');
 
-        /// <inheritdoc />
-        public virtual int? GetInt32(string key)
+        foreach (var e in entries)
         {
-            string value = GetString(key);
-
-            return int.TryParse(value, out int result)
-                       ? result
-                       : (int?)null;
+            var kv = e.Split(':');
+            if (allowOptionalMappings && kv.Length == 1)
+            {
+                var key = kv[0];
+                var value = string.Empty;
+                dictionary[key] = value;
+            }
+            else if (kv.Length != 2)
+            {
+                continue;
+            }
+            else
+            {
+                var key = kv[0];
+                var value = kv[1];
+                dictionary[key] = value;
+            }
         }
 
-        /// <inheritdoc />
-        public double? GetDouble(string key)
-        {
-            string value = GetString(key);
+        return dictionary;
+    }
 
-            return double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out double result)
-                       ? result
-                       : (double?)null;
-        }
+    /// <inheritdoc />
+    public abstract string GetString(string key);
 
-        /// <inheritdoc />
-        public virtual bool? GetBool(string key)
-        {
-            var value = GetString(key);
-            return bool.TryParse(value, out bool result) ? result : null;
-        }
+    /// <inheritdoc />
+    public virtual int? GetInt32(string key)
+    {
+        string value = GetString(key);
 
-        /// <summary>
-        /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> from parsing
-        /// </summary>
-        /// <param name="key">The key</param>
-        /// <returns><see cref="ConcurrentDictionary{TKey, TValue}"/> containing all of the key-value pairs.</returns>
-        public IDictionary<string, string> GetDictionary(string key)
-        {
-            return ParseCustomKeyValues(GetString(key), allowOptionalMappings: false);
-        }
+        return int.TryParse(value, out int result)
+            ? result
+            : (int?)null;
+    }
 
-        /// <summary>
-        /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> from parsing
-        /// </summary>
-        /// <param name="key">The key</param>
-        /// <param name="allowOptionalMappings">Determines whether to create dictionary entries when the input has no value mapping</param>
-        /// <returns><see cref="ConcurrentDictionary{TKey, TValue}"/> containing all of the key-value pairs.</returns>
-        public IDictionary<string, string> GetDictionary(string key, bool allowOptionalMappings)
-        {
-            return ParseCustomKeyValues(GetString(key), allowOptionalMappings);
-        }
+    /// <inheritdoc />
+    public double? GetDouble(string key)
+    {
+        string value = GetString(key);
+
+        return double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out double result)
+            ? result
+            : (double?)null;
+    }
+
+    /// <inheritdoc />
+    public virtual bool? GetBool(string key)
+    {
+        var value = GetString(key);
+        return bool.TryParse(value, out bool result) ? result : null;
+    }
+
+    /// <summary>
+    /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> from parsing
+    /// </summary>
+    /// <param name="key">The key</param>
+    /// <returns><see cref="ConcurrentDictionary{TKey, TValue}"/> containing all of the key-value pairs.</returns>
+    public IDictionary<string, string> GetDictionary(string key)
+    {
+        return ParseCustomKeyValues(GetString(key), allowOptionalMappings: false);
+    }
+
+    /// <summary>
+    /// Gets a <see cref="ConcurrentDictionary{TKey, TValue}"/> from parsing
+    /// </summary>
+    /// <param name="key">The key</param>
+    /// <param name="allowOptionalMappings">Determines whether to create dictionary entries when the input has no value mapping</param>
+    /// <returns><see cref="ConcurrentDictionary{TKey, TValue}"/> containing all of the key-value pairs.</returns>
+    public IDictionary<string, string> GetDictionary(string key, bool allowOptionalMappings)
+    {
+        return ParseCustomKeyValues(GetString(key), allowOptionalMappings);
     }
 }

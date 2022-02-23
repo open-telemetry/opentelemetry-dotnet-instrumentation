@@ -1,26 +1,25 @@
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
+
+/// <summary>
+/// A proxy enum for GraphQL.Language.AST.OperationType.
+/// The enum values must match those of GraphQL.Language.AST.OperationType for spans
+/// to be decorated with the correct operation. Since the original type is public,
+/// we not expect changes between minor versions of the GraphQL library.
+/// </summary>
+public enum OperationTypeProxy
 {
     /// <summary>
-    /// A proxy enum for GraphQL.Language.AST.OperationType.
-    /// The enum values must match those of GraphQL.Language.AST.OperationType for spans
-    /// to be decorated with the correct operation. Since the original type is public,
-    /// we not expect changes between minor versions of the GraphQL library.
+    /// A query operation.
     /// </summary>
-    public enum OperationTypeProxy
-    {
-        /// <summary>
-        /// A query operation.
-        /// </summary>
-        Query,
+    Query,
 
-        /// <summary>
-        /// A mutation operation.
-        /// </summary>
-        Mutation,
+    /// <summary>
+    /// A mutation operation.
+    /// </summary>
+    Mutation,
 
-        /// <summary>
-        /// A subscription operation.
-        /// </summary>
-        Subscription
-    }
+    /// <summary>
+    /// A subscription operation.
+    /// </summary>
+    Subscription
 }

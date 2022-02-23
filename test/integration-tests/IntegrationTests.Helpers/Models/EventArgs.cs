@@ -1,14 +1,13 @@
 using System;
 
-namespace IntegrationTests.Helpers.Models
-{
-    public class EventArgs<T> : EventArgs
-    {
-        public EventArgs(T value)
-        {
-            Value = value;
-        }
+namespace IntegrationTests.Helpers.Models;
 
-        public T Value { get; }
+public class EventArgs<T> : EventArgs
+{
+    public EventArgs(T value)
+    {
+        Value = value;
     }
+
+    public T Value { get; }
 }

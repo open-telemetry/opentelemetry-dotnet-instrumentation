@@ -3,156 +3,155 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
-namespace OpenTelemetry.AutoInstrumentation.Tagging
+namespace OpenTelemetry.AutoInstrumentation.Tagging;
+
+internal abstract class TagsList : ITags
 {
-    internal abstract class TagsList : ITags
+    private List<KeyValuePair<string, string>> _tags;
+
+    public List<KeyValuePair<string, string>> GetAllTags()
     {
-        private List<KeyValuePair<string, string>> _tags;
+        var customTags = GetCustomTags();
+        var additionalTags = GetAdditionalTags();
+        var allTags = new List<KeyValuePair<string, string>>(
+            customTags?.Count ?? 0 +
+            additionalTags?.Length ?? 0);
 
-        public List<KeyValuePair<string, string>> GetAllTags()
+        if (customTags != null)
         {
-            var customTags = GetCustomTags();
-            var additionalTags = GetAdditionalTags();
-            var allTags = new List<KeyValuePair<string, string>>(
-                customTags?.Count ?? 0 +
-                additionalTags?.Length ?? 0);
-
-            if (customTags != null)
+            lock (customTags)
             {
-                lock (customTags)
-                {
-                    allTags.AddRange(customTags);
-                }
+                allTags.AddRange(customTags);
             }
-
-            if (additionalTags != null)
-            {
-                lock (additionalTags)
-                {
-                    foreach (var property in additionalTags)
-                    {
-                        var value = property.Getter(this);
-
-                        if (value != null)
-                        {
-                            allTags.Add(new KeyValuePair<string, string>(property.Key, value));
-                        }
-                    }
-                }
-            }
-
-            return allTags;
         }
 
-        public string GetTag(string key)
+        if (additionalTags != null)
         {
-            foreach (var property in GetAdditionalTags())
+            lock (additionalTags)
             {
-                if (property.Key == key)
+                foreach (var property in additionalTags)
                 {
-                    return property.Getter(this);
-                }
-            }
+                    var value = property.Getter(this);
 
-            var tags = GetCustomTags();
-
-            if (tags == null)
-            {
-                return null;
-            }
-
-            lock (tags)
-            {
-                for (int i = 0; i < tags.Count; i++)
-                {
-                    if (tags[i].Key == key)
+                    if (value != null)
                     {
-                        return tags[i].Value;
+                        allTags.Add(new KeyValuePair<string, string>(property.Key, value));
                     }
                 }
             }
+        }
 
+        return allTags;
+    }
+
+    public string GetTag(string key)
+    {
+        foreach (var property in GetAdditionalTags())
+        {
+            if (property.Key == key)
+            {
+                return property.Getter(this);
+            }
+        }
+
+        var tags = GetCustomTags();
+
+        if (tags == null)
+        {
             return null;
         }
 
-        public void SetTag(string key, string value)
+        lock (tags)
         {
-            foreach (var property in GetAdditionalTags())
+            for (int i = 0; i < tags.Count; i++)
             {
-                if (property.Key == key)
+                if (tags[i].Key == key)
                 {
-                    property.Setter(this, value);
+                    return tags[i].Value;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public void SetTag(string key, string value)
+    {
+        foreach (var property in GetAdditionalTags())
+        {
+            if (property.Key == key)
+            {
+                property.Setter(this, value);
+                return;
+            }
+        }
+
+        var tags = GetCustomTags();
+
+        if (tags == null)
+        {
+            var newTags = new List<KeyValuePair<string, string>>();
+            tags = Interlocked.CompareExchange(ref _tags, newTags, null) ?? newTags;
+        }
+
+        lock (tags)
+        {
+            for (int i = 0; i < tags.Count; i++)
+            {
+                if (tags[i].Key == key)
+                {
+                    if (value == null)
+                    {
+                        tags.RemoveAt(i);
+                    }
+                    else
+                    {
+                        tags[i] = new KeyValuePair<string, string>(key, value);
+                    }
+
                     return;
                 }
             }
 
-            var tags = GetCustomTags();
-
-            if (tags == null)
+            // If we get there, the tag wasn't in the collection
+            if (value != null)
             {
-                var newTags = new List<KeyValuePair<string, string>>();
-                tags = Interlocked.CompareExchange(ref _tags, newTags, null) ?? newTags;
+                tags.Add(new KeyValuePair<string, string>(key, value));
             }
+        }
+    }
 
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+
+        var tags = GetCustomTags();
+
+        if (tags != null)
+        {
             lock (tags)
             {
-                for (int i = 0; i < tags.Count; i++)
+                foreach (var pair in tags)
                 {
-                    if (tags[i].Key == key)
-                    {
-                        if (value == null)
-                        {
-                            tags.RemoveAt(i);
-                        }
-                        else
-                        {
-                            tags[i] = new KeyValuePair<string, string>(key, value);
-                        }
-
-                        return;
-                    }
-                }
-
-                // If we get there, the tag wasn't in the collection
-                if (value != null)
-                {
-                    tags.Add(new KeyValuePair<string, string>(key, value));
+                    sb.Append($"{pair.Key} (tag):{pair.Value},");
                 }
             }
         }
 
-        public override string ToString()
+        foreach (var property in GetAdditionalTags())
         {
-            var sb = new StringBuilder();
+            var value = property.Getter(this);
 
-            var tags = GetCustomTags();
-
-            if (tags != null)
+            if (value != null)
             {
-                lock (tags)
-                {
-                    foreach (var pair in tags)
-                    {
-                        sb.Append($"{pair.Key} (tag):{pair.Value},");
-                    }
-                }
+                sb.Append($"{property.Key} (tag):{value},");
             }
-
-            foreach (var property in GetAdditionalTags())
-            {
-                var value = property.Getter(this);
-
-                if (value != null)
-                {
-                    sb.Append($"{property.Key} (tag):{value},");
-                }
-            }
-
-            return sb.ToString();
         }
 
-        protected virtual IProperty<string>[] GetAdditionalTags() => Array.Empty<IProperty<string>>();
-
-        protected virtual IList<KeyValuePair<string, string>> GetCustomTags() => Volatile.Read(ref _tags);
+        return sb.ToString();
     }
+
+    protected virtual IProperty<string>[] GetAdditionalTags() => Array.Empty<IProperty<string>>();
+
+    protected virtual IList<KeyValuePair<string, string>> GetCustomTags() => Volatile.Read(ref _tags);
 }
