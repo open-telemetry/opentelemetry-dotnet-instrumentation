@@ -2,30 +2,29 @@ using System;
 using System.Collections.Generic;
 using OpenTelemetry.Trace;
 
-namespace OpenTelemetry.AutoInstrumentation.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration;
+
+internal static class PluginsConfigurationHelper
 {
-    internal static class PluginsConfigurationHelper
+    public static TracerProviderBuilder InvokePlugins(this TracerProviderBuilder builder, IEnumerable<string> pluginsAssemblyQualifiedNames)
     {
-        public static TracerProviderBuilder InvokePlugins(this TracerProviderBuilder builder, IEnumerable<string> pluginsAssemblyQualifiedNames)
+        foreach (var assemblyQualifiedName in pluginsAssemblyQualifiedNames)
         {
-            foreach (var assemblyQualifiedName in pluginsAssemblyQualifiedNames)
-            {
-                builder = builder.InvokePlugin(assemblyQualifiedName);
-            }
-
-            return builder;
+            builder = builder.InvokePlugin(assemblyQualifiedName);
         }
 
-        private static TracerProviderBuilder InvokePlugin(this TracerProviderBuilder builder, string pluginAssemblyQualifiedName)
-        {
-            // get the type and method
-            var t = Type.GetType(pluginAssemblyQualifiedName);
-            var mi = t.GetMethod("ConfigureTracerProvider", new Type[] { typeof(TracerProviderBuilder) });
+        return builder;
+    }
 
-            // execute
-            var obj = Activator.CreateInstance(t);
-            var result = mi.Invoke(obj, new object[] { builder });
-            return (TracerProviderBuilder)result;
-        }
+    private static TracerProviderBuilder InvokePlugin(this TracerProviderBuilder builder, string pluginAssemblyQualifiedName)
+    {
+        // get the type and method
+        var t = Type.GetType(pluginAssemblyQualifiedName);
+        var mi = t.GetMethod("ConfigureTracerProvider", new Type[] { typeof(TracerProviderBuilder) });
+
+        // execute
+        var obj = Activator.CreateInstance(t);
+        var result = mi.Invoke(obj, new object[] { builder });
+        return (TracerProviderBuilder)result;
     }
 }

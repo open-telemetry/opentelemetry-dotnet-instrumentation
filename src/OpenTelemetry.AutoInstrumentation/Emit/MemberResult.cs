@@ -1,87 +1,86 @@
 using System;
 
-namespace OpenTelemetry.AutoInstrumentation.Emit
+namespace OpenTelemetry.AutoInstrumentation.Emit;
+
+internal readonly struct MemberResult<T>
 {
-    internal readonly struct MemberResult<T>
+    /// <summary>
+    /// A static value used to represent a member that was not found.
+    /// </summary>
+    public static readonly MemberResult<T> NotFound = default;
+
+    public readonly bool HasValue;
+
+    private readonly T _value;
+
+    public MemberResult(T value)
     {
-        /// <summary>
-        /// A static value used to represent a member that was not found.
-        /// </summary>
-        public static readonly MemberResult<T> NotFound = default;
+        _value = value;
+        HasValue = true;
+    }
 
-        public readonly bool HasValue;
+    public T Value =>
+        HasValue
+            ? _value
+            : throw new InvalidOperationException("Reflected member not found.");
 
-        private readonly T _value;
+    public T GetValueOrDefault()
+    {
+        return _value;
+    }
 
-        public MemberResult(T value)
+    public MemberResult<TResult> GetProperty<TResult>(string propertyName)
+    {
+        if (!HasValue || Value == null || !Value.TryGetPropertyValue(propertyName, out TResult result))
         {
-            _value = value;
-            HasValue = true;
+            return MemberResult<TResult>.NotFound;
         }
 
-        public T Value =>
-            HasValue
-                ? _value
-                : throw new InvalidOperationException("Reflected member not found.");
+        return new MemberResult<TResult>(result);
+    }
 
-        public T GetValueOrDefault()
+    public MemberResult<object> GetProperty(string propertyName)
+    {
+        return GetProperty<object>(propertyName);
+    }
+
+    public MemberResult<TResult> GetField<TResult>(string fieldName)
+    {
+        if (!HasValue || Value == null || !Value.TryGetFieldValue(fieldName, out TResult result))
         {
-            return _value;
+            return MemberResult<TResult>.NotFound;
         }
 
-        public MemberResult<TResult> GetProperty<TResult>(string propertyName)
-        {
-            if (!HasValue || Value == null || !Value.TryGetPropertyValue(propertyName, out TResult result))
-            {
-                return MemberResult<TResult>.NotFound;
-            }
+        return new MemberResult<TResult>(result);
+    }
 
-            return new MemberResult<TResult>(result);
+    public MemberResult<object> GetField(string fieldName)
+    {
+        return GetField<object>(fieldName);
+    }
+
+    public MemberResult<TResult> CallMethod<TArg1, TResult>(string methodName, TArg1 arg1)
+    {
+        if (!HasValue || Value == null || !Value.TryCallMethod(methodName, arg1, out TResult result))
+        {
+            return MemberResult<TResult>.NotFound;
         }
 
-        public MemberResult<object> GetProperty(string propertyName)
+        return new MemberResult<TResult>(result);
+    }
+
+    public MemberResult<object> CallMethod<TArg1>(string methodName, TArg1 arg1)
+    {
+        return CallMethod<TArg1, object>(methodName, arg1);
+    }
+
+    public override string ToString()
+    {
+        if (!HasValue || Value == null)
         {
-            return GetProperty<object>(propertyName);
+            return string.Empty;
         }
 
-        public MemberResult<TResult> GetField<TResult>(string fieldName)
-        {
-            if (!HasValue || Value == null || !Value.TryGetFieldValue(fieldName, out TResult result))
-            {
-                return MemberResult<TResult>.NotFound;
-            }
-
-            return new MemberResult<TResult>(result);
-        }
-
-        public MemberResult<object> GetField(string fieldName)
-        {
-            return GetField<object>(fieldName);
-        }
-
-        public MemberResult<TResult> CallMethod<TArg1, TResult>(string methodName, TArg1 arg1)
-        {
-            if (!HasValue || Value == null || !Value.TryCallMethod(methodName, arg1, out TResult result))
-            {
-                return MemberResult<TResult>.NotFound;
-            }
-
-            return new MemberResult<TResult>(result);
-        }
-
-        public MemberResult<object> CallMethod<TArg1>(string methodName, TArg1 arg1)
-        {
-            return CallMethod<TArg1, object>(methodName, arg1);
-        }
-
-        public override string ToString()
-        {
-            if (!HasValue || Value == null)
-            {
-                return string.Empty;
-            }
-
-            return Value.ToString();
-        }
+        return Value.ToString();
     }
 }

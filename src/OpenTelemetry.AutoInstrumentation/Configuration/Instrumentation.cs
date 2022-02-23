@@ -1,34 +1,33 @@
 // ReSharper disable InconsistentNaming - Name is used for integration names
-namespace OpenTelemetry.AutoInstrumentation.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration;
+
+/// <summary>
+/// Enum representing supported instrumentations.
+/// </summary>
+public enum Instrumentation
 {
     /// <summary>
-    /// Enum representing supported instrumentations.
+    /// HttpClient instrumentation.
     /// </summary>
-    public enum Instrumentation
-    {
-        /// <summary>
-        /// HttpClient instrumentation.
-        /// </summary>
-        HttpClient,
+    HttpClient,
 
-        /// <summary>
-        /// ASP.NET instrumentation.
-        /// </summary>
-        AspNet,
+    /// <summary>
+    /// ASP.NET instrumentation.
+    /// </summary>
+    AspNet,
 
-        /// <summary>
-        /// SqlClient instrumentation.
-        /// </summary>
-        SqlClient,
+    /// <summary>
+    /// SqlClient instrumentation.
+    /// </summary>
+    SqlClient,
 
-        /// <summary>
-        /// MongoDb instrumentation.
-        /// </summary>
-        MongoDb,
+    /// <summary>
+    /// MongoDb instrumentation.
+    /// </summary>
+    MongoDb,
 
-        /// <summary>
-        /// GraphQL instrumentation.
-        /// </summary>
-        GraphQL,
-    }
+    /// <summary>
+    /// GraphQL instrumentation.
+    /// </summary>
+    GraphQL,
 }

@@ -1,12 +1,11 @@
 using System;
 
-namespace OpenTelemetry.AutoInstrumentation.CallTarget
+namespace OpenTelemetry.AutoInstrumentation.CallTarget;
+
+internal class CallTargetInvokerException : Exception
 {
-    internal class CallTargetInvokerException : Exception
+    public CallTargetInvokerException(Exception innerException)
+        : base(innerException.Message, innerException)
     {
-        public CallTargetInvokerException(Exception innerException)
-            : base(innerException.Message, innerException)
-        {
-        }
     }
 }

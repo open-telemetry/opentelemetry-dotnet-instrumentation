@@ -1,5 +1,3 @@
-using System;
-
 namespace Samples.ExampleLibraryTracer
 {
     public class Class1

@@ -1,16 +1,15 @@
-namespace OpenTelemetry.AutoInstrumentation.DuckTyping
+namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
+
+/// <summary>
+/// Duck attribute where the underlying member is a field
+/// </summary>
+public class DuckFieldAttribute : DuckAttribute
 {
     /// <summary>
-    /// Duck attribute where the underlying member is a field
+    /// Initializes a new instance of the <see cref="DuckFieldAttribute"/> class.
     /// </summary>
-    public class DuckFieldAttribute : DuckAttribute
+    public DuckFieldAttribute()
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DuckFieldAttribute"/> class.
-        /// </summary>
-        public DuckFieldAttribute()
-        {
-            Kind = DuckKind.Field;
-        }
+        Kind = DuckKind.Field;
     }
 }

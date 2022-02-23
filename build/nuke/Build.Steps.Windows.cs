@@ -8,6 +8,7 @@ using Nuke.Common.Tools.Docker;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.MSBuild;
 using Serilog;
+using static DotNetMSBuildTasks;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.Docker.DockerTasks;
@@ -104,7 +105,7 @@ partial class Build
         {
             // Compile .NET Framework projects
 
-            MSBuild(x => x
+            DotNetMSBuild(x => x
                 .SetTargetPath(MsBuildProject)
                 .SetTargetPlatform(Platform)
                 .SetConfiguration(BuildConfiguration)

@@ -5,85 +5,84 @@ using DotNet.Testcontainers.Containers.WaitStrategies;
 using IntegrationTests.Helpers;
 using Xunit;
 
-namespace IntegrationTests.MongoDB
+namespace IntegrationTests.MongoDB;
+
+[CollectionDefinition(Name)]
+public class MongoDbCollection : ICollectionFixture<MongoDbFixture>
 {
-    [CollectionDefinition(Name)]
-    public class MongoDbCollection : ICollectionFixture<MongoDbFixture>
+    public const string Name = nameof(MongoDbCollection);
+}
+
+public class MongoDbFixture : IDisposable
+{
+    private const int MongoDbPort = 27017;
+    private const string MongoDbImage = "mongo:5.0.4";
+
+    private TestcontainersContainer _container;
+
+    public MongoDbFixture()
     {
-        public const string Name = nameof(MongoDbCollection);
+        bool launchContainer = ShouldLaunchContainer();
+
+        Port = launchContainer
+            ? TcpPortProvider.GetOpenPort()
+            : MongoDbPort;
+
+        if (launchContainer)
+        {
+            _container = LaunchMongoContainer(Port);
+        }
     }
 
-    public class MongoDbFixture : IDisposable
+    public int Port { get; }
+
+    public void Dispose()
     {
-        private const int MongoDbPort = 27017;
-        private const string MongoDbImage = "mongo:5.0.4";
-
-        private TestcontainersContainer _container;
-
-        public MongoDbFixture()
+        if (_container != null)
         {
-            bool launchContainer = ShouldLaunchContainer();
+            ShutDownMongoContainer(_container);
+        }
+    }
 
-            Port = launchContainer
-                ? TcpPortProvider.GetOpenPort()
-                : MongoDbPort;
-
-            if (launchContainer)
+    private bool ShouldLaunchContainer()
+    {
+        if (EnvironmentHelper.IsRunningOnCI())
+        {
+            if (EnvironmentTools.IsMacOS())
             {
-                _container = LaunchMongoContainer(Port);
+                return false;
+            }
+            else if (EnvironmentTools.IsWindows() ||
+                     EnvironmentTools.IsLinux())
+            {
+                return true;
             }
         }
 
-        public int Port { get; }
+        return true;
+    }
 
-        public void Dispose()
-        {
-            if (_container != null)
-            {
-                ShutDownMongoContainer(_container);
-            }
-        }
+    private TestcontainersContainer LaunchMongoContainer(int port)
+    {
+        var waitOS = EnvironmentTools.IsWindows()
+            ? Wait.ForWindowsContainer()
+            : Wait.ForUnixContainer();
 
-        private bool ShouldLaunchContainer()
-        {
-            if (EnvironmentHelper.IsRunningOnCI())
-            {
-                if (EnvironmentTools.IsMacOS())
-                {
-                    return false;
-                }
-                else if (EnvironmentTools.IsWindows() ||
-                         EnvironmentTools.IsLinux())
-                {
-                    return true;
-                }
-            }
+        var mongoContainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
+            .WithImage(MongoDbImage)
+            .WithName($"mongo-db-{port}")
+            .WithPortBinding(port, MongoDbPort)
+            .WithWaitStrategy(waitOS.UntilPortIsAvailable(MongoDbPort));
 
-            return true;
-        }
+        var container = mongoContainersBuilder.Build();
+        container.StartAsync().Wait();
 
-        private TestcontainersContainer LaunchMongoContainer(int port)
-        {
-            var waitOS = EnvironmentTools.IsWindows()
-                ? Wait.ForWindowsContainer()
-                : Wait.ForUnixContainer();
+        return container;
+    }
 
-            var mongoContainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
-              .WithImage(MongoDbImage)
-              .WithName($"mongo-db-{port}")
-              .WithPortBinding(port, MongoDbPort)
-              .WithWaitStrategy(waitOS.UntilPortIsAvailable(MongoDbPort));
-
-            var container = mongoContainersBuilder.Build();
-            container.StartAsync().Wait();
-
-            return container;
-        }
-
-        private void ShutDownMongoContainer(TestcontainersContainer container)
-        {
-            container.CleanUpAsync().Wait();
-            container.DisposeAsync().AsTask().Wait();
-        }
+    private void ShutDownMongoContainer(TestcontainersContainer container)
+    {
+        container.CleanUpAsync().Wait();
+        container.DisposeAsync().AsTask().Wait();
     }
 }

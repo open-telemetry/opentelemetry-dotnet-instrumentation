@@ -64,6 +64,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenTelemetry.AutoInstrumentation.Native.Tests", "test\OpenTelemetry.AutoInstrumentation.Native.Tests\OpenTelemetry.AutoInstrumentation.Native.Tests.vcxproj", "{5728056A-51AA-4FF5-AD0C-E86E44E36102}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dependency-libs", "dependency-libs", "{82A3CE96-0935-45E5-A9AA-A93A5B63500B}"
+	ProjectSection(SolutionItems) = preProject
+		test\test-applications\integrations\dependency-libs\Directory.Build.props = test\test-applications\integrations\dependency-libs\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.ExampleLibrary", "test\test-applications\integrations\dependency-libs\Samples.ExampleLibrary\Samples.ExampleLibrary.csproj", "{EFAE6960-9425-462E-BFFB-4C9A038DD8C0}"
 EndProject
@@ -109,13 +112,13 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.MongoDB", "test\test-applications\integrations\Samples.MongoDB\Samples.MongoDB.csproj", "{02D6A472-A602-4BF4-A539-8AD165097898}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "aspnet", "aspnet", "{2E1F47D9-BEC1-4DCE-A84D-847FE5BBBE9E}"
+	ProjectSection(SolutionItems) = preProject
+		test\test-applications\integrations\aspnet\Directory.Build.props = test\test-applications\integrations\aspnet\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Samples.AspNet", "test\test-applications\integrations\aspnet\Samples.AspNet\Samples.AspNet.csproj", "{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "aspnet", "aspnet", "{A0B40A84-EF97-47DB-8455-796A9BCA1097}"
-	ProjectSection(SolutionItems) = preProject
-		test\integration-tests\aspnet\Directory.Build.props = test\integration-tests\aspnet\Directory.Build.props
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests.AspNet", "test\integration-tests\aspnet\IntegrationTests.AspNet\IntegrationTests.AspNet.csproj", "{EE65928D-15C8-45E5-A94C-7094381E7ACF}"
 EndProject

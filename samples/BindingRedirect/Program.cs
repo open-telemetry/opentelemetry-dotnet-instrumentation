@@ -1,13 +1,12 @@
 using System.Threading.Tasks;
 using OldReference;
 
-namespace BindingRedirect
+namespace BindingRedirect;
+
+public class Program
 {
-    public class Program
+    public static async Task Main(string[] args)
     {
-        public static async Task Main(string[] args)
-        {
-            await InstrumentedHttpCall.GetAsync("https://www.google.com");
-        }
+        await InstrumentedHttpCall.GetAsync("https://www.google.com");
     }
 }

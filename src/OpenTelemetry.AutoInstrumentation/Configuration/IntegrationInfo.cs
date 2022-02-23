@@ -1,28 +1,27 @@
 using System;
 
-namespace OpenTelemetry.AutoInstrumentation.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration;
+
+internal readonly struct IntegrationInfo
 {
-    internal readonly struct IntegrationInfo
+    public readonly string Name;
+
+    public readonly int Id;
+
+    public IntegrationInfo(string integrationName)
     {
-        public readonly string Name;
-
-        public readonly int Id;
-
-        public IntegrationInfo(string integrationName)
+        if (integrationName == null)
         {
-            if (integrationName == null)
-            {
-                throw new ArgumentNullException(nameof(integrationName));
-            }
-
-            Name = integrationName;
-            Id = 0;
+            throw new ArgumentNullException(nameof(integrationName));
         }
 
-        public IntegrationInfo(int integrationId)
-        {
-            Name = null;
-            Id = integrationId;
-        }
+        Name = integrationName;
+        Id = 0;
+    }
+
+    public IntegrationInfo(int integrationId)
+    {
+        Name = null;
+        Id = integrationId;
     }
 }

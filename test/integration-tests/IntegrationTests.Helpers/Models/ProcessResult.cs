@@ -1,33 +1,32 @@
 using System;
 using System.Diagnostics;
 
-namespace IntegrationTests.Helpers.Models
+namespace IntegrationTests.Helpers.Models;
+
+public class ProcessResult : IDisposable
 {
-    public class ProcessResult : IDisposable
+    public ProcessResult(
+        Process process,
+        string standardOutput,
+        string standardError,
+        int exitCode)
     {
-        public ProcessResult(
-            Process process,
-            string standardOutput,
-            string standardError,
-            int exitCode)
-        {
-            Process = process;
-            StandardOutput = standardOutput;
-            StandardError = standardError;
-            ExitCode = exitCode;
-        }
+        Process = process;
+        StandardOutput = standardOutput;
+        StandardError = standardError;
+        ExitCode = exitCode;
+    }
 
-        public Process Process { get; }
+    public Process Process { get; }
 
-        public string StandardOutput { get; }
+    public string StandardOutput { get; }
 
-        public string StandardError { get; }
+    public string StandardError { get; }
 
-        public int ExitCode { get; }
+    public int ExitCode { get; }
 
-        public void Dispose()
-        {
-            Process?.Dispose();
-        }
+    public void Dispose()
+    {
+        Process?.Dispose();
     }
 }

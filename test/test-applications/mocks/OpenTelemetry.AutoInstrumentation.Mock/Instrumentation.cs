@@ -1,12 +1,11 @@
 using System;
 
-namespace OpenTelemetry.AutoInstrumentation
+namespace OpenTelemetry.AutoInstrumentation;
+
+public static class Instrumentation
 {
-    public static class Instrumentation
+    public static void Initialize()
     {
-        public static void Initialize()
-        {
-            Console.WriteLine($"{nameof(Initialize)} called");
-        }
+        Console.WriteLine($"{nameof(Initialize)} called");
     }
 }

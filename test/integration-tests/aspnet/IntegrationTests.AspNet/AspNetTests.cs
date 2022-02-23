@@ -4,41 +4,40 @@ using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace IntegrationTests.AspNet
+namespace IntegrationTests.AspNet;
+
+public class AspNetTests : TestHelper
 {
-    public class AspNetTests : TestHelper
+    private static readonly string SampleDir = Path.Combine("test", "test-applications", "integrations", "aspnet");
+
+    public AspNetTests(ITestOutputHelper output)
+        : base(new EnvironmentHelper("AspNet", typeof(TestHelper), output, SampleDir), output)
     {
-        private static readonly string SampleDir = Path.Combine("test", "test-applications", "integrations", "aspnet");
+    }
 
-        public AspNetTests(ITestOutputHelper output)
-            : base(new EnvironmentHelper("AspNet", typeof(TestHelper), output, samplesDirectory: SampleDir), output)
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    [Trait("WindowsOnly", "True")]
+    public void SubmitsTraces()
+    {
+        var agentPort = TcpPortProvider.GetOpenPort();
+        var webPort = TcpPortProvider.GetOpenPort();
+
+        using (var fwPort = FirewallHelper.OpenWinPort(agentPort, Output))
+        using (var agent = new MockZipkinCollector(Output, agentPort))
+        using (var container = StartContainer(agentPort, webPort))
         {
-        }
+            var client = new HttpClient();
 
-        [Fact]
-        [Trait("Category", "EndToEnd")]
-        [Trait("WindowsOnly", "True")]
-        public void SubmitsTraces()
-        {
-            int agentPort = TcpPortProvider.GetOpenPort();
-            int webPort = TcpPortProvider.GetOpenPort();
+            var response = client.GetAsync($"http://localhost:{webPort}").Result;
+            var content = response.Content.ReadAsStringAsync().Result;
 
-            using (var fwPort = FirewallHelper.OpenWinPort(agentPort, Output))
-            using (var agent = new MockZipkinCollector(Output, agentPort))
-            using (var container = StartContainer(agentPort, webPort))
-            {
-                HttpClient client = new HttpClient();
+            Output.WriteLine("Sample response:");
+            Output.WriteLine(content);
 
-                var response = client.GetAsync($"http://localhost:{webPort}").Result;
-                var content = response.Content.ReadAsStringAsync().Result;
+            var spans = agent.WaitForSpans(1);
 
-                Output.WriteLine("Sample response:");
-                Output.WriteLine(content);
-
-                var spans = agent.WaitForSpans(1);
-
-                Assert.True(spans.Count >= 1, $"Expecting at least 1 span, only received {spans.Count}");
-            }
+            Assert.True(spans.Count >= 1, $"Expecting at least 1 span, only received {spans.Count}");
         }
     }
 }

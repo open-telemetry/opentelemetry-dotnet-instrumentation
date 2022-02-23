@@ -1,18 +1,17 @@
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
+
+/// <summary>
+/// GraphQL.Language.AST.Operation interface for ducktyping
+/// </summary>
+public interface IOperation
 {
     /// <summary>
-    /// GraphQL.Language.AST.Operation interface for ducktyping
+    /// Gets the name of the operation
     /// </summary>
-    public interface IOperation
-    {
-        /// <summary>
-        /// Gets the name of the operation
-        /// </summary>
-        string Name { get; }
+    string Name { get; }
 
-        /// <summary>
-        /// Gets the type of the operation
-        /// </summary>
-        OperationTypeProxy OperationType { get; }
-    }
+    /// <summary>
+    /// Gets the type of the operation
+    /// </summary>
+    OperationTypeProxy OperationType { get; }
 }
