@@ -1,10 +1,6 @@
-# Usage
+# Configuration
 
-> :warning: There is no official release yet, so you have to build the code manually beforehand.
-
-## Configuration
-
-### Global management settings
+## Global management
 
 | Environment variable | Description | Default |
 |-|-|-|
@@ -14,7 +10,7 @@
 | `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` | Sets the filename of executables the profiler cannot attach to. If not defined (default), the profiler will attach to any process. Supports multiple values separated with comma, for example: `MyApp.exe,dotnet.exe` |  |
 | `OTEL_DOTNET_AUTO_AZURE_APP_SERVICES` | Set to indicate that the profiler is running in the context of Azure App Services. | `false` |
 
-### Resource
+## Resources
 
 Resource is the immutable representation of the entity producing the telemetry.
 See [Resource semantic conventions](https://github.com/open-telemetry/opentelemetry-specification/tree/main/specification/resource/semantic_conventions)
@@ -25,7 +21,7 @@ for more details.
 | `OTEL_RESOURCE_ATTRIBUTES` | Key-value pairs to be used as resource attributes. See [Resource SDK](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/sdk.md#specifying-resource-information-via-an-environment-variable) for more details. | See [Resource semantic conventions](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#semantic-attributes-with-sdk-provided-default-value) for details. |
 | `OTEL_SERVICE_NAME` | Sets the value of the [`service.name`](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#service) resource attribute. If `service.name` is also provided in `OTEL_RESOURCE_ATTRIBUTES`, then `OTEL_SERVICE_NAME` takes precedence. | `unknown_service:%ProcessName%` |
 
-### Instrumentations
+## Instrumentations
 
 | Environment variable | Description | Default |
 |-|-|-|
@@ -38,14 +34,14 @@ for more details.
 | `OTEL_DOTNET_AUTO_CLR_ENABLE_INLINING` | Set to `false` to disable JIT inlining. | `true` |
 | `OTEL_DOTNET_AUTO_CLR_ENABLE_NGEN` | Set to `false` to disable NGEN images. | `true` |
 
-### ASP.NET (.NET Framework) Instrumentation
+## ASP.NET (.NET Framework) Instrumentation
 
 ASP.NET instrumentation on .NET Framework requires installing the
 [`OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule/)
 NuGet package on the instrumented project.
-More info [here](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.AspNet#step-2-modify-webconfig).
+See [the WebConfig section](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.AspNet#step-2-modify-webconfig) for more information.
 
-### Logging
+## Logging
 
 Default logs directory paths are:
 
@@ -60,7 +56,7 @@ Default logs directory paths are:
 | `OTEL_DOTNET_AUTO_CONSOLE_EXPORTER_ENABLED` | Defines whether the console exporter is enabled or not. | `true` |
 | `OTEL_DOTNET_AUTO_DUMP_ILREWRITE_ENABLED` | Allows the profiler to dump the IL original code and modification to the log. | `false` |
 
-### Exporters
+## Exporters
 
 The exporter is used to output the telemetry.
 
@@ -84,9 +80,9 @@ The exporter is used to output the telemetry.
   E.g. by adding `<PackageReference Include="Grpc.Net.Client" Version="2.32.0" />` to the `.csproj` file.
 - On .NET Framework, using the `grpc` OTLP exporter protocol is not supported.
   
-### Batch Span Processor
+## Batch Span Processor
 
-The Batch Span Processor batches of finished spans before they are send by the exporter.
+The Batch Span Processor batches finished spans before they are sent by the exporter.
 
 | Environment variable | Description | Default |
 |-|-|-|
@@ -95,7 +91,7 @@ The Batch Span Processor batches of finished spans before they are send by the e
 | `OTEL_BSP_MAX_QUEUE_SIZE` | Maximum queue size. | `2048` |
 | `OTEL_BSP_MAX_EXPORT_BATCH_SIZE` | Maximum batch size. Must be less than or equal to `OTEL_BSP_MAX_QUEUE_SIZE`. | `512` (ms) |
 
-### Customization
+## Customization
 
 | Environment variable | Description | Default |
 |-|-|-|
@@ -126,10 +122,10 @@ public OpenTelemetry.Trace.TracerProviderBuilder ConfigureTracerProvider(OpenTel
 The plugin must use the same version of the `OpenTelemetry` as the
 OpenTelemetry .NET AutoInstrumentation. Current version is `1.2.0-rc2`.
 
-### .NET CLR Profiler
+## .NET CLR Profiler
 
-OpenTelemetry .NET Auto-Instrumentation has to be configured
-as .NET CLR Profiler in order to peform bytecode instrumentation.
+To perform bytecode instrumentation, configure the OpenTelemetry .NET
+auto-instrumentation as a .NET CLR Profiler.
 Below are the environment variables used by CLR to setup the profiler.
 
 | Environment variable | Description | Value |
@@ -149,106 +145,15 @@ Remarks:
 
 Reference: [.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/profiling/Profiler%20Loading.md).
 
-## Troubleshooting
+## .NET Runtime Additional-Deps and Package Store
 
-Check if you are not hitting one of the issues listed below.
-
-### Handling of Assembly version Conflicts
-
-OpenTelemetry SDK NuGet package are deployed with the OpenTelemetry .NET Instrumentation.
-Conflicts in assemblies referenced by "source instrumentations", should be handled in
-the same way: updating the project references to ensure that they are the same version
-as the one used by the instrumentation.
-
-However, the workarounds proposed above only work at build time. When a rebuild is not
-possible, there are ways to force the application to use the assembly versions shipped
-together with the instrumentation.
-
-For .NET Framework applications, the workaround is to use Binding Redirects. For .NET Core
-[Framework-dependent deployment](https://docs.microsoft.com/en-us/dotnet/core/deploying/deploy-with-vs?tabs=vs156#framework-dependent-deployment)
-applications,
-[Additional-deps](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md)
-and [runtime package store](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
-from OpenTelemetry .NET Auto-Instrumentation installation location can be used as workaround.
-For other .NET Core deployment models, the workaround is to manipulate the `deps.json`. Currently,
-we do not automate any of these workarounds, but we are manually validating them.
-
-#### .NET Framework Binding Redirects
-
-The [samples/BindingRedirect](./samples/BindingRedirect/) app shows how
-to use the `app.config` to solve the version conflicts. As configured in the PoC branch,
-the BindingRedirect sample can only run successfully under the instrumentation since the
-binding redirect makes the application dependent on a version of `System.Diagnostics.DiagnosticSource`
-that is not available during building time.
-
-#### Additional-Deps and Runtime Package Store
-
-To resolve assembly version conflicts in .NET Core, set the environment variables
-[DOTNET_ADDITIONAL_DEPS](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md)
-and [DOTNET_SHARED_STORE](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store) to below value.
+To resolve assembly version conflicts in .NET Core,
+set the
+[`DOTNET_ADDITIONAL_DEPS`](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md)
+and [`DOTNET_SHARED_STORE`](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
+environment variables to the following values:
 
 | Environment variable | Value |
 |-|-|
 | `DOTNET_ADDITIONAL_DEPS` | `%InstallationLocation%/AdditionalDeps` |
 | `DOTNET_SHARED_STORE` | `%InstallationLocation%/store` |
-
-Where `%InstallationLocation%` stands for the OpenTelemetry .NET Auto-Instrumentation installation location.
-
-#### .NET Core Dependency File
-
-To fix assembly version conflicts in .NET Core, the `<application>.deps.json`, generated by default
-during the build of .NET Core applications, needs to be modified. Build a .NET Core app with package
-references using the required version and use the respective `deps.json` file to see what changes
-are needed.
-
-To experiment with modifying the `deps.json` file, add a reference to the required version OpenTelemetry
-package to the [samples/CoreAppOldReference](./samples/CoreAppOldReference/) sample and rebuild the
-application. Save the generated `deps.json` file, remove the package reference and rebuild the
-sample app. Compare the files to understand the changes.
-
-### Linux instrumentation not working
-
-The proper binary needs to be selected when deploying to Linux, eg.: the default Microsoft .NET images are
-based on Debian and should use the `deb` package, see the [Linux](#Linux) setup section.
-
-If you are not sure what is the Linux distribution being used try the following commands:
-
-```terminal
-lsb_release -a
-cat /etc/*release
-cat /etc/issue*
-cat /proc/version
-```
-
-### High CPU usage
-
-The default installation of auto-instrumentation enables tracing all .NET processes on the box.
-In the typical scenarios (dedicated VMs or containers), this is not a problem.
-Use the environment variables `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` and `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`
-to include/exclude applications from the tracing auto-instrumentation.
-These are ";" delimited lists that control the inclusion/exclusion of processes.
-
-### No proper relatioship between spans
-
-On .NET Framework strong name signing can force multiple versions of the same assembly being loaded on the same process.
-This causes a separate hierarchy of Activity objects. If you are referencing packages in your application that use
-different version of the `System.Diagnostics.DiagnosticSource` than the `OpenTelemetry.Api` used by autoinstrumentation
-(`6.0.0`) you have to explicitly reference the `System.Diagnostics.DiagnosticSource` package in the correct version
-in your application (see [custom instrumentation section](#configure-custom-instrumentation)).
-This will cause automatic binding redirection to occur resolving the issue.
-
-If automatic binding redirection is [disabled](https://docs.microsoft.com/en-us/dotnet/framework/configure-apps/how-to-enable-and-disable-automatic-binding-redirection)
-you can also manually add binding redirection to [the `App.config` file](../samples/BindingRedirect/App.config).
-
-### Investigating other issues
-
-If none of the suggestions above solves your issue, detailed logs are necessary.
-Follow the steps below to get the detailed logs from OpenTelemetry AutoInstrumentation for .NET:
-
-Set the environment variable `OTEL_DOTNET_AUTO_DEBUG` to `true` before the instrumented process starts.
-By default, the library writes the log files under the below predefined locations.
-If needed, change the default location by updating the environment variable `OTEL_DOTNET_AUTO_LOG_PATH` to an appropriate path.
-On Linux, the default log location is `/var/log/opentelemetry/dotnet/`
-On Windows, the default log location is `%ProgramData%\\OpenTelemetry .NET AutoInstrumentation\logs\`
-Compress the whole folder to capture the multiple log files and send the compressed folder to us.
-After obtaining the logs, remember to remove the environment variable `OTEL_DOTNET_AUTO_DEBUG` to avoid unnecessary overhead.
