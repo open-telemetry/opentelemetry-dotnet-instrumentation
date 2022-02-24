@@ -27,7 +27,7 @@ OpenTelemetry .NET Auto-Instrumentation attempts to work with all officially
 supported operating systems and versions of
 [.NET (Core)](https://dotnet.microsoft.com/download/dotnet),
 and [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework)
-except for versions lower than `.NET Framework 4.6.1`.
+except for versions lower than `.NET Framework 4.6.2`.
 
 CI tests run against the following operating systems:
 

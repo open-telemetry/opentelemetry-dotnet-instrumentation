@@ -45,7 +45,7 @@ internal static class EnvironmentConfigurationHelper
 
     public static TracerProviderBuilder AddSdkAspNetInstrumentation(this TracerProviderBuilder builder)
     {
-#if NET461
+#if NET462
         return builder.AddAspNetInstrumentation();
 #elif NETCOREAPP3_1_OR_GREATER
             return builder.AddAspNetCoreInstrumentation();

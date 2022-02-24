@@ -14,7 +14,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader
         private static string ResolveManagedProfilerDirectory()
         {
             var tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_AUTO_HOME") ?? string.Empty;
-            var tracerFrameworkDirectory = "net461";
+            var tracerFrameworkDirectory = "net462";
             return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
         }
 

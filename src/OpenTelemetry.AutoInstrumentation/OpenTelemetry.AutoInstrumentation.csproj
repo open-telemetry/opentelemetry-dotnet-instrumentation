@@ -10,7 +10,7 @@
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.2.0-rc2" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9" />
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.0.0-rc9" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNet" Version="1.0.0-rc9" Condition="'$(TargetFramework)' == 'net461'" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNet" Version="1.0.0-rc9" Condition="'$(TargetFramework)' == 'net462'" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9" Condition="'$(TargetFramework)' == 'netcoreapp3.1'" />
     <PackageReference Include="OpenTelemetry.Exporter.Jaeger" Version="1.2.0-rc2" />
     <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.2.0-rc2" />
@@ -18,7 +18,7 @@
     <PackageReference Include="OpenTelemetry.Shims.OpenTracing" Version="1.0.0-rc9" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web" />
   </ItemGroup>
