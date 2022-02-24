@@ -31,7 +31,7 @@ except for versions lower than `.NET Framework 4.6.2`.
 
 CI tests run against the following operating systems:
 
-- Microsoft Windows Server 2019,
+- Microsoft Windows Server 2022,
 - macOS Catalina 10.15,
 - Ubuntu 20.04 LTS.
 
