@@ -44,4 +44,5 @@ It is best to do this in advance so that maintainers can decide if the proposal 
 this repository. This will help avoid situations when you spend significant time
 on something that maintainers may decide this repo is not the right place for.
 
-See [DEVELOPING.md](DEVELOPING.md) to get familiar with the development environment setup and usage.
+See [DEVELOPING.md](DEVELOPING.md) to learn more about
+the development environment setup and usage.
