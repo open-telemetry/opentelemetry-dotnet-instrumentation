@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2019
+FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2022
 ARG configuration=debug
 ARG platform=x64
 ENV COR_ENABLE_PROFILING=1 \

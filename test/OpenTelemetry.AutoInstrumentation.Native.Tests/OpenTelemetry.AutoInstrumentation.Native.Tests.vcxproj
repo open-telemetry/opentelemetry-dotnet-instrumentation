@@ -25,7 +25,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <LIB_PATH>..\..\src\OpenTelemetry.AutoInstrumentation.Native\lib\</LIB_PATH>
     <LIB_PLATFORM Condition="'$(Platform)'=='x64'">x64</LIB_PLATFORM>
     <LIB_PLATFORM Condition="'$(Platform)'=='Win32' OR '$(Platform)'=='x86'">x86</LIB_PLATFORM>
@@ -89,11 +89,11 @@
   <ItemGroup>
     <ProjectReference Include="..\test-applications\integrations\dependency-libs\Samples.ExampleLibraryTracer\Samples.ExampleLibraryTracer.csproj">
       <Project>{4b243cf1-4269-45c6-a238-1a9bfa58b8cc}</Project>
-      <SetTargetFramework>TargetFramework=net461</SetTargetFramework>
+      <SetTargetFramework>TargetFramework=net462</SetTargetFramework>
     </ProjectReference>
     <ProjectReference Include="..\test-applications\integrations\dependency-libs\Samples.ExampleLibrary\Samples.ExampleLibrary.csproj">
       <Project>{fdb5c8d0-018d-4ff9-9680-c6a5078f819b}</Project>
-      <SetTargetFramework>TargetFramework=net461</SetTargetFramework>
+      <SetTargetFramework>TargetFramework=net462</SetTargetFramework>
     </ProjectReference>
     <ProjectReference Include="..\..\src\OpenTelemetry.AutoInstrumentation.Native\OpenTelemetry.AutoInstrumentation.Native.vcxproj">
       <Project>{91b6272f-5780-4c94-8071-dbba7b4f67f3}</Project>

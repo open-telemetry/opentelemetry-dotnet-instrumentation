@@ -107,7 +107,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo6), (void**)&info6);
 
     // Fail if net46+ not detected
-    // TODO: Update this to ICorProfilerInfo7 which corresponds to net461 and make CorProfilerBase.info_ have type ICorProfilerInfo7*
+    // TODO: Update this to ICorProfilerInfo7 which corresponds to net462 and make CorProfilerBase.info_ have type ICorProfilerInfo7*
     if (FAILED(hr)) {
         Logger::Warn("OpenTelemetry TRACER DIAGNOSTICS - Failed to attach profiler: interface ICorProfilerInfo6 not found.");
         return E_FAIL;
@@ -2193,8 +2193,8 @@ void CorProfiler::GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray, int* assembl
 
     if (runtime_information_.is_desktop())
     {
-        dllLpName = MAKEINTRESOURCE(NET461_MANAGED_ENTRYPOINT_DLL);
-        symbolsLpName = MAKEINTRESOURCE(NET461_MANAGED_ENTRYPOINT_SYMBOLS);
+        dllLpName = MAKEINTRESOURCE(NET462_MANAGED_ENTRYPOINT_DLL);
+        symbolsLpName = MAKEINTRESOURCE(NET462_MANAGED_ENTRYPOINT_SYMBOLS);
     }
     else
     {

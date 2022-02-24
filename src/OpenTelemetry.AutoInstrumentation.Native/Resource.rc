@@ -91,8 +91,8 @@ END
 
 NETCOREAPP31_MANAGED_ENTRYPOINT_DLL ASSEMBLY "..\\bin\\ProfilerResources\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.Loader.dll"
 NETCOREAPP31_MANAGED_ENTRYPOINT_SYMBOLS SYMBOLS "..\\bin\\ProfilerResources\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.Loader.pdb"
-NET461_MANAGED_ENTRYPOINT_DLL ASSEMBLY "..\\bin\\ProfilerResources\\net461\\OpenTelemetry.AutoInstrumentation.Loader.dll"
-NET461_MANAGED_ENTRYPOINT_SYMBOLS SYMBOLS "..\\bin\\ProfilerResources\\net461\\OpenTelemetry.AutoInstrumentation.Loader.pdb"
+NET462_MANAGED_ENTRYPOINT_DLL ASSEMBLY "..\\bin\\ProfilerResources\\net462\\OpenTelemetry.AutoInstrumentation.Loader.dll"
+NET462_MANAGED_ENTRYPOINT_SYMBOLS SYMBOLS "..\\bin\\ProfilerResources\\net462\\OpenTelemetry.AutoInstrumentation.Loader.pdb"
 
 #ifndef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

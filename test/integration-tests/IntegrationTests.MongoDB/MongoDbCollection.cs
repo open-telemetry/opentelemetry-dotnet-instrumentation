@@ -16,7 +16,7 @@ public class MongoDbCollection : ICollectionFixture<MongoDbFixture>
 public class MongoDbFixture : IDisposable
 {
     private const int MongoDbPort = 27017;
-    private const string MongoDbImage = "mongo:5.0.4";
+    private const string MongoDbImage = "mongo:5.0.6";
 
     private TestcontainersContainer _container;
 

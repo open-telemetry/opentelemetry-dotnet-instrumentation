@@ -157,7 +157,7 @@ partial class Build
             DotNetTest(config => config
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatform(Platform)
-                .SetFramework(TargetFramework.NET461)
+                .SetFramework(TargetFramework.NET462)
                 .EnableNoRestore()
                 .EnableNoBuild()
                 .CombineWith(aspNetTests, (s, project) => s
