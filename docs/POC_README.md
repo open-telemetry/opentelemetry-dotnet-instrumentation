@@ -91,7 +91,7 @@ aspNetAppTargetFramework=net5.0 sampleAppTargetFramework=net5.0 ./poc.sh
 For .NET Framework run:
 
 ```sh
-sampleAppTargetFramework=net46 ./poc.sh
+sampleAppTargetFramework=net462 ./poc.sh
 ```
 
 To instrument the .NET BindingRedirect sample application run:
