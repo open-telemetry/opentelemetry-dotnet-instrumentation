@@ -70,6 +70,7 @@ public static class Instrumentation
                 // Register to shutdown events
                 AppDomain.CurrentDomain.ProcessExit += OnExit;
                 AppDomain.CurrentDomain.DomainUnload += OnExit;
+                AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             }
         }
         catch (Exception ex)
@@ -116,6 +117,15 @@ public static class Instrumentation
         _tracerProvider.Dispose();
 
         Log("OpenTelemetry tracer exit.");
+    }
+
+    private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs args)
+    {
+        Log("UnhandledException event raised.");
+        if (args.IsTerminating)
+        {
+            OnExit(sender, args);
+        }
     }
 
     private static void Log(string message)
