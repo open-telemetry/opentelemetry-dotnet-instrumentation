@@ -10,14 +10,13 @@ On all platforms, the minimum requirements are:
 
 ### Windows
 
-- [Visual Studio 2022 (17.0)](https://visualstudio.microsoft.com/downloads/) or newer
-  - Workloads
-    - Desktop development with C++
+- [Visual Studio 2022 (17.1)](https://visualstudio.microsoft.com/downloads/) or newer
+  - Workloads (with recommeded components):
+    - ASP.NET and web development
     - .NET desktop development
-    - .NET Core cross-platform development
-    - Optional: ASP.NET and web development (to build samples)
-  - Individual components
-    - .NET Framework 4.7 targeting pack
+    - Desktop development with C++
+  - Individual components:
+    - MSVC v142 - VS 2019 C++ x64/x86 build tools (v14.29)
 - [Docker for Windows](https://docs.docker.com/docker-for-windows/)
 
 Microsoft provides
