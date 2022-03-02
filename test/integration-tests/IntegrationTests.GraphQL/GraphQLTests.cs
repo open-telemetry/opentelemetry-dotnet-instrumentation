@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
 using IntegrationTests.Helpers;
 using IntegrationTests.Helpers.Models;
@@ -219,7 +220,10 @@ public class GraphQLTests : TestHelper
     {
         try
         {
+            #pragma warning disable SYSLIB0014 // suppress error SYSLIB0014: 'WebRequest.Create(string)' is obsolete: 'WebRequest, HttpWebRequest, ServicePoint, and WebClient are obsolete. Use HttpClient instead
             var request = WebRequest.Create($"http://localhost:{aspNetCorePort}{requestInfo.Url}");
+            #pragma warning restore SYSLIB0014
+
             request.Method = requestInfo.HttpMethod;
 
             if (requestInfo.RequestBody != null)
