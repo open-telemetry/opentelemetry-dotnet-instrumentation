@@ -114,17 +114,47 @@ public static class Instrumentation
             return;
         }
 
-        _tracerProvider.Dispose();
+        try
+        {
+            _tracerProvider.Dispose();
 
-        Log("OpenTelemetry tracer exit.");
+            Log("OpenTelemetry tracer exit.");
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                Log($"An error occured while attempting to exit. {ex}");
+            }
+            catch
+            {
+                // If we encounter an error while logging there is nothing else we can do
+                // with the exception.
+            }
+        }
     }
 
     private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs args)
     {
-        Log("UnhandledException event raised.");
-        if (args.IsTerminating)
+        try
         {
-            OnExit(sender, args);
+            Log("UnhandledException event raised.");
+            if (args.IsTerminating)
+            {
+                OnExit(sender, args);
+            }
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                Log($"An exception occured while processing an unhandled exception. {ex}");
+            }
+            catch
+            {
+                // If we encounter an error while logging there is nothing else we can do
+                // with the exception.
+            }
         }
     }
 
