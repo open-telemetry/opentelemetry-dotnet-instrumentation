@@ -138,9 +138,9 @@ public static class Instrumentation
     {
         try
         {
-            Log("UnhandledException event raised.");
             if (args.IsTerminating)
             {
+                Log("UnhandledException event raised with a terminating exception.");
                 OnExit(sender, args);
             }
         }
