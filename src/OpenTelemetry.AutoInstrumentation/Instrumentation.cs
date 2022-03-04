@@ -70,6 +70,7 @@ public static class Instrumentation
                 // Register to shutdown events
                 AppDomain.CurrentDomain.ProcessExit += OnExit;
                 AppDomain.CurrentDomain.DomainUnload += OnExit;
+                AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             }
         }
         catch (Exception ex)
@@ -113,9 +114,48 @@ public static class Instrumentation
             return;
         }
 
-        _tracerProvider.Dispose();
+        try
+        {
+            _tracerProvider.Dispose();
 
-        Log("OpenTelemetry tracer exit.");
+            Log("OpenTelemetry tracer exit.");
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                Log($"An error occured while attempting to exit. {ex}");
+            }
+            catch
+            {
+                // If we encounter an error while logging there is nothing else we can do
+                // with the exception.
+            }
+        }
+    }
+
+    private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs args)
+    {
+        try
+        {
+            if (args.IsTerminating)
+            {
+                Log("UnhandledException event raised with a terminating exception.");
+                OnExit(sender, args);
+            }
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                Log($"An exception occured while processing an unhandled exception. {ex}");
+            }
+            catch
+            {
+                // If we encounter an error while logging there is nothing else we can do
+                // with the exception.
+            }
+        }
     }
 
     private static void Log(string message)
