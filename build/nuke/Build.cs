@@ -17,6 +17,9 @@ partial class Build : NukeBuild
     [Parameter("Platform to build - x86 or x64. Default is x64")]
     readonly MSBuildTargetPlatform Platform = MSBuildTargetPlatform.x64;
 
+    [Parameter("Windows Server Core container version. Use it if your Windows does not support the default value. Default is 'ltsc2022'")]
+    readonly string WindowsContainerVersion = "ltsc2022";
+
     [Parameter("The location to create the tracer home directory. Default is ./bin/tracer-home ")]
     readonly AbsolutePath TracerHome;
     [Parameter("The location to place NuGet packages and other packages. Default is ./bin/artifacts ")]
