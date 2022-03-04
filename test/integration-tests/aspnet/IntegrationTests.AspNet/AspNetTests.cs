@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using IntegrationTests.Helpers;
 using Xunit;
@@ -36,8 +37,9 @@ public class AspNetTests : TestHelper
             Output.WriteLine(content);
 
             var spans = agent.WaitForSpans(1);
+            var webSpansCount = spans.Count(x => x.Name != "health-check");
 
-            Assert.True(spans.Count >= 1, $"Expecting at least 1 span, only received {spans.Count}");
+            Assert.True(webSpansCount >= 1, $"Expecting at least 1 span, only received {spans.Count}");
         }
     }
 }

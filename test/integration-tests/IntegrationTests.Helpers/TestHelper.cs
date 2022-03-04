@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using DotNet.Testcontainers.Containers.Builders;
 using DotNet.Testcontainers.Containers.Modules;
 using DotNet.Testcontainers.Containers.OutputConsumers;
@@ -82,9 +83,27 @@ public abstract class TestHelper
 
         PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {healthCheckEndpoint}", Output);
 
-        var (standardOutput, _) = PowershellHelper.RunCommand($"Write-Host (Test-NetConnection -ComputerName 'localhost' -Port {webPort}).TcpTestSucceeded", Output);
+        var healthChecks = 0;
+        var healthChecksUrl = $"http://localhost:{webPort}/health-check";
+        var healthChecksPassed = false;
 
-        standardOutput.Should().Contain("True", $"Test connection to the port number {webPort} failed. On this port container service should be available.");
+        do
+        {
+            var (standardOutput, _) = PowershellHelper.RunCommand($"Write-Host (Invoke-WebRequest -Uri {healthChecksUrl}).StatusCode", Output);
+
+            healthChecksPassed = standardOutput.Trim() == "200";
+
+            if (!healthChecksPassed)
+            {
+                healthChecks++;
+
+                // wait for next health check
+                Thread.Sleep(2000 * healthChecks);
+            }
+        }
+        while (healthChecks < 5 && !healthChecksPassed);
+
+        healthChecksPassed.Should().BeTrue($"Health checks to the url '{healthChecksUrl}' failed. Application didn't respond with given time.");
 
         return new Container(container);
     }
