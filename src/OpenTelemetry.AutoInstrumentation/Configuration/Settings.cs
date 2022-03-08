@@ -25,7 +25,6 @@ public class Settings
 
         TracesExporter = ParseTracesExporter(source);
         OtlpExportProtocol = GetExporterOtlpProtocol(source);
-        OtlpExportEndpoint = GetExporterOtlpEndpoint(source, OtlpExportProtocol);
 
         LoadTracerAtStartup = source.GetBool(ConfigurationKeys.LoadTracerAtStartup) ?? true;
         ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? true;
@@ -114,13 +113,6 @@ public class Settings
     public OtlpExportProtocol? OtlpExportProtocol { get; }
 
     /// <summary>
-    /// Gets the the OTLP exporter endpoint.
-    /// Will be removed when https://github.com/open-telemetry/opentelemetry-dotnet/pull/2868 is released.
-    /// </summary>
-    // TODO: To be removed when https://github.com/open-telemetry/opentelemetry-dotnet/pull/2868 is released.
-    public Uri OtlpExportEndpoint { get; }
-
-    /// <summary>
     /// Gets a value indicating whether the console exporter is enabled.
     /// </summary>
     public bool ConsoleExporterEnabled { get; }
@@ -167,13 +159,13 @@ public class Settings
 
     private static OtlpExportProtocol? GetExporterOtlpProtocol(IConfigurationSource source)
     {
-        // the defualt in SDK is grpc. http/protobuf should be default for our purposes
+        // the default in SDK is grpc. http/protobuf should be default for our purposes
         var exporterOtlpProtocol = source.GetString(ConfigurationKeys.ExporterOtlpProtocol);
 
         if (string.IsNullOrEmpty(exporterOtlpProtocol) || exporterOtlpProtocol == "http/protobuf")
         {
             // override settings only for http/protobuf
-            // the second part of the condition is needed to override default endpoint as long as https://github.com/open-telemetry/opentelemetry-dotnet/pull/2868 is not fixed
+            // the second part of the condition is needed to override default endpoint as long as we verify if enable System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport in EnvironmentConfigurationHelper
             return OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
         }
 
@@ -199,19 +191,5 @@ public class Settings
             default:
                 throw new FormatException($"Traces exporter '{tracesExporterEnvVar}' is not supported");
         }
-    }
-
-    private static Uri GetExporterOtlpEndpoint(IConfigurationSource source, OtlpExportProtocol? otlpExportProtocol)
-    {
-        var exporterOtlpEndpoint = source.GetString(ConfigurationKeys.ExporterOtlpEndpoint);
-
-        if (otlpExportProtocol == OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf && string.IsNullOrWhiteSpace(exporterOtlpEndpoint))
-        {
-            // override endpoint only for otlp over http/protobuf
-            return new Uri("http://localhost:4318/v1/traces");
-        }
-
-        // null value here means that it will be handled by OTEL .NET SDK
-        return null;
     }
 }
