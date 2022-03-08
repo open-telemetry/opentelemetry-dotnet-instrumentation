@@ -120,7 +120,7 @@ public OpenTelemetry.Trace.TracerProviderBuilder ConfigureTracerProvider(OpenTel
 ```
 
 The plugin must use the same version of the `OpenTelemetry` as the
-OpenTelemetry .NET AutoInstrumentation. Current version is `1.2.0-rc2`.
+OpenTelemetry .NET AutoInstrumentation. Current version is `1.2.0-rc3`.
 
 ## .NET CLR Profiler
 
