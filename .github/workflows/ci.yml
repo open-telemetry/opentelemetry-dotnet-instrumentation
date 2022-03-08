@@ -26,13 +26,13 @@ jobs:
         run: brew services start mongodb-community
       - run: ./build.cmd Workflow
       - name: Upload logs
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: logs-${{ matrix.machine }}
           path: build_data/profiler-logs/
       - name: Upload binaries
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: bin-${{ matrix.machine }}
