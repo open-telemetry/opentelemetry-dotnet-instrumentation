@@ -31,7 +31,6 @@ public class SettingsTests : IDisposable
             settings.LoadTracerAtStartup.Should().BeTrue();
             settings.TracesExporter.Should().Be(TracesExporter.Otlp);
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
-            settings.OtlpExportEndpoint.Should().Be(new Uri("http://localhost:4318/v1/traces"));
             settings.ConsoleExporterEnabled.Should().BeTrue();
             settings.EnabledInstrumentations.Should().BeEmpty();
             settings.TracerPlugins.Should().BeEmpty();
@@ -68,45 +67,24 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData("", OtlpExportProtocol.HttpProtobuf, "http://localhost:4318/v1/traces")]
-    [InlineData(null, OtlpExportProtocol.HttpProtobuf, "http://localhost:4318/v1/traces")]
-    [InlineData("http/protobuf", OtlpExportProtocol.HttpProtobuf, "http://localhost:4318/v1/traces")]
-    [InlineData("grpc", null, null)]
-    [InlineData("nonExistingProtocol", null, null)]
-    public void OtlpExporterProperties_DependsOnCorrespondingEnvVariables(string otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol, string expectedOtlpExportEndpoint)
+    [InlineData("", OtlpExportProtocol.HttpProtobuf)]
+    [InlineData(null, OtlpExportProtocol.HttpProtobuf)]
+    [InlineData("http/protobuf", OtlpExportProtocol.HttpProtobuf)]
+    [InlineData("grpc", null)]
+    [InlineData("nonExistingProtocol", null)]
+    public void OtlpExportProtocol_DependsOnCorrespondingEnvVariable(string otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, otlpProtocol);
 
         var settings = Settings.FromDefaultSources();
 
-        using (new AssertionScope())
-        {
-            // null values for expected data will be handled by OTel .NET SDK
-            settings.OtlpExportProtocol.Should().Be(expectedOtlpExportProtocol);
-            settings.OtlpExportEndpoint.Should().Be(expectedOtlpExportEndpoint != null ? new Uri(expectedOtlpExportEndpoint) : null);
-        }
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData(null)]
-    [InlineData("http/protobuf")]
-    [InlineData("grpc")]
-    [InlineData("nonExistingProtocol")]
-    public void OtlpExportEndpoint_IsNullWhenCorrespondingEnvVarIsSet(string otlpProtocol)
-    {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, otlpProtocol);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpEndpoint, "http://customurl:1234");
-
-        var settings = Settings.FromDefaultSources();
-
-        settings.OtlpExportEndpoint.Should().BeNull("leaving as null as SDK will handle it");
+        // null values for expected data will be handled by OTel .NET SDK
+        settings.OtlpExportProtocol.Should().Be(expectedOtlpExportProtocol);
     }
 
     private static void ClearEnvVars()
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.TracesExporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpEndpoint, null);
     }
 }

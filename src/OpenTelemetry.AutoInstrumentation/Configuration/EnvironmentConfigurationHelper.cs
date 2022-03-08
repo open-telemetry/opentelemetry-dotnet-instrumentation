@@ -85,11 +85,6 @@ internal static class EnvironmentConfigurationHelper
                     {
                         options.Protocol = settings.OtlpExportProtocol.Value;
                     }
-
-                    if (settings.OtlpExportEndpoint != null)
-                    {
-                        options.Endpoint = settings.OtlpExportEndpoint;
-                    }
                 });
                 break;
             case TracesExporter.None:

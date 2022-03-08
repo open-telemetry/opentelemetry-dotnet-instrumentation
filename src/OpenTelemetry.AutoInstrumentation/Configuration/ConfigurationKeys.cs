@@ -32,11 +32,6 @@ public class ConfigurationKeys
     public const string ExporterOtlpProtocol = "OTEL_EXPORTER_OTLP_PROTOCOL";
 
     /// <summary>
-    /// Configuration key for the OTLP exporter endpoint to be used.
-    /// </summary>
-    public const string ExporterOtlpEndpoint = "OTEL_EXPORTER_OTLP_ENDPOINT";
-
-    /// <summary>
     /// Configuration key for whether the console exporter is enabled.
     /// </summary>
     public const string ConsoleExporterEnabled = "OTEL_DOTNET_AUTO_CONSOLE_EXPORTER_ENABLED";
