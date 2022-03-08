@@ -84,7 +84,7 @@ public abstract class TestHelper
         var healthChecksUrl = $"http://localhost:{webPort}/healthz";
 
         // try healthz a few times
-        HttpStatusCode statusCode = 0;
+        HttpStatusCode statusCode = default;
         HttpClient client = new();
 
         for (int retry = 0; retry < 5; retry++)
