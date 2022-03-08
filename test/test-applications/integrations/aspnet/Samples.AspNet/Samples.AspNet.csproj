@@ -41,10 +41,10 @@
       <HintPath>..\..\..\..\..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="OpenTelemetry.Api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7bd6737fe5b67e3c, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\..\packages\OpenTelemetry.Api.1.2.0-rc2\lib\net462\OpenTelemetry.Api.dll</HintPath>
+      <HintPath>..\..\..\..\..\packages\OpenTelemetry.Api.1.2.0-rc3\lib\net462\OpenTelemetry.Api.dll</HintPath>
     </Reference>
     <Reference Include="OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7bd6737fe5b67e3c, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\..\packages\OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule.1.0.0-rc9\lib\net462\OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\packages\OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule.1.0.0-rc10\lib\net462\OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
