@@ -84,7 +84,7 @@ public abstract class TestHelper
         PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {healthCheckEndpoint}", Output);
 
         var healthChecks = 0;
-        var healthChecksUrl = $"http://localhost:{webPort}/health-check";
+        var healthChecksUrl = $"http://localhost:{webPort}/healthz";
         var healthChecksPassed = false;
 
         do

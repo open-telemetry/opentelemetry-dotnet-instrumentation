@@ -35,7 +35,7 @@ public class AspNetTests : TestHelper
             Output.WriteLine("Sample response:");
             Output.WriteLine(content);
 
-            agent.SpanFilters.Add(x => x.Name != "health-check");
+            agent.SpanFilters.Add(x => x.Name != "healthz");
 
             var spans = agent.WaitForSpans(1);
 

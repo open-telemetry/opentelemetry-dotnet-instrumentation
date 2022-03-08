@@ -2,7 +2,7 @@ using System.Web.Mvc;
 
 namespace Samples.AspNet.Controllers;
 
-public class HealtCheckController : Controller
+public class HealthCheckController : Controller
 {
     public ActionResult Index()
     {

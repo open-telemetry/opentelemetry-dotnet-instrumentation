@@ -11,8 +11,8 @@ public class RouteConfig
 
         routes.MapRoute(
             name: "HealthCheck",
-            url: "health-check",
-            defaults: new { controller = "HealtCheck", action = "Index" }
+            url: "healthz",
+            defaults: new { controller = "HealthCheck", action = "Index" }
         );
 
         routes.MapRoute(
