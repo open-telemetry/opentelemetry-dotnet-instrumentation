@@ -167,7 +167,7 @@ public class Settings
 
     private static OtlpExportProtocol? GetExporterOtlpProtocol(IConfigurationSource source)
     {
-        // the defualt in SDK is grpc. http/protobuf should be default for our purposes
+        // the default in SDK is grpc. http/protobuf should be default for our purposes
         var exporterOtlpProtocol = source.GetString(ConfigurationKeys.ExporterOtlpProtocol);
 
         if (string.IsNullOrEmpty(exporterOtlpProtocol) || exporterOtlpProtocol == "http/protobuf")
