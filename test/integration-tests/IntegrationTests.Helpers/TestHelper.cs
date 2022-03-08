@@ -1,11 +1,13 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
+using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using DotNet.Testcontainers.Containers.Builders;
 using DotNet.Testcontainers.Containers.Modules;
 using DotNet.Testcontainers.Containers.OutputConsumers;
-using DotNet.Testcontainers.Containers.WaitStrategies;
 using FluentAssertions;
 using IntegrationTests.Helpers.Models;
 using Xunit.Abstractions;
@@ -38,14 +40,10 @@ public abstract class TestHelper
 
     protected ITestOutputHelper Output { get; }
 
-    public Container StartContainer(int traceAgentPort, int webPort)
+    public async Task<Container> StartContainerAsync(int traceAgentPort, int webPort)
     {
         // get path to sample app that the profiler will attach to
         string sampleName = $"samples-{EnvironmentHelper.SampleName.ToLowerInvariant()}";
-
-        var waitOS = EnvironmentTools.IsWindows()
-            ? Wait.ForWindowsContainer()
-            : Wait.ForUnixContainer();
 
         string agentBaseUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{traceAgentPort}";
         string healthCheckEndpoint = $"{agentBaseUrl}/health-check";
@@ -83,27 +81,26 @@ public abstract class TestHelper
 
         PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {healthCheckEndpoint}", Output);
 
-        var healthChecks = 0;
         var healthChecksUrl = $"http://localhost:{webPort}/healthz";
-        var healthChecksPassed = false;
 
-        do
+        // try healthz a few times
+        HttpStatusCode statusCode = 0;
+        HttpClient client = new();
+
+        for (int retry = 0; retry < 5; retry++)
         {
-            var (standardOutput, _) = PowershellHelper.RunCommand($"Write-Host (Invoke-WebRequest -Uri {healthChecksUrl}).StatusCode", Output);
+            var response = await client.GetAsync(healthChecksUrl);
+            statusCode = response.StatusCode;
 
-            healthChecksPassed = standardOutput.Trim() == "200";
-
-            if (!healthChecksPassed)
+            if (statusCode == HttpStatusCode.OK)
             {
-                healthChecks++;
-
-                // wait for next health check
-                Thread.Sleep(2000 * healthChecks);
+                break;
             }
-        }
-        while (healthChecks < 5 && !healthChecksPassed);
 
-        healthChecksPassed.Should().BeTrue($"Health checks to the url '{healthChecksUrl}' failed. Application didn't respond with given time.");
+            Thread.Sleep(TimeSpan.FromSeconds(4));
+        }
+
+        statusCode.Should().Be(HttpStatusCode.OK, "Health check never returned OK.");
 
         return new Container(container);
     }

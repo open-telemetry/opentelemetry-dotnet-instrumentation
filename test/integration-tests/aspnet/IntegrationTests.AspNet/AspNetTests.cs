@@ -1,5 +1,6 @@
 using System.IO;
 using System.Net.Http;
+using System.Threading.Tasks;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -18,19 +19,19 @@ public class AspNetTests : TestHelper
     [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("WindowsOnly", "True")]
-    public void SubmitsTraces()
+    public async Task SubmitsTraces()
     {
         var agentPort = TcpPortProvider.GetOpenPort();
         var webPort = TcpPortProvider.GetOpenPort();
 
         using (var fwPort = FirewallHelper.OpenWinPort(agentPort, Output))
         using (var agent = new MockZipkinCollector(Output, agentPort))
-        using (var container = StartContainer(agentPort, webPort))
+        using (var container = await StartContainerAsync(agentPort, webPort))
         {
             var client = new HttpClient();
 
-            var response = client.GetAsync($"http://localhost:{webPort}").Result;
-            var content = response.Content.ReadAsStringAsync().Result;
+            var response = await client.GetAsync($"http://localhost:{webPort}");
+            var content = await response.Content.ReadAsStringAsync();
 
             Output.WriteLine("Sample response:");
             Output.WriteLine(content);
