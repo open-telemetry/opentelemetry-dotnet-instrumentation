@@ -97,7 +97,7 @@ public abstract class TestHelper
                 break;
             }
 
-            Thread.Sleep(TimeSpan.FromSeconds(4));
+            await Task.Delay(TimeSpan.FromSeconds(4));
         }
 
         statusCode.Should().Be(HttpStatusCode.OK, "Health check never returned OK.");
