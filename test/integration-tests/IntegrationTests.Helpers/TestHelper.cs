@@ -1,8 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using DotNet.Testcontainers.Containers.Builders;
 using DotNet.Testcontainers.Containers.Modules;
@@ -81,26 +79,9 @@ public abstract class TestHelper
         PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {agentHealthzUrl}", Output);
 
         var webappHealthzUrl = $"http://localhost:{webPort}/healthz";
+        var webAppHealthzResult = await HealthzHelper.TestHealtzAsync(webappHealthzUrl, "IIS WebApp", Output);
 
-        // try healthz a few times
-        HttpStatusCode statusCode = default;
-        HttpClient client = new();
-
-        for (int retry = 0; retry < 5; retry++)
-        {
-            var response = await client.GetAsync(webappHealthzUrl);
-            statusCode = response.StatusCode;
-
-            if (statusCode == HttpStatusCode.OK)
-            {
-                break;
-            }
-
-            Output.WriteLine($"IIS App healthz failed {retry + 1}/5");
-            await Task.Delay(TimeSpan.FromSeconds(4));
-        }
-
-        statusCode.Should().Be(HttpStatusCode.OK, "Health check never returned OK.");
+        webAppHealthzResult.Should().BeTrue("IIS WebApp health check never returned OK.");
 
         Output.WriteLine($"IIS WebApp was started successfully.");
 
