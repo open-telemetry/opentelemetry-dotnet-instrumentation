@@ -1,10 +1,13 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using DotNet.Testcontainers.Containers.Builders;
 using DotNet.Testcontainers.Containers.Modules;
 using DotNet.Testcontainers.Containers.OutputConsumers;
-using DotNet.Testcontainers.Containers.WaitStrategies;
 using FluentAssertions;
 using IntegrationTests.Helpers.Models;
 using Xunit.Abstractions;
@@ -37,14 +40,10 @@ public abstract class TestHelper
 
     protected ITestOutputHelper Output { get; }
 
-    public Container StartContainer(int traceAgentPort, int webPort)
+    public async Task<Container> StartContainerAsync(int traceAgentPort, int webPort)
     {
         // get path to sample app that the profiler will attach to
         string sampleName = $"samples-{EnvironmentHelper.SampleName.ToLowerInvariant()}";
-
-        var waitOS = EnvironmentTools.IsWindows()
-            ? Wait.ForWindowsContainer()
-            : Wait.ForUnixContainer();
 
         string agentBaseUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{traceAgentPort}";
         string healthCheckEndpoint = $"{agentBaseUrl}/health-check";
@@ -82,9 +81,26 @@ public abstract class TestHelper
 
         PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {healthCheckEndpoint}", Output);
 
-        var (standardOutput, _) = PowershellHelper.RunCommand($"Write-Host (Test-NetConnection -ComputerName 'localhost' -Port {webPort}).TcpTestSucceeded", Output);
+        var healthChecksUrl = $"http://localhost:{webPort}/healthz";
 
-        standardOutput.Should().Contain("True", $"Test connection to the port number {webPort} failed. On this port container service should be available.");
+        // try healthz a few times
+        HttpStatusCode statusCode = default;
+        HttpClient client = new();
+
+        for (int retry = 0; retry < 5; retry++)
+        {
+            var response = await client.GetAsync(healthChecksUrl);
+            statusCode = response.StatusCode;
+
+            if (statusCode == HttpStatusCode.OK)
+            {
+                break;
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(4));
+        }
+
+        statusCode.Should().Be(HttpStatusCode.OK, "Health check never returned OK.");
 
         return new Container(container);
     }
