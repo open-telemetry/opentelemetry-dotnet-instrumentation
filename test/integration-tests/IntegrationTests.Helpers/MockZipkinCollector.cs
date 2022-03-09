@@ -178,7 +178,7 @@ public class MockZipkinCollector : IDisposable
                 var ctx = _listener.GetContext();
                 OnRequestReceived(ctx);
 
-                if (ctx.Request.RawUrl.Equals("/health-check", StringComparison.OrdinalIgnoreCase))
+                if (ctx.Request.RawUrl.Equals("/healthz", StringComparison.OrdinalIgnoreCase))
                 {
                     CreateHealthResponse(ctx);
 

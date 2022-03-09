@@ -1,9 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
-using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using DotNet.Testcontainers.Containers.Builders;
 using DotNet.Testcontainers.Containers.Modules;
@@ -46,7 +43,7 @@ public abstract class TestHelper
         string sampleName = $"samples-{EnvironmentHelper.SampleName.ToLowerInvariant()}";
 
         string agentBaseUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{traceAgentPort}";
-        string healthCheckEndpoint = $"{agentBaseUrl}/health-check";
+        string agentHealthzUrl = $"{agentBaseUrl}/healthz";
         string zipkinEndpoint = $"{agentBaseUrl}/api/v2/spans";
         string networkName = DockerNetworkHelper.IntegrationTestsNetworkName;
         string networkId = DockerNetworkHelper.SetupIntegrationTestsNetwork();
@@ -79,28 +76,14 @@ public abstract class TestHelper
 
         Output.WriteLine($"Container was started successfully.");
 
-        PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {healthCheckEndpoint}", Output);
+        PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {agentHealthzUrl}", Output);
 
-        var healthChecksUrl = $"http://localhost:{webPort}/healthz";
+        var webAppHealthzUrl = $"http://localhost:{webPort}/healthz";
+        var webAppHealthzResult = await HealthzHelper.TestHealtzAsync(webAppHealthzUrl, "IIS WebApp", Output);
 
-        // try healthz a few times
-        HttpStatusCode statusCode = default;
-        HttpClient client = new();
+        webAppHealthzResult.Should().BeTrue("IIS WebApp health check never returned OK.");
 
-        for (int retry = 0; retry < 5; retry++)
-        {
-            var response = await client.GetAsync(healthChecksUrl);
-            statusCode = response.StatusCode;
-
-            if (statusCode == HttpStatusCode.OK)
-            {
-                break;
-            }
-
-            await Task.Delay(TimeSpan.FromSeconds(4));
-        }
-
-        statusCode.Should().Be(HttpStatusCode.OK, "Health check never returned OK.");
+        Output.WriteLine($"IIS WebApp was started successfully.");
 
         return new Container(container);
     }
