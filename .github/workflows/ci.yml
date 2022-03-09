@@ -21,8 +21,6 @@ jobs:
             3.1.x
             5.0.x
             6.0.x
-      - uses: microsoft/setup-msbuild@v1.1
-        if: ${{ runner.os == 'Windows' }}
       - name: Start MongoDB service
         if: ${{ runner.os == 'macOS' }}
         run: brew services start mongodb-community
