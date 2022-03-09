@@ -96,7 +96,7 @@ public abstract class TestHelper
                 break;
             }
 
-            Output.WriteLine($"IIS App healthz retry {retry + 1}/5");
+            Output.WriteLine($"IIS App healthz failed {retry + 1}/5");
             await Task.Delay(TimeSpan.FromSeconds(4));
         }
 
