@@ -78,8 +78,8 @@ public abstract class TestHelper
 
         PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {agentHealthzUrl}", Output);
 
-        var webappHealthzUrl = $"http://localhost:{webPort}/healthz";
-        var webAppHealthzResult = await HealthzHelper.TestHealtzAsync(webappHealthzUrl, "IIS WebApp", Output);
+        var webAppHealthzUrl = $"http://localhost:{webPort}/healthz";
+        var webAppHealthzResult = await HealthzHelper.TestHealtzAsync(webAppHealthzUrl, "IIS WebApp", Output);
 
         webAppHealthzResult.Should().BeTrue("IIS WebApp health check never returned OK.");
 
