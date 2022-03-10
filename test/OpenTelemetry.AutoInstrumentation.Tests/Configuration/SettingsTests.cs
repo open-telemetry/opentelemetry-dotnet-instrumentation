@@ -70,7 +70,7 @@ public class SettingsTests : IDisposable
     [Theory]
     [InlineData("", OtlpExportProtocol.HttpProtobuf)]
     [InlineData(null, OtlpExportProtocol.HttpProtobuf)]
-    [InlineData("http/protobuf", OtlpExportProtocol.HttpProtobuf)]
+    [InlineData("http/protobuf", null)]
     [InlineData("grpc", null)]
     [InlineData("nonExistingProtocol", null)]
     public void OtlpExportProtocol_DependsOnCorrespondingEnvVariable(string otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol)

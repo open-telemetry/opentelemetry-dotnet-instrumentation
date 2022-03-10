@@ -172,10 +172,9 @@ public class Settings
         // the default in SDK is grpc. http/protobuf should be default for our purposes
         var exporterOtlpProtocol = source.GetString(ConfigurationKeys.ExporterOtlpProtocol);
 
-        if (string.IsNullOrEmpty(exporterOtlpProtocol) || exporterOtlpProtocol == "http/protobuf")
+        if (string.IsNullOrEmpty(exporterOtlpProtocol))
         {
             // override settings only for http/protobuf
-            // the second part of the condition is needed to override default endpoint as long as we verify if enable System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport in EnvironmentConfigurationHelper
             return OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
         }
 
