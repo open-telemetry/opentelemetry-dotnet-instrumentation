@@ -62,6 +62,13 @@ public class ConfigurationKeys
     public const string LegacySources = "OTEL_DOTNET_AUTO_LEGACY_SOURCES";
 
     /// <summary>
+    /// Configuration key for enabling `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`.
+    /// It is required by OTLP Grpc exporter.
+    /// Default is <c>false</c>.
+    /// </summary>
+    public const string Http2UnencryptedSupportEnabled = "OTEL_DOTNET_AUTO_HTTP2UNENCRYPTEDSUPPORT_ENABLED";
+
+    /// <summary>
     /// String format patterns used to match integration-specific configuration keys.
     /// </summary>
     internal static class Integrations

@@ -88,6 +88,8 @@ public class Settings
         LoadTracerAtStartup = source.GetBool(ConfigurationKeys.LoadTracerAtStartup) ?? true;
 
         Integrations = new IntegrationSettingsCollection(source);
+
+        Http2UnencryptedSupportEnabled = source.GetBool(ConfigurationKeys.Http2UnencryptedSupportEnabled) ?? false;
     }
 
     /// <summary>
@@ -141,6 +143,14 @@ public class Settings
     /// Gets a collection of <see cref="Integrations"/> keyed by integration name.
     /// </summary>
     public IntegrationSettingsCollection Integrations { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`
+    /// should be enabled.
+    /// It is required by OTLP Grpc exporter.
+    /// Default is <c>false</c>.
+    /// </summary>
+    public bool Http2UnencryptedSupportEnabled { get; }
 
     internal static Settings FromDefaultSources()
     {
