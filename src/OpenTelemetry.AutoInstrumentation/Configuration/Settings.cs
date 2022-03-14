@@ -147,7 +147,7 @@ public class Settings
     /// <summary>
     /// Gets a value indicating whether the `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`
     /// should be enabled.
-    /// It is required by OTLP Grpc exporter.
+    /// It is required by OTLP gRPC exporter on .NET Core 3.x.
     /// Default is <c>false</c>.
     /// </summary>
     public bool Http2UnencryptedSupportEnabled { get; }

@@ -63,7 +63,7 @@ public class ConfigurationKeys
 
     /// <summary>
     /// Configuration key for enabling `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`.
-    /// It is required by OTLP Grpc exporter.
+    /// It is required by OTLP gRPC exporter on .NET Core 3.x.
     /// Default is <c>false</c>.
     /// </summary>
     public const string Http2UnencryptedSupportEnabled = "OTEL_DOTNET_AUTO_HTTP2UNENCRYPTEDSUPPORT_ENABLED";
