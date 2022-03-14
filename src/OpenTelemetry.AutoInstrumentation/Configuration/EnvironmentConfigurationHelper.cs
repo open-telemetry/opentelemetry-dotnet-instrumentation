@@ -71,7 +71,7 @@ internal static class EnvironmentConfigurationHelper
                 break;
             case TracesExporter.Otlp:
 #if NETCOREAPP3_1
-                if (!settings.OtlpExportProtocol.HasValue || settings.OtlpExportProtocol != OtlpExportProtocol.HttpProtobuf)
+                if (settings.Http2UnencryptedSupportEnabled)
                 {
                     // Adding the OtlpExporter creates a GrpcChannel.
                     // This switch must be set before creating a GrpcChannel/HttpClient when calling an insecure gRPC service.

@@ -88,6 +88,8 @@ public class Settings
         LoadTracerAtStartup = source.GetBool(ConfigurationKeys.LoadTracerAtStartup) ?? true;
 
         Integrations = new IntegrationSettingsCollection(source);
+
+        Http2UnencryptedSupportEnabled = source.GetBool(ConfigurationKeys.Http2UnencryptedSupportEnabled) ?? false;
     }
 
     /// <summary>
@@ -142,6 +144,14 @@ public class Settings
     /// </summary>
     public IntegrationSettingsCollection Integrations { get; }
 
+    /// <summary>
+    /// Gets a value indicating whether the `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`
+    /// should be enabled.
+    /// It is required by OTLP gRPC exporter on .NET Core 3.x.
+    /// Default is <c>false</c>.
+    /// </summary>
+    public bool Http2UnencryptedSupportEnabled { get; }
+
     internal static Settings FromDefaultSources()
     {
         var configurationSource = new CompositeConfigurationSource
@@ -162,10 +172,9 @@ public class Settings
         // the default in SDK is grpc. http/protobuf should be default for our purposes
         var exporterOtlpProtocol = source.GetString(ConfigurationKeys.ExporterOtlpProtocol);
 
-        if (string.IsNullOrEmpty(exporterOtlpProtocol) || exporterOtlpProtocol == "http/protobuf")
+        if (string.IsNullOrEmpty(exporterOtlpProtocol))
         {
             // override settings only for http/protobuf
-            // the second part of the condition is needed to override default endpoint as long as we verify if enable System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport in EnvironmentConfigurationHelper
             return OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
         }
 

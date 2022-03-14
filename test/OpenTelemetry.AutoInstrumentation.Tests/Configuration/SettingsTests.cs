@@ -37,6 +37,7 @@ public class SettingsTests : IDisposable
             settings.ActivitySources.Should().BeEquivalentTo(new List<string> { "OpenTelemetry.AutoInstrumentation.*" });
             settings.LegacySources.Should().BeEmpty();
             settings.Integrations.Should().NotBeNull();
+            settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
         }
     }
 
@@ -69,7 +70,7 @@ public class SettingsTests : IDisposable
     [Theory]
     [InlineData("", OtlpExportProtocol.HttpProtobuf)]
     [InlineData(null, OtlpExportProtocol.HttpProtobuf)]
-    [InlineData("http/protobuf", OtlpExportProtocol.HttpProtobuf)]
+    [InlineData("http/protobuf", null)]
     [InlineData("grpc", null)]
     [InlineData("nonExistingProtocol", null)]
     public void OtlpExportProtocol_DependsOnCorrespondingEnvVariable(string otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol)
@@ -82,9 +83,23 @@ public class SettingsTests : IDisposable
         settings.OtlpExportProtocol.Should().Be(expectedOtlpExportProtocol);
     }
 
+    [Theory]
+    [InlineData("true", true)]
+    [InlineData("false", false)]
+    [InlineData(null, false)]
+    public void Http2UnencryptedSupportEnabled_DependsOnCorrespondingEnvVariable(string http2UnencryptedSupportEnabled, bool expectedValue)
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Http2UnencryptedSupportEnabled, http2UnencryptedSupportEnabled);
+
+        var settings = Settings.FromDefaultSources();
+
+        settings.Http2UnencryptedSupportEnabled.Should().Be(expectedValue);
+    }
+
     private static void ClearEnvVars()
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.TracesExporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Http2UnencryptedSupportEnabled, null);
     }
 }
