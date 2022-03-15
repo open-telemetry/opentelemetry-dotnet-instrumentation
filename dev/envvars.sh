@@ -55,7 +55,10 @@ then
 fi
 
 # Configure .NET Core runtime
-export DOTNET_ADDITIONAL_DEPS="${CURDIR}/bin/tracer-home/AdditionalDeps"
+#
+# Not all apps/samples are prepared to run with DOTNET_ADDITIONAL_DEPS - when it is needed define it as
+# export DOTNET_ADDITIONAL_DEPS="${CURDIR}/bin/tracer-home/AdditionalDeps"
+#
 export DOTNET_SHARED_STORE="${CURDIR}/bin/tracer-home/store"
 export DOTNET_STARTUP_HOOKS="${CURDIR}/bin/tracer-home/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
 
