@@ -146,6 +146,18 @@ partial class Build
         .DependsOn(CompileNativeSrcLinux)
         .DependsOn(CompileNativeSrcMacOs);
 
+    Target CompileSamples => _ => _
+        .Unlisted()
+        .Description("Compiles all the projects in the samples directory")
+        .Executes(() =>
+        {
+            foreach(var sampleProject in Solution.GetSampleProjects())
+            {
+                DotNetBuild(s => s
+                    .SetProjectFile(sampleProject)
+                    .SetConfiguration(BuildConfiguration));
+            }
+        });
 
     Target CompileNativeTests => _ => _
         .Unlisted()
