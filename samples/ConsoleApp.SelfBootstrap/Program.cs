@@ -9,7 +9,7 @@ namespace ConsoleApp.SelfBootstrap;
 
 internal class Program
 {
-    private static readonly ActivitySource MyActivitySource = new ActivitySource("ConsoleApp");
+    private static readonly ActivitySource MyActivitySource = new ActivitySource("ConsoleApp.SelfBootstrap");
     private static TracerProvider _tracerProvider;
 
     private static async Task<int> Main()
@@ -19,7 +19,7 @@ internal class Program
             .AddHttpClientInstrumentation()
             .AddSqlClientInstrumentation()
             .SetSampler(new AlwaysOnSampler())
-            .AddSource("OpenTelemetry.AutoInstrumentation.*", "ConsoleApp")
+            .AddSource("OpenTelemetry.AutoInstrumentation.*", "ConsoleApp.SelfBootstrap")
             .AddConsoleExporter()
             .AddZipkinExporter(options =>
             {
@@ -36,13 +36,9 @@ internal class Program
             var baseAddress = new Uri("https://www.example.com/");
             var regularHttpClient = new HttpClient { BaseAddress = baseAddress };
 
-            Console.WriteLine("Calling regularHttpClient.GetAsync");
             await regularHttpClient.GetAsync("default-handler");
-            Console.WriteLine("Called regularHttpClient.GetAsync");
-
-            Console.WriteLine("Calling client.GetAsync");
-            await regularHttpClient.GetAsync("http://127.0.0.1:8080");
-            Console.WriteLine("Called client.GetAsync");
+            await regularHttpClient.GetAsync("http://127.0.0.1:8080/api/mongo");
+            await regularHttpClient.GetAsync("http://127.0.0.1:8080/api/redis");
 
             return 0;
         }

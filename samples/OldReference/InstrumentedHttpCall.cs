@@ -8,8 +8,9 @@ namespace OldReference;
 
 public static class InstrumentedHttpCall
 {
+    private static readonly string OperationName = $"{nameof(InstrumentedHttpCall)}.{nameof(GetAsync)}";
 
-    public static async Task GetAsync(string url)
+    static InstrumentedHttpCall()
     {
         Console.WriteLine(">>>>>>>>>>>>>>>>>>>>>>> System.Diagnostics.DiagnosticSource assemblies loaded:");
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -18,8 +19,11 @@ public static class InstrumentedHttpCall
             .Select(assembly => $">>>>>>>>>>>>>>>>>>>>>>> {assembly.FullName}");
             
         Console.WriteLine(string.Join("\n", loaded));
+    }
 
-        var activity = new Activity("RunAsync");
+    public static async Task GetAsync(string url)
+    {
+        var activity = new Activity(OperationName);
         try
         {
             activity.Start();
