@@ -27,7 +27,7 @@ public class Settings
         OtlpExportProtocol = GetExporterOtlpProtocol(source);
 
         LoadTracerAtStartup = source.GetBool(ConfigurationKeys.LoadTracerAtStartup) ?? true;
-        ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? true;
+        ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? false;
 
         var instrumentations = new Dictionary<string, Instrumentation>();
         var enabledInstrumentations = source.GetString(ConfigurationKeys.Instrumentations);
