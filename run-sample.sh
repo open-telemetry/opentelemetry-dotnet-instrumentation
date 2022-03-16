@@ -4,12 +4,14 @@ set -euxo pipefail
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 cd $DIR
 
+# Defaults for selected dotnet CLI commands.
 aspNetAppTargetFramework=${aspNetAppTargetFramework:-netcoreapp3.1}
 sampleAppTargetFramework=${sampleAppTargetFramework:-netcoreapp3.1}
 sampleApp=${sampleApp:-ConsoleApp}
 
-# Defaults for select OTEL env vars
+# Defaults for selected OTEL env vars.
 exporter=${exporter:-jaeger}
+sampleAppInjectSDK=${sampleAppInjectSDK:-true}
 
 function finish {
   docker stop jaeger # stop Jaeger
@@ -52,7 +54,7 @@ unset OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS
 ./dev/wait-local-port.sh 8080
 
 # instrument and run HTTP client app
-time ./dev/instrument.sh OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS="HttpClient" OTEL_SERVICE_NAME="http-client" OTEL_TRACES_EXPORTER=${exporter} dotnet run --no-launch-profile -f $sampleAppTargetFramework --project ./samples/${sampleApp}/${sampleApp}.csproj
+time ./dev/instrument.sh OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS="HttpClient" OTEL_SERVICE_NAME="http-client" OTEL_TRACES_EXPORTER=${exporter} OTEL_DOTNET_AUTO_LOAD_AT_STARTUP=${sampleAppInjectSDK} dotnet run --no-launch-profile -f $sampleAppTargetFramework --project ./samples/${sampleApp}/${sampleApp}.csproj
 
 # verify if it works
 read -p "Check traces under: http://localhost:16686/search. Press enter to close containers and stop sample apps"
