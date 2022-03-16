@@ -1,4 +1,6 @@
 <Project>
+  <Import Project="..\..\..\Common.props" />
+
   <PropertyGroup>
     <!-- only run .NET Framework tests on Windows -->
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">net462;netcoreapp3.1;net5.0;net6.0</TargetFrameworks>
