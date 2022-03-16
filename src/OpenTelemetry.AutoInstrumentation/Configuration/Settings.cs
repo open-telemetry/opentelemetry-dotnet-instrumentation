@@ -26,7 +26,6 @@ public class Settings
         TracesExporter = ParseTracesExporter(source);
         OtlpExportProtocol = GetExporterOtlpProtocol(source);
 
-        LoadTracerAtStartup = source.GetBool(ConfigurationKeys.LoadTracerAtStartup) ?? true;
         ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? false;
 
         var instrumentations = new Dictionary<string, Instrumentation>();
