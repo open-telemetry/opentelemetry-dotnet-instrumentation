@@ -2,6 +2,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OldReference\OldReference.csproj" />
+    <!-- ProjectReference OldReference above uses an old version of System.Diagnostics.DiagnosticSource -->
+    <!-- that is incompatible with the OTel SDK, make an explicit reference to the desired version here -->
+    <!-- so the package resolution version ensures that the desired version is loaded.                  -->
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
   </ItemGroup>
 
   <PropertyGroup>
