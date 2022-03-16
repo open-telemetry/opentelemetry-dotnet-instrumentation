@@ -31,7 +31,7 @@ public class SettingsTests : IDisposable
             settings.LoadTracerAtStartup.Should().BeTrue();
             settings.TracesExporter.Should().Be(TracesExporter.Otlp);
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
-            settings.ConsoleExporterEnabled.Should().BeTrue();
+            settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.EnabledInstrumentations.Should().BeEmpty();
             settings.TracerPlugins.Should().BeEmpty();
             settings.ActivitySources.Should().BeEquivalentTo(new List<string> { "OpenTelemetry.AutoInstrumentation.*" });
