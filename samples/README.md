@@ -59,21 +59,21 @@ OTEL_DOTNET_AUTO_LEGACY_SOURCES="InstrumentedHttpCall.GetAsync" sampleApp=Bindin
 ### ConsoleApp
 
 The default sample app used by `./run-samples.sh`. It contains manual instrumentation using a
-[ActivitySource](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.activitysource?view=net-6.0)
-and [OpenTracing](https://opentracing.io/). No configuration is needed to capture the
-manually created ActivitySource since its name is `OpenTelemetry.AutoInstrumentation.ConsoleApp` which
-is match for the default value for the environment variable
+[ActivitySource](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#activity-source)
+and [OpenTracing](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Shims.OpenTracing#readme).
+No configuration is needed to capture the manually created ActivitySource since its name is
+`OpenTelemetry.AutoInstrumentation.ConsoleApp` which is match for the default value for the environment variable
 [`OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES`](../docs/config.md#customization).
 
 Usage example:
 ```terminal
-$ aspNetAppTargetFramework="net6.0" sampleAppTargetFramework="net6.0" ./run-sample.sh
+$ sampleAppTargetFramework="net6.0" ./run-sample.sh
 ```
 
 ### ConsoleApp.SelfBootstrap
 
 A sample client app that takes care of bootstrapping the OpenTelemetry SDK. It uses an
-[ActivitySource](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.activitysource?view=net-6.0)
+[ActivitySource](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#activity-source)
 to implement manual instrumentation. The bootstrap code takes care of adding the ActivitySource name
 for the auto-instrumentation and the manual instrumentation.
 
@@ -103,7 +103,23 @@ Usage example:
 $ OTEL_DOTNET_AUTO_LEGACY_SOURCES="InstrumentedHttpCall.GetAsync" sampleApp=CoreAppOldReference ./run-sample.sh
 ```
 
-### OldReference Project
+### OldReference
 
 Represents a 3rd party project that can't be updated to use the same version of the assemblies
 required by OpenTelemetry .NET SDK used by auto-instrumentation.
+
+### OpenTracing.Library
+
+A library that wraps an OpenTracing span around a `Func<Task>` delegate.
+
+### Samples.AspNetCoreMvc31
+
+An ASP.NET Core MVC application used to simulate a server application capable of making calls
+to MongoDB and Redis. Besides these calls it also supports various other endpoints, check
+the [Controllers](./Samples.AspNetCoreMvc31/Controllers/) for some of the endpoints that
+can be used.
+
+Usage example:
+```terminal
+$ aspNetAppTargetFramework="net6.0" ./run-sample.sh
+```
