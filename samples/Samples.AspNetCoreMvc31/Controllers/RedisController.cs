@@ -22,7 +22,7 @@ namespace Samples.AspNetCoreMvc.Controllers;
 [Route("api/redis")]
 public class RedisController : ControllerBase
 {
-    public static ConnectionMultiplexer Connection = ConnectionMultiplexer.Connect("localhost");
+    public static ConnectionMultiplexer Connection => ConnectionMultiplexer.Connect("localhost");
 
     [HttpGet]
     [Route("")]
