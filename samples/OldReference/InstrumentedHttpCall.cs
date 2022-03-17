@@ -24,7 +24,6 @@ namespace OldReference;
 
 public static class InstrumentedHttpCall
 {
-
     public static async Task GetAsync(string url)
     {
         Console.WriteLine(">>>>>>>>>>>>>>>>>>>>>>> System.Diagnostics.DiagnosticSource assemblies loaded:");
