@@ -51,7 +51,7 @@ The project representing the third-party library has a legacy Activity named `In
 set [`OTEL_DOTNET_AUTO_LEGACY_SOURCES`](../docs/config.md#customization) to capture it.
 
 The following usage example is for Windows, as binding redirection only applies to .NET Framework:
-```terminal
+```bash
 OTEL_DOTNET_AUTO_LEGACY_SOURCES="InstrumentedHttpCall.GetAsync" sampleApp=BindingRedirect sampleAppTargetFramework=net472 ./run-sample.sh
 ```
 
@@ -65,8 +65,8 @@ No configuration is needed to capture the manually created ActivitySource, as it
 [`OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES`](../docs/config.md#customization).
 
 Usage example:
-```terminal
-$ sampleAppTargetFramework="net6.0" ./run-sample.sh
+```bash
+sampleAppTargetFramework="net6.0" ./run-sample.sh
 ```
 
 ### ConsoleApp.SelfBootstrap
@@ -84,8 +84,8 @@ Use the script environment variable `sampleAppInjectSDK` to control the value of
 the sample app.
 
 Usage example:
-```terminal
-$ sampleAppInjectSDK=false sampleApp=ConsoleApp.SelfBootstrap ./run-sample.sh
+```bash
+sampleAppInjectSDK=false sampleApp=ConsoleApp.SelfBootstrap ./run-sample.sh
 ```
 
 ### CoreAppOldReference
@@ -97,8 +97,8 @@ The project representing the third-party library has a legacy Activity named `In
 set [`OTEL_DOTNET_AUTO_LEGACY_SOURCES`](../docs/config.md#customization) to capture it.
 
 Usage example:
-```terminal
-$ OTEL_DOTNET_AUTO_LEGACY_SOURCES="InstrumentedHttpCall.GetAsync" sampleApp=CoreAppOldReference ./run-sample.sh
+```bash
+OTEL_DOTNET_AUTO_LEGACY_SOURCES="InstrumentedHttpCall.GetAsync" sampleApp=CoreAppOldReference ./run-sample.sh
 ```
 
 ### OldReference
@@ -118,6 +118,6 @@ the [Controllers](./Samples.AspNetCoreMvc31/Controllers/) for some of the endpoi
 can be used.
 
 Usage example:
-```terminal
-$ aspNetAppTargetFramework="net6.0" ./run-sample.sh
+```bash
+aspNetAppTargetFramework="net6.0" ./run-sample.sh
 ```
