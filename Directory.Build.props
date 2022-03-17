@@ -1,5 +1,5 @@
 <Project>
-  <Import Project=".\Common.props" />
+  <Import Project="$(MSBuildThisFileDirectory)Common.props" />
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
