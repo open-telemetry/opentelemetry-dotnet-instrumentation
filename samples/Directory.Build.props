@@ -1,4 +1,6 @@
 <Project>
+  <Import Project="..\Common.props" />
+
   <PropertyGroup>
     <LangVersion>10.0</LangVersion>
   </PropertyGroup>
