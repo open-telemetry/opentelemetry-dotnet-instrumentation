@@ -121,7 +121,7 @@ export OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS=HttpClient
 
 ### Run Samples
 
-The sample applications can be used to see the local changes in action, see the
+You can use the sample applications to see the local changes in action. See the
 [`samples/README.md`](../samples/README.md) for instructions on how to run the samples.
 
 ## Debug .NET Runtime on Linux
