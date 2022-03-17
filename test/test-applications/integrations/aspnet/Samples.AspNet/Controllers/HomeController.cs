@@ -28,7 +28,7 @@ public class HomeController : Controller
 {
     public ActionResult Index()
     {
-        var prefixes = new[] {"COR_", "CORECLR_", "DOTNET_", "OTEL_"};
+        var prefixes = new[] { "COR_", "CORECLR_", "DOTNET_", "OTEL_" };
 
         var envVars = from envVar in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>()
             from prefix in prefixes
