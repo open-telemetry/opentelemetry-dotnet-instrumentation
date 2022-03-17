@@ -35,8 +35,7 @@ public class Program
             .UseKestrel(serverOptions =>
                 // Explicitly set AllowSynchronousIO to true since the default changes
                 // between AspNetCore 2.0 and 3.0
-                serverOptions.AllowSynchronousIO = true
-            )
+                serverOptions.AllowSynchronousIO = true)
             .UseContentRoot(directory)
             .UseStartup<Startup>()
             .Build();
