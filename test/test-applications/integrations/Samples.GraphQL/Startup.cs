@@ -61,7 +61,8 @@ public class Startup
             .AddUserContextBuilder(httpContext => new GraphQLUserContext { User = httpContext.User });
     }
 
-    public void Configure(IApplicationBuilder app,
+    public void Configure(
+        IApplicationBuilder app,
 #if NETCOREAPP2_1 || NET462
         IHostingEnvironment env,
 #else
