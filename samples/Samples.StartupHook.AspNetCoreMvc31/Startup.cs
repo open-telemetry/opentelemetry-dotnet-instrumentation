@@ -48,6 +48,7 @@ public class Startup
         {
             app.UseExceptionHandler("/Home/Error");
         }
+
         app.UseStaticFiles();
 
         app.UseRouting();

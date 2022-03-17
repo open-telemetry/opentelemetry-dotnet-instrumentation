@@ -43,6 +43,7 @@ public class HomeController : Controller
         catch
         {
         }
+
         return View();
     }
 
