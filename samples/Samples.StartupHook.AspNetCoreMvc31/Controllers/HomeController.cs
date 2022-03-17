@@ -14,16 +14,11 @@
 // limitations under the License.
 // </copyright>
 
+using System.Diagnostics;
+using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Samples.StartupHook.AspNetCoreMvc31.Models;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
 
 namespace Samples.StartupHook.AspNetCoreMvc31.Controllers;
 
