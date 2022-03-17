@@ -32,11 +32,6 @@ public static class Program
     internal static readonly ActivitySource ActivitySource = new ActivitySource(
         "Samples.MongoDB", "1.0.0");
 
-    private static string Host()
-    {
-        return Environment.GetEnvironmentVariable("MONGO_HOST") ?? "localhost";
-    }
-
     public static void Main(string[] args)
     {
         Console.WriteLine($"Command line: {string.Join(";", args)}");
@@ -72,16 +67,6 @@ public static class Program
             WireProtocolExecuteIntegrationTest(client);
 #endif
         }
-    }
-
-    private static string GetMongoPort(string[] args)
-    {
-        if (args.Length > 0)
-        {
-            return args[1];
-        }
-
-        return "27017";
     }
 
     public static void Run(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
@@ -165,15 +150,22 @@ public static class Program
             channel.KillCursorsAsync(new long[] { 0, 1, 2 }, new global::MongoDB.Driver.Core.WireProtocol.Messages.Encoders.MessageEncoderSettings(), CancellationToken.None).Wait();
         }
     }
-
-    internal class ServerSelector : global::MongoDB.Driver.Core.Clusters.ServerSelectors.IServerSelector
-    {
-        public IEnumerable<ServerDescription> SelectServers(ClusterDescription cluster, IEnumerable<ServerDescription> servers)
-        {
-            return servers;
-        }
-    }
 #endif
+
+    private static string Host()
+    {
+        return Environment.GetEnvironmentVariable("MONGO_HOST") ?? "localhost";
+    }
+
+    private static string GetMongoPort(string[] args)
+    {
+        if (args.Length > 0)
+        {
+            return args[1];
+        }
+
+        return "27017";
+    }
 
     private static bool? IsProfilerAttached()
     {
@@ -190,4 +182,14 @@ public static class Program
 
         return isAttached ?? false;
     }
+
+#if MONGODB_2_2
+    internal class ServerSelector : global::MongoDB.Driver.Core.Clusters.ServerSelectors.IServerSelector
+    {
+        public IEnumerable<ServerDescription> SelectServers(ClusterDescription cluster, IEnumerable<ServerDescription> servers)
+        {
+            return servers;
+        }
+    }
+#endif
 }
