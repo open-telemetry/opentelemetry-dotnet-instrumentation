@@ -45,7 +45,7 @@ public class HomeController : Controller
         {
             client.GetStringAsync("http://httpstat.us/500").Wait();
         }
-        catch 
+        catch
         {
         }
         return View();

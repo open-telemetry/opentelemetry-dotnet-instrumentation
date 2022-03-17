@@ -32,7 +32,7 @@ public static class InstrumentedHttpCall
         var loaded = assemblies
             .Where(assembly => assembly.FullName.Contains("System.Diagnostics.DiagnosticSource"))
             .Select(assembly => $">>>>>>>>>>>>>>>>>>>>>>> {assembly.FullName}");
-            
+
         Console.WriteLine(string.Join("\n", loaded));
 
         var activity = new Activity("RunAsync");

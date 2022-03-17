@@ -44,7 +44,7 @@ internal class Program
             });
 
         _tracerProvider = builder.Build();
-            
+
         using (var activity = MyActivitySource.StartActivity("Main"))
         {
             activity?.SetTag("foo", "bar");
