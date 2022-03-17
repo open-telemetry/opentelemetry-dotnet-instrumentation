@@ -66,7 +66,7 @@ public class Startup
 #if NETCOREAPP2_1 || NET462
         IHostingEnvironment env,
 #else
-                              IWebHostEnvironment env,
+        IWebHostEnvironment env,
 #endif
         ILoggerFactory loggerFactory)
     {
