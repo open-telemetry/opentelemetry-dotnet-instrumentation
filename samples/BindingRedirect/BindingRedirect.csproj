@@ -5,7 +5,7 @@
     <TargetFrameworks>net472</TargetFrameworks>
     <!-- Forcing binding redirection via app.config that references assemblies -->
     <!-- only present if bytecode instrumentation is used. -->
-    <MSBuildWarningsAsMessages>MSB3277</MSBuildWarningsAsMessages>
+    <MSBuildWarningsAsMessages>MSB3277;MSB3836</MSBuildWarningsAsMessages>
   </PropertyGroup>
 
   <ItemGroup>

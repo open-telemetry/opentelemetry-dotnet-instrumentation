@@ -27,7 +27,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		integrations.json = integrations.json
 		LICENSE = LICENSE
 		LICENSE-3rdparty.csv = LICENSE-3rdparty.csv
-		poc.sh = poc.sh
+		run_sample.sh = run_sample.sh
 		docs\README.md = docs\README.md
 		stylecop.json = stylecop.json
 	EndProjectSection

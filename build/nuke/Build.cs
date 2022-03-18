@@ -61,6 +61,7 @@ partial class Build : NukeBuild
         .Description("GitHub workflow entry point")
         .DependsOn(Clean)
         .DependsOn(BuildTracer)
+        .DependsOn(BuildSamples)
         .DependsOn(NativeTests)
         .DependsOn(ManagedTests);
 
@@ -90,4 +91,8 @@ partial class Build : NukeBuild
         .DependsOn(CompileMocks)
         .DependsOn(PublishMocks)
         .DependsOn(RunManagedTests);
+
+    Target BuildSamples => _ => _
+        .Description("Build the Samples")
+        .DependsOn(CompileSamples);
 }

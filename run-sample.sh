@@ -4,9 +4,14 @@ set -euxo pipefail
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 cd $DIR
 
+# Defaults for selected dotnet CLI commands.
 aspNetAppTargetFramework=${aspNetAppTargetFramework:-netcoreapp3.1}
 sampleAppTargetFramework=${sampleAppTargetFramework:-netcoreapp3.1}
 sampleApp=${sampleApp:-ConsoleApp}
+
+# Defaults for selected OTEL env vars.
+exporter=${exporter:-jaeger}
+sampleAppInjectSDK=${sampleAppInjectSDK:-true}
 
 function finish {
   docker stop jaeger # stop Jaeger
@@ -44,12 +49,12 @@ docker run -d --rm --name jaeger \
 
 # instrument and run HTTP server app in background
 export OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS="Samples.AspNetCoreMvc.OtelSdkPlugin, Samples.AspNetCoreMvc31, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null:Vendor.Distro.Plugin, Vendor.Distro, Version=0.0.1.0, Culture=neutral, PublicKeyToken=null"
-./dev/instrument.sh OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS="AspNet,SqlClient,MongoDb" OTEL_SERVICE_NAME="aspnet-server" ASPNETCORE_URLS="http://127.0.0.1:8080/" dotnet run --no-launch-profile -f $aspNetAppTargetFramework --project ./samples/Samples.AspNetCoreMvc31/Samples.AspNetCoreMvc31.csproj &
+./dev/instrument.sh OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS="AspNet,SqlClient" OTEL_SERVICE_NAME="aspnet-server" OTEL_TRACES_EXPORTER=${exporter} ASPNETCORE_URLS="http://127.0.0.1:8080/" dotnet run --no-launch-profile -f $aspNetAppTargetFramework --project ./samples/Samples.AspNetCoreMvc31/Samples.AspNetCoreMvc31.csproj &
 unset OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS
 ./dev/wait-local-port.sh 8080
 
 # instrument and run HTTP client app
-time ./dev/instrument.sh OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS="HttpClient" OTEL_SERVICE_NAME="http-client" dotnet run --no-launch-profile -f $sampleAppTargetFramework --project ./samples/${sampleApp}/${sampleApp}.csproj
+time ./dev/instrument.sh OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS="HttpClient" OTEL_SERVICE_NAME="http-client" OTEL_TRACES_EXPORTER=${exporter} OTEL_DOTNET_AUTO_LOAD_AT_STARTUP=${sampleAppInjectSDK} dotnet run --no-launch-profile -f $sampleAppTargetFramework --project ./samples/${sampleApp}/${sampleApp}.csproj
 
 # verify if it works
-read -p "Check traces under: http://localhost:16686/search. Press enter to continue"
+read -p "Check traces under: http://localhost:16686/search. Press enter to close containers and stop sample apps"

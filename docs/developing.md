@@ -119,6 +119,11 @@ export OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS=HttpClient
 ./samples/ConsoleApp/bin/Debug/netcoreapp3.1/ConsoleApp
 ```
 
+### Run Samples
+
+You can use the sample applications to see the local changes in action. See the
+[`samples/README.md`](../samples/README.md) for instructions on how to run the samples.
+
 ## Debug .NET Runtime on Linux
 
 - [Requirements](https://github.com/dotnet/runtime/blob/main/docs/workflow/requirements/linux-requirements.md)
