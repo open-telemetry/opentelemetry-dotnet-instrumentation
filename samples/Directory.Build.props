@@ -1,5 +1,12 @@
 <Project>
+  <Import Project="$(MSBuildThisFileDirectory)..\Common.props" />
+
   <PropertyGroup>
     <LangVersion>10.0</LangVersion>
   </PropertyGroup>
+
+  <!-- StyleCop -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" Link="GlobalSuppressions.samples.cs" />
+  </ItemGroup>
 </Project>

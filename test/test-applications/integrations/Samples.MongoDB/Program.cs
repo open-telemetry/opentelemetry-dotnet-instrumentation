@@ -1,3 +1,19 @@
+// <copyright file="Program.cs" company="OpenTelemetry Authors">
+// Copyright The OpenTelemetry Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// </copyright>
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,11 +31,6 @@ public static class Program
 {
     internal static readonly ActivitySource ActivitySource = new ActivitySource(
         "Samples.MongoDB", "1.0.0");
-
-    private static string Host()
-    {
-        return Environment.GetEnvironmentVariable("MONGO_HOST") ?? "localhost";
-    }
 
     public static void Main(string[] args)
     {
@@ -56,16 +67,6 @@ public static class Program
             WireProtocolExecuteIntegrationTest(client);
 #endif
         }
-    }
-
-    private static string GetMongoPort(string[] args)
-    {
-        if (args.Length > 0)
-        {
-            return args[1];
-        }
-
-        return "27017";
     }
 
     public static void Run(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
@@ -149,15 +150,22 @@ public static class Program
             channel.KillCursorsAsync(new long[] { 0, 1, 2 }, new global::MongoDB.Driver.Core.WireProtocol.Messages.Encoders.MessageEncoderSettings(), CancellationToken.None).Wait();
         }
     }
-
-    internal class ServerSelector : global::MongoDB.Driver.Core.Clusters.ServerSelectors.IServerSelector
-    {
-        public IEnumerable<ServerDescription> SelectServers(ClusterDescription cluster, IEnumerable<ServerDescription> servers)
-        {
-            return servers;
-        }
-    }
 #endif
+
+    private static string Host()
+    {
+        return Environment.GetEnvironmentVariable("MONGO_HOST") ?? "localhost";
+    }
+
+    private static string GetMongoPort(string[] args)
+    {
+        if (args.Length > 0)
+        {
+            return args[1];
+        }
+
+        return "27017";
+    }
 
     private static bool? IsProfilerAttached()
     {
@@ -174,4 +182,14 @@ public static class Program
 
         return isAttached ?? false;
     }
+
+#if MONGODB_2_2
+    internal class ServerSelector : global::MongoDB.Driver.Core.Clusters.ServerSelectors.IServerSelector
+    {
+        public IEnumerable<ServerDescription> SelectServers(ClusterDescription cluster, IEnumerable<ServerDescription> servers)
+        {
+            return servers;
+        }
+    }
+#endif
 }

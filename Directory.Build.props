@@ -1,17 +1,11 @@
 <Project>
+  <Import Project="$(MSBuildThisFileDirectory)Common.props" />
+
   <PropertyGroup>
     <IsPackable>false</IsPackable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <LangVersion>10.0</LangVersion>
   </PropertyGroup>
-
-  <!-- StyleCop -->
-  <ItemGroup>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.*" PrivateAssets="all" />
-    <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" />
-    <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" Link="GlobalSuppressions.solution.cs" />
-  </ItemGroup>
 
   <!-- Deterministic builds -->
   <PropertyGroup Condition="'$(TF_BUILD)' == 'true' OR '$(GITLAB_CI)' == 'true'">
