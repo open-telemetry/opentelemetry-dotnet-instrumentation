@@ -110,7 +110,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.MongoDB", "test\tes
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "aspnet", "aspnet", "{2E1F47D9-BEC1-4DCE-A84D-847FE5BBBE9E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.AspNet", "test\test-applications\integrations\aspnet\Samples.AspNet\Samples.AspNet.csproj", "{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Samples.AspNet", "test\test-applications\integrations\aspnet\Samples.AspNet\Samples.AspNet.csproj", "{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "aspnet", "aspnet", "{A0B40A84-EF97-47DB-8455-796A9BCA1097}"
 EndProject
