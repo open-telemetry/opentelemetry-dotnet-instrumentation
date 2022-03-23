@@ -31,9 +31,10 @@ current_dir() {
 CURDIR=$(current_dir)
 SUFIX=$(native_sufix)
 OS=$(uname_os)
+ENABLE_PROFILING=${ENABLE_PROFILING:-1}
 
 # Enable .NET Framework Profiling API
-export COR_ENABLE_PROFILING="1"
+export COR_ENABLE_PROFILING="${ENABLE_PROFILING}"
 export COR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
 export COR_PROFILER_PATH="${CURDIR}/bin/tracer-home/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
 if [ "$OS" == "windows" ]
@@ -44,7 +45,7 @@ then
 fi
 
 # Enable .NET Core Profiling API
-export CORECLR_ENABLE_PROFILING="1"
+export CORECLR_ENABLE_PROFILING="${ENABLE_PROFILING}"
 export CORECLR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
 export CORECLR_PROFILER_PATH="${CURDIR}/bin/tracer-home/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
 if [ "$OS" == "windows" ]
@@ -55,10 +56,7 @@ then
 fi
 
 # Configure .NET Core runtime
-#
-# Not all apps/samples are prepared to run with DOTNET_ADDITIONAL_DEPS - when it is needed define it as
-# export DOTNET_ADDITIONAL_DEPS="${CURDIR}/bin/tracer-home/AdditionalDeps"
-#
+export DOTNET_ADDITIONAL_DEPS="${CURDIR}/bin/tracer-home/AdditionalDeps"
 export DOTNET_SHARED_STORE="${CURDIR}/bin/tracer-home/store"
 export DOTNET_STARTUP_HOOKS="${CURDIR}/bin/tracer-home/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
 

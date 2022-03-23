@@ -7,17 +7,24 @@
 namespace trace
 {
 
-inline const std::filesystem::path GetExpectedStartupHookPath(const WSTRING& home_path) {
-    std::filesystem::path path = home_path;
-    return (path / "netcoreapp3.1" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll");
-}
-
-inline bool IsStartupHookEnabled(const WSTRING& startup_hooks, const WSTRING& home_path)
+inline bool IsStartupHookEnabled(const std::vector<WSTRING>& startup_hooks, const WSTRING& home_path)
 {
-    const std::filesystem::path expected_startuphook_path = GetExpectedStartupHookPath(home_path);
-    const std::filesystem::path actual_startup_path = startup_hooks;
+    if (startup_hooks.empty())
+    {
+        return false;
+    }
 
-    return actual_startup_path == expected_startuphook_path;
+    const auto expected_startuphook_path = std::filesystem::path(home_path)
+        / "netcoreapp3.1" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll";
+
+    for (auto i = startup_hooks.begin(); i != startup_hooks.end(); i++)
+    {
+        if (std::filesystem::path(*i) == expected_startuphook_path)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 }  // namespace trace

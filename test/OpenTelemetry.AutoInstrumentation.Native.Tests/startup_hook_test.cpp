@@ -4,26 +4,9 @@
 
 using namespace trace;
 
-TEST(StartupHookTest, GetExpectedStartupHookPathDoesNotAddSeparator) {
-  const auto home_path = WStr("C:\\tracer_home\\");
-  const auto expected_path = WStr("C:\\tracer_home\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.StartupHook.dll");
-
-  const auto startup_hook_path = GetExpectedStartupHookPath(home_path);
-
-  ASSERT_EQ(expected_path, startup_hook_path);
-}
-
-TEST(StartupHookTest, GetExpectedStartupHookPathAddsSeparator) {
-  const auto home_path = WStr("C:\\tracer_home");
-  const auto expected_path = WStr("C:\\tracer_home\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.StartupHook.dll");
-
-  const auto startup_hook_path = GetExpectedStartupHookPath(home_path);
-
-  ASSERT_EQ(expected_path, startup_hook_path);
-}
-
 TEST(StartupHookTest, StartupHookIsEnabled) {
-  const auto startup_hooks = WStr("C:\\tracer_home\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.StartupHook.dll");
+  const auto startup_hooks =
+      std::vector<WSTRING>{WStr("C:\\tracer_home\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.StartupHook.dll")};
   const auto home_path = WStr("C:\\tracer_home");
 
   const auto is_enabled = IsStartupHookEnabled(startup_hooks, home_path);
@@ -32,7 +15,7 @@ TEST(StartupHookTest, StartupHookIsEnabled) {
 }
 
 TEST(StartupHookTest, StartupHookIsNotEnabledWhenStartupHooksIsEmpty) {
-  const auto startup_hooks = WStr("");
+  const auto startup_hooks = std::vector<WSTRING>{WStr("")};
   const auto home_path = WStr("C:\\tracer_home");
 
   const auto is_enabled = IsStartupHookEnabled(startup_hooks, home_path);
@@ -41,7 +24,7 @@ TEST(StartupHookTest, StartupHookIsNotEnabledWhenStartupHooksIsEmpty) {
 }
 
 TEST(StartupHookTest, StartupHookIsNotEnabledWhenNoStartupHooksDefined) {
-  const WSTRING startup_hooks;
+  const std::vector<WSTRING> startup_hooks;
   const auto home_path = WStr("C:\\tracer_home");
 
   const auto is_enabled = IsStartupHookEnabled(startup_hooks, home_path);
@@ -50,7 +33,7 @@ TEST(StartupHookTest, StartupHookIsNotEnabledWhenNoStartupHooksDefined) {
 }
 
 TEST(StartupHookTest, StartupHookIsNotEnabledWhenStartupHookDoesNotContainOpenTelemetryHook) {
-  const auto startup_hooks = WStr("C:\\other_folder\\StartupHook.dll");
+  const auto startup_hooks = std::vector<WSTRING>{WStr("C:\\other_folder\\StartupHook.dll")};
   const auto home_path = WStr("C:\\tracer_home");
 
   const auto is_enabled = IsStartupHookEnabled(startup_hooks, home_path);
@@ -59,7 +42,8 @@ TEST(StartupHookTest, StartupHookIsNotEnabledWhenStartupHookDoesNotContainOpenTe
 }
 
 TEST(StartupHookTest, StartupHookIsNotEnabledWhenNotInTheCorrectLocation) {
-  const auto startup_hooks = WStr("C:\\other_folder\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.StartupHook.dll");
+  const auto startup_hooks = std::vector<WSTRING>{
+      WStr("C:\\other_folder\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.StartupHook.dll")};
   const auto home_path = WStr("C:\\tracer_home");
 
   const auto is_enabled = IsStartupHookEnabled(startup_hooks, home_path);
@@ -68,12 +52,12 @@ TEST(StartupHookTest, StartupHookIsNotEnabledWhenNotInTheCorrectLocation) {
 }
 
 TEST(StartupHookTest, StartupHookIsEnabledWhenMultipleStartupHooksDefined) {
-  std::stringstream ss;
-  ss << "C:\\folder1\\StartupHook.dll" << DIR_SEPARATOR
-     << "C:\\tracer_home\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.StartupHook.dll"
-     << DIR_SEPARATOR << "C:\\folder2\\StartupHook.dll";
+  const auto startup_hooks = std::vector<WSTRING>{
+      WStr("C:\\folder1\\StartupHook.dll"),
+      WStr("C:\\tracer_home\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.StartupHook.dll"),
+      WStr("C:\\folder2\\StartupHook.dll"),
+  };
 
-  const auto startup_hooks = ToWSTRING(ss.str());
   const auto home_path = WStr("C:\\tracer_home");
 
   const auto is_enabled = IsStartupHookEnabled(startup_hooks, home_path);
