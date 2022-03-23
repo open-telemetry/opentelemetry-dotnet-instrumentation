@@ -27,8 +27,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		integrations.json = integrations.json
 		LICENSE = LICENSE
 		LICENSE-3rdparty.csv = LICENSE-3rdparty.csv
-		run_sample.sh = run_sample.sh
 		docs\README.md = docs\README.md
+		run_sample.sh = run_sample.sh
 		stylecop.json = stylecop.json
 	EndProjectSection
 EndProject
@@ -119,8 +119,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests", "test\OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests\OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests.csproj", "{35AB65D8-D76E-40C6-B10C-501A6D44C9E0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.StartupHook", "src\OpenTelemetry.AutoInstrumentation.StartupHook\OpenTelemetry.AutoInstrumentation.StartupHook.csproj", "{E04DA938-E153-4A0D-9CB0-EAC38210FAF2}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.StartupHook.AspNetCoreMvc31", "samples\Samples.StartupHook.AspNetCoreMvc31\Samples.StartupHook.AspNetCoreMvc31.csproj", "{B25F7404-A6F0-4071-A0CC-139AAB3B0A91}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests.StartupHook", "test\integration-tests\IntegrationTests.StartupHook\IntegrationTests.StartupHook.csproj", "{0584ADC1-956E-49B0-A46F-8405AA2AD207}"
 EndProject
@@ -452,18 +450,6 @@ Global
 		{E04DA938-E153-4A0D-9CB0-EAC38210FAF2}.Release|x64.Build.0 = Release|Any CPU
 		{E04DA938-E153-4A0D-9CB0-EAC38210FAF2}.Release|x86.ActiveCfg = Release|Any CPU
 		{E04DA938-E153-4A0D-9CB0-EAC38210FAF2}.Release|x86.Build.0 = Release|Any CPU
-		{B25F7404-A6F0-4071-A0CC-139AAB3B0A91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B25F7404-A6F0-4071-A0CC-139AAB3B0A91}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B25F7404-A6F0-4071-A0CC-139AAB3B0A91}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{B25F7404-A6F0-4071-A0CC-139AAB3B0A91}.Debug|x64.Build.0 = Debug|Any CPU
-		{B25F7404-A6F0-4071-A0CC-139AAB3B0A91}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{B25F7404-A6F0-4071-A0CC-139AAB3B0A91}.Debug|x86.Build.0 = Debug|Any CPU
-		{B25F7404-A6F0-4071-A0CC-139AAB3B0A91}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B25F7404-A6F0-4071-A0CC-139AAB3B0A91}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B25F7404-A6F0-4071-A0CC-139AAB3B0A91}.Release|x64.ActiveCfg = Release|Any CPU
-		{B25F7404-A6F0-4071-A0CC-139AAB3B0A91}.Release|x64.Build.0 = Release|Any CPU
-		{B25F7404-A6F0-4071-A0CC-139AAB3B0A91}.Release|x86.ActiveCfg = Release|Any CPU
-		{B25F7404-A6F0-4071-A0CC-139AAB3B0A91}.Release|x86.Build.0 = Release|Any CPU
 		{0584ADC1-956E-49B0-A46F-8405AA2AD207}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0584ADC1-956E-49B0-A46F-8405AA2AD207}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0584ADC1-956E-49B0-A46F-8405AA2AD207}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -549,7 +535,6 @@ Global
 		{EE65928D-15C8-45E5-A94C-7094381E7ACF} = {A0B40A84-EF97-47DB-8455-796A9BCA1097}
 		{35AB65D8-D76E-40C6-B10C-501A6D44C9E0} = {5C915382-C886-457D-8641-9E766D8E5A17}
 		{E04DA938-E153-4A0D-9CB0-EAC38210FAF2} = {9E5F0022-0A50-40BF-AC6A-C3078585ECAB}
-		{B25F7404-A6F0-4071-A0CC-139AAB3B0A91} = {BAF8F246-3645-42AD-B1D0-0F7EAFBAB34A}
 		{0584ADC1-956E-49B0-A46F-8405AA2AD207} = {357C3F25-98CA-41C6-BA2C-20968695D026}
 		{FF665CC4-6643-4614-A1A0-FA182E3AF37C} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{E026D9FA-FBD5-4066-AF6A-FB63DE28521F} = {9E5F0022-0A50-40BF-AC6A-C3078585ECAB}
