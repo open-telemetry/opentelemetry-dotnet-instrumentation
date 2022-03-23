@@ -8,46 +8,77 @@
     }
   },
   "profiles": {
-    "IIS Express": {
+    "StartupHook IIS Express": {
       "commandName": "IISExpress",
-      "launchBrowser": false,
+      "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-
-        "CORECLR_ENABLE_PROFILING": "1",
-        "CORECLR_PROFILER": "{918728DD-259F-4A6A-AC2B-B85E1B658318}",
-        "CORECLR_PROFILER_PATH": "$(SolutionDir)bin\\tracer-home\\win-x64\\OpenTelemetry.AutoInstrumentation.Native.dll",
+        "DOTNET_ADDITIONAL_DEPS": "$(SolutionDir)bin\\tracer-home\\AdditionalDeps",
+        "DOTNET_SHARED_STORE": "$(SolutionDir)bin\\tracer-home\\store",
         "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.StartupHook.dll",
-
-        "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home",
-        "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE": "$(SolutionDir)bin\\tracer-home\\integrations.json",
-        "OTEL_SERVICE_NAME": "Samples.AspNetCoreMvc31",
-        "OTEL_TRACES_EXPORTER": "jaeger",
-        "OTEL_EXPORTER_JAEGER_AGENT_HOST": "localhost",
-        "OTEL_EXPORTER_JAEGER_AGENT_PORT": "6831"
+        "OTEL_DOTNET_AUTO_CONSOLE_EXPORTER_ENABLED": "true",
+        "OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS": "AspNet,HttpClient,SqlClient",
+        "OTEL_SERVICE_NAME": "StartupHook.IISExpress",
+        "OTEL_TRACES_EXPORTER": "jaeger"
       },
       "use64Bit": true,
       "nativeDebugging": true
     },
-    "Samples.AspNetCoreMvc31": {
-      "commandName": "Project",
-      "launchBrowser": false,
+    "CLR Profiler IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-
         "CORECLR_ENABLE_PROFILING": "1",
         "CORECLR_PROFILER": "{918728DD-259F-4A6A-AC2B-B85E1B658318}",
-        "CORECLR_PROFILER_PATH": "$(SolutionDir)bin\\tracer-home$(OutputPath)\\OpenTelemetry.AutoInstrumentation.Native.dll",
+        "CORECLR_PROFILER_PATH": "$(SolutionDir)bin\\tracer-home\\win-x64\\OpenTelemetry.AutoInstrumentation.Native.dll",
+        "DOTNET_ADDITIONAL_DEPS": "$(SolutionDir)bin\\tracer-home\\AdditionalDeps",
+        "DOTNET_SHARED_STORE": "$(SolutionDir)bin\\tracer-home\\store",
         "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.StartupHook.dll",
-
+        "OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS": "AspNet,HttpClient,SqlClient",
         "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home",
         "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE": "$(SolutionDir)bin\\tracer-home\\integrations.json",
-
-        "OTEL_SERVICE_NAME": "Samples.AspNetCoreMvc31",
-        "OTEL_TRACES_EXPORTER": "jaeger",
-        "OTEL_EXPORTER_JAEGER_AGENT_HOST": "localhost",
-        "OTEL_EXPORTER_JAEGER_AGENT_PORT": "6831"
+        "OTEL_SERVICE_NAME": "CLRProfiler.IISExpress",
+        "OTEL_TRACES_EXPORTER": "jaeger"
       },
+      "use64Bit": true,
+      "nativeDebugging": true
+    },
+    "StartupHook Self-hosted": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ADDITIONAL_DEPS": "$(SolutionDir)bin\\tracer-home\\AdditionalDeps",
+        "DOTNET_SHARED_STORE": "$(SolutionDir)bin\\tracer-home\\store",
+        "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.StartupHook.dll",
+        "OTEL_DOTNET_AUTO_CONSOLE_EXPORTER_ENABLED": "true",
+        "OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS": "AspNet,HttpClient,SqlClient",
+        "OTEL_SERVICE_NAME": "StartupHook.Self-hosted",
+        "OTEL_TRACES_EXPORTER": "jaeger"
+      },
+      "use64Bit": true,
+      "nativeDebugging": true,
+      "applicationUrl": "http://localhost:54568"
+    },
+    "CLRProfiler Self-hosted": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "CORECLR_ENABLE_PROFILING": "1",
+        "CORECLR_PROFILER": "{918728DD-259F-4A6A-AC2B-B85E1B658318}",
+        "CORECLR_PROFILER_PATH": "$(SolutionDir)bin\\tracer-home\\win-x64\\OpenTelemetry.AutoInstrumentation.Native.dll",
+        "DOTNET_ADDITIONAL_DEPS": "$(SolutionDir)bin\\tracer-home\\AdditionalDeps",
+        "DOTNET_SHARED_STORE": "$(SolutionDir)bin\\tracer-home\\store",
+        "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.StartupHook.dll",
+        "OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS": "AspNet,HttpClient,SqlClient",
+        "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home",
+        "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE": "$(SolutionDir)bin\\tracer-home\\integrations.json",
+        "OTEL_SERVICE_NAME": "CLRProfiler.Self-hosted",
+        "OTEL_TRACES_EXPORTER": "jaeger"
+      },
+      "use64Bit": true,
       "nativeDebugging": true,
       "applicationUrl": "http://localhost:54568"
     }
