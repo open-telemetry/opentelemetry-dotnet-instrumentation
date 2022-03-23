@@ -121,3 +121,9 @@ Usage example:
 ```bash
 aspNetAppTargetFramework="net6.0" ./run-sample.sh
 ```
+
+### Vendor.Distro
+
+Implements an [instrumentation plugin](../docs/config.md#customization).
+The sample script adds this plugin to the instrumentation configuration
+when launching the server application of the demo.
