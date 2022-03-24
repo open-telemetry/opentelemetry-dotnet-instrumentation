@@ -26,8 +26,6 @@ public class OtelSdkPlugin
     {
         var typeName = this.ToString();
         Console.WriteLine($"Hello from {typeName}");
-        var connection = RedisController.Connection;
-        var ret = builder.AddRedisInstrumentation(connection);
-        return ret;
+        return builder.AddRedisInstrumentation(RedisController.Connection);
     }
 }
