@@ -7,19 +7,26 @@
 namespace trace
 {
 
-inline bool IsStartupHookEnabled(const std::vector<WSTRING>& startup_hooks, const WSTRING& home_path)
+inline bool IsStartupHookValid(const std::vector<WSTRING>& startup_hooks, const WSTRING& home_path)
 {
     if (startup_hooks.empty())
     {
         return false;
     }
 
-    const auto expected_startuphook_path = std::filesystem::path(home_path)
+    const auto expected_startuphook_path =
+        std::filesystem::path(home_path)
         / "netcoreapp3.1" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll";
+    if (!std::filesystem::exists(expected_startuphook_path))
+    {
+        return false;
+    }
 
     for (auto i = startup_hooks.begin(); i != startup_hooks.end(); i++)
     {
-        if (std::filesystem::path(*i) == expected_startuphook_path)
+        const auto start_hook_path = std::filesystem::path(*i);
+        std::error_code ec;
+        if (std::filesystem::equivalent(expected_startuphook_path, start_hook_path, ec))
         {
             return true;
         }
