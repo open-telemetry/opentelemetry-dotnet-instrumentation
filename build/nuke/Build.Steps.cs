@@ -346,9 +346,9 @@ partial class Build
                                    .ForEach(file => {
                                        string depsJsonContent = File.ReadAllText(file);
                                        // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from target section.
-                                       depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+)AutoInstrumentation.AdditionalDeps.dll(.+?)},\r\n(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                                       depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+)AutoInstrumentation.AdditionalDeps.dll(.+?)}," + Environment.NewLine + "(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
                                        // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from library section and write to file.
-                                       depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+?)},\r\n(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                                       depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+?)}," + Environment.NewLine + "(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
                                        File.WriteAllText(file, depsJsonContent);
                                    });
         });

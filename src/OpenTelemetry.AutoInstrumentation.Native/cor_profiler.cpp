@@ -142,12 +142,13 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     if (use_dotnet_startuphook_bootstrapper)
     {
+        // Ensure that OTel StartupHook is listed.
         const auto home_path = GetEnvironmentValue(environment::profiler_home_path);
-        const auto startup_hooks = GetEnvironmentValue(environment::dotnet_startup_hooks);
-        if (!IsStartupHookEnabled(startup_hooks, home_path))
+        const auto startup_hooks = GetEnvironmentValues(environment::dotnet_startup_hooks, ENV_VAR_PATH_SEPARATOR);
+        if (!IsStartupHookValid(startup_hooks, home_path))
         {
-          Logger::Error("The required startup hook was not configured correctly. No telemetry will be captured.");
-          return E_FAIL;
+            Logger::Error("The required startup hook was not configured correctly. No telemetry will be captured.");
+            return E_FAIL;
         }
     }
 

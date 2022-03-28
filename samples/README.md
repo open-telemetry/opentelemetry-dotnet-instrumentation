@@ -27,10 +27,14 @@ The script run can be customized using the following environment variables:
 | Environment variable | Description | Default |
 |-|-|-|
 | **aspNetAppTargetFramework** | Target framework for the `aspnet-server` service | `netcoreapp3.1` |
-| **exporter** | Value for [`OTEL_TRACES_EXPORTER`](../docs/config.md#exporters) env. variable | `jaeger` |
+| **configuration** | Build configuration for sample apps, either `Release` or `Debug` | `Release` |
+| **enableProfiling** | Value of `CLR_ENABLE_PROFILING` and `CORECLR_ENABLE_PROFILING` for the sample apps | `1` |
+| **exporter** | Value for [`OTEL_TRACES_EXPORTER`](../docs/config.md#exporters) env. variable | `otlp` |
+| **keepContainers** | Whether the docker containers should kept after the script finishes | `false` |
 | **sampleApp** | Application selected for the `http-client` service | `ConsoleApp` |
 | **sampleAppInjectSDK** | Whether auto-instrumentation injects the SDK on the `http-client` service | `true` |
 | **sampleAppTargetFramework** | Target framework for the `http-client` service | `netcoreapp3.1` |
+| **skipAppBuild** | Whether the script should skip building the sample apps | `false` |
 
 Usage example:
 
@@ -121,3 +125,9 @@ Usage example:
 ```bash
 aspNetAppTargetFramework="net6.0" ./run-sample.sh
 ```
+
+### Vendor.Distro
+
+Implements an [instrumentation plugin](../docs/config.md#customization).
+The sample script adds this plugin to the instrumentation configuration
+when launching the server application of the demo.

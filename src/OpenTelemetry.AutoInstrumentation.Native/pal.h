@@ -24,8 +24,10 @@
 
 #ifdef _WIN32
 #define DIR_SEPARATOR WStr('\\')
+#define ENV_VAR_PATH_SEPARATOR WStr(';')
 #else
 #define DIR_SEPARATOR WStr('/')
+#define ENV_VAR_PATH_SEPARATOR WStr(':')
 #endif
 
 namespace trace
