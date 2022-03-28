@@ -19,8 +19,9 @@
         "OTEL_DOTNET_AUTO_CONSOLE_EXPORTER_ENABLED": "true",
         "OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS": "AspNet,HttpClient,SqlClient",
         "OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS": "Samples.AspNetCoreMvc.OtelSdkPlugin, Samples.AspNetCoreMvc31, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4318",
         "OTEL_SERVICE_NAME": "StartupHook.IISExpress",
-        "OTEL_TRACES_EXPORTER": "jaeger"
+        "OTEL_TRACES_EXPORTER": "otlp"
       },
       "use64Bit": true,
       "nativeDebugging": true
@@ -40,8 +41,9 @@
         "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home",
         "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE": "$(SolutionDir)bin\\tracer-home\\integrations.json",
         "OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS": "Samples.AspNetCoreMvc.OtelSdkPlugin, Samples.AspNetCoreMvc31, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4318",
         "OTEL_SERVICE_NAME": "CLRProfiler.IISExpress",
-        "OTEL_TRACES_EXPORTER": "jaeger"
+        "OTEL_TRACES_EXPORTER": "otlp"
       },
       "use64Bit": true,
       "nativeDebugging": true
@@ -57,8 +59,9 @@
         "OTEL_DOTNET_AUTO_CONSOLE_EXPORTER_ENABLED": "true",
         "OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS": "AspNet,HttpClient,SqlClient",
         "OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS": "Samples.AspNetCoreMvc.OtelSdkPlugin, Samples.AspNetCoreMvc31, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4318",
         "OTEL_SERVICE_NAME": "StartupHook.Self-hosted",
-        "OTEL_TRACES_EXPORTER": "jaeger"
+        "OTEL_TRACES_EXPORTER": "otlp"
       },
       "use64Bit": true,
       "nativeDebugging": true,
@@ -79,8 +82,9 @@
         "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home",
         "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE": "$(SolutionDir)bin\\tracer-home\\integrations.json",
         "OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS": "Samples.AspNetCoreMvc.OtelSdkPlugin, Samples.AspNetCoreMvc31, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4318",
         "OTEL_SERVICE_NAME": "CLRProfiler.Self-hosted",
-        "OTEL_TRACES_EXPORTER": "jaeger"
+        "OTEL_TRACES_EXPORTER": "otlp"
       },
       "use64Bit": true,
       "nativeDebugging": true,

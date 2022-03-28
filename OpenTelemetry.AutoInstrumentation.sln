@@ -45,6 +45,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{BAF8F246-3645-42AD-B1D0-0F7EAFBAB34A}"
 	ProjectSection(SolutionItems) = preProject
 		test\test-applications\integrations\Directory.Build.props = test\test-applications\integrations\Directory.Build.props
+		samples\docker-compose.yaml = samples\docker-compose.yaml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "samples\ConsoleApp\ConsoleApp.csproj", "{2A172931-3439-4563-A6E5-525924DC2F76}"
@@ -128,7 +129,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Tests", "test\OpenTelemetry.AutoInstrumentation.Tests\OpenTelemetry.AutoInstrumentation.Tests.csproj", "{065FEB4E-A99E-4A59-8112-1CB30CF794F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vendor.Distro", "samples\Vendor.Distro\Vendor.Distro.csproj", "{56938BD4-37F4-4E3F-BFBF-80F0309DFDBF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vendor.Distro", "samples\Vendor.Distro\Vendor.Distro.csproj", "{56938BD4-37F4-4E3F-BFBF-80F0309DFDBF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
