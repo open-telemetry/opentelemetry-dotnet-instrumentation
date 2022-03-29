@@ -15,10 +15,10 @@
 // </copyright>
 
 using System;
+using Examples.AspNetCoreMvc.Controllers;
 using OpenTelemetry.Trace;
-using Samples.AspNetCoreMvc.Controllers;
 
-namespace Samples.AspNetCoreMvc;
+namespace Examples.AspNetCoreMvc;
 
 public class OtelSdkPlugin
 {

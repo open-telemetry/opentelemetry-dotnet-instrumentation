@@ -21,10 +21,10 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Examples.AspNetCoreMvc.Shared;
 using Microsoft.AspNetCore.Mvc;
-using Samples.AspNetCoreMvc.Shared;
 
-namespace Samples.AspNetCoreMvc.Controllers;
+namespace Examples.AspNetCoreMvc.Controllers;
 
 public class HomeController : Controller
 {

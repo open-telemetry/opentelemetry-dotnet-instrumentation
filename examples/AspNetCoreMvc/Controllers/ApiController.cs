@@ -19,7 +19,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Samples.AspNetCoreMvc.Controllers;
+namespace Examples.AspNetCoreMvc.Controllers;
 
 [Route("api")]
 public class ApiController : ControllerBase

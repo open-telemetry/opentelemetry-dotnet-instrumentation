@@ -40,7 +40,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9E5F0022-0A5
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Loader", "src\OpenTelemetry.AutoInstrumentation.Loader\OpenTelemetry.AutoInstrumentation.Loader.csproj", "{AB8596C1-CFDA-4A5E-9E9C-74A3DF9AED77}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples.AspNetCoreMvc31", "examples\AspNetCoreMvc\Examples.AspNetCoreMvc31.csproj", "{303F8E41-691F-4453-AB7D-88A0036C0465}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples.AspNetCoreMvc", "examples\AspNetCoreMvc\Examples.AspNetCoreMvc.csproj", "{303F8E41-691F-4453-AB7D-88A0036C0465}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{BAF8F246-3645-42AD-B1D0-0F7EAFBAB34A}"
 	ProjectSection(SolutionItems) = preProject

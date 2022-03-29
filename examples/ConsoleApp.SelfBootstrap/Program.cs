@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 using OpenTelemetry;
 using OpenTelemetry.Trace;
 
-namespace ConsoleApp.SelfBootstrap;
+namespace Examples.ConsoleApp.SelfBootstrap;
 
 internal class Program
 {

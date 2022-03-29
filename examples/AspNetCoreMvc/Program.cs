@@ -17,7 +17,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace Samples.AspNetCoreMvc;
+namespace Examples.AspNetCoreMvc;
 
 public class Program
 {

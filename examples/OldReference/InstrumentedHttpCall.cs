@@ -20,7 +20,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace OldReference;
+namespace Examples.OldReference;
 
 public static class InstrumentedHttpCall
 {

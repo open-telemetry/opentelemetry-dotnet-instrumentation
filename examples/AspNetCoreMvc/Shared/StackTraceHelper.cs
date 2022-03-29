@@ -16,7 +16,7 @@
 
 using System;
 
-namespace Samples.AspNetCoreMvc.Shared;
+namespace Examples.AspNetCoreMvc.Shared;
 
 public static class StackTraceHelper
 {

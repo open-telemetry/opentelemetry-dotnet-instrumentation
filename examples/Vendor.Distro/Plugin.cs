@@ -17,7 +17,7 @@
 using System;
 using OpenTelemetry.Trace;
 
-namespace Vendor.Distro
+namespace Examples.Vendor.Distro
 {
     public class Plugin
     {

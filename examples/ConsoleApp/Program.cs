@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 using OpenTracing.Propagation;
 using OpenTracing.Util;
 
-namespace ConsoleApp;
+namespace Examples.ConsoleApp;
 
 internal class Program
 {

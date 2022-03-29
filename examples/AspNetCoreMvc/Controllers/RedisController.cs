@@ -17,7 +17,7 @@
 using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
 
-namespace Samples.AspNetCoreMvc.Controllers;
+namespace Examples.AspNetCoreMvc.Controllers;
 
 [Route("api/redis")]
 public class RedisController : ControllerBase

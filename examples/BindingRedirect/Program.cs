@@ -15,9 +15,9 @@
 // </copyright>
 
 using System.Threading.Tasks;
-using OldReference;
+using Examples.OldReference;
 
-namespace BindingRedirect;
+namespace Examples.BindingRedirect;
 
 public class Program
 {

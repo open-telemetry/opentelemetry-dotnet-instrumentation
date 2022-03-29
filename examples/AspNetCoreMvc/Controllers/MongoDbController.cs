@@ -20,7 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace Samples.AspNetCoreMvc.Controllers;
+namespace Examples.AspNetCoreMvc.Controllers;
 
 [Route("api/mongo")]
 public class MongoDbController : ControllerBase
