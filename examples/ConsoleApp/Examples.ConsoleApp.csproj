@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OpenTracingLibrary\OpenTracingLibrary.csproj" />
+    <ProjectReference Include="..\OpenTracingLibrary\Examples.OpenTracingLibrary.csproj" />
   </ItemGroup>
 
 </Project>

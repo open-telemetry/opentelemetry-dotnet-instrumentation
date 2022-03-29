@@ -22,9 +22,9 @@ For other .NET Core deployment models, edit the `deps.json` file.
 
 ### .NET Framework binding redirects
 
-The [samples/BindingRedirect](./../samples/BindingRedirect/) app shows how
+The [examples/BindingRedirect](./../examples/BindingRedirect/) app shows how
 to use the `app.config` file to solve version conflicts.
-The sample can only run successfully under the instrumentation, as the
+The example can only run successfully under the instrumentation, as the
 binding redirect makes the application dependent on a version of `System.Diagnostics.DiagnosticSource`
 that is not available at build time.
 
@@ -36,9 +36,9 @@ references using the required version, and use the respective `deps.json` file t
 are needed.
 
 To test your edits to the `deps.json` file, add a reference to the required version of the OpenTelemetry
-package to the [samples/CoreAppOldReference](./../samples/CoreAppOldReference/) sample and rebuild the
+package to the [examples/CoreAppOldReference](./../examples/CoreAppOldReference/) example and rebuild the
 application. Save the generated `deps.json` file, remove the package reference, and rebuild the
-sample app. Compare the files to explore the changes.
+example app. Compare the files to explore the changes.
 
 ## No proper relationship between spans
 
@@ -50,7 +50,7 @@ version used by the OpenTelemetry .NET Auto-Instrumentation (`6.0.0`) reference 
 This causes automatic binding redirection to solve the issue.
 
 If automatic binding redirection is [disabled](https://docs.microsoft.com/en-us/dotnet/framework/configure-apps/how-to-enable-and-disable-automatic-binding-redirection)
-you can also manually add binding redirection to the [`App.config`](../samples/BindingRedirect/App.config) file.
+you can also manually add binding redirection to the [`App.config`](../examples/BindingRedirect/App.config) file.
 
 ## High CPU usage
 
