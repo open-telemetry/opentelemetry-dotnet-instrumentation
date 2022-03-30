@@ -30,14 +30,5 @@ namespace Extensions
                 // Skip helpers project
                 .Where(x => !x.Name.Equals(Projects.Tests.IntegrationTestsHelpers, StringComparison.OrdinalIgnoreCase));
         }
-
-        public static IEnumerable<Project> GetSampleProjects(this Solution solution)
-        {
-            var samplesDirectory = solution.Directory / "samples";
-            return solution
-                .AllProjects
-                .Where(x => samplesDirectory ==  x.Directory.Parent)
-                .OrderBy(x => x.Path.Name);
-        }
     }
 }

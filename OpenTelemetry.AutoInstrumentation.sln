@@ -28,7 +28,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE = LICENSE
 		LICENSE-3rdparty.csv = LICENSE-3rdparty.csv
 		docs\README.md = docs\README.md
-		run_sample.sh = run_sample.sh
+		run-example.sh = run-example.sh
 		stylecop.json = stylecop.json
 	EndProjectSection
 EndProject
@@ -40,27 +40,27 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9E5F0022-0A5
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Loader", "src\OpenTelemetry.AutoInstrumentation.Loader\OpenTelemetry.AutoInstrumentation.Loader.csproj", "{AB8596C1-CFDA-4A5E-9E9C-74A3DF9AED77}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.AspNetCoreMvc31", "samples\Samples.AspNetCoreMvc31\Samples.AspNetCoreMvc31.csproj", "{303F8E41-691F-4453-AB7D-88A0036C0465}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples.AspNetCoreMvc", "examples\AspNetCoreMvc\Examples.AspNetCoreMvc.csproj", "{303F8E41-691F-4453-AB7D-88A0036C0465}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{BAF8F246-3645-42AD-B1D0-0F7EAFBAB34A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{BAF8F246-3645-42AD-B1D0-0F7EAFBAB34A}"
 	ProjectSection(SolutionItems) = preProject
 		test\test-applications\integrations\Directory.Build.props = test\test-applications\integrations\Directory.Build.props
-		samples\docker-compose.yaml = samples\docker-compose.yaml
+		examples\docker-compose.yaml = examples\docker-compose.yaml
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "samples\ConsoleApp\ConsoleApp.csproj", "{2A172931-3439-4563-A6E5-525924DC2F76}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples.ConsoleApp", "examples\ConsoleApp\Examples.ConsoleApp.csproj", "{2A172931-3439-4563-A6E5-525924DC2F76}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation", "src\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.csproj", "{6690361C-CCD8-42C4-A5CF-82D554B03A3D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp.SelfBootstrap", "samples\ConsoleApp.SelfBootstrap\ConsoleApp.SelfBootstrap.csproj", "{7EA51D34-8E0E-4548-8A7F-5C6F9C3533AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples.ConsoleApp.SelfBootstrap", "examples\ConsoleApp.SelfBootstrap\Examples.ConsoleApp.SelfBootstrap.csproj", "{7EA51D34-8E0E-4548-8A7F-5C6F9C3533AF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTracingLibrary", "samples\OpenTracingLibrary\OpenTracingLibrary.csproj", "{7220BDBB-084D-40B3-A710-19E3C7147185}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples.OpenTracingLibrary", "examples\OpenTracingLibrary\Examples.OpenTracingLibrary.csproj", "{7220BDBB-084D-40B3-A710-19E3C7147185}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Core", "src\OpenTelemetry.AutoInstrumentation.Core\OpenTelemetry.AutoInstrumentation.Core.csproj", "{8BA1CCCC-B07C-46DD-9D54-0B98B3001100}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BindingRedirect", "samples\BindingRedirect\BindingRedirect.csproj", "{94089CFF-FD2A-45EF-A496-874569882E81}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples.BindingRedirect", "examples\BindingRedirect\Examples.BindingRedirect.csproj", "{94089CFF-FD2A-45EF-A496-874569882E81}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OldReference", "samples\OldReference\OldReference.csproj", "{4C10E5C1-E212-4744-B92E-49A3AFC314FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples.OldReference", "examples\OldReference\Examples.OldReference.csproj", "{4C10E5C1-E212-4744-B92E-49A3AFC314FC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenTelemetry.AutoInstrumentation.Native.Tests", "test\OpenTelemetry.AutoInstrumentation.Native.Tests\OpenTelemetry.AutoInstrumentation.Native.Tests.vcxproj", "{5728056A-51AA-4FF5-AD0C-E86E44E36102}"
 EndProject
@@ -129,7 +129,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Tests", "test\OpenTelemetry.AutoInstrumentation.Tests\OpenTelemetry.AutoInstrumentation.Tests.csproj", "{065FEB4E-A99E-4A59-8112-1CB30CF794F9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vendor.Distro", "samples\Vendor.Distro\Vendor.Distro.csproj", "{56938BD4-37F4-4E3F-BFBF-80F0309DFDBF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples.Vendor.Distro", "examples\Vendor.Distro\Examples.Vendor.Distro.csproj", "{56938BD4-37F4-4E3F-BFBF-80F0309DFDBF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

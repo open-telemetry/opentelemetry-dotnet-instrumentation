@@ -107,7 +107,7 @@ with auto-instrumentation in your shell (e.g. bash, zsh, git bash).
 Example usage:
 
 ```sh
-./dev/instrument.sh OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS=HttpClient dotnet run -f netcoreapp3.1 --project ./samples/ConsoleApp/ConsoleApp.csproj
+./dev/instrument.sh OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS=HttpClient dotnet run -f netcoreapp3.1 --project ./examples/ConsoleApp/Examples.ConsoleApp.csproj
 ```
 
 [`dev/envvars.sh`](../dev/envvars.sh) can be used to export profiler environmental variables to your current shell session.
@@ -116,13 +116,13 @@ Example usage:
 ```sh
 source ./dev/envvars.sh
 export OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS=HttpClient
-./samples/ConsoleApp/bin/Debug/netcoreapp3.1/ConsoleApp
+ ./examples/ConsoleApp/bin/Release/netcoreapp3.1/Examples.ConsoleApp
 ```
 
-### Run Samples
+### Running the Examples
 
-You can use the sample applications to see the local changes in action. See the
-[`samples/README.md`](../samples/README.md) for instructions on how to run the samples.
+You can use the example applications to see the local changes in action. See the
+[`examples/README.md`](../examples/README.md) for instructions on how to run the examples.
 
 ## Debug .NET Runtime on Linux
 
@@ -139,7 +139,7 @@ You can use the sample applications to see the local changes in action. See the
   ```bash
   PATH="$PATH:$PWD/artifacts/bin/coreclr/Linux.x64.Debug/corerun"
   export CORE_LIBRARIES="$PWD/artifacts/bin/runtime/net6.0-Linux-Debug-x64"
-  corerun ~/repos/opentelemetry-dotnet-instrumentation/samples/ConsoleApp/bin/Debug/net6.0/ConsoleApp.dll
+  corerun ~/repos/opentelemetry-dotnet-instrumentation/examples/ConsoleApp/bin/Debug/net6.0/Examples.ConsoleApp.dll
   ```
 
 - [Debugging](https://github.com/dotnet/runtime/blob/main/docs/workflow/debugging/coreclr/debugging.md)
@@ -149,10 +149,10 @@ You can use the sample applications to see the local changes in action. See the
   ```bash
   ~/repos/opentelemetry-dotnet-instrumentation$ source dev/envvars.sh 
   ~/repos/opentelemetry-dotnet-instrumentation$ cd ../runtime/
-  ~/repos/runtime$ lldb -- ./artifacts/bin/coreclr/Linux.x64.Debug/corerun ~/repos/opentelemetry-dotnet-instrumentation/samples/ConsoleApp/bin/Debug/net6.0/ConsoleApp.dll
+  ~/repos/runtime$ lldb -- ./artifacts/bin/coreclr/Linux.x64.Debug/corerun ~/repos/opentelemetry-dotnet-instrumentation/examples/ConsoleApp/bin/Debug/net6.0/Examples.ConsoleApp.dll
   (lldb) target create "./artifacts/bin/coreclr/Linux.x64.Debug/corerun"
   Current executable set to '/home/user/repos/runtime/artifacts/bin/coreclr/Linux.x64.Debug/corerun' (x86_64).
-  (lldb) settings set -- target.run-args  "/home/user/repos/opentelemetry-dotnet-instrumentation/samples/ConsoleApp/bin/Debug/net6.0/ConsoleApp.dll"
+  (lldb) settings set -- target.run-args  "/home/user/repos/opentelemetry-dotnet-instrumentation/examples/ConsoleApp/bin/Debug/net6.0/Examples.ConsoleApp.dll"
   (lldb) process launch -s
   Process 1905 launched: '/home/user/repos/runtime/artifacts/bin/coreclr/Linux.x64.Debug/corerun' (x86_64)
   (lldb) process handle -s false SIGUSR1 SIGUSR2
