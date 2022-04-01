@@ -31,7 +31,7 @@ Add any other context about the problem here.
 Steps to reproduce the behavior:
 
  1. First step;
- 2. Second steps;
+ 2. Second step;
  3. etc
 
 <!--
