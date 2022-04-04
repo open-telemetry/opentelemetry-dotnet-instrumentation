@@ -3,45 +3,210 @@ updates:
 
   - package-ecosystem: github-actions
     directory: /
-    labels:
-      - dependencies
-      - actions
     schedule:
       day: sunday
       interval: weekly
 
+ 
   - package-ecosystem: nuget
     directory: /build/nuke
-    labels:
-      - dependencies
     schedule:
       day: sunday
       interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /examples/AspNetCoreMvc
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /examples/BindingRedirect
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /examples/ConsoleApp
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /examples/ConsoleApp.SelfBootstrap
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /examples/CoreAppOldReference
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /examples/OldReference
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /examples/OpenTracingLibrary
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /examples/Vendor.Distro
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /src/OpenTelemetry.AutoInstrumentation
-    labels:
-      - dependencies
-    ignore:
-      # these libraries are kept at the lowest supported version for compatibility on netstandard2.0
-      - dependency-name: "System.Reflection.Emit"
-      - dependency-name: "System.Reflection.Emit.Lightweight"
     schedule:
       day: sunday
       interval: weekly
-  
-  - package-ecosystem: nuget
-    directory: /src
-    labels:
-      - dependencies
-    schedule:
-      day: sunday
-      interval: weekly
+    open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
-    directory: /test
-    labels:
-      - dependencies
+    directory: /src/OpenTelemetry.AutoInstrumentation.AdditionalDeps
     schedule:
       day: sunday
       interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /src/OpenTelemetry.AutoInstrumentation.Core
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /src/OpenTelemetry.AutoInstrumentation.Loader
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /src/OpenTelemetry.AutoInstrumentation.StartupHook
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /test/integration-tests/aspnet/IntegrationTests.AspNet
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /test/integration-tests/IntegrationTests.GraphQL
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /test/integration-tests/IntegrationTests.Helpers
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /test/integration-tests/IntegrationTests.MongoDB
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /test/integration-tests/IntegrationTests.StartupHook
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /test/OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /test/OpenTelemetry.AutoInstrumentation.Loader.Tests
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /test/OpenTelemetry.AutoInstrumentation.Tests
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /test/test-applications/integrations/aspnet/Samples.AspNet
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /test/test-applications/integrations/dependency-libs/Samples.ExampleLibrary
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /test/test-applications/integrations/dependency-libs/Samples.ExampleLibraryTracer
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /test/test-applications/integrations/Samples.GraphQL
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /test/test-applications/integrations/Samples.MongoDB
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /test/test-applications/integrations/Samples.StartupHook
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /test/test-applications/mocks/OpenTelemetry.AutoInstrumentation.Mock
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
