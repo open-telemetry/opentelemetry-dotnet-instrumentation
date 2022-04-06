@@ -206,7 +206,7 @@ internal class ConsoleLogger : ILogger
     {
         try
         {
-            Console.WriteLine($"[{_name}] {level}:{string.Format(messageTemplate, args)}");
+            Console.WriteLine($"[{_name}] {level}: {string.Format(messageTemplate, args)}");
 
             if (exception != null)
             {
