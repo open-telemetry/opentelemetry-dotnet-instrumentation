@@ -1,4 +1,4 @@
-// <copyright file="ConsoleLogger.cs" company="OpenTelemetry Authors">
+// <copyright file="Logger.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,25 +19,14 @@ using System.Runtime.CompilerServices;
 
 namespace OpenTelemetry.AutoInstrumentation.Logging;
 
-internal class ConsoleLogger : ILogger
+internal class Logger : ILogger
 {
     private static readonly object[] NoPropertyValues = Array.Empty<object>();
+    private readonly ISink _sink;
 
-    private readonly string _name;
-
-    public ConsoleLogger(string name)
+    internal Logger(ISink sink)
     {
-        _name = name;
-    }
-
-    public static ConsoleLogger Create<T>()
-    {
-        return Create(typeof(T));
-    }
-
-    public static ConsoleLogger Create(Type type)
-    {
-        return new ConsoleLogger(type.Name);
+        _sink = sink ?? throw new ArgumentNullException(nameof(sink));
     }
 
     public bool IsEnabled(LogLevel level)
@@ -206,11 +195,14 @@ internal class ConsoleLogger : ILogger
     {
         try
         {
-            Console.WriteLine($"[{_name}] {level}:{string.Format(messageTemplate, args)}");
+            var message =
+                $"[{DateTime.UtcNow}] [{level}] {messageTemplate} {Environment.NewLine}";
+            _sink.Write(message);
 
             if (exception != null)
             {
-                Console.WriteLine($">> Exception: {exception.Message} {Environment.NewLine} {exception}");
+                var exceptionMessage = $"Exception: {exception.Message}{Environment.NewLine}{exception}{Environment.NewLine}";
+                _sink.Write(exceptionMessage);
             }
         }
         catch
@@ -221,7 +213,6 @@ internal class ConsoleLogger : ILogger
                 var properties = args.Length == 0
                     ? string.Empty
                     : "; " + string.Join(", ", args);
-
                 Console.Error.WriteLine($"{messageTemplate}{properties}{ex}");
             }
             catch

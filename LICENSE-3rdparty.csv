@@ -1,7 +1,7 @@
 Component,Origin,License,Copyright
-Datadog.Trace,https://github.com/serilog/serilog,Apache-2.0,Copyright (c) 2013-2018 Serilog Contributors
-Datadog.Trace,https://github.com/serilog/serilog-sinks-file,Apache-2.0,Copyright (c) 2016 Serilog Contributors
-Datadog.Trace,https://github.com/JamesNK/Newtonsoft.Json,MIT,Copyright (c) 2007 James Newton-King
+OpenTelemetry.AutoInstrumentation,https://github.com/serilog/serilog,Apache-2.0,Copyright (c) 2013-2018 Serilog Contributors
+OpenTelemetry.AutoInstrumentation,https://github.com/serilog/serilog-sinks-file,Apache-2.0,Copyright (c) 2016 Serilog Contributors
+OpenTelemetry.AutoInstrumentation,https://github.com/JamesNK/Newtonsoft.Json,MIT,Copyright (c) 2007 James Newton-King
 OpenTelemetry.AutoInstrumentation.Native,https://github.com/dotnet/runtime,MIT,Copyright (c) .NET Foundation and contributors. All rights reserved.
 OpenTelemetry.AutoInstrumentation.Native,https://github.com/Microsoft/clr-samples,MIT,Copyright (c) .NET Foundation and contributors. All rights reserved.
 OpenTelemetry.AutoInstrumentation.Native,https://github.com/MicrosoftArchive/clrprofiler,MIT,Copyright (c) Microsoft Corporation.  All rights reserved.

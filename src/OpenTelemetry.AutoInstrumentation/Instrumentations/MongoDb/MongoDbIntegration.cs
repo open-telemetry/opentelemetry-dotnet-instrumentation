@@ -40,7 +40,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDb
 
         private const string OperationName = "mongodb.query";
 
-        private static readonly ILogger Log = ConsoleLogger.Create(typeof(MongoDbIntegration));
+        private static readonly ILogger Log = OtelLogging.GetLogger();
 
         private static readonly ActivitySource ActivitySource = new ActivitySource(
             "OpenTelemetry.AutoInstrumentation.MongoDB", "0.0.1");
