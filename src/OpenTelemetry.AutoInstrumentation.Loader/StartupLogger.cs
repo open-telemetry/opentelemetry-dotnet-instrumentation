@@ -152,7 +152,7 @@ internal static class StartupLogger
         catch
         {
             // We can't get the process info
-            return Path.Combine(LogDirectory, "dotnet-tracer-loader.log");
+            return Path.Combine(LogDirectory, $"dotnet-tracer-loader-{Guid.NewGuid()}.log");
         }
     }
 
