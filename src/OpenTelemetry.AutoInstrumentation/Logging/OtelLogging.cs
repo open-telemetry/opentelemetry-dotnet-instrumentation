@@ -32,7 +32,7 @@ internal static class OtelLogging
 
     static OtelLogging()
     {
-        ISink sink = new NoopSink();
+        ISink sink = null;
         try
         {
             var logDirectory = GetLogDirectory();
@@ -45,7 +45,12 @@ internal static class OtelLogging
         }
         catch (Exception)
         {
-            // ignored
+            // unable to configure logging to a file
+        }
+
+        if (sink == null)
+        {
+            sink = new NoopSink();
         }
 
         Logger = new Logger(sink);
@@ -58,12 +63,14 @@ internal static class OtelLogging
         try
         {
             using var process = Process.GetCurrentProcess();
-            return $"dotnet-tracer-managed-{process.ProcessName}-{process.Id}.log";
+            var appDomainName = AppDomain.CurrentDomain.FriendlyName;
+
+            return $"dotnet-tracer-managed-{appDomainName}-{process.Id}.log";
         }
         catch
         {
             // We can't get the process info
-            return "dotnet-tracer-managed.log";
+            return $"dotnet-tracer-managed-{Guid.NewGuid()}.log";
         }
     }
 
