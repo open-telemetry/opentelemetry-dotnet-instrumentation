@@ -1,4 +1,4 @@
-// <copyright file="PluginsConfiguratioHelperTests.cs" company="OpenTelemetry Authors">
+// <copyright file="PluginsConfigurationHelperTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,22 +16,29 @@
 
 using System;
 using System.IO;
+using FluentAssertions;
 using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.Trace;
 using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configuration;
 
-public class PluginsConfiguratioHelperTests
+public class PluginsConfigurationHelperTests
 {
-    [Theory]
-    [InlineData("Missing.Assembly.PluginType", typeof(TypeLoadException))]
-    [InlineData("Missing.Assembly.PluginType, Missing.Assembly", typeof(FileNotFoundException))]
-    public void FailToLoadPluginAssembly(string pluginAssemblyQualifiedName, Type expectedExceptionType)
+    [Fact]
+    public void MissingAssembly()
     {
-        var action = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
+        var action = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { "Missing.Assembly.PluginType, Missing.Assembly" });
 
-        Assert.Throws(expectedExceptionType, action);
+        action.Should().Throw<FileNotFoundException>();
+    }
+
+    [Fact]
+    public void MissingPluginTypeFromAssembly()
+    {
+        var action = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { "Missing.PluginType" });
+
+        action.Should().Throw<TypeLoadException>();
     }
 
     [Fact]
@@ -40,7 +47,7 @@ public class PluginsConfiguratioHelperTests
         var pluginAssemblyQualifiedName = GetType().AssemblyQualifiedName;
         var action = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
 
-        Assert.Throws<MissingMethodException>(action);
+        action.Should().Throw<MissingMethodException>();
     }
 
     [Fact]
@@ -49,16 +56,14 @@ public class PluginsConfiguratioHelperTests
         var pluginAssemblyQualifiedName = typeof(MockPluginMissingDefaultConstructor).AssemblyQualifiedName;
         var action = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
 
-        Assert.Throws<MissingMethodException>(action);
+        action.Should().Throw<MissingMethodException>();
     }
 
     [Fact]
     public void InvokePluginSuccess()
     {
         var pluginAssemblyQualifiedName = typeof(MockPlugin).AssemblyQualifiedName;
-        var action = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
-
-        action();
+        Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
     }
 
     public class MockPlugin
