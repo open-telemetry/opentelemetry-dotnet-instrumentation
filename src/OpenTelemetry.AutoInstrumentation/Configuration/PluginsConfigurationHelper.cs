@@ -34,9 +34,15 @@ internal static class PluginsConfigurationHelper
 
     private static TracerProviderBuilder InvokePlugin(this TracerProviderBuilder builder, string pluginAssemblyQualifiedName)
     {
+        const string configureTracerProviderMethodName = "ConfigureTracerProvider";
+
         // get the type and method
-        var t = Type.GetType(pluginAssemblyQualifiedName);
-        var mi = t.GetMethod("ConfigureTracerProvider", new Type[] { typeof(TracerProviderBuilder) });
+        var t = Type.GetType(pluginAssemblyQualifiedName, throwOnError: true);
+        var mi = t.GetMethod(configureTracerProviderMethodName, new Type[] { typeof(TracerProviderBuilder) });
+        if (mi is null)
+        {
+            throw new MissingMethodException(t.Name, configureTracerProviderMethodName);
+        }
 
         // execute
         var obj = Activator.CreateInstance(t);
