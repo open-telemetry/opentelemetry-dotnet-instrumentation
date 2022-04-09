@@ -20,12 +20,12 @@ using Xunit;
 namespace IntegrationTests.Http
 {
     [CollectionDefinition(Name)]
-    public class HttpCollection : ICollectionFixture<HttpClientFixture>
+    public class HttpCollection : ICollectionFixture<HttpFixture>
     {
         public const string Name = nameof(HttpCollection);
     }
 
-    internal class HttpClientFixture : IDisposable
+    internal class HttpFixture : IDisposable
     {
         public void Dispose()
         {
