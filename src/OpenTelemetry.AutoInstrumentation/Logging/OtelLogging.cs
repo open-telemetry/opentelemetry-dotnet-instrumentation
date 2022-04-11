@@ -1,4 +1,4 @@
-﻿// <copyright file="OtelLogging.cs" company="OpenTelemetry Authors">
+// <copyright file="OtelLogging.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -84,11 +84,11 @@ internal static class OtelLogging
 
             if (logDirectory == null)
             {
-                var nativeLogFile = Environment.GetEnvironmentVariable(ConfigurationKeys.LogPath);
+                var envVarValue = Environment.GetEnvironmentVariable(ConfigurationKeys.LogPath);
 
-                if (!string.IsNullOrEmpty(nativeLogFile))
+                if (!string.IsNullOrEmpty(envVarValue))
                 {
-                    logDirectory = Path.GetDirectoryName(nativeLogFile);
+                    logDirectory = Path.GetDirectoryName(envVarValue);
                 }
             }
 

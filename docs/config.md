@@ -58,7 +58,9 @@ Default logs directory paths are:
 - Windows: `%ProgramData%\OpenTelemetry .NET AutoInstrumentation\logs`
 - Linux: `/var/log/opentelemetry/dotnet`
 
-If there is a problem with creation of the default directory, the path of the current user's [temporary folder](https://docs.microsoft.com/en-us/dotnet/api/System.IO.Path.GetTempPath?view=net-6.0) is used.
+If there is a problem with the creation of the default directory,
+the path of the current user's [temporary folder](https://docs.microsoft.com/en-us/dotnet/api/System.IO.Path.GetTempPath?view=net-6.0)
+is used.
 
 | Environment variable | Description | Default |
 |-|-|-|

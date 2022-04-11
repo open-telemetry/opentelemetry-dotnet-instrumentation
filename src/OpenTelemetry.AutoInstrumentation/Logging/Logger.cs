@@ -196,7 +196,7 @@ internal class Logger : ILogger
         try
         {
             var message =
-                $"[{DateTime.UtcNow}] [{level}] {messageTemplate} {Environment.NewLine}";
+                $"[{DateTime.UtcNow}] [{level}] {string.Format(messageTemplate, args)} {Environment.NewLine}";
             _sink.Write(message);
 
             if (exception != null)
