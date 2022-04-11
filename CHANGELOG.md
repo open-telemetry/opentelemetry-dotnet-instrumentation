@@ -16,6 +16,9 @@ which is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/
 
 ### Added
 
+- Add support for .NET Framework 4.6.2 and later.
+- Add support for .NET Core 3.1.
+- Add support for .NET 5.0 and 6.0.
 - Add ASP.NET and ASP.NET Core source instrumentations.
 - Add [GraphQL](https://www.nuget.org/packages/GraphQL/) bytecode instrumentation.
 - Add [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient)
