@@ -57,7 +57,7 @@ injected into the application.
 
 - [**Managed Profiler**](../src/OpenTelemetry.AutoInstrumentation):
 contains the code setting up the OpenTelemetry .NET SDK and configured instrumentations.
-Plus, support code to run and implement bytecode instrumentations. Optionally, the code
+Additionally, support code to run and implement bytecode instrumentations. Optionally, the code
 setting-up the OpenTelemetry .NET SDK can be left to the application by setting the
 environment variable `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP` to `false`.
 
