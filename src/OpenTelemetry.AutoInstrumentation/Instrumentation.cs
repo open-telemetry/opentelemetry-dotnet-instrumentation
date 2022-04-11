@@ -16,8 +16,10 @@
 
 using System;
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Configuration;
+using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Shims.OpenTracing;
 using OpenTelemetry.Trace;
@@ -32,6 +34,7 @@ public static class Instrumentation
     private static readonly Process _process = Process.GetCurrentProcess();
     private static int _firstInitialization = 1;
     private static int _isExiting = 0;
+    private static SdkSelfDiagnosticsEventListener _sdkEventListener;
 
     private static TracerProvider _tracerProvider;
 
@@ -74,6 +77,9 @@ public static class Instrumentation
         {
             if (TracerSettings.LoadTracerAtStartup)
             {
+                // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
+                _sdkEventListener = new(EventLevel.Warning);
+
                 var builder = Sdk
                     .CreateTracerProviderBuilder()
                     .UseEnvironmentVariables(TracerSettings)
@@ -133,6 +139,7 @@ public static class Instrumentation
         try
         {
             _tracerProvider.Dispose();
+            _sdkEventListener.Dispose();
 
             Log("OpenTelemetry tracer exit.");
         }
