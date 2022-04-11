@@ -107,6 +107,10 @@ OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
 
 See [config.md](config.md).
 
+### Instumented libraries and frameworks
+
+See [config.md#instumented-libraries-and-frameworks](config.md#instumented-libraries-and-frameworks).
+
 ## Troubleshooting
 
 See [troubleshooting.md](troubleshooting.md).

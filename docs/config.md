@@ -34,7 +34,7 @@ for more details.
 | `OTEL_DOTNET_AUTO_CLR_ENABLE_INLINING` | Set to `false` to disable JIT inlining. | `true` |
 | `OTEL_DOTNET_AUTO_CLR_ENABLE_NGEN` | Set to `false` to disable NGEN images. | `true` |
 
-### Instumented libraries and framework
+### Instumented libraries and frameworks
 
 | ID | Library | Instrumentation type |
 |-|-|-|
