@@ -5,27 +5,26 @@
 This project adds [OpenTelemetry instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/#automatic-instrumentation)
 to .NET applications without having to modify their source code.
 
-It is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
+OpenTelemetry .NET Auto-Instrumentation is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
 - core components: [`1.2.0-rc4`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.2.0-rc4)
 - non-core components: [`1.0.0-rc9.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/1.0.0-rc9.1)
 - `System.Diagnostics.DiagnosticSource`: [`6.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/6.0.0)
 
-To auto-instrument applications, OpenTelemetry .NET Auto-Instrumentation:
+To auto-instrument applications, the OpenTelemetry .NET Auto-Instrumentation does the following:
 
 1. Injects and configures the [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#opentelemetry-net-sdk)
    into the application.
 2. Adds [OpenTelemetry Instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/)
    to key packages and APIs used by the application.
 
-Moreover, OpenTelemetry .NET Auto-Instrumentation can by used as .NET Profiler
-in order to inject additional instrumentations at runtime
-using a technique known as [monkey-patching](https://en.wikipedia.org/wiki/Monkey_patch).
-This allows to instrument specific packages or APIs that does not provide the necessary hooks
+In addition, you can use the OpenTelemetry .NET Auto-Instrumentation as a .NET Profiler
+to inject additional instrumentations at runtime, using a technique known as [monkey-patching](https://en.wikipedia.org/wiki/Monkey_patch).
+This lets you instrument specific packages or APIs that does not provide the necessary hooks
 to generate .NET instrumentation packages using `System.Diagnostics.DiagnosticSource`.
 
-See [examples](../examples) which demonstrates how different instrumentation scenarios
-are covered by OpenTelemetry .NET Auto-Instrumentation.
+See the [examples](../examples) for demonstrations of different instrumentation scenarios
+covered by the OpenTelemetry .NET Auto-Instrumentation.
 
 See [design.md](design.md) for an architectural overview.
 

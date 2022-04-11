@@ -72,7 +72,7 @@ The exporter is used to output the telemetry.
 
 | Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_TRACES_EXPORTER` | The traces exporter to be used. Available values are: `zipkin`, `jaeger`, `otlp`, `none`. | `otlp` |
+| `OTEL_TRACES_EXPORTER` | The traces exporter to be used. The value can be one of: `zipkin`, `jaeger`, `otlp`, `none`. | `otlp` |
 | `OTEL_EXPORTER_JAEGER_AGENT_HOST` | Hostname for the Jaeger agent. Used for `udp/thrift.compact` protocol.| `localhost` |
 | `OTEL_EXPORTER_JAEGER_AGENT_PORT` | Port for the Jaeger agent. Used for `udp/thrift.compact` protocol. | `6831` |
 | `OTEL_EXPORTER_JAEGER_ENDPOINT` | The Jaeger Collector HTTP endpoint. Used for `http/thrift.binary` protocol. | `http://localhost:14268` |

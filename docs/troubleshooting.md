@@ -42,11 +42,11 @@ example app. Compare the files to explore the changes.
 
 ## No proper relationship between spans
 
-On .NET Framework, strong name signing can force multiple versions of the same
-assembly being loaded on the same process. This causes a separate hierarchy of
+On .NET Framework, strong name signing can force the loading of multiple versions
+of the same assembly on the same process. This causes a separate hierarchy of
 Activity objects. If you are referencing packages in your application that use a
 version of the `System.Diagnostics.DiagnosticSource` different than the `OpenTelemetry.Api`
-version used by the OpenTelemetry .NET Auto-Instrumentation reference the `System.Diagnostics.DiagnosticSource` package in the correct version in your application.
+version used by the OpenTelemetry .NET Auto-Instrumentation, reference the correct version of the `System.Diagnostics.DiagnosticSource` package in your application.
 This causes automatic binding redirection to solve the issue.
 
 If automatic binding redirection is [disabled](https://docs.microsoft.com/en-us/dotnet/framework/configure-apps/how-to-enable-and-disable-automatic-binding-redirection)
