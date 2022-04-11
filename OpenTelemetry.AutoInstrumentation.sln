@@ -131,7 +131,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples.Vendor.Distro", "examples\Vendor.Distro\Examples.Vendor.Distro.csproj", "{56938BD4-37F4-4E3F-BFBF-80F0309DFDBF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.Http", "C:\workspace\dszmigielski\opentelemetry-dotnet-instrumentation\test\test-applications\integrations\Samples.Http\Samples.Http.csproj", "{4E17BE29-B227-41D8-97FE-26F674951E26}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.Http", "test\test-applications\integrations\Samples.Http\Samples.Http.csproj", "{4E17BE29-B227-41D8-97FE-26F674951E26}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests.Http", "test\integration-tests\IntegrationTests.Http\IntegrationTests.Http.csproj", "{413326C3-4B8F-4C44-93C8-0E20EFB97DB4}"
 EndProject
