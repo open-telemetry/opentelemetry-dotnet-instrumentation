@@ -31,7 +31,7 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
 {
     private const string EventSourceNamePrefix = "OpenTelemetry-";
 
-    private static readonly ILogger Log = ConsoleLogger.Create(typeof(SdkSelfDiagnosticsEventListener));
+    private static readonly ILogger Log = OtelLogging.GetLogger();
     private readonly object lockObj = new();
     private readonly EventLevel logLevel;
     private readonly List<EventSource> eventSourcesBeforeConstructor = new();

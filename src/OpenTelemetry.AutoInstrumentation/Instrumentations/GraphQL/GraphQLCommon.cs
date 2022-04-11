@@ -43,7 +43,7 @@ internal class GraphQLCommon
     internal static readonly ActivitySource ActivitySource = new ActivitySource(
         "OpenTelemetry.AutoInstrumentation.GraphQL", "0.0.1");
 
-    private static readonly ILogger Log = ConsoleLogger.Create(typeof(GraphQLCommon));
+    private static readonly ILogger Log = OtelLogging.GetLogger();
 
     internal static Activity CreateActivityFromValidate(IDocument document)
     {
