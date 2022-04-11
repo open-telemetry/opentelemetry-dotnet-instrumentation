@@ -37,6 +37,10 @@ CI tests run against the following operating systems:
 - macOS Catalina 10.15,
 - Ubuntu 20.04 LTS.
 
+### Instumented libraries and frameworks
+
+See [config.md#instumented-libraries-and-frameworks](config.md#instumented-libraries-and-frameworks).
+
 ## Get Started
 
 ### Installation
@@ -106,10 +110,6 @@ OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
 ## Configuration
 
 See [config.md](config.md).
-
-### Instumented libraries and frameworks
-
-See [config.md#instumented-libraries-and-frameworks](config.md#instumented-libraries-and-frameworks).
 
 ## Troubleshooting
 
