@@ -74,7 +74,6 @@ hooks/callbacks to allow implementation of good observability data. These instru
 implemented following the proper attribute annotation so the native CLR Profiler implementation
 can properly inject them at runtime. Some examples:
 
-  - [MongoDB Instrumentation](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/MongoDB)
   - [GraphQL](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/GraphQL)
 
 ![Overview](./images/architecture-overview.png)

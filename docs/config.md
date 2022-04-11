@@ -28,7 +28,7 @@ for more details.
 | `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | The file path of bytecode instrumentations JSON configuration file. Usually it should be set to `%ProfilerDirectory%/integrations.json` | |
 | `OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS` | The source instrumentations you want to enable, separated by a comma. |  |
 | `OTEL_DOTNET_AUTO_DISABLED_INSTRUMENTATIONS` | The source instrumentations set via `OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS` value and bytecode instrumentations `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` set via configuration file you want to disable, separated by a comma. | |
-| `OTEL_DOTNET_AUTO_{0}_ENABLED` | Configuration pattern for enabling or disabling a specific bytecode. For example, in order to disable MongoDb instrumentation, set `OTEL_TRACE_MongoDb_ENABLED=false` | `true` |
+| `OTEL_DOTNET_AUTO_{0}_ENABLED` | Configuration pattern for enabling or disabling a specific bytecode. For example, in order to disable GraphQL instrumentation, set `OTEL_TRACE_GraphQL_ENABLED=false` | `true` |
 | `OTEL_DOTNET_AUTO_DOMAIN_NEUTRAL_INSTRUMENTATION` |  Sets whether to intercept method calls when the caller method is inside a domain-neutral assembly. This is recommended when instrumenting IIS applications. | `false` |
 | `OTEL_DOTNET_AUTO_CLR_DISABLE_OPTIMIZATIONS` |  Set to `true` to disable all JIT optimizations. | `false` |
 | `OTEL_DOTNET_AUTO_CLR_ENABLE_INLINING` | Set to `false` to disable JIT inlining. | `true` |
@@ -41,7 +41,6 @@ for more details.
 | `AspNet` | ASP.NET and ASP.NET Core | source |
 | `GraphQL` | [GraphQL](https://www.nuget.org/packages/GraphQL/) | bytecode |
 | `HttpClient` | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | source |
-| `MongoDb` | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core/) | bytecode |
 | `SqlClient` | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) | source |
 
 ## ASP.NET (.NET Framework) Instrumentation
