@@ -124,6 +124,10 @@ export OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS=HttpClient
 You can use the example applications to see the local changes in action. See the
 [`examples/README.md`](../examples/README.md) for instructions on how to run the examples.
 
+## Releasing
+
+The releasing process is in [releasing.md](releasing.md).
+
 ## Debug .NET Runtime on Linux
 
 - [Requirements](https://github.com/dotnet/runtime/blob/main/docs/workflow/requirements/linux-requirements.md)
