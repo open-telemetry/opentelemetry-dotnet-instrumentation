@@ -46,7 +46,7 @@ See [config.md#instumented-libraries-and-frameworks](config.md#instumented-libra
 ### Installation
 
 Download and install the binaries from
-[the latest release](https://github.com/open-telemetry/opentelemetry-dotnet/releases/latest).
+[the latest release](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest).
 In the docs, the binaries location is referred to as `%InstallationLocation%`.
 
 On Linux, you can optionally create the default log directory
