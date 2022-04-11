@@ -37,9 +37,9 @@ CI tests run against the following operating systems:
 - macOS Catalina 10.15,
 - Ubuntu 20.04 LTS.
 
-### Instumented libraries and frameworks
+### Instrumented libraries and frameworks
 
-See [config.md#instumented-libraries-and-frameworks](config.md#instumented-libraries-and-frameworks).
+See [config.md#instrumented-libraries-and-frameworks](config.md#instumented-libraries-and-frameworks).
 
 ## Get Started
 
