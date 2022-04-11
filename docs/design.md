@@ -75,7 +75,6 @@ hooks/callbacks to allow implementation of good observability data. These instru
 implemented following the proper attribute annotation so the native CLR Profiler implementation
 can properly inject them at runtime. Some examples:
 
-  - [MongoDB Instrumentation](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/MongoDB)
   - [GraphQL](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/GraphQL)
 
 ![Overview](./images/architecture-overview.png)
@@ -162,20 +161,15 @@ If changing the application build is not an option to add or update the necessar
 still possible to address the conflicts via the methods described at
 [Handling of Assembly version Conflicts](./troubleshooting.md#handling-of-assembly-version-conflicts).
 
-## Plans
-
-TODO: Create New Roadmap
-
-[Previous Roadmap Google doc](https://docs.google.com/document/d/10BiAfYDURrk8PQxjT65bEc0ydVngWLoWk8IGo4xDKko/edit?usp=sharing)
-
 ## Further Reading
 
 OpenTelemetry:
+
 - [OpenTelemetry website](https://opentelemetry.io/)
 - [OpenTelemetry Specification](https://github.com/open-telemetry/opentelemetry-specification)
 
 Microsoft .NET Profiling APIs:
+
 - [Profiling API](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
 - [Metadata API](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/metadata/)
 - [The Book of the Runtime - Profiling](https://github.com/dotnet/coreclr/blob/master/Documentation/botr/profiling.md)
-
