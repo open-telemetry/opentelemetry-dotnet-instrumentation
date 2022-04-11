@@ -16,7 +16,6 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 
@@ -25,8 +24,6 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// </summary>
 public static class DuckTypeExtensions
 {
-    private static readonly ILogger Log = ConsoleLogger.Create(typeof(DuckType));
-
     /// <summary>
     /// Gets the duck type instance for the object implementing a base class or interface T
     /// </summary>

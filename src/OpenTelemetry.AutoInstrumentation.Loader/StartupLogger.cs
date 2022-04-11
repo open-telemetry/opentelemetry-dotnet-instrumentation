@@ -144,14 +144,15 @@ internal static class StartupLogger
 
         try
         {
-            var process = Process.GetCurrentProcess();
+            using var process = Process.GetCurrentProcess();
+            var appDomainName = AppDomain.CurrentDomain.FriendlyName;
             // Do our best to not block other processes on write
-            return Path.Combine(LogDirectory, $"dotnet-tracer-loader-{process.ProcessName}-{process.Id}.log");
+            return Path.Combine(LogDirectory, $"dotnet-tracer-loader-{appDomainName}-{process.Id}.log");
         }
         catch
         {
             // We can't get the process info
-            return Path.Combine(LogDirectory, "dotnet-tracer-loader.log");
+            return Path.Combine(LogDirectory, $"dotnet-tracer-loader-{Guid.NewGuid()}.log");
         }
     }
 
