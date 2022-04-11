@@ -22,13 +22,13 @@ which is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/
   and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient)
   source instrumentation.
 - Add OTLP, Jaeger, Zipkin and Console trace exporters.
-- Add global management using environemtal variables:
+- Add global management using environmental  variables:
   `OTEL_DOTNET_AUTO_HOME`, `OTEL_DOTNET_AUTO_ENABLED`,
   `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`, `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`,
   `OTEL_DOTNET_AUTO_AZURE_APP_SERVICES`.
-- Add support for OpenTelemetry resource environemtal variables:
+- Add support for OpenTelemetry resource environmental  variables:
   `OTEL_RESOURCE_ATTRIBUTES`, `OTEL_SERVICE_NAME`.
-- Add instrumentation management using environemtal variables:
+- Add instrumentation management using environmental  variables:
   `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE`, `OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS`,
   `OTEL_DOTNET_AUTO_DISABLED_INSTRUMENTATIONS`,
   `OTEL_DOTNET_AUTO_{0}_ENABLED`,
@@ -36,7 +36,7 @@ which is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/
   `OTEL_DOTNET_AUTO_CLR_DISABLE_OPTIMIZATIONS`,
   `OTEL_DOTNET_AUTO_CLR_ENABLE_INLINING`,
   `OTEL_DOTNET_AUTO_CLR_ENABLE_NGEN`.
-- Add support for OpenTelemetry exporter related environemtal variables:
+- Add support for OpenTelemetry exporter related environmental  variables:
   `OTEL_TRACES_EXPORTER`,
   `OTEL_EXPORTER_JAEGER_AGENT_HOST`, `OTEL_EXPORTER_JAEGER_AGENT_PORT`,
   `OTEL_EXPORTER_JAEGER_ENDPOINT`,
@@ -46,18 +46,18 @@ which is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/
   `OTEL_EXPORTER_OTLP_TIMEOUT`,
   `OTEL_EXPORTER_OTLP_PROTOCOL`,
   `OTEL_EXPORTER_ZIPKIN_ENDPOINT`.
-- Add support for OpenTelemetry batch span processor related environemtal variables:
+- Add support for OpenTelemetry batch span processor related environmental  variables:
   `OTEL_BSP_SCHEDULE_DELAY`,
   `OTEL_BSP_EXPORT_TIMEOUT`,
   `OTEL_BSP_MAX_QUEUE_SIZE`,
   `OTEL_BSP_MAX_EXPORT_BATCH_SIZE`.
 - Add customization and plugin capabilities which can be configured
-  using environemtal variables:
+  using environmental  variables:
   `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP`,
   `OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES`,
   `OTEL_DOTNET_AUTO_LEGACY_SOURCES`,
   `OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS`.
-- Add `OTEL_DOTNET_AUTO_HTTP2UNENCRYPTEDSUPPORT_ENABLED` environemtal variable
+- Add `OTEL_DOTNET_AUTO_HTTP2UNENCRYPTEDSUPPORT_ENABLED` environmental  variable
   which enables `[System.Net](http://system.net/).Http.SocketsHttpHandler.Http2UnencryptedSupport`.
   See the [official Microsoft documentation](https://docs.microsoft.com/en-us/aspnet/core/grpc/troubleshoot?view=aspnetcore-6.0#call-insecure-grpc-services-with-net-core-client)
   for more details.
