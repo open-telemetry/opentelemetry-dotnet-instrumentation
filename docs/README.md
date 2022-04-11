@@ -39,7 +39,7 @@ CI tests run against the following operating systems:
 
 ### Instrumented libraries and frameworks
 
-See [config.md#instrumented-libraries-and-frameworks](config.md#instumented-libraries-and-frameworks).
+See [config.md#instrumented-libraries-and-frameworks](config.md#instrumented-libraries-and-frameworks).
 
 ## Get Started
 
