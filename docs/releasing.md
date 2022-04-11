@@ -1,5 +1,7 @@
 # Release Process
 
+0. Remember to run tests on .NET 4.6.2 locally (they do not run in GitHub).
+
 1. Update the version in the following files:
 
    - `*.cs` - TODO: extract as a constant to reduce the number of occurances
