@@ -22,7 +22,6 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests.Http
 {
-    [Collection(HttpCollection.Name)]
     public class HttpTests : TestHelper
     {
         private const string ServiceName = "Samples.Http";
@@ -50,6 +49,7 @@ namespace IntegrationTests.Http
             using var scope = new AssertionScope();
             Assert.True(spans.Count == expectedSpanCount, $"Expecting {expectedSpanCount} spans, received {spans.Count}");
 
+            // ASP.NET Core auto-instrumentation is generating spans
             var httpClientSpan = spans.FirstOrDefault(span => span.Name.Equals("HTTP GET"));
             var httpServerSpan = spans.FirstOrDefault(span => span.Name.Equals("/test"));
             var manualSpan = spans.FirstOrDefault(span => span.Name.Equals("manual span"));
@@ -58,6 +58,7 @@ namespace IntegrationTests.Http
             Assert.NotNull(httpServerSpan);
             Assert.NotNull(manualSpan);
 
+            // checking trace hierarchy
             Assert.False(httpClientSpan.ParentId.HasValue);
             Assert.Equal(httpClientSpan.SpanId, httpServerSpan.ParentId);
             Assert.Equal(httpServerSpan.SpanId, manualSpan.ParentId);
