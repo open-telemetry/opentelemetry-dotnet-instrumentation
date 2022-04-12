@@ -18,7 +18,7 @@ struct TracerLoggerPolicy
     // the same product folder name
     inline static const WSTRING folder_path = WStr(R"(OpenTelemetry .NET AutoInstrumentation\logs)");
 #endif
-    inline static const std::string pattern = "%D %I:%M:%S.%e %p [%P|%t] [%l] %v";
+    inline static const std::string pattern = "[%Y-%m-%dT%X.%FZ] [%P|%t] [%l] %v";
     struct logging_environment
     {
         // cannot reuse environment::log_path variable. On alpine, test fails
