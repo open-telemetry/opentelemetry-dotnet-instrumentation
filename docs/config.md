@@ -28,20 +28,19 @@ for more details.
 | `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | The file path of bytecode instrumentations JSON configuration file. Usually it should be set to `%ProfilerDirectory%/integrations.json` | |
 | `OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS` | The source instrumentations you want to enable, separated by a comma. |  |
 | `OTEL_DOTNET_AUTO_DISABLED_INSTRUMENTATIONS` | The source instrumentations set via `OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS` value and bytecode instrumentations `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` set via configuration file you want to disable, separated by a comma. | |
-| `OTEL_DOTNET_AUTO_{0}_ENABLED` | Configuration pattern for enabling or disabling a specific bytecode. For example, in order to disable MongoDb instrumentation, set `OTEL_TRACE_MongoDb_ENABLED=false` | `true` |
+| `OTEL_DOTNET_AUTO_{0}_ENABLED` | Configuration pattern for enabling or disabling a specific bytecode. For example, in order to disable GraphQL instrumentation, set `OTEL_TRACE_GraphQL_ENABLED=false` | `true` |
 | `OTEL_DOTNET_AUTO_DOMAIN_NEUTRAL_INSTRUMENTATION` |  Sets whether to intercept method calls when the caller method is inside a domain-neutral assembly. This is recommended when instrumenting IIS applications. | `false` |
 | `OTEL_DOTNET_AUTO_CLR_DISABLE_OPTIMIZATIONS` |  Set to `true` to disable all JIT optimizations. | `false` |
 | `OTEL_DOTNET_AUTO_CLR_ENABLE_INLINING` | Set to `false` to disable JIT inlining. | `true` |
 | `OTEL_DOTNET_AUTO_CLR_ENABLE_NGEN` | Set to `false` to disable NGEN images. | `true` |
 
-### Instumented libraries and framework
+### Instrumented libraries and frameworks
 
 | ID | Library | Instrumentation type |
 |-|-|-|
 | `AspNet` | ASP.NET and ASP.NET Core | source |
 | `GraphQL` | [GraphQL](https://www.nuget.org/packages/GraphQL/) | bytecode |
 | `HttpClient` | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | source |
-| `MongoDb` | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core/) | bytecode |
 | `SqlClient` | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) | source |
 
 ## ASP.NET (.NET Framework) Instrumentation
@@ -58,6 +57,10 @@ Default logs directory paths are:
 - Windows: `%ProgramData%\OpenTelemetry .NET AutoInstrumentation\logs`
 - Linux: `/var/log/opentelemetry/dotnet`
 
+If there is a problem with the creation of the default directory,
+the path of the current user's [temporary folder](https://docs.microsoft.com/en-us/dotnet/api/System.IO.Path.GetTempPath?view=net-6.0)
+is used.
+
 | Environment variable | Description | Default |
 |-|-|-|
 | `OTEL_DOTNET_AUTO_LOG_DIRECTORY` | The directory of the .NET Tracer logs. Overrides the value in `OTEL_DOTNET_AUTO_LOG_PATH` if present. | _see above_ |
@@ -72,7 +75,7 @@ The exporter is used to output the telemetry.
 
 | Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_TRACES_EXPORTER` | The traces exporter to be used. Available values are: `zipkin`, `jeager`, `otlp`, `none`. | `otlp` |
+| `OTEL_TRACES_EXPORTER` | The traces exporter to be used. The value can be one of: `zipkin`, `jaeger`, `otlp`, `none`. | `otlp` |
 | `OTEL_EXPORTER_JAEGER_AGENT_HOST` | Hostname for the Jaeger agent. Used for `udp/thrift.compact` protocol.| `localhost` |
 | `OTEL_EXPORTER_JAEGER_AGENT_PORT` | Port for the Jaeger agent. Used for `udp/thrift.compact` protocol. | `6831` |
 | `OTEL_EXPORTER_JAEGER_ENDPOINT` | The Jaeger Collector HTTP endpoint. Used for `http/thrift.binary` protocol. | `http://localhost:14268` |
@@ -131,7 +134,7 @@ public OpenTelemetry.Trace.TracerProviderBuilder ConfigureTracerProvider(OpenTel
 ```
 
 The plugin must use the same version of the `OpenTelemetry` as the
-OpenTelemetry .NET AutoInstrumentation. Current version is `1.2.0-rc4`.
+OpenTelemetry .NET Auto-Instrumentation.
 
 ## .NET CLR Profiler
 

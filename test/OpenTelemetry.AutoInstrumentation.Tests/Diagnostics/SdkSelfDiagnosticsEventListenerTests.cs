@@ -16,57 +16,75 @@
 
 // Source originated from https://github.com/open-telemetry/opentelemetry-dotnet/blob/23609730ddd73c860553de847e67c9b2226cff94/test/OpenTelemetry.Tests/Internal/SelfDiagnosticsEventListenerTest.cs
 
-using System;
+using System.Collections.Generic;
 using System.Diagnostics.Tracing;
-using System.IO;
 using FluentAssertions;
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
+using OpenTelemetry.AutoInstrumentation.Logging;
 using Xunit;
+
+namespace OpenTelemetry.AutoInstrumentation.Tests.Diagnostics;
 
 public class SdkSelfDiagnosticsEventListenerTests
 {
     [Fact]
     public void EventSourceSetup_LowerSeverity()
     {
-        var originalConsoleOut = Console.Out; // preserve the original stream
-        using var writer = new StringWriter();
-        var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Error);
+        // get default sink using reflection
+        var defaultLogger = OtelLogging.GetLogger();
+        var sinkField = defaultLogger.GetType().GetField("_sink", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var defaultSink = (ISink)sinkField.GetValue(defaultLogger);
 
-        // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
-        AspNetTelemetryEventSource.Log.ActivityRestored("123");
-        OpenTelemetrySdkEventSource.Log.ActivityStarted("Activity started", "1");
+        try
+        {
+            var testSink = new TestSink();
+            var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Error);
 
-        // Prepare the output for assertion
-        writer.Flush();
-        var outputString = writer.GetStringBuilder().ToString();
-        outputString.Should().NotContain("EventSource=OpenTelemetry-Instrumentation-AspNet-Telemetry, Message=Activity restored, Id='123'");
-        outputString.Should().NotContain("EventSource=OpenTelemetry-Sdk, Message=Activity started.");
+            // override default logger's sink with test sink
+            sinkField.SetValue(defaultLogger, testSink);
 
-        // Cleanup
-        Console.SetOut(originalConsoleOut);
+            // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
+            AspNetTelemetryEventSource.Log.ActivityRestored("123");
+            OpenTelemetrySdkEventSource.Log.ActivityStarted("Activity started", "1");
+
+            testSink.Messages.Should().BeEmpty("events with lower severity than error should not be written.");
+        }
+        finally
+        {
+            // restore default sink
+            sinkField.SetValue(defaultLogger, defaultSink);
+        }
     }
 
     [Fact]
     public void EventSourceSetup_HigherSeverity()
     {
-        // Redirect the ConsoleLogger
-        var originalConsoleOut = Console.Out;
-        using var writer = new StringWriter();
-        Console.SetOut(writer);
-        var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Verbose);
+        // get default sink using reflection
+        var defaultLogger = OtelLogging.GetLogger();
+        var sinkField = defaultLogger.GetType().GetField("_sink", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var defaultSink = (ISink)sinkField.GetValue(defaultLogger);
 
-        // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
-        AspNetTelemetryEventSource.Log.ActivityRestored("123");
-        OpenTelemetrySdkEventSource.Log.ActivityStarted("Activity started", "1");
+        try
+        {
+            var testSink = new TestSink();
 
-        // Prepare the output for assertion
-        writer.Flush();
-        var outputString = writer.GetStringBuilder().ToString();
-        outputString.Should().Contain("EventSource=OpenTelemetry-Instrumentation-AspNet-Telemetry, Message=Activity restored, Id='123'");
-        outputString.Should().Contain("EventSource=OpenTelemetry-Sdk, Message=Activity started.");
+            var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Verbose);
 
-        // Cleanup
-        Console.SetOut(originalConsoleOut);
+            // override default logger's sink with test sink
+            sinkField.SetValue(defaultLogger, testSink);
+
+            // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
+            AspNetTelemetryEventSource.Log.ActivityRestored("123");
+            OpenTelemetrySdkEventSource.Log.ActivityStarted("Activity started", "1");
+
+            testSink.Messages.Should().Contain(msg => msg.Contains("EventSource=OpenTelemetry-Instrumentation-AspNet-Telemetry, Message=Activity restored, Id='123'"));
+            testSink.Messages.Should().Contain(msg => msg.Contains("EventSource=OpenTelemetry-Sdk, Message=Activity started."));
+        }
+        finally
+        {
+            // restore default sink
+            sinkField.SetValue(defaultLogger, defaultSink);
+        }
     }
 
     [EventSource(Name = "OpenTelemetry-Instrumentation-AspNet-Telemetry", Guid = "1de158cc-f7ce-4293-bd19-2358c93c8186")]
@@ -90,6 +108,16 @@ public class SdkSelfDiagnosticsEventListenerTests
         public void ActivityStarted(string operationName, string id)
         {
             this.WriteEvent(24, operationName, id);
+        }
+    }
+
+    private class TestSink : ISink
+    {
+        public IList<string> Messages { get; } = new List<string>();
+
+        public void Write(string message)
+        {
+            Messages.Add(message);
         }
     }
 }

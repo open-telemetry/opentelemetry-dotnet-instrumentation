@@ -22,7 +22,7 @@ namespace OpenTelemetry.AutoInstrumentation;
 
 internal partial class FrameworkDescription
 {
-    private static readonly ILogger Log = ConsoleLogger.Create(typeof(FrameworkDescription));
+    private static readonly ILogger Log = OtelLogging.GetLogger();
 
     private static readonly Assembly RootAssembly = typeof(object).Assembly;
 

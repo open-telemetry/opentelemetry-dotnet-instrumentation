@@ -56,9 +56,10 @@ load paths to include the folders with the OpenTelemetry .NET SDK and the instru
 injected into the application.
 
 - [**Managed Profiler**](../src/OpenTelemetry.AutoInstrumentation):
-contains the code setting up the OpenTelemtry .NET SDK and configured instrumentations.
-Plus, support code to run and implement bytecode instrumentations. Optionally, the code
-setting-up the OpenTelemetry .NET SDK can be left to the application by setting the
+contains the code to set up the OpenTelemetry .NET SDK and configured instrumentations,
+as well as support code to run and implement bytecode instrumentations.
+Optionally, the code
+that sets up the OpenTelemetry .NET SDK can be left to the application by setting the
 environment variable `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP` to `false`.
 
 - **Source Instrumentations**: instrumentations created on top of API hooks/callbacks provided
@@ -74,7 +75,6 @@ hooks/callbacks to allow implementation of good observability data. These instru
 implemented following the proper attribute annotation so the native CLR Profiler implementation
 can properly inject them at runtime. Some examples:
 
-  - [MongoDB Instrumentation](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/MongoDB)
   - [GraphQL](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/GraphQL)
 
 ![Overview](./images/architecture-overview.png)
@@ -161,20 +161,15 @@ If changing the application build is not an option to add or update the necessar
 still possible to address the conflicts via the methods described at
 [Handling of Assembly version Conflicts](./troubleshooting.md#handling-of-assembly-version-conflicts).
 
-## Plans
-
-TODO: Create New Roadmap
-
-[Previous Roadmap Google doc](https://docs.google.com/document/d/10BiAfYDURrk8PQxjT65bEc0ydVngWLoWk8IGo4xDKko/edit?usp=sharing)
-
 ## Further Reading
 
 OpenTelemetry:
+
 - [OpenTelemetry website](https://opentelemetry.io/)
 - [OpenTelemetry Specification](https://github.com/open-telemetry/opentelemetry-specification)
 
 Microsoft .NET Profiling APIs:
+
 - [Profiling API](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
 - [Metadata API](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/metadata/)
 - [The Book of the Runtime - Profiling](https://github.com/dotnet/coreclr/blob/master/Documentation/botr/profiling.md)
-
