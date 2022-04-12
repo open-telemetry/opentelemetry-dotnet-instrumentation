@@ -24,7 +24,7 @@ namespace Samples.Http
     {
         public static void Main(string[] args)
         {
-            var port = TcpPortProvider.GetOpenPort();
+            var port = IntegrationTests.Helpers.TcpPortProvider.GetOpenPort();
             using var host = CreateHostBuilder(args, port).Build();
             host.Start();
 
