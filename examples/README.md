@@ -122,6 +122,10 @@ Usage example:
 OTEL_DOTNET_AUTO_LEGACY_SOURCES="InstrumentedHttpCall.GetAsync" exampleApp=CoreAppOldReference ./run-example.sh
 ```
 
+### ManualInstrumenation
+
+Example console application to ilustrate how to make [manual instrumentation](..\docs\manual-instrumentation.md).
+
 ### OldReference
 
 Represents a third-party project that can't be updated to use the same version of the assemblies
