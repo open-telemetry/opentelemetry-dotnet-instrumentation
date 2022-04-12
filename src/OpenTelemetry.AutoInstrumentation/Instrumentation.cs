@@ -20,9 +20,11 @@ using System.Diagnostics.Tracing;
 using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
+using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Shims.OpenTracing;
 using OpenTelemetry.Trace;
+using OpenTracing.Util;
 
 namespace OpenTelemetry.AutoInstrumentation;
 
@@ -31,7 +33,8 @@ namespace OpenTelemetry.AutoInstrumentation;
 /// </summary>
 public static class Instrumentation
 {
-    private static readonly Process _process = Process.GetCurrentProcess();
+    private static readonly ILogger Logger = OtelLogging.GetLogger();
+
     private static int _firstInitialization = 1;
     private static int _isExiting = 0;
     private static SdkSelfDiagnosticsEventListener _sdkEventListener;
@@ -87,7 +90,7 @@ public static class Instrumentation
                     .InvokePlugins(TracerSettings.TracerPlugins);
 
                 _tracerProvider = builder.Build();
-                Log("OpenTelemetry tracer initialized.");
+                Logger.Information("OpenTelemetry tracer initialized.");
 
                 // Register to shutdown events
                 AppDomain.CurrentDomain.ProcessExit += OnExit;
@@ -97,7 +100,7 @@ public static class Instrumentation
         }
         catch (Exception ex)
         {
-            Log($"OpenTelemetry SDK load exception: {ex}");
+            Logger.Error(ex, "OpenTelemetry SDK load exception.");
             throw;
         }
 
@@ -113,17 +116,17 @@ public static class Instrumentation
 
                 // This registration must occur prior to any reference to the OpenTracing tracer:
                 // otherwise the no-op tracer is going to be used by OpenTracing instead.
-                OpenTracing.Util.GlobalTracer.RegisterIfAbsent(openTracingShim);
-                Log("OpenTracingShim loaded.");
+                GlobalTracer.RegisterIfAbsent(openTracingShim);
+                Logger.Information("OpenTracingShim loaded.");
             }
             else
             {
-                Log("OpenTracingShim was not loaded as the provider is not initialized.");
+                Logger.Information("OpenTracingShim was not loaded as the provider is not initialized.");
             }
         }
         catch (Exception ex)
         {
-            Log($"OpenTracingShim exception: {ex}");
+            Logger.Error(ex, "OpenTracingShim exception.");
             throw;
         }
     }
@@ -141,13 +144,13 @@ public static class Instrumentation
             _tracerProvider.Dispose();
             _sdkEventListener.Dispose();
 
-            Log("OpenTelemetry tracer exit.");
+            Logger.Information("OpenTelemetry tracer exit.");
         }
         catch (Exception ex)
         {
             try
             {
-                Log($"An error occured while attempting to exit. {ex}");
+                Logger.Error(ex, "An error occured while attempting to exit.");
             }
             catch
             {
@@ -163,7 +166,7 @@ public static class Instrumentation
         {
             if (args.IsTerminating)
             {
-                Log("UnhandledException event raised with a terminating exception.");
+                Logger.Error("UnhandledException event raised with a terminating exception.");
                 OnExit(sender, args);
             }
         }
@@ -171,7 +174,7 @@ public static class Instrumentation
         {
             try
             {
-                Log($"An exception occured while processing an unhandled exception. {ex}");
+                Logger.Error(ex, "An exception occured while processing an unhandled exception.");
             }
             catch
             {
@@ -179,10 +182,5 @@ public static class Instrumentation
                 // with the exception.
             }
         }
-    }
-
-    private static void Log(string message)
-    {
-        Console.WriteLine($">>>>>>>>>>>>>>>>>>>>>>> Process: {_process.ProcessName}({_process.Id}): {message}");
     }
 }

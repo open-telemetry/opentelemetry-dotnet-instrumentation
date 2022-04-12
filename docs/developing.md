@@ -11,7 +11,7 @@ On all platforms, the minimum requirements are:
 ### Windows
 
 - [Visual Studio 2022 (17.1)](https://visualstudio.microsoft.com/downloads/) or newer
-  - Workloads (with recommeded components):
+  - Workloads (with recommended components):
     - ASP.NET and web development
     - .NET desktop development
     - Desktop development with C++
@@ -123,6 +123,10 @@ export OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS=HttpClient
 
 You can use the example applications to see the local changes in action. See the
 [`examples/README.md`](../examples/README.md) for instructions on how to run the examples.
+
+## Releasing
+
+The releasing process is in [releasing.md](releasing.md).
 
 ## Debug .NET Runtime on Linux
 

@@ -85,6 +85,21 @@ public class ConfigurationKeys
     public const string Http2UnencryptedSupportEnabled = "OTEL_DOTNET_AUTO_HTTP2UNENCRYPTEDSUPPORT_ENABLED";
 
     /// <summary>
+    /// Configuration key for setting the directory for the profiler's log files.
+    /// If set, this setting takes precedence over environment variable OTEL_DOTNET_AUTO_LOG_PATH.
+    /// If not set, default is
+    /// "%ProgramData%"\OpenTelemetry .NET AutoInstrumentation\logs\" on Windows or
+    /// "/var/log/opentelemetry/dotnet/" on Linux.
+    /// </summary>
+    public const string LogDirectory = "OTEL_DOTNET_AUTO_LOG_DIRECTORY";
+
+    /// <summary>
+    /// Configuration key for setting the path for the profiler's native log file.
+    /// Environment variable OTEL_DOTNET_AUTO_LOG_DIRECTORY takes precedence over this setting, if set.
+    /// </summary>
+    public const string LogPath = "OTEL_DOTNET_AUTO_LOG_PATH";
+
+    /// <summary>
     /// String format patterns used to match integration-specific configuration keys.
     /// </summary>
     internal static class Integrations

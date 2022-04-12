@@ -31,7 +31,7 @@ internal class IntegrationMapper
     private const string EndMethodName = "OnMethodEnd";
     private const string EndAsyncMethodName = "OnAsyncMethodEnd";
 
-    private static readonly ILogger Log = ConsoleLogger.Create(typeof(IntegrationMapper));
+    private static readonly ILogger Log = OtelLogging.GetLogger();
     private static readonly MethodInfo UnwrapReturnValueMethodInfo = typeof(IntegrationMapper).GetMethod(nameof(IntegrationMapper.UnwrapReturnValue), BindingFlags.NonPublic | BindingFlags.Static);
     private static readonly MethodInfo ConvertTypeMethodInfo = typeof(IntegrationMapper).GetMethod(nameof(IntegrationMapper.ConvertType), BindingFlags.NonPublic | BindingFlags.Static);
 
