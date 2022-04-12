@@ -34,7 +34,6 @@ namespace Samples.Http
 
         public static IHostBuilder CreateHostBuilder(string[] args, int port) =>
             Host.CreateDefaultBuilder(args)
-
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

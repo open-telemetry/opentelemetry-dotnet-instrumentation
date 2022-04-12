@@ -8,8 +8,4 @@
     <ProjectReference Include="..\IntegrationTests.Helpers\IntegrationTests.Helpers.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Update="FluentAssertions" Version="6.6.0" />
-  </ItemGroup>
-
 </Project>
