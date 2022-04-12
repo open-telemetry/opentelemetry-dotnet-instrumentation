@@ -15,6 +15,7 @@
 // </copyright>
 
 using System.Linq;
+using FluentAssertions;
 using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
 using Xunit;
@@ -46,38 +47,40 @@ namespace IntegrationTests.Http
             Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
             var spans = agent.WaitForSpans(expectedSpanCount, 3000);
 
-            using var scope = new AssertionScope();
-            Assert.True(spans.Count == expectedSpanCount, $"Expecting {expectedSpanCount} spans, received {spans.Count}");
+            using (new AssertionScope())
+            {
+                spans.Count.Should().Be(expectedSpanCount);
 
-            // ASP.NET Core auto-instrumentation is generating spans
-            var httpClientSpan = spans.FirstOrDefault(span => span.Name.Equals("HTTP GET"));
-            var httpServerSpan = spans.FirstOrDefault(span => span.Name.Equals("/test"));
-            var manualSpan = spans.FirstOrDefault(span => span.Name.Equals("manual span"));
+                // ASP.NET Core auto-instrumentation is generating spans
+                var httpClientSpan = spans.FirstOrDefault(span => span.Name.Equals("HTTP GET"));
+                var httpServerSpan = spans.FirstOrDefault(span => span.Name.Equals("/test"));
+                var manualSpan = spans.FirstOrDefault(span => span.Name.Equals("manual span"));
 
-            Assert.NotNull(httpClientSpan);
-            Assert.NotNull(httpServerSpan);
-            Assert.NotNull(manualSpan);
+                httpClientSpan.Should().NotBeNull();
+                httpServerSpan.Should().NotBeNull();
+                manualSpan.Should().NotBeNull();
 
-            // checking trace hierarchy
-            Assert.False(httpClientSpan.ParentId.HasValue);
-            Assert.Equal(httpClientSpan.SpanId, httpServerSpan.ParentId);
-            Assert.Equal(httpServerSpan.SpanId, manualSpan.ParentId);
+                // checking trace hierarchy
+                httpClientSpan.ParentId.HasValue.Should().BeFalse();
+                httpServerSpan.ParentId.Should().Be(httpClientSpan.SpanId);
+                manualSpan.ParentId.Should().Be(httpServerSpan.SpanId);
 
-            Assert.Equal(ServiceName, httpClientSpan.Service);
-            Assert.Equal(ServiceName, httpServerSpan.Service);
-            Assert.Equal(ServiceName, manualSpan.Service);
+                httpClientSpan.Service.Should().Be(ServiceName);
+                httpServerSpan.Service.Should().Be(ServiceName);
+                manualSpan.Service.Should().Be(ServiceName);
 
-            var httpClientTags = httpClientSpan.Tags;
-            var httpServerTags = httpServerSpan.Tags;
+                var httpClientTags = httpClientSpan.Tags;
+                var httpServerTags = httpServerSpan.Tags;
 
-            Assert.Equal(8, httpClientTags.Count);
-            Assert.Equal("GET", httpClientTags["http.method"]);
-            Assert.Equal(httpServerTags["http.host"], httpClientTags["http.host"]);
-            Assert.Equal(httpServerTags["http.url"], httpClientTags["http.url"]);
-            Assert.Equal("200", httpClientTags["http.status_code"]);
-            Assert.Equal(httpServerTags["http.host"], httpClientTags["peer.service"]);
-            Assert.Equal("client", httpClientTags["span.kind"]);
-            Assert.Equal("server", httpServerTags["span.kind"]);
+                httpClientTags.Count.Should().Be(8);
+                httpClientTags["http.method"].Should().Be("GET");
+                httpClientTags["http.host"].Should().Be(httpServerTags["http.host"]);
+                httpClientTags["http.url"].Should().Be(httpServerTags["http.url"]);
+                httpClientTags["http.status_code"].Should().Be("200");
+                httpClientTags["peer.service"].Should().Be(httpServerTags["http.host"]);
+                httpClientTags["span.kind"].Should().Be("client");
+                httpServerTags["span.kind"].Should().Be("server");
+            }
         }
     }
 }
