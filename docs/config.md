@@ -43,6 +43,10 @@ for more details.
 | `HttpClient` | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | source |
 | `SqlClient` | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) | source |
 
+### Manual instrumentation
+
+See [manual-instrumentation.md](manual-instrumentation.md).
+
 ## ASP.NET (.NET Framework) Instrumentation
 
 ASP.NET instrumentation on .NET Framework requires installing the
