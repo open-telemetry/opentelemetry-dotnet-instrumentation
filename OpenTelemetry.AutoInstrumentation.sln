@@ -131,7 +131,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples.Vendor.Distro", "examples\Vendor.Distro\Examples.Vendor.Distro.csproj", "{56938BD4-37F4-4E3F-BFBF-80F0309DFDBF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Examples.ManualInstrumentations", "examples\ManualInstrumenation\Examples.ManualInstrumentations\Examples.ManualInstrumentations.csproj", "{346746C5-A0EA-40D8-A1C7-FE324BDF3772}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Examples.ManualInstrumentations", "examples\ManualInstrumentations\Examples.ManualInstrumentations.csproj", "{346746C5-A0EA-40D8-A1C7-FE324BDF3772}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
