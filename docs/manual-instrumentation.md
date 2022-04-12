@@ -18,7 +18,7 @@ To create your custom traces manually, follow these steps:
         private static readonly ActivitySource RegisteredActivity = new ActivitySource("Examples.ManualInstrumentations.Registered");
     ```
 
-1. Create `Activity` and optionally set tags
+3. Create an `Activity`. Optionally, set tags:
 
     ```csharp
             using (var activity = RegisteredActivity.StartActivity("Main"))
