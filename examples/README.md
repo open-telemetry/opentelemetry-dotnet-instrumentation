@@ -126,6 +126,10 @@ OTEL_DOTNET_AUTO_LEGACY_SOURCES="InstrumentedHttpCall.GetAsync" exampleApp=CoreA
 
 Example console application to ilustrate how to make [manual instrumentation](..\docs\manual-instrumentation.md).
 
+```bash
+OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES="Examples.ManualInstrumentations.*" exampleApp=ManualInstrumentations ./run-example.sh
+```
+
 ### OldReference
 
 Represents a third-party project that can't be updated to use the same version of the assemblies
