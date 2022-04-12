@@ -122,7 +122,7 @@ Usage example:
 OTEL_DOTNET_AUTO_LEGACY_SOURCES="InstrumentedHttpCall.GetAsync" exampleApp=CoreAppOldReference ./run-example.sh
 ```
 
-### ManualInstrumenation
+### ManualInstrumentations
 
 Example console application to ilustrate how to make [manual instrumentation](..\docs\manual-instrumentation.md).
 
