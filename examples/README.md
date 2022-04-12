@@ -124,7 +124,7 @@ OTEL_DOTNET_AUTO_LEGACY_SOURCES="InstrumentedHttpCall.GetAsync" exampleApp=CoreA
 
 ### ManualInstrumentations
 
-Example console application to ilustrate how to make [manual instrumentation](..\docs\manual-instrumentation.md).
+Sample console application to illustrate how to make [manual instrumentation](..\docs\manual-instrumentation.md).
 
 Usage example:
 

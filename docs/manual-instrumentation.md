@@ -1,11 +1,10 @@
 # Manually instrument a .NET application
 
-The auto-instrumentation provides a base you can build on by adding your own
-custom instrumentation. By using both instrumentation approaches, you'll be
-able to present a more detailed representation of the logic and functionality
-of your application, clients, and framework.
+The automatic instrumentation provides a base you can build on by adding your own
+manual instrumentation. By using both automatic and manual instrumentation, you can
+better instrument the logic and functionality of your applications, clients, and frameworks.
 
-To create your custom traces you should execute following steps.
+To create your custom traces manually, follow these steps:
 
 1. Add the `System.Diagnostics.DiagnosticSource` dependency to your project:
 
@@ -13,7 +12,7 @@ To create your custom traces you should execute following steps.
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
     ```
 
-1. Create `ActivitySource` instance
+2. Create an `ActivitySource` instance:
 
     ```csharp
         private static readonly ActivitySource RegisteredActivity = new ActivitySource("Examples.ManualInstrumentations.Registered");
@@ -29,16 +28,16 @@ To create your custom traces you should execute following steps.
             }
     ```
 
-1. Register your `ActivitySource` in OpenTelemetry.AutoInstrumentation
-by setting enironemental variable `OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES`.
-Value can be set either to very specific value `Examples.ManualInstrumentations.Registerd`
-or to `Examples.ManualInstrumentations.*` which registers whole prefix.
+4. Register your `ActivitySource` in OpenTelemetry.AutoInstrumentation
+by setting the `OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES` environmental variable.
+You can set the value to either `Examples.ManualInstrumentations.Registerd`
+or to `Examples.ManualInstrumentations.*`, which registers the entire prefix.
 
-You can see example console application with auto (`HttpClient`) and manual
+You can see a sample console application with auto (`HttpClient`) and manual
 instrumentation [here](..\examples\ManualInstrumenation\Examples.ManualInstrumentations).
 
-Please note that `Activity` created for `NonRegistered.ManualInstrumentations`
-`ActivitySoruce` will be not handled by the OpenTelemetry AutoInstrumentation.
+>  Note that an `Activity` created for `NonRegistered.ManualInstrumentations`
+`ActivitySoruce` is not handled by the OpenTelemetry Automatic Instrumentation.
 
 Further reading:
 
