@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Net.Http;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -26,7 +25,8 @@ namespace Samples.Http
         public static void Main(string[] args)
         {
             var port = TcpPortProvider.GetOpenPort();
-            CreateHostBuilder(args, port).Build().RunAsync();
+            using var host = CreateHostBuilder(args, port).Build();
+            host.Start();
 
             using var httpClient = new HttpClient();
             httpClient.GetAsync($"http://localhost:{port}/test").Wait();

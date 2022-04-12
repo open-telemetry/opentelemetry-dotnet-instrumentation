@@ -44,7 +44,7 @@ namespace IntegrationTests.Http
 
             using var processResult = RunSampleAndWaitForExit(agent.Port, enableStartupHook: true);
             Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
-            var spans = agent.WaitForSpans(expectedSpanCount, 500);
+            var spans = agent.WaitForSpans(expectedSpanCount, 3000);
 
             using var scope = new AssertionScope();
             Assert.True(spans.Count == expectedSpanCount, $"Expecting {expectedSpanCount} spans, received {spans.Count}");
