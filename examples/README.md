@@ -75,12 +75,7 @@ OTEL_DOTNET_AUTO_LEGACY_SOURCES="InstrumentedHttpCall.GetAsync" exampleApp=Bindi
 
 ### ConsoleApp
 
-The default example app used by `./run-example.sh`. It contains manual instrumentation using an
-[ActivitySource](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#activity-source)
-and [OpenTracing](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Shims.OpenTracing#readme).
-No configuration is needed to capture the manually created ActivitySource, as its name is
-`OpenTelemetry.AutoInstrumentation.ConsoleApp`, which is match for the default value for the environment variable
-[`OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES`](../docs/config.md#customization).
+The default example app used by `./run-example.sh`. [OpenTracing](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Shims.OpenTracing#readme).
 
 Usage example:
 
