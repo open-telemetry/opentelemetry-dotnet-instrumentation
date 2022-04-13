@@ -27,17 +27,12 @@ namespace Examples.ConsoleApp;
 
 internal class Program
 {
-    private static readonly ActivitySource MyActivitySource = new ActivitySource("OpenTelemetry.AutoInstrumentation.ConsoleApp");
-
     private static async Task<int> Main()
     {
         Console.WriteLine("Ensure right version of DiagnosticSource is installed");
         Console.WriteLine(typeof(ActivitySource).Assembly.FullName);
 
-        using (var activity = MyActivitySource.StartActivity("Main"))
-        {
-            await OpenTracingLibrary.Wrapper.WithOpenTracingSpanAsync("client", RunAsync);
-        }
+        await OpenTracingLibrary.Wrapper.WithOpenTracingSpanAsync("client", RunAsync);
 
         return 0;
     }
@@ -45,14 +40,10 @@ internal class Program
     private static async Task RunAsync()
     {
         using var client = new HttpClient();
-        using (var activity = MyActivitySource.StartActivity("RunAsync"))
-        {
-            activity?.SetTag("foo", "bar");
 
-            await HttpGet("https://www.example.com/default-handler");
-            await HttpGet("http://127.0.0.1:8080/api/mongo");
-            await HttpGet("http://127.0.0.1:8080/api/redis");
-        }
+        await HttpGet("https://www.example.com/default-handler");
+        await HttpGet("http://127.0.0.1:8080/api/mongo");
+        await HttpGet("http://127.0.0.1:8080/api/redis");
 
         const string requestUrl = "https://www.example.com/";
         var request = new HttpRequestMessage

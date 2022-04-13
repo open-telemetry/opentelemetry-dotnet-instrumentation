@@ -122,6 +122,10 @@ OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
 
 See [config.md](config.md).
 
+### Manual instrumentation
+
+See [manual-instrumentation.md](manual-instrumentation.md).
+
 ## Troubleshooting
 
 See [troubleshooting.md](troubleshooting.md).
