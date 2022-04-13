@@ -34,9 +34,9 @@ You can set the value to either `Examples.ManualInstrumentations.Registerd`
 or to `Examples.ManualInstrumentations.*`, which registers the entire prefix.
 
 You can see a sample console application with automatic (`HttpClient`) and manual
-instrumentation [here](..\examples\ManualInstrumenation\Examples.ManualInstrumentations).
+instrumentation [here](../examples/ManualInstrumenation/Examples.ManualInstrumentations).
 
->  Note that an `Activity` created for `NonRegistered.ManualInstrumentations`
+> Note that an `Activity` created for `NonRegistered.ManualInstrumentations`
 `ActivitySoruce` is not handled by the OpenTelemetry Automatic Instrumentation.
 
 Further reading:
