@@ -12,17 +12,17 @@ TEST_F(CLRHelperTest, EnumeratesTypeDefs) {
   std::vector<std::wstring> expected_types = {
       L"Microsoft.CodeAnalysis.EmbeddedAttribute",
       L"System.Runtime.CompilerServices.IsReadOnlyAttribute",
-      L"Samples.ExampleLibrary.Class1",
-      L"Samples.ExampleLibrary.GenericTests.ComprehensiveCaller`2",
-      L"Samples.ExampleLibrary.GenericTests.GenericTarget`2",
-      L"Samples.ExampleLibrary.GenericTests.PointStruct",
-      L"Samples.ExampleLibrary.GenericTests.StructContainer`1",
-      L"Samples.ExampleLibrary.FakeClient.Biscuit`1",
-      L"Samples.ExampleLibrary.FakeClient.Biscuit",
-      L"Samples.ExampleLibrary.FakeClient.StructBiscuit",
-      L"Samples.ExampleLibrary.FakeClient.DogClient`2",
-      L"Samples.ExampleLibrary.FakeClient.DogTrick`1",
-      L"Samples.ExampleLibrary.FakeClient.DogTrick",
+      L"TestApplication.ExampleLibrary.Class1",
+      L"TestApplication.ExampleLibrary.GenericTests.ComprehensiveCaller`2",
+      L"TestApplication.ExampleLibrary.GenericTests.GenericTarget`2",
+      L"TestApplication.ExampleLibrary.GenericTests.PointStruct",
+      L"TestApplication.ExampleLibrary.GenericTests.StructContainer`1",
+      L"TestApplication.ExampleLibrary.FakeClient.Biscuit`1",
+      L"TestApplication.ExampleLibrary.FakeClient.Biscuit",
+      L"TestApplication.ExampleLibrary.FakeClient.StructBiscuit",
+      L"TestApplication.ExampleLibrary.FakeClient.DogClient`2",
+      L"TestApplication.ExampleLibrary.FakeClient.DogTrick`1",
+      L"TestApplication.ExampleLibrary.FakeClient.DogTrick",
       L"<>c",
       L"Cookie",
       L"Cookie",
@@ -68,17 +68,17 @@ TEST_F(CLRHelperTest, GetsTypeInfoFromTypeDefs) {
       L"Cookie",
       L"Microsoft.CodeAnalysis.EmbeddedAttribute",
       L"Raisin",
-      L"Samples.ExampleLibrary.Class1",
-      L"Samples.ExampleLibrary.FakeClient.Biscuit",
-      L"Samples.ExampleLibrary.FakeClient.Biscuit`1",
-      L"Samples.ExampleLibrary.FakeClient.DogClient`2",
-      L"Samples.ExampleLibrary.FakeClient.DogTrick",
-      L"Samples.ExampleLibrary.FakeClient.DogTrick`1",
-      L"Samples.ExampleLibrary.FakeClient.StructBiscuit",
-      L"Samples.ExampleLibrary.GenericTests.ComprehensiveCaller`2",
-      L"Samples.ExampleLibrary.GenericTests.GenericTarget`2",
-      L"Samples.ExampleLibrary.GenericTests.PointStruct",
-      L"Samples.ExampleLibrary.GenericTests.StructContainer`1",
+      L"TestApplication.ExampleLibrary.Class1",
+      L"TestApplication.ExampleLibrary.FakeClient.Biscuit",
+      L"TestApplication.ExampleLibrary.FakeClient.Biscuit`1",
+      L"TestApplication.ExampleLibrary.FakeClient.DogClient`2",
+      L"TestApplication.ExampleLibrary.FakeClient.DogTrick",
+      L"TestApplication.ExampleLibrary.FakeClient.DogTrick`1",
+      L"TestApplication.ExampleLibrary.FakeClient.StructBiscuit",
+      L"TestApplication.ExampleLibrary.GenericTests.ComprehensiveCaller`2",
+      L"TestApplication.ExampleLibrary.GenericTests.GenericTarget`2",
+      L"TestApplication.ExampleLibrary.GenericTests.PointStruct",
+      L"TestApplication.ExampleLibrary.GenericTests.StructContainer`1",
       L"System.Runtime.CompilerServices.IsReadOnlyAttribute"};
   std::set<std::wstring> actual;
   for (auto& type_def : EnumTypeDefs(metadata_import_)) {
@@ -166,17 +166,17 @@ TEST_F(CLRHelperTest, GetsTypeInfoFromMethods) {
       L"<StayAndLayDown>d__4`2",
       L"Cookie",
       L"Raisin",
-      L"Samples.ExampleLibrary.Class1",
-      L"Samples.ExampleLibrary.FakeClient.Biscuit",
-      L"Samples.ExampleLibrary.FakeClient.Biscuit`1",
-      L"Samples.ExampleLibrary.FakeClient.DogClient`2",
-      L"Samples.ExampleLibrary.FakeClient.DogTrick",
-      L"Samples.ExampleLibrary.FakeClient.DogTrick`1",
-      L"Samples.ExampleLibrary.FakeClient.StructBiscuit",
-      L"Samples.ExampleLibrary.GenericTests.ComprehensiveCaller`2",
-      L"Samples.ExampleLibrary.GenericTests.GenericTarget`2",
-      L"Samples.ExampleLibrary.GenericTests.PointStruct",
-      L"Samples.ExampleLibrary.GenericTests.StructContainer`1"};
+      L"TestApplication.ExampleLibrary.Class1",
+      L"TestApplication.ExampleLibrary.FakeClient.Biscuit",
+      L"TestApplication.ExampleLibrary.FakeClient.Biscuit`1",
+      L"TestApplication.ExampleLibrary.FakeClient.DogClient`2",
+      L"TestApplication.ExampleLibrary.FakeClient.DogTrick",
+      L"TestApplication.ExampleLibrary.FakeClient.DogTrick`1",
+      L"TestApplication.ExampleLibrary.FakeClient.StructBiscuit",
+      L"TestApplication.ExampleLibrary.GenericTests.ComprehensiveCaller`2",
+      L"TestApplication.ExampleLibrary.GenericTests.GenericTarget`2",
+      L"TestApplication.ExampleLibrary.GenericTests.PointStruct",
+      L"TestApplication.ExampleLibrary.GenericTests.StructContainer`1"};
   std::set<std::wstring> actual;
   for (auto& type_def : EnumTypeDefs(metadata_import_)) {
     for (auto& method_def : EnumMethods(metadata_import_, type_def)) {
@@ -191,20 +191,20 @@ TEST_F(CLRHelperTest, GetsTypeInfoFromMethods) {
 
 TEST_F(CLRHelperTest, FindTypeDefsByName) {
   std::vector<std::wstring> expected_types = {
-      L"Samples.ExampleLibrary.Class1",
-      L"Samples.ExampleLibrary.GenericTests.ComprehensiveCaller`2",
-      L"Samples.ExampleLibrary.GenericTests.GenericTarget`2",
-      L"Samples.ExampleLibrary.GenericTests.PointStruct",
-      L"Samples.ExampleLibrary.GenericTests.StructContainer`1",
-      L"Samples.ExampleLibrary.FakeClient.Biscuit`1",
-      L"Samples.ExampleLibrary.FakeClient.Biscuit",
-      L"Samples.ExampleLibrary.FakeClient.DogClient`2",
-      L"Samples.ExampleLibrary.FakeClient.DogTrick`1",
-      L"Samples.ExampleLibrary.FakeClient.DogTrick"};
+      L"TestApplication.ExampleLibrary.Class1",
+      L"TestApplication.ExampleLibrary.GenericTests.ComprehensiveCaller`2",
+      L"TestApplication.ExampleLibrary.GenericTests.GenericTarget`2",
+      L"TestApplication.ExampleLibrary.GenericTests.PointStruct",
+      L"TestApplication.ExampleLibrary.GenericTests.StructContainer`1",
+      L"TestApplication.ExampleLibrary.FakeClient.Biscuit`1",
+      L"TestApplication.ExampleLibrary.FakeClient.Biscuit",
+      L"TestApplication.ExampleLibrary.FakeClient.DogClient`2",
+      L"TestApplication.ExampleLibrary.FakeClient.DogTrick`1",
+      L"TestApplication.ExampleLibrary.FakeClient.DogTrick"};
 
   for (auto& def : expected_types) {
     mdTypeDef typeDef = mdTypeDefNil;
-    auto found = FindTypeDefByName(def, L"Samples.ExampleLibrary",
+    auto found = FindTypeDefByName(def, L"TestApplication.ExampleLibrary",
                                    metadata_import_, typeDef);
     EXPECT_TRUE(found) << "Failed type is : " << def << std::endl;
     EXPECT_NE(typeDef, mdTypeDefNil) << "Failed type is : " << def << std::endl;
@@ -213,12 +213,12 @@ TEST_F(CLRHelperTest, FindTypeDefsByName) {
 
 TEST_F(CLRHelperTest, FindNestedTypeDefsByName) {
   std::vector<std::wstring> expected_types = {
-      L"Samples.ExampleLibrary.FakeClient.Biscuit+Cookie",
-      L"Samples.ExampleLibrary.FakeClient.StructBiscuit+Cookie"};
+      L"TestApplication.ExampleLibrary.FakeClient.Biscuit+Cookie",
+      L"TestApplication.ExampleLibrary.FakeClient.StructBiscuit+Cookie"};
 
   for (auto& def : expected_types) {
     mdTypeDef typeDef = mdTypeDefNil;
-    auto found = FindTypeDefByName(def, L"Samples.ExampleLibrary",
+    auto found = FindTypeDefByName(def, L"TestApplication.ExampleLibrary",
                                    metadata_import_, typeDef);
     EXPECT_TRUE(found) << "Failed type is : " << def << std::endl;
     EXPECT_NE(typeDef, mdTypeDefNil) << "Failed type is : " << def << std::endl;
@@ -227,12 +227,12 @@ TEST_F(CLRHelperTest, FindNestedTypeDefsByName) {
 
 TEST_F(CLRHelperTest, DoesNotFindDoubleNestedTypeDefsByName) {
   std::vector<std::wstring> expected_types = {
-      L"Samples.ExampleLibrary.NotARealClass",
-      L"Samples.ExampleLibrary.FakeClient.Biscuit+Cookie+Raisin"};
+      L"TestApplication.ExampleLibrary.NotARealClass",
+      L"TestApplication.ExampleLibrary.FakeClient.Biscuit+Cookie+Raisin"};
 
   for (auto& def : expected_types) {
     mdTypeDef typeDef = mdTypeDefNil;
-    auto found = FindTypeDefByName(def, L"Samples.ExampleLibrary",
+    auto found = FindTypeDefByName(def, L"TestApplication.ExampleLibrary",
                                    metadata_import_, typeDef);
     EXPECT_FALSE(found) << "Failed type is : " << def << std::endl;
     EXPECT_EQ(typeDef, mdTypeDefNil) << "Failed type is : " << def << std::endl;

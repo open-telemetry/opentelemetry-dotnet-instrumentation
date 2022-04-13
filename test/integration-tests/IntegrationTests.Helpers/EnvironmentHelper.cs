@@ -39,7 +39,7 @@ public class EnvironmentHelper
     private readonly string _appNamePrepend;
     private readonly string _runtime;
     private readonly bool _isCoreClr;
-    private readonly string _samplesDirectory;
+    private readonly string _testApplicationDirectory;
     private readonly TargetFrameworkAttribute _targetFramework;
 
     private bool _requiresProfiling;
@@ -47,15 +47,15 @@ public class EnvironmentHelper
     private string _profilerFileLocation;
 
     public EnvironmentHelper(
-        string sampleName,
+        string testApplicationName,
         Type anchorType,
         ITestOutputHelper output,
-        string samplesDirectory = null,
-        bool prependSamplesToAppName = true,
+        string testApplicationDirectory = null,
+        bool prependTestApplicationToAppName = true,
         bool requiresProfiling = true)
     {
-        SampleName = sampleName;
-        _samplesDirectory = samplesDirectory ?? Path.Combine("test", "test-applications", "integrations");
+        TestApplicationName = testApplicationName;
+        _testApplicationDirectory = testApplicationDirectory ?? Path.Combine("test", "test-applications", "integrations");
         _targetFramework = Assembly.GetAssembly(anchorType).GetCustomAttribute<TargetFrameworkAttribute>();
         _output = output;
         _requiresProfiling = requiresProfiling;
@@ -73,8 +73,8 @@ public class EnvironmentHelper
             _patch = versionParts[2];
         }
 
-        _appNamePrepend = prependSamplesToAppName
-            ? "Samples."
+        _appNamePrepend = prependTestApplicationToAppName
+            ? "TestApplication."
             : string.Empty;
     }
 
@@ -82,9 +82,9 @@ public class EnvironmentHelper
 
     public Dictionary<string, string> CustomEnvironmentVariables { get; set; } = new Dictionary<string, string>();
 
-    public string SampleName { get; }
+    public string TestApplicationName { get; }
 
-    public string FullSampleName => $"{_appNamePrepend}{SampleName}";
+    public string FullTestApplicationName => $"{_appNamePrepend}{TestApplicationName}";
 
     public static bool IsNet5()
     {
@@ -202,10 +202,10 @@ public class EnvironmentHelper
         environmentVariables["OTEL_TRACES_EXPORTER"] = "zipkin";
         environmentVariables["OTEL_EXPORTER_ZIPKIN_ENDPOINT"] = $"http://127.0.0.1:{agentPort}";
 
-        // for ASP.NET Core sample apps, set the server's port
+        // for ASP.NET Core test applications, set the server's port
         environmentVariables["ASPNETCORE_URLS"] = $"http://127.0.0.1:{aspNetCorePort}/";
 
-        environmentVariables["OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES"] = "Samples.*";
+        environmentVariables["OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES"] = "TestApplication.*";
 
         foreach (var key in CustomEnvironmentVariables.Keys)
         {
@@ -264,32 +264,25 @@ public class EnvironmentHelper
         throw new Exception($"Unable to find integrations at: {integrationsPath}");
     }
 
-    public string GetSampleApplicationPath(string packageVersion = "", string framework = "")
+    public string GetTestApplicationPath(string packageVersion = "", string framework = "")
     {
         string extension = "exe";
 
-        if (IsCoreClr() || _samplesDirectory.Contains("aspnet"))
+        if (IsCoreClr() || _testApplicationDirectory.Contains("aspnet"))
         {
             extension = "dll";
         }
 
-        var appFileName = $"{FullSampleName}.{extension}";
-        var sampleAppPath = Path.Combine(GetSampleApplicationOutputDirectory(packageVersion: packageVersion, framework: framework), appFileName);
-        return sampleAppPath;
+        var appFileName = $"{FullTestApplicationName}.{extension}";
+        var testApplicationPath = Path.Combine(GetTestApplicationApplicationOutputDirectory(packageVersion: packageVersion, framework: framework), appFileName);
+        return testApplicationPath;
     }
 
-    public string GetTestCommandForSampleApplicationPath(string packageVersion = "", string framework = "")
-    {
-        var appFileName = $"{FullSampleName}.dll";
-        var sampleAppPath = Path.Combine(GetSampleApplicationOutputDirectory(packageVersion: packageVersion, framework: framework), appFileName);
-        return sampleAppPath;
-    }
-
-    public string GetSampleExecutionSource()
+    public string GetTestApplicationExecutionSource()
     {
         string executor;
 
-        if (_samplesDirectory.Contains("aspnet"))
+        if (_testApplicationDirectory.Contains("aspnet"))
         {
             executor = $"C:\\Program Files{(Environment.Is64BitProcess ? string.Empty : " (x86)")}\\IIS Express\\iisexpress.exe";
         }
@@ -299,8 +292,8 @@ public class EnvironmentHelper
         }
         else
         {
-            var appFileName = $"{FullSampleName}.exe";
-            executor = Path.Combine(GetSampleApplicationOutputDirectory(), appFileName);
+            var appFileName = $"{FullTestApplicationName}.exe";
+            executor = Path.Combine(GetTestApplicationApplicationOutputDirectory(), appFileName);
 
             if (!File.Exists(executor))
             {
@@ -311,24 +304,24 @@ public class EnvironmentHelper
         return executor;
     }
 
-    public string GetSampleProjectDirectory()
+    public string GetTestApplicationProjectDirectory()
     {
         var solutionDirectory = EnvironmentTools.GetSolutionDirectory();
         var projectDir = Path.Combine(
             solutionDirectory,
-            _samplesDirectory,
-            $"{FullSampleName}");
+            _testApplicationDirectory,
+            $"{FullTestApplicationName}");
         return projectDir;
     }
 
-    public string GetSampleApplicationOutputDirectory(string packageVersion = "", string framework = "")
+    public string GetTestApplicationApplicationOutputDirectory(string packageVersion = "", string framework = "")
     {
         var targetFramework = string.IsNullOrEmpty(framework) ? GetTargetFramework() : framework;
         var binDir = Path.Combine(
-            GetSampleProjectDirectory(),
+            GetTestApplicationProjectDirectory(),
             "bin");
 
-        if (_samplesDirectory.Contains("aspnet"))
+        if (_testApplicationDirectory.Contains("aspnet"))
         {
             return Path.Combine(
                 binDir,

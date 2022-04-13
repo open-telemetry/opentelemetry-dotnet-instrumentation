@@ -32,8 +32,8 @@ public abstract class TestHelper
     // Warning: Long timeouts can cause integer overflow!
     private static readonly TimeSpan DefaultProcessTimeout = TimeSpan.FromMinutes(5);
 
-    protected TestHelper(string sampleAppName, ITestOutputHelper output)
-        : this(new EnvironmentHelper(sampleAppName, typeof(TestHelper), output), output)
+    protected TestHelper(string testApplicationName, ITestOutputHelper output)
+        : this(new EnvironmentHelper(testApplicationName, typeof(TestHelper), output), output)
     {
     }
 
@@ -55,8 +55,8 @@ public abstract class TestHelper
 
     public async Task<Container> StartContainerAsync(int traceAgentPort, int webPort)
     {
-        // get path to sample app that the profiler will attach to
-        string sampleName = $"samples-{EnvironmentHelper.SampleName.ToLowerInvariant()}";
+        // get path to test application that the profiler will attach to
+        string testApplicationName = $"testapplication-{EnvironmentHelper.TestApplicationName.ToLowerInvariant()}";
 
         string agentBaseUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{traceAgentPort}";
         string agentHealthzUrl = $"{agentBaseUrl}/healthz";
@@ -75,10 +75,10 @@ public abstract class TestHelper
         Output.WriteLine("Collecting docker logs to: " + logPath);
 
         var builder = new TestcontainersBuilder<TestcontainersContainer>()
-            .WithImage(sampleName)
+            .WithImage(testApplicationName)
             .WithCleanUp(cleanUp: true)
             .WithOutputConsumer(Consume.RedirectStdoutAndStderrToConsole())
-            .WithName($"{sampleName}-{traceAgentPort}-{webPort}")
+            .WithName($"{testApplicationName}-{traceAgentPort}-{webPort}")
             .WithNetwork(networkId, networkName)
             .WithPortBinding(webPort, 80)
             .WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", zipkinEndpoint)
@@ -88,7 +88,7 @@ public abstract class TestHelper
         var container = builder.Build();
         var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
 
-        wasStarted.Should().BeTrue($"Container based on {sampleName} has to be operational for the test.");
+        wasStarted.Should().BeTrue($"Container based on {testApplicationName} has to be operational for the test.");
 
         Output.WriteLine($"Container was started successfully.");
 
@@ -104,18 +104,18 @@ public abstract class TestHelper
         return new Container(container);
     }
 
-    public Process StartSample(int traceAgentPort, string arguments, string packageVersion, int aspNetCorePort, string framework = "", bool enableStartupHook = true)
+    public Process StartTestApplication(int traceAgentPort, string arguments, string packageVersion, int aspNetCorePort, string framework = "", bool enableStartupHook = true)
     {
-        // get path to sample app that the profiler will attach to
-        string sampleAppPath = EnvironmentHelper.GetSampleApplicationPath(packageVersion, framework);
-        if (!File.Exists(sampleAppPath))
+        // get path to test application that the profiler will attach to
+        string testApplicationPath = EnvironmentHelper.GetTestApplicationPath(packageVersion, framework);
+        if (!File.Exists(testApplicationPath))
         {
-            throw new Exception($"application not found: {sampleAppPath}");
+            throw new Exception($"application not found: {testApplicationPath}");
         }
 
-        Output.WriteLine($"Starting Application: {sampleAppPath}");
-        var executable = EnvironmentHelper.IsCoreClr() ? EnvironmentHelper.GetSampleExecutionSource() : sampleAppPath;
-        var args = EnvironmentHelper.IsCoreClr() ? $"{sampleAppPath} {arguments ?? string.Empty}" : arguments;
+        Output.WriteLine($"Starting Application: {testApplicationPath}");
+        var executable = EnvironmentHelper.IsCoreClr() ? EnvironmentHelper.GetTestApplicationExecutionSource() : testApplicationPath;
+        var args = EnvironmentHelper.IsCoreClr() ? $"{testApplicationPath} {arguments ?? string.Empty}" : arguments;
 
         return InstrumentedProcessHelper.StartInstrumentedProcess(
             executable,
@@ -127,9 +127,9 @@ public abstract class TestHelper
             enableStartupHook: enableStartupHook);
     }
 
-    public ProcessResult RunSampleAndWaitForExit(int traceAgentPort, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000, bool enableStartupHook = true)
+    public ProcessResult RunTestApplicationAndWaitForExit(int traceAgentPort, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000, bool enableStartupHook = true)
     {
-        var process = StartSample(traceAgentPort, arguments, packageVersion, aspNetCorePort: aspNetCorePort, framework: framework, enableStartupHook: enableStartupHook);
+        var process = StartTestApplication(traceAgentPort, arguments, packageVersion, aspNetCorePort: aspNetCorePort, framework: framework, enableStartupHook: enableStartupHook);
         var name = process.ProcessName;
 
         using var helper = new ProcessHelper(process);

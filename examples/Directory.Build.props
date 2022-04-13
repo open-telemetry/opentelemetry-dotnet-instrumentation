@@ -7,6 +7,6 @@
 
   <!-- StyleCop -->
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" Link="GlobalSuppressions.samples.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" Link="GlobalSuppressions.testApplication.cs" />
   </ItemGroup>
 </Project>

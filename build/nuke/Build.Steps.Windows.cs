@@ -100,7 +100,7 @@ partial class Build
         .Unlisted()
         .After(CompileManagedTests)
         .OnlyWhenStatic(() => IsWin)
-        .Triggers(PublishIisSamples)
+        .Triggers(PublishIisTestApplications)
         .Executes(() =>
         {
             // Compile .NET Framework projects
@@ -114,7 +114,7 @@ partial class Build
             );
         });
 
-    Target PublishIisSamples => _ => _
+    Target PublishIisTestApplications => _ => _
         .Unlisted()
         .After(CompileManagedTestsWindows)
         .OnlyWhenStatic(() => IsWin)
@@ -148,7 +148,7 @@ partial class Build
         .Unlisted()
         .After(RunManagedTests)
         .DependsOn(CompileManagedTestsWindows)
-        .DependsOn(PublishIisSamples)
+        .DependsOn(PublishIisTestApplications)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {

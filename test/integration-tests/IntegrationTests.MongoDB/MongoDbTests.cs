@@ -45,13 +45,13 @@ namespace IntegrationTests.MongoDB
         [Trait("Category", "EndToEnd")]
         public void SubmitsTraces()
         {
-            const string ServiceName = "Samples.MongoDB";
+            const string ServiceName = "TestApplication.MongoDB";
             SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
 
             int agentPort = TcpPortProvider.GetOpenPort();
 
             using (var agent = new MockZipkinCollector(Output, agentPort))
-            using (var processResult = RunSampleAndWaitForExit(agent.Port, arguments: $"--mongo-db {_mongoDb.Port}"))
+            using (var processResult = RunTestApplicationAndWaitForExit(agent.Port, arguments: $"--mongo-db {_mongoDb.Port}"))
             {
                 Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
 
