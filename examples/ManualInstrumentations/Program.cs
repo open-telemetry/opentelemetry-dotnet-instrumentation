@@ -44,6 +44,8 @@ internal class Program
             activity?.SetTag("foo", "bar2");
 
             await HttpGet("https://www.example.com/default-handler");
+            await HttpGet("http://127.0.0.1:8080/api/mongo");
+            await HttpGet("http://127.0.0.1:8080/api/redis");
         }
     }
 
