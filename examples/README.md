@@ -30,7 +30,7 @@ You can customize the script using the following environment variables:
 |-|-|-|
 | **aspNetAppTargetFramework** | Target framework for the `aspnet-server` service | `netcoreapp3.1` |
 | **configuration** | Build configuration for example apps, either `Release` or `Debug` | `Release` |
-| **enableProfiling** | Value of `CLR_ENABLE_PROFILING` and `CORECLR_ENABLE_PROFILING` for the sample apps | `1` |
+| **enableProfiling** | Value of `COR_ENABLE_PROFILING` and `CORECLR_ENABLE_PROFILING` for the sample apps | `1` |
 | **exampleApp** | Application selected for the `http-client` service | `ConsoleApp` |
 | **exampleAppInjectSDK** | Whether automatic instrumentation injects the SDK on the `http-client` service | `true` |
 | **exampleAppTargetFramework** | Target framework for the `http-client` service | `netcoreapp3.1` |
