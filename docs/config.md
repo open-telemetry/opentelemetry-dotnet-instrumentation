@@ -131,22 +131,19 @@ OpenTelemetry .NET Automatic Instrumentation.
 
 To perform bytecode instrumentation, configure the OpenTelemetry .NET
 Automatic Instrumentation as a .NET CLR Profiler. The CLR uses the following
-environment variables to set up the profiler.
+environment variables to set up the profiler. 
+
+> Notice that .NET Framework uses the `COR_` prefix instead of `CORECLR_`.
 
 | Environment variable | Description | Value |
 |-|-|-|
 | `CORECLR_ENABLE_PROFILING` | Enables the profiler. | `1` |
 | `CORECLR_PROFILER` | CLSID of the profiler. | `30000` (ms) |
 | `CORECLR_PROFILER_PATH` | Path to the profiler. | `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.so` for Linux, `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.dylib` for MacOS |
-| `CORECLR_PROFILER_PATH_32` | Path to the 32-bit profiler. | `%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
-| `CORECLR_PROFILER_PATH_64` | Path to the 64-bit profiler. | `%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
+| `CORECLR_PROFILER_PATH_32` | Path to the 32-bit profiler. Bitness-specific paths take precedence over generic paths. | `%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
+| `CORECLR_PROFILER_PATH_64` | Path to the 64-bit profiler. Bitness-specific paths take precedence over generic paths. | `%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
 
-### Considerations on the CLR profiler
-
-- .NET Framework uses the `CLR_` prefix instead of `CORECLR_`.
-- Bitness-specific paths take precedence over generic paths.
-- The `*_PROFILER_PATH_*` environment variable is not needed on Windows
-   if the DLL file is registered.
+The `*_PROFILER_PATH_*` environment variable is not needed on Windows if the DLL file is already registered.
 
 See [.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/profiling/Profiler%20Loading.md) for more information.
 
