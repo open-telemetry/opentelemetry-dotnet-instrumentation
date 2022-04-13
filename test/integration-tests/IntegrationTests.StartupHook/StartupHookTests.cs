@@ -28,7 +28,7 @@ namespace IntegrationTests.StartupHook;
 
 public class StartupHookTests : TestHelper
 {
-    private const string ServiceName = "Samples.MongoDB";
+    private const string ServiceName = "TestApplication.MongoDB";
 
     private List<WebServerSpanExpectation> _expectations = new List<WebServerSpanExpectation>();
 
@@ -73,7 +73,7 @@ public class StartupHookTests : TestHelper
         int expectedSpanCount = 2;
         if (excludeApplication)
         {
-            applicationNameToExclude = EnvironmentHelper.FullSampleName;
+            applicationNameToExclude = EnvironmentHelper.FullTestApplicationName;
             expectedSpanCount = 0;
         }
 
@@ -89,7 +89,7 @@ public class StartupHookTests : TestHelper
         int agentPort = TcpPortProvider.GetOpenPort();
 
         using (var agent = new MockZipkinCollector(Output, agentPort))
-        using (var processResult = RunSampleAndWaitForExit(agent.Port, enableStartupHook: enableStartupHook))
+        using (var processResult = RunTestApplicationAndWaitForExit(agent.Port, enableStartupHook: enableStartupHook))
         {
             Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
             return agent.WaitForSpans(2, 500);

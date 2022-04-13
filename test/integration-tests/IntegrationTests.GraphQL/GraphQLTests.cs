@@ -20,7 +20,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading;
 using IntegrationTests.Helpers;
 using IntegrationTests.Helpers.Models;
@@ -31,7 +30,7 @@ namespace IntegrationTests.GraphQL;
 
 public class GraphQLTests : TestHelper
 {
-    private const string ServiceName = "Samples.GraphQL";
+    private const string ServiceName = "TestApplication.GraphQL";
 
     private static readonly string _graphQLValidateOperationName = "graphql.validate";
     private static readonly string _graphQLExecuteOperationName = "graphql.execute";
@@ -87,11 +86,11 @@ public class GraphQLTests : TestHelper
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
 
         using (var agent = new MockZipkinCollector(Output, agentPort))
-        using (Process process = StartSample(agent.Port, arguments: null, packageVersion: string.Empty, aspNetCorePort: aspNetCorePort))
+        using (Process process = StartTestApplication(agent.Port, arguments: null, packageVersion: string.Empty, aspNetCorePort: aspNetCorePort))
         {
             if (process.HasExited)
             {
-                throw new InvalidOperationException($"Sample has exited with code: {process.ExitCode}");
+                throw new InvalidOperationException($"Test application has exited with code: {process.ExitCode}");
             }
 
             var wh = new EventWaitHandle(false, EventResetMode.AutoReset);

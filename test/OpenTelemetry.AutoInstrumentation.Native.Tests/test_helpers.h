@@ -40,10 +40,10 @@ class CLRHelperTestBase : public ::testing::Test {
     ASSERT_TRUE(SUCCEEDED(hr));
 
     ComPtr<IUnknown> metadataInterfaces;
-    hr = metadata_dispenser_->OpenScope(L"Samples.ExampleLibrary.dll",
+    hr = metadata_dispenser_->OpenScope(L"TestApplication.ExampleLibrary.dll",
                                         ofReadWriteMask, IID_IMetaDataImport2,
                                         metadataInterfaces.GetAddressOf());
-    ASSERT_TRUE(SUCCEEDED(hr)) << "Samples.ExampleLibrary.dll was not found.";
+    ASSERT_TRUE(SUCCEEDED(hr)) << "TestApplication.ExampleLibrary.dll was not found.";
 
     metadata_import_ =
         metadataInterfaces.As<IMetaDataImport2>(IID_IMetaDataImport2);
