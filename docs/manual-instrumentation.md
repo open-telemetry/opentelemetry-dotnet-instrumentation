@@ -41,4 +41,4 @@ instrumentation [here](../examples/ManualInstrumenation/Examples.ManualInstrumen
 
 Further reading:
 
-- [OpenTelemetry.io documentation for .NET Manual Instrumentation](https://opentelemetry.io/docs/instrumentation/net/manual/)
+- [OpenTelemetry.io documentation for .NET Manual Instrumentation](https://opentelemetry.io/docs/instrumentation/net/manual/#setting-up-an-activitysource)
