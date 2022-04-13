@@ -144,7 +144,7 @@ LoggerImpl<TLoggerPolicy>::LoggerImpl()
 
     m_fileout->set_level(spdlog::level::debug);
 
-    m_fileout->set_pattern(TLoggerPolicy::pattern);
+    m_fileout->set_pattern(TLoggerPolicy::pattern, spdlog::pattern_time_type::utc);
 
     m_fileout->flush_on(spdlog::level::info);
 };

@@ -38,7 +38,7 @@ internal static class StartupLogger
                 {
                     using (var fileSink = new FileSink(StartupLogFilePath))
                     {
-                        fileSink.Info($"[{DateTime.UtcNow}] {message}{Environment.NewLine}", args);
+                        fileSink.Info($"[{DateTime.UtcNow:O}] {message}{Environment.NewLine}", args);
                     }
 
                     return;

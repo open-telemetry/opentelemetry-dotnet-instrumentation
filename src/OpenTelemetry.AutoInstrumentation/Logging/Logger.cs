@@ -22,6 +22,7 @@ namespace OpenTelemetry.AutoInstrumentation.Logging;
 internal class Logger : ILogger
 {
     private static readonly object[] NoPropertyValues = Array.Empty<object>();
+
     private readonly ISink _sink;
 
     internal Logger(ISink sink)
@@ -196,7 +197,7 @@ internal class Logger : ILogger
         try
         {
             var message =
-                $"[{DateTime.UtcNow}] [{level}] {string.Format(messageTemplate, args)} {Environment.NewLine}";
+                $"[{DateTime.UtcNow:O}] [{level}] {string.Format(messageTemplate, args)} {Environment.NewLine}";
             _sink.Write(message);
 
             if (exception != null)
