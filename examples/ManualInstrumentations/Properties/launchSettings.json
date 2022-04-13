@@ -13,7 +13,6 @@
 
         "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home\\",
         "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE": "$(SolutionDir)bin\\tracer-home\\integrations.json",
-        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4318",
         "OTEL_DOTNET_AUTO_DEBUG": "1",
 
         "DOTNET_ADDITIONAL_DEPS": "$(SolutionDir)bin\\tracer-home\\AdditionalDeps",
