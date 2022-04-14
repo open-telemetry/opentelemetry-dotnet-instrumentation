@@ -24,7 +24,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 #if NETFRAMEWORK
-using IntegrationTests.Helpers.Comptability;
+using IntegrationTests.Helpers.Compatibility;
 #endif
 
 namespace IntegrationTests.Helpers.Mocks

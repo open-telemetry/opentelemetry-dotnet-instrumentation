@@ -14,19 +14,18 @@
 // limitations under the License.
 // </copyright>
 
+using System;
 #if NETCOREAPP
 using System.Collections.Generic;
 #endif
-
 using System.Linq;
 using IntegrationTests.Helpers;
+#if NETFRAMEWORK
+using IntegrationTests.Helpers.Compatibility;
+#endif
 using OpenTelemetry.AutoInstrumentation.Tagging;
 using Xunit;
 using Xunit.Abstractions;
-
-#if NETFRAMEWORK
-using IntegrationTests.Helpers.Comptability;
-#endif
 
 namespace IntegrationTests.MongoDB
 {
@@ -55,7 +54,7 @@ namespace IntegrationTests.MongoDB
             {
                 Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
 
-                var spans = agent.WaitForSpans(3, 500);
+                var spans = agent.WaitForSpans(3, TimeSpan.FromSeconds(5));
                 Assert.True(spans.Count >= 3, $"Expecting at least 3 spans, only received {spans.Count}");
 
                 var rootSpan = spans.Single(s => s.ParentId == null);
