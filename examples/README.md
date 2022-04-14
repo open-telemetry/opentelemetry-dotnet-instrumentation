@@ -5,7 +5,7 @@ the OpenTelemetry .NET Automatic Instrumentation.
 
 ## Overview
 
-The sample script instruments two .NET processes. These processes are identified
+The example script instruments two .NET processes. These processes are identified
 as [OpenTelemetry services](https://github.com/open-telemetry/opentelemetry-specification/blob/d6bcc0cb072d8d6f6ced856f1f23c451648a3caa/specification/resource/semantic_conventions/README.md#service)
 with the following names:
 
@@ -19,7 +19,7 @@ used in the specific run. The script waits for your input before stopping the co
 
 ## How to run the examples
 
-To run the sample applications:
+To run the example applications:
 
  1. Create a local build of the project following the [developing instructions](../docs/developing.md).
  2. Run the `./run-example.sh` script at the root of the repository.
@@ -30,13 +30,13 @@ You can customize the script using the following environment variables:
 |-|-|-|
 | **aspNetAppTargetFramework** | Target framework for the `aspnet-server` service | `netcoreapp3.1` |
 | **configuration** | Build configuration for example apps, either `Release` or `Debug` | `Release` |
-| **enableProfiling** | Value of `COR_ENABLE_PROFILING` and `CORECLR_ENABLE_PROFILING` for the sample apps | `1` |
+| **enableProfiling** | Value of `COR_ENABLE_PROFILING` and `CORECLR_ENABLE_PROFILING` for the example apps | `1` |
 | **exampleApp** | Application selected for the `http-client` service | `ConsoleApp` |
 | **exampleAppInjectSDK** | Whether automatic instrumentation injects the SDK on the `http-client` service | `true` |
 | **exampleAppTargetFramework** | Target framework for the `http-client` service | `netcoreapp3.1` |
 | **exporter** | Value for [`OTEL_TRACES_EXPORTER`](../docs/config.md#exporters) env. variable | `otlp` |
 | **keepContainers** | Whether the docker containers are preserved after the script execution | `false` |
-| **skipAppBuild** | Whether the script skips building the sample apps | `false` |
+| **skipAppBuild** | Whether the script skips building the example apps | `false` |
 
 Usage example:
 
@@ -44,7 +44,7 @@ Usage example:
 exampleAppTargetFramework="net6.0" ./run-example.sh
 ```
 
-## Sample projects
+## Project examples
 
 ### AspNetCoreMvc
 
@@ -60,7 +60,7 @@ aspNetAppTargetFramework="net6.0" ./run-example.sh
 
 ### BindingRedirect
 
-Sample client app that uses .NET Framework binding redirects to handle assembly version conflict
+Example client app that uses .NET Framework binding redirects to handle assembly version conflict
 between automatic instrumentation and third-party libraries that cannot be updated to the same
 version required by OpenTelemetry. See the `OldReference` project for more information.
 
@@ -75,7 +75,7 @@ OTEL_DOTNET_AUTO_LEGACY_SOURCES="InstrumentedHttpCall.GetAsync" exampleApp=Bindi
 
 ### ConsoleApp
 
-The default sample app used by `./run-example.sh`. [OpenTracing](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Shims.OpenTracing#readme).
+The default example app used by `./run-example.sh`. [OpenTracing](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Shims.OpenTracing#readme).
 
 Usage example:
 
@@ -85,7 +85,7 @@ exampleAppTargetFramework="net6.0" ./run-example.sh
 
 ### ConsoleApp.SelfBootstrap
 
-A sample client app that bootstraps the OpenTelemetry SDK. It uses an
+A client app that bootstraps the OpenTelemetry SDK. It uses an
 [ActivitySource](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#activity-source)
 to implement manual instrumentation. The bootstrap code takes care of adding the ActivitySource name
 for the automatic instrumentation and the manual instrumentation.
@@ -102,7 +102,7 @@ exampleAppInjectSDK=false exampleApp=ConsoleApp.SelfBootstrap ./run-example.sh
 
 ### CoreAppOldReference
 
-Sample client application that uses NuGet package version resolution at build time to handle assembly version conflict
+Example client application that uses NuGet package version resolution at build time to handle assembly version conflict
 between automatic instrumentation and third-party libraries that can't be updated to the same version required by OpenTelemetry. See the `OldReference` project for more information.
 
 The project representing the third-party library has a legacy Activity named `InstrumentedHttpCall.GetAsync`
@@ -116,7 +116,7 @@ OTEL_DOTNET_AUTO_LEGACY_SOURCES="InstrumentedHttpCall.GetAsync" exampleApp=CoreA
 
 ### ManualInstrumentations
 
-Sample console application to illustrate how to make [manual instrumentation](..\docs\manual-instrumentation.md).
+Example console application to illustrate how to make [manual instrumentation](..\docs\manual-instrumentation.md).
 
 Usage example:
 
@@ -136,5 +136,5 @@ A library that wraps an OpenTracing span around a `Func<Task>` delegate.
 ### Vendor.Distro
 
 Implements an [instrumentation plugin](../docs/config.md#customization).
-The sample script adds this plugin to the instrumentation configuration
+The example script adds this plugin to the instrumentation configuration
 when launching the server application of the demo.

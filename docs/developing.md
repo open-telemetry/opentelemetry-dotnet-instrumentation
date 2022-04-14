@@ -123,7 +123,7 @@ export OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS=HttpClient
 
 ### Running the examples
 
-You can use the sample applications to see the local changes in action. See
+You can use the example applications to see the local changes in action. See
 [`examples/README.md`](../examples/README.md) for instructions on how to run the examples.
 
 ## Release process
