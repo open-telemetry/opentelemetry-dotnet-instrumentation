@@ -84,16 +84,6 @@ internal static class OtelLogging
 
             if (logDirectory == null)
             {
-                var envVarValue = Environment.GetEnvironmentVariable(ConfigurationKeys.LogPath);
-
-                if (!string.IsNullOrEmpty(envVarValue))
-                {
-                    logDirectory = Path.GetDirectoryName(envVarValue);
-                }
-            }
-
-            if (logDirectory == null)
-            {
                 if (Environment.OSVersion.Platform == PlatformID.Win32NT)
                 {
                     var windowsDefaultDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OpenTelemetry .NET AutoInstrumentation", "logs");

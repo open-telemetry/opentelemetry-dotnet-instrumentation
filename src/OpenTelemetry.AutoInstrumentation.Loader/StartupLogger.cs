@@ -81,16 +81,6 @@ internal static class StartupLogger
 
             if (logDirectory == null)
             {
-                var nativeLogFile = Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_PATH");
-
-                if (!string.IsNullOrEmpty(nativeLogFile))
-                {
-                    logDirectory = Path.GetDirectoryName(nativeLogFile);
-                }
-            }
-
-            if (logDirectory == null)
-            {
                 if (Environment.OSVersion.Platform == PlatformID.Win32NT)
                 {
                     var windowsDefaultDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OpenTelemetry .NET AutoInstrumentation", "logs");

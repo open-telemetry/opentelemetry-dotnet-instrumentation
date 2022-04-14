@@ -63,8 +63,7 @@ the instrumentation uses the path of the current user's [temporary folder](https
 
 | Environment variable | Description | Default |
 |-|-|-|
-| `OTEL_DOTNET_AUTO_LOG_DIRECTORY` | Directory of the .NET Tracer logs. Overrides the value in `OTEL_DOTNET_AUTO_LOG_PATH`, if present. | _See the previous note on default paths_ |
-| `OTEL_DOTNET_AUTO_LOG_PATH` | The path of the profiler log file. | _See the previous note on default paths_ |
+| `OTEL_DOTNET_AUTO_LOG_DIRECTORY` | Directory of the .NET Tracer logs. | _See the previous note on default paths_ |
 | `OTEL_DOTNET_AUTO_DEBUG` | Enables debugging mode for the tracer. | `false` |
 | `OTEL_DOTNET_AUTO_CONSOLE_EXPORTER_ENABLED` | Whether the console exporter is enabled or not. | `false` |
 | `OTEL_DOTNET_AUTO_DUMP_ILREWRITE_ENABLED` | Lets the profiler dump the IL original code and modification to the log. | `false` |
