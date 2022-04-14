@@ -176,42 +176,42 @@ updates:
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
-    directory: /test/test-applications/integrations/aspnet/Samples.AspNet
+    directory: /test/test-applications/integrations/aspnet/TestApplication.AspNet
     schedule:
       day: sunday
       interval: weekly
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
-    directory: /test/test-applications/integrations/dependency-libs/Samples.ExampleLibrary
+    directory: /test/test-applications/integrations/dependency-libs/TestApplication.ExampleLibrary
     schedule:
       day: sunday
       interval: weekly
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
-    directory: /test/test-applications/integrations/dependency-libs/Samples.ExampleLibraryTracer
+    directory: /test/test-applications/integrations/dependency-libs/TestApplication.ExampleLibraryTracer
     schedule:
       day: sunday
       interval: weekly
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
-    directory: /test/test-applications/integrations/Samples.GraphQL
+    directory: /test/test-applications/integrations/TestApplication.GraphQL
     schedule:
       day: sunday
       interval: weekly
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
-    directory: /test/test-applications/integrations/Samples.MongoDB
+    directory: /test/test-applications/integrations/TestApplication.MongoDB
     schedule:
       day: sunday
       interval: weekly
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
-    directory: /test/test-applications/integrations/Samples.StartupHook
+    directory: /test/test-applications/integrations/TestApplication.StartupHook
     schedule:
       day: sunday
       interval: weekly
