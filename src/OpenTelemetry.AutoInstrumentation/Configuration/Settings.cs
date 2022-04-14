@@ -105,6 +105,8 @@ public class Settings
         Integrations = new IntegrationSettingsCollection(source);
 
         Http2UnencryptedSupportEnabled = source.GetBool(ConfigurationKeys.Http2UnencryptedSupportEnabled) ?? false;
+
+        UnhandledExceptionsEnabled = source.GetBool(ConfigurationKeys.UnhandledExceptionsEnabled) ?? false;
     }
 
     /// <summary>
@@ -166,6 +168,12 @@ public class Settings
     /// Default is <c>false</c>.
     /// </summary>
     public bool Http2UnencryptedSupportEnabled { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the `AppDomain.UnhandledException` event should be enabled.
+    /// Default is <c>false</c>.
+    /// </summary>
+    public bool UnhandledExceptionsEnabled { get; }
 
     internal static Settings FromDefaultSources()
     {

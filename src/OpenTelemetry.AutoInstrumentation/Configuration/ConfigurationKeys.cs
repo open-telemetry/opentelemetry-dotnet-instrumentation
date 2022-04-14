@@ -93,6 +93,11 @@ public class ConfigurationKeys
     public const string LogDirectory = "OTEL_DOTNET_AUTO_LOG_DIRECTORY";
 
     /// <summary>
+    /// Configuration key for enabling the notification of unhandled exceptions.
+    /// </summary>
+    public const string UnhandledExceptionsEnabled = "OTEL_DOTNET_AUTO_UNHANDLEDEXCEPTION_ENABLED";
+
+    /// <summary>
     /// String format patterns used to match integration-specific configuration keys.
     /// </summary>
     internal static class Integrations
