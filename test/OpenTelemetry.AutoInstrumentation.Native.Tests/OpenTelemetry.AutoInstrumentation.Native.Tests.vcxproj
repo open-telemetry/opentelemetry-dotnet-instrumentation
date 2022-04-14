@@ -87,11 +87,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\test-applications\integrations\dependency-libs\Samples.ExampleLibraryTracer\Samples.ExampleLibraryTracer.csproj">
+    <ProjectReference Include="..\test-applications\integrations\dependency-libs\TestApplication.ExampleLibraryTracer\TestApplication.ExampleLibraryTracer.csproj">
       <Project>{4b243cf1-4269-45c6-a238-1a9bfa58b8cc}</Project>
       <SetTargetFramework>TargetFramework=net462</SetTargetFramework>
     </ProjectReference>
-    <ProjectReference Include="..\test-applications\integrations\dependency-libs\Samples.ExampleLibrary\Samples.ExampleLibrary.csproj">
+    <ProjectReference Include="..\test-applications\integrations\dependency-libs\TestApplication.ExampleLibrary\TestApplication.ExampleLibrary.csproj">
       <Project>{fdb5c8d0-018d-4ff9-9680-c6a5078f819b}</Project>
       <SetTargetFramework>TargetFramework=net462</SetTargetFramework>
     </ProjectReference>

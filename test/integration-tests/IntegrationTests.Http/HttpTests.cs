@@ -25,7 +25,7 @@ namespace IntegrationTests.Http
 {
     public class HttpTests : TestHelper
     {
-        private const string ServiceName = "Samples.Http";
+        private const string ServiceName = "TestApplication.Http";
 
         public HttpTests(ITestOutputHelper output)
             : base("Http", output)
@@ -43,7 +43,7 @@ namespace IntegrationTests.Http
 
             const int expectedSpanCount = 3;
 
-            using var processResult = RunSampleAndWaitForExit(agent.Port, enableStartupHook: true);
+            using var processResult = RunTestApplicationAndWaitForExit(agent.Port, enableStartupHook: true);
             Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
             var spans = agent.WaitForSpans(expectedSpanCount, 3000);
 

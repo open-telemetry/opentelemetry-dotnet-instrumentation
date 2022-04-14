@@ -66,9 +66,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenTelemetry.AutoInstrumen
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dependency-libs", "dependency-libs", "{82A3CE96-0935-45E5-A9AA-A93A5B63500B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.ExampleLibrary", "test\test-applications\integrations\dependency-libs\Samples.ExampleLibrary\Samples.ExampleLibrary.csproj", "{EFAE6960-9425-462E-BFFB-4C9A038DD8C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.ExampleLibrary", "test\test-applications\integrations\dependency-libs\TestApplication.ExampleLibrary\TestApplication.ExampleLibrary.csproj", "{EFAE6960-9425-462E-BFFB-4C9A038DD8C0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.ExampleLibraryTracer", "test\test-applications\integrations\dependency-libs\Samples.ExampleLibraryTracer\Samples.ExampleLibraryTracer.csproj", "{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.ExampleLibraryTracer", "test\test-applications\integrations\dependency-libs\TestApplication.ExampleLibraryTracer\TestApplication.ExampleLibraryTracer.csproj", "{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{36004B32-55EB-4591-B6D2-B99DE373D0B8}"
 EndProject
@@ -97,7 +97,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "integrations", "integration
 		test\test-applications\integrations\Directory.Build.props = test\test-applications\integrations\Directory.Build.props
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.GraphQL", "test\test-applications\integrations\Samples.GraphQL\Samples.GraphQL.csproj", "{63FD1231-345F-461E-A9C2-237ED305ED11}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.GraphQL", "test\test-applications\integrations\TestApplication.GraphQL\TestApplication.GraphQL.csproj", "{63FD1231-345F-461E-A9C2-237ED305ED11}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Loader.Tests", "test\OpenTelemetry.AutoInstrumentation.Loader.Tests\OpenTelemetry.AutoInstrumentation.Loader.Tests.csproj", "{735434B9-6555-4DEE-97FC-786C763CA1F1}"
 EndProject
@@ -107,11 +107,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests.MongoDB", "test\integration-tests\IntegrationTests.MongoDB\IntegrationTests.MongoDB.csproj", "{446D0E14-2788-43DD-A465-8F16DA7014F8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.MongoDB", "test\test-applications\integrations\Samples.MongoDB\Samples.MongoDB.csproj", "{02D6A472-A602-4BF4-A539-8AD165097898}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.MongoDB", "test\test-applications\integrations\TestApplication.MongoDB\TestApplication.MongoDB.csproj", "{02D6A472-A602-4BF4-A539-8AD165097898}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "aspnet", "aspnet", "{2E1F47D9-BEC1-4DCE-A84D-847FE5BBBE9E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Samples.AspNet", "test\test-applications\integrations\aspnet\Samples.AspNet\Samples.AspNet.csproj", "{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.AspNet", "test\test-applications\integrations\aspnet\TestApplication.AspNet\TestApplication.AspNet.csproj", "{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "aspnet", "aspnet", "{A0B40A84-EF97-47DB-8455-796A9BCA1097}"
 EndProject
@@ -123,7 +123,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests.StartupHook", "test\integration-tests\IntegrationTests.StartupHook\IntegrationTests.StartupHook.csproj", "{0584ADC1-956E-49B0-A46F-8405AA2AD207}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.StartupHook", "test\test-applications\integrations\Samples.StartupHook\Samples.StartupHook.csproj", "{FF665CC4-6643-4614-A1A0-FA182E3AF37C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.StartupHook", "test\test-applications\integrations\TestApplication.StartupHook\TestApplication.StartupHook.csproj", "{FF665CC4-6643-4614-A1A0-FA182E3AF37C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.AdditionalDeps", "src\OpenTelemetry.AutoInstrumentation.AdditionalDeps\OpenTelemetry.AutoInstrumentation.AdditionalDeps.csproj", "{E026D9FA-FBD5-4066-AF6A-FB63DE28521F}"
 EndProject
@@ -131,9 +131,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples.Vendor.Distro", "examples\Vendor.Distro\Examples.Vendor.Distro.csproj", "{56938BD4-37F4-4E3F-BFBF-80F0309DFDBF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Examples.ManualInstrumentations", "examples\ManualInstrumentations\Examples.ManualInstrumentations.csproj", "{346746C5-A0EA-40D8-A1C7-FE324BDF3772}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples.ManualInstrumentations", "examples\ManualInstrumentations\Examples.ManualInstrumentations.csproj", "{346746C5-A0EA-40D8-A1C7-FE324BDF3772}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.Http", "test\test-applications\integrations\Samples.Http\Samples.Http.csproj", "{4E17BE29-B227-41D8-97FE-26F674951E26}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Http", "test\test-applications\integrations\TestApplication.Http\TestApplication.Http.csproj", "{4E17BE29-B227-41D8-97FE-26F674951E26}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests.Http", "test\integration-tests\IntegrationTests.Http\IntegrationTests.Http.csproj", "{413326C3-4B8F-4C44-93C8-0E20EFB97DB4}"
 EndProject

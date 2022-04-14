@@ -7,20 +7,22 @@ to .NET applications without having to modify their source code.
 
 OpenTelemetry .NET Automatic Instrumentation is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
-- Core components: [`1.2.0-rc4`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.2.0-rc4)
-- Non-core components: [`1.0.0-rc9.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/1.0.0-rc9.1)
+- Core components: [`1.2.0-rc5`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.2.0-rc4)
+- Non-core components: [`1.0.0-rc9.2`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/1.0.0-rc9.1)
 - `System.Diagnostics.DiagnosticSource`: [`6.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/6.0.0)
 
-To auto-instrument applications, the OpenTelemetry .NET Automatic Instrumentation does the following:
+To automatically instrument applications, the OpenTelemetry .NET Automatic Instrumentation does the following:
 
 1. Injects and configures the [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#opentelemetry-net-sdk)
    into the application.
 2. Adds [OpenTelemetry Instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/)
    to key packages and APIs used by the application.
 
-In addition, you can enable the OpenTelemetry .NET Automatic Instrumentation as a .NET Profiler
-to inject additional instrumentations at runtime, using a technique known as [monkey-patching](https://en.wikipedia.org/wiki/Monkey_patch). When enabled, the OpenTelemetry .NET Automatic Instrumentation generates traces for libraries that don't
-already generate traces using the OpenTelemetry .NET SDK.
+You can enable the OpenTelemetry .NET Automatic Instrumentation as a .NET Profiler
+to inject additional instrumentations of this project at runtime, using a technique
+known as [monkey-patching](https://en.wikipedia.org/wiki/Monkey_patch). When enabled,
+the OpenTelemetry .NET Automatic Instrumentation generates traces for libraries that
+don't already generate traces using the OpenTelemetry .NET SDK.
 
 See the [examples](../examples) for demonstrations of different instrumentation scenarios
 covered by the OpenTelemetry .NET Automatic Instrumentation.

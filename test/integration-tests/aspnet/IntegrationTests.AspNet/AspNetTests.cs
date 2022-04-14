@@ -9,10 +9,10 @@ namespace IntegrationTests.AspNet;
 
 public class AspNetTests : TestHelper
 {
-    private static readonly string SampleDir = Path.Combine("test", "test-applications", "integrations", "aspnet");
+    private static readonly string TestApplicationDir = Path.Combine("test", "test-applications", "integrations", "aspnet");
 
     public AspNetTests(ITestOutputHelper output)
-        : base(new EnvironmentHelper("AspNet", typeof(TestHelper), output, SampleDir), output)
+        : base(new EnvironmentHelper("AspNet", typeof(TestHelper), output, TestApplicationDir), output)
     {
     }
 
