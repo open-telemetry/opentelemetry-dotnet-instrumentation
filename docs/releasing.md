@@ -1,10 +1,10 @@
 # Release Process
 
-0. Remember to run tests on .NET 4.6.2 locally (they do not run in GitHub).
+0. Run tests on .NET 4.6.2 locally: they do not run in GitHub.
 
 1. Update the version in the following files:
 
-   - `*.cs` - TODO: extract as a constant to reduce the number of occurances
+   - `*.cs` (TODO: extract as a constant to reduce the number of occurances)
    - `otel_profiler_constants.h`
    - `version.h`
    - `OpenTelemetry.AutoInstrumentation.csproj`
@@ -15,12 +15,10 @@
 
 2. Update the [CHANGELOG.md](../CHANGELOG.md) with the new release.
 
-3. Create a Pull Request on GitHub with the changes above.
+3. Create a pull request on GitHub with the changes described in the changelog.
 
-4. Once the Pull Request merged
-   it is time to create a signed tag for the merged commit.
-
-   You can do this using the following Bash snippet.
+4. Once the pull request has been merged, create a signed tag for the merged commit.
+   You can do this using the following Bash snippet:
 
    ```bash
    TAG='v{new-version-here}'
@@ -29,9 +27,9 @@
    git push {remote-to-the-main-repo} $TAG
    ```
 
-   After you push the Git tag, a `release` GitHub workflow should start.
+   After you've pushed the git tag, a `release` GitHub workflow starts.
 
-5. Publish a GitHub release:
+5. Publish a release in GitHub:
 
    - Use the [CHANGELOG.md](../CHANGELOG.md) content in the description.
    - Add the artifacts from [the `release` GitHub workflow](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/actions/workflows/release.yml).
