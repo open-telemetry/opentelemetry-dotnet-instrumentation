@@ -1,6 +1,6 @@
 # Development
 
-## Development Environment
+## Development environment
 
 On all platforms, the minimum requirements are:
 
@@ -10,36 +10,36 @@ On all platforms, the minimum requirements are:
 
 ### Windows
 
-- [Visual Studio 2022 (17.1)](https://visualstudio.microsoft.com/downloads/) or newer
-  - Workloads (with recommended components):
+- [Visual Studio 2022 (17.1)](https://visualstudio.microsoft.com/downloads/) or higher
+  - Workloads with the following components:
     - ASP.NET and web development
     - .NET desktop development
     - Desktop development with C++
   - Individual components:
-    - MSVC v142 - VS 2019 C++ x64/x86 build tools (v14.29)
+    - MSVC v142 - Visual Studio 2019 C++ x64/x86 build tools (version 14.29)
 - [Docker for Windows](https://docs.docker.com/docker-for-windows/)
 
 Microsoft provides
 [evaluation developer VMs](https://developer.microsoft.com/en-us/windows/downloads/virtual-machines)
-with Windows and Visual Studio pre-installed.
+with Windows and Visual Studio preinstalled.
 
-### Linux and MacOS
+### Linux and macOS
 
-- cmake, make, gcc, clang, clang++
+- cmake, make, gcc, clang, and clang++
 - [Docker](https://docs.docker.com/engine/install/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
 When using [C# for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp),
-because of [Mono missing features](https://github.com/OmniSharp/omnisharp-vscode#note-about-using-net-6-sdks),
-`omnisharp.useGlobalMono` has to be set to `never`.
-Go to `File` -> `Preferences` -> `Settings` -> `Extensions` -> `C# Configuration` ->
-Change `Omnisharp: Use Global Mono` (you can search for it if the menu is too long) to `never`.
-Afterwards, you have restart OmniSharp: `F1` -> `OmniSharp: Restart OmniSharp`.
+follow these steps to set `omnisharp.useGlobalMono` to `never`:
 
-There may be a lot of errors, because some projects target .NET Framework.
-You can switch try `F1` -> `OmniSharp: Select Project` in Visual Studio Code
-to load a subset of projects which work without any issues.
-You can also try building the projects which have errors.
+1. Go to `File` -> `Preferences` -> `Settings` -> `Extensions` -> `C# Configuration`.
+2. Change `Omnisharp: Use Global Mono` to `never`.
+3. Restart OmniSharp by pressing `F1` and selecting `OmniSharp: Restart OmniSharp`.
+
+If you get errors due to projects targeting .NET Framework, use 
+`OmniSharp: Select Project` in Visual Studio Code to load a subset of projects
+which work without any issues. You can also try building the projects which throw
+errors.
 
 ## Build
 
@@ -52,7 +52,7 @@ Support plugins are available for:
 - Microsoft VisualStudio     https://nuke.build/visualstudio
 - Microsoft VSCode           https://nuke.build/vscode
 
-Restore dotnet tools to prepare build tools for solution. This will install dotnet nuke tool locally.
+Restore dotnet tools to prepare build tools for solution. This installs the dotnet `nuke` tool locally.
 
 ```cmd
 dotnet tool restore
@@ -64,13 +64,13 @@ To see a list of possible targets and configurations run:
 dotnet nuke --help
 ```
 
-To build you can simply run:
+To build, run:
 
 ```cmd
 dotnet nuke
 ```
 
-The main build artifacts are located under `bin/tracer-home`.
+The main build artifacts are in `bin/tracer-home`.
 
 Clean your repository by running:
 
@@ -78,12 +78,12 @@ Clean your repository by running:
 git clean -fXd
 ```
 
-## Manual Testing
+## Manual testing
 
-### Test Environment
+### Test environment
 
 The [`dev/docker-compose.yaml`](../dev/docker-compose.yaml) contains
-configuration for running OTel Collector and Jaeger.
+configuration for running the OpenTelemetry Collector and Jaeger.
 
 You can run the services using:
 
@@ -93,25 +93,27 @@ docker-compose -f dev/docker-compose.yaml up
 
 The following Web UI endpoints are exposed:
 
-- <http://localhost:16686/search> - collected traces,
-- <http://localhost:8889/metrics> - collected metrics,
-- <http://localhost:13133> - collector's health.
+- <http://localhost:16686/search>: Collected traces
+- <http://localhost:8889/metrics>: Collected metrics
+- <http://localhost:13133>: Collector health status
 
 ### Instrument an application
 
-> *Caution:* Make sure to build and prepare the test environment beforehand.
+> *Warning:* Make sure to build and prepare the test environment beforehand.
 
 [`dev/instrument.sh`](../dev/instrument.sh) helps to run a command
-with auto-instrumentation in your shell (e.g. bash, zsh, git bash).
+with automatic instrumentation in your shell, such as bash, zsh, or git bash.
 
-Example usage:
+For example:
 
 ```sh
 ./dev/instrument.sh OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS=HttpClient dotnet run -f netcoreapp3.1 --project ./examples/ConsoleApp/Examples.ConsoleApp.csproj
 ```
 
-[`dev/envvars.sh`](../dev/envvars.sh) can be used to export profiler environmental variables to your current shell session.
-**It has to be executed from the root of this repository**. Example usage:
+You can use [`dev/envvars.sh`](../dev/envvars.sh) to export profiler environmental variables to your
+current shell session. 
+
+You must run `dev/envvars.sh` from the root of this repository. For example:
 
 ```sh
 source ./dev/envvars.sh
@@ -119,16 +121,16 @@ export OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS=HttpClient
  ./examples/ConsoleApp/bin/Release/netcoreapp3.1/Examples.ConsoleApp
 ```
 
-### Running the Examples
+### Running the examples
 
-You can use the example applications to see the local changes in action. See the
+You can use the example applications to see the local changes in action. See
 [`examples/README.md`](../examples/README.md) for instructions on how to run the examples.
 
-## Releasing
+## Release process
 
-The releasing process is in [releasing.md](releasing.md).
+The release process is described in [releasing.md](releasing.md).
 
-## Debug .NET Runtime on Linux
+## Debug the .NET runtime on Linux
 
 - [Requirements](https://github.com/dotnet/runtime/blob/main/docs/workflow/requirements/linux-requirements.md)
 
@@ -148,7 +150,7 @@ The releasing process is in [releasing.md](releasing.md).
 
 - [Debugging](https://github.com/dotnet/runtime/blob/main/docs/workflow/debugging/coreclr/debugging.md)
 
-  Example showing how you can debug if the profiler is attached properly:
+  The following example shows how you can debug if the profiler is attached:
 
   ```bash
   ~/repos/opentelemetry-dotnet-instrumentation$ source dev/envvars.sh 
@@ -191,8 +193,8 @@ The releasing process is in [releasing.md](releasing.md).
   (lldb) 
   ```
 
-  You may need to add a [`dlerror()`](https://linux.die.net/man/3/dlerror) call
-  in order to get the error message. Example:
+  You might need to add a [`dlerror()`](https://linux.die.net/man/3/dlerror) call
+  in order to get the error message. For example:
 
   ```bash
   Process 20148 stopped

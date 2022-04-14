@@ -1,30 +1,31 @@
-# OpenTelemetry .NET Auto-Instrumentation
+# OpenTelemetry .NET Automatic Instrumentation
 
 [![Slack](https://img.shields.io/badge/slack-@cncf/otel--dotnet--auto--instr-brightgreen.svg?logo=slack)](https://cloud-native.slack.com/archives/C01NR1YLSE7)
 
 This project adds [OpenTelemetry instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/#automatic-instrumentation)
 to .NET applications without having to modify their source code.
 
-OpenTelemetry .NET Auto-Instrumentation is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
+OpenTelemetry .NET Automatic Instrumentation is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
-- core components: [`1.2.0-rc5`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.2.0-rc5)
-- non-core components: [`1.0.0-rc9.2`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/1.0.0-rc9.2)
+- Core components: [`1.2.0-rc5`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.2.0-rc5)
+- Non-core components: [`1.0.0-rc9.2`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/1.0.0-rc9.2)
 - `System.Diagnostics.DiagnosticSource`: [`6.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/6.0.0)
 
-To auto-instrument applications, the OpenTelemetry .NET Auto-Instrumentation does the following:
+To automatically instrument applications, the OpenTelemetry .NET Automatic Instrumentation does the following:
 
 1. Injects and configures the [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#opentelemetry-net-sdk)
    into the application.
 2. Adds [OpenTelemetry Instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/)
    to key packages and APIs used by the application.
 
-In addition, you can use the OpenTelemetry .NET Auto-Instrumentation as a .NET Profiler
-to inject additional instrumentations at runtime, using a technique known as [monkey-patching](https://en.wikipedia.org/wiki/Monkey_patch).
-This lets you instrument specific packages or APIs that does not provide the necessary hooks
-to generate .NET instrumentation packages using `System.Diagnostics.DiagnosticSource`.
+You can enable the OpenTelemetry .NET Automatic Instrumentation as a .NET Profiler
+to inject additional instrumentations of this project at runtime, using a technique
+known as [monkey-patching](https://en.wikipedia.org/wiki/Monkey_patch). When enabled,
+the OpenTelemetry .NET Automatic Instrumentation generates traces for libraries that
+don't already generate traces using the OpenTelemetry .NET SDK.
 
 See the [examples](../examples) for demonstrations of different instrumentation scenarios
-covered by the OpenTelemetry .NET Auto-Instrumentation.
+covered by the OpenTelemetry .NET Automatic Instrumentation.
 
 See [design.md](design.md) for an architectural overview.
 
@@ -36,29 +37,29 @@ shows the current work in progress.
 
 ## Compatibility
 
-OpenTelemetry .NET Auto-Instrumentation attempts to work with all officially
+OpenTelemetry .NET Automatic Instrumentation attempts to work with all officially
 supported operating systems and versions of
 [.NET (Core)](https://dotnet.microsoft.com/download/dotnet),
-and [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework)
-except for versions lower than `.NET Framework 4.6.2`.
+and [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework).
+
+> Versions lower than `.NET Framework 4.6.2` are not supported.
 
 CI tests run against the following operating systems:
 
-- Microsoft Windows Server 2022,
-- macOS Catalina 10.15,
-- Ubuntu 20.04 LTS.
+- Microsoft Windows Server 2022
+- macOS Catalina 10.15
+- Ubuntu 20.04 LTS
 
 ### Instrumented libraries and frameworks
 
 See [config.md#instrumented-libraries-and-frameworks](config.md#instrumented-libraries-and-frameworks).
 
-## Get Started
+## Get started
 
-### Installation
+### Install the instrumentation
 
-Download and install the binaries from
+Download and install the instrumentation binaries from
 [the latest release](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest).
-In the docs, the binaries location is referred to as `%InstallationLocation%`.
 
 On Linux, you can optionally create the default log directory
 after installation by running the following commands:
@@ -70,7 +71,7 @@ sudo chmod a+rwx /var/log/opentelemetry/dotnet
 
 ### Instrument a .NET application on Windows
 
-Before running the application, set the following environment variables:
+Before running your application, set the following environment variables:
 
 ```env
 COR_ENABLE_PROFILING=1
@@ -90,7 +91,7 @@ OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
 
 ### Instrument a .NET application on Linux
 
-Before running the application, set the following environment variables:
+Before running your application, set the following environment variables:
 
 ```env
 CORECLR_ENABLE_PROFILING=1
@@ -105,7 +106,7 @@ OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
 
 ### Instrument a .NET application on macOS
 
-Before running the application, set the following environment variables:
+Before running your application, set the following environment variables:
 
 ```env
 CORECLR_ENABLE_PROFILING=1
