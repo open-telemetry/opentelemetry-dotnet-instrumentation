@@ -100,6 +100,12 @@ updates:
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
+    directory: /src/OpenTelemetry.AutoInstrumentation.Native
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
     directory: /src/OpenTelemetry.AutoInstrumentation.StartupHook
     schedule:
       day: sunday
@@ -150,6 +156,13 @@ updates:
 
   - package-ecosystem: nuget
     directory: /test/OpenTelemetry.AutoInstrumentation.Loader.Tests
+    schedule:
+      day: sunday
+      interval: weekly
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /test/OpenTelemetry.AutoInstrumentation.Native.Tests
     schedule:
       day: sunday
       interval: weekly
