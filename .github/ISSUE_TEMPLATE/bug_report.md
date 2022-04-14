@@ -19,7 +19,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Runtime environment (please complete the following information):**
 
-- OpenTelemetry Auto-Instrumentation version: [e.g. 1.0.0]
+- OpenTelemetry Automatic Instrumentation version: [e.g. 1.0.0]
 - OS: [e.g. Windows Server 2012 R2 ]
 - .NET version: [e.g. .NET Framework 4.6.2, .NET Core 2.1]
 

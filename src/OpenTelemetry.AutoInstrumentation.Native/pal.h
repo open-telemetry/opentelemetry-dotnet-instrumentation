@@ -44,14 +44,6 @@ inline WSTRING GetDatadogLogFilePath(const std::string& file_name_suffix)
     {
         return directory + DIR_SEPARATOR + ToWSTRING(file_name);
     }
-
-    WSTRING path = GetEnvironmentValue(TLoggerPolicy::logging_environment::log_path);
-
-    if (path.length() > 0)
-    {
-        return path;
-    }
-
 #ifdef _WIN32
     std::filesystem::path program_data_path;
     program_data_path = GetEnvironmentValue(WStr("PROGRAMDATA"));
