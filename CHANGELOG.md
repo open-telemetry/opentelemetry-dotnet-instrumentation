@@ -42,19 +42,7 @@ built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelem
   `OTEL_DOTNET_AUTO_CLR_ENABLE_NGEN`.
 - Support for OpenTelemetry exporter related environment variables:
   `OTEL_TRACES_EXPORTER`,
-  `OTEL_EXPORTER_JAEGER_AGENT_HOST`, `OTEL_EXPORTER_JAEGER_AGENT_PORT`,
-  `OTEL_EXPORTER_JAEGER_ENDPOINT`,
-  `OTEL_EXPORTER_JAEGER_PROTOCOL`,
-  `OTEL_EXPORTER_OTLP_ENDPOINT`,
-  `OTEL_EXPORTER_OTLP_HEADERS`,
-  `OTEL_EXPORTER_OTLP_TIMEOUT`,
   `OTEL_EXPORTER_OTLP_PROTOCOL`,
-  `OTEL_EXPORTER_ZIPKIN_ENDPOINT`.
-- Support for OpenTelemetry batch span processor related environment variables:
-  `OTEL_BSP_SCHEDULE_DELAY`,
-  `OTEL_BSP_EXPORT_TIMEOUT`,
-  `OTEL_BSP_MAX_QUEUE_SIZE`,
-  `OTEL_BSP_MAX_EXPORT_BATCH_SIZE`.
 - Customization and plugin capabilities which can be configured
   using the following environment variables:
   `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP`,
