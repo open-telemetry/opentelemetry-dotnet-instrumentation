@@ -170,7 +170,7 @@ public class Settings
     public bool Http2UnencryptedSupportEnabled { get; }
 
     /// <summary>
-    /// Gets a value indicating whether the <see cref="E:System.AppDomain.CurrentDomain.UnhandledException"/> event should be enabled.
+    /// Gets a value indicating whether the <see cref="AppDomain.UnhandledException"/> event should be enabled.
     /// Default is <c>false</c>.
     /// </summary>
     public bool UnhandledExceptionsEnabled { get; }
