@@ -92,7 +92,7 @@ public class StartupHookTests : TestHelper
         using (var processResult = RunTestApplicationAndWaitForExit(agent.Port, enableStartupHook: enableStartupHook))
         {
             Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
-            return agent.WaitForSpans(2, 500);
+            return agent.WaitForSpans(2, TimeSpan.FromSeconds(5));
         }
     }
 
