@@ -17,7 +17,7 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNet" Version="1.0.0-rc9.2" Condition="'$(TargetFramework)' == 'net462'" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.2" Condition="'$(TargetFramework)' != 'net462'" />
     <PackageReference Include="OpenTelemetry.Exporter.Jaeger" Version="1.2.0-rc5" />
-    <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.2.0-rc5" />
+    <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.2.0" />
     <PackageReference Include="OpenTelemetry.Shims.OpenTracing" Version="1.0.0-rc9.2" />
   </ItemGroup>
   
