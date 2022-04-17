@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="OpenTelemetry" Version="1.2.0-rc5" />
-    <PackageReference Include="OpenTelemetry.Api" Version="1.2.0-rc5" />
+    <PackageReference Include="OpenTelemetry.Api" Version="1.2.0" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.2.0-rc5" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9.2" />
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.0.0-rc9.2" />
