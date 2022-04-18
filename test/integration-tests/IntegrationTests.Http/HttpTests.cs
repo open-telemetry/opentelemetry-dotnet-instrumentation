@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System;
 using System.Linq;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -45,7 +46,7 @@ namespace IntegrationTests.Http
 
             using var processResult = RunTestApplicationAndWaitForExit(agent.Port, enableStartupHook: true);
             Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
-            var spans = agent.WaitForSpans(expectedSpanCount, 3000);
+            var spans = agent.WaitForSpans(expectedSpanCount, TimeSpan.FromSeconds(5));
 
             using (new AssertionScope())
             {
