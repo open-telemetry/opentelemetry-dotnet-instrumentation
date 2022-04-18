@@ -54,7 +54,7 @@ public class SettingsTests : IDisposable
             settings.LegacySources.Should().BeEmpty();
             settings.Integrations.Should().NotBeNull();
             settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
-            settings.UnhandledExceptionsEnabled.Should().BeFalse();
+            settings.FlushOnUnhandledException.Should().BeFalse();
         }
     }
 
@@ -117,13 +117,13 @@ public class SettingsTests : IDisposable
     [InlineData("true", true)]
     [InlineData("false", false)]
     [InlineData(null, false)]
-    public void UnhandledExceptionsEnabled_DependsOnCorrespondingEnvVariable(string unhandledExceptionsEnabled, bool expectedValue)
+    public void FlushOnUnhandledException_DependsOnCorrespondingEnvVariable(string flushOnUnhandledException, bool expectedValue)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.UnhandledExceptionsEnabled, unhandledExceptionsEnabled);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, flushOnUnhandledException);
 
         var settings = Settings.FromDefaultSources();
 
-        settings.UnhandledExceptionsEnabled.Should().Be(expectedValue);
+        settings.FlushOnUnhandledException.Should().Be(expectedValue);
     }
 
     private static void ClearEnvVars()
@@ -131,6 +131,6 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.TracesExporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Http2UnencryptedSupportEnabled, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.UnhandledExceptionsEnabled, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, null);
     }
 }

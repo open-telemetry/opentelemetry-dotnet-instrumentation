@@ -96,7 +96,7 @@ public static class Instrumentation
                 AppDomain.CurrentDomain.ProcessExit += OnExit;
                 AppDomain.CurrentDomain.DomainUnload += OnExit;
 
-                if (TracerSettings.UnhandledExceptionsEnabled)
+                if (TracerSettings.FlushOnUnhandledException)
                 {
                     AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
                 }

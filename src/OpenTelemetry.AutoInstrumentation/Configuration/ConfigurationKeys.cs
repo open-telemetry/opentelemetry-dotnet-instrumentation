@@ -93,9 +93,9 @@ public class ConfigurationKeys
     public const string LogDirectory = "OTEL_DOTNET_AUTO_LOG_DIRECTORY";
 
     /// <summary>
-    /// Configuration key for enabling the notification of unhandled exceptions.
+    /// Configuration key for enabling the flushing of telemetry data when an unhandled exception occurs.
     /// </summary>
-    public const string UnhandledExceptionsEnabled = "OTEL_DOTNET_AUTO_UNHANDLEDEXCEPTION_ENABLED";
+    public const string FlushOnUnhandledException = "OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION";
 
     /// <summary>
     /// String format patterns used to match integration-specific configuration keys.

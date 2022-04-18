@@ -106,7 +106,7 @@ public class Settings
 
         Http2UnencryptedSupportEnabled = source.GetBool(ConfigurationKeys.Http2UnencryptedSupportEnabled) ?? false;
 
-        UnhandledExceptionsEnabled = source.GetBool(ConfigurationKeys.UnhandledExceptionsEnabled) ?? false;
+        FlushOnUnhandledException = source.GetBool(ConfigurationKeys.FlushOnUnhandledException) ?? false;
     }
 
     /// <summary>
@@ -170,10 +170,11 @@ public class Settings
     public bool Http2UnencryptedSupportEnabled { get; }
 
     /// <summary>
-    /// Gets a value indicating whether the <see cref="AppDomain.UnhandledException"/> event should be enabled.
+    /// Gets a value indicating whether the <see cref="AppDomain.UnhandledException"/> event should trigger
+    /// the flushing of telemetry data.
     /// Default is <c>false</c>.
     /// </summary>
-    public bool UnhandledExceptionsEnabled { get; }
+    public bool FlushOnUnhandledException { get; }
 
     internal static Settings FromDefaultSources()
     {

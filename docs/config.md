@@ -111,7 +111,7 @@ The batch span processor batches finished spans before sending them through the 
 | `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP` | Whether the tracer is created by the automatic instrumentation library or not. Set to `false` when the application initializes the OpenTelemetry .NET SDK Tracer on its own. This configuration can be used, for example, to retrieve the bytecode instrumentations. | `true` |
 | `OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES` | Comma-separated list of additional `ActivitySource` names to be added to the tracer at the startup. Use it to capture manually instrumented spans. |  |
 | `OTEL_DOTNET_AUTO_LEGACY_SOURCES` | Comma-separated list of additional legacy source names to be added to the tracer at the startup. Use it to capture `Activity` objects created without using the `ActivitySource` API. |  |
-| `OTEL_DOTNET_AUTO_UNHANDLEDEXCEPTION_ENABLED` | Controls listening to the [AppDomain.UnhandledException](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.unhandledexception) event. Set to `true` when you suspect that you are experiencing a problem related to unhandled exceptions. | `false` |
+| `OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION` | Controls whether the telemetry data is flushed when an [AppDomain.UnhandledException](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.unhandledexception) event is raised. Set to `true` when you suspect that you are experiencing a problem with missing telemetry data and also experiencing unhandled exceptions. | `false` |
 | `OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS` | Colon-separated list of OTel SDK instrumentation plugins represented by `System.Type.AssemblyQualifiedName`. | |
 
 
