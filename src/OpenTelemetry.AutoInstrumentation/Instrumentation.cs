@@ -95,7 +95,11 @@ public static class Instrumentation
                 // Register to shutdown events
                 AppDomain.CurrentDomain.ProcessExit += OnExit;
                 AppDomain.CurrentDomain.DomainUnload += OnExit;
-                AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+
+                if (TracerSettings.FlushOnUnhandledException)
+                {
+                    AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+                }
             }
         }
         catch (Exception ex)
