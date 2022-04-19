@@ -28,7 +28,7 @@ namespace IntegrationTests.StartupHook;
 
 public class StartupHookTests : TestHelper
 {
-    private const string ServiceName = "TestApplication.MongoDB";
+    private const string ServiceName = "TestApplication.GraphQL";
 
     private List<WebServerSpanExpectation> _expectations = new List<WebServerSpanExpectation>();
 

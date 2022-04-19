@@ -86,27 +86,6 @@ public static class Tags
     public const string OutPort = "out.port";
 
     /// <summary>
-    /// MongoDB specific tags
-    /// </summary>
-    public static class MongoDb
-    {
-        /// <summary>
-        /// A MongoDB query.
-        /// </summary>
-        public const string Query = "mongodb.query";
-
-        /// <summary>
-        /// A MongoDB database name.
-        /// </summary>
-        public const string Name = "mongodb.name";
-
-        /// <summary>
-        /// A MongoDB collection name.
-        /// </summary>
-        public const string Collection = "mongodb.collection";
-    }
-
-    /// <summary>
     /// GraphQL specific tags
     /// </summary>
     public static class GraphQL
