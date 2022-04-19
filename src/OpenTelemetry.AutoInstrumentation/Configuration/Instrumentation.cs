@@ -37,11 +37,6 @@ public enum Instrumentation
     SqlClient,
 
     /// <summary>
-    /// MongoDb instrumentation.
-    /// </summary>
-    MongoDb,
-
-    /// <summary>
     /// GraphQL instrumentation.
     /// </summary>
     GraphQL,
