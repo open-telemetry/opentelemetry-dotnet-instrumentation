@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\OldReference\OldReference.csproj" />
+    <ProjectReference Include="..\OldReference\Examples.OldReference.csproj" />
     <!-- ProjectReference OldReference above uses an old version of System.Diagnostics.DiagnosticSource -->
     <!-- that is incompatible with the OTel SDK, make an explicit reference to the desired version here -->
     <!-- so the package resolution version ensures that the desired version is loaded.                  -->
