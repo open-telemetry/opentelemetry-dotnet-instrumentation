@@ -3,20 +3,20 @@
 ## Handling of assembly version conflicts
 
 OpenTelemetry SDK NuGet packages are deployed with the OpenTelemetry .NET Instrumentation.
-To handle conflicts in assemblies referenced by "source instrumentations", update the project
-references to ensure that they are on the same versions as the ones used by the instrumentation.
+To handle conflicts in assemblies referenced by "source instrumentations",
+update the project references to ensure that they are on the same versions
+as the ones used by the instrumentation.
 
-Previous workarounds only work at build time. When a rebuild is not possible, use one of the
-following suggestions to force the application to use the assembly versions shipped with the
-instrumentation.
+Previous workarounds only work at build time. When a rebuild is not possible,
+use one of the following suggestions to force the application to use
+the assembly versions shipped with the instrumentation.
 
-For .NET Framework applications, the workaround is to use binding redirects. For .NET Core
-[Framework-dependent deployment](https://docs.microsoft.com/en-us/dotnet/core/deploying/deploy-with-vs?tabs=vs156#framework-dependent-deployment)
-applications,
-[Additional-deps](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md),
+For .NET Framework applications, the workaround is to use binding redirects.
+For .NET Core [Framework-dependent deployment](https://docs.microsoft.com/en-us/dotnet/core/deploying/deploy-with-vs?tabs=vs156#framework-dependent-deployment)
+applications, [Additional-deps](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md),
 and [runtime package store](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
-from OpenTelemetry .NET, use the automatic instrumentation installation path. For other .NET Core
-deployment models, edit the `deps.json` file.
+from OpenTelemetry .NET, use the automatic instrumentation installation path.
+For other .NET Core deployment models, edit the `deps.json` file.
 
 ### .NET Framework binding redirects
 
@@ -28,15 +28,16 @@ that is not available at build time.
 
 ### .NET Core dependency file
 
-To fix assembly version conflicts in .NET Core, edit the default `<application>.deps.json` file
-generated at build for .NET Core applications. Build a .NET Core app with package
-references using the required version, and use the respective `deps.json` file to see what changes
-are needed.
+To fix assembly version conflicts in .NET Core, edit the default
+`<application>.deps.json` file generated at build for .NET Core applications.
+Build a .NET Core app with package references using the required version,
+and use the respective `deps.json` file to see what changes are needed.
 
-To test your edits to the `deps.json` file, add a reference to the required version of the OpenTelemetry
-package to the [examples/CoreAppOldReference](./../examples/CoreAppOldReference/) example and rebuild the
-application. Save the generated `deps.json` file, remove the package reference, and rebuild the
-example app. Compare the files to explore the changes.
+To test your edits to the `deps.json` file, add a reference to the required
+version of the OpenTelemetry package to the [examples/CoreAppOldReference](./../examples/CoreAppOldReference/)
+example and rebuild the application. Save the generated `deps.json` file,
+remove the package reference, and rebuild the example app.
+Compare the files to explore the changes.
 
 ## No proper relationship between spans
 
@@ -44,11 +45,14 @@ On .NET Framework, strong name signing can force the loading of multiple version
 of the same assembly on the same process. This causes a separate hierarchy of
 Activity objects. If you are referencing packages in your application that use a
 version of the `System.Diagnostics.DiagnosticSource` different than the `OpenTelemetry.Api`
-version used by the OpenTelemetry .NET Automatic Instrumentation, reference the correct version of the `System.Diagnostics.DiagnosticSource` package in your application.
+version used by the OpenTelemetry .NET Automatic Instrumentation, reference
+the correct version of the `System.Diagnostics.DiagnosticSource` package
+in your application.
 This causes automatic binding redirection to solve the issue.
 
 If automatic binding redirection is [disabled](https://docs.microsoft.com/en-us/dotnet/framework/configure-apps/how-to-enable-and-disable-automatic-binding-redirection)
-you can also manually add binding redirection to the [`App.config`](../examples/BindingRedirect/App.config) file.
+you can also manually add binding redirection to the [`App.config`](../examples/BindingRedirect/App.config)
+file.
 
 ## High CPU usage
 
