@@ -261,7 +261,6 @@ __pycache__/
 *.pyc
 
 # vscode
-.vscode/
 .devcontainer/
 
 # Benchmark results
