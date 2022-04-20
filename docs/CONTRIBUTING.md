@@ -4,11 +4,21 @@
 
 We'd love your help!
 
-Please join our weekly [SIG meeting](https://github.com/open-telemetry/community#special-interest-groups)
-or get in touch on [Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
-
+Please join our weekly [SIG meeting](https://github.com/open-telemetry/community#special-interest-groups).
 Meeting notes are available as a public [Google
 doc](https://docs.google.com/document/d/1XedN2D8_PH4YLej-maT8sp4RKogfuhFpccRi3QpUcoI/edit?usp=sharing).
+
+Get in touch on [Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
+If you are new, you can create a CNCF Slack account [here](http://slack.cncf.io/).
+
+## Submit an experience report
+
+We are in early phase of development
+and we are looking forward for getting any experience report.
+
+You can do this by [submitting a GitHub issue](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/new).
+
+You may also prefer writting on [Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
 
 ## Report a bug
 
@@ -21,7 +31,7 @@ Reporting bugs is an important contribution. Please make sure to include:
 ## Request a feature
 
 If you would like to work on something that is not listed as an issue
-(e.g. a new feature or enhancement) please first read our [DESIGN.md](DESIGN.md)
+(e.g. a new feature or enhancement) please first read our [design.md](design.md)
 to make sure your proposal aligns with the goals of the
 project, then create an issue and describe your proposal.
 
