@@ -126,24 +126,13 @@ To perform bytecode instrumentation, configure the OpenTelemetry .NET
 Automatic Instrumentation as a .NET CLR Profiler. The CLR uses the following
 environment variables to set up the profiler. See [.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/profiling/Profiler%20Loading.md) for more information.
 
-### .NET Framework
-| Environment variable | Description | Value |
-|-|-|-|
-| `COR_ENABLE_PROFILING` | Enables the profiler. | `1` |
-| `COR_PROFILER` | CLSID of the profiler. | `30000` (ms) |
-| `COR_PROFILER_PATH` | Path to the profiler. | `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.dll` |
-| `COR_PROFILER_PATH_32` | Path to the 32-bit profiler. Bitness-specific paths take precedence over generic paths. | `%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll` |
-| `COR_PROFILER_PATH_64` | Path to the 64-bit profiler. Bitness-specific paths take precedence over generic paths. | `%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll` |
-
-### .NET Core (including .NET 5+)
-
-| Environment variable | Description | Value |
-|-|-|-|
-| `CORECLR_ENABLE_PROFILING` | Enables the profiler. | `1` |
-| `CORECLR_PROFILER` | CLSID of the profiler. | `30000` (ms) |
-| `CORECLR_PROFILER_PATH` | Path to the profiler. | `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.so` for Linux, `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.dylib` for MacOS |
-| `CORECLR_PROFILER_PATH_32` | Path to the 32-bit profiler. Bitness-specific paths take precedence over generic paths. | `%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
-| `CORECLR_PROFILER_PATH_64` | Path to the 64-bit profiler. Bitness-specific paths take precedence over generic paths. | `%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
+| .NET Framework environment variable | .NET Core environment variable | Description | Required value |
+|-|-|-|-|
+| `COR_ENABLE_PROFILING` | `CORECLR_ENABLE_PROFILING` | Enables the profiler. | `1` |
+| `COR_PROFILER` | `CORECLR_PROFILER` | CLSID of the profiler. | `{918728DD-259F-4A6A-AC2B-B85E1B658318}` |
+| `COR_PROFILER_PATH` | `CORECLR_PROFILER_PATH` | Path to the profiler. | `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows, `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.so` for Linux, `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.dylib` for MacOS |
+| `COR_PROFILER_PATH_32` | `CORECLR_PROFILER_PATH_32` | Path to the 32-bit profiler. Bitness-specific paths take precedence over generic paths. | `%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
+| `COR_PROFILER_PATH_64` | `CORECLR_PROFILER_PATH_64` | Path to the 64-bit profiler. Bitness-specific paths take precedence over generic paths. | `%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
 
 ## .NET Runtime additional dependencies and package store
 
