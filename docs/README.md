@@ -43,7 +43,7 @@ Please, give us your **feedback** (in whatever form you like).
 
 You can do this by [submitting a GitHub issue](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/new).
 
-You may also prefer writting on [Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
+You may also prefer writing on [Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
 If you are new, you can create a CNCF Slack account [here](http://slack.cncf.io/).
 
 ## Compatibility
