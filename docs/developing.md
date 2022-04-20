@@ -82,19 +82,19 @@ git clean -fXd
 ### Documentation lint
 
 If you made changes to the Markdown documents (`*.md` files), ensure that lint
-tool passed withouth any issues. Execute
+tool passed without any issues by executing:
 
 ```cmd
 nuke InstallMarkdownLint MarkdownLint
 ```
 
-Part of the issues can be automatiacaly fixed by
+Some issues can be automatically fixed by:
 
 ```cmd
 nuke MarkdownLintFix
 ```
 
-All MarkdownLint tasks requier NPM/NodeJS installed locally.
+All MarkdownLint tasks require [Node.js](https://nodejs.org/) installed locally.
 
 ## Manual testing
 
