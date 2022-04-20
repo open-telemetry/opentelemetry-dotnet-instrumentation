@@ -74,29 +74,41 @@ Exporters output the telemetry.
 | `OTEL_TRACES_EXPORTER` | Traces exporter to be used. The value can be one of the following: `zipkin`, `jaeger`, `otlp`, `none`. | `otlp` |
 
 ### Jaeger
-To enable the Jaeger exporter, set the `OTEL_TRACES_EXPORTER` environment variable to `jaeger`. To customize the Jaeger exporter using environment variables, see the [Jaeger exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.Jaeger#environment-variables).
-
-### OTLP
-To enable the OTLP exporter, set the `OTEL_TRACES_EXPORTER` environment variable to `otlp`. To customize the OTLP exporter using environment variables, see the [OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables).
-
-The OpenTelemetry .NET Automatic Instrumentation also supports the following environment variables for the OTLP exporter:
+To enable the Jaeger exporter, set the `OTEL_TRACES_EXPORTER` environment variable to `jaeger`. To customize the Jaeger exporter using environment variables, see the [Jaeger exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.Jaeger#environment-variables). Important environment variables include:
 
 | Environment variable | Description | Default value |
 |-|-|-|
+| `OTEL_EXPORTER_JAEGER_AGENT_HOST` | Host name for the Jaeger agent. Used for the `udp/thrift.compact` protocol.| `localhost` |
+| `OTEL_EXPORTER_JAEGER_AGENT_PORT` | Port for the Jaeger agent. Used for the `udp/thrift.compact` protocol. | `6831` |
+| `OTEL_EXPORTER_JAEGER_ENDPOINT` | Jaeger Collector HTTP endpoint. Used for the `http/thrift.binary` protocol. | `http://localhost:14268` |
+| `OTEL_EXPORTER_JAEGER_PROTOCOL` | Protocol to use for Jager exporter. Supported values are `udp/thrift.compact`, `http/thrift.binary` | `udp/thrift.compact` |
+
+### OTLP
+To enable the OTLP exporter, set the `OTEL_TRACES_EXPORTER` environment variable to `otlp`. To customize the OTLP exporter using environment variables, see the [OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables). Important environment variables include:
+
+| Environment variable | Description | Default value |
+|-|-|-|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Target endpoint for the OTLP exporter. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md) for more details. | `http://localhost:4318` for the `http/protobuf` protocol, `http://localhost:4317` for the `grpc` protocol |
 | `OTEL_EXPORTER_OTLP_PROTOCOL` | OTLP exporter transport protocol. Supported values are `grpc`, `http/protobuf`. [1] | `http/protobuf` |
+
+> **[1]**: Considerations on the `OTEL_EXPORTER_OTLP_PROTOCOL`:
+> - The OpenTelemetry .NET Automatic Instrumentation defaults to `http/protobuf`, which differs from the OpenTelemetry .NET SDK default value of `grpc`.
+> - On .NET 5 and higher, the application must reference [`Grpc.Net.Client`](https://www.nuget.org/packages/Grpc.Net.Client/)
+>   to use the `grpc` OTLP exporter protocol. For example, by adding 
+>   `<PackageReference Include="Grpc.Net.Client" Version="2.32.0" />` to the `.csproj` file.
+> - On .NET Framework, the `grpc` OTLP exporter protocol is not supported.
+
+The OpenTelemetry .NET Automatic Instrumentation also supports the following environment variables for the OTLP exporter:
+| Environment variable | Description | Default value |
+|-|-|-|
 | `OTEL_DOTNET_AUTO_HTTP2UNENCRYPTEDSUPPORT_ENABLED` | Enables `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`. Required when instrumenting .NET Core 3.x applications while using a non-TLS endpoint for gRPC OTLP. See the [official Microsoft documentation](https://docs.microsoft.com/en-us/aspnet/core/grpc/troubleshoot?view=aspnetcore-6.0#call-insecure-grpc-services-with-net-core-client) for more details. | `false` |
 
-**[1]**: Considerations on the `OTEL_EXPORTER_OTLP_PROTOCOL`:
-
-- On .NET 5 and higher, the application must reference [`Grpc.Net.Client`](https://www.nuget.org/packages/Grpc.Net.Client/)
-  to use the `grpc` OTLP exporter protocol. For example, by adding
-  `<PackageReference Include="Grpc.Net.Client" Version="2.32.0" />` to the `.csproj`
-  file.
-- On .NET Framework, the `grpc` OTLP exporter protocol is not supported.
-
-
 ### Zipkin
-To enable the Zipkin exporter, set the `OTEL_TRACES_EXPORTER` environment variable to `zipkin`. To customize the Zipkin exporter using environment variables, see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
+To enable the Zipkin exporter, set the `OTEL_TRACES_EXPORTER` environment variable to `zipkin`. To customize the Zipkin exporter using environment variables, see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables). Important environment variables include:
+
+| Environment variable | Description | Default value |
+|-|-|-|
+| `OTEL_EXPORTER_ZIPKIN_ENDPOINT` | Zipkin URL. | `http://localhost:8126` |
 
 ## Additional settings
 
