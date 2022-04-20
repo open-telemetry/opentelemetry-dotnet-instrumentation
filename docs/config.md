@@ -74,10 +74,10 @@ Exporters output the telemetry.
 | `OTEL_TRACES_EXPORTER` | Traces exporter to be used. The value can be one of the following: `zipkin`, `jaeger`, `otlp`, `none`. | `otlp` |
 
 ### Jaeger
-To enable the Jaeger exporter, set `OTEL_TRACES_EXPORTER=jaeger`. To customize the Jaeger exporter via environment variables, see the [Jaeger exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.Jaeger#environment-variables).
+To enable the Jaeger exporter, set the `OTEL_TRACES_EXPORTER` environment variable to `jaeger`. To customize the Jaeger exporter using environment variables, see the [Jaeger exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.Jaeger#environment-variables).
 
 ### OTLP
-To enable the OTLP exporter, set `OTEL_TRACES_EXPORTER=otlp`. To customize the OTLP exporter via environment variables, see the [OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables).
+To enable the OTLP exporter, set the `OTEL_TRACES_EXPORTER` environment variable to `otlp`. To customize the OTLP exporter using environment variables, see the [OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables).
 
 The OpenTelemetry .NET Automatic Instrumentation also supports the following environment variables for the OTLP exporter:
 
@@ -96,7 +96,7 @@ The OpenTelemetry .NET Automatic Instrumentation also supports the following env
 
 
 ### Zipkin
-To enable the Zipkin exporter, set `OTEL_TRACES_EXPORTER=zipkin`. To customize the Zipkin exporter via environment variables, see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
+To enable the Zipkin exporter, set the `OTEL_TRACES_EXPORTER` environment variable to `zipkin`. To customize the Zipkin exporter using environment variables, see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
 
 ## Additional settings
 
