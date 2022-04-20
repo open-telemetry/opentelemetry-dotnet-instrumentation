@@ -8,7 +8,6 @@
 | `OTEL_DOTNET_AUTO_ENABLED` | Enables the tracer. | `true` |
 | `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES` | Names of the executable files that the profiler can instrument. Supports multiple comma-separated values, for example: `MyApp.exe,dotnet.exe`. If unset, the profiler attaches to all processes by default. |  |
 | `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` | Names of the executable files that the profiler cannot instrument. Supports multiple comma-separated values, for example: `ReservedProcess.exe,powershell.exe`. The list is processed after `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`. If unset, the profiler attaches to all processes by default. |  |
- 
 
 ## Resources
 
@@ -74,7 +73,11 @@ Exporters output the telemetry.
 | `OTEL_TRACES_EXPORTER` | Traces exporter to be used. The value can be one of the following: `zipkin`, `jaeger`, `otlp`, `none`. | `otlp` |
 
 ### Jaeger
-To enable the Jaeger exporter, set the `OTEL_TRACES_EXPORTER` environment variable to `jaeger`. To customize the Jaeger exporter using environment variables, see the [Jaeger exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.Jaeger#environment-variables). Important environment variables include:
+
+To enable the Jaeger exporter, set the `OTEL_TRACES_EXPORTER` environment variable
+to `jaeger`. To customize the Jaeger exporter using environment variables, see the
+[Jaeger exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.Jaeger#environment-variables).
+Important environment variables include:
 
 | Environment variable | Description | Default value |
 |-|-|-|
@@ -84,7 +87,11 @@ To enable the Jaeger exporter, set the `OTEL_TRACES_EXPORTER` environment variab
 | `OTEL_EXPORTER_JAEGER_PROTOCOL` | Protocol to use for Jager exporter. Supported values are `udp/thrift.compact`, `http/thrift.binary` | `udp/thrift.compact` |
 
 ### OTLP
-To enable the OTLP exporter, set the `OTEL_TRACES_EXPORTER` environment variable to `otlp`. To customize the OTLP exporter using environment variables, see the [OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables). Important environment variables include:
+
+To enable the OTLP exporter, set the `OTEL_TRACES_EXPORTER` environment variable
+to `otlp`. To customize the OTLP exporter using environment variables, see the
+[OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables).
+Important environment variables include:
 
 | Environment variable | Description | Default value |
 |-|-|-|
@@ -92,19 +99,26 @@ To enable the OTLP exporter, set the `OTEL_TRACES_EXPORTER` environment variable
 | `OTEL_EXPORTER_OTLP_PROTOCOL` | OTLP exporter transport protocol. Supported values are `grpc`, `http/protobuf`. [1] | `http/protobuf` |
 
 > **[1]**: Considerations on the `OTEL_EXPORTER_OTLP_PROTOCOL`:
-> - The OpenTelemetry .NET Automatic Instrumentation defaults to `http/protobuf`, which differs from the OpenTelemetry .NET SDK default value of `grpc`.
+> - The OpenTelemetry .NET Automatic Instrumentation defaults to `http/protobuf`,
+>   which differs from the OpenTelemetry .NET SDK default value of `grpc`.
 > - On .NET 5 and higher, the application must reference [`Grpc.Net.Client`](https://www.nuget.org/packages/Grpc.Net.Client/)
->   to use the `grpc` OTLP exporter protocol. For example, by adding 
->   `<PackageReference Include="Grpc.Net.Client" Version="2.32.0" />` to the `.csproj` file.
+>   to use the `grpc` OTLP exporter protocol. For example, by adding
+>   `<PackageReference Include="Grpc.Net.Client" Version="2.32.0" />` to the
+>   `.csproj` file.
 > - On .NET Framework, the `grpc` OTLP exporter protocol is not supported.
 
-The OpenTelemetry .NET Automatic Instrumentation also supports the following environment variables for the OTLP exporter:
+The OpenTelemetry .NET Automatic Instrumentation also supports the following
+environment variables for the OTLP exporter:
 | Environment variable | Description | Default value |
 |-|-|-|
 | `OTEL_DOTNET_AUTO_HTTP2UNENCRYPTEDSUPPORT_ENABLED` | Enables `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`. Required when instrumenting .NET Core 3.x applications while using a non-TLS endpoint for gRPC OTLP. See the [official Microsoft documentation](https://docs.microsoft.com/en-us/aspnet/core/grpc/troubleshoot?view=aspnetcore-6.0#call-insecure-grpc-services-with-net-core-client) for more details. | `false` |
 
 ### Zipkin
-To enable the Zipkin exporter, set the `OTEL_TRACES_EXPORTER` environment variable to `zipkin`. To customize the Zipkin exporter using environment variables, see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables). Important environment variables include:
+
+To enable the Zipkin exporter, set the `OTEL_TRACES_EXPORTER` environment
+variable to `zipkin`. To customize the Zipkin exporter using environment
+variables, see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
+Important environment variables include:
 
 | Environment variable | Description | Default value |
 |-|-|-|
@@ -118,7 +132,7 @@ To enable the Zipkin exporter, set the `OTEL_TRACES_EXPORTER` environment variab
 | `OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES` | Comma-separated list of additional `System.Diagnostics.ActivitySource` names to be added to the tracer at the startup. Use it to capture manually instrumented spans. |  |
 | `OTEL_DOTNET_AUTO_LEGACY_SOURCES` | Comma-separated list of additional legacy source names to be added to the tracer at the startup. Use it to capture `System.Diagnostics.Activity` objects created without using the `System.Diagnostics.ActivitySource` API. |  |
 | `OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION` | Controls whether the telemetry data is flushed when an [AppDomain.UnhandledException](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.unhandledexception) event is raised. Set to `true` when you suspect that you are experiencing a problem with missing telemetry data and also experiencing unhandled exceptions. | `false` |
-| `OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS` | Colon-separated list of OTel SDK instrumentation plugin types, specified with the [assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname). *Note: This list must be colon-separated because the type names may include commas.* | |
+| `OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS` | Colon-separated list of OTel SDK instrumentation plugin types, specified with the [assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname). _Note: This list must be colon-separated because the type names may include commas._ | |
 
 You can use `OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS` to extend the
 configuration of the OpenTelemetry .NET SDK Tracer. A plugin must be a
@@ -136,7 +150,8 @@ OpenTelemetry .NET Automatic Instrumentation.
 
 To perform bytecode instrumentation, configure the OpenTelemetry .NET
 Automatic Instrumentation as a .NET CLR Profiler. The CLR uses the following
-environment variables to set up the profiler. See [.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/profiling/Profiler%20Loading.md) for more information.
+environment variables to set up the profiler. See
+[.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/profiling/Profiler%20Loading.md) for more information.
 
 | .NET Framework environment variable | .NET Core environment variable | Description | Required value |
 |-|-|-|-|
