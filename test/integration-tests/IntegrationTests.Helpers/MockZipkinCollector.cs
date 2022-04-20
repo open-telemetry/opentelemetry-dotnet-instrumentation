@@ -32,6 +32,8 @@ namespace IntegrationTests.Helpers;
 
 public class MockZipkinCollector : IDisposable
 {
+    private static readonly TimeSpan DefaultSpanWaitTimeout = TimeSpan.FromSeconds(20);
+
     private readonly ITestOutputHelper _output;
     private readonly HttpListener _listener;
     private readonly Thread _listenerThread;
@@ -114,12 +116,13 @@ public class MockZipkinCollector : IDisposable
     /// <returns>The list of spans.</returns>
     public IImmutableList<IMockSpan> WaitForSpans(
         int count,
-        int timeoutInMilliseconds = 20000,
+        TimeSpan? timeout = null,
         string operationName = null,
         DateTimeOffset? minDateTime = null,
         bool returnAllOperations = false)
     {
-        var deadline = DateTime.Now.AddMilliseconds(timeoutInMilliseconds);
+        timeout ??= DefaultSpanWaitTimeout;
+        var deadline = DateTime.Now.Add(timeout.Value);
         var minimumOffset = (minDateTime ?? DateTimeOffset.MinValue).ToUnixTimeNanoseconds();
 
         IImmutableList<IMockSpan> relevantSpans = ImmutableList<IMockSpan>.Empty;

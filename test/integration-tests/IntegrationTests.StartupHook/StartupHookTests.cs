@@ -28,7 +28,7 @@ namespace IntegrationTests.StartupHook;
 
 public class StartupHookTests : TestHelper
 {
-    private const string ServiceName = "TestApplication.MongoDB";
+    private const string ServiceName = "TestApplication.GraphQL";
 
     private List<WebServerSpanExpectation> _expectations = new List<WebServerSpanExpectation>();
 
@@ -92,7 +92,7 @@ public class StartupHookTests : TestHelper
         using (var processResult = RunTestApplicationAndWaitForExit(agent.Port, enableStartupHook: enableStartupHook))
         {
             Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
-            return agent.WaitForSpans(2, 500);
+            return agent.WaitForSpans(2, TimeSpan.FromSeconds(5));
         }
     }
 
