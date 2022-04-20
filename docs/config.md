@@ -2,7 +2,7 @@
 
 ## Global settings
 
-| Environment variable | Description | Default |
+| Environment variable | Description | Default value |
 |-|-|-|
 | `OTEL_DOTNET_AUTO_HOME` | Installation location. |  |
 | `OTEL_DOTNET_AUTO_ENABLED` | Enables the tracer. | `true` |
@@ -16,14 +16,14 @@ A resource is the immutable representation of the entity producing the telemetry
 See [Resource semantic conventions](https://github.com/open-telemetry/opentelemetry-specification/tree/main/specification/resource/semantic_conventions)
 for more details.
 
-| Environment variable | Description | Default |
+| Environment variable | Description | Default value |
 |-|-|-|
 | `OTEL_RESOURCE_ATTRIBUTES` | Key-value pairs to be used as resource attributes. See [Resource SDK](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/sdk.md#specifying-resource-information-via-an-environment-variable) for more details. | See [Resource semantic conventions](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#semantic-attributes-with-sdk-provided-default-value) for details. |
 | `OTEL_SERVICE_NAME` | Sets the value of the [`service.name`](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md#service) resource attribute. If `service.name` is provided in `OTEL_RESOURCE_ATTRIBUTES`, the value of `OTEL_SERVICE_NAME` takes precedence. | `unknown_service:%ProcessName%` |
 
 ## Instrumentations
 
-| Environment variable | Description | Default |
+| Environment variable | Description | Default value |
 |-|-|-|
 | `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | File path of JSON configuration files of bytecode instrumentations. For example: `%ProfilerDirectory%/integrations.json` | |
 | `OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS` | Comma-separated list of source instrumentations you want to enable. |  |
@@ -59,7 +59,7 @@ If the default log directories can't be created,
 the instrumentation uses the path of the current user's [temporary folder](https://docs.microsoft.com/en-us/dotnet/api/System.IO.Path.GetTempPath?view=net-6.0)
 instead.
 
-| Environment variable | Description | Default |
+| Environment variable | Description | Default value |
 |-|-|-|
 | `OTEL_DOTNET_AUTO_LOG_DIRECTORY` | Directory of the .NET Tracer logs. | _See the previous note on default paths_ |
 | `OTEL_DOTNET_AUTO_DEBUG` | Enables debugging mode for the tracer. | `false` |
@@ -69,7 +69,7 @@ instead.
 
 Exporters output the telemetry.
 
-| Environment variable | Description | Default |
+| Environment variable | Description | Default value |
 |-|-|-|
 | `OTEL_TRACES_EXPORTER` | Traces exporter to be used. The value can be one of the following: `zipkin`, `jaeger`, `otlp`, `none`. | `otlp` |
 
@@ -81,7 +81,7 @@ To enable the OTLP exporter, set the `OTEL_TRACES_EXPORTER` environment variable
 
 The OpenTelemetry .NET Automatic Instrumentation also supports the following environment variables for the OTLP exporter:
 
-| Environment variable | Description | Default |
+| Environment variable | Description | Default value |
 |-|-|-|
 | `OTEL_EXPORTER_OTLP_PROTOCOL` | OTLP exporter transport protocol. Supported values are `grpc`, `http/protobuf`. [1] | `http/protobuf` |
 | `OTEL_DOTNET_AUTO_HTTP2UNENCRYPTEDSUPPORT_ENABLED` | Enables `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`. Required when instrumenting .NET Core 3.x applications while using a non-TLS endpoint for gRPC OTLP. See the [official Microsoft documentation](https://docs.microsoft.com/en-us/aspnet/core/grpc/troubleshoot?view=aspnetcore-6.0#call-insecure-grpc-services-with-net-core-client) for more details. | `false` |
@@ -100,7 +100,7 @@ To enable the Zipkin exporter, set the `OTEL_TRACES_EXPORTER` environment variab
 
 ## Additional settings
 
-| Environment variable | Description | Default |
+| Environment variable | Description | Default value |
 |-|-|-|
 | `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP` | Whether the tracer is created by the automatic instrumentation library or not. Set to `false` when the application initializes the OpenTelemetry .NET SDK Tracer on its own. This configuration can be used, for example, to retrieve the bytecode instrumentations. | `true` |
 | `OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES` | Comma-separated list of additional `System.Diagnostics.ActivitySource` names to be added to the tracer at the startup. Use it to capture manually instrumented spans. |  |
