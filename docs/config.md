@@ -98,14 +98,15 @@ Important environment variables include:
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Target endpoint for the OTLP exporter. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md) for more details. | `http://localhost:4318` for the `http/protobuf` protocol, `http://localhost:4317` for the `grpc` protocol |
 | `OTEL_EXPORTER_OTLP_PROTOCOL` | OTLP exporter transport protocol. Supported values are `grpc`, `http/protobuf`. [1] | `http/protobuf` |
 
-> **[1]**: Considerations on the `OTEL_EXPORTER_OTLP_PROTOCOL`:
-> - The OpenTelemetry .NET Automatic Instrumentation defaults to `http/protobuf`,
->   which differs from the OpenTelemetry .NET SDK default value of `grpc`.
-> - On .NET 5 and higher, the application must reference [`Grpc.Net.Client`](https://www.nuget.org/packages/Grpc.Net.Client/)
->   to use the `grpc` OTLP exporter protocol. For example, by adding
->   `<PackageReference Include="Grpc.Net.Client" Version="2.32.0" />` to the
->   `.csproj` file.
-> - On .NET Framework, the `grpc` OTLP exporter protocol is not supported.
+**[1]**: Considerations on the `OTEL_EXPORTER_OTLP_PROTOCOL`:
+
+- The OpenTelemetry .NET Automatic Instrumentation defaults to `http/protobuf`,
+  which differs from the OpenTelemetry .NET SDK default value of `grpc`.
+- On .NET 5 and higher, the application must reference [`Grpc.Net.Client`](https://www.nuget.org/packages/Grpc.Net.Client/)
+  to use the `grpc` OTLP exporter protocol. For example, by adding
+  `<PackageReference Include="Grpc.Net.Client" Version="2.32.0" />` to the
+  `.csproj` file.
+- On .NET Framework, the `grpc` OTLP exporter protocol is not supported.
 
 The OpenTelemetry .NET Automatic Instrumentation also supports the following
 environment variables for the OTLP exporter:
@@ -151,7 +152,8 @@ OpenTelemetry .NET Automatic Instrumentation.
 To perform bytecode instrumentation, configure the OpenTelemetry .NET
 Automatic Instrumentation as a .NET CLR Profiler. The CLR uses the following
 environment variables to set up the profiler. See
-[.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/profiling/Profiler%20Loading.md) for more information.
+[.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/profiling/Profiler%20Loading.md)
+for more information.
 
 | .NET Framework environment variable | .NET Core environment variable | Description | Required value |
 |-|-|-|-|
