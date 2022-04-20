@@ -1,48 +1,55 @@
 # OpenTelemetry.AutoInstrumentation.DuckTyping
 
-The duck typing library allows us to get and set data from fields and properties and call methods from an object without having the type definition at compile time. This is done by creating a proxy type to an object instance using a proxy definition at runtime.
+The duck typing library allows us to get and set data from fields and properties
+and call methods from an object without having the type definition at compile
+time. This is done by creating a proxy type to an object instance using a proxy
+definition at runtime.
 
-The goal of the library is to have an unify code to access unknown types as fastest and with the minimum allocations as possible.
+The goal of the library is to have an unify code to access unknown types
+as fastest and with the minimum allocations as possible.
 
-### Example
-Given the following scenario, where we want to access the data from an anonymous class instance in another method, a code example to do that would be:
+## Example
+
+Given the following scenario, where we want to access the data from an anonymous
+class instance in another method, a code example to do that would be:
 
 ```csharp
 public class Program
 {
-	public static void Main()
-	{
-		// We create an anonymous object
-		var anonymousObject = new { Name = ".NET Core", Version = "3.1" };
-		
-		Process(anonymousObject);
-	}
-	
-	public static void Process(object obj) 
-	{
+    public static void Main()
+    {
+        // We create an anonymous object
+        var anonymousObject = new { Name = ".NET Core", Version = "3.1" };
+
+        Process(anonymousObject);
+    }
+    
+    public static void Process(object obj) 
+    {
                 // First, we create a proxy instance using IDuckAnonymous type
                 // as a proxy definition and the obj instance as the target.
-		// Now the proxyInstance implements IDuckAnonymous type and all
+                // Now the proxyInstance implements IDuckAnonymous type and all
                 // getters to access the anonymous object internals were generated
                 // automatically for us.
 
                 // We use the `As` extension method to call the duck typing proxy creator.
-		var proxyInstance = obj.As<IDuckAnonymous>();
+        var proxyInstance = obj.As<IDuckAnonymous>();
 
-		// Here we can access the internal properties
-		Console.WriteLine($"Name: {proxyInstance.Name}");
-		Console.WriteLine($"Version: {proxyInstance.Version}");
-	}
-	
-	public interface IDuckAnonymous 
-	{
-		string Name { get; }
-		string Version { get; }
-	}		
+        // Here we can access the internal properties
+        Console.WriteLine($"Name: {proxyInstance.Name}");
+        Console.WriteLine($"Version: {proxyInstance.Version}");
+    }
+
+    public interface IDuckAnonymous 
+    {
+        string Name { get; }
+        string Version { get; }
+    }
 }
 ```
 
-For this particular case the generated proxy type by the Duck Type library will look like this:
+For this particular case the generated proxy type by the Duck Type library will
+look like this:
 
 ```csharp
 public readonly struct IDuckAnonymous___<>f__AnonymousType0`2[System.String,System.String] : IDuckAnonymous, IDuckType
@@ -60,7 +67,9 @@ public readonly struct IDuckAnonymous___<>f__AnonymousType0`2[System.String,Syst
 ```
 
 ## Proxy types
-Depending on the proxy definition type, the library will create different proxy types as shown in the following table:
+
+Depending on the proxy definition type, the library will create different proxy
+types as shown in the following table:
 
 |    Proxy Definition Type   |               Resulting Proxy Type               |
 |----------------------------|--------------------------------------------------|
@@ -68,7 +77,8 @@ Depending on the proxy definition type, the library will create different proxy 
 | Abstract class             | Class inherits and overriding the abstract class |
 | Class with virtual members | Class inherits and overriding the virtual class  |
 
-Also, all resulting proxy types implements the `IDuckType` interface to expose the target instance and type. The interface has the following definition:
+Also, all resulting proxy types implements the `IDuckType` interface to expose
+the target instance and type. The interface has the following definition:
 
 ```csharp
 public interface IDuckType
@@ -87,7 +97,8 @@ public interface IDuckType
 
 ## Controlling bindings
 
-To control the bindings between the proxy definition and the target type, we can make use of the `DuckAttribute` attribute type defined as:
+To control the bindings between the proxy definition and the target type, we can
+make use of the `DuckAttribute` attribute type defined as:
 
 ```csharp
 /// <summary>
@@ -148,9 +159,10 @@ public enum DuckKind
 }
 ```
 
-This attribute can be used in `Properties` or `Methods` in the proxy definition and is used by the library to select the members we want to access.
+This attribute can be used in `Properties` or `Methods` in the proxy definition
+and is used by the library to select the members we want to access.
 
-### Example
+### Example with control bindings
 
 The following example shows multiple uses of the `DuckAttribute`:
 
@@ -222,10 +234,12 @@ public interface IMyProxy
 }
 ```
 
-
 ## Accessor modifiers (AM)
 
-In order to support all accessor modifiers for: instance types, parameters and return value types, the Duck Type library applies some `tricks` to avoid the visibility checks. This is done automatically when the library is creating the proxy type. In summary the following logic is applied depending on each case:
+In order to support all accessor modifiers for: instance types, parameters
+and return value types, the Duck Type library applies some `tricks` to avoid
+the visibility checks. This is done automatically when the library is creating
+the proxy type. In summary the following logic is applied depending on each case:
 
 |        Target Type AM        | Target Member Type |       Target Member AM       | Access Method                                 |
 |------------------------------|--------------------|------------------------------|-----------------------------------------------|
@@ -244,10 +258,14 @@ In order to support all accessor modifiers for: instance types, parameters and r
 
 ## Generics methods
 
-Calling generics methods are supported by the library, but due the use of `DynamicMethod`in some scenarios we can´t define it as a normal generic method (Please note if we know that the target type is Public, then we can declare a normal generic method).
+Calling generics methods are supported by the library, but due
+the use of `DynamicMethod`in some scenarios we can´t define it as a normal
+generic method (Please note if we know that the target type is Public,
+then we can declare a normal generic method).
 
-For those scenarios were we can´t use the generic definition, the alternative is to specify the generic parameters to be match in the duck attribute of the proxy definition.
-
+For those scenarios were we can´t use the generic definition, the alternative
+is to specify the generic parameters to be match in the duck attribute
+of the proxy definition.
 
 ### Example with public type
 
@@ -286,7 +304,8 @@ private class PrivateType
 }
 ```
 
-Because the type is non public we have to define each generic arguments we want to use in different calls.
+Because the type is non public we have to define each generic arguments we want
+to use in different calls.
 
 ```csharp
 public interface IMyProxy
@@ -303,9 +322,11 @@ public interface IMyProxy
 
 ## Duck chaining
 
-Duck chaining enables the possibility to interact with properties or methods returning or using non public type parameters to be wrapped with a new duck type proxy, so we can access the internals of those objects.
+Duck chaining enables the possibility to interact with properties or methods
+returning or using non public type parameters to be wrapped with a new duck type
+proxy, so we can access the internals of those objects.
 
-### Example
+### Example with chanining
 
 Consider the following types:
 
@@ -338,17 +359,22 @@ public interface IProxyMyHandlerConfiguration
 }
 ```
 
-In this example the non public instance of `MyHandlerConfiguration` when calling the `Configuration` property is going to be wrapped with a `IProxyMyHandlerConfiguration` instance automatically. That allow us to access the internal data of that non public type.
+In this example the non public instance of `MyHandlerConfiguration` when calling
+the `Configuration` property is going to be wrapped with
+a `IProxyMyHandlerConfiguration` instance automatically. That allow us to access
+the internal data of that non public type.
 
 ## Benchmarks
 
-Several benchmark tests were run for multiple cases to keep track of the time execution and heap allocations of the library, these are the results:
+Several benchmark tests were run for multiple cases to keep track of the time
+execution and heap allocations of the library, these are the results:
 
 ### Fields Getter and Setter
 
 The `proxy` column indicates the target type access modifier.
 
-Tests with `blank` proxy are the direct access of the value through an interface without creating any ducktype proxy.
+Tests with `blank` proxy are the direct access of the value through an interface
+without creating any ducktype proxy.
 
 ``` ini
 BenchmarkDotNet=v0.12.1, OS=Windows 10.0.19041.508 (2004/?/20H1)
@@ -358,6 +384,7 @@ Intel Core i7-1068NG7 CPU 2.30GHz, 1 CPU, 2 logical and 2 physical cores
   Job-LJAVIR : .NET Framework 4.8 (4.8.4220.0), X64 RyuJIT
   Job-OHOUFK : .NET Core 3.1.8 (CoreCLR 4.700.20.41105, CoreFX 4.700.20.41903), X64 RyuJIT
 ```
+
 |                  Method |       Runtime |    Categories |    proxy |     Mean |     Error |    StdDev | Ratio | RatioSD | Gen 0 | Gen 1 | Gen 2 | Allocated |
 |------------------------ |-------------- |-------------- |--------- |---------:|----------:|----------:|------:|--------:|------:|------:|------:|----------:|
 |    GetPublicStaticField |    .NET 4.7.2 | Static Getter | Internal | 3.207 ns | 0.0623 ns | 0.0553 ns |  1.00 |    0.00 |     - |     - |     - |         - |
@@ -508,7 +535,8 @@ Intel Core i7-1068NG7 CPU 2.30GHz, 1 CPU, 2 logical and 2 physical cores
 
 The `proxy` column indicates the target type access modifier.
 
-Tests with `blank` proxy are the direct access of the value through an interface without creating any ducktype proxy.
+Tests with `blank` proxy are the direct access of the value through an interface
+without creating any ducktype proxy.
 
 ``` ini
 BenchmarkDotNet=v0.12.1, OS=Windows 10.0.19041.508 (2004/?/20H1)
@@ -518,6 +546,7 @@ Intel Core i7-1068NG7 CPU 2.30GHz, 1 CPU, 2 logical and 2 physical cores
   Job-QIOTKF : .NET Framework 4.8 (4.8.4220.0), X64 RyuJIT
   Job-FEKUVA : .NET Core 3.1.8 (CoreCLR 4.700.20.41105, CoreFX 4.700.20.41903), X64 RyuJIT
 ```
+
 |                     Method |       Runtime |     Categories |    proxy |     Mean |     Error |    StdDev | Ratio | RatioSD | Gen 0 | Gen 1 | Gen 2 | Allocated |
 |--------------------------- |-------------- |--------------- |--------- |---------:|----------:|----------:|------:|--------:|------:|------:|------:|----------:|
 |          GetPublicProperty |    .NET 4.7.2 |         Getter |          | 1.046 ns | 0.0457 ns | 0.0449 ns |  1.00 |    0.00 |     - |     - |     - |         - |
@@ -698,7 +727,8 @@ Intel Core i7-1068NG7 CPU 2.30GHz, 1 CPU, 2 logical and 2 physical cores
 
 The `proxy` column indicates the target type access modifier.
 
-Tests with `blank` proxy are the direct access of the value through an interface without creating any ducktype proxy.
+Tests with `blank` proxy are the direct access of the value through an interface
+without creating any ducktype proxy.
 
 ``` ini
 BenchmarkDotNet=v0.12.1, OS=Windows 10.0.19041.508 (2004/?/20H1)
@@ -708,6 +738,7 @@ Intel Core i7-1068NG7 CPU 2.30GHz, 1 CPU, 2 logical and 2 physical cores
   Job-CGLGGF : .NET Framework 4.8 (4.8.4220.0), X64 RyuJIT
   Job-GEDFFR : .NET Core 3.1.8 (CoreCLR 4.700.20.41105, CoreFX 4.700.20.41903), X64 RyuJIT
 ```
+
 |                    Method |       Runtime |       Categories |    proxy |      Mean |     Error |    StdDev | Ratio | RatioSD | Gen 0 | Gen 1 | Gen 2 | Allocated |
 |-------------------------- |-------------- |----------------- |--------- |----------:|----------:|----------:|------:|--------:|------:|------:|------:|----------:|
 |          PublicVoidMethod |    .NET 4.7.2 |      Void Method |          | 1.3457 ns | 0.0441 ns | 0.0391 ns |  1.00 |    0.00 |     - |     - |     - |         - |
@@ -772,4 +803,3 @@ Intel Core i7-1068NG7 CPU 2.30GHz, 1 CPU, 2 logical and 2 physical cores
 |                           |               |                  |          |           |           |           |       |         |       |       |       |           |
 | PrivateOutParameterMethod |    .NET 4.7.2 | Out-Param Method |   Public | 3.7001 ns | 0.0380 ns | 0.0318 ns |  1.00 |    0.00 |     - |     - |     - |         - |
 | PrivateOutParameterMethod | .NET Core 3.1 | Out-Param Method |   Public | 3.9932 ns | 0.0553 ns | 0.0490 ns |  1.08 |    0.01 |     - |     - |     - |         - |
-

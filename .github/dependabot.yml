@@ -7,6 +7,12 @@ updates:
       interval: "daily"
 
 
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'daily'
+
+ 
   - package-ecosystem: nuget
     directory: /build/nuke
     schedule:

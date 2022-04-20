@@ -36,7 +36,7 @@ follow these steps to set `omnisharp.useGlobalMono` to `never`:
 2. Change `Omnisharp: Use Global Mono` to `never`.
 3. Restart OmniSharp by pressing `F1` and selecting `OmniSharp: Restart OmniSharp`.
 
-If you get errors due to projects targeting .NET Framework, use 
+If you get errors due to projects targeting .NET Framework, use
 `OmniSharp: Select Project` in Visual Studio Code to load a subset of projects
 which work without any issues. You can also try building the projects which throw
 errors.
@@ -47,12 +47,13 @@ This repository uses [Nuke](https://nuke.build/) for build automation.
 
 Support plugins are available for:
 
-- JetBrains ReSharper        https://nuke.build/resharper
-- JetBrains Rider            https://nuke.build/rider
-- Microsoft VisualStudio     https://nuke.build/visualstudio
-- Microsoft VSCode           https://nuke.build/vscode
+- JetBrains ReSharper        <https://nuke.build/resharper>
+- JetBrains Rider            <https://nuke.build/rider>
+- Microsoft VisualStudio     <https://nuke.build/visualstudio>
+- Microsoft VSCode           <https://nuke.build/vscode>
 
-Restore dotnet tools to prepare build tools for solution. This installs the dotnet `nuke` tool locally.
+Restore dotnet tools to prepare build tools for solution.
+This installs the dotnet `nuke` tool locally.
 
 ```cmd
 dotnet tool restore
@@ -77,6 +78,23 @@ Clean your repository by running:
 ```cmd
 git clean -fXd
 ```
+
+### Documentation lint
+
+If you made changes to the Markdown documents (`*.md` files), ensure that lint
+tool passed without any issues by executing:
+
+```cmd
+nuke InstallMarkdownLint MarkdownLint
+```
+
+Some issues can be automatically fixed by:
+
+```cmd
+nuke MarkdownLintFix
+```
+
+All MarkdownLint tasks require [Node.js](https://nodejs.org/) installed locally.
 
 ## Manual testing
 
@@ -110,8 +128,8 @@ For example:
 ./dev/instrument.sh OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS=HttpClient dotnet run -f netcoreapp3.1 --project ./examples/ConsoleApp/Examples.ConsoleApp.csproj
 ```
 
-You can use [`dev/envvars.sh`](../dev/envvars.sh) to export profiler environmental variables to your
-current shell session. 
+You can use [`dev/envvars.sh`](../dev/envvars.sh) to export profiler
+environmental variables to your current shell session.
 
 You must run `dev/envvars.sh` from the root of this repository. For example:
 
@@ -124,7 +142,8 @@ export OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS=HttpClient
 ### Running the examples
 
 You can use the example applications to see the local changes in action. See
-[`examples/README.md`](../examples/README.md) for instructions on how to run the examples.
+[`examples/README.md`](../examples/README.md) for instructions on
+how to run the examples.
 
 ## Release process
 

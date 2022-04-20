@@ -4,7 +4,8 @@
 
 We'd love your help!
 
-Please join our weekly [SIG meeting](https://github.com/open-telemetry/community#special-interest-groups) or get in touch on [Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
+Please join our weekly [SIG meeting](https://github.com/open-telemetry/community#special-interest-groups)
+or get in touch on [Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
 
 Meeting notes are available as a public [Google
 doc](https://docs.google.com/document/d/1XedN2D8_PH4YLej-maT8sp4RKogfuhFpccRi3QpUcoI/edit?usp=sharing).
@@ -22,7 +23,7 @@ Reporting bugs is an important contribution. Please make sure to include:
 If you would like to work on something that is not listed as an issue
 (e.g. a new feature or enhancement) please first read our [DESIGN.md](DESIGN.md)
 to make sure your proposal aligns with the goals of the
-project, then create an issue and describe your proposal. 
+project, then create an issue and describe your proposal.
 
 ## How to contribute
 
@@ -40,8 +41,9 @@ clarify anything related to it.
 
 If you would like to work on something that is not listed as an issue,
 please [request a feature](#request-a-feature) first.
-It is best to do this in advance so that maintainers can decide if the proposal is a good fit for
-this repository. This will help avoid situations when you spend significant time
+It is best to do this in advance so that maintainers can decide if the proposal
+is a good fit for this repository.
+This will help avoid situations when you spend significant time
 on something that maintainers may decide this repo is not the right place for.
 
 See [developing.md](developing.md) to learn more about

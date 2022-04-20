@@ -1,0 +1,26 @@
+name: markdownlint
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - '**.md'
+    - 'package-lock.json'
+    - 'package.json'
+  pull_request:
+    branches: [ main ]
+    paths:
+    - '**.md'
+    - 'package-lock.json'
+    - 'package.json'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3.0.1
+
+    - run: npm install
+
+    - run: npm run markdownlint
