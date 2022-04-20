@@ -53,7 +53,7 @@ Support plugins are available for:
 - Microsoft VSCode           <https://nuke.build/vscode>
 
 Restore dotnet tools to prepare build tools for solution.
-This installsthe dotnet `nuke` tool locally.
+This installs the dotnet `nuke` tool locally.
 
 ```cmd
 dotnet tool restore

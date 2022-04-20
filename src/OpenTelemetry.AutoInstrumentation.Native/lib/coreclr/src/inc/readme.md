@@ -15,4 +15,4 @@ so we work around the issue by doing:
   Typically this is just adding MIDL_DEFINE_GUID(...)
   for any new classes/interfaces that have been added to the idl file.
 
-Include these src changes with the remainder of your work whenyou submit a PR.
+Include these src changes with the remainder of your work when you submit a PR.
