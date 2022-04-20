@@ -5,10 +5,14 @@ on:
     branches: [ main ]
     paths:
     - '**.md'
+    - 'package-lock.json'
+    - 'package.json'
   pull_request:
     branches: [ main ]
     paths:
     - '**.md'
+    - 'package-lock.json'
+    - 'package.json'
 
 jobs:
   build:
@@ -17,6 +21,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3.0.1
 
-    - run: sudo npm install -g markdownlint-cli
+    - run: npm install
 
-    - run: markdownlint .
+    - run: npm run markdownlint
