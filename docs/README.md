@@ -39,7 +39,7 @@ shows the current work in progress.
 
 ⚠️ **We need you!** ⚠️
 
-Please leave us an **experience report** (in whatever form you like).
+Please, give us your **feedback** (in whatever form you like).
 
 You can do this by [submitting a GitHub issue](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/new).
 

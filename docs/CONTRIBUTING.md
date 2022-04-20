@@ -11,10 +11,10 @@ doc](https://docs.google.com/document/d/1XedN2D8_PH4YLej-maT8sp4RKogfuhFpccRi3Qp
 Get in touch on [Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
 If you are new, you can create a CNCF Slack account [here](http://slack.cncf.io/).
 
-## Submit an experience report
+## Give feedback
 
 We are in early phase of development
-and we are looking forward for getting any experience report.
+and we are looking for your feedback.
 
 You can do this by [submitting a GitHub issue](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/new).
 
