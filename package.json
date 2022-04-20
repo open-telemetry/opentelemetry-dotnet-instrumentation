@@ -2,27 +2,11 @@
   "name": "opentelemetry-dotnet-instrumentation",
   "version": "0.0.1",
   "description": "Application to configure and execute markdownlint",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs",
-    "example": "examples",
-    "test": "test"
-  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "markdownlint": "npx markdownlint . -i node_modules",
     "markdownlint-fix": "npx markdownlint . -i node_modules --fix"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation.git"
-  },
-  "author": "",
   "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues"
-  },
-  "homepage": "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation#readme",
   "dependencies": {
     "markdownlint-cli": "^0.31.1"
   }
