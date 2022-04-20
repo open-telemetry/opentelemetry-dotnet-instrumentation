@@ -4,8 +4,7 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
 
 
   - package-ecosystem: 'npm'
@@ -17,215 +16,185 @@ updates:
   - package-ecosystem: nuget
     directory: /build/nuke
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /examples/AspNetCoreMvc
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /examples/BindingRedirect
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /examples/ConsoleApp
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /examples/ConsoleApp.SelfBootstrap
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /examples/CoreAppOldReference
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /examples/OldReference
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /examples/OpenTracingLibrary
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /examples/Vendor.Distro
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /src/OpenTelemetry.AutoInstrumentation
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /src/OpenTelemetry.AutoInstrumentation.AdditionalDeps
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /src/OpenTelemetry.AutoInstrumentation.Core
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /src/OpenTelemetry.AutoInstrumentation.Loader
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /src/OpenTelemetry.AutoInstrumentation.Native
-      day: sunday
-      interval: weekly
+    schedule:
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /src/OpenTelemetry.AutoInstrumentation.StartupHook
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /test/integration-tests/aspnet/IntegrationTests.AspNet
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /test/integration-tests/IntegrationTests.GraphQL
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /test/integration-tests/IntegrationTests.Helpers
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /test/integration-tests/IntegrationTests.Http
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /test/integration-tests/IntegrationTests.StartupHook
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /test/OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /test/OpenTelemetry.AutoInstrumentation.Loader.Tests
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /test/OpenTelemetry.AutoInstrumentation.Native.Tests
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /test/OpenTelemetry.AutoInstrumentation.Tests
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /test/test-applications/integrations/aspnet/TestApplication.AspNet
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /test/test-applications/integrations/dependency-libs/TestApplication.ExampleLibrary
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /test/test-applications/integrations/dependency-libs/TestApplication.ExampleLibraryTracer
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /test/test-applications/integrations/TestApplication.GraphQL
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /test/test-applications/integrations/TestApplication.Http
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /test/test-applications/integrations/TestApplication.StartupHook
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
     directory: /test/test-applications/mocks/OpenTelemetry.AutoInstrumentation.Mock
     schedule:
-      day: sunday
-      interval: weekly
+      interval: "daily"
     open-pull-requests-limit: 20
