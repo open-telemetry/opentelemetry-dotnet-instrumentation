@@ -1,6 +1,6 @@
 # Configuration
 
-This document describes configuration settings not generally needed by consumers of this library but still require documentation.
+This document lists advanced configuration settings rarely changed by users.
 
 ## Environment
 
