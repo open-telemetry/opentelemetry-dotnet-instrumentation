@@ -2,7 +2,8 @@
 
 The automatic instrumentation provides a base you can build on by adding your own
 manual instrumentation. By using both automatic and manual instrumentation, you can
-better instrument the logic and functionality of your applications, clients, and frameworks.
+better instrument the logic and functionality of your applications, clients,
+and frameworks.
 
 To create your custom traces manually, follow these steps:
 

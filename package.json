@@ -1,0 +1,13 @@
+{
+  "name": "opentelemetry-dotnet-instrumentation",
+  "version": "0.0.1",
+  "description": "Application to configure and execute markdownlint",
+  "scripts": {
+    "markdownlint": "npx markdownlint . -i node_modules",
+    "markdownlint-fix": "npx markdownlint . -i node_modules --fix"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "markdownlint-cli": "^0.31.1"
+  }
+}

@@ -9,7 +9,6 @@
 | `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES` | Names of the executable files that the profiler can instrument. Supports multiple comma-separated values, for example: `MyApp.exe,dotnet.exe`. If unset, the profiler attaches to all processes by default. |  |
 | `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` | Names of the executable files that the profiler cannot instrument. Supports multiple comma-separated values, for example: `ReservedProcess.exe,powershell.exe`. The list is processed after `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`. If unset, the profiler attaches to all processes by default. |  |
 | `OTEL_DOTNET_AUTO_AZURE_APP_SERVICES` | Set to indicate that the profiler is running in the context of Azure App Services. | `false` |
- 
 
 ## Resources
 
@@ -49,7 +48,8 @@ for more details.
 ASP.NET instrumentation on .NET Framework requires to install the
 [`OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule/)
 NuGet package in the instrumented project.
-See [the WebConfig section](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.AspNet#step-2-modify-webconfig) for more information.
+See [the WebConfig section](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.AspNet#step-2-modify-webconfig)
+for more information.
 
 ## Logging
 
@@ -59,7 +59,8 @@ The default log directory paths are:
 - Linux: `/var/log/opentelemetry/dotnet`
 
 If the default log directories can't be created,
-the instrumentation uses the path of the current user's [temporary folder](https://docs.microsoft.com/en-us/dotnet/api/System.IO.Path.GetTempPath?view=net-6.0) instead.
+the instrumentation uses the path of the current user's [temporary folder](https://docs.microsoft.com/en-us/dotnet/api/System.IO.Path.GetTempPath?view=net-6.0)
+instead.
 
 | Environment variable | Description | Default |
 |-|-|-|
@@ -89,8 +90,9 @@ Exporters output the telemetry.
 **[1]**: Considerations on the `OTEL_EXPORTER_OTLP_PROTOCOL`:
 
 - On .NET 5 and higher, the application must reference [`Grpc.Net.Client`](https://www.nuget.org/packages/Grpc.Net.Client/)
-  to use the `grpc` OTLP exporter protocol. For example, by adding 
-  `<PackageReference Include="Grpc.Net.Client" Version="2.32.0" />` to the `.csproj` file.
+  to use the `grpc` OTLP exporter protocol. For example, by adding
+  `<PackageReference Include="Grpc.Net.Client" Version="2.32.0" />` to the `.csproj`
+  file.
 - On .NET Framework, the `grpc` OTLP exporter protocol is not supported.
   
 ## Batch span processor
@@ -114,7 +116,6 @@ The batch span processor batches finished spans before sending them through the 
 | `OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION` | Controls whether the telemetry data is flushed when an [AppDomain.UnhandledException](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.unhandledexception) event is raised. Set to `true` when you suspect that you are experiencing a problem with missing telemetry data and also experiencing unhandled exceptions. | `false` |
 | `OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS` | Colon-separated list of OTel SDK instrumentation plugins represented by `System.Type.AssemblyQualifiedName`. | |
 
-
 You can use `OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS` to extend the
 configuration of the OpenTelemetry .NET SDK Tracer. A plugin must be a
 non-static, non-abstract class which has a default constructor and a method
@@ -131,7 +132,7 @@ OpenTelemetry .NET Automatic Instrumentation.
 
 To perform bytecode instrumentation, configure the OpenTelemetry .NET
 Automatic Instrumentation as a .NET CLR Profiler. The CLR uses the following
-environment variables to set up the profiler. 
+environment variables to set up the profiler.
 
 > Notice that .NET Framework uses the `COR_` prefix instead of `CORECLR_`.
 
@@ -143,9 +144,11 @@ environment variables to set up the profiler.
 | `CORECLR_PROFILER_PATH_32` | Path to the 32-bit profiler. Bitness-specific paths take precedence over generic paths. | `%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
 | `CORECLR_PROFILER_PATH_64` | Path to the 64-bit profiler. Bitness-specific paths take precedence over generic paths. | `%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
 
-The `*_PROFILER_PATH_*` environment variable is not needed on Windows if the DLL file is already registered.
+The `*_PROFILER_PATH_*` environment variable is not needed on Windows if the DLL
+file is already registered.
 
-See [.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/profiling/Profiler%20Loading.md) for more information.
+See [.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/profiling/Profiler%20Loading.md)
+for more information.
 
 ## .NET Runtime additional dependencies and package store
 

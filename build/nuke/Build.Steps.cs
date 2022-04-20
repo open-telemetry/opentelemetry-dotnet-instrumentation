@@ -10,6 +10,7 @@ using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.MSBuild;
+using Nuke.Common.Tools.Npm;
 using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Utilities.Collections;
 using Serilog;
@@ -351,6 +352,29 @@ partial class Build
                                        depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+?)}," + Environment.NewLine + "(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
                                        File.WriteAllText(file, depsJsonContent);
                                    });
+        });
+
+    Target InstallMarkdownLint => _ => _
+        .Description("Installs markdownlint-cli locally. npm is required")
+        .Executes(() =>
+        {
+            NpmTasks.NpmInstall();
+        });
+
+    Target MarkdownLint => _ => _
+        .Description("Executes MarkdownLint")
+        .After(InstallMarkdownLint)
+        .Executes(() =>
+        {
+            NpmTasks.NpmRun(s => s.SetCommand(@"markdownlint"));
+        });
+
+    Target MarkdownLintFix => _ => _
+        .Description("Trying to fix MarkdownLint issues")
+        .After(InstallMarkdownLint)
+        .Executes(() =>
+        {
+            NpmTasks.NpmRun(s => s.SetCommand(@"markdownlint-fix"));
         });
 
     private AbsolutePath GetResultsDirectory(Project proj) => BuildDataDirectory / "results" / proj.Name;
