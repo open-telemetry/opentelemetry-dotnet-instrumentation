@@ -261,6 +261,8 @@ __pycache__/
 *.pyc
 
 # vscode
+.vscode/*
+!.vscode/extensions.json
 .devcontainer/
 
 # Benchmark results
