@@ -79,6 +79,23 @@ Clean your repository by running:
 git clean -fXd
 ```
 
+### Documentation lint
+
+If you made changes to the Markdown documents (`*.md` files), ensure that lint
+tool passed withouth any issues. Execute
+
+```cmd
+nuke InstallMarkdownLint MarkdownLint
+```
+
+Part of the issues can be automatiacaly fixed by
+
+```cmd
+nuke MarkdownLintFix
+```
+
+All MarkdownLint tasks requier NPM/NodeJS installed locally.
+
 ## Manual testing
 
 ### Test environment
