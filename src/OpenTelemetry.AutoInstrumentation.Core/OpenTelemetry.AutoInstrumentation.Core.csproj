@@ -5,7 +5,7 @@
     <AssemblyName>OpenTelemetry.AutoInstrumentation.Core</AssemblyName>
 
     <!-- NuGet -->
-    <Version>0.0.1</Version>
+    <Version>0.1.0</Version>
     <IsPackable>false</IsPackable>
 
     <!-- Allow the GenerateAssemblyInfo task in the .NET SDK to generate all

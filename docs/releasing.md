@@ -4,7 +4,7 @@
 
 1. Update the version in the following files:
 
-   - `*.cs` (TODO: extract as a constant to reduce the number of occurances)
+   - `TracerConstants.cs`
    - `otel_profiler_constants.h`
    - `version.h`
    - `OpenTelemetry.AutoInstrumentation.csproj`

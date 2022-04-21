@@ -78,7 +78,7 @@ const WSTRING system_private_corelib_assemblyName = WStr("System.Private.CoreLib
 const WSTRING opentelemetry_autoinstrumentation_loader_assemblyName = WStr("OpenTelemetry.AutoInstrumentation.Loader");
 
 const WSTRING managed_profiler_full_assembly_version =
-    WStr("OpenTelemetry.AutoInstrumentation, Version=0.0.1.0, Culture=neutral, PublicKeyToken=null");
+    WStr("OpenTelemetry.AutoInstrumentation, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null");
 
 const WSTRING managed_profiler_name = WStr("OpenTelemetry.AutoInstrumentation");
 
