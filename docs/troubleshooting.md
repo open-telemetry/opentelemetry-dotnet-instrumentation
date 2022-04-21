@@ -8,7 +8,7 @@ To handle conflicts in assemblies referenced by "source instrumentations",
 update the project references to ensure that they are on the same versions
 as the ones used by the instrumentation.
 
-This workaround only work at build time. When a rebuild is not possible,
+This workaround works only at build time. When a rebuild is not possible,
 use one of the following suggestions to force the application to use
 the assembly versions shipped with the instrumentation.
 
