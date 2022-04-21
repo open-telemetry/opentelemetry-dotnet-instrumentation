@@ -146,6 +146,10 @@ See [manual-instrumentation.md](manual-instrumentation.md).
 
 See [troubleshooting.md](troubleshooting.md).
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Community Roles
 
 [Maintainers](https://github.com/open-telemetry/community/blob/main/community-membership.md#maintainer)
