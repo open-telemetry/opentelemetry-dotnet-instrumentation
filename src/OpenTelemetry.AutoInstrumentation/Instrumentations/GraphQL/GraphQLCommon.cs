@@ -41,7 +41,7 @@ internal class GraphQLCommon
     internal static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(IntegrationName);
 
     internal static readonly ActivitySource ActivitySource = new ActivitySource(
-        "OpenTelemetry.AutoInstrumentation.GraphQL", "0.0.1");
+        "OpenTelemetry.AutoInstrumentation.GraphQL", TracerConstants.Version);
 
     private static readonly ILogger Log = OtelLogging.GetLogger();
 
