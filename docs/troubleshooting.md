@@ -2,29 +2,27 @@
 
 ## Handling of assembly version conflicts
 
-OpenTelemetry SDK NuGet packages are deployed with the OpenTelemetry .NET Instrumentation.
+OpenTelemetry .NET NuGet packages are deployed with
+the OpenTelemetry .NET Automatic Instrumentation.
 To handle conflicts in assemblies referenced by "source instrumentations",
 update the project references to ensure that they are on the same versions
 as the ones used by the instrumentation.
 
-Previous workarounds only work at build time. When a rebuild is not possible,
+This workaround only work at build time. When a rebuild is not possible,
 use one of the following suggestions to force the application to use
 the assembly versions shipped with the instrumentation.
 
 For .NET Framework applications, the workaround is to use binding redirects.
+The [examples/BindingRedirect](./../examples/BindingRedirect/) app shows how
+to use the `app.config` file to solve version conflicts.
+The example can only run successfully under the instrumentation, as the
+binding redirect makes the application dependent on a version of
+`System.Diagnostics.DiagnosticSource` that is not available at build time.
+
 For .NET Core [Framework-dependent deployment](https://docs.microsoft.com/en-us/dotnet/core/deploying/deploy-with-vs?tabs=vs156#framework-dependent-deployment)
 applications, [Additional-deps](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md),
 and [runtime package store](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
 from OpenTelemetry .NET, use the automatic instrumentation installation path.
-For other .NET Core deployment models, edit the `deps.json` file.
-
-### .NET Framework binding redirects
-
-The [examples/BindingRedirect](./../examples/BindingRedirect/) app shows how
-to use the `app.config` file to solve version conflicts.
-The example can only run successfully under the instrumentation, as the
-binding redirect makes the application dependent on a version of `System.Diagnostics.DiagnosticSource`
-that is not available at build time.
 
 ## No proper relationship between spans
 
