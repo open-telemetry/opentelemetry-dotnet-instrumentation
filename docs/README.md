@@ -46,6 +46,8 @@ You can do this by [submitting a GitHub issue](https://github.com/open-telemetry
 You may also prefer writing on [Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
 If you are new, you can create a CNCF Slack account [here](http://slack.cncf.io/).
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
+
 ## Compatibility
 
 OpenTelemetry .NET Automatic Instrumentation attempts to work with all officially
@@ -69,8 +71,10 @@ See [config.md#instrumented-libraries-and-frameworks](config.md#instrumented-lib
 
 ### Install the instrumentation
 
-Download and install the instrumentation binaries from
+Download and extract the appropriate binaries from
 [the latest release](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest).
+
+> The path where you put the binaries is referenced as `%InstallationLocation%`
 
 On Linux, you can optionally create the default log directory
 after installation by running the following commands:
