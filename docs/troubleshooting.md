@@ -26,19 +26,6 @@ The example can only run successfully under the instrumentation, as the
 binding redirect makes the application dependent on a version of `System.Diagnostics.DiagnosticSource`
 that is not available at build time.
 
-### .NET Core dependency file
-
-To fix assembly version conflicts in .NET Core, edit the default
-`<application>.deps.json` file generated at build for .NET Core applications.
-Build a .NET Core app with package references using the required version,
-and use the respective `deps.json` file to see what changes are needed.
-
-To test your edits to the `deps.json` file, add a reference to the required
-version of the OpenTelemetry package to the [examples/CoreAppOldReference](./../examples/CoreAppOldReference/)
-example and rebuild the application. Save the generated `deps.json` file,
-remove the package reference, and rebuild the example app.
-Compare the files to explore the changes.
-
 ## No proper relationship between spans
 
 On .NET Framework, strong name signing can force the loading of multiple versions
