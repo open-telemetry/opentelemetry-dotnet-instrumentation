@@ -5,7 +5,8 @@
 This project adds [OpenTelemetry instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/#automatic-instrumentation)
 to .NET applications without having to modify their source code.
 
-OpenTelemetry .NET Automatic Instrumentation is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
+OpenTelemetry .NET Automatic Instrumentation is built on top of
+[OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
 [`1.2.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.2.0)
@@ -36,6 +37,9 @@ See [design.md](design.md) for an architectural overview.
 This project is in the early stages of development.
 [The project board](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/projects/1)
 shows the current work in progress.
+
+Project versioning information and stability guarantees
+can be found in the [versioning documentation](versioning.md).
 
 ⚠️ **We need you!** ⚠️
 
