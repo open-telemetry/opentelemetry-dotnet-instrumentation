@@ -10,3 +10,4 @@ omnisharp
 envvars
 distro
 ducktype
+OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION
