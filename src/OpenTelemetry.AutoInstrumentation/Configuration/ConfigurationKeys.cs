@@ -95,7 +95,7 @@ public class ConfigurationKeys
     /// <summary>
     /// Configuration key for enabling the flushing of telemetry data when an unhandled exception occurs.
     /// </summary>
-    public const string FlushOnUnhandledException = "OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION";
+    public const string FlushOnUnhandledException = "OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLED_EXCEPTION";
 
     /// <summary>
     /// String format patterns used to match integration-specific configuration keys.

@@ -99,7 +99,7 @@ into the target process through a series of steps started by the CLR Profiler DL
 callback, the CLR Profiler DLL takes the following actions:
 
    - If the loaded module is in the set of modules for which there is bytecode instrumentation,
-   or if it's the first non-corelib module or not in one of the special cases,
+   or if it's the first non-core lib module or not in one of the special cases,
    the profiler adds the module to a map of modules to be instrumented.
    - If there is bytecode instrumentation for the module, the profiler requests
    a JIT recompilation using

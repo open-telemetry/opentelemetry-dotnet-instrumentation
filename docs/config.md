@@ -84,7 +84,7 @@ Important environment variables include:
 | `OTEL_EXPORTER_JAEGER_AGENT_HOST` | Host name for the Jaeger agent. Used for the `udp/thrift.compact` protocol.| `localhost` |
 | `OTEL_EXPORTER_JAEGER_AGENT_PORT` | Port for the Jaeger agent. Used for the `udp/thrift.compact` protocol. | `6831` |
 | `OTEL_EXPORTER_JAEGER_ENDPOINT` | Jaeger Collector HTTP endpoint. Used for the `http/thrift.binary` protocol. | `http://localhost:14268` |
-| `OTEL_EXPORTER_JAEGER_PROTOCOL` | Protocol to use for Jager exporter. Supported values are `udp/thrift.compact`, `http/thrift.binary` | `udp/thrift.compact` |
+| `OTEL_EXPORTER_JAEGER_PROTOCOL` | Protocol to use for Jaeger exporter. Supported values are `udp/thrift.compact`, `http/thrift.binary` | `udp/thrift.compact` |
 
 ### OTLP
 
@@ -132,7 +132,7 @@ Important environment variables include:
 | `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP` | Whether the tracer is created by the automatic instrumentation library or not. Set to `false` when the application initializes the OpenTelemetry .NET SDK Tracer on its own. This configuration can be used, for example, to retrieve the bytecode instrumentations. | `true` |
 | `OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES` | Comma-separated list of additional `System.Diagnostics.ActivitySource` names to be added to the tracer at the startup. Use it to capture manually instrumented spans. |  |
 | `OTEL_DOTNET_AUTO_LEGACY_SOURCES` | Comma-separated list of additional legacy source names to be added to the tracer at the startup. Use it to capture `System.Diagnostics.Activity` objects created without using the `System.Diagnostics.ActivitySource` API. |  |
-| `OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION` | Controls whether the telemetry data is flushed when an [AppDomain.UnhandledException](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.unhandledexception) event is raised. Set to `true` when you suspect that you are experiencing a problem with missing telemetry data and also experiencing unhandled exceptions. | `false` |
+| `OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLED_EXCEPTION` | Controls whether the telemetry data is flushed when an [AppDomain.UnhandledException](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.unhandledexception) event is raised. Set to `true` when you suspect that you are experiencing a problem with missing telemetry data and also experiencing unhandled exceptions. | `false` |
 | `OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS` | Colon-separated list of OTel SDK instrumentation plugin types, specified with the [assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname). _Note: This list must be colon-separated because the type names may include commas._ | |
 
 You can use `OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS` to extend the
