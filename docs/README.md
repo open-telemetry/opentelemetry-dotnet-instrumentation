@@ -37,6 +37,17 @@ This project is in the early stages of development.
 [The project board](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/projects/1)
 shows the current work in progress.
 
+⚠️ **We need you!** ⚠️
+
+Please, give us your **feedback** (in whatever form you like).
+
+You can do this by [submitting a GitHub issue](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/new).
+
+You may also prefer writing on [Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
+If you are new, you can create a CNCF Slack account [here](http://slack.cncf.io/).
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
+
 ## Compatibility
 
 OpenTelemetry .NET Automatic Instrumentation attempts to work with all officially
@@ -60,8 +71,10 @@ See [config.md#instrumented-libraries-and-frameworks](config.md#instrumented-lib
 
 ### Install the instrumentation
 
-Download and install the instrumentation binaries from
+Download and extract the appropriate binaries from
 [the latest release](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest).
+
+> The path where you put the binaries is referenced as `%InstallationLocation%`
 
 On Linux, you can optionally create the default log directory
 after installation by running the following commands:
@@ -150,6 +163,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 [Approvers](https://github.com/open-telemetry/community/blob/main/community-membership.md#approver)
 ([@open-telemetry/dotnet-instrumentation-approvers](https://github.com/orgs/open-telemetry/teams/dotnet-instrumentation-approvers)):
 
+- [Piotr Kie&#x142;kowicz](https://github.com/Kielek), Splunk
 - [Rajkumar Rangaraj](https://github.com/rajkumar-rangaraj), Microsoft
 - [Rasmus Kuusmann](https://github.com/RassK), Splunk
 

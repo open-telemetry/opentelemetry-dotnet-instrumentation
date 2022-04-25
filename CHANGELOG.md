@@ -5,7 +5,9 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.1.0-beta.1...HEAD)
+
+## [0.1.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.1.0-beta.1)
 
 The is an initial, official beta release,
 built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
@@ -42,19 +44,7 @@ built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelem
   `OTEL_DOTNET_AUTO_CLR_ENABLE_NGEN`.
 - Support for OpenTelemetry exporter related environment variables:
   `OTEL_TRACES_EXPORTER`,
-  `OTEL_EXPORTER_JAEGER_AGENT_HOST`, `OTEL_EXPORTER_JAEGER_AGENT_PORT`,
-  `OTEL_EXPORTER_JAEGER_ENDPOINT`,
-  `OTEL_EXPORTER_JAEGER_PROTOCOL`,
-  `OTEL_EXPORTER_OTLP_ENDPOINT`,
-  `OTEL_EXPORTER_OTLP_HEADERS`,
-  `OTEL_EXPORTER_OTLP_TIMEOUT`,
   `OTEL_EXPORTER_OTLP_PROTOCOL`,
-  `OTEL_EXPORTER_ZIPKIN_ENDPOINT`.
-- Support for OpenTelemetry batch span processor related environment variables:
-  `OTEL_BSP_SCHEDULE_DELAY`,
-  `OTEL_BSP_EXPORT_TIMEOUT`,
-  `OTEL_BSP_MAX_QUEUE_SIZE`,
-  `OTEL_BSP_MAX_EXPORT_BATCH_SIZE`.
 - Customization and plugin capabilities which can be configured
   using the following environment variables:
   `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP`,
