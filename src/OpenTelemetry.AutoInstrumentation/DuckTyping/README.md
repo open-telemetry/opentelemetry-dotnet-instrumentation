@@ -326,7 +326,7 @@ Duck chaining enables the possibility to interact with properties or methods
 returning or using non public type parameters to be wrapped with a new duck type
 proxy, so we can access the internals of those objects.
 
-### Example with chanining
+### Example with chaining
 
 Consider the following types:
 
@@ -374,7 +374,7 @@ execution and heap allocations of the library, these are the results:
 The `proxy` column indicates the target type access modifier.
 
 Tests with `blank` proxy are the direct access of the value through an interface
-without creating any ducktype proxy.
+without creating any duck type proxy.
 
 ``` ini
 BenchmarkDotNet=v0.12.1, OS=Windows 10.0.19041.508 (2004/?/20H1)
@@ -536,7 +536,7 @@ Intel Core i7-1068NG7 CPU 2.30GHz, 1 CPU, 2 logical and 2 physical cores
 The `proxy` column indicates the target type access modifier.
 
 Tests with `blank` proxy are the direct access of the value through an interface
-without creating any ducktype proxy.
+without creating any duck type proxy.
 
 ``` ini
 BenchmarkDotNet=v0.12.1, OS=Windows 10.0.19041.508 (2004/?/20H1)
@@ -728,7 +728,7 @@ Intel Core i7-1068NG7 CPU 2.30GHz, 1 CPU, 2 logical and 2 physical cores
 The `proxy` column indicates the target type access modifier.
 
 Tests with `blank` proxy are the direct access of the value through an interface
-without creating any ducktype proxy.
+without creating any duck type proxy.
 
 ``` ini
 BenchmarkDotNet=v0.12.1, OS=Windows 10.0.19041.508 (2004/?/20H1)
