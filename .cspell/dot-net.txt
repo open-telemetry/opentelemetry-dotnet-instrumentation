@@ -27,3 +27,4 @@ corprof
 idls
 midl
 stdlibc
+corelib
