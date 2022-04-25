@@ -82,10 +82,10 @@ git clean -fXd
 ### Documentation lint
 
 If you made changes to the Markdown documents (`*.md` files), ensure that lint
-tool passed without any issues by executing:
+tool and spellcheck passed without any issues by executing:
 
 ```cmd
-nuke InstallMarkdownLint MarkdownLint
+nuke InstallDocumentationTools ValidateDocumentation
 ```
 
 Some issues can be automatically fixed by:

@@ -355,8 +355,8 @@ partial class Build
                                    });
         });
 
-    Target InstallMarkdownLint => _ => _
-        .Description("Installs markdownlint-cli locally. npm is required")
+    Target InstallDocumentationTools => _ => _
+        .Description("Installs markdownlint-cli and cspell locally. npm is required")
         .Executes(() =>
         {
             NpmTasks.NpmInstall();
@@ -364,7 +364,7 @@ partial class Build
 
     Target MarkdownLint => _ => _
         .Description("Executes MarkdownLint")
-        .After(InstallMarkdownLint)
+        .After(InstallDocumentationTools)
         .Executes(() =>
         {
             NpmTasks.NpmRun(s => s.SetCommand(@"markdownlint"));
@@ -372,11 +372,24 @@ partial class Build
 
     Target MarkdownLintFix => _ => _
         .Description("Trying to fix MarkdownLint issues")
-        .After(InstallMarkdownLint)
+        .After(InstallDocumentationTools)
         .Executes(() =>
         {
             NpmTasks.NpmRun(s => s.SetCommand(@"markdownlint-fix"));
         });
+
+    Target SpellcheckDocumentation => _ => _
+        .Description("Executes MarkdownLint")
+        .After(InstallDocumentationTools)
+        .Executes(() =>
+        {
+            NpmTasks.NpmRun(s => s.SetCommand(@"cspell"));
+        });
+
+    Target ValidateDocumentation => _ => _
+        .Description("Executes validation tools for documentation")
+        .DependsOn(MarkdownLint)
+        .DependsOn(SpellcheckDocumentation);
 
     private AbsolutePath GetResultsDirectory(Project proj) => BuildDataDirectory / "results" / proj.Name;
 
