@@ -1,0 +1,12 @@
+mkdir
+dylib
+bytecode
+unencrypted
+UNENCRYPTEDSUPPORT
+protobuf
+bitness
+cmake
+omnisharp
+envvars
+distro
+ducktype

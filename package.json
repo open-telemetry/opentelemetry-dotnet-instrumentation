@@ -5,7 +5,7 @@
   "scripts": {
     "markdownlint": "npx markdownlint . -i node_modules",
     "markdownlint-fix": "npx markdownlint . -i node_modules --fix",
-    "cspell": "npx cspell **/*.md"
+    "cspell": "npx cspell **/*.md --gitignore"
   },
   "license": "Apache-2.0",
   "dependencies": {
