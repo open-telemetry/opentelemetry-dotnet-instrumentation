@@ -31,7 +31,7 @@ perspective, but unfortunately it is currently unavoidable
 and bumping a major version during each dependency version bump
 would be an overkill.
 
-## Semantic Conventions Stability
+## Semantic Conventions stability
 
 See [here](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md#semantic-conventions-stability).
 
