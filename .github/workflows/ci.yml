@@ -21,6 +21,9 @@ jobs:
             3.1.x
             5.0.x
             6.0.x
+      - name: Start MongoDB service
+        if: ${{ runner.os == 'macOS' }}
+        run: brew services start mongodb-community
       - run: ./build.cmd Workflow
       - name: Upload logs
         uses: actions/upload-artifact@v3.0.0

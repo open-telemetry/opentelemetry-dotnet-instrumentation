@@ -2472,7 +2472,7 @@ size_t CorProfiler::CallTarget_RequestRejitForModule(ModuleID module_id, ModuleM
             if (numOfArgs != integration.replacement.target_method.signature_types.size() - 1)
             {
                 Logger::Debug("The caller for the methoddef: ", integration.replacement.target_method.method_name,
-                              " doesn't have the right number of arguments.");
+                              " doesn't have the right number of arguments(", numOfArgs, " arguments).");
                 enumIterator = ++enumIterator;
                 continue;
             }
