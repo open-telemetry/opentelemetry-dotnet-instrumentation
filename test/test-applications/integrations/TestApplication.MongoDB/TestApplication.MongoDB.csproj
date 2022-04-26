@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ApiVersion Condition="'$(ApiVersion)' == ''">2.13.1</ApiVersion>
+    <DefineConstants Condition="'$(ApiVersion)'&gt;='2.7.0'">$(DefineConstants);MONGODB_2_7</DefineConstants>
+    <DefineConstants Condition="'$(ApiVersion)'&gt;='2.2.0'">$(DefineConstants);MONGODB_2_2</DefineConstants>
+
+    <!-- Required to build multiple projects with the same Configuration|Platform -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" Version="$(ApiVersion)" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
+
+    <!-- Hack to fix SDK dependencies -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.0.3" />
+  </ItemGroup>
+
+</Project>
