@@ -70,12 +70,12 @@ public class MongoDbFixture : IAsyncLifetime
     {
         if (EnvironmentHelper.IsRunningOnCI())
         {
-            if (EnvironmentTools.IsMacOS())
+            if (EnvironmentTools.IsWindows() ||
+                EnvironmentTools.IsMacOS())
             {
                 return false;
             }
-            else if (EnvironmentTools.IsWindows() ||
-                     EnvironmentTools.IsLinux())
+            else if (EnvironmentTools.IsLinux())
             {
                 return true;
             }
