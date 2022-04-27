@@ -40,4 +40,9 @@ public enum Instrumentation
     /// GraphQL instrumentation.
     /// </summary>
     GraphQL,
+
+    /// <summary>
+    /// MongoDb instrumentation.
+    /// </summary>
+    MongoDb
 }

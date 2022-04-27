@@ -31,7 +31,8 @@ internal static class EnvironmentConfigurationHelper
     {
         [Instrumentation.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
         [Instrumentation.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
-        [Instrumentation.SqlClient] = builder => builder.AddSqlClientInstrumentation()
+        [Instrumentation.SqlClient] = builder => builder.AddSqlClientInstrumentation(),
+        [Instrumentation.MongoDb] = builder => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources")
     };
 
     public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, Settings settings)

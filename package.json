@@ -1,13 +1,15 @@
 {
   "name": "opentelemetry-dotnet-instrumentation",
   "version": "0.0.1",
-  "description": "Application to configure and execute markdownlint",
+  "description": "Application to configure and execute markdownlint and spellcheck documentation.",
   "scripts": {
     "markdownlint": "npx markdownlint . -i node_modules",
-    "markdownlint-fix": "npx markdownlint . -i node_modules --fix"
+    "markdownlint-fix": "npx markdownlint . -i node_modules --fix",
+    "cspell": "npx cspell **/*.md --gitignore"
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "markdownlint-cli": "^0.31.1"
+    "markdownlint-cli": "^0.31.1",
+    "cspell-cli": "^5.9.1"
   }
 }

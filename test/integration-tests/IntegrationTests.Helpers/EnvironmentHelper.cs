@@ -170,8 +170,9 @@ public class EnvironmentHelper
             // to false when testing the case that instrumentation should not be available.
             if (enableStartupHook)
             {
-                string hookPath = GetStartupHookOutputPath();
-                environmentVariables["DOTNET_STARTUP_HOOKS"] = hookPath;
+                environmentVariables["DOTNET_STARTUP_HOOKS"] = GetStartupHookOutputPath();
+                environmentVariables["DOTNET_SHARED_STORE"] = GetSharedStorePath();
+                environmentVariables["DOTNET_ADDITIONAL_DEPS"] = GetAdditionalDepsPath();
             }
 
             environmentVariables["CORECLR_ENABLE_PROFILING"] = profilerEnabled;
@@ -360,5 +361,23 @@ public class EnvironmentHelper
             "OpenTelemetry.AutoInstrumentation.StartupHook.dll");
 
         return startupHookOutputPath;
+    }
+
+    private static string GetSharedStorePath()
+    {
+        string storePath = Path.Combine(
+            GetNukeBuildOutput(),
+            "store");
+
+        return storePath;
+    }
+
+    private static string GetAdditionalDepsPath()
+    {
+        string additionalDeps = Path.Combine(
+            GetNukeBuildOutput(),
+            "AdditionalDeps");
+
+        return additionalDeps;
     }
 }

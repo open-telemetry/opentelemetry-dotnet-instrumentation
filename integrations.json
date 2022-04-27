@@ -1,5 +1,33 @@
 [
   {
+    "name": "MongoDb",
+    "method_replacements": [
+      {
+        "caller": {},
+        "target": {
+          "assembly": "MongoDB.Driver",
+          "type": "MongoDB.Driver.MongoClient",
+          "method": ".ctor",
+          "signature_types": [
+            "System.Void",
+            "MongoDB.Driver.MongoClientSettings"
+          ],
+          "minimum_major": 2,
+          "minimum_minor": 0,
+          "minimum_patch": 0,
+          "maximum_major": 2,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation",
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDb.MongoClientIntegration",
+          "action": "CallTargetModification"
+        }
+      }
+    ]
+  },
+  {
     "name": "GraphQL",
     "method_replacements": [
       {
