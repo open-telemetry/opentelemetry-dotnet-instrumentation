@@ -32,12 +32,14 @@ for more details.
 
 ### Instrumented libraries and frameworks
 
-| ID | Library | Instrumentation type |
-|-|-|-|
-| `AspNet` | ASP.NET and ASP.NET Core | source |
-| `GraphQL` | [GraphQL](https://www.nuget.org/packages/GraphQL/) | bytecode |
-| `HttpClient` | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | source |
-| `SqlClient` | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) | source |
+| ID | Library | Supported versions | Instrumentation type |
+|-|-|-|-|
+| `AspNet` | ASP.NET MVC Framework | * | source |
+| `AspNet` | ASP.NET Core | * | source |
+| `GraphQL` | [GraphQL](https://www.nuget.org/packages/GraphQL/) | ≥2.3.0 & < 3.0.0 | bytecode |
+| `HttpClient` | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | * | source |
+| `MongoDb` | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core) | ≥2.3.0 & < 3.0.0 | source & bytecode |
+| `SqlClient` | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) | * | source |
 
 ## ASP.NET (.NET Framework) Instrumentation
 

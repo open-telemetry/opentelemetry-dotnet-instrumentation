@@ -7,6 +7,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.1.0-beta.1...HEAD)
 
+### Added
+
+- Adds Mongodb instrumentation support from .NET Core 3.1+.
+
 ## [0.1.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.1.0-beta.1)
 
 The is an initial, official beta release,
