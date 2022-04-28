@@ -1,7 +1,14 @@
 # Default state for all rules
 default: true
 
-# allow long lines for tables and code blocks
+# Configure long lines for tables and code blocks
 MD013:
   code_blocks: false
   tables: false
+
+# Configure Multiple headings with the same content
+MD024:
+  # Only check sibling headings
+  allow_different_nesting: true
+  # Only check sibling headings
+  siblings_only: true
