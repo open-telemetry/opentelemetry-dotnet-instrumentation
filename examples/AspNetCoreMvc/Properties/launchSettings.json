@@ -58,7 +58,10 @@
         "OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS": "AspNet,HttpClient,SqlClient",
         "OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS": "Examples.AspNetCoreMvc.OtelSdkPlugin, Examples.AspNetCoreMvc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
         "OTEL_SERVICE_NAME": "StartupHook.Self-hosted",
-        "OTEL_TRACES_EXPORTER": "otlp"
+        "OTEL_TRACES_EXPORTER": "otlp",
+        "OTEL_METRICS_EXPORTER": "otlp",
+        "OTEL_DOTNET_AUTO_METER_ENABLED_INSTRUMENTATIONS": "AspNet",
+        "OTEL_DOTNET_AUTO_METER_ADDITIONAL_SOURCES": "MyCompany.MyProduct.MyLibrary"
       },
       "use64Bit": true,
       "nativeDebugging": true,

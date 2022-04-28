@@ -15,6 +15,7 @@
 // </copyright>
 
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
@@ -58,9 +59,19 @@ public class ConfigurationKeys
     public const string Instrumentations = "OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS";
 
     /// <summary>
+    /// Configuration key for comma separated list of meter enabled instrumentations.
+    /// </summary>
+    public const string MeterInstrumentations = "OTEL_DOTNET_AUTO_METER_ENABLED_INSTRUMENTATIONS";
+
+    /// <summary>
     /// Configuration key for comma separated list of disabled instrumentations.
     /// </summary>
     public const string DisabledInstrumentations = "OTEL_DOTNET_AUTO_DISABLED_INSTRUMENTATIONS";
+
+    /// <summary>
+    /// Configuration key for comma separated list of disabled meter instrumentations.
+    /// </summary>
+    public const string DisabledMeterInstrumentations = "OTEL_DOTNET_AUTO_METER_DISABLED_INSTRUMENTATIONS";
 
     /// <summary>
     /// Configuration key for colon (:) separated list of plugins represented by <see cref="System.Type.AssemblyQualifiedName"/>.
@@ -68,9 +79,24 @@ public class ConfigurationKeys
     public const string ProviderPlugins = "OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS";
 
     /// <summary>
+    /// Configuration key for colon (:) separated list of plugins represented by <see cref="System.Type.AssemblyQualifiedName"/>.
+    /// </summary>
+    public const string ProviderMetricPlugins = "OTEL_DOTNET_AUTO_METRIC_PLUGINS";
+
+    /// <summary>
     /// Configuration key for additional <see cref="ActivitySource"/> names to be added to the tracer at the startup.
     /// </summary>
     public const string AdditionalSources = "OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES";
+
+    /// <summary>
+    /// Configuration key for additional <see cref="Meter"/> names to be added to the tracer at the startup.
+    /// </summary>
+    public const string AdditionalMeters = "OTEL_DOTNET_AUTO_METER_ADDITIONAL_SOURCES";
+
+    /// <summary>
+    /// Configuration key for additional <see cref="Meter"/> names to be added to the tracer at the startup.
+    /// </summary>
+    public const string AdditionalMeterSources = "OTEL_DOTNET_AUTO_METER_ADDITIONAL_SOURCES";
 
     /// <summary>
     /// Configuration key for legacy source names to be added to the tracer at the startup.
@@ -83,6 +109,24 @@ public class ConfigurationKeys
     /// Default is <c>false</c>.
     /// </summary>
     public const string Http2UnencryptedSupportEnabled = "OTEL_DOTNET_AUTO_HTTP2UNENCRYPTEDSUPPORT_ENABLED";
+
+    /// <summary>
+    /// Configuration key for the metrics exporter to be used.
+    /// Default is <c>"otlp"</c>.
+    /// </summary>
+    public const string MetricsExporter = "OTEL_METRICS_EXPORTER";
+
+    /// <summary>
+    /// Configuration key for enabling or disabling the Tracer.
+    /// Default is value is true (enabled).
+    /// </summary>
+    /// <seealso cref="MetricSettings.MetricsEnabled"/>
+    public const string MetricsEnabled = "OTEL_DOTNET_AUTO_ENABLED";
+
+    /// <summary>
+    /// Configuration key for whether the tracer should be initialized by the profiler or not.
+    /// </summary>
+    public const string LoadMetricAtStartup = "OTEL_DOTNET_AUTO_LOAD_AT_STARTUP";
 
     /// <summary>
     /// Configuration key for setting the directory for the profiler's log files.

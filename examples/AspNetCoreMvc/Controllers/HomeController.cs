@@ -17,6 +17,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -29,9 +30,18 @@ namespace Examples.AspNetCoreMvc.Controllers;
 public class HomeController : Controller
 {
     private const string CorrelationIdentifierHeaderName = "sample.correlation.identifier";
+    private static readonly Meter MyMeter = new("MyCompany.MyProduct.MyLibrary", "1.0");
+    private static readonly Counter<long> MyFruitCounter = MyMeter.CreateCounter<long>("MyFruitCounter");
 
     public IActionResult Index()
     {
+        MyFruitCounter.Add(1, new("name", "apple"), new("color", "red"));
+        MyFruitCounter.Add(2, new("name", "lemon"), new("color", "yellow"));
+        MyFruitCounter.Add(1, new("name", "lemon"), new("color", "yellow"));
+        MyFruitCounter.Add(2, new("name", "apple"), new("color", "green"));
+        MyFruitCounter.Add(5, new("name", "apple"), new("color", "red"));
+        MyFruitCounter.Add(4, new("name", "lemon"), new("color", "yellow"));
+
         var instrumentationType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation");
         ViewBag.ProfilerAttached = instrumentationType?.GetProperty("ProfilerAttached", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) ?? false;
         ViewBag.TracerAssemblyLocation = Type.GetType("OpenTelemetry.Trace.Tracer, OpenTelemetry.Api")?.Assembly.Location;

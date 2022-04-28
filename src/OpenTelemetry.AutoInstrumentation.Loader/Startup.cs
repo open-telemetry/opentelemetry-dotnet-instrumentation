@@ -72,6 +72,20 @@ public partial class Startup
             }
 
             method.Invoke(obj: null, parameters: null);
+
+            var metricInstrumentationType = assembly.GetType("OpenTelemetry.AutoInstrumentation.MetricInstrumentation", throwOnError: false);
+            if (metricInstrumentationType == null)
+            {
+                throw new TypeLoadException("The type OpenTelemetry.AutoInstrumentation.MetricInstrumentation could not be loaded");
+            }
+
+            var metricInstrumentationMethod = metricInstrumentationType.GetRuntimeMethod("Initialize", new Type[0]);
+            if (metricInstrumentationMethod == null)
+            {
+                throw new MissingMethodException("The method OpenTelemetry.AutoInstrumentation.MetricInstrumentation.Initialize could not be loaded");
+            }
+
+            metricInstrumentationMethod.Invoke(obj: null, parameters: null);
         }
         catch (Exception ex)
         {
