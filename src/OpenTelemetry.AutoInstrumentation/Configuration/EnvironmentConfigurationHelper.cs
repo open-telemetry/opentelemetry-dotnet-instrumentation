@@ -17,9 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-#if NETCOREAPP3_1
-using OpenTelemetry.Exporter;
-#endif
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -65,9 +62,7 @@ internal static class EnvironmentConfigurationHelper
 #if NET462
         return builder.AddAspNetInstrumentation();
 #elif NETCOREAPP3_1_OR_GREATER
-            return builder.AddAspNetCoreInstrumentation();
-#else
-            return builder;
+        return builder.AddAspNetCoreInstrumentation();
 #endif
     }
 

@@ -86,14 +86,9 @@ public class EnvironmentHelper
 
     public string FullTestApplicationName => $"{_appNamePrepend}{TestApplicationName}";
 
-    public static bool IsNet5()
-    {
-        return Environment.Version.Major >= 5;
-    }
-
     public static bool IsCoreClr()
     {
-        return RuntimeFrameworkDescription.Contains("core") || IsNet5();
+        return RuntimeFrameworkDescription.Contains("core") || Environment.Version.Major >= 5;
     }
 
     public static void ClearProfilerEnvironmentVariables()
