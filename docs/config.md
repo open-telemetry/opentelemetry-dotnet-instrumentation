@@ -99,6 +99,8 @@ Important environment variables include:
 |-|-|-|
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Target endpoint for the OTLP exporter. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md) for more details. | `http://localhost:4318` for the `http/protobuf` protocol, `http://localhost:4317` for the `grpc` protocol |
 | `OTEL_EXPORTER_OTLP_PROTOCOL` | OTLP exporter transport protocol. Supported values are `grpc`, `http/protobuf`. [1] | `http/protobuf` |
+| `OTEL_EXPORTER_OTLP_TIMEOUT` | The max waiting time (in milliseconds) for the backend to process each batch. | `10000` |
+| `OTEL_EXPORTER_OTLP_HEADERS` | Comma-separated list of additional HTTP headers sent with each export, for example: `Authorization=secret,X-Key=Value`. | |
 
 **[1]**: Considerations on the `OTEL_EXPORTER_OTLP_PROTOCOL`:
 
