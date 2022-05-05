@@ -104,7 +104,7 @@ provided by the SDK. The OpenTelemetry collector container is also configured
 to accept Zipkin spans.
 
 Use the environment variable `exampleAppInjectSDK` in the script to control
-the value of [`OTEL_DOTNET_AUTO_LOAD_AT_STARTUP`](../docs/config.md#customization).
+the value of [`OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP`](../docs/config.md#customization).
 For example:
 
 ```bash
@@ -135,7 +135,7 @@ Example console application to illustrate how to make [manual instrumentation](.
 Usage example:
 
 ```bash
-OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES="Examples.ManualInstrumentations.*" exampleApp=ManualInstrumentations ./run-example.sh
+OTEL_DOTNET_AUTO_TRACE_ADDITIONAL_SOURCES="Examples.ManualInstrumentations.*" exampleApp=ManualInstrumentations ./run-example.sh
 ```
 
 ### OldReference
