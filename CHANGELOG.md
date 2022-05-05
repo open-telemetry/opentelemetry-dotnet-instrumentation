@@ -10,7 +10,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 
 - Adds MongoDB instrumentation support from .NET Core 3.1+.
+
+### Changed
+
 - Raname generic environment variables to include trace.
+
   `OTEL_DOTNET_AUTO_ENABLED`&#8594;`OTEL_DOTNET_AUTO_TRACE_ENABLED`
   `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP`&#8594;`OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP`
   `OTEL_DOTNET_AUTO_CONSOLE_EXPORTER_ENABLED`&#8594;`OTEL_DOTNET_AUTO_TRACE_CONSOLE_EXPORTER_ENABLED`
