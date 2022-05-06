@@ -33,15 +33,7 @@ public partial class Startup
     {
         ManagedProfilerDirectory = ResolveManagedProfilerDirectory();
 
-        try
-        {
-            AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve_ManagedProfilerDependencies;
-        }
-        catch (Exception ex)
-        {
-            StartupLogger.Log(ex, "Unable to register a callback to the CurrentDomain.AssemblyResolve event.");
-        }
-
+        Initialize();
         TryLoadManagedAssembly();
     }
 
@@ -53,7 +45,7 @@ public partial class Startup
 
         try
         {
-            var assembly = Assembly.Load("OpenTelemetry.AutoInstrumentation");
+            var assembly = LoadAssembly("OpenTelemetry.AutoInstrumentation");
             if (assembly == null)
             {
                 throw new FileNotFoundException("The assembly OpenTelemetry.AutoInstrumentation could not be loaded");

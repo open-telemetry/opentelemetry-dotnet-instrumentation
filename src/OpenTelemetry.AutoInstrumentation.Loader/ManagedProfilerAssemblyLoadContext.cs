@@ -15,6 +15,7 @@
 // </copyright>
 
 #if NETCOREAPP
+using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
@@ -22,8 +23,30 @@ namespace OpenTelemetry.AutoInstrumentation.Loader
 {
     internal class ManagedProfilerAssemblyLoadContext : AssemblyLoadContext
     {
+        private AssemblyDependencyResolver _resolver;
+
+        public ManagedProfilerAssemblyLoadContext(string managedHome)
+            : base(name: nameof(ManagedProfilerAssemblyLoadContext))
+        {
+            string managedEntryModule = Path.Combine(managedHome, "OpenTelemetry.AutoInstrumentation.dll");
+
+            _resolver = new AssemblyDependencyResolver(managedEntryModule);
+        }
+
         protected override Assembly Load(AssemblyName assemblyName)
         {
+            // All exceptions here, libraries that must be shared are going to Default load context
+            if (assemblyName.Name.Contains("System.Diagnostics.DiagnosticSource"))
+            {
+                return null;
+            }
+
+            string assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
+            if (assemblyPath != null)
+            {
+                return LoadFromAssemblyPath(assemblyPath);
+            }
+
             return null;
         }
     }

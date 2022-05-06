@@ -27,6 +27,23 @@ namespace OpenTelemetry.AutoInstrumentation.Loader
     /// </summary>
     public partial class Startup
     {
+        private static void Initialize()
+        {
+            try
+            {
+                AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve_ManagedProfilerDependencies;
+            }
+            catch (Exception ex)
+            {
+                StartupLogger.Log(ex, "Unable to register a callback to the CurrentDomain.AssemblyResolve event.");
+            }
+        }
+
+        private static Assembly LoadAssembly(string name)
+        {
+            return Assembly.Load(name);
+        }
+
         private static string ResolveManagedProfilerDirectory()
         {
             var tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_AUTO_HOME") ?? string.Empty;
