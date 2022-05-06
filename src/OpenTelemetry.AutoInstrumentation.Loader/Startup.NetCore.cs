@@ -15,6 +15,7 @@
 // </copyright>
 
 #if NETCOREAPP
+using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -44,6 +45,13 @@ namespace OpenTelemetry.AutoInstrumentation.Loader
             string tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_AUTO_HOME") ?? string.Empty;
 
             return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
+        }
+
+        private static Assembly AssemblyResolve_ManagedProfilerDependencies(object sender, ResolveEventArgs args)
+        {
+            var assemblyName = new AssemblyName(args.Name);
+
+            return OpenTelemetryLoadContext.LoadFromAssemblyName(assemblyName);
         }
     }
 }

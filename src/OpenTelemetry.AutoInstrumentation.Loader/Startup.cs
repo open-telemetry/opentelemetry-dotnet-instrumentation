@@ -34,6 +34,16 @@ public partial class Startup
         ManagedProfilerDirectory = ResolveManagedProfilerDirectory();
 
         Initialize();
+
+        try
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve_ManagedProfilerDependencies;
+        }
+        catch (Exception ex)
+        {
+            StartupLogger.Log(ex, "Unable to register a callback to the CurrentDomain.AssemblyResolve event.");
+        }
+
         TryLoadManagedAssembly();
     }
 

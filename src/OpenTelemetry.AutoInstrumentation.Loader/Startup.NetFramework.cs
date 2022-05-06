@@ -29,14 +29,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader
     {
         private static void Initialize()
         {
-            try
-            {
-                AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve_ManagedProfilerDependencies;
-            }
-            catch (Exception ex)
-            {
-                StartupLogger.Log(ex, "Unable to register a callback to the CurrentDomain.AssemblyResolve event.");
-            }
+            // Nothing to initialize here
         }
 
         private static Assembly LoadAssembly(string name)
