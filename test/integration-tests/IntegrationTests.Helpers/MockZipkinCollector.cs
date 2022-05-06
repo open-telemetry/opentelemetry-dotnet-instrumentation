@@ -91,7 +91,7 @@ public class MockZipkinCollector : IDisposable
 
     /// <summary>
     /// Gets the TCP port that this Agent is listening on.
-    /// Can be different from <see cref="MockZipkinCollector(int, int)"/>'s <c>initialPort</c>
+    /// Can be different from <see cref="MockZipkinCollector(ITestOutputHelper, int, int)"/>'s <c>initialPort</c>
     /// parameter if listening on that port fails.
     /// </summary>
     public int Port { get; }
@@ -109,7 +109,7 @@ public class MockZipkinCollector : IDisposable
     /// Wait for the given number of spans to appear.
     /// </summary>
     /// <param name="count">The expected number of spans.</param>
-    /// <param name="timeoutInMilliseconds">The timeout</param>
+    /// <param name="timeout">The timeout</param>
     /// <param name="operationName">The integration we're testing</param>
     /// <param name="minDateTime">Minimum time to check for spans from</param>
     /// <param name="returnAllOperations">When true, returns every span regardless of operation name</param>
