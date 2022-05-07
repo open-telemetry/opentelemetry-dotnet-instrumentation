@@ -8,7 +8,7 @@ namespace environment {
 
 // Sets whether the profiler is enabled. Default is true.
 // Setting this to false disabled the profiler entirely.
-const WSTRING tracing_enabled = WStr("OTEL_DOTNET_AUTO_ENABLED");
+const WSTRING tracing_enabled = WStr("OTEL_DOTNET_AUTO_TRACE_ENABLED");
 
 // Sets whether debug mode is enabled. Default is false.
 const WSTRING debug_enabled = WStr("OTEL_DOTNET_AUTO_DEBUG");
@@ -39,7 +39,7 @@ const WSTRING exclude_process_names = WStr("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES")
 // multiple values separated with comma, for example:
 // "ElasticsearchNet,AspNetWebApi2"
 const WSTRING disabled_integrations =
-    WStr("OTEL_DOTNET_AUTO_DISABLED_INSTRUMENTATIONS");
+    WStr("OTEL_DOTNET_AUTO_TRACE_DISABLED_INSTRUMENTATIONS");
 
 // Sets the directory for the profiler's log file.
 // If not set, default is

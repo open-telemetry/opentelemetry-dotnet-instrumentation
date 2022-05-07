@@ -36,7 +36,7 @@ namespace IntegrationTests.MongoDB
         {
             _mongoDb = mongoDb;
 
-            SetEnvironmentVariable("OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS", "MongoDb");
+            SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACE_ENABLED_INSTRUMENTATIONS", "MongoDb");
             SetEnvironmentVariable("OTEL_SERVICE_NAME", "TestApplication.MongoDB");
         }
 

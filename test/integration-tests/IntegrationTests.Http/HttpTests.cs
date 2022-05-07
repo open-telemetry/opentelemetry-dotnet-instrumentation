@@ -32,7 +32,7 @@ namespace IntegrationTests.Http
             : base("Http", output)
         {
             SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
-            SetEnvironmentVariable("OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS", "HttpClient,AspNet");
+            SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACE_ENABLED_INSTRUMENTATIONS", "HttpClient,AspNet");
         }
 
         [Fact]
