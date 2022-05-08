@@ -42,10 +42,10 @@ public class Settings
         TracesExporter = ParseTracesExporter(source);
         OtlpExportProtocol = GetExporterOtlpProtocol(source);
 
-        ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? false;
+        ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleTraceExporterEnabled) ?? false;
 
         var instrumentations = new Dictionary<string, Instrumentation>();
-        var enabledInstrumentations = source.GetString(ConfigurationKeys.Instrumentations);
+        var enabledInstrumentations = source.GetString(ConfigurationKeys.EnabledTraceInstrumentations);
         if (enabledInstrumentations != null)
         {
             foreach (var instrumentation in enabledInstrumentations.Split(separator: ','))
@@ -61,7 +61,7 @@ public class Settings
             }
         }
 
-        var disabledInstrumentations = source.GetString(ConfigurationKeys.DisabledInstrumentations);
+        var disabledInstrumentations = source.GetString(ConfigurationKeys.DisabledTraceInstrumentations);
         if (disabledInstrumentations != null)
         {
             foreach (var instrumentation in disabledInstrumentations.Split(separator: ','))
@@ -72,7 +72,7 @@ public class Settings
 
         EnabledInstrumentations = instrumentations.Values.ToList();
 
-        var providerPlugins = source.GetString(ConfigurationKeys.ProviderPlugins);
+        var providerPlugins = source.GetString(ConfigurationKeys.TracerProviderPlugins);
         if (providerPlugins != null)
         {
             foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(':'))
@@ -81,7 +81,7 @@ public class Settings
             }
         }
 
-        var additionalSources = source.GetString(ConfigurationKeys.AdditionalSources);
+        var additionalSources = source.GetString(ConfigurationKeys.AdditionalTraceSources);
         if (additionalSources != null)
         {
             foreach (var sourceName in additionalSources.Split(separator: ','))

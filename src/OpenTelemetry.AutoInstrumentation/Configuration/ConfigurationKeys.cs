@@ -50,27 +50,27 @@ public class ConfigurationKeys
     /// <summary>
     /// Configuration key for whether the trace console exporter is enabled.
     /// </summary>
-    public const string ConsoleExporterEnabled = "OTEL_DOTNET_AUTO_TRACE_CONSOLE_EXPORTER_ENABLED";
+    public const string ConsoleTraceExporterEnabled = "OTEL_DOTNET_AUTO_TRACE_CONSOLE_EXPORTER_ENABLED";
 
     /// <summary>
     /// Configuration key for comma separated list of enabled trace instrumentations.
     /// </summary>
-    public const string Instrumentations = "OTEL_DOTNET_AUTO_TRACE_ENABLED_INSTRUMENTATIONS";
+    public const string EnabledTraceInstrumentations = "OTEL_DOTNET_AUTO_TRACE_ENABLED_INSTRUMENTATIONS";
 
     /// <summary>
     /// Configuration key for comma separated list of disabled trace instrumentations.
     /// </summary>
-    public const string DisabledInstrumentations = "OTEL_DOTNET_AUTO_TRACE_DISABLED_INSTRUMENTATIONS";
+    public const string DisabledTraceInstrumentations = "OTEL_DOTNET_AUTO_TRACE_DISABLED_INSTRUMENTATIONS";
 
     /// <summary>
     /// Configuration key for colon (:) separated list of trace plugins represented by <see cref="System.Type.AssemblyQualifiedName"/>.
     /// </summary>
-    public const string ProviderPlugins = "OTEL_DOTNET_AUTO_TRACE_INSTRUMENTATION_PLUGINS";
+    public const string TracerProviderPlugins = "OTEL_DOTNET_AUTO_TRACE_INSTRUMENTATION_PLUGINS";
 
     /// <summary>
     /// Configuration key for additional <see cref="ActivitySource"/> names to be added to the tracer at the startup.
     /// </summary>
-    public const string AdditionalSources = "OTEL_DOTNET_AUTO_TRACE_ADDITIONAL_SOURCES";
+    public const string AdditionalTraceSources = "OTEL_DOTNET_AUTO_TRACE_ADDITIONAL_SOURCES";
 
     /// <summary>
     /// Configuration key for legacy source names to be added to the tracer at the startup.
