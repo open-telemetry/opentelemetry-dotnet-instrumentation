@@ -65,7 +65,7 @@ public class SettingsTests : IDisposable
     [InlineData("zipkin", TracesExporter.Zipkin)]
     public void TracesExporter_SupportedValues(string tracesExporter, TracesExporter expectedTracesExporter)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.TracesExporter, tracesExporter);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Tracer.TracesExporter, tracesExporter);
 
         var settings = Settings.FromDefaultSources();
 
@@ -77,7 +77,7 @@ public class SettingsTests : IDisposable
     [InlineData("prometheus")]
     public void TracesExporter_UnsupportedValues(string tracesExporter)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.TracesExporter, tracesExporter);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Tracer.TracesExporter, tracesExporter);
 
         Action act = () => Settings.FromDefaultSources();
 
@@ -128,7 +128,7 @@ public class SettingsTests : IDisposable
 
     private static void ClearEnvVars()
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.TracesExporter, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Tracer.TracesExporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Http2UnencryptedSupportEnabled, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, null);
