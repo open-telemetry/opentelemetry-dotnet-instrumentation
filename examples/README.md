@@ -135,7 +135,7 @@ Example console application to illustrate how to make [manual instrumentation](.
 Usage example:
 
 ```bash
-OTEL_DOTNET_AUTO_TRACE_ADDITIONAL_SOURCES="Examples.ManualInstrumentations.*" exampleApp=ManualInstrumentations ./run-example.sh
+OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES="Examples.ManualInstrumentations.*" exampleApp=ManualInstrumentations ./run-example.sh
 ```
 
 ### OldReference

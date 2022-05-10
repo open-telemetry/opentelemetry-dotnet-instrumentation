@@ -5,7 +5,7 @@
 | Environment variable | Description | Default value |
 |-|-|-|
 | `OTEL_DOTNET_AUTO_HOME` | Installation location. |  |
-| `OTEL_DOTNET_AUTO_TRACE_ENABLED` | Enables the tracer. | `true` |
+| `OTEL_DOTNET_AUTO_TRACES_ENABLED` | Enables the tracer. | `true` |
 | `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES` | Names of the executable files that the profiler can instrument. Supports multiple comma-separated values, for example: `MyApp.exe,dotnet.exe`. If unset, the profiler attaches to all processes by default. |  |
 | `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` | Names of the executable files that the profiler cannot instrument. Supports multiple comma-separated values, for example: `ReservedProcess.exe,powershell.exe`. The list is processed after `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`. If unset, the profiler attaches to all processes by default. |  |
 
@@ -25,8 +25,8 @@ for more details.
 | Environment variable | Description | Default value |
 |-|-|-|
 | `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | File path of JSON configuration files of bytecode instrumentations. For example: `%ProfilerDirectory%/integrations.json` | |
-| `OTEL_DOTNET_AUTO_TRACE_ENABLED_INSTRUMENTATIONS` | Comma-separated list of source instrumentations you want to enable. |  |
-| `OTEL_DOTNET_AUTO_TRACE_DISABLED_INSTRUMENTATIONS` | Comma-separated list of source and bytecode instrumentations you want to disable. | |
+| `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS` | Comma-separated list of source instrumentations you want to enable. |  |
+| `OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS` | Comma-separated list of source and bytecode instrumentations you want to disable. | |
 | `OTEL_DOTNET_AUTO_{0}_ENABLED` | Configuration pattern for enabling or disabling specific bytecode. For example, to disable GraphQL instrumentation, set the `OTEL_TRACE_GraphQL_ENABLED` environment variable to `false`. | `true` |
 | `OTEL_DOTNET_AUTO_DOMAIN_NEUTRAL_INSTRUMENTATION` | Whether to intercept method calls when the caller method is inside a domain-neutral assembly. Useful when instrumenting IIS applications. | `false` |
 
@@ -134,12 +134,12 @@ Important environment variables include:
 | Environment variable | Description | Default value |
 |-|-|-|
 | `OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP` | Whether the tracer is created by the automatic instrumentation library or not. Set to `false` when the application initializes the OpenTelemetry .NET SDK Tracer on its own. This configuration can be used, for example, to retrieve the bytecode instrumentations. | `true` |
-| `OTEL_DOTNET_AUTO_TRACE_ADDITIONAL_SOURCES` | Comma-separated list of additional `System.Diagnostics.ActivitySource` names to be added to the tracer at the startup. Use it to capture manually instrumented spans. |  |
+| `OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES` | Comma-separated list of additional `System.Diagnostics.ActivitySource` names to be added to the tracer at the startup. Use it to capture manually instrumented spans. |  |
 | `OTEL_DOTNET_AUTO_LEGACY_SOURCES` | Comma-separated list of additional legacy source names to be added to the tracer at the startup. Use it to capture `System.Diagnostics.Activity` objects created without using the `System.Diagnostics.ActivitySource` API. |  |
 | `OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION` | Controls whether the telemetry data is flushed when an [AppDomain.UnhandledException](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.unhandledexception) event is raised. Set to `true` when you suspect that you are experiencing a problem with missing telemetry data and also experiencing unhandled exceptions. | `false` |
-| `OTEL_DOTNET_AUTO_TRACE_INSTRUMENTATION_PLUGINS` | Colon-separated list of OTel SDK instrumentation plugin types, specified with the [assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname). _Note: This list must be colon-separated because the type names may include commas._ | |
+| `OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_PLUGINS` | Colon-separated list of OTel SDK instrumentation plugin types, specified with the [assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname). _Note: This list must be colon-separated because the type names may include commas._ | |
 
-You can use `OTEL_DOTNET_AUTO_TRACE_INSTRUMENTATION_PLUGINS` to extend the
+You can use `OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_PLUGINS` to extend the
 configuration of the OpenTelemetry .NET SDK Tracer. A plugin must be a
 non-static, non-abstract class which has a default constructor and a method
 with following signature:
