@@ -102,7 +102,7 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 if (NOT EXISTS ${OUTPUT_DEPS_DIR}/json)
     add_custom_command(
         OUTPUT ${OUTPUT_DEPS_DIR}/json
-        COMMAND git clone --quiet --depth 1 --branch v3.10.4 https://github.com/nlohmann/json.git
+        COMMAND git clone --quiet --depth 1 --branch v3.10.5 https://github.com/nlohmann/json.git
         WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
     )
 endif()
