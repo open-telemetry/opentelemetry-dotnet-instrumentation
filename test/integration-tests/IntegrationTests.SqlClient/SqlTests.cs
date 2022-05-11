@@ -41,7 +41,7 @@ namespace IntegrationTests.SqlClient
             var agentPort = TcpPortProvider.GetOpenPort();
             using var agent = new MockZipkinCollector(Output, agentPort);
 
-            const int expectedSpanCount = 1;
+            const int expectedSpanCount = 8;
 
             using var processResult = RunTestApplicationAndWaitForExit(agent.Port, enableStartupHook: true);
             Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");

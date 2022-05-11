@@ -15,7 +15,6 @@
 // </copyright>
 
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 
@@ -23,27 +22,111 @@ namespace TestApplication.SqlClient
 {
     public class Program
     {
-        public static async Task Main(string[] args)
+        private const string CreateCommand = "CREATE TABLE MY_TABLE ( Id int, Value1 varchar(255), Value2 varchar(255) )";
+        private const string DropCommand = "DROP TABLE MY_TABLE";
+        private const string InsertCommand = "INSERT INTO MY_TABLE ( Id, Value1, Value2 ) VALUES ( 1, \"value1\", \"value2\" )";
+        private const string SelectCommand = "SELECT * FROM MY_TABLE";
+
+        public static async Task Main()
         {
-            Console.WriteLine($"Command line: {string.Join(";", args)}");
             Console.WriteLine($"Profiler attached: {IsProfilerAttached()}");
             Console.WriteLine($"Platform: {(Environment.Is64BitProcess ? "x64" : "x32")}");
 
             var connectionString = GetConnectionString();
 
-            await using var connection = new SqlConnection(connectionString);
-            await connection.OpenAsync();
-            await ExecuteCreate(connection);
+            await using (var connection = new SqlConnection(connectionString))
+            {
+                ExecuteCommands(connection);
+            }
+
+            await using (var connection = new SqlConnection(connectionString))
+            {
+                await ExecuteAsyncCommands(connection);
+            }
         }
 
-        private static async Task ExecuteCreate(SqlConnection connection)
+        private static void ExecuteCommands(SqlConnection connection)
         {
-            await using var command = new SqlCommand("CREATE TABLE MY_TABLE ( Id int, Value1 varchar(255), Value2 varchar(255) )", connection);
+            connection.Open();
+            ExecuteCreate(connection);
+            ExecuteInsert(connection);
+            ExecuteSelect(connection);
+            ExecuteDrop(connection);
+        }
+
+        private static void ExecuteCreate(SqlConnection connection)
+        {
+            ExecuteCommand(CreateCommand, connection);
+        }
+
+        private static void ExecuteInsert(SqlConnection connection)
+        {
+            ExecuteCommand(InsertCommand, connection);
+        }
+
+        private static void ExecuteSelect(SqlConnection connection)
+        {
+            ExecuteCommand(SelectCommand, connection);
+        }
+
+        private static void ExecuteDrop(SqlConnection connection)
+        {
+            ExecuteCommand(DropCommand, connection);
+        }
+
+        private static void ExecuteCommand(string commandString, SqlConnection connection)
+        {
+            using var command = new SqlCommand(commandString, connection);
+            using var reader = command.ExecuteReader();
+            if (reader.Read())
+            {
+                foreach (var result in reader)
+                {
+                    Console.WriteLine(result);
+                }
+            }
+        }
+
+        private static async Task ExecuteAsyncCommands(SqlConnection connection)
+        {
+            await connection.OpenAsync();
+            await ExecuteCreateAsync(connection);
+            await ExecuteInsertAsync(connection);
+            await ExecuteSelectAsync(connection);
+            await ExecuteDropAsync(connection);
+        }
+
+        private static async Task ExecuteCommandAsync(string commandString, SqlConnection connection)
+        {
+            await using var command = new SqlCommand(commandString, connection);
             await using var reader = await command.ExecuteReaderAsync();
             if (await reader.ReadAsync())
             {
-                await using var stream = await reader.GetFieldValueAsync<Stream>(1);
+                foreach (var result in reader)
+                {
+                    Console.WriteLine(result);
+                }
             }
+        }
+
+        private static async Task ExecuteCreateAsync(SqlConnection connection)
+        {
+            await ExecuteCommandAsync(CreateCommand, connection);
+        }
+
+        private static async Task ExecuteInsertAsync(SqlConnection connection)
+        {
+            await ExecuteCommandAsync(InsertCommand, connection);
+        }
+
+        private static async Task ExecuteSelectAsync(SqlConnection connection)
+        {
+            await ExecuteCommandAsync(SelectCommand, connection);
+        }
+
+        private static async Task ExecuteDropAsync(SqlConnection connection)
+        {
+            await ExecuteCommandAsync(DropCommand, connection);
         }
 
         private static string GetConnectionString()
