@@ -161,6 +161,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 - [Chris Ventura](https://github.com/nrcventura), New Relic
 - [Paulo Janotti](https://github.com/pjanotti), Splunk
+- [Rajkumar Rangaraj](https://github.com/rajkumar-rangaraj), Microsoft
 - [Robert Paj&#x105;k](https://github.com/pellared), Splunk
 - [Zach Montoya](https://github.com/zacharycmontoya), Datadog
 
@@ -168,7 +169,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 ([@open-telemetry/dotnet-instrumentation-approvers](https://github.com/orgs/open-telemetry/teams/dotnet-instrumentation-approvers)):
 
 - [Piotr Kie&#x142;kowicz](https://github.com/Kielek), Splunk
-- [Rajkumar Rangaraj](https://github.com/rajkumar-rangaraj), Microsoft
 - [Rasmus Kuusmann](https://github.com/RassK), Splunk
 
 [Emeritus
