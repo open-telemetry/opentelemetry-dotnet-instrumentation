@@ -42,10 +42,10 @@ public class Settings
         TracesExporter = ParseTracesExporter(source);
         OtlpExportProtocol = GetExporterOtlpProtocol(source);
 
-        ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.ConsoleExporterEnabled) ?? false;
+        ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.Traces.ConsoleExporterEnabled) ?? false;
 
         var instrumentations = new Dictionary<string, Instrumentation>();
-        var enabledInstrumentations = source.GetString(ConfigurationKeys.Instrumentations);
+        var enabledInstrumentations = source.GetString(ConfigurationKeys.Traces.Instrumentations);
         if (enabledInstrumentations != null)
         {
             foreach (var instrumentation in enabledInstrumentations.Split(separator: ','))
@@ -61,7 +61,7 @@ public class Settings
             }
         }
 
-        var disabledInstrumentations = source.GetString(ConfigurationKeys.DisabledInstrumentations);
+        var disabledInstrumentations = source.GetString(ConfigurationKeys.Traces.DisabledInstrumentations);
         if (disabledInstrumentations != null)
         {
             foreach (var instrumentation in disabledInstrumentations.Split(separator: ','))
@@ -72,7 +72,7 @@ public class Settings
 
         EnabledInstrumentations = instrumentations.Values.ToList();
 
-        var providerPlugins = source.GetString(ConfigurationKeys.ProviderPlugins);
+        var providerPlugins = source.GetString(ConfigurationKeys.Traces.ProviderPlugins);
         if (providerPlugins != null)
         {
             foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(':'))
@@ -81,7 +81,7 @@ public class Settings
             }
         }
 
-        var additionalSources = source.GetString(ConfigurationKeys.AdditionalSources);
+        var additionalSources = source.GetString(ConfigurationKeys.Traces.AdditionalSources);
         if (additionalSources != null)
         {
             foreach (var sourceName in additionalSources.Split(separator: ','))
@@ -90,7 +90,7 @@ public class Settings
             }
         }
 
-        var legacySources = source.GetString(ConfigurationKeys.LegacySources);
+        var legacySources = source.GetString(ConfigurationKeys.Traces.LegacySources);
         if (legacySources != null)
         {
             foreach (var sourceName in legacySources.Split(separator: ','))
@@ -99,8 +99,8 @@ public class Settings
             }
         }
 
-        TraceEnabled = source.GetBool(ConfigurationKeys.TraceEnabled) ?? true;
-        LoadTracerAtStartup = source.GetBool(ConfigurationKeys.LoadTracerAtStartup) ?? true;
+        TraceEnabled = source.GetBool(ConfigurationKeys.Traces.Enabled) ?? true;
+        LoadTracerAtStartup = source.GetBool(ConfigurationKeys.Traces.LoadTracerAtStartup) ?? true;
 
         Integrations = new IntegrationSettingsCollection(source);
 
@@ -113,7 +113,7 @@ public class Settings
     /// Gets a value indicating whether tracing is enabled.
     /// Default is <c>true</c>.
     /// </summary>
-    /// <seealso cref="ConfigurationKeys.TraceEnabled"/>
+    /// <seealso cref="ConfigurationKeys.Traces.Enabled"/>
     public bool TraceEnabled { get; }
 
     /// <summary>
@@ -208,7 +208,7 @@ public class Settings
 
     private static TracesExporter ParseTracesExporter(IConfigurationSource source)
     {
-        var tracesExporterEnvVar = source.GetString(ConfigurationKeys.TracesExporter) ?? "otlp";
+        var tracesExporterEnvVar = source.GetString(ConfigurationKeys.Traces.Exporter) ?? "otlp";
         switch (tracesExporterEnvVar)
         {
             case null:

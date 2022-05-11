@@ -113,7 +113,7 @@ public class EnvironmentHelper
             "OTEL_DOTNET_AUTO_HOME",
             "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE",
             "OTEL_DISABLED_INTEGRATIONS",
-            "OTEL_DOTNET_AUTO_TRACE_ADDITIONAL_SOURCES",
+            "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES",
             "OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES"
         };
 
@@ -201,7 +201,7 @@ public class EnvironmentHelper
         // for ASP.NET Core test applications, set the server's port
         environmentVariables["ASPNETCORE_URLS"] = $"http://127.0.0.1:{aspNetCorePort}/";
 
-        environmentVariables["OTEL_DOTNET_AUTO_TRACE_ADDITIONAL_SOURCES"] = "TestApplication.*";
+        environmentVariables["OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES"] = "TestApplication.*";
 
         foreach (var key in CustomEnvironmentVariables.Keys)
         {

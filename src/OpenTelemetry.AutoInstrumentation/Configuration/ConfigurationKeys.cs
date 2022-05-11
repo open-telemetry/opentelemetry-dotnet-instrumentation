@@ -24,58 +24,10 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 public class ConfigurationKeys
 {
     /// <summary>
-    /// Configuration key for enabling or disabling the Tracer.
-    /// Default is value is true (enabled).
-    /// </summary>
-    /// <seealso cref="Settings.TraceEnabled"/>
-    public const string TraceEnabled = "OTEL_DOTNET_AUTO_TRACE_ENABLED";
-
-    /// <summary>
-    /// Configuration key for whether the tracer should be initialized by the profiler or not.
-    /// </summary>
-    public const string LoadTracerAtStartup = "OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP";
-
-    /// <summary>
-    /// Configuration key for the traces exporter to be used.
-    /// Default is <c>"otlp"</c>.
-    /// </summary>
-    public const string TracesExporter = "OTEL_TRACES_EXPORTER";
-
-    /// <summary>
     /// Configuration key for the OTLP protocol to be used.
     /// Default is <c>"http/protobuf"</c>.
     /// </summary>
     public const string ExporterOtlpProtocol = "OTEL_EXPORTER_OTLP_PROTOCOL";
-
-    /// <summary>
-    /// Configuration key for whether the trace console exporter is enabled.
-    /// </summary>
-    public const string ConsoleExporterEnabled = "OTEL_DOTNET_AUTO_TRACE_CONSOLE_EXPORTER_ENABLED";
-
-    /// <summary>
-    /// Configuration key for comma separated list of enabled trace instrumentations.
-    /// </summary>
-    public const string Instrumentations = "OTEL_DOTNET_AUTO_TRACE_ENABLED_INSTRUMENTATIONS";
-
-    /// <summary>
-    /// Configuration key for comma separated list of disabled trace instrumentations.
-    /// </summary>
-    public const string DisabledInstrumentations = "OTEL_DOTNET_AUTO_TRACE_DISABLED_INSTRUMENTATIONS";
-
-    /// <summary>
-    /// Configuration key for colon (:) separated list of trace plugins represented by <see cref="System.Type.AssemblyQualifiedName"/>.
-    /// </summary>
-    public const string ProviderPlugins = "OTEL_DOTNET_AUTO_TRACE_INSTRUMENTATION_PLUGINS";
-
-    /// <summary>
-    /// Configuration key for additional <see cref="ActivitySource"/> names to be added to the tracer at the startup.
-    /// </summary>
-    public const string AdditionalSources = "OTEL_DOTNET_AUTO_TRACE_ADDITIONAL_SOURCES";
-
-    /// <summary>
-    /// Configuration key for legacy source names to be added to the tracer at the startup.
-    /// </summary>
-    public const string LegacySources = "OTEL_DOTNET_AUTO_LEGACY_SOURCES";
 
     /// <summary>
     /// Configuration key for enabling `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`.
@@ -96,6 +48,60 @@ public class ConfigurationKeys
     /// Configuration key for enabling the flushing of telemetry data when an unhandled exception occurs.
     /// </summary>
     public const string FlushOnUnhandledException = "OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION";
+
+    /// <summary>
+    /// Configuration keys for trace exporter
+    /// </summary>
+    public static class Traces
+    {
+        /// <summary>
+        /// Configuration key for enabling or disabling the Tracer.
+        /// Default is value is true (enabled).
+        /// </summary>
+        /// <seealso cref="Settings.TraceEnabled"/>
+        public const string Enabled = "OTEL_DOTNET_AUTO_TRACES_ENABLED";
+
+        /// <summary>
+        /// Configuration key for whether the tracer should be initialized by the profiler or not.
+        /// </summary>
+        public const string LoadTracerAtStartup = "OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP";
+
+        /// <summary>
+        /// Configuration key for the traces exporter to be used.
+        /// Default is <c>"otlp"</c>.
+        /// </summary>
+        public const string Exporter = "OTEL_TRACES_EXPORTER";
+
+        /// <summary>
+        /// Configuration key for whether the trace console exporter is enabled.
+        /// </summary>
+        public const string ConsoleExporterEnabled = "OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED";
+
+        /// <summary>
+        /// Configuration key for comma separated list of enabled trace instrumentations.
+        /// </summary>
+        public const string Instrumentations = "OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS";
+
+        /// <summary>
+        /// Configuration key for comma separated list of disabled trace instrumentations.
+        /// </summary>
+        public const string DisabledInstrumentations = "OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS";
+
+        /// <summary>
+        /// Configuration key for colon (:) separated list of trace plugins represented by <see cref="System.Type.AssemblyQualifiedName"/>.
+        /// </summary>
+        public const string ProviderPlugins = "OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_PLUGINS";
+
+        /// <summary>
+        /// Configuration key for additional <see cref="ActivitySource"/> names to be added to the tracer at the startup.
+        /// </summary>
+        public const string AdditionalSources = "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES";
+
+        /// <summary>
+        /// Configuration key for legacy source names to be added to the tracer at the startup.
+        /// </summary>
+        public const string LegacySources = "OTEL_DOTNET_AUTO_LEGACY_SOURCES";
+    }
 
     /// <summary>
     /// String format patterns used to match integration-specific configuration keys.
