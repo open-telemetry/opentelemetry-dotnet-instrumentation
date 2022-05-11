@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp3.1;net6.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="O:\test\integration-tests\IntegrationTests.Helpers\IntegrationTests.Helpers.csproj" />
+  </ItemGroup>
+
+</Project>
