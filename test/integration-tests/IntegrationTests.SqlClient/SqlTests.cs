@@ -27,10 +27,12 @@ namespace IntegrationTests.SqlClient
     public class SqlTests : TestHelper
     {
         private const string ServiceName = "TestApplication.SqlClient";
+        private readonly SqlClientFixture _sqlClientFixture;
 
-        public SqlTests(ITestOutputHelper output)
+        public SqlTests(ITestOutputHelper output, SqlClientFixture sqlClientFixture)
             : base("SqlClient", output)
         {
+            _sqlClientFixture = sqlClientFixture;
             SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
             SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "SqlClient");
         }
@@ -43,7 +45,7 @@ namespace IntegrationTests.SqlClient
 
             const int expectedSpanCount = 8;
 
-            using var processResult = RunTestApplicationAndWaitForExit(agent.Port, enableStartupHook: true);
+            using var processResult = RunTestApplicationAndWaitForExit(agent.Port, arguments: $"--database-port {_sqlClientFixture.Port}", enableStartupHook: true);
             Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
             var spans = agent.WaitForSpans(expectedSpanCount, TimeSpan.FromSeconds(5));
 

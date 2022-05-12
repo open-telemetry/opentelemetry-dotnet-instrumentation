@@ -15,6 +15,7 @@
 // </copyright>
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 
@@ -24,22 +25,24 @@ namespace TestApplication.SqlClient
     {
         private const string CreateCommand = "CREATE TABLE MY_TABLE ( Id int, Value1 varchar(255), Value2 varchar(255) )";
         private const string DropCommand = "DROP TABLE MY_TABLE";
-        private const string InsertCommand = "INSERT INTO MY_TABLE ( Id, Value1, Value2 ) VALUES ( 1, \"value1\", \"value2\" )";
+        private const string InsertCommand = "INSERT INTO MY_TABLE VALUES ( 1, 'value1', 'value2' )";
         private const string SelectCommand = "SELECT * FROM MY_TABLE";
 
-        public static async Task Main()
+        public static async Task Main(string[] args)
         {
+            Console.WriteLine($"Command line: {string.Join(";", args)}");
             Console.WriteLine($"Profiler attached: {IsProfilerAttached()}");
             Console.WriteLine($"Platform: {(Environment.Is64BitProcess ? "x64" : "x32")}");
 
-            var connectionString = GetConnectionString();
+            var databasePort = GetPort(args);
+            var connectionString = GetConnectionString(databasePort);
 
-            await using (var connection = new SqlConnection(connectionString))
+            using (var connection = new SqlConnection(connectionString))
             {
                 ExecuteCommands(connection);
             }
 
-            await using (var connection = new SqlConnection(connectionString))
+            using (var connection = new SqlConnection(connectionString))
             {
                 await ExecuteAsyncCommands(connection);
             }
@@ -76,14 +79,21 @@ namespace TestApplication.SqlClient
 
         private static void ExecuteCommand(string commandString, SqlConnection connection)
         {
-            using var command = new SqlCommand(commandString, connection);
-            using var reader = command.ExecuteReader();
-            if (reader.Read())
+            try
             {
-                foreach (var result in reader)
+                using var command = new SqlCommand(commandString, connection);
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
                 {
-                    Console.WriteLine(result);
+                    foreach (var result in reader)
+                    {
+                        Console.WriteLine(result);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while executing SQL query.\n{ex.Message}");
             }
         }
 
@@ -98,8 +108,8 @@ namespace TestApplication.SqlClient
 
         private static async Task ExecuteCommandAsync(string commandString, SqlConnection connection)
         {
-            await using var command = new SqlCommand(commandString, connection);
-            await using var reader = await command.ExecuteReaderAsync();
+            using var command = new SqlCommand(commandString, connection);
+            using var reader = await command.ExecuteReaderAsync();
             if (await reader.ReadAsync())
             {
                 foreach (var result in reader)
@@ -129,10 +139,10 @@ namespace TestApplication.SqlClient
             await ExecuteCommandAsync(DropCommand, connection);
         }
 
-        private static string GetConnectionString()
+        private static string GetConnectionString(string databasePort)
         {
             return Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION_STRING")
-                   ?? "Server=localhost;User=sa;Password=@someThingComplicated1234;Trusted_Connection=false;";
+                   ?? $"Server=localhost,{databasePort};User=sa;Password=@someThingComplicated1234;TrustServerCertificate=True;";
         }
 
         private static bool? IsProfilerAttached()
@@ -148,6 +158,11 @@ namespace TestApplication.SqlClient
             var isAttached = property?.GetValue(null) as bool?;
 
             return isAttached ?? false;
+        }
+
+        private static string GetPort(IReadOnlyList<string> args)
+        {
+            return args.Count > 0 ? args[1] : "1433";
         }
     }
 }
