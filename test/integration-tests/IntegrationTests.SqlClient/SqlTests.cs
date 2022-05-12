@@ -52,6 +52,17 @@ namespace IntegrationTests.SqlClient
             using (new AssertionScope())
             {
                 spans.Count.Should().Be(expectedSpanCount);
+
+                foreach (var span in spans)
+                {
+                    span.Service.Should().Be(ServiceName);
+                    span.Name.Should().Be("master");
+                    span.Tags["db.system"].Should().Be("mssql");
+                    span.Tags["db.name"].Should().Be("master");
+                    span.Tags["peer.service"].Should().Contain($"{_sqlClientFixture.Port}");
+                    span.Tags["db.statement_type"].Should().Be("Text");
+                    span.Tags["span.kind"].Should().Be("client");
+                }
             }
         }
     }
