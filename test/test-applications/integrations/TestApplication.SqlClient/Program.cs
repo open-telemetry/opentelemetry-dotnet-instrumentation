@@ -83,17 +83,11 @@ namespace TestApplication.SqlClient
             {
                 using var command = new SqlCommand(commandString, connection);
                 using var reader = command.ExecuteReader();
-                if (reader.Read())
-                {
-                    foreach (var result in reader)
-                    {
-                        Console.WriteLine(result);
-                    }
-                }
+                Console.WriteLine($"SQL query executed successfully: {commandString}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error while executing SQL query.\n{ex.Message}");
+                Console.WriteLine($"Error while executing SQL query: {commandString}.\n{ex.Message}");
             }
         }
 
@@ -108,14 +102,15 @@ namespace TestApplication.SqlClient
 
         private static async Task ExecuteCommandAsync(string commandString, SqlConnection connection)
         {
-            using var command = new SqlCommand(commandString, connection);
-            using var reader = await command.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            try
             {
-                foreach (var result in reader)
-                {
-                    Console.WriteLine(result);
-                }
+                using var command = new SqlCommand(commandString, connection);
+                using var reader = await command.ExecuteReaderAsync();
+                Console.WriteLine($"Async SQL query executed successfully: {commandString}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while executing async SQL query: {commandString}.\n{ex.Message}");
             }
         }
 
