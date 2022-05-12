@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="O:\test\integration-tests\IntegrationTests.Helpers\IntegrationTests.Helpers.csproj" />
+    <ProjectReference Include="..\IntegrationTests.Helpers\IntegrationTests.Helpers.csproj" />
   </ItemGroup>
 
 </Project>

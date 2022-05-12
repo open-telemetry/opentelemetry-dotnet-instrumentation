@@ -136,8 +136,7 @@ namespace TestApplication.SqlClient
 
         private static string GetConnectionString(string databasePort)
         {
-            return Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION_STRING")
-                   ?? $"Server=localhost,{databasePort};User=sa;Password=@someThingComplicated1234;TrustServerCertificate=True;";
+            return $"Server=localhost,{databasePort};User=sa;Password=@someThingComplicated1234;TrustServerCertificate=True;";
         }
 
         private static bool? IsProfilerAttached()
