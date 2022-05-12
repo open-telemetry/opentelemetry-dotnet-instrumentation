@@ -58,7 +58,7 @@ public class ConfigurationKeys
         /// Configuration key for enabling or disabling the Tracer.
         /// Default is value is true (enabled).
         /// </summary>
-        /// <seealso cref="Settings.TraceEnabled"/>
+        /// <seealso cref="TracerSettings.TraceEnabled"/>
         public const string Enabled = "OTEL_DOTNET_AUTO_TRACES_ENABLED";
 
         /// <summary>

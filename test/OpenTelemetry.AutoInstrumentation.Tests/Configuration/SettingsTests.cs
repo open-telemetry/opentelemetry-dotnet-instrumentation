@@ -39,7 +39,7 @@ public class SettingsTests : IDisposable
     [Fact]
     public void DefaultValues()
     {
-        var settings = Settings.FromDefaultSources();
+        var settings = TracerSettings.FromDefaultSources();
 
         using (new AssertionScope())
         {
@@ -67,7 +67,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, tracesExporter);
 
-        var settings = Settings.FromDefaultSources();
+        var settings = TracerSettings.FromDefaultSources();
 
         settings.TracesExporter.Should().Be(expectedTracesExporter);
     }
@@ -79,7 +79,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, tracesExporter);
 
-        Action act = () => Settings.FromDefaultSources();
+        Action act = () => TracerSettings.FromDefaultSources();
 
         act.Should().Throw<FormatException>();
     }
@@ -94,7 +94,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, otlpProtocol);
 
-        var settings = Settings.FromDefaultSources();
+        var settings = TracerSettings.FromDefaultSources();
 
         // null values for expected data will be handled by OTel .NET SDK
         settings.OtlpExportProtocol.Should().Be(expectedOtlpExportProtocol);
@@ -108,7 +108,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Http2UnencryptedSupportEnabled, http2UnencryptedSupportEnabled);
 
-        var settings = Settings.FromDefaultSources();
+        var settings = TracerSettings.FromDefaultSources();
 
         settings.Http2UnencryptedSupportEnabled.Should().Be(expectedValue);
     }
@@ -121,7 +121,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, flushOnUnhandledException);
 
-        var settings = Settings.FromDefaultSources();
+        var settings = TracerSettings.FromDefaultSources();
 
         settings.FlushOnUnhandledException.Should().Be(expectedValue);
     }

@@ -62,7 +62,7 @@ public static class Instrumentation
         }
     }
 
-    internal static Settings TracerSettings { get; } = Settings.FromDefaultSources();
+    internal static TracerSettings TracerSettings { get; } = TracerSettings.FromDefaultSources();
 
     /// <summary>
     /// Initialize the OpenTelemetry SDK with a pre-defined set of exporters, shims, and
