@@ -18,6 +18,7 @@ public class AspNetTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Windows")]
     public async Task SubmitsTraces()
     {
         var agentPort = TcpPortProvider.GetOpenPort();

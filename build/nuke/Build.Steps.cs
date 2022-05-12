@@ -308,6 +308,7 @@ partial class Build
             DotNetTest(config => config
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatform(Platform)
+                .SetFilter(ContainersTestFilter())
                 .EnableNoRestore()
                 .EnableNoBuild()
                 .CombineWith(frameworks, (s, fx) => s

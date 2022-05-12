@@ -158,6 +158,7 @@ partial class Build
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatform(Platform)
                 .SetFramework(TargetFramework.NET462)
+                .SetFilter(ContainersTestFilter())
                 .EnableNoRestore()
                 .EnableNoBuild()
                 .CombineWith(aspNetTests, (s, project) => s

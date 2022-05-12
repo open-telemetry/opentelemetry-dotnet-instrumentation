@@ -35,26 +35,16 @@ public class MongoDbFixture : IAsyncLifetime
     private const string MongoDbImage = "mongo:5.0.6";
 
     private TestcontainersContainer _container;
-    private bool _shouldLaunchContainer = false;
 
     public MongoDbFixture()
     {
-        _shouldLaunchContainer = ShouldLaunchContainer();
-
-        Port = _shouldLaunchContainer
-            ? TcpPortProvider.GetOpenPort()
-            : MongoDbPort;
+        Port = TcpPortProvider.GetOpenPort();
     }
 
     public int Port { get; }
 
     public async Task InitializeAsync()
     {
-        if (!_shouldLaunchContainer)
-        {
-            return;
-        }
-
         _container = await LaunchMongoContainerAsync(Port);
     }
 
@@ -62,26 +52,8 @@ public class MongoDbFixture : IAsyncLifetime
     {
         if (_container != null)
         {
-            await ShutDownMongoContainerAsync(_container);
+            await ShutdownMongoContainerAsync(_container);
         }
-    }
-
-    private bool ShouldLaunchContainer()
-    {
-        if (EnvironmentHelper.IsRunningOnCI())
-        {
-            if (EnvironmentTools.IsWindows() ||
-                EnvironmentTools.IsMacOS())
-            {
-                return false;
-            }
-            else if (EnvironmentTools.IsLinux())
-            {
-                return true;
-            }
-        }
-
-        return true;
     }
 
     private async Task<TestcontainersContainer> LaunchMongoContainerAsync(int port)
@@ -102,7 +74,7 @@ public class MongoDbFixture : IAsyncLifetime
         return container;
     }
 
-    private async Task ShutDownMongoContainerAsync(TestcontainersContainer container)
+    private async Task ShutdownMongoContainerAsync(TestcontainersContainer container)
     {
         await container.CleanUpAsync();
         await container.DisposeAsync();
