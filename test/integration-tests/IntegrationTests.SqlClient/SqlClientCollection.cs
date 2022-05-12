@@ -35,17 +35,27 @@ namespace IntegrationTests.SqlClient
         private const string DatabaseImage = "mcr.microsoft.com/mssql/server:2019-CU15-ubuntu-20.04";
         private const string DatabasePassword = "@someThingComplicated1234";
 
+        private readonly bool _shouldLaunchContainer;
         private TestcontainersContainer _container;
 
         public SqlClientFixture()
         {
-            Port = TcpPortProvider.GetOpenPort();
+            _shouldLaunchContainer = ShouldLaunchContainer();
+
+            Port = _shouldLaunchContainer
+                ? TcpPortProvider.GetOpenPort()
+                : DatabasePort;
         }
 
         public int Port { get; }
 
         public async Task InitializeAsync()
         {
+            if (!_shouldLaunchContainer)
+            {
+                return;
+            }
+
             _container = await LaunchDatabaseContainerAsync(Port);
         }
 
@@ -55,6 +65,16 @@ namespace IntegrationTests.SqlClient
             {
                 await ShutdownDatabaseContainerAsync(_container);
             }
+        }
+
+        private static bool ShouldLaunchContainer()
+        {
+            if (!EnvironmentHelper.IsRunningOnCI())
+            {
+                return true;
+            }
+
+            return !EnvironmentTools.IsWindows() && !EnvironmentTools.IsMacOS();
         }
 
         private static async Task<TestcontainersContainer> LaunchDatabaseContainerAsync(int port)
