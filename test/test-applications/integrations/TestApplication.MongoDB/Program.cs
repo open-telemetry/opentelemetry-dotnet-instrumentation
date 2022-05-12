@@ -57,7 +57,11 @@ public static class Program
         {
             var connectionString = $"mongodb://{Host()}:{mongoPort}";
 
-            var client = new MongoClient(connectionString);
+            var settings = MongoClientSettings.FromConnectionString(connectionString);
+            settings.ConnectTimeout = TimeSpan.FromMinutes(5);
+            settings.SocketTimeout = TimeSpan.FromMinutes(5);
+
+            var client = new MongoClient(settings);
             var database = client.GetDatabase("test-db");
             var collection = database.GetCollection<BsonDocument>("employees");
 
