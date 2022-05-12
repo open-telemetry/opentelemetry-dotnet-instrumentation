@@ -32,7 +32,7 @@ namespace IntegrationTests.SqlClient
     public class SqlClientFixture : IAsyncLifetime
     {
         private const int DatabasePort = 1433;
-        private const string DatabaseImage = "mcr.microsoft.com/azure-sql-edge";
+        private const string DatabaseImage = "mcr.microsoft.com/mssql/server:2019-CU15-ubuntu-20.04";
         private const string DatabasePassword = "@someThingComplicated1234";
 
         private readonly bool _shouldLaunchContainer;
@@ -85,7 +85,7 @@ namespace IntegrationTests.SqlClient
 
             var databaseContainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
                 .WithImage(DatabaseImage)
-                .WithName("sql-server")
+                .WithName($"sql-server-{port}")
                 .WithPortBinding(port, DatabasePort)
                 .WithEnvironment("SA_PASSWORD", DatabasePassword)
                 .WithEnvironment("ACCEPT_EULA", "Y")
