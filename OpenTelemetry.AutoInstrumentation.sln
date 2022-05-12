@@ -139,9 +139,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests.MongoDB", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.MongoDB", "test\test-applications\integrations\TestApplication.MongoDB\TestApplication.MongoDB.csproj", "{3B77F975-BF66-4218-9982-F48D3271DDFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests.SqlClient", "C:\workspace\dszmigielski\opentelemetry-dotnet-instrumentation\test\integration-tests\IntegrationTests.SqlClient\IntegrationTests.SqlClient.csproj", "{474834F1-2769-4FBB-BD0A-941DE276DFB6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests.SqlClient", "\test\integration-tests\IntegrationTests.SqlClient\IntegrationTests.SqlClient.csproj", "{474834F1-2769-4FBB-BD0A-941DE276DFB6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.SqlClient", "C:\workspace\dszmigielski\opentelemetry-dotnet-instrumentation\test\test-applications\integrations\TestApplication.SqlClient\TestApplication.SqlClient.csproj", "{2120CFA2-9D16-45F0-A333-B0385C371509}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.SqlClient", "\test\test-applications\integrations\TestApplication.SqlClient\TestApplication.SqlClient.csproj", "{2120CFA2-9D16-45F0-A333-B0385C371509}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
