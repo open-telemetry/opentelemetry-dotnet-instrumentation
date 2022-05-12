@@ -15,6 +15,7 @@
 // </copyright>
 
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
@@ -101,6 +102,54 @@ public class ConfigurationKeys
         /// Configuration key for legacy source names to be added to the tracer at the startup.
         /// </summary>
         public const string LegacySources = "OTEL_DOTNET_AUTO_LEGACY_SOURCES";
+    }
+
+    /// <summary>
+    /// Configuration keys for metrics exporter
+    /// </summary>
+    public static class Metrics
+    {
+        /// <summary>
+        /// Configuration key for enabling or disabling the Meter.
+        /// Default is value is true (enabled).
+        /// </summary>
+        public const string Enabled = "OTEL_DOTNET_AUTO_METRICS_ENABLED";
+
+        /// <summary>
+        /// Configuration key for whether the meter should be initialized by the profiler or not.
+        /// </summary>
+        public const string LoadTracerAtStartup = "OTEL_DOTNET_AUTO_LOAD_METER_AT_STARTUP";
+
+        /// <summary>
+        /// Configuration key for the metrics exporter to be used.
+        /// Default is <c>"otlp"</c>.
+        /// </summary>
+        public const string Exporter = "OTEL_METRICS_EXPORTER";
+
+        /// <summary>
+        /// Configuration key for whether the metrics console exporter is enabled.
+        /// </summary>
+        public const string ConsoleExporterEnabled = "OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED";
+
+        /// <summary>
+        /// Configuration key for comma separated list of enabled metric instrumentations.
+        /// </summary>
+        public const string Instrumentations = "OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS";
+
+        /// <summary>
+        /// Configuration key for comma separated list of disabled metric instrumentations.
+        /// </summary>
+        public const string DisabledInstrumentations = "OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS";
+
+        /// <summary>
+        /// Configuration key for colon (:) separated list of metric plugins represented by <see cref="System.Type.AssemblyQualifiedName"/>.
+        /// </summary>
+        public const string ProviderPlugins = "OTEL_DOTNET_AUTO_METRICS_PLUGINS";
+
+        /// <summary>
+        /// Configuration key for additional <see cref="Meter"/> names to be added to the meter at the startup.
+        /// </summary>
+        public const string AdditionalSources = "OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES";
     }
 
     /// <summary>
