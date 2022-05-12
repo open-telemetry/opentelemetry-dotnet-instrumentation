@@ -10,6 +10,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 
 - Adds MongoDB instrumentation support from .NET Core 3.1+.
+- Support for OpenTelemetry metric exporter related environment variables:
+  `OTEL_DOTNET_AUTO_METRICS_ENABLED`,
+  `OTEL_DOTNET_AUTO_LOAD_METER_AT_STARTUP`,
+  `OTEL_METRICS_EXPORTER`,
+  `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED`,
+  `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS`,
+  `OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS`,
+  `OTEL_DOTNET_AUTO_METRICS_PLUGINS`,
+  `OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES`.
 
 ### Changed
 
