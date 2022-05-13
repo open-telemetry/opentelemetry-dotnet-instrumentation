@@ -303,15 +303,14 @@ partial class Build
         {
             Project[] integrationTests = Solution.GetCrossPlatformIntegrationTests();
 
-            string filter = IsWin ? null : "WindowsOnly!=true";
             IEnumerable<TargetFramework> frameworks = IsWin ? TestFrameworks : TestFrameworks.ExceptNetFramework();
 
             DotNetTest(config => config
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatform(Platform)
+                .SetFilter(ContainersTestFilter())
                 .EnableNoRestore()
                 .EnableNoBuild()
-                .SetFilter(filter)
                 .CombineWith(frameworks, (s, fx) => s
                     .SetFramework(fx)
                 )

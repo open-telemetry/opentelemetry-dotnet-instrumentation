@@ -42,6 +42,7 @@ namespace IntegrationTests.MongoDB
 
         [Fact]
         [Trait("Category", "EndToEnd")]
+        [Trait("Containers", "Linux")]
         public void SubmitsTraces()
         {
             int agentPort = TcpPortProvider.GetOpenPort();
