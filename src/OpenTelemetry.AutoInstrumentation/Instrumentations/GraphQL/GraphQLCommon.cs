@@ -37,7 +37,7 @@ internal class GraphQLCommon
     internal const string ExecuteOperationName = "graphql.execute";
     internal const string ResolveOperationName = "graphql.resolve"; // Instrumentation not yet implemented
 
-    internal const string IntegrationName = nameof(Configuration.Instrumentation.GraphQL);
+    internal const string IntegrationName = nameof(Configuration.TracerInstrumentation.GraphQL);
     internal static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(IntegrationName);
 
     internal static readonly ActivitySource ActivitySource = new ActivitySource(
