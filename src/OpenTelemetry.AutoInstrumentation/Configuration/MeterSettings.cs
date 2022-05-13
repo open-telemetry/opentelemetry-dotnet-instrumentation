@@ -126,14 +126,14 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
         internal static MeterSettings FromDefaultSources()
         {
             var configurationSource = new CompositeConfigurationSource
-        {
-            new EnvironmentConfigurationSource(),
+            {
+                new EnvironmentConfigurationSource(),
 
 #if NETFRAMEWORK
-            // on .NET Framework only, also read from app.config/web.config
-            new NameValueConfigurationSource(System.Configuration.ConfigurationManager.AppSettings)
+                // on .NET Framework only, also read from app.config/web.config
+                new NameValueConfigurationSource(System.Configuration.ConfigurationManager.AppSettings)
 #endif
-        };
+            };
 
             return new MeterSettings(configurationSource);
         }
