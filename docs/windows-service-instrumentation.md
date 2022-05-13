@@ -8,10 +8,10 @@ using the Windows Registry.
 
 ## Set environment variables for a Windows Service
 
-The registry key of a given Windows Service is located under:
+The registry key of a given Windows Service (named `$svcName`) is located under:
 
-```batch
-HKLM\SYSTEM\CurrentControlSet\Services\%MyService%
+```powershell
+HKLM\SYSTEM\CurrentControlSet\Services\$svcName
 ```
 
 The environment variables can be defined
