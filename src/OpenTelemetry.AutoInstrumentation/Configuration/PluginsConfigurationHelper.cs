@@ -63,9 +63,15 @@ internal static class PluginsConfigurationHelper
 
     private static MeterProviderBuilder InvokePlugin(this MeterProviderBuilder builder, string pluginAssemblyQualifiedName)
     {
+        const string configureMeterProviderMethodName = "ConfigureMeterProvider";
+
         // get the type and method
-        var t = Type.GetType(pluginAssemblyQualifiedName);
-        var mi = t.GetMethod("ConfigureMeterProvider", new Type[] { typeof(MeterProviderBuilder) });
+        var t = Type.GetType(pluginAssemblyQualifiedName, throwOnError: true);
+        var mi = t.GetMethod(configureMeterProviderMethodName, new Type[] { typeof(MeterProviderBuilder) });
+        if (mi is null)
+        {
+            throw new MissingMethodException(t.Name, configureMeterProviderMethodName);
+        }
 
         // execute
         var obj = Activator.CreateInstance(t);
