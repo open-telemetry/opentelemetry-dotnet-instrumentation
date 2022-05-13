@@ -92,7 +92,7 @@ sudo chmod a+rwx /var/log/opentelemetry/dotnet
 
 Before running your application, set the following environment variables:
 
-```env
+```batch
 COR_ENABLE_PROFILING=1
 COR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
 COR_PROFILER_PATH_64=%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll
@@ -112,7 +112,7 @@ OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
 
 Before running your application, set the following environment variables:
 
-```env
+```batch
 CORECLR_ENABLE_PROFILING=1
 CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
 CORECLR_PROFILER_PATH=%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.so
@@ -127,7 +127,7 @@ OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
 
 Before running your application, set the following environment variables:
 
-```env
+```batch
 CORECLR_ENABLE_PROFILING=1
 CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
 CORECLR_PROFILER_PATH=%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.dylib
@@ -137,6 +137,10 @@ DOTNET_STARTUP_HOOKS=%InstallationLocation%/netcoreapp3.1/OpenTelemetry.AutoInst
 OTEL_DOTNET_AUTO_HOME=%InstallationLocation%
 OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
 ```
+
+## Instrument a Windows Service running a .NET application
+
+See [windows-service-instrumentation.md](windows-service-instrumentation.md).
 
 ## Configuration
 
