@@ -23,7 +23,8 @@ Var1=Value1
 Var2=Value2
 ```
 
-Below is an example how instrumentation can be configured in PowerShell:
+Below is an example demonstrating how instrumentation can be configured
+in PowerShell (run as administrator):
 
 ```powershell
 $installationLocation = "C:\some\dir" # The path where you put the OTel .NET AutoInstrumentation binaries
