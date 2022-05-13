@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using Nuke.Common;
@@ -16,6 +17,14 @@ partial class Build : NukeBuild
 
     [Parameter("Platform to build - x86 or x64. Default is x64")]
     readonly MSBuildTargetPlatform Platform = MSBuildTargetPlatform.x64;
+
+    [Parameter($"Docker containers type to be used. One of '{ContainersNone}', '{ContainersLinux}', '{ContainersWindows}'. Default is '{ContainersLinux}'")]
+    readonly string Containers = ContainersLinux;
+
+    const string ContainersNone = "none";
+    const string ContainersLinux = "linux";
+    const string ContainersWindows = "windows";
+
 
     [Parameter("Windows Server Core container version. Use it if your Windows does not support the default value. Default is 'ltsc2022'")]
     readonly string WindowsContainerVersion = "ltsc2022";
@@ -95,4 +104,19 @@ partial class Build : NukeBuild
     Target BuildExamples => _ => _
         .Description("Build the Examples")
         .DependsOn(CompileExamples);
+
+    string ContainersTestFilter()
+    {
+            switch (Containers)
+            {
+                case ContainersNone:
+                    return "Containers!=Linux&Containers!=Windows";
+                case ContainersLinux:
+                    return "Containers!=Windows";
+                case ContainersWindows:
+                    return "Containers!=Linux";
+                default:
+                    throw new InvalidOperationException($"Container={Containers} is not supported");
+            }
+    }
 }
