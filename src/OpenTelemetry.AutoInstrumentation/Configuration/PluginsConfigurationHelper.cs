@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
@@ -23,6 +24,16 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 internal static class PluginsConfigurationHelper
 {
     public static TracerProviderBuilder InvokePlugins(this TracerProviderBuilder builder, IEnumerable<string> pluginsAssemblyQualifiedNames)
+    {
+        foreach (var assemblyQualifiedName in pluginsAssemblyQualifiedNames)
+        {
+            builder = builder.InvokePlugin(assemblyQualifiedName);
+        }
+
+        return builder;
+    }
+
+    public static MeterProviderBuilder InvokePlugins(this MeterProviderBuilder builder, IEnumerable<string> pluginsAssemblyQualifiedNames)
     {
         foreach (var assemblyQualifiedName in pluginsAssemblyQualifiedNames)
         {
@@ -48,5 +59,17 @@ internal static class PluginsConfigurationHelper
         var obj = Activator.CreateInstance(t);
         var result = mi.Invoke(obj, new object[] { builder });
         return (TracerProviderBuilder)result;
+    }
+
+    private static MeterProviderBuilder InvokePlugin(this MeterProviderBuilder builder, string pluginAssemblyQualifiedName)
+    {
+        // get the type and method
+        var t = Type.GetType(pluginAssemblyQualifiedName);
+        var mi = t.GetMethod("ConfigureMeterProvider", new Type[] { typeof(MeterProviderBuilder) });
+
+        // execute
+        var obj = Activator.CreateInstance(t);
+        var result = mi.Invoke(obj, new object[] { builder });
+        return (MeterProviderBuilder)result;
     }
 }
