@@ -1,9 +1,9 @@
 # Instrument a Windows Service running a .NET application
 
-We recommed setting environment variables for a Windows Service
+We recommend setting environment variables for a Windows Service
 using the Windows Registry.
 
-> Remember to restart the Windows Serivce
+> Remember to restart the Windows Service
   after making changes to its configuration.
 
 ## Set environment variables for a Windows Service
