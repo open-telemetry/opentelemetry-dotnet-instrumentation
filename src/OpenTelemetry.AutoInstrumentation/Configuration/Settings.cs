@@ -39,18 +39,12 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
             OtlpExportProtocol = GetExporterOtlpProtocol(source);
             Http2UnencryptedSupportEnabled = source.GetBool(ConfigurationKeys.Http2UnencryptedSupportEnabled) ?? false;
             FlushOnUnhandledException = source.GetBool(ConfigurationKeys.FlushOnUnhandledException) ?? false;
-            Integrations = new IntegrationSettingsCollection(source);
         }
 
         /// <summary>
         /// Gets the the OTLP transport protocol. Supported values: Grpc and HttpProtobuf.
         /// </summary>
         public OtlpExportProtocol? OtlpExportProtocol { get; }
-
-        /// <summary>
-        /// Gets a collection of <see cref="Integrations"/> keyed by integration name.
-        /// </summary>
-        public IntegrationSettingsCollection Integrations { get; }
 
         /// <summary>
         /// Gets a value indicating whether the `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`
