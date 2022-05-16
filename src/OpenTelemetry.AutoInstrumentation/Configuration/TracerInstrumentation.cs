@@ -1,4 +1,4 @@
-// <copyright file="Instrumentation.cs" company="OpenTelemetry Authors">
+// <copyright file="TracerInstrumentation.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Enum representing supported instrumentations.
 /// </summary>
-public enum Instrumentation
+public enum TracerInstrumentation
 {
     /// <summary>
     /// HttpClient instrumentation.

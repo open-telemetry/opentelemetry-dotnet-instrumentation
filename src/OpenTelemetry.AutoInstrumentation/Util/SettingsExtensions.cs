@@ -20,7 +20,7 @@ namespace OpenTelemetry.AutoInstrumentation.Util;
 
 internal static class SettingsExtensions
 {
-    internal static bool IsIntegrationEnabled(this Settings settings, IntegrationInfo integration, bool defaultValue = true)
+    internal static bool IsIntegrationEnabled(this TracerSettings settings, IntegrationInfo integration, bool defaultValue = true)
     {
         if (settings.TraceEnabled && !DomainMetadata.ShouldAvoidAppDomain())
         {

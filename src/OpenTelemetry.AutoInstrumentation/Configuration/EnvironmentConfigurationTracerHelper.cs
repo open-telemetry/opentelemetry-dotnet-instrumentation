@@ -1,4 +1,4 @@
-// <copyright file="EnvironmentConfigurationHelper.cs" company="OpenTelemetry Authors">
+// <copyright file="EnvironmentConfigurationTracerHelper.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,17 +22,17 @@ using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
-internal static class EnvironmentConfigurationHelper
+internal static class EnvironmentConfigurationTracerHelper
 {
-    private static readonly Dictionary<Instrumentation, Action<TracerProviderBuilder>> AddInstrumentation = new()
+    private static readonly Dictionary<TracerInstrumentation, Action<TracerProviderBuilder>> AddInstrumentation = new()
     {
-        [Instrumentation.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
-        [Instrumentation.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
-        [Instrumentation.SqlClient] = builder => builder.AddSqlClientInstrumentation(),
-        [Instrumentation.MongoDb] = builder => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources")
+        [TracerInstrumentation.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
+        [TracerInstrumentation.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
+        [TracerInstrumentation.SqlClient] = builder => builder.AddSqlClientInstrumentation(),
+        [TracerInstrumentation.MongoDb] = builder => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources")
     };
 
-    public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, Settings settings)
+    public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, TracerSettings settings)
     {
         var resourceBuilder = ResourceBuilder.CreateDefault();
 
@@ -66,7 +66,7 @@ internal static class EnvironmentConfigurationHelper
 #endif
     }
 
-    private static TracerProviderBuilder SetExporter(this TracerProviderBuilder builder, Settings settings)
+    private static TracerProviderBuilder SetExporter(this TracerProviderBuilder builder, TracerSettings settings)
     {
         if (settings.ConsoleExporterEnabled)
         {

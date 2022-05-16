@@ -138,6 +138,10 @@ OTEL_DOTNET_AUTO_HOME=%InstallationLocation%
 OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
 ```
 
+## Instrument a Windows Service running a .NET application
+
+See [windows-service-instrumentation.md](windows-service-instrumentation.md).
+
 ## Configuration
 
 See [config.md](config.md).

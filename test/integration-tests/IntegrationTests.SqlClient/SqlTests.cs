@@ -38,6 +38,8 @@ namespace IntegrationTests.SqlClient
         }
 
         [Fact]
+        [Trait("Category", "EndToEnd")]
+        [Trait("Containers", "Linux")]
         public void SubmitTraces()
         {
             var agentPort = TcpPortProvider.GetOpenPort();

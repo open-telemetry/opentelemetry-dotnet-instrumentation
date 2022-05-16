@@ -20,13 +20,12 @@ jobs:
           dotnet-version: | 
             3.1.x
             6.0.x
-      - name: Start MongoDB service
+      - run: ./build.cmd Workflow --containers windows
+        if: ${{ runner.os == 'Windows' }}
+      - run: ./build.cmd Workflow --containers linux
+        if: ${{ runner.os == 'Linux' }}
+      - run: ./build.cmd Workflow --containers none
         if: ${{ runner.os == 'macOS' }}
-        run: brew services start mongodb-community
-      - name: Start SQL Server
-        if: ${{ runner.os != 'Linux' }}
-        run: docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=@someThingComplicated1234" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2019-CU15-ubuntu-20.04
-      - run: ./build.cmd Workflow
       - name: Upload logs
         uses: actions/upload-artifact@v3.0.0
         if: always()

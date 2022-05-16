@@ -1,4 +1,4 @@
-// <copyright file="Settings.cs" company="OpenTelemetry Authors">
+// <copyright file="TracerSettings.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,16 +23,16 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 // TODO Move settings to more suitable place?
 
 /// <summary>
-/// Settings
+/// Tracer Settings
 /// </summary>
-public class Settings
+public class TracerSettings
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="Settings"/> class
+    /// Initializes a new instance of the <see cref="TracerSettings"/> class
     /// using the specified <see cref="IConfigurationSource"/> to initialize values.
     /// </summary>
     /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
-    private Settings(IConfigurationSource source)
+    private TracerSettings(IConfigurationSource source)
     {
         if (source == null)
         {
@@ -44,13 +44,13 @@ public class Settings
 
         ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.Traces.ConsoleExporterEnabled) ?? false;
 
-        var instrumentations = new Dictionary<string, Instrumentation>();
+        var instrumentations = new Dictionary<string, TracerInstrumentation>();
         var enabledInstrumentations = source.GetString(ConfigurationKeys.Traces.Instrumentations);
         if (enabledInstrumentations != null)
         {
             foreach (var instrumentation in enabledInstrumentations.Split(separator: ','))
             {
-                if (Enum.TryParse(instrumentation, out Instrumentation parsedType))
+                if (Enum.TryParse(instrumentation, out TracerInstrumentation parsedType))
                 {
                     instrumentations[instrumentation] = parsedType;
                 }
@@ -139,7 +139,7 @@ public class Settings
     /// <summary>
     /// Gets the list of enabled instrumentations.
     /// </summary>
-    public IList<Instrumentation> EnabledInstrumentations { get; }
+    public IList<TracerInstrumentation> EnabledInstrumentations { get; }
 
     /// <summary>
     /// Gets the list of plugins represented by <see cref="Type.AssemblyQualifiedName"/>.
@@ -176,7 +176,7 @@ public class Settings
     /// </summary>
     public bool FlushOnUnhandledException { get; }
 
-    internal static Settings FromDefaultSources()
+    internal static TracerSettings FromDefaultSources()
     {
         var configurationSource = new CompositeConfigurationSource
         {
@@ -188,7 +188,7 @@ public class Settings
 #endif
         };
 
-        return new Settings(configurationSource);
+        return new TracerSettings(configurationSource);
     }
 
     private static OtlpExportProtocol? GetExporterOtlpProtocol(IConfigurationSource source)
