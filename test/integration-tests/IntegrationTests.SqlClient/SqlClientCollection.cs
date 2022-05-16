@@ -56,7 +56,7 @@ namespace IntegrationTests.SqlClient
                 return;
             }
 
-            _container = await LaunchDatabaseContainerAsync(Port);
+            _container = await LaunchDatabaseContainerAsync();
         }
 
         public async Task DisposeAsync()
@@ -77,7 +77,13 @@ namespace IntegrationTests.SqlClient
             return !EnvironmentTools.IsWindows() && !EnvironmentTools.IsMacOS();
         }
 
-        private static async Task<TestcontainersContainer> LaunchDatabaseContainerAsync(int port)
+        private static async Task ShutdownDatabaseContainerAsync(TestcontainersContainer container)
+        {
+            await container.CleanUpAsync();
+            await container.DisposeAsync();
+        }
+
+        private async Task<TestcontainersContainer> LaunchDatabaseContainerAsync()
         {
             var waitForOs = EnvironmentTools.IsWindows()
                 ? Wait.ForWindowsContainer()
@@ -85,8 +91,8 @@ namespace IntegrationTests.SqlClient
 
             var databaseContainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
                 .WithImage(DatabaseImage)
-                .WithName($"sql-server-{port}")
-                .WithPortBinding(port, DatabasePort)
+                .WithName($"sql-server-{Port}")
+                .WithPortBinding(Port, DatabasePort)
                 .WithEnvironment("SA_PASSWORD", DatabasePassword)
                 .WithEnvironment("ACCEPT_EULA", "Y")
                 .WithWaitStrategy(waitForOs.UntilPortIsAvailable(DatabasePort));
@@ -95,12 +101,6 @@ namespace IntegrationTests.SqlClient
             await container.StartAsync();
 
             return container;
-        }
-
-        private static async Task ShutdownDatabaseContainerAsync(TestcontainersContainer container)
-        {
-            await container.CleanUpAsync();
-            await container.DisposeAsync();
         }
     }
 }
