@@ -116,7 +116,8 @@ public static class Instrumentation
                 var builder = Sdk
                     .CreateMeterProviderBuilder()
                     .SetResourceBuilder(_resourceBuilder)
-                    .UseEnvironmentVariables(MeterSettings);
+                    .UseEnvironmentVariables(MeterSettings)
+                    .InvokePlugins(MeterSettings.MetricPlugins);
 
                 _meterProvider = builder.Build();
                 Logger.Information("OpenTelemetry meter initialized.");
