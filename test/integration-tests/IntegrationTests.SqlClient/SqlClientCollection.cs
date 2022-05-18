@@ -65,17 +65,13 @@ namespace IntegrationTests.SqlClient
 
         private async Task<TestcontainersContainer> LaunchDatabaseContainerAsync()
         {
-            var waitForOs = EnvironmentTools.IsWindows()
-                ? Wait.ForWindowsContainer()
-                : Wait.ForUnixContainer();
-
             var databaseContainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
                 .WithImage(DatabaseImage)
                 .WithName($"sql-server-{Port}")
                 .WithPortBinding(Port, DatabasePort)
                 .WithEnvironment("SA_PASSWORD", DatabasePassword)
                 .WithEnvironment("ACCEPT_EULA", "Y")
-                .WithWaitStrategy(waitForOs.UntilPortIsAvailable(DatabasePort));
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(DatabasePort));
 
             var container = databaseContainersBuilder.Build();
             await container.StartAsync();
