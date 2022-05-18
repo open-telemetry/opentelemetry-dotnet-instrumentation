@@ -22,6 +22,7 @@ using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Shims.OpenTracing;
 using OpenTelemetry.Trace;
 using OpenTracing.Util;
@@ -34,6 +35,7 @@ namespace OpenTelemetry.AutoInstrumentation;
 public static class Instrumentation
 {
     private static readonly ILogger Logger = OtelLogging.GetLogger();
+    private static readonly ResourceBuilder _resourceBuilder = ResourceBuilder.CreateDefault();
 
     private static int _firstInitialization = 1;
     private static int _isExiting = 0;
@@ -100,6 +102,7 @@ public static class Instrumentation
             {
                 var builder = Sdk
                     .CreateTracerProviderBuilder()
+                    .SetResourceBuilder(_resourceBuilder)
                     .UseEnvironmentVariables(TracerSettings)
                     .SetSampler(new AlwaysOnSampler())
                     .InvokePlugins(TracerSettings.TracerPlugins);
@@ -112,6 +115,7 @@ public static class Instrumentation
             {
                 var builder = Sdk
                     .CreateMeterProviderBuilder()
+                    .SetResourceBuilder(_resourceBuilder)
                     .UseEnvironmentVariables(MeterSettings);
 
                 _meterProvider = builder.Build();
@@ -161,10 +165,11 @@ public static class Instrumentation
 
         try
         {
-            _tracerProvider.Dispose();
+            _tracerProvider?.Dispose();
+            _meterProvider?.Dispose();
             _sdkEventListener.Dispose();
 
-            Logger.Information("OpenTelemetry tracer exit.");
+            Logger.Information("OpenTelemetry tracer/meter exit.");
         }
         catch (Exception ex)
         {

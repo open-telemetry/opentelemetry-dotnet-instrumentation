@@ -25,13 +25,9 @@ internal static class EnvironmentConfigurationMetricHelper
 {
     public static MeterProviderBuilder UseEnvironmentVariables(this MeterProviderBuilder builder, MeterSettings settings)
     {
-        var resourceBuilder = ResourceBuilder.CreateDefault();
-
         builder
-            .SetResourceBuilder(resourceBuilder)
-            .SetExporter(settings);
-
-        builder.AddMeter(settings.Meters.ToArray());
+            .SetExporter(settings)
+            .AddMeter(settings.Meters.ToArray());
 
         return builder;
     }
