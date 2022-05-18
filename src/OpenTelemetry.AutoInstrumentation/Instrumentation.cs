@@ -169,7 +169,7 @@ public static class Instrumentation
             _meterProvider?.Dispose();
             _sdkEventListener.Dispose();
 
-            Logger.Information("OpenTelemetry tracer/meter exit.");
+            Logger.Information("OpenTelemetry Automatic Instrumentation exit.");
         }
         catch (Exception ex)
         {
