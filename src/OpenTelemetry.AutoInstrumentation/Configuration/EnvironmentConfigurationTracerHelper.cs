@@ -34,11 +34,7 @@ internal static class EnvironmentConfigurationTracerHelper
 
     public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, TracerSettings settings)
     {
-        var resourceBuilder = ResourceBuilder.CreateDefault();
-
-        builder
-            .SetResourceBuilder(resourceBuilder)
-            .SetExporter(settings);
+        builder.SetExporter(settings);
 
         foreach (var enabledInstrumentation in settings.EnabledInstrumentations)
         {
