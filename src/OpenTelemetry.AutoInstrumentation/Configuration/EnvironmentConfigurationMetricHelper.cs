@@ -15,19 +15,32 @@
 // </copyright>
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 internal static class EnvironmentConfigurationMetricHelper
 {
+    private static readonly Dictionary<MeterInstrumentation, Action<MeterProviderBuilder>> AddMeters = new()
+    {
+        [MeterInstrumentation.AspNet] = builder => builder.AddRuntimeMetrics(),
+    };
+
     public static MeterProviderBuilder UseEnvironmentVariables(this MeterProviderBuilder builder, MeterSettings settings)
     {
         builder
             .SetExporter(settings)
             .AddMeter(settings.Meters.ToArray());
+
+        foreach (var enabledMeter in settings.EnabledInstrumentation)
+        {
+            if (AddMeters.TryGetValue(enabledMeter, out var addMeter))
+            {
+                addMeter(builder);
+            }
+        }
 
         return builder;
     }
