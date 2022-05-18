@@ -1,4 +1,4 @@
-// <copyright file="SettingsExtensions.cs" company="OpenTelemetry Authors">
+// <copyright file="MetricsExporter.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,19 +14,25 @@
 // limitations under the License.
 // </copyright>
 
-using OpenTelemetry.AutoInstrumentation.Configuration;
+namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
-namespace OpenTelemetry.AutoInstrumentation.Util;
-
-internal static class SettingsExtensions
+/// <summary>
+/// Enum representing supported metrics exporters.
+/// </summary>
+public enum MetricsExporter
 {
-    internal static bool IsIntegrationEnabled(this TracerSettings settings, IntegrationInfo integration, bool defaultValue = true)
-    {
-        if (settings.TraceEnabled && !DomainMetadata.ShouldAvoidAppDomain())
-        {
-            return settings.Integrations[integration].Enabled ?? defaultValue;
-        }
+    /// <summary>
+    /// None exporter.
+    /// </summary>
+    None,
 
-        return false;
-    }
+    /// <summary>
+    /// OTLP exporter.
+    /// </summary>
+    Otlp,
+
+    /// <summary>
+    /// Prometheus exporter.
+    /// </summary>
+    Prometheus,
 }

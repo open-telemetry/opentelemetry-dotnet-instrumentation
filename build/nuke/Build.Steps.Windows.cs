@@ -118,6 +118,7 @@ partial class Build
         .Unlisted()
         .After(CompileManagedTestsWindows)
         .OnlyWhenStatic(() => IsWin)
+        .OnlyWhenStatic(() => Containers == ContainersWindows)
         .Executes(() =>
         {
             var aspnetFolder = TestsDirectory / "test-applications" / "integrations" / "aspnet";
@@ -158,6 +159,7 @@ partial class Build
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatform(Platform)
                 .SetFramework(TargetFramework.NET462)
+                .SetFilter(ContainersTestFilter())
                 .EnableNoRestore()
                 .EnableNoBuild()
                 .CombineWith(aspNetTests, (s, project) => s

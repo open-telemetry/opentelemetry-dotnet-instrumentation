@@ -28,12 +28,12 @@ internal static class IntegrationRegistry
 
     static IntegrationRegistry()
     {
-        var values = Enum.GetValues(typeof(Instrumentation));
+        var values = Enum.GetValues(typeof(TracerInstrumentation));
         var ids = new Dictionary<string, int>(values.Length);
 
         Names = new string[values.Cast<int>().Max() + 1];
 
-        foreach (Instrumentation value in values)
+        foreach (TracerInstrumentation value in values)
         {
             var name = value.ToString();
 

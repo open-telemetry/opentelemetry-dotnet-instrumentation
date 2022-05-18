@@ -1,4 +1,4 @@
-// <copyright file="SettingsExtensions.cs" company="OpenTelemetry Authors">
+// <copyright file="MeterInstrumentation.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,19 +14,15 @@
 // limitations under the License.
 // </copyright>
 
-using OpenTelemetry.AutoInstrumentation.Configuration;
+namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
-namespace OpenTelemetry.AutoInstrumentation.Util;
-
-internal static class SettingsExtensions
+/// <summary>
+/// Enum representing supported meter instrumentations.
+/// </summary>
+public enum MeterInstrumentation
 {
-    internal static bool IsIntegrationEnabled(this TracerSettings settings, IntegrationInfo integration, bool defaultValue = true)
-    {
-        if (settings.TraceEnabled && !DomainMetadata.ShouldAvoidAppDomain())
-        {
-            return settings.Integrations[integration].Enabled ?? defaultValue;
-        }
-
-        return false;
-    }
+    /// <summary>
+    /// ASP.NET Metrics instrumentation.
+    /// </summary>
+    AspNet,
 }
