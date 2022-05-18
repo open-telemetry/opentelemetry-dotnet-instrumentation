@@ -15,13 +15,14 @@
 // </copyright>
 
 using System;
-using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Context.Propagation;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Shims.OpenTracing;
 using OpenTelemetry.Trace;
 using OpenTracing.Util;
@@ -34,12 +35,14 @@ namespace OpenTelemetry.AutoInstrumentation;
 public static class Instrumentation
 {
     private static readonly ILogger Logger = OtelLogging.GetLogger();
+    private static readonly ResourceBuilder _resourceBuilder = ResourceBuilder.CreateDefault();
 
     private static int _firstInitialization = 1;
     private static int _isExiting = 0;
     private static SdkSelfDiagnosticsEventListener _sdkEventListener;
 
     private static TracerProvider _tracerProvider;
+    private static MeterProvider _meterProvider;
 
     /// <summary>
     /// Gets a value indicating whether OpenTelemetry's profiler is attached to the current process.
@@ -64,6 +67,8 @@ public static class Instrumentation
 
     internal static TracerSettings TracerSettings { get; } = TracerSettings.FromDefaultSources();
 
+    internal static MeterSettings MeterSettings { get; } = MeterSettings.FromDefaultSources();
+
     /// <summary>
     /// Initialize the OpenTelemetry SDK with a pre-defined set of exporters, shims, and
     /// instrumentations.
@@ -78,28 +83,43 @@ public static class Instrumentation
 
         try
         {
-            if (TracerSettings.LoadTracerAtStartup)
+            if (TracerSettings.LoadTracerAtStartup || MeterSettings.LoadMetricsAtStartup)
             {
                 // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
                 _sdkEventListener = new(EventLevel.Warning);
 
+                // Register to shutdown events
+                AppDomain.CurrentDomain.ProcessExit += OnExit;
+                AppDomain.CurrentDomain.DomainUnload += OnExit;
+
+                if (TracerSettings.FlushOnUnhandledException || MeterSettings.FlushOnUnhandledException)
+                {
+                    AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+                }
+            }
+
+            if (TracerSettings.LoadTracerAtStartup)
+            {
                 var builder = Sdk
                     .CreateTracerProviderBuilder()
+                    .SetResourceBuilder(_resourceBuilder)
                     .UseEnvironmentVariables(TracerSettings)
                     .SetSampler(new AlwaysOnSampler())
                     .InvokePlugins(TracerSettings.TracerPlugins);
 
                 _tracerProvider = builder.Build();
                 Logger.Information("OpenTelemetry tracer initialized.");
+            }
 
-                // Register to shutdown events
-                AppDomain.CurrentDomain.ProcessExit += OnExit;
-                AppDomain.CurrentDomain.DomainUnload += OnExit;
+            if (MeterSettings.LoadMetricsAtStartup)
+            {
+                var builder = Sdk
+                    .CreateMeterProviderBuilder()
+                    .SetResourceBuilder(_resourceBuilder)
+                    .UseEnvironmentVariables(MeterSettings);
 
-                if (TracerSettings.FlushOnUnhandledException)
-                {
-                    AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
-                }
+                _meterProvider = builder.Build();
+                Logger.Information("OpenTelemetry meter initialized.");
             }
         }
         catch (Exception ex)
@@ -145,10 +165,11 @@ public static class Instrumentation
 
         try
         {
-            _tracerProvider.Dispose();
+            _tracerProvider?.Dispose();
+            _meterProvider?.Dispose();
             _sdkEventListener.Dispose();
 
-            Logger.Information("OpenTelemetry tracer exit.");
+            Logger.Information("OpenTelemetry Automatic Instrumentation exit.");
         }
         catch (Exception ex)
         {

@@ -118,7 +118,7 @@ public class ConfigurationKeys
         /// <summary>
         /// Configuration key for whether the meter should be initialized by the profiler or not.
         /// </summary>
-        public const string LoadTracerAtStartup = "OTEL_DOTNET_AUTO_LOAD_METER_AT_STARTUP";
+        public const string LoadMeterAtStartup = "OTEL_DOTNET_AUTO_LOAD_METER_AT_STARTUP";
 
         /// <summary>
         /// Configuration key for the metrics exporter to be used.

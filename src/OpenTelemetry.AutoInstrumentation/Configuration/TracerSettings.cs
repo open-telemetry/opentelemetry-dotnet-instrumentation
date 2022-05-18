@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using OpenTelemetry.Exporter;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 // TODO Move settings to more suitable place?
@@ -25,7 +24,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Tracer Settings
 /// </summary>
-public class TracerSettings
+public class TracerSettings : Settings
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="TracerSettings"/> class
@@ -33,15 +32,9 @@ public class TracerSettings
     /// </summary>
     /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
     private TracerSettings(IConfigurationSource source)
+        : base(source)
     {
-        if (source == null)
-        {
-            throw new ArgumentNullException(nameof(source));
-        }
-
         TracesExporter = ParseTracesExporter(source);
-        OtlpExportProtocol = GetExporterOtlpProtocol(source);
-
         ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.Traces.ConsoleExporterEnabled) ?? false;
 
         var instrumentations = new Dictionary<string, TracerInstrumentation>();
@@ -56,7 +49,7 @@ public class TracerSettings
                 }
                 else
                 {
-                    throw new ArgumentException($"The \"{instrumentation}\" is not recognized as supported instrumentation and cannot be disabled");
+                    throw new ArgumentException($"The \"{instrumentation}\" is not recognized as supported trace instrumentation and cannot be enabled");
                 }
             }
         }
@@ -101,12 +94,7 @@ public class TracerSettings
 
         TraceEnabled = source.GetBool(ConfigurationKeys.Traces.Enabled) ?? true;
         LoadTracerAtStartup = source.GetBool(ConfigurationKeys.Traces.LoadTracerAtStartup) ?? true;
-
         Integrations = new IntegrationSettingsCollection(source);
-
-        Http2UnencryptedSupportEnabled = source.GetBool(ConfigurationKeys.Http2UnencryptedSupportEnabled) ?? false;
-
-        FlushOnUnhandledException = source.GetBool(ConfigurationKeys.FlushOnUnhandledException) ?? false;
     }
 
     /// <summary>
@@ -125,11 +113,6 @@ public class TracerSettings
     /// Gets the traces exporter.
     /// </summary>
     public TracesExporter TracesExporter { get; }
-
-    /// <summary>
-    /// Gets the the OTLP transport protocol. Supported values: Grpc and HttpProtobuf.
-    /// </summary>
-    public OtlpExportProtocol? OtlpExportProtocol { get; }
 
     /// <summary>
     /// Gets a value indicating whether the console exporter is enabled.
@@ -161,21 +144,6 @@ public class TracerSettings
     /// </summary>
     public IntegrationSettingsCollection Integrations { get; }
 
-    /// <summary>
-    /// Gets a value indicating whether the `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`
-    /// should be enabled.
-    /// It is required by OTLP gRPC exporter on .NET Core 3.x.
-    /// Default is <c>false</c>.
-    /// </summary>
-    public bool Http2UnencryptedSupportEnabled { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the <see cref="AppDomain.UnhandledException"/> event should trigger
-    /// the flushing of telemetry data.
-    /// Default is <c>false</c>.
-    /// </summary>
-    public bool FlushOnUnhandledException { get; }
-
     internal static TracerSettings FromDefaultSources()
     {
         var configurationSource = new CompositeConfigurationSource
@@ -189,21 +157,6 @@ public class TracerSettings
         };
 
         return new TracerSettings(configurationSource);
-    }
-
-    private static OtlpExportProtocol? GetExporterOtlpProtocol(IConfigurationSource source)
-    {
-        // the default in SDK is grpc. http/protobuf should be default for our purposes
-        var exporterOtlpProtocol = source.GetString(ConfigurationKeys.ExporterOtlpProtocol);
-
-        if (string.IsNullOrEmpty(exporterOtlpProtocol))
-        {
-            // override settings only for http/protobuf
-            return OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
-        }
-
-        // null value here means that it will be handled by OTEL .NET SDK
-        return null;
     }
 
     private static TracesExporter ParseTracesExporter(IConfigurationSource source)
