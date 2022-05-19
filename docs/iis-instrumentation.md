@@ -14,18 +14,6 @@ by setting the required environment variables for
 ASP.NET instrumentation on .NET Framework requires to install the
 [`OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule/)
 NuGet package in the instrumented project.
-The following shows changes required to your `Web.config`:
-
-```xml
-<system.webServer>
-  <modules>
-    <add
-      name="TelemetryHttpModule"
-      type="OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule"
-      preCondition="integratedMode,managedHandler" />
-    </modules>
-</system.webServer>
-```
 
 Make sure to enable the ASP.NET instrumentation by setting
 `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS=AspNet`.

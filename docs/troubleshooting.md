@@ -40,6 +40,12 @@ If the system or user scope is intended, use the `OTEL_DOTNET_AUTO_EXCLUDE_PROCE
 and `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES` environment variables to include or exclude
 applications from the automatic instrumentation.
 
+## ASP.NET instrumentation is not producing spans
+
+Make sure that your instrumented application's `Web.config` has
+added the `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`
+ASP.NET HTTP module.
+
 ## Collect debug logs
 
 Detailed debug logs can help you troubleshoot instrumentation issues, and can be
@@ -55,3 +61,12 @@ environment variable.
 
 After obtaining the logs, remove the `OTEL_DOTNET_AUTO_DEBUG`
 environment variable to avoid unnecessary overhead.
+
+## Nothing happens
+
+It may occur that the .NET Profiler is unable to attach
+and therefore no logs would be emited.
+
+The most common reason is that the instrumented application
+has no permissions to load the OpenTelemetry .NET Automatic Instrumentation
+assemblies.
