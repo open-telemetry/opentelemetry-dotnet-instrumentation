@@ -11,8 +11,7 @@ by setting the required environment variables for
   Therefore all applications will share
   the same configuration (e.g. `OTEL_SERVICE_NAME`).
 
-ASP.NET instrumentation on .NET Framework requires to install the
-[`OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule/)
+Install the [`OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule/)
 NuGet package in the instrumented project.
 
 Make sure to enable the ASP.NET instrumentation by setting
