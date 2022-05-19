@@ -19,8 +19,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS`,
   `OTEL_DOTNET_AUTO_METRICS_PLUGINS`,
   `OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES`.
-- Support for .NET Runtime metrics collection using package
-  `OpenTelemetry.Instrumentation.Runtime`
+- Support for .NET Runtime metrics collection using
+  the `OpenTelemetry.Instrumentation.Runtime` package.
 
 ### Changed
 
