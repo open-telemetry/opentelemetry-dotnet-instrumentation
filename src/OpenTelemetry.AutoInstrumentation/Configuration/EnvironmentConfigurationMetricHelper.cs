@@ -25,7 +25,7 @@ internal static class EnvironmentConfigurationMetricHelper
 {
     private static readonly Dictionary<MeterInstrumentation, Action<MeterProviderBuilder>> AddMeters = new()
     {
-        [MeterInstrumentation.AspNet] = builder => builder.AddRuntimeMetrics(),
+        [MeterInstrumentation.NetRuntime] = builder => builder.AddRuntimeMetrics(),
     };
 
     public static MeterProviderBuilder UseEnvironmentVariables(this MeterProviderBuilder builder, MeterSettings settings)

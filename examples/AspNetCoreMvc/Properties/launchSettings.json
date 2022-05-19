@@ -96,7 +96,7 @@
         "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.StartupHook.dll",
         "OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED": "true",
         "OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES": "MyCompany.MyProduct.MyLibrary",
-        "OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS": "AspNet",
+        "OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS": "NetRuntime",
         "OTEL_SERVICE_NAME": "StartupHook.Self-hosted.Metrics",
         "OTEL_METRICS_EXPORTER": "otlp"
       },
