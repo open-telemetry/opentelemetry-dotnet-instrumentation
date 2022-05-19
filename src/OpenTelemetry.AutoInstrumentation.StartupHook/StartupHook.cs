@@ -123,7 +123,10 @@ internal class StartupHook
             return excludedProcesses;
         }
 
-        foreach (var processName in environmentValue.Split(','))
+        // The separator should always match the Settings.Separator. However, to avoid
+        // creating a dependecy in the StartupHook project the separator is being redefined here.
+        const char settingsSeparator = ',';
+        foreach (var processName in environmentValue.Split(settingsSeparator))
         {
             if (!string.IsNullOrWhiteSpace(processName))
             {

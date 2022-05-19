@@ -41,7 +41,7 @@ public class TracerSettings : Settings
         var enabledInstrumentations = source.GetString(ConfigurationKeys.Traces.Instrumentations);
         if (enabledInstrumentations != null)
         {
-            foreach (var instrumentation in enabledInstrumentations.Split(separator: ','))
+            foreach (var instrumentation in enabledInstrumentations.Split(Separator))
             {
                 if (Enum.TryParse(instrumentation, out TracerInstrumentation parsedType))
                 {
@@ -57,7 +57,7 @@ public class TracerSettings : Settings
         var disabledInstrumentations = source.GetString(ConfigurationKeys.Traces.DisabledInstrumentations);
         if (disabledInstrumentations != null)
         {
-            foreach (var instrumentation in disabledInstrumentations.Split(separator: ','))
+            foreach (var instrumentation in disabledInstrumentations.Split(Separator))
             {
                 instrumentations.Remove(instrumentation);
             }
@@ -68,7 +68,7 @@ public class TracerSettings : Settings
         var providerPlugins = source.GetString(ConfigurationKeys.Traces.ProviderPlugins);
         if (providerPlugins != null)
         {
-            foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(':'))
+            foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(DotNetQualifiedNameSeparator))
             {
                 TracerPlugins.Add(pluginAssemblyQualifiedName);
             }
@@ -77,7 +77,7 @@ public class TracerSettings : Settings
         var additionalSources = source.GetString(ConfigurationKeys.Traces.AdditionalSources);
         if (additionalSources != null)
         {
-            foreach (var sourceName in additionalSources.Split(separator: ','))
+            foreach (var sourceName in additionalSources.Split(Separator))
             {
                 ActivitySources.Add(sourceName);
             }
@@ -86,7 +86,7 @@ public class TracerSettings : Settings
         var legacySources = source.GetString(ConfigurationKeys.Traces.LegacySources);
         if (legacySources != null)
         {
-            foreach (var sourceName in legacySources.Split(separator: ','))
+            foreach (var sourceName in legacySources.Split(Separator))
             {
                 LegacySources.Add(sourceName);
             }

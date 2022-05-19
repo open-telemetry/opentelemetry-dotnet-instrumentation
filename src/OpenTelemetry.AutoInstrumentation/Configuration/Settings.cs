@@ -25,6 +25,18 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
     public abstract class Settings
     {
         /// <summary>
+        /// Default delimiter for textual representation of multi-valued settings.
+        /// </summary>
+        public const char Separator = ',';
+
+        /// <summary>
+        /// Delimiter for textual representation of settings that contains multiple
+        /// fully qualifined .NET names, e.g.: assembly or type names. Comma is part
+        /// of a fully qualified name and can't be used here.
+        /// </summary>
+        public const char DotNetQualifiedNameSeparator = ':';
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Settings"/> class
         /// using the specified <see cref="IConfigurationSource"/> to initialize values.
         /// </summary>
