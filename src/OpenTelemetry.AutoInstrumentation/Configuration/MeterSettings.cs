@@ -40,7 +40,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
             var enabledInstrumentations = source.GetString(ConfigurationKeys.Metrics.Instrumentations);
             if (enabledInstrumentations != null)
             {
-                foreach (var instrumentation in enabledInstrumentations.Split(separator: ','))
+                foreach (var instrumentation in enabledInstrumentations.Split(Separator))
                 {
                     if (Enum.TryParse(instrumentation, out MeterInstrumentation parsedType))
                     {
@@ -56,7 +56,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
             var disabledInstrumentations = source.GetString(ConfigurationKeys.Metrics.DisabledInstrumentations);
             if (disabledInstrumentations != null)
             {
-                foreach (var instrumentation in disabledInstrumentations.Split(separator: ','))
+                foreach (var instrumentation in disabledInstrumentations.Split(Separator))
                 {
                     instrumentations.Remove(instrumentation);
                 }
@@ -67,7 +67,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
             var providerPlugins = source.GetString(ConfigurationKeys.Metrics.ProviderPlugins);
             if (providerPlugins != null)
             {
-                foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(':'))
+                foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(DotNetQualifiedNameSeparator))
                 {
                     MetricPlugins.Add(pluginAssemblyQualifiedName);
                 }
@@ -76,7 +76,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
             var additionalSources = source.GetString(ConfigurationKeys.Metrics.AdditionalSources);
             if (additionalSources != null)
             {
-                foreach (var sourceName in additionalSources.Split(separator: ','))
+                foreach (var sourceName in additionalSources.Split(Separator))
                 {
                     Meters.Add(sourceName);
                 }

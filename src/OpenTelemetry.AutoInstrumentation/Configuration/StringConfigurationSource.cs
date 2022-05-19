@@ -61,7 +61,7 @@ public abstract class StringConfigurationSource : IConfigurationSource
             return dictionary;
         }
 
-        var entries = data.Split(',');
+        var entries = data.Split(Settings.Separator);
 
         foreach (var e in entries)
         {
