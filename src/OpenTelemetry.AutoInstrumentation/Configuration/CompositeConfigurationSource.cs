@@ -114,18 +114,4 @@ public class CompositeConfigurationSource : IConfigurationSource, IEnumerable<IC
     {
         return _sources.GetEnumerator();
     }
-
-    /// <inheritdoc />
-    public IDictionary<string, string> GetDictionary(string key)
-    {
-        return _sources.Select(source => source.GetDictionary(key))
-            .FirstOrDefault(value => value != null);
-    }
-
-    /// <inheritdoc />
-    public IDictionary<string, string> GetDictionary(string key, bool allowOptionalMappings)
-    {
-        return _sources.Select(source => source.GetDictionary(key, allowOptionalMappings))
-            .FirstOrDefault(value => value != null);
-    }
 }
