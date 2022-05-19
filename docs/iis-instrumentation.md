@@ -33,7 +33,7 @@ Make sure to enable the ASP.NET instrumentation by setting
 ## Instrument an ASP.NET Core application
 
 Use the [`environmentVariable`](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/web-config#set-environment-variables)
-elements inside the `<aspNetCore>` block of your `web.config` file
+elements inside the `<aspNetCore>` block of your `Web.config` file
 to set environment variables.
 
 Make sure to enable the ASP.NET instrumentation by setting
