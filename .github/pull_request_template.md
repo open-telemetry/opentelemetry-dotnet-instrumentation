@@ -19,4 +19,4 @@ Fixes #
 
 - [ ] `CHANGELOG.md` is updated.
 - [ ] Documentation is updated.
-- [ ] The code changes are covered by tests.
+- [ ] New features are covered by tests.
