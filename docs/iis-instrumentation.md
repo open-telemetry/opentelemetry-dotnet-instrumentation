@@ -51,7 +51,7 @@ You can add it in the following places:
 
 The ASP.NET HTTP module can be also set in `applicationHost.config`.
 Here is an example where you can add the module
-to set it for all ASP.NET application runing in Integrated Pipeline Mode:
+to set it for all ASP.NET application running in Integrated Pipeline Mode:
 
 ```xml
   <location path="" overrideMode="Allow">
