@@ -40,12 +40,6 @@ If the system or user scope is intended, use the `OTEL_DOTNET_AUTO_EXCLUDE_PROCE
 and `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES` environment variables to include or exclude
 applications from the automatic instrumentation.
 
-## ASP.NET instrumentation is not producing spans
-
-Make sure that your instrumented application's `Web.config` has
-added the `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`
-ASP.NET HTTP module.
-
 ## Collect debug logs
 
 Detailed debug logs can help you troubleshoot instrumentation issues, and can be

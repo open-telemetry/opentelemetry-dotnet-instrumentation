@@ -1,27 +1,69 @@
 # Instrument an ASP.NET application deployed on IIS
 
-## Instrument an ASP.NET 4.x application
+## Set environment variables
 
-You can instrumental all ASP.NET 4.x application deployed to IIS
-by setting the required environment variables for
-`W3SVC` and `WAS` Windows Services as described in [windows-service-instrumentation.md](windows-service-instrumentation.md).
+You can add the [`<environmentVariables>`](https://docs.microsoft.com/en-us/iis/configuration/system.applicationhost/applicationpools/add/environmentvariables/)
+in `applicationHost.config`
+to set environment variables for given application pools.
 
-> Unfortunately it is not possible to set distinct environment variables
-  values for the instrumented ASP.NET application.
-  Therefore all applications will share
-  the same configuration (e.g. `OTEL_SERVICE_NAME`).
+> For IIS versions older than 10.0, you can consider creating a distinct user,
+  set its environment variables
+  and use it as the application pool user.
 
-Install the [`OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule/)
-NuGet package in the instrumented project.
-
-Make sure to enable the ASP.NET instrumentation by setting
-`OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS=AspNet`.
-
-## Instrument an ASP.NET Core application
-
-Use the [`environmentVariable`](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/web-config#set-environment-variables)
+For ASP.NET Core application you can also use
+the [`<environmentVariable>`](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/web-config#set-environment-variables)
 elements inside the `<aspNetCore>` block of your `Web.config` file
 to set environment variables.
+
+You can consider setting common environment variables,
+such us `COR_PROFILER`,
+for all application deployed to IIS
+by setting the environment variables for
+`W3SVC` and `WAS` Windows Services as described in [windows-service-instrumentation.md](windows-service-instrumentation.md).
+
+## Add TelemetryHttpModule ASP.NET HTTP module
+
+> This is NOT required for ASP.NET Core deployments.
+
+This step is necessary only for ASP.NET (.NET Framework).
+
+Add `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`
+ASP.NET HTTP module to your application's `Web.config`.
+You can add it in the following places:
+
+```xml
+  <system.web>
+    <httpModules>
+      <add name="TelemetryHttpModule" type="OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule" />
+    </httpModules>
+  </system.web>
+```
+
+```xml
+  <system.webServer>
+    <validation validateIntegratedModeConfiguration="false" />
+    <modules>
+      <remove name="TelemetryHttpModule" />
+      <add name="TelemetryHttpModule" type="OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule" preCondition="managedHandler" />
+    </modules>
+  </system.webServer>
+```
+
+The ASP.NET HTTP module can be also set in `applicationHost.config`.
+Here is an example where you can add the module
+to set it for all ASP.NET application runing in Integrated Pipeline Mode:
+
+```xml
+  <location path="" overrideMode="Allow">
+    <system.webServer>
+      <modules>
+        <add name="TelemetryHttpModule" type="OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule" preCondition="managedHandler" />
+      </modules>
+    </system.webServer>
+  </location>
+```
+
+## Enable ASP.NET instrumentation
 
 Make sure to enable the ASP.NET instrumentation by setting
 `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS=AspNet`.
