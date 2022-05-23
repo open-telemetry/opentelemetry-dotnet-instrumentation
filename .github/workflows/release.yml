@@ -21,7 +21,7 @@ jobs:
             6.0.x
       - run: ./build.cmd
       - name: Upload binaries
-        uses: actions/upload-artifact@v3.0.0
+        uses: actions/upload-artifact@v3.1.0
         if: always()
         with:
           name: bin-${{ matrix.machine }}
