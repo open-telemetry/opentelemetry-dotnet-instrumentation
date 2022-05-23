@@ -50,14 +50,6 @@ for more details.
 |-|-|-|-|
 | `NetRuntime` | [OpenTelemetry.Instrumentation.Runtime](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.Runtime) | * | source |
 
-## ASP.NET (.NET Framework) Instrumentation
-
-ASP.NET instrumentation on .NET Framework requires to install the
-[`OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule/)
-NuGet package in the instrumented project.
-See [the WebConfig section](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.AspNet#step-2-modify-webconfig)
-for more information.
-
 ## Logging
 
 The default log directory paths are:
