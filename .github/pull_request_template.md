@@ -15,7 +15,7 @@ Fixes #
 ## Checklist
 
 <!-- All items should be verified and marked as done.
-     If an item doesn't apply to the introduced changes - check it as done too. -->
+     ~~strikethrough~~ if an item doesn't apply to the introduced changes. -->
 
 - [ ] `CHANGELOG.md` is updated.
 - [ ] Documentation is updated.
