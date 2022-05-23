@@ -48,7 +48,7 @@ for more details.
 
 | ID | Library | Supported versions | Instrumentation type |
 |-|-|-|-|
-| `NetRuntime` | [OpenTelemetry.Instrumentation.Runtime]https://www.nuget.org/packages/OpenTelemetry.Instrumentation.Runtime/ | * | source |
+| `NetRuntime` | [OpenTelemetry.Instrumentation.Runtime](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.Runtime) | * | source |
 
 ## ASP.NET (.NET Framework) Instrumentation
 
