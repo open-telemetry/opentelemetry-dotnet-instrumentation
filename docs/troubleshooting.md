@@ -55,3 +55,12 @@ environment variable.
 
 After obtaining the logs, remove the `OTEL_DOTNET_AUTO_DEBUG`
 environment variable to avoid unnecessary overhead.
+
+## Nothing happens
+
+It may occur that the .NET Profiler is unable to attach
+and therefore no logs would be emitted.
+
+The most common reason is that the instrumented application
+has no permissions to load the OpenTelemetry .NET Automatic Instrumentation
+assemblies.

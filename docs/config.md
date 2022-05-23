@@ -41,14 +41,6 @@ for more details.
 | `MongoDb` | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core) | ≥2.3.0 & < 3.0.0 | source & bytecode |
 | `SqlClient` | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) | * | source |
 
-## ASP.NET (.NET Framework) Instrumentation
-
-ASP.NET instrumentation on .NET Framework requires to install the
-[`OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule/)
-NuGet package in the instrumented project.
-See [the WebConfig section](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.AspNet#step-2-modify-webconfig)
-for more information.
-
 ## Logging
 
 The default log directory paths are:

@@ -115,6 +115,7 @@ DOTNET_SHARED_STORE=%InstallationLocation%/store
 DOTNET_STARTUP_HOOKS=%InstallationLocation%/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll
 OTEL_DOTNET_AUTO_HOME=%InstallationLocation%
 OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
+OTEL_SERVICE_NAME=my-service-name
 ```
 
 ### Instrument a .NET application on Linux
@@ -130,6 +131,7 @@ DOTNET_SHARED_STORE=%InstallationLocation%/store
 DOTNET_STARTUP_HOOKS=%InstallationLocation%/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll
 OTEL_DOTNET_AUTO_HOME=%InstallationLocation%
 OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
+OTEL_SERVICE_NAME=my-service-name
 ```
 
 ### Instrument a .NET application on macOS
@@ -145,11 +147,16 @@ DOTNET_SHARED_STORE=%InstallationLocation%/store
 DOTNET_STARTUP_HOOKS=%InstallationLocation%/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll
 OTEL_DOTNET_AUTO_HOME=%InstallationLocation%
 OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
+OTEL_SERVICE_NAME=my-service-name
 ```
 
 ## Instrument a Windows Service running a .NET application
 
 See [windows-service-instrumentation.md](windows-service-instrumentation.md).
+
+## Instrument an ASP.NET application deployed on IIS
+
+See [iis-instrumentation.md](iis-instrumentation.md).
 
 ## Configuration
 
