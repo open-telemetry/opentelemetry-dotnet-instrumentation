@@ -34,8 +34,8 @@ namespace TestApplication.SqlClient
             Console.WriteLine($"Profiler attached: {IsProfilerAttached()}");
             Console.WriteLine($"Platform: {(Environment.Is64BitProcess ? "x64" : "x32")}");
 
-            var databasePort = GetPort(args);
-            var connectionString = GetConnectionString(databasePort);
+            (string databasePassword, string databasePort) = ParseArgs(args);
+            var connectionString = GetConnectionString(databasePassword, databasePort);
 
             using (var connection = new SqlConnection(connectionString))
             {
@@ -134,9 +134,9 @@ namespace TestApplication.SqlClient
             await ExecuteCommandAsync(DropCommand, connection);
         }
 
-        private static string GetConnectionString(string databasePort)
+        private static string GetConnectionString(string databasePassword, string databasePort)
         {
-            return $"Server=localhost,{databasePort};User=sa;Password=@someThingComplicated1234;TrustServerCertificate=True;";
+            return $"Server=localhost,{databasePort};User=sa;Password={databasePassword};TrustServerCertificate=True;";
         }
 
         private static bool? IsProfilerAttached()
@@ -154,9 +154,14 @@ namespace TestApplication.SqlClient
             return isAttached ?? false;
         }
 
-        private static string GetPort(IReadOnlyList<string> args)
+        private static (string DatabasePassword, string Port) ParseArgs(IReadOnlyList<string> args)
         {
-            return args.Count > 0 ? args[1] : "1433";
+            if (args?.Count != 2)
+            {
+                throw new ArgumentException($"{nameof(TestApplication.SqlClient)}: requires two command-line arguments: <dbPassword> <dbPort>");
+            }
+
+            return (DatabasePassword: args[0], Port: args[1]);
         }
     }
 }

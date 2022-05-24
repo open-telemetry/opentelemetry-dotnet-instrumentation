@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System;
 using System.Threading.Tasks;
 using DotNet.Testcontainers.Containers.Builders;
 using DotNet.Testcontainers.Containers.Modules;
@@ -33,7 +34,6 @@ namespace IntegrationTests.SqlClient
     {
         private const int DatabasePort = 1433;
         private const string DatabaseImage = "mcr.microsoft.com/mssql/server:2019-CU15-ubuntu-20.04";
-        private const string DatabasePassword = "@someThingComplicated1234";
 
         private TestcontainersContainer _container;
 
@@ -41,6 +41,8 @@ namespace IntegrationTests.SqlClient
         {
             Port = TcpPortProvider.GetOpenPort();
         }
+
+        public string Password { get; } = $"@{Guid.NewGuid().ToString("N")}";
 
         public int Port { get; }
 
@@ -69,7 +71,7 @@ namespace IntegrationTests.SqlClient
                 .WithImage(DatabaseImage)
                 .WithName($"sql-server-{Port}")
                 .WithPortBinding(Port, DatabasePort)
-                .WithEnvironment("SA_PASSWORD", DatabasePassword)
+                .WithEnvironment("SA_PASSWORD", Password)
                 .WithEnvironment("ACCEPT_EULA", "Y")
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(DatabasePort));
 
