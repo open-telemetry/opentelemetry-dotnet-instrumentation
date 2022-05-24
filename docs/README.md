@@ -142,7 +142,7 @@ OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0
 ```
 
 Enable desired library instrumentations using `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS`
-and  `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS` environment variables.
+and `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS` environment variables.
 For example:
 
 ```env
