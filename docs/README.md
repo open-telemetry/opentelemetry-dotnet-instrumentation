@@ -82,7 +82,7 @@ See [config.md#instrumented-libraries-and-frameworks](config.md#instrumented-lib
 
 ## Get started
 
-### Install the instrumentation
+### Install
 
 Download and extract the appropriate binaries from
 [the latest release](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest).
@@ -97,57 +97,57 @@ sudo mkdir -p /var/log/opentelemetry/dotnet
 sudo chmod a+rwx /var/log/opentelemetry/dotnet
 ```
 
-### Instrument a .NET application on Windows
+### Instrument a .NET application
 
 Before running your application, set the following environment variables:
 
 ```env
 COR_ENABLE_PROFILING=1
 COR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
+CORECLR_ENABLE_PROFILING=1
+CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
+DOTNET_ADDITIONAL_DEPS=%InstallationLocation%/AdditionalDeps
+DOTNET_SHARED_STORE=%InstallationLocation%/store
+DOTNET_STARTUP_HOOKS=%InstallationLocation%/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll
+OTEL_DOTNET_AUTO_HOME=%InstallationLocation%
+OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
+```
+
+On **Windows** you need to additionally set:
+
+```env
 COR_PROFILER_PATH_64=%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll
 COR_PROFILER_PATH_32=%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll
-CORECLR_ENABLE_PROFILING=1
-CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
 CORECLR_PROFILER_PATH_64=%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll
 CORECLR_PROFILER_PATH_32=%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll
-DOTNET_ADDITIONAL_DEPS=%InstallationLocation%/AdditionalDeps
-DOTNET_SHARED_STORE=%InstallationLocation%/store
-DOTNET_STARTUP_HOOKS=%InstallationLocation%/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll
-OTEL_DOTNET_AUTO_HOME=%InstallationLocation%
-OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
-OTEL_SERVICE_NAME=my-service-name
 ```
 
-### Instrument a .NET application on Linux
-
-Before running your application, set the following environment variables:
+On **Linux** you need to additionally set:
 
 ```env
-CORECLR_ENABLE_PROFILING=1
-CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
 CORECLR_PROFILER_PATH=%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.so
-DOTNET_ADDITIONAL_DEPS=%InstallationLocation%/AdditionalDeps
-DOTNET_SHARED_STORE=%InstallationLocation%/store
-DOTNET_STARTUP_HOOKS=%InstallationLocation%/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll
-OTEL_DOTNET_AUTO_HOME=%InstallationLocation%
-OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
-OTEL_SERVICE_NAME=my-service-name
 ```
 
-### Instrument a .NET application on macOS
-
-Before running your application, set the following environment variables:
+On **macOS** you need to additionally set:
 
 ```env
-CORECLR_ENABLE_PROFILING=1
-CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
 CORECLR_PROFILER_PATH=%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.dylib
-DOTNET_ADDITIONAL_DEPS=%InstallationLocation%/AdditionalDeps
-DOTNET_SHARED_STORE=%InstallationLocation%/store
-DOTNET_STARTUP_HOOKS=%InstallationLocation%/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll
-OTEL_DOTNET_AUTO_HOME=%InstallationLocation%
-OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
-OTEL_SERVICE_NAME=my-service-name
+```
+
+Configure application's resources. For example:
+
+```env
+OTEL_SERVICE_NAME=my-service
+OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0
+```
+
+Enable desired library instrumentations using `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS`
+and `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS` environment variables.
+For example:
+
+```env
+OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS=AspNet,HttpClient
+OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS=NetRuntime
 ```
 
 ## Instrument a Windows Service running a .NET application
