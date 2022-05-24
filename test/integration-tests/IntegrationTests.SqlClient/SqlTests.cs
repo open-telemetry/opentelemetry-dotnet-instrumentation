@@ -47,7 +47,7 @@ namespace IntegrationTests.SqlClient
 
             const int expectedSpanCount = 8;
 
-            using var processResult = RunTestApplicationAndWaitForExit(agent.Port, arguments: $"--database-port {_sqlClientFixture.Port}", enableStartupHook: true);
+            using var processResult = RunTestApplicationAndWaitForExit(agent.Port, arguments: $"{_sqlClientFixture.Password} {_sqlClientFixture.Port}", enableStartupHook: true);
             Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
             var spans = agent.WaitForSpans(expectedSpanCount, TimeSpan.FromSeconds(5));
 
