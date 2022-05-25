@@ -168,6 +168,9 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
+    ignore:
+      # The instrumentation only supports specific versions of GraphQL and the test app needs to test against a specific version
+      - dependency-name: "GraphQL*"
 
   - package-ecosystem: nuget
     directory: /test/test-applications/integrations/dependency-libs/TestApplication.ExampleLibraryTracer
