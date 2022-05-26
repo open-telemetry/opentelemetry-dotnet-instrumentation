@@ -1,0 +1,6 @@
+<!-- This is an empty *.csproj so that dependabot can bump dependencies in Directory.Build.props. -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <DefaultItemExcludes>**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>
