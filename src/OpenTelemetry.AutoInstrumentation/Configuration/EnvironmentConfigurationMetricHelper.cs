@@ -52,6 +52,34 @@ internal static class EnvironmentConfigurationMetricHelper
             builder.AddConsoleExporter();
         }
 
+        switch (settings.MetricExporter)
+        {
+            case MetricsExporter.Prometheus:
+                throw new NotSupportedException("Prometheus is not supported yet.");
+            case MetricsExporter.Otlp:
+#if NETCOREAPP3_1
+                if (settings.Http2UnencryptedSupportEnabled)
+                {
+                    // Adding the OtlpExporter creates a GrpcChannel.
+                    // This switch must be set before creating a GrpcChannel/HttpClient when calling an insecure gRPC service.
+                    // See: https://docs.microsoft.com/aspnet/core/grpc/troubleshoot#call-insecure-grpc-services-with-net-core-client
+                    AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+                }
+#endif
+                builder.AddOtlpExporter(options =>
+                {
+                    if (settings.OtlpExportProtocol.HasValue)
+                    {
+                        options.Protocol = settings.OtlpExportProtocol.Value;
+                    }
+                });
+                break;
+            case MetricsExporter.None:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException($"Metrics exporter '{settings.MetricExporter}' is incorrect");
+        }
+
         return builder;
     }
 }

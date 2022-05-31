@@ -31,13 +31,19 @@ public class SettingsTests : IDisposable
         ClearEnvVars();
     }
 
+    public static IEnumerable<object[]> ExporterEnvVarAndLoadSettingsAction()
+    {
+        yield return new object[] { ConfigurationKeys.Traces.Exporter, () => _ = TracerSettings.FromDefaultSources() };
+        yield return new object[] { ConfigurationKeys.Metrics.Exporter, () => _ = MeterSettings.FromDefaultSources() };
+    }
+
     public void Dispose()
     {
         ClearEnvVars();
     }
 
     [Fact]
-    public void DefaultValues()
+    public void TracerSettings_DefaultValues()
     {
         var settings = TracerSettings.FromDefaultSources();
 
@@ -58,6 +64,26 @@ public class SettingsTests : IDisposable
         }
     }
 
+    [Fact]
+    public void MeterSettings_DefaultValues()
+    {
+        var settings = MeterSettings.FromDefaultSources();
+
+        using (new AssertionScope())
+        {
+            settings.MetricsEnabled.Should().BeTrue();
+            settings.LoadMetricsAtStartup.Should().BeTrue();
+            settings.MetricExporter.Should().Be(MetricsExporter.Otlp);
+            settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
+            settings.ConsoleExporterEnabled.Should().BeFalse();
+            settings.EnabledInstrumentation.Should().BeEmpty();
+            settings.MetricPlugins.Should().BeEmpty();
+            settings.Meters.Should().BeEmpty();
+            settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
+            settings.FlushOnUnhandledException.Should().BeFalse();
+        }
+    }
+
     [Theory]
     [InlineData("none", TracesExporter.None)]
     [InlineData("jaeger", TracesExporter.Jaeger)]
@@ -73,15 +99,23 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData("not-existing")]
-    [InlineData("prometheus")]
-    public void TracesExporter_UnsupportedValues(string tracesExporter)
+    [InlineData("none", MetricsExporter.None)]
+    [InlineData("otlp", MetricsExporter.Otlp)]
+    public void MetricExporter_SupportedValues(string metricExporter, MetricsExporter expectedMetricsExporter)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, tracesExporter);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, metricExporter);
 
-        Action act = () => TracerSettings.FromDefaultSources();
+        var settings = MeterSettings.FromDefaultSources();
 
-        act.Should().Throw<FormatException>();
+        settings.MetricExporter.Should().Be(expectedMetricsExporter);
+    }
+
+    [Theory]
+    [MemberData(nameof(ExporterEnvVarAndLoadSettingsAction))]
+    public void UnsupportedExporterValues(string exporterEnvVar, Action loadSettingsAction)
+    {
+        Environment.SetEnvironmentVariable(exporterEnvVar, "not-existing");
+        loadSettingsAction.Should().Throw<FormatException>();
     }
 
     [Theory]
@@ -128,6 +162,7 @@ public class SettingsTests : IDisposable
 
     private static void ClearEnvVars()
     {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Http2UnencryptedSupportEnabled, null);
