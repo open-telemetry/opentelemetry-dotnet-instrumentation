@@ -101,6 +101,7 @@ public class SettingsTests : IDisposable
     [Theory]
     [InlineData("none", MetricsExporter.None)]
     [InlineData("otlp", MetricsExporter.Otlp)]
+    [InlineData("prometheus", MetricsExporter.Prometheus)]
     public void MetricExporter_SupportedValues(string metricExporter, MetricsExporter expectedMetricsExporter)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, metricExporter);
