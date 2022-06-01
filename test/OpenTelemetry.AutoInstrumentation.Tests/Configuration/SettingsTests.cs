@@ -33,8 +33,8 @@ public class SettingsTests : IDisposable
 
     public static IEnumerable<object[]> ExporterEnvVarAndLoadSettingsAction()
     {
-        yield return new object[] { ConfigurationKeys.Traces.Exporter, () => _ = TracerSettings.FromDefaultSources() };
-        yield return new object[] { ConfigurationKeys.Metrics.Exporter, () => _ = MeterSettings.FromDefaultSources() };
+        yield return new object[] { ConfigurationKeys.Traces.Exporter, void () => TracerSettings.FromDefaultSources() };
+        yield return new object[] { ConfigurationKeys.Metrics.Exporter, void () => MeterSettings.FromDefaultSources() };
     }
 
     public void Dispose()
