@@ -52,7 +52,7 @@ docker-compose -f ./dev/docker-compose.yaml -f ./examples/docker-compose.yaml up
 
 # instrument and run HTTP server app in background
 export OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_PLUGINS="Examples.AspNetCoreMvc.OtelSdkPlugin, Examples.AspNetCoreMvc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null:Examples.Vendor.Distro.Plugin, Examples.Vendor.Distro, Version=0.0.1.0, Culture=neutral, PublicKeyToken=null"
-ENABLE_PROFILING=${enableProfiling} OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS="AspNet,SqlClient" OTEL_SERVICE_NAME="aspnet-server" OTEL_TRACES_EXPORTER=${exporter} ./dev/instrument.sh ASPNETCORE_URLS="http://127.0.0.1:8080/" dotnet ./examples/AspNetCoreMvc/bin/${configuration}/${aspNetAppTargetFramework}/Examples.AspNetCoreMvc.dll &
+ENABLE_PROFILING=${enableProfiling} OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS="AspNet,MongoDb,SqlClient" OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES="MyCompany.MyProduct.MyLibrary" OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS="NetRuntime" OTEL_SERVICE_NAME="aspnet-server" OTEL_TRACES_EXPORTER=${exporter} ./dev/instrument.sh ASPNETCORE_URLS="http://127.0.0.1:8080/" dotnet ./examples/AspNetCoreMvc/bin/${configuration}/${aspNetAppTargetFramework}/Examples.AspNetCoreMvc.dll &
 unset OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_PLUGINS
 ./dev/wait-local-port.sh 8080
 
@@ -60,4 +60,9 @@ unset OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_PLUGINS
 ENABLE_PROFILING=${enableProfiling} OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS="HttpClient" OTEL_SERVICE_NAME=${exampleApp} OTEL_TRACES_EXPORTER=${exporter} OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP=${exampleAppInjectSDK} ./dev/instrument.sh $exampleAppDotnetCli ./examples/${exampleApp}/bin/$configuration/${exampleAppTargetFramework}/Examples.${exampleApp}.${exampleAppExt}
 
 # verify if it works
-read -p "Check traces under: http://localhost:16686/search. Press enter to close containers and stop example apps"
+{
+  echo "Check traces at http://localhost:16686/search"
+  echo "Check metrics at http://localhost:9090"
+  echo "Press enter to close containers and stop example apps"
+  read
+} 2> /dev/null
