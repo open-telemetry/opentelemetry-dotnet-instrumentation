@@ -7,6 +7,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.1.0-beta.1...HEAD)
 
+This release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
+
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.3.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.3.0)
+- Non-core components: [`1.0.0-rc9.4`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/1.0.0-rc9.4)
+- `System.Diagnostics.DiagnosticSource`: [`6.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/6.0.0)
+
 ### Added
 
 - Adds MongoDB instrumentation support from .NET Core 3.1+.
