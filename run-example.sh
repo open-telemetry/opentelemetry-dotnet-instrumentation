@@ -15,6 +15,13 @@ aspNetAppTargetFramework=${aspNetAppTargetFramework:-netcoreapp3.1}
 exampleAppTargetFramework=${exampleAppTargetFramework:-netcoreapp3.1}
 exampleApp=${exampleApp:-ConsoleApp}
 
+if [[ $aspNetAppTargetFramework == net462 ]];
+then
+  vendorPluginTargetFramework=${exampleAppTargetFramework:-net462}
+else
+  vendorPluginTargetFramework=${exampleAppTargetFramework:-netcoreapp3.1}
+fi
+
 # Handle the differences between launching a dll and exe
 exampleAppExt="dll"
 exampleAppDotnetCli="dotnet"
@@ -33,7 +40,7 @@ if [[ $skipAppBuild != "true" && $skipAppBuild != "1" ]]; then
   dotnet publish -f $aspNetAppTargetFramework -c $configuration ./examples/AspNetCoreMvc/Examples.AspNetCoreMvc.csproj
 
   # build plugin for HTTP server app
-  dotnet publish -f $aspNetAppTargetFramework -c $configuration ./examples/Vendor.Distro/Examples.Vendor.Distro.csproj -o bin/tracer-home/$aspNetAppTargetFramework
+  dotnet publish -f $vendorPluginTargetFramework -c $configuration ./examples/Vendor.Distro/Examples.Vendor.Distro.csproj -o bin/tracer-home/$vendorPluginTargetFramework
 
   # build the client app
   dotnet publish -f $exampleAppTargetFramework -c $configuration ./examples/${exampleApp}/Examples.${exampleApp}.csproj
