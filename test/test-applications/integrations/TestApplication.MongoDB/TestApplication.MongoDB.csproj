@@ -17,9 +17,6 @@
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="$(ApiVersion)" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
-
-    <!-- Hack to fix SDK dependencies -->
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.0.3" />
   </ItemGroup>
 
 </Project>
