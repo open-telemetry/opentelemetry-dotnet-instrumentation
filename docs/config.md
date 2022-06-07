@@ -81,7 +81,7 @@ Exporters output the telemetry.
 
 To enable the Jaeger exporter, set the `OTEL_TRACES_EXPORTER` environment variable
 to `jaeger`. To customize the Jaeger exporter using environment variables, see the
-[Jaeger exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.Jaeger#environment-variables).
+[Jaeger exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.3.0/src/OpenTelemetry.Exporter.Jaeger#environment-variables).
 Important environment variables include:
 
 | Environment variable | Description | Default value |
@@ -95,7 +95,7 @@ Important environment variables include:
 
 To enable the OTLP exporter, set the `OTEL_TRACES_EXPORTER` environment variable
 to `otlp`. To customize the OTLP exporter using environment variables, see the
-[OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables).
+[OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.3.0/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables).
 Important environment variables include:
 
 | Environment variable | Description | Default value |
@@ -125,7 +125,7 @@ environment variables for the OTLP exporter:
 
 To enable the Zipkin exporter, set the `OTEL_TRACES_EXPORTER` environment
 variable to `zipkin`. To customize the Zipkin exporter using environment
-variables, see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.2.0/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
+variables, see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.3.0/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
 Important environment variables include:
 
 | Environment variable | Description | Default value |
