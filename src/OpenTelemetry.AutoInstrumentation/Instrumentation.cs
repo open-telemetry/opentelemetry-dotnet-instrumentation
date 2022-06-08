@@ -19,6 +19,7 @@ using System.Diagnostics.Tracing;
 using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
+using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Metrics;
@@ -40,6 +41,7 @@ public static class Instrumentation
     private static int _firstInitialization = 1;
     private static int _isExiting = 0;
     private static SdkSelfDiagnosticsEventListener _sdkEventListener;
+    private static LazyInstrumentationLoader _lazyInstrumentation;
 
     private static TracerProvider _tracerProvider;
     private static MeterProvider _meterProvider;
@@ -87,6 +89,7 @@ public static class Instrumentation
             {
                 // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
                 _sdkEventListener = new(EventLevel.Warning);
+                _lazyInstrumentation = new();
 
                 // Register to shutdown events
                 AppDomain.CurrentDomain.ProcessExit += OnExit;
@@ -101,13 +104,20 @@ public static class Instrumentation
             if (TracerSettings.LoadTracerAtStartup)
             {
                 var builder = Sdk
-                    .CreateTracerProviderBuilder()
+                    .CreateTracerProviderBuilder();
+
+                _lazyInstrumentation.OnBuilderAvailable(builder);
+
+                builder
                     .SetResourceBuilder(_resourceBuilder)
                     .UseEnvironmentVariables(TracerSettings)
                     .SetSampler(new AlwaysOnSampler())
                     .InvokePlugins(TracerSettings.TracerPlugins);
 
                 _tracerProvider = builder.Build();
+
+                _lazyInstrumentation.OnProviderAvailable(_tracerProvider);
+
                 Logger.Information("OpenTelemetry tracer initialized.");
             }
 
