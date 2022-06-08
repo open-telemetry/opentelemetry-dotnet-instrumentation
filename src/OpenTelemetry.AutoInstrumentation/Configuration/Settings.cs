@@ -31,7 +31,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
 
         /// <summary>
         /// Delimiter for textual representation of settings that contains multiple
-        /// fully qualifined .NET names, e.g.: assembly or type names. Comma is part
+        /// fully qualified .NET names, e.g.: assembly or type names. Comma is part
         /// of a fully qualified name and can't be used here.
         /// </summary>
         public const char DotNetQualifiedNameSeparator = ':';
