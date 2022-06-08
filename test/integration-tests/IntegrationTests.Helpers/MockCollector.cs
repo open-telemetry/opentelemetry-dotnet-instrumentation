@@ -202,15 +202,19 @@ public class MockCollector : IDisposable
                             RequestHeaders = RequestHeaders.Add(new NameValueCollection(ctx.Request.Headers));
                         }
                     }
+
+                    // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
+                    // (Setting content-length avoids that)
+                    ctx.Response.ContentType = "application/x-protobuf";
+                    var responseMessage = new ExportMetricsServiceResponse();
+                    ctx.Response.ContentLength64 = responseMessage.CalculateSize();
+                    responseMessage.WriteTo(ctx.Response.OutputStream);
+                    ctx.Response.Close();
+                    continue;
                 }
 
-                // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
-                // (Setting content-length avoids that)
-
-                ctx.Response.ContentType = "application/x-protobuf";
-                var responseMessage = new ExportMetricsServiceResponse();
-                ctx.Response.ContentLength64 = responseMessage.CalculateSize();
-                responseMessage.WriteTo(ctx.Response.OutputStream);
+                // We received an unsupported request
+                ctx.Response.StatusCode = (int)HttpStatusCode.NotImplemented;
                 ctx.Response.Close();
             }
             catch (HttpListenerException)
