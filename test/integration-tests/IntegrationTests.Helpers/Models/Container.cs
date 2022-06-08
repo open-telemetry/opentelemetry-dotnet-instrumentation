@@ -15,7 +15,7 @@
 // </copyright>
 
 using System;
-using DotNet.Testcontainers.Containers.Modules;
+using DotNet.Testcontainers.Containers;
 
 namespace IntegrationTests.Helpers.Models;
 

@@ -18,9 +18,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using DotNet.Testcontainers.Containers.Builders;
-using DotNet.Testcontainers.Containers.Modules;
-using DotNet.Testcontainers.Containers.OutputConsumers;
+using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Containers;
 using FluentAssertions;
 using IntegrationTests.Helpers.Models;
 using Xunit.Abstractions;
@@ -82,8 +81,8 @@ public abstract class TestHelper
             .WithNetwork(networkId, networkName)
             .WithPortBinding(webPort, 80)
             .WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", zipkinEndpoint)
-            .WithMount(logPath, "c:/inetpub/wwwroot/logs")
-            .WithMount(EnvironmentHelper.GetNukeBuildOutput(), "c:/opentelemetry");
+            .WithBindMount(logPath, "c:/inetpub/wwwroot/logs")
+            .WithBindMount(EnvironmentHelper.GetNukeBuildOutput(), "c:/opentelemetry");
 
         var container = builder.Build();
         var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
