@@ -56,7 +56,7 @@ exampleAppTargetFramework="net6.0" ./run-example.sh
 ### AspNetCoreMvc
 
 An ASP.NET Core MVC application used to simulate a server application capable
-of making calls to MongoDB and Redis. In addition to these calls,
+of making calls to MongoDB, Redis and generate metrics. In addition to these calls,
 it also supports various other endpoints.
 Check the [Controllers](./AspNetCoreMvc/Controllers/) for some
 of the endpoints you can use.
