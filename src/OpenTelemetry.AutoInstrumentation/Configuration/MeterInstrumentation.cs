@@ -22,6 +22,16 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 public enum MeterInstrumentation
 {
     /// <summary>
+    /// ASP.NET instrumentation.
+    /// </summary>
+    AspNet,
+
+    /// <summary>
+    /// HttpClient instrumentation.
+    /// </summary>
+    HttpClient,
+
+    /// <summary>
     /// .NET Runtime Metrics instrumentation.
     /// </summary>
     NetRuntime,
