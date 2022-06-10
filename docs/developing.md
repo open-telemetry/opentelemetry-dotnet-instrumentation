@@ -125,7 +125,7 @@ with automatic instrumentation in your shell, such as bash, zsh, or git bash.
 For example:
 
 ```sh
-./dev/instrument.sh OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS=HttpClient dotnet run -f netcoreapp3.1 --project ./examples/ConsoleApp/Examples.ConsoleApp.csproj
+./dev/instrument.sh OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS=HttpClient dotnet run -f netcoreapp3.1 --project ./examples/ConsoleApp/Examples.ConsoleApp.csproj
 ```
 
 You can use [`dev/envvars.sh`](../dev/envvars.sh) to export profiler
@@ -135,7 +135,7 @@ You must run `dev/envvars.sh` from the root of this repository. For example:
 
 ```sh
 source ./dev/envvars.sh
-export OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS=HttpClient
+export OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS=HttpClient
  ./examples/ConsoleApp/bin/Release/netcoreapp3.1/Examples.ConsoleApp
 ```
 
