@@ -39,7 +39,8 @@ You can customize the script using the following environment variables:
 | **exampleApp**                  | Application selected for the `http-client` service                                  | `ConsoleApp`                                                                  |
 | **exampleAppInjectSDK**         | Whether automatic instrumentation injects the SDK on the `http-client` service      | `true`                                                                        |
 | **exampleAppTargetFramework**   | Target framework for the `http-client` service                                      | `netcoreapp3.1`                                                               |
-| **exporter**                    | Value for [`OTEL_TRACES_EXPORTER`](../docs/config.md#exporters) env. variable       | `otlp`                                                                        |
+| **tracesExporter**              | Value for [`OTEL_TRACES_EXPORTER`](../docs/config.md#exporters) env. variable       | `otlp`                                                                        |
+| **metricsExporter**             | Value for [`OTEL_METRICS_EXPORTER`](../docs/config.md#exporters) env. variable      | `otlp`                                                                        |
 | **keepContainers**              | Whether the docker containers are preserved after the script execution              | `false`                                                                       |
 | **skipAppBuild**                | Whether the script skips building the example apps                                  | `false`                                                                       |
 | **vendorPluginTargetFramework** | Target framework for the `aspnet-server` service                                    | `net462` if `aspNetAppTargetFramework` is `net462`, `netcoreapp3.1` otherwise |
@@ -55,7 +56,7 @@ exampleAppTargetFramework="net6.0" ./run-example.sh
 ### AspNetCoreMvc
 
 An ASP.NET Core MVC application used to simulate a server application capable
-of making calls to MongoDB and Redis. In addition to these calls,
+of making calls to MongoDB, Redis and generate metrics. In addition to these calls,
 it also supports various other endpoints.
 Check the [Controllers](./AspNetCoreMvc/Controllers/) for some
 of the endpoints you can use.
@@ -151,6 +152,6 @@ A library that wraps an OpenTracing span around a `Func<Task>` delegate.
 
 ### Vendor.Distro
 
-Implements an [instrumentation plugin](../docs/config.md#customization).
+Implements an [instrumentation plugin](../docs/config.md#additional-settings).
 The example script adds this plugin to the instrumentation configuration
 when launching the server application of the demo.
