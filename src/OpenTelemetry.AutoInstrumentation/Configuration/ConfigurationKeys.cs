@@ -91,7 +91,7 @@ public class ConfigurationKeys
         /// <summary>
         /// Configuration key for colon (:) separated list of trace plugins represented by <see cref="System.Type.AssemblyQualifiedName"/>.
         /// </summary>
-        public const string ProviderPlugins = "OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_PLUGINS";
+        public const string ProviderPlugins = "OTEL_DOTNET_AUTO_TRACES_PLUGINS";
 
         /// <summary>
         /// Configuration key for additional <see cref="ActivitySource"/> names to be added to the tracer at the startup.
