@@ -39,8 +39,8 @@ You can customize the script using the following environment variables:
 | **exampleApp**                  | Application selected for the `http-client` service                                  | `ConsoleApp`                                                                  |
 | **exampleAppInjectSDK**         | Whether automatic instrumentation injects the SDK on the `http-client` service      | `true`                                                                        |
 | **exampleAppTargetFramework**   | Target framework for the `http-client` service                                      | `netcoreapp3.1`                                                               |
-| **tracesexporter**              | Value for [`OTEL_TRACES_EXPORTER`](../docs/config.md#exporters) env. variable       | `otlp`                                                                        |
-| **metricsexporter**             | Value for [`OTEL_METRICS_EXPORTER`](../docs/config.md#exporters) env. variable      | `otlp`                                                                        |
+| **tracesExporter**              | Value for [`OTEL_TRACES_EXPORTER`](../docs/config.md#exporters) env. variable       | `otlp`                                                                        |
+| **metricsExporter**             | Value for [`OTEL_METRICS_EXPORTER`](../docs/config.md#exporters) env. variable      | `otlp`                                                                        |
 | **keepContainers**              | Whether the docker containers are preserved after the script execution              | `false`                                                                       |
 | **skipAppBuild**                | Whether the script skips building the example apps                                  | `false`                                                                       |
 | **vendorPluginTargetFramework** | Target framework for the `aspnet-server` service                                    | `net462` if `aspNetAppTargetFramework` is `net462`, `netcoreapp3.1` otherwise |
