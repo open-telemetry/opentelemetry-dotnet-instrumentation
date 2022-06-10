@@ -29,43 +29,43 @@ public class PluginsConfigurationHelperTests
     [Fact]
     public void MissingAssembly()
     {
-        var traceraction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { "Missing.Assembly.PluginType, Missing.Assembly" });
-        traceraction.Should().Throw<FileNotFoundException>();
+        var tracerAction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { "Missing.Assembly.PluginType, Missing.Assembly" });
+        tracerAction.Should().Throw<FileNotFoundException>();
 
-        var meteraction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(new[] { "Missing.Assembly.PluginType, Missing.Assembly" });
-        meteraction.Should().Throw<FileNotFoundException>();
+        var meterAction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(new[] { "Missing.Assembly.PluginType, Missing.Assembly" });
+        meterAction.Should().Throw<FileNotFoundException>();
     }
 
     [Fact]
     public void MissingPluginTypeFromAssembly()
     {
-        var traceraction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { "Missing.PluginType" });
-        traceraction.Should().Throw<TypeLoadException>();
+        var tracerAction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { "Missing.PluginType" });
+        tracerAction.Should().Throw<TypeLoadException>();
 
-        var meteraction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(new[] { "Missing.PluginType" });
-        meteraction.Should().Throw<TypeLoadException>();
+        var meterAction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(new[] { "Missing.PluginType" });
+        meterAction.Should().Throw<TypeLoadException>();
     }
 
     [Fact]
     public void PluginTypeMissingExpectedMethod()
     {
         var pluginAssemblyQualifiedName = GetType().AssemblyQualifiedName;
-        var traceraction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
-        traceraction.Should().Throw<MissingMethodException>();
+        var tracerAction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
+        tracerAction.Should().Throw<MissingMethodException>();
 
-        var meteraction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
-        meteraction.Should().Throw<MissingMethodException>();
+        var meterAction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
+        meterAction.Should().Throw<MissingMethodException>();
     }
 
     [Fact]
     public void PluginTypeMissingDefaultConstructor()
     {
         var pluginAssemblyQualifiedName = typeof(MockPluginMissingDefaultConstructor).AssemblyQualifiedName;
-        var traceraction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
-        traceraction.Should().Throw<MissingMethodException>();
+        var tracerAction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
+        tracerAction.Should().Throw<MissingMethodException>();
 
-        var meteraction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
-        meteraction.Should().Throw<MissingMethodException>();
+        var meterAction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
+        meterAction.Should().Throw<MissingMethodException>();
     }
 
     [Fact]
