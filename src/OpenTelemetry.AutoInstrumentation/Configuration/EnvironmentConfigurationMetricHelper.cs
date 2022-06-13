@@ -25,6 +25,8 @@ internal static class EnvironmentConfigurationMetricHelper
 {
     private static readonly Dictionary<MeterInstrumentation, Action<MeterProviderBuilder>> AddMeters = new()
     {
+        [MeterInstrumentation.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
+        [MeterInstrumentation.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
         [MeterInstrumentation.NetRuntime] = builder => builder.AddRuntimeMetrics(),
     };
 
@@ -43,6 +45,15 @@ internal static class EnvironmentConfigurationMetricHelper
         }
 
         return builder;
+    }
+
+    public static MeterProviderBuilder AddSdkAspNetInstrumentation(this MeterProviderBuilder builder)
+    {
+#if NET462
+        return builder.AddAspNetInstrumentation();
+#elif NETCOREAPP3_1_OR_GREATER
+        return builder.AddAspNetCoreInstrumentation();
+#endif
     }
 
     private static MeterProviderBuilder SetExporter(this MeterProviderBuilder builder, MeterSettings settings)
