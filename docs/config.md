@@ -48,6 +48,9 @@ for more details.
 
 | ID | Library | Supported versions | Instrumentation type |
 |-|-|-|-|
+| `AspNet` | ASP.NET MVC Framework | * | source |
+| `AspNet` | ASP.NET Core | * | source |
+| `HttpClient` | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | * | source |
 | `NetRuntime` | [OpenTelemetry.Instrumentation.Runtime](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.Runtime) | * | source |
 
 ## Logging
@@ -141,11 +144,11 @@ Important environment variables include:
 | `OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES` | Comma-separated list of additional `System.Diagnostics.ActivitySource` names to be added to the tracer at the startup. Use it to capture manually instrumented spans. |  |
 | `OTEL_DOTNET_AUTO_LEGACY_SOURCES` | Comma-separated list of additional legacy source names to be added to the tracer at the startup. Use it to capture `System.Diagnostics.Activity` objects created without using the `System.Diagnostics.ActivitySource` API. |  |
 | `OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION` | Controls whether the telemetry data is flushed when an [AppDomain.UnhandledException](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.unhandledexception) event is raised. Set to `true` when you suspect that you are experiencing a problem with missing telemetry data and also experiencing unhandled exceptions. | `false` |
-| `OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_PLUGINS` | Colon-separated list of OTel SDK instrumentation tracer plugin types, specified with the [assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname). _Note: This list must be colon-separated because the type names may include commas._ | |
+| `OTEL_DOTNET_AUTO_TRACES_PLUGINS` | Colon-separated list of OTel SDK instrumentation tracer plugin types, specified with the [assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname). _Note: This list must be colon-separated because the type names may include commas._ | |
 | `OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES` | Comma-separated list of additional `System.Diagnostics.Metrics.Meter` names to be added to the meter at the startup. Use it to capture manually instrumented spans. |  |
 | `OTEL_DOTNET_AUTO_METRICS_PLUGINS` | Colon-separated list of OTel SDK instrumentation meter plugin types, specified with the [assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname). _Note: This list must be colon-separated because the type names may include commas._ | |
 
-You can use `OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_PLUGINS` to extend the
+You can use `OTEL_DOTNET_AUTO_TRACES_PLUGINS` to extend the
 configuration of the OpenTelemetry .NET SDK Tracer. A plugin must be a
 non-static, non-abstract class which has a default constructor and a method
 with following signature:

@@ -15,6 +15,7 @@
 // </copyright>
 
 using System;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
 namespace Examples.Vendor.Distro
@@ -24,7 +25,14 @@ namespace Examples.Vendor.Distro
         public TracerProviderBuilder ConfigureTracerProvider(TracerProviderBuilder builder)
         {
             var typeName = this.ToString();
-            Console.WriteLine($"Hello from {typeName}");
+            Console.WriteLine($"Hello from Tracer Plugin - {typeName}");
+            return builder;
+        }
+
+        public MeterProviderBuilder ConfigureMeterProvider(MeterProviderBuilder builder)
+        {
+            var typeName = this.ToString();
+            Console.WriteLine($"Hello from Meter Plugin - {typeName}");
             return builder;
         }
     }
