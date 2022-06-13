@@ -44,6 +44,7 @@ internal class Program
         await HttpGet("https://www.example.com/default-handler");
         await HttpGet("http://127.0.0.1:8080/api/mongo");
         await HttpGet("http://127.0.0.1:8080/api/redis");
+        await HttpGet("http://127.0.0.1:8080/api/metrics");
 
         const string requestUrl = "https://www.example.com/";
         var request = new HttpRequestMessage
