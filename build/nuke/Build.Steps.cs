@@ -69,8 +69,9 @@ partial class Build
     Target Restore => _ => _
         .After(Clean)
         .Unlisted()
-        .Executes(() =>
+        .Executes(() => ControlFlow.ExecuteWithRetry(() =>
         {
+            
             if (IsWin)
             {
                 NuGetTasks.NuGetRestore(s => s
@@ -89,7 +90,7 @@ partial class Build
                     .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
                         o.SetPackageDirectory(NugetPackageDirectory)));
             }
-        });
+        }));
 
     Target CompileManagedSrc => _ => _
         .Unlisted()
