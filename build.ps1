@@ -28,9 +28,18 @@ $env:DOTNET_MULTILEVEL_LOOKUP = 0
 # EXECUTION
 ###########################################################################
 
-function ExecSafe([scriptblock] $cmd) {
-    & $cmd
-    if ($LASTEXITCODE) { exit $LASTEXITCODE }
+function ExecSafe([scriptblock] $cmd, [int]$maxRetries = 0 ) {
+    $tryCount = 0
+    while ($true) {
+        $tryCount++
+        & $cmd
+        if ($global:LASTEXITCODE -eq 0) { 
+            break
+        }
+        if ($tryCount -gt $maxRetries) {
+            exit $global:LASTEXITCODE 
+        }  
+    }
 }
 
 # If dotnet CLI is installed globally and it matches requested version, use for execution
@@ -65,5 +74,6 @@ else {
 
 Write-Output "Microsoft (R) .NET Core SDK version $(& $env:DOTNET_EXE --version)"
 
-ExecSafe { & $env:DOTNET_EXE build $BuildProjectFile /nodeReuse:false /p:UseSharedCompilation=false -nologo -clp:NoSummary --verbosity quiet }
+ExecSafe { & $env:DOTNET_EXE restore $BuildProjectFile -nologo -clp:NoSummary --verbosity quiet } -maxRetries 2
+ExecSafe { & $env:DOTNET_EXE build $BuildProjectFile /nodeReuse:false /p:UseSharedCompilation=false -nologo -clp:NoSummary --verbosity quiet --no-restore }
 ExecSafe { & $env:DOTNET_EXE run --project $BuildProjectFile --no-build -- $BuildArguments }
