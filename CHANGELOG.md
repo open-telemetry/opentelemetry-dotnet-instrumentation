@@ -28,6 +28,7 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
   `OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES`.
 - Support for .NET Runtime metrics collection using
   the `OpenTelemetry.Instrumentation.Runtime` package.
+- Support for ASP.NET and HttpClient metrics instrumentations.
 
 ### Changed
 

@@ -147,7 +147,7 @@ For example:
 
 ```env
 OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS=AspNet,HttpClient
-OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS=NetRuntime
+OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS=AspNet,HttpClient,NetRuntime
 ```
 
 ## Instrument a Windows Service running a .NET application
