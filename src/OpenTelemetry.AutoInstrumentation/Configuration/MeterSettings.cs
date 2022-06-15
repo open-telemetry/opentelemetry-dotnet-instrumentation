@@ -48,7 +48,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
                     }
                     else
                     {
-                        throw new ArgumentException($"The \"{instrumentation}\" is not recognized as supported metrics instrumentation and cannot be enabled");
+                        throw new FormatException($"The \"{instrumentation}\" is not recognized as supported metrics instrumentation and cannot be enabled");
                     }
                 }
             }
