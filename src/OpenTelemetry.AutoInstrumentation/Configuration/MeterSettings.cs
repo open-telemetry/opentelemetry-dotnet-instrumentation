@@ -62,7 +62,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
                 }
             }
 
-            EnabledInstrumentation = instrumentations.Values.ToList();
+            EnabledInstrumentations = instrumentations.Values.ToList();
 
             var providerPlugins = source.GetString(ConfigurationKeys.Metrics.ProviderPlugins);
             if (providerPlugins != null)
@@ -116,7 +116,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
         /// <summary>
         /// Gets the list of enabled meters.
         /// </summary>
-        public IList<MeterInstrumentation> EnabledInstrumentation { get; }
+        public IList<MeterInstrumentation> EnabledInstrumentations { get; }
 
         /// <summary>
         /// Gets the list of meters to be added to the MeterProvider at the startup.

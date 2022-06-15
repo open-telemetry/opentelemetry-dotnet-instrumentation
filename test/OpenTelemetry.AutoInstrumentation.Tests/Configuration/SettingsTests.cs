@@ -78,7 +78,7 @@ public class SettingsTests : IDisposable
             settings.MetricExporter.Should().Be(MetricsExporter.Otlp);
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.ConsoleExporterEnabled.Should().BeFalse();
-            settings.EnabledInstrumentation.Should().BeEmpty();
+            settings.EnabledInstrumentations.Should().BeEmpty();
             settings.MetricPlugins.Should().BeEmpty();
             settings.Meters.Should().BeEmpty();
             settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
@@ -149,7 +149,7 @@ public class SettingsTests : IDisposable
 
         var settings = MeterSettings.FromDefaultSources();
 
-        settings.EnabledInstrumentation.Should().BeEquivalentTo(new List<MeterInstrumentation> { expectedMeterInstrumentation });
+        settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<MeterInstrumentation> { expectedMeterInstrumentation });
     }
 
     [Fact]
@@ -160,7 +160,7 @@ public class SettingsTests : IDisposable
 
         var settings = MeterSettings.FromDefaultSources();
 
-        settings.EnabledInstrumentation.Should().BeEquivalentTo(new List<MeterInstrumentation> { MeterInstrumentation.NetRuntime });
+        settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<MeterInstrumentation> { MeterInstrumentation.NetRuntime });
     }
 
     [Theory]
