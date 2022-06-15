@@ -34,7 +34,9 @@ public class SettingsTests : IDisposable
     public static IEnumerable<object[]> ExporterEnvVarAndLoadSettingsAction()
     {
         yield return new object[] { ConfigurationKeys.Traces.Exporter, void () => TracerSettings.FromDefaultSources() };
+        yield return new object[] { ConfigurationKeys.Traces.Instrumentations, void () => TracerSettings.FromDefaultSources() };
         yield return new object[] { ConfigurationKeys.Metrics.Exporter, void () => MeterSettings.FromDefaultSources() };
+        yield return new object[] { ConfigurationKeys.Metrics.Instrumentations, void () => MeterSettings.FromDefaultSources() };
     }
 
     public void Dispose()
@@ -112,6 +114,56 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
+    [InlineData(nameof(TracerInstrumentation.AspNet), TracerInstrumentation.AspNet)]
+    [InlineData(nameof(TracerInstrumentation.GraphQL), TracerInstrumentation.GraphQL)]
+    [InlineData(nameof(TracerInstrumentation.HttpClient), TracerInstrumentation.HttpClient)]
+    [InlineData(nameof(TracerInstrumentation.MongoDb), TracerInstrumentation.MongoDb)]
+    [InlineData(nameof(TracerInstrumentation.SqlClient), TracerInstrumentation.SqlClient)]
+    public void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, tracerInstrumentation);
+
+        var settings = TracerSettings.FromDefaultSources();
+
+        settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<TracerInstrumentation> { expectedTracerInstrumentation });
+    }
+
+    [Fact]
+    public void TracerSettings_DisabledInstrumentations()
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, $"{nameof(TracerInstrumentation.AspNet)},{nameof(TracerInstrumentation.GraphQL)}");
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.DisabledInstrumentations, nameof(TracerInstrumentation.GraphQL));
+
+        var settings = TracerSettings.FromDefaultSources();
+
+        settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<TracerInstrumentation> { TracerInstrumentation.AspNet });
+    }
+
+    [Theory]
+    [InlineData(nameof(MeterInstrumentation.NetRuntime), MeterInstrumentation.NetRuntime)]
+    [InlineData(nameof(MeterInstrumentation.AspNet), MeterInstrumentation.AspNet)]
+    [InlineData(nameof(MeterInstrumentation.HttpClient), MeterInstrumentation.HttpClient)]
+    public void MeterSettings_Instrumentations_SupportedValues(string meterInstrumentation, MeterInstrumentation expectedMeterInstrumentation)
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, meterInstrumentation);
+
+        var settings = MeterSettings.FromDefaultSources();
+
+        settings.EnabledInstrumentation.Should().BeEquivalentTo(new List<MeterInstrumentation> { expectedMeterInstrumentation });
+    }
+
+    [Fact]
+    public void MeterSettings_DisabledInstrumentations()
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, $"{nameof(MeterInstrumentation.NetRuntime)},{nameof(MeterInstrumentation.AspNet)}");
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.DisabledInstrumentations, nameof(MeterInstrumentation.AspNet));
+
+        var settings = MeterSettings.FromDefaultSources();
+
+        settings.EnabledInstrumentation.Should().BeEquivalentTo(new List<MeterInstrumentation> { MeterInstrumentation.NetRuntime });
+    }
+
+    [Theory]
     [MemberData(nameof(ExporterEnvVarAndLoadSettingsAction))]
     public void UnsupportedExporterValues(string exporterEnvVar, Action loadSettingsAction)
     {
@@ -164,7 +216,11 @@ public class SettingsTests : IDisposable
     private static void ClearEnvVars()
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.DisabledInstrumentations, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.DisabledInstrumentations, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Http2UnencryptedSupportEnabled, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, null);
