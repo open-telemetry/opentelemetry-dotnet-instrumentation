@@ -36,7 +36,7 @@ internal static class EnvironmentConfigurationMetricHelper
             .SetExporter(settings)
             .AddMeter(settings.Meters.ToArray());
 
-        foreach (var enabledMeter in settings.EnabledInstrumentation)
+        foreach (var enabledMeter in settings.EnabledInstrumentations)
         {
             if (AddMeters.TryGetValue(enabledMeter, out var addMeter))
             {
