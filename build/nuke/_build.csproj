@@ -15,7 +15,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageDownload Include="Nuget.CommandLine" Version="[6.0.0]" />
+    <PackageDownload Include="Nuget.CommandLine" Version="[6.2.1]" />
   </ItemGroup>
 
 </Project>
