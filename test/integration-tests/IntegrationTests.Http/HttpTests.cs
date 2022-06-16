@@ -132,15 +132,15 @@ namespace IntegrationTests.Http
                 httpClientDurationAttributes.Count.Should().Be(4);
                 httpClientDurationAttributes.Single(a => a.Key == "http.method").Value.StringValue.Should().Be("GET");
                 httpClientDurationAttributes.Single(a => a.Key == "http.scheme").Value.StringValue.Should().Be("http");
-                httpClientDurationAttributes.Single(a => a.Key == "http.flavor").Value.StringValue.Should().Be("1.0");
-                httpClientDurationAttributes.Single(a => a.Key == "http.status_code").Value.StringValue.Should().Be("200");
+                httpClientDurationAttributes.Single(a => a.Key == "http.flavor").Value.StringValue.Should().Be("1.1");
+                httpClientDurationAttributes.Single(a => a.Key == "http.status_code").Value.IntValue.Should().Be(200);
 
                 httpServerDurationAttributes.Count.Should().Be(5);
                 httpServerDurationAttributes.Single(a => a.Key == "http.method").Value.StringValue.Should().Be("GET");
                 httpClientDurationAttributes.Single(a => a.Key == "http.scheme").Value.StringValue.Should().Be("http");
-                httpClientDurationAttributes.Single(a => a.Key == "http.flavor").Value.StringValue.Should().Be("1.0");
-                httpServerDurationAttributes.Single(a => a.Key == "http.host").Value.StringValue.Should().Be("localhost");
-                httpClientDurationAttributes.Single(a => a.Key == "http.status_code").Value.StringValue.Should().Be("200");
+                httpClientDurationAttributes.Single(a => a.Key == "http.flavor").Value.StringValue.Should().Be("1.1");
+                httpServerDurationAttributes.Single(a => a.Key == "http.host").Value.StringValue.Should().StartWith("localhost");
+                httpClientDurationAttributes.Single(a => a.Key == "http.status_code").Value.IntValue.Should().Be(200);
             }
         }
     }
