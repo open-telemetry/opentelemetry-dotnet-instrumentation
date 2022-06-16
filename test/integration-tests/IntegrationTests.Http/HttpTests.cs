@@ -19,6 +19,7 @@ using System.Linq;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
+using Opentelemetry.Proto.Common.V1;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -33,6 +34,7 @@ namespace IntegrationTests.Http
         {
             SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
             SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "HttpClient,AspNet");
+            SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "HttpClient,AspNet");
         }
 
         [Fact]
@@ -81,6 +83,64 @@ namespace IntegrationTests.Http
                 httpClientTags["peer.service"].Should().Be(httpServerTags["http.host"]);
                 httpClientTags["span.kind"].Should().Be("client");
                 httpServerTags["span.kind"].Should().Be("server");
+            }
+        }
+
+        [Fact]
+        [Trait("Category", "EndToEnd")]
+        public void SubmitMetrics()
+        {
+            var collectorPort = TcpPortProvider.GetOpenPort();
+            using var collector = new MockCollector(Output, collectorPort);
+
+            const int expectedMetricRequests = 1;
+
+            var testSettings = new TestSettings
+            {
+                MetricsSettings = new MetricsSettings { Port = collectorPort },
+                EnableStartupHook = true
+            };
+
+            using var processResult = RunTestApplicationAndWaitForExit(testSettings);
+            Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
+            var metricRequests = collector.WaitForMetrics(expectedMetricRequests, TimeSpan.FromSeconds(5));
+
+            using (new AssertionScope())
+            {
+                metricRequests.Count.Should().Be(expectedMetricRequests);
+
+                var resourceMetrics = metricRequests.Single().ResourceMetrics.Single();
+
+                var expectedServiceNameAttribute = new KeyValue { Key = "service.name", Value = new AnyValue { StringValue = ServiceName } };
+                resourceMetrics.Resource.Attributes.Should().ContainEquivalentOf(expectedServiceNameAttribute);
+
+                var httpclientScope = resourceMetrics.ScopeMetrics.Single(rm => rm.Scope.Name.Equals("OpenTelemetry.Instrumentation.Http", StringComparison.OrdinalIgnoreCase));
+                var aspnetcoreScope = resourceMetrics.ScopeMetrics.Single(rm => rm.Scope.Name.Equals("OpenTelemetry.Instrumentation.AspNetCore", StringComparison.OrdinalIgnoreCase));
+
+                var httpClientDurationMetric = httpclientScope.Metrics.FirstOrDefault(m => m.Name.Equals("http.client.duration", StringComparison.OrdinalIgnoreCase));
+                var httpServerDurationMetric = aspnetcoreScope.Metrics.FirstOrDefault(m => m.Name.Equals("http.server.duration", StringComparison.OrdinalIgnoreCase));
+
+                httpClientDurationMetric.Should().NotBeNull();
+                httpServerDurationMetric.Should().NotBeNull();
+
+                httpClientDurationMetric.DataCase.Should().Be(Opentelemetry.Proto.Metrics.V1.Metric.DataOneofCase.Histogram);
+                httpServerDurationMetric.DataCase.Should().Be(Opentelemetry.Proto.Metrics.V1.Metric.DataOneofCase.Histogram);
+
+                var httpClientDurationAttributes = httpClientDurationMetric.Histogram.DataPoints.Single().Attributes;
+                var httpServerDurationAttributes = httpServerDurationMetric.Histogram.DataPoints.Single().Attributes;
+
+                httpClientDurationAttributes.Count.Should().Be(4);
+                httpClientDurationAttributes.Single(a => a.Key == "http.method").Value.StringValue.Should().Be("GET");
+                httpClientDurationAttributes.Single(a => a.Key == "http.scheme").Value.StringValue.Should().Be("http");
+                httpClientDurationAttributes.Single(a => a.Key == "http.flavor").Value.StringValue.Should().Be("1.0");
+                httpClientDurationAttributes.Single(a => a.Key == "http.status_code").Value.StringValue.Should().Be("200");
+
+                httpServerDurationAttributes.Count.Should().Be(5);
+                httpServerDurationAttributes.Single(a => a.Key == "http.method").Value.StringValue.Should().Be("GET");
+                httpClientDurationAttributes.Single(a => a.Key == "http.scheme").Value.StringValue.Should().Be("http");
+                httpClientDurationAttributes.Single(a => a.Key == "http.flavor").Value.StringValue.Should().Be("1.0");
+                httpServerDurationAttributes.Single(a => a.Key == "http.host").Value.StringValue.Should().Be("localhost");
+                httpClientDurationAttributes.Single(a => a.Key == "http.status_code").Value.StringValue.Should().Be("200");
             }
         }
     }

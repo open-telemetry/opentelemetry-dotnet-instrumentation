@@ -105,30 +105,35 @@ public abstract class TestHelper
 
     public Process StartTestApplication(int traceAgentPort, string arguments, string packageVersion, int aspNetCorePort, string framework = "", bool enableStartupHook = true)
     {
-        // get path to test application that the profiler will attach to
-        string testApplicationPath = EnvironmentHelper.GetTestApplicationPath(packageVersion, framework);
-        if (!File.Exists(testApplicationPath))
+        var testSettings = new TestSettings
         {
-            throw new Exception($"application not found: {testApplicationPath}");
-        }
-
-        Output.WriteLine($"Starting Application: {testApplicationPath}");
-        var executable = EnvironmentHelper.IsCoreClr() ? EnvironmentHelper.GetTestApplicationExecutionSource() : testApplicationPath;
-        var args = EnvironmentHelper.IsCoreClr() ? $"{testApplicationPath} {arguments ?? string.Empty}" : arguments;
-
-        return InstrumentedProcessHelper.StartInstrumentedProcess(
-            executable,
-            EnvironmentHelper,
-            args,
-            traceAgentPort: traceAgentPort,
-            aspNetCorePort: aspNetCorePort,
-            processToProfile: executable,
-            enableStartupHook: enableStartupHook);
+            TracesSettings = new TracesSettings { Port = traceAgentPort },
+            Arguments = arguments,
+            PackageVersion = packageVersion,
+            AspNetCorePort = aspNetCorePort,
+            Framework = framework,
+            EnableStartupHook = enableStartupHook
+        };
+        return StartTestApplication(testSettings);
     }
 
     public ProcessResult RunTestApplicationAndWaitForExit(int traceAgentPort, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000, bool enableStartupHook = true)
     {
-        var process = StartTestApplication(traceAgentPort, arguments, packageVersion, aspNetCorePort: aspNetCorePort, framework: framework, enableStartupHook: enableStartupHook);
+        var testSettings = new TestSettings
+        {
+            TracesSettings = new TracesSettings { Port = traceAgentPort },
+            Arguments = arguments,
+            PackageVersion = packageVersion,
+            AspNetCorePort = aspNetCorePort,
+            Framework = framework,
+            EnableStartupHook = enableStartupHook
+        };
+        return RunTestApplicationAndWaitForExit(testSettings);
+    }
+
+    public ProcessResult RunTestApplicationAndWaitForExit(TestSettings testSettings)
+    {
+        var process = StartTestApplication(testSettings);
         var name = process.ProcessName;
 
         using var helper = new ProcessHelper(process);
@@ -162,5 +167,25 @@ public abstract class TestHelper
     protected void SetEnvironmentVariable(string key, string value)
     {
         EnvironmentHelper.CustomEnvironmentVariables.Add(key, value);
+    }
+
+    private Process StartTestApplication(TestSettings testSettings)
+    {
+        // get path to test application that the profiler will attach to
+        string testApplicationPath = EnvironmentHelper.GetTestApplicationPath(testSettings.PackageVersion, testSettings.Framework);
+        if (!File.Exists(testApplicationPath))
+        {
+            throw new Exception($"application not found: {testApplicationPath}");
+        }
+
+        Output.WriteLine($"Starting Application: {testApplicationPath}");
+        var executable = EnvironmentHelper.IsCoreClr() ? EnvironmentHelper.GetTestApplicationExecutionSource() : testApplicationPath;
+        var args = EnvironmentHelper.IsCoreClr() ? $"{testApplicationPath} {testSettings.Arguments ?? string.Empty}" : testSettings.Arguments;
+
+        return InstrumentedProcessHelper.StartInstrumentedProcess(
+            executable,
+            EnvironmentHelper,
+            args,
+            testSettings);
     }
 }

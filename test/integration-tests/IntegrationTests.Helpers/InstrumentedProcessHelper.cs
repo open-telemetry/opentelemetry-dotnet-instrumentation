@@ -24,12 +24,13 @@ public class InstrumentedProcessHelper
     public static Process StartInstrumentedProcess(
         string executable,
         EnvironmentHelper environmentHelper,
-        string arguments = null,
-        bool redirectStandardInput = false,
+        string arguments,
+        TestSettings testSettings)
+        /*bool redirectStandardInput = false,
         int traceAgentPort = 9696,
         int aspNetCorePort = 5000,
         string processToProfile = null,
-        bool enableStartupHook = true)
+        bool enableStartupHook = true)*/
     {
         if (environmentHelper == null)
         {
@@ -41,13 +42,13 @@ public class InstrumentedProcessHelper
 
         var startInfo = new ProcessStartInfo(executable, $"{arguments ?? string.Empty}");
 
-        environmentHelper.SetEnvironmentVariables(traceAgentPort, aspNetCorePort, startInfo.EnvironmentVariables, enableStartupHook, processToProfile);
+        environmentHelper.SetEnvironmentVariables(testSettings, startInfo.EnvironmentVariables, executable);
 
         startInfo.UseShellExecute = false;
         startInfo.CreateNoWindow = true;
         startInfo.RedirectStandardOutput = true;
         startInfo.RedirectStandardError = true;
-        startInfo.RedirectStandardInput = redirectStandardInput;
+        startInfo.RedirectStandardInput = false;
 
         return Process.Start(startInfo);
     }
