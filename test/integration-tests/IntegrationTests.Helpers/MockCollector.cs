@@ -187,7 +187,7 @@ public class MockCollector : IDisposable
                     continue;
                 }
 
-                if (ctx.Request.RawUrl.Equals("v1/metrics", StringComparison.OrdinalIgnoreCase))
+                if (ctx.Request.RawUrl.Equals("/v1/metrics", StringComparison.OrdinalIgnoreCase))
                 {
                     if (ShouldDeserializeMetrics)
                     {
@@ -206,6 +206,7 @@ public class MockCollector : IDisposable
                     // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
                     // (Setting content-length avoids that)
                     ctx.Response.ContentType = "application/x-protobuf";
+                    ctx.Response.StatusCode = (int)HttpStatusCode.OK;
                     var responseMessage = new ExportMetricsServiceResponse();
                     ctx.Response.ContentLength64 = responseMessage.CalculateSize();
                     responseMessage.WriteTo(ctx.Response.OutputStream);
