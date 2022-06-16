@@ -58,7 +58,8 @@ internal static class EnvironmentConfigurationTracerHelper
 #if NET462
         return builder.AddAspNetInstrumentation();
 #elif NETCOREAPP3_1_OR_GREATER
-        return builder.AddAspNetCoreInstrumentation();
+        // Instrumentation will be added via assembly load detector
+        return builder.AddAspNetCoreSources();
 #endif
     }
 

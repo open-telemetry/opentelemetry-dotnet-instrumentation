@@ -15,30 +15,26 @@
 // </copyright>
 
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
+using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading
 {
     internal class LazyInstrumentationLoader
     {
-        private readonly ConcurrentBag<AssemblyLoadDetector> _assemblyLoadDetectors = new ConcurrentBag<AssemblyLoadDetector>();
+        private readonly List<AssemblyLoadDetector> _assemblyLoadDetectors = new List<AssemblyLoadDetector>();
 
-        private TracerProviderBuilder _builder;
         private TracerProvider _provider;
+        private TracerSettings _tracerSettings;
 
-        public LazyInstrumentationLoader()
+        public LazyInstrumentationLoader(TracerSettings tracerSettings)
         {
+            _tracerSettings = tracerSettings;
+
 #if NETCOREAPP
-            SubScribe(new AspNetCoreDetector());
+            SubScribe(TracerInstrumentation.AspNet, () => new AspNetCoreDetector());
 #endif
-        }
-
-        public void OnBuilderAvailable(TracerProviderBuilder builder)
-        {
-            Console.WriteLine("builder is now available");
-
-            _builder = builder;
         }
 
         public void OnProviderAvailable(TracerProvider provider)
@@ -48,18 +44,22 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
             _provider = provider;
         }
 
-        private void SubScribe(AssemblyLoadDetector detector)
+        private void SubScribe(TracerInstrumentation instrumentation, Func<AssemblyLoadDetector> builder)
         {
-            detector.OnReady += Detector_OnReady;
+            if (_tracerSettings.EnabledInstrumentations.Contains(instrumentation))
+            {
+                var detector = builder();
+                detector.OnReady += Detector_OnReady;
 
-            _assemblyLoadDetectors.Add(detector);
+                _assemblyLoadDetectors.Add(detector);
+            }
         }
 
         private void Detector_OnReady(object sender, AssemblyLoadDetector.LoadDetectorReadyEventArgs e)
         {
             if (_provider != null)
             {
-                Console.WriteLine("Provider '{0}' executed load", sender.GetType().Name);
+                Console.WriteLine("Detector '{0}' executed load", sender.GetType().Name);
 
                 try
                 {
@@ -71,9 +71,12 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
                     Console.WriteLine(ex);
                 }
 
-                ((AssemblyLoadDetector)sender).OnReady -= Detector_OnReady;
+                var detector = (AssemblyLoadDetector)sender;
+                detector.OnReady -= Detector_OnReady;
 
-                // TODO: Dispose the sender, it's not needed any more
+                _assemblyLoadDetectors.Remove(detector);
+
+                Console.WriteLine("Detector '{0}' removed", sender.GetType().Name);
             }
         }
     }

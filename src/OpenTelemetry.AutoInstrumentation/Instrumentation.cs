@@ -89,7 +89,7 @@ public static class Instrumentation
             {
                 // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
                 _sdkEventListener = new(EventLevel.Warning);
-                _lazyInstrumentation = new();
+                _lazyInstrumentation = new(TracerSettings);
 
                 // Register to shutdown events
                 AppDomain.CurrentDomain.ProcessExit += OnExit;
@@ -104,11 +104,7 @@ public static class Instrumentation
             if (TracerSettings.LoadTracerAtStartup)
             {
                 var builder = Sdk
-                    .CreateTracerProviderBuilder();
-
-                _lazyInstrumentation.OnBuilderAvailable(builder);
-
-                builder
+                    .CreateTracerProviderBuilder()
                     .SetResourceBuilder(_resourceBuilder)
                     .UseEnvironmentVariables(TracerSettings)
                     .SetSampler(new AlwaysOnSampler())
