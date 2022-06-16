@@ -26,11 +26,6 @@ public class InstrumentedProcessHelper
         EnvironmentHelper environmentHelper,
         string arguments,
         TestSettings testSettings)
-        /*bool redirectStandardInput = false,
-        int traceAgentPort = 9696,
-        int aspNetCorePort = 5000,
-        string processToProfile = null,
-        bool enableStartupHook = true)*/
     {
         if (environmentHelper == null)
         {
