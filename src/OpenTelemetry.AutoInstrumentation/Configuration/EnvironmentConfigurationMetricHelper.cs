@@ -66,7 +66,8 @@ internal static class EnvironmentConfigurationMetricHelper
         switch (settings.MetricExporter)
         {
             case MetricsExporter.Prometheus:
-                throw new NotSupportedException("Prometheus is not supported yet.");
+                builder.AddPrometheusExporter(options => { options.StartHttpListener = true; });
+                break;
             case MetricsExporter.Otlp:
 #if NETCOREAPP3_1
                 if (settings.Http2UnencryptedSupportEnabled)
