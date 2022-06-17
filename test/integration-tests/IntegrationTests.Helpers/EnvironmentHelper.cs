@@ -114,7 +114,11 @@ public class EnvironmentHelper
             "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE",
             "OTEL_DISABLED_INTEGRATIONS",
             "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES",
-            "OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES"
+            "OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES",
+            "OTEL_TRACES_EXPORTER",
+            "OTEL_METRICS_EXPORTER",
+            "OTEL_EXPORTER_ZIPKIN_ENDPOINT",
+            "OTEL_EXPORTER_OTLP_ENDPOINT"
         };
 
         foreach (string variable in environmentVariables)
@@ -150,11 +154,9 @@ public class EnvironmentHelper
     }
 
     public void SetEnvironmentVariables(
-        int agentPort,
-        int aspNetCorePort,
+        TestSettings testSettings,
         StringDictionary environmentVariables,
-        bool enableStartupHook,
-        string processToProfile = null)
+        string processToProfile)
     {
         string profilerEnabled = _requiresProfiling ? "1" : "0";
         string profilerPath = GetProfilerPath();
@@ -163,7 +165,7 @@ public class EnvironmentHelper
         {
             // enableStartupHook should be true by default, and the parameter should only be set
             // to false when testing the case that instrumentation should not be available.
-            if (enableStartupHook)
+            if (testSettings.EnableStartupHook)
             {
                 environmentVariables["DOTNET_STARTUP_HOOKS"] = GetStartupHookOutputPath();
                 environmentVariables["DOTNET_SHARED_STORE"] = GetSharedStorePath();
@@ -195,11 +197,21 @@ public class EnvironmentHelper
         string integrations = GetIntegrationsPath();
         environmentVariables["OTEL_DOTNET_AUTO_HOME"] = GetNukeBuildOutput();
         environmentVariables["OTEL_DOTNET_AUTO_INTEGRATIONS_FILE"] = integrations;
-        environmentVariables["OTEL_TRACES_EXPORTER"] = "zipkin";
-        environmentVariables["OTEL_EXPORTER_ZIPKIN_ENDPOINT"] = $"http://127.0.0.1:{agentPort}";
+
+        if (testSettings.TracesSettings != null)
+        {
+            environmentVariables["OTEL_TRACES_EXPORTER"] = testSettings.TracesSettings.Exporter;
+            environmentVariables["OTEL_EXPORTER_ZIPKIN_ENDPOINT"] = $"http://127.0.0.1:{testSettings.TracesSettings.Port}";
+        }
+
+        if (testSettings.MetricsSettings != null)
+        {
+            environmentVariables["OTEL_METRICS_EXPORTER"] = testSettings.MetricsSettings.Exporter;
+            environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = $"http://127.0.0.1:{testSettings.MetricsSettings.Port}";
+        }
 
         // for ASP.NET Core test applications, set the server's port
-        environmentVariables["ASPNETCORE_URLS"] = $"http://127.0.0.1:{aspNetCorePort}/";
+        environmentVariables["ASPNETCORE_URLS"] = $"http://127.0.0.1:{testSettings.AspNetCorePort}/";
 
         environmentVariables["OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES"] = "TestApplication.*";
 

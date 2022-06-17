@@ -2,6 +2,8 @@
 
   <ItemGroup>
     <PackageReference Include="DotNet.Testcontainers" Version="1.6.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.21.1" />
+    <PackageReference Include="Grpc.Tools" Version="2.46.3" PrivateAssets="all" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
@@ -11,5 +13,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- GrpcServices is 'none' so that we do not need to depend on the grpc nuget package, and we only need protobuf support. -->
+    <Protobuf Include="opentelemetry\**\*.proto" GrpcServices="none" />
   </ItemGroup>
 </Project>

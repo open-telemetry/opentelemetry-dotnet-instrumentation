@@ -3,6 +3,8 @@ dylib
 bytecode
 unencrypted
 UNENCRYPTEDSUPPORT
+proto
+protos
 protobuf
 bitness
 cmake
