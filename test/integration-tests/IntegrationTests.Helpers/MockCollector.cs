@@ -51,7 +51,7 @@ public class MockCollector : IDisposable
             try
             {
                 listener.Start();
-                listener.Prefixes.Add($"http://*:{port}/"); // Warning: Requires admin access
+                listener.Prefixes.Add($"http://127.0.0.1:{port}/");
 
                 // successfully listening
                 Port = port;
