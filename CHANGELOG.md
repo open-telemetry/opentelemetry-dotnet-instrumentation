@@ -32,7 +32,7 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 
 ### Changed
 
-- Raname generic environment variables to include trace.
+- Rename generic environment variables to include trace.
 
   `OTEL_DOTNET_AUTO_ENABLED`&#8594;`OTEL_DOTNET_AUTO_TRACES_ENABLED`
   `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP`&#8594;`OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP`
