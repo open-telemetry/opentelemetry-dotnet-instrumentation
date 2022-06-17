@@ -31,7 +31,7 @@ namespace IntegrationTests.Helpers;
 
 public class MockCollector : IDisposable
 {
-    private static readonly TimeSpan DefaultSpanWaitTimeout = TimeSpan.FromSeconds(20);
+    private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromSeconds(20);
 
     private readonly ITestOutputHelper _output;
     private readonly HttpListener _listener;
@@ -114,7 +114,7 @@ public class MockCollector : IDisposable
         int count,
         TimeSpan? timeout = null)
     {
-        timeout ??= DefaultSpanWaitTimeout;
+        timeout ??= DefaultWaitTimeout;
         var deadline = DateTime.Now.Add(timeout.Value);
 
         IImmutableList<ExportMetricsServiceRequest> relevantMetricRequests = ImmutableList<ExportMetricsServiceRequest>.Empty;
