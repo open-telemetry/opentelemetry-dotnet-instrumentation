@@ -29,10 +29,11 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 - Support for .NET Runtime metrics collection using
   the `OpenTelemetry.Instrumentation.Runtime` package.
 - Support for ASP.NET and HttpClient metrics instrumentations.
+- Support for Prometheus Exporter HttpListener version.
 
 ### Changed
 
-- Raname generic environment variables to include trace.
+- Rename generic environment variables to include trace.
 
   `OTEL_DOTNET_AUTO_ENABLED`&#8594;`OTEL_DOTNET_AUTO_TRACES_ENABLED`
   `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP`&#8594;`OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP`

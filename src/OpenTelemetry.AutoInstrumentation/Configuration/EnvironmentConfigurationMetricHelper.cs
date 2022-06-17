@@ -36,7 +36,7 @@ internal static class EnvironmentConfigurationMetricHelper
             .SetExporter(settings)
             .AddMeter(settings.Meters.ToArray());
 
-        foreach (var enabledMeter in settings.EnabledInstrumentation)
+        foreach (var enabledMeter in settings.EnabledInstrumentations)
         {
             if (AddMeters.TryGetValue(enabledMeter, out var addMeter))
             {
@@ -66,7 +66,8 @@ internal static class EnvironmentConfigurationMetricHelper
         switch (settings.MetricExporter)
         {
             case MetricsExporter.Prometheus:
-                throw new NotSupportedException("Prometheus is not supported yet.");
+                builder.AddPrometheusExporter(options => { options.StartHttpListener = true; });
+                break;
             case MetricsExporter.Otlp:
 #if NETCOREAPP3_1
                 if (settings.Http2UnencryptedSupportEnabled)
