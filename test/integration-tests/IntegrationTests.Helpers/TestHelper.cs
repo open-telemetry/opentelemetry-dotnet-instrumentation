@@ -103,6 +103,50 @@ public abstract class TestHelper
         return new Container(container);
     }
 
+    public async Task<Container> StartContainerForMetricsAsync(int webPort, int prometheusPort)
+    {
+        // get path to test application that the profiler will attach to
+        string testApplicationName = $"testapplication-{EnvironmentHelper.TestApplicationName.ToLowerInvariant()}";
+
+        string networkName = DockerNetworkHelper.IntegrationTestsNetworkName;
+        string networkId = DockerNetworkHelper.SetupIntegrationTestsNetwork();
+
+        string logPath = EnvironmentHelper.IsRunningOnCI()
+            ? Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "build_data", "profiler-logs")
+            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OpenTelemetry .NET AutoInstrumentation", "logs");
+
+        Directory.CreateDirectory(logPath);
+
+        Output.WriteLine("Collecting docker logs to: " + logPath);
+
+        var builder = new TestcontainersBuilder<TestcontainersContainer>()
+            .WithImage(testApplicationName)
+            .WithCleanUp(cleanUp: true)
+            .WithOutputConsumer(Consume.RedirectStdoutAndStderrToConsole())
+            .WithName($"{testApplicationName}-{webPort}")
+            .WithNetwork(networkId, networkName)
+            .WithPortBinding(webPort, 80)
+            .WithEnvironment("OTEL_METRICS_EXPORTER", "prometheus")
+            .WithBindMount(logPath, "c:/inetpub/wwwroot/logs")
+            .WithBindMount(EnvironmentHelper.GetNukeBuildOutput(), "c:/opentelemetry");
+
+        var container = builder.Build();
+        var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
+
+        wasStarted.Should().BeTrue($"Container based on {testApplicationName} has to be operational for the test.");
+
+        Output.WriteLine($"Container was started successfully.");
+
+        var webAppHealthzUrl = $"http://localhost:{webPort}/healthz";
+        var webAppHealthzResult = await HealthzHelper.TestHealtzAsync(webAppHealthzUrl, "IIS WebApp", Output);
+
+        webAppHealthzResult.Should().BeTrue("IIS WebApp health check never returned OK.");
+
+        Output.WriteLine($"IIS WebApp was started successfully.");
+
+        return new Container(container);
+    }
+
     public Process StartTestApplication(int traceAgentPort, string arguments, string packageVersion, int aspNetCorePort, string framework = "", bool enableStartupHook = true)
     {
         var testSettings = new TestSettings

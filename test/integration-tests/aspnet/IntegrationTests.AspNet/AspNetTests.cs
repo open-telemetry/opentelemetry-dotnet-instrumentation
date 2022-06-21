@@ -1,4 +1,5 @@
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using IntegrationTests.Helpers;
@@ -41,6 +42,38 @@ public class AspNetTests : TestHelper
             var spans = agent.WaitForSpans(1);
 
             Assert.True(spans.Count >= 1, $"Expecting at least 1 span, only received {spans.Count}");
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Windows")]
+    public async Task SubmitsMetrics()
+    {
+        var prometheusPort = TcpPortProvider.GetOpenPort();
+        var webPort = TcpPortProvider.GetOpenPort();
+
+        using (var container = await StartContainerForMetricsAsync(webPort, prometheusPort))
+        {
+            var client = new HttpClient();
+
+            var response = await client.GetAsync($"http://localhost:{webPort}/metrics");
+            var content = await response.Content.ReadAsStringAsync();
+
+            Output.WriteLine("Sample response:");
+            Output.WriteLine(content);
+
+            response = await client.GetAsync($"http://localhost:{webPort}/prometheusmetrics");
+            content = await response.Content.ReadAsStringAsync();
+
+            Output.WriteLine("Raw metrics from Prometheus:");
+            Output.WriteLine(content);
+
+            //PrometheusMetrics
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("MyFruitCounter{color=\"red\",name=\"apple\"} 6", content);
+            Assert.Contains("http_server_duration_ms_count{http_method=\"GET\",http_scheme=\"http\",http_status_code=\"200\"}", content);
         }
     }
 }

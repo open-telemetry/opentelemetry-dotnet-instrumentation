@@ -31,6 +31,11 @@ public class RouteConfig
             defaults: new { controller = "HealthCheck", action = "Index" });
 
         routes.MapRoute(
+            name: "PrometheusMetrics",
+            url: "prometheusmetrics",
+            defaults: new { controller = "Metrics", action = "GetPrometheusMetrics" });
+
+        routes.MapRoute(
             name: "Default",
             url: "{controller}/{action}/{id}",
             defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional });
