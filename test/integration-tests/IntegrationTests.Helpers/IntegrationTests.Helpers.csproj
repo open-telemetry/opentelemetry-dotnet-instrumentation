@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="DotNet.Testcontainers" Version="1.6.0" />
+
     <PackageReference Include="Google.Protobuf" Version="3.21.1" />
     <PackageReference Include="Grpc.Tools" Version="2.46.3" PrivateAssets="all" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+    <PackageReference Include="Testcontainers" Version="2.0.0" />
     <PackageReference Include="xunit.abstractions" Version="2.0.3" />
   </ItemGroup>
 
