@@ -52,7 +52,7 @@ public class MockZipkinCollector : IDisposable
             try
             {
                 listener.Start();
-                listener.Prefixes.Add($"http://*:{port}/"); // Warning: Requires admin access
+                listener.Prefixes.Add($"http://localhost:{port}/");
 
                 // successfully listening
                 Port = port;
