@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 
@@ -35,10 +36,10 @@ internal static class DockerNetworkHelper
     /// if named network exists with specified fixed gateway address, gets the existing one.
     /// </summary>
     /// <returns>Docker network ID</returns>
-    internal static string SetupIntegrationTestsNetwork()
+    internal static async Task<string> SetupIntegrationTestsNetworkAsync()
     {
         var client = new DockerClientConfiguration().CreateClient();
-        var networks = client.Networks.ListNetworksAsync().Result;
+        var networks = await client.Networks.ListNetworksAsync();
         var network = networks.FirstOrDefault(x => x.Name == IntegrationTestsNetworkName);
 
         if (network != null)
@@ -49,7 +50,7 @@ internal static class DockerNetworkHelper
             }
             else
             {
-                client.Networks.DeleteNetworkAsync(network.ID).Wait();
+                await client.Networks.DeleteNetworkAsync(network.ID);
             }
         }
 
@@ -69,7 +70,7 @@ internal static class DockerNetworkHelper
             Subnet = "10.1.1.0/24"
         });
 
-        var result = client.Networks.CreateNetworkAsync(networkParams).Result;
+        var result = await client.Networks.CreateNetworkAsync(networkParams);
         if (string.IsNullOrWhiteSpace(result.ID))
         {
             throw new Exception("Could not create docker network");
