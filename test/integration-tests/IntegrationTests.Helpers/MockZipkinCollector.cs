@@ -38,7 +38,7 @@ public class MockZipkinCollector : IDisposable
     private readonly HttpListener _listener;
     private readonly Thread _listenerThread;
 
-    public MockZipkinCollector(ITestOutputHelper output, int port = 9080, int retries = 5)
+    public MockZipkinCollector(ITestOutputHelper output, int port = 9411, int retries = 5)
     {
         _output = output;
 
@@ -52,7 +52,7 @@ public class MockZipkinCollector : IDisposable
             try
             {
                 listener.Start();
-                listener.Prefixes.Add($"http://localhost:{port}/");
+                listener.Prefixes.Add($"http://localhost:{port}/api/v2/spans/");
 
                 // successfully listening
                 Port = port;
