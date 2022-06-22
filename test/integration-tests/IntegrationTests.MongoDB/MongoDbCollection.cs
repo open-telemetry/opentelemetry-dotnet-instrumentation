@@ -57,15 +57,11 @@ public class MongoDbFixture : IAsyncLifetime
 
     private async Task<TestcontainersContainer> LaunchMongoContainerAsync(int port)
     {
-        var waitOS = EnvironmentTools.IsWindows()
-            ? Wait.ForWindowsContainer()
-            : Wait.ForUnixContainer();
-
         var mongoContainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
             .WithImage(MongoDbImage)
             .WithName($"mongo-db-{port}")
             .WithPortBinding(port, MongoDbPort)
-            .WithWaitStrategy(waitOS.UntilPortIsAvailable(MongoDbPort));
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(MongoDbPort));
 
         var container = mongoContainersBuilder.Build();
         await container.StartAsync();
