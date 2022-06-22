@@ -61,7 +61,7 @@ public abstract class TestHelper
         string agentHealthzUrl = $"{agentBaseUrl}/healthz";
         string zipkinEndpoint = $"{agentBaseUrl}/api/v2/spans";
         string networkName = DockerNetworkHelper.IntegrationTestsNetworkName;
-        string networkId = await DockerNetworkHelper.SetupIntegrationTestsNetwork();
+        string networkId = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
 
         Output.WriteLine($"Zipkin Endpoint: {zipkinEndpoint}");
 

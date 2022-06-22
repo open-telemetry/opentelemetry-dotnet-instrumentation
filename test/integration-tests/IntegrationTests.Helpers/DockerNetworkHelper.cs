@@ -36,7 +36,7 @@ internal static class DockerNetworkHelper
     /// if named network exists with specified fixed gateway address, gets the existing one.
     /// </summary>
     /// <returns>Docker network ID</returns>
-    internal static async Task<string> SetupIntegrationTestsNetwork()
+    internal static async Task<string> SetupIntegrationTestsNetworkAsync()
     {
         var client = new DockerClientConfiguration().CreateClient();
         var networks = await client.Networks.ListNetworksAsync();
