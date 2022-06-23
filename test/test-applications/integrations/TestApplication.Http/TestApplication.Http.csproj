@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\..\integration-tests\IntegrationTests.Helpers\TcpPortProvider.cs" />
+    <Compile Include="..\..\..\IntegrationTests\Helpers\TcpPortProvider.cs" />
   </ItemGroup>
   
 </Project>

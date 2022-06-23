@@ -14,16 +14,15 @@
     <TestApplicationProject Include="test\test-applications\integrations\dependency-libs\*\*.csproj" />
     <TestApplicationProjectFX Include="test\test-applications\integrations\aspnet\*\*.csproj" Condition="'$(OS)' == 'Windows_NT'" />
     <MockProject Include="test\test-applications\mocks\*\*.csproj" />
-    <IntegrationProject Include="test\integration-tests\*\*.csproj" />
-    <IntegrationProjectFX Include="test\integration-tests\aspnet\*\*.csproj" Condition="'$(OS)' == 'Windows_NT'" />
+    <IntegrationProject Include="test\IntegrationTests\IntegrationTests.csproj" />
   </ItemGroup>
 
   <Target Name="Restore">
-    <MSBuild Targets="Restore" Projects="@(CsharpProject);@(UnitTestProject);@(TestApplicationProject);@(IntegrationProject);@(MockProject)"/>
+    <MSBuild Targets="Restore" Projects="@(CsharpProject);@(UnitTestProject);@(TestApplicationProject);@(MockProject)"/>
   </Target>
 
   <Target Name="Clean">
-    <MSBuild Targets="Clean" Projects="@(CsharpProject);@(UnitTestProject);@(TestApplicationProject);@(IntegrationProject);@(MockProject)"/>
+    <MSBuild Targets="Clean" Projects="@(CsharpProject);@(UnitTestProject);@(TestApplicationProject);@(MockProject)"/>
   </Target>
 
   <!-- default target -->
@@ -55,16 +54,6 @@
     </MSBuild>
 
     <MSBuild Targets="Build" Projects="@(TestApplicationProject);@(IntegrationProject)">
-      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
-    </MSBuild>
-  </Target>
-
-  <Target Name="BuildCsharpFXTest">
-    <MSBuild Targets="Restore" Projects="@(TestApplicationProjectFX);@(IntegrationProjectFX)">
-      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
-    </MSBuild>
-
-    <MSBuild Targets="Build" Projects="@(TestApplicationProjectFX);@(IntegrationProjectFX)">
       <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
     </MSBuild>
   </Target>
