@@ -15,7 +15,6 @@
     <TestApplicationProjectFX Include="test\test-applications\integrations\aspnet\*\*.csproj" Condition="'$(OS)' == 'Windows_NT'" />
     <MockProject Include="test\test-applications\mocks\*\*.csproj" />
     <IntegrationProject Include="test\IntegrationTests\IntegrationTests.csproj" />
-    <IntegrationProjectFX Include="test\IntegrationTests.AspNet\IntegrationTests.AspNet.csproj" Condition="'$(OS)' == 'Windows_NT'" />
   </ItemGroup>
 
   <Target Name="Restore">
@@ -55,16 +54,6 @@
     </MSBuild>
 
     <MSBuild Targets="Build" Projects="@(TestApplicationProject);@(IntegrationProject)">
-      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
-    </MSBuild>
-  </Target>
-
-  <Target Name="BuildCsharpFXTest">
-    <MSBuild Targets="Restore" Projects="@(TestApplicationProjectFX);@(IntegrationProjectFX)">
-      <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
-    </MSBuild>
-
-    <MSBuild Targets="Build" Projects="@(TestApplicationProjectFX);@(IntegrationProjectFX)">
       <Output TaskParameter="TargetOutputs" ItemName="CollectedBuildOutput"/>
     </MSBuild>
   </Target>

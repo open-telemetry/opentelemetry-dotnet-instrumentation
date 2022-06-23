@@ -54,6 +54,7 @@ partial class Build
         .Unlisted()
         .After(CompileNativeSrcLinux)
         .After(CompileNativeTestsLinux)
+        .After(PublishManagedProfiler)
         .OnlyWhenStatic(() => IsLinux)
         .Executes(() =>
         {

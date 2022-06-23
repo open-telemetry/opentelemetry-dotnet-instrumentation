@@ -1,5 +1,4 @@
 using System.IO;
-using Extensions;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
@@ -8,11 +7,9 @@ using Nuke.Common.Tools.Docker;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.MSBuild;
 using Serilog;
-using static DotNetMSBuildTasks;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.Docker.DockerTasks;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.MSBuild.MSBuildTasks;
 
 partial class Build
@@ -85,6 +82,7 @@ partial class Build
         .Unlisted()
         .After(CompileNativeSrcWindows)
         .After(CompileNativeTestsWindows)
+        .After(PublishManagedProfiler)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
@@ -96,27 +94,9 @@ partial class Build
             testExe("--gtest_output=xml", workingDirectory: workingDirectory);
         });
 
-    Target CompileManagedTestsWindows => _ => _
-        .Unlisted()
-        .After(CompileManagedTests)
-        .OnlyWhenStatic(() => IsWin)
-        .Triggers(PublishIisTestApplications)
-        .Executes(() =>
-        {
-            // Compile .NET Framework projects
-
-            DotNetMSBuild(x => x
-                .SetTargetPath(MsBuildProject)
-                .SetTargetPlatform(Platform)
-                .SetConfiguration(BuildConfiguration)
-                .DisableRestore()
-                .SetTargets("BuildCsharpFXTest")
-            );
-        });
-
     Target PublishIisTestApplications => _ => _
         .Unlisted()
-        .After(CompileManagedTestsWindows)
+        .After(CompileManagedTests)
         .OnlyWhenStatic(() => IsWin)
         .OnlyWhenStatic(() => Containers == ContainersWindows)
         .Executes(() =>
@@ -143,27 +123,5 @@ partial class Build
                     .SetProcessWorkingDirectory(proj.Parent)
                 );
             }
-        });
-
-    Target RunManagedTestsWindows => _ => _
-        .Unlisted()
-        .After(RunManagedTests)
-        .DependsOn(CompileManagedTestsWindows)
-        .DependsOn(PublishIisTestApplications)
-        .OnlyWhenStatic(() => IsWin)
-        .Executes(() =>
-        {
-            Project[] aspNetTests = Solution.GetWindowsOnlyIntegrationTests();
-
-            DotNetTest(config => config
-                .SetConfiguration(BuildConfiguration)
-                .SetTargetPlatform(Platform)
-                .SetFramework(TargetFramework.NET462)
-                .SetFilter(ContainersTestFilter())
-                .EnableNoRestore()
-                .EnableNoBuild()
-                .CombineWith(aspNetTests, (s, project) => s
-                    .EnableTrxLogOutput(GetResultsDirectory(project))
-                    .SetProjectFile(project)), degreeOfParallelism: 4);
         });
 }
