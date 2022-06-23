@@ -25,6 +25,8 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// </summary>
 public partial class Startup
 {
+    private static readonly string ManagedProfilerDirectory;
+
     /// <summary>
     /// Initializes static members of the <see cref="Startup"/> class.
     /// This method also attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
@@ -44,8 +46,6 @@ public partial class Startup
 
         TryLoadManagedAssembly();
     }
-
-    private static readonly string ManagedProfilerDirectory;
 
     private static void TryLoadManagedAssembly()
     {
