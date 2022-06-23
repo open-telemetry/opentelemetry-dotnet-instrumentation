@@ -110,13 +110,7 @@ updates:
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
-    directory: /test/integration-tests/aspnet/IntegrationTests.AspNet
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 20
-
-  - package-ecosystem: nuget
-    directory: /test/integration-tests/IntegrationTests.Helpers
+    directory: /test/IntegrationTests
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
