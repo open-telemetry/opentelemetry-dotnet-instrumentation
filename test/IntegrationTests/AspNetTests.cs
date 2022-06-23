@@ -14,7 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-#if !NETFRAMEWORK
+#if NETFRAMEWORK
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
