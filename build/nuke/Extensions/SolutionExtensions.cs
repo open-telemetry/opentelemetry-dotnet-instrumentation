@@ -26,7 +26,7 @@ namespace Extensions
         public static IEnumerable<Project> GetIntegrationTests(this Solution solution)
         {
             return solution
-                .GetProjects("IntegrationTests.*");
+                .GetProjects("IntegrationTests*");
         }
     }
 }
