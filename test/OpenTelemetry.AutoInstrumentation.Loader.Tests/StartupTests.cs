@@ -29,7 +29,7 @@ public class StartupTests
         var directory = Directory.GetCurrentDirectory();
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", Path.Combine(directory, "..", "Profiler"));
 
-        var exception = Record.Exception(() => AutoInstrumentation.Loader.Startup.ManagedProfilerDirectory);
+        var exception = Record.Exception(() => new AutoInstrumentation.Loader.Startup());
 
         // That means the assembly was loaded successfully and Initialize method was called.
         Assert.Null(exception);

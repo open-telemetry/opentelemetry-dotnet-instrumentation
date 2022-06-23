@@ -1,7 +1,0 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="..\IntegrationTests.Helpers\IntegrationTests.Helpers.csproj" />
-  </ItemGroup>
-
-</Project>

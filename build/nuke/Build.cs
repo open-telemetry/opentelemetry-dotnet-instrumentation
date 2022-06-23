@@ -99,6 +99,7 @@ partial class Build : NukeBuild
         .DependsOn(CompileManagedTests)
         .DependsOn(CompileMocks)
         .DependsOn(PublishMocks)
+        .DependsOn(PublishIisTestApplications)
         .DependsOn(RunManagedTests);
 
     Target BuildExamples => _ => _

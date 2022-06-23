@@ -113,7 +113,6 @@ partial class Build
         .Unlisted()
         .Description("Compiles the managed code in the test directory")
         .After(CompileManagedSrc)
-        .Triggers(CompileManagedTestsWindows)
         .Executes(() =>
         {
             // Always AnyCPU
@@ -240,7 +239,6 @@ partial class Build
         .After(PublishMocks)
         .Triggers(RunManagedUnitTests)
         .Triggers(RunManagedIntegrationTests)
-        .Triggers(RunManagedTestsWindows)
         .Executes(() => { });
 
     Target PublishMocks => _ => _
@@ -302,7 +300,7 @@ partial class Build
         .Unlisted()
         .Executes(() =>
         {
-            Project[] integrationTests = Solution.GetCrossPlatformIntegrationTests();
+            var project = Solution.GetProject("IntegrationTests");
 
             IEnumerable<TargetFramework> frameworks = IsWin ? TestFrameworks : TestFrameworks.ExceptNetFramework();
 
@@ -310,14 +308,13 @@ partial class Build
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatform(Platform)
                 .SetFilter(ContainersTestFilter())
+                .EnableTrxLogOutput(GetResultsDirectory(project))
+                .SetProjectFile(project)
                 .EnableNoRestore()
                 .EnableNoBuild()
                 .CombineWith(frameworks, (s, fx) => s
                     .SetFramework(fx)
-                )
-                .CombineWith(integrationTests, (s, project) => s
-                    .EnableTrxLogOutput(GetResultsDirectory(project))
-                    .SetProjectFile(project)), degreeOfParallelism: 4);
+                ));
         });
 
     Target CopyAdditionalDeps => _ => _
