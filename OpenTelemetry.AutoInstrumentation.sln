@@ -139,9 +139,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests.MongoDB", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.MongoDB", "test\test-applications\integrations\TestApplication.MongoDB\TestApplication.MongoDB.csproj", "{3B77F975-BF66-4218-9982-F48D3271DDFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests.SqlClient", "test\integration-tests\IntegrationTests.SqlClient\IntegrationTests.SqlClient.csproj", "{474834F1-2769-4FBB-BD0A-941DE276DFB6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests.SqlClient", "test\integration-tests\IntegrationTests.SqlClient\IntegrationTests.SqlClient.csproj", "{474834F1-2769-4FBB-BD0A-941DE276DFB6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.SqlClient", "test\test-applications\integrations\TestApplication.SqlClient\TestApplication.SqlClient.csproj", "{2120CFA2-9D16-45F0-A333-B0385C371509}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.SqlClient", "test\test-applications\integrations\TestApplication.SqlClient\TestApplication.SqlClient.csproj", "{2120CFA2-9D16-45F0-A333-B0385C371509}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -322,17 +322,11 @@ Global
 		{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24}.Release|x86.ActiveCfg = Release|x86
 		{6615B3D8-87C7-40D4-A7EA-19A7BFC7FD24}.Release|x86.Build.0 = Release|x86
 		{4DDEEB10-A6B5-4A46-96C1-1B7276B61E08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4DDEEB10-A6B5-4A46-96C1-1B7276B61E08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DDEEB10-A6B5-4A46-96C1-1B7276B61E08}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{4DDEEB10-A6B5-4A46-96C1-1B7276B61E08}.Debug|x64.Build.0 = Debug|Any CPU
 		{4DDEEB10-A6B5-4A46-96C1-1B7276B61E08}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{4DDEEB10-A6B5-4A46-96C1-1B7276B61E08}.Debug|x86.Build.0 = Debug|Any CPU
 		{4DDEEB10-A6B5-4A46-96C1-1B7276B61E08}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4DDEEB10-A6B5-4A46-96C1-1B7276B61E08}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4DDEEB10-A6B5-4A46-96C1-1B7276B61E08}.Release|x64.ActiveCfg = Release|Any CPU
-		{4DDEEB10-A6B5-4A46-96C1-1B7276B61E08}.Release|x64.Build.0 = Release|Any CPU
 		{4DDEEB10-A6B5-4A46-96C1-1B7276B61E08}.Release|x86.ActiveCfg = Release|Any CPU
-		{4DDEEB10-A6B5-4A46-96C1-1B7276B61E08}.Release|x86.Build.0 = Release|Any CPU
 		{56BA76DB-56E0-465E-84B6-71C64F12017F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{56BA76DB-56E0-465E-84B6-71C64F12017F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56BA76DB-56E0-465E-84B6-71C64F12017F}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -453,7 +447,8 @@ Global
 		{0584ADC1-956E-49B0-A46F-8405AA2AD207}.Release|x64.Build.0 = Release|Any CPU
 		{0584ADC1-956E-49B0-A46F-8405AA2AD207}.Release|x86.ActiveCfg = Release|Any CPU
 		{0584ADC1-956E-49B0-A46F-8405AA2AD207}.Release|x86.Build.0 = Release|Any CPU
-		{FF665CC4-6643-4614-A1A0-FA182E3AF37C}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{FF665CC4-6643-4614-A1A0-FA182E3AF37C}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{FF665CC4-6643-4614-A1A0-FA182E3AF37C}.Debug|Any CPU.Build.0 = Debug|x64
 		{FF665CC4-6643-4614-A1A0-FA182E3AF37C}.Debug|x64.ActiveCfg = Debug|x64
 		{FF665CC4-6643-4614-A1A0-FA182E3AF37C}.Debug|x64.Build.0 = Debug|x64
 		{FF665CC4-6643-4614-A1A0-FA182E3AF37C}.Debug|x86.ActiveCfg = Debug|x86
