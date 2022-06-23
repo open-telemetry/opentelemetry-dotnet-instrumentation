@@ -1,7 +1,4 @@
-# IntegrationTests.Helpers
-
-This project contains code that can be used other integration test
-projects to support writing integration tests.
+# Integration Tests
 
 ## OTLP protos
 

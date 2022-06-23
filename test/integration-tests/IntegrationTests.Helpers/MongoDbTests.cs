@@ -69,9 +69,9 @@ namespace IntegrationTests.MongoDB
 
                     if (Regex.IsMatch(span.Name, "employees\\.*"))
                     {
-                        Assert.Equal("mongodb", span.Tags?.GetValueOrDefault("db.system"));
-                        Assert.Equal("test-db", span.Tags?.GetValueOrDefault("db.name"));
-                        Assert.True("1.0.0.0" == span.Tags?.GetValueOrDefault("otel.library.version"), span.ToString());
+                        Assert.Equal("mongodb", span.Tags["db.system"]);
+                        Assert.Equal("test-db", span.Tags["db.name"]);
+                        Assert.True("1.0.0.0" == span.Tags["otel.library.version"], span.ToString());
 
                         if (span.Tags?.ContainsKey("db.statement") ?? false)
                         {
@@ -82,7 +82,7 @@ namespace IntegrationTests.MongoDB
                     else
                     {
                         // These are manual (DiagnosticSource) traces
-                        Assert.True("1.0.0" == span.Tags?.GetValueOrDefault("otel.library.version"), span.ToString());
+                        Assert.True("1.0.0" == span.Tags["otel.library.version"], span.ToString());
                     }
                 }
 

@@ -26,9 +26,7 @@ namespace Extensions
         public static IEnumerable<Project> GetIntegrationTests(this Solution solution)
         {
             return solution
-                .GetProjects("IntegrationTests.*")
-                // Skip helpers project
-                .Where(x => !x.Name.Equals(Projects.Tests.IntegrationTestsHelpers, StringComparison.OrdinalIgnoreCase));
+                .GetProjects("IntegrationTests.*");
         }
     }
 }

@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+#if !NETFRAMEWORK
 using System;
 using System.Linq;
 using FluentAssertions;
@@ -145,3 +146,4 @@ namespace IntegrationTests.Http
         }
     }
 }
+#endif

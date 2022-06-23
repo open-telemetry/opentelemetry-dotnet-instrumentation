@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+#if !NETFRAMEWORK
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -131,3 +132,4 @@ public class StartupHookTests : TestHelper
         Assert.True(!failures.Any(), finalMessage);
     }
 }
+#endif
