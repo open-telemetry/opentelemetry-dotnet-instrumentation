@@ -45,7 +45,7 @@ public partial class Startup
         TryLoadManagedAssembly();
     }
 
-    internal static string ManagedProfilerDirectory { get; }
+    private static readonly string ManagedProfilerDirectory;
 
     private static void TryLoadManagedAssembly()
     {
