@@ -116,37 +116,7 @@ updates:
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
-    directory: /test/integration-tests/IntegrationTests.GraphQL
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 20
-
-  - package-ecosystem: nuget
     directory: /test/integration-tests/IntegrationTests.Helpers
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 20
-
-  - package-ecosystem: nuget
-    directory: /test/integration-tests/IntegrationTests.Http
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 20
-
-  - package-ecosystem: nuget
-    directory: /test/integration-tests/IntegrationTests.StartupHook
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 20
-
-  - package-ecosystem: nuget
-    directory: /test/integration-tests/IntegrationTests.MongoDB
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 20
-
-  - package-ecosystem: nuget
-    directory: /test/integration-tests/IntegrationTests.SqlClient
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
