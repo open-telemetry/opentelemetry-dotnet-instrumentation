@@ -16,7 +16,7 @@ public class AspNetTests : TestHelper
     {
     }
 
-    [Fact]
+    [FactRequiringWindowsAdministrator]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
     public async Task SubmitsTraces()
@@ -41,6 +41,17 @@ public class AspNetTests : TestHelper
             var spans = agent.WaitForSpans(1);
 
             Assert.True(spans.Count >= 1, $"Expecting at least 1 span, only received {spans.Count}");
+        }
+    }
+
+    public sealed class FactRequiringWindowsAdministratorAttribute : FactAttribute
+    {
+        public FactRequiringWindowsAdministratorAttribute()
+        {
+            if (!EnvironmentTools.IsWindowsAdministrator())
+            {
+                Skip = "This test requires Windows Administrator privileges";
+            }
         }
     }
 }

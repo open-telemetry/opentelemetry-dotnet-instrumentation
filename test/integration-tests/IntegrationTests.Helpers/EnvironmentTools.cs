@@ -18,6 +18,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 
 namespace IntegrationTests.Helpers;
 
@@ -69,7 +70,7 @@ public class EnvironmentTools
 
     public static string GetOS()
     {
-        return IsWindows()                                       ? "win" :
+        return IsWindows()                                    ? "win" :
             RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "linux" :
             RuntimeInformation.IsOSPlatform(OSPlatform.OSX)   ? "osx" :
             string.Empty;
@@ -83,6 +84,21 @@ public class EnvironmentTools
     public static bool IsWindows()
     {
         return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+    }
+
+    public static bool IsWindowsAdministrator()
+    {
+        if (!IsWindows())
+        {
+            return false;
+        }
+
+#pragma warning disable CA1416 // Validate platform compatibility
+        using var identity = WindowsIdentity.GetCurrent();
+        var principal = new WindowsPrincipal(identity);
+
+        return principal.IsInRole(WindowsBuiltInRole.Administrator);
+#pragma warning restore CA1416 // Validate platform compatibility
     }
 
     public static bool IsMacOS()
@@ -100,7 +116,7 @@ public class EnvironmentTools
 #if DEBUG
         return "Debug";
 #else
-            return "Release";
+        return "Release";
 #endif
     }
 }

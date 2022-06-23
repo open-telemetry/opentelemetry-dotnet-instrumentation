@@ -52,7 +52,10 @@ public class MockZipkinCollector : IDisposable
             try
             {
                 listener.Start();
-                listener.Prefixes.Add($"http://localhost:{port}/api/v2/spans/");
+
+                // For the mock collector to receive data from Windows containers we need to bind to all network interfaces.
+                var host = EnvironmentTools.IsWindowsAdministrator() ? "*" : "localhost";
+                listener.Prefixes.Add($"http://{host}:{port}/api/v2/spans/");
 
                 // successfully listening
                 Port = port;

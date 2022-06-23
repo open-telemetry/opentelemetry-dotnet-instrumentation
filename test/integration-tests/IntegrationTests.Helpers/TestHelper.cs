@@ -59,7 +59,7 @@ public abstract class TestHelper
 
         string agentBaseUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{traceAgentPort}";
         string agentHealthzUrl = $"{agentBaseUrl}/healthz";
-        string zipkinEndpoint = $"http://host.docker.internal:{traceAgentPort}/api/v2/spans";
+        string zipkinEndpoint = $"{agentBaseUrl}/api/v2/spans";
         string networkName = DockerNetworkHelper.IntegrationTestsNetworkName;
         string networkId = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
 
