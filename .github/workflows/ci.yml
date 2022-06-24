@@ -11,7 +11,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [ { host-os: windows-2022, container: [linux, windows] }, { host-os: ubuntu-20.04, container: [linux] },  { host-os: macos-10.15, container: [none] } ]
+        target:
+          - host-os: windows-2022
+            container: linux
+          - host-os: windows-2022
+            container: windows
+          - host-os: ubuntu-20.04
+            container: linux
+          - host-os: macos-10.15
+            container: none
     runs-on: ${{ matrix.target.host-os }}
     steps:
       - uses: actions/checkout@v3.0.2
