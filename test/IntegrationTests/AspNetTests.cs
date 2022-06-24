@@ -33,11 +33,13 @@ public class AspNetTests : TestHelper
     {
     }
 
-    [FactRequiringWindowsAdministrator]
+    [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
     public async Task SubmitsTraces()
     {
+        Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
+
         var agentPort = TcpPortProvider.GetOpenPort();
         var webPort = TcpPortProvider.GetOpenPort();
 
@@ -58,17 +60,6 @@ public class AspNetTests : TestHelper
             var spans = agent.WaitForSpans(1);
 
             Assert.True(spans.Count >= 1, $"Expecting at least 1 span, only received {spans.Count}");
-        }
-    }
-
-    public sealed class FactRequiringWindowsAdministratorAttribute : FactAttribute
-    {
-        public FactRequiringWindowsAdministratorAttribute()
-        {
-            if (!EnvironmentTools.IsWindowsAdministrator())
-            {
-                Skip = "This test requires Windows Administrator privileges";
-            }
         }
     }
 }
