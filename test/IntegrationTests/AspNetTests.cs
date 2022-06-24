@@ -43,24 +43,27 @@ public class AspNetTests : TestHelper
         var agentPort = TcpPortProvider.GetOpenPort();
         var webPort = TcpPortProvider.GetOpenPort();
 
-        using (var fwPort = FirewallHelper.OpenWinPort(agentPort, Output))
-        using (var agent = new MockZipkinCollector(Output, agentPort))
-        using (var container = await StartContainerAsync(agentPort, webPort))
-        {
-            var client = new HttpClient();
+         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
+         // accessible to the Windows docker container where the test application is executed by binding
+         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
+         // on the firewall.
+        using var fwPort = FirewallHelper.OpenWinPort(agentPort, Output);
+        using var agent = new MockZipkinCollector(Output, agentPort, host: "*");
+        using var container = await StartContainerAsync(agentPort, webPort);
 
-            var response = await client.GetAsync($"http://localhost:{webPort}");
-            var content = await response.Content.ReadAsStringAsync();
+        var client = new HttpClient();
 
-            Output.WriteLine("Sample response:");
-            Output.WriteLine(content);
+        var response = await client.GetAsync($"http://localhost:{webPort}");
+        var content = await response.Content.ReadAsStringAsync();
 
-            agent.SpanFilters.Add(x => x.Name != "healthz");
+        Output.WriteLine("Sample response:");
+        Output.WriteLine(content);
 
-            var spans = agent.WaitForSpans(1);
+        agent.SpanFilters.Add(x => x.Name != "healthz");
 
-            Assert.True(spans.Count >= 1, $"Expecting at least 1 span, only received {spans.Count}");
-        }
+        var spans = agent.WaitForSpans(1);
+
+        Assert.True(spans.Count >= 1, $"Expecting at least 1 span, only received {spans.Count}");
     }
 }
 #endif

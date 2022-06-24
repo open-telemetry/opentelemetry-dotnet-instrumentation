@@ -38,7 +38,7 @@ public class MockZipkinCollector : IDisposable
     private readonly HttpListener _listener;
     private readonly Thread _listenerThread;
 
-    public MockZipkinCollector(ITestOutputHelper output, int port = 9411, int retries = 5)
+    public MockZipkinCollector(ITestOutputHelper output, int port = 9411, int retries = 5, string host = "localhost")
     {
         _output = output;
 
@@ -53,9 +53,10 @@ public class MockZipkinCollector : IDisposable
             {
                 listener.Start();
 
-                // For the mock collector to receive data from Windows containers we need to bind to all network interfaces.
-                var host = EnvironmentTools.IsWindowsAdministrator() ? "*" : "localhost";
-                listener.Prefixes.Add($"http://{host}:{port}/api/v2/spans/");
+                // See https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistenerprefixcollection.add?redirectedfrom=MSDN&view=net-6.0#remarks
+                // for info about the host value.
+                string prefix = new UriBuilder("http", host, port, "/api/v2/spans/").ToString();
+                listener.Prefixes.Add(prefix);
 
                 // successfully listening
                 Port = port;
