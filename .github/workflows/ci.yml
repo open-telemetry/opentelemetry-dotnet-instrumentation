@@ -11,8 +11,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        machine: [ windows-2022, ubuntu-20.04, macos-10.15 ]
-    runs-on: ${{ matrix.machine }}
+        host-os: [ windows-2022, ubuntu-20.04, macos-10.15 ]
+        container: [ linux, none, windows ]
+    runs-on: ${{ matrix.host-os }}
     steps:
       - uses: actions/checkout@v3.0.2
       - uses: actions/setup-dotnet@v2.1.0
@@ -20,21 +21,25 @@ jobs:
           dotnet-version: | 
             3.1.x
             6.0.x
-      - run: ./build.cmd Workflow --containers windows
-        if: ${{ runner.os == 'Windows' }}
-      - run: ./build.cmd Workflow --containers linux
-        if: ${{ runner.os == 'Linux' }}
-      - run: ./build.cmd Workflow --containers none
-        if: ${{ runner.os == 'macOS' }}
+
+      - run: ./build.cmd Workflow --containers ${{ matrix.container }}
+        if: ${{ runner.os == 'Windows' && (matrix.container != 'none') }}
+
+      - run: ./build.cmd Workflow --containers ${{ matrix.container }}
+        if: ${{ (runner.os == 'Linux') && (matrix.container == 'linux') }}
+
+      - run: ./build.cmd Workflow --containers ${{ matrix.container }}
+        if: ${{ (runner.os == 'macOS') && (matrix.container == 'none') }}
+
       - name: Upload logs
         uses: actions/upload-artifact@v3.1.0
         if: always()
         with:
-          name: logs-${{ matrix.machine }}
+          name: logs-${{ matrix.host-os }}-container-${{ matrix.container }}
           path: build_data/profiler-logs/
       - name: Upload binaries
         uses: actions/upload-artifact@v3.1.0
         if: always()
         with:
-          name: bin-${{ matrix.machine }}
+          name: bin-${{ matrix.host-os }} # The container doesn't matter in this case, overwriting the older one is ok.
           path: bin/tracer-home
