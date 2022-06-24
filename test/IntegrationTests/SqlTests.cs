@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+#if !NETFRAMEWORK
 using System;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -69,3 +70,4 @@ namespace IntegrationTests.SqlClient
         }
     }
 }
+#endif

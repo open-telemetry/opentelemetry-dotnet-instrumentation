@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+#if !NETFRAMEWORK
 using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
@@ -75,3 +76,4 @@ public class MongoDbFixture : IAsyncLifetime
         await container.DisposeAsync();
     }
 }
+#endif
