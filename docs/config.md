@@ -41,7 +41,7 @@ for more details.
 | `AspNet` | ASP.NET Core | * | source |
 | `GraphQL` | [GraphQL](https://www.nuget.org/packages/GraphQL/) | ≥2.3.0 & < 3.0.0 | bytecode |
 | `HttpClient` | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | * | source |
-| `MongoDb` | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core) | ≥2.3.0 & < 3.0.0 | source & bytecode |
+| `MongoDB` | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core) **Not supported on .NET Framework**  | ≥2.3.0 & < 3.0.0 | source & bytecode |
 | `SqlClient` | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) | * | source |
 
 ### Instrumented metrics libraries and frameworks
