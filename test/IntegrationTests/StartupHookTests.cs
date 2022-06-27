@@ -65,7 +65,7 @@ public class StartupHookTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public void ApplicationIsNotExcluded()
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet;dotnet.exe");
 
         var spans = RunTestApplication();
 
@@ -76,7 +76,11 @@ public class StartupHookTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public void ApplicationIsExcluded()
     {
+#if NETFRAMEWORK
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet;dotnet.exe;{EnvironmentHelper.FullTestApplicationName};{EnvironmentHelper.FullTestApplicationName}.exe");
+#else
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
+#endif
 
         var spans = RunTestApplication();
 
