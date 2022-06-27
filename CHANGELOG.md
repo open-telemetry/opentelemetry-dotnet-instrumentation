@@ -47,6 +47,13 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 
 - Support for .NET 5.0
 
+### Fixed
+
+- `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`, `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`,
+  `OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS`,
+  `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` use `,` as seperator
+  instead of `;`.
+
 ## [0.1.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.1.0-beta.1)
 
 The is an initial, official beta release,
