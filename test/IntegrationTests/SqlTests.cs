@@ -14,8 +14,8 @@
 // limitations under the License.
 // </copyright>
 
-#if !NETFRAMEWORK
 using System;
+using System.Collections.Generic;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
@@ -60,14 +60,12 @@ namespace IntegrationTests.SqlClient
                 {
                     span.Service.Should().Be(ServiceName);
                     span.Name.Should().Be("master");
-                    span.Tags["db.system"].Should().Be("mssql");
-                    span.Tags["db.name"].Should().Be("master");
-                    span.Tags["peer.service"].Should().Contain($"{_sqlClientFixture.Port}");
-                    span.Tags["db.statement_type"].Should().Be("Text");
-                    span.Tags["span.kind"].Should().Be("client");
+                    span.Tags.Should().Contain(new KeyValuePair<string, string>("db.system", "mssql"));
+                    span.Tags.Should().Contain(new KeyValuePair<string, string>("db.name", "master"));
+                    span.Tags.Should().Contain(new KeyValuePair<string, string>("peer.service", $"localhost,{_sqlClientFixture.Port}"));
+                    span.Tags.Should().Contain(new KeyValuePair<string, string>("span.kind", "client"));
                 }
             }
         }
     }
 }
-#endif
