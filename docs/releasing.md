@@ -2,7 +2,7 @@
 
 1. Run the integration tests with Linux containers on Windows
    (not covered by CI):
-   
+
    ```bash
    nuke Workflow --containers linux
    ```
