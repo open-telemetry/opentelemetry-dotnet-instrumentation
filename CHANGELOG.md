@@ -30,6 +30,9 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
   the `OpenTelemetry.Instrumentation.Runtime` package.
 - Support for ASP.NET and HttpClient metrics instrumentations.
 - Support for Prometheus Exporter HttpListener version.
+- `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` can accept multiple filepaths
+  delimted by the platform-specific path separator
+  (`;` on Windows, `:` on Linux and macOS).
 
 ### Changed
 
@@ -49,10 +52,10 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 
 ### Fixed
 
-- `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`, `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`,
-  `OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS`,
-  `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` use `,` as seperator
-  instead of `;`.
+- Use `,` as seperator, as documented, instead of `;`, for:
+  - `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`,
+  - `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`,
+  - `OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS`.
 
 ## [0.1.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.1.0-beta.1)
 
