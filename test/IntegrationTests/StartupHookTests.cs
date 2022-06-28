@@ -57,6 +57,7 @@ public class StartupHookTests : TestHelper
 #if NETFRAMEWORK
         AssertAllSpansReceived(spans);
 #else
+        // on .NET Core it is required to set DOTNET_STARTUP_HOOKS
         AssertNoSpansReceived(spans);
 #endif
     }
@@ -81,6 +82,23 @@ public class StartupHookTests : TestHelper
         var spans = RunTestApplication();
 
         AssertNoSpansReceived(spans);
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void ApplicationIsNotIncluded()
+    {
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES", $"dotnet,dotnet.exe");
+
+        var spans = RunTestApplication();
+
+#if NETFRAMEWORK
+        AssertNoSpansReceived(spans);
+#else
+        // FIXME: OTEL_DOTNET_AUTO_INCLUDE_PROCESSES does on .NET Core.
+        // https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/895
+        AssertAllSpansReceived(spans);
+#endif
     }
 
     private static void AssertNoSpansReceived(IImmutableList<IMockSpan> spans)
