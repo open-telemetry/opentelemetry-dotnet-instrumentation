@@ -14,7 +14,7 @@ using json = nlohmann::json;
 
 void LoadIntegrationsFromEnvironment(std::vector<IntegrationMethod>& integrationMethods, const std::vector<WSTRING>& disabledIntegrationNames)
 {
-    for (const WSTRING& filePath : GetEnvironmentValues(environment::integrations_path))
+    for (const WSTRING& filePath : GetEnvironmentValues(environment::integrations_path, ENV_VAR_PATH_SEPARATOR))
     {
         Logger::Debug("Loading integrations from file: ", filePath);
         LoadIntegrationsFromFile(filePath, integrationMethods, disabledIntegrationNames);
