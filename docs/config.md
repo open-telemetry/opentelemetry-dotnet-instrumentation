@@ -25,7 +25,7 @@ for more details.
 
 | Environment variable | Description | Default value |
 |-|-|-|
-| `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | File path of JSON configuration files of bytecode instrumentations. For example: `%ProfilerDirectory%/integrations.json` | |
+| `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | List of bytecode instrumentations JSON configuration filepaths, delimited by the platform-specific path separator (`;` on Windows, `:` on Linux and macOS). For example: `%ProfilerDirectory%/integrations.json` | |
 | `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS` | Comma-separated list of traces source instrumentations you want to enable. |  |
 | `OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS` | Comma-separated list of traces source and bytecode instrumentations you want to disable. | |
 | `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS` | Comma-separated list of metrics source instrumentations you want to enable. |  |
@@ -59,6 +59,7 @@ The default log directory paths are:
 
 - Windows: `%ProgramData%\OpenTelemetry .NET AutoInstrumentation\logs`
 - Linux: `/var/log/opentelemetry/dotnet`
+- macOS: `/var/log/opentelemetry/dotnet`
 
 If the default log directories can't be created,
 the instrumentation uses the path of the current user's [temporary folder](https://docs.microsoft.com/en-us/dotnet/api/System.IO.Path.GetTempPath?view=net-6.0)
@@ -181,19 +182,21 @@ for more information.
 |-|-|-|-|
 | `COR_ENABLE_PROFILING` | `CORECLR_ENABLE_PROFILING` | Enables the profiler. | `1` |
 | `COR_PROFILER` | `CORECLR_PROFILER` | CLSID of the profiler. | `{918728DD-259F-4A6A-AC2B-B85E1B658318}` |
-| `COR_PROFILER_PATH` | `CORECLR_PROFILER_PATH` | Path to the profiler. | `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows, `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.so` for Linux, `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.dylib` for MacOS |
+| `COR_PROFILER_PATH` | `CORECLR_PROFILER_PATH` | Path to the profiler. | `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows, `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.so` for Linux, `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.dylib` for macOS |
 | `COR_PROFILER_PATH_32` | `CORECLR_PROFILER_PATH_32` | Path to the 32-bit profiler. Bitness-specific paths take precedence over generic paths. | `%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
 | `COR_PROFILER_PATH_64` | `CORECLR_PROFILER_PATH_64` | Path to the 64-bit profiler. Bitness-specific paths take precedence over generic paths. | `%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
 
-## .NET Runtime additional dependencies and package store
+## .NET Runtime
 
-To resolve assembly version conflicts in .NET Core,
-set the
+On .NET Core it is required to set the
+[`DOTNET_STARTUP_HOOKS`](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)
+
 [`DOTNET_ADDITIONAL_DEPS`](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md)
 and [`DOTNET_SHARED_STORE`](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
-environment variables to the following values:
+are used to mitigate assembly version conflicts in .NET Core.
 
-| Environment variable | Value |
+| Environment variable | Required value |
 |-|-|
+| `DOTNET_STARTUP_HOOKS` | `%InstallationLocation%/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
 | `DOTNET_ADDITIONAL_DEPS` | `%InstallationLocation%/AdditionalDeps` |
 | `DOTNET_SHARED_STORE` | `%InstallationLocation%/store` |

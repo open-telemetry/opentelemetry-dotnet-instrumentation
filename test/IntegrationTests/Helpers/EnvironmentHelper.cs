@@ -201,7 +201,7 @@ public class EnvironmentHelper
         if (testSettings.TracesSettings != null)
         {
             environmentVariables["OTEL_TRACES_EXPORTER"] = testSettings.TracesSettings.Exporter;
-            environmentVariables["OTEL_EXPORTER_ZIPKIN_ENDPOINT"] = $"http://127.0.0.1:{testSettings.TracesSettings.Port}";
+            environmentVariables["OTEL_EXPORTER_ZIPKIN_ENDPOINT"] = $"http://localhost:{testSettings.TracesSettings.Port}/api/v2/spans";
         }
 
         if (testSettings.MetricsSettings != null)
