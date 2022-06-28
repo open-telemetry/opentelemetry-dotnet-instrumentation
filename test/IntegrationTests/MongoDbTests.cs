@@ -14,10 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#if !NETFRAMEWORK
 using System;
-#if NETCOREAPP
-using System.Collections.Generic;
-#endif
 using System.Linq;
 using System.Text.RegularExpressions;
 using IntegrationTests.Helpers;
@@ -91,3 +89,4 @@ namespace IntegrationTests.MongoDB
         }
     }
 }
+#endif
