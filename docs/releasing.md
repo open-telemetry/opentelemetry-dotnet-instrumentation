@@ -1,6 +1,6 @@
 # Release Process
 
-1. Run the integration tests with Linux containers on Windows
+1. Run the integration tests with Linux containers on Windows and macOS
    (not covered by CI):
 
    ```bash
