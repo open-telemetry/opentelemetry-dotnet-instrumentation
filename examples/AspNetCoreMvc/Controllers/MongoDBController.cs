@@ -1,4 +1,4 @@
-// <copyright file="MongoDbController.cs" company="OpenTelemetry Authors">
+// <copyright file="MongoDBController.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,7 @@ using MongoDB.Driver;
 namespace Examples.AspNetCoreMvc.Controllers;
 
 [Route("api/mongo")]
-public class MongoDbController : ControllerBase
+public class MongoDBController : ControllerBase
 {
     private const string ConnectionString = "mongodb://localhost:27017";
 
