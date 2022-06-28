@@ -31,32 +31,42 @@ namespace TestApplication.StartupHook
             {
                 if (o.Trace)
                 {
-                    var myActivitySource = new ActivitySource("TestApplication.StartupHook", "1.0.0");
-
-                    using (var activity = myActivitySource.StartActivity("SayHello"))
-                    {
-                        activity?.SetTag("foo", 1);
-                        activity?.SetTag("bar", "Hello, World!");
-                        activity?.SetTag("baz", new int[] { 1, 2, 3 });
-                    }
-
-                    var client = new HttpClient();
-                    client.GetStringAsync("http://httpstat.us/200").Wait();
+                    GenerateTraceData();
                 }
 
                 if (o.Metrics)
                 {
-                    var myMeter = new Meter("MyCompany.MyProduct.MyLibrary", "1.0");
-                    var myFruitCounter = myMeter.CreateCounter<long>("MyFruitCounter");
-
-                    myFruitCounter.Add(1, new("name", "apple"), new("color", "red"));
-                    myFruitCounter.Add(2, new("name", "lemon"), new("color", "yellow"));
-                    myFruitCounter.Add(1, new("name", "lemon"), new("color", "yellow"));
-                    myFruitCounter.Add(2, new("name", "apple"), new("color", "green"));
-                    myFruitCounter.Add(5, new("name", "apple"), new("color", "red"));
-                    myFruitCounter.Add(4, new("name", "lemon"), new("color", "yellow"));
+                    GenerateMetricsData();
                 }
             });
+        }
+
+        private static void GenerateTraceData()
+        {
+            var myActivitySource = new ActivitySource("TestApplication.StartupHook", "1.0.0");
+
+            using (var activity = myActivitySource.StartActivity("SayHello"))
+            {
+                activity?.SetTag("foo", 1);
+                activity?.SetTag("bar", "Hello, World!");
+                activity?.SetTag("baz", new int[] { 1, 2, 3 });
+            }
+
+            var client = new HttpClient();
+            client.GetStringAsync("http://httpstat.us/200").Wait();
+        }
+
+        private static void GenerateMetricsData()
+        {
+            var myMeter = new Meter("MyCompany.MyProduct.MyLibrary", "1.0");
+            var myFruitCounter = myMeter.CreateCounter<long>("MyFruitCounter");
+
+            myFruitCounter.Add(1, new("name", "apple"), new("color", "red"));
+            myFruitCounter.Add(2, new("name", "lemon"), new("color", "yellow"));
+            myFruitCounter.Add(1, new("name", "lemon"), new("color", "yellow"));
+            myFruitCounter.Add(2, new("name", "apple"), new("color", "green"));
+            myFruitCounter.Add(5, new("name", "apple"), new("color", "red"));
+            myFruitCounter.Add(4, new("name", "lemon"), new("color", "yellow"));
         }
 
         public class Options
