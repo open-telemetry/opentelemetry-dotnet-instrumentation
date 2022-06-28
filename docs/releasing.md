@@ -1,5 +1,12 @@
 # Release Process
 
+1. Run the integration tests with Linux containers on Windows and macOS
+   (not covered by CI):
+
+   ```bash
+   nuke Workflow --containers linux
+   ```
+
 1. Update the version in the following files:
 
    - `TracerConstants.cs`
@@ -11,11 +18,11 @@
    - `CMakeLists.txt`
    - `Resource.rc`
 
-2. Update the [CHANGELOG.md](../CHANGELOG.md) with the new release.
+1. Update the [CHANGELOG.md](../CHANGELOG.md) with the new release.
 
-3. Create a pull request on GitHub with the changes described in the changelog.
+1. Create a pull request on GitHub with the changes described in the changelog.
 
-4. Once the pull request has been merged, create a signed tag for the merged commit.
+1. Once the pull request has been merged, create a signed tag for the merged commit.
    You can do this using the following Bash snippet:
 
    ```bash
@@ -27,7 +34,7 @@
 
    After you've pushed the git tag, a `release` GitHub workflow starts.
 
-5. Publish a release in GitHub:
+1. Publish a release in GitHub:
 
    - Use the [CHANGELOG.md](../CHANGELOG.md) content in the description.
    - Add the artifacts from [the `release` GitHub workflow](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/actions/workflows/release.yml).
