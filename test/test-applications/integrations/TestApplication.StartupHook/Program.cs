@@ -15,25 +15,60 @@
 // </copyright>
 
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Net.Http;
+using CommandLine;
 
 namespace TestApplication.StartupHook
 {
     public class Program
     {
-        private static readonly ActivitySource MyActivitySource = new ActivitySource("TestApplication.StartupHook", "1.0.0");
-
         public static void Main(string[] args)
         {
-            using (var activity = MyActivitySource.StartActivity("SayHello"))
-            {
-                activity?.SetTag("foo", 1);
-                activity?.SetTag("bar", "Hello, World!");
-                activity?.SetTag("baz", new int[] { 1, 2, 3 });
-            }
+            var options = Parser.Default.ParseArguments<Options>(args);
 
-            var client = new HttpClient();
-            client.GetStringAsync("http://httpstat.us/200").Wait();
+            options.WithParsed<Options>(o =>
+            {
+                if (o.Trace)
+                {
+                    var myActivitySource = new ActivitySource("TestApplication.StartupHook", "1.0.0");
+
+                    using (var activity = myActivitySource.StartActivity("SayHello"))
+                    {
+                        activity?.SetTag("foo", 1);
+                        activity?.SetTag("bar", "Hello, World!");
+                        activity?.SetTag("baz", new int[] { 1, 2, 3 });
+                    }
+
+                    var client = new HttpClient();
+                    client.GetStringAsync("http://httpstat.us/200").Wait();
+                }
+
+                if (o.Metrics)
+                {
+                    var myMeter = new Meter("MyCompany.MyProduct.MyLibrary", "1.0");
+                    var myFruitCounter = myMeter.CreateCounter<long>("MyFruitCounter");
+
+                    myFruitCounter.Add(1, new("name", "apple"), new("color", "red"));
+                    myFruitCounter.Add(2, new("name", "lemon"), new("color", "yellow"));
+                    myFruitCounter.Add(1, new("name", "lemon"), new("color", "yellow"));
+                    myFruitCounter.Add(2, new("name", "apple"), new("color", "green"));
+                    myFruitCounter.Add(5, new("name", "apple"), new("color", "red"));
+                    myFruitCounter.Add(4, new("name", "lemon"), new("color", "yellow"));
+                }
+            });
+        }
+
+        public class Options
+        {
+            [Option('t', "Trace", Required = false, HelpText = "Set this option to collect trace messages.")]
+            public bool Trace { get; set; }
+
+            [Option('l', "verbose", Required = false, HelpText = "Set this option to collect logs.")]
+            public bool Logs { get; set; }
+
+            [Option('m', "verbose", Required = false, HelpText = "Set this option to collect metrics.")]
+            public bool Metrics { get; set; }
         }
     }
 }

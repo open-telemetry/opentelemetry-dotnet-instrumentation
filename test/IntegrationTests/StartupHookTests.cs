@@ -18,9 +18,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using FluentAssertions;
+using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
 using IntegrationTests.Helpers.Mocks;
 using IntegrationTests.Helpers.Models;
+using Opentelemetry.Proto.Common.V1;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -101,6 +104,59 @@ public class StartupHookTests : TestHelper
 #endif
     }
 
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void SubmitMetrics()
+    {
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
+        var collectorPort = TcpPortProvider.GetOpenPort();
+        using var collector = new MockCollector(Output, collectorPort);
+
+        const int expectedMetricRequests = 1;
+
+        var testSettings = new TestSettings
+        {
+            MetricsSettings = new MetricsSettings { Port = collectorPort },
+            EnableStartupHook = true,
+            Arguments = "-m"
+        };
+
+        using var processResult = RunTestApplicationAndWaitForExit(testSettings);
+        Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
+        var metricRequests = collector.WaitForMetrics(expectedMetricRequests, TimeSpan.FromSeconds(5));
+
+        using (new AssertionScope())
+        {
+            metricRequests.Count.Should().Be(expectedMetricRequests);
+
+            var resourceMetrics = metricRequests.Single().ResourceMetrics.Single();
+
+            var expectedServiceNameAttribute = new KeyValue { Key = "service.name", Value = new AnyValue { StringValue = ServiceName } };
+            resourceMetrics.Resource.Attributes.Should().ContainEquivalentOf(expectedServiceNameAttribute);
+
+            var customClientScope = resourceMetrics.ScopeMetrics.Single(rm => rm.Scope.Name.Equals("MyCompany.MyProduct.MyLibrary", StringComparison.OrdinalIgnoreCase));
+            var myFruitCounterMetric = customClientScope.Metrics.FirstOrDefault(m => m.Name.Equals("MyFruitCounter", StringComparison.OrdinalIgnoreCase));
+            myFruitCounterMetric.Should().NotBeNull();
+            myFruitCounterMetric.DataCase.Should().Be(Opentelemetry.Proto.Metrics.V1.Metric.DataOneofCase.Sum);
+            myFruitCounterMetric.Sum.DataPoints.Count.Should().Be(3);
+
+            var myFruitCounterAttributes = myFruitCounterMetric.Sum.DataPoints[0].Attributes;
+            myFruitCounterAttributes.Count.Should().Be(2);
+            myFruitCounterAttributes.Single(a => a.Key == "color").Value.StringValue.Should().Be("red");
+            myFruitCounterAttributes.Single(a => a.Key == "name").Value.StringValue.Should().Be("apple");
+
+            myFruitCounterAttributes = myFruitCounterMetric.Sum.DataPoints[1].Attributes;
+            myFruitCounterAttributes.Count.Should().Be(2);
+            myFruitCounterAttributes.Single(a => a.Key == "color").Value.StringValue.Should().Be("yellow");
+            myFruitCounterAttributes.Single(a => a.Key == "name").Value.StringValue.Should().Be("lemon");
+
+            myFruitCounterAttributes = myFruitCounterMetric.Sum.DataPoints[2].Attributes;
+            myFruitCounterAttributes.Count.Should().Be(2);
+            myFruitCounterAttributes.Single(a => a.Key == "color").Value.StringValue.Should().Be("green");
+            myFruitCounterAttributes.Single(a => a.Key == "name").Value.StringValue.Should().Be("apple");
+        }
+    }
+
     private static void AssertNoSpansReceived(IImmutableList<IMockSpan> spans)
     {
         Assert.True(spans.Count() == 0, $"Expecting no spans, received {spans.Count()}");
@@ -151,7 +207,7 @@ public class StartupHookTests : TestHelper
     {
         int agentPort = TcpPortProvider.GetOpenPort();
         using var agent = new MockZipkinCollector(Output, agentPort);
-        using var processResult = RunTestApplicationAndWaitForExit(agent.Port, enableStartupHook: enableStartupHook);
+        using var processResult = RunTestApplicationAndWaitForExit(agent.Port, enableStartupHook: enableStartupHook, arguments: "-t");
 
         Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
         return agent.WaitForSpans(2, TimeSpan.FromSeconds(5));
