@@ -36,7 +36,16 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
 
         internal override Action<TracerProvider> GetInstrumentationLoader()
         {
-            return (TracerProvider provider) => provider.AddAspNetCoreInstrumentation();
+            return (TracerProvider provider) =>
+            {
+                var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentation, OpenTelemetry.Instrumentation.AspNetCore");
+                var httpInListenerType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.Implementation.HttpInListener, OpenTelemetry.Instrumentation.AspNetCore");
+
+                object httpInListener = Activator.CreateInstance(httpInListenerType, args: new OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentationOptions());
+                object instrumentation = Activator.CreateInstance(instrumentationType, args: httpInListener);
+
+                provider.AddInstrumentation(instrumentation);
+            };
         }
     }
 }
