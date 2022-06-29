@@ -1,6 +1,6 @@
 [
   {
-    "name": "MongoDb",
+    "name": "MongoDB",
     "method_replacements": [
       {
         "caller": {},
@@ -21,7 +21,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDb.MongoClientIntegration",
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration",
           "action": "CallTargetModification"
         }
       }
