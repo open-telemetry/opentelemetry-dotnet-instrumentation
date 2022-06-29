@@ -28,7 +28,7 @@ namespace IntegrationTests;
 
 public class SmokeTests : TestHelper
 {
-    private const string ServiceName = "TestApplication.StartupHook";
+    private const string ServiceName = "TestApplication.Smoke";
 
     private List<WebServerSpanExpectation> _expectations = new List<WebServerSpanExpectation>();
 
