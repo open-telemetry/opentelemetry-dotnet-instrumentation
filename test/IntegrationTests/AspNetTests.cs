@@ -15,11 +15,15 @@
 // </copyright>
 
 #if NETFRAMEWORK
+using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
+using Opentelemetry.Proto.Common.V1;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -79,10 +83,12 @@ public class AspNetTests : TestHelper
     {
         var collectorPort = TcpPortProvider.GetOpenPort();
         var webPort = TcpPortProvider.GetOpenPort();
+        const int expectedMetricRequests = 1;
 
         var testSettings = new TestSettings
         {
-            MetricsSettings = new MetricsSettings { Port = collectorPort }
+            MetricsSettings = new MetricsSettings { Port = collectorPort },
+            EnableStartupHook = true
         };
 
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
@@ -90,22 +96,30 @@ public class AspNetTests : TestHelper
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
         using var fwPort = FirewallHelper.OpenWinPort(collectorPort, Output);
-        using var agent = new MockCollector(Output, collectorPort);
-        using (var container = await StartContainerAsync(testSettings, webPort))
+        using var collector = new MockCollector(Output, collectorPort, host: "*");
+        using var container = await StartContainerAsync(testSettings, webPort);
+
+        var client = new HttpClient();
+
+        var response = await client.GetAsync($"http://localhost:{webPort}");
+        var content = await response.Content.ReadAsStringAsync();
+
+        Output.WriteLine("Sample response:");
+        Output.WriteLine(content);
+
+        var metricRequests = collector.WaitForMetrics(expectedMetricRequests, TimeSpan.FromSeconds(5));
+
+        using (new AssertionScope())
         {
-            // Makes a request to application's metrics url to
-            // read metrics information from prometheus scrape http endpoint http://localhost:9464/metrics.
-            var client = new HttpClient();
-            var response = await client.GetAsync($"http://localhost:{webPort}/");
-            var content = await response.Content.ReadAsStringAsync();
+            metricRequests.Count.Should().BeGreaterThanOrEqualTo(expectedMetricRequests);
+            var resourceMetrics = metricRequests.LastOrDefault().ResourceMetrics.Single();
 
-            Output.WriteLine("Sample response:");
-            Output.WriteLine(content);
+            var expectedServiceNameAttribute = new KeyValue { Key = "service.name", Value = new AnyValue { StringValue = "TestApplication.AspNet" } };
+            resourceMetrics.Resource.Attributes.Should().ContainEquivalentOf(expectedServiceNameAttribute);
+            var aspnetScope = resourceMetrics.ScopeMetrics.Single(rm => rm.Scope.Name.Equals("OpenTelemetry.Instrumentation.AspNet", StringComparison.OrdinalIgnoreCase));
 
-            var spans = agent.WaitForMetrics(1);
-
-            // var partofSuccessMetric = "http_server_duration_ms_count{http_method=\"GET\",http_scheme=\"http\",http_status_code=\"200\"}";
-            // content.Should().Contain(partofSuccessMetric);
+            var httpServerDurationMetric = aspnetScope.Metrics.FirstOrDefault(m => m.Name.Equals("http.server.duration", StringComparison.OrdinalIgnoreCase));
+            httpServerDurationMetric.Should().NotBeNull();
         }
     }
 }
