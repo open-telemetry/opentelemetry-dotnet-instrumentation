@@ -1,4 +1,4 @@
-// <copyright file="MsSqlCollection.cs" company="OpenTelemetry Authors">
+// <copyright file="SqlClientCollection.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,9 +24,9 @@ using Xunit;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class MsSqlCollection : ICollectionFixture<SqlClientFixture>
+public class SqlClientCollection : ICollectionFixture<SqlClientFixture>
 {
-    public const string Name = nameof(MsSqlCollection);
+    public const string Name = nameof(SqlClientCollection);
 }
 
 public class SqlClientFixture : IAsyncLifetime

@@ -1,4 +1,4 @@
-// <copyright file="MsSqlTests.cs" company="OpenTelemetry Authors">
+// <copyright file="SqlClientTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,13 +24,13 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    [Collection(MsSqlCollection.Name)]
-    public class MsSqlTests : TestHelper
+    [Collection(SqlClientCollection.Name)]
+    public class SqlClientTests : TestHelper
     {
         private const string ServiceName = "TestApplication.SqlClient";
         private readonly SqlClientFixture _sqlClientFixture;
 
-        public MsSqlTests(ITestOutputHelper output, SqlClientFixture sqlClientFixture)
+        public SqlClientTests(ITestOutputHelper output, SqlClientFixture sqlClientFixture)
             : base("SqlClient", output)
         {
             _sqlClientFixture = sqlClientFixture;

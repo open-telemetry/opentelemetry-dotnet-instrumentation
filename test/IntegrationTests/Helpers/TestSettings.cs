@@ -14,7 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-namespace IntegrationTests.Helpers; 
+namespace IntegrationTests.Helpers;
 public class TestSettings
 {
     public TracesSettings TracesSettings { get; set; } = null;
