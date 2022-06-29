@@ -18,7 +18,7 @@ namespace IntegrationTests.Helpers
 {
     public class MetricsSettings
     {
-        public string Exporter { get; set; } = "otlp";
+        public string Exporter => "otlp";
 
         public int Port { get; set; }
     }

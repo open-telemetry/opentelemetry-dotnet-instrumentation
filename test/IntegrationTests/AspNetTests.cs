@@ -46,7 +46,7 @@ public class AspNetTests : TestHelper
 
         var testSettings = new TestSettings
         {
-            TracesSettings = new TracesSettings { Port = agentPort },
+            TracesSettings = new TracesSettings { Port = agentPort }
         };
 
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
@@ -77,26 +77,35 @@ public class AspNetTests : TestHelper
     [Trait("Containers", "Windows")]
     public async Task SubmitsMetrics()
     {
+        var collectorPort = TcpPortProvider.GetOpenPort();
         var webPort = TcpPortProvider.GetOpenPort();
 
         var testSettings = new TestSettings
         {
-            MetricsSettings = new MetricsSettings { Exporter = "prometheus" },
+            MetricsSettings = new MetricsSettings { Port = collectorPort }
         };
 
+        // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
+        // accessible to the Windows docker container where the test application is executed by binding
+        // the endpoint to all network interfaces. In order to do that it is necessary to open the port
+        // on the firewall.
+        using var fwPort = FirewallHelper.OpenWinPort(collectorPort, Output);
+        using var agent = new MockCollector(Output, collectorPort);
         using (var container = await StartContainerAsync(testSettings, webPort))
         {
             // Makes a request to application's metrics url to
             // read metrics information from prometheus scrape http endpoint http://localhost:9464/metrics.
             var client = new HttpClient();
-            var response = await client.GetAsync($"http://localhost:{webPort}/metrics");
+            var response = await client.GetAsync($"http://localhost:{webPort}/");
             var content = await response.Content.ReadAsStringAsync();
 
             Output.WriteLine("Sample response:");
             Output.WriteLine(content);
 
-            var partofSuccessMetric = "http_server_duration_ms_count{http_method=\"GET\",http_scheme=\"http\",http_status_code=\"200\"}";
-            content.Should().Contain(partofSuccessMetric);
+            var spans = agent.WaitForMetrics(1);
+
+            // var partofSuccessMetric = "http_server_duration_ms_count{http_method=\"GET\",http_scheme=\"http\",http_status_code=\"200\"}";
+            // content.Should().Contain(partofSuccessMetric);
         }
     }
 }

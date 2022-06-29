@@ -68,7 +68,7 @@ public abstract class TestHelper
 
         Output.WriteLine("Collecting docker logs to: " + logPath);
 
-        var agentPort = testSettings.TracesSettings?.Port ?? 0;
+        var agentPort = testSettings.TracesSettings?.Port ?? testSettings.MetricsSettings?.Port;
         var builder = new TestcontainersBuilder<TestcontainersContainer>()
             .WithImage(testApplicationName)
             .WithCleanUp(cleanUp: true)
@@ -92,7 +92,6 @@ public abstract class TestHelper
 
         if (testSettings.MetricsSettings != null)
         {
-            builder = builder.WithEnvironment("OTEL_METRICS_EXPORTER", testSettings.MetricsSettings.Exporter);
             builder = builder.WithEnvironment("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "AspNet");
         }
 
