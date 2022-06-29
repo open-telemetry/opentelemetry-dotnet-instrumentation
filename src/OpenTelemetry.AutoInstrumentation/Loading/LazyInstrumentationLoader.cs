@@ -15,18 +15,20 @@
 // </copyright>
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using OpenTelemetry.AutoInstrumentation.Configuration;
-using OpenTelemetry.Trace;
+using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading
 {
-    internal class LazyInstrumentationLoader
+    internal class LazyInstrumentationLoader : IDisposable
     {
-        private readonly List<AssemblyLoadDetector> _assemblyLoadDetectors = new List<AssemblyLoadDetector>();
+        private static readonly ILogger Logger = OtelLogging.GetLogger();
 
-        private TracerProvider _provider;
-        private TracerSettings _tracerSettings;
+        private readonly List<AssemblyLoadDetector> _assemblyLoadDetectors = new();
+        private readonly ConcurrentBag<object> _instrumentations = new();
+        private readonly TracerSettings _tracerSettings;
 
         public LazyInstrumentationLoader(TracerSettings tracerSettings)
         {
@@ -37,11 +39,15 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
 #endif
         }
 
-        public void OnProviderAvailable(TracerProvider provider)
+        public void Dispose()
         {
-            Console.WriteLine("Provider is now available");
-
-            _provider = provider;
+            while (_instrumentations.TryTake(out object instrumentation))
+            {
+                if (instrumentation is IDisposable disposableInstrumentation)
+                {
+                    disposableInstrumentation.Dispose();
+                }
+            }
         }
 
         private void SubScribe(TracerInstrumentation instrumentation, Func<AssemblyLoadDetector> builder)
@@ -57,27 +63,25 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
 
         private void Detector_OnReady(object sender, AssemblyLoadDetector.LoadDetectorReadyEventArgs e)
         {
-            if (_provider != null)
+            string detectorName = sender.GetType().Name;
+
+            Logger.Debug("Detector '{0}' executed load", detectorName);
+
+            try
             {
-                Console.WriteLine("Detector '{0}' executed load", sender.GetType().Name);
-
-                try
-                {
-                    e.Loader(_provider);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Could not execute '{0}' load", sender.GetType().Name);
-                    Console.WriteLine(ex);
-                }
-
-                var detector = (AssemblyLoadDetector)sender;
-                detector.OnReady -= Detector_OnReady;
-
-                _assemblyLoadDetectors.Remove(detector);
-
-                Console.WriteLine("Detector '{0}' removed", sender.GetType().Name);
+                e.Loader(_instrumentations);
             }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "Could not execute '{0}' load", detectorName);
+            }
+
+            var detector = (AssemblyLoadDetector)sender;
+            detector.OnReady -= Detector_OnReady;
+
+            _assemblyLoadDetectors.Remove(detector);
+
+            Logger.Debug("Detector '{0}' removed", detectorName);
         }
     }
 }

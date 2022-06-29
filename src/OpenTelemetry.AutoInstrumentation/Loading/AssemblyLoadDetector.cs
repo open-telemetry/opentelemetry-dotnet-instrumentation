@@ -15,9 +15,10 @@
 // </copyright>
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using OpenTelemetry.Trace;
+using System.Threading;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading
 {
@@ -25,7 +26,6 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
     {
         private HashSet<string> _requiredAssemblies;
         private int _loadedCount;
-        private object _lock = new object();
 
         public AssemblyLoadDetector(IEnumerable<string> requiredAssemblies)
         {
@@ -36,38 +36,33 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
 
         public event EventHandler<LoadDetectorReadyEventArgs> OnReady;
 
-        internal abstract Action<TracerProvider> GetInstrumentationLoader();
+        internal abstract Action<ConcurrentBag<object>> GetInstrumentationLoader();
 
         private void CurrentDomain_AssemblyLoad(object sender, AssemblyLoadEventArgs args)
         {
             string assemblyName = args.LoadedAssembly.FullName.Split(',')[0];
 
-            lock (_lock)
+            if (_requiredAssemblies.Contains(assemblyName, StringComparer.InvariantCultureIgnoreCase))
             {
-                if (_requiredAssemblies.Contains(assemblyName, StringComparer.InvariantCultureIgnoreCase))
+                if (Interlocked.Increment(ref _loadedCount) == _requiredAssemblies.Count)
                 {
-                    ++_loadedCount;
+                    var loader = GetInstrumentationLoader();
 
-                    if (_loadedCount == _requiredAssemblies.Count)
-                    {
-                        var loader = GetInstrumentationLoader();
+                    OnReady?.Invoke(this, new LoadDetectorReadyEventArgs(loader));
 
-                        OnReady?.Invoke(this, new LoadDetectorReadyEventArgs(loader));
-
-                        AppDomain.CurrentDomain.AssemblyLoad -= CurrentDomain_AssemblyLoad;
-                    }
+                    AppDomain.CurrentDomain.AssemblyLoad -= CurrentDomain_AssemblyLoad;
                 }
             }
         }
 
         public class LoadDetectorReadyEventArgs : EventArgs
         {
-            public LoadDetectorReadyEventArgs(Action<TracerProvider> loader)
+            public LoadDetectorReadyEventArgs(Action<ConcurrentBag<object>> loader)
             {
                 Loader = loader;
             }
 
-            public Action<TracerProvider> Loader { get; }
+            public Action<ConcurrentBag<object>> Loader { get; }
         }
     }
 }

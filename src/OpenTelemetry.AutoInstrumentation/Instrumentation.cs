@@ -112,8 +112,6 @@ public static class Instrumentation
 
                 _tracerProvider = builder.Build();
 
-                _lazyInstrumentation.OnProviderAvailable(_tracerProvider);
-
                 Logger.Information("OpenTelemetry tracer initialized.");
             }
 
@@ -172,6 +170,7 @@ public static class Instrumentation
 
         try
         {
+            _lazyInstrumentation?.Dispose();
             _tracerProvider?.Dispose();
             _meterProvider?.Dispose();
             _sdkEventListener.Dispose();

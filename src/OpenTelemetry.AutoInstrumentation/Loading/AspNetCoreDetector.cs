@@ -17,8 +17,8 @@
 #if NETCOREAPP
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading
 {
@@ -34,9 +34,9 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
         {
         }
 
-        internal override Action<TracerProvider> GetInstrumentationLoader()
+        internal override Action<ConcurrentBag<object>> GetInstrumentationLoader()
         {
-            return (TracerProvider provider) =>
+            return (ConcurrentBag<object> instrumentations) =>
             {
                 var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentation, OpenTelemetry.Instrumentation.AspNetCore");
                 var httpInListenerType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.Implementation.HttpInListener, OpenTelemetry.Instrumentation.AspNetCore");
@@ -44,7 +44,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
                 object httpInListener = Activator.CreateInstance(httpInListenerType, args: new OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentationOptions());
                 object instrumentation = Activator.CreateInstance(instrumentationType, args: httpInListener);
 
-                provider.AddInstrumentation(instrumentation);
+                instrumentations.Add(instrumentation);
             };
         }
     }
