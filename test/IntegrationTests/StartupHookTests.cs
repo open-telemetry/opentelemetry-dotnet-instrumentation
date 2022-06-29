@@ -131,11 +131,11 @@ public class StartupHookTests : TestHelper
             expectations.Add(new WebServerSpanExpectation(ServiceName, null, "SayHello", "SayHello", null));
             expectations.Add(new WebServerSpanExpectation(ServiceName, null, "HTTP GET", "HTTP GET", null, "GET"));
 
-            AssertExpectationsMet(expectations, spanList);
+            AssertSpanExpectations(expectations, spanList);
         }
     }
 
-    private static void AssertExpectationsMet(List<WebServerSpanExpectation> expectations, List<IMockSpan> spans)
+    private static void AssertSpanExpectations(List<WebServerSpanExpectation> expectations, List<IMockSpan> spans)
     {
         List<IMockSpan> remainingSpans = spans.Select(s => s).ToList();
         List<string> failures = new List<string>();
