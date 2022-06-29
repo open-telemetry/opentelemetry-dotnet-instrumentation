@@ -108,9 +108,9 @@ namespace IntegrationTests.Http
 
             using (new AssertionScope())
             {
-                metricRequests.Count.Should().Be(expectedMetricRequests);
+                metricRequests.Count.Should().BeGreaterThanOrEqualTo(expectedMetricRequests);
 
-                var resourceMetrics = metricRequests.Single().ResourceMetrics.Single();
+                var resourceMetrics = metricRequests.FirstOrDefault().ResourceMetrics.Single();
 
                 var expectedServiceNameAttribute = new KeyValue { Key = "service.name", Value = new AnyValue { StringValue = ServiceName } };
                 resourceMetrics.Resource.Attributes.Should().ContainEquivalentOf(expectedServiceNameAttribute);
