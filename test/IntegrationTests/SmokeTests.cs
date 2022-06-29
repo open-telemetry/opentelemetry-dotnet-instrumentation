@@ -1,4 +1,4 @@
-// <copyright file="StartupHookTests.cs" company="OpenTelemetry Authors">
+// <copyright file="SmokeTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,15 +24,15 @@ using IntegrationTests.Helpers.Models;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace IntegrationTests.StartupHook;
+namespace IntegrationTests;
 
-public class StartupHookTests : TestHelper
+public class SmokeTests : TestHelper
 {
     private const string ServiceName = "TestApplication.StartupHook";
 
     private List<WebServerSpanExpectation> _expectations = new List<WebServerSpanExpectation>();
 
-    public StartupHookTests(ITestOutputHelper output)
+    public SmokeTests(ITestOutputHelper output)
         : base("StartupHook", output)
     {
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);

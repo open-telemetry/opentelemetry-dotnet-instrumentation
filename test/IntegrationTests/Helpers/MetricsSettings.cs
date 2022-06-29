@@ -14,12 +14,11 @@
 // limitations under the License.
 // </copyright>
 
-namespace IntegrationTests.Helpers
-{
-    public class MetricsSettings
-    {
-        public string Exporter => "otlp";
+namespace IntegrationTests.Helpers;
 
-        public int Port { get; set; }
-    }
+public class MetricsSettings
+{
+    public string Exporter => "otlp";
+
+    public int Port { get; set; }
 }

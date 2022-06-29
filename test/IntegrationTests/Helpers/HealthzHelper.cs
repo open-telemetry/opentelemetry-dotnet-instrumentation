@@ -20,38 +20,37 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 
-namespace IntegrationTests.Helpers
+namespace IntegrationTests.Helpers;
+
+internal static class HealthzHelper
 {
-    internal static class HealthzHelper
+    public static async Task<bool> TestHealtzAsync(string healthzUrl, string logPrefix, ITestOutputHelper output)
     {
-        public static async Task<bool> TestHealtzAsync(string healthzUrl, string logPrefix, ITestOutputHelper output)
+        output.WriteLine($"{logPrefix} healthz endpoint: {healthzUrl}");
+        HttpClient client = new();
+
+        for (int retry = 0; retry < 5; retry++)
         {
-            output.WriteLine($"{logPrefix} healthz endpoint: {healthzUrl}");
-            HttpClient client = new();
+            HttpResponseMessage response;
 
-            for (int retry = 0; retry < 5; retry++)
+            try
             {
-                HttpResponseMessage response;
-
-                try
-                {
-                    response = await client.GetAsync(healthzUrl);
-                }
-                catch (TaskCanceledException)
-                {
-                    response = null;
-                }
-
-                if (response?.StatusCode == HttpStatusCode.OK)
-                {
-                    return true;
-                }
-
-                output.WriteLine($"{logPrefix} healthz failed {retry + 1}/5");
-                await Task.Delay(TimeSpan.FromSeconds(4));
+                response = await client.GetAsync(healthzUrl);
+            }
+            catch (TaskCanceledException)
+            {
+                response = null;
             }
 
-            return false;
+            if (response?.StatusCode == HttpStatusCode.OK)
+            {
+                return true;
+            }
+
+            output.WriteLine($"{logPrefix} healthz failed {retry + 1}/5");
+            await Task.Delay(TimeSpan.FromSeconds(4));
         }
+
+        return false;
     }
 }
