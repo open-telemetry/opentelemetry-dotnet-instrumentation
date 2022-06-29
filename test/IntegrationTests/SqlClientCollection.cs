@@ -21,63 +21,62 @@ using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
 using Xunit;
 
-namespace IntegrationTests.SqlClient
+namespace IntegrationTests;
+
+[CollectionDefinition(Name)]
+public class SqlClientCollection : ICollectionFixture<SqlClientFixture>
 {
-    [CollectionDefinition(Name)]
-    public class SqlClientCollection : ICollectionFixture<SqlClientFixture>
+    public const string Name = nameof(SqlClientCollection);
+}
+
+public class SqlClientFixture : IAsyncLifetime
+{
+    private const int DatabasePort = 1433;
+    private const string DatabaseImage = "mcr.microsoft.com/mssql/server:2019-CU15-ubuntu-20.04";
+
+    private TestcontainersContainer _container;
+
+    public SqlClientFixture()
     {
-        public const string Name = nameof(SqlClientCollection);
+        Port = TcpPortProvider.GetOpenPort();
     }
 
-    public class SqlClientFixture : IAsyncLifetime
+    public string Password { get; } = $"@{Guid.NewGuid().ToString("N")}";
+
+    public int Port { get; }
+
+    public async Task InitializeAsync()
     {
-        private const int DatabasePort = 1433;
-        private const string DatabaseImage = "mcr.microsoft.com/mssql/server:2019-CU15-ubuntu-20.04";
+        _container = await LaunchDatabaseContainerAsync();
+    }
 
-        private TestcontainersContainer _container;
-
-        public SqlClientFixture()
+    public async Task DisposeAsync()
+    {
+        if (_container != null)
         {
-            Port = TcpPortProvider.GetOpenPort();
+            await ShutdownDatabaseContainerAsync(_container);
         }
+    }
 
-        public string Password { get; } = $"@{Guid.NewGuid().ToString("N")}";
+    private static async Task ShutdownDatabaseContainerAsync(TestcontainersContainer container)
+    {
+        await container.CleanUpAsync();
+        await container.DisposeAsync();
+    }
 
-        public int Port { get; }
+    private async Task<TestcontainersContainer> LaunchDatabaseContainerAsync()
+    {
+        var databaseContainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
+            .WithImage(DatabaseImage)
+            .WithName($"sql-server-{Port}")
+            .WithPortBinding(Port, DatabasePort)
+            .WithEnvironment("SA_PASSWORD", Password)
+            .WithEnvironment("ACCEPT_EULA", "Y")
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(DatabasePort));
 
-        public async Task InitializeAsync()
-        {
-            _container = await LaunchDatabaseContainerAsync();
-        }
+        var container = databaseContainersBuilder.Build();
+        await container.StartAsync();
 
-        public async Task DisposeAsync()
-        {
-            if (_container != null)
-            {
-                await ShutdownDatabaseContainerAsync(_container);
-            }
-        }
-
-        private static async Task ShutdownDatabaseContainerAsync(TestcontainersContainer container)
-        {
-            await container.CleanUpAsync();
-            await container.DisposeAsync();
-        }
-
-        private async Task<TestcontainersContainer> LaunchDatabaseContainerAsync()
-        {
-            var databaseContainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
-                .WithImage(DatabaseImage)
-                .WithName($"sql-server-{Port}")
-                .WithPortBinding(Port, DatabasePort)
-                .WithEnvironment("SA_PASSWORD", Password)
-                .WithEnvironment("ACCEPT_EULA", "Y")
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(DatabasePort));
-
-            var container = databaseContainersBuilder.Build();
-            await container.StartAsync();
-
-            return container;
-        }
+        return container;
     }
 }

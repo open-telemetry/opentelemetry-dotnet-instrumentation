@@ -22,70 +22,69 @@ using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace IntegrationTests.MongoDB
+namespace IntegrationTests;
+
+[Collection(MongoDBCollection.Name)]
+public class MongoDBTests : TestHelper
 {
-    [Collection(MongoDBCollection.Name)]
-    public class MongoDBTests : TestHelper
+    private readonly MongoDBFixture _mongoDB;
+
+    public MongoDBTests(ITestOutputHelper output, MongoDBFixture mongoDB)
+        : base("MongoDB", output)
     {
-        private readonly MongoDBFixture _mongoDB;
+        _mongoDB = mongoDB;
 
-        public MongoDBTests(ITestOutputHelper output, MongoDBFixture mongoDB)
-            : base("MongoDB", output)
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "MongoDB");
+        SetEnvironmentVariable("OTEL_SERVICE_NAME", "TestApplication.MongoDB");
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Linux")]
+    public void SubmitsTraces()
+    {
+        int agentPort = TcpPortProvider.GetOpenPort();
+
+        using (var agent = new MockZipkinCollector(Output, agentPort))
+        using (var processResult = RunTestApplicationAndWaitForExit(agent.Port, arguments: $"--mongo-db {_mongoDB.Port}", enableStartupHook: true))
         {
-            _mongoDB = mongoDB;
+            Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
 
-            SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "MongoDB");
-            SetEnvironmentVariable("OTEL_SERVICE_NAME", "TestApplication.MongoDB");
-        }
+            var spans = agent.WaitForSpans(3, TimeSpan.FromSeconds(5));
+            Assert.True(spans.Count >= 3, $"Expecting at least 3 spans, only received {spans.Count}");
 
-        [Fact]
-        [Trait("Category", "EndToEnd")]
-        [Trait("Containers", "Linux")]
-        public void SubmitsTraces()
-        {
-            int agentPort = TcpPortProvider.GetOpenPort();
+            var rootSpan = spans.Single(s => s.ParentId == null);
 
-            using (var agent = new MockZipkinCollector(Output, agentPort))
-            using (var processResult = RunTestApplicationAndWaitForExit(agent.Port, arguments: $"--mongo-db {_mongoDB.Port}", enableStartupHook: true))
+            // Check for manual trace
+            Assert.Equal("Main()", rootSpan.Name);
+            Assert.Null(rootSpan.Type);
+
+            int spansWithStatement = 0;
+
+            foreach (var span in spans)
             {
-                Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
+                Assert.Equal("TestApplication.MongoDB", span.Service);
 
-                var spans = agent.WaitForSpans(3, TimeSpan.FromSeconds(5));
-                Assert.True(spans.Count >= 3, $"Expecting at least 3 spans, only received {spans.Count}");
-
-                var rootSpan = spans.Single(s => s.ParentId == null);
-
-                // Check for manual trace
-                Assert.Equal("Main()", rootSpan.Name);
-                Assert.Null(rootSpan.Type);
-
-                int spansWithStatement = 0;
-
-                foreach (var span in spans)
+                if (Regex.IsMatch(span.Name, "employees\\.*"))
                 {
-                    Assert.Equal("TestApplication.MongoDB", span.Service);
+                    Assert.Equal("mongodb", span.Tags["db.system"]);
+                    Assert.Equal("test-db", span.Tags["db.name"]);
+                    Assert.True("1.0.0.0" == span.Tags["otel.library.version"], span.ToString());
 
-                    if (Regex.IsMatch(span.Name, "employees\\.*"))
+                    if (span.Tags?.ContainsKey("db.statement") ?? false)
                     {
-                        Assert.Equal("mongodb", span.Tags["db.system"]);
-                        Assert.Equal("test-db", span.Tags["db.name"]);
-                        Assert.True("1.0.0.0" == span.Tags["otel.library.version"], span.ToString());
-
-                        if (span.Tags?.ContainsKey("db.statement") ?? false)
-                        {
-                            spansWithStatement++;
-                            Assert.True(span.Tags?.ContainsKey("db.statement"), $"No db.statement found on span {span}");
-                        }
-                    }
-                    else
-                    {
-                        // These are manual (DiagnosticSource) traces
-                        Assert.True("1.0.0" == span.Tags["otel.library.version"], span.ToString());
+                        spansWithStatement++;
+                        Assert.True(span.Tags?.ContainsKey("db.statement"), $"No db.statement found on span {span}");
                     }
                 }
-
-                Assert.False(spansWithStatement == 0, "Extraction of the command failed on all spans");
+                else
+                {
+                    // These are manual (DiagnosticSource) traces
+                    Assert.True("1.0.0" == span.Tags["otel.library.version"], span.ToString());
+                }
             }
+
+            Assert.False(spansWithStatement == 0, "Extraction of the command failed on all spans");
         }
     }
 }

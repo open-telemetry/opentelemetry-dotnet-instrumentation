@@ -179,13 +179,13 @@ updates:
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
-    directory: /test/test-applications/integrations/TestApplication.SqlClient
+    directory: /test/test-applications/integrations/TestApplication.Smoke
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
-    directory: /test/test-applications/integrations/TestApplication.StartupHook
+    directory: /test/test-applications/integrations/TestApplication.SqlClient
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20

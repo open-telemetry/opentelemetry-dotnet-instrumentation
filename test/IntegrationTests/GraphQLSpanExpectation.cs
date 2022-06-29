@@ -19,7 +19,7 @@ using IntegrationTests.Helpers.Mocks;
 using IntegrationTests.Helpers.Models;
 using OpenTelemetry.AutoInstrumentation.Tagging;
 
-namespace IntegrationTests.GraphQL;
+namespace IntegrationTests;
 
 public class GraphQLSpanExpectation : WebServerSpanExpectation
 {

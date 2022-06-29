@@ -26,7 +26,7 @@ using IntegrationTests.Helpers.Models;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace IntegrationTests.GraphQL;
+namespace IntegrationTests;
 
 public class GraphQLTests : TestHelper
 {
