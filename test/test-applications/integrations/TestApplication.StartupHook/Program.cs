@@ -18,7 +18,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Net.Http;
-using CommandLine;
 
 namespace TestApplication.StartupHook
 {
@@ -26,20 +25,8 @@ namespace TestApplication.StartupHook
     {
         public static void Main(string[] args)
         {
-            var options = Parser.Default.ParseArguments<Options>(args);
-
-            options.WithParsed<Options>(o =>
-            {
-                if (o.Traces)
-                {
-                    EmitTraces();
-                }
-
-                if (o.Metrics)
-                {
-                    EmitMetrics();
-                }
-            });
+            EmitTraces();
+            EmitMetrics();
         }
 
         private static void EmitTraces()
@@ -63,15 +50,6 @@ namespace TestApplication.StartupHook
             var myFruitCounter = myMeter.CreateCounter<int>("MyFruitCounter");
 
             myFruitCounter.Add(1, new KeyValuePair<string, object>("name", "apple"));
-        }
-
-        public class Options
-        {
-            [Option('t', "traces", HelpText = "Emit spans.")]
-            public bool Traces { get; set; }
-
-            [Option('m', "metrics", HelpText = "Emit metrics.")]
-            public bool Metrics { get; set; }
         }
     }
 }

@@ -118,7 +118,6 @@ public class StartupHookTests : TestHelper
         {
             MetricsSettings = new MetricsSettings { Port = collectorPort },
             EnableStartupHook = true,
-            Arguments = "-m"
         };
 
         using var processResult = RunTestApplicationAndWaitForExit(testSettings);
@@ -196,7 +195,7 @@ public class StartupHookTests : TestHelper
     {
         int agentPort = TcpPortProvider.GetOpenPort();
         using var agent = new MockZipkinCollector(Output, agentPort);
-        using var processResult = RunTestApplicationAndWaitForExit(agent.Port, enableStartupHook: enableStartupHook, arguments: "-t");
+        using var processResult = RunTestApplicationAndWaitForExit(agent.Port, enableStartupHook: enableStartupHook);
 
         Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
         return agent.WaitForSpans(2, TimeSpan.FromSeconds(5));
