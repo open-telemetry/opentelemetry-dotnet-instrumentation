@@ -1,4 +1,4 @@
-// <copyright file="StartupHookTests.cs" company="OpenTelemetry Authors">
+// <copyright file="SmokeTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,16 +27,16 @@ using Opentelemetry.Proto.Common.V1;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace IntegrationTests.StartupHook;
+namespace IntegrationTests;
 
-public class StartupHookTests : TestHelper
+public class SmokeTests : TestHelper
 {
-    private const string ServiceName = "TestApplication.StartupHook";
+    private const string ServiceName = "TestApplication.Smoke";
 
     private List<WebServerSpanExpectation> _expectations = new List<WebServerSpanExpectation>();
 
-    public StartupHookTests(ITestOutputHelper output)
-        : base("StartupHook", output)
+    public SmokeTests(ITestOutputHelper output)
+        : base("Smoke", output)
     {
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "HttpClient");
@@ -46,7 +46,7 @@ public class StartupHookTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public void SubmitsTraces()
     {
-        var spans = RunTestApplication(enableStartupHook: true);
+        var spans = RunTestApplication();
 
         AssertAllSpansReceived(spans);
     }
@@ -102,6 +102,17 @@ public class StartupHookTests : TestHelper
         // https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/895
         AssertAllSpansReceived(spans);
 #endif
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void ApplicationIsIncluded()
+    {
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES", $"{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
+
+        var spans = RunTestApplication();
+
+        AssertAllSpansReceived(spans);
     }
 
     [Fact]
@@ -164,11 +175,11 @@ public class StartupHookTests : TestHelper
             expectations.Add(new WebServerSpanExpectation(ServiceName, null, "SayHello", "SayHello", null));
             expectations.Add(new WebServerSpanExpectation(ServiceName, null, "HTTP GET", "HTTP GET", null, "GET"));
 
-            AssertExpectationsMet(expectations, spanList);
+            AssertSpanExpectations(expectations, spanList);
         }
     }
 
-    private static void AssertExpectationsMet(List<WebServerSpanExpectation> expectations, List<IMockSpan> spans)
+    private static void AssertSpanExpectations(List<WebServerSpanExpectation> expectations, List<IMockSpan> spans)
     {
         List<IMockSpan> remainingSpans = spans.Select(s => s).ToList();
         List<string> failures = new List<string>();

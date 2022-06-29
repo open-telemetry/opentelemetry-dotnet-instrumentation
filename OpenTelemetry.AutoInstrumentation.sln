@@ -109,7 +109,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.StartupHook", "src\OpenTelemetry.AutoInstrumentation.StartupHook\OpenTelemetry.AutoInstrumentation.StartupHook.csproj", "{E04DA938-E153-4A0D-9CB0-EAC38210FAF2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.StartupHook", "test\test-applications\integrations\TestApplication.StartupHook\TestApplication.StartupHook.csproj", "{FF665CC4-6643-4614-A1A0-FA182E3AF37C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Smoke", "test\test-applications\integrations\TestApplication.Smoke\TestApplication.Smoke.csproj", "{FF665CC4-6643-4614-A1A0-FA182E3AF37C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.AdditionalDeps", "src\OpenTelemetry.AutoInstrumentation.AdditionalDeps\OpenTelemetry.AutoInstrumentation.AdditionalDeps.csproj", "{E026D9FA-FBD5-4066-AF6A-FB63DE28521F}"
 EndProject
