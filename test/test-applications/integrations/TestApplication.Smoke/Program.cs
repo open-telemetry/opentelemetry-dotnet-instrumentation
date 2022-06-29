@@ -14,18 +14,26 @@
 // limitations under the License.
 // </copyright>
 
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Net.Http;
 
 namespace TestApplication.StartupHook
 {
     public class Program
     {
-        private static readonly ActivitySource MyActivitySource = new ActivitySource("TestApplication.StartupHook", "1.0.0");
-
         public static void Main(string[] args)
         {
-            using (var activity = MyActivitySource.StartActivity("SayHello"))
+            EmitTraces();
+            EmitMetrics();
+        }
+
+        private static void EmitTraces()
+        {
+            var myActivitySource = new ActivitySource("TestApplication.StartupHook", "1.0.0");
+
+            using (var activity = myActivitySource.StartActivity("SayHello"))
             {
                 activity?.SetTag("foo", 1);
                 activity?.SetTag("bar", "Hello, World!");
@@ -34,6 +42,14 @@ namespace TestApplication.StartupHook
 
             var client = new HttpClient();
             client.GetStringAsync("http://httpstat.us/200").Wait();
+        }
+
+        private static void EmitMetrics()
+        {
+            var myMeter = new Meter("MyCompany.MyProduct.MyLibrary", "1.0");
+            var myFruitCounter = myMeter.CreateCounter<int>("MyFruitCounter");
+
+            myFruitCounter.Add(1, new KeyValuePair<string, object>("name", "apple"));
         }
     }
 }
