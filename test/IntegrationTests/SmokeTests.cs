@@ -33,7 +33,7 @@ public class SmokeTests : TestHelper
     private List<WebServerSpanExpectation> _expectations = new List<WebServerSpanExpectation>();
 
     public SmokeTests(ITestOutputHelper output)
-        : base("StartupHook", output)
+        : base("Smoke", output)
     {
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "HttpClient");
