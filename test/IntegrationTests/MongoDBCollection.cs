@@ -1,4 +1,4 @@
-// <copyright file="MongoDbCollection.cs" company="OpenTelemetry Authors">
+// <copyright file="MongoDBCollection.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,19 +24,19 @@ using Xunit;
 namespace IntegrationTests.MongoDB;
 
 [CollectionDefinition(Name)]
-public class MongoDbCollection : ICollectionFixture<MongoDbFixture>
+public class MongoDBCollection : ICollectionFixture<MongoDBFixture>
 {
-    public const string Name = nameof(MongoDbCollection);
+    public const string Name = nameof(MongoDBCollection);
 }
 
-public class MongoDbFixture : IAsyncLifetime
+public class MongoDBFixture : IAsyncLifetime
 {
-    private const int MongoDbPort = 27017;
-    private const string MongoDbImage = "mongo:5.0.6";
+    private const int MongoDBPort = 27017;
+    private const string MongoDBImage = "mongo:5.0.6";
 
     private TestcontainersContainer _container;
 
-    public MongoDbFixture()
+    public MongoDBFixture()
     {
         Port = TcpPortProvider.GetOpenPort();
     }
@@ -59,10 +59,10 @@ public class MongoDbFixture : IAsyncLifetime
     private async Task<TestcontainersContainer> LaunchMongoContainerAsync(int port)
     {
         var mongoContainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
-            .WithImage(MongoDbImage)
+            .WithImage(MongoDBImage)
             .WithName($"mongo-db-{port}")
-            .WithPortBinding(port, MongoDbPort)
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(MongoDbPort));
+            .WithPortBinding(port, MongoDBPort)
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(MongoDBPort));
 
         var container = mongoContainersBuilder.Build();
         await container.StartAsync();

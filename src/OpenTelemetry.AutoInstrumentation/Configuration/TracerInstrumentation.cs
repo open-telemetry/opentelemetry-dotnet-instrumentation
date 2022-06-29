@@ -42,7 +42,7 @@ public enum TracerInstrumentation
     GraphQL,
 
     /// <summary>
-    /// MongoDb instrumentation.
+    /// MongoDB instrumentation.
     /// </summary>
-    MongoDb
+    MongoDB
 }
