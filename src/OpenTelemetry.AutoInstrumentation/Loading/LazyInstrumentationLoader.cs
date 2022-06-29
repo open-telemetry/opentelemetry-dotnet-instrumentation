@@ -35,7 +35,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
             _tracerSettings = tracerSettings;
 
 #if NETCOREAPP
-            SubScribe(TracerInstrumentation.AspNet, () => new AspNetCoreDetector());
+            Subscribe(TracerInstrumentation.AspNet, () => new AspNetCoreDetector());
 #endif
         }
 
@@ -50,7 +50,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
             }
         }
 
-        private void SubScribe(TracerInstrumentation instrumentation, Func<AssemblyLoadDetector> builder)
+        private void Subscribe(TracerInstrumentation instrumentation, Func<AssemblyLoadDetector> builder)
         {
             if (_tracerSettings.EnabledInstrumentations.Contains(instrumentation))
             {
