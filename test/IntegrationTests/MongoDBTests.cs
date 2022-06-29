@@ -1,4 +1,4 @@
-// <copyright file="MongoDbTests.cs" company="OpenTelemetry Authors">
+// <copyright file="MongoDBTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,17 +24,17 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests.MongoDB
 {
-    [Collection(MongoDbCollection.Name)]
-    public class MongoDbTests : TestHelper
+    [Collection(MongoDBCollection.Name)]
+    public class MongoDBTests : TestHelper
     {
-        private readonly MongoDbFixture _mongoDb;
+        private readonly MongoDBFixture _mongoDB;
 
-        public MongoDbTests(ITestOutputHelper output, MongoDbFixture mongoDb)
+        public MongoDBTests(ITestOutputHelper output, MongoDBFixture mongoDB)
             : base("MongoDB", output)
         {
-            _mongoDb = mongoDb;
+            _mongoDB = mongoDB;
 
-            SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "MongoDb");
+            SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "MongoDB");
             SetEnvironmentVariable("OTEL_SERVICE_NAME", "TestApplication.MongoDB");
         }
 
@@ -46,7 +46,7 @@ namespace IntegrationTests.MongoDB
             int agentPort = TcpPortProvider.GetOpenPort();
 
             using (var agent = new MockZipkinCollector(Output, agentPort))
-            using (var processResult = RunTestApplicationAndWaitForExit(agent.Port, arguments: $"--mongo-db {_mongoDb.Port}", enableStartupHook: true))
+            using (var processResult = RunTestApplicationAndWaitForExit(agent.Port, arguments: $"--mongo-db {_mongoDB.Port}", enableStartupHook: true))
             {
                 Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
 
