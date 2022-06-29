@@ -4,7 +4,7 @@
     <Version>0.1.0</Version>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(Configuration)' == 'Release' ">
+  <ItemGroup>
     <PackageReference Include="OpenTelemetry" Version="1.3.0" />
     <PackageReference Include="OpenTelemetry.Api" Version="1.3.0" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.3.0" />
@@ -18,26 +18,6 @@
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.3.0" />
     <PackageReference Include="OpenTelemetry.Shims.OpenTracing" Version="1.0.0-rc9.4" />
     <PackageReference Include="OpenTelemetry.Exporter.Prometheus" Version="1.3.0-rc.2" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <ProjectReference Include="F:\Dev\opentelemetry-dotnet\src\OpenTelemetry\OpenTelemetry.csproj" />
-    <ProjectReference Include="F:\Dev\opentelemetry-dotnet\src\OpenTelemetry.Api\OpenTelemetry.Api.csproj" />
-    <ProjectReference Include="F:\Dev\opentelemetry-dotnet\src\OpenTelemetry.Exporter.Console\OpenTelemetry.Exporter.Console.csproj" />
-    <ProjectReference Include="F:\Dev\opentelemetry-dotnet\src\OpenTelemetry.Instrumentation.Http\OpenTelemetry.Instrumentation.Http.csproj" />
-    <ProjectReference Include="F:\Dev\opentelemetry-dotnet-contrib\src\OpenTelemetry.Instrumentation.Runtime\OpenTelemetry.Instrumentation.Runtime.csproj" />
-    <ProjectReference Include="F:\Dev\opentelemetry-dotnet\src\OpenTelemetry.Instrumentation.SqlClient\OpenTelemetry.Instrumentation.SqlClient.csproj" />
-    <ProjectReference Include="F:\Dev\opentelemetry-dotnet-contrib\src\OpenTelemetry.Instrumentation.AspNet\OpenTelemetry.Instrumentation.AspNet.csproj" Condition="'$(TargetFramework)' == 'net462'" />
-    <ProjectReference Include="F:\Dev\opentelemetry-dotnet\src\OpenTelemetry.Instrumentation.AspNetCore\OpenTelemetry.Instrumentation.AspNetCore.csproj" Condition="'$(TargetFramework)' == 'netcoreapp3.1'" />
-    <ProjectReference Include="F:\Dev\opentelemetry-dotnet\src\OpenTelemetry.Exporter.Jaeger\OpenTelemetry.Exporter.Jaeger.csproj" />
-    <ProjectReference Include="F:\Dev\opentelemetry-dotnet\src\OpenTelemetry.Exporter.Zipkin\OpenTelemetry.Exporter.Zipkin.csproj" />
-    <ProjectReference Include="F:\Dev\opentelemetry-dotnet\src\OpenTelemetry.Exporter.OpenTelemetryProtocol\OpenTelemetry.Exporter.OpenTelemetryProtocol.csproj" />
-    <ProjectReference Include="F:\Dev\opentelemetry-dotnet\src\OpenTelemetry.Shims.OpenTracing\OpenTelemetry.Shims.OpenTracing.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
-    <PackageReference Include="OpenTracing" Version="0.12.1" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">

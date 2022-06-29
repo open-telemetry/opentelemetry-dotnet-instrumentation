@@ -56,7 +56,7 @@ internal static class EnvironmentConfigurationTracerHelper
     public static TracerProviderBuilder AddSdkAspNetInstrumentation(this TracerProviderBuilder builder)
     {
 #if NET462
-        // builder.AddAspNetInstrumentation();
+        builder.AddAspNetInstrumentation();
 #elif NETCOREAPP3_1_OR_GREATER
         // Instrumentation will be added via assembly load detector
         builder.AddSource("OpenTelemetry.Instrumentation.AspNetCore");
