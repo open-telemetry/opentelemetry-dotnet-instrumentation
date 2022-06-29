@@ -138,21 +138,10 @@ public class StartupHookTests : TestHelper
             var myFruitCounterMetric = customClientScope.Metrics.FirstOrDefault(m => m.Name.Equals("MyFruitCounter", StringComparison.OrdinalIgnoreCase));
             myFruitCounterMetric.Should().NotBeNull();
             myFruitCounterMetric.DataCase.Should().Be(Opentelemetry.Proto.Metrics.V1.Metric.DataOneofCase.Sum);
-            myFruitCounterMetric.Sum.DataPoints.Count.Should().Be(3);
+            myFruitCounterMetric.Sum.DataPoints.Count.Should().Be(1);
 
             var myFruitCounterAttributes = myFruitCounterMetric.Sum.DataPoints[0].Attributes;
-            myFruitCounterAttributes.Count.Should().Be(2);
-            myFruitCounterAttributes.Single(a => a.Key == "color").Value.StringValue.Should().Be("red");
-            myFruitCounterAttributes.Single(a => a.Key == "name").Value.StringValue.Should().Be("apple");
-
-            myFruitCounterAttributes = myFruitCounterMetric.Sum.DataPoints[1].Attributes;
-            myFruitCounterAttributes.Count.Should().Be(2);
-            myFruitCounterAttributes.Single(a => a.Key == "color").Value.StringValue.Should().Be("yellow");
-            myFruitCounterAttributes.Single(a => a.Key == "name").Value.StringValue.Should().Be("lemon");
-
-            myFruitCounterAttributes = myFruitCounterMetric.Sum.DataPoints[2].Attributes;
-            myFruitCounterAttributes.Count.Should().Be(2);
-            myFruitCounterAttributes.Single(a => a.Key == "color").Value.StringValue.Should().Be("green");
+            myFruitCounterAttributes.Count.Should().Be(1);
             myFruitCounterAttributes.Single(a => a.Key == "name").Value.StringValue.Should().Be("apple");
         }
     }

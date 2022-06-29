@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Net.Http;
@@ -29,19 +30,19 @@ namespace TestApplication.StartupHook
 
             options.WithParsed<Options>(o =>
             {
-                if (o.Trace)
+                if (o.Traces)
                 {
-                    GenerateTraceData();
+                    EmitTraces();
                 }
 
                 if (o.Metrics)
                 {
-                    GenerateMetricsData();
+                    EmitMetrics();
                 }
             });
         }
 
-        private static void GenerateTraceData()
+        private static void EmitTraces()
         {
             var myActivitySource = new ActivitySource("TestApplication.StartupHook", "1.0.0");
 
@@ -56,28 +57,20 @@ namespace TestApplication.StartupHook
             client.GetStringAsync("http://httpstat.us/200").Wait();
         }
 
-        private static void GenerateMetricsData()
+        private static void EmitMetrics()
         {
             var myMeter = new Meter("MyCompany.MyProduct.MyLibrary", "1.0");
-            var myFruitCounter = myMeter.CreateCounter<long>("MyFruitCounter");
+            var myFruitCounter = myMeter.CreateCounter<int>("MyFruitCounter");
 
-            myFruitCounter.Add(1, new("name", "apple"), new("color", "red"));
-            myFruitCounter.Add(2, new("name", "lemon"), new("color", "yellow"));
-            myFruitCounter.Add(1, new("name", "lemon"), new("color", "yellow"));
-            myFruitCounter.Add(2, new("name", "apple"), new("color", "green"));
-            myFruitCounter.Add(5, new("name", "apple"), new("color", "red"));
-            myFruitCounter.Add(4, new("name", "lemon"), new("color", "yellow"));
+            myFruitCounter.Add(1, new KeyValuePair<string, object>("name", "apple"));
         }
 
         public class Options
         {
-            [Option('t', "Trace", Required = false, HelpText = "Set this option to collect trace messages.")]
-            public bool Trace { get; set; }
+            [Option('t', "traces", HelpText = "Emit spans.")]
+            public bool Traces { get; set; }
 
-            [Option('l', "verbose", Required = false, HelpText = "Set this option to collect logs.")]
-            public bool Logs { get; set; }
-
-            [Option('m', "verbose", Required = false, HelpText = "Set this option to collect metrics.")]
+            [Option('m', "metrics", HelpText = "Emit metrics.")]
             public bool Metrics { get; set; }
         }
     }
