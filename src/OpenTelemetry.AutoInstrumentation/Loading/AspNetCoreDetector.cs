@@ -23,7 +23,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
     {
         private static readonly IEnumerable<string> _requiredAssemblies = new string[]
         {
-            "Microsoft.AspNetCore"
+            "Microsoft.AspNetCore.Http"
         };
 
         public AspNetCoreDetector()
