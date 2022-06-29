@@ -14,10 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-#if NETCOREAPP
-
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading
@@ -34,9 +31,9 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
         {
         }
 
-        internal override Action<ConcurrentBag<object>> GetInstrumentationLoader()
+        internal override Func<object> GetInstrumentationBuilder()
         {
-            return (ConcurrentBag<object> instrumentations) =>
+            return () =>
             {
                 var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentation, OpenTelemetry.Instrumentation.AspNetCore");
                 var httpInListenerType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.Implementation.HttpInListener, OpenTelemetry.Instrumentation.AspNetCore");
@@ -44,10 +41,8 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
                 object httpInListener = Activator.CreateInstance(httpInListenerType, args: new OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentationOptions());
                 object instrumentation = Activator.CreateInstance(instrumentationType, args: httpInListener);
 
-                instrumentations.Add(instrumentation);
+                return instrumentation;
             };
         }
     }
 }
-
-#endif

@@ -15,7 +15,6 @@
 // </copyright>
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -36,7 +35,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
 
         public event EventHandler<LoadDetectorReadyEventArgs> OnReady;
 
-        internal abstract Action<ConcurrentBag<object>> GetInstrumentationLoader();
+        internal abstract Func<object> GetInstrumentationBuilder();
 
         private void CurrentDomain_AssemblyLoad(object sender, AssemblyLoadEventArgs args)
         {
@@ -46,9 +45,9 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
             {
                 if (Interlocked.Increment(ref _loadedCount) == _requiredAssemblies.Count)
                 {
-                    var loader = GetInstrumentationLoader();
+                    var builder = GetInstrumentationBuilder();
 
-                    OnReady?.Invoke(this, new LoadDetectorReadyEventArgs(loader));
+                    OnReady?.Invoke(this, new LoadDetectorReadyEventArgs(builder));
 
                     AppDomain.CurrentDomain.AssemblyLoad -= CurrentDomain_AssemblyLoad;
                 }
@@ -57,12 +56,12 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
 
         public class LoadDetectorReadyEventArgs : EventArgs
         {
-            public LoadDetectorReadyEventArgs(Action<ConcurrentBag<object>> loader)
+            public LoadDetectorReadyEventArgs(Func<object> loader)
             {
-                Loader = loader;
+                Builder = loader;
             }
 
-            public Action<ConcurrentBag<object>> Loader { get; }
+            public Func<object> Builder { get; }
         }
     }
 }

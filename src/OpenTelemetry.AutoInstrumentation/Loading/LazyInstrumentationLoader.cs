@@ -34,9 +34,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
         {
             _tracerSettings = tracerSettings;
 
-#if NETCOREAPP
             Subscribe(TracerInstrumentation.AspNet, () => new AspNetCoreDetector());
-#endif
         }
 
         public void Dispose()
@@ -69,7 +67,9 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
 
             try
             {
-                e.Loader(_instrumentations);
+                var instrumentation = e.Builder();
+
+                _instrumentations.Add(instrumentation);
             }
             catch (Exception ex)
             {
