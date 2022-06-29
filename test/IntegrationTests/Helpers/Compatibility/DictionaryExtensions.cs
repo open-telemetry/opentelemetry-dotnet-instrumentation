@@ -20,77 +20,76 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-namespace IntegrationTests.Helpers.Compatibility
+namespace IntegrationTests.Helpers.Compatibility;
+
+public static class DictionaryExtensions
 {
-    public static class DictionaryExtensions
+    public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
     {
-        public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
+        if (dictionary == null)
         {
-            if (dictionary == null)
-            {
-                throw new ArgumentNullException(nameof(dictionary));
-            }
-
-            return dictionary.TryGetValue(key, out var value)
-                       ? value
-                       : default;
+            throw new ArgumentNullException(nameof(dictionary));
         }
 
-        public static TValue GetValueOrDefault<TValue>(this IDictionary dictionary, object key)
-        {
-            if (dictionary == null)
-            {
-                throw new ArgumentNullException(nameof(dictionary));
-            }
+        return dictionary.TryGetValue(key, out var value)
+                    ? value
+                    : default;
+    }
 
-            return dictionary.TryGetValue(key, out TValue value)
-                       ? value
-                       : default;
+    public static TValue GetValueOrDefault<TValue>(this IDictionary dictionary, object key)
+    {
+        if (dictionary == null)
+        {
+            throw new ArgumentNullException(nameof(dictionary));
         }
 
-        public static bool TryGetValue<TValue>(this IDictionary dictionary, object key, out TValue value)
+        return dictionary.TryGetValue(key, out TValue value)
+                    ? value
+                    : default;
+    }
+
+    public static bool TryGetValue<TValue>(this IDictionary dictionary, object key, out TValue value)
+    {
+        if (dictionary == null)
         {
-            if (dictionary == null)
-            {
-                throw new ArgumentNullException(nameof(dictionary));
-            }
-
-            object valueObj;
-
-            try
-            {
-                // per its contract, IDictionary.Item[] should return null instead of throwing an exception
-                // if a key is not found, but let's use try/catch to be defensive against misbehaving implementations
-                valueObj = dictionary[key];
-            }
-            catch
-            {
-                valueObj = null;
-            }
-
-            switch (valueObj)
-            {
-                case TValue valueTyped:
-                    value = valueTyped;
-                    return true;
-                case IConvertible convertible:
-                    value = (TValue)convertible.ToType(typeof(TValue), provider: null);
-                    return true;
-                default:
-                    value = default;
-                    return false;
-            }
+            throw new ArgumentNullException(nameof(dictionary));
         }
 
-        public static bool IsEmpty<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
-        {
-            if (dictionary is ConcurrentDictionary<TKey, TValue> concurrentDictionary)
-            {
-                return concurrentDictionary.IsEmpty;
-            }
+        object valueObj;
 
-            return dictionary.Count == 0;
+        try
+        {
+            // per its contract, IDictionary.Item[] should return null instead of throwing an exception
+            // if a key is not found, but let's use try/catch to be defensive against misbehaving implementations
+            valueObj = dictionary[key];
         }
+        catch
+        {
+            valueObj = null;
+        }
+
+        switch (valueObj)
+        {
+            case TValue valueTyped:
+                value = valueTyped;
+                return true;
+            case IConvertible convertible:
+                value = (TValue)convertible.ToType(typeof(TValue), provider: null);
+                return true;
+            default:
+                value = default;
+                return false;
+        }
+    }
+
+    public static bool IsEmpty<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+    {
+        if (dictionary is ConcurrentDictionary<TKey, TValue> concurrentDictionary)
+        {
+            return concurrentDictionary.IsEmpty;
+        }
+
+        return dictionary.Count == 0;
     }
 }
 #endif

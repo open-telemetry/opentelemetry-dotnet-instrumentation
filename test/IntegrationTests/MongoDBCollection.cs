@@ -21,7 +21,7 @@ using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
 using Xunit;
 
-namespace IntegrationTests.MongoDB;
+namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
 public class MongoDBCollection : ICollectionFixture<MongoDBFixture>
