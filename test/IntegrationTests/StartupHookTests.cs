@@ -43,7 +43,7 @@ public class StartupHookTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public void SubmitsTraces()
     {
-        var spans = RunTestApplication(enableStartupHook: true);
+        var spans = RunTestApplication();
 
         AssertAllSpansReceived(spans);
     }
@@ -99,6 +99,17 @@ public class StartupHookTests : TestHelper
         // https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/895
         AssertAllSpansReceived(spans);
 #endif
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void ApplicationIsIncluded()
+    {
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES", $"{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
+
+        var spans = RunTestApplication();
+
+        AssertAllSpansReceived(spans);
     }
 
     private static void AssertNoSpansReceived(IImmutableList<IMockSpan> spans)
