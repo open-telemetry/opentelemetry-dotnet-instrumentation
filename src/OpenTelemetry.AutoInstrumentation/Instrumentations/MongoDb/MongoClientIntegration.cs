@@ -21,7 +21,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDb
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB
 {
     /// <summary>
     /// MongoDB.Driver.MongoClient calltarget instrumentation
@@ -34,7 +34,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDb
         ParameterTypeNames = new[] { "MongoDB.Driver.MongoClientSettings" },
         MinimumVersion = "2.3.0",
         MaximumVersion = "2.65535.65535",
-        IntegrationName = "MongoDb")]
+        IntegrationName = "MongoDB")]
     public class MongoClientIntegration
     {
 #if NETCOREAPP3_1_OR_GREATER
