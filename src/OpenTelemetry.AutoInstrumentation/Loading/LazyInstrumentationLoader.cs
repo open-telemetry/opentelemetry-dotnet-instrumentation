@@ -69,6 +69,9 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
             {
                 var instrumentation = e.Builder();
 
+                // We just track the instances to keep them alive.
+                // During the shut down event IDisposable types are also disposed.
+                // This behavior repliactes SDK internal logic.
                 _instrumentations.Add(instrumentation);
             }
             catch (Exception ex)
