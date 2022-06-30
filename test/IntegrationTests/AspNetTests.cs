@@ -88,7 +88,6 @@ public class AspNetTests : TestHelper
         var testSettings = new TestSettings
         {
             MetricsSettings = new MetricsSettings { Port = collectorPort },
-            EnableStartupHook = true
         };
 
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
