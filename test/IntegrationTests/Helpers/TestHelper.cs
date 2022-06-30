@@ -92,6 +92,7 @@ public abstract class TestHelper
 
         if (testSettings.MetricsSettings != null)
         {
+            Output.WriteLine($"Otlp Endpoint: {agentBaseUrl}");
             builder = builder.WithEnvironment("OTEL_EXPORTER_OTLP_ENDPOINT", agentBaseUrl);
             builder = builder.WithEnvironment("OTEL_METRIC_EXPORT_INTERVAL", "1000");
             builder = builder.WithEnvironment("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "AspNet");
