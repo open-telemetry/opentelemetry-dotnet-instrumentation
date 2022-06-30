@@ -39,7 +39,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
 
         private void CurrentDomain_AssemblyLoad(object sender, AssemblyLoadEventArgs args)
         {
-            string assemblyName = args.LoadedAssembly.FullName.Split(',')[0];
+            string assemblyName = args.LoadedAssembly.FullName.Split(new[] { ',' }, count: 2)[0];
 
             if (_requiredAssemblies.Contains(assemblyName, StringComparer.InvariantCultureIgnoreCase))
             {
