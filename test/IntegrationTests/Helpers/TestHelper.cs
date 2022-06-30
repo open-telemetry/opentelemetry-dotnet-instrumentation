@@ -123,7 +123,7 @@ public abstract class TestHelper
 
     /// <summary>
     /// RunTestApplication starts the test application, wait up to DefaultProcessTimeout.
-    /// Assertion excetpions are thrown if it timeout out or the exit code is non-zero.
+    /// Assertion exceptions are thrown if it timed out or the exit code is non-zero.
     /// </summary>
     public void RunTestApplication(int traceAgentPort = 0, int metricsAgentPort = 0, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000, bool enableStartupHook = true)
     {
