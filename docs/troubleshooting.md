@@ -5,7 +5,7 @@
 OpenTelemetry .NET NuGet packages and its dependencies
 are deployed with the OpenTelemetry .NET Automatic Instrumentation.
 
-In case of assembly version conficts you may get a `TargetInvocationException`.
+In case of assembly version conflicts you may get a `TargetInvocationException`.
 For example:
 
 ```txt
