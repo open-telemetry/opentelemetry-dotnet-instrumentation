@@ -103,6 +103,10 @@ public abstract class TestHelper
         return new Container(container);
     }
 
+    /// <summary>
+    /// StartTestApplication starts the test application
+    // and returns the Process instance for further interaction.
+    /// </summary>
     public Process StartTestApplication(int traceAgentPort, string arguments, string packageVersion, int aspNetCorePort, string framework = "", bool enableStartupHook = true)
     {
         var testSettings = new TestSettings
@@ -117,46 +121,32 @@ public abstract class TestHelper
         return StartTestApplication(testSettings);
     }
 
-    public ProcessResult RunTestApplicationAndWaitForExit(int traceAgentPort, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000, bool enableStartupHook = true)
+    /// <summary>
+    /// RunTestApplication starts the test application, wait up to DefaultProcessTimeout.
+    /// Assertion excetpions are thrown if it timeout out or the exit code is non-zero.
+    /// </summary>
+    public void RunTestApplication(int traceAgentPort = 0, int metricsAgentPort = 0, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000, bool enableStartupHook = true)
     {
         var testSettings = new TestSettings
         {
-            TracesSettings = new TracesSettings { Port = traceAgentPort },
             Arguments = arguments,
             PackageVersion = packageVersion,
             AspNetCorePort = aspNetCorePort,
             Framework = framework,
             EnableStartupHook = enableStartupHook
         };
-        return RunTestApplicationAndWaitForExit(testSettings);
-    }
 
-    public ProcessResult RunTestApplicationAndWaitForExit(TestSettings testSettings)
-    {
-        var process = StartTestApplication(testSettings);
-        var name = process.ProcessName;
-
-        using var helper = new ProcessHelper(process);
-
-        bool processTimeout = !process.WaitForExit((int)DefaultProcessTimeout.TotalMilliseconds);
-        if (processTimeout)
+        if (traceAgentPort != 0)
         {
-            process.Kill();
+            testSettings.TracesSettings = new() { Port = traceAgentPort };
         }
 
-        var exitCode = process.ExitCode;
-
-        Output.WriteLine($"ProcessName: " + name);
-        Output.WriteLine($"ProcessId: " + process.Id);
-        Output.WriteLine($"Exit Code: " + exitCode);
-        Output.WriteResult(helper);
-
-        if (processTimeout)
+        if (metricsAgentPort != 0)
         {
-            throw new TimeoutException($"{name} ({process.Id}) did not exit within {DefaultProcessTimeout.TotalSeconds} sec");
+            testSettings.MetricsSettings = new() { Port = metricsAgentPort };
         }
 
-        return new ProcessResult(process, helper.StandardOutput, helper.ErrorOutput, exitCode);
+        RunTestApplication(testSettings);
     }
 
     protected void EnableDebugMode()
@@ -167,6 +157,26 @@ public abstract class TestHelper
     protected void SetEnvironmentVariable(string key, string value)
     {
         EnvironmentHelper.CustomEnvironmentVariables.Add(key, value);
+    }
+
+    private void RunTestApplication(TestSettings testSettings)
+    {
+        using var process = StartTestApplication(testSettings);
+        Output.WriteLine($"ProcessName: " + process.ProcessName);
+        using var helper = new ProcessHelper(process);
+
+        bool processTimeout = !process.WaitForExit((int)DefaultProcessTimeout.TotalMilliseconds);
+        if (processTimeout)
+        {
+            process.Kill();
+        }
+
+        Output.WriteLine($"ProcessId: " + process.Id);
+        Output.WriteLine($"Exit Code: " + process.ExitCode);
+        Output.WriteResult(helper);
+
+        processTimeout.Should().BeFalse("Test application timed out");
+        process.ExitCode.Should().Be(0, $"Test application exited with non-zero exit code");
     }
 
     private Process StartTestApplication(TestSettings testSettings)

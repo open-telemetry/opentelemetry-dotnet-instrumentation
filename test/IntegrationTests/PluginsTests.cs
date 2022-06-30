@@ -40,8 +40,7 @@ public class PluginsTests : TestHelper
 
         int agentPort = TcpPortProvider.GetOpenPort();
         using var agent = new MockZipkinCollector(Output, agentPort);
-        using var processResult = RunTestApplicationAndWaitForExit(agent.Port);
-        Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
+        RunTestApplication(agent.Port);
         var spans = agent.WaitForSpans(1, TimeSpan.FromSeconds(5));
 
         spans.Should().Contain(x => x.Name == "SayHello");
@@ -55,13 +54,7 @@ public class PluginsTests : TestHelper
 
         var collectorPort = TcpPortProvider.GetOpenPort();
         using var collector = new MockCollector(Output, collectorPort);
-        var testSettings = new TestSettings
-        {
-            MetricsSettings = new MetricsSettings { Port = collectorPort },
-            EnableStartupHook = true,
-        };
-        using var processResult = RunTestApplicationAndWaitForExit(testSettings);
-        Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
+        RunTestApplication(metricsAgentPort: collectorPort);
         var metricRequests = collector.WaitForMetrics(1, TimeSpan.FromSeconds(5));
 
         var metrics = metricRequests.Should().NotBeEmpty().And.Subject.First().ResourceMetrics.Should().ContainSingle().Subject.ScopeMetrics;

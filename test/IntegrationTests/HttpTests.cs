@@ -47,8 +47,7 @@ public class HttpTests : TestHelper
 
         const int expectedSpanCount = 3;
 
-        using var processResult = RunTestApplicationAndWaitForExit(agent.Port, enableStartupHook: true);
-        Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
+        RunTestApplication(agent.Port);
         var spans = agent.WaitForSpans(expectedSpanCount, TimeSpan.FromSeconds(5));
 
         using (new AssertionScope())
@@ -96,14 +95,7 @@ public class HttpTests : TestHelper
 
         const int expectedMetricRequests = 1;
 
-        var testSettings = new TestSettings
-        {
-            MetricsSettings = new MetricsSettings { Port = collectorPort },
-            EnableStartupHook = true
-        };
-
-        using var processResult = RunTestApplicationAndWaitForExit(testSettings);
-        Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
+        RunTestApplication(metricsAgentPort: collectorPort);
         var metricRequests = collector.WaitForMetrics(expectedMetricRequests, TimeSpan.FromSeconds(5));
 
         using (new AssertionScope())

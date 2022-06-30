@@ -123,14 +123,7 @@ public class SmokeTests : TestHelper
 
         const int expectedMetricRequests = 1;
 
-        var testSettings = new TestSettings
-        {
-            MetricsSettings = new MetricsSettings { Port = collectorPort },
-            EnableStartupHook = true,
-        };
-
-        using var processResult = RunTestApplicationAndWaitForExit(testSettings);
-        Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
+        RunTestApplication(metricsAgentPort: collectorPort);
         var metricRequests = collector.WaitForMetrics(expectedMetricRequests, TimeSpan.FromSeconds(5));
 
         using (new AssertionScope())
@@ -206,9 +199,8 @@ public class SmokeTests : TestHelper
 
         int agentPort = TcpPortProvider.GetOpenPort();
         using var agent = new MockZipkinCollector(Output, agentPort);
-        using var processResult = RunTestApplicationAndWaitForExit(agent.Port, enableStartupHook: enableStartupHook);
+        RunTestApplication(agent.Port, enableStartupHook: enableStartupHook);
 
-        Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
         return agent.WaitForSpans(2, TimeSpan.FromSeconds(5));
     }
 }
