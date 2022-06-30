@@ -33,8 +33,6 @@ public class SmokeTests : TestHelper
 {
     private const string ServiceName = "TestApplication.Smoke";
 
-    private List<WebServerSpanExpectation> _expectations = new List<WebServerSpanExpectation>();
-
     public SmokeTests(ITestOutputHelper output)
         : base("Smoke", output)
     {
@@ -204,6 +202,8 @@ public class SmokeTests : TestHelper
 
     private IImmutableList<IMockSpan> RunTestApplication(bool enableStartupHook = true)
     {
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
+
         int agentPort = TcpPortProvider.GetOpenPort();
         using var agent = new MockZipkinCollector(Output, agentPort);
         using var processResult = RunTestApplicationAndWaitForExit(agent.Port, enableStartupHook: enableStartupHook);
