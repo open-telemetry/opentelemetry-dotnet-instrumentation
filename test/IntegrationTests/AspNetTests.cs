@@ -111,14 +111,9 @@ public class AspNetTests : TestHelper
         using (new AssertionScope())
         {
             metricRequests.Count.Should().BeGreaterThanOrEqualTo(expectedMetricRequests);
-            var resourceMetrics = metricRequests.LastOrDefault().ResourceMetrics.Single();
-
-            var expectedServiceNameAttribute = new KeyValue { Key = "service.name", Value = new AnyValue { StringValue = "TestApplication.AspNet" } };
-            resourceMetrics.Resource.Attributes.Should().ContainEquivalentOf(expectedServiceNameAttribute);
-            var aspnetScope = resourceMetrics.ScopeMetrics.Single(rm => rm.Scope.Name.Equals("OpenTelemetry.Instrumentation.AspNet", StringComparison.OrdinalIgnoreCase));
-
-            var httpServerDurationMetric = aspnetScope.Metrics.FirstOrDefault(m => m.Name.Equals("http.server.duration", StringComparison.OrdinalIgnoreCase));
-            httpServerDurationMetric.Should().NotBeNull();
+            var resourceMetrics = metricRequests.SelectMany(r => r.ResourceMetrics).Where(s => s.ScopeMetrics.Count > 0).FirstOrDefault();
+            var aspnetMetrics = resourceMetrics.ScopeMetrics.Should().ContainSingle(x => x.Scope.Name == "OpenTelemetry.Instrumentation.AspNet").Which.Metrics;
+            aspnetMetrics.Should().ContainSingle(x => x.Name == "http.server.duration");
         }
     }
 }
