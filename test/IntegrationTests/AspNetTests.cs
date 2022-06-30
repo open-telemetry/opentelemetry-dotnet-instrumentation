@@ -40,16 +40,14 @@ public class AspNetTests : TestHelper
     {
         Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
 
-        var agentPort = TcpPortProvider.GetOpenPort();
+        // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
+        // accessible to the Windows docker container where the test application is executed by binding
+        // the endpoint to all network interfaces. In order to do that it is necessary to open the port
+        // on the firewall.
+        using var agent = new MockZipkinCollector(Output, host: "*");
+        using var fwPort = FirewallHelper.OpenWinPort(agent.Port, Output);
         var webPort = TcpPortProvider.GetOpenPort();
-
-         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
-         // accessible to the Windows docker container where the test application is executed by binding
-         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
-         // on the firewall.
-        using var fwPort = FirewallHelper.OpenWinPort(agentPort, Output);
-        using var agent = new MockZipkinCollector(Output, agentPort, host: "*");
-        using var container = await StartContainerAsync(agentPort, webPort);
+        using var container = await StartContainerAsync(agent.Port, webPort);
 
         var client = new HttpClient();
 

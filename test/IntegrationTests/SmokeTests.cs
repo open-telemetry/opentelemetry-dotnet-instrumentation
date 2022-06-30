@@ -198,7 +198,7 @@ public class SmokeTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
 
         int agentPort = TcpPortProvider.GetOpenPort();
-        using var agent = new MockZipkinCollector(Output, agentPort);
+        using var agent = new MockZipkinCollector(Output);
         RunTestApplication(agent.Port, enableStartupHook: enableStartupHook);
 
         return agent.WaitForSpans(2, TimeSpan.FromSeconds(5));

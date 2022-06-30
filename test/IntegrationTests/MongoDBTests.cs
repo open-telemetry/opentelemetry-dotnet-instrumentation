@@ -43,9 +43,7 @@ public class MongoDBTests : TestHelper
     [Trait("Containers", "Linux")]
     public void SubmitsTraces()
     {
-        int agentPort = TcpPortProvider.GetOpenPort();
-
-        using var agent = new MockZipkinCollector(Output, agentPort);
+        using var agent = new MockZipkinCollector(Output);
         RunTestApplication(agent.Port, arguments: $"--mongo-db {_mongoDB.Port}");
         var spans = agent.WaitForSpans(3, TimeSpan.FromSeconds(5));
         Assert.True(spans.Count >= 3, $"Expecting at least 3 spans, only received {spans.Count}");

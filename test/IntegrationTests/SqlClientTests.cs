@@ -43,8 +43,7 @@ namespace IntegrationTests
         [Trait("Containers", "Linux")]
         public void SubmitTraces()
         {
-            var agentPort = TcpPortProvider.GetOpenPort();
-            using var agent = new MockZipkinCollector(Output, agentPort);
+            using var agent = new MockZipkinCollector(Output);
 
             const int expectedSpanCount = 8;
 

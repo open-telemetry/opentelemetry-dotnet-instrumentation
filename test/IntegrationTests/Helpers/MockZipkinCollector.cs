@@ -38,47 +38,43 @@ public class MockZipkinCollector : IDisposable
     private readonly HttpListener _listener;
     private readonly Thread _listenerThread;
 
-    public MockZipkinCollector(ITestOutputHelper output, int port = 9411, int retries = 5, string host = "localhost")
+    public MockZipkinCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
 
         // try up to 5 consecutive ports before giving up
+        int retries = 4;
         while (true)
         {
             // seems like we can't reuse a listener if it fails to start,
             // so create a new listener each time we retry
-            var listener = new HttpListener();
+            _listener = new HttpListener();
 
             try
             {
-                listener.Start();
+                _listener.Start();
 
                 // See https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistenerprefixcollection.add?redirectedfrom=MSDN&view=net-6.0#remarks
                 // for info about the host value.
-                string prefix = new UriBuilder("http", host, port, "/api/v2/spans/").ToString();
-                listener.Prefixes.Add(prefix);
+                Port = TcpPortProvider.GetOpenPort();
+                string prefix = new UriBuilder("http", host, Port, "/api/v2/spans/").ToString();
+                _listener.Prefixes.Add(prefix);
 
                 // successfully listening
-                Port = port;
-                _listener = listener;
-
                 _listenerThread = new Thread(HandleHttpRequests);
                 _listenerThread.Start();
-
                 WriteOutput($"Running on port '{Port}'");
 
                 return;
             }
             catch (HttpListenerException) when (retries > 0)
             {
-                // only catch the exception if there are retries left
-                port++;
                 retries--;
             }
 
             // always close listener if exception is thrown,
             // whether it was caught or not
-            listener.Close();
+            _listener.Close();
 
             WriteOutput("Listener shut down. Could not find available port.");
         }
