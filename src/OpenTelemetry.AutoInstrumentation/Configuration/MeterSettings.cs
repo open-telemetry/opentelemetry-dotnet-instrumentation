@@ -82,6 +82,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
                 }
             }
 
+            MetricExportInterval = source.GetInt32(ConfigurationKeys.Metrics.ExportInterval);
             MetricsEnabled = source.GetBool(ConfigurationKeys.Metrics.Enabled) ?? true;
             LoadMetricsAtStartup = source.GetBool(ConfigurationKeys.Metrics.LoadMeterAtStartup) ?? true;
         }
@@ -102,6 +103,11 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
         /// Gets the metrics exporter.
         /// </summary>
         public MetricsExporter MetricExporter { get; }
+
+        /// <summary>
+        /// Gets the metrics export interval.
+        /// </summary>
+        public int? MetricExportInterval { get; }
 
         /// <summary>
         /// Gets a value indicating whether the console exporter is enabled.

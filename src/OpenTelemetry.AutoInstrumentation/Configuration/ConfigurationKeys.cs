@@ -127,6 +127,11 @@ public class ConfigurationKeys
         public const string Exporter = "OTEL_METRICS_EXPORTER";
 
         /// <summary>
+        /// Configuration key for the time interval (in milliseconds) between the start of two metrics export attempts.
+        /// </summary>
+        public const string ExportInterval = "OTEL_METRIC_EXPORT_INTERVAL";
+
+        /// <summary>
         /// Configuration key for whether the metrics console exporter is enabled.
         /// </summary>
         public const string ConsoleExporterEnabled = "OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED";
