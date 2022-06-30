@@ -89,12 +89,10 @@ public class HttpTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public void SubmitMetrics()
     {
-        var collectorPort = TcpPortProvider.GetOpenPort();
-        using var collector = new MockCollector(Output, collectorPort);
-
         const int expectedMetricRequests = 1;
 
-        RunTestApplication(metricsAgentPort: collectorPort);
+        using var collector = new MockMetricsCollector(Output);
+        RunTestApplication(metricsAgentPort: collector.Port);
         var metricRequests = collector.WaitForMetrics(expectedMetricRequests, TimeSpan.FromSeconds(5));
 
         using (new AssertionScope())

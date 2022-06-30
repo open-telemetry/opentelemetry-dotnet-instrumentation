@@ -52,9 +52,8 @@ public class PluginsTests : TestHelper
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
 
-        var collectorPort = TcpPortProvider.GetOpenPort();
-        using var collector = new MockCollector(Output, collectorPort);
-        RunTestApplication(metricsAgentPort: collectorPort);
+        using var collector = new MockMetricsCollector(Output);
+        RunTestApplication(metricsAgentPort: collector.Port);
         var metricRequests = collector.WaitForMetrics(1, TimeSpan.FromSeconds(5));
 
         var metrics = metricRequests.Should().NotBeEmpty().And.Subject.First().ResourceMetrics.Should().ContainSingle().Subject.ScopeMetrics;
