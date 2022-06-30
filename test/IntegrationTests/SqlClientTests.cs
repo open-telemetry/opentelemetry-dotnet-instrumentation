@@ -35,7 +35,6 @@ namespace IntegrationTests
         {
             _sqlClientFixture = sqlClientFixture;
             SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
-            SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "SqlClient");
         }
 
         [Fact]

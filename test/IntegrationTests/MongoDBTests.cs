@@ -34,7 +34,6 @@ public class MongoDBTests : TestHelper
     {
         _mongoDB = mongoDB;
 
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "MongoDB");
         SetEnvironmentVariable("OTEL_SERVICE_NAME", "TestApplication.MongoDB");
     }
 

@@ -16,14 +16,21 @@
 
         "CORECLR_ENABLE_PROFILING": "1",
         "CORECLR_PROFILER": "{918728DD-259F-4A6A-AC2B-B85E1B658318}",
-        "CORECLR_PROFILER_PATH": "$(SolutionDir)bin\\tracer-home\\win-x64\\OpenTelemetry.AutoInstrumentation.Native.dll",
-        "DOTNET_STARTUP_HOOKS": "$(SolutionDir)bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.StartupHook.dll",
+        "CORECLR_PROFILER_PATH_64": "F:\\Dev\\forks\\rassk\\opentelemetry-dotnet-instrumentation\\bin\\tracer-home\\win-x64\\OpenTelemetry.AutoInstrumentation.Native.dll",
+        "CORECLR_PROFILER_PATH_32": "F:\\Dev\\forks\\rassk\\opentelemetry-dotnet-instrumentation\\bin\\tracer-home\\win-x86\\OpenTelemetry.AutoInstrumentation.Native.dll",
 
-        "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home\\",
-        "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE": "$(SolutionDir)bin\\tracer-home\\integrations.json",
+        "DOTNET_ADDITIONAL_DEPS": "F:\\Dev\\forks\\rassk\\opentelemetry-dotnet-instrumentation\\bin\\tracer-home\\AdditionalDeps",
+        "DOTNET_SHARED_STORE": "F:\\Dev\\forks\\rassk\\opentelemetry-dotnet-instrumentation\\bin\\tracer-home\\store",
+        "DOTNET_STARTUP_HOOKS": "F:\\Dev\\forks\\rassk\\opentelemetry-dotnet-instrumentation\\bin\\tracer-home\\netcoreapp3.1\\OpenTelemetry.AutoInstrumentation.StartupHook.dll",
+
+        // "OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS": "HttpClient,AspNet,SqlClient,MongoDb,GraphQL",
+        "OTEL_DOTNET_AUTO_LOG_DIRECTORY": "%ProgramData%\\OpenTelemetry .NET AutoInstrumentation\\logs\\",
+        "OTEL_DOTNET_AUTO_HOME": "F:\\Dev\\forks\\rassk\\opentelemetry-dotnet-instrumentation\\bin\\tracer-home",
+        "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE": "F:\\Dev\\forks\\rassk\\opentelemetry-dotnet-instrumentation\\bin\\tracer-home\\integrations.json",
         "OTEL_TRACES_EXPORTER": "zipkin",
         "OTEL_EXPORTER_ZIPKIN_ENDPOINT": "http://127.0.0.1:9411/api/v2/spans",
-        "OTEL_DOTNET_AUTO_DEBUG": "1"
+        "OTEL_DOTNET_AUTO_DEBUG": "1",
+        "OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED": "true"
       },
       "applicationUrl": "http://localhost:54568/",
       "nativeDebugging": true
