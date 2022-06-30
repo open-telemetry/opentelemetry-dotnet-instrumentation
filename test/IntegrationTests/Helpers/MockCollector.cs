@@ -37,7 +37,7 @@ public class MockCollector : IDisposable
     private readonly HttpListener _listener;
     private readonly Thread _listenerThread;
 
-    public MockCollector(ITestOutputHelper output, int port = 4318, int retries = 5, string host = "localhost")
+    public MockCollector(ITestOutputHelper output, int port = 4318, int retries = 5, string host = "127.0.0.1")
     {
         _output = output;
 

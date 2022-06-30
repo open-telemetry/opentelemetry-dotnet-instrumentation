@@ -79,7 +79,7 @@ public class AspNetTests : TestHelper
     [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
-    public async Task SubmitsMetrics()
+    public async Task SubmitMetrics()
     {
         var collectorPort = TcpPortProvider.GetOpenPort();
         var webPort = TcpPortProvider.GetOpenPort();
