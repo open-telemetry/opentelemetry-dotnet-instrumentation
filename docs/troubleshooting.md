@@ -1,9 +1,21 @@
 # Troubleshooting
 
-## Handling of assembly version conflicts
+## Assembly version conflicts
 
 OpenTelemetry .NET NuGet packages and its dependencies
 are deployed with the OpenTelemetry .NET Automatic Instrumentation.
+
+In case of assembly version conficts you may get a `TargetInvocationException`.
+For example:
+
+```txt
+Unhandled exception. System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation.
+ ---> System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation.
+ ---> System.TypeInitializationException: The type initializer for 'OpenTelemetry.AutoInstrumentation.Loader.Startup' threw an exception.
+ ---> System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation.
+ ---> System.TypeLoadException: Could not load type 'OpenTelemetry.Exporter.OtlpExportProtocol' from assembly 'OpenTelemetry.Exporter.OpenTelemetryProtocol, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7bd6737fe5b67e3c'.
+```
+
 To handle dependency versions conflicts,
 update the instrumented application's project references
 to use the same versions.
