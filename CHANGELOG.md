@@ -34,7 +34,7 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
   delimted by the platform-specific path separator
   (`;` on Windows, `:` on Linux and macOS).
 - Support for metric exporter interval using environment variable:
-  `OTEL_AUTO_METRIC_EXPORT_INTERVAL`.
+  `OTEL_METRIC_EXPORT_INTERVAL`.
 
 ### Changed
 
