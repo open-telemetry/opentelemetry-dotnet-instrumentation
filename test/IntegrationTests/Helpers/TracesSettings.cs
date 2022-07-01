@@ -14,12 +14,11 @@
 // limitations under the License.
 // </copyright>
 
-namespace IntegrationTests.Helpers
-{
-    public class TracesSettings
-    {
-        public string Exporter => "zipkin";
+namespace IntegrationTests.Helpers;
 
-        public int Port { get; set; }
-    }
+public class TracesSettings
+{
+    public string Exporter => "zipkin";
+
+    public int Port { get; set; }
 }

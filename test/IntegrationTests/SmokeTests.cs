@@ -1,4 +1,4 @@
-// <copyright file="StartupHookTests.cs" company="OpenTelemetry Authors">
+// <copyright file="SmokeTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,22 +18,25 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using FluentAssertions;
+using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
 using IntegrationTests.Helpers.Mocks;
 using IntegrationTests.Helpers.Models;
+using Opentelemetry.Proto.Common.V1;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace IntegrationTests.StartupHook;
+namespace IntegrationTests;
 
-public class StartupHookTests : TestHelper
+public class SmokeTests : TestHelper
 {
-    private const string ServiceName = "TestApplication.StartupHook";
+    private const string ServiceName = "TestApplication.Smoke";
 
     private List<WebServerSpanExpectation> _expectations = new List<WebServerSpanExpectation>();
 
-    public StartupHookTests(ITestOutputHelper output)
-        : base("StartupHook", output)
+    public SmokeTests(ITestOutputHelper output)
+        : base("Smoke", output)
     {
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "HttpClient");
@@ -43,7 +46,7 @@ public class StartupHookTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public void SubmitsTraces()
     {
-        var spans = RunTestApplication(enableStartupHook: true);
+        var spans = RunTestApplication();
 
         AssertAllSpansReceived(spans);
     }
@@ -101,6 +104,58 @@ public class StartupHookTests : TestHelper
 #endif
     }
 
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void ApplicationIsIncluded()
+    {
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES", $"{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
+
+        var spans = RunTestApplication();
+
+        AssertAllSpansReceived(spans);
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void SubmitMetrics()
+    {
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
+        var collectorPort = TcpPortProvider.GetOpenPort();
+        using var collector = new MockCollector(Output, collectorPort);
+
+        const int expectedMetricRequests = 1;
+
+        var testSettings = new TestSettings
+        {
+            MetricsSettings = new MetricsSettings { Port = collectorPort },
+            EnableStartupHook = true,
+        };
+
+        using var processResult = RunTestApplicationAndWaitForExit(testSettings);
+        Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
+        var metricRequests = collector.WaitForMetrics(expectedMetricRequests, TimeSpan.FromSeconds(5));
+
+        using (new AssertionScope())
+        {
+            metricRequests.Count.Should().Be(expectedMetricRequests);
+
+            var resourceMetrics = metricRequests.Single().ResourceMetrics.Single();
+
+            var expectedServiceNameAttribute = new KeyValue { Key = "service.name", Value = new AnyValue { StringValue = ServiceName } };
+            resourceMetrics.Resource.Attributes.Should().ContainEquivalentOf(expectedServiceNameAttribute);
+
+            var customClientScope = resourceMetrics.ScopeMetrics.Single(rm => rm.Scope.Name.Equals("MyCompany.MyProduct.MyLibrary", StringComparison.OrdinalIgnoreCase));
+            var myFruitCounterMetric = customClientScope.Metrics.FirstOrDefault(m => m.Name.Equals("MyFruitCounter", StringComparison.OrdinalIgnoreCase));
+            myFruitCounterMetric.Should().NotBeNull();
+            myFruitCounterMetric.DataCase.Should().Be(Opentelemetry.Proto.Metrics.V1.Metric.DataOneofCase.Sum);
+            myFruitCounterMetric.Sum.DataPoints.Count.Should().Be(1);
+
+            var myFruitCounterAttributes = myFruitCounterMetric.Sum.DataPoints[0].Attributes;
+            myFruitCounterAttributes.Count.Should().Be(1);
+            myFruitCounterAttributes.Single(a => a.Key == "name").Value.StringValue.Should().Be("apple");
+        }
+    }
+
     private static void AssertNoSpansReceived(IImmutableList<IMockSpan> spans)
     {
         Assert.True(spans.Count() == 0, $"Expecting no spans, received {spans.Count()}");
@@ -120,11 +175,11 @@ public class StartupHookTests : TestHelper
             expectations.Add(new WebServerSpanExpectation(ServiceName, null, "SayHello", "SayHello", null));
             expectations.Add(new WebServerSpanExpectation(ServiceName, null, "HTTP GET", "HTTP GET", null, "GET"));
 
-            AssertExpectationsMet(expectations, spanList);
+            AssertSpanExpectations(expectations, spanList);
         }
     }
 
-    private static void AssertExpectationsMet(List<WebServerSpanExpectation> expectations, List<IMockSpan> spans)
+    private static void AssertSpanExpectations(List<WebServerSpanExpectation> expectations, List<IMockSpan> spans)
     {
         List<IMockSpan> remainingSpans = spans.Select(s => s).ToList();
         List<string> failures = new List<string>();
