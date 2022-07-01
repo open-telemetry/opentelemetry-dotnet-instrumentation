@@ -33,6 +33,7 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 - `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` can accept multiple filepaths
   delimted by the platform-specific path separator
   (`;` on Windows, `:` on Linux and macOS).
+- Support for ASP.NET Core running on .NET 4.6.2
 
 ### Changed
 
@@ -46,7 +47,7 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
   `OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS`&#8594;`OTEL_DOTNET_AUTO_TRACES_PLUGINS`
   `OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES`&#8594;`OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES`
 
-- `OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS` default value is changed to
+- `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS` default value is changed to
   include all of the available instrumentations.
   
 ### Removed
