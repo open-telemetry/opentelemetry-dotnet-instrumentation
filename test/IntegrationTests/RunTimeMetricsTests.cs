@@ -30,7 +30,7 @@ public class RunTimeMetricsTests : TestHelper
         : base("StartupHook", output)
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "NetRuntime");
-        SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "500");
+        SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "100");
     }
 
     [Fact]
