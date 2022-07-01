@@ -35,53 +35,12 @@ public class MockZipkinCollector : IDisposable
     private static readonly TimeSpan DefaultSpanWaitTimeout = TimeSpan.FromSeconds(20);
 
     private readonly ITestOutputHelper _output;
-    private readonly HttpListener _listener;
-    private readonly Thread _listenerThread;
+    private readonly TestHttpListener _listener;
 
-    public MockZipkinCollector(ITestOutputHelper output, int port = 9411, int retries = 5, string host = "localhost")
+    public MockZipkinCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
-
-        // try up to 5 consecutive ports before giving up
-        while (true)
-        {
-            // seems like we can't reuse a listener if it fails to start,
-            // so create a new listener each time we retry
-            var listener = new HttpListener();
-
-            try
-            {
-                listener.Start();
-
-                // See https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistenerprefixcollection.add?redirectedfrom=MSDN&view=net-6.0#remarks
-                // for info about the host value.
-                string prefix = new UriBuilder("http", host, port, "/api/v2/spans/").ToString();
-                listener.Prefixes.Add(prefix);
-
-                // successfully listening
-                Port = port;
-                _listener = listener;
-
-                _listenerThread = new Thread(HandleHttpRequests);
-                _listenerThread.Start();
-
-                WriteOutput($"Running on port '{Port}'");
-
-                return;
-            }
-            catch (HttpListenerException) when (retries > 0)
-            {
-                // only catch the exception if there are retries left
-                port++;
-                retries--;
-            }
-
-            // always close listener if exception is thrown,
-            // whether it was caught or not
-            listener.Close();
-
-            WriteOutput("Listener shut down. Could not find available port.");
-        }
+        _listener = new(output, HandleHttpRequests, host, "/api/v2/spans/");
     }
 
     public event EventHandler<EventArgs<HttpListenerContext>> RequestReceived;
@@ -94,11 +53,9 @@ public class MockZipkinCollector : IDisposable
     public bool ShouldDeserializeTraces { get; set; } = true;
 
     /// <summary>
-    /// Gets the TCP port that this Agent is listening on.
-    /// Can be different from <see cref="MockZipkinCollector(ITestOutputHelper, int, int)"/>'s <c>initialPort</c>
-    /// parameter if listening on that port fails.
+    /// Gets the TCP port that this collector is listening on.
     /// </summary>
-    public int Port { get; }
+    public int Port { get => _listener.Port; }
 
     /// <summary>
     /// Gets the filters used to filter out spans we don't want to look at for a test.
@@ -161,7 +118,7 @@ public class MockZipkinCollector : IDisposable
     public void Dispose()
     {
         WriteOutput($"Shutting down. Total spans received: '{Spans.Count}'");
-        _listener?.Stop();
+        _listener.Dispose();
     }
 
     protected virtual void OnRequestReceived(HttpListenerContext context)
@@ -174,96 +131,43 @@ public class MockZipkinCollector : IDisposable
         RequestDeserialized?.Invoke(this, new EventArgs<IList<IMockSpan>>(trace));
     }
 
-    private void AssertHeader(
-        NameValueCollection headers,
-        string headerKey,
-        Func<string, bool> assertion)
+    private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        var header = headers.Get(headerKey);
-
-        if (string.IsNullOrEmpty(header))
+        if (ctx.Request.RawUrl.Equals("/healthz", StringComparison.OrdinalIgnoreCase))
         {
-            throw new Exception($"Every submission to the agent should have a {headerKey} header.");
+            CreateHealthResponse(ctx);
+            return;
         }
 
-        if (!assertion(header))
+        if (ShouldDeserializeTraces)
         {
-            throw new Exception($"Failed assertion for {headerKey} on {header}");
-        }
-    }
-
-    private void HandleHttpRequests()
-    {
-        while (_listener.IsListening)
-        {
-            try
+            using (var reader = new StreamReader(ctx.Request.InputStream))
             {
-                var ctx = _listener.GetContext();
-                OnRequestReceived(ctx);
-
-                if (ctx.Request.RawUrl.Equals("/healthz", StringComparison.OrdinalIgnoreCase))
+                var zspans = JsonConvert.DeserializeObject<List<ZSpanMock>>(reader.ReadToEnd());
+                if (zspans != null)
                 {
-                    CreateHealthResponse(ctx);
+                    IList<IMockSpan> spans = zspans.ConvertAll(x => (IMockSpan)x);
+                    OnRequestDeserialized(spans);
 
-                    continue;
-                }
-
-                if (ShouldDeserializeTraces)
-                {
-                    using (var reader = new StreamReader(ctx.Request.InputStream))
+                    lock (this)
                     {
-                        var zspans = JsonConvert.DeserializeObject<List<ZSpanMock>>(reader.ReadToEnd());
-                        if (zspans != null)
-                        {
-                            IList<IMockSpan> spans = zspans.ConvertAll(x => (IMockSpan)x);
-                            OnRequestDeserialized(spans);
-
-                            lock (this)
-                            {
-                                // we only need to lock when replacing the span collection,
-                                // not when reading it because it is immutable
-                                Spans = Spans.AddRange(spans);
-                                RequestHeaders = RequestHeaders.Add(new NameValueCollection(ctx.Request.Headers));
-                            }
-                        }
+                        // we only need to lock when replacing the span collection,
+                        // not when reading it because it is immutable
+                        Spans = Spans.AddRange(spans);
+                        RequestHeaders = RequestHeaders.Add(new NameValueCollection(ctx.Request.Headers));
                     }
                 }
-
-                // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
-                // (Setting content-length avoids that)
-
-                ctx.Response.ContentType = "application/json";
-                var buffer = Encoding.UTF8.GetBytes("{}");
-                ctx.Response.ContentLength64 = buffer.LongLength;
-                ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
-                ctx.Response.Close();
-            }
-            catch (HttpListenerException)
-            {
-                // listener was stopped,
-                // ignore to let the loop end and the method return
-            }
-            catch (ObjectDisposedException)
-            {
-                // the response has been already disposed.
-            }
-            catch (InvalidOperationException)
-            {
-                // this can occur when setting Response.ContentLength64, with the framework claiming that the response has already been submitted
-                // for now ignore, and we'll see if this introduces downstream issues
-            }
-            catch (Exception) when (!_listener.IsListening)
-            {
-                // we don't care about any exception when listener is stopped
             }
         }
-    }
 
-    private void WriteOutput(string msg)
-    {
-        const string name = nameof(MockZipkinCollector);
+        // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
+        // (Setting content-length avoids that)
 
-        _output.WriteLine($"[{name}]: {msg}");
+        ctx.Response.ContentType = "application/json";
+        var buffer = Encoding.UTF8.GetBytes("{}");
+        ctx.Response.ContentLength64 = buffer.LongLength;
+        ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
+        ctx.Response.Close();
     }
 
     private void CreateHealthResponse(HttpListenerContext ctx)
@@ -274,5 +178,11 @@ public class MockZipkinCollector : IDisposable
         ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
         ctx.Response.StatusCode = (int)HttpStatusCode.OK;
         ctx.Response.Close();
+    }
+
+    private void WriteOutput(string msg)
+    {
+        const string name = nameof(MockZipkinCollector);
+        _output.WriteLine($"[{name}]: {msg}");
     }
 }
