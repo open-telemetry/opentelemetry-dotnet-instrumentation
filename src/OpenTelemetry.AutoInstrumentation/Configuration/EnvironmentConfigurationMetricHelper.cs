@@ -78,11 +78,16 @@ internal static class EnvironmentConfigurationMetricHelper
                     AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
                 }
 #endif
-                builder.AddOtlpExporter(options =>
+                builder.AddOtlpExporter((options, metricReaderOptions) =>
                 {
                     if (settings.OtlpExportProtocol.HasValue)
                     {
                         options.Protocol = settings.OtlpExportProtocol.Value;
+                    }
+
+                    if (settings.MetricExportInterval != null)
+                    {
+                        metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = settings.MetricExportInterval;
                     }
                 });
                 break;

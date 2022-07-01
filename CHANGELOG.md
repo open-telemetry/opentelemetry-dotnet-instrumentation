@@ -33,6 +33,8 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 - `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` can accept multiple filepaths
   delimted by the platform-specific path separator
   (`;` on Windows, `:` on Linux and macOS).
+- Support for metric exporter interval using environment variable:
+  `OTEL_METRIC_EXPORT_INTERVAL`.
 
 ### Changed
 

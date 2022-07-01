@@ -36,10 +36,10 @@ public class MockMetricsCollector : IDisposable
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
 
-    public MockMetricsCollector(ITestOutputHelper output)
+    public MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
-        _listener = new(output, HandleHttpRequests);
+        _listener = new(output, HandleHttpRequests, host);
     }
 
     public event EventHandler<EventArgs<HttpListenerContext>> RequestReceived;
