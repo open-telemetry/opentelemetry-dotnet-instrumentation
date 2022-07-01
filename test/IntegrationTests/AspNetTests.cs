@@ -15,10 +15,15 @@
 // </copyright>
 
 #if NETFRAMEWORK
+using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using FluentAssertions;
+using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
+using Opentelemetry.Proto.Common.V1;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -43,13 +48,18 @@ public class AspNetTests : TestHelper
         var agentPort = TcpPortProvider.GetOpenPort();
         var webPort = TcpPortProvider.GetOpenPort();
 
-         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
-         // accessible to the Windows docker container where the test application is executed by binding
-         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
-         // on the firewall.
+        var testSettings = new TestSettings
+        {
+            TracesSettings = new TracesSettings { Port = agentPort }
+        };
+
+        // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
+        // accessible to the Windows docker container where the test application is executed by binding
+        // the endpoint to all network interfaces. In order to do that it is necessary to open the port
+        // on the firewall.
         using var fwPort = FirewallHelper.OpenWinPort(agentPort, Output);
         using var agent = new MockZipkinCollector(Output, agentPort, host: "*");
-        using var container = await StartContainerAsync(agentPort, webPort);
+        using var container = await StartContainerAsync(testSettings, webPort);
 
         var client = new HttpClient();
 
@@ -64,6 +74,47 @@ public class AspNetTests : TestHelper
         var spans = agent.WaitForSpans(1);
 
         Assert.True(spans.Count >= 1, $"Expecting at least 1 span, only received {spans.Count}");
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Windows")]
+    public async Task SubmitMetrics()
+    {
+        var collectorPort = TcpPortProvider.GetOpenPort();
+        var webPort = TcpPortProvider.GetOpenPort();
+        const int expectedMetricRequests = 1;
+
+        var testSettings = new TestSettings
+        {
+            MetricsSettings = new MetricsSettings { Port = collectorPort },
+        };
+
+        // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
+        // accessible to the Windows docker container where the test application is executed by binding
+        // the endpoint to all network interfaces. In order to do that it is necessary to open the port
+        // on the firewall.
+        using var fwPort = FirewallHelper.OpenWinPort(collectorPort, Output);
+        using var collector = new MockCollector(Output, collectorPort, host: "*");
+        using var container = await StartContainerAsync(testSettings, webPort);
+
+        var client = new HttpClient();
+
+        var response = await client.GetAsync($"http://localhost:{webPort}");
+        var content = await response.Content.ReadAsStringAsync();
+
+        Output.WriteLine("Sample response:");
+        Output.WriteLine(content);
+
+        var metricRequests = collector.WaitForMetrics(expectedMetricRequests, TimeSpan.FromSeconds(5));
+
+        using (new AssertionScope())
+        {
+            metricRequests.Count.Should().BeGreaterThanOrEqualTo(expectedMetricRequests);
+            var resourceMetrics = metricRequests.SelectMany(r => r.ResourceMetrics).Where(s => s.ScopeMetrics.Count > 0).FirstOrDefault();
+            var aspnetMetrics = resourceMetrics.ScopeMetrics.Should().ContainSingle(x => x.Scope.Name == "OpenTelemetry.Instrumentation.AspNet").Which.Metrics;
+            aspnetMetrics.Should().ContainSingle(x => x.Name == "http.server.duration");
+        }
     }
 }
 #endif

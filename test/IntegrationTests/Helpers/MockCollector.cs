@@ -37,7 +37,7 @@ public class MockCollector : IDisposable
     private readonly HttpListener _listener;
     private readonly Thread _listenerThread;
 
-    public MockCollector(ITestOutputHelper output, int port = 4318, int retries = 5)
+    public MockCollector(ITestOutputHelper output, int port = 4318, int retries = 5, string host = "127.0.0.1")
     {
         _output = output;
 
@@ -51,7 +51,8 @@ public class MockCollector : IDisposable
             try
             {
                 listener.Start();
-                listener.Prefixes.Add($"http://127.0.0.1:{port}/");
+                string prefix = new UriBuilder("http", host, port).ToString();
+                listener.Prefixes.Add(prefix);
 
                 // successfully listening
                 Port = port;

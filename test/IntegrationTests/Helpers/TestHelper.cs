@@ -52,18 +52,13 @@ public abstract class TestHelper
 
     protected ITestOutputHelper Output { get; }
 
-    public async Task<Container> StartContainerAsync(int traceAgentPort, int webPort)
+    public async Task<Container> StartContainerAsync(TestSettings testSettings, int webPort)
     {
         // get path to test application that the profiler will attach to
         string testApplicationName = $"testapplication-{EnvironmentHelper.TestApplicationName.ToLowerInvariant()}";
 
-        string agentBaseUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{traceAgentPort}";
-        string agentHealthzUrl = $"{agentBaseUrl}/healthz";
-        string zipkinEndpoint = $"{agentBaseUrl}/api/v2/spans";
         string networkName = DockerNetworkHelper.IntegrationTestsNetworkName;
         string networkId = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
-
-        Output.WriteLine($"Zipkin Endpoint: {zipkinEndpoint}");
 
         string logPath = EnvironmentHelper.IsRunningOnCI()
             ? Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "build_data", "profiler-logs")
@@ -73,16 +68,35 @@ public abstract class TestHelper
 
         Output.WriteLine("Collecting docker logs to: " + logPath);
 
+        var agentPort = testSettings.TracesSettings?.Port ?? testSettings.MetricsSettings?.Port;
         var builder = new TestcontainersBuilder<TestcontainersContainer>()
             .WithImage(testApplicationName)
             .WithCleanUp(cleanUp: true)
             .WithOutputConsumer(Consume.RedirectStdoutAndStderrToConsole())
-            .WithName($"{testApplicationName}-{traceAgentPort}-{webPort}")
+            .WithName($"{testApplicationName}-{agentPort}-{webPort}")
             .WithNetwork(networkId, networkName)
             .WithPortBinding(webPort, 80)
-            .WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", zipkinEndpoint)
             .WithBindMount(logPath, "c:/inetpub/wwwroot/logs")
             .WithBindMount(EnvironmentHelper.GetNukeBuildOutput(), "c:/opentelemetry");
+
+        string agentBaseUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{agentPort}";
+        string agentHealthzUrl = $"{agentBaseUrl}/healthz";
+
+        if (testSettings.TracesSettings != null)
+        {
+            string zipkinEndpoint = $"{agentBaseUrl}/api/v2/spans";
+            Output.WriteLine($"Zipkin Endpoint: {zipkinEndpoint}");
+
+            builder = builder.WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", zipkinEndpoint);
+        }
+
+        if (testSettings.MetricsSettings != null)
+        {
+            Output.WriteLine($"Otlp Endpoint: {agentBaseUrl}");
+            builder = builder.WithEnvironment("OTEL_EXPORTER_OTLP_ENDPOINT", agentBaseUrl);
+            builder = builder.WithEnvironment("OTEL_METRIC_EXPORT_INTERVAL", "1000");
+            builder = builder.WithEnvironment("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "AspNet");
+        }
 
         var container = builder.Build();
         var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
