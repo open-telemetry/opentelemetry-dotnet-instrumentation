@@ -27,7 +27,7 @@ namespace IntegrationTests;
 public class RunTimeMetricsTests : TestHelper
 {
     public RunTimeMetricsTests(ITestOutputHelper output)
-        : base("StartupHook", output)
+        : base("Smoke", output)
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "NetRuntime");
         SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "100");
@@ -37,25 +37,14 @@ public class RunTimeMetricsTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public void SubmitMetrics()
     {
-        var collectorPort = TcpPortProvider.GetOpenPort();
-        using var collector = new MockCollector(Output, collectorPort);
-
-        const int expectedMetricRequests = 1;
-
-        var testSettings = new TestSettings
-        {
-            MetricsSettings = new MetricsSettings { Port = collectorPort },
-            EnableStartupHook = true,
-        };
-
-        using var processResult = RunTestApplicationAndWaitForExit(testSettings);
-        Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
-        var metricRequests = collector.WaitForMetrics(expectedMetricRequests, TimeSpan.FromSeconds(5));
+        using var collector = new MockMetricsCollector(Output);
+        RunTestApplication(metricsAgentPort: collector.Port);
+        var metricRequests = collector.WaitForMetrics(1, TimeSpan.FromSeconds(5));
 
         using (new AssertionScope())
         {
-            var metrics = metricRequests.Should().NotBeEmpty().And.Subject.First().ResourceMetrics.Should().ContainSingle().Subject.ScopeMetrics;
-            metrics.Should().Contain(x => x.Scope.Name == "OpenTelemetry.Instrumentation.Runtime");
+            var metrics = metricRequests.SelectMany(r => r.ResourceMetrics).Where(s => s.ScopeMetrics.Count > 0).FirstOrDefault();
+            metrics.ScopeMetrics.Should().ContainSingle(x => x.Scope.Name == "OpenTelemetry.Instrumentation.Runtime");
         }
     }
 }
