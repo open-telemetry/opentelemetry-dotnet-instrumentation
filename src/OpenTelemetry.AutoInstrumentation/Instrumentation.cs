@@ -167,7 +167,6 @@ public static class Instrumentation
         try
         {
             _tracerProvider?.Dispose();
-            _meterProvider.ForceFlush();
             _meterProvider?.Dispose();
             _sdkEventListener.Dispose();
 

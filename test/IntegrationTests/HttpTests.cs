@@ -110,7 +110,7 @@ public class HttpTests : TestHelper
         {
             metricRequests.Count.Should().Be(expectedMetricRequests);
 
-                var resourceMetrics = metricRequests.Single().ResourceMetrics.Single();
+            var resourceMetrics = metricRequests.Single().ResourceMetrics.Single();
 
             var expectedServiceNameAttribute = new KeyValue { Key = "service.name", Value = new AnyValue { StringValue = ServiceName } };
             resourceMetrics.Resource.Attributes.Should().ContainEquivalentOf(expectedServiceNameAttribute);
