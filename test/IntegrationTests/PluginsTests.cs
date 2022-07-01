@@ -38,10 +38,9 @@ public class PluginsTests : TestHelper
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
 
-        int agentPort = TcpPortProvider.GetOpenPort();
-        using var agent = new MockZipkinCollector(Output);
-        RunTestApplication(agent.Port);
-        var spans = agent.WaitForSpans(1, TimeSpan.FromSeconds(5));
+        using var collector = new MockZipkinCollector(Output);
+        RunTestApplication(collector.Port);
+        var spans = collector.WaitForSpans(1, TimeSpan.FromSeconds(5));
 
         spans.Should().Contain(x => x.Name == "SayHello");
     }
