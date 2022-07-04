@@ -18,8 +18,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using FluentAssertions.Extensions;
 using IntegrationTests.Helpers;
 using IntegrationTests.Helpers.Mocks;
 using IntegrationTests.Helpers.Models;
@@ -142,6 +146,39 @@ public class SmokeTests : TestHelper
             var myFruitCounterAttributes = myFruitCounterMetric.Sum.DataPoints[0].Attributes;
             myFruitCounterAttributes.Count.Should().Be(1);
             myFruitCounterAttributes.Single(a => a.Key == "name").Value.StringValue.Should().Be("apple");
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public async Task PrometheusExporter()
+    {
+        SetEnvironmentVariable("LONG_RUNNING", "true");
+        SetEnvironmentVariable("OTEL_METRICS_EXPORTER", "prometheus");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
+        string defaultPrometheusMetricsEndpoint = "http://localhost:9464/metrics";
+
+        using var process = StartTestApplication();
+
+        try
+        {
+            Func<Task> assert = async () =>
+            {
+                var response = await new HttpClient().GetAsync(defaultPrometheusMetricsEndpoint);
+                response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+                var content = await response.Content.ReadAsStringAsync();
+                Output.WriteLine("Raw metrics from Prometheus:");
+                Output.WriteLine(content);
+                content.Should().Contain("TYPE MyFruitCounter counter");
+            };
+            await assert.Should().NotThrowAfterAsync(
+                waitTime: 30.Seconds(),
+                pollInterval: 1.Seconds());
+        }
+        finally
+        {
+            process.Kill();
         }
     }
 
