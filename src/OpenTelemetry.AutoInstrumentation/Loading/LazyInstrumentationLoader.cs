@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading
@@ -28,14 +27,19 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
 
         private readonly List<AssemblyLoadDetector> _assemblyLoadDetectors = new();
         private readonly ConcurrentBag<object> _instrumentations = new();
-        private readonly TracerSettings _tracerSettings;
 
-        public LazyInstrumentationLoader(TracerSettings tracerSettings)
+        public LazyInstrumentationLoader(LazyInstrumentationBuilders subscriptions)
         {
-            _tracerSettings = tracerSettings;
+            foreach (var builder in subscriptions.EnabledBuilders)
+            {
+                var detector = builder();
+                detector.OnReady += Detector_OnReady;
 
-            Subscribe(TracerInstrumentation.AspNet, () => new AspNetCoreDetector());
+                _assemblyLoadDetectors.Add(detector);
+            }
         }
+
+        public IEnumerable<object> Instrumentations => _instrumentations;
 
         public void Dispose()
         {
@@ -45,17 +49,6 @@ namespace OpenTelemetry.AutoInstrumentation.Loading
                 {
                     disposableInstrumentation.Dispose();
                 }
-            }
-        }
-
-        private void Subscribe(TracerInstrumentation instrumentation, Func<AssemblyLoadDetector> builder)
-        {
-            if (_tracerSettings.EnabledInstrumentations.Contains(instrumentation))
-            {
-                var detector = builder();
-                detector.OnReady += Detector_OnReady;
-
-                _assemblyLoadDetectors.Add(detector);
             }
         }
 

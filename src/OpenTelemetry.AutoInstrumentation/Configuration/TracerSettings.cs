@@ -31,7 +31,7 @@ public class TracerSettings : Settings
     /// using the specified <see cref="IConfigurationSource"/> to initialize values.
     /// </summary>
     /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
-    private TracerSettings(IConfigurationSource source)
+    internal TracerSettings(IConfigurationSource source)
         : base(source)
     {
         TracesExporter = ParseTracesExporter(source);
