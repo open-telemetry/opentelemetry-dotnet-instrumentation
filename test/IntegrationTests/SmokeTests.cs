@@ -162,7 +162,7 @@ public class SmokeTests : TestHelper
 
         try
         {
-            Func<Task> assert = async () =>
+            var assert = async () =>
             {
                 var response = await new HttpClient().GetAsync(defaultPrometheusMetricsEndpoint);
                 response.StatusCode.Should().Be(HttpStatusCode.OK);
