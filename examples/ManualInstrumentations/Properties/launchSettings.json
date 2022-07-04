@@ -18,7 +18,6 @@
         "DOTNET_ADDITIONAL_DEPS": "$(SolutionDir)bin\\tracer-home\\AdditionalDeps",
         "DOTNET_SHARED_STORE": "$(SolutionDir)bin\\tracer-home\\store",
 
-        "OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS": "HttpClient",
         "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES": "Examples.ManualInstrumentations.*"
       }
     }
