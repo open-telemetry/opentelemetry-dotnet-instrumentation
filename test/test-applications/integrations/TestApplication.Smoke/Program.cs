@@ -19,10 +19,12 @@ using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Net.Http;
 
-namespace TestApplication.StartupHook
+namespace TestApplication.Smoke
 {
     public class Program
     {
+        public static readonly string SourceName = "MyCompany.MyProduct.MyLibrary";
+
         public static void Main(string[] args)
         {
             EmitTraces();
@@ -31,7 +33,7 @@ namespace TestApplication.StartupHook
 
         private static void EmitTraces()
         {
-            var myActivitySource = new ActivitySource("TestApplication.StartupHook", "1.0.0");
+            var myActivitySource = new ActivitySource(SourceName, "1.0.0");
 
             using (var activity = myActivitySource.StartActivity("SayHello"))
             {
@@ -46,7 +48,7 @@ namespace TestApplication.StartupHook
 
         private static void EmitMetrics()
         {
-            var myMeter = new Meter("MyCompany.MyProduct.MyLibrary", "1.0");
+            var myMeter = new Meter(SourceName, "1.0");
             var myFruitCounter = myMeter.CreateCounter<int>("MyFruitCounter");
 
             myFruitCounter.Add(1, new KeyValuePair<string, object>("name", "apple"));

@@ -41,13 +41,11 @@ public class HttpTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public void SubmitTraces()
     {
-        var agentPort = TcpPortProvider.GetOpenPort();
-        using var agent = new MockZipkinCollector(Output, agentPort);
+        using var agent = new MockZipkinCollector(Output);
 
         const int expectedSpanCount = 3;
 
-        using var processResult = RunTestApplicationAndWaitForExit(agent.Port, enableStartupHook: true);
-        Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
+        RunTestApplication(agent.Port);
         var spans = agent.WaitForSpans(expectedSpanCount, TimeSpan.FromSeconds(5));
 
         using (new AssertionScope())
@@ -90,19 +88,10 @@ public class HttpTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public void SubmitMetrics()
     {
-        var collectorPort = TcpPortProvider.GetOpenPort();
-        using var collector = new MockCollector(Output, collectorPort);
-
         const int expectedMetricRequests = 1;
 
-        var testSettings = new TestSettings
-        {
-            MetricsSettings = new MetricsSettings { Port = collectorPort },
-            EnableStartupHook = true
-        };
-
-        using var processResult = RunTestApplicationAndWaitForExit(testSettings);
-        Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
+        using var collector = new MockMetricsCollector(Output);
+        RunTestApplication(metricsAgentPort: collector.Port);
         var metricRequests = collector.WaitForMetrics(expectedMetricRequests, TimeSpan.FromSeconds(5));
 
         using (new AssertionScope())

@@ -45,20 +45,17 @@ public class AspNetTests : TestHelper
     {
         Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
 
-        var agentPort = TcpPortProvider.GetOpenPort();
-        var webPort = TcpPortProvider.GetOpenPort();
-
-        var testSettings = new TestSettings
-        {
-            TracesSettings = new TracesSettings { Port = agentPort }
-        };
-
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
-        using var fwPort = FirewallHelper.OpenWinPort(agentPort, Output);
-        using var agent = new MockZipkinCollector(Output, agentPort, host: "*");
+        using var agent = new MockZipkinCollector(Output, host: "*");
+        using var fwPort = FirewallHelper.OpenWinPort(agent.Port, Output);
+        var testSettings = new TestSettings
+        {
+            TracesSettings = new TracesSettings { Port = agent.Port }
+        };
+        var webPort = TcpPortProvider.GetOpenPort();
         using var container = await StartContainerAsync(testSettings, webPort);
 
         var client = new HttpClient();
@@ -81,21 +78,19 @@ public class AspNetTests : TestHelper
     [Trait("Containers", "Windows")]
     public async Task SubmitMetrics()
     {
-        var collectorPort = TcpPortProvider.GetOpenPort();
-        var webPort = TcpPortProvider.GetOpenPort();
         const int expectedMetricRequests = 1;
-
-        var testSettings = new TestSettings
-        {
-            MetricsSettings = new MetricsSettings { Port = collectorPort },
-        };
 
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
-        using var fwPort = FirewallHelper.OpenWinPort(collectorPort, Output);
-        using var collector = new MockCollector(Output, collectorPort, host: "*");
+        using var collector = new MockMetricsCollector(Output, host: "*");
+        using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
+        var testSettings = new TestSettings
+        {
+            MetricsSettings = new MetricsSettings { Port = collector.Port },
+        };
+        var webPort = TcpPortProvider.GetOpenPort();
         using var container = await StartContainerAsync(testSettings, webPort);
 
         var client = new HttpClient();

@@ -42,13 +42,11 @@ namespace IntegrationTests
         [Trait("Containers", "Linux")]
         public void SubmitTraces()
         {
-            var agentPort = TcpPortProvider.GetOpenPort();
-            using var agent = new MockZipkinCollector(Output, agentPort);
+            using var agent = new MockZipkinCollector(Output);
 
             const int expectedSpanCount = 8;
 
-            using var processResult = RunTestApplicationAndWaitForExit(agent.Port, arguments: $"{_sqlClientFixture.Password} {_sqlClientFixture.Port}", enableStartupHook: true);
-            Assert.True(processResult.ExitCode >= 0, $"Process exited with code {processResult.ExitCode} and exception: {processResult.StandardError}");
+            RunTestApplication(agent.Port, arguments: $"{_sqlClientFixture.Password} {_sqlClientFixture.Port}");
             var spans = agent.WaitForSpans(expectedSpanCount, TimeSpan.FromSeconds(5));
 
             using (new AssertionScope())
