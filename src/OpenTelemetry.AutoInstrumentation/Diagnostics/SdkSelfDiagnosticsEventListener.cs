@@ -31,13 +31,19 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
 {
     private const string EventSourceNamePrefix = "OpenTelemetry-";
 
-    private static readonly ILogger Log = OtelLogging.GetLogger();
     private readonly object lockObj = new();
     private readonly EventLevel logLevel;
+    private readonly ILogger log;
     private readonly List<EventSource> eventSourcesBeforeConstructor = new();
 
     public SdkSelfDiagnosticsEventListener(EventLevel eventLevel)
+        : this(eventLevel, OtelLogging.GetLogger())
     {
+    }
+
+    internal SdkSelfDiagnosticsEventListener(EventLevel eventLevel, ILogger logger)
+    {
+        log = logger;
         logLevel = eventLevel;
 
         List<EventSource> eventSources;
@@ -94,17 +100,17 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
         {
             case EventLevel.Critical:
             case EventLevel.Error:
-                Log.Error("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message, payloadArray));
+                log.Error("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message, payloadArray));
                 break;
             case EventLevel.Warning:
-                Log.Warning("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message, payloadArray));
+                log.Warning("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message, payloadArray));
                 break;
             case EventLevel.LogAlways:
             case EventLevel.Informational:
-                Log.Information("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message, payloadArray));
+                log.Information("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message, payloadArray));
                 break;
             case EventLevel.Verbose:
-                Log.Debug("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message, payloadArray));
+                log.Debug("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message, payloadArray));
                 break;
         }
     }
