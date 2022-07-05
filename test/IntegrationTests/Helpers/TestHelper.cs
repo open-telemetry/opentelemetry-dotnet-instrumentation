@@ -121,7 +121,7 @@ public abstract class TestHelper
     /// StartTestApplication starts the test application
     // and returns the Process instance for further interaction.
     /// </summary>
-    public Process StartTestApplication(int traceAgentPort = 0, string arguments = null, string packageVersion = "", int aspNetCorePort = 0, string framework = "", bool enableStartupHook = true)
+    public Process StartTestApplication(int traceAgentPort = 0, int metricsAgentPort = 0, string arguments = null, string packageVersion = "", int aspNetCorePort = 0, string framework = "", bool enableStartupHook = true)
     {
         var testSettings = new TestSettings
         {
@@ -135,6 +135,11 @@ public abstract class TestHelper
         if (traceAgentPort != 0)
         {
             testSettings.TracesSettings = new() { Port = traceAgentPort };
+        }
+
+        if (metricsAgentPort != 0)
+        {
+            testSettings.MetricsSettings = new() { Port = metricsAgentPort };
         }
 
         return StartTestApplication(testSettings);

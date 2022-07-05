@@ -18,6 +18,7 @@ using System;
 using System.Linq;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using FluentAssertions.Extensions;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -29,8 +30,9 @@ public class RunTimeMetricsTests : TestHelper
     public RunTimeMetricsTests(ITestOutputHelper output)
         : base("Smoke", output)
     {
+        SetEnvironmentVariable("LONG_RUNNING", "true");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "NetRuntime");
-        SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "10");
+        SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "100");
     }
 
     [Fact]
@@ -38,13 +40,28 @@ public class RunTimeMetricsTests : TestHelper
     public void SubmitMetrics()
     {
         using var collector = new MockMetricsCollector(Output);
-        RunTestApplication(metricsAgentPort: collector.Port);
-        var metricRequests = collector.WaitForMetrics(1, TimeSpan.FromSeconds(5));
+        using var process = StartTestApplication(metricsAgentPort: collector.Port);
+
+        try
+        {
+            var assert = () =>
+            {
+                var metricRequests = collector.WaitForMetrics(1, TimeSpan.FromSeconds(5));
+                var metrics = metricRequests.SelectMany(r => r.ResourceMetrics).Where(s => s.ScopeMetrics.Count > 0).FirstOrDefault();
+                metrics.ScopeMetrics.Should().ContainSingle(x => x.Scope.Name == "OpenTelemetry.Instrumentation.Runtime");
+            };
+
+            assert.Should().NotThrowAfter(
+                waitTime: 30.Seconds(),
+                pollInterval: 1.Seconds());
+        }
+        finally
+        {
+            process.Kill();
+        }
 
         using (new AssertionScope())
         {
-            var metrics = metricRequests.SelectMany(r => r.ResourceMetrics).Where(s => s.ScopeMetrics.Count > 0).FirstOrDefault();
-            metrics.ScopeMetrics.Should().ContainSingle(x => x.Scope.Name == "OpenTelemetry.Instrumentation.Runtime");
         }
     }
 }
