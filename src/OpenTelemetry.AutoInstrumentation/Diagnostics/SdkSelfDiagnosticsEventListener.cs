@@ -36,12 +36,7 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
     private readonly ILogger log;
     private readonly List<EventSource> eventSourcesBeforeConstructor = new();
 
-    public SdkSelfDiagnosticsEventListener(EventLevel eventLevel)
-        : this(eventLevel, OtelLogging.GetLogger())
-    {
-    }
-
-    internal SdkSelfDiagnosticsEventListener(EventLevel eventLevel, ILogger logger)
+    public SdkSelfDiagnosticsEventListener(EventLevel eventLevel, ILogger logger)
     {
         log = logger;
         logLevel = eventLevel;
