@@ -1,4 +1,4 @@
-// <copyright file="RunTimeMetricsTests.cs" company="OpenTelemetry Authors">
+// <copyright file="RuntimeTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,6 @@
 using System;
 using System.Linq;
 using FluentAssertions;
-using FluentAssertions.Execution;
 using FluentAssertions.Extensions;
 using IntegrationTests.Helpers;
 using Xunit;
@@ -25,9 +24,9 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-public class RunTimeMetricsTests : TestHelper
+public class RuntimeTests : TestHelper
 {
-    public RunTimeMetricsTests(ITestOutputHelper output)
+    public RuntimeTests(ITestOutputHelper output)
         : base("Smoke", output)
     {
         SetEnvironmentVariable("LONG_RUNNING", "true");
@@ -58,10 +57,6 @@ public class RunTimeMetricsTests : TestHelper
         finally
         {
             process.Kill();
-        }
-
-        using (new AssertionScope())
-        {
         }
     }
 }
