@@ -1,8 +1,3 @@
 <Project>
-  <Import Project="..\Directory.Build.props" />
-
-  <PropertyGroup>
-    <TargetFrameworks></TargetFrameworks> <!-- Fixes NuGet restore -->
-  </PropertyGroup>
-
+  <Import Project="$(MSBuildThisFileDirectory)..\Integrations.props" />
 </Project>
