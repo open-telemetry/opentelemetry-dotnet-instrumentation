@@ -84,7 +84,7 @@ public class GraphQLTests : TestHelper
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
         using (var agent = new MockZipkinCollector(Output))
-        using (Process process = StartTestApplication(agent.Port, arguments: null, packageVersion: string.Empty, aspNetCorePort: aspNetCorePort))
+        using (var process = StartTestApplication(agent.Port, aspNetCorePort: aspNetCorePort))
         {
             if (process.HasExited)
             {
