@@ -13,7 +13,7 @@
             "MongoDB.Driver.MongoClientSettings"
           ],
           "minimum_major": 2,
-          "minimum_minor": 0,
+          "minimum_minor": 3,
           "minimum_patch": 0,
           "maximum_major": 2,
           "maximum_minor": 65535,
