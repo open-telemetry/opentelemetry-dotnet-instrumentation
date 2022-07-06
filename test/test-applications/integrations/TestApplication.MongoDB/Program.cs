@@ -64,9 +64,7 @@ public static class Program
             Run(collection, newDocument);
             RunAsync(collection, newDocument).Wait();
 
-#if MONGODB_2_2
             WireProtocolExecuteIntegrationTest(client);
-#endif
         }
     }
 
@@ -76,7 +74,6 @@ public static class Program
 
         using (var syncScope = ActivitySource.StartActivity("sync-calls"))
         {
-#if MONGODB_2_2
             collection.DeleteMany(allFilter);
             collection.InsertOne(newDocument);
 
@@ -107,7 +104,6 @@ public static class Program
             {
                 Console.WriteLine(document);
             }
-#endif
         }
     }
 
@@ -133,7 +129,6 @@ public static class Program
             Console.WriteLine(allDocuments.FirstOrDefault());
         }
     }
-#if MONGODB_2_2
 
     public static void WireProtocolExecuteIntegrationTest(MongoClient client)
     {
@@ -151,7 +146,6 @@ public static class Program
             channel.KillCursorsAsync(new long[] { 0, 1, 2 }, new global::MongoDB.Driver.Core.WireProtocol.Messages.Encoders.MessageEncoderSettings(), CancellationToken.None).Wait();
         }
     }
-#endif
 
     private static string Host()
     {
@@ -185,7 +179,6 @@ public static class Program
     }
 }
 
-#if MONGODB_2_2
 #pragma warning disable SA1402 // File may only contain a single type
 internal class ServerSelector : global::MongoDB.Driver.Core.Clusters.ServerSelectors.IServerSelector
 {
@@ -195,4 +188,3 @@ internal class ServerSelector : global::MongoDB.Driver.Core.Clusters.ServerSelec
     }
 }
 #pragma warning restore SA1402 // File may only contain a single type
-#endif
