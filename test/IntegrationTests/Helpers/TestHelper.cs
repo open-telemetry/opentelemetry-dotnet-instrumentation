@@ -32,20 +32,15 @@ public abstract class TestHelper
     private static readonly TimeSpan DefaultProcessTimeout = TimeSpan.FromMinutes(5);
 
     protected TestHelper(string testApplicationName, ITestOutputHelper output)
-        : this(new EnvironmentHelper(testApplicationName, typeof(TestHelper), output), output)
     {
-    }
-
-    protected TestHelper(EnvironmentHelper environmentHelper, ITestOutputHelper output)
-    {
-        EnvironmentHelper = environmentHelper;
         Output = output;
+        EnvironmentHelper = new EnvironmentHelper(testApplicationName, typeof(TestHelper), output);
 
-        Output.WriteLine($"Platform: {EnvironmentTools.GetPlatform()}");
-        Output.WriteLine($"Configuration: {EnvironmentTools.GetBuildConfiguration()}");
-        Output.WriteLine($"TargetFramework: {EnvironmentHelper.GetTargetFramework()}");
-        Output.WriteLine($".NET Core: {EnvironmentHelper.IsCoreClr()}");
-        Output.WriteLine($"Profiler DLL: {EnvironmentHelper.GetProfilerPath()}");
+        output.WriteLine($"Platform: {EnvironmentTools.GetPlatform()}");
+        output.WriteLine($"Configuration: {EnvironmentTools.GetBuildConfiguration()}");
+        output.WriteLine($"TargetFramework: {EnvironmentHelper.GetTargetFramework()}");
+        output.WriteLine($".NET Core: {EnvironmentHelper.IsCoreClr()}");
+        output.WriteLine($"Profiler DLL: {EnvironmentHelper.GetProfilerPath()}");
     }
 
     protected EnvironmentHelper EnvironmentHelper { get; }

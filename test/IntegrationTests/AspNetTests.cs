@@ -31,10 +31,8 @@ namespace IntegrationTests;
 
 public class AspNetTests : TestHelper
 {
-    private static readonly string TestApplicationDir = Path.Combine("test", "test-applications", "integrations", "aspnet");
-
     public AspNetTests(ITestOutputHelper output)
-        : base(new EnvironmentHelper("AspNet", typeof(TestHelper), output, TestApplicationDir), output)
+        : base("AspNet", output)
     {
     }
 
