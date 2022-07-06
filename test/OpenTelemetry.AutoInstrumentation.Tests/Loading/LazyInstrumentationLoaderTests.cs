@@ -36,7 +36,7 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Loading
                 { default(TracerInstrumentation), () => new DummyDetector() }
             };
 
-            var loader = CreateLoader(new NameValueCollection(), detectors);
+            using var loader = CreateLoader(new NameValueCollection(), detectors);
 
             CreateDummyAssembly();
 
@@ -58,7 +58,7 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Loading
                 { ConfigurationKeys.Traces.Instrumentations, nameof(TracerInstrumentation.AspNet) }
             };
 
-            var loader = CreateLoader(config, detectors);
+            using var loader = CreateLoader(config, detectors);
 
             CreateDummyAssembly();
 
