@@ -62,6 +62,7 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
   - `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`,
   - `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`,
   - `OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS`.
+- Remove invalid instrumentation for `MongoDB.Driver.Core` <2.3.0.
 
 ## [0.1.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.1.0-beta.1)
 

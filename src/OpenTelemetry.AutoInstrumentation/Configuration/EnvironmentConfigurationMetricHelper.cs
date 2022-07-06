@@ -27,7 +27,7 @@ internal static class EnvironmentConfigurationMetricHelper
     {
         [MeterInstrumentation.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
         [MeterInstrumentation.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
-        [MeterInstrumentation.NetRuntime] = builder => builder.AddRuntimeMetrics(),
+        [MeterInstrumentation.NetRuntime] = builder => builder.AddRuntimeInstrumentation(),
     };
 
     public static MeterProviderBuilder UseEnvironmentVariables(this MeterProviderBuilder builder, MeterSettings settings)
@@ -60,7 +60,13 @@ internal static class EnvironmentConfigurationMetricHelper
     {
         if (settings.ConsoleExporterEnabled)
         {
-            builder.AddConsoleExporter();
+            builder.AddConsoleExporter((_, metricReaderOptions) =>
+            {
+                if (settings.MetricExportInterval != null)
+                {
+                    metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = settings.MetricExportInterval;
+                }
+            });
         }
 
         switch (settings.MetricExporter)

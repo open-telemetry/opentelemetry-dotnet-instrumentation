@@ -14,10 +14,12 @@
 // limitations under the License.
 // </copyright>
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Net.Http;
+using System.Threading;
 
 namespace TestApplication.Smoke
 {
@@ -29,6 +31,12 @@ namespace TestApplication.Smoke
         {
             EmitTraces();
             EmitMetrics();
+
+            var longRunning = Environment.GetEnvironmentVariable("LONG_RUNNING");
+            while (longRunning == "true")
+            {
+                Thread.Yield();
+            }
         }
 
         private static void EmitTraces()
