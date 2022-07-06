@@ -60,7 +60,13 @@ internal static class EnvironmentConfigurationMetricHelper
     {
         if (settings.ConsoleExporterEnabled)
         {
-            builder.AddConsoleExporter();
+            builder.AddConsoleExporter((_, metricReaderOptions) =>
+            {
+                if (settings.MetricExportInterval != null)
+                {
+                    metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = settings.MetricExportInterval;
+                }
+            });
         }
 
         switch (settings.MetricExporter)
