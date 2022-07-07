@@ -64,7 +64,7 @@ public class SdkSelfDiagnosticsEventListenerTests
         [Event(4, Message = "Activity restored, Id='{0}'", Level = EventLevel.Informational)]
         public void ActivityRestored(string id)
         {
-            this.WriteEvent(4, id);
+            WriteEvent(4, id);
         }
     }
 
@@ -76,7 +76,7 @@ public class SdkSelfDiagnosticsEventListenerTests
         [Event(24, Message = "Activity started. OperationName = '{0}', Id = '{1}'.", Level = EventLevel.Verbose)]
         public void ActivityStarted(string operationName, string id)
         {
-            this.WriteEvent(24, operationName, id);
+            WriteEvent(24, operationName, id);
         }
     }
 
