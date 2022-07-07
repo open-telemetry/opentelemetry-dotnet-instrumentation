@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net472</TargetFrameworks>
+    <TargetFrameworks>net462</TargetFrameworks>
     <!-- Forcing binding redirection via app.config that references assemblies -->
     <!-- only present if bytecode instrumentation is used. -->
     <MSBuildWarningsAsMessages>MSB3277;MSB3836</MSBuildWarningsAsMessages>

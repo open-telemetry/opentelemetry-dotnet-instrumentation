@@ -82,7 +82,7 @@ The following usage example is for Windows, as binding redirection only applies
 to .NET Framework:
 
 ```bash
-OTEL_DOTNET_AUTO_LEGACY_SOURCES="InstrumentedHttpCall.GetAsync" exampleApp=BindingRedirect exampleAppTargetFramework=net472 ./run-example.sh
+OTEL_DOTNET_AUTO_LEGACY_SOURCES="InstrumentedHttpCall.GetAsync" exampleApp=BindingRedirect exampleAppTargetFramework=net462 ./run-example.sh
 ```
 
 ### ConsoleApp

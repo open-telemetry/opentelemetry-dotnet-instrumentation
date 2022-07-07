@@ -1,12 +1,5 @@
 # Release Process
 
-1. Run the integration tests with Linux containers on Windows and macOS
-   (not covered by CI):
-
-   ```bash
-   nuke Workflow --containers linux
-   ```
-
 1. Update the version in the following files:
 
    - `TracerConstants.cs`
@@ -21,6 +14,15 @@
 1. Update the [CHANGELOG.md](../CHANGELOG.md) with the new release.
 
 1. Create a pull request on GitHub with the changes described in the changelog.
+
+1. Run the integration tests with Linux containers on Windows and macOS
+   (not covered by CI):
+
+   ```bash
+   nuke Workflow --containers linux
+   ```
+
+1. Test the described [examples](../examples/README.md).
 
 1. Once the pull request has been merged, create a signed tag for the merged commit.
    You can do this using the following Bash snippet:

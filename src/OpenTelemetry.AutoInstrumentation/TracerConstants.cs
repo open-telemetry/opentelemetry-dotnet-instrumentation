@@ -20,7 +20,7 @@ namespace OpenTelemetry.AutoInstrumentation;
 public static class TracerConstants
 {
     public const string Language = "dotnet";
-    public const string Version = "0.1.0";
+    public const string Version = "0.2.0";
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 #pragma warning restore SA1600 // Elements should be documented

@@ -37,7 +37,7 @@ for more details.
 
 | ID | Library | Supported versions | Instrumentation type |
 |-|-|-|-|
-| `AspNet` | ASP.NET MVC Framework | * | source |
+| `AspNet` | ASP.NET Framework | * | source |
 | `AspNet` | ASP.NET Core | * | source |
 | `GraphQL` | [GraphQL](https://www.nuget.org/packages/GraphQL/) | ≥2.3.0 & < 3.0.0 | bytecode |
 | `HttpClient` | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | * | source |
@@ -48,7 +48,7 @@ for more details.
 
 | ID | Library | Supported versions | Instrumentation type |
 |-|-|-|-|
-| `AspNet` | ASP.NET MVC Framework | * | source |
+| `AspNet` | ASP.NET Framework | * | source |
 | `AspNet` | ASP.NET Core | * | source |
 | `HttpClient` | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | * | source |
 | `NetRuntime` | [OpenTelemetry.Instrumentation.Runtime](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.Runtime) | * | source |
