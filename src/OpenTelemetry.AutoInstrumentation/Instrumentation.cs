@@ -86,7 +86,7 @@ public static class Instrumentation
             if (TracerSettings.LoadTracerAtStartup || MeterSettings.LoadMetricsAtStartup)
             {
                 // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
-                _sdkEventListener = new(EventLevel.Warning);
+                _sdkEventListener = new(EventLevel.Warning, Logger);
 
                 // Register to shutdown events
                 AppDomain.CurrentDomain.ProcessExit += OnExit;
