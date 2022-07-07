@@ -50,11 +50,14 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Loading
         {
             var detectors = new Dictionary<TracerInstrumentation, Func<AssemblyLoadDetector>>()
             {
+                // Random instrumentation here that doesn't match with configuration
+                // below to simulate non enabled instrumentation
                 { TracerInstrumentation.HttpClient, () => new DummyDetector() }
             };
 
             var config = new NameValueCollection()
             {
+                // Random enabled instrumentation configuration that doesn't match with the Detector.
                 { ConfigurationKeys.Traces.Instrumentations, nameof(TracerInstrumentation.AspNet) }
             };
 
