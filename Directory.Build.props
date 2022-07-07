@@ -6,9 +6,4 @@
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <LangVersion>10.0</LangVersion>
   </PropertyGroup>
-
-  <!-- Deterministic builds -->
-  <PropertyGroup Condition="'$(TF_BUILD)' == 'true' OR '$(GITLAB_CI)' == 'true'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-  </PropertyGroup>
 </Project>

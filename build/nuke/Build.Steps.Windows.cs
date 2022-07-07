@@ -101,27 +101,22 @@ partial class Build
         .OnlyWhenStatic(() => Containers == ContainersWindows)
         .Executes(() =>
         {
-            var aspnetFolder = TestsDirectory / "test-applications" / "integrations" / "aspnet";
-            var aspnetProjects = aspnetFolder.GlobFiles("**/*.csproj");
+            var aspNetProject = TestsDirectory / "test-applications" / "integrations" / "TestApplication.AspNet" / "TestApplication.AspNet.csproj";
 
             MSBuild(x => x
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatform(Platform)
                 .SetProperty("DeployOnBuild", true)
                 .SetMaxCpuCount(null)
-                .CombineWith(aspnetProjects, (c, project) => c
-                    .SetProperty("PublishProfile", project.Parent / "Properties" / "PublishProfiles" / $"FolderProfile.{BuildConfiguration}.pubxml")
-                    .SetTargetPath(project)));
+                    .SetProperty("PublishProfile", aspNetProject.Parent / "Properties" / "PublishProfiles" / $"FolderProfile.{BuildConfiguration}.pubxml")
+                    .SetTargetPath(aspNetProject));
 
-            foreach (var proj in aspnetProjects)
-            {
-                DockerBuild(x => x
-                    .SetPath(".")
-                    .SetBuildArg($"configuration={BuildConfiguration}", $"windowscontainer_version={WindowsContainerVersion}")
-                    .SetRm(true)
-                    .SetTag(Path.GetFileNameWithoutExtension(proj).Replace(".", "-").ToLowerInvariant())
-                    .SetProcessWorkingDirectory(proj.Parent)
-                );
-            }
+            DockerBuild(x => x
+                .SetPath(".")
+                .SetBuildArg($"configuration={BuildConfiguration}", $"windowscontainer_version={WindowsContainerVersion}")
+                .SetRm(true)
+                .SetTag(Path.GetFileNameWithoutExtension(aspNetProject).Replace(".", "-").ToLowerInvariant())
+                .SetProcessWorkingDirectory(aspNetProject.Parent)
+            );
         });
 }

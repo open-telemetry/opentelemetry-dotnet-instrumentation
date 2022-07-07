@@ -5,27 +5,40 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.1.0-beta.1...HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.2.0-beta.1...HEAD)
+
+### Added
+
+- Support for ASP.NET Core running on .NET 4.6.2
+
+### Changed
+
+- `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS` default value is changed to
+  include all of the available instrumentations.
+
+## [0.2.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.2.0-beta.1)
 
 This release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
   [`1.3.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.3.0)
-- Non-core components: [`1.0.0-rc9.4`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/1.0.0-rc9.4)
 - `System.Diagnostics.DiagnosticSource`: [`6.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/6.0.0)
+
+You can find all OpenTelemetry references in
+[OpenTelemetry.AutoInstrumentation.csproj](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.2.0-beta.1/src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj).
 
 ### Added
 
 - Adds MongoDB instrumentation support from .NET Core 3.1+.
 - Support for OpenTelemetry metric exporter related environment variables:
-  `OTEL_DOTNET_AUTO_METRICS_ENABLED`,
-  `OTEL_DOTNET_AUTO_LOAD_METER_AT_STARTUP`,
-  `OTEL_METRICS_EXPORTER`,
-  `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED`,
-  `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS`,
-  `OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS`,
-  `OTEL_DOTNET_AUTO_METRICS_PLUGINS`,
-  `OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES`.
+  - `OTEL_DOTNET_AUTO_METRICS_ENABLED`,
+  - `OTEL_DOTNET_AUTO_LOAD_METER_AT_STARTUP`,
+  - `OTEL_METRICS_EXPORTER`,
+  - `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED`,
+  - `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS`,
+  - `OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS`,
+  - `OTEL_DOTNET_AUTO_METRICS_PLUGINS`,
+  - `OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES`.
 - Support for .NET Runtime metrics collection using
   the `OpenTelemetry.Instrumentation.Runtime` package.
 - Support for ASP.NET and HttpClient metrics instrumentations.
@@ -35,22 +48,17 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
   (`;` on Windows, `:` on Linux and macOS).
 - Support for metric exporter interval using environment variable:
   `OTEL_METRIC_EXPORT_INTERVAL`.
-- Support for ASP.NET Core running on .NET 4.6.2
 
 ### Changed
 
 - Rename generic environment variables to include trace.
-
-  `OTEL_DOTNET_AUTO_ENABLED`&#8594;`OTEL_DOTNET_AUTO_TRACES_ENABLED`
-  `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP`&#8594;`OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP`
-  `OTEL_DOTNET_AUTO_CONSOLE_EXPORTER_ENABLED`&#8594;`OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED`
-  `OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS`&#8594;`OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS`
-  `OTEL_DOTNET_AUTO_DISABLED_INSTRUMENTATIONS`&#8594;`OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS`
-  `OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS`&#8594;`OTEL_DOTNET_AUTO_TRACES_PLUGINS`
-  `OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES`&#8594;`OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES`
-
-- `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS` default value is changed to
-  include all of the available instrumentations.
+  - `OTEL_DOTNET_AUTO_ENABLED` &#8594; `OTEL_DOTNET_AUTO_TRACES_ENABLED`,
+  - `OTEL_DOTNET_AUTO_LOAD_AT_STARTUP` &#8594; `OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP`,
+  - `OTEL_DOTNET_AUTO_CONSOLE_EXPORTER_ENABLED` &#8594; `OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED`,
+  - `OTEL_DOTNET_AUTO_ENABLED_INSTRUMENTATIONS` &#8594; `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS`,
+  - `OTEL_DOTNET_AUTO_DISABLED_INSTRUMENTATIONS` &#8594; `OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS`,
+  - `OTEL_DOTNET_AUTO_INSTRUMENTATION_PLUGINS` &#8594; `OTEL_DOTNET_AUTO_TRACES_PLUGINS`,
+  - `OTEL_DOTNET_AUTO_ADDITIONAL_SOURCES` &#8594; `OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES`.
   
 ### Removed
 

@@ -140,12 +140,6 @@ updates:
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
-    directory: /test/test-applications/integrations/aspnet/TestApplication.AspNet
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 20
-
-  - package-ecosystem: nuget
     directory: /test/test-applications/integrations/dependency-libs/TestApplication.ExampleLibrary
     schedule:
       interval: "daily"
@@ -153,6 +147,12 @@ updates:
 
   - package-ecosystem: nuget
     directory: /test/test-applications/integrations/dependency-libs/TestApplication.ExampleLibraryTracer
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
+    directory: /test/test-applications/integrations/TestApplication.AspNet
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
