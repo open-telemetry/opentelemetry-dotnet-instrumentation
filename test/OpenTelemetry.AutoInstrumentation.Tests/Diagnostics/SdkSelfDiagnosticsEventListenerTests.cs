@@ -30,61 +30,30 @@ public class SdkSelfDiagnosticsEventListenerTests
     [Fact]
     public void EventSourceSetup_LowerSeverity()
     {
-        // get default sink using reflection
-        var defaultLogger = OtelLogging.GetLogger();
-        var sinkField = defaultLogger.GetType().GetField("_sink", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        var defaultSink = (ISink)sinkField.GetValue(defaultLogger);
+        var testSink = new TestSink();
+        var logger = new Logger(testSink);
+        var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Error, logger);
 
-        try
-        {
-            var testSink = new TestSink();
-            var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Error);
+        // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
+        AspNetTelemetryEventSource.Log.ActivityRestored("123");
+        OpenTelemetrySdkEventSource.Log.ActivityStarted("Activity started", "1");
 
-            // override default logger's sink with test sink
-            sinkField.SetValue(defaultLogger, testSink);
-
-            // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
-            AspNetTelemetryEventSource.Log.ActivityRestored("123");
-            OpenTelemetrySdkEventSource.Log.ActivityStarted("Activity started", "1");
-
-            testSink.Messages.Should().BeEmpty("events with lower severity than error should not be written.");
-        }
-        finally
-        {
-            // restore default sink
-            sinkField.SetValue(defaultLogger, defaultSink);
-        }
+        testSink.Messages.Should().BeEmpty("events with lower severity than error should not be written.");
     }
 
     [Fact]
     public void EventSourceSetup_HigherSeverity()
     {
-        // get default sink using reflection
-        var defaultLogger = OtelLogging.GetLogger();
-        var sinkField = defaultLogger.GetType().GetField("_sink", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        var defaultSink = (ISink)sinkField.GetValue(defaultLogger);
+        var testSink = new TestSink();
+        var logger = new Logger(testSink);
+        var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Verbose, logger);
 
-        try
-        {
-            var testSink = new TestSink();
+        // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
+        AspNetTelemetryEventSource.Log.ActivityRestored("123");
+        OpenTelemetrySdkEventSource.Log.ActivityStarted("Activity started", "1");
 
-            var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Verbose);
-
-            // override default logger's sink with test sink
-            sinkField.SetValue(defaultLogger, testSink);
-
-            // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
-            AspNetTelemetryEventSource.Log.ActivityRestored("123");
-            OpenTelemetrySdkEventSource.Log.ActivityStarted("Activity started", "1");
-
-            testSink.Messages.Should().Contain(msg => msg.Contains("EventSource=OpenTelemetry-Instrumentation-AspNet-Telemetry, Message=Activity restored, Id='123'"));
-            testSink.Messages.Should().Contain(msg => msg.Contains("EventSource=OpenTelemetry-Sdk, Message=Activity started."));
-        }
-        finally
-        {
-            // restore default sink
-            sinkField.SetValue(defaultLogger, defaultSink);
-        }
+        testSink.Messages.Should().Contain(msg => msg.Contains("EventSource=OpenTelemetry-Instrumentation-AspNet-Telemetry, Message=Activity restored, Id='123'"));
+        testSink.Messages.Should().Contain(msg => msg.Contains("EventSource=OpenTelemetry-Sdk, Message=Activity started."));
     }
 
     [EventSource(Name = "OpenTelemetry-Instrumentation-AspNet-Telemetry", Guid = "1de158cc-f7ce-4293-bd19-2358c93c8186")]
@@ -95,7 +64,7 @@ public class SdkSelfDiagnosticsEventListenerTests
         [Event(4, Message = "Activity restored, Id='{0}'", Level = EventLevel.Informational)]
         public void ActivityRestored(string id)
         {
-            this.WriteEvent(4, id);
+            WriteEvent(4, id);
         }
     }
 
@@ -107,7 +76,7 @@ public class SdkSelfDiagnosticsEventListenerTests
         [Event(24, Message = "Activity started. OperationName = '{0}', Id = '{1}'.", Level = EventLevel.Verbose)]
         public void ActivityStarted(string operationName, string id)
         {
-            this.WriteEvent(24, operationName, id);
+            WriteEvent(24, operationName, id);
         }
     }
 
