@@ -16,14 +16,12 @@
 
 #if NETFRAMEWORK
 using System;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
-using Opentelemetry.Proto.Common.V1;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -31,10 +29,8 @@ namespace IntegrationTests;
 
 public class AspNetTests : TestHelper
 {
-    private static readonly string TestApplicationDir = Path.Combine("test", "test-applications", "integrations", "aspnet");
-
     public AspNetTests(ITestOutputHelper output)
-        : base(new EnvironmentHelper("AspNet", typeof(TestHelper), output, TestApplicationDir), output)
+        : base("AspNet", output)
     {
     }
 
@@ -78,6 +74,8 @@ public class AspNetTests : TestHelper
     [Trait("Containers", "Windows")]
     public async Task SubmitMetrics()
     {
+        Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
+
         const int expectedMetricRequests = 1;
 
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
