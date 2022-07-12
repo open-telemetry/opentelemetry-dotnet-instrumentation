@@ -16,3 +16,9 @@ OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION
 HKLM
 tracesexporter
 metricsexporter
+LINQ
+OWIN
+Couchbase
+MSMQ
+Serilog
+AWSSDK
