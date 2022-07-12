@@ -29,7 +29,8 @@ internal static class EnvironmentConfigurationTracerHelper
         [TracerInstrumentation.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
         [TracerInstrumentation.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
         [TracerInstrumentation.SqlClient] = builder => builder.AddSqlClientInstrumentation(),
-        [TracerInstrumentation.MongoDB] = builder => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources")
+        [TracerInstrumentation.MongoDB] = builder => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources"),
+        [TracerInstrumentation.Npgsql] = builder => builder.AddSource("Npgsql")
     };
 
     public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, TracerSettings settings)
