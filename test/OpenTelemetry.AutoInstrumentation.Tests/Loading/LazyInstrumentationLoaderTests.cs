@@ -55,10 +55,8 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Loading
         {
             public const string DummyAssemblyName = "Dummy.Assembly";
 
-            private static readonly string[] _requiredAssemblies = new[] { DummyAssemblyName };
-
             public DummyInitizalier()
-                : base(_requiredAssemblies)
+                : base(requiredAssemblies: DummyAssemblyName)
             {
             }
 
