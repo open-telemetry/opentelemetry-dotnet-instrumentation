@@ -17,67 +17,78 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading
 {
-    internal class LazyInstrumentationLoader : IDisposable
+    internal class LazyInstrumentationLoader : ILifespanManager, IDisposable
     {
-        private static readonly ILogger Logger = OtelLogging.GetLogger();
-
-        private readonly List<AssemblyLoadDetector> _assemblyLoadDetectors = new();
+        // some instrumentations requires to keep references to objects
+        // so that they are not garbage collected
         private readonly ConcurrentBag<object> _instrumentations = new();
-
-        public LazyInstrumentationLoader(LazyInstrumentationBuilders subscriptions)
-        {
-            foreach (var builder in subscriptions.EnabledBuilders)
-            {
-                var detector = builder();
-                detector.OnReady += Detector_OnReady;
-
-                _assemblyLoadDetectors.Add(detector);
-            }
-        }
-
-        public IEnumerable<object> Instrumentations => _instrumentations;
 
         public void Dispose()
         {
-            while (_instrumentations.TryTake(out object instrumentation))
+            while (_instrumentations.TryTake(out var instrumentation))
             {
-                if (instrumentation is IDisposable disposableInstrumentation)
+                if (instrumentation is IDisposable disposable)
                 {
-                    disposableInstrumentation.Dispose();
+                    disposable.Dispose();
                 }
             }
         }
 
-        private void Detector_OnReady(object sender, AssemblyLoadDetector.LoadDetectorReadyEventArgs e)
+        public void Add(InstrumentationInitializer loader)
         {
-            string detectorName = sender.GetType().Name;
+            new OnAssemblyLoadInitializer(this, loader);
+        }
 
-            Logger.Debug("Detector '{0}' executed load", detectorName);
+        void ILifespanManager.Track(object instance)
+        {
+            _instrumentations.Add(instance);
+        }
 
-            try
+        private class OnAssemblyLoadInitializer
+        {
+            private static readonly ILogger Logger = OtelLogging.GetLogger();
+            private readonly InstrumentationInitializer _instrumentationInitializer;
+            private readonly LazyInstrumentationLoader _manager;
+            private HashSet<string> _requiredAssemblies;
+            private int _loadedCount;
+
+            public OnAssemblyLoadInitializer(LazyInstrumentationLoader manager, InstrumentationInitializer instrumentationInitializer)
             {
-                var instrumentation = e.Builder();
-
-                // We just track the instances to keep them alive.
-                // During the shut down event IDisposable types are also disposed.
-                // This behavior repliactes SDK internal logic.
-                _instrumentations.Add(instrumentation);
+                _instrumentationInitializer = instrumentationInitializer;
+                _manager = manager;
+                _requiredAssemblies = new HashSet<string>(instrumentationInitializer.RequiredAssemblies);
+                AppDomain.CurrentDomain.AssemblyLoad += CurrentDomain_AssemblyLoad;
             }
-            catch (Exception ex)
+
+            private void CurrentDomain_AssemblyLoad(object sender, AssemblyLoadEventArgs args)
             {
-                Logger.Error(ex, "Could not execute '{0}' load", detectorName);
+                string assemblyName = args.LoadedAssembly.FullName.Split(new[] { ',' }, count: 2)[0];
+
+                if (_requiredAssemblies.Contains(assemblyName))
+                {
+                    if (Interlocked.Increment(ref _loadedCount) == _requiredAssemblies.Count)
+                    {
+                        string initializerName = _instrumentationInitializer.GetType().Name;
+                        Logger.Debug("'{0}' started", initializerName);
+
+                        try
+                        {
+                            _instrumentationInitializer.Initialize(_manager);
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error(ex, "'{0}' failed", initializerName);
+                        }
+
+                        AppDomain.CurrentDomain.AssemblyLoad -= CurrentDomain_AssemblyLoad;
+                    }
+                }
             }
-
-            var detector = (AssemblyLoadDetector)sender;
-            detector.OnReady -= Detector_OnReady;
-
-            _assemblyLoadDetectors.Remove(detector);
-
-            Logger.Debug("Detector '{0}' removed", detectorName);
         }
     }
 }

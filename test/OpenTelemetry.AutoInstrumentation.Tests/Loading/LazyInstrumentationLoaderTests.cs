@@ -15,12 +15,10 @@
 // </copyright>
 
 using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using OpenTelemetry.AutoInstrumentation.Configuration;
+using FluentAssertions;
+using FluentAssertions.Execution;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using Xunit;
 
@@ -29,114 +27,54 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Loading
     public class LazyInstrumentationLoaderTests
     {
         [Fact]
-        public void LazyInstrumentationLoader_DefaultLoad()
+        public void InitializesOnAssemblyLoad()
         {
-            var detectors = new Dictionary<TracerInstrumentation, Func<AssemblyLoadDetector>>()
+            var initializer = new DummyInitizalier();
+            using (var loader = new LazyInstrumentationLoader())
             {
-                { default(TracerInstrumentation), () => new DummyDetector() }
-            };
+                loader.Add(initializer);
 
-            using var loader = CreateLoader(new NameValueCollection(), detectors);
+                CreateDummyAssembly(); // Creates and loads assembly dynamically. This should trigger also assembly load event.
+            }
 
-            CreateDummyAssembly();
-
-            var instrumentation = loader.Instrumentations.FirstOrDefault();
-
-            Assert.True(instrumentation is DummyInstrumentation);
-        }
-
-        [Fact]
-        public void LazyInstrumentationLoader_InstrumentationNotEnabled()
-        {
-            var detectors = new Dictionary<TracerInstrumentation, Func<AssemblyLoadDetector>>()
+            using (new AssertionScope())
             {
-                // Random instrumentation here that doesn't match with configuration
-                // below to simulate non enabled instrumentation
-                { TracerInstrumentation.HttpClient, () => new DummyDetector() }
-            };
-
-            var config = new NameValueCollection()
-            {
-                // Random enabled instrumentation configuration that doesn't match with the Detector.
-                { ConfigurationKeys.Traces.Instrumentations, nameof(TracerInstrumentation.AspNet) }
-            };
-
-            using var loader = CreateLoader(config, detectors);
-
-            CreateDummyAssembly();
-
-            var instrumentation = loader.Instrumentations.FirstOrDefault();
-
-            Assert.Null(instrumentation);
-        }
-
-        [Fact]
-        public void LazyInstrumentationLoader_Disposing()
-        {
-            var detectors = new Dictionary<TracerInstrumentation, Func<AssemblyLoadDetector>>()
-            {
-                { default(TracerInstrumentation), () => new DummyDetector() }
-            };
-
-            var loader = CreateLoader(new NameValueCollection(), detectors);
-
-            CreateDummyAssembly();
-
-            var instrumentation = loader.Instrumentations.FirstOrDefault();
-
-            loader.Dispose();
-
-            Assert.True(instrumentation is DummyInstrumentation);
-            Assert.True((instrumentation as DummyInstrumentation).IsDisposed);
-        }
-
-        private LazyInstrumentationLoader CreateLoader(NameValueCollection settingsConfig, Dictionary<TracerInstrumentation, Func<AssemblyLoadDetector>> detectors)
-        {
-            var settings = new TracerSettings(new NameValueConfigurationSource(settingsConfig));
-            var builders = new LazyInstrumentationBuilders(settings, detectors);
-            var loader = new LazyInstrumentationLoader(builders);
-
-            return loader;
+                initializer.Initialized.Should().BeTrue();
+                initializer.Disposed.Should().BeTrue();
+            }
         }
 
         private void CreateDummyAssembly()
         {
-            // Creates and loads assembly dynamically.
-            // This should trigger also assembly load event.
-
-            AssemblyName assemblyName = new AssemblyName(DummyDetector.DummyAssemblyName);
-            AssemblyBuilder ab =
-                AssemblyBuilder.DefineDynamicAssembly(
-                    assemblyName,
-                    AssemblyBuilderAccess.Run);
-
+            AssemblyName assemblyName = new AssemblyName(DummyInitizalier.DummyAssemblyName);
+            AssemblyBuilder ab = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
             ModuleBuilder mb = ab.DefineDynamicModule(assemblyName.Name);
         }
 
-        private class DummyDetector : AssemblyLoadDetector
+        private class DummyInitizalier : InstrumentationInitializer, IDisposable
         {
             public const string DummyAssemblyName = "Dummy.Assembly";
 
             private static readonly string[] _requiredAssemblies = new[] { DummyAssemblyName };
 
-            public DummyDetector()
+            public DummyInitizalier()
                 : base(_requiredAssemblies)
             {
             }
 
-            internal override Func<object> GetInstrumentationBuilder()
-            {
-                return () => new DummyInstrumentation();
-            }
-        }
+            public bool Initialized { get; private set; }
 
-        private class DummyInstrumentation : IDisposable
-        {
-            public bool IsDisposed { get; private set; }
+            public bool Disposed { get; private set; }
+
+            public override void Initialize(ILifespanManager lifespanManager)
+            {
+                Initialized = true;
+                lifespanManager.Track(this);
+            }
 
             public void Dispose()
             {
-                IsDisposed = true;
+                Disposed = true;
             }
         }
     }
