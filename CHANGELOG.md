@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
-- Support for ASP.NET Core running on .NET 4.6.2
+- Support for ASP.NET Core traces instrumentation on .NET Framework.
 
 ### Changed
 
