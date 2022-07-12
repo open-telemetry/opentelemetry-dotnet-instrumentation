@@ -97,6 +97,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB
             return shouldStartActivityLambda;
         }
 
+#if NETCOREAPP3_1_OR_GREATER
         private static LambdaExpression GetClusterConfiguratorExpression()
         {
             Type eventSubscriberInterface = Type.GetType("MongoDB.Driver.Core.Events.IEventSubscriber, MongoDB.Driver.Core");
@@ -120,5 +121,6 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB
 
             return setListenerLambda;
         }
+#endif
     }
 }
