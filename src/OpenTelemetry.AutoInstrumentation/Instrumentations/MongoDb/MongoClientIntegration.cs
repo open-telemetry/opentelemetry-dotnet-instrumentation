@@ -68,6 +68,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB
             return CallTargetState.GetDefault();
         }
 
+#if NETCOREAPP3_1_OR_GREATER
         private static object GetInstrumentationOptions()
         {
             Type optionsType = Type.GetType("MongoDB.Driver.Core.Extensions.DiagnosticSources.InstrumentationOptions, MongoDB.Driver.Core.Extensions.DiagnosticSources");
@@ -97,7 +98,6 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB
             return shouldStartActivityLambda;
         }
 
-#if NETCOREAPP3_1_OR_GREATER
         private static LambdaExpression GetClusterConfiguratorExpression()
         {
             Type eventSubscriberInterface = Type.GetType("MongoDB.Driver.Core.Events.IEventSubscriber, MongoDB.Driver.Core");
