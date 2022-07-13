@@ -32,7 +32,7 @@ submit an issue to request its inclusion.
 1. ADO.NET
 1. EntityFramework
 1. Dapper
-1. System.Data.LINQ
+1. LINQ to SQL
 1. Microsoft.Practices.EnterpriseLibrary.Data
 1. EntityFrameworkCore
 
