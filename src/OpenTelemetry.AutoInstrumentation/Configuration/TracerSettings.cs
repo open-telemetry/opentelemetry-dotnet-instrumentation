@@ -31,7 +31,7 @@ public class TracerSettings : Settings
     /// using the specified <see cref="IConfigurationSource"/> to initialize values.
     /// </summary>
     /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
-    private TracerSettings(IConfigurationSource source)
+    public TracerSettings(IConfigurationSource source)
         : base(source)
     {
         TracesExporter = ParseTracesExporter(source);
@@ -52,6 +52,14 @@ public class TracerSettings : Settings
                     throw new FormatException($"The \"{instrumentation}\" is not recognized as supported trace instrumentation and cannot be enabled");
                 }
             }
+        }
+        else
+        {
+            instrumentations = Enum.GetValues(typeof(TracerInstrumentation))
+                .Cast<TracerInstrumentation>()
+                .ToDictionary(
+                    key => Enum.GetName(typeof(TracerInstrumentation), key),
+                    val => val);
         }
 
         var disabledInstrumentations = source.GetString(ConfigurationKeys.Traces.DisabledInstrumentations);
