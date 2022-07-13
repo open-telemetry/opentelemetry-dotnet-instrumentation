@@ -25,7 +25,6 @@ submit an issue to request its inclusion.
 1. AspNetCore
 1. Windows Workflow Foundation
 1. OWIN
-1. Azure Service Fabric
 
 ### Databases
 
