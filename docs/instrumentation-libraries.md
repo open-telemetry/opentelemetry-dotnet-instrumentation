@@ -52,6 +52,7 @@ submit an issue to request its inclusion.
 1. Elasticsearch
 1. Oracle
 1. DynamoDB
+1. Cosmos DB
 
 ### External request libraries (REST/RPC)
 
