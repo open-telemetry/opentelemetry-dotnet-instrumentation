@@ -53,6 +53,14 @@ public class TracerSettings : Settings
                 }
             }
         }
+        else
+        {
+            instrumentations = Enum.GetValues(typeof(TracerInstrumentation))
+                .Cast<TracerInstrumentation>()
+                .ToDictionary(
+                    key => Enum.GetName(typeof(TracerInstrumentation), key),
+                    val => val);
+        }
 
         var disabledInstrumentations = source.GetString(ConfigurationKeys.Traces.DisabledInstrumentations);
         if (disabledInstrumentations != null)
