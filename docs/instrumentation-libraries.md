@@ -52,9 +52,6 @@ submit an issue to request its inclusion.
 1. Elasticsearch
 1. Oracle
 1. DynamoDB
-1. Cassandra
-1. IBM DB2
-1. Couchbase
 
 ### External request libraries (REST/RPC)
 
@@ -84,9 +81,7 @@ submit an issue to request its inclusion.
 ### Other
 
 1. AWSSDK
-1. Polly
 1. Microsoft.extensions.caching
-1. System.Threading.Channels
 
 ### Libraries we should not support
 
@@ -97,3 +92,9 @@ application in a negative manner.
 instrumenting it can affect the performance of an application in negative ways
 causing an increase in network traffic (as compared to the application running
 without instrumentation).
+* System.Threading.Channels - This is a lower-level library and may not provide
+enough contextual information on its own.
+* Cassandra - Lower usage
+* IBM DB2 - Lower usage
+* Couchbase - Lower usage
+* Polly - Waiting for interest and further analysis.
