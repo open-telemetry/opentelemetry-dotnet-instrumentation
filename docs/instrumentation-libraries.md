@@ -81,8 +81,24 @@ submit an issue to request its inclusion.
 
 ### Other
 
-1. AWSSDK
 1. Microsoft.extensions.caching
+
+## Cloud Environments and SDKs
+
+### AWS
+
+TODO: Determine appropriate resource detectors and AWS SDK related
+instrumentation libraries to support.
+
+### Azure
+
+TODO: Determine appropriate resource detectors and Azure SDK related
+instrumentation libraries to support.
+
+### GCP
+
+TODO: Determine appropriate resource detectors and GCP SDK related
+instrumentation libraries to support.
 
 ### Libraries we should not support
 
