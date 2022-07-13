@@ -1,9 +1,11 @@
 # Support for OpenTelemetry Instrumentation Libraries
 
-OpenTelemetry instrumentation are implemented using a variety of techniques.
-Sometimes the instrumentation is built directly into the library being
-instrumented, sometimes the instrumentation requires the addition of a separate
-instrumentation library, and other times it is a hybrid of those approaches. This
+OpenTelemetry instrumentation is implemented using a variety of techniques.
+Sometimes the instrumentation is built directly into the
+[instrumented library](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/glossary.md#instrumented-library),
+sometimes the instrumentation requires the addition of a separate
+[instrumentation library](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/glossary.md#instrumentation-library),
+and other times it is a hybrid of those approaches. This
 project aims to make using these instrumentation approaches easier and more
 automatic for our users. This requires us to both vet and dynamically enable a
 subset of the instrumentation that is available to the OpenTelemetry community,
