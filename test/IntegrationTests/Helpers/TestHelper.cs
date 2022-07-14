@@ -92,6 +92,11 @@ public abstract class TestHelper
             builder = builder.WithEnvironment("OTEL_METRIC_EXPORT_INTERVAL", "1000");
         }
 
+        foreach (var env in EnvironmentHelper.CustomEnvironmentVariables)
+        {
+            builder = builder.WithEnvironment(env.Key, env.Value);
+        }
+
         var container = builder.Build();
         var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
 
@@ -113,8 +118,9 @@ public abstract class TestHelper
 
     /// <summary>
     /// StartTestApplication starts the test application
-    // and returns the Process instance for further interaction.
+    /// and returns the Process instance for further interaction.
     /// </summary>
+    /// <returns>Test application process</returns>
     public Process StartTestApplication(int traceAgentPort = 0, int metricsAgentPort = 0, string arguments = null, string packageVersion = "", int aspNetCorePort = 0, string framework = "", bool enableStartupHook = true)
     {
         var testSettings = new TestSettings
