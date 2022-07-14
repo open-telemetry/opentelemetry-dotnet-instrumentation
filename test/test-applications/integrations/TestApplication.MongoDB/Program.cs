@@ -154,7 +154,7 @@ public static class Program
 
     private static string GetMongoPort(string[] args)
     {
-        if (args.Length > 0)
+        if (args.Length > 1)
         {
             return args[1];
         }

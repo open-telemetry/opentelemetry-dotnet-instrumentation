@@ -44,5 +44,10 @@ public enum TracerInstrumentation
     /// <summary>
     /// MongoDB instrumentation.
     /// </summary>
-    MongoDB
+    MongoDB,
+
+    /// <summary>
+    /// Npgsql instrumentation.
+    /// </summary>
+    Npgsql
 }
