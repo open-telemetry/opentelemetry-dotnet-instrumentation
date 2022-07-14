@@ -21,10 +21,12 @@ submit an issue to request its inclusion.
 
 ### Application Frameworks
 
-1. ASP.NET
-1. AspNetCore
-1. Windows Workflow Foundation
-1. OWIN
+| Framework | Tracing Support | Metrics Support | Comments |
+| --- | :---: | :---: | --- |
+| [ASP.NET](https://docs.microsoft.com/en-us/aspnet/overview) | [Yes](./config.md#instrumented-traces-libraries-and-frameworks) | [Yes](./config.md#instrumented-metrics-libraries-and-frameworks) | |
+| [ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/introduction-to-aspnet-core?view=aspnetcore-6.0) | [Yes](./config.md#instrumented-traces-libraries-and-frameworks) | [Yes](./config.md#instrumented-metrics-libraries-and-frameworks) | |
+| [Windows Workflow Foundation](https://docs.microsoft.com/en-us/dotnet/framework/windows-workflow-foundation/) | | | This is .NET Framework only. There is an [experimental port for .NET 6](https://github.com/UiPath/CoreWF). | |
+| [OWIN](https://docs.microsoft.com/en-us/aspnet/aspnet/overview/owin-and-katana/) | | | This is .NET Framework only. |
 
 ### Databases
 
