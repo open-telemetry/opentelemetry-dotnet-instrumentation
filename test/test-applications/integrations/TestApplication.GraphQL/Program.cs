@@ -22,6 +22,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using TestApplication.Shared;
 
 namespace TestApplication.GraphQL;
 
@@ -41,7 +42,7 @@ public class Program
             .Build();
 
         var logger = host.Services.GetRequiredService<ILogger<Program>>();
-        logger.LogInformation($"Instrumentation.ProfilerAttached = {IsProfilerAttached()}");
+        logger.LogInformation($"Instrumentation.ProfilerAttached = {ProfilerHelper.IsProfilerAttached()}");
 
         var prefixes = new[] { "COR_", "CORECLR_", "DOTNET_", "OTEL_" };
         var envVars = from envVar in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>()
@@ -58,21 +59,5 @@ public class Program
         }
 
         host.Run();
-    }
-
-    private static bool? IsProfilerAttached()
-    {
-        var instrumentationType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation", throwOnError: false);
-
-        if (instrumentationType == null)
-        {
-            return null;
-        }
-
-        var property = instrumentationType.GetProperty("ProfilerAttached");
-
-        var isAttached = property?.GetValue(null) as bool?;
-
-        return isAttached ?? false;
     }
 }

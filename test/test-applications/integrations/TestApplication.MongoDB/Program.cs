@@ -24,6 +24,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Core.Clusters;
 using MongoDB.Driver.Core.Servers;
+using TestApplication.Shared;
 
 namespace TestApplication.MongoDB;
 
@@ -34,9 +35,7 @@ public static class Program
 
     public static void Main(string[] args)
     {
-        Console.WriteLine($"Command line: {string.Join(";", args)}");
-        Console.WriteLine($"Profiler attached: {IsProfilerAttached()}");
-        Console.WriteLine($"Platform: {(Environment.Is64BitProcess ? "x64" : "x32")}");
+        HeaderHelper.WriteHeader(args);
 
         var mongoPort = GetMongoPort(args);
         var newDocument = new BsonDocument
@@ -160,22 +159,6 @@ public static class Program
         }
 
         return "27017";
-    }
-
-    private static bool? IsProfilerAttached()
-    {
-        var instrumentationType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation", throwOnError: false);
-
-        if (instrumentationType == null)
-        {
-            return null;
-        }
-
-        var property = instrumentationType.GetProperty("ProfilerAttached");
-
-        var isAttached = property?.GetValue(null) as bool?;
-
-        return isAttached ?? false;
     }
 }
 

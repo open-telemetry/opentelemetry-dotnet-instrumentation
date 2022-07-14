@@ -17,14 +17,13 @@
 using System;
 using System.Threading.Tasks;
 using Npgsql;
+using TestApplication.Shared;
 
 public static class Program
 {
     public static async Task Main(string[] args)
     {
-        Console.WriteLine($"Command line: {string.Join(";", args)}");
-        Console.WriteLine($"Profiler attached: {IsProfilerAttached()}");
-        Console.WriteLine($"Platform: {(Environment.Is64BitProcess ? "x64" : "x32")}");
+        HeaderHelper.WriteHeader(args);
 
         var postgresPort = GetNpgsqlPort(args);
 
@@ -49,20 +48,5 @@ public static class Program
         }
 
         return "5432";
-    }
-
-    private static bool? IsProfilerAttached()
-    {
-        var instrumentationType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation", false);
-
-        if (instrumentationType == null)
-        {
-            return null;
-        }
-
-        var property = instrumentationType.GetProperty("ProfilerAttached");
-        var isAttached = property?.GetValue(null) as bool?;
-
-        return isAttached ?? false;
     }
 }
