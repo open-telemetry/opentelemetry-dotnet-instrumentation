@@ -1,3 +1,4 @@
+AWSSDK
 bitness
 bytecode
 cmake

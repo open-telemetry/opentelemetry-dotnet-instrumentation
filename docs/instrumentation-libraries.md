@@ -30,32 +30,24 @@ submit an issue to request its inclusion.
 
 ### Databases
 
-#### General database frameworks
-
-1. ADO.NET
-1. EntityFramework
-1. Dapper
-1. LINQ to SQL
-1. Microsoft.Practices.EnterpriseLibrary.Data
-1. EntityFrameworkCore
-
-#### Specific Databases
-
-1. MySQL
-    * MySql.data
-    * MySqlConnector
-1. PostgreSQL
-1. SQLite
-1. MongoDB
-1. MS SQL Server
-1. Redis
-    * StackExchange.Redis
-1. MariaDB
-1. Firebase
-1. Elasticsearch
-1. Oracle
-1. DynamoDB
-1. Cosmos DB
+| Library | [Tracing Support](./config.md#instrumented-traces-libraries-and-frameworks) | [Metrics Support](./config.md#instrumented-metrics-libraries-and-frameworks)| Databases Tested | Notes |
+| --- | :---: | :---: | --- | --- |
+| [Entity Framework](https://docs.microsoft.com/en-us/ef/ef6/) | | | | Needs investigation. It might be implicitly supported based on the configured [database provider](https://docs.microsoft.com/en-us/ef/ef6/fundamentals/providers/). |
+| [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) | | | | Needs investigation. It might be implicitly supported based on the configured [database provider](https://docs.microsoft.com/en-us/ef/core/providers/). |
+| [Dapper](https://github.com/DapperLib/Dapper) | | | | Needs investigation. It might be implicitly supported based on the configured [database provider](https://github.com/DapperLib/Dapper#will-dapper-work-with-my-db-provider). |
+| [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) | Yes | | [MS SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-2019) | |
+| [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) | Yes | | | |
+| [MySql.Data](https://dev.mysql.com/doc/connector-net/en/connector-net-introduction.html) | | | | This is the official [MySQL](https://dev.mysql.com/) library. |
+| [MySqlConnector](https://mysqlconnector.net/) | | | | Seems to be the [recommended library for MariaDB](https://mariadb.com/kb/en/mysqlconnector-for-adonet/). |
+| [Npgsql](https://www.npgsql.org/) | Yes | | [PostgreSQL](https://www.postgresql.org/) | |
+| [Microsoft.Data.SqlLite](https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/?tabs=netcore-cli) | | | | |
+| [MongoDB.Driver](https://www.nuget.org/packages/mongodb.driver) | Yes | | [MongoDB](https://www.mongodb.com/docs/) | |
+| [StackExchange.Redis](https://stackexchange.github.io/StackExchange.Redis/) | | | | |
+| [Elasticsearch-net](https://github.com/elastic/elasticsearch-net) | | | | We should be able to use [OpenTelemetry.Instrumentation.ElasticsearchClient](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/tree/main/src/OpenTelemetry.Instrumentation.ElasticsearchClient). |
+| [Oracle.ManagedDataAccess.Core](https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core) | | | | |
+| [Oracle.ManagedDataAccess](https://www.nuget.org/packages/Oracle.ManagedDataAccess) | | | | |
+| [AWSSDK.DynamoDBv2](https://www.nuget.org/packages/AWSSDK.DynamoDBv2) | | | | |
+| [Microsoft.Azure.Cosmos](https://www.nuget.org/packages/Microsoft.Azure.Cosmos) | | | | |
 
 ### External request libraries (REST/RPC)
 
@@ -118,4 +110,8 @@ enough contextual information on its own.
 * Cassandra - Lower usage
 * IBM DB2 - Lower usage
 * Couchbase - Lower usage
+* [LINQ to SQL](https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/sql/linq/)
+\- Legacy technology and pattern. Wait until there is enough interest.
+* [Microsoft.Practices.EnterpriseLibrary.Data](https://docs.microsoft.com/en-us/previous-versions/msp-n-p/dn440726(v=pandp.60))
+\- Legacy technology and pattern. Wait until there is enough interest.
 * Polly - Waiting for interest and further analysis.
