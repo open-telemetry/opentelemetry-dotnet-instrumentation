@@ -47,6 +47,6 @@ public class NpqsqlTests : TestHelper
         var spans = agent.WaitForSpans(1, TimeSpan.FromSeconds(5));
 
         spans.Count.Should().Be(1);
-        spans.First().Tags["db.statement"].Should().Be($"SELECT {_npgsql.Port};");
+        spans.First().Tags["db.statement"].Should().Be("SELECT 123;");
     }
 }

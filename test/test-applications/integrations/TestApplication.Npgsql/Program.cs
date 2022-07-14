@@ -33,19 +33,17 @@ public static class Program
         await using var conn = new NpgsqlConnection(connString);
         await conn.OpenAsync();
 
-        using (var cmd = new NpgsqlCommand($@"SELECT {postgresPort};", conn))
-        await using (var reader = await cmd.ExecuteReaderAsync())
+        using var cmd = new NpgsqlCommand(@"SELECT 123;", conn);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
         {
-            while (await reader.ReadAsync())
-            {
-                Console.WriteLine(reader.GetInt32(0));
-            }
+            Console.WriteLine(reader.GetInt32(0));
         }
     }
 
     private static string GetNpgsqlPort(string[] args)
     {
-        if (args.Length > 0)
+        if (args.Length > 1)
         {
             return args[1];
         }
