@@ -74,7 +74,7 @@ public class AspNetTests : TestHelper
     [Trait("Containers", "Windows")]
     public async Task SubmitMetrics()
     {
-        // Helps to reduce noice by enabling only AspNet metrics.
+        // Helps to reduce noise by enabling only AspNet metrics.
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "AspNet");
 
         Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
