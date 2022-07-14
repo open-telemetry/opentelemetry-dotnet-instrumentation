@@ -60,7 +60,7 @@ docker-compose -f ./dev/docker-compose.yaml -f ./examples/docker-compose.yaml up
 
 # instrument and run HTTP server app in background
 export {OTEL_DOTNET_AUTO_TRACES_PLUGINS,OTEL_DOTNET_AUTO_METRICS_PLUGINS}="Examples.AspNetCoreMvc.OtelSdkPlugin, Examples.AspNetCoreMvc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null:Examples.Vendor.Distro.Plugin, Examples.Vendor.Distro, Version=0.0.1.0, Culture=neutral, PublicKeyToken=null"
-ENABLE_PROFILING=${enableProfiling} OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES="MyCompany.MyProduct.MyLibrary" OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS="AspNet,NetRuntime,HttpClient" OTEL_SERVICE_NAME="aspnet-server" OTEL_TRACES_EXPORTER=${tracesExporter} OTEL_METRICS_EXPORTER=${metricsExporter} ./dev/instrument.sh ASPNETCORE_URLS="http://127.0.0.1:8080/" dotnet ./examples/AspNetCoreMvc/bin/${configuration}/${aspNetAppTargetFramework}/Examples.AspNetCoreMvc.dll &
+ENABLE_PROFILING=${enableProfiling} OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES="MyCompany.MyProduct.MyLibrary" OTEL_SERVICE_NAME="aspnet-server" OTEL_TRACES_EXPORTER=${tracesExporter} OTEL_METRICS_EXPORTER=${metricsExporter} ./dev/instrument.sh ASPNETCORE_URLS="http://127.0.0.1:8080/" dotnet ./examples/AspNetCoreMvc/bin/${configuration}/${aspNetAppTargetFramework}/Examples.AspNetCoreMvc.dll &
 unset OTEL_DOTNET_AUTO_TRACES_PLUGINS OTEL_DOTNET_AUTO_METRICS_PLUGINS
 ./dev/wait-local-port.sh 8080
 

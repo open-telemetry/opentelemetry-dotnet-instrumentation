@@ -17,7 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
@@ -58,7 +58,7 @@ internal static class EnvironmentConfigurationTracerHelper
 #if NET462
         builder.AddAspNetInstrumentation();
 #elif NETCOREAPP3_1_OR_GREATER
-        if (Assembly.GetEntryAssembly()?.GetReferencedAssemblies().Any(x => x.Name == "Microsoft.AspNetCore") ?? false)
+        if (AssemblyDetector.IsAspNetCoreDetected)
         {
             builder.AddAspNetCoreInstrumentation();
         }
