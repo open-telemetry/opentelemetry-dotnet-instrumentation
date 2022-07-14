@@ -179,6 +179,12 @@ updates:
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
+    directory: /test/test-applications/integrations/TestApplication.Npgsql
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
     directory: /test/test-applications/integrations/TestApplication.Plugins
     schedule:
       interval: "daily"
