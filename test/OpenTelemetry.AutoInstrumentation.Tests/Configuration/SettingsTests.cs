@@ -118,6 +118,7 @@ public class SettingsTests : IDisposable
     [InlineData(nameof(TracerInstrumentation.GraphQL), TracerInstrumentation.GraphQL)]
     [InlineData(nameof(TracerInstrumentation.HttpClient), TracerInstrumentation.HttpClient)]
     [InlineData(nameof(TracerInstrumentation.MongoDB), TracerInstrumentation.MongoDB)]
+    [InlineData(nameof(TracerInstrumentation.Npgsql), TracerInstrumentation.Npgsql)]
     [InlineData(nameof(TracerInstrumentation.SqlClient), TracerInstrumentation.SqlClient)]
     public void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
