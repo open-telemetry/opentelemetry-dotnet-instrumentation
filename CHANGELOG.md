@@ -46,7 +46,7 @@ You can find all OpenTelemetry references in
 - Support for ASP.NET and HttpClient metrics instrumentations.
 - Support for Prometheus Exporter HttpListener version.
 - `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` can accept multiple filepaths
-  delimted by the platform-specific path separator
+  delimited by the platform-specific path separator
   (`;` on Windows, `:` on Linux and macOS).
 - Support for metric exporter interval using environment variable:
   `OTEL_METRIC_EXPORT_INTERVAL`.
@@ -68,7 +68,7 @@ You can find all OpenTelemetry references in
 
 ### Fixed
 
-- Use `,` as seperator, as documented, instead of `;`, for:
+- Use `,` as separator, as documented, instead of `;`, for:
   - `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`,
   - `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`,
   - `OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS`.
