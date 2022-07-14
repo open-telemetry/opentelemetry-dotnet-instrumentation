@@ -52,6 +52,14 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
                     }
                 }
             }
+            else
+            {
+                instrumentations = Enum.GetValues(typeof(MeterInstrumentation))
+                    .Cast<MeterInstrumentation>()
+                    .ToDictionary(
+                        key => Enum.GetName(typeof(MeterInstrumentation), key),
+                        val => val);
+            }
 
             var disabledInstrumentations = source.GetString(ConfigurationKeys.Metrics.DisabledInstrumentations);
             if (disabledInstrumentations != null)

@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.Metrics;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
@@ -50,10 +51,15 @@ internal static class EnvironmentConfigurationMetricHelper
     public static MeterProviderBuilder AddSdkAspNetInstrumentation(this MeterProviderBuilder builder)
     {
 #if NET462
-        return builder.AddAspNetInstrumentation();
+        builder.AddAspNetInstrumentation();
 #elif NETCOREAPP3_1_OR_GREATER
-        return builder.AddAspNetCoreInstrumentation();
+        if (AssemblyDetector.IsAspNetCoreDetected)
+        {
+            builder.AddAspNetCoreInstrumentation();
+        }
 #endif
+
+        return builder;
     }
 
     private static MeterProviderBuilder SetExporter(this MeterProviderBuilder builder, MeterSettings settings)

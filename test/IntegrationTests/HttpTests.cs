@@ -34,7 +34,6 @@ public class HttpTests : TestHelper
         : base("Http", output)
     {
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "HttpClient,AspNet");
     }
 
     [Fact]

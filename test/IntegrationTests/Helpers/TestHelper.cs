@@ -90,7 +90,11 @@ public abstract class TestHelper
             Output.WriteLine($"Otlp Endpoint: {agentBaseUrl}");
             builder = builder.WithEnvironment("OTEL_EXPORTER_OTLP_ENDPOINT", agentBaseUrl);
             builder = builder.WithEnvironment("OTEL_METRIC_EXPORT_INTERVAL", "1000");
-            builder = builder.WithEnvironment("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "AspNet");
+        }
+
+        foreach (var env in EnvironmentHelper.CustomEnvironmentVariables)
+        {
+            builder = builder.WithEnvironment(env.Key, env.Value);
         }
 
         var container = builder.Build();
@@ -114,8 +118,9 @@ public abstract class TestHelper
 
     /// <summary>
     /// StartTestApplication starts the test application
-    // and returns the Process instance for further interaction.
+    /// and returns the Process instance for further interaction.
     /// </summary>
+    /// <returns>Test application process</returns>
     public Process StartTestApplication(int traceAgentPort = 0, int metricsAgentPort = 0, string arguments = null, string packageVersion = "", int aspNetCorePort = 0, string framework = "", bool enableStartupHook = true)
     {
         var testSettings = new TestSettings
