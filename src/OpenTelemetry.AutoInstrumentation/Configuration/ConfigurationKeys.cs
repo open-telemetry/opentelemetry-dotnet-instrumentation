@@ -156,15 +156,4 @@ public class ConfigurationKeys
         /// </summary>
         public const string AdditionalSources = "OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES";
     }
-
-    /// <summary>
-    /// String format patterns used to match integration-specific configuration keys.
-    /// </summary>
-    internal static class Integrations
-    {
-        /// <summary>
-        /// Configuration key pattern for enabling or disabling an integration.
-        /// </summary>
-        public const string Enabled = "OTEL_DOTNET_AUTO_{0}_ENABLED";
-    }
 }

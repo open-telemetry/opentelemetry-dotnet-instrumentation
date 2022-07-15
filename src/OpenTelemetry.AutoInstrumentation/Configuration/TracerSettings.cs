@@ -102,7 +102,6 @@ public class TracerSettings : Settings
 
         TraceEnabled = source.GetBool(ConfigurationKeys.Traces.Enabled) ?? true;
         LoadTracerAtStartup = source.GetBool(ConfigurationKeys.Traces.LoadTracerAtStartup) ?? true;
-        Integrations = new IntegrationSettingsCollection(source);
     }
 
     /// <summary>
@@ -146,11 +145,6 @@ public class TracerSettings : Settings
     /// Gets the list of legacy sources to be added to the tracer at the startup.
     /// </summary>
     public IList<string> LegacySources { get; } = new List<string>();
-
-    /// <summary>
-    /// Gets a collection of <see cref="Integrations"/> keyed by integration name.
-    /// </summary>
-    public IntegrationSettingsCollection Integrations { get; }
 
     internal static TracerSettings FromDefaultSources()
     {

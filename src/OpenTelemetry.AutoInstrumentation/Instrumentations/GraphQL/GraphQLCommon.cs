@@ -47,14 +47,6 @@ internal class GraphQLCommon
 
     internal static Activity CreateActivityFromValidate(IDocument document)
     {
-        var settings = Instrumentation.TracerSettings;
-
-        if (!settings.IsIntegrationEnabled(IntegrationId))
-        {
-            // integration disabled, don't create a scope, skip this trace
-            return null;
-        }
-
         Activity activity = null;
 
         try
@@ -74,14 +66,6 @@ internal class GraphQLCommon
 
     internal static Activity CreateActivityFromExecuteAsync(IExecutionContext executionContext)
     {
-        var settings = Instrumentation.TracerSettings;
-
-        if (!settings.IsIntegrationEnabled(IntegrationId))
-        {
-            // integration disabled, don't create a scope, skip this trace
-            return null;
-        }
-
         Activity activity = null;
 
         try
