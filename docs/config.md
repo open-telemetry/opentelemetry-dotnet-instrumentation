@@ -30,7 +30,6 @@ for more details.
 | `OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS` | Comma-separated list of traces source and bytecode instrumentations you want to disable. | |
 | `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS` | Comma-separated list of metrics source instrumentations you want to enable. Set `none` to disable all metric instrumentations. | all available instrumentations |
 | `OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS` | Comma-separated list of metrics source instrumentations you want to disable. | |
-| `OTEL_DOTNET_AUTO_DOMAIN_NEUTRAL_INSTRUMENTATION` | Whether to intercept method calls when the caller method is inside a domain-neutral assembly. Useful when instrumenting IIS applications. | `false` |
 
 ### Instrumented traces libraries and frameworks
 

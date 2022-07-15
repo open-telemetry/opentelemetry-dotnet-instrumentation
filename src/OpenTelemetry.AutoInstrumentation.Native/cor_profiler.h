@@ -31,7 +31,6 @@ private:
     bool first_jit_compilation_completed = false;
     bool use_dotnet_startuphook_bootstrapper = false;
 
-    bool instrument_domain_neutral_assemblies = false;
     bool corlib_module_loaded = false;
     AppDomainID corlib_app_domain_id = 0;
     bool managed_profiler_loaded_domain_neutral = false;
