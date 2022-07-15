@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration
 {
@@ -36,41 +37,11 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
             MetricExporter = ParseMetricExporter(source);
             ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.Metrics.ConsoleExporterEnabled) ?? false;
 
-            var instrumentations = new Dictionary<string, MeterInstrumentation>();
-            var enabledInstrumentations = source.GetString(ConfigurationKeys.Metrics.Instrumentations);
-            if (enabledInstrumentations != null)
-            {
-                foreach (var instrumentation in enabledInstrumentations.Split(Separator))
-                {
-                    if (Enum.TryParse(instrumentation, out MeterInstrumentation parsedType))
-                    {
-                        instrumentations[instrumentation] = parsedType;
-                    }
-                    else
-                    {
-                        throw new FormatException($"The \"{instrumentation}\" is not recognized as supported metrics instrumentation and cannot be enabled");
-                    }
-                }
-            }
-            else
-            {
-                instrumentations = Enum.GetValues(typeof(MeterInstrumentation))
-                    .Cast<MeterInstrumentation>()
-                    .ToDictionary(
-                        key => Enum.GetName(typeof(MeterInstrumentation), key),
-                        val => val);
-            }
-
-            var disabledInstrumentations = source.GetString(ConfigurationKeys.Metrics.DisabledInstrumentations);
-            if (disabledInstrumentations != null)
-            {
-                foreach (var instrumentation in disabledInstrumentations.Split(Separator))
-                {
-                    instrumentations.Remove(instrumentation);
-                }
-            }
-
-            EnabledInstrumentations = instrumentations.Values.ToList();
+            EnabledInstrumentations = source.ParseEnabledEnumList<MeterInstrumentation>(
+                enabledConfiguration: ConfigurationKeys.Metrics.Instrumentations,
+                disabledConfiguration: ConfigurationKeys.Metrics.DisabledInstrumentations,
+                separator: Separator,
+                error: "The \"{0}\" is not recognized as supported metrics instrumentation and cannot be enabled");
 
             var providerPlugins = source.GetString(ConfigurationKeys.Metrics.ProviderPlugins);
             if (providerPlugins != null)

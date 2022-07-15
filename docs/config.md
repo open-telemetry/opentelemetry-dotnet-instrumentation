@@ -26,9 +26,9 @@ for more details.
 | Environment variable | Description | Default value |
 |-|-|-|
 | `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | List of bytecode instrumentations JSON configuration filepaths, delimited by the platform-specific path separator (`;` on Windows, `:` on Linux and macOS). For example: `%ProfilerDirectory%/integrations.json` | |
-| `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS` | Comma-separated list of traces source instrumentations you want to enable. | all available instrumentations |
+| `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS` | Comma-separated list of traces source instrumentations you want to enable. Set `none` to disable all trace instrumentations. | all available instrumentations |
 | `OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS` | Comma-separated list of traces source and bytecode instrumentations you want to disable. | |
-| `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS` | Comma-separated list of metrics source instrumentations you want to enable. | all available instrumentations |
+| `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS` | Comma-separated list of metrics source instrumentations you want to enable. Set `none` to disable all metric instrumentations. | all available instrumentations |
 | `OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS` | Comma-separated list of metrics source instrumentations you want to disable. | |
 | `OTEL_DOTNET_AUTO_{0}_ENABLED` | Configuration pattern for enabling or disabling specific bytecode. For example, to disable GraphQL instrumentation, set the `OTEL_TRACE_GraphQL_ENABLED` environment variable to `false`. | `true` |
 | `OTEL_DOTNET_AUTO_DOMAIN_NEUTRAL_INSTRUMENTATION` | Whether to intercept method calls when the caller method is inside a domain-neutral assembly. Useful when instrumenting IIS applications. | `false` |
