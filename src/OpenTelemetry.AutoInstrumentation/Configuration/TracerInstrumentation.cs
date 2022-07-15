@@ -49,5 +49,10 @@ public enum TracerInstrumentation
     /// <summary>
     /// Npgsql instrumentation.
     /// </summary>
-    Npgsql
+    Npgsql,
+
+    /// <summary>
+    /// MySqlData instrumentation.
+    /// </summary>
+    MySqlData
 }

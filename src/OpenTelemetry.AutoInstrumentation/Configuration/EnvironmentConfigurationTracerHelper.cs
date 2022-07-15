@@ -30,6 +30,7 @@ internal static class EnvironmentConfigurationTracerHelper
         [TracerInstrumentation.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
         [TracerInstrumentation.SqlClient] = builder => builder.AddSqlClientInstrumentation(),
         [TracerInstrumentation.MongoDB] = builder => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources"),
+        [TracerInstrumentation.MySqlData] = builder => builder.AddSource("OpenTelemetry.Instrumentation.MySqlData"),
         [TracerInstrumentation.Npgsql] = builder => builder.AddSource("Npgsql")
     };
 
