@@ -68,15 +68,19 @@ submit an issue to request its inclusion.
 
 ### Logging
 
-1. Log4net
-1. Microsoft.Extensions.Logging
-1. Serilog
-1. NLog
-1. Common.Logging
+TODO: Determine how we want to support logging.
+
+1. [Log4net](https://logging.apache.org/log4net/)
+1. [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging/)
+1. [Serilog](https://github.com/serilog/serilog)
+1. [NLog](https://github.com/NLog/NLog)
+1. [Common.Logging](https://github.com/net-commons/common-logging)
 
 ### Other
 
-1. Microsoft.extensions.caching
+| Library | [Tracing Support](./config.md#instrumented-traces-libraries-and-frameworks) | [Metrics Support](./config.md#instrumented-metrics-libraries-and-frameworks) | Notes |
+| --- | :---: | :---: | --- |
+| [Microsoft.Extensions.Caching](https://docs.microsoft.com/en-us/dotnet/core/extensions/caching) | | | TODO: Evaluate if this is desired. |
 
 ## Cloud Environments and SDKs
 
@@ -98,24 +102,16 @@ instrumentation libraries to support.
 
 ### Libraries we should not support
 
-* System.IO.Pipelines - This library is used for high-throughput scenarios and
-instrumenting this library could potentially impact the performance of the
-application in a negative manner.
-* Pipelines.Sockets.Unofficial - This is a lower-level networking library and
-instrumenting it can affect the performance of an application in negative ways
-causing an increase in network traffic (as compared to the application running
-without instrumentation).
-* System.Threading.Channels - This is a lower-level library and may not provide
-enough contextual information on its own.
-* Cassandra - Lower usage
-* IBM DB2 - Lower usage
-* Couchbase - Lower usage
-* [LINQ to SQL](https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/sql/linq/)
-\- Legacy technology and pattern. Wait until there is enough interest.
-* [Microsoft.Practices.EnterpriseLibrary.Data](https://docs.microsoft.com/en-us/previous-versions/msp-n-p/dn440726(v=pandp.60))
-\- Legacy technology and pattern. Wait until there is enough interest.
-* Polly - Waiting for interest and further analysis.
-* [gRPC for C#](https://github.com/grpc/grpc/tree/master/src/csharp)
-\- Library is deprecated.
-* [MSMQ](https://docs.microsoft.com/en-us/previous-versions/windows/desktop/msmq/ms711472(v=vs.85))
-\- This is a legacy system. Wait until there is enough interest.
+| Library | Notes |
+| --- | --- |
+| [System.IO.Pipelines](https://docs.microsoft.com/en-us/dotnet/standard/io/pipelines) | This library is used for high-throughput scenarios and instrumenting this library could potentially impact the performance of the application in a negative manner. |
+| [Pipelines.Sockets.Unofficial](https://github.com/mgravell/Pipelines.Sockets.Unofficial) | This is a lower-level networking library and instrumenting it can affect the performance of an application in negative ways causing an increase in network traffic (as compared to the application running without instrumentation). |
+| [System.Threading.Channels](https://docs.microsoft.com/en-us/dotnet/api/system.threading.channels) | This is a lower-level library and may not provide enough contextual information on its own. |
+| [Cassandra](https://www.nuget.org/packages/CassandraCSharpDriver) | Lower usage |
+| [IBM DB2](https://www.ibm.com/docs/en/db2/11.5?topic=adonet-data-server-provider-net) | Lower usage |
+| [Couchbase](https://www.nuget.org/packages/CouchbaseNetClient) | Lower usage |
+| [LINQ to SQL](https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/sql/linq/) | Legacy technology and pattern. Wait until there is enough interest. |
+| [Microsoft.Practices.EnterpriseLibrary.Data](https://docs.microsoft.com/en-us/previous-versions/msp-n-p/dn440726(v=pandp.60)) | Legacy technology and pattern. Wait until there is enough interest. |
+| [Polly](http://www.thepollyproject.org/) | Waiting for interest and further analysis. |
+| [gRPC for C#](https://github.com/grpc/grpc/tree/master/src/csharp) | Library is deprecated. |
+| [MSMQ](https://docs.microsoft.com/en-us/previous-versions/windows/desktop/msmq/ms711472(v=vs.85)) | This is a legacy system. Wait until there is enough interest. |
