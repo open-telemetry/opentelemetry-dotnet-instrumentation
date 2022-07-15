@@ -83,7 +83,7 @@ public class GraphQLTests : TestHelper
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
         using var agent = new MockZipkinCollector(Output);
-        var process = StartTestApplication(agent.Port, aspNetCorePort: aspNetCorePort);
+        using var process = StartTestApplication(agent.Port, aspNetCorePort: aspNetCorePort);
         if (process.HasExited)
         {
             throw new InvalidOperationException($"Test application has exited with code: {process.ExitCode}");
