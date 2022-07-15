@@ -21,7 +21,7 @@ submit an issue to request its inclusion.
 
 ### Application Frameworks
 
-| Framework | [Tracing Support](./config.md#instrumented-traces-libraries-and-frameworks) | [Metrics Support](./config.md#instrumented-metrics-libraries-and-frameworks) | Notes |
+| Framework | [Tracing Support](../config.md#instrumented-traces-libraries-and-frameworks) | [Metrics Support](../config.md#instrumented-metrics-libraries-and-frameworks) | Notes |
 | --- | :---: | :---: | --- |
 | [ASP.NET](https://docs.microsoft.com/en-us/aspnet/overview) | Yes | Yes | |
 | [ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/introduction-to-aspnet-core?view=aspnetcore-6.0) | Yes | Yes | |
@@ -30,7 +30,7 @@ submit an issue to request its inclusion.
 
 ### Databases
 
-| Library | [Tracing Support](./config.md#instrumented-traces-libraries-and-frameworks) | [Metrics Support](./config.md#instrumented-metrics-libraries-and-frameworks)| Databases Tested | Notes |
+| Library | [Tracing Support](../config.md#instrumented-traces-libraries-and-frameworks) | [Metrics Support](../config.md#instrumented-metrics-libraries-and-frameworks)| Databases Tested | Notes |
 | --- | :---: | :---: | --- | --- |
 | [Entity Framework](https://docs.microsoft.com/en-us/ef/ef6/) | | | | Needs investigation. It might be implicitly supported based on the configured [database provider](https://docs.microsoft.com/en-us/ef/ef6/fundamentals/providers/). |
 | [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) | | | | Needs investigation. It might be implicitly supported based on the configured [database provider](https://docs.microsoft.com/en-us/ef/core/providers/). |
@@ -51,7 +51,7 @@ submit an issue to request its inclusion.
 
 ### Inter-process communication (IPC)
 
-| Library | [Tracing Support](./config.md#instrumented-traces-libraries-and-frameworks) | [Metrics Support](./config.md#instrumented-metrics-libraries-and-frameworks) | Notes |
+| Library | [Tracing Support](../config.md#instrumented-traces-libraries-and-frameworks) | [Metrics Support](../config.md#instrumented-metrics-libraries-and-frameworks) | Notes |
 | --- | :---: | :---: | --- |
 | [HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) | Yes | Yes | |
 | [HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | Yes | Yes | |
@@ -78,7 +78,7 @@ TODO: Determine how we want to support logging.
 
 ### Other
 
-| Library | [Tracing Support](./config.md#instrumented-traces-libraries-and-frameworks) | [Metrics Support](./config.md#instrumented-metrics-libraries-and-frameworks) | Notes |
+| Library | [Tracing Support](../config.md#instrumented-traces-libraries-and-frameworks) | [Metrics Support](../config.md#instrumented-metrics-libraries-and-frameworks) | Notes |
 | --- | :---: | :---: | --- |
 | [Microsoft.Extensions.Caching](https://docs.microsoft.com/en-us/dotnet/core/extensions/caching) | | | TODO: Evaluate if this is desired. |
 
