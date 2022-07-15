@@ -49,22 +49,22 @@ submit an issue to request its inclusion.
 | [AWSSDK.DynamoDBv2](https://www.nuget.org/packages/AWSSDK.DynamoDBv2) | | | | |
 | [Microsoft.Azure.Cosmos](https://www.nuget.org/packages/Microsoft.Azure.Cosmos) | | | | |
 
-### External request libraries (REST/RPC)
+### Inter-process communication (IPC)
 
-1. HttpClient
-1. HttpWebRequest
-1. WCF
-1. RestSharp
-1. Grpc
-1. GraphQL
-1. WCF Core
-
-### Messaging
-
-1. RabbitMQ
-1. MSMQ
-1. Kafka
-1. NServiceBus
+| Library | [Tracing Support](./config.md#instrumented-traces-libraries-and-frameworks) | [Metrics Support](./config.md#instrumented-metrics-libraries-and-frameworks) | Notes |
+| --- | :---: | :---: | --- |
+| [HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) | Yes | Yes | |
+| [HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | Yes | Yes | |
+| [WCF](https://docs.microsoft.com/en-us/dotnet/framework/wcf/whats-wcf) | | | Server and client support should be added. |
+| [CoreWCF](https://github.com/CoreWCF/CoreWCF) | | | Server and client support should be added. |
+| [RestSharp](https://restsharp.dev/) | | | This library may be implicitly supported by instrumenting the underlying HttpClient or HttpWebRequest.  |
+| [gRPC-dotnet](https://github.com/grpc/grpc-dotnet) | | | Client and service support should be added. |
+| [GraphQL](https://www.nuget.org/packages/GraphQL/) | Yes | | The current instrumentation needs updates to match the semantic conventions. |
+| [GraphQL Client](https://github.com/graphql-dotnet/graphql-client) | | | |
+| [RabbitMQ](https://www.nuget.org/packages/RabbitMQ.Client) | | | These is an [issue in the RabbitMQ repo](https://github.com/rabbitmq/rabbitmq-dotnet-client/issues/776) to add instrumentation directly into RabbitMQ. |
+| [Kafka](https://www.nuget.org/packages/Confluent.Kafka) | | | |
+| [NServiceBus](https://docs.particular.net/nservicebus/) | | | |
+| [MassTransit](https://masstransit-project.com/) | | | |
 
 ### Logging
 
@@ -115,3 +115,7 @@ enough contextual information on its own.
 * [Microsoft.Practices.EnterpriseLibrary.Data](https://docs.microsoft.com/en-us/previous-versions/msp-n-p/dn440726(v=pandp.60))
 \- Legacy technology and pattern. Wait until there is enough interest.
 * Polly - Waiting for interest and further analysis.
+* [gRPC for C#](https://github.com/grpc/grpc/tree/master/src/csharp)
+\- Library is deprecated.
+* [MSMQ](https://docs.microsoft.com/en-us/previous-versions/windows/desktop/msmq/ms711472(v=vs.85))
+\- This is a legacy system. Wait until there is enough interest.
