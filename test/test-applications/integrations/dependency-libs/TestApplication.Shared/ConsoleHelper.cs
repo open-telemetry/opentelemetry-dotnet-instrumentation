@@ -23,7 +23,8 @@ public static class ConsoleHelper
     public static void WriteSplashScreen(string[] args)
     {
         Console.WriteLine($"Command line: {string.Join(" ", args)}");
-        Console.WriteLine($"Profiler attached: {ProfilerHelper.IsProfilerAttached()}");
+        var (isProfilerAttached, additionalMessage) = ProfilerHelper.IsProfilerAttached();
+        Console.WriteLine($"Profiler attached: {(isProfilerAttached.HasValue ? isProfilerAttached.Value.ToString() : additionalMessage)}");
         Console.WriteLine($"Platform: {(Environment.Is64BitProcess ? "x64" : "x32")}");
     }
 }

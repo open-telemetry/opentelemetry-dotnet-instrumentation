@@ -42,7 +42,8 @@ public class Program
             .Build();
 
         var logger = host.Services.GetRequiredService<ILogger<Program>>();
-        logger.LogInformation($"Instrumentation.ProfilerAttached = {ProfilerHelper.IsProfilerAttached()}");
+        var (isProfilerAttached, additionalMessage) = ProfilerHelper.IsProfilerAttached();
+        logger.LogInformation($"Instrumentation.ProfilerAttached = {(isProfilerAttached.HasValue ? isProfilerAttached.Value.ToString() : additionalMessage)}");
 
         var prefixes = new[] { "COR_", "CORECLR_", "DOTNET_", "OTEL_" };
         var envVars = from envVar in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>()

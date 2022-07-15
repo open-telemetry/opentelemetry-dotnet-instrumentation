@@ -20,19 +20,19 @@ namespace TestApplication.Shared;
 
 public static class ProfilerHelper
 {
-    public static bool? IsProfilerAttached()
+    public static (bool? Attached, string Message) IsProfilerAttached()
     {
         var instrumentationType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation", throwOnError: false);
 
         if (instrumentationType == null)
         {
-            return null;
+            return (null, "OpenTelemetry.AutoInstrumentation.Instrumentation is not loaded");
         }
 
         var property = instrumentationType.GetProperty("ProfilerAttached");
 
         var isAttached = property?.GetValue(null) as bool?;
 
-        return isAttached ?? false;
+        return (isAttached ?? false, null);
     }
 }
