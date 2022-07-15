@@ -20,6 +20,7 @@ using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Net.Http;
 using System.Threading;
+using TestApplication.Shared;
 
 namespace TestApplication.Smoke
 {
@@ -29,6 +30,8 @@ namespace TestApplication.Smoke
 
         public static void Main(string[] args)
         {
+            ConsoleHelper.WriteSplashScreen(args);
+
             EmitTraces();
             EmitMetrics();
 

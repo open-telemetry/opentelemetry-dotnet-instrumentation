@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
+using TestApplication.Shared;
 
 namespace TestApplication.SqlClient
 {
@@ -30,9 +31,7 @@ namespace TestApplication.SqlClient
 
         public static async Task Main(string[] args)
         {
-            Console.WriteLine($"Command line: {string.Join(";", args)}");
-            Console.WriteLine($"Profiler attached: {IsProfilerAttached()}");
-            Console.WriteLine($"Platform: {(Environment.Is64BitProcess ? "x64" : "x32")}");
+            ConsoleHelper.WriteSplashScreen(args);
 
             (string databasePassword, string databasePort) = ParseArgs(args);
             var connectionString = GetConnectionString(databasePassword, databasePort);
@@ -137,21 +136,6 @@ namespace TestApplication.SqlClient
         private static string GetConnectionString(string databasePassword, string databasePort)
         {
             return $"Server=localhost,{databasePort};User=sa;Password={databasePassword};TrustServerCertificate=True;";
-        }
-
-        private static bool? IsProfilerAttached()
-        {
-            var instrumentationType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation", false);
-
-            if (instrumentationType == null)
-            {
-                return null;
-            }
-
-            var property = instrumentationType.GetProperty("ProfilerAttached");
-            var isAttached = property?.GetValue(null) as bool?;
-
-            return isAttached ?? false;
         }
 
         private static (string DatabasePassword, string Port) ParseArgs(IReadOnlyList<string> args)

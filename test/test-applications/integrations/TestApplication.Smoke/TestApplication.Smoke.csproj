@@ -6,4 +6,8 @@
   <ItemGroup>
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
+  </ItemGroup>
 </Project>
