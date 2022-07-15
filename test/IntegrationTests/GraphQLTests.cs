@@ -76,7 +76,6 @@ public class GraphQLTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    [Trait("RunOnWindows", "True")]
     public void SubmitsTraces()
     {
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
