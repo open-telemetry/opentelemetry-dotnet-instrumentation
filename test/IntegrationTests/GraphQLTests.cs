@@ -81,7 +81,6 @@ public class GraphQLTests : TestHelper
     public void SubmitsTraces()
     {
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
-        SetEnvironmentVariable("OTEL_TRACE_GraphQL_ENABLED", "false");
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
         using (var agent = new MockZipkinCollector(Output))
