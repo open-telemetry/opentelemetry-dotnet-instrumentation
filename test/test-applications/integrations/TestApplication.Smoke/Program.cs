@@ -30,7 +30,7 @@ namespace TestApplication.Smoke
 
         public static void Main(string[] args)
         {
-            HeaderHelper.WriteHeader(args);
+            ConsoleHelper.WriteSplashScreen(args);
 
             EmitTraces();
             EmitMetrics();

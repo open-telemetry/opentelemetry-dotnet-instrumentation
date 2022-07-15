@@ -35,7 +35,7 @@ public static class Program
 
     public static void Main(string[] args)
     {
-        HeaderHelper.WriteHeader(args);
+        ConsoleHelper.WriteSplashScreen(args);
 
         var mongoPort = GetMongoPort(args);
         var newDocument = new BsonDocument

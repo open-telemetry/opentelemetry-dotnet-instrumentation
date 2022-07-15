@@ -1,4 +1,4 @@
-// <copyright file="HeaderHelper.cs" company="OpenTelemetry Authors">
+// <copyright file="ConsoleHelper.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +18,11 @@ using System;
 
 namespace TestApplication.Shared;
 
-public static class HeaderHelper
+public static class ConsoleHelper
 {
-    public static void WriteHeader(string[] args)
+    public static void WriteSplashScreen(string[] args)
     {
-        Console.WriteLine($"Command line: {string.Join(";", args)}");
+        Console.WriteLine($"Command line: {string.Join(" ", args)}");
         Console.WriteLine($"Profiler attached: {ProfilerHelper.IsProfilerAttached()}");
         Console.WriteLine($"Platform: {(Environment.Is64BitProcess ? "x64" : "x32")}");
     }

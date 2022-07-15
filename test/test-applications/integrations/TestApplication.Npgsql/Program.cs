@@ -23,7 +23,7 @@ public static class Program
 {
     public static async Task Main(string[] args)
     {
-        HeaderHelper.WriteHeader(args);
+        ConsoleHelper.WriteSplashScreen(args);
 
         var postgresPort = GetNpgsqlPort(args);
 

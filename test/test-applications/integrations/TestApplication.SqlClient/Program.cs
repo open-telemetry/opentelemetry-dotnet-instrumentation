@@ -31,7 +31,7 @@ namespace TestApplication.SqlClient
 
         public static async Task Main(string[] args)
         {
-            HeaderHelper.WriteHeader(args);
+            ConsoleHelper.WriteSplashScreen(args);
 
             (string databasePassword, string databasePort) = ParseArgs(args);
             var connectionString = GetConnectionString(databasePassword, databasePort);
