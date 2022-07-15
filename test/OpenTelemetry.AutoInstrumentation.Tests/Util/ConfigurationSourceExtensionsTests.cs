@@ -43,10 +43,7 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Util
                 separator: ',',
                 error: "Invalid enum value: {0}");
 
-            list.Should().NotBeEmpty()
-                .And.HaveCount(3)
-                .And.ContainInOrder(new[] { TestEnum.Test1, TestEnum.Test2, TestEnum.Test3 })
-                .And.ContainItemsAssignableTo<TestEnum>();
+            list.Should().Equal(TestEnum.Test1, TestEnum.Test2, TestEnum.Test3);
         }
 
         [Fact]
@@ -63,10 +60,7 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Util
                 separator: ',',
                 error: "Invalid enum value: {0}");
 
-            list.Should().NotBeEmpty()
-                .And.HaveCount(2)
-                .And.ContainInOrder(new[] { TestEnum.Test1, TestEnum.Test3 })
-                .And.ContainItemsAssignableTo<TestEnum>();
+            list.Should().Equal(TestEnum.Test1, TestEnum.Test3);
         }
 
         [Fact]
@@ -83,10 +77,7 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Util
                 separator: ',',
                 error: "Invalid enum value: {0}");
 
-            list.Should().NotBeEmpty()
-                .And.HaveCount(2)
-                .And.ContainInOrder(new[] { TestEnum.Test1, TestEnum.Test3 })
-                .And.ContainItemsAssignableTo<TestEnum>();
+            list.Should().Equal(TestEnum.Test1, TestEnum.Test3);
         }
 
         [Fact]
@@ -114,13 +105,14 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Util
                 { "TEST_ENABLED_VALUES", "invalid" }
             });
 
-            source.Invoking(s => s.ParseEnabledEnumList<TestEnum>(
+            var act = () => source.ParseEnabledEnumList<TestEnum>(
                 enabledConfiguration: "TEST_ENABLED_VALUES",
                 disabledConfiguration: "TEST_DISABLED_VALUES",
                 separator: ',',
-                error: "Invalid enum value: {0}"))
-                .Should().Throw<FormatException>()
-                .WithMessage("Invalid enum value: invalid");
+                error: "Invalid enum value: {0}");
+
+            act.Should().Throw<FormatException>()
+               .WithMessage("Invalid enum value: invalid");
         }
     }
 }
