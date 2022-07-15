@@ -66,10 +66,6 @@ bool IsAzureAppServices() {
   CheckIfTrue(GetEnvironmentValue(environment::azure_app_services));
 }
 
-bool IsDomainNeutralInstrumentation() {
-  CheckIfTrue(GetEnvironmentValue(environment::domain_neutral_instrumentation));
-}
-
 }  // namespace trace
 
 #endif  // OTEL_CLR_PROFILER_ENVIRONMENT_VARIABLES_UTIL_H_

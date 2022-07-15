@@ -224,23 +224,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         event_mask |= COR_PRF_DISABLE_ALL_NGEN_IMAGES;
     }
 
-    const WSTRING domain_neutral_instrumentation = GetEnvironmentValue(environment::domain_neutral_instrumentation);
-
-    if (domain_neutral_instrumentation == WStr("1") || domain_neutral_instrumentation == WStr("true"))
-    {
-        instrument_domain_neutral_assemblies = true;
-    }
-
     // set event mask to subscribe to events and disable NGEN images
     hr = info6->SetEventMask2(event_mask, COR_PRF_HIGH_ADD_ASSEMBLY_REFERENCES);
-
-    if (instrument_domain_neutral_assemblies)
-    {
-        Logger::Info("Note: The ", environment::domain_neutral_instrumentation,
-                        " environment variable is not needed when running on .NET Framework 4.5.2 or higher, and will be "
-                        "ignored.");
-    }
-    
     if (FAILED(hr))
     {
         Logger::Warn("OpenTelemetry TRACER DIAGNOSTICS - Failed to attach profiler: unable to set event mask.");
@@ -1037,7 +1022,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::GetAssemblyReferences(const WCHAR* wszAss
 
     Logger::Debug("GetAssemblyReferences extending assembly closure for ", assembly_name, " to include ", asmRefInfo.szName,
                   ". Path=", wszAssemblyPath);
-    instrument_domain_neutral_assemblies = true;
 
     return S_OK;
 }
