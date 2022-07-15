@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 // TODO Move settings to more suitable place?
@@ -37,41 +38,11 @@ public class TracerSettings : Settings
         TracesExporter = ParseTracesExporter(source);
         ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.Traces.ConsoleExporterEnabled) ?? false;
 
-        var instrumentations = new Dictionary<string, TracerInstrumentation>();
-        var enabledInstrumentations = source.GetString(ConfigurationKeys.Traces.Instrumentations);
-        if (enabledInstrumentations != null)
-        {
-            foreach (var instrumentation in enabledInstrumentations.Split(Separator))
-            {
-                if (Enum.TryParse(instrumentation, out TracerInstrumentation parsedType))
-                {
-                    instrumentations[instrumentation] = parsedType;
-                }
-                else
-                {
-                    throw new FormatException($"The \"{instrumentation}\" is not recognized as supported trace instrumentation and cannot be enabled");
-                }
-            }
-        }
-        else
-        {
-            instrumentations = Enum.GetValues(typeof(TracerInstrumentation))
-                .Cast<TracerInstrumentation>()
-                .ToDictionary(
-                    key => Enum.GetName(typeof(TracerInstrumentation), key),
-                    val => val);
-        }
-
-        var disabledInstrumentations = source.GetString(ConfigurationKeys.Traces.DisabledInstrumentations);
-        if (disabledInstrumentations != null)
-        {
-            foreach (var instrumentation in disabledInstrumentations.Split(Separator))
-            {
-                instrumentations.Remove(instrumentation);
-            }
-        }
-
-        EnabledInstrumentations = instrumentations.Values.ToList();
+        EnabledInstrumentations = source.ParseEnabledEnumList<TracerInstrumentation>(
+            enabledConfiguration: ConfigurationKeys.Traces.Instrumentations,
+            disabledConfiguration: ConfigurationKeys.Traces.DisabledInstrumentations,
+            separator: Separator,
+            error: "The \"{0}\" is not recognized as supported trace instrumentation and cannot be enabled");
 
         var providerPlugins = source.GetString(ConfigurationKeys.Traces.ProviderPlugins);
         if (providerPlugins != null)
