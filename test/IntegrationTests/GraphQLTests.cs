@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -83,93 +82,91 @@ public class GraphQLTests : TestHelper
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
-        using (var agent = new MockZipkinCollector(Output))
-        using (var process = StartTestApplication(agent.Port, aspNetCorePort: aspNetCorePort))
+        using var agent = new MockZipkinCollector(Output);
+        var process = StartTestApplication(agent.Port, aspNetCorePort: aspNetCorePort);
+        if (process.HasExited)
         {
-            if (process.HasExited)
-            {
-                throw new InvalidOperationException($"Test application has exited with code: {process.ExitCode}");
-            }
-
-            var wh = new EventWaitHandle(false, EventResetMode.AutoReset);
-
-            process.OutputDataReceived += (sender, args) =>
-            {
-                if (args.Data != null)
-                {
-                    if (args.Data.Contains("Now listening on:") || args.Data.Contains("Unable to start Kestrel"))
-                    {
-                        wh.Set();
-                    }
-
-                    Output.WriteLine($"[webserver][stdout] {args.Data}");
-                }
-            };
-            process.BeginOutputReadLine();
-
-            process.ErrorDataReceived += (sender, args) =>
-            {
-                if (args.Data != null)
-                {
-                    Output.WriteLine($"[webserver][stderr] {args.Data}");
-                }
-            };
-            process.BeginErrorReadLine();
-
-            wh.WaitOne(5000);
-
-            var maxMillisecondsToWait = 15_000;
-            var intervalMilliseconds = 500;
-            var intervals = maxMillisecondsToWait / intervalMilliseconds;
-            var serverReady = false;
-
-            // wait for server to be ready to receive requests
-            while (intervals-- > 0)
-            {
-                var aliveCheckRequest = new RequestInfo() { HttpMethod = "GET", Url = "/alive-check" };
-                try
-                {
-                    serverReady = SubmitRequest(aspNetCorePort, aliveCheckRequest, false) == HttpStatusCode.OK;
-                }
-                catch
-                {
-                    // ignore
-                }
-
-                if (serverReady)
-                {
-                    Output.WriteLine("The server is ready.");
-                    break;
-                }
-
-                Thread.Sleep(intervalMilliseconds);
-            }
-
-            if (!serverReady)
-            {
-                throw new Exception("Couldn't verify the application is ready to receive requests.");
-            }
-
-            var testStart = DateTime.Now;
-
-            SubmitRequests(aspNetCorePort);
-            var graphQLValidateSpans = agent.WaitForSpans(_expectedGraphQLValidateSpanCount, operationName: _graphQLValidateOperationName, returnAllOperations: false)
-                .GroupBy(s => s.SpanId)
-                .Select(grp => grp.First())
-                .OrderBy(s => s.Start);
-            var graphQLExecuteSpans = agent.WaitForSpans(_expectedGraphQLExecuteSpanCount, operationName: _graphQLExecuteOperationName, returnAllOperations: false)
-                .GroupBy(s => s.SpanId)
-                .Select(grp => grp.First())
-                .OrderBy(s => s.Start);
-
-            if (!process.HasExited)
-            {
-                process.Kill();
-            }
-
-            var spans = graphQLValidateSpans.Concat(graphQLExecuteSpans).ToList();
-            SpanTestHelpers.AssertExpectationsMet(_expectations, spans);
+            throw new InvalidOperationException($"Test application has exited with code: {process.ExitCode}");
         }
+
+        var wh = new EventWaitHandle(false, EventResetMode.AutoReset);
+
+        process.OutputDataReceived += (sender, args) =>
+        {
+            if (args.Data != null)
+            {
+                if (args.Data.Contains("Now listening on:") || args.Data.Contains("Unable to start Kestrel"))
+                {
+                    wh.Set();
+                }
+
+                Output.WriteLine($"[webserver][stdout] {args.Data}");
+            }
+        };
+        process.BeginOutputReadLine();
+
+        process.ErrorDataReceived += (sender, args) =>
+        {
+            if (args.Data != null)
+            {
+                Output.WriteLine($"[webserver][stderr] {args.Data}");
+            }
+        };
+        process.BeginErrorReadLine();
+
+        wh.WaitOne(5000);
+
+        var maxMillisecondsToWait = 15_000;
+        var intervalMilliseconds = 500;
+        var intervals = maxMillisecondsToWait / intervalMilliseconds;
+        var serverReady = false;
+
+        // wait for server to be ready to receive requests
+        while (intervals-- > 0)
+        {
+            var aliveCheckRequest = new RequestInfo() { HttpMethod = "GET", Url = "/alive-check" };
+            try
+            {
+                serverReady = SubmitRequest(aspNetCorePort, aliveCheckRequest, false) == HttpStatusCode.OK;
+            }
+            catch
+            {
+                // ignore
+            }
+
+            if (serverReady)
+            {
+                Output.WriteLine("The server is ready.");
+                break;
+            }
+
+            Thread.Sleep(intervalMilliseconds);
+        }
+
+        if (!serverReady)
+        {
+            throw new Exception("Couldn't verify the application is ready to receive requests.");
+        }
+
+        var testStart = DateTime.Now;
+
+        SubmitRequests(aspNetCorePort);
+        var graphQLValidateSpans = agent.WaitForSpans(_expectedGraphQLValidateSpanCount, operationName: _graphQLValidateOperationName, returnAllOperations: false)
+            .GroupBy(s => s.SpanId)
+            .Select(grp => grp.First())
+            .OrderBy(s => s.Start);
+        var graphQLExecuteSpans = agent.WaitForSpans(_expectedGraphQLExecuteSpanCount, operationName: _graphQLExecuteOperationName, returnAllOperations: false)
+            .GroupBy(s => s.SpanId)
+            .Select(grp => grp.First())
+            .OrderBy(s => s.Start);
+
+        if (!process.HasExited)
+        {
+            process.Kill();
+        }
+
+        var spans = graphQLValidateSpans.Concat(graphQLExecuteSpans).ToList();
+        SpanTestHelpers.AssertExpectationsMet(_expectations, spans);
     }
 
     private static void CreateGraphQLRequestsAndExpectations(
@@ -233,9 +230,9 @@ public class GraphQLTests : TestHelper
     {
         try
         {
-            #pragma warning disable SYSLIB0014 // suppress error SYSLIB0014: 'WebRequest.Create(string)' is obsolete: 'WebRequest, HttpWebRequest, ServicePoint, and WebClient are obsolete. Use HttpClient instead
+#pragma warning disable SYSLIB0014 // suppress error SYSLIB0014: 'WebRequest.Create(string)' is obsolete: 'WebRequest, HttpWebRequest, ServicePoint, and WebClient are obsolete. Use HttpClient instead
             var request = WebRequest.Create($"http://localhost:{aspNetCorePort}{requestInfo.Url}");
-            #pragma warning restore SYSLIB0014
+#pragma warning restore SYSLIB0014
 
             request.Method = requestInfo.HttpMethod;
 
