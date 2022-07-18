@@ -245,8 +245,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     opcodes_names.push_back("(count)"); // CEE_COUNT
     opcodes_names.push_back("->");      // CEE_SWITCH_ARG
 
-    //
-    managed_profiler_assembly_reference = AssemblyReference::GetFromCache(managed_profiler_full_assembly_version);
 
     // we're in!
     Logger::Info("Profiler attached.");
@@ -921,107 +919,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITInlining(FunctionID callerId, Function
             return S_OK;
         }
     }
-
-    return S_OK;
-}
-
-//
-// ICorProfilerCallback6 methods
-//
-HRESULT STDMETHODCALLTYPE CorProfiler::GetAssemblyReferences(const WCHAR* wszAssemblyPath,
-                                                             ICorProfilerAssemblyReferenceProvider* pAsmRefProvider)
-{
-    if (in_azure_app_services)
-    {
-        Logger::Debug("GetAssemblyReferences skipping entire callback because this is running in Azure App Services, which "
-                      "isn't yet supported for this feature. AssemblyPath=",
-                      wszAssemblyPath);
-        return S_OK;
-    }
-
-    // Convert the assembly path to the assembly name, assuming the assembly name
-    // is either <assembly_name.ni.dll> or <assembly_name>.dll
-    auto assemblyPathString = ToString(wszAssemblyPath);
-    auto filename = assemblyPathString.substr(assemblyPathString.find_last_of("\\/") + 1);
-    auto lastNiDllPeriodIndex = filename.rfind(".ni.dll");
-    auto lastDllPeriodIndex = filename.rfind(".dll");
-    if (lastNiDllPeriodIndex != std::string::npos)
-    {
-        filename.erase(lastNiDllPeriodIndex, 7);
-    }
-    else if (lastDllPeriodIndex != std::string::npos)
-    {
-        filename.erase(lastDllPeriodIndex, 4);
-    }
-
-    const WSTRING assembly_name = ToWSTRING(filename);
-
-    // Skip known framework assemblies that we will not instrument and,
-    // as a result, will not need an assembly reference to the
-    // managed profiler
-    for (auto&& skip_assembly_pattern : skip_assembly_prefixes)
-    {
-        if (assembly_name.rfind(skip_assembly_pattern, 0) == 0)
-        {
-            Logger::Debug("GetAssemblyReferences skipping module by pattern: Name=", assembly_name, " Path=", wszAssemblyPath);
-            return S_OK;
-        }
-    }
-
-    for (auto&& skip_assembly : skip_assemblies)
-    {
-        if (assembly_name == skip_assembly)
-        {
-            Logger::Debug("GetAssemblyReferences skipping known assembly: Name=", assembly_name, " Path=", wszAssemblyPath);
-            return S_OK;
-        }
-    }
-
-    // Construct an ASSEMBLYMETADATA structure for the managed profiler that can
-    // be consumed by the runtime
-    ASSEMBLYMETADATA assembly_metadata{};
-
-    assembly_metadata.usMajorVersion = managed_profiler_assembly_reference->version.major;
-    assembly_metadata.usMinorVersion = managed_profiler_assembly_reference->version.minor;
-    assembly_metadata.usBuildNumber = managed_profiler_assembly_reference->version.build;
-    assembly_metadata.usRevisionNumber = managed_profiler_assembly_reference->version.revision;
-    if (managed_profiler_assembly_reference->locale == WStr("neutral"))
-    {
-        assembly_metadata.szLocale = const_cast<WCHAR*>(WStr("\0"));
-        assembly_metadata.cbLocale = 0;
-    }
-    else
-    {
-        assembly_metadata.szLocale = const_cast<WCHAR*>(managed_profiler_assembly_reference->locale.c_str());
-        assembly_metadata.cbLocale = (DWORD)(managed_profiler_assembly_reference->locale.size());
-    }
-
-    DWORD public_key_size = 8;
-    if (managed_profiler_assembly_reference->public_key == trace::PublicKey())
-    {
-        public_key_size = 0;
-    }
-
-    COR_PRF_ASSEMBLY_REFERENCE_INFO asmRefInfo;
-    asmRefInfo.pbPublicKeyOrToken = (void*) &managed_profiler_assembly_reference->public_key.data[0];
-    asmRefInfo.cbPublicKeyOrToken = public_key_size;
-    asmRefInfo.szName = managed_profiler_assembly_reference->name.c_str();
-    asmRefInfo.pMetaData = &assembly_metadata;
-    asmRefInfo.pbHashValue = nullptr;
-    asmRefInfo.cbHashValue = 0;
-    asmRefInfo.dwAssemblyRefFlags = 0;
-
-    // Attempt to extend the assembly closure of the provided assembly to include
-    // the managed profiler
-    auto hr = pAsmRefProvider->AddAssemblyReference(&asmRefInfo);
-    if (FAILED(hr))
-    {
-        Logger::Warn("GetAssemblyReferences failed for call from ", wszAssemblyPath);
-        return S_OK;
-    }
-
-    Logger::Debug("GetAssemblyReferences extending assembly closure for ", assembly_name, " to include ", asmRefInfo.szName,
-                  ". Path=", wszAssemblyPath);
 
     return S_OK;
 }
