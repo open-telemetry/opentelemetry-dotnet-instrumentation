@@ -1,4 +1,4 @@
-// <copyright file="SettingsExtensions.cs" company="OpenTelemetry Authors">
+// <copyright file="AssemblyDetector.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,19 +14,22 @@
 // limitations under the License.
 // </copyright>
 
-using OpenTelemetry.AutoInstrumentation.Configuration;
+using System.Linq;
+using System.Reflection;
 
-namespace OpenTelemetry.AutoInstrumentation.Util;
-
-internal static class SettingsExtensions
+namespace OpenTelemetry.AutoInstrumentation.Util
 {
-    internal static bool IsIntegrationEnabled(this TracerSettings settings, IntegrationInfo integration, bool defaultValue = true)
+    internal static class AssemblyDetector
     {
-        if (settings.TraceEnabled && !DomainMetadata.ShouldAvoidAppDomain())
-        {
-            return settings.Integrations[integration].Enabled ?? defaultValue;
-        }
+        private static bool? _isAspNetCoreDetected;
 
-        return false;
+        public static bool IsAspNetCoreDetected => _isAspNetCoreDetected ??= DetectAspNetCore();
+
+        private static bool DetectAspNetCore()
+        {
+            return Assembly.GetEntryAssembly()?
+                .GetReferencedAssemblies()
+                .Any(x => x.Name == "Microsoft.AspNetCore") ?? false;
+        }
     }
 }

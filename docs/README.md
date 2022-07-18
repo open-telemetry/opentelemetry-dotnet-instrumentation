@@ -143,17 +143,6 @@ OTEL_SERVICE_NAME=my-service
 OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0
 ```
 
-Enable desired library instrumentations using `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS`
-and `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS` environment variables.
-NOTE: By default all available **trace** instrumentations are included automatically.
-
-For example:
-
-```env
-OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS=AspNet,HttpClient
-OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS=AspNet,HttpClient,NetRuntime
-```
-
 ## Instrument a Windows Service running a .NET application
 
 See [windows-service-instrumentation.md](windows-service-instrumentation.md).

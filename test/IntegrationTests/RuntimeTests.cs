@@ -30,7 +30,6 @@ public class RuntimeTests : TestHelper
         : base("Smoke", output)
     {
         SetEnvironmentVariable("LONG_RUNNING", "true");
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "NetRuntime");
         SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "100");
     }
 

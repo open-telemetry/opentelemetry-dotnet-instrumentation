@@ -10,11 +10,23 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 
 - Add Npgsql traces instrumentation.
+- Add configuration option `none` to `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS`
+  and `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS`.
 
 ### Changed
 
 - `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS` default value is changed to
   include all of the available instrumentations.
+- `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS` default value is changed to
+  include all of the available instrumentations.
+
+## Removed
+
+- Remove `OTEL_DOTNET_AUTO_DOMAIN_NEUTRAL_INSTRUMENTATION` configuration
+  as it is not needed.
+- Remove `OTEL_DOTNET_AUTO_{0}_ENABLED` configuration,
+  use `OTEL_DOTNET_AUTO_[TRACES/METRICS]_[ENABLED/DISABLED]_INSTRUMENTATIONS`
+  instead.
 
 ## [0.2.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.2.0-beta.1)
 

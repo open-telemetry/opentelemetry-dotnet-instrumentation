@@ -60,7 +60,6 @@ public class SettingsTests : IDisposable
             settings.TracerPlugins.Should().BeEmpty();
             settings.ActivitySources.Should().BeEquivalentTo(new List<string> { "OpenTelemetry.AutoInstrumentation.*" });
             settings.LegacySources.Should().BeEmpty();
-            settings.Integrations.Should().NotBeNull();
             settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
             settings.FlushOnUnhandledException.Should().BeFalse();
         }
@@ -78,7 +77,7 @@ public class SettingsTests : IDisposable
             settings.MetricExporter.Should().Be(MetricsExporter.Otlp);
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.ConsoleExporterEnabled.Should().BeFalse();
-            settings.EnabledInstrumentations.Should().BeEmpty();
+            settings.EnabledInstrumentations.Should().NotBeEmpty();
             settings.MetricPlugins.Should().BeEmpty();
             settings.Meters.Should().BeEmpty();
             settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
