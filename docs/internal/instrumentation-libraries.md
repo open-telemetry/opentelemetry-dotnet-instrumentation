@@ -107,9 +107,9 @@ instrumentation libraries to support.
 | [System.IO.Pipelines](https://docs.microsoft.com/en-us/dotnet/standard/io/pipelines) | This library is used for high-throughput scenarios and instrumenting this library could potentially impact the performance of the application in a negative manner. |
 | [Pipelines.Sockets.Unofficial](https://github.com/mgravell/Pipelines.Sockets.Unofficial) | This is a lower-level networking library and instrumenting it can affect the performance of an application in negative ways causing an increase in network traffic (as compared to the application running without instrumentation). |
 | [System.Threading.Channels](https://docs.microsoft.com/en-us/dotnet/api/system.threading.channels) | This is a lower-level library and may not provide enough contextual information on its own. |
-| [Cassandra](https://www.nuget.org/packages/CassandraCSharpDriver) | Lower usage |
-| [IBM DB2](https://www.ibm.com/docs/en/db2/11.5?topic=adonet-data-server-provider-net) | Lower usage |
-| [Couchbase](https://www.nuget.org/packages/CouchbaseNetClient) | Lower usage |
+| [Cassandra](https://www.nuget.org/packages/CassandraCSharpDriver) | Low usage |
+| [IBM DB2](https://www.ibm.com/docs/en/db2/11.5?topic=adonet-data-server-provider-net) | Low usage |
+| [Couchbase](https://www.nuget.org/packages/CouchbaseNetClient) | Low usage |
 | [LINQ to SQL](https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/sql/linq/) | Legacy technology and pattern. Wait until there is enough interest. |
 | [Microsoft.Practices.EnterpriseLibrary.Data](https://docs.microsoft.com/en-us/previous-versions/msp-n-p/dn440726(v=pandp.60)) | Legacy technology and pattern. Wait until there is enough interest. |
 | [Polly](http://www.thepollyproject.org/) | Waiting for interest and further analysis. |
