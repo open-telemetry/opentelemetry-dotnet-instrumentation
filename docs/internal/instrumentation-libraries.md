@@ -23,24 +23,24 @@ submit an issue to request its inclusion.
 
 | Framework | [Tracing Support](../config.md#instrumented-traces-libraries-and-frameworks) | [Metrics Support](../config.md#instrumented-metrics-libraries-and-frameworks) | Notes |
 | --- | :---: | :---: | --- |
-| [ASP.NET](https://docs.microsoft.com/en-us/aspnet/overview) | Yes | Yes | |
-| [ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/introduction-to-aspnet-core?view=aspnetcore-6.0) | Yes | Yes | |
-| [Windows Workflow Foundation](https://docs.microsoft.com/en-us/dotnet/framework/windows-workflow-foundation/) | | | This is .NET Framework only. There is an [experimental port for .NET 6](https://github.com/UiPath/CoreWF). | |
-| [OWIN](https://docs.microsoft.com/en-us/aspnet/aspnet/overview/owin-and-katana/) | | | This is .NET Framework only. |
+| [ASP.NET](https://docs.microsoft.com/aspnet/overview) | Yes | Yes | |
+| [ASP.NET Core](https://docs.microsoft.com/aspnet/core/introduction-to-aspnet-core?view=aspnetcore-6.0) | Yes | Yes | |
+| [Windows Workflow Foundation](https://docs.microsoft.com/dotnet/framework/windows-workflow-foundation/) | | | This is .NET Framework only. There is an [experimental port for .NET 6](https://github.com/UiPath/CoreWF). | |
+| [OWIN](https://docs.microsoft.com/aspnet/aspnet/overview/owin-and-katana/) | | | This is .NET Framework only. |
 
 ### Databases
 
 | Library | [Tracing Support](../config.md#instrumented-traces-libraries-and-frameworks) | [Metrics Support](../config.md#instrumented-metrics-libraries-and-frameworks)| Databases Tested | Notes |
 | --- | :---: | :---: | --- | --- |
-| [Entity Framework](https://docs.microsoft.com/en-us/ef/ef6/) | | | | Needs investigation. It might be implicitly supported based on the configured [database provider](https://docs.microsoft.com/en-us/ef/ef6/fundamentals/providers/). |
-| [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) | | | | Needs investigation. It might be implicitly supported based on the configured [database provider](https://docs.microsoft.com/en-us/ef/core/providers/). |
+| [Entity Framework](https://docs.microsoft.com/ef/ef6/) | | | | Needs investigation. It might be implicitly supported based on the configured [database provider](https://docs.microsoft.com/ef/ef6/fundamentals/providers/). |
+| [Entity Framework Core](https://docs.microsoft.com/ef/core/) | | | | Needs investigation. It might be implicitly supported based on the configured [database provider](https://docs.microsoft.com/ef/core/providers/). |
 | [Dapper](https://github.com/DapperLib/Dapper) | | | | Needs investigation. It might be implicitly supported based on the configured [database provider](https://github.com/DapperLib/Dapper#will-dapper-work-with-my-db-provider). |
-| [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) | Yes | | [MS SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-2019) | |
+| [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) | Yes | | [MS SQL Server](https://www.microsoft.com/sql-server/sql-server-2019) | |
 | [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) | Yes | | | |
 | [MySql.Data](https://dev.mysql.com/doc/connector-net/en/connector-net-introduction.html) | | | | This is the official [MySQL](https://dev.mysql.com/) library. |
 | [MySqlConnector](https://mysqlconnector.net/) | | | | Seems to be the [recommended library for MariaDB](https://mariadb.com/kb/en/mysqlconnector-for-adonet/). |
 | [Npgsql](https://www.npgsql.org/) | Yes | | [PostgreSQL](https://www.postgresql.org/) | |
-| [Microsoft.Data.SqlLite](https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/?tabs=netcore-cli) | | | | |
+| [Microsoft.Data.SqlLite](https://docs.microsoft.com/dotnet/standard/data/sqlite/?tabs=netcore-cli) | | | | |
 | [MongoDB.Driver](https://www.nuget.org/packages/mongodb.driver) | Yes | | [MongoDB](https://www.mongodb.com/docs/) | |
 | [StackExchange.Redis](https://stackexchange.github.io/StackExchange.Redis/) | | | | |
 | [Elasticsearch-net](https://github.com/elastic/elasticsearch-net) | | | | We should be able to use [OpenTelemetry.Instrumentation.ElasticsearchClient](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/tree/main/src/OpenTelemetry.Instrumentation.ElasticsearchClient). |
@@ -55,7 +55,7 @@ submit an issue to request its inclusion.
 | --- | :---: | :---: | --- |
 | [HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) | Yes | Yes | |
 | [HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | Yes | Yes | |
-| [WCF](https://docs.microsoft.com/en-us/dotnet/framework/wcf/whats-wcf) | | | Server and client support should be added. |
+| [WCF](https://docs.microsoft.com/dotnet/framework/wcf/whats-wcf) | | | Server and client support should be added. |
 | [CoreWCF](https://github.com/CoreWCF/CoreWCF) | | | Server and client support should be added. |
 | [RestSharp](https://restsharp.dev/) | | | This library may be implicitly supported by instrumenting the underlying HttpClient or HttpWebRequest.  |
 | [gRPC-dotnet](https://github.com/grpc/grpc-dotnet) | | | Client and service support should be added. |
@@ -80,7 +80,7 @@ TODO: Determine how we want to support logging.
 
 | Library | [Tracing Support](../config.md#instrumented-traces-libraries-and-frameworks) | [Metrics Support](../config.md#instrumented-metrics-libraries-and-frameworks) | Notes |
 | --- | :---: | :---: | --- |
-| [Microsoft.Extensions.Caching](https://docs.microsoft.com/en-us/dotnet/core/extensions/caching) | | | TODO: Evaluate if this is desired. |
+| [Microsoft.Extensions.Caching](https://docs.microsoft.com/dotnet/core/extensions/caching) | | | TODO: Evaluate if this is desired. |
 
 ## Cloud Environments and SDKs
 
@@ -93,7 +93,7 @@ instrumentation libraries to support.
 
 TODO: Determine appropriate resource detectors and Azure SDK related
 instrumentation libraries to support. This should also include support
-for frameworks like [Azure Service Fabric](https://azure.microsoft.com/en-us/services/service-fabric/).
+for frameworks like [Azure Service Fabric](https://azure.microsoft.com/services/service-fabric/).
 
 ### [GCP](https://cloud.google.com/)
 
@@ -104,14 +104,14 @@ instrumentation libraries to support.
 
 | Library | Notes |
 | --- | --- |
-| [System.IO.Pipelines](https://docs.microsoft.com/en-us/dotnet/standard/io/pipelines) | This library is used for high-throughput scenarios and instrumenting this library could potentially impact the performance of the application in a negative manner. |
+| [System.IO.Pipelines](https://docs.microsoft.com/dotnet/standard/io/pipelines) | This library is used for high-throughput scenarios and instrumenting this library could potentially impact the performance of the application in a negative manner. |
 | [Pipelines.Sockets.Unofficial](https://github.com/mgravell/Pipelines.Sockets.Unofficial) | This is a lower-level networking library and instrumenting it can affect the performance of an application in negative ways causing an increase in network traffic (as compared to the application running without instrumentation). |
-| [System.Threading.Channels](https://docs.microsoft.com/en-us/dotnet/api/system.threading.channels) | This is a lower-level library and may not provide enough contextual information on its own. |
+| [System.Threading.Channels](https://docs.microsoft.com/dotnet/api/system.threading.channels) | This is a lower-level library and may not provide enough contextual information on its own. |
 | [Cassandra](https://www.nuget.org/packages/CassandraCSharpDriver) | Low usage |
-| [IBM DB2](https://www.ibm.com/docs/en/db2/11.5?topic=adonet-data-server-provider-net) | Low usage |
+| [IBM DB2](https://www.ibm.com/docs/db2/11.5?topic=adonet-data-server-provider-net) | Low usage |
 | [Couchbase](https://www.nuget.org/packages/CouchbaseNetClient) | Low usage |
-| [LINQ to SQL](https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/sql/linq/) | Legacy technology and pattern. Wait until there is enough interest. |
-| [Microsoft.Practices.EnterpriseLibrary.Data](https://docs.microsoft.com/en-us/previous-versions/msp-n-p/dn440726(v=pandp.60)) | Legacy technology and pattern. Wait until there is enough interest. |
+| [LINQ to SQL](https://docs.microsoft.com/dotnet/framework/data/adonet/sql/linq/) | Legacy technology and pattern. Wait until there is enough interest. |
+| [Microsoft.Practices.EnterpriseLibrary.Data](https://docs.microsoft.com/previous-versions/msp-n-p/dn440726(v=pandp.60)) | Legacy technology and pattern. Wait until there is enough interest. |
 | [Polly](http://www.thepollyproject.org/) | Waiting for interest and further analysis. |
 | [gRPC for C#](https://github.com/grpc/grpc/tree/master/src/csharp) | Library is deprecated. |
-| [MSMQ](https://docs.microsoft.com/en-us/previous-versions/windows/desktop/msmq/ms711472(v=vs.85)) | This is a legacy system. Wait until there is enough interest. |
+| [MSMQ](https://docs.microsoft.com/previous-versions/windows/desktop/msmq/ms711472(v=vs.85)) | This is a legacy system. Wait until there is enough interest. |
