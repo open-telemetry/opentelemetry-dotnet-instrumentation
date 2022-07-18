@@ -19,6 +19,8 @@ using System.Threading.Tasks;
 using Npgsql;
 using TestApplication.Shared;
 
+namespace TestApplication.Npgsql;
+
 public static class Program
 {
     public static async Task Main(string[] args)
