@@ -46,7 +46,6 @@ private:
 
     // Cor assembly properties
     AssemblyProperty corAssemblyProperty{};
-    AssemblyReference* managed_profiler_assembly_reference;
 
     //
     // OpCodes helper
@@ -129,12 +128,6 @@ public:
                                          HRESULT hrStatus) override;
 
     HRESULT STDMETHODCALLTYPE JITCachedFunctionSearchStarted(FunctionID functionId, BOOL* pbUseCachedFunction) override;
-
-    //
-    // ICorProfilerCallback6 methods
-    //
-    HRESULT STDMETHODCALLTYPE GetAssemblyReferences(const WCHAR* wszAssemblyPath,
-                                                    ICorProfilerAssemblyReferenceProvider* pAsmRefProvider) override;
 };
 
 // Note: Generally you should not have a single, global callback implementation,
