@@ -19,6 +19,7 @@ using System.Diagnostics.Tracing;
 using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
+using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Metrics;
@@ -36,6 +37,7 @@ public static class Instrumentation
 {
     private static readonly ILogger Logger = OtelLogging.GetLogger();
     private static readonly ResourceBuilder _resourceBuilder = ResourceBuilder.CreateDefault();
+    private static readonly LazyInstrumentationLoader LazyInstrumentationLoader = new();
 
     private static int _firstInitialization = 1;
     private static int _isExiting = 0;
@@ -100,6 +102,15 @@ public static class Instrumentation
 
             if (TracerSettings.LoadTracerAtStartup)
             {
+                // Setup the instrumentations that have additional setup occurring during AssemblyLoad
+                // -> this should be refactored in a separate PR
+                // e.g. we could have a static method that returns a collection of initializers
+                //      and TracerSettings.EnabledInstrumentations would be passed as input
+                if (TracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.MySqlData))
+                {
+                    LazyInstrumentationLoader.Add(new MySqlDataInitializer());
+                }
+
                 var builder = Sdk
                     .CreateTracerProviderBuilder()
                     .SetResourceBuilder(_resourceBuilder)
@@ -166,6 +177,7 @@ public static class Instrumentation
 
         try
         {
+            LazyInstrumentationLoader?.Dispose();
             _tracerProvider?.Dispose();
             _meterProvider?.Dispose();
             _sdkEventListener.Dispose();
@@ -200,7 +212,7 @@ public static class Instrumentation
         {
             try
             {
-                Logger.Error(ex, "An exception occured while processing an unhandled exception.");
+                Logger.Error(ex, "An exception occurred while processing an unhandled exception.");
             }
             catch
             {
