@@ -19,9 +19,12 @@ namespace OpenTelemetry.AutoInstrumentation.Loading;
 
 internal interface ILifespanManager
 {
-    // Track an object so that it is not garbage collected.
-    // Additionally, if the objects implements IDisposable,
-    // it will be disposed together with the manager.
+    /// <summary>
+    /// Track an object so that it is not garbage collected.
+    /// Additionally, if the objects implements IDisposable,
+    /// it will be disposed together with the manager.
+    /// </summary>
+    /// <param name="instance">Trackable object</param>
     void Track(object instance);
 }
 #endif

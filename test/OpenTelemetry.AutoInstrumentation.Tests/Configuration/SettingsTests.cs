@@ -116,8 +116,10 @@ public class SettingsTests : IDisposable
     [InlineData(nameof(TracerInstrumentation.AspNet), TracerInstrumentation.AspNet)]
     [InlineData(nameof(TracerInstrumentation.GraphQL), TracerInstrumentation.GraphQL)]
     [InlineData(nameof(TracerInstrumentation.HttpClient), TracerInstrumentation.HttpClient)]
+#if NETCOREAPP3_1_OR_GREATER
     [InlineData(nameof(TracerInstrumentation.MongoDB), TracerInstrumentation.MongoDB)]
     [InlineData(nameof(TracerInstrumentation.MySqlData), TracerInstrumentation.MySqlData)]
+#endif
     [InlineData(nameof(TracerInstrumentation.Npgsql), TracerInstrumentation.Npgsql)]
     [InlineData(nameof(TracerInstrumentation.SqlClient), TracerInstrumentation.SqlClient)]
     public void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)

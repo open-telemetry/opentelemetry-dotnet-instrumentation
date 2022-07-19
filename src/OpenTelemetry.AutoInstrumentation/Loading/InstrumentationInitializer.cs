@@ -17,6 +17,10 @@
 #if NETCOREAPP3_1_OR_GREATER
 namespace OpenTelemetry.AutoInstrumentation.Loading;
 
+/// <summary>
+/// InstrumentationInitializer encapsulates instrumentation initialization
+/// together with the assemblies which are required by the implementation.
+/// </summary>
 internal abstract class InstrumentationInitializer
 {
     protected InstrumentationInitializer(params string[] requiredAssemblies)

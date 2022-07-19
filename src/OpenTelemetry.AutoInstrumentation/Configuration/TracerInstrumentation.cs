@@ -24,35 +24,39 @@ public enum TracerInstrumentation
     /// <summary>
     /// HttpClient instrumentation.
     /// </summary>
-    HttpClient,
+    HttpClient = 0,
 
     /// <summary>
     /// ASP.NET instrumentation.
     /// </summary>
-    AspNet,
+    AspNet = 1,
 
     /// <summary>
     /// SqlClient instrumentation.
     /// </summary>
-    SqlClient,
+    SqlClient = 2,
 
     /// <summary>
     /// GraphQL instrumentation.
     /// </summary>
-    GraphQL,
+    GraphQL = 3,
 
+#if NETCOREAPP3_1_OR_GREATER
     /// <summary>
     /// MongoDB instrumentation.
     /// </summary>
-    MongoDB,
+    MongoDB = 4,
+#endif
 
     /// <summary>
     /// Npgsql instrumentation.
     /// </summary>
-    Npgsql,
+    Npgsql = 5,
 
+#if NETCOREAPP3_1_OR_GREATER
     /// <summary>
     /// MySqlData instrumentation.
     /// </summary>
-    MySqlData
+    MySqlData = 6
+#endif
 }

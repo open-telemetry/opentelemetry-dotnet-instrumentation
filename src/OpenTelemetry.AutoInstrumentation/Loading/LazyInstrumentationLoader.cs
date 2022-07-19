@@ -24,6 +24,9 @@ using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading;
 
+/// <summary>
+/// LazyInstrumentationLoader is responsible for managing deferred instrumentation initialization.
+/// </summary>
 internal class LazyInstrumentationLoader : ILifespanManager, IDisposable
 {
     // some instrumentations requires to keep references to objects
