@@ -23,7 +23,7 @@ OpenTelemetry .NET Automatic Instrumentation is built on top of
 
 You can find all references in
 [OpenTelemetry.AutoInstrumentation.csproj](../src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj)
-and [Directory.Build.props](../src/OpenTelemetry.AutoInstrumentation.AdditionalDeps/Directory.Build.props).
+and [OpenTelemetry.AutoInstrumentation.AdditionalDeps/Directory.Build.props](../src/OpenTelemetry.AutoInstrumentation.AdditionalDeps/Directory.Build.props).
 
 To automatically instrument applications, the OpenTelemetry .NET Automatic
 Instrumentation does the following:
