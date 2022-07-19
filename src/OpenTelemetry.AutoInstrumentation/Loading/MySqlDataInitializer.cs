@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#if NETCOREAPP3_1_OR_GREATER
+
 using System;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading;
@@ -36,3 +38,4 @@ internal class MySqlDataInitializer : InstrumentationInitializer
         lifespanManager.Track(instrumentation);
     }
 }
+#endif

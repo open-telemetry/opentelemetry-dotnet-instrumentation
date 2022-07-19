@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+#if NETCOREAPP3_1_OR_GREATER
 using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
@@ -76,3 +77,4 @@ public class MySqlDataFixture : IAsyncLifetime
         await container.DisposeAsync();
     }
 }
+#endif

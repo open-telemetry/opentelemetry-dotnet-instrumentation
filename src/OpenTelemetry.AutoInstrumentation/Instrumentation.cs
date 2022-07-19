@@ -19,7 +19,9 @@ using System.Diagnostics.Tracing;
 using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
+#if NETCOREAPP3_1_OR_GREATER
 using OpenTelemetry.AutoInstrumentation.Loading;
+#endif
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Metrics;
@@ -37,7 +39,9 @@ public static class Instrumentation
 {
     private static readonly ILogger Logger = OtelLogging.GetLogger();
     private static readonly ResourceBuilder _resourceBuilder = ResourceBuilder.CreateDefault();
+#if NETCOREAPP3_1_OR_GREATER
     private static readonly LazyInstrumentationLoader LazyInstrumentationLoader = new();
+#endif
 
     private static int _firstInitialization = 1;
     private static int _isExiting = 0;
@@ -106,10 +110,13 @@ public static class Instrumentation
                 // -> this should be refactored in a separate PR
                 // e.g. we could have a static method that returns a collection of initializers
                 //      and TracerSettings.EnabledInstrumentations would be passed as input
+#if NETCOREAPP3_1_OR_GREATER
+
                 if (TracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.MySqlData))
                 {
                     LazyInstrumentationLoader.Add(new MySqlDataInitializer());
                 }
+#endif
 
                 var builder = Sdk
                     .CreateTracerProviderBuilder()
@@ -177,7 +184,9 @@ public static class Instrumentation
 
         try
         {
+#if NETCOREAPP3_1_OR_GREATER
             LazyInstrumentationLoader?.Dispose();
+#endif
             _tracerProvider?.Dispose();
             _meterProvider?.Dispose();
             _sdkEventListener.Dispose();
@@ -188,7 +197,7 @@ public static class Instrumentation
         {
             try
             {
-                Logger.Error(ex, "An error occured while attempting to exit.");
+                Logger.Error(ex, "An error occurred while attempting to exit.");
             }
             catch
             {

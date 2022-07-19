@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#if NETCOREAPP3_1_OR_GREATER
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -91,3 +93,4 @@ internal class LazyInstrumentationLoader : ILifespanManager, IDisposable
         }
     }
 }
+#endif

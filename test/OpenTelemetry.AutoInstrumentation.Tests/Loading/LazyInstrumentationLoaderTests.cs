@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+#if NETCOREAPP3_1_OR_GREATER
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -76,3 +77,4 @@ public class LazyInstrumentationLoaderTests
         }
     }
 }
+#endif
