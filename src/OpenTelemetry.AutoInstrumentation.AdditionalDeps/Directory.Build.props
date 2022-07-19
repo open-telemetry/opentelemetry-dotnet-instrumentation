@@ -1,2 +1,7 @@
 <Project>
+  <ItemGroup>
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+    <PackageReference Include="MongoDB.Driver.Core.Extensions.DiagnosticSources" Version="1.1.0" />
+  </ItemGroup>
 </Project>
