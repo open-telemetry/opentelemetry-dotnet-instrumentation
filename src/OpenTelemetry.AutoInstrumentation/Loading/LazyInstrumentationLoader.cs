@@ -63,7 +63,6 @@ internal class LazyInstrumentationLoader : ILifespanManager, IDisposable
         private static readonly ILogger Logger = OtelLogging.GetLogger();
         private readonly InstrumentationInitializer _instrumentationInitializer;
         private readonly LazyInstrumentationLoader _manager;
-        private readonly object _requiredAssembliesLocker = new();
         private readonly HashSet<string> _requiredAssemblies;
 
         public OnAssemblyLoadInitializer(LazyInstrumentationLoader manager, InstrumentationInitializer instrumentationInitializer)
@@ -80,7 +79,7 @@ internal class LazyInstrumentationLoader : ILifespanManager, IDisposable
 
             if (_requiredAssemblies.Contains(assemblyName))
             {
-                lock (_requiredAssembliesLocker)
+                lock (_requiredAssemblies)
                 {
                     if (_requiredAssemblies.Contains(assemblyName))
                     {
