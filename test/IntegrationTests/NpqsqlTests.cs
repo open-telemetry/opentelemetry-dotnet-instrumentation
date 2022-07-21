@@ -23,16 +23,16 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(NpgsqlCollection.Name)]
+[Collection(PostgresCollection.Name)]
 public class NpqsqlTests : TestHelper
 {
     private const string ServiceName = "TestApplication.Npgsql";
-    private readonly NpgsqlFixture _npgsql;
+    private readonly PostgresFixture _postgres;
 
-    public NpqsqlTests(ITestOutputHelper output, NpgsqlFixture npgsql)
+    public NpqsqlTests(ITestOutputHelper output, PostgresFixture postgres)
         : base("Npgsql", output)
     {
-        _npgsql = npgsql;
+        _postgres = postgres;
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
     }
 
@@ -43,7 +43,7 @@ public class NpqsqlTests : TestHelper
     {
         using var agent = new MockZipkinCollector(Output);
 
-        RunTestApplication(agent.Port, arguments: $"--postgres {_npgsql.Port}");
+        RunTestApplication(agent.Port, arguments: $"--postgres {_postgres.Port}");
         var spans = agent.WaitForSpans(1, TimeSpan.FromSeconds(5));
 
         spans.Count.Should().Be(1);
