@@ -25,16 +25,16 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(MySqlDataCollection.Name)]
+[Collection(MySqlCollection.Name)]
 public class MySqlDataTests : TestHelper
 {
     private const string ServiceName = "TestApplication.MySqlData";
-    private readonly MySqlDataFixture _mySqlData;
+    private readonly MySqlFixture _mySql;
 
-    public MySqlDataTests(ITestOutputHelper output, MySqlDataFixture mySqlData)
+    public MySqlDataTests(ITestOutputHelper output, MySqlFixture mySql)
         : base("MySqlData", output)
     {
-        _mySqlData = mySqlData;
+        _mySql = mySql;
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
     }
 
@@ -45,7 +45,7 @@ public class MySqlDataTests : TestHelper
     {
         using var agent = new MockZipkinCollector(Output);
 
-        RunTestApplication(agent.Port, arguments: $"--mysql {_mySqlData.Port}");
+        RunTestApplication(agent.Port, arguments: $"--mysql {_mySql.Port}");
 
         var spans = agent.WaitForSpans(1, TimeSpan.FromSeconds(5));
 
