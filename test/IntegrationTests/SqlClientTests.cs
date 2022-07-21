@@ -24,16 +24,16 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    [Collection(SqlClientCollection.Name)]
+    [Collection(SqlServerCollection.Name)]
     public class SqlClientTests : TestHelper
     {
         private const string ServiceName = "TestApplication.SqlClient";
-        private readonly SqlClientFixture _sqlClientFixture;
+        private readonly SqlServerFixture _sqlServerFixture;
 
-        public SqlClientTests(ITestOutputHelper output, SqlClientFixture sqlClientFixture)
+        public SqlClientTests(ITestOutputHelper output, SqlServerFixture sqlServerFixture)
             : base("SqlClient", output)
         {
-            _sqlClientFixture = sqlClientFixture;
+            _sqlServerFixture = sqlServerFixture;
             SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
         }
 
@@ -46,7 +46,7 @@ namespace IntegrationTests
 
             const int expectedSpanCount = 8;
 
-            RunTestApplication(agent.Port, arguments: $"{_sqlClientFixture.Password} {_sqlClientFixture.Port}");
+            RunTestApplication(agent.Port, arguments: $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}");
             var spans = agent.WaitForSpans(expectedSpanCount, TimeSpan.FromSeconds(5));
 
             using (new AssertionScope())
@@ -59,7 +59,7 @@ namespace IntegrationTests
                     span.Name.Should().Be("master");
                     span.Tags.Should().Contain(new KeyValuePair<string, string>("db.system", "mssql"));
                     span.Tags.Should().Contain(new KeyValuePair<string, string>("db.name", "master"));
-                    span.Tags.Should().Contain(new KeyValuePair<string, string>("peer.service", $"localhost,{_sqlClientFixture.Port}"));
+                    span.Tags.Should().Contain(new KeyValuePair<string, string>("peer.service", $"localhost,{_sqlServerFixture.Port}"));
                     span.Tags.Should().Contain(new KeyValuePair<string, string>("span.kind", "client"));
                 }
             }
