@@ -63,8 +63,8 @@ internal class LazyInstrumentationLoader : ILifespanManager, IDisposable
         private static readonly ILogger Logger = OtelLogging.GetLogger();
         private readonly InstrumentationInitializer _instrumentationInitializer;
         private readonly LazyInstrumentationLoader _manager;
+        private readonly object _requiredAssembliesLocker = new();
         private readonly HashSet<string> _requiredAssemblies;
-        private int _loadedCount;
 
         public OnAssemblyLoadInitializer(LazyInstrumentationLoader manager, InstrumentationInitializer instrumentationInitializer)
         {
@@ -80,21 +80,29 @@ internal class LazyInstrumentationLoader : ILifespanManager, IDisposable
 
             if (_requiredAssemblies.Contains(assemblyName))
             {
-                if (Interlocked.Increment(ref _loadedCount) == _requiredAssemblies.Count)
+                lock (_requiredAssembliesLocker)
                 {
-                    var initializerName = _instrumentationInitializer.GetType().Name;
-                    Logger.Debug("'{0}' started", initializerName);
-
-                    try
+                    if (_requiredAssemblies.Contains(assemblyName))
                     {
-                        _instrumentationInitializer.Initialize(_manager);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Error(ex, "'{0}' failed", initializerName);
-                    }
+                        _requiredAssemblies.Remove(assemblyName);
 
-                    AppDomain.CurrentDomain.AssemblyLoad -= CurrentDomain_AssemblyLoad;
+                        if (_requiredAssemblies.Count == 0)
+                        {
+                            var initializerName = _instrumentationInitializer.GetType().Name;
+                            Logger.Debug("'{0}' started", initializerName);
+
+                            try
+                            {
+                                _instrumentationInitializer.Initialize(_manager);
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Error(ex, "'{0}' failed", initializerName);
+                            }
+
+                            AppDomain.CurrentDomain.AssemblyLoad -= CurrentDomain_AssemblyLoad;
+                        }
+                    }
                 }
             }
         }
