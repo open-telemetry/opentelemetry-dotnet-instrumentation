@@ -119,6 +119,7 @@ public class SettingsTests : IDisposable
 #if NETCOREAPP3_1_OR_GREATER
     [InlineData(nameof(TracerInstrumentation.MongoDB), TracerInstrumentation.MongoDB)]
     [InlineData(nameof(TracerInstrumentation.MySqlData), TracerInstrumentation.MySqlData)]
+    [InlineData(nameof(TracerInstrumentation.StackExchangeRedis), TracerInstrumentation.StackExchangeRedis)]
 #endif
     [InlineData(nameof(TracerInstrumentation.Npgsql), TracerInstrumentation.Npgsql)]
     [InlineData(nameof(TracerInstrumentation.SqlClient), TracerInstrumentation.SqlClient)]

@@ -43,6 +43,7 @@ for more details.
 | `MySqlData` | [MySql.Data](https://www.nuget.org/packages/MySql.Data)  **Not supported on .NET Framework** | ≥6.10.7 | source |
 | `Npgsql` | [Npgsql](https://www.nuget.org/packages/Npgsql) | ≥6.0.0 | source |
 | `SqlClient` | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) | * | source |
+| `StackExchangeRedis` | [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)  **Not supported on .NET Framework** | ≥2.1.58 < 3.0.0 | source & binary |
 
 ### Instrumented metrics libraries and frameworks
 

@@ -16,7 +16,6 @@
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.3.0" />
     <PackageReference Include="OpenTelemetry.Shims.OpenTracing" Version="1.0.0-rc9.4" />
     <PackageReference Include="OpenTelemetry.Exporter.Prometheus" Version="1.3.0-rc.2" />
-
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
@@ -30,6 +29,9 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.MySqlData" Version="1.0.0-beta.3" />
     <!-- MySql.Data is required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
     <PackageReference Include="MySql.Data" Version="6.10.7" ExcludeAssets="all" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc9.7" />
+    <!-- StackExchange.Redis is required by OpenTelemetry.Instrumentation.StackExchangeRedis. ExcludeAssets="all" prevents copying it to the output -->
+    <PackageReference Include="StackExchange.Redis" Version="2.1.58" ExcludeAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
