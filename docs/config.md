@@ -40,6 +40,7 @@ for more details.
 | `GraphQL` | [GraphQL](https://www.nuget.org/packages/GraphQL/) | ≥2.3.0 & < 3.0.0 | bytecode |
 | `HttpClient` | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | * | source |
 | `MongoDB` | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core) **Not supported on .NET Framework** | ≥2.3.0 & < 3.0.0 | source & bytecode |
+| `MySql.Data` | [MySql.Data](https://www.nuget.org/packages/MySql.Data)  **Not supported on .NET Framework** | ≥6.10.7 | source |
 | `Npgsql` | [Npgsql](https://www.nuget.org/packages/Npgsql) | ≥6.0.0 | source |
 | `SqlClient` | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) | * | source |
 
