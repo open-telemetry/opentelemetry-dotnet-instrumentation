@@ -1,4 +1,4 @@
-// <copyright file="SqlClientCollection.cs" company="OpenTelemetry Authors">
+// <copyright file="SqlServerCollection.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,19 +24,19 @@ using Xunit;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class SqlClientCollection : ICollectionFixture<SqlClientFixture>
+public class SqlServerCollection : ICollectionFixture<SqlServerFixture>
 {
-    public const string Name = nameof(SqlClientCollection);
+    public const string Name = nameof(SqlServerCollection);
 }
 
-public class SqlClientFixture : IAsyncLifetime
+public class SqlServerFixture : IAsyncLifetime
 {
     private const int DatabasePort = 1433;
     private const string DatabaseImage = "mcr.microsoft.com/mssql/server:2019-CU15-ubuntu-20.04";
 
     private TestcontainersContainer _container;
 
-    public SqlClientFixture()
+    public SqlServerFixture()
     {
         Port = TcpPortProvider.GetOpenPort();
     }
@@ -47,24 +47,24 @@ public class SqlClientFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _container = await LaunchDatabaseContainerAsync();
+        _container = await LaunchSqlServerContainerAsync();
     }
 
     public async Task DisposeAsync()
     {
         if (_container != null)
         {
-            await ShutdownDatabaseContainerAsync(_container);
+            await ShutdownSqlServerContainerAsync(_container);
         }
     }
 
-    private static async Task ShutdownDatabaseContainerAsync(TestcontainersContainer container)
+    private static async Task ShutdownSqlServerContainerAsync(TestcontainersContainer container)
     {
         await container.CleanUpAsync();
         await container.DisposeAsync();
     }
 
-    private async Task<TestcontainersContainer> LaunchDatabaseContainerAsync()
+    private async Task<TestcontainersContainer> LaunchSqlServerContainerAsync()
     {
         var databaseContainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
             .WithImage(DatabaseImage)
