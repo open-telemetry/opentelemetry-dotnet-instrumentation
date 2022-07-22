@@ -1,4 +1,4 @@
-// <copyright file="NpgsqlCollection.cs" company="OpenTelemetry Authors">
+// <copyright file="PostgresCollection.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,19 +23,19 @@ using Xunit;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class NpgsqlCollection : ICollectionFixture<NpgsqlFixture>
+public class PostgresCollection : ICollectionFixture<PostgresFixture>
 {
-    public const string Name = nameof(NpgsqlCollection);
+    public const string Name = nameof(PostgresCollection);
 }
 
-public class NpgsqlFixture : IAsyncLifetime
+public class PostgresFixture : IAsyncLifetime
 {
-    private const int NpgsqlPort = 5432;
-    private const string NpgsqlImage = "postgres:14.4";
+    private const int PostgresPort = 5432;
+    private const string PostgresImage = "postgres:14.4";
 
     private TestcontainersContainer _container;
 
-    public NpgsqlFixture()
+    public PostgresFixture()
     {
         Port = TcpPortProvider.GetOpenPort();
     }
@@ -44,25 +44,25 @@ public class NpgsqlFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _container = await LaunchNpgsqlContainerAsync(Port);
+        _container = await LaunchPostgresContainerAsync(Port);
     }
 
     public async Task DisposeAsync()
     {
         if (_container != null)
         {
-            await ShutdownNpgsqlContainerAsync(_container);
+            await ShutdownPostgresContainerAsync(_container);
         }
     }
 
-    private async Task<TestcontainersContainer> LaunchNpgsqlContainerAsync(int port)
+    private async Task<TestcontainersContainer> LaunchPostgresContainerAsync(int port)
     {
         var containersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
-            .WithImage(NpgsqlImage)
+            .WithImage(PostgresImage)
             .WithName($"postgres-{port}")
-            .WithPortBinding(port, NpgsqlPort)
+            .WithPortBinding(port, PostgresPort)
             .WithEnvironment("POSTGRES_HOST_AUTH_METHOD", "trust")
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(NpgsqlPort));
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(PostgresPort));
 
         var container = containersBuilder.Build();
         await container.StartAsync();
@@ -70,7 +70,7 @@ public class NpgsqlFixture : IAsyncLifetime
         return container;
     }
 
-    private async Task ShutdownNpgsqlContainerAsync(TestcontainersContainer container)
+    private async Task ShutdownPostgresContainerAsync(TestcontainersContainer container)
     {
         await container.CleanUpAsync();
         await container.DisposeAsync();

@@ -1,4 +1,4 @@
-// <copyright file="MySqlDataCollection.cs" company="OpenTelemetry Authors">
+// <copyright file="MySqlCollection.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,19 +24,19 @@ using Xunit;
 namespace IntegrationTests;
 
 [CollectionDefinition(Name)]
-public class MySqlDataCollection : ICollectionFixture<MySqlDataFixture>
+public class MySqlCollection : ICollectionFixture<MySqlFixture>
 {
-    public const string Name = nameof(MySqlDataCollection);
+    public const string Name = nameof(MySqlCollection);
 }
 
-public class MySqlDataFixture : IAsyncLifetime
+public class MySqlFixture : IAsyncLifetime
 {
     private const int MySqlPort = 3306;
     private const string MySqlImage = "mysql:8.0.29";
 
     private TestcontainersContainer _container;
 
-    public MySqlDataFixture()
+    public MySqlFixture()
     {
         Port = TcpPortProvider.GetOpenPort();
     }
