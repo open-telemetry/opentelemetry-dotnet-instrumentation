@@ -1,4 +1,4 @@
-// <copyright file="InstrumentationInitializer.cs" company="OpenTelemetry Authors">
+// <copyright file="IRequiredAssemblies.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,20 +17,10 @@
 #if NETCOREAPP3_1_OR_GREATER
 namespace OpenTelemetry.AutoInstrumentation.Loading;
 
-/// <summary>
-/// InstrumentationInitializer encapsulates instrumentation initialization
-/// together with the assemblies which are required by the implementation.
-/// </summary>
-internal abstract class InstrumentationInitializer
+internal interface IRequiredAssemblies
 {
-    protected InstrumentationInitializer(IRequiredAssemblies requiredAssemblies)
-    {
-        RequiredAssemblies = requiredAssemblies;
-    }
+    bool AllRequiredAssembliesLoaded { get; }
 
-    public IRequiredAssemblies RequiredAssemblies { get; }
-
-    public abstract void Initialize(ILifespanManager lifespanManager);
+    bool NotifyAssemblyLoaded(string assemblyName);
 }
-
 #endif
