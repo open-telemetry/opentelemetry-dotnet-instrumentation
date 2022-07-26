@@ -25,6 +25,6 @@ internal interface ILifespanManager
     /// it will be disposed together with the manager.
     /// </summary>
     /// <param name="instance">Trackable object</param>
-    public void Track(object instance);
+    void Track(object instance);
 }
 #endif
