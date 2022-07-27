@@ -57,7 +57,7 @@ public class LazyInstrumentationLoaderTests
         public const string DummyAssemblyName = "Dummy.Assembly";
 
         public DummyInitializer()
-            : base(new DummyAssemblyRequiredAssemblies())
+            : base(DummyAssemblyName)
         {
         }
 
@@ -74,27 +74,6 @@ public class LazyInstrumentationLoaderTests
         public void Dispose()
         {
             Disposed = true;
-        }
-
-        private class DummyAssemblyRequiredAssemblies : IRequiredAssemblies
-        {
-            private volatile bool _dummyAssemblyLoaded;
-
-            public bool AllRequiredAssembliesLoaded
-            {
-                get { return _dummyAssemblyLoaded; }
-            }
-
-            public bool NotifyAssemblyLoaded(string assemblyName)
-            {
-                if (assemblyName == "Dummy.Assembly")
-                {
-                    _dummyAssemblyLoaded = true;
-                    return true;
-                }
-
-                return false;
-            }
         }
     }
 }

@@ -23,7 +23,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loading;
 internal class MySqlDataInitializer : InstrumentationInitializer
 {
     public MySqlDataInitializer()
-        : base(new MySqlDataRequiredAssemblies())
+        : base("MySql.Data")
     {
     }
 
@@ -36,27 +36,6 @@ internal class MySqlDataInitializer : InstrumentationInitializer
         var instrumentation = Activator.CreateInstance(instrumentationType, options);
 
         lifespanManager.Track(instrumentation);
-    }
-
-    private class MySqlDataRequiredAssemblies : IRequiredAssemblies
-    {
-        private volatile bool _mySqlDataLoaded;
-
-        public bool AllRequiredAssembliesLoaded
-        {
-            get { return _mySqlDataLoaded; }
-        }
-
-        public bool NotifyAssemblyLoaded(string assemblyName)
-        {
-            if (assemblyName == "MySql.Data")
-            {
-                _mySqlDataLoaded = true;
-                return true;
-            }
-
-            return false;
-        }
     }
 }
 #endif
