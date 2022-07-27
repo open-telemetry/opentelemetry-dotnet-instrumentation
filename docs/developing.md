@@ -158,7 +158,7 @@ as they give the biggest confidence if the auto-instrumentation works properly.
 Each test class has its related test application that can be found
 under [test/test-applications/integrations](../test/test-applications/integrations)
 Each library instrumentation has its own test class.
-Other features are tested via `SmokeTests` class or if have its own test class
+Other features are tested via `SmokeTests` class or have its own test class
 if a dedicated test application is needed.
 
 Currently, the strategy is to test the library instrumentations
