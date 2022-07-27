@@ -10,6 +10,7 @@
    - `OpenTelemetry.AutoInstrumentation.Loader.csproj`
    - `CMakeLists.txt`
    - `Resource.rc`
+   - `README.md`
 
 1. Update the [CHANGELOG.md](../CHANGELOG.md) with the new release.
 
