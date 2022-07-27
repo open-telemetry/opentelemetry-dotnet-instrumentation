@@ -19,37 +19,54 @@
 using System;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
+
+/// <summary>
+/// StackExchange.Redis.ConnectionMultiplexer calltarget instrumentation
+/// </summary>
+[InstrumentMethod(// releases 2.0.495 - 2.1.39
+    AssemblyName = StackExchangeRedisConstants.AssemblyName,
+    TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    MethodName = StackExchangeRedisConstants.ConnectImplMethodName,
+    ReturnTypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    ParameterTypeNames = new[] { ClrNames.Object, StackExchangeRedisConstants.TextWriterTypeName },
+    MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
+    MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
+    IntegrationName = StackExchangeRedisConstants.IntegrationName)]
+[InstrumentMethod(// releases 2.1.50 - 2.5.43
+    AssemblyName = StackExchangeRedisConstants.AssemblyName,
+    TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    MethodName = StackExchangeRedisConstants.ConnectImplMethodName,
+    ReturnTypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName },
+    MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
+    MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
+    IntegrationName = StackExchangeRedisConstants.IntegrationName)]
+[InstrumentMethod(// releases 2.5.61+
+    AssemblyName = StackExchangeRedisConstants.AssemblyName,
+    TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    MethodName = StackExchangeRedisConstants.ConnectImplMethodName,
+    ReturnTypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName, StackExchangeRedisConstants.NullableServerType },
+    MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
+    MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
+    IntegrationName = StackExchangeRedisConstants.IntegrationName)]
+public class StackExchangeRedisIntegration
 {
     /// <summary>
-    /// StackExchange.Redis.ConnectionMultiplexer calltarget instrumentation
+    /// OnMethodEnd callback
     /// </summary>
-    [InstrumentMethod(
-        AssemblyName = StackExchangeRedisConstants.AssemblyName,
-        TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
-        MethodName = StackExchangeRedisConstants.ConnectMethodName,
-        ReturnTypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
-        ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName },
-        MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
-        MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
-        IntegrationName = StackExchangeRedisConstants.IntegrationName)]
-    public class StackExchangeRedisIntegration
+    /// <param name="returnValue">Return value</param>
+    /// <param name="exception">Exception value</param>
+    /// <param name="state">CallTarget state</param>
+    /// <typeparam name="TTarget">Type of the target</typeparam>
+    /// <typeparam name="TReturn">Return type</typeparam>
+    /// <returns>A response value, in an async scenario will be T of Task of T</returns>
+    public static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TReturn returnValue, Exception exception, CallTargetState state)
     {
-        /// <summary>
-        /// OnMethodEnd callback
-        /// </summary>
-        /// <param name="returnValue">Return value</param>
-        /// <param name="exception">Exception value</param>
-        /// <param name="state">CallTarget state</param>
-        /// <typeparam name="TTarget">Type of the target</typeparam>
-        /// <typeparam name="TReturn">Return type</typeparam>
-        /// <returns>A response value, in an async scenario will be T of Task of T</returns>
-        public static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TReturn returnValue, Exception exception, CallTargetState state)
-        {
-            StackExchangeRedisInitializer.Initialize(returnValue);
+        StackExchangeRedisInitializer.Initialize(returnValue);
 
-            return new CallTargetReturn<TReturn>(returnValue);
-        }
+        return new CallTargetReturn<TReturn>(returnValue);
     }
 }
 #endif

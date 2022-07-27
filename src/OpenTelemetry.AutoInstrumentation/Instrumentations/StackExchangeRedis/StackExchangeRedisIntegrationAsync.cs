@@ -24,12 +24,30 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
 /// <summary>
 /// StackExchange.Redis.ConnectionMultiplexer calltarget instrumentation
 /// </summary>
-[InstrumentMethod(
+[InstrumentMethod(// releases 2.0.495 - 2.1.39
     AssemblyName = StackExchangeRedisConstants.AssemblyName,
     TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
-    MethodName = StackExchangeRedisConstants.ConnectAsyncMethodName,
+    MethodName = StackExchangeRedisConstants.ConnectImplAsyncMethodName,
     ReturnTypeName = StackExchangeRedisConstants.TaskConnectionMultiplexerTypeName,
     ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName },
+    MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
+    MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
+    IntegrationName = StackExchangeRedisConstants.IntegrationName)]
+[InstrumentMethod(// releases 2.1.50 - 2.5.43
+    AssemblyName = StackExchangeRedisConstants.AssemblyName,
+    TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    MethodName = StackExchangeRedisConstants.ConnectImplAsyncMethodName,
+    ReturnTypeName = StackExchangeRedisConstants.TaskConnectionMultiplexerTypeName,
+    ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName },
+    MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
+    MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
+    IntegrationName = StackExchangeRedisConstants.IntegrationName)]
+[InstrumentMethod(// releases 2.5.61+
+    AssemblyName = StackExchangeRedisConstants.AssemblyName,
+    TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    MethodName = StackExchangeRedisConstants.ConnectImplAsyncMethodName,
+    ReturnTypeName = StackExchangeRedisConstants.TaskConnectionMultiplexerTypeName,
+    ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName, StackExchangeRedisConstants.NullableServerType },
     MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
     MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
     IntegrationName = StackExchangeRedisConstants.IntegrationName)]

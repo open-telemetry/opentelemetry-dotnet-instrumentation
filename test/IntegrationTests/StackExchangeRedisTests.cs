@@ -47,7 +47,7 @@ public class StackExchangeRedisTests : TestHelper
 
         RunTestApplication(agent.Port, arguments: $"--redis {_redis.Port}");
 
-        const int expectedSpansCount = 2;
+        const int expectedSpansCount = 8;
 
         var spans = agent.WaitForSpans(expectedSpansCount, TimeSpan.FromSeconds(5));
 
