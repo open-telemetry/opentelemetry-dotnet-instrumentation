@@ -76,7 +76,7 @@ and [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework).
 CI tests run against the following operating systems:
 
 - Microsoft Windows Server 2022
-- macOS Catalina 10.15
+- macOS Big Sur 11
 - Ubuntu 20.04 LTS
 
 ### Instrumented libraries and frameworks
