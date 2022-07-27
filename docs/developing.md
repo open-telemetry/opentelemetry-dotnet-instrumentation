@@ -162,7 +162,7 @@ Other features are tested via `SmokeTests` class or if have its own test class
 if a dedicated test application is needed.
 
 Currently, the strategy is to test the library instrumentations
-against its the lowest supported version.
+against its lowest supported version.
 The pull requests created by @dependabot with `do NOT merge` label
 are used to test against higher library versions when they are released.
 
