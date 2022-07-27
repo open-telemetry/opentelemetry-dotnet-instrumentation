@@ -23,12 +23,12 @@ namespace OpenTelemetry.AutoInstrumentation.Loading;
 /// </summary>
 internal abstract class InstrumentationInitializer
 {
-    protected InstrumentationInitializer(string requiredAssembly)
+    protected InstrumentationInitializer(string requiredAssemblyName)
     {
-        RequiredAssembly = requiredAssembly;
+        RequiredAssemblyName = requiredAssemblyName;
     }
 
-    public string RequiredAssembly { get; }
+    public string RequiredAssemblyName { get; }
 
     public abstract void Initialize(ILifespanManager lifespanManager);
 }

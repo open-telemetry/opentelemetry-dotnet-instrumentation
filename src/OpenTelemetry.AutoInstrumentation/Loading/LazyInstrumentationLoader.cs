@@ -61,13 +61,13 @@ internal class LazyInstrumentationLoader : ILifespanManager, IDisposable
         private static readonly ILogger Logger = OtelLogging.GetLogger();
         private readonly InstrumentationInitializer _instrumentationInitializer;
         private readonly LazyInstrumentationLoader _manager;
-        private readonly string _requiredAssembly;
+        private readonly string _requiredAssemblyName;
 
         public OnAssemblyLoadInitializer(LazyInstrumentationLoader manager, InstrumentationInitializer instrumentationInitializer)
         {
             _instrumentationInitializer = instrumentationInitializer;
             _manager = manager;
-            _requiredAssembly = instrumentationInitializer.RequiredAssembly;
+            _requiredAssemblyName = instrumentationInitializer.RequiredAssemblyName;
             AppDomain.CurrentDomain.AssemblyLoad += CurrentDomain_AssemblyLoad;
         }
 
@@ -75,7 +75,7 @@ internal class LazyInstrumentationLoader : ILifespanManager, IDisposable
         {
             var assemblyName = args.LoadedAssembly.FullName.Split(new[] { ',' }, count: 2)[0];
 
-            if (_requiredAssembly == assemblyName)
+            if (_requiredAssemblyName == assemblyName)
             {
                 var initializerName = _instrumentationInitializer.GetType().Name;
                 Logger.Debug("'{0}' started", initializerName);
