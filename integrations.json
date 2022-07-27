@@ -37,7 +37,7 @@
           "type": "GraphQL.Execution.ExecutionStrategy",
           "method": "ExecuteAsync",
           "signature_types": [
-            "System.Threading.Tasks.Task`1<GraphQL.ExecutionResult>",
+            "System.Threading.Tasks.Task`1[GraphQL.ExecutionResult]",
             "GraphQL.Execution.ExecutionContext"
           ],
           "minimum_major": 2,
@@ -60,7 +60,7 @@
           "type": "GraphQL.Execution.SubscriptionExecutionStrategy",
           "method": "ExecuteAsync",
           "signature_types": [
-            "System.Threading.Tasks.Task`1<GraphQL.ExecutionResult>",
+            "System.Threading.Tasks.Task`1[GraphQL.ExecutionResult]",
             "GraphQL.Execution.ExecutionContext"
           ],
           "minimum_major": 2,
