@@ -57,6 +57,11 @@ public enum TracerInstrumentation
     /// <summary>
     /// MySqlData instrumentation.
     /// </summary>
-    MySqlData = 6
+    MySqlData = 6,
+
+    /// <summary>
+    /// StackExchangeRedis instrumentation.
+    /// </summary>
+    StackExchangeRedis = 7
 #endif
 }

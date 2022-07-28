@@ -37,7 +37,7 @@
           "type": "GraphQL.Execution.ExecutionStrategy",
           "method": "ExecuteAsync",
           "signature_types": [
-            "System.Threading.Tasks.Task`1<GraphQL.ExecutionResult>",
+            "System.Threading.Tasks.Task`1[GraphQL.ExecutionResult]",
             "GraphQL.Execution.ExecutionContext"
           ],
           "minimum_major": 2,
@@ -60,7 +60,7 @@
           "type": "GraphQL.Execution.SubscriptionExecutionStrategy",
           "method": "ExecuteAsync",
           "signature_types": [
-            "System.Threading.Tasks.Task`1<GraphQL.ExecutionResult>",
+            "System.Threading.Tasks.Task`1[GraphQL.ExecutionResult]",
             "GraphQL.Execution.ExecutionContext"
           ],
           "minimum_major": 2,
@@ -101,6 +101,157 @@
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
           "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ValidateIntegration",
+          "action": "CallTargetModification"
+        }
+      }
+    ]
+  },
+  {
+    "name": "StackExchangeRedis",
+    "method_replacements": [
+      {
+        "caller": {},
+        "target": {
+          "assembly": "StackExchange.Redis",
+          "type": "StackExchange.Redis.ConnectionMultiplexer",
+          "method": "ConnectImpl",
+          "signature_types": [
+            "StackExchange.Redis.ConnectionMultiplexer",
+            "System.Object",
+            "System.IO.TextWriter"
+          ],
+          "minimum_major": 2,
+          "minimum_minor": 0,
+          "minimum_patch": 0,
+          "maximum_major": 2,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation",
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration",
+          "action": "CallTargetModification"
+        }
+      },
+      {
+        "caller": {},
+        "target": {
+          "assembly": "StackExchange.Redis",
+          "type": "StackExchange.Redis.ConnectionMultiplexer",
+          "method": "ConnectImpl",
+          "signature_types": [
+            "StackExchange.Redis.ConnectionMultiplexer",
+            "StackExchange.Redis.ConfigurationOptions",
+            "System.IO.TextWriter"
+          ],
+          "minimum_major": 2,
+          "minimum_minor": 0,
+          "minimum_patch": 0,
+          "maximum_major": 2,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation",
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration",
+          "action": "CallTargetModification"
+        }
+      },
+      {
+        "caller": {},
+        "target": {
+          "assembly": "StackExchange.Redis",
+          "type": "StackExchange.Redis.ConnectionMultiplexer",
+          "method": "ConnectImpl",
+          "signature_types": [
+            "StackExchange.Redis.ConnectionMultiplexer",
+            "StackExchange.Redis.ConfigurationOptions",
+            "System.IO.TextWriter",
+            "System.Nullable`1[StackExchange.Redis.ServerType]"
+          ],
+          "minimum_major": 2,
+          "minimum_minor": 0,
+          "minimum_patch": 0,
+          "maximum_major": 2,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation",
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration",
+          "action": "CallTargetModification"
+        }
+      },
+      {
+        "caller": {},
+        "target": {
+          "assembly": "StackExchange.Redis",
+          "type": "StackExchange.Redis.ConnectionMultiplexer",
+          "method": "ConnectImplAsync",
+          "signature_types": [
+            "System.Threading.Tasks.Task`1[StackExchange.Redis.ConnectionMultiplexer]",
+            "System.Object",
+            "System.IO.TextWriter"
+          ],
+          "minimum_major": 2,
+          "minimum_minor": 0,
+          "minimum_patch": 0,
+          "maximum_major": 2,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation",
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync",
+          "action": "CallTargetModification"
+        }
+      },
+      {
+        "caller": {},
+        "target": {
+          "assembly": "StackExchange.Redis",
+          "type": "StackExchange.Redis.ConnectionMultiplexer",
+          "method": "ConnectImplAsync",
+          "signature_types": [
+            "System.Threading.Tasks.Task`1[StackExchange.Redis.ConnectionMultiplexer]",
+            "StackExchange.Redis.ConfigurationOptions",
+            "System.IO.TextWriter"
+          ],
+          "minimum_major": 2,
+          "minimum_minor": 0,
+          "minimum_patch": 0,
+          "maximum_major": 2,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation",
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync",
+          "action": "CallTargetModification"
+        }
+      },
+      {
+        "caller": {},
+        "target": {
+          "assembly": "StackExchange.Redis",
+          "type": "StackExchange.Redis.ConnectionMultiplexer",
+          "method": "ConnectImplAsync",
+          "signature_types": [
+            "System.Threading.Tasks.Task`1[StackExchange.Redis.ConnectionMultiplexer]",
+            "StackExchange.Redis.ConfigurationOptions",
+            "System.IO.TextWriter",
+            "System.Nullable`1[StackExchange.Redis.ServerType]"
+          ],
+          "minimum_major": 2,
+          "minimum_minor": 0,
+          "minimum_patch": 0,
+          "maximum_major": 2,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation",
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync",
           "action": "CallTargetModification"
         }
       }

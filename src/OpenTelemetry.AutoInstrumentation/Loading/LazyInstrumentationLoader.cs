@@ -51,7 +51,7 @@ internal class LazyInstrumentationLoader : ILifespanManager, IDisposable
         _ = new OnAssemblyLoadInitializer(this, loader);
     }
 
-    void ILifespanManager.Track(object instance)
+    public void Track(object instance)
     {
         _instrumentations.Add(instance);
     }

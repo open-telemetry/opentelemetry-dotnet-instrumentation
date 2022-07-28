@@ -17,7 +17,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+#if NETCOREAPP3_1_OR_GREATER
 using OpenTelemetry.AutoInstrumentation.Util;
+#endif
 using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
@@ -32,6 +34,7 @@ internal static class EnvironmentConfigurationTracerHelper
 #if NETCOREAPP3_1_OR_GREATER
         [TracerInstrumentation.MongoDB] = builder => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources"),
         [TracerInstrumentation.MySqlData] = builder => builder.AddSource("OpenTelemetry.Instrumentation.MySqlData"),
+        [TracerInstrumentation.StackExchangeRedis] = builder => builder.AddSource("OpenTelemetry.Instrumentation.StackExchangeRedis"),
 #endif
         [TracerInstrumentation.Npgsql] = builder => builder.AddSource("Npgsql")
     };

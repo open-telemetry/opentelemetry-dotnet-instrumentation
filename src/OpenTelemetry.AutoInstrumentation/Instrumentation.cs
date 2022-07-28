@@ -71,6 +71,10 @@ public static class Instrumentation
         }
     }
 
+#if NETCOREAPP3_1_OR_GREATER
+    internal static ILifespanManager LifespanManager => LazyInstrumentationLoader;
+#endif
+
     internal static TracerSettings TracerSettings { get; } = TracerSettings.FromDefaultSources();
 
     internal static MeterSettings MeterSettings { get; } = MeterSettings.FromDefaultSources();

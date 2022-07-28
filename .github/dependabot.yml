@@ -249,6 +249,12 @@ updates:
       - "do NOT merge"
 
   - package-ecosystem: nuget
+    directory: /test/test-applications/integrations/TestApplication.StackExchangeRedis
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
     directory: /test/test-applications/mocks/OpenTelemetry.AutoInstrumentation.Mock
     schedule:
       interval: "daily"
