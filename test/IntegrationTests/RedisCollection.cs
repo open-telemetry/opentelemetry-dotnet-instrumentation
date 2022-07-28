@@ -61,7 +61,7 @@ public class RedisFixture : IAsyncLifetime
     {
         var containersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
             .WithImage(RedisImage)
-            .WithName($"postgres-{port}")
+            .WithName($"redis-{port}")
             .WithPortBinding(port, RedisPort)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(RedisPort));
 
