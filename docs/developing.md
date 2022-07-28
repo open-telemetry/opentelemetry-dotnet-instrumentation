@@ -166,6 +166,11 @@ against its lowest supported version.
 The pull requests created by @dependabot with `do NOT merge` label
 are used to test against higher library versions when they are released.
 
+> `TestApplication.AspNet` is an exception to this strategy
+> as it would not work well, because of multiple dependent packages.
+> `TestApplication.AspNet` references the latest versions
+> of the ASP.NET packages.
+
 ## Debug the .NET runtime on Linux
 
 - [Requirements](https://github.com/dotnet/runtime/blob/main/docs/workflow/requirements/linux-requirements.md)
