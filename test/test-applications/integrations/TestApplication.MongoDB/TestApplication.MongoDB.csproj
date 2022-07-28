@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <ApiVersion Condition="'$(ApiVersion)' == ''">2.13.0</ApiVersion>
+    <ApiVersion Condition="'$(ApiVersion)' == ''">2.17.0</ApiVersion>
     <DefineConstants Condition="'$(ApiVersion)'>='2.15.0'">$(DefineConstants);MONGODB_2_15</DefineConstants>
     <DefineConstants Condition="'$(ApiVersion)'>='2.7.0'">$(DefineConstants);MONGODB_2_7</DefineConstants>
 
