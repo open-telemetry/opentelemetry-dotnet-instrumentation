@@ -31,7 +31,7 @@
     <PackageReference Include="MySql.Data" Version="6.10.7" ExcludeAssets="all" />
     <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc9.7" />
     <!-- StackExchange.Redis is required by OpenTelemetry.Instrumentation.StackExchangeRedis. ExcludeAssets="all" prevents copying it to the output -->
-    <PackageReference Include="StackExchange.Redis" Version="2.1.58" ExcludeAssets="all" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.48" ExcludeAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
