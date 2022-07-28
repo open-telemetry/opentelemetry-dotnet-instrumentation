@@ -17,7 +17,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+#if NETCOREAPP3_1_OR_GREATER
 using OpenTelemetry.AutoInstrumentation.Util;
+#endif
 using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
