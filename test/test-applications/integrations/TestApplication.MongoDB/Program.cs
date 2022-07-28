@@ -18,7 +18,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+#if !MONGODB_2_15
 using System.Threading;
+#endif
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -30,8 +32,7 @@ namespace TestApplication.MongoDB;
 
 public static class Program
 {
-    internal static readonly ActivitySource ActivitySource = new(
-        "TestApplication.MongoDB", "1.0.0");
+    internal static readonly ActivitySource ActivitySource = new("TestApplication.MongoDB", "1.0.0");
 
     public static void Main(string[] args)
     {
@@ -62,7 +63,9 @@ public static class Program
         Run(collection, newDocument);
         RunAsync(collection, newDocument).Wait();
 
+#if !MONGODB_2_15
         WireProtocolExecuteIntegrationTest(client);
+#endif
     }
 
     public static void Run(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
@@ -88,9 +91,11 @@ public static class Program
         // https://stackoverflow.com/questions/49506857/how-do-i-run-an-explain-query-with-the-2-4-c-sharp-mongo-driver
         var options = new FindOptions
         {
+#if !MONGODB_2_15
 #pragma warning disable 0618 // 'FindOptionsBase.Modifiers' is obsolete: 'Use individual properties instead.'
             Modifiers = new BsonDocument("$explain", true)
 #pragma warning restore 0618
+#endif
         };
         // Without properly unboxing generic arguments whose instantiations
         // are valuetypes, the following line will fail with
@@ -113,7 +118,7 @@ public static class Program
 #if MONGODB_2_7
         var count = await collection.CountDocumentsAsync(new BsonDocument());
 #else
-            var count = await collection.CountAsync(new BsonDocument());
+        var count = await collection.CountAsync(new BsonDocument());
 #endif
 
         Console.WriteLine($"Documents: {count}");
@@ -123,6 +128,7 @@ public static class Program
         Console.WriteLine(allDocuments.FirstOrDefault());
     }
 
+#if !MONGODB_2_15
     public static void WireProtocolExecuteIntegrationTest(MongoClient client)
     {
         using (var syncScope = ActivitySource.StartActivity("sync-calls-execute"))
@@ -139,6 +145,7 @@ public static class Program
             channel.KillCursorsAsync(new long[] { 0, 1, 2 }, new global::MongoDB.Driver.Core.WireProtocol.Messages.Encoders.MessageEncoderSettings(), CancellationToken.None).Wait();
         }
     }
+#endif
 
     private static string Host()
     {
@@ -156,6 +163,7 @@ public static class Program
     }
 }
 
+#if !MONGODB_2_15
 #pragma warning disable SA1402 // File may only contain a single type
 internal class ServerSelector : global::MongoDB.Driver.Core.Clusters.ServerSelectors.IServerSelector
 {
@@ -165,3 +173,4 @@ internal class ServerSelector : global::MongoDB.Driver.Core.Clusters.ServerSelec
     }
 }
 #pragma warning restore SA1402 // File may only contain a single type
+#endif
