@@ -18,8 +18,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading;
@@ -63,14 +61,13 @@ internal class LazyInstrumentationLoader : ILifespanManager, IDisposable
         private static readonly ILogger Logger = OtelLogging.GetLogger();
         private readonly InstrumentationInitializer _instrumentationInitializer;
         private readonly LazyInstrumentationLoader _manager;
-        private readonly HashSet<string> _requiredAssemblies;
-        private int _loadedCount;
+        private readonly string _requiredAssemblyName;
 
         public OnAssemblyLoadInitializer(LazyInstrumentationLoader manager, InstrumentationInitializer instrumentationInitializer)
         {
             _instrumentationInitializer = instrumentationInitializer;
             _manager = manager;
-            _requiredAssemblies = new HashSet<string>(instrumentationInitializer.RequiredAssemblies);
+            _requiredAssemblyName = instrumentationInitializer.RequiredAssemblyName;
             AppDomain.CurrentDomain.AssemblyLoad += CurrentDomain_AssemblyLoad;
         }
 
@@ -78,24 +75,21 @@ internal class LazyInstrumentationLoader : ILifespanManager, IDisposable
         {
             var assemblyName = args.LoadedAssembly.FullName.Split(new[] { ',' }, count: 2)[0];
 
-            if (_requiredAssemblies.Contains(assemblyName))
+            if (_requiredAssemblyName == assemblyName)
             {
-                if (Interlocked.Increment(ref _loadedCount) == _requiredAssemblies.Count)
+                var initializerName = _instrumentationInitializer.GetType().Name;
+                Logger.Debug("'{0}' started", initializerName);
+
+                try
                 {
-                    var initializerName = _instrumentationInitializer.GetType().Name;
-                    Logger.Debug("'{0}' started", initializerName);
-
-                    try
-                    {
-                        _instrumentationInitializer.Initialize(_manager);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Error(ex, "'{0}' failed", initializerName);
-                    }
-
-                    AppDomain.CurrentDomain.AssemblyLoad -= CurrentDomain_AssemblyLoad;
+                    _instrumentationInitializer.Initialize(_manager);
                 }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "'{0}' failed", initializerName);
+                }
+
+                AppDomain.CurrentDomain.AssemblyLoad -= CurrentDomain_AssemblyLoad;
             }
         }
     }

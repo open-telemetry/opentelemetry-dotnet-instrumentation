@@ -45,7 +45,7 @@ public class LazyInstrumentationLoaderTests
         }
     }
 
-    private void CreateDummyAssembly()
+    private static void CreateDummyAssembly()
     {
         var assemblyName = new AssemblyName(DummyInitializer.DummyAssemblyName);
         var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
@@ -57,7 +57,7 @@ public class LazyInstrumentationLoaderTests
         public const string DummyAssemblyName = "Dummy.Assembly";
 
         public DummyInitializer()
-            : base(requiredAssemblies: DummyAssemblyName)
+            : base(DummyAssemblyName)
         {
         }
 

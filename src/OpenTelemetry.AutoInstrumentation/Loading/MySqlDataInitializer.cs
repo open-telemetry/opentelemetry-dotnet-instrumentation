@@ -23,7 +23,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loading;
 internal class MySqlDataInitializer : InstrumentationInitializer
 {
     public MySqlDataInitializer()
-        : base(requiredAssemblies: "MySql.Data")
+        : base("MySql.Data")
     {
     }
 
