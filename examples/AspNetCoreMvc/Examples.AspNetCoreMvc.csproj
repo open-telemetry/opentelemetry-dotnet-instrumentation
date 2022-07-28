@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="2.13.1" />
+    <PackageReference Include="MongoDB.Driver" Version="2.17.0" />
     <PackageReference Include="OpenTelemetry" Version="1.3.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc9.7" />
     <PackageReference Include="StackExchange.Redis" Version="2.6.48" />

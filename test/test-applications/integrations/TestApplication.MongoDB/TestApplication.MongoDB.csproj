@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,7 +6,8 @@
 
   <PropertyGroup>
     <ApiVersion Condition="'$(ApiVersion)' == ''">2.13.1</ApiVersion>
-    <DefineConstants Condition="'$(ApiVersion)'&gt;='2.7.0'">$(DefineConstants);MONGODB_2_7</DefineConstants>
+    <DefineConstants Condition="'$(ApiVersion)'>='2.15.0'">$(DefineConstants);MONGODB_2_15</DefineConstants>
+    <DefineConstants Condition="'$(ApiVersion)'>='2.7.0'">$(DefineConstants);MONGODB_2_7</DefineConstants>
 
     <!-- Required to build multiple projects with the same Configuration|Platform -->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
