@@ -164,7 +164,11 @@ public class SmokeTests : TestHelper
         {
             var assert = async () =>
             {
-                var response = await new HttpClient().GetAsync(defaultPrometheusMetricsEndpoint);
+                var httpClient = new HttpClient
+                {
+                    Timeout = 5.Seconds()
+                };
+                var response = await httpClient.GetAsync(defaultPrometheusMetricsEndpoint);
                 response.StatusCode.Should().Be(HttpStatusCode.OK);
 
                 var content = await response.Content.ReadAsStringAsync();
