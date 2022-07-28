@@ -38,6 +38,7 @@ for more details.
 | `AspNet` | ASP.NET Framework | * | source |
 | `AspNet` | ASP.NET Core | * | source |
 | `GraphQL` | [GraphQL](https://www.nuget.org/packages/GraphQL/) | ≥2.3.0 & < 3.0.0 | bytecode |
+| `GrpcNetClient` | [Grpc.Net.Client](https://www.nuget.org/packages/Grpc.Net.Client) | ≥2.43.0 & < 3.0.0 | source |
 | `HttpClient` | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | * | source |
 | `MongoDB` | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core) **Not supported on .NET Framework** | ≥2.3.0 & < 3.0.0 | source & bytecode |
 | `MySqlData` | [MySql.Data](https://www.nuget.org/packages/MySql.Data)  **Not supported on .NET Framework** | ≥6.10.7 | source |

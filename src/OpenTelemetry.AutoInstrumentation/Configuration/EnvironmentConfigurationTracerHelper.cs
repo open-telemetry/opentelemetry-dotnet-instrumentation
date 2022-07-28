@@ -36,7 +36,8 @@ internal static class EnvironmentConfigurationTracerHelper
         [TracerInstrumentation.MySqlData] = builder => builder.AddSource("OpenTelemetry.Instrumentation.MySqlData"),
         [TracerInstrumentation.StackExchangeRedis] = builder => builder.AddSource("OpenTelemetry.Instrumentation.StackExchangeRedis"),
 #endif
-        [TracerInstrumentation.Npgsql] = builder => builder.AddSource("Npgsql")
+        [TracerInstrumentation.Npgsql] = builder => builder.AddSource("Npgsql"),
+        [TracerInstrumentation.GrpcNetClient] = builder => builder.AddGrpcClientInstrumentation(options => options.SuppressDownstreamInstrumentation = !Instrumentation.TracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.HttpClient))
     };
 
     public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, TracerSettings settings)

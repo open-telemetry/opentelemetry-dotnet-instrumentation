@@ -123,6 +123,7 @@ public class SettingsTests : IDisposable
 #endif
     [InlineData(nameof(TracerInstrumentation.Npgsql), TracerInstrumentation.Npgsql)]
     [InlineData(nameof(TracerInstrumentation.SqlClient), TracerInstrumentation.SqlClient)]
+    [InlineData(nameof(TracerInstrumentation.GrpcNetClient), TracerInstrumentation.GrpcNetClient)]
     public void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, tracerInstrumentation);
