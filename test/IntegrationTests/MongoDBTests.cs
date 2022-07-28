@@ -53,7 +53,7 @@ public class MongoDBTests : TestHelper
         Assert.Equal("Main()", rootSpan.Name);
         Assert.Null(rootSpan.Type);
 
-        int spansWithStatement = 0;
+        var spansWithStatement = 0;
 
         foreach (var span in spans)
         {

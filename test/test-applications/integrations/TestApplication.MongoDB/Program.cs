@@ -30,7 +30,7 @@ namespace TestApplication.MongoDB;
 
 public static class Program
 {
-    internal static readonly ActivitySource ActivitySource = new ActivitySource(
+    internal static readonly ActivitySource ActivitySource = new(
         "TestApplication.MongoDB", "1.0.0");
 
     public static void Main(string[] args)
@@ -52,57 +52,53 @@ public static class Program
             }
         };
 
-        using (var mainScope = ActivitySource.StartActivity("Main()"))
-        {
-            var connectionString = $"mongodb://{Host()}:{mongoPort}";
+        using var mainScope = ActivitySource.StartActivity("Main()");
+        var connectionString = $"mongodb://{Host()}:{mongoPort}";
 
-            var client = new MongoClient(connectionString);
-            var database = client.GetDatabase("test-db");
-            var collection = database.GetCollection<BsonDocument>("employees");
+        var client = new MongoClient(connectionString);
+        var database = client.GetDatabase("test-db");
+        var collection = database.GetCollection<BsonDocument>("employees");
 
-            Run(collection, newDocument);
-            RunAsync(collection, newDocument).Wait();
+        Run(collection, newDocument);
+        RunAsync(collection, newDocument).Wait();
 
-            WireProtocolExecuteIntegrationTest(client);
-        }
+        WireProtocolExecuteIntegrationTest(client);
     }
 
     public static void Run(IMongoCollection<BsonDocument> collection, BsonDocument newDocument)
     {
         var allFilter = new BsonDocument();
 
-        using (var syncScope = ActivitySource.StartActivity("sync-calls"))
-        {
-            collection.DeleteMany(allFilter);
-            collection.InsertOne(newDocument);
+        using var syncScope = ActivitySource.StartActivity("sync-calls");
+        collection.DeleteMany(allFilter);
+        collection.InsertOne(newDocument);
 
 #if MONGODB_2_7
-            var count = collection.CountDocuments(new BsonDocument());
+        var count = collection.CountDocuments(new BsonDocument());
 #else
             var count = collection.Count(new BsonDocument());
 #endif
-            Console.WriteLine($"Documents: {count}");
+        Console.WriteLine($"Documents: {count}");
 
-            var find = collection.Find(allFilter);
-            var allDocuments = find.ToList();
-            Console.WriteLine(allDocuments.FirstOrDefault());
+        var find = collection.Find(allFilter);
+        var allDocuments = find.ToList();
+        Console.WriteLine(allDocuments.FirstOrDefault());
 
-            // Run an explain query to invoke problematic MongoDB.Driver.Core.Operations.FindOpCodeOperation<TDocument>
-            // https://stackoverflow.com/questions/49506857/how-do-i-run-an-explain-query-with-the-2-4-c-sharp-mongo-driver
-            var options = new FindOptions
-            {
+        // Run an explain query to invoke problematic MongoDB.Driver.Core.Operations.FindOpCodeOperation<TDocument>
+        // https://stackoverflow.com/questions/49506857/how-do-i-run-an-explain-query-with-the-2-4-c-sharp-mongo-driver
+        var options = new FindOptions
+        {
 #pragma warning disable 0618 // 'FindOptionsBase.Modifiers' is obsolete: 'Use individual properties instead.'
-                Modifiers = new BsonDocument("$explain", true)
+            Modifiers = new BsonDocument("$explain", true)
 #pragma warning restore 0618
-            };
-            // Without properly unboxing generic arguments whose instantiations
-            // are valuetypes, the following line will fail with
-            // System.EntryPointNotFoundException: Entry point was not found.
-            var cursor = collection.Find(x => true, options).ToCursor();
-            foreach (var document in cursor.ToEnumerable())
-            {
-                Console.WriteLine(document);
-            }
+        };
+        // Without properly unboxing generic arguments whose instantiations
+        // are valuetypes, the following line will fail with
+        // System.EntryPointNotFoundException: Entry point was not found.
+        var cursor = collection.Find(x => true, options).ToCursor();
+        foreach (var document in cursor.ToEnumerable())
+        {
+            Console.WriteLine(document);
         }
     }
 
@@ -110,23 +106,21 @@ public static class Program
     {
         var allFilter = new BsonDocument();
 
-        using (var asyncScope = ActivitySource.StartActivity("async-calls"))
-        {
-            await collection.DeleteManyAsync(allFilter);
-            await collection.InsertOneAsync(newDocument);
+        using var asyncScope = ActivitySource.StartActivity("async-calls");
+        await collection.DeleteManyAsync(allFilter);
+        await collection.InsertOneAsync(newDocument);
 
 #if MONGODB_2_7
-            var count = await collection.CountDocumentsAsync(new BsonDocument());
+        var count = await collection.CountDocumentsAsync(new BsonDocument());
 #else
             var count = await collection.CountAsync(new BsonDocument());
 #endif
 
-            Console.WriteLine($"Documents: {count}");
+        Console.WriteLine($"Documents: {count}");
 
-            var find = await collection.FindAsync(allFilter);
-            var allDocuments = await find.ToListAsync();
-            Console.WriteLine(allDocuments.FirstOrDefault());
-        }
+        var find = await collection.FindAsync(allFilter);
+        var allDocuments = await find.ToListAsync();
+        Console.WriteLine(allDocuments.FirstOrDefault());
     }
 
     public static void WireProtocolExecuteIntegrationTest(MongoClient client)
