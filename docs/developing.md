@@ -149,6 +149,23 @@ how to run the examples.
 
 The release process is described in [releasing.md](releasing.md).
 
+## Integration tests
+
+Apart from regular unit tests this repository contains integration tests
+under [test/IntegrationTests](../test/IntegrationTests)
+as they give the biggest confidence if the auto-instrumentation works properly.
+
+Each test class has its related test application that can be found
+under [test/test-applications/integrations](../test/test-applications/integrations)
+Each library instrumentation has its own test class.
+Other features are tested via `SmokeTests` class or have its own test class
+if a dedicated test application is needed.
+
+Currently, the strategy is to test the library instrumentations
+against its lowest supported version.
+The pull requests created by @dependabot with `do NOT merge` label
+are used to test against higher library versions when they are released.
+
 ## Debug the .NET runtime on Linux
 
 - [Requirements](https://github.com/dotnet/runtime/blob/main/docs/workflow/requirements/linux-requirements.md)

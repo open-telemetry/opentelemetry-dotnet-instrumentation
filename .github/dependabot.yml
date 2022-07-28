@@ -144,24 +144,40 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - ".NET"
+      - "do NOT merge"
 
   - package-ecosystem: nuget
     directory: /test/test-applications/integrations/dependency-libs/TestApplication.ExampleLibraryTracer
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - ".NET"
+      - "do NOT merge"
 
   - package-ecosystem: nuget
     directory: /test/test-applications/integrations/TestApplication.AspNet
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - ".NET"
+      - "do NOT merge"
 
   - package-ecosystem: nuget
     directory: /test/test-applications/integrations/TestApplication.GraphQL
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - ".NET"
+      - "do NOT merge"
     ignore:
       # The instrumentation only supports specific versions of GraphQL and the test app needs to test against a specific version
       - dependency-name: "GraphQL*"
@@ -171,45 +187,77 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - ".NET"
+      - "do NOT merge"
 
   - package-ecosystem: nuget
     directory: /test/test-applications/integrations/TestApplication.MongoDB
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - ".NET"
+      - "do NOT merge"
 
   - package-ecosystem: nuget
     directory: /test/test-applications/integrations/TestApplication.MySqlData
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - ".NET"
+      - "do NOT merge"
 
   - package-ecosystem: nuget
     directory: /test/test-applications/integrations/TestApplication.Npgsql
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - ".NET"
+      - "do NOT merge"
 
   - package-ecosystem: nuget
     directory: /test/test-applications/integrations/TestApplication.Plugins
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - ".NET"
+      - "do NOT merge"
 
   - package-ecosystem: nuget
     directory: /test/test-applications/integrations/TestApplication.Smoke
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - ".NET"
+      - "do NOT merge"
 
   - package-ecosystem: nuget
     directory: /test/test-applications/integrations/TestApplication.SqlClient
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - ".NET"
+      - "do NOT merge"
 
   - package-ecosystem: nuget
     directory: /test/test-applications/mocks/OpenTelemetry.AutoInstrumentation.Mock
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - ".NET"
+      - "do NOT merge"
