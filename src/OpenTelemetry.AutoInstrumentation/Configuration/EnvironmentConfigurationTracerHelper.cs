@@ -65,11 +65,6 @@ internal static class EnvironmentConfigurationTracerHelper
     {
 #if NET462
         builder.AddAspNetInstrumentation();
-#elif NETCOREAPP3_1_OR_GREATER
-        if (AssemblyDetector.IsAspNetCoreDetected)
-        {
-            builder.AddAspNetCoreInstrumentation();
-        }
 #endif
 
         return builder;

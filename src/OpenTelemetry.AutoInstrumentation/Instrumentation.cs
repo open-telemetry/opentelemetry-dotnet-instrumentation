@@ -116,6 +116,11 @@ public static class Instrumentation
                 //      and TracerSettings.EnabledInstrumentations would be passed as input
 #if NETCOREAPP3_1_OR_GREATER
 
+                if (TracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.AspNet))
+                {
+                    LazyInstrumentationLoader.Add(new AspNetCoreInitializer());
+                }
+
                 if (TracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.MySqlData))
                 {
                     LazyInstrumentationLoader.Add(new MySqlDataInitializer());
