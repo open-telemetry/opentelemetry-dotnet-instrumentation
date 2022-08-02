@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.19.4" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.43.0" />
+    <PackageReference Include="Grpc.Net.Client.Web" Version="2.43.0"  Condition="'$(TargetFramework)' == 'net462'" />
+    <PackageReference Include="Grpc.Tools" Version="2.44.0" />
+    <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v. 3.1.0 is minimal version supportef by auto instrumentation.
+    Grpc.Net.Client references older version. It prevents to load required version from Additional Dependencies store-->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.0" />
+    <!-- Workaround! System.Diagnostics.DiagnosticSource v. 6.0.0 is minimal version supportef by auto instrumentation.
+    Grpc.Net.Client references older version. It prevents to use older version during runtime.-->
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Proto\greet.proto" GrpcServices="Client" />
+  </ItemGroup>
+
+</Project>

@@ -62,6 +62,11 @@ public enum TracerInstrumentation
     /// <summary>
     /// StackExchangeRedis instrumentation.
     /// </summary>
-    StackExchangeRedis = 7
+    StackExchangeRedis = 7,
 #endif
+
+    /// <summary>
+    /// GrpcNetClient instrumentation.
+    /// </summary>
+    GrpcNetClient = 8
 }
