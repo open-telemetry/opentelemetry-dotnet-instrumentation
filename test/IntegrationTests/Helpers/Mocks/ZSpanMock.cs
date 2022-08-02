@@ -81,19 +81,19 @@ internal class ZSpanMock : IMockSpan
 
     public Dictionary<string, string> Tags { get; set; }
 
-    public Dictionary<DateTimeOffset, Dictionary<string, string>> Logs
+    public Dictionary<DateTimeOffset, Dictionary<string, object>> Logs
     {
         get
         {
-            var logs = new Dictionary<DateTimeOffset, Dictionary<string, string>>();
+            var logs = new Dictionary<DateTimeOffset, Dictionary<string, object>>();
 
             if (_zipkinData.TryGetValue("annotations", out JToken annotations))
             {
                 foreach (var item in annotations.ToObject<List<Dictionary<string, object>>>())
                 {
                     DateTimeOffset timestamp = ((long)item["timestamp"]).UnixMicrosecondsToDateTimeOffset();
-                    Dictionary<string, string> fields = JsonConvert.DeserializeObject<Dictionary<string, string>>(item["value"].ToString());
-                    logs[timestamp] = fields;
+                    item.Remove("timestamp");
+                    logs[timestamp] = item;
                 }
             }
 
