@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using IntegrationTests.Helpers.Mocks;
-using OpenTelemetry.AutoInstrumentation;
 using OpenTelemetry.AutoInstrumentation.Tagging;
 
 namespace IntegrationTests.Helpers.Models;
@@ -47,7 +46,7 @@ public class SpanExpectation
 
         RegisterTagExpectation(
             key: Tags.Language,
-            expected: TracerConstants.Language,
+            expected: OpenTelemetry.AutoInstrumentation.Constants.Tracer.Language,
             when: s => GetTag(s, Tags.SpanKind) != nameof(ActivityKind.Client));
 
         RegisterTagExpectation(

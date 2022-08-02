@@ -4,4 +4,10 @@
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs" Link="Constants.cs">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Compile>
+  </ItemGroup>
+
 </Project>

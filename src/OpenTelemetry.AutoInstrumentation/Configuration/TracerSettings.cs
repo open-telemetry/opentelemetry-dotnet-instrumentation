@@ -41,13 +41,12 @@ public class TracerSettings : Settings
         EnabledInstrumentations = source.ParseEnabledEnumList<TracerInstrumentation>(
             enabledConfiguration: ConfigurationKeys.Traces.Instrumentations,
             disabledConfiguration: ConfigurationKeys.Traces.DisabledInstrumentations,
-            separator: Separator,
             error: "The \"{0}\" is not recognized as supported trace instrumentation and cannot be enabled");
 
         var providerPlugins = source.GetString(ConfigurationKeys.Traces.ProviderPlugins);
         if (providerPlugins != null)
         {
-            foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(DotNetQualifiedNameSeparator))
+            foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(Constants.ConfigurationValues.DotNetQualifiedNameSeparator))
             {
                 TracerPlugins.Add(pluginAssemblyQualifiedName);
             }
@@ -56,7 +55,7 @@ public class TracerSettings : Settings
         var additionalSources = source.GetString(ConfigurationKeys.Traces.AdditionalSources);
         if (additionalSources != null)
         {
-            foreach (var sourceName in additionalSources.Split(Separator))
+            foreach (var sourceName in additionalSources.Split(Constants.ConfigurationValues.Separator))
             {
                 ActivitySources.Add(sourceName);
             }
@@ -65,7 +64,7 @@ public class TracerSettings : Settings
         var legacySources = source.GetString(ConfigurationKeys.Traces.LegacySources);
         if (legacySources != null)
         {
-            foreach (var sourceName in legacySources.Split(Separator))
+            foreach (var sourceName in legacySources.Split(Constants.ConfigurationValues.Separator))
             {
                 LegacySources.Add(sourceName);
             }
@@ -134,18 +133,20 @@ public class TracerSettings : Settings
 
     private static TracesExporter ParseTracesExporter(IConfigurationSource source)
     {
-        var tracesExporterEnvVar = source.GetString(ConfigurationKeys.Traces.Exporter) ?? "otlp";
+        var tracesExporterEnvVar = source.GetString(ConfigurationKeys.Traces.Exporter)
+            ?? Constants.ConfigurationValues.Exporters.Otlp;
+
         switch (tracesExporterEnvVar)
         {
             case null:
             case "":
-            case "otlp":
+            case Constants.ConfigurationValues.Exporters.Otlp:
                 return TracesExporter.Otlp;
-            case "zipkin":
+            case Constants.ConfigurationValues.Exporters.Zipkin:
                 return TracesExporter.Zipkin;
-            case "jaeger":
+            case Constants.ConfigurationValues.Exporters.Jaeger:
                 return TracesExporter.Jaeger;
-            case "none":
+            case Constants.ConfigurationValues.None:
                 return TracesExporter.None;
             default:
                 throw new FormatException($"Traces exporter '{tracesExporterEnvVar}' is not supported");
