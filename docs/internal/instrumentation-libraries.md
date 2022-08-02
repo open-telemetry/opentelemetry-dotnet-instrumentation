@@ -37,12 +37,12 @@ submit an issue to request its inclusion.
 | [Dapper](https://github.com/DapperLib/Dapper) | | | | Needs investigation. It might be implicitly supported based on the configured [database provider](https://github.com/DapperLib/Dapper#will-dapper-work-with-my-db-provider). |
 | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) | Yes | | [MS SQL Server](https://www.microsoft.com/sql-server/sql-server-2019) | |
 | [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) | Yes | | | |
-| [MySql.Data](https://dev.mysql.com/doc/connector-net/en/connector-net-introduction.html) | | | | This is the official [MySQL](https://dev.mysql.com/) library. |
+| [MySql.Data](https://dev.mysql.com/doc/connector-net/en/connector-net-introduction.html) | Partial[^not_on_framework] | | | This is the official [MySQL](https://dev.mysql.com/) library. |
 | [MySqlConnector](https://mysqlconnector.net/) | | | | Seems to be the [recommended library for MariaDB](https://mariadb.com/kb/en/mysqlconnector-for-adonet/). |
 | [Npgsql](https://www.npgsql.org/) | Yes | | [PostgreSQL](https://www.postgresql.org/) | |
 | [Microsoft.Data.SqlLite](https://docs.microsoft.com/dotnet/standard/data/sqlite/?tabs=netcore-cli) | | | | |
-| [MongoDB.Driver](https://www.nuget.org/packages/mongodb.driver) | Yes | | [MongoDB](https://www.mongodb.com/docs/) | |
-| [StackExchange.Redis](https://stackexchange.github.io/StackExchange.Redis/) | | | | |
+| [MongoDB.Driver](https://www.nuget.org/packages/mongodb.driver) | Partial[^not_on_framework] | | [MongoDB](https://www.mongodb.com/docs/) | |
+| [StackExchange.Redis](https://stackexchange.github.io/StackExchange.Redis/) | Partial[^not_on_framework] | | | |
 | [Elasticsearch-net](https://github.com/elastic/elasticsearch-net) | | | | We should be able to use [OpenTelemetry.Instrumentation.ElasticsearchClient](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/tree/main/src/OpenTelemetry.Instrumentation.ElasticsearchClient). |
 | [Oracle.ManagedDataAccess.Core](https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core) | | | | |
 | [Oracle.ManagedDataAccess](https://www.nuget.org/packages/Oracle.ManagedDataAccess) | | | | |
@@ -55,10 +55,10 @@ submit an issue to request its inclusion.
 | --- | :---: | :---: | --- |
 | [HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) | Yes | Yes | |
 | [HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | Yes | Yes | |
-| [WCF](https://docs.microsoft.com/dotnet/framework/wcf/whats-wcf) | | | Server and client support should be added. |
-| [CoreWCF](https://github.com/CoreWCF/CoreWCF) | | | Server and client support should be added. |
+| [WCF](https://docs.microsoft.com/dotnet/framework/wcf/whats-wcf) | See [issue 946](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/946) | | Server and client support should be added. |
+| [CoreWCF](https://github.com/CoreWCF/CoreWCF) | See [issue 946](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/946) | | Server and client support should be added. |
 | [RestSharp](https://restsharp.dev/) | | | This library may be implicitly supported by instrumenting the underlying HttpClient or HttpWebRequest.  |
-| [gRPC-dotnet](https://github.com/grpc/grpc-dotnet) | | | Client and service support should be added. |
+| [gRPC-dotnet](https://github.com/grpc/grpc-dotnet) | Partial[^grpc_client_only] | | Client and service support should be added. |
 | [GraphQL](https://www.nuget.org/packages/GraphQL/) | Yes | | The current instrumentation needs updates to match the semantic conventions. |
 | [GraphQL Client](https://github.com/graphql-dotnet/graphql-client) | | | |
 | [RabbitMQ](https://www.nuget.org/packages/RabbitMQ.Client) | | | These is an [issue in the RabbitMQ repo](https://github.com/rabbitmq/rabbitmq-dotnet-client/issues/776) to add instrumentation directly into RabbitMQ. |
@@ -115,3 +115,7 @@ instrumentation libraries to support.
 | [Polly](http://www.thepollyproject.org/) | Waiting for interest and further analysis. |
 | [gRPC for C#](https://github.com/grpc/grpc/tree/master/src/csharp) | Library is deprecated. |
 | [MSMQ](https://docs.microsoft.com/previous-versions/windows/desktop/msmq/ms711472(v=vs.85)) | This is a legacy system. Wait until there is enough interest. |
+
+[^not_on_framework]: Not supported on .NET framework.
+[^grpc_client_only]: Only [Grpc.Net.Client](https://www.nuget.org/packages/Grpc.Net.Client)
+is supported.
