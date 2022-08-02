@@ -118,7 +118,13 @@ public class EnvironmentHelper
             "OTEL_TRACES_EXPORTER",
             "OTEL_METRICS_EXPORTER",
             "OTEL_EXPORTER_ZIPKIN_ENDPOINT",
-            "OTEL_EXPORTER_OTLP_ENDPOINT"
+            "OTEL_EXPORTER_OTLP_ENDPOINT",
+
+            // Auto Instrumentation
+            "OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS",
+            "OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS",
+            "OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS",
+            "OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS"
         };
 
         foreach (string variable in environmentVariables)

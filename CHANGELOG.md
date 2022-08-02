@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- Add Grpc.Net.Client traces instrumentation.
 - Add MySql.Data traces instrumentation.
 - Add Npgsql traces instrumentation.
 - Add StackExchange.Redis traces instrumentation.
