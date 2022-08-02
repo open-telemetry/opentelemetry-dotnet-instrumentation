@@ -140,6 +140,14 @@ public static class Instrumentation
 
             if (MeterSettings.LoadMetricsAtStartup)
             {
+#if NETCOREAPP3_1_OR_GREATER
+
+                if (TracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.AspNet))
+                {
+                    LazyInstrumentationLoader.Add(new AspNetCoreMetricsInitializer());
+                }
+#endif
+
                 var builder = Sdk
                     .CreateMeterProviderBuilder()
                     .SetResourceBuilder(_resourceBuilder)
