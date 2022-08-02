@@ -37,9 +37,9 @@ namespace OpenTelemetry.AutoInstrumentation
             public const char Separator = ',';
 
             /// <summary>a
-            /// Delimiter for textual representation of settings that contains multiple
-            /// fully qualified .NET names, e.g.: assembly or type names. Comma is part
-            /// of a fully qualified name and can't be used here.
+            /// Delimiter for textual representation of settings that may contain multiple
+            /// fully qualified .NET names, e.g.: assembly or type names, that already
+            /// use commas as separators.
             /// </summary>
             public const char DotNetQualifiedNameSeparator = ':';
 
