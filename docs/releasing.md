@@ -41,3 +41,5 @@
 
    - Use the [CHANGELOG.md](../CHANGELOG.md) content in the description.
    - Add the artifacts from [the `release` GitHub workflow](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/actions/workflows/release.yml).
+
+1. Update version under [OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator/blob/main/autoinstrumentation/dotnet/version.txt).
