@@ -40,13 +40,12 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
             EnabledInstrumentations = source.ParseEnabledEnumList<MeterInstrumentation>(
                 enabledConfiguration: ConfigurationKeys.Metrics.Instrumentations,
                 disabledConfiguration: ConfigurationKeys.Metrics.DisabledInstrumentations,
-                separator: Separator,
                 error: "The \"{0}\" is not recognized as supported metrics instrumentation and cannot be enabled");
 
             var providerPlugins = source.GetString(ConfigurationKeys.Metrics.ProviderPlugins);
             if (providerPlugins != null)
             {
-                foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(DotNetQualifiedNameSeparator))
+                foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(Constants.ConfigurationValues.DotNetQualifiedNameSeparator))
                 {
                     MetricPlugins.Add(pluginAssemblyQualifiedName);
                 }
@@ -55,7 +54,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
             var additionalSources = source.GetString(ConfigurationKeys.Metrics.AdditionalSources);
             if (additionalSources != null)
             {
-                foreach (var sourceName in additionalSources.Split(Separator))
+                foreach (var sourceName in additionalSources.Split(Constants.ConfigurationValues.Separator))
                 {
                     Meters.Add(sourceName);
                 }
@@ -125,16 +124,18 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
 
         private static MetricsExporter ParseMetricExporter(IConfigurationSource source)
         {
-            var metricsExporterEnvVar = source.GetString(ConfigurationKeys.Metrics.Exporter) ?? "otlp";
+            var metricsExporterEnvVar = source.GetString(ConfigurationKeys.Metrics.Exporter)
+                ?? Constants.ConfigurationValues.Exporters.Otlp;
+
             switch (metricsExporterEnvVar)
             {
                 case null:
                 case "":
-                case "otlp":
+                case Constants.ConfigurationValues.Exporters.Otlp:
                     return MetricsExporter.Otlp;
-                case "prometheus":
+                case Constants.ConfigurationValues.Exporters.Prometheus:
                     return MetricsExporter.Prometheus;
-                case "none":
+                case Constants.ConfigurationValues.None:
                     return MetricsExporter.None;
                 default:
                     throw new FormatException($"Metric exporter '{metricsExporterEnvVar}' is not supported");

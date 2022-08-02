@@ -40,7 +40,6 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Util
             var list = source.ParseEnabledEnumList<TestEnum>(
                 enabledConfiguration: "TEST_ENABLED_VALUES",
                 disabledConfiguration: "TEST_DISABLED_VALUES",
-                separator: ',',
                 error: "Invalid enum value: {0}");
 
             list.Should().Equal(TestEnum.Test1, TestEnum.Test2, TestEnum.Test3);
@@ -57,7 +56,6 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Util
             var list = source.ParseEnabledEnumList<TestEnum>(
                 enabledConfiguration: "TEST_ENABLED_VALUES",
                 disabledConfiguration: "TEST_DISABLED_VALUES",
-                separator: ',',
                 error: "Invalid enum value: {0}");
 
             list.Should().Equal(TestEnum.Test1, TestEnum.Test3);
@@ -74,7 +72,6 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Util
             var list = source.ParseEnabledEnumList<TestEnum>(
                 enabledConfiguration: "TEST_ENABLED_VALUES",
                 disabledConfiguration: "TEST_DISABLED_VALUES",
-                separator: ',',
                 error: "Invalid enum value: {0}");
 
             list.Should().Equal(TestEnum.Test1, TestEnum.Test3);
@@ -91,7 +88,6 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Util
             var list = source.ParseEnabledEnumList<TestEnum>(
                 enabledConfiguration: "TEST_ENABLED_VALUES",
                 disabledConfiguration: "TEST_DISABLED_VALUES",
-                separator: ',',
                 error: "Invalid enum value: {0}");
 
             list.Should().BeEmpty();
@@ -108,7 +104,6 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Util
             var act = () => source.ParseEnabledEnumList<TestEnum>(
                 enabledConfiguration: "TEST_ENABLED_VALUES",
                 disabledConfiguration: "TEST_DISABLED_VALUES",
-                separator: ',',
                 error: "Invalid enum value: {0}");
 
             act.Should().Throw<FormatException>()

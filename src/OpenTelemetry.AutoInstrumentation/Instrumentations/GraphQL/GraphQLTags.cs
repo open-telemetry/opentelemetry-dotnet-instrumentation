@@ -34,7 +34,7 @@ internal class GraphQLTags : InstrumentationTags
 
     public string InstrumentationName => GraphQLCommon.IntegrationName;
 
-    public string Language => TracerConstants.Language;
+    public string Language => Constants.Tracer.Language;
 
     public string Source { get; set; }
 

@@ -23,21 +23,19 @@ namespace OpenTelemetry.AutoInstrumentation.Util
 {
     internal static class ConfigurationSourceExtensions
     {
-        private const string None = "none";
-
-        public static IList<TEnum> ParseEnabledEnumList<TEnum>(this IConfigurationSource source, string enabledConfiguration, string disabledConfiguration, char separator, string error)
+        public static IList<TEnum> ParseEnabledEnumList<TEnum>(this IConfigurationSource source, string enabledConfiguration, string disabledConfiguration, string error)
             where TEnum : struct, IConvertible
         {
             var instrumentations = new Dictionary<string, TEnum>();
             var enabledInstrumentations = source.GetString(enabledConfiguration);
             if (enabledInstrumentations != null)
             {
-                if (enabledInstrumentations == None)
+                if (enabledInstrumentations == Constants.ConfigurationValues.None)
                 {
                     return Array.Empty<TEnum>();
                 }
 
-                foreach (var instrumentation in enabledInstrumentations.Split(separator))
+                foreach (var instrumentation in enabledInstrumentations.Split(Constants.ConfigurationValues.Separator))
                 {
                     if (Enum.TryParse(instrumentation, out TEnum parsedType))
                     {
@@ -61,7 +59,7 @@ namespace OpenTelemetry.AutoInstrumentation.Util
             var disabledInstrumentations = source.GetString(disabledConfiguration);
             if (disabledInstrumentations != null)
             {
-                foreach (var instrumentation in disabledInstrumentations.Split(separator))
+                foreach (var instrumentation in disabledInstrumentations.Split(Constants.ConfigurationValues.Separator))
                 {
                     instrumentations.Remove(instrumentation);
                 }

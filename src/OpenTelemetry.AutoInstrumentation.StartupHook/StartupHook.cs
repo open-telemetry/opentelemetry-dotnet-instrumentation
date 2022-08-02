@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using OpenTelemetry.AutoInstrumentation;
 using OpenTelemetry.AutoInstrumentation.StartupHook;
 
 /// <summary>
@@ -123,10 +124,7 @@ internal class StartupHook
             return excludedProcesses;
         }
 
-        // The separator should always match the Settings.Separator. However, to avoid
-        // creating a dependecy in the StartupHook project the separator is being redefined here.
-        const char settingsSeparator = ',';
-        foreach (var processName in environmentValue.Split(settingsSeparator))
+        foreach (var processName in environmentValue.Split(Constants.ConfigurationValues.Separator))
         {
             if (!string.IsNullOrWhiteSpace(processName))
             {
