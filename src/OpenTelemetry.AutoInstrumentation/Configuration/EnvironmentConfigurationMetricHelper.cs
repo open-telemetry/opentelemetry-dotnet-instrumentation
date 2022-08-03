@@ -53,6 +53,8 @@ internal static class EnvironmentConfigurationMetricHelper
         builder.AddAspNetInstrumentation();
 #endif
 
+        builder.AddMeter("OpenTelemetry.Instrumentation.AspNetCore");
+
         return builder;
     }
 

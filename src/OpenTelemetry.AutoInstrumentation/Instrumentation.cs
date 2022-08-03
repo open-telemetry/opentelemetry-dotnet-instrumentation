@@ -142,7 +142,7 @@ public static class Instrumentation
             {
 #if NETCOREAPP3_1_OR_GREATER
 
-                if (TracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.AspNet))
+                if (MeterSettings.EnabledInstrumentations.Contains(MeterInstrumentation.AspNet))
                 {
                     LazyInstrumentationLoader.Add(new AspNetCoreMetricsInitializer());
                 }
