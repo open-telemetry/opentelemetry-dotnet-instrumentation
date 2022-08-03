@@ -67,6 +67,9 @@ internal static class EnvironmentConfigurationTracerHelper
         builder.AddAspNetInstrumentation();
 #endif
 
+        builder.AddSource("OpenTelemetry.Instrumentation.AspNetCore");
+        builder.AddLegacySource("Microsoft.AspNetCore.Hosting.HttpRequestIn");
+
         return builder;
     }
 
