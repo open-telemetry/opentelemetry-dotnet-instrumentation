@@ -17,9 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-#if NETCOREAPP3_1_OR_GREATER
-using OpenTelemetry.AutoInstrumentation.Util;
-#endif
 using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
@@ -66,10 +63,8 @@ internal static class EnvironmentConfigurationTracerHelper
 #if NET462
         builder.AddAspNetInstrumentation();
 #elif NETCOREAPP3_1_OR_GREATER
-        if (AssemblyDetector.IsAspNetCoreDetected)
-        {
-            builder.AddAspNetCoreInstrumentation();
-        }
+        builder.AddSource("OpenTelemetry.Instrumentation.AspNetCore");
+        builder.AddLegacySource("Microsoft.AspNetCore.Hosting.HttpRequestIn");
 #endif
 
         return builder;

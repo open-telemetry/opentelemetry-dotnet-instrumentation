@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.Metrics;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
@@ -53,10 +52,7 @@ internal static class EnvironmentConfigurationMetricHelper
 #if NET462
         builder.AddAspNetInstrumentation();
 #elif NETCOREAPP3_1_OR_GREATER
-        if (AssemblyDetector.IsAspNetCoreDetected)
-        {
-            builder.AddAspNetCoreInstrumentation();
-        }
+        builder.AddMeter("OpenTelemetry.Instrumentation.AspNetCore");
 #endif
 
         return builder;
