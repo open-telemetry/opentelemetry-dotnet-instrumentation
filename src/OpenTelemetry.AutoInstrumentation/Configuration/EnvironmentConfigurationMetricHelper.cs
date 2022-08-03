@@ -51,9 +51,9 @@ internal static class EnvironmentConfigurationMetricHelper
     {
 #if NET462
         builder.AddAspNetInstrumentation();
-#endif
-
+#elif NETCOREAPP3_1_OR_GREATER
         builder.AddMeter("OpenTelemetry.Instrumentation.AspNetCore");
+#endif
 
         return builder;
     }
