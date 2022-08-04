@@ -20,7 +20,7 @@ using System.Collections.Concurrent;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading
 {
-    internal class InstrumentationLifespanManager : ILifespanManager, IDisposable
+    internal class InstrumentationLifespanManager : ILifespanManager
     {
         // some instrumentations requires to keep references to objects
         // so that they are not garbage collected
