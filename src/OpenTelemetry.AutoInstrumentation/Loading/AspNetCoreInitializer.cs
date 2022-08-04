@@ -15,7 +15,6 @@
 // </copyright>
 
 #if NETCOREAPP3_1_OR_GREATER
-
 using System;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading

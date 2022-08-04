@@ -15,9 +15,7 @@
 // </copyright>
 
 #if NETCOREAPP3_1_OR_GREATER
-
 using System;
-using System.Collections.Concurrent;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading;
@@ -29,44 +27,31 @@ namespace OpenTelemetry.AutoInstrumentation.Loading;
 /// Some instrumentations require setup that can be preformed
 /// when some prerequisites are met.
 /// </remarks>
-internal class LazyInstrumentationLoader : ILifespanManager, IDisposable
+internal class LazyInstrumentationLoader : IDisposable
 {
-    // some instrumentations requires to keep references to objects
-    // so that they are not garbage collected
-    private readonly ConcurrentBag<object> _instrumentations = new();
+    public ILifespanManager LifespanManager { get; } = new InstrumentationLifespanManager();
 
     public void Dispose()
     {
-        while (_instrumentations.TryTake(out var instrumentation))
-        {
-            if (instrumentation is IDisposable disposable)
-            {
-                disposable.Dispose();
-            }
-        }
+        LifespanManager.Dispose();
     }
 
     public void Add(InstrumentationInitializer loader)
     {
-        _ = new OnAssemblyLoadInitializer(this, loader);
-    }
-
-    public void Track(object instance)
-    {
-        _instrumentations.Add(instance);
+        _ = new OnAssemblyLoadInitializer(LifespanManager, loader);
     }
 
     private class OnAssemblyLoadInitializer
     {
         private static readonly ILogger Logger = OtelLogging.GetLogger();
         private readonly InstrumentationInitializer _instrumentationInitializer;
-        private readonly LazyInstrumentationLoader _manager;
+        private readonly ILifespanManager _lifespanManager;
         private readonly string _requiredAssemblyName;
 
-        public OnAssemblyLoadInitializer(LazyInstrumentationLoader manager, InstrumentationInitializer instrumentationInitializer)
+        public OnAssemblyLoadInitializer(ILifespanManager lifespanManager, InstrumentationInitializer instrumentationInitializer)
         {
             _instrumentationInitializer = instrumentationInitializer;
-            _manager = manager;
+            _lifespanManager = lifespanManager;
             _requiredAssemblyName = instrumentationInitializer.RequiredAssemblyName;
             AppDomain.CurrentDomain.AssemblyLoad += CurrentDomain_AssemblyLoad;
         }
@@ -82,7 +67,7 @@ internal class LazyInstrumentationLoader : ILifespanManager, IDisposable
 
                 try
                 {
-                    _instrumentationInitializer.Initialize(_manager);
+                    _instrumentationInitializer.Initialize(_lifespanManager);
                 }
                 catch (Exception ex)
                 {

@@ -15,9 +15,11 @@
 // </copyright>
 
 #if NETCOREAPP3_1_OR_GREATER
+using System;
+
 namespace OpenTelemetry.AutoInstrumentation.Loading;
 
-internal interface ILifespanManager
+internal interface ILifespanManager : IDisposable
 {
     /// <summary>
     /// Track an object so that it is not garbage collected.

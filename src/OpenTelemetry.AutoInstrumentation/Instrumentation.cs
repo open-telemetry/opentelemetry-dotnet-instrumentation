@@ -72,7 +72,7 @@ public static class Instrumentation
     }
 
 #if NETCOREAPP3_1_OR_GREATER
-    internal static ILifespanManager LifespanManager => LazyInstrumentationLoader;
+    internal static ILifespanManager LifespanManager => LazyInstrumentationLoader.LifespanManager;
 #endif
 
     internal static TracerSettings TracerSettings { get; } = TracerSettings.FromDefaultSources();
