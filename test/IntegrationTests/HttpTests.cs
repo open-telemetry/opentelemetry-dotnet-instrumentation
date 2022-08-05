@@ -20,7 +20,7 @@ using System.Linq;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
-using Opentelemetry.Proto.Common.V1;
+using OpenTelemetry.Proto.Common.V1;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -111,8 +111,8 @@ public class HttpTests : TestHelper
             httpClientDurationMetric.Should().NotBeNull();
             httpServerDurationMetric.Should().NotBeNull();
 
-            httpClientDurationMetric.DataCase.Should().Be(Opentelemetry.Proto.Metrics.V1.Metric.DataOneofCase.Histogram);
-            httpServerDurationMetric.DataCase.Should().Be(Opentelemetry.Proto.Metrics.V1.Metric.DataOneofCase.Histogram);
+            httpClientDurationMetric.DataCase.Should().Be(OpenTelemetry.Proto.Metrics.V1.Metric.DataOneofCase.Histogram);
+            httpServerDurationMetric.DataCase.Should().Be(OpenTelemetry.Proto.Metrics.V1.Metric.DataOneofCase.Histogram);
 
             var httpClientDurationAttributes = httpClientDurationMetric.Histogram.DataPoints.Single().Attributes;
             var httpServerDurationAttributes = httpServerDurationMetric.Histogram.DataPoints.Single().Attributes;
