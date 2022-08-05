@@ -24,7 +24,7 @@ using System.Text;
 using System.Threading;
 using Google.Protobuf;
 using IntegrationTests.Helpers.Models;
-using Opentelemetry.Proto.Collector.Metrics.V1;
+using OpenTelemetry.Proto.Collector.Metrics.V1;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
