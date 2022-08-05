@@ -27,7 +27,7 @@ using FluentAssertions.Extensions;
 using IntegrationTests.Helpers;
 using IntegrationTests.Helpers.Mocks;
 using IntegrationTests.Helpers.Models;
-using Opentelemetry.Proto.Common.V1;
+using OpenTelemetry.Proto.Common.V1;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -140,7 +140,7 @@ public class SmokeTests : TestHelper
             var customClientScope = resourceMetrics.ScopeMetrics.Single(rm => rm.Scope.Name.Equals("MyCompany.MyProduct.MyLibrary", StringComparison.OrdinalIgnoreCase));
             var myFruitCounterMetric = customClientScope.Metrics.FirstOrDefault(m => m.Name.Equals("MyFruitCounter", StringComparison.OrdinalIgnoreCase));
             myFruitCounterMetric.Should().NotBeNull();
-            myFruitCounterMetric.DataCase.Should().Be(Opentelemetry.Proto.Metrics.V1.Metric.DataOneofCase.Sum);
+            myFruitCounterMetric.DataCase.Should().Be(OpenTelemetry.Proto.Metrics.V1.Metric.DataOneofCase.Sum);
             myFruitCounterMetric.Sum.DataPoints.Count.Should().Be(1);
 
             var myFruitCounterAttributes = myFruitCounterMetric.Sum.DataPoints[0].Attributes;
