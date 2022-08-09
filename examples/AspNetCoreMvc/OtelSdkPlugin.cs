@@ -15,7 +15,6 @@
 // </copyright>
 
 using System;
-using Examples.AspNetCoreMvc.Controllers;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
@@ -27,7 +26,7 @@ public class OtelSdkPlugin
     {
         var typeName = this.ToString();
         Console.WriteLine($"Hello from Tracer Plugin - {typeName}");
-        return builder.AddRedisInstrumentation(RedisController.Connection);
+        return builder;
     }
 
     public MeterProviderBuilder ConfigureMeterProvider(MeterProviderBuilder builder)
