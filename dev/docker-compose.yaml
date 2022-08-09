@@ -15,7 +15,7 @@ services:
       - "9090:9090"
 
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.51.0
+    image: otel/opentelemetry-collector-contrib:0.57.2
     volumes:
       - ./otel-config.yaml:/etc/otel/config.yaml
     command: --config /etc/otel/config.yaml
