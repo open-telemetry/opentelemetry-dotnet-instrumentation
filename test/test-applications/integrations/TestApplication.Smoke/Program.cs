@@ -35,10 +35,17 @@ namespace TestApplication.Smoke
             EmitTraces();
             EmitMetrics();
 
+            // The "LONG_RUNNING" environment variable is used by tests that access/receive
+            // data that takes time to be produced.
             var longRunning = Environment.GetEnvironmentVariable("LONG_RUNNING");
             while (longRunning == "true")
             {
-                Thread.Yield();
+                // In this case it is necessary to ensure that the test has a chance to read the
+                // expected data, only by keeping the application alive for some time that can
+                // be ensured. Anyway, tests that set "LONG_RUNNING" env var to true are expected
+                // to kill the process directly.
+                Console.WriteLine("LONG_RUNNING is true, waiting for process to be killed...");
+                Console.ReadLine();
             }
         }
 
