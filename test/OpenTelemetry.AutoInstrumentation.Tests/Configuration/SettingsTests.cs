@@ -35,8 +35,8 @@ public class SettingsTests : IDisposable
     {
         yield return new object[] { ConfigurationKeys.Traces.Exporter, void () => TracerSettings.FromDefaultSources() };
         yield return new object[] { ConfigurationKeys.Traces.Instrumentations, void () => TracerSettings.FromDefaultSources() };
-        yield return new object[] { ConfigurationKeys.Metrics.Exporter, void () => MeterSettings.FromDefaultSources() };
-        yield return new object[] { ConfigurationKeys.Metrics.Instrumentations, void () => MeterSettings.FromDefaultSources() };
+        yield return new object[] { ConfigurationKeys.Metrics.Exporter, void () => MetricSettings.FromDefaultSources() };
+        yield return new object[] { ConfigurationKeys.Metrics.Instrumentations, void () => MetricSettings.FromDefaultSources() };
     }
 
     public void Dispose()
@@ -68,7 +68,7 @@ public class SettingsTests : IDisposable
     [Fact]
     public void MeterSettings_DefaultValues()
     {
-        var settings = MeterSettings.FromDefaultSources();
+        var settings = MetricSettings.FromDefaultSources();
 
         using (new AssertionScope())
         {
@@ -107,7 +107,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, metricExporter);
 
-        var settings = MeterSettings.FromDefaultSources();
+        var settings = MetricSettings.FromDefaultSources();
 
         settings.MetricExporter.Should().Be(expectedMetricsExporter);
     }
@@ -145,27 +145,27 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData(nameof(MeterInstrumentation.NetRuntime), MeterInstrumentation.NetRuntime)]
-    [InlineData(nameof(MeterInstrumentation.AspNet), MeterInstrumentation.AspNet)]
-    [InlineData(nameof(MeterInstrumentation.HttpClient), MeterInstrumentation.HttpClient)]
-    public void MeterSettings_Instrumentations_SupportedValues(string meterInstrumentation, MeterInstrumentation expectedMeterInstrumentation)
+    [InlineData(nameof(MetricInstrumentation.NetRuntime), MetricInstrumentation.NetRuntime)]
+    [InlineData(nameof(MetricInstrumentation.AspNet), MetricInstrumentation.AspNet)]
+    [InlineData(nameof(MetricInstrumentation.HttpClient), MetricInstrumentation.HttpClient)]
+    public void MeterSettings_Instrumentations_SupportedValues(string meterInstrumentation, MetricInstrumentation expectedMetricInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, meterInstrumentation);
 
-        var settings = MeterSettings.FromDefaultSources();
+        var settings = MetricSettings.FromDefaultSources();
 
-        settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<MeterInstrumentation> { expectedMeterInstrumentation });
+        settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<MetricInstrumentation> { expectedMetricInstrumentation });
     }
 
     [Fact]
     public void MeterSettings_DisabledInstrumentations()
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, $"{nameof(MeterInstrumentation.NetRuntime)},{nameof(MeterInstrumentation.AspNet)}");
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.DisabledInstrumentations, nameof(MeterInstrumentation.AspNet));
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, $"{nameof(MetricInstrumentation.NetRuntime)},{nameof(MetricInstrumentation.AspNet)}");
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.DisabledInstrumentations, nameof(MetricInstrumentation.AspNet));
 
-        var settings = MeterSettings.FromDefaultSources();
+        var settings = MetricSettings.FromDefaultSources();
 
-        settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<MeterInstrumentation> { MeterInstrumentation.NetRuntime });
+        settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<MetricInstrumentation> { MetricInstrumentation.NetRuntime });
     }
 
     [Theory]

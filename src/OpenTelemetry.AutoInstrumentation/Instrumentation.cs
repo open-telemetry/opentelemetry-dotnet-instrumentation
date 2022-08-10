@@ -77,7 +77,7 @@ public static class Instrumentation
 
     internal static TracerSettings TracerSettings { get; } = TracerSettings.FromDefaultSources();
 
-    internal static MeterSettings MeterSettings { get; } = MeterSettings.FromDefaultSources();
+    internal static MetricSettings MetricSettings { get; } = MetricSettings.FromDefaultSources();
 
     /// <summary>
     /// Initialize the OpenTelemetry SDK with a pre-defined set of exporters, shims, and
@@ -93,7 +93,7 @@ public static class Instrumentation
 
         try
         {
-            if (TracerSettings.LoadTracerAtStartup || MeterSettings.LoadMetricsAtStartup)
+            if (TracerSettings.LoadTracerAtStartup || MetricSettings.LoadMetricsAtStartup)
             {
                 // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
                 _sdkEventListener = new(EventLevel.Warning, Logger);
@@ -102,7 +102,7 @@ public static class Instrumentation
                 AppDomain.CurrentDomain.ProcessExit += OnExit;
                 AppDomain.CurrentDomain.DomainUnload += OnExit;
 
-                if (TracerSettings.FlushOnUnhandledException || MeterSettings.FlushOnUnhandledException)
+                if (TracerSettings.FlushOnUnhandledException || MetricSettings.FlushOnUnhandledException)
                 {
                     AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
                 }
@@ -138,11 +138,11 @@ public static class Instrumentation
                 Logger.Information("OpenTelemetry tracer initialized.");
             }
 
-            if (MeterSettings.LoadMetricsAtStartup)
+            if (MetricSettings.LoadMetricsAtStartup)
             {
 #if NETCOREAPP3_1_OR_GREATER
 
-                if (MeterSettings.EnabledInstrumentations.Contains(MeterInstrumentation.AspNet))
+                if (MetricSettings.EnabledInstrumentations.Contains(MetricInstrumentation.AspNet))
                 {
                     LazyInstrumentationLoader.Add(new AspNetCoreMetricsInitializer());
                 }
@@ -151,8 +151,8 @@ public static class Instrumentation
                 var builder = Sdk
                     .CreateMeterProviderBuilder()
                     .SetResourceBuilder(_resourceBuilder)
-                    .UseEnvironmentVariables(MeterSettings)
-                    .InvokePlugins(MeterSettings.MetricPlugins);
+                    .UseEnvironmentVariables(MetricSettings)
+                    .InvokePlugins(MetricSettings.MetricPlugins);
 
                 _meterProvider = builder.Build();
                 Logger.Information("OpenTelemetry meter initialized.");
