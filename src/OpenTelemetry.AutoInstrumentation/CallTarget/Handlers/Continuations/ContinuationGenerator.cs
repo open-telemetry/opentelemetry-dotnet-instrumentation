@@ -29,7 +29,7 @@ internal class ContinuationGenerator<TTarget, TReturn>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected static TReturn ToTReturn<TFrom>(TFrom returnValue)
     {
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
         return Unsafe.As<TFrom, TReturn>(ref returnValue);
 #else
         return ContinuationsHelper.Convert<TFrom, TReturn>(returnValue);
@@ -39,7 +39,7 @@ internal class ContinuationGenerator<TTarget, TReturn>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected static TTo FromTReturn<TTo>(TReturn returnValue)
     {
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
         return Unsafe.As<TReturn, TTo>(ref returnValue);
 #else
         return ContinuationsHelper.Convert<TReturn, TTo>(returnValue);
