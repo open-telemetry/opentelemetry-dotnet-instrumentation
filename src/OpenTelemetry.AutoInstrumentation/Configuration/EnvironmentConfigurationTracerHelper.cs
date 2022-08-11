@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenTelemetry.Instrumentation.Wcf;
 using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
@@ -25,6 +26,7 @@ internal static class EnvironmentConfigurationTracerHelper
 {
     private static readonly Dictionary<TracerInstrumentation, Action<TracerProviderBuilder>> AddInstrumentation = new()
     {
+        [TracerInstrumentation.Wcf] = builder => builder.AddWcfInstrumentation(),
         [TracerInstrumentation.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
         [TracerInstrumentation.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
         [TracerInstrumentation.SqlClient] = builder => builder.AddSqlClientInstrumentation(),

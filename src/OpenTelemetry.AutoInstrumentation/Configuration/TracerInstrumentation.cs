@@ -68,5 +68,10 @@ public enum TracerInstrumentation
     /// <summary>
     /// GrpcNetClient instrumentation.
     /// </summary>
-    GrpcNetClient = 8
+    GrpcNetClient = 8,
+
+    /// <summary>
+    /// WCF instrumentation.
+    /// </summary>
+    Wcf = 9
 }
