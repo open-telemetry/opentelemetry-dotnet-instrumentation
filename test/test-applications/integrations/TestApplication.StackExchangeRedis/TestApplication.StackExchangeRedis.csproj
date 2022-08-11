@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,6 +6,9 @@
 
   <ItemGroup>
     <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
+    <!-- Workaround! System.Runtime.CompilerServices.Unsafe v. 6.0.0 is minimal version supportef by auto instrumentation.
+    StackExchange.Redis references older version. It prevents to use older version during runtime.-->
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" Condition=" '$(TargetFramework)' == 'netcoreapp3.1' " />
   </ItemGroup>
 
   <ItemGroup>
