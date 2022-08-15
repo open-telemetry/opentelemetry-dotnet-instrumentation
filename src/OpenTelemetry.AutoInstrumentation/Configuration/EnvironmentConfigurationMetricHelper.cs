@@ -23,14 +23,14 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 internal static class EnvironmentConfigurationMetricHelper
 {
-    private static readonly Dictionary<MeterInstrumentation, Action<MeterProviderBuilder>> AddMeters = new()
+    private static readonly Dictionary<MetricInstrumentation, Action<MeterProviderBuilder>> AddMeters = new()
     {
-        [MeterInstrumentation.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
-        [MeterInstrumentation.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
-        [MeterInstrumentation.NetRuntime] = builder => builder.AddRuntimeInstrumentation(),
+        [MetricInstrumentation.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
+        [MetricInstrumentation.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
+        [MetricInstrumentation.NetRuntime] = builder => builder.AddRuntimeInstrumentation(),
     };
 
-    public static MeterProviderBuilder UseEnvironmentVariables(this MeterProviderBuilder builder, MeterSettings settings)
+    public static MeterProviderBuilder UseEnvironmentVariables(this MeterProviderBuilder builder, MetricSettings settings)
     {
         builder
             .SetExporter(settings)
@@ -58,7 +58,7 @@ internal static class EnvironmentConfigurationMetricHelper
         return builder;
     }
 
-    private static MeterProviderBuilder SetExporter(this MeterProviderBuilder builder, MeterSettings settings)
+    private static MeterProviderBuilder SetExporter(this MeterProviderBuilder builder, MetricSettings settings)
     {
         if (settings.ConsoleExporterEnabled)
         {
