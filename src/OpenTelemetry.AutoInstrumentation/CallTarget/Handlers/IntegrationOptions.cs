@@ -15,6 +15,7 @@
 // </copyright>
 
 using System;
+using System.IO;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Logging;
@@ -46,6 +47,14 @@ internal static class IntegrationOptions<TIntegration, TTarget>
         {
             Log.Warning($"CallTargetInvokerException has been detected, the integration <{typeof(TIntegration)}, {typeof(TTarget)}> will be disabled.");
             _disableIntegration = true;
+        }
+        else if (exception is FileLoadException fileLoadException)
+        {
+            if (fileLoadException.FileName.StartsWith("System.Diagnostics.DiagnosticSource") || fileLoadException.FileName.StartsWith("System.Runtime.CompilerServices.Unsafe"))
+            {
+                Log.Warning($"FileLoadException for '{fileLoadException.FileName}' has been detected, the integration <{typeof(TIntegration)}, {typeof(TTarget)}> will be disabled.");
+                _disableIntegration = true;
+            }
         }
     }
 }
