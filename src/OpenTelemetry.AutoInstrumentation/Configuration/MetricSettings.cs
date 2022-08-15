@@ -1,4 +1,4 @@
-// <copyright file="MeterSettings.cs" company="OpenTelemetry Authors">
+// <copyright file="MetricSettings.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,28 +16,27 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration
 {
     /// <summary>
-    /// Meter Settings
+    /// Metric Settings
     /// </summary>
-    public class MeterSettings : Settings
+    public class MetricSettings : Settings
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MeterSettings"/> class
+        /// Initializes a new instance of the <see cref="MetricSettings"/> class
         /// using the specified <see cref="IConfigurationSource"/> to initialize values.
         /// </summary>
         /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
-        private MeterSettings(IConfigurationSource source)
+        private MetricSettings(IConfigurationSource source)
             : base(source)
         {
             MetricExporter = ParseMetricExporter(source);
             ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.Metrics.ConsoleExporterEnabled) ?? false;
 
-            EnabledInstrumentations = source.ParseEnabledEnumList<MeterInstrumentation>(
+            EnabledInstrumentations = source.ParseEnabledEnumList<MetricInstrumentation>(
                 enabledConfiguration: ConfigurationKeys.Metrics.Instrumentations,
                 disabledConfiguration: ConfigurationKeys.Metrics.DisabledInstrumentations,
                 error: "The \"{0}\" is not recognized as supported metrics instrumentation and cannot be enabled");
@@ -100,14 +99,14 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
         /// <summary>
         /// Gets the list of enabled meters.
         /// </summary>
-        public IList<MeterInstrumentation> EnabledInstrumentations { get; }
+        public IList<MetricInstrumentation> EnabledInstrumentations { get; }
 
         /// <summary>
         /// Gets the list of meters to be added to the MeterProvider at the startup.
         /// </summary>
         public IList<string> Meters { get; } = new List<string>();
 
-        internal static MeterSettings FromDefaultSources()
+        internal static MetricSettings FromDefaultSources()
         {
             var configurationSource = new CompositeConfigurationSource
             {
@@ -119,7 +118,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
 #endif
             };
 
-            return new MeterSettings(configurationSource);
+            return new MetricSettings(configurationSource);
         }
 
         private static MetricsExporter ParseMetricExporter(IConfigurationSource source)
