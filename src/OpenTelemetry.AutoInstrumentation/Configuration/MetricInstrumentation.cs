@@ -1,4 +1,4 @@
-// <copyright file="MeterInstrumentation.cs" company="OpenTelemetry Authors">
+// <copyright file="MetricInstrumentation.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Enum representing supported meter instrumentations.
 /// </summary>
-public enum MeterInstrumentation
+public enum MetricInstrumentation
 {
     /// <summary>
     /// ASP.NET instrumentation.
