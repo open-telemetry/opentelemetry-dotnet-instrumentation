@@ -41,7 +41,7 @@ public class GrpcNetClientTests : TestHelper
         // Disabling HttpClient instrumentation to have consistent set of spans.
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS", "HttpClient");
 
-        RunTestApplication(agent.Port);
+        RunTestApplication(agent.Port, enableClrProfiler: !IsCoreClr());
 
         const int expectedSpansCount = 1;
         var spans = agent.WaitForSpans(expectedSpansCount, TimeSpan.FromSeconds(5));

@@ -19,14 +19,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Net.Http;
-using System.Threading;
 using TestApplication.Shared;
 
 namespace TestApplication.Smoke
 {
     public class Program
     {
-        public static readonly string SourceName = "MyCompany.MyProduct.MyLibrary";
+        public const string SourceName = "MyCompany.MyProduct.MyLibrary";
 
         public static void Main(string[] args)
         {

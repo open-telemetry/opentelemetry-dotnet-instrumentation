@@ -42,7 +42,6 @@ public class EnvironmentHelper
     private readonly string _testApplicationDirectory;
     private readonly TargetFrameworkAttribute _targetFramework;
 
-    private bool _requiresProfiling;
     private string _integrationsFileLocation;
     private string _profilerFileLocation;
 
@@ -51,14 +50,12 @@ public class EnvironmentHelper
         Type anchorType,
         ITestOutputHelper output,
         string testApplicationDirectory = null,
-        bool prependTestApplicationToAppName = true,
-        bool requiresProfiling = true)
+        bool prependTestApplicationToAppName = true)
     {
         TestApplicationName = testApplicationName;
         _testApplicationDirectory = testApplicationDirectory ?? Path.Combine("test", "test-applications", "integrations");
         _targetFramework = Assembly.GetAssembly(anchorType).GetCustomAttribute<TargetFrameworkAttribute>();
         _output = output;
-        _requiresProfiling = requiresProfiling;
 
         var parts = _targetFramework.FrameworkName.Split(',');
         _runtime = parts[0];
@@ -164,7 +161,6 @@ public class EnvironmentHelper
         StringDictionary environmentVariables,
         string processToProfile)
     {
-        string profilerEnabled = _requiresProfiling ? "1" : "0";
         string profilerPath = GetProfilerPath();
 
         if (IsCoreClr())
@@ -178,15 +174,21 @@ public class EnvironmentHelper
                 environmentVariables["DOTNET_ADDITIONAL_DEPS"] = GetAdditionalDepsPath();
             }
 
-            environmentVariables["CORECLR_ENABLE_PROFILING"] = profilerEnabled;
-            environmentVariables["CORECLR_PROFILER"] = EnvironmentTools.ProfilerClsId;
-            environmentVariables["CORECLR_PROFILER_PATH"] = profilerPath;
+            if (testSettings.EnableClrProfiler)
+            {
+                environmentVariables["CORECLR_ENABLE_PROFILING"] = "1";
+                environmentVariables["CORECLR_PROFILER"] = EnvironmentTools.ProfilerClsId;
+                environmentVariables["CORECLR_PROFILER_PATH"] = profilerPath;
+            }
         }
         else
         {
-            environmentVariables["COR_ENABLE_PROFILING"] = profilerEnabled;
-            environmentVariables["COR_PROFILER"] = EnvironmentTools.ProfilerClsId;
-            environmentVariables["COR_PROFILER_PATH"] = profilerPath;
+            if (testSettings.EnableClrProfiler)
+            {
+                environmentVariables["COR_ENABLE_PROFILING"] = "1";
+                environmentVariables["COR_PROFILER"] = EnvironmentTools.ProfilerClsId;
+                environmentVariables["COR_PROFILER_PATH"] = profilerPath;
+            }
         }
 
         if (DebugModeEnabled)

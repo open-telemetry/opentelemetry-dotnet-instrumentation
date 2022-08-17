@@ -121,7 +121,7 @@ public abstract class TestHelper
     /// and returns the Process instance for further interaction.
     /// </summary>
     /// <returns>Test application process</returns>
-    public Process StartTestApplication(int traceAgentPort = 0, int metricsAgentPort = 0, string arguments = null, string packageVersion = "", int aspNetCorePort = 0, string framework = "", bool enableStartupHook = true)
+    public Process StartTestApplication(int traceAgentPort = 0, int metricsAgentPort = 0, string arguments = null, string packageVersion = "", int aspNetCorePort = 0, string framework = "", bool enableStartupHook = true, bool enableClrProfiler = true)
     {
         var testSettings = new TestSettings
         {
@@ -129,7 +129,8 @@ public abstract class TestHelper
             PackageVersion = packageVersion,
             AspNetCorePort = aspNetCorePort,
             Framework = framework,
-            EnableStartupHook = enableStartupHook
+            EnableStartupHook = enableStartupHook,
+            EnableClrProfiler = enableClrProfiler
         };
 
         if (traceAgentPort != 0)
@@ -149,7 +150,7 @@ public abstract class TestHelper
     /// RunTestApplication starts the test application, wait up to DefaultProcessTimeout.
     /// Assertion exceptions are thrown if it timed out or the exit code is non-zero.
     /// </summary>
-    public void RunTestApplication(int traceAgentPort = 0, int metricsAgentPort = 0, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000, bool enableStartupHook = true)
+    public void RunTestApplication(int traceAgentPort = 0, int metricsAgentPort = 0, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000, bool enableStartupHook = true, bool enableClrProfiler = true)
     {
         var testSettings = new TestSettings
         {
@@ -157,7 +158,8 @@ public abstract class TestHelper
             PackageVersion = packageVersion,
             AspNetCorePort = aspNetCorePort,
             Framework = framework,
-            EnableStartupHook = enableStartupHook
+            EnableStartupHook = enableStartupHook,
+            EnableClrProfiler = enableClrProfiler
         };
 
         if (traceAgentPort != 0)
@@ -173,9 +175,9 @@ public abstract class TestHelper
         RunTestApplication(testSettings);
     }
 
-    protected void EnableDebugMode()
+    protected bool IsCoreClr()
     {
-        EnvironmentHelper.DebugModeEnabled = true;
+        return EnvironmentHelper.IsCoreClr();
     }
 
     protected void SetEnvironmentVariable(string key, string value)

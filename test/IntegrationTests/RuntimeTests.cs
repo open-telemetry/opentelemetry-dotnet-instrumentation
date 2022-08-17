@@ -38,7 +38,7 @@ public class RuntimeTests : TestHelper
     public void SubmitMetrics()
     {
         using var collector = new MockMetricsCollector(Output);
-        using var process = StartTestApplication(metricsAgentPort: collector.Port);
+        using var process = StartTestApplication(metricsAgentPort: collector.Port, enableClrProfiler: !IsCoreClr());
 
         try
         {

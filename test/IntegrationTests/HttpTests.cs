@@ -44,7 +44,7 @@ public class HttpTests : TestHelper
 
         const int expectedSpanCount = 3;
 
-        RunTestApplication(agent.Port);
+        RunTestApplication(agent.Port, enableClrProfiler: !IsCoreClr());
         var spans = agent.WaitForSpans(expectedSpanCount, TimeSpan.FromSeconds(5));
 
         using (new AssertionScope())
@@ -90,7 +90,7 @@ public class HttpTests : TestHelper
         const int expectedMetricRequests = 1;
 
         using var collector = new MockMetricsCollector(Output);
-        RunTestApplication(metricsAgentPort: collector.Port);
+        RunTestApplication(metricsAgentPort: collector.Port, enableClrProfiler: !IsCoreClr());
         var metricRequests = collector.WaitForMetrics(expectedMetricRequests, TimeSpan.FromSeconds(5));
 
         using (new AssertionScope())

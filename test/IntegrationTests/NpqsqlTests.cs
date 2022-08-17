@@ -43,7 +43,7 @@ public class NpqsqlTests : TestHelper
     {
         using var agent = new MockZipkinCollector(Output);
 
-        RunTestApplication(agent.Port, arguments: $"--postgres {_postgres.Port}");
+        RunTestApplication(agent.Port, arguments: $"--postgres {_postgres.Port}", enableClrProfiler: !IsCoreClr());
         var spans = agent.WaitForSpans(1, TimeSpan.FromSeconds(5));
 
         spans.Count.Should().Be(1);

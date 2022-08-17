@@ -46,7 +46,7 @@ namespace IntegrationTests
 
             const int expectedSpanCount = 8;
 
-            RunTestApplication(agent.Port, arguments: $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}");
+            RunTestApplication(agent.Port, arguments: $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}", enableClrProfiler: !IsCoreClr());
             var spans = agent.WaitForSpans(expectedSpanCount, TimeSpan.FromSeconds(5));
 
             using (new AssertionScope())
