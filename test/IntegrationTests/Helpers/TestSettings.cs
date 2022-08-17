@@ -31,4 +31,6 @@ public class TestSettings
     public int AspNetCorePort { get; set; } = 5000;
 
     public bool EnableStartupHook { get; set; } = true;
+
+    public bool EnableClrProfiler { get; set; } = true;
 }
