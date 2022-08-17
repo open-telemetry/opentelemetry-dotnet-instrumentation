@@ -9,7 +9,7 @@
 namespace trace
 {
 
-const WSTRING env_vars_to_display[]{environment::tracing_enabled,
+const WSTRING env_vars_to_display[]{environment::clr_profiler_enabled,
                                     environment::debug_enabled,
                                     environment::profiler_home_path,
                                     environment::integrations_path,
