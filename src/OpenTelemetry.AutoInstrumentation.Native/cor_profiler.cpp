@@ -50,7 +50,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     // check if tracing is completely disabled
     if (IsTracingDisabled())
     {
-        Logger::Info("OpenTelemetry TRACER DIAGNOSTICS - Profiler disabled in ", environment::tracing_enabled);
+        Logger::Info("OpenTelemetry Automatic Instrumentation - CLR Profiler disabled via ", environment::clr_profiler_enabled);
         return E_FAIL;
     }
 

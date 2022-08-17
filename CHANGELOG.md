@@ -18,6 +18,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- Renamed `OTEL_DOTNET_AUTO_TRACES_ENABLED` to `OTEL_DOTNET_AUTO_ENABLED` since it
+  controls enabling or disabling the CLR profiler independent of the signal type.
 - `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS` default value is changed to
   include all of the available instrumentations.
 - `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS` default value is changed to
