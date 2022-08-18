@@ -76,7 +76,8 @@ instead.
 
 ## Propagators
 
-Propagators allow applications to share context. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/context/api-propagators.md) for more details.
+Propagators allow applications to share context. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/context/api-propagators.md)
+for more details.
 
 | Environment variable | Description | Default value |
 |-|-|-|
