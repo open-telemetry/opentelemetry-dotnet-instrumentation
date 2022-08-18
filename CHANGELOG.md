@@ -15,8 +15,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Add StackExchange.Redis traces instrumentation.
 - Add configuration option `none` to `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS`
   and `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS`.
-- Add support for `b3multi` propagator.
-- Add support for `OTEL_PROPAGATORS` environmental variable.
+- Add support for the `b3multi` propagator.
+- Add support for the `OTEL_PROPAGATORS` environment variable.
   Supported configuration options are `b3multi`, `baggage`, `tracecontext`.
   Default is `tracecontext,baggage`.
 

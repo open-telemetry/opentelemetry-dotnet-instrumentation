@@ -76,11 +76,11 @@ instead.
 
 ## Propagators
 
-Propagators allows exchange context by the applications. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/context/api-propagators.md).
+Propagators allow applications to share context. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/context/api-propagators.md) for more details.
 
 | Environment variable | Description | Default value |
 |-|-|-|
-| `OTEL_PROPAGATORS` | Comma-separated list of propagators. Supported options: `tracecontext`, `baggage`, `b3multi`. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/sdk-environment-variables.md#general-sdk-configuration)
+| `OTEL_PROPAGATORS` | Comma-separated list of propagators. Supported options: `tracecontext`, `baggage`, `b3multi`. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/sdk-environment-variables.md#general-sdk-configuration) for more details.
  | `tracecontext,baggage` |
 
 ## Exporters
