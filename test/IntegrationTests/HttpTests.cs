@@ -36,10 +36,15 @@ public class HttpTests : TestHelper
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
     }
 
-    [Fact]
+    [Theory]
+    [InlineData("")] // equivalent of default value
+    [InlineData("b3multi")]
     [Trait("Category", "EndToEnd")]
-    public void SubmitTraces()
+    public void SubmitTraces(string propagators)
     {
+        SetEnvironmentVariable("OTEL_PROPAGATORS", propagators);
+        SetEnvironmentVariable("DISABLE_DistributedContextPropagator", "true");
+
         using var agent = new MockZipkinCollector(Output);
 
         const int expectedSpanCount = 3;

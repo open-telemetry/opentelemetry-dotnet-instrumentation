@@ -74,6 +74,15 @@ instead.
 | `OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED` | Whether the traces console exporter is enabled or not. | `false` |
 | `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED` | Whether the metrics console exporter is enabled or not. | `false` |
 
+## Propagators
+
+Propagators allows exchange context by the applications. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/context/api-propagators.md).
+
+| Environment variable | Description | Default value |
+|-|-|-|
+| `OTEL_PROPAGATORS` | Comma-separated list of propagators. Supported options: `tracecontext`, `baggage`, `b3multi`. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/sdk-environment-variables.md#general-sdk-configuration)
+ | `tracecontext,baggage` |
+
 ## Exporters
 
 Exporters output the telemetry.

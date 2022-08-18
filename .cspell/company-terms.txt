@@ -1,6 +1,7 @@
 CNCF
-triager
+opentelemetry
 OTEL
 OTLP
+tracecontext
+triager
 Zipkin
-opentelemetry

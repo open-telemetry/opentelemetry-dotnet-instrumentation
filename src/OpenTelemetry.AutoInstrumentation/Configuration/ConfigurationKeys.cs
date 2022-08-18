@@ -156,4 +156,16 @@ public class ConfigurationKeys
         /// </summary>
         public const string AdditionalSources = "OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES";
     }
+
+    /// <summary>
+    /// Configuration keys for Sdk
+    /// </summary>
+    public static class Sdk
+    {
+        /// <summary>
+        /// Configuration key for comma separated list of propagators to be used.
+        /// Default is <c>"tracecontext,baggage"</c>.
+        /// </summary>
+        public const string Propagators = "OTEL_PROPAGATORS";
+    }
 }

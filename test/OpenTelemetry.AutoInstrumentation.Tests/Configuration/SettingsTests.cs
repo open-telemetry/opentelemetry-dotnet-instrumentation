@@ -37,6 +37,7 @@ public class SettingsTests : IDisposable
         yield return new object[] { ConfigurationKeys.Traces.Instrumentations, void () => TracerSettings.FromDefaultSources() };
         yield return new object[] { ConfigurationKeys.Metrics.Exporter, void () => MetricSettings.FromDefaultSources() };
         yield return new object[] { ConfigurationKeys.Metrics.Instrumentations, void () => MetricSettings.FromDefaultSources() };
+        yield return new object[] { ConfigurationKeys.Sdk.Propagators, void () => SdkSettings.FromDefaultSources() };
     }
 
     public void Dispose()
@@ -85,6 +86,17 @@ public class SettingsTests : IDisposable
         }
     }
 
+    [Fact]
+    public void SdkSettings_DefaultValues()
+    {
+        var settings = SdkSettings.FromDefaultSources();
+
+        using (new AssertionScope())
+        {
+            settings.Propagators.Should().BeEmpty();
+        }
+    }
+
     [Theory]
     [InlineData("none", TracesExporter.None)]
     [InlineData("jaeger", TracesExporter.Jaeger)]
@@ -110,6 +122,20 @@ public class SettingsTests : IDisposable
         var settings = MetricSettings.FromDefaultSources();
 
         settings.MetricExporter.Should().Be(expectedMetricsExporter);
+    }
+
+    [Theory]
+    [InlineData("tracecontext", new[] { Propagator.W3CTraceContext })]
+    [InlineData("baggage", new[] { Propagator.W3CBaggage })]
+    [InlineData("b3multi", new[] { Propagator.B3Multi })]
+    [InlineData("tracecontext,baggage,b3multi", new[] { Propagator.W3CTraceContext, Propagator.W3CBaggage, Propagator.B3Multi })]
+    public void Propagators_SupportedValues(string propagators, Propagator[] expectedPropagators)
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, propagators);
+
+        var settings = SdkSettings.FromDefaultSources();
+
+        settings.Propagators.Should().BeEquivalentTo(expectedPropagators);
     }
 
     [Theory]
@@ -229,5 +255,6 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Http2UnencryptedSupportEnabled, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, null);
     }
 }
