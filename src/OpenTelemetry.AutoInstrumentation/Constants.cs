@@ -50,6 +50,13 @@ namespace OpenTelemetry.AutoInstrumentation
                 public const string Zipkin = "zipkin";
                 public const string Jaeger = "jaeger";
             }
+
+            public static class Propagators
+            {
+                public const string W3CTraceContext = "tracecontext";
+                public const string W3CBaggage = "baggage";
+                public const string B3Multi = "b3multi";
+            }
         }
     }
 }

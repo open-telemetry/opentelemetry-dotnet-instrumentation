@@ -79,6 +79,8 @@ public static class Instrumentation
 
     internal static MetricSettings MetricSettings { get; } = MetricSettings.FromDefaultSources();
 
+    internal static SdkSettings SdkSettings { get; } = SdkSettings.FromDefaultSources();
+
     /// <summary>
     /// Initialize the OpenTelemetry SDK with a pre-defined set of exporters, shims, and
     /// instrumentations.
@@ -106,6 +108,8 @@ public static class Instrumentation
                 {
                     AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
                 }
+
+                EnvironmentConfigurationSdkHelper.UseEnvironmentVariables(SdkSettings);
             }
 
             if (TracerSettings.LoadTracerAtStartup)

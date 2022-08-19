@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+using System;
+using System.Diagnostics;
 using System.Net.Http;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -25,6 +27,12 @@ namespace TestApplication.Http
         public static void Main(string[] args)
         {
             var port = IntegrationTests.Helpers.TcpPortProvider.GetOpenPort();
+            var disableDistributedContextPropagator = Environment.GetEnvironmentVariable("DISABLE_DistributedContextPropagator") == "true";
+            if (disableDistributedContextPropagator)
+            {
+                DistributedContextPropagator.Current = DistributedContextPropagator.CreateNoOutputPropagator();
+            }
+
             using var host = CreateHostBuilder(args, port).Build();
             host.Start();
 
