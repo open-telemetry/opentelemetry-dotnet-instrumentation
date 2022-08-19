@@ -135,7 +135,6 @@ public static class Instrumentation
                     .CreateTracerProviderBuilder()
                     .SetResourceBuilder(_resourceBuilder)
                     .UseEnvironmentVariables(TracerSettings)
-                    .SetSampler(new AlwaysOnSampler())
                     .InvokePlugins(TracerSettings.TracerPlugins);
 
                 _tracerProvider = builder.Build();

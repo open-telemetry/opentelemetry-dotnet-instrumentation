@@ -28,6 +28,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   include all of the available instrumentations.
 - `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS` default value is changed to
   include all of the available instrumentations.
+- Changed Tracing sampler from `always_on` to `parentbased_always_on`.
+  See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/6ce62202e5407518e19c56c445c13682ef51a51d/specification/sdk-environment-variables.md?plain=1#L46)
+  for more details.
 
 ## Removed
 
