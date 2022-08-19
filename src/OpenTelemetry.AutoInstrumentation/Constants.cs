@@ -14,52 +14,45 @@
 // limitations under the License.
 // </copyright>
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-#pragma warning disable SA1600 // Elements should be documented
+namespace OpenTelemetry.AutoInstrumentation;
 
-namespace OpenTelemetry.AutoInstrumentation
+internal static class Constants
 {
-    public static class Constants
+    public static class Tracer
     {
-        public static class Tracer
+        public const string Language = "dotnet";
+        public const string Version = "0.2.0";
+    }
+
+    public static class ConfigurationValues
+    {
+        public const string None = "none";
+
+        /// <summary>
+        /// Default delimiter for textual representation of multi-valued settings.
+        /// </summary>
+        public const char Separator = ',';
+
+        /// <summary>a
+        /// Delimiter for textual representation of settings that may contain multiple
+        /// fully qualified .NET names, e.g.: assembly or type names, that already
+        /// use commas as separators.
+        /// </summary>
+        public const char DotNetQualifiedNameSeparator = ':';
+
+        public static class Exporters
         {
-            public const string Language = "dotnet";
-            public const string Version = "0.2.0";
+            public const string Otlp = "otlp";
+            public const string Prometheus = "prometheus";
+            public const string Zipkin = "zipkin";
+            public const string Jaeger = "jaeger";
         }
 
-        public static class ConfigurationValues
+        public static class Propagators
         {
-            public const string None = "none";
-
-            /// <summary>
-            /// Default delimiter for textual representation of multi-valued settings.
-            /// </summary>
-            public const char Separator = ',';
-
-            /// <summary>a
-            /// Delimiter for textual representation of settings that may contain multiple
-            /// fully qualified .NET names, e.g.: assembly or type names, that already
-            /// use commas as separators.
-            /// </summary>
-            public const char DotNetQualifiedNameSeparator = ':';
-
-            public static class Exporters
-            {
-                public const string Otlp = "otlp";
-                public const string Prometheus = "prometheus";
-                public const string Zipkin = "zipkin";
-                public const string Jaeger = "jaeger";
-            }
-
-            public static class Propagators
-            {
-                public const string W3CTraceContext = "tracecontext";
-                public const string W3CBaggage = "baggage";
-                public const string B3Multi = "b3multi";
-            }
+            public const string W3CTraceContext = "tracecontext";
+            public const string W3CBaggage = "baggage";
+            public const string B3Multi = "b3multi";
         }
     }
 }
-
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-#pragma warning restore SA1600 // Elements should be documented

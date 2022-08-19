@@ -20,32 +20,31 @@ using System.Net.Http;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace TestApplication.Http
+namespace TestApplication.Http;
+
+public class Program
 {
-    public class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
+        var port = IntegrationTests.Helpers.TcpPortProvider.GetOpenPort();
+        var disableDistributedContextPropagator = Environment.GetEnvironmentVariable("DISABLE_DistributedContextPropagator") == "true";
+        if (disableDistributedContextPropagator)
         {
-            var port = IntegrationTests.Helpers.TcpPortProvider.GetOpenPort();
-            var disableDistributedContextPropagator = Environment.GetEnvironmentVariable("DISABLE_DistributedContextPropagator") == "true";
-            if (disableDistributedContextPropagator)
-            {
-                DistributedContextPropagator.Current = DistributedContextPropagator.CreateNoOutputPropagator();
-            }
-
-            using var host = CreateHostBuilder(args, port).Build();
-            host.Start();
-
-            using var httpClient = new HttpClient();
-            httpClient.GetAsync($"http://localhost:{port}/test").Wait();
+            DistributedContextPropagator.Current = DistributedContextPropagator.CreateNoOutputPropagator();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args, int port) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                    webBuilder.UseUrls($"http://localhost:{port}");
-                });
+        using var host = CreateHostBuilder(args, port).Build();
+        host.Start();
+
+        using var httpClient = new HttpClient();
+        httpClient.GetAsync($"http://localhost:{port}/test").Wait();
     }
+
+    public static IHostBuilder CreateHostBuilder(string[] args, int port) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>();
+                webBuilder.UseUrls($"http://localhost:{port}");
+            });
 }

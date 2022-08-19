@@ -14,17 +14,16 @@
 // limitations under the License.
 // </copyright>
 
-namespace TestApplication.ExampleLibrary.GenericTests
-{
-    public struct PointStruct
-    {
-        public int X;
-        public int Y;
+namespace TestApplication.ExampleLibrary.GenericTests;
 
-        public PointStruct(int x, int y)
-        {
-            X = x;
-            Y = y;
-        }
+public struct PointStruct
+{
+    public int X;
+    public int Y;
+
+    public PointStruct(int x, int y)
+    {
+        X = x;
+        Y = y;
     }
 }

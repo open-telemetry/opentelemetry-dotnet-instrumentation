@@ -22,46 +22,45 @@ using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace IntegrationTests
+namespace IntegrationTests;
+
+[Collection(SqlServerCollection.Name)]
+public class SqlClientTests : TestHelper
 {
-    [Collection(SqlServerCollection.Name)]
-    public class SqlClientTests : TestHelper
+    private const string ServiceName = "TestApplication.SqlClient";
+    private readonly SqlServerFixture _sqlServerFixture;
+
+    public SqlClientTests(ITestOutputHelper output, SqlServerFixture sqlServerFixture)
+        : base("SqlClient", output)
     {
-        private const string ServiceName = "TestApplication.SqlClient";
-        private readonly SqlServerFixture _sqlServerFixture;
+        _sqlServerFixture = sqlServerFixture;
+        SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
+    }
 
-        public SqlClientTests(ITestOutputHelper output, SqlServerFixture sqlServerFixture)
-            : base("SqlClient", output)
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Linux")]
+    public void SubmitTraces()
+    {
+        using var agent = new MockZipkinCollector(Output);
+
+        const int expectedSpanCount = 8;
+
+        RunTestApplication(agent.Port, arguments: $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}", enableClrProfiler: !IsCoreClr());
+        var spans = agent.WaitForSpans(expectedSpanCount, TimeSpan.FromSeconds(5));
+
+        using (new AssertionScope())
         {
-            _sqlServerFixture = sqlServerFixture;
-            SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
-        }
+            spans.Count.Should().Be(expectedSpanCount);
 
-        [Fact]
-        [Trait("Category", "EndToEnd")]
-        [Trait("Containers", "Linux")]
-        public void SubmitTraces()
-        {
-            using var agent = new MockZipkinCollector(Output);
-
-            const int expectedSpanCount = 8;
-
-            RunTestApplication(agent.Port, arguments: $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}", enableClrProfiler: !IsCoreClr());
-            var spans = agent.WaitForSpans(expectedSpanCount, TimeSpan.FromSeconds(5));
-
-            using (new AssertionScope())
+            foreach (var span in spans)
             {
-                spans.Count.Should().Be(expectedSpanCount);
-
-                foreach (var span in spans)
-                {
-                    span.Service.Should().Be(ServiceName);
-                    span.Name.Should().Be("master");
-                    span.Tags.Should().Contain(new KeyValuePair<string, string>("db.system", "mssql"));
-                    span.Tags.Should().Contain(new KeyValuePair<string, string>("db.name", "master"));
-                    span.Tags.Should().Contain(new KeyValuePair<string, string>("peer.service", $"localhost,{_sqlServerFixture.Port}"));
-                    span.Tags.Should().Contain(new KeyValuePair<string, string>("span.kind", "client"));
-                }
+                span.Service.Should().Be(ServiceName);
+                span.Name.Should().Be("master");
+                span.Tags.Should().Contain(new KeyValuePair<string, string>("db.system", "mssql"));
+                span.Tags.Should().Contain(new KeyValuePair<string, string>("db.name", "master"));
+                span.Tags.Should().Contain(new KeyValuePair<string, string>("peer.service", $"localhost,{_sqlServerFixture.Port}"));
+                span.Tags.Should().Contain(new KeyValuePair<string, string>("span.kind", "client"));
             }
         }
     }

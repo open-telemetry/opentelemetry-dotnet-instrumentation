@@ -18,27 +18,26 @@
 using System;
 using System.Collections.Concurrent;
 
-namespace OpenTelemetry.AutoInstrumentation.Loading
+namespace OpenTelemetry.AutoInstrumentation.Loading;
+
+internal class InstrumentationLifespanManager : ILifespanManager
 {
-    internal class InstrumentationLifespanManager : ILifespanManager
+    // some instrumentations requires to keep references to objects
+    // so that they are not garbage collected
+    private readonly ConcurrentBag<object> _instrumentations = new();
+
+    public void Track(object instance)
     {
-        // some instrumentations requires to keep references to objects
-        // so that they are not garbage collected
-        private readonly ConcurrentBag<object> _instrumentations = new();
+        _instrumentations.Add(instance);
+    }
 
-        public void Track(object instance)
+    public void Dispose()
+    {
+        while (_instrumentations.TryTake(out var instrumentation))
         {
-            _instrumentations.Add(instance);
-        }
-
-        public void Dispose()
-        {
-            while (_instrumentations.TryTake(out var instrumentation))
+            if (instrumentation is IDisposable disposable)
             {
-                if (instrumentation is IDisposable disposable)
-                {
-                    disposable.Dispose();
-                }
+                disposable.Dispose();
             }
         }
     }

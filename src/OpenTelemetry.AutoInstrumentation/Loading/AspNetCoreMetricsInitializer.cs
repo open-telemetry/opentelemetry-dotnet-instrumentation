@@ -18,23 +18,22 @@
 
 using System;
 
-namespace OpenTelemetry.AutoInstrumentation.Loading
+namespace OpenTelemetry.AutoInstrumentation.Loading;
+
+internal class AspNetCoreMetricsInitializer : InstrumentationInitializer
 {
-    internal class AspNetCoreMetricsInitializer : InstrumentationInitializer
+    public AspNetCoreMetricsInitializer()
+        : base("Microsoft.AspNetCore.Http")
     {
-        public AspNetCoreMetricsInitializer()
-            : base("Microsoft.AspNetCore.Http")
-        {
-        }
+    }
 
-        public override void Initialize(ILifespanManager lifespanManager)
-        {
-            var metricsType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreMetrics, OpenTelemetry.Instrumentation.AspNetCore");
+    public override void Initialize(ILifespanManager lifespanManager)
+    {
+        var metricsType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreMetrics, OpenTelemetry.Instrumentation.AspNetCore");
 
-            var aspNetCoreMetrics = Activator.CreateInstance(metricsType);
+        var aspNetCoreMetrics = Activator.CreateInstance(metricsType);
 
-            lifespanManager.Track(aspNetCoreMetrics);
-        }
+        lifespanManager.Track(aspNetCoreMetrics);
     }
 }
 #endif

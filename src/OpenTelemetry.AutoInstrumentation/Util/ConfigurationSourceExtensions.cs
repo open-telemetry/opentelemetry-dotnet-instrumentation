@@ -19,53 +19,52 @@ using System.Collections.Generic;
 using System.Linq;
 using OpenTelemetry.AutoInstrumentation.Configuration;
 
-namespace OpenTelemetry.AutoInstrumentation.Util
+namespace OpenTelemetry.AutoInstrumentation.Util;
+
+internal static class ConfigurationSourceExtensions
 {
-    internal static class ConfigurationSourceExtensions
+    public static IList<TEnum> ParseEnabledEnumList<TEnum>(this IConfigurationSource source, string enabledConfiguration, string disabledConfiguration, string error)
+        where TEnum : struct, IConvertible
     {
-        public static IList<TEnum> ParseEnabledEnumList<TEnum>(this IConfigurationSource source, string enabledConfiguration, string disabledConfiguration, string error)
-            where TEnum : struct, IConvertible
+        var instrumentations = new Dictionary<string, TEnum>();
+        var enabledInstrumentations = source.GetString(enabledConfiguration);
+        if (enabledInstrumentations != null)
         {
-            var instrumentations = new Dictionary<string, TEnum>();
-            var enabledInstrumentations = source.GetString(enabledConfiguration);
-            if (enabledInstrumentations != null)
+            if (enabledInstrumentations == Constants.ConfigurationValues.None)
             {
-                if (enabledInstrumentations == Constants.ConfigurationValues.None)
-                {
-                    return Array.Empty<TEnum>();
-                }
-
-                foreach (var instrumentation in enabledInstrumentations.Split(Constants.ConfigurationValues.Separator))
-                {
-                    if (Enum.TryParse(instrumentation, out TEnum parsedType))
-                    {
-                        instrumentations[instrumentation] = parsedType;
-                    }
-                    else
-                    {
-                        throw new FormatException(string.Format(error, instrumentation));
-                    }
-                }
-            }
-            else
-            {
-                instrumentations = Enum.GetValues(typeof(TEnum))
-                    .Cast<TEnum>()
-                    .ToDictionary(
-                        key => Enum.GetName(typeof(TEnum), key),
-                        val => val);
+                return Array.Empty<TEnum>();
             }
 
-            var disabledInstrumentations = source.GetString(disabledConfiguration);
-            if (disabledInstrumentations != null)
+            foreach (var instrumentation in enabledInstrumentations.Split(Constants.ConfigurationValues.Separator))
             {
-                foreach (var instrumentation in disabledInstrumentations.Split(Constants.ConfigurationValues.Separator))
+                if (Enum.TryParse(instrumentation, out TEnum parsedType))
                 {
-                    instrumentations.Remove(instrumentation);
+                    instrumentations[instrumentation] = parsedType;
+                }
+                else
+                {
+                    throw new FormatException(string.Format(error, instrumentation));
                 }
             }
-
-            return instrumentations.Values.ToList();
         }
+        else
+        {
+            instrumentations = Enum.GetValues(typeof(TEnum))
+                .Cast<TEnum>()
+                .ToDictionary(
+                    key => Enum.GetName(typeof(TEnum), key),
+                    val => val);
+        }
+
+        var disabledInstrumentations = source.GetString(disabledConfiguration);
+        if (disabledInstrumentations != null)
+        {
+            foreach (var instrumentation in disabledInstrumentations.Split(Constants.ConfigurationValues.Separator))
+            {
+                instrumentations.Remove(instrumentation);
+            }
+        }
+
+        return instrumentations.Values.ToList();
     }
 }

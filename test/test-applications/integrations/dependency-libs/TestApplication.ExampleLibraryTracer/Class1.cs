@@ -14,18 +14,17 @@
 // limitations under the License.
 // </copyright>
 
-namespace TestApplication.ExampleLibraryTracer
-{
-    public class Class1
-    {
-        public int Add(int x, int y)
-        {
-            return 2 * (x + y);
-        }
+namespace TestApplication.ExampleLibraryTracer;
 
-        public virtual int Multiply(int x, int y)
-        {
-            return 2 * (x * y);
-        }
+public class Class1
+{
+    public int Add(int x, int y)
+    {
+        return 2 * (x + y);
+    }
+
+    public virtual int Multiply(int x, int y)
+    {
+        return 2 * (x * y);
     }
 }

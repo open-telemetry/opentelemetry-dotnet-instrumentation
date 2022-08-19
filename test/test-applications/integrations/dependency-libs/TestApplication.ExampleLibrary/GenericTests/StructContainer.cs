@@ -16,18 +16,17 @@
 
 using System.Collections.Generic;
 
-namespace TestApplication.ExampleLibrary.GenericTests
+namespace TestApplication.ExampleLibrary.GenericTests;
+
+public struct StructContainer<T>
 {
-    public struct StructContainer<T>
+    public List<T> Items { get; }
+
+    public long Id { get; }
+
+    public StructContainer(long id, List<T> items)
     {
-        public List<T> Items { get; }
-
-        public long Id { get; }
-
-        public StructContainer(long id, List<T> items)
-        {
-            Id = id;
-            Items = items;
-        }
+        Id = id;
+        Items = items;
     }
 }

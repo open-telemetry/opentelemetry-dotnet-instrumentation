@@ -21,38 +21,37 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace TestApplication.Http
+namespace TestApplication.Http;
+
+public class Startup
 {
-    public class Startup
+    private static readonly ActivitySource MyActivitySource = new ActivitySource("TestApplication.Http", "1.0.0");
+
+    public Startup(IConfiguration configuration)
     {
-        private static readonly ActivitySource MyActivitySource = new ActivitySource("TestApplication.Http", "1.0.0");
+        Configuration = configuration;
+    }
 
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+    public IConfiguration Configuration { get; }
 
-        public IConfiguration Configuration { get; }
+    // This method gets called by the runtime. Use this method to add services to the container.
+    public void ConfigureServices(IServiceCollection services)
+    {
+    }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
-        {
-        }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            app.Map(
-                "/test",
-                configuration => configuration.Run(async context =>
+    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        app.Map(
+            "/test",
+            configuration => configuration.Run(async context =>
+            {
+                using (var activity = MyActivitySource.StartActivity("manual span"))
                 {
-                    using (var activity = MyActivitySource.StartActivity("manual span"))
-                    {
-                        activity?.SetTag("test_tag", "test_value");
-                    }
+                    activity?.SetTag("test_tag", "test_value");
+                }
 
-                    await context.Response.WriteAsync("Pong");
-                }));
-        }
+                await context.Response.WriteAsync("Pong");
+            }));
     }
 }

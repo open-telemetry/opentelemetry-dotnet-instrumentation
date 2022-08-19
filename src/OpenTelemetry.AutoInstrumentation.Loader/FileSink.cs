@@ -21,50 +21,49 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace OpenTelemetry.AutoInstrumentation.Loader
+namespace OpenTelemetry.AutoInstrumentation.Loader;
+
+internal sealed class FileSink : IDisposable
 {
-    internal sealed class FileSink : IDisposable
+    readonly TextWriter _output;
+    readonly FileStream _underlyingStream;
+    readonly object _syncRoot = new object();
+
+    public FileSink(string path, Encoding encoding = null)
     {
-        readonly TextWriter _output;
-        readonly FileStream _underlyingStream;
-        readonly object _syncRoot = new object();
+        if (path == null) throw new ArgumentNullException(nameof(path));
 
-        public FileSink(string path, Encoding encoding = null)
+        var directory = Path.GetDirectoryName(path);
+        if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
         {
-            if (path == null) throw new ArgumentNullException(nameof(path));
-
-            var directory = Path.GetDirectoryName(path);
-            if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            Stream outputStream = _underlyingStream = System.IO.File.Open(path, FileMode.Append, FileAccess.Write, FileShare.Read);
-
-            _output = new StreamWriter(outputStream, encoding ?? new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            Directory.CreateDirectory(directory);
         }
 
-        public void Info(string message, params object[] args)
-        {
-            _output.Write(message, args);
-            FlushToDisk();
-        }
+        Stream outputStream = _underlyingStream = System.IO.File.Open(path, FileMode.Append, FileAccess.Write, FileShare.Read);
 
-        public void Dispose()
-        {
-            lock (_syncRoot)
-            {
-                _output.Dispose();
-            }
-        }
+        _output = new StreamWriter(outputStream, encoding ?? new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+    }
 
-        private void FlushToDisk()
+    public void Info(string message, params object[] args)
+    {
+        _output.Write(message, args);
+        FlushToDisk();
+    }
+
+    public void Dispose()
+    {
+        lock (_syncRoot)
         {
-            lock (_syncRoot)
-            {
-                _output.Flush();
-                _underlyingStream.Flush(true);
-            }
+            _output.Dispose();
+        }
+    }
+
+    private void FlushToDisk()
+    {
+        lock (_syncRoot)
+        {
+            _output.Flush();
+            _underlyingStream.Flush(true);
         }
     }
 }
