@@ -5,7 +5,7 @@
 | Environment variable | Description | Default value |
 |-|-|-|
 | `OTEL_DOTNET_AUTO_HOME` | Installation location. |  |
-| `OTEL_DOTNET_AUTO_ENABLED` | Enables CLR profiler needed by Tracer. | `true` |
+| `OTEL_DOTNET_AUTO_ENABLED` | Enables CLR profiler. If `false`, it disables Automatic Instrumentation for .NET Framework and it disables bytecode instrumentation for .NET (Core). | `true` |
 | `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES` | Names of the executable files that the profiler can instrument. Supports multiple comma-separated values, for example: `MyApp.exe,dotnet.exe`. If unset, the profiler attaches to all processes by default. |  |
 | `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` | Names of the executable files that the profiler cannot instrument. Supports multiple comma-separated values, for example: `ReservedProcess.exe,powershell.exe`. The list is processed after `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`. If unset, the profiler attaches to all processes by default. |  |
 
