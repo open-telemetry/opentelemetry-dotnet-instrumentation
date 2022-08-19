@@ -34,7 +34,6 @@ internal class Program
             .CreateTracerProviderBuilder()
             .AddHttpClientInstrumentation()
             .AddSqlClientInstrumentation()
-            .SetSampler(new AlwaysOnSampler())
             .AddSource("OpenTelemetry.AutoInstrumentation.*", "ConsoleApp.SelfBootstrap")
             .AddConsoleExporter()
             .AddZipkinExporter(options =>
