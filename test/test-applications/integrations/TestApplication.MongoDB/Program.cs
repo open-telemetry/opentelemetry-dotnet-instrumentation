@@ -79,7 +79,7 @@ public static class Program
 #if MONGODB_2_7
         var count = collection.CountDocuments(new BsonDocument());
 #else
-            var count = collection.Count(new BsonDocument());
+        var count = collection.Count(new BsonDocument());
 #endif
         Console.WriteLine($"Documents: {count}");
 

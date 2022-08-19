@@ -2,37 +2,40 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using System.Xml;
 using System.Xml.Schema;
-using System.IO;
 
-public class GenerateHeaders {
+public class GenerateHeaders
+{
 
-    public static void Main(string[] args) {
+    public static void Main(string[] args)
+    {
 
-        if (args.Length != 3) {
+        if (args.Length != 3)
+        {
             Console.WriteLine("Usage:genheaders XML-file header-file resorce-file");
             return;
         }
 
         ValidateXML(args[0]);
-        String Message=null;
-        String SymbolicName=null;
-        String NumericValue=null;
+        String Message = null;
+        String SymbolicName = null;
+        String NumericValue = null;
         String tempheaderfile = "temp.h";
         String temprcfile = "temp.rc";
 
-        StreamWriter HSW=File.CreateText(tempheaderfile);
-        StreamWriter RSW=File.CreateText(temprcfile);
+        StreamWriter HSW = File.CreateText(tempheaderfile);
+        StreamWriter RSW = File.CreateText(temprcfile);
 
-	int FaciltyUrt=0x13;
-	int SeveritySuccess=0;
-	int SeverityError=1;
+        int FaciltyUrt = 0x13;
+        int SeveritySuccess = 0;
+        int SeverityError = 1;
 
-	int minSR = MakeHresult(SeveritySuccess,FaciltyUrt,0);
-        int maxSR = MakeHresult(SeveritySuccess,FaciltyUrt,0xffff);
-	int minHR = MakeHresult(SeverityError,FaciltyUrt,0);
-	int maxHR = MakeHresult(SeverityError,FaciltyUrt,0xffff);
+        int minSR = MakeHresult(SeveritySuccess, FaciltyUrt, 0);
+        int maxSR = MakeHresult(SeveritySuccess, FaciltyUrt, 0xffff);
+        int minHR = MakeHresult(SeverityError, FaciltyUrt, 0);
+        int maxHR = MakeHresult(SeverityError, FaciltyUrt, 0xffff);
 
         PrintLicenseHeader(HSW);
         PrintHeader(HSW);
@@ -42,51 +45,66 @@ public class GenerateHeaders {
         XmlTextReader rdr = new XmlTextReader(args[0]);
         rdr.WhitespaceHandling = WhitespaceHandling.None;
 
-        while (rdr.Read()) {
+        while (rdr.Read())
+        {
 
-            switch (rdr.NodeType) {
+            switch (rdr.NodeType)
+            {
 
                 case XmlNodeType.Element:
 
-                    if (rdr.Name.ToString() == "HRESULT") {
-                        NumericValue=rdr.GetAttribute("NumericValue");
+                    if (rdr.Name.ToString() == "HRESULT")
+                    {
+                        NumericValue = rdr.GetAttribute("NumericValue");
                     }
-                    if (rdr.Name.ToString() == "Message") {
+                    if (rdr.Name.ToString() == "Message")
+                    {
                         Message = rdr.ReadString();
                     }
-                    if (rdr.Name.ToString() == "SymbolicName") {
+                    if (rdr.Name.ToString() == "SymbolicName")
+                    {
                         SymbolicName = rdr.ReadString();
                     }
 
                     break;
 
                 case XmlNodeType.EndElement:
-                    if(rdr.Name.ToString() == "HRESULT"){
+                    if (rdr.Name.ToString() == "HRESULT")
+                    {
 
-			// For CLR Hresult's we take the last 4 digits as the resource strings.
+                        // For CLR Hresult's we take the last 4 digits as the resource strings.
 
-			if ( (NumericValue.StartsWith("0x")) || (NumericValue.StartsWith("0X")) ) {
+                        if ((NumericValue.StartsWith("0x")) || (NumericValue.StartsWith("0X")))
+                        {
 
-			    String HexResult = NumericValue.Substring(2);
-			    int num = int.Parse(HexResult, System.Globalization.NumberStyles.HexNumber);
+                            String HexResult = NumericValue.Substring(2);
+                            int num = int.Parse(HexResult, System.Globalization.NumberStyles.HexNumber);
 
-			    if ((num>minSR) && (num <= maxSR)) {
-				num = num & 0xffff;
-				HSW.WriteLine("#define " + SymbolicName + " SMAKEHR(0x" + num.ToString("x") + ")");
-			    } else if ((num>minHR) && (num <= maxHR)) {
-				num = num & 0xffff;
-			        HSW.WriteLine("#define " + SymbolicName + " EMAKEHR(0x" + num.ToString("x") + ")");
-			    } else {
-              		        HSW.WriteLine("#define " + SymbolicName + " " + NumericValue );
+                            if ((num > minSR) && (num <= maxSR))
+                            {
+                                num = num & 0xffff;
+                                HSW.WriteLine("#define " + SymbolicName + " SMAKEHR(0x" + num.ToString("x") + ")");
+                            }
+                            else if ((num > minHR) && (num <= maxHR))
+                            {
+                                num = num & 0xffff;
+                                HSW.WriteLine("#define " + SymbolicName + " EMAKEHR(0x" + num.ToString("x") + ")");
+                            }
+                            else
+                            {
+                                HSW.WriteLine("#define " + SymbolicName + " " + NumericValue);
                             }
 
 
 
-			} else {
-	                    HSW.WriteLine("#define " + SymbolicName + " " + NumericValue );
-			}
+                        }
+                        else
+                        {
+                            HSW.WriteLine("#define " + SymbolicName + " " + NumericValue);
+                        }
 
-                        if (Message != null) {
+                        if (Message != null)
+                        {
                             RSW.Write("\tMSG_FOR_URT_HR(" + SymbolicName + ") ");
                             RSW.WriteLine(Message);
                         }
@@ -108,7 +126,8 @@ public class GenerateHeaders {
 
         bool AreFilesEqual = false;
 
-        if (File.Exists(args[1])) {
+        if (File.Exists(args[1]))
+        {
             StreamReader sr1 = new StreamReader(tempheaderfile);
             StreamReader sr2 = new StreamReader(args[1]);
             AreFilesEqual = CompareFiles(sr1, sr2);
@@ -116,12 +135,14 @@ public class GenerateHeaders {
             sr2.Close();
         }
 
-        if (!AreFilesEqual) {
+        if (!AreFilesEqual)
+        {
             File.Copy(tempheaderfile, args[1], true);
             File.Copy(temprcfile, args[2], true);
         }
 
-        if (!File.Exists(args[2])) {
+        if (!File.Exists(args[2]))
+        {
             File.Copy(temprcfile, args[2], true);
         }
 
@@ -129,7 +150,8 @@ public class GenerateHeaders {
         File.Delete(temprcfile);
     }
 
-    private static void ValidateXML (String XMLFile) {
+    private static void ValidateXML(String XMLFile)
+    {
 
         // Set the validation settings on the XmlReaderSettings object.
         XmlReaderSettings settings = new XmlReaderSettings();
@@ -137,30 +159,34 @@ public class GenerateHeaders {
         settings.ValidationType = ValidationType.Schema;
         settings.ValidationFlags |= XmlSchemaValidationFlags.ProcessInlineSchema;
 
-        settings.ValidationEventHandler += new ValidationEventHandler (ValidationCallBack);
+        settings.ValidationEventHandler += new ValidationEventHandler(ValidationCallBack);
 
         // Create the XmlReader object.
         XmlReader reader = XmlReader.Create(XMLFile, settings);
 
         // Parse the file.
 
-        while (reader.Read()) {
+        while (reader.Read())
+        {
         }
     }
 
     // Display any validation errors.
-    private static void ValidationCallBack(object sender, ValidationEventArgs e) {
-    Console.WriteLine("Validation Error: {0}", e.Message);
-    Environment.Exit(-1);
+    private static void ValidationCallBack(object sender, ValidationEventArgs e)
+    {
+        Console.WriteLine("Validation Error: {0}", e.Message);
+        Environment.Exit(-1);
     }
 
-    private static void PrintLicenseHeader(StreamWriter SW) {
+    private static void PrintLicenseHeader(StreamWriter SW)
+    {
         SW.WriteLine("// Licensed to the .NET Foundation under one or more agreements.");
         SW.WriteLine("// The .NET Foundation licenses this file to you under the MIT license.");
         SW.WriteLine();
     }
 
-    private static void PrintHeader(StreamWriter SW) {
+    private static void PrintHeader(StreamWriter SW)
+    {
 
         SW.WriteLine("#ifndef __COMMON_LANGUAGE_RUNTIME_HRESULTS__");
         SW.WriteLine("#define __COMMON_LANGUAGE_RUNTIME_HRESULTS__");
@@ -185,33 +211,40 @@ public class GenerateHeaders {
         SW.WriteLine();
     }
 
-    private static void PrintFooter(StreamWriter SW) {
+    private static void PrintFooter(StreamWriter SW)
+    {
         SW.WriteLine();
         SW.WriteLine();
         SW.WriteLine("#endif // __COMMON_LANGUAGE_RUNTIME_HRESULTS__");
     }
 
-    private static void PrintResourceHeader(StreamWriter SW) {
+    private static void PrintResourceHeader(StreamWriter SW)
+    {
         SW.WriteLine("STRINGTABLE DISCARDABLE");
         SW.WriteLine("BEGIN");
     }
 
-    private static void PrintResourceFooter(StreamWriter SW) {
+    private static void PrintResourceFooter(StreamWriter SW)
+    {
         SW.WriteLine("END");
     }
 
-    private static bool CompareFiles(StreamReader sr1, StreamReader sr2) {
-        String line1,line2;
+    private static bool CompareFiles(StreamReader sr1, StreamReader sr2)
+    {
+        String line1, line2;
 
-        while (true) {
+        while (true)
+        {
             line1 = sr1.ReadLine();
             line2 = sr2.ReadLine();
 
-            if ( (line1 == null) && (line2 == null) ) {
+            if ((line1 == null) && (line2 == null))
+            {
                 return true;
             }
 
-            if (line1 != line2) {
+            if (line1 != line2)
+            {
                 return false;
             }
 
@@ -219,9 +252,10 @@ public class GenerateHeaders {
 
     }
 
-   private static int MakeHresult(int sev, int fac, int code) {
-	 return ((sev<<31) | (fac<<16) | (code));
-   }
+    private static int MakeHresult(int sev, int fac, int code)
+    {
+        return ((sev << 31) | (fac << 16) | (code));
+    }
 }
 
 

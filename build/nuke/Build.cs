@@ -108,16 +108,16 @@ partial class Build : NukeBuild
 
     string ContainersTestFilter()
     {
-            switch (Containers)
-            {
-                case ContainersNone:
-                    return "Containers!=Linux&Containers!=Windows";
-                case ContainersLinux:
-                    return "Containers!=Windows";
-                case ContainersWindows:
-                    return "Containers!=Linux";
-                default:
-                    throw new InvalidOperationException($"Container={Containers} is not supported");
-            }
+        switch (Containers)
+        {
+            case ContainersNone:
+                return "Containers!=Linux&Containers!=Windows";
+            case ContainersLinux:
+                return "Containers!=Windows";
+            case ContainersWindows:
+                return "Containers!=Linux";
+            default:
+                throw new InvalidOperationException($"Container={Containers} is not supported");
+        }
     }
 }

@@ -70,9 +70,9 @@ public class EnvironmentTools
 
     public static string GetOS()
     {
-        return IsWindows()                                    ? "win" :
+        return IsWindows() ? "win" :
             RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "linux" :
-            RuntimeInformation.IsOSPlatform(OSPlatform.OSX)   ? "osx" :
+            RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "osx" :
             string.Empty;
     }
 

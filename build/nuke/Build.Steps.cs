@@ -71,7 +71,7 @@ partial class Build
         .Unlisted()
         .Executes(() => ControlFlow.ExecuteWithRetry(() =>
         {
-            
+
             if (IsWin)
             {
                 NuGetTasks.NuGetRestore(s => s
@@ -151,7 +151,7 @@ partial class Build
         .Description("Compiles all the example projects")
         .Executes(() =>
         {
-            foreach(var exampleProject in Solution.GetProjects("Examples.*"))
+            foreach (var exampleProject in Solution.GetProjects("Examples.*"))
             {
                 DotNetBuild(s => s
                     .SetProjectFile(exampleProject)
@@ -341,7 +341,8 @@ partial class Build
 
             AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml").ForEach(DeleteFile);
             AdditionalDepsDirectory.GlobFiles("**/*deps.json")
-                                   .ForEach(file => {
+                                   .ForEach(file =>
+                                   {
                                        string depsJsonContent = File.ReadAllText(file);
                                        // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from target section.
                                        depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+)AutoInstrumentation.AdditionalDeps.dll(.+?)}," + Environment.NewLine + "(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);

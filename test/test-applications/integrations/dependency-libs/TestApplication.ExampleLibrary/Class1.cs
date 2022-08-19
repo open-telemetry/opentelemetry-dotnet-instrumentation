@@ -56,7 +56,7 @@ public class Class1
         return Array.CreateInstance(typeof(Class1), lengthsArray, lowerBoundsArray);
     }
 
-    public Class1[, ,] ToMdArray()
+    public Class1[,,] ToMdArray()
     {
         return new Class1[4, 2, 3];
     }
