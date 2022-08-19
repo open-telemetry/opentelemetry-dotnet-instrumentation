@@ -15,11 +15,9 @@
 // </copyright>
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using IntegrationTests.Helpers;
-using IntegrationTests.Helpers.Models;
 using Xunit;
 using Xunit.Abstractions;
 
