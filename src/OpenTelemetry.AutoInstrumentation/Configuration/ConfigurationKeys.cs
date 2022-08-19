@@ -56,13 +56,6 @@ public class ConfigurationKeys
     public static class Traces
     {
         /// <summary>
-        /// Configuration key for enabling or disabling the Tracer.
-        /// Default is value is true (enabled).
-        /// </summary>
-        /// <seealso cref="TracerSettings.TraceEnabled"/>
-        public const string Enabled = "OTEL_DOTNET_AUTO_TRACES_ENABLED";
-
-        /// <summary>
         /// Configuration key for whether the tracer should be initialized by the profiler or not.
         /// </summary>
         public const string LoadTracerAtStartup = "OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP";
@@ -109,12 +102,6 @@ public class ConfigurationKeys
     /// </summary>
     public static class Metrics
     {
-        /// <summary>
-        /// Configuration key for enabling or disabling the Meter.
-        /// Default is value is true (enabled).
-        /// </summary>
-        public const string Enabled = "OTEL_DOTNET_AUTO_METRICS_ENABLED";
-
         /// <summary>
         /// Configuration key for whether the meter should be initialized by the profiler or not.
         /// </summary>

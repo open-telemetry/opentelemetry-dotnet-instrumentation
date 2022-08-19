@@ -69,16 +69,8 @@ public class TracerSettings : Settings
             }
         }
 
-        TraceEnabled = source.GetBool(ConfigurationKeys.Traces.Enabled) ?? true;
         LoadTracerAtStartup = source.GetBool(ConfigurationKeys.Traces.LoadTracerAtStartup) ?? true;
     }
-
-    /// <summary>
-    /// Gets a value indicating whether tracing is enabled.
-    /// Default is <c>true</c>.
-    /// </summary>
-    /// <seealso cref="ConfigurationKeys.Traces.Enabled"/>
-    public bool TraceEnabled { get; }
 
     /// <summary>
     /// Gets a value indicating whether the tracer should be loaded by the profiler. Default is true.

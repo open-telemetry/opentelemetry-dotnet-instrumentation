@@ -52,7 +52,6 @@ public class SettingsTests : IDisposable
 
         using (new AssertionScope())
         {
-            settings.TraceEnabled.Should().BeTrue();
             settings.LoadTracerAtStartup.Should().BeTrue();
             settings.TracesExporter.Should().Be(TracesExporter.Otlp);
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
@@ -73,7 +72,6 @@ public class SettingsTests : IDisposable
 
         using (new AssertionScope())
         {
-            settings.MetricsEnabled.Should().BeTrue();
             settings.LoadMetricsAtStartup.Should().BeTrue();
             settings.MetricExporter.Should().Be(MetricsExporter.Otlp);
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);

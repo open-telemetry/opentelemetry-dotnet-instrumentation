@@ -60,16 +60,8 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration
             }
 
             MetricExportInterval = source.GetInt32(ConfigurationKeys.Metrics.ExportInterval);
-            MetricsEnabled = source.GetBool(ConfigurationKeys.Metrics.Enabled) ?? true;
             LoadMetricsAtStartup = source.GetBool(ConfigurationKeys.Metrics.LoadMeterAtStartup) ?? true;
         }
-
-        /// <summary>
-        /// Gets a value indicating whether metrics is enabled.
-        /// Default is <c>true</c>.
-        /// </summary>
-        /// <seealso cref="ConfigurationKeys.Metrics.Enabled"/>
-        public bool MetricsEnabled { get; }
 
         /// <summary>
         /// Gets a value indicating whether the metrics should be loaded by the profiler. Default is true.
