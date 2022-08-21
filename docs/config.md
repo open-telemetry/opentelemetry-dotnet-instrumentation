@@ -44,6 +44,7 @@ for more details.
 | `Npgsql` | [Npgsql](https://www.nuget.org/packages/Npgsql) | ≥6.0.0 | source |
 | `SqlClient` | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) | * | source |
 | `StackExchangeRedis` | [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)  **Not supported on .NET Framework** | ≥2.0.405 < 3.0.0 | source & binary |
+| `Wcf` | [System.ServiceModel.Http](https://www.nuget.org/packages/System.ServiceModel.Http/), [System.ServiceModel.NetTcp](https://www.nuget.org/packages/System.ServiceModel.NetTcp/), [System.ServiceModel](https://www.nuget.org/packages/System.ServiceModel) **No support for server side on .NET Core**. For configuration see [WCF Instrumentaion Configuration](wcf-config.md) | * | source |
 
 ### Instrumented metrics libraries and frameworks
 
