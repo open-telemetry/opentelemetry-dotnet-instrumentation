@@ -16,7 +16,6 @@
 
 using System.ServiceModel;
 using System.Threading.Tasks;
-using Examples.Wcf;
 using TestApplication.Wcf.Shared;
 
 namespace TestApplication.Wcf.Client.NetFramework
