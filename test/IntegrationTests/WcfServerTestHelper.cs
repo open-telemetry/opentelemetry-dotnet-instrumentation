@@ -1,4 +1,4 @@
-// <copyright file="Program.cs" company="OpenTelemetry Authors">
+// <copyright file="WcfServerTestHelper.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,22 +14,18 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.ServiceModel;
+using IntegrationTests.Helpers;
+using Xunit.Abstractions;
 
-namespace TestApplication.Wcf.Server.NetFramework
+namespace IntegrationTests;
+
+internal class WcfServerTestHelper : TestHelper
 {
-    internal static class Program
+    private const string ServiceName = "TestApplication.Wcf.Server.NetFramework";
+
+    public WcfServerTestHelper(ITestOutputHelper output)
+        : base("Wcf.Server.NetFramework", output)
     {
-        public static void Main()
-        {
-            ServiceHost serviceHost = new ServiceHost(typeof(StatusService));
-            serviceHost.Open();
-
-            Console.WriteLine("Service listening. Press enter to exit.");
-            Console.ReadLine();
-
-            serviceHost.Close();
-        }
+        SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
     }
 }

@@ -17,9 +17,6 @@
 using System;
 using System.ServiceModel;
 using System.Threading.Tasks;
-using OpenTelemetry;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 using TestApplication.Wcf.Shared;
 
 namespace TestApplication.Wcf.Client.NetFramework
@@ -28,17 +25,8 @@ namespace TestApplication.Wcf.Client.NetFramework
     {
         public static async Task Main()
         {
-            using var openTelemetry = Sdk.CreateTracerProviderBuilder()
-                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Wcf-Client"))
-                .AddWcfInstrumentation()
-                .AddZipkinExporter()
-                .Build();
-
             await CallService("StatusService_Http").ConfigureAwait(false);
             await CallService("StatusService_Tcp").ConfigureAwait(false);
-
-            Console.WriteLine("Press enter to exit.");
-            Console.ReadLine();
         }
 
         private static async Task CallService(string name)
