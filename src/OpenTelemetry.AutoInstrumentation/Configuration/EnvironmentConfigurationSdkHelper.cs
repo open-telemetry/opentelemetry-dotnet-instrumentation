@@ -24,13 +24,14 @@ internal static class EnvironmentConfigurationSdkHelper
 {
     public static void UseEnvironmentVariables(SdkSettings settings)
     {
-        SetDefaultTextMapPropagator(settings.Propagators);
+        SetSdkTextMapPropagator(settings.Propagators);
     }
 
-    private static void SetDefaultTextMapPropagator(IList<Propagator> settingsPropagators)
+    private static void SetSdkTextMapPropagator(IList<Propagator> settingsPropagators)
     {
         if (settingsPropagators.Count == 0)
         {
+            // use Sdk defaults
             return;
         }
 
@@ -64,9 +65,9 @@ internal static class EnvironmentConfigurationSdkHelper
             case Propagator.W3CBaggage:
                 return new BaggagePropagator();
             case Propagator.B3Multi:
-                return new Extensions.Propagators.B3Propagator(false);
+                return new Extensions.Propagators.B3Propagator(singleHeader: false);
         }
 
-        throw new ArgumentOutOfRangeException(nameof(propagator));
+        throw new ArgumentOutOfRangeException(nameof(propagator), propagator, "Propagator has an unexpected value.");
     }
 }
