@@ -202,7 +202,7 @@ public abstract class TestHelper
         Output.WriteResult(helper);
 
         processTimeout.Should().BeFalse("Test application timed out");
-        process.ExitCode.Should().Be(0, $"Test application exited with non-zero exit code");
+        process.ExitCode.Should().Be(0, "Test application exited with non-zero exit code");
     }
 
     private Process StartTestApplication(TestSettings testSettings)
