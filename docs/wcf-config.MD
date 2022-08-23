@@ -1,6 +1,10 @@
 # WCF Instrumentation Configration
 
-For each version of auto WCF instrumentation you mustn't attach `OpenTelemetry.Instrumentation.Wcf` package.
+for application compiling purposes
+
+## WCF Client Configuration (.NET Framework)
+
+For this integration you mustn't attach `OpenTelemetry.Instrumentation.Wcf` package.
 Attaching it can result in `API` version conflict and application crash.
 Please use `ExludeAssets` for compilation purposes.
 
@@ -9,10 +13,6 @@ Please use `ExludeAssets` for compilation purposes.
     <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.6" ExcludeAssets="runtime" />
   </ItemGroup>
 ```
-
-for application compiling purposes
-
-## WCF Client Configuration (.NET Framework)
 
 Add the `IClientMessageInspector` instrumentation via a behavior extension on
 the clients you want to instrument:
@@ -71,6 +71,16 @@ Example project available in
 folder.
 
 ## WCF Server Configuration (.NET Framework)
+
+For this integration you mustn't attach `OpenTelemetry.Instrumentation.Wcf` package.
+Attaching it can result in `API` version conflict and application crash.
+Please use `ExludeAssets` for compilation purposes.
+
+```xml
+  <ItemGroup>
+    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.6" ExcludeAssets="runtime" />
+  </ItemGroup>
+```
 
 ### Option 1: Instrument by endpoint
 
