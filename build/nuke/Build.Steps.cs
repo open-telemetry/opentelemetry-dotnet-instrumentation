@@ -298,6 +298,7 @@ partial class Build
 
     Target RunManagedIntegrationTests => _ => _
         .Unlisted()
+        .After(RunManagedUnitTests)
         .Executes(() =>
         {
             var project = Solution.GetProject("IntegrationTests");

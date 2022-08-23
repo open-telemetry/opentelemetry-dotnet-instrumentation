@@ -35,7 +35,7 @@ public class InstrumentedProcessHelper
         // clear all relevant environment variables to start with a clean slate
         EnvironmentHelper.ClearProfilerEnvironmentVariables();
 
-        var startInfo = new ProcessStartInfo(executable, $"{arguments ?? string.Empty}");
+        var startInfo = new ProcessStartInfo(executable, arguments ?? string.Empty);
 
         environmentHelper.SetEnvironmentVariables(testSettings, startInfo.EnvironmentVariables, executable);
 
