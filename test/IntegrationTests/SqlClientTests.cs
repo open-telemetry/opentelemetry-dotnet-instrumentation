@@ -55,12 +55,7 @@ namespace IntegrationTests
 
                 foreach (var span in spans)
                 {
-                    span.Service.Should().Be(ServiceName);
-                    span.Name.Should().Be("master");
-                    span.Tags.Should().Contain(new KeyValuePair<string, string>("db.system", "mssql"));
-                    span.Tags.Should().Contain(new KeyValuePair<string, string>("db.name", "master"));
-                    span.Tags.Should().Contain(new KeyValuePair<string, string>("peer.service", $"localhost,{_sqlServerFixture.Port}"));
-                    span.Tags.Should().Contain(new KeyValuePair<string, string>("span.kind", "client"));
+                    span.Tags.Should().Contain(new KeyValuePair<string, string>("otel.library.name", "OpenTelemetry.SqlClient"));
                 }
             }
         }
