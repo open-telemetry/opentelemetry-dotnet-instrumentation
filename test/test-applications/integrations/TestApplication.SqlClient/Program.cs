@@ -135,7 +135,7 @@ namespace TestApplication.SqlClient
 
         private static string GetConnectionString(string databasePassword, string databasePort)
         {
-            return $"Server=localhost,{databasePort};User=sa;Password={databasePassword};TrustServerCertificate=True;";
+            return $"Server=127.0.0.1,{databasePort};User=sa;Password={databasePassword};TrustServerCertificate=True;";
         }
 
         private static (string DatabasePassword, string Port) ParseArgs(IReadOnlyList<string> args)
