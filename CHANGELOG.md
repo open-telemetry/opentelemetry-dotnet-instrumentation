@@ -19,6 +19,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Add support for the `OTEL_PROPAGATORS` environment variable.
   Supported configuration options are `b3multi`, `baggage`, `tracecontext`.
   Default is `tracecontext,baggage`.
+- Add WCF traces instrumentation (server side for .NET Framework, client side
+  for both .NET Core and .NET Framework).
 
 ### Changed
 
