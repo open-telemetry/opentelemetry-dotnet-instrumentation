@@ -123,6 +123,7 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
+    [InlineData(null, new Propagator[] { })]
     [InlineData("tracecontext", new[] { Propagator.W3CTraceContext })]
     [InlineData("baggage", new[] { Propagator.W3CBaggage })]
     [InlineData("b3multi", new[] { Propagator.B3Multi })]
