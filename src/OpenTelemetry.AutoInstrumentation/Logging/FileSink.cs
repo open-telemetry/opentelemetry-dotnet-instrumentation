@@ -20,57 +20,59 @@
 using System;
 using System.IO;
 using System.Text;
+using OpenTelemetry.AutoInstrumentation.Logging;
 
-namespace OpenTelemetry.AutoInstrumentation.Logging;
-
-internal sealed class FileSink : ISink, IDisposable
+namespace OpenTelemetry.AutoInstrumentation.Logging
 {
-    readonly TextWriter _output;
-    readonly FileStream _underlyingStream;
-    readonly WriteCountingStream _countingStreamWrapper;
-    readonly object _syncRoot = new object();
-    static readonly long FileSizeLimitBytes = 10 * 1024 * 1024;
-
-    public FileSink(string path, Encoding encoding = null)
+    internal sealed class FileSink : ISink, IDisposable
     {
-        if (path == null) throw new ArgumentNullException(nameof(path));
+        readonly TextWriter _output;
+        readonly FileStream _underlyingStream;
+        readonly WriteCountingStream _countingStreamWrapper;
+        readonly object _syncRoot = new object();
+        static readonly long FileSizeLimitBytes = 10 * 1024 * 1024;
 
-        var directory = Path.GetDirectoryName(path);
-        if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
+        public FileSink(string path, Encoding encoding = null)
         {
-            Directory.CreateDirectory(directory);
-        }
+            if (path == null) throw new ArgumentNullException(nameof(path));
 
-        _underlyingStream = System.IO.File.Open(path, FileMode.Append, FileAccess.Write, FileShare.Read);
-
-        Stream outputStream = _countingStreamWrapper = new WriteCountingStream(_underlyingStream);
-        _output = new StreamWriter(outputStream, encoding ?? new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-    }
-
-    public void Write(string message)
-    {
-        lock (_syncRoot)
-        {
-            if (_countingStreamWrapper.CountedLength >= FileSizeLimitBytes)
+            var directory = Path.GetDirectoryName(path);
+            if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
             {
-                return;
+                Directory.CreateDirectory(directory);
             }
-            _output.Write(message);
-            FlushToDisk();
-        }
-    }
 
-    public void Dispose()
-    {
-        lock (_syncRoot)
+            _underlyingStream = System.IO.File.Open(path, FileMode.Append, FileAccess.Write, FileShare.Read);
+
+            Stream outputStream = _countingStreamWrapper = new WriteCountingStream(_underlyingStream);
+            _output = new StreamWriter(outputStream, encoding ?? new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        }
+
+        public void Write(string message)
         {
-            _output.Dispose();
+            lock (_syncRoot)
+            {
+                if (_countingStreamWrapper.CountedLength >= FileSizeLimitBytes)
+                {
+                    return;
+                }
+                _output.Write(message);
+                FlushToDisk();
+            }
         }
-    }
 
-    private void FlushToDisk()
-    {
-        _output.Flush();
-        _underlyingStream.Flush(true);
+        public void Dispose()
+        {
+            lock (_syncRoot)
+            {
+                _output.Dispose();
+            }
+        }
+
+        private void FlushToDisk()
+        {
+            _output.Flush();
+            _underlyingStream.Flush(true);
+        }
     }
 }
