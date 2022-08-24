@@ -14,7 +14,8 @@
 // limitations under the License.
 // </copyright>
 
-#if NETCOREAPP3_1_OR_GREATER
+// This test won't work outside of windows as it need the server side which is .NET Framework only.
+#if NETCOREAPP3_1_OR_GREATER && _WINDOWS
 
 using System;
 using System.Diagnostics;
@@ -41,7 +42,6 @@ public class WcfCoreTests : TestHelper, IDisposable
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    [Trait("Containers", "Windows")]
     public void SubmitsTraces()
     {
         using var agent = new MockZipkinCollector(Output);
@@ -65,6 +65,7 @@ public class WcfCoreTests : TestHelper, IDisposable
             span.Tags["rpc.service"].Should().Be("http://opentelemetry.io/StatusService");
             span.Tags["rpc.method"].Should().Be("Ping");
             span.Tags["wcf.channel.path"].Should().Be("/Telemetry");
+            span.Tags["otel.library.name"].Should().Be("OpenTelemetry.Instrumentation.Wcf");
         }
 
         var clientSpans = spans.Where(span => span.Service == "TestApplication.Wcf.Client.Core").ToList();
@@ -74,7 +75,6 @@ public class WcfCoreTests : TestHelper, IDisposable
         {
             clientSpan.Tags["span.kind"].Should().Be("client");
             clientSpan.Tags["net.peer.name"].Should().Be("localhost");
-            clientSpan.Tags["otel.library.name"].Should().Be("OpenTelemetry.Instrumentation.Wcf");
         }
 
         var httpClientSpan = clientSpans.Where(span => span.Tags["wcf.channel.scheme"] == "http").ToList()[0];
@@ -89,7 +89,6 @@ public class WcfCoreTests : TestHelper, IDisposable
         foreach (var serverSpan in serverSpans)
         {
             serverSpan.Tags["span.kind"].Should().Be("server");
-            serverSpan.Tags["otel.library.name"].Should().Be("OpenTelemetry.WCF");
         }
     }
 

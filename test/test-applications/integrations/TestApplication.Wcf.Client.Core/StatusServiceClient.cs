@@ -41,11 +41,5 @@ namespace TestApplication.Wcf.Client.Core
             ICommunicationObject communicationObject = this;
             return Task.Factory.FromAsync(communicationObject.BeginOpen, communicationObject.EndOpen, null);
         }
-
-        public Task CloseAsync()
-        {
-            ICommunicationObject communicationObject = this;
-            return Task.Factory.FromAsync(communicationObject.BeginClose, communicationObject.EndClose, null);
-        }
     }
 }

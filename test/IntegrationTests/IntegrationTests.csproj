@@ -1,7 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
+  <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
+    <DefineConstants>_WINDOWS</DefineConstants>
+  </PropertyGroup>
 
+  <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.21.5" />
     <PackageReference Include="Grpc.Tools" Version="2.48.0" PrivateAssets="all" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />

@@ -41,7 +41,6 @@ public class WcfNetFrameworkTests : TestHelper, IDisposable
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    [Trait("Containers", "Windows")]
     public void SubmitsTraces()
     {
         using var agent = new MockZipkinCollector(Output);
@@ -65,7 +64,7 @@ public class WcfNetFrameworkTests : TestHelper, IDisposable
             span.Tags["rpc.service"].Should().Be("http://opentelemetry.io/StatusService");
             span.Tags["rpc.method"].Should().Be("Ping");
             span.Tags["wcf.channel.path"].Should().Be("/Telemetry");
-            span.Tags["otel.library.name"].Should().Be("OpenTelemetry.WCF");
+            span.Tags["otel.library.name"].Should().Be("OpenTelemetry.Instrumentation.Wcf");
         }
 
         var clientSpans = spans.Where(span => span.Service == "TestApplication.Wcf.Client.NetFramework").ToList();
