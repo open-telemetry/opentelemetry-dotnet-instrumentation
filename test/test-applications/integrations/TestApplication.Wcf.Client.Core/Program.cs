@@ -15,15 +15,10 @@
 // </copyright>
 
 using System;
-using System.IO;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using OpenTelemetry;
 using OpenTelemetry.Instrumentation.Wcf;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 using TestApplication.Wcf.Shared;
 
 namespace TestApplication.Wcf.Client.Core
@@ -32,26 +27,12 @@ namespace TestApplication.Wcf.Client.Core
     {
         public static async Task Main()
         {
-            IConfigurationRoot config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            using var openTelemetry = Sdk.CreateTracerProviderBuilder()
-                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Wcf-Client-Core"))
-                .AddWcfInstrumentation()
-                .AddZipkinExporter()
-                .Build();
-
             await CallService(
                 new BasicHttpBinding(BasicHttpSecurityMode.None),
-                new EndpointAddress(config.GetSection("Service").GetValue<string>("HttpAddress"))).ConfigureAwait(false);
+                new EndpointAddress("http://localhost:9009/Telemetry")).ConfigureAwait(false);
             await CallService(
                 new NetTcpBinding(SecurityMode.None),
-                new EndpointAddress(config.GetSection("Service").GetValue<string>("TcpAddress"))).ConfigureAwait(false);
-
-            Console.WriteLine("Press enter to exit.");
-            Console.ReadLine();
+                new EndpointAddress("net.tcp://localhost:9090/Telemetry")).ConfigureAwait(false);
         }
 
         private static async Task CallService(Binding binding, EndpointAddress remoteAddress)

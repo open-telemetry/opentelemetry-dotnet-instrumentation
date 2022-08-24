@@ -1,4 +1,4 @@
-// <copyright file="WcfNetFrameworkTests.cs" company="OpenTelemetry Authors">
+// <copyright file="WcfCoreTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-#if NET462
+#if NETCOREAPP3_1_OR_GREATER
 
 using System;
 using System.Diagnostics;
@@ -28,13 +28,13 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-public class WcfNetFrameworkTests : TestHelper, IDisposable
+public class WcfCoreTests : TestHelper, IDisposable
 {
-    private const string ServiceName = "TestApplication.Wcf.Client.NetFramework";
+    private const string ServiceName = "TestApplication.Wcf.Client.Core";
     private Process _serverProcess;
 
-    public WcfNetFrameworkTests(ITestOutputHelper output)
-        : base("Wcf.Client.NetFramework", output)
+    public WcfCoreTests(ITestOutputHelper output)
+        : base("Wcf.Client.Core", output)
     {
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
     }
@@ -64,16 +64,16 @@ public class WcfNetFrameworkTests : TestHelper, IDisposable
             span.Tags["rpc.service"].Should().Be("http://opentelemetry.io/StatusService");
             span.Tags["rpc.method"].Should().Be("Ping");
             span.Tags["wcf.channel.path"].Should().Be("/Telemetry");
-            span.Tags["otel.library.name"].Should().Be("OpenTelemetry.WCF");
         }
 
-        var clientSpans = spans.Where(span => span.Service == "TestApplication.Wcf.Client.NetFramework").ToList();
+        var clientSpans = spans.Where(span => span.Service == "TestApplication.Wcf.Client.Core").ToList();
         var serverSpans = spans.Where(span => span.Service == "TestApplication.Wcf.Server.NetFramework").ToList();
 
         foreach (var clientSpan in clientSpans)
         {
             clientSpan.Tags["span.kind"].Should().Be("client");
             clientSpan.Tags["net.peer.name"].Should().Be("localhost");
+            clientSpan.Tags["otel.library.name"].Should().Be("OpenTelemetry.Instrumentation.Wcf");
         }
 
         var httpClientSpan = clientSpans.Where(span => span.Tags["wcf.channel.scheme"] == "http").ToList()[0];
@@ -88,6 +88,7 @@ public class WcfNetFrameworkTests : TestHelper, IDisposable
         foreach (var serverSpan in serverSpans)
         {
             serverSpan.Tags["span.kind"].Should().Be("server");
+            serverSpan.Tags["otel.library.name"].Should().Be("OpenTelemetry.WCF");
         }
     }
 

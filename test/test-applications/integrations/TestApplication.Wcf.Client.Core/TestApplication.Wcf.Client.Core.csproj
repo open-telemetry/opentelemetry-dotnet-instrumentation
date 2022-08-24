@@ -2,26 +2,17 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFrameworks>netcoreapp3.1;net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.ServiceModel.Http" Version="4.7.0" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.9" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.9" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.6" />
-    <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.0.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.7" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TestApplication.Wcf.Shared\TestApplication.Wcf.Shared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

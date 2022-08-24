@@ -1,16 +1,18 @@
 # WCF Instrumentation Configration
 
-for application compiling purposes
+For each version of .NET the `OpenTelemetry.Instrumentation.Wcf` package version
+has to match the version used by Autoinstrumentation library to avoid compatibility
+issues.
 
 ## WCF Client Configuration (.NET Framework)
 
-For this integration you mustn't attach `OpenTelemetry.Instrumentation.Wcf` package.
+For this integration you shouldn't attach `OpenTelemetry.Instrumentation.Wcf` package.
 Attaching it can result in `API` version conflict and application crash.
 Please use `ExludeAssets` for compilation purposes.
 
 ```xml
   <ItemGroup>
-    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.6" ExcludeAssets="runtime" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.7" ExcludeAssets="runtime" />
   </ItemGroup>
 ```
 
@@ -72,13 +74,13 @@ folder.
 
 ## WCF Server Configuration (.NET Framework)
 
-For this integration you mustn't attach `OpenTelemetry.Instrumentation.Wcf` package.
+For this integration you shouldn't attach `OpenTelemetry.Instrumentation.Wcf` package.
 Attaching it can result in `API` version conflict and application crash.
 Please use `ExludeAssets` for compilation purposes.
 
 ```xml
   <ItemGroup>
-    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.6" ExcludeAssets="runtime" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.7" ExcludeAssets="runtime" />
   </ItemGroup>
 ```
 
