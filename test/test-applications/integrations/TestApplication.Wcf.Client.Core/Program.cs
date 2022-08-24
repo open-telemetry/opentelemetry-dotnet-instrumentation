@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#if _WINDOWS
+
 using System;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
@@ -21,10 +23,14 @@ using System.Threading.Tasks;
 using OpenTelemetry.Instrumentation.Wcf;
 using TestApplication.Wcf.Shared;
 
+#endif
+
 namespace TestApplication.Wcf.Client.Core
 {
     internal static class Program
     {
+#if _WINDOWS
+
         public static async Task Main()
         {
             await CallService(
@@ -72,5 +78,12 @@ namespace TestApplication.Wcf.Client.Core
                 }
             }
         }
+
+#else
+        public static void Main()
+        {
+        }
+#endif
+
     }
 }

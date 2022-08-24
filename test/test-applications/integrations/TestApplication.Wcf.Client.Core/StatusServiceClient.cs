@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#if _WINDOWS
+
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Threading.Tasks;
@@ -43,3 +45,5 @@ namespace TestApplication.Wcf.Client.Core
         }
     }
 }
+
+#endif
