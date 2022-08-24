@@ -10,6 +10,8 @@
    - [`src/OpenTelemetry.AutoInstrumentation.Native/version.h`](../src/OpenTelemetry.AutoInstrumentation.Native/version.h)
    - [`src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj`](../src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj)
 
+1. Update the documentation link on the [README.md](./README.md) file.
+
 1. Update the [CHANGELOG.md](../CHANGELOG.md) with the new release.
 
 1. Create a pull request on GitHub with the changes described in the changelog.
