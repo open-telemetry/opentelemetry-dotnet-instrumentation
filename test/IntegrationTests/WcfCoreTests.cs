@@ -41,6 +41,7 @@ public class WcfCoreTests : TestHelper, IDisposable
 
     [Fact]
     [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Windows")]
     public void SubmitsTraces()
     {
         using var agent = new MockZipkinCollector(Output);
