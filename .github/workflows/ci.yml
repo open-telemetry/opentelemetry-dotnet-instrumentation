@@ -38,3 +38,33 @@ jobs:
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
+
+  container-build:
+    name: Container Build 
+    strategy:
+      fail-fast: false
+      matrix:
+        base-image: [ alpine ]
+    runs-on: ubuntu-20.04
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v3.0.2
+    - name: Build Docker image
+      run: |
+        docker build \
+          --tag otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
+          --file "./build/nuke/docker/${{ matrix.base-image }}.dockerfile" \
+          "./build/nuke"
+    - name: Build in Docker container
+      run: |
+        docker run --rm \
+          --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project \
+          otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
+          dotnet /build/bin/Debug/_build.dll Workflow --containers none
+    - name: Publish Linux build
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        name: bin-${{ matrix.base-image }}
+        path: bin/tracer-home
+      if: (${{ job.status }} != 'cancelled')
+      continue-on-error: true
