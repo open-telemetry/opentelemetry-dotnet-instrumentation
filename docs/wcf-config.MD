@@ -1,10 +1,5 @@
 # WCF Instrumentation Configration
 
-If you want to attach `OpenTelemetry.Instrumentation.Wcf` package, its version
-has to match the version used by Autoinstrumentation library to avoid compatibility
-issues. For .NET Framework integrations attaching this package is not required
-and not recommended.
-
 ## WCF Client Configuration (.NET Framework)
 
 Add the `IClientMessageInspector` instrumentation via a behavior extension on
@@ -50,6 +45,18 @@ Example project available in
 folder.
 
 ## WCF Client Configuration (.NET Core)
+
+Add `OpenTelemetry.Instrumentation.Wcf` and `System.Diagnostics.DiagnosticSource`
+package to the project. The version of `OpenTelemetry.Instrumentation.Wcf`
+should match the one used by Autoinstrumentation library to avoid compatibility
+issues.
+
+```xml
+  <ItemGroup>
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.7" ExcludeAssets="runtime" />
+  </ItemGroup>
+```
 
 Add the `IClientMessageInspector` instrumentation as an endpoint behavior on the
 clients you want to instrument:
