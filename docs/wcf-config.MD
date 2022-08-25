@@ -1,20 +1,11 @@
 # WCF Instrumentation Configration
 
-For each version of .NET the `OpenTelemetry.Instrumentation.Wcf` package version
+If you want to attach `OpenTelemetry.Instrumentation.Wcf` package, its version
 has to match the version used by Autoinstrumentation library to avoid compatibility
-issues.
+issues. For .NET Framework integrations attaching this package is not required
+and not recommended.
 
 ## WCF Client Configuration (.NET Framework)
-
-For this integration you shouldn't attach `OpenTelemetry.Instrumentation.Wcf` package.
-Attaching it can result in `API` version conflict and application crash.
-Please use `ExludeAssets` for compilation purposes.
-
-```xml
-  <ItemGroup>
-    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.7" ExcludeAssets="runtime" />
-  </ItemGroup>
-```
 
 Add the `IClientMessageInspector` instrumentation via a behavior extension on
 the clients you want to instrument:
@@ -73,16 +64,6 @@ Example project available in
 folder.
 
 ## WCF Server Configuration (.NET Framework)
-
-For this integration you shouldn't attach `OpenTelemetry.Instrumentation.Wcf` package.
-Attaching it can result in `API` version conflict and application crash.
-Please use `ExludeAssets` for compilation purposes.
-
-```xml
-  <ItemGroup>
-    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.7" ExcludeAssets="runtime" />
-  </ItemGroup>
-```
 
 ### Option 1: Instrument by endpoint
 
@@ -172,26 +153,6 @@ instrument:
     </services>
   </system.serviceModel>
 </configuration>
-```
-
-## WCF Programmatic Configuration Server and/or Client (.NET Framework + .NET Core)
-
-To add `IDispatchMessageInspector` for servers (.NET Framework only) and/or
-`IClientMessageInspector` for clients (.NET Framework & .NET Core)
-programmatically, use the `TelemetryContractBehaviorAttribute` on the service
-contracts you want to instrument:
-
-```csharp
-    [ServiceContract(
-        Namespace = "http://opentelemetry.io/",
-        Name = "StatusService",
-        SessionMode = SessionMode.Allowed)]
-    [TelemetryContractBehavior]
-    public interface IStatusServiceContract
-    {
-        [OperationContract]
-        Task<StatusResponse> PingAsync(StatusRequest request);
-    }
 ```
 
 ## References
