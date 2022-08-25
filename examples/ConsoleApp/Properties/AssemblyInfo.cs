@@ -16,4 +16,4 @@
 
 using System.Reflection;
 
-[assembly:AssemblyKeyFileAttribute("ConsoleApp.snk")]
+[assembly: AssemblyKeyFileAttribute("ConsoleApp.snk")]

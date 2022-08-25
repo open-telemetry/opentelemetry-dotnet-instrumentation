@@ -33,11 +33,11 @@ public class SettingsTests : IDisposable
 
     public static IEnumerable<object[]> ExporterEnvVarAndLoadSettingsAction()
     {
-        yield return new object[] { ConfigurationKeys.Traces.Exporter, void () => TracerSettings.FromDefaultSources() };
-        yield return new object[] { ConfigurationKeys.Traces.Instrumentations, void () => TracerSettings.FromDefaultSources() };
-        yield return new object[] { ConfigurationKeys.Metrics.Exporter, void () => MetricSettings.FromDefaultSources() };
-        yield return new object[] { ConfigurationKeys.Metrics.Instrumentations, void () => MetricSettings.FromDefaultSources() };
-        yield return new object[] { ConfigurationKeys.Sdk.Propagators, void () => SdkSettings.FromDefaultSources() };
+        yield return new object[] { ConfigurationKeys.Traces.Exporter, new Action(() => TracerSettings.FromDefaultSources()) };
+        yield return new object[] { ConfigurationKeys.Traces.Instrumentations, new Action(() => TracerSettings.FromDefaultSources()) };
+        yield return new object[] { ConfigurationKeys.Metrics.Exporter, new Action(() => MetricSettings.FromDefaultSources()) };
+        yield return new object[] { ConfigurationKeys.Metrics.Instrumentations, new Action(() => MetricSettings.FromDefaultSources()) };
+        yield return new object[] { ConfigurationKeys.Sdk.Propagators, new Action(() => SdkSettings.FromDefaultSources()) };
     }
 
     public void Dispose()

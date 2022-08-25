@@ -18,22 +18,21 @@ using System;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
-namespace Examples.Vendor.Distro
-{
-    public class Plugin
-    {
-        public TracerProviderBuilder ConfigureTracerProvider(TracerProviderBuilder builder)
-        {
-            var typeName = this.ToString();
-            Console.WriteLine($"Hello from Tracer Plugin - {typeName}");
-            return builder;
-        }
+namespace Examples.Vendor.Distro;
 
-        public MeterProviderBuilder ConfigureMeterProvider(MeterProviderBuilder builder)
-        {
-            var typeName = this.ToString();
-            Console.WriteLine($"Hello from Meter Plugin - {typeName}");
-            return builder;
-        }
+public class Plugin
+{
+    public TracerProviderBuilder ConfigureTracerProvider(TracerProviderBuilder builder)
+    {
+        var typeName = this.ToString();
+        Console.WriteLine($"Hello from Tracer Plugin - {typeName}");
+        return builder;
+    }
+
+    public MeterProviderBuilder ConfigureMeterProvider(MeterProviderBuilder builder)
+    {
+        var typeName = this.ToString();
+        Console.WriteLine($"Hello from Meter Plugin - {typeName}");
+        return builder;
     }
 }

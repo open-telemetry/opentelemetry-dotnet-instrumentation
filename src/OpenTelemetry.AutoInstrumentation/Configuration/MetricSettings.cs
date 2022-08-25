@@ -18,119 +18,118 @@ using System;
 using System.Collections.Generic;
 using OpenTelemetry.AutoInstrumentation.Util;
 
-namespace OpenTelemetry.AutoInstrumentation.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration;
+
+/// <summary>
+/// Metric Settings
+/// </summary>
+public class MetricSettings : Settings
 {
     /// <summary>
-    /// Metric Settings
+    /// Initializes a new instance of the <see cref="MetricSettings"/> class
+    /// using the specified <see cref="IConfigurationSource"/> to initialize values.
     /// </summary>
-    public class MetricSettings : Settings
+    /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
+    private MetricSettings(IConfigurationSource source)
+        : base(source)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MetricSettings"/> class
-        /// using the specified <see cref="IConfigurationSource"/> to initialize values.
-        /// </summary>
-        /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
-        private MetricSettings(IConfigurationSource source)
-            : base(source)
+        MetricExporter = ParseMetricExporter(source);
+        ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.Metrics.ConsoleExporterEnabled) ?? false;
+
+        EnabledInstrumentations = source.ParseEnabledEnumList<MetricInstrumentation>(
+            enabledConfiguration: ConfigurationKeys.Metrics.Instrumentations,
+            disabledConfiguration: ConfigurationKeys.Metrics.DisabledInstrumentations,
+            error: "The \"{0}\" is not recognized as supported metrics instrumentation and cannot be enabled");
+
+        var providerPlugins = source.GetString(ConfigurationKeys.Metrics.ProviderPlugins);
+        if (providerPlugins != null)
         {
-            MetricExporter = ParseMetricExporter(source);
-            ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.Metrics.ConsoleExporterEnabled) ?? false;
-
-            EnabledInstrumentations = source.ParseEnabledEnumList<MetricInstrumentation>(
-                enabledConfiguration: ConfigurationKeys.Metrics.Instrumentations,
-                disabledConfiguration: ConfigurationKeys.Metrics.DisabledInstrumentations,
-                error: "The \"{0}\" is not recognized as supported metrics instrumentation and cannot be enabled");
-
-            var providerPlugins = source.GetString(ConfigurationKeys.Metrics.ProviderPlugins);
-            if (providerPlugins != null)
+            foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(Constants.ConfigurationValues.DotNetQualifiedNameSeparator))
             {
-                foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(Constants.ConfigurationValues.DotNetQualifiedNameSeparator))
-                {
-                    MetricPlugins.Add(pluginAssemblyQualifiedName);
-                }
+                MetricPlugins.Add(pluginAssemblyQualifiedName);
             }
-
-            var additionalSources = source.GetString(ConfigurationKeys.Metrics.AdditionalSources);
-            if (additionalSources != null)
-            {
-                foreach (var sourceName in additionalSources.Split(Constants.ConfigurationValues.Separator))
-                {
-                    Meters.Add(sourceName);
-                }
-            }
-
-            MetricExportInterval = source.GetInt32(ConfigurationKeys.Metrics.ExportInterval);
-            LoadMetricsAtStartup = source.GetBool(ConfigurationKeys.Metrics.LoadMeterAtStartup) ?? true;
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the metrics should be loaded by the profiler. Default is true.
-        /// </summary>
-        public bool LoadMetricsAtStartup { get; }
-
-        /// <summary>
-        /// Gets the metrics exporter.
-        /// </summary>
-        public MetricsExporter MetricExporter { get; }
-
-        /// <summary>
-        /// Gets the metrics export interval.
-        /// </summary>
-        public int? MetricExportInterval { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether the console exporter is enabled.
-        /// </summary>
-        public bool ConsoleExporterEnabled { get; }
-
-        /// <summary>
-        /// Gets the list of plugins represented by <see cref="Type.AssemblyQualifiedName"/>.
-        /// </summary>
-        public IList<string> MetricPlugins { get; } = new List<string>();
-
-        /// <summary>
-        /// Gets the list of enabled meters.
-        /// </summary>
-        public IList<MetricInstrumentation> EnabledInstrumentations { get; }
-
-        /// <summary>
-        /// Gets the list of meters to be added to the MeterProvider at the startup.
-        /// </summary>
-        public IList<string> Meters { get; } = new List<string>();
-
-        internal static MetricSettings FromDefaultSources()
+        var additionalSources = source.GetString(ConfigurationKeys.Metrics.AdditionalSources);
+        if (additionalSources != null)
         {
-            var configurationSource = new CompositeConfigurationSource
+            foreach (var sourceName in additionalSources.Split(Constants.ConfigurationValues.Separator))
             {
-                new EnvironmentConfigurationSource(),
+                Meters.Add(sourceName);
+            }
+        }
+
+        MetricExportInterval = source.GetInt32(ConfigurationKeys.Metrics.ExportInterval);
+        LoadMetricsAtStartup = source.GetBool(ConfigurationKeys.Metrics.LoadMeterAtStartup) ?? true;
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether the metrics should be loaded by the profiler. Default is true.
+    /// </summary>
+    public bool LoadMetricsAtStartup { get; }
+
+    /// <summary>
+    /// Gets the metrics exporter.
+    /// </summary>
+    public MetricsExporter MetricExporter { get; }
+
+    /// <summary>
+    /// Gets the metrics export interval.
+    /// </summary>
+    public int? MetricExportInterval { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the console exporter is enabled.
+    /// </summary>
+    public bool ConsoleExporterEnabled { get; }
+
+    /// <summary>
+    /// Gets the list of plugins represented by <see cref="Type.AssemblyQualifiedName"/>.
+    /// </summary>
+    public IList<string> MetricPlugins { get; } = new List<string>();
+
+    /// <summary>
+    /// Gets the list of enabled meters.
+    /// </summary>
+    public IList<MetricInstrumentation> EnabledInstrumentations { get; }
+
+    /// <summary>
+    /// Gets the list of meters to be added to the MeterProvider at the startup.
+    /// </summary>
+    public IList<string> Meters { get; } = new List<string>();
+
+    internal static MetricSettings FromDefaultSources()
+    {
+        var configurationSource = new CompositeConfigurationSource
+        {
+            new EnvironmentConfigurationSource(),
 
 #if NETFRAMEWORK
-                // on .NET Framework only, also read from app.config/web.config
-                new NameValueConfigurationSource(System.Configuration.ConfigurationManager.AppSettings)
+            // on .NET Framework only, also read from app.config/web.config
+            new NameValueConfigurationSource(System.Configuration.ConfigurationManager.AppSettings)
 #endif
-            };
+        };
 
-            return new MetricSettings(configurationSource);
-        }
+        return new MetricSettings(configurationSource);
+    }
 
-        private static MetricsExporter ParseMetricExporter(IConfigurationSource source)
+    private static MetricsExporter ParseMetricExporter(IConfigurationSource source)
+    {
+        var metricsExporterEnvVar = source.GetString(ConfigurationKeys.Metrics.Exporter)
+                                    ?? Constants.ConfigurationValues.Exporters.Otlp;
+
+        switch (metricsExporterEnvVar)
         {
-            var metricsExporterEnvVar = source.GetString(ConfigurationKeys.Metrics.Exporter)
-                ?? Constants.ConfigurationValues.Exporters.Otlp;
-
-            switch (metricsExporterEnvVar)
-            {
-                case null:
-                case "":
-                case Constants.ConfigurationValues.Exporters.Otlp:
-                    return MetricsExporter.Otlp;
-                case Constants.ConfigurationValues.Exporters.Prometheus:
-                    return MetricsExporter.Prometheus;
-                case Constants.ConfigurationValues.None:
-                    return MetricsExporter.None;
-                default:
-                    throw new FormatException($"Metric exporter '{metricsExporterEnvVar}' is not supported");
-            }
+            case null:
+            case "":
+            case Constants.ConfigurationValues.Exporters.Otlp:
+                return MetricsExporter.Otlp;
+            case Constants.ConfigurationValues.Exporters.Prometheus:
+                return MetricsExporter.Prometheus;
+            case Constants.ConfigurationValues.None:
+                return MetricsExporter.None;
+            default:
+                throw new FormatException($"Metric exporter '{metricsExporterEnvVar}' is not supported");
         }
     }
 }

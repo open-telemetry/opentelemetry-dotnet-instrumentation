@@ -17,63 +17,62 @@
 using System;
 using OpenTelemetry.Exporter;
 
-namespace OpenTelemetry.AutoInstrumentation.Configuration
+namespace OpenTelemetry.AutoInstrumentation.Configuration;
+
+/// <summary>
+/// Global Settings
+/// </summary>
+public abstract class Settings
 {
     /// <summary>
-    /// Global Settings
+    /// Initializes a new instance of the <see cref="Settings"/> class
+    /// using the specified <see cref="IConfigurationSource"/> to initialize values.
     /// </summary>
-    public abstract class Settings
+    /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
+    protected Settings(IConfigurationSource source)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Settings"/> class
-        /// using the specified <see cref="IConfigurationSource"/> to initialize values.
-        /// </summary>
-        /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
-        protected Settings(IConfigurationSource source)
+        if (source == null)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            OtlpExportProtocol = GetExporterOtlpProtocol(source);
-            Http2UnencryptedSupportEnabled = source.GetBool(ConfigurationKeys.Http2UnencryptedSupportEnabled) ?? false;
-            FlushOnUnhandledException = source.GetBool(ConfigurationKeys.FlushOnUnhandledException) ?? false;
+            throw new ArgumentNullException(nameof(source));
         }
 
-        /// <summary>
-        /// Gets the the OTLP transport protocol. Supported values: Grpc and HttpProtobuf.
-        /// </summary>
-        public OtlpExportProtocol? OtlpExportProtocol { get; }
+        OtlpExportProtocol = GetExporterOtlpProtocol(source);
+        Http2UnencryptedSupportEnabled = source.GetBool(ConfigurationKeys.Http2UnencryptedSupportEnabled) ?? false;
+        FlushOnUnhandledException = source.GetBool(ConfigurationKeys.FlushOnUnhandledException) ?? false;
+    }
 
-        /// <summary>
-        /// Gets a value indicating whether the `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`
-        /// should be enabled.
-        /// It is required by OTLP gRPC exporter on .NET Core 3.x.
-        /// Default is <c>false</c>.
-        /// </summary>
-        public bool Http2UnencryptedSupportEnabled { get; }
+    /// <summary>
+    /// Gets the the OTLP transport protocol. Supported values: Grpc and HttpProtobuf.
+    /// </summary>
+    public OtlpExportProtocol? OtlpExportProtocol { get; }
 
-        /// <summary>
-        /// Gets a value indicating whether the <see cref="AppDomain.UnhandledException"/> event should trigger
-        /// the flushing of telemetry data.
-        /// Default is <c>false</c>.
-        /// </summary>
-        public bool FlushOnUnhandledException { get; }
+    /// <summary>
+    /// Gets a value indicating whether the `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`
+    /// should be enabled.
+    /// It is required by OTLP gRPC exporter on .NET Core 3.x.
+    /// Default is <c>false</c>.
+    /// </summary>
+    public bool Http2UnencryptedSupportEnabled { get; }
 
-        private static OtlpExportProtocol? GetExporterOtlpProtocol(IConfigurationSource source)
+    /// <summary>
+    /// Gets a value indicating whether the <see cref="AppDomain.UnhandledException"/> event should trigger
+    /// the flushing of telemetry data.
+    /// Default is <c>false</c>.
+    /// </summary>
+    public bool FlushOnUnhandledException { get; }
+
+    private static OtlpExportProtocol? GetExporterOtlpProtocol(IConfigurationSource source)
+    {
+        // the default in SDK is grpc. http/protobuf should be default for our purposes
+        var exporterOtlpProtocol = source.GetString(ConfigurationKeys.ExporterOtlpProtocol);
+
+        if (string.IsNullOrEmpty(exporterOtlpProtocol))
         {
-            // the default in SDK is grpc. http/protobuf should be default for our purposes
-            var exporterOtlpProtocol = source.GetString(ConfigurationKeys.ExporterOtlpProtocol);
-
-            if (string.IsNullOrEmpty(exporterOtlpProtocol))
-            {
-                // override settings only for http/protobuf
-                return Exporter.OtlpExportProtocol.HttpProtobuf;
-            }
-
-            // null value here means that it will be handled by OTEL .NET SDK
-            return null;
+            // override settings only for http/protobuf
+            return Exporter.OtlpExportProtocol.HttpProtobuf;
         }
+
+        // null value here means that it will be handled by OTEL .NET SDK
+        return null;
     }
 }

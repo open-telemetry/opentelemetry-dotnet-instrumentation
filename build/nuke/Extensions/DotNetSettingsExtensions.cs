@@ -1,6 +1,8 @@
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.MSBuild;
 
+namespace Extensions;
+
 internal static class DotNetSettingsExtensions
 {
     public static DotNetPublishSettings SetTargetPlatformAnyCPU(this DotNetPublishSettings settings)

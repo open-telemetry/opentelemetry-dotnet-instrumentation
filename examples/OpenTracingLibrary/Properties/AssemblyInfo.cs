@@ -16,4 +16,4 @@
 
 using System.Reflection;
 
-[assembly:AssemblyKeyFileAttribute("OpenTracingLibrary.snk")]
+[assembly: AssemblyKeyFileAttribute("OpenTracingLibrary.snk")]
