@@ -48,7 +48,7 @@ folder.
 
 Add `OpenTelemetry.Instrumentation.Wcf` and `System.Diagnostics.DiagnosticSource`
 package to the project. The version of `OpenTelemetry.Instrumentation.Wcf`
-should match the one used by Autoinstrumentation library to avoid compatibility
+should match the one used by AutoInstrumentation library to avoid compatibility
 issues.
 
 ```xml
