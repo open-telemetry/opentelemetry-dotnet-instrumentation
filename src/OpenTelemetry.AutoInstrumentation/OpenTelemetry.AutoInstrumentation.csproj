@@ -36,8 +36,4 @@
     <PackageReference Include="StackExchange.Redis" Version="2.1.58" ExcludeAssets="all" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\OpenTelemetry.AutoInstrumentation.Core\OpenTelemetry.AutoInstrumentation.Core.csproj" />
-  </ItemGroup>
-
 </Project>

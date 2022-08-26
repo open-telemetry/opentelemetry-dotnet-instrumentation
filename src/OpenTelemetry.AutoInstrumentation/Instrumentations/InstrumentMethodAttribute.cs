@@ -16,7 +16,7 @@
 
 using System;
 
-namespace OpenTelemetry.AutoInstrumentation;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations;
 
 /// <summary>
 /// Attribute that indicates that the decorated class is meant to intercept a method
@@ -77,7 +77,7 @@ public class InstrumentMethodAttribute : Attribute
     /// <summary>
     /// Gets the target version range for <see cref="AssemblyName"/>.
     /// </summary>
-    public IntegrationVersionRange VersionRange { get; } = new IntegrationVersionRange();
+    public IntegrationVersionRange VersionRange { get; } = new();
 
     /// <summary>
     /// Gets or sets the target minimum version.
