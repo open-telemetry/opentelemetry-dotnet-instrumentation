@@ -2,7 +2,6 @@
 
 1. Update the version in the following files:
 
-   - [`src/OpenTelemetry.AutoInstrumentation.Core/OpenTelemetry.AutoInstrumentation.Core.csproj`](../src/OpenTelemetry.AutoInstrumentation.Core/OpenTelemetry.AutoInstrumentation.Core.csproj)
    - [`src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Loader.csproj`](../src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Loader.csproj)
    - [`src/OpenTelemetry.AutoInstrumentation.Native/CMakeLists.txt`](../src/OpenTelemetry.AutoInstrumentation.Native/CMakeLists.txt)
    - [`src/OpenTelemetry.AutoInstrumentation.Native/Resource.rc`](../src/OpenTelemetry.AutoInstrumentation.Native/Resource.rc)
