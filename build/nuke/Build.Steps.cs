@@ -360,19 +360,6 @@ partial class Build
                                        depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+?)}," + Environment.NewLine + "(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
                                        File.WriteAllText(file, depsJsonContent);
                                    });
-            
-            //DotNetPublish(s => s
-            //    .SetProject(Solution.GetProject(Projects.AutoInstrumentationStartupBootstrapper))
-            //    .SetConfiguration(BuildConfiguration)
-            //    .SetTargetPlatformAnyCPU()
-            //    .SetProperty("TracerHomePath", TracerHomeDirectory)
-            //    .EnableNoBuild()
-            //    .EnableNoRestore()
-            //    .CombineWith(TestFrameworks.ExceptNetFramework(), (p, framework) => p
-            //        .SetFramework(framework)
-            //        .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
-
-            //AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml").ForEach(DeleteFile);
         });
 
     Target InstallDocumentationTools => _ => _
