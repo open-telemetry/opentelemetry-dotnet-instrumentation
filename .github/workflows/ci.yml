@@ -54,13 +54,13 @@ jobs:
         docker build \
           --tag otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
           --file "./build/nuke/docker/${{ matrix.base-image }}.dockerfile" \
-          "./build/nuke"
+          ./build/nuke
     - name: Build in Docker container
       run: |
         docker run --rm \
           --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project \
           otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
-          "./build.cmd Workflow --containers none"
+          ./build.cmd Workflow --containers none
     - name: Publish Linux build
       uses: actions/upload-artifact@v3.1.0
       with:
