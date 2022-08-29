@@ -13,7 +13,9 @@
     <TestApplicationProject Include="test\test-applications\integrations\*\*.csproj" />
     <TestApplicationProject Include="test\test-applications\integrations\dependency-libs\*\*.csproj" />
     <TestApplicationProject Remove="test\test-applications\integrations\TestApplication.AspNet\TestApplication.AspNet.csproj" />
+    <TestApplicationProject Remove="test\test-applications\integrations\TestApplication.Wcf.Server.NetFramework\TestApplication.Wcf.Server.NetFramework.csproj" />
     <TestApplicationProjectFX Include="test\test-applications\integrations\TestApplication.AspNet\TestApplication.AspNet.csproj" Condition="'$(OS)' == 'Windows_NT'" />
+    <TestApplicationProjectFX Include="test\test-applications\integrations\TestApplication.Wcf.Server.NetFramework\TestApplication.Wcf.Server.NetFramework.csproj" Condition="'$(OS)' == 'Windows_NT'" />
     <MockProject Include="test\test-applications\mocks\*\*.csproj" />
     <IntegrationProject Include="test\IntegrationTests\IntegrationTests.csproj" />
   </ItemGroup>
