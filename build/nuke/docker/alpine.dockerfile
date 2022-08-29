@@ -6,6 +6,7 @@ RUN apk update \
         clang \
         cmake \
         make \
+        bash \
         alpine-sdk \
         protobuf \
         protobuf-dev \
