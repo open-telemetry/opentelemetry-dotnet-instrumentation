@@ -205,6 +205,15 @@ partial class Build
                 .EnableNoRestore()
                 .SetFramework(TargetFramework.NETCOREAPP3_1)
                 .SetOutput(TracerHomeDirectory / TargetFramework.NETCOREAPP3_1));
+
+            DotNetPublish(s => s
+                .SetProject(Solution.GetProject(Projects.AutoInstrumentationStartupBootstrapper))
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatformAnyCPU()
+                .EnableNoBuild()
+                .EnableNoRestore()
+                .SetFramework(TargetFramework.NETCOREAPP3_1)
+                .SetOutput(TracerHomeDirectory / TargetFramework.NETCOREAPP3_1));
         });
 
     Target PublishNativeProfiler => _ => _
@@ -351,6 +360,19 @@ partial class Build
                                        depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+?)}," + Environment.NewLine + "(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
                                        File.WriteAllText(file, depsJsonContent);
                                    });
+            
+            //DotNetPublish(s => s
+            //    .SetProject(Solution.GetProject(Projects.AutoInstrumentationStartupBootstrapper))
+            //    .SetConfiguration(BuildConfiguration)
+            //    .SetTargetPlatformAnyCPU()
+            //    .SetProperty("TracerHomePath", TracerHomeDirectory)
+            //    .EnableNoBuild()
+            //    .EnableNoRestore()
+            //    .CombineWith(TestFrameworks.ExceptNetFramework(), (p, framework) => p
+            //        .SetFramework(framework)
+            //        .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
+
+            //AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml").ForEach(DeleteFile);
         });
 
     Target InstallDocumentationTools => _ => _

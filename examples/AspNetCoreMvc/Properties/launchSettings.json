@@ -55,7 +55,13 @@
         "OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED": "true",
         "OTEL_DOTNET_AUTO_TRACES_PLUGINS": "Examples.AspNetCoreMvc.OtelSdkPlugin, Examples.AspNetCoreMvc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
         "OTEL_SERVICE_NAME": "StartupHook.Self-hosted",
-        "OTEL_TRACES_EXPORTER": "otlp"
+        "OTEL_TRACES_EXPORTER": "otlp",
+        "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home",
+        "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "OpenTelemetry.AutoInstrumentation.StartupBootstrapper",
+        "OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED": "true",
+        "OTEL_LOGS_EXPORTER": "otlp",
+        "OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES": "true",
+        "OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE": "true"
       },
       "use64Bit": true,
       "nativeDebugging": true,
