@@ -24,5 +24,3 @@ RUN curl -sSL https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
 
 # Copy the build project in and build it
 WORKDIR /project
-COPY . /build
-RUN dotnet build /build

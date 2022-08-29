@@ -60,7 +60,7 @@ jobs:
         docker run --rm \
           --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project \
           otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
-          dotnet /build/nuke/bin/Debug/_build.dll Workflow --containers none
+          "./build.cmd Workflow --containers none"
     - name: Publish Linux build
       uses: actions/upload-artifact@v3.1.0
       with:
