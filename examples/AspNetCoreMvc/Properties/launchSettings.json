@@ -57,7 +57,7 @@
         "OTEL_SERVICE_NAME": "StartupHook.Self-hosted",
         "OTEL_TRACES_EXPORTER": "otlp",
         "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home",
-        "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "OpenTelemetry.AutoInstrumentation.StartupBootstrapper",
+        "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper",
         "OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED": "true",
         "OTEL_LOGS_EXPORTER": "otlp",
         "OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES": "true",

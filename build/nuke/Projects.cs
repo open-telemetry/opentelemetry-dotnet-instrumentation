@@ -5,7 +5,7 @@ public static class Projects
     public const string AutoInstrumentationNative = "OpenTelemetry.AutoInstrumentation.Native";
     public const string AutoInstrumentationStartupHook = "OpenTelemetry.AutoInstrumentation.StartupHook";
     public const string AutoInstrumentationAdditionalDeps = "OpenTelemetry.AutoInstrumentation.AdditionalDeps";
-    public const string AutoInstrumentationStartupBootstrapper = "OpenTelemetry.AutoInstrumentation.StartupBootstrapper";
+    public const string AutoInstrumentationAspNetCoreBootstrapper = "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper";
 
     public static class Tests
     {

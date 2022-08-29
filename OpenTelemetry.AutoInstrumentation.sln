@@ -135,7 +135,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.StackExchan
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.GrpcNetClient", "test\test-applications\integrations\TestApplication.GrpcNetClient\TestApplication.GrpcNetClient.csproj", "{0605872C-AB2B-4167-9B00-A525090D10BE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.StartupBootstrapper", "src\OpenTelemetry.AutoInstrumentation.StartupBootstrapper\OpenTelemetry.AutoInstrumentation.StartupBootstrapper.csproj", "{C1AEDAE0-6629-4C88-AB35-AB5B81FD50F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper", "src\OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper\OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper.csproj", "{C1AEDAE0-6629-4C88-AB35-AB5B81FD50F6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

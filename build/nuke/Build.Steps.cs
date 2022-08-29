@@ -207,7 +207,7 @@ partial class Build
                 .SetOutput(TracerHomeDirectory / TargetFramework.NETCOREAPP3_1));
 
             DotNetPublish(s => s
-                .SetProject(Solution.GetProject(Projects.AutoInstrumentationStartupBootstrapper))
+                .SetProject(Solution.GetProject(Projects.AutoInstrumentationAspNetCoreBootstrapper))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()

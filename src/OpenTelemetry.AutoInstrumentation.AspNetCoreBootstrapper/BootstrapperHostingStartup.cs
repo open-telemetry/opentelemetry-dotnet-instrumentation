@@ -20,9 +20,9 @@ using Microsoft.Extensions.Logging;
 using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.Logs;
 
-[assembly: HostingStartup(typeof(OpenTelemetry.AutoInstrumentation.StartupBootstrapper.BootstrapperHostingStartup))]
+[assembly: HostingStartup(typeof(OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper.BootstrapperHostingStartup))]
 
-namespace OpenTelemetry.AutoInstrumentation.StartupBootstrapper;
+namespace OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper;
 
 /// <summary>
 /// Add summary.
