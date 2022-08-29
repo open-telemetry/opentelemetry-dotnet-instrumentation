@@ -5,17 +5,8 @@ RUN apk update \
     && apk add --no-cache --update \
         clang \
         cmake \
-        git \
-        bash \
         make \
         alpine-sdk \
-        util-linux-dev \
-        autoconf \
-        libtool \
-        automake \
-        xz-dev \
-        gdb \
-        musl-dbg \
         protobuf \
         protobuf-dev \
         grpc
