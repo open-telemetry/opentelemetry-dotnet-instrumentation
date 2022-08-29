@@ -21,7 +21,7 @@ internal static class Constants
     public static class Tracer
     {
         public const string Language = "dotnet";
-        public const string Version = "0.2.0";
+        public const string Version = "0.3.0";
     }
 
     public static class ConfigurationValues

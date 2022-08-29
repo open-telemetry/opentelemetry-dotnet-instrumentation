@@ -1,4 +1,4 @@
-// <copyright file="AssemblyInfo.cs" company="OpenTelemetry Authors">
+// <copyright file="ConstantsTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,16 @@
 // limitations under the License.
 // </copyright>
 
-using System.Runtime.CompilerServices;
+using FluentAssertions;
+using Xunit;
 
-[assembly: System.Reflection.AssemblyVersion("0.0.0.0")]
-[assembly: InternalsVisibleTo("OpenTelemetry.AutoInstrumentation")]
+namespace OpenTelemetry.AutoInstrumentation.Tests;
+
+public class ConstantsTests
+{
+    [Fact]
+    public void VersionTag()
+    {
+        Constants.Tracer.Version.Should().Be(typeof(Constants).Assembly.GetName().Version?.ToString(fieldCount: 3));
+    }
+}

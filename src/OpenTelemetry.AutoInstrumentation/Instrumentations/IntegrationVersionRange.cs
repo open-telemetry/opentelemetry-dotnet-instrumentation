@@ -14,7 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-namespace OpenTelemetry.AutoInstrumentation;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations;
 
 /// <summary>
 /// Specifies a safe version range for an integration.
