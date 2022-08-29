@@ -8,6 +8,8 @@
    - [`src/OpenTelemetry.AutoInstrumentation.Native/otel_profiler_constants.h`](../src/OpenTelemetry.AutoInstrumentation.Native/otel_profiler_constants.h)
    - [`src/OpenTelemetry.AutoInstrumentation.Native/version.h`](../src/OpenTelemetry.AutoInstrumentation.Native/version.h)
    - [`src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj`](../src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj)
+   - ['src/OpenTelemetry.AutoInstrumentation\Constants.cs'](../src/OpenTelemetry.AutoInstrumentation\Constants.cs)
+     (Version tag)
 
 1. Update the documentation link on the [README.md](./README.md) file.
 
