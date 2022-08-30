@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
@@ -37,6 +38,11 @@ internal class WcfServerTestHelper : TestHelper
         var projectDirectory = EnvironmentHelper.GetTestApplicationProjectDirectory();
         var exeFileName = $"{EnvironmentHelper.FullTestApplicationName}.exe";
         var testApplicationPath = Path.Combine(projectDirectory, "bin", EnvironmentTools.GetPlatform().ToLowerInvariant(), EnvironmentTools.GetBuildConfiguration(), "net462", exeFileName);
+
+        if (!File.Exists(testApplicationPath))
+        {
+            throw new Exception($"Unable to find executing assembly at {testApplicationPath}");
+        }
 
         var testSettings = new TestSettings
         {
