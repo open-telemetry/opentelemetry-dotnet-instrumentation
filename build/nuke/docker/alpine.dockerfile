@@ -16,7 +16,7 @@ ENV IsAlpine=true
 ENV PROTOBUF_PROTOC=/usr/bin/protoc
 ENV gRPC_PluginFullPath=/usr/bin/grpc_csharp_plugin
 
-# Install .NET Core older sdks using install script
+# Install older sdks using the install script
 RUN curl -sSL https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
     && chmod +x ./dotnet-install.sh \
     && ./dotnet-install.sh -c 3.1 --install-dir /usr/share/dotnet --no-path \
