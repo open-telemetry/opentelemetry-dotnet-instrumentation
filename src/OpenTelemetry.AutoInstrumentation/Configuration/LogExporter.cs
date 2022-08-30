@@ -1,4 +1,4 @@
-// <copyright file="AssemblyInfo.cs" company="OpenTelemetry Authors">
+// <copyright file="LogExporter.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +14,20 @@
 // limitations under the License.
 // </copyright>
 
-using System.Runtime.CompilerServices;
+namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
-[assembly: InternalsVisibleTo("OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper")]
-[assembly: InternalsVisibleTo("OpenTelemetry.AutoInstrumentation.Tests")]
-[assembly: InternalsVisibleTo("IntegrationTests")]
+/// <summary>
+/// Enum representing supported log exporters.
+/// </summary>
+public enum LogExporter
+{
+    /// <summary>
+    /// None exporter.
+    /// </summary>
+    None,
+
+    /// <summary>
+    /// OTLP exporter.
+    /// </summary>
+    Otlp,
+}
