@@ -16,12 +16,11 @@
 
 using System.Runtime.Serialization;
 
-namespace TestApplication.Wcf.Shared
+namespace TestApplication.Wcf.Shared;
+
+[DataContract]
+public class StatusRequest
 {
-    [DataContract]
-    public class StatusRequest
-    {
-        [DataMember]
-        public string Status { get; set; }
-    }
+    [DataMember]
+    public string Status { get; set; }
 }

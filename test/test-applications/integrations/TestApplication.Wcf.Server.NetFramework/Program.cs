@@ -17,19 +17,18 @@
 using System;
 using System.ServiceModel;
 
-namespace TestApplication.Wcf.Server.NetFramework
+namespace TestApplication.Wcf.Server.NetFramework;
+
+internal static class Program
 {
-    internal static class Program
+    public static void Main()
     {
-        public static void Main()
-        {
-            ServiceHost serviceHost = new ServiceHost(typeof(StatusService));
-            serviceHost.Open();
+        ServiceHost serviceHost = new ServiceHost(typeof(StatusService));
+        serviceHost.Open();
 
-            Console.WriteLine("Service listening. Press enter to exit.");
-            Console.ReadLine();
+        Console.WriteLine("Service listening. Press enter to exit.");
+        Console.ReadLine();
 
-            serviceHost.Close();
-        }
+        serviceHost.Close();
     }
 }

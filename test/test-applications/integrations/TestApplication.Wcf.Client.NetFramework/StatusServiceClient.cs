@@ -18,28 +18,27 @@ using System.ServiceModel;
 using System.Threading.Tasks;
 using TestApplication.Wcf.Shared;
 
-namespace TestApplication.Wcf.Client.NetFramework
+namespace TestApplication.Wcf.Client.NetFramework;
+
+public class StatusServiceClient : ClientBase<IStatusServiceContract>, IStatusServiceContract
 {
-    public class StatusServiceClient : ClientBase<IStatusServiceContract>, IStatusServiceContract
+    public StatusServiceClient(string name)
+        : base(name)
     {
-        public StatusServiceClient(string name)
-            : base(name)
-        {
-        }
+    }
 
-        public Task<StatusResponse> PingAsync(StatusRequest request)
-            => this.Channel.PingAsync(request);
+    public Task<StatusResponse> PingAsync(StatusRequest request)
+        => this.Channel.PingAsync(request);
 
-        public Task OpenAsync()
-        {
-            ICommunicationObject communicationObject = this;
-            return Task.Factory.FromAsync(communicationObject.BeginOpen, communicationObject.EndOpen, null);
-        }
+    public Task OpenAsync()
+    {
+        ICommunicationObject communicationObject = this;
+        return Task.Factory.FromAsync(communicationObject.BeginOpen, communicationObject.EndOpen, null);
+    }
 
-        public Task CloseAsync()
-        {
-            ICommunicationObject communicationObject = this;
-            return Task.Factory.FromAsync(communicationObject.BeginClose, communicationObject.EndClose, null);
-        }
+    public Task CloseAsync()
+    {
+        ICommunicationObject communicationObject = this;
+        return Task.Factory.FromAsync(communicationObject.BeginClose, communicationObject.EndClose, null);
     }
 }

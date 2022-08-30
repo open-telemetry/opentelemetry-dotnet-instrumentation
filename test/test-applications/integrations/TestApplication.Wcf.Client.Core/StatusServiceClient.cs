@@ -19,27 +19,26 @@ using System.ServiceModel.Channels;
 using System.Threading.Tasks;
 using TestApplication.Wcf.Shared;
 
-namespace TestApplication.Wcf.Client.Core
+namespace TestApplication.Wcf.Client.Core;
+
+public class StatusServiceClient : ClientBase<IStatusServiceContract>, IStatusServiceContract
 {
-    public class StatusServiceClient : ClientBase<IStatusServiceContract>, IStatusServiceContract
+    public StatusServiceClient(string name)
+        : base(name)
     {
-        public StatusServiceClient(string name)
-            : base(name)
-        {
-        }
+    }
 
-        public StatusServiceClient(Binding binding, EndpointAddress remoteAddress)
-            : base(binding, remoteAddress)
-        {
-        }
+    public StatusServiceClient(Binding binding, EndpointAddress remoteAddress)
+        : base(binding, remoteAddress)
+    {
+    }
 
-        public Task<StatusResponse> PingAsync(StatusRequest request)
-            => this.Channel.PingAsync(request);
+    public Task<StatusResponse> PingAsync(StatusRequest request)
+        => this.Channel.PingAsync(request);
 
-        public Task OpenAsync()
-        {
-            ICommunicationObject communicationObject = this;
-            return Task.Factory.FromAsync(communicationObject.BeginOpen, communicationObject.EndOpen, null);
-        }
+    public Task OpenAsync()
+    {
+        ICommunicationObject communicationObject = this;
+        return Task.Factory.FromAsync(communicationObject.BeginOpen, communicationObject.EndOpen, null);
     }
 }
