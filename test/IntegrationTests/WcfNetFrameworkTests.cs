@@ -64,10 +64,11 @@ public class WcfNetFrameworkTests : TestHelper, IDisposable
 
     public void Dispose()
     {
+        _serverProcess.Process.StandardInput.Write(Environment.NewLine);
+
         Output.WriteLine($"ProcessId: " + _serverProcess.Process.Id);
         Output.WriteLine($"Exit Code: " + _serverProcess.Process.ExitCode);
         Output.WriteResult(_serverProcess);
-        _serverProcess.Process?.Kill();
     }
 }
 
