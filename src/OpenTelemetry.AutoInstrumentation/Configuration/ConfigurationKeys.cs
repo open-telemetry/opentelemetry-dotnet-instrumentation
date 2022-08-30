@@ -148,7 +148,7 @@ public class ConfigurationKeys
     /// <summary>
     /// Configuration keys for logs.
     /// </summary>
-    public static class Log
+    public static class Logs
     {
         /// <summary>
         /// Configuration key for the logs exporter to be used.

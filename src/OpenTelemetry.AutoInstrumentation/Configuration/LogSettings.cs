@@ -33,11 +33,11 @@ public class LogSettings : Settings
         : base(source)
     {
         LogExporter = ParseLogExporter(source);
-        ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.Log.ConsoleExporterEnabled) ?? false;
-        ParseStateValues = source.GetBool(ConfigurationKeys.Log.ParseStateValues) ?? false;
-        IncludeFormattedMessage = source.GetBool(ConfigurationKeys.Log.IncludeFormattedMessage) ?? false;
+        ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.Logs.ConsoleExporterEnabled) ?? false;
+        ParseStateValues = source.GetBool(ConfigurationKeys.Logs.ParseStateValues) ?? false;
+        IncludeFormattedMessage = source.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
 
-        var providerPlugins = source.GetString(ConfigurationKeys.Log.ProviderPlugins);
+        var providerPlugins = source.GetString(ConfigurationKeys.Logs.ProviderPlugins);
         if (providerPlugins != null)
         {
             foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(Constants.ConfigurationValues.DotNetQualifiedNameSeparator))
@@ -89,7 +89,7 @@ public class LogSettings : Settings
 
     private static LogExporter ParseLogExporter(IConfigurationSource source)
     {
-        var logExporterEnvVar = source.GetString(ConfigurationKeys.Log.Exporter)
+        var logExporterEnvVar = source.GetString(ConfigurationKeys.Logs.Exporter)
             ?? Constants.ConfigurationValues.Exporters.Otlp;
 
         switch (logExporterEnvVar)
