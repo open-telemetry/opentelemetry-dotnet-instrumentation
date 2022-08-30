@@ -60,41 +60,13 @@ public class WcfCoreTests : TestHelper, IDisposable
 
         foreach (var span in spans)
         {
-            span.Resource.Should().Be("http://opentelemetry.io/StatusService/Ping");
-            span.Tags["rpc.system"].Should().Be("wcf");
-            span.Tags["rpc.service"].Should().Be("http://opentelemetry.io/StatusService");
-            span.Tags["rpc.method"].Should().Be("Ping");
-            span.Tags["wcf.channel.path"].Should().Be("/Telemetry");
             span.Tags["otel.library.name"].Should().Be("OpenTelemetry.Instrumentation.Wcf");
-        }
-
-        var clientSpans = spans.Where(span => span.Service == "TestApplication.Wcf.Client.Core").ToList();
-        var serverSpans = spans.Where(span => span.Service == "TestApplication.Wcf.Server.NetFramework").ToList();
-
-        foreach (var clientSpan in clientSpans)
-        {
-            clientSpan.Tags["span.kind"].Should().Be("client");
-            clientSpan.Tags["net.peer.name"].Should().Be("localhost");
-        }
-
-        var httpClientSpan = clientSpans.Where(span => span.Tags["wcf.channel.scheme"] == "http").ToList()[0];
-        var netTcpClientSpan = clientSpans.Where(span => span.Tags["wcf.channel.scheme"] == "net.tcp").ToList()[0];
-
-        httpClientSpan.Tags["net.peer.port"].Should().Be("9009");
-        httpClientSpan.Tags["peer.service"].Should().Be("localhost:9009");
-
-        netTcpClientSpan.Tags["net.peer.port"].Should().Be("9090");
-        netTcpClientSpan.Tags["peer.service"].Should().Be("localhost:9090");
-
-        foreach (var serverSpan in serverSpans)
-        {
-            serverSpan.Tags["span.kind"].Should().Be("server");
         }
     }
 
     public void Dispose()
     {
-        _serverProcess.Process.StandardInput.Write(Environment.NewLine);
+        _serverProcess.Process.Kill();
 
         Output.WriteLine($"ProcessId: " + _serverProcess.Process.Id);
         Output.WriteLine($"Exit Code: " + _serverProcess.Process.ExitCode);
