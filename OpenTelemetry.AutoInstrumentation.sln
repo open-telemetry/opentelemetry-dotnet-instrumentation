@@ -135,13 +135,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.StackExchan
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.GrpcNetClient", "test\test-applications\integrations\TestApplication.GrpcNetClient\TestApplication.GrpcNetClient.csproj", "{0605872C-AB2B-4167-9B00-A525090D10BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Wcf.Client.Core", "C:\workspace\dszmigielski\opentelemetry-dotnet-instrumentation\test\test-applications\integrations\TestApplication.Wcf.Client.Core\TestApplication.Wcf.Client.Core.csproj", "{5BFB9A97-A83F-4719-A35B-6421364B9820}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Wcf.Client.Core", "test\test-applications\integrations\TestApplication.Wcf.Client.Core\TestApplication.Wcf.Client.Core.csproj", "{5BFB9A97-A83F-4719-A35B-6421364B9820}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Wcf.Client.NetFramework", "C:\workspace\dszmigielski\opentelemetry-dotnet-instrumentation\test\test-applications\integrations\TestApplication.Wcf.Client.NetFramework\TestApplication.Wcf.Client.NetFramework.csproj", "{ACB51ACB-82E6-4CA8-B233-2C05A5CEDE01}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Wcf.Client.NetFramework", "test\test-applications\integrations\TestApplication.Wcf.Client.NetFramework\TestApplication.Wcf.Client.NetFramework.csproj", "{ACB51ACB-82E6-4CA8-B233-2C05A5CEDE01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Wcf.Server.NetFramework", "C:\workspace\dszmigielski\opentelemetry-dotnet-instrumentation\test\test-applications\integrations\TestApplication.Wcf.Server.NetFramework\TestApplication.Wcf.Server.NetFramework.csproj", "{F7ACC09E-899F-4D47-BA1D-4009FB76F6AA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Wcf.Server.NetFramework", "test\test-applications\integrations\TestApplication.Wcf.Server.NetFramework\TestApplication.Wcf.Server.NetFramework.csproj", "{F7ACC09E-899F-4D47-BA1D-4009FB76F6AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Wcf.Shared", "C:\workspace\dszmigielski\opentelemetry-dotnet-instrumentation\test\test-applications\integrations\TestApplication.Wcf.Shared\TestApplication.Wcf.Shared.csproj", "{86B61808-6B61-465E-8451-84DC31935C03}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Wcf.Shared", "test\test-applications\integrations\TestApplication.Wcf.Shared\TestApplication.Wcf.Shared.csproj", "{86B61808-6B61-465E-8451-84DC31935C03}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
