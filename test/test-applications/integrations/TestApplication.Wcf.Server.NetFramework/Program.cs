@@ -23,12 +23,20 @@ internal static class Program
 {
     public static void Main()
     {
-        ServiceHost serviceHost = new ServiceHost(typeof(StatusService));
-        serviceHost.Open();
+        try
+        {
+            ServiceHost serviceHost = new ServiceHost(typeof(StatusService));
+            serviceHost.Open();
 
-        Console.WriteLine("Service listening. Press enter to exit.");
-        Console.ReadLine();
+            Console.WriteLine("Service listening. Press enter to exit.");
+            Console.ReadLine();
 
-        serviceHost.Close();
+            serviceHost.Close();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"ServerException: {e}");
+            throw;
+        }
     }
 }
