@@ -33,7 +33,7 @@ internal class WcfServerTestHelper : TestHelper
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
     }
 
-    public Process RunWcfServer(int traceAgentPort)
+    public ProcessHelper RunWcfServer(int traceAgentPort)
     {
         var projectDirectory = EnvironmentHelper.GetTestApplicationProjectDirectory();
         var exeFileName = $"{EnvironmentHelper.FullTestApplicationName}.exe";
@@ -62,7 +62,8 @@ internal class WcfServerTestHelper : TestHelper
         startInfo.RedirectStandardError = true;
         startInfo.RedirectStandardInput = false;
 
-        return Process.Start(startInfo);
+        var process = Process.Start(startInfo);
+        return new ProcessHelper(process);
     }
 
     private void SetEnvironmentVariables(

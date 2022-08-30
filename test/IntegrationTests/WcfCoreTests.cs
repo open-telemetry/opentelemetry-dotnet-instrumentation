@@ -32,7 +32,7 @@ namespace IntegrationTests;
 public class WcfCoreTests : TestHelper, IDisposable
 {
     private const string ServiceName = "TestApplication.Wcf.Client.Core";
-    private Process _serverProcess;
+    private ProcessHelper _serverProcess;
 
     public WcfCoreTests(ITestOutputHelper output)
         : base("Wcf.Client.Core", output)
@@ -94,7 +94,10 @@ public class WcfCoreTests : TestHelper, IDisposable
 
     public void Dispose()
     {
-        _serverProcess?.Kill();
+        Output.WriteLine($"ProcessId: " + _serverProcess.Process.Id);
+        Output.WriteLine($"Exit Code: " + _serverProcess.Process.ExitCode);
+        Output.WriteResult(_serverProcess);
+        _serverProcess.Process?.Kill();
     }
 }
 

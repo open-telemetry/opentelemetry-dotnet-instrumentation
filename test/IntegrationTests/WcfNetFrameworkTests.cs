@@ -30,7 +30,7 @@ namespace IntegrationTests;
 public class WcfNetFrameworkTests : TestHelper, IDisposable
 {
     private const string ServiceName = "TestApplication.Wcf.Client.NetFramework";
-    private Process _serverProcess;
+    private ProcessHelper _serverProcess;
 
     public WcfNetFrameworkTests(ITestOutputHelper output)
         : base("Wcf.Client.NetFramework", output)
@@ -64,7 +64,10 @@ public class WcfNetFrameworkTests : TestHelper, IDisposable
 
     public void Dispose()
     {
-        _serverProcess?.Kill();
+        Output.WriteLine($"ProcessId: " + _serverProcess.Process.Id);
+        Output.WriteLine($"Exit Code: " + _serverProcess.Process.ExitCode);
+        Output.WriteResult(_serverProcess);
+        _serverProcess.Process?.Kill();
     }
 }
 
