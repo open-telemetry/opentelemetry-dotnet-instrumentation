@@ -19,50 +19,49 @@ using System.ServiceModel;
 using System.Threading.Tasks;
 using TestApplication.Wcf.Shared;
 
-namespace TestApplication.Wcf.Client.NetFramework
-{
-    internal static class Program
-    {
-        public static async Task Main()
-        {
-            await CallService("StatusService_Http").ConfigureAwait(false);
-            await CallService("StatusService_Tcp").ConfigureAwait(false);
-        }
+namespace TestApplication.Wcf.Client.NetFramework;
 
-        private static async Task CallService(string name)
+internal static class Program
+{
+    public static async Task Main()
+    {
+        await CallService("StatusService_Http").ConfigureAwait(false);
+        await CallService("StatusService_Tcp").ConfigureAwait(false);
+    }
+
+    private static async Task CallService(string name)
+    {
+        // Note: Best practice is to re-use your client/channel instances.
+        // This code is not meant to illustrate best practices, only the
+        // instrumentation.
+        StatusServiceClient client = new StatusServiceClient(name);
+        try
         {
-            // Note: Best practice is to re-use your client/channel instances.
-            // This code is not meant to illustrate best practices, only the
-            // instrumentation.
-            StatusServiceClient client = new StatusServiceClient(name);
+            await client.OpenAsync().ConfigureAwait(false);
+
+            var response = await client.PingAsync(
+                new StatusRequest
+                {
+                    Status = Guid.NewGuid().ToString("N"),
+                }).ConfigureAwait(false);
+
+            Console.WriteLine($"Server returned: {response?.ServerTime}");
+        }
+        finally
+        {
             try
             {
-                await client.OpenAsync().ConfigureAwait(false);
-
-                var response = await client.PingAsync(
-                    new StatusRequest
-                    {
-                        Status = Guid.NewGuid().ToString("N"),
-                    }).ConfigureAwait(false);
-
-                Console.WriteLine($"Server returned: {response?.ServerTime}");
+                if (client.State == CommunicationState.Faulted)
+                {
+                    client.Abort();
+                }
+                else
+                {
+                    await client.CloseAsync().ConfigureAwait(false);
+                }
             }
-            finally
+            catch
             {
-                try
-                {
-                    if (client.State == CommunicationState.Faulted)
-                    {
-                        client.Abort();
-                    }
-                    else
-                    {
-                        await client.CloseAsync().ConfigureAwait(false);
-                    }
-                }
-                catch
-                {
-                }
             }
         }
     }

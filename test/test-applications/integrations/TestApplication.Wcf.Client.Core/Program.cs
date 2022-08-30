@@ -21,55 +21,54 @@ using System.Threading.Tasks;
 using OpenTelemetry.Instrumentation.Wcf;
 using TestApplication.Wcf.Shared;
 
-namespace TestApplication.Wcf.Client.Core
-{
-    internal static class Program
-    {
-        public static async Task Main()
-        {
-            await CallService(
-                new BasicHttpBinding(BasicHttpSecurityMode.None),
-                new EndpointAddress("http://localhost:9009/Telemetry")).ConfigureAwait(false);
-            await CallService(
-                new NetTcpBinding(SecurityMode.None),
-                new EndpointAddress("net.tcp://localhost:9090/Telemetry")).ConfigureAwait(false);
-        }
+namespace TestApplication.Wcf.Client.Core;
 
-        private static async Task CallService(Binding binding, EndpointAddress remoteAddress)
+internal static class Program
+{
+    public static async Task Main()
+    {
+        await CallService(
+            new BasicHttpBinding(BasicHttpSecurityMode.None),
+            new EndpointAddress("http://localhost:9009/Telemetry")).ConfigureAwait(false);
+        await CallService(
+            new NetTcpBinding(SecurityMode.None),
+            new EndpointAddress("net.tcp://localhost:9090/Telemetry")).ConfigureAwait(false);
+    }
+
+    private static async Task CallService(Binding binding, EndpointAddress remoteAddress)
+    {
+        // Note: Best practice is to re-use your client/channel instances.
+        // This code is not meant to illustrate best practices, only the
+        // instrumentation.
+        StatusServiceClient client = new StatusServiceClient(binding, remoteAddress);
+        client.Endpoint.EndpointBehaviors.Add(new TelemetryEndpointBehavior());
+        try
         {
-            // Note: Best practice is to re-use your client/channel instances.
-            // This code is not meant to illustrate best practices, only the
-            // instrumentation.
-            StatusServiceClient client = new StatusServiceClient(binding, remoteAddress);
-            client.Endpoint.EndpointBehaviors.Add(new TelemetryEndpointBehavior());
+            await client.OpenAsync().ConfigureAwait(false);
+
+            var response = await client.PingAsync(
+                new StatusRequest
+                {
+                    Status = Guid.NewGuid().ToString("N"),
+                }).ConfigureAwait(false);
+
+            Console.WriteLine($"Server returned: {response?.ServerTime}");
+        }
+        finally
+        {
             try
             {
-                await client.OpenAsync().ConfigureAwait(false);
-
-                var response = await client.PingAsync(
-                    new StatusRequest
-                    {
-                        Status = Guid.NewGuid().ToString("N"),
-                    }).ConfigureAwait(false);
-
-                Console.WriteLine($"Server returned: {response?.ServerTime}");
+                if (client.State == CommunicationState.Faulted)
+                {
+                    client.Abort();
+                }
+                else
+                {
+                    await client.CloseAsync().ConfigureAwait(false);
+                }
             }
-            finally
+            catch
             {
-                try
-                {
-                    if (client.State == CommunicationState.Faulted)
-                    {
-                        client.Abort();
-                    }
-                    else
-                    {
-                        await client.CloseAsync().ConfigureAwait(false);
-                    }
-                }
-                catch
-                {
-                }
             }
         }
     }

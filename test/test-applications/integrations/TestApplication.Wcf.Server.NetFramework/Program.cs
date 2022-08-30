@@ -17,11 +17,13 @@
 using System;
 using System.ServiceModel;
 
-namespace TestApplication.Wcf.Server.NetFramework
+namespace TestApplication.Wcf.Server.NetFramework;
+
+internal static class Program
 {
-    internal static class Program
+    public static void Main()
     {
-        public static void Main()
+        try
         {
             try
             {
@@ -38,6 +40,11 @@ namespace TestApplication.Wcf.Server.NetFramework
                 Console.WriteLine($"ServerException: {e}");
                 throw;
             }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"ServerException: {e}");
+            throw;
         }
     }
 }
