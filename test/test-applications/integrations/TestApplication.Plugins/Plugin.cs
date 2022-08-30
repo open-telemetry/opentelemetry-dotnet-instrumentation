@@ -17,18 +17,17 @@
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
-namespace TestApplication.Plugins
-{
-    public class Plugin
-    {
-        public TracerProviderBuilder ConfigureTracerProvider(TracerProviderBuilder builder)
-        {
-            return builder.AddSource(TestApplication.Smoke.Program.SourceName);
-        }
+namespace TestApplication.Plugins;
 
-        public MeterProviderBuilder ConfigureMeterProvider(MeterProviderBuilder builder)
-        {
-            return builder.AddMeter(TestApplication.Smoke.Program.SourceName);
-        }
+public class Plugin
+{
+    public TracerProviderBuilder ConfigureTracerProvider(TracerProviderBuilder builder)
+    {
+        return builder.AddSource(TestApplication.Smoke.Program.SourceName);
+    }
+
+    public MeterProviderBuilder ConfigureMeterProvider(MeterProviderBuilder builder)
+    {
+        return builder.AddMeter(TestApplication.Smoke.Program.SourceName);
     }
 }

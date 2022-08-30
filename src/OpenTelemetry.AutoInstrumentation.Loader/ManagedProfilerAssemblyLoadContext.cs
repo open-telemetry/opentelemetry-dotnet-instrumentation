@@ -18,14 +18,13 @@
 using System.Reflection;
 using System.Runtime.Loader;
 
-namespace OpenTelemetry.AutoInstrumentation.Loader
+namespace OpenTelemetry.AutoInstrumentation.Loader;
+
+internal class ManagedProfilerAssemblyLoadContext : AssemblyLoadContext
 {
-    internal class ManagedProfilerAssemblyLoadContext : AssemblyLoadContext
+    protected override Assembly Load(AssemblyName assemblyName)
     {
-        protected override Assembly Load(AssemblyName assemblyName)
-        {
-            return null;
-        }
+        return null;
     }
 }
 #endif

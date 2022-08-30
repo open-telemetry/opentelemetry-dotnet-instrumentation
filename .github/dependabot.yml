@@ -80,12 +80,6 @@ updates:
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
-    directory: /src/OpenTelemetry.AutoInstrumentation.Core
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 20
-
-  - package-ecosystem: nuget
     directory: /src/OpenTelemetry.AutoInstrumentation.Loader
     schedule:
       interval: "daily"

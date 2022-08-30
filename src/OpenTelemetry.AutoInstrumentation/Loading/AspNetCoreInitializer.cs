@@ -17,25 +17,24 @@
 #if NETCOREAPP3_1_OR_GREATER
 using System;
 
-namespace OpenTelemetry.AutoInstrumentation.Loading
+namespace OpenTelemetry.AutoInstrumentation.Loading;
+
+internal class AspNetCoreInitializer : InstrumentationInitializer
 {
-    internal class AspNetCoreInitializer : InstrumentationInitializer
+    public AspNetCoreInitializer()
+        : base("Microsoft.AspNetCore.Http")
     {
-        public AspNetCoreInitializer()
-            : base("Microsoft.AspNetCore.Http")
-        {
-        }
+    }
 
-        public override void Initialize(ILifespanManager lifespanManager)
-        {
-            var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentation, OpenTelemetry.Instrumentation.AspNetCore");
-            var httpInListenerType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.Implementation.HttpInListener, OpenTelemetry.Instrumentation.AspNetCore");
+    public override void Initialize(ILifespanManager lifespanManager)
+    {
+        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentation, OpenTelemetry.Instrumentation.AspNetCore");
+        var httpInListenerType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.Implementation.HttpInListener, OpenTelemetry.Instrumentation.AspNetCore");
 
-            var httpInListener = Activator.CreateInstance(httpInListenerType, args: new OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentationOptions());
-            var instrumentation = Activator.CreateInstance(instrumentationType, args: httpInListener);
+        var httpInListener = Activator.CreateInstance(httpInListenerType, args: new OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentationOptions());
+        var instrumentation = Activator.CreateInstance(instrumentationType, args: httpInListener);
 
-            lifespanManager.Track(instrumentation);
-        }
+        lifespanManager.Track(instrumentation);
     }
 }
 #endif

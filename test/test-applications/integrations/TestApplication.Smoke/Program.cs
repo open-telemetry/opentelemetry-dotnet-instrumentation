@@ -21,54 +21,53 @@ using System.Diagnostics.Metrics;
 using System.Net.Http;
 using TestApplication.Shared;
 
-namespace TestApplication.Smoke
+namespace TestApplication.Smoke;
+
+public class Program
 {
-    public class Program
+    public const string SourceName = "MyCompany.MyProduct.MyLibrary";
+
+    public static void Main(string[] args)
     {
-        public const string SourceName = "MyCompany.MyProduct.MyLibrary";
+        ConsoleHelper.WriteSplashScreen(args);
 
-        public static void Main(string[] args)
+        EmitTraces();
+        EmitMetrics();
+
+        // The "LONG_RUNNING" environment variable is used by tests that access/receive
+        // data that takes time to be produced.
+        var longRunning = Environment.GetEnvironmentVariable("LONG_RUNNING");
+        while (longRunning == "true")
         {
-            ConsoleHelper.WriteSplashScreen(args);
+            // In this case it is necessary to ensure that the test has a chance to read the
+            // expected data, only by keeping the application alive for some time that can
+            // be ensured. Anyway, tests that set "LONG_RUNNING" env var to true are expected
+            // to kill the process directly.
+            Console.WriteLine("LONG_RUNNING is true, waiting for process to be killed...");
+            Console.ReadLine();
+        }
+    }
 
-            EmitTraces();
-            EmitMetrics();
+    private static void EmitTraces()
+    {
+        var myActivitySource = new ActivitySource(SourceName, "1.0.0");
 
-            // The "LONG_RUNNING" environment variable is used by tests that access/receive
-            // data that takes time to be produced.
-            var longRunning = Environment.GetEnvironmentVariable("LONG_RUNNING");
-            while (longRunning == "true")
-            {
-                // In this case it is necessary to ensure that the test has a chance to read the
-                // expected data, only by keeping the application alive for some time that can
-                // be ensured. Anyway, tests that set "LONG_RUNNING" env var to true are expected
-                // to kill the process directly.
-                Console.WriteLine("LONG_RUNNING is true, waiting for process to be killed...");
-                Console.ReadLine();
-            }
+        using (var activity = myActivitySource.StartActivity("SayHello"))
+        {
+            activity?.SetTag("foo", 1);
+            activity?.SetTag("bar", "Hello, World!");
+            activity?.SetTag("baz", new int[] { 1, 2, 3 });
         }
 
-        private static void EmitTraces()
-        {
-            var myActivitySource = new ActivitySource(SourceName, "1.0.0");
+        var client = new HttpClient();
+        client.GetStringAsync("http://httpstat.us/200").Wait();
+    }
 
-            using (var activity = myActivitySource.StartActivity("SayHello"))
-            {
-                activity?.SetTag("foo", 1);
-                activity?.SetTag("bar", "Hello, World!");
-                activity?.SetTag("baz", new int[] { 1, 2, 3 });
-            }
+    private static void EmitMetrics()
+    {
+        var myMeter = new Meter(SourceName, "1.0");
+        var myFruitCounter = myMeter.CreateCounter<int>("MyFruitCounter");
 
-            var client = new HttpClient();
-            client.GetStringAsync("http://httpstat.us/200").Wait();
-        }
-
-        private static void EmitMetrics()
-        {
-            var myMeter = new Meter(SourceName, "1.0");
-            var myFruitCounter = myMeter.CreateCounter<int>("MyFruitCounter");
-
-            myFruitCounter.Add(1, new KeyValuePair<string, object>("name", "apple"));
-        }
+        myFruitCounter.Add(1, new KeyValuePair<string, object>("name", "apple"));
     }
 }

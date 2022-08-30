@@ -2,15 +2,16 @@
 
 1. Update the version in the following files:
 
-   - `TracerConstants.cs`
-   - `otel_profiler_constants.h`
-   - `version.h`
-   - `OpenTelemetry.AutoInstrumentation.csproj`
-   - `OpenTelemetry.AutoInstrumentation.Core.csproj`
-   - `OpenTelemetry.AutoInstrumentation.Loader.csproj`
-   - `CMakeLists.txt`
-   - `Resource.rc`
-   - `README.md`
+   - [`src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Loader.csproj`](../src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Loader.csproj)
+   - [`src/OpenTelemetry.AutoInstrumentation.Native/CMakeLists.txt`](../src/OpenTelemetry.AutoInstrumentation.Native/CMakeLists.txt)
+   - [`src/OpenTelemetry.AutoInstrumentation.Native/Resource.rc`](../src/OpenTelemetry.AutoInstrumentation.Native/Resource.rc)
+   - [`src/OpenTelemetry.AutoInstrumentation.Native/otel_profiler_constants.h`](../src/OpenTelemetry.AutoInstrumentation.Native/otel_profiler_constants.h)
+   - [`src/OpenTelemetry.AutoInstrumentation.Native/version.h`](../src/OpenTelemetry.AutoInstrumentation.Native/version.h)
+   - [`src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj`](../src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj)
+   - ['src/OpenTelemetry.AutoInstrumentation\Constants.cs'](../src/OpenTelemetry.AutoInstrumentation\Constants.cs)
+     (Version tag)
+
+1. Update the documentation link on the [README.md](./README.md) file.
 
 1. Update the [CHANGELOG.md](../CHANGELOG.md) with the new release.
 
