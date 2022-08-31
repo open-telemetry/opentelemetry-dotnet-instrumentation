@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
@@ -41,6 +42,16 @@ internal static class PluginsConfigurationHelper
         }
 
         return builder;
+    }
+
+    public static OpenTelemetryLoggerOptions InvokePlugins(this OpenTelemetryLoggerOptions options, IEnumerable<string> pluginsAssemblyQualifiedNames)
+    {
+        foreach (var assemblyQualifiedName in pluginsAssemblyQualifiedNames)
+        {
+            options = options.InvokePlugin(assemblyQualifiedName);
+        }
+
+        return options;
     }
 
     private static TracerProviderBuilder InvokePlugin(this TracerProviderBuilder builder, string pluginAssemblyQualifiedName)
@@ -77,5 +88,23 @@ internal static class PluginsConfigurationHelper
         var obj = Activator.CreateInstance(t);
         var result = mi.Invoke(obj, new object[] { builder });
         return (MeterProviderBuilder)result;
+    }
+
+    private static OpenTelemetryLoggerOptions InvokePlugin(this OpenTelemetryLoggerOptions options, string pluginAssemblyQualifiedName)
+    {
+        const string configureLoggerOptionsMethodName = "ConfigureLoggerOptions";
+
+        // get the type and method
+        var t = Type.GetType(pluginAssemblyQualifiedName, throwOnError: true);
+        var mi = t.GetMethod(configureLoggerOptionsMethodName, new Type[] { typeof(OpenTelemetryLoggerOptions) });
+        if (mi is null)
+        {
+            throw new MissingMethodException(t.Name, configureLoggerOptionsMethodName);
+        }
+
+        // execute
+        var obj = Activator.CreateInstance(t);
+        var result = mi.Invoke(obj, new object[] { options });
+        return (OpenTelemetryLoggerOptions)result;
     }
 }

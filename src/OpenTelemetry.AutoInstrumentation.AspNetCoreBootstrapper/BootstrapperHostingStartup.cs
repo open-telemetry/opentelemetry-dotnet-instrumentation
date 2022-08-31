@@ -45,41 +45,70 @@ public class BootstrapperHostingStartup : IHostingStartup
     /// <param name="builder">The <see cref="IWebHostBuilder"/>.</param>
     public void Configure(IWebHostBuilder builder)
     {
-        builder.ConfigureLogging(logging => logging.AddOpenTelemetry(options =>
+        try
         {
-            if (settings.ConsoleExporterEnabled)
+            builder.ConfigureLogging(logging => logging.AddOpenTelemetry(options =>
             {
-                options.AddConsoleExporter();
-            }
+                if (settings.LogPlugins.Count > 0)
+                {
+                    options.InvokePlugins(settings.LogPlugins);
+                }
 
-            switch (settings.LogExporter)
-            {
-                case LogExporter.Otlp:
+                if (settings.ConsoleExporterEnabled)
+                {
+                    options.AddConsoleExporter();
+                }
+
+                switch (settings.LogExporter)
+                {
+                    case LogExporter.Otlp:
 #if NETCOREAPP3_1
-                    if (settings.Http2UnencryptedSupportEnabled)
-                    {
-                        // Adding the OtlpExporter creates a GrpcChannel.
-                        // This switch must be set before creating a GrpcChannel/HttpClient when calling an insecure gRPC service.
-                        // See: https://docs.microsoft.com/aspnet/core/grpc/troubleshoot#call-insecure-grpc-services-with-net-core-client
-                        AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-                    }
-#endif
-                    options.AddOtlpExporter(options =>
-                    {
-                        if (settings.OtlpExportProtocol.HasValue)
+                        if (settings.Http2UnencryptedSupportEnabled)
                         {
-                            options.Protocol = settings.OtlpExportProtocol.Value;
+                            // Adding the OtlpExporter creates a GrpcChannel.
+                            // This switch must be set before creating a GrpcChannel/HttpClient when calling an insecure gRPC service.
+                            // See: https://docs.microsoft.com/aspnet/core/grpc/troubleshoot#call-insecure-grpc-services-with-net-core-client
+                            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
                         }
-                    });
-                    break;
-                case LogExporter.None:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException($"Traces exporter '{settings.LogExporter}' is incorrect");
-            }
+#endif
+                        options.AddOtlpExporter(options =>
+                        {
+                            if (settings.OtlpExportProtocol.HasValue)
+                            {
+                                options.Protocol = settings.OtlpExportProtocol.Value;
+                            }
+                        });
+                        break;
+                    case LogExporter.None:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException($"Traces exporter '{settings.LogExporter}' is incorrect");
+                }
 
-            options.ParseStateValues = settings.ParseStateValues;
-            options.IncludeFormattedMessage = settings.IncludeFormattedMessage;
-        }));
+                options.ParseStateValues = settings.ParseStateValues;
+                options.IncludeFormattedMessage = settings.IncludeFormattedMessage;
+            }));
+
+            var applicationName = GetApplicationName();
+            BootstrapperEventSource.Log.Trace($"BootstrapperHostingStartup loaded for application with name {applicationName}.");
+        }
+        catch (Exception ex)
+        {
+            BootstrapperEventSource.Log.Error($"Error in BootstrapperHostingStartup: {ex}");
+            throw;
+        }
+    }
+
+    private static string GetApplicationName()
+    {
+        try
+        {
+            return AppDomain.CurrentDomain.FriendlyName;
+        }
+        catch (Exception ex)
+        {
+            BootstrapperEventSource.Log.Error($"Error getting AppDomain.CurrentDomain.FriendlyName: {ex}");
+            return string.Empty;
+        }
     }
 }
