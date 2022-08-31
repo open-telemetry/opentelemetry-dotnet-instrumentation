@@ -17,60 +17,15 @@
 // This test won't work outside of windows as it need the server side which is .NET Framework only.
 #if NETCOREAPP3_1_OR_GREATER && _WINDOWS
 
-using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentAssertions;
-using FluentAssertions.Execution;
-using IntegrationTests.Helpers;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-public class WcfCoreTests : TestHelper, IDisposable
+public class WcfCoreTests : WcfTestsBase
 {
-    private const string ServiceName = "TestApplication.Wcf.Client.Core";
-    private ProcessHelper _serverProcess;
-
     public WcfCoreTests(ITestOutputHelper output)
         : base("Wcf.Client.Core", output)
     {
-        SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
-    }
-
-    [Fact]
-    [Trait("Category", "EndToEnd")]
-    public void SubmitsTraces()
-    {
-        using var agent = new MockZipkinCollector(Output);
-
-        var serverHelper = new WcfServerTestHelper(Output);
-        _serverProcess = serverHelper.RunWcfServer(agent.Port);
-
-        RunTestApplication(agent.Port);
-
-        // wait so the spans from server are delivered
-        Task.Delay(2000);
-        var spans = agent.WaitForSpans(4, TimeSpan.FromSeconds(5));
-
-        using var scope = new AssertionScope();
-        spans.Count.Should().Be(4);
-
-        foreach (var span in spans)
-        {
-            span.Tags["otel.library.name"].Should().Be("OpenTelemetry.Instrumentation.Wcf");
-        }
-    }
-
-    public void Dispose()
-    {
-        _serverProcess.Process.Kill();
-
-        Output.WriteLine($"ProcessId: " + _serverProcess.Process.Id);
-        Output.WriteLine($"Exit Code: " + _serverProcess.Process.ExitCode);
-        Output.WriteResult(_serverProcess);
     }
 }
 

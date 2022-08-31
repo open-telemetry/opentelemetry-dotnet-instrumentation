@@ -27,48 +27,11 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-public class WcfNetFrameworkTests : TestHelper, IDisposable
+public class WcfNetFrameworkTests : WcfTestsBase
 {
-    private const string ServiceName = "TestApplication.Wcf.Client.NetFramework";
-    private ProcessHelper _serverProcess;
-
     public WcfNetFrameworkTests(ITestOutputHelper output)
         : base("Wcf.Client.NetFramework", output)
     {
-        SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
-    }
-
-    [Fact]
-    [Trait("Category", "EndToEnd")]
-    public void SubmitsTraces()
-    {
-        using var agent = new MockZipkinCollector(Output);
-
-        var serverHelper = new WcfServerTestHelper(Output);
-        _serverProcess = serverHelper.RunWcfServer(agent.Port);
-
-        RunTestApplication(agent.Port);
-
-        // wait so the spans from server are delivered
-        Task.Delay(2000);
-        var spans = agent.WaitForSpans(4, TimeSpan.FromSeconds(5));
-
-        using var scope = new AssertionScope();
-        spans.Count.Should().Be(4);
-
-        foreach (var span in spans)
-        {
-            span.Tags["otel.library.name"].Should().Be("OpenTelemetry.Instrumentation.Wcf");
-        }
-    }
-
-    public void Dispose()
-    {
-        _serverProcess.Process.Kill();
-
-        Output.WriteLine($"ProcessId: " + _serverProcess.Process.Id);
-        Output.WriteLine($"Exit Code: " + _serverProcess.Process.ExitCode);
-        Output.WriteResult(_serverProcess);
     }
 }
 
