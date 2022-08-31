@@ -15,11 +15,11 @@
 // </copyright>
 
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
+using IntegrationTests.Helpers.TestContainers;
 using Microsoft.Data.SqlClient;
 using Xunit;
 
@@ -75,7 +75,7 @@ public class SqlServerFixture : IAsyncLifetime
             .WithEnvironment("SA_PASSWORD", Password)
             .WithEnvironment("ACCEPT_EULA", "Y")
             .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(DatabasePort))
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilOperationIsSucceeded(DatabaseLoginOperation, 15));
+            .WithWaitStrategy(Wait.ForUnixContainer().AddCustomWaitStrategy(new UntilAsyncOperationIsSucceeded(DatabaseLoginOperation, 15)));
 
         var container = databaseContainersBuilder.Build();
         await container.StartAsync();
@@ -83,7 +83,7 @@ public class SqlServerFixture : IAsyncLifetime
         return container;
     }
 
-    private bool DatabaseLoginOperation()
+    private async Task<bool> DatabaseLoginOperation()
     {
         try
         {
@@ -96,7 +96,7 @@ public class SqlServerFixture : IAsyncLifetime
         catch
         {
             // Slow down next connection attempt
-            Thread.Sleep(TimeSpan.FromSeconds(2));
+            await Task.Delay(TimeSpan.FromSeconds(2));
 
             return false;
         }
