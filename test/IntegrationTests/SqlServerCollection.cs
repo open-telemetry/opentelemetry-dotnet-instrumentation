@@ -19,6 +19,8 @@ using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
+using IntegrationTests.Helpers.TestContainers;
+using Microsoft.Data.SqlClient;
 using Xunit;
 
 namespace IntegrationTests;
@@ -32,7 +34,7 @@ public class SqlServerCollection : ICollectionFixture<SqlServerFixture>
 public class SqlServerFixture : IAsyncLifetime
 {
     private const int DatabasePort = 1433;
-    private const string DatabaseImage = "mcr.microsoft.com/mssql/server:2019-CU15-ubuntu-20.04";
+    private const string DatabaseImage = "mcr.microsoft.com/mssql/server:2019-CU17-ubuntu-20.04";
 
     private TestcontainersContainer _container;
 
@@ -72,11 +74,32 @@ public class SqlServerFixture : IAsyncLifetime
             .WithPortBinding(Port, DatabasePort)
             .WithEnvironment("SA_PASSWORD", Password)
             .WithEnvironment("ACCEPT_EULA", "Y")
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(DatabasePort));
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(DatabasePort))
+            .WithWaitStrategy(Wait.ForUnixContainer().AddCustomWaitStrategy(new UntilAsyncOperationIsSucceeded(DatabaseLoginOperation, 15)));
 
         var container = databaseContainersBuilder.Build();
         await container.StartAsync();
 
         return container;
+    }
+
+    private async Task<bool> DatabaseLoginOperation()
+    {
+        try
+        {
+            string connectionString = $"Server=127.0.0.1,{Port};User=sa;Password={Password};TrustServerCertificate=True;";
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                return true;
+            }
+        }
+        catch
+        {
+            // Slow down next connection attempt
+            await Task.Delay(TimeSpan.FromSeconds(2));
+
+            return false;
+        }
     }
 }
