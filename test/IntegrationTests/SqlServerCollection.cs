@@ -87,7 +87,8 @@ public class SqlServerFixture : IAsyncLifetime
     {
         try
         {
-            using (var connection = new SqlConnection(GetConnectionString()))
+            string connectionString = $"Server=127.0.0.1,{Port};User=sa;Password={Password};TrustServerCertificate=True;";
+            using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();
                 return true;
@@ -100,10 +101,5 @@ public class SqlServerFixture : IAsyncLifetime
 
             return false;
         }
-    }
-
-    private string GetConnectionString()
-    {
-        return $"Server=127.0.0.1,{Port};User=sa;Password={Password};TrustServerCertificate=True;";
     }
 }
