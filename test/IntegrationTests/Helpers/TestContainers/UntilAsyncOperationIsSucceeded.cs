@@ -21,6 +21,7 @@ using DotNet.Testcontainers.Containers;
 using Microsoft.Extensions.Logging;
 
 namespace IntegrationTests.Helpers.TestContainers;
+
 internal class UntilAsyncOperationIsSucceeded : IWaitUntil
 {
     private readonly int _maxCallCount;
