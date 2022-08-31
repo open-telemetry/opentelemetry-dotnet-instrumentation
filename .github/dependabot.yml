@@ -6,7 +6,17 @@ updates:
     schedule:
       interval: "daily"
 
+  # Maintain dependencies for Dockerfiles used in build pipeline
+  - package-ecosystem: "docker"
+    directory: "/tracer/build/nuke/docker"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - "Docker"
 
+  # Maintain dependencies for workflows checking the markdown files
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
