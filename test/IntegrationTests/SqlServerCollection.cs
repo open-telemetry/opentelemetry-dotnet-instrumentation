@@ -15,6 +15,7 @@
 // </copyright>
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
@@ -94,6 +95,9 @@ public class SqlServerFixture : IAsyncLifetime
         }
         catch
         {
+            // Slow down next connection attempt
+            Thread.Sleep(TimeSpan.FromSeconds(2));
+
             return false;
         }
     }
