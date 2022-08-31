@@ -261,3 +261,14 @@ updates:
       - "dependencies"
       - ".NET"
       - "do NOT merge"
+
+
+  # Maintain dependencies for Dockerfiles used in build pipeline
+  - package-ecosystem: "docker"
+    directory: "/tracer/build/nuke/docker"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - "Docker"
