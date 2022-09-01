@@ -15,6 +15,7 @@
 // </copyright>
 
 using System;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
@@ -33,6 +34,13 @@ public class OtelSdkPlugin
     {
         var typeName = this.ToString();
         Console.WriteLine($"Hello from Meter Plugin - {typeName}");
+        return builder;
+    }
+
+    public OpenTelemetryLoggerOptions ConfigureLoggerOptions(OpenTelemetryLoggerOptions builder)
+    {
+        var typeName = this.ToString();
+        Console.WriteLine($"Hello from Logs Plugin - {typeName}");
         return builder;
     }
 }
