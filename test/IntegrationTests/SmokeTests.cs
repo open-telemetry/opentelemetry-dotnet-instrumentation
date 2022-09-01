@@ -46,18 +46,18 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitsTraces()
+    public async Task SubmitsTraces()
     {
-        var spans = RunTestApplication();
+        var spans = await RunTestApplicationAsync();
 
         AssertAllSpansReceived(spans);
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void WhenStartupHookIsNotEnabled()
+    public async Task WhenStartupHookIsNotEnabled()
     {
-        var spans = RunTestApplication(enableStartupHook: false);
+        var spans = await RunTestApplicationAsync(enableStartupHook: false);
 
 #if NETFRAMEWORK
         AssertAllSpansReceived(spans);
@@ -69,33 +69,33 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ApplicationIsNotExcluded()
+    public async Task ApplicationIsNotExcluded()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe");
 
-        var spans = RunTestApplication();
+        var spans = await RunTestApplicationAsync();
 
         AssertAllSpansReceived(spans);
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ApplicationIsExcluded()
+    public async Task ApplicationIsExcluded()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
 
-        var spans = RunTestApplication();
+        var spans = await RunTestApplicationAsync();
 
         AssertNoSpansReceived(spans);
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ApplicationIsNotIncluded()
+    public async Task ApplicationIsNotIncluded()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES", $"dotnet,dotnet.exe");
 
-        var spans = RunTestApplication();
+        var spans = await RunTestApplicationAsync();
 
 #if NETFRAMEWORK
         AssertNoSpansReceived(spans);
@@ -108,11 +108,11 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ApplicationIsIncluded()
+    public async Task ApplicationIsIncluded()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES", $"{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
 
-        var spans = RunTestApplication();
+        var spans = await RunTestApplicationAsync();
 
         AssertAllSpansReceived(spans);
     }
@@ -232,14 +232,13 @@ public class SmokeTests : TestHelper
         Assert.True(!failures.Any(), finalMessage);
     }
 
-    private IImmutableList<IMockSpan> RunTestApplication(bool enableStartupHook = true)
+    private async Task<IImmutableList<IMockSpan>> RunTestApplicationAsync(bool enableStartupHook = true)
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
 
-        int agentPort = TcpPortProvider.GetOpenPort();
         using var agent = new MockZipkinCollector(Output);
         RunTestApplication(agent.Port, enableStartupHook: enableStartupHook);
 
-        return agent.WaitForSpans(2, TimeSpan.FromSeconds(5));
+        return await agent.WaitForSpansAsync(2, TimeSpan.FromSeconds(5));
     }
 }

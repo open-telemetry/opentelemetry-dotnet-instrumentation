@@ -18,6 +18,7 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -40,11 +41,11 @@ public class MongoDBTests : TestHelper
     [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    public void SubmitsTraces()
+    public async Task SubmitsTraces()
     {
         using var agent = new MockZipkinCollector(Output);
         RunTestApplication(agent.Port, arguments: $"--mongo-db {_mongoDB.Port}");
-        var spans = agent.WaitForSpans(3, TimeSpan.FromSeconds(5));
+        var spans = await agent.WaitForSpansAsync(3, TimeSpan.FromSeconds(5));
         Assert.True(spans.Count >= 3, $"Expecting at least 3 spans, only received {spans.Count}");
 
         var rootSpan = spans.Single(s => s.ParentId == null);

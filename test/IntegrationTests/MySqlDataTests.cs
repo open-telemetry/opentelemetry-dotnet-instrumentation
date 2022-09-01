@@ -17,6 +17,7 @@
 #if NETCOREAPP3_1_OR_GREATER
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
@@ -41,13 +42,13 @@ public class MySqlDataTests : TestHelper
     [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    public void SubmitsTraces()
+    public async Task SubmitsTraces()
     {
         using var agent = new MockZipkinCollector(Output);
 
         RunTestApplication(agent.Port, arguments: $"--mysql {_mySql.Port}", enableClrProfiler: !IsCoreClr());
 
-        var spans = agent.WaitForSpans(1, TimeSpan.FromSeconds(5));
+        var spans = await agent.WaitForSpansAsync(1, TimeSpan.FromSeconds(5));
 
         using (new AssertionScope())
         {

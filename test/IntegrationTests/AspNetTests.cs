@@ -64,7 +64,7 @@ public class AspNetTests : TestHelper
 
         agent.SpanFilters.Add(x => x.Name != "healthz");
 
-        var spans = agent.WaitForSpans(1);
+        var spans = await agent.WaitForSpansAsync(1);
 
         Assert.True(spans.Count >= 1, $"Expecting at least 1 span, only received {spans.Count}");
     }

@@ -20,6 +20,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using IntegrationTests.Helpers;
 using IntegrationTests.Helpers.Models;
 using Xunit;
@@ -76,7 +77,7 @@ public class GraphQLTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitsTraces()
+    public async Task SubmitsTraces()
     {
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
 
@@ -150,11 +151,11 @@ public class GraphQLTests : TestHelper
         var testStart = DateTime.Now;
 
         SubmitRequests(aspNetCorePort);
-        var graphQLValidateSpans = agent.WaitForSpans(_expectedGraphQLValidateSpanCount, operationName: _graphQLValidateOperationName, returnAllOperations: false)
+        var graphQLValidateSpans = (await agent.WaitForSpansAsync(_expectedGraphQLValidateSpanCount, operationName: _graphQLValidateOperationName, returnAllOperations: false))
             .GroupBy(s => s.SpanId)
             .Select(grp => grp.First())
             .OrderBy(s => s.Start);
-        var graphQLExecuteSpans = agent.WaitForSpans(_expectedGraphQLExecuteSpanCount, operationName: _graphQLExecuteOperationName, returnAllOperations: false)
+        var graphQLExecuteSpans = (await agent.WaitForSpansAsync(_expectedGraphQLExecuteSpanCount, operationName: _graphQLExecuteOperationName, returnAllOperations: false))
             .GroupBy(s => s.SpanId)
             .Select(grp => grp.First())
             .OrderBy(s => s.Start);
