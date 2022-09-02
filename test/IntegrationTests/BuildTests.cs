@@ -22,7 +22,7 @@ using Xunit;
 
 namespace IntegrationTests;
 
-public class CommonTests
+public class BuildTests
 {
     [Fact]
     public void DistributionDoesNotContainExcludedAssets()
