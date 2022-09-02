@@ -26,3 +26,32 @@ jobs:
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
+
+  container-build:
+    name: Container Build 
+    strategy:
+      fail-fast: false
+      matrix:
+        base-image: [ alpine ]
+    runs-on: ubuntu-20.04
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v3.0.2
+    - name: Build Docker image
+      run: |
+        docker build \
+          --tag otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
+          --file "./build/nuke/docker/${{ matrix.base-image }}.dockerfile" \
+          ./build/nuke
+    - name: Build in Docker container
+      run: |
+        docker run --rm \
+          --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project \
+          otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
+          ./build.sh
+    - name: Upload ${{ matrix.base-image }} binaries
+      uses: actions/upload-artifact@v3.1.0
+      if: always()
+      with:
+        name: bin-${{ matrix.base-image }}
+        path: bin/tracer-home
