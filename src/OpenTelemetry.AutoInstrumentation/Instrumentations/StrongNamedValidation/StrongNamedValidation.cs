@@ -22,6 +22,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Validations
 {
     /// <summary>
     /// Instrumentation targeting the test application used to validate the strong name scenario.
+    /// When an actual bytecode instrumentation targeting a strong named assembly on .NET Framework
+    /// is added we can remove this instrumentation.
     /// </summary>
     [InstrumentMethod(
         AssemblyName = "TestApplication.StrongNamed",
