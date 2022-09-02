@@ -88,6 +88,8 @@ public:
 
     bool IsAttached() const;
 
+    WSTRING GetBytecodeInstrumentationAssembly() const;
+
     void GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray, int* assemblySize, BYTE** pSymbolsArray,
                                     int* symbolsSize) const;
 
