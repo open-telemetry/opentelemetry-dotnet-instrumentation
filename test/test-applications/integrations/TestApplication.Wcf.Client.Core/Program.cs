@@ -28,11 +28,11 @@ internal static class Program
     public static async Task Main()
     {
         await CallService(
-            new BasicHttpBinding(BasicHttpSecurityMode.None),
-            new EndpointAddress("http://127.0.0.1:9009/Telemetry")).ConfigureAwait(false);
-        await CallService(
             new NetTcpBinding(SecurityMode.None),
             new EndpointAddress("net.tcp://127.0.0.1:9090/Telemetry")).ConfigureAwait(false);
+        await CallService(
+            new BasicHttpBinding(BasicHttpSecurityMode.None),
+            new EndpointAddress("http://127.0.0.1:9009/Telemetry")).ConfigureAwait(false);
     }
 
     private static async Task CallService(Binding binding, EndpointAddress remoteAddress)

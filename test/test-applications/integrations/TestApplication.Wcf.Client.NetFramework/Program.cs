@@ -25,8 +25,8 @@ internal static class Program
 {
     public static async Task Main()
     {
-        await CallService("StatusService_Http").ConfigureAwait(false);
         await CallService("StatusService_Tcp").ConfigureAwait(false);
+        await CallService("StatusService_Http").ConfigureAwait(false);
     }
 
     private static async Task CallService(string name)
