@@ -34,6 +34,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9E5F0022-0A50-40BF-AC6A-C3078585ECAB}"
 	ProjectSection(SolutionItems) = preProject
+		src\CommonExcludedAssets.props = src\CommonExcludedAssets.props
 		src\Directory.Build.props = src\Directory.Build.props
 		src\GlobalSuppressions.cs = src\GlobalSuppressions.cs
 	EndProjectSection
