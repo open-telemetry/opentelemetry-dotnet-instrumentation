@@ -25,7 +25,7 @@ namespace IntegrationTests.Helpers;
 /// <summary>
 /// General use utility methods for all tests and tools.
 /// </summary>
-public class EnvironmentTools
+public static class EnvironmentTools
 {
     public const string ProfilerClsId = "{918728DD-259F-4A6A-AC2B-B85E1B658318}";
     public const string DotNetFramework = ".NETFramework";
