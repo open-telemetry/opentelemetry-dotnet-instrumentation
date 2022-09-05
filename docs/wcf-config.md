@@ -1,4 +1,4 @@
-# WCF Instrumentation Configration
+# WCF Instrumentation Configuration
 
 ## WCF Client Configuration (.NET Framework)
 
@@ -78,7 +78,7 @@ To add the `IDispatchMessageInspector` instrumentation to select endpoints of a
 service, use the endpoint behavior extension on the service endpoints you want
 to instrument:
 
-```xml
+```xmlu
 <?xml version="1.0" encoding="utf-8" ?>
 <configuration>
   <system.serviceModel>
