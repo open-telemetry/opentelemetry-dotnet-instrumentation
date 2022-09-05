@@ -14,28 +14,58 @@
 // limitations under the License.
 // </copyright>
 
+using System;
+using System.Collections.Generic;
 using System.IO;
-using FluentAssertions;
-using FluentAssertions.Execution;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using IntegrationTests.Helpers;
+using VerifyXunit;
 using Xunit;
 
 namespace IntegrationTests;
 
+[UsesVerify]
 public class BuildTests
 {
     [Fact]
-    public void DistributionDoesNotContainExcludedAssets()
+    public Task DistributionStructure()
     {
         var distributionFolder = EnvironmentHelper.GetNukeBuildOutput();
         var files = Directory.GetFiles(distributionFolder, "*", SearchOption.AllDirectories);
 
-        using (new AssertionScope())
+        var relativesPaths = new List<string>(files.Length);
+        foreach (var file in files)
         {
-            foreach (var file in files)
-            {
-                file.Should().NotContainAny("StackExchange.Redis", "MySql.Data", "Pipelines.Sockets.Unofficial");
-            }
+            relativesPaths.Add(file.Substring(distributionFolder.Length));
         }
+
+        relativesPaths.Sort(StringComparer.Ordinal);
+
+        var systemName = GetSystemName();
+
+        return Verifier.Verify(relativesPaths)
+            .UseTextForParameters(systemName)
+            .DisableDiff();
+    }
+
+    private static string GetSystemName()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return "osx";
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return "linux";
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return "windows";
+        }
+
+        return "unknown";
     }
 }
