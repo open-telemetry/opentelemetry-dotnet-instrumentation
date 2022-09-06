@@ -4,6 +4,11 @@
 #include "logger.h"
 #include "module_metadata.h"
 #include "otel_profiler_constants.h"
+#include "cor_profiler.h"
+
+#ifndef _WIN32
+#include <dlfcn.h>
+#endif
 
 namespace trace
 {
@@ -163,7 +168,9 @@ HRESULT CallTargetTokens::EnsureBaseCalltargetTokens()
     // *** Ensure profiler assembly ref
     if (profilerAssemblyRef == mdAssemblyRefNil)
     {
-        const AssemblyReference assemblyReference = *trace::AssemblyReference::GetFromCache(managed_profiler_full_assembly_version);
+        const auto bytecode_instrumentation_name = trace::profiler->GetBytecodeInstrumentationAssembly();
+        Logger::Debug("CallTargetTokens::EnsureBaseCalltargetTokens() Bytecode Instrumentation Assembly: ", bytecode_instrumentation_name);
+        const AssemblyReference assemblyReference = *trace::AssemblyReference::GetFromCache(bytecode_instrumentation_name);
         ASSEMBLYMETADATA assembly_metadata{};
 
         assembly_metadata.usMajorVersion = assemblyReference.version.major;

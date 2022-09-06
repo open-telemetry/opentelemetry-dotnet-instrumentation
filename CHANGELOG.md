@@ -10,6 +10,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 
 - Add support for Alpine.
+- Add strong name signature to the OpenTelemetry.AutoInstrumentation assembly used
+  on the .NET Framework.
+
+### Changed
 
 ## [0.3.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.3.0-beta.1)
 

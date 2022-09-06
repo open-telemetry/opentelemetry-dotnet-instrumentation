@@ -76,10 +76,13 @@ const WSTRING mscorlib_assemblyName = WStr("mscorlib");
 const WSTRING system_private_corelib_assemblyName = WStr("System.Private.CoreLib");
 const WSTRING opentelemetry_autoinstrumentation_loader_assemblyName = WStr("OpenTelemetry.AutoInstrumentation.Loader");
 
+const WSTRING managed_profiler_name = WStr("OpenTelemetry.AutoInstrumentation");
+
 const WSTRING managed_profiler_full_assembly_version =
     WStr("OpenTelemetry.AutoInstrumentation, Version=0.3.0.0, Culture=neutral, PublicKeyToken=null");
 
-const WSTRING managed_profiler_name = WStr("OpenTelemetry.AutoInstrumentation");
+const WSTRING managed_profiler_full_assembly_version_strong_name =
+    WStr("OpenTelemetry.AutoInstrumentation, Version=0.3.0.0, Culture=neutral, PublicKeyToken=c0db600a13f60b51");
 
 const WSTRING nonwindows_nativemethods_type = WStr("OpenTelemetry.AutoInstrumentation.NativeMethods+NonWindows");
 
