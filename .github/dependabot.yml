@@ -7,20 +7,16 @@ updates:
       interval: "daily"
 
   # Maintain dependencies for Dockerfiles used in build pipeline
-  - package-ecosystem: "docker"
-    directory: "/tracer/build/nuke/docker"
+  - package-ecosystem: docker
+    directory: /build/nuke/docker
     schedule:
       interval: "daily"
-    open-pull-requests-limit: 20
-    labels:
-      - "dependencies"
-      - "Docker"
 
   # Maintain dependencies for workflows checking the markdown files
-  - package-ecosystem: 'npm'
-    directory: '/'
+  - package-ecosystem: npm
+    directory: /
     schedule:
-      interval: 'daily'
+      interval: "daily"
 
  
   - package-ecosystem: nuget
@@ -85,6 +81,7 @@ updates:
     ignore:
       - dependency-name: "MySql.Data"
       - dependency-name: "StackExchange.Redis"
+      - dependency-name: "Pipelines.Sockets.Unofficial" # Pipelines.Sockets.Unofficial is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis
 
   - package-ecosystem: nuget
     directory: /src/OpenTelemetry.AutoInstrumentation.AdditionalDeps
