@@ -1,4 +1,4 @@
-// <copyright file="AssemblyInfo.cs" company="OpenTelemetry Authors">
+// <copyright file="Command.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +14,15 @@
 // limitations under the License.
 // </copyright>
 
-#if NETCOREAPP3_1_OR_GREATER
-using System.Runtime.CompilerServices;
+using System;
+using System.Threading;
 
-[assembly: InternalsVisibleTo("OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper")]
-[assembly: InternalsVisibleTo("OpenTelemetry.AutoInstrumentation.Tests")]
-[assembly: InternalsVisibleTo("IntegrationTests")]
-#endif
+namespace TestApplication.StrongNamed;
+
+public class Command
+{
+    public void Execute()
+    {
+        Thread.Yield(); // Just to have some call to outside code.
+    }
+}

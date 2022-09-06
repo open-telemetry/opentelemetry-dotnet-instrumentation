@@ -14,10 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-#if NETCOREAPP3_1_OR_GREATER
-using System.Runtime.CompilerServices;
+using System.Reflection;
 
-[assembly: InternalsVisibleTo("OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper")]
-[assembly: InternalsVisibleTo("OpenTelemetry.AutoInstrumentation.Tests")]
-[assembly: InternalsVisibleTo("IntegrationTests")]
-#endif
+[assembly: AssemblyKeyFileAttribute("test-keypair.snk")]

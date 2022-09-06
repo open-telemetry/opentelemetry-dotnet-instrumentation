@@ -207,9 +207,9 @@ public class EnvironmentHelper
             environmentVariables["OTEL_DOTNET_AUTO_INCLUDE_PROCESSES"] = Path.GetFileName(processToProfile);
         }
 
-        string integrations = GetIntegrationsPath();
         environmentVariables["OTEL_DOTNET_AUTO_HOME"] = GetNukeBuildOutput();
-        environmentVariables["OTEL_DOTNET_AUTO_INTEGRATIONS_FILE"] = integrations;
+
+        environmentVariables["OTEL_DOTNET_AUTO_INTEGRATIONS_FILE"] = Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE") ?? GetIntegrationsPath();
 
         if (testSettings.TracesSettings != null)
         {
