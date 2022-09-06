@@ -29,10 +29,10 @@ internal static class Program
     {
         await CallService(
             new NetTcpBinding(SecurityMode.None),
-            new EndpointAddress("net.tcp://127.0.0.1:6543/Telemetry")).ConfigureAwait(false);
+            new EndpointAddress("net.tcp://127.0.0.1:9090/Telemetry")).ConfigureAwait(false);
         await CallService(
             new BasicHttpBinding(BasicHttpSecurityMode.None),
-            new EndpointAddress("http://127.0.0.1:3456/Telemetry")).ConfigureAwait(false);
+            new EndpointAddress("http://127.0.0.1:9009/Telemetry")).ConfigureAwait(false);
     }
 
     private static async Task CallService(Binding binding, EndpointAddress remoteAddress)
