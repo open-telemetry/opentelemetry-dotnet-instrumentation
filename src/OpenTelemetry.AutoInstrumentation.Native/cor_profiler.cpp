@@ -102,6 +102,13 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         return E_FAIL;
     }
 
+    // code is ready to get runtime information
+    runtime_information_ = GetRuntimeInformation(this->info_);
+    if (process_name == WStr("w3wp.exe") || process_name == WStr("iisexpress.exe"))
+    {
+        is_desktop_iis = runtime_information_.is_desktop();
+    }
+
     // get ICorProfilerInfo6 for net46+
     ICorProfilerInfo6* info6;
     hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo6), (void**)&info6);
@@ -232,11 +239,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         return E_FAIL;
     }
 
-    runtime_information_ = GetRuntimeInformation(this->info_);
-    if (process_name == WStr("w3wp.exe") || process_name == WStr("iisexpress.exe"))
-    {
-        is_desktop_iis = runtime_information_.is_desktop();
-    }
 
     // writing opcodes vector for the IL dumper
 #define OPDEF(c, s, pop, push, args, type, l, s1, s2, flow) opcodes_names.push_back(s);
@@ -262,8 +264,14 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
     {
         // if assembly failed to load, skip it entirely,
         // otherwise we can crash the process if module is not valid
+        Logger::Warn("AssemblyLoadFinished: ", assembly_id, " ", hr_status);
         CorProfilerBase::AssemblyLoadFinished(assembly_id, hr_status);
         return S_OK;
+    }
+
+    if (Logger::IsDebugEnabled())
+    {
+        Logger::Debug("AssemblyLoadFinished: ", assembly_id, " ", hr_status);
     }
 
     // keep this lock until we are done using the module,
@@ -279,89 +287,48 @@ HRESULT STDMETHODCALLTYPE CorProfiler::AssemblyLoadFinished(AssemblyID assembly_
     const auto assembly_info = GetAssemblyInfo(this->info_, assembly_id);
     if (!assembly_info.IsValid())
     {
-        Logger::Debug("AssemblyLoadFinished: ", assembly_id, " ", hr_status);
         return S_OK;
     }
 
-    const auto is_instrumentation_assembly = assembly_info.name == WStr("OpenTelemetry.AutoInstrumentation");
-
-    if (is_instrumentation_assembly)
+    const auto is_instrumentation_assembly = assembly_info.name == managed_profiler_name;
+    if (!is_instrumentation_assembly)
     {
-        if (Logger::IsDebugEnabled())
+        return S_OK;
+    }
+
+    if (Logger::IsDebugEnabled())
+    {
+        Logger::Debug("AssemblyLoadFinished: Bytecode Instrumentation Assembly: ", GetBytecodeInstrumentationAssembly());
+    }
+
+    ComPtr<IUnknown> metadata_interfaces;
+    auto hr = this->info_->GetModuleMetaData(assembly_info.manifest_module_id, ofRead | ofWrite,
+                                                IID_IMetaDataImport2, metadata_interfaces.GetAddressOf());
+    if (FAILED(hr))
+    {
+        Logger::Warn("AssemblyLoadFinished failed to get metadata interface for module id ",
+                        assembly_info.manifest_module_id, " from assembly ", assembly_info.name);
+        return S_OK;
+    }
+
+    // Get the IMetaDataAssemblyImport interface to get metadata from the managed assembly
+    const auto assembly_import = metadata_interfaces.As<IMetaDataAssemblyImport>(IID_IMetaDataAssemblyImport);
+    const auto assembly_metadata = GetAssemblyImportMetadata(assembly_import);
+
+    managed_profiler_loaded_app_domains.insert(assembly_info.app_domain_id);
+
+    if (runtime_information_.is_desktop() && corlib_module_loaded)
+    {
+        // Set the managed_profiler_loaded_domain_neutral flag whenever the
+        // managed profiler is loaded shared
+        if (assembly_info.app_domain_id == corlib_app_domain_id)
         {
-            Logger::Debug("AssemblyLoadFinished: ", assembly_id, " ", hr_status);
+            Logger::Info("AssemblyLoadFinished: ", assembly_info.name, " was loaded domain-neutral");
+            managed_profiler_loaded_domain_neutral = true;
         }
-
-        ComPtr<IUnknown> metadata_interfaces;
-        auto hr = this->info_->GetModuleMetaData(assembly_info.manifest_module_id, ofRead | ofWrite,
-                                                 IID_IMetaDataImport2, metadata_interfaces.GetAddressOf());
-
-        if (FAILED(hr))
+        else
         {
-            Logger::Warn("AssemblyLoadFinished failed to get metadata interface for module id ",
-                         assembly_info.manifest_module_id, " from assembly ", assembly_info.name);
-            return S_OK;
-        }
-
-        // Get the IMetaDataAssemblyImport interface to get metadata from the managed assembly
-        const auto assembly_import = metadata_interfaces.As<IMetaDataAssemblyImport>(IID_IMetaDataAssemblyImport);
-        const auto assembly_metadata = GetAssemblyImportMetadata(assembly_import);
-
-        // used multiple times for logging
-        const auto assembly_version = assembly_metadata.version.str();
-
-        if (Logger::IsDebugEnabled())
-        {
-            Logger::Debug("AssemblyLoadFinished: AssemblyName=", assembly_info.name,
-                          " AssemblyVersion=", assembly_version);
-        }
-
-        if (is_instrumentation_assembly)
-        {
-            const auto expected_assembly_reference = trace::AssemblyReference(managed_profiler_full_assembly_version);
-
-            // used multiple times for logging
-            const auto expected_version = expected_assembly_reference.version.str();
-
-            bool is_viable_version;
-
-            if (runtime_information_.is_core())
-            {
-                is_viable_version = (assembly_metadata.version >= expected_assembly_reference.version);
-            }
-            else
-            {
-                is_viable_version = (assembly_metadata.version == expected_assembly_reference.version);
-            }
-
-            // Check that Major.Minor.Build matches the profiler version.
-            // On .NET Core, allow managed library to be a higher version than the native library.
-            if (is_viable_version)
-            {
-                Logger::Info("AssemblyLoadFinished: OpenTelemetry.AutoInstrumentation.dll v", assembly_version,
-                             " matched profiler version v", expected_version);
-                managed_profiler_loaded_app_domains.insert(assembly_info.app_domain_id);
-
-                if (runtime_information_.is_desktop() && corlib_module_loaded)
-                {
-                    // Set the managed_profiler_loaded_domain_neutral flag whenever the
-                    // managed profiler is loaded shared
-                    if (assembly_info.app_domain_id == corlib_app_domain_id)
-                    {
-                        Logger::Info("AssemblyLoadFinished: OpenTelemetry.AutoInstrumentation.dll was loaded domain-neutral");
-                        managed_profiler_loaded_domain_neutral = true;
-                    }
-                    else
-                    {
-                        Logger::Info("AssemblyLoadFinished: OpenTelemetry.AutoInstrumentation.dll was not loaded domain-neutral");
-                    }
-                }
-            }
-            else
-            {
-                Logger::Warn("AssemblyLoadFinished: OpenTelemetry.AutoInstrumentation.dll v", assembly_version,
-                             " did not match profiler version v", expected_version);
-            }
+            Logger::Info("AssemblyLoadFinished: ", assembly_info.name, " was not loaded domain-neutral");
         }
     }
 
@@ -928,6 +895,22 @@ bool CorProfiler::IsAttached() const
     return is_attached_;
 }
 
+WSTRING CorProfiler::GetBytecodeInstrumentationAssembly() const
+{
+    WSTRING bytecodeInstrumentationAssembly = managed_profiler_full_assembly_version;
+    if (!runtime_information_.runtime_type)
+    {
+        Logger::Error("GetBytecodeInstrumentationAssembly: called before runtime_information was initialized.");
+    }
+    else if (!runtime_information_.is_core())
+    {
+        // When on .NET Framework use the signature with the public key so strong name works.
+        bytecodeInstrumentationAssembly = managed_profiler_full_assembly_version_strong_name;
+    }
+
+    return bytecodeInstrumentationAssembly;
+}
+
 //
 // Helper methods
 //
@@ -985,15 +968,22 @@ bool CorProfiler::GetWrapperMethodRef(ModuleMetadata* module_metadata, ModuleID 
                                                module_metadata->metadata_emit, module_metadata->assembly_import,
                                                module_metadata->assembly_emit);
 
+        const AssemblyReference* wrapper_assembly = &method_replacement.wrapper_method.assembly;
+        if (wrapper_assembly->name == managed_profiler_name)
+        {
+            // Handle the typical case in which the wrapper is also the bytecode instrumentation assembly.
+            wrapper_assembly = AssemblyReference::GetFromCache(GetBytecodeInstrumentationAssembly());
+        }
+
         // for each wrapper assembly, emit an assembly reference
-        hr = metadata_builder.EmitAssemblyRef(method_replacement.wrapper_method.assembly);
+        hr = metadata_builder.EmitAssemblyRef(*wrapper_assembly);
         if (FAILED(hr))
         {
             Logger::Warn("JITCompilationStarted failed to emit wrapper assembly ref for assembly=",
-                         method_replacement.wrapper_method.assembly.name,
-                         ", Version=", method_replacement.wrapper_method.assembly.version.str(),
-                         ", Culture=", method_replacement.wrapper_method.assembly.locale,
-                         " PublicKeyToken=", method_replacement.wrapper_method.assembly.public_key.str());
+                         wrapper_assembly->name,
+                         ", Version=", wrapper_assembly->version.str(),
+                         ", Culture=", wrapper_assembly->locale,
+                         " PublicKeyToken=", wrapper_assembly->public_key.str());
             return false;
         }
 

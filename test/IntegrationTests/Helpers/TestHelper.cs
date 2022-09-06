@@ -17,6 +17,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
@@ -46,6 +47,23 @@ public abstract class TestHelper
     protected EnvironmentHelper EnvironmentHelper { get; }
 
     protected ITestOutputHelper Output { get; }
+
+    /// <summary>
+    /// Gets the path for the test assembly, not the shadow copy created by xunit.
+    /// </summary>
+    public string GetTestAssemblyPath()
+    {
+#if NETFRAMEWORK
+        // CodeBase is deprecated outside .NET Framework, instead of suppressing the error
+        // build the code as per recommendation for each runtime.
+        var codeBaseUrl = new Uri(Assembly.GetExecutingAssembly().CodeBase);
+        var codeBasePath = Uri.UnescapeDataString(codeBaseUrl.AbsolutePath);
+        var directory = Path.GetDirectoryName(codeBasePath);
+        return Path.GetFullPath(directory);
+#else
+        return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+#endif
+    }
 
     public async Task<Container> StartContainerAsync(TestSettings testSettings, int webPort)
     {

@@ -1,5 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <AddTestStrongNameAssemblyKeyOnNetFramework>true</AddTestStrongNameAssemblyKeyOnNetFramework>
+    <DisableStrongNamer Condition="!$(TargetFramework.StartsWith('net4'))">true</DisableStrongNamer>
+  </PropertyGroup>
+
   <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
     <DefineConstants>_WINDOWS</DefineConstants>
   </PropertyGroup>
@@ -9,10 +14,12 @@
     <PackageReference Include="Grpc.Tools" Version="2.48.1" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="StrongNamer" Version="0.2.5" Condition="$(TargetFramework.StartsWith('net4'))" />
     <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <PackageReference Include="Testcontainers" Version="2.1.0" />
+    <PackageReference Include="Verify.Xunit" Version="17.10.2" />
     <PackageReference Include="xunit.abstractions" Version="2.0.3" />
   </ItemGroup>
 
@@ -23,5 +30,11 @@
   <ItemGroup>
     <!-- GrpcServices is 'none' so that we do not need to depend on the grpc nuget package, and we only need protobuf support. -->
     <Protobuf Include="opentelemetry\**\*.proto" GrpcServices="none" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="StrongNamedTestsIntegrations.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
