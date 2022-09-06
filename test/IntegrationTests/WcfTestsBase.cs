@@ -35,7 +35,7 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitsTraces()
+    public async Task SubmitsTraces()
     {
         using var agent = new MockZipkinCollector(Output);
 
@@ -43,12 +43,12 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         _serverProcess = serverHelper.RunWcfServer(agent.Port);
 
         // wait for server to start
-        Task.Delay(5000);
+        await Task.Delay(5000);
 
         RunTestApplication(agent.Port);
 
         // wait so the spans from server are delivered
-        Task.Delay(2000);
+        await Task.Delay(2000);
         var spans = agent.WaitForSpans(4, TimeSpan.FromSeconds(5));
 
         using var scope = new AssertionScope();
