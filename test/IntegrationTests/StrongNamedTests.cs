@@ -38,7 +38,6 @@ public class StrongNamedTests : TestHelper
     {
         var assemblyPath = GetTestAssemblyPath();
         var integrationsFile = Path.Combine(assemblyPath, "StrongNamedTestsIntegrations.json");
-        Output.WriteLine($"IntegrationsFile: {integrationsFile}");
         File.Exists(integrationsFile).Should().BeTrue();
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE", integrationsFile);
