@@ -42,6 +42,9 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         var serverHelper = new WcfServerTestHelper(Output);
         _serverProcess = serverHelper.RunWcfServer(agent.Port);
 
+        // wait for server to start
+        Task.Delay(5000);
+
         RunTestApplication(agent.Port);
 
         // wait so the spans from server are delivered
