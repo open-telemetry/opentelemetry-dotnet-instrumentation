@@ -47,7 +47,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
     TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
     MethodName = StackExchangeRedisConstants.ConnectImplAsyncMethodName,
     ReturnTypeName = StackExchangeRedisConstants.TaskConnectionMultiplexerTypeName,
-    ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName, StackExchangeRedisConstants.NullableServerType },
+    ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName, StackExchangeRedisConstants.NullableServerTypeTypeName },
     MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
     MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
     IntegrationName = StackExchangeRedisConstants.IntegrationName)]
