@@ -15,6 +15,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- Extend StackExchange.Redis traces instrumentation for versions 2.6.66+.
 - Replaced `OTEL_DOTNET_AUTO_TRACES_PLUGINS` and `OTEL_DOTNET_AUTO_METRICS_PLUGINS`
   with new environment variable `OTEL_DOTNET_AUTO_PLUGINS`.
 
