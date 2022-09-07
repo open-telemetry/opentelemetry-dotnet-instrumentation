@@ -16,6 +16,7 @@
 
 using System;
 using System.ServiceModel;
+using System.Threading;
 
 namespace TestApplication.Wcf.Server.NetFramework;
 
@@ -30,13 +31,12 @@ internal static class Program
                 ServiceHost serviceHost = new ServiceHost(typeof(StatusService));
                 serviceHost.Open();
 
-                Console.WriteLine("Service listening. Press enter to exit.");
-                Console.ReadLine();
+                while (StatusService.TimesHit != 2)
+                {
+                    Console.WriteLine("Server waiting for calls");
+                    Thread.Sleep(1000);
+                }
 
-                Console.WriteLine("WCFServer: before Thread.Sleep");
-                System.Threading.Thread.Sleep(29_000);
-
-                Console.WriteLine("WCFServer: before serviceHost.Close()");
                 serviceHost.Close();
             }
             catch (Exception e)

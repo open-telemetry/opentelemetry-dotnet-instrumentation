@@ -64,10 +64,6 @@ internal class WcfServerTestHelper : TestHelper
 
         var process = Process.Start(startInfo);
         var processHelper = new ProcessHelper(process);
-
-        // Temporary cheap change to test to if delay will fix test issue.
-        System.Threading.Thread.Sleep(15_000);
-
         return processHelper;
     }
 

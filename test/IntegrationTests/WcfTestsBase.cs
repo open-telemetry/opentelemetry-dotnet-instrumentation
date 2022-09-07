@@ -64,7 +64,7 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
     {
         if (_serverProcess.Process.HasExited)
         {
-            Output.WriteLine($"WCF server process has exited prematurely. Exit code: {_serverProcess.Process.ExitCode}.");
+            Output.WriteLine($"WCF server process finished. Exit code: {_serverProcess.Process.ExitCode}.");
         }
         else
         {

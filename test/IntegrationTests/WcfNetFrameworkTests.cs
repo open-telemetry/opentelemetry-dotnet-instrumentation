@@ -16,13 +16,6 @@
 
 #if NET462
 
-using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using FluentAssertions;
-using FluentAssertions.Execution;
-using IntegrationTests.Helpers;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;

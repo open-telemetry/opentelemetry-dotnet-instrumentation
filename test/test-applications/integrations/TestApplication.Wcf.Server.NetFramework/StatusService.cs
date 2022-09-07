@@ -29,8 +29,12 @@ namespace TestApplication.Wcf.Server.NetFramework;
     Name = "StatusService")]
 public class StatusService : IStatusServiceContract
 {
+    public static int TimesHit { get; set; }
+
     public Task<StatusResponse> PingAsync(StatusRequest request)
     {
+        TimesHit += 1;
+
         return Task.FromResult(
             new StatusResponse
             {
