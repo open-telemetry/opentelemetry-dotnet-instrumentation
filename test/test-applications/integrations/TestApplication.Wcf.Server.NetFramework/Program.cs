@@ -33,6 +33,9 @@ internal static class Program
                 Console.WriteLine("Service listening. Press enter to exit.");
                 Console.ReadLine();
 
+                Console.WriteLine("WCFServer: before Thread.Sleep");
+                System.Threading.Thread.Sleep(29_000);
+
                 Console.WriteLine("WCFServer: before serviceHost.Close()");
                 serviceHost.Close();
             }
