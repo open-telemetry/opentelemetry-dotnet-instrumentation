@@ -33,18 +33,19 @@ internal static class Program
                 Console.WriteLine("Service listening. Press enter to exit.");
                 Console.ReadLine();
 
+                Console.WriteLine("WCFServer: before serviceHost.Close()");
                 serviceHost.Close();
             }
             catch (Exception e)
             {
-                Console.WriteLine($"ServerException: {e}");
-                throw;
+                Console.WriteLine($"ServerException: nested try-catch {e}");
             }
         }
         catch (Exception e)
         {
-            Console.WriteLine($"ServerException: {e}");
-            throw;
+            Console.WriteLine($"ServerException: top-level try-catch {e}");
         }
+
+        Console.WriteLine("WCFServer: exiting main()");
     }
 }
