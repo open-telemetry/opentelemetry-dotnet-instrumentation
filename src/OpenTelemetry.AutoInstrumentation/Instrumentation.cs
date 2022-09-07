@@ -135,7 +135,7 @@ public static class Instrumentation
                     .CreateTracerProviderBuilder()
                     .SetResourceBuilder(_resourceBuilder)
                     .UseEnvironmentVariables(TracerSettings)
-                    .InvokePlugins(TracerSettings.TracerPlugins);
+                    .InvokePlugins(TracerSettings.Plugins);
 
                 _tracerProvider = builder.Build();
                 Logger.Information("OpenTelemetry tracer initialized.");
@@ -155,7 +155,7 @@ public static class Instrumentation
                     .CreateMeterProviderBuilder()
                     .SetResourceBuilder(_resourceBuilder)
                     .UseEnvironmentVariables(MetricSettings)
-                    .InvokePlugins(MetricSettings.MetricPlugins);
+                    .InvokePlugins(MetricSettings.Plugins);
 
                 _meterProvider = builder.Build();
                 Logger.Information("OpenTelemetry meter initialized.");

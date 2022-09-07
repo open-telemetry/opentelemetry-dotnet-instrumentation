@@ -42,15 +42,6 @@ public class TracerSettings : Settings
             disabledConfiguration: ConfigurationKeys.Traces.DisabledInstrumentations,
             error: "The \"{0}\" is not recognized as supported trace instrumentation and cannot be enabled");
 
-        var providerPlugins = source.GetString(ConfigurationKeys.Traces.ProviderPlugins);
-        if (providerPlugins != null)
-        {
-            foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(Constants.ConfigurationValues.DotNetQualifiedNameSeparator))
-            {
-                TracerPlugins.Add(pluginAssemblyQualifiedName);
-            }
-        }
-
         var additionalSources = source.GetString(ConfigurationKeys.Traces.AdditionalSources);
         if (additionalSources != null)
         {
@@ -91,11 +82,6 @@ public class TracerSettings : Settings
     /// Gets the list of enabled instrumentations.
     /// </summary>
     public IList<TracerInstrumentation> EnabledInstrumentations { get; }
-
-    /// <summary>
-    /// Gets the list of plugins represented by <see cref="Type.AssemblyQualifiedName"/>.
-    /// </summary>
-    public IList<string> TracerPlugins { get; } = new List<string>();
 
     /// <summary>
     /// Gets the list of activity sources to be added to the tracer at the startup.

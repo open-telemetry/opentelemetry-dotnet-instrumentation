@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -24,6 +25,8 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 internal static class PluginsConfigurationHelper
 {
+    private static readonly ILogger Logger = OtelLogging.GetLogger();
+
     public static TracerProviderBuilder InvokePlugins(this TracerProviderBuilder builder, IEnumerable<string> pluginsAssemblyQualifiedNames)
     {
         foreach (var assemblyQualifiedName in pluginsAssemblyQualifiedNames)
@@ -63,7 +66,8 @@ internal static class PluginsConfigurationHelper
         var mi = t.GetMethod(configureTracerProviderMethodName, new Type[] { typeof(TracerProviderBuilder) });
         if (mi is null)
         {
-            throw new MissingMethodException(t.Name, configureTracerProviderMethodName);
+            Logger.Warning(new MissingMethodException(t.Name, configureTracerProviderMethodName), $"{configureTracerProviderMethodName} is missing in {pluginAssemblyQualifiedName}");
+            return builder;
         }
 
         // execute
@@ -81,7 +85,8 @@ internal static class PluginsConfigurationHelper
         var mi = t.GetMethod(configureMeterProviderMethodName, new Type[] { typeof(MeterProviderBuilder) });
         if (mi is null)
         {
-            throw new MissingMethodException(t.Name, configureMeterProviderMethodName);
+            Logger.Warning(new MissingMethodException(t.Name, configureMeterProviderMethodName), $"{configureMeterProviderMethodName} is missing in {pluginAssemblyQualifiedName}");
+            return builder;
         }
 
         // execute
@@ -99,7 +104,8 @@ internal static class PluginsConfigurationHelper
         var mi = t.GetMethod(configureLoggerOptionsMethodName, new Type[] { typeof(OpenTelemetryLoggerOptions) });
         if (mi is null)
         {
-            throw new MissingMethodException(t.Name, configureLoggerOptionsMethodName);
+            Logger.Warning(new MissingMethodException(t.Name, configureLoggerOptionsMethodName), $"{configureLoggerOptionsMethodName} is missing in {pluginAssemblyQualifiedName}");
+            return options;
         }
 
         // execute
