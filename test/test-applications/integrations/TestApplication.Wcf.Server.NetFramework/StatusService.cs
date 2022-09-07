@@ -29,11 +29,16 @@ namespace TestApplication.Wcf.Server.NetFramework;
     Name = "StatusService")]
 public class StatusService : IStatusServiceContract
 {
+    private static readonly object Lock = new();
+
     public static int TimesHit { get; set; }
 
     public Task<StatusResponse> PingAsync(StatusRequest request)
     {
-        TimesHit += 1;
+        lock (Lock)
+        {
+            TimesHit += 1;
+        }
 
         return Task.FromResult(
             new StatusResponse
