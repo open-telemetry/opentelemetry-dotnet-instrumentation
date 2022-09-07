@@ -72,6 +72,28 @@ public class PluginsConfigurationHelperTests
     }
 
     [Fact]
+    public void PluginTypeMissingMethodDoesNotThrow()
+    {
+        var pluginAssemblyQualifiedName = GetType().AssemblyQualifiedName;
+        var tracerAction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
+        var meterAction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
+        var logsAction = () => LoggerFactory.Create(builder =>
+        {
+            builder.AddOpenTelemetry(options =>
+            {
+                options.InvokePlugins(new[] { pluginAssemblyQualifiedName });
+            });
+        });
+
+        using (new AssertionScope())
+        {
+            tracerAction.Should().NotThrow();
+            meterAction.Should().NotThrow();
+            logsAction.Should().NotThrow();
+        }
+    }
+
+    [Fact]
     public void PluginTypeMissingDefaultConstructor()
     {
         var pluginAssemblyQualifiedName = typeof(MockPluginMissingDefaultConstructor).AssemblyQualifiedName;
