@@ -160,7 +160,7 @@ Important environment variables include:
 | `OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES` | Comma-separated list of additional `System.Diagnostics.Metrics.Meter` names to be added to the meter at the startup. Use it to capture manually instrumented spans. |  |
 | `OTEL_DOTNET_AUTO_PLUGINS` | Colon-separated list of OTel SDK instrumentation plugin types, specified with the [assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname). _Note: This list must be colon-separated because the type names may include commas._ | |
 
-You can use `OTEL_DOTNET_AUTO_PLUGINS` to extend the 
+You can use `OTEL_DOTNET_AUTO_PLUGINS` to extend the
 configuration of the OpenTelemetry .NET SDK Tracer or Meter. A plugin must be a
 non-static, non-abstract class which has a default constructor and a method
 with following signature:
