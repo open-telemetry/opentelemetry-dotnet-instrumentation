@@ -66,7 +66,7 @@ internal static class PluginsConfigurationHelper
         var mi = t.GetMethod(configureTracerProviderMethodName, new Type[] { typeof(TracerProviderBuilder) });
         if (mi is null)
         {
-            Logger.Warning(new MissingMethodException(t.Name, configureTracerProviderMethodName), $"{configureTracerProviderMethodName} is missing in {pluginAssemblyQualifiedName}");
+            Logger.Information(new MissingMethodException(t.Name, configureTracerProviderMethodName), $"{configureTracerProviderMethodName} is missing in {pluginAssemblyQualifiedName}");
             return builder;
         }
 
@@ -85,7 +85,7 @@ internal static class PluginsConfigurationHelper
         var mi = t.GetMethod(configureMeterProviderMethodName, new Type[] { typeof(MeterProviderBuilder) });
         if (mi is null)
         {
-            Logger.Warning(new MissingMethodException(t.Name, configureMeterProviderMethodName), $"{configureMeterProviderMethodName} is missing in {pluginAssemblyQualifiedName}");
+            Logger.Information(new MissingMethodException(t.Name, configureMeterProviderMethodName), $"{configureMeterProviderMethodName} is missing in {pluginAssemblyQualifiedName}");
             return builder;
         }
 
@@ -104,7 +104,7 @@ internal static class PluginsConfigurationHelper
         var mi = t.GetMethod(configureLoggerOptionsMethodName, new Type[] { typeof(OpenTelemetryLoggerOptions) });
         if (mi is null)
         {
-            Logger.Warning(new MissingMethodException(t.Name, configureLoggerOptionsMethodName), $"{configureLoggerOptionsMethodName} is missing in {pluginAssemblyQualifiedName}");
+            Logger.Information(new MissingMethodException(t.Name, configureLoggerOptionsMethodName), $"{configureLoggerOptionsMethodName} is missing in {pluginAssemblyQualifiedName}");
             return options;
         }
 
