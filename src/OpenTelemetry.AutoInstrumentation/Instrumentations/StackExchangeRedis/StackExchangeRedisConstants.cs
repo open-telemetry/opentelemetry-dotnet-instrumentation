@@ -30,7 +30,8 @@ internal static class StackExchangeRedisConstants
     public const string ConfigurationOptionsTypeName = "StackExchange.Redis.ConfigurationOptions";
     public const string TextWriterTypeName = "System.IO.TextWriter";
     public const string TaskConnectionMultiplexerTypeName = $"System.Threading.Tasks.Task`1[{ConnectionMultiplexerTypeName}]";
-    public const string NullableServerType = $"System.Nullable`1[{ServerTypeTypeName}]";
+    public const string NullableServerTypeTypeName = $"System.Nullable`1[{ServerTypeTypeName}]";
+    public const string EndPointCollectionTypeName = "StackExchange.Redis.EndPointCollection";
 
     public const string ConnectImplMethodName = "ConnectImpl";
     public const string ConnectImplAsyncMethodName = "ConnectImplAsync";

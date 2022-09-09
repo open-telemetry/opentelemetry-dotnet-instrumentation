@@ -58,7 +58,7 @@ public class SettingsTests : IDisposable
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.EnabledInstrumentations.Should().NotBeEmpty();
-            settings.TracerPlugins.Should().BeEmpty();
+            settings.Plugins.Should().BeEmpty();
             settings.ActivitySources.Should().BeEquivalentTo(new List<string> { "OpenTelemetry.AutoInstrumentation.*" });
             settings.LegacySources.Should().BeEmpty();
             settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
@@ -78,7 +78,7 @@ public class SettingsTests : IDisposable
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.EnabledInstrumentations.Should().NotBeEmpty();
-            settings.MetricPlugins.Should().BeEmpty();
+            settings.Plugins.Should().BeEmpty();
             settings.Meters.Should().BeEmpty();
             settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
             settings.FlushOnUnhandledException.Should().BeFalse();
@@ -95,7 +95,7 @@ public class SettingsTests : IDisposable
             settings.LogExporter.Should().Be(LogExporter.Otlp);
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.ConsoleExporterEnabled.Should().BeFalse();
-            settings.LogPlugins.Should().BeEmpty();
+            settings.Plugins.Should().BeEmpty();
             settings.IncludeFormattedMessage.Should().BeFalse();
             settings.ParseStateValues.Should().BeFalse();
             settings.Http2UnencryptedSupportEnabled.Should().BeFalse();

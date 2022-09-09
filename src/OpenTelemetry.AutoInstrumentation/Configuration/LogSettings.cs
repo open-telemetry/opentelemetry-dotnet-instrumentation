@@ -36,15 +36,6 @@ public class LogSettings : Settings
         ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.Logs.ConsoleExporterEnabled) ?? false;
         ParseStateValues = source.GetBool(ConfigurationKeys.Logs.ParseStateValues) ?? false;
         IncludeFormattedMessage = source.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
-
-        var providerPlugins = source.GetString(ConfigurationKeys.Logs.ProviderPlugins);
-        if (providerPlugins != null)
-        {
-            foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(Constants.ConfigurationValues.DotNetQualifiedNameSeparator))
-            {
-                LogPlugins.Add(pluginAssemblyQualifiedName);
-            }
-        }
     }
 
     /// <summary>
@@ -66,11 +57,6 @@ public class LogSettings : Settings
     /// Gets a value indicating whether the console exporter is enabled.
     /// </summary>
     public bool ConsoleExporterEnabled { get; }
-
-    /// <summary>
-    /// Gets the list of plugins represented by <see cref="Type.AssemblyQualifiedName"/>.
-    /// </summary>
-    public IList<string> LogPlugins { get; } = new List<string>();
 
     internal static LogSettings FromDefaultSources()
     {

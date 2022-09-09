@@ -49,9 +49,9 @@ public class BootstrapperHostingStartup : IHostingStartup
         {
             builder.ConfigureLogging(logging => logging.AddOpenTelemetry(options =>
             {
-                if (settings.LogPlugins.Count > 0)
+                if (settings.Plugins.Count > 0)
                 {
-                    options.InvokePlugins(settings.LogPlugins);
+                    options.InvokePlugins(settings.Plugins);
                 }
 
                 if (settings.ConsoleExporterEnabled)
