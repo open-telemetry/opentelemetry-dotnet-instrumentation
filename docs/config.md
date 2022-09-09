@@ -167,7 +167,7 @@ Important environment variables include:
 You can use `OTEL_DOTNET_AUTO_PLUGINS` to extend the
 configuration of the OpenTelemetry .NET SDK Tracer, Meter or Logs. A plugin
 must be a non-static, non-abstract class which has a default constructor
-and a method with following signature:
+and that implements at least one of the configuration methods below:
 
 ```csharp
 public OpenTelemetry.Trace.TracerProviderBuilder ConfigureTracerProvider(OpenTelemetry.Trace.TracerProviderBuilder builder)
