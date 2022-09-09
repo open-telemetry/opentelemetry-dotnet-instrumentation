@@ -15,6 +15,7 @@
 // </copyright>
 
 using System;
+using System.Collections.Generic;
 using OpenTelemetry.Exporter;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
@@ -39,6 +40,15 @@ public abstract class Settings
         OtlpExportProtocol = GetExporterOtlpProtocol(source);
         Http2UnencryptedSupportEnabled = source.GetBool(ConfigurationKeys.Http2UnencryptedSupportEnabled) ?? false;
         FlushOnUnhandledException = source.GetBool(ConfigurationKeys.FlushOnUnhandledException) ?? false;
+
+        var providerPlugins = source.GetString(ConfigurationKeys.ProviderPlugins);
+        if (providerPlugins != null)
+        {
+            foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(Constants.ConfigurationValues.DotNetQualifiedNameSeparator))
+            {
+                Plugins.Add(pluginAssemblyQualifiedName);
+            }
+        }
     }
 
     /// <summary>
@@ -60,6 +70,11 @@ public abstract class Settings
     /// Default is <c>false</c>.
     /// </summary>
     public bool FlushOnUnhandledException { get; }
+
+    /// <summary>
+    /// Gets the list of plugins represented by <see cref="Type.AssemblyQualifiedName"/>.
+    /// </summary>
+    public IList<string> Plugins { get; } = new List<string>();
 
     private static OtlpExportProtocol? GetExporterOtlpProtocol(IConfigurationSource source)
     {

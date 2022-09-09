@@ -34,7 +34,7 @@ public class PluginsTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public void SubmitsTraces()
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
 
         using var collector = new MockZipkinCollector(Output);
         RunTestApplication(collector.Port);
@@ -47,7 +47,7 @@ public class PluginsTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public void SubmitMetrics()
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
 
         using var collector = new MockMetricsCollector(Output);
         RunTestApplication(metricsAgentPort: collector.Port);

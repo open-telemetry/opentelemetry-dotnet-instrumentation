@@ -72,7 +72,7 @@ public class PluginsConfigurationHelperTests
     }
 
     [Fact]
-    public void PluginTypeMissingExpectedMethod()
+    public void PluginTypeMissingMethodDoesNotThrow()
     {
         var pluginAssemblyQualifiedName = GetType().AssemblyQualifiedName;
         var tracerAction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
@@ -87,9 +87,9 @@ public class PluginsConfigurationHelperTests
 
         using (new AssertionScope())
         {
-            tracerAction.Should().Throw<MissingMethodException>();
-            meterAction.Should().Throw<MissingMethodException>();
-            logsAction.Should().Throw<MissingMethodException>();
+            tracerAction.Should().NotThrow();
+            meterAction.Should().NotThrow();
+            logsAction.Should().NotThrow();
         }
     }
 
