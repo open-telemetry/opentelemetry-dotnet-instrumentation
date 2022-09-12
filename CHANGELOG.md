@@ -9,6 +9,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- WCF traces instrumentation (server side for .NET Framework, client side
+  for both .NET Core and .NET Framework).
 - Support for ASP.NET Core OpenTelemetry Log exporter related environment variables:
   - `OTEL_LOGS_EXPORTER`,
   - `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED`,
@@ -33,8 +35,6 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 - Add support for Alpine.
 - Add strong name signature to the OpenTelemetry.AutoInstrumentation assembly used
   on the .NET Framework.
-- Add WCF traces instrumentation (server side for .NET Framework, client side
-  for both .NET Core and .NET Framework).
 
 ### Changed
 
