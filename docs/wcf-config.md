@@ -1,5 +1,7 @@
 # WCF Instrumentation Configuration
 
+***NOTE: WCF Instrumentation has only been tested for Http and NetTcp bindings.***
+
 ## WCF Client Configuration (.NET Framework)
 
 Add the `IClientMessageInspector` instrumentation via a behavior extension on
