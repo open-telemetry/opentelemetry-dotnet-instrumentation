@@ -223,6 +223,12 @@ public class EnvironmentHelper
             environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = $"http://localhost:{testSettings.MetricsSettings.Port}";
         }
 
+        if (testSettings.LogSettings != null)
+        {
+            environmentVariables["OTEL_LOGS_EXPORTER"] = testSettings.LogSettings.Exporter;
+            environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = $"http://localhost:{testSettings.LogSettings.Port}";
+        }
+
         // for ASP.NET Core test applications, set the server's port
         environmentVariables["ASPNETCORE_URLS"] = $"http://127.0.0.1:{testSettings.AspNetCorePort}/";
 

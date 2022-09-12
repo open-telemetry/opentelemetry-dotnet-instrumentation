@@ -139,7 +139,7 @@ public abstract class TestHelper
     /// and returns the Process instance for further interaction.
     /// </summary>
     /// <returns>Test application process</returns>
-    public Process StartTestApplication(int traceAgentPort = 0, int metricsAgentPort = 0, string arguments = null, string packageVersion = "", int aspNetCorePort = 0, string framework = "", bool enableStartupHook = true, bool enableClrProfiler = true)
+    public Process StartTestApplication(int traceAgentPort = 0, int metricsAgentPort = 0, int logsAgentPort = 0, string arguments = null, string packageVersion = "", int aspNetCorePort = 0, string framework = "", bool enableStartupHook = true, bool enableClrProfiler = true)
     {
         var testSettings = new TestSettings
         {
@@ -159,6 +159,11 @@ public abstract class TestHelper
         if (metricsAgentPort != 0)
         {
             testSettings.MetricsSettings = new() { Port = metricsAgentPort };
+        }
+
+        if (logsAgentPort != 0)
+        {
+            testSettings.LogSettings = new() { Port = logsAgentPort };
         }
 
         return StartTestApplication(testSettings);
