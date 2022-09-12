@@ -16,6 +16,7 @@
 
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
@@ -33,7 +34,7 @@ public class GrpcNetClientTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitsTraces()
+    public async Task SubmitsTraces()
     {
         using var agent = new MockZipkinCollector(Output);
 
@@ -44,7 +45,7 @@ public class GrpcNetClientTests : TestHelper
         RunTestApplication(agent.Port, enableClrProfiler: !IsCoreClr());
 
         const int expectedSpansCount = 1;
-        var spans = agent.WaitForSpans(expectedSpansCount, TimeSpan.FromSeconds(5));
+        var spans = await agent.WaitForSpansAsync(expectedSpansCount, TimeSpan.FromSeconds(5));
 
         using (new AssertionScope())
         {

@@ -16,6 +16,7 @@
 
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit;
@@ -39,12 +40,12 @@ public class NpqsqlTests : TestHelper
     [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    public void SubmitsTraces()
+    public async Task SubmitsTraces()
     {
         using var agent = new MockZipkinCollector(Output);
 
         RunTestApplication(agent.Port, arguments: $"--postgres {_postgres.Port}", enableClrProfiler: !IsCoreClr());
-        var spans = agent.WaitForSpans(1, TimeSpan.FromSeconds(5));
+        var spans = await agent.WaitForSpansAsync(1, TimeSpan.FromSeconds(5));
 
         spans.Count.Should().Be(1);
         spans.First().Tags["db.statement"].Should().Be("SELECT 123;");

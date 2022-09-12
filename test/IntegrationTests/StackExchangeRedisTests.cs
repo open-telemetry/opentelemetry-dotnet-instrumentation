@@ -17,6 +17,7 @@
 #if NETCOREAPP3_1_OR_GREATER
 
 using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
@@ -41,7 +42,7 @@ public class StackExchangeRedisTests : TestHelper
     [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    public void SubmitsTraces()
+    public async Task SubmitsTraces()
     {
         using var agent = new MockZipkinCollector(Output);
 
@@ -49,7 +50,7 @@ public class StackExchangeRedisTests : TestHelper
 
         const int expectedSpansCount = 8;
 
-        var spans = agent.WaitForSpans(expectedSpansCount, TimeSpan.FromSeconds(5));
+        var spans = await agent.WaitForSpansAsync(expectedSpansCount, TimeSpan.FromSeconds(5));
 
         using (new AssertionScope())
         {
