@@ -107,6 +107,7 @@ sudo chmod a+rwx /var/log/opentelemetry/dotnet
 Before running your application, set the following environment variables:
 
 ```env
+ASPNETCORE_HOSTINGSTARTUPASSEMBLIES=OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper
 COR_ENABLE_PROFILING=1
 COR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
 CORECLR_ENABLE_PROFILING=1
