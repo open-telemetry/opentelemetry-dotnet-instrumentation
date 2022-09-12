@@ -17,7 +17,7 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
+using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
@@ -34,7 +34,7 @@ public class StrongNamedTests : TestHelper
     }
 
     [Fact]
-    public void SubmitsTraces()
+    public async Task SubmitsTraces()
     {
         var assemblyPath = GetTestAssemblyPath();
         var integrationsFile = Path.Combine(assemblyPath, "StrongNamedTestsIntegrations.json");
@@ -47,7 +47,7 @@ public class StrongNamedTests : TestHelper
         RunTestApplication(agent.Port);
 
         const int expectedSpansCount = 1;
-        var spans = agent.WaitForSpans(expectedSpansCount, TimeSpan.FromSeconds(5));
+        var spans = await agent.WaitForSpansAsync(expectedSpansCount, TimeSpan.FromSeconds(5));
 
         using (new AssertionScope())
         {
