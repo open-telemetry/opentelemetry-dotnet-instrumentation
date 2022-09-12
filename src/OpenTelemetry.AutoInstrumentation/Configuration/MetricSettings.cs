@@ -41,15 +41,6 @@ public class MetricSettings : Settings
             disabledConfiguration: ConfigurationKeys.Metrics.DisabledInstrumentations,
             error: "The \"{0}\" is not recognized as supported metrics instrumentation and cannot be enabled");
 
-        var providerPlugins = source.GetString(ConfigurationKeys.Metrics.ProviderPlugins);
-        if (providerPlugins != null)
-        {
-            foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(Constants.ConfigurationValues.DotNetQualifiedNameSeparator))
-            {
-                MetricPlugins.Add(pluginAssemblyQualifiedName);
-            }
-        }
-
         var additionalSources = source.GetString(ConfigurationKeys.Metrics.AdditionalSources);
         if (additionalSources != null)
         {
@@ -82,11 +73,6 @@ public class MetricSettings : Settings
     /// Gets a value indicating whether the console exporter is enabled.
     /// </summary>
     public bool ConsoleExporterEnabled { get; }
-
-    /// <summary>
-    /// Gets the list of plugins represented by <see cref="Type.AssemblyQualifiedName"/>.
-    /// </summary>
-    public IList<string> MetricPlugins { get; } = new List<string>();
 
     /// <summary>
     /// Gets the list of enabled meters.

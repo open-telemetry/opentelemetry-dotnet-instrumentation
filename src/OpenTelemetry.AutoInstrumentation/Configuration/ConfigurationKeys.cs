@@ -52,6 +52,11 @@ public class ConfigurationKeys
     public const string FlushOnUnhandledException = "OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION";
 
     /// <summary>
+    /// Configuration key for colon (:) separated list of plugins represented by <see cref="System.Type.AssemblyQualifiedName"/>.
+    /// </summary>
+    public const string ProviderPlugins = "OTEL_DOTNET_AUTO_PLUGINS";
+
+    /// <summary>
     /// Configuration keys for traces.
     /// </summary>
     public static class Traces
@@ -81,11 +86,6 @@ public class ConfigurationKeys
         /// Configuration key for comma separated list of disabled trace instrumentations.
         /// </summary>
         public const string DisabledInstrumentations = "OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS";
-
-        /// <summary>
-        /// Configuration key for colon (:) separated list of trace plugins represented by <see cref="System.Type.AssemblyQualifiedName"/>.
-        /// </summary>
-        public const string ProviderPlugins = "OTEL_DOTNET_AUTO_TRACES_PLUGINS";
 
         /// <summary>
         /// Configuration key for additional <see cref="ActivitySource"/> names to be added to the tracer at the startup.
@@ -135,11 +135,6 @@ public class ConfigurationKeys
         public const string DisabledInstrumentations = "OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS";
 
         /// <summary>
-        /// Configuration key for colon (:) separated list of metric plugins represented by <see cref="System.Type.AssemblyQualifiedName"/>.
-        /// </summary>
-        public const string ProviderPlugins = "OTEL_DOTNET_AUTO_METRICS_PLUGINS";
-
-        /// <summary>
         /// Configuration key for additional <see cref="Meter"/> names to be added to the meter at the startup.
         /// </summary>
         public const string AdditionalSources = "OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES";
@@ -172,11 +167,6 @@ public class ConfigurationKeys
         /// should be included on generated <see cref="LogRecord"/>s.
         /// </summary>
         public const string IncludeFormattedMessage = "OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE";
-
-        /// <summary>
-        /// Configuration key for colon (:) separated list of logs plugins represented by <see cref="System.Type.AssemblyQualifiedName"/>.
-        /// </summary>
-        public const string ProviderPlugins = "OTEL_DOTNET_AUTO_LOGS_PLUGINS";
     }
 
     /// <summary>

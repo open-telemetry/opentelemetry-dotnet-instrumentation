@@ -42,12 +42,21 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
     MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
     MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
     IntegrationName = StackExchangeRedisConstants.IntegrationName)]
-[InstrumentMethod(// releases 2.5.61+
+[InstrumentMethod(// releases 2.5.61 - 2.6.48
     AssemblyName = StackExchangeRedisConstants.AssemblyName,
     TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
     MethodName = StackExchangeRedisConstants.ConnectImplMethodName,
     ReturnTypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
-    ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName, StackExchangeRedisConstants.NullableServerType },
+    ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName, StackExchangeRedisConstants.NullableServerTypeTypeName },
+    MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
+    MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
+    IntegrationName = StackExchangeRedisConstants.IntegrationName)]
+[InstrumentMethod(// releases 2.6.66+
+    AssemblyName = StackExchangeRedisConstants.AssemblyName,
+    TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    MethodName = StackExchangeRedisConstants.ConnectImplMethodName,
+    ReturnTypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName, StackExchangeRedisConstants.NullableServerTypeTypeName, StackExchangeRedisConstants.EndPointCollectionTypeName },
     MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
     MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
     IntegrationName = StackExchangeRedisConstants.IntegrationName)]

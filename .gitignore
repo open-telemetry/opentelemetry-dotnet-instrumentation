@@ -298,3 +298,6 @@ src/OpenTelemetry.AutoInstrumentation.Native/cmake_install.cmake
 
 # exception for native profiler dependencies
 !src/OpenTelemetry.AutoInstrumentation.Native/lib/**
+
+# ignore verify .received files
+*.received.*

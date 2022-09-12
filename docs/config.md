@@ -72,6 +72,9 @@ instead.
 | `OTEL_DOTNET_AUTO_DEBUG` | Enables debugging mode for the tracer. | `false` |
 | `OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED` | Whether the traces console exporter is enabled or not. | `false` |
 | `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED` | Whether the metrics console exporter is enabled or not. | `false` |
+| `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED` | Whether the logs console exporter is enabled or not. | `false` |
+| `OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES` | Whether the log state should be parsed. | `false` |
+| `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE` | Whether the log state should be formatted. | `false` |
 
 ## Propagators
 
@@ -92,6 +95,7 @@ Exporters output the telemetry.
 | `OTEL_TRACES_EXPORTER` | Traces exporter to be used. The value can be one of the following: `zipkin`, `jaeger`, `otlp`, `none`. | `otlp` |
 | `OTEL_METRICS_EXPORTER` | Metrics exporter to be used. The value can be one of the following: `otlp`, `prometheus`, `none`. | `otlp` |
 | `OTEL_METRIC_EXPORT_INTERVAL` | The time interval (in milliseconds) between the start of two export attempts. | `60000` for OTLP exporter, `10000` for console exporter |
+| `OTEL_LOGS_EXPORTER` | Logs exporter to be used. The value can be one of the following: `otlp`, `none`. | `otlp` |
 
 ### Jaeger
 
@@ -157,26 +161,24 @@ Important environment variables include:
 | `OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES` | Comma-separated list of additional `System.Diagnostics.ActivitySource` names to be added to the tracer at the startup. Use it to capture manually instrumented spans. |  |
 | `OTEL_DOTNET_AUTO_LEGACY_SOURCES` | Comma-separated list of additional legacy source names to be added to the tracer at the startup. Use it to capture `System.Diagnostics.Activity` objects created without using the `System.Diagnostics.ActivitySource` API. |  |
 | `OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION` | Controls whether the telemetry data is flushed when an [AppDomain.UnhandledException](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.unhandledexception) event is raised. Set to `true` when you suspect that you are experiencing a problem with missing telemetry data and also experiencing unhandled exceptions. | `false` |
-| `OTEL_DOTNET_AUTO_TRACES_PLUGINS` | Colon-separated list of OTel SDK instrumentation tracer plugin types, specified with the [assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname). _Note: This list must be colon-separated because the type names may include commas._ | |
 | `OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES` | Comma-separated list of additional `System.Diagnostics.Metrics.Meter` names to be added to the meter at the startup. Use it to capture manually instrumented spans. |  |
-| `OTEL_DOTNET_AUTO_METRICS_PLUGINS` | Colon-separated list of OTel SDK instrumentation meter plugin types, specified with the [assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname). _Note: This list must be colon-separated because the type names may include commas._ | |
+| `OTEL_DOTNET_AUTO_PLUGINS` | Colon-separated list of OTel SDK instrumentation plugin types, specified with the [assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname). _Note: This list must be colon-separated because the type names may include commas._ | |
 
-You can use `OTEL_DOTNET_AUTO_TRACES_PLUGINS` to extend the
-configuration of the OpenTelemetry .NET SDK Tracer. A plugin must be a
-non-static, non-abstract class which has a default constructor and a method
-with following signature:
+You can use `OTEL_DOTNET_AUTO_PLUGINS` to extend the
+configuration of the OpenTelemetry .NET SDK Tracer, Meter or Logs. A plugin
+must be a non-static, non-abstract class which has a default constructor
+and that implements at least one of the configuration methods below:
 
 ```csharp
 public OpenTelemetry.Trace.TracerProviderBuilder ConfigureTracerProvider(OpenTelemetry.Trace.TracerProviderBuilder builder)
 ```
 
-You can use `OTEL_DOTNET_AUTO_METRICS_PLUGINS` to extend the
-configuration of the OpenTelemetry .NET SDK Meter. A plugin must be a
-non-static, non-abstract class which has a default constructor and a method
-with following signature:
-
 ```csharp
 public OpenTelemetry.Metrics.MeterProviderBuilder ConfigureMeterProvider(OpenTelemetry.Metrics.MeterProviderBuilder builder)
+```
+
+```csharp
+public OpenTelemetryLoggerOptions ConfigureLoggerOptions(OpenTelemetryLoggerOptions builder)
 ```
 
 The plugin must use the same version of the `OpenTelemetry` as the
@@ -212,3 +214,4 @@ are used to mitigate assembly version conflicts in .NET Core.
 | `DOTNET_STARTUP_HOOKS` | `%InstallationLocation%/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
 | `DOTNET_ADDITIONAL_DEPS` | `%InstallationLocation%/AdditionalDeps` |
 | `DOTNET_SHARED_STORE` | `%InstallationLocation%/store` |
+| `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` | `OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper` |

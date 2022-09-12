@@ -9,8 +9,8 @@ to .NET applications without having to modify their source code.
 
 ⚠️ The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
-([0.3.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
-can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.3.0-beta.1/docs/README.md).
+([0.3.1-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
+can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.3.1-beta.1/docs/README.md).
 
 ---
 
@@ -18,7 +18,7 @@ OpenTelemetry .NET Automatic Instrumentation is built on top of
 [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-[`1.3.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.3.0)
+[`1.3.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.3.1)
 - `System.Diagnostics.DiagnosticSource`: [`6.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/6.0.0)
   referencing `System.Runtime.CompilerServices.Unsafe`: [`6.0.0`](https://www.nuget.org/packages/System.Runtime.CompilerServices.Unsafe/6.0.0)
 

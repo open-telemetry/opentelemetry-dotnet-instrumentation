@@ -37,6 +37,7 @@ public class SettingsTests : IDisposable
         yield return new object[] { ConfigurationKeys.Traces.Instrumentations, new Action(() => TracerSettings.FromDefaultSources()) };
         yield return new object[] { ConfigurationKeys.Metrics.Exporter, new Action(() => MetricSettings.FromDefaultSources()) };
         yield return new object[] { ConfigurationKeys.Metrics.Instrumentations, new Action(() => MetricSettings.FromDefaultSources()) };
+        yield return new object[] { ConfigurationKeys.Logs.Exporter, new Action(() => LogSettings.FromDefaultSources()) };
         yield return new object[] { ConfigurationKeys.Sdk.Propagators, new Action(() => SdkSettings.FromDefaultSources()) };
     }
 
@@ -57,7 +58,7 @@ public class SettingsTests : IDisposable
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.EnabledInstrumentations.Should().NotBeEmpty();
-            settings.TracerPlugins.Should().BeEmpty();
+            settings.Plugins.Should().BeEmpty();
             settings.ActivitySources.Should().BeEquivalentTo(new List<string> { "OpenTelemetry.AutoInstrumentation.*" });
             settings.LegacySources.Should().BeEmpty();
             settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
@@ -77,8 +78,26 @@ public class SettingsTests : IDisposable
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.EnabledInstrumentations.Should().NotBeEmpty();
-            settings.MetricPlugins.Should().BeEmpty();
+            settings.Plugins.Should().BeEmpty();
             settings.Meters.Should().BeEmpty();
+            settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
+            settings.FlushOnUnhandledException.Should().BeFalse();
+        }
+    }
+
+    [Fact]
+    public void LogSettings_DefaultValues()
+    {
+        var settings = LogSettings.FromDefaultSources();
+
+        using (new AssertionScope())
+        {
+            settings.LogExporter.Should().Be(LogExporter.Otlp);
+            settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
+            settings.ConsoleExporterEnabled.Should().BeFalse();
+            settings.Plugins.Should().BeEmpty();
+            settings.IncludeFormattedMessage.Should().BeFalse();
+            settings.ParseStateValues.Should().BeFalse();
             settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
             settings.FlushOnUnhandledException.Should().BeFalse();
         }
@@ -120,6 +139,18 @@ public class SettingsTests : IDisposable
         var settings = MetricSettings.FromDefaultSources();
 
         settings.MetricExporter.Should().Be(expectedMetricsExporter);
+    }
+
+    [Theory]
+    [InlineData("none", LogExporter.None)]
+    [InlineData("otlp", LogExporter.Otlp)]
+    public void LogExporter_SupportedValues(string logExporter, LogExporter expectedLogExporter)
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, logExporter);
+
+        var settings = LogSettings.FromDefaultSources();
+
+        settings.LogExporter.Should().Be(expectedLogExporter);
     }
 
     [Theory]
@@ -194,6 +225,30 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
+    [InlineData("true", true)]
+    [InlineData("false", false)]
+    public void ParseStateValues_DependsOnCorrespondingEnvVariable(string parseStateValue, bool expectedValue)
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.ParseStateValues, parseStateValue);
+
+        var settings = LogSettings.FromDefaultSources();
+
+        settings.ParseStateValues.Should().Be(expectedValue);
+    }
+
+    [Theory]
+    [InlineData("true", true)]
+    [InlineData("false", false)]
+    public void IncludeFormattedMessage_DependsOnCorrespondingEnvVariable(string includeFormattedMessage, bool expectedValue)
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.IncludeFormattedMessage, includeFormattedMessage);
+
+        var settings = LogSettings.FromDefaultSources();
+
+        settings.IncludeFormattedMessage.Should().Be(expectedValue);
+    }
+
+    [Theory]
     [MemberData(nameof(ExporterEnvVarAndLoadSettingsAction))]
     public void UnsupportedExporterValues(string exporterEnvVar, Action loadSettingsAction)
     {
@@ -245,6 +300,9 @@ public class SettingsTests : IDisposable
 
     private static void ClearEnvVars()
     {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.IncludeFormattedMessage, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.ParseStateValues, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.DisabledInstrumentations, null);
