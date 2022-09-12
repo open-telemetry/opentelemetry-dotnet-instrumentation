@@ -17,6 +17,7 @@
 #if !NETFRAMEWORK
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
@@ -40,7 +41,7 @@ public class HttpTests : TestHelper
     [InlineData("")] // equivalent of default value
     [InlineData("b3multi")]
     [Trait("Category", "EndToEnd")]
-    public void SubmitTraces(string propagators)
+    public async Task SubmitTraces(string propagators)
     {
         SetEnvironmentVariable("OTEL_PROPAGATORS", propagators);
         SetEnvironmentVariable("DISABLE_DistributedContextPropagator", "true");
@@ -50,7 +51,7 @@ public class HttpTests : TestHelper
         const int expectedSpanCount = 3;
 
         RunTestApplication(agent.Port, enableClrProfiler: !IsCoreClr());
-        var spans = agent.WaitForSpans(expectedSpanCount, TimeSpan.FromSeconds(5));
+        var spans = await agent.WaitForSpansAsync(expectedSpanCount, TimeSpan.FromSeconds(5));
 
         using (new AssertionScope())
         {

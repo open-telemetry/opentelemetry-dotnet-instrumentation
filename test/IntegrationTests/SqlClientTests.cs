@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
@@ -40,14 +41,14 @@ public class SqlClientTests : TestHelper
     [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    public void SubmitTraces()
+    public async Task SubmitTraces()
     {
         using var agent = new MockZipkinCollector(Output);
 
         const int expectedSpanCount = 8;
 
         RunTestApplication(agent.Port, arguments: $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}", enableClrProfiler: !IsCoreClr());
-        var spans = agent.WaitForSpans(expectedSpanCount, TimeSpan.FromSeconds(5));
+        var spans = await agent.WaitForSpansAsync(expectedSpanCount, TimeSpan.FromSeconds(5));
 
         using (new AssertionScope())
         {

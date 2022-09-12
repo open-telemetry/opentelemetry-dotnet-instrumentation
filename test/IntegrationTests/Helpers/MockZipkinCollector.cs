@@ -22,7 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading;
+using System.Threading.Tasks;
 using IntegrationTests.Helpers.Mocks;
 using IntegrationTests.Helpers.Models;
 using Newtonsoft.Json;
@@ -75,7 +75,7 @@ public class MockZipkinCollector : IDisposable
     /// <param name="minDateTime">Minimum time to check for spans from</param>
     /// <param name="returnAllOperations">When true, returns every span regardless of operation name</param>
     /// <returns>The list of spans.</returns>
-    public IImmutableList<IMockSpan> WaitForSpans(
+    public async Task<IImmutableList<IMockSpan>> WaitForSpansAsync(
         int count,
         TimeSpan? timeout = null,
         string operationName = null,
@@ -101,7 +101,7 @@ public class MockZipkinCollector : IDisposable
                 break;
             }
 
-            Thread.Sleep(500);
+            await Task.Delay(500);
         }
 
         if (!returnAllOperations)
