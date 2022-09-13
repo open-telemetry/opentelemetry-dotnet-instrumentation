@@ -1,6 +1,6 @@
 # WCF Instrumentation Configuration
 
-***NOTE: WCF Instrumentation has only been tested for Http and NetTcp bindings.***
+⚠️ **NOTICE:** WCF Instrumentation has only been tested for Http and NetTcp bindings.
 
 ## WCF Client Configuration (.NET Framework)
 
