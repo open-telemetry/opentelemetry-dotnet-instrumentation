@@ -1,4 +1,4 @@
-// <copyright file="TestSettings.cs" company="OpenTelemetry Authors">
+// <copyright file="LogSettings.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,23 +16,9 @@
 
 namespace IntegrationTests.Helpers;
 
-public class TestSettings
+public class LogSettings
 {
-    public TracesSettings TracesSettings { get; set; } = null;
+    public string Exporter => "otlp";
 
-    public MetricsSettings MetricsSettings { get; set; } = null;
-
-    public LogSettings LogSettings { get; set; } = null;
-
-    public string Arguments { get; set; } = null;
-
-    public string PackageVersion { get; set; } = string.Empty;
-
-    public string Framework { get; set; } = string.Empty;
-
-    public int AspNetCorePort { get; set; } = 5000;
-
-    public bool EnableStartupHook { get; set; } = true;
-
-    public bool EnableClrProfiler { get; set; } = true;
+    public int Port { get; set; }
 }
