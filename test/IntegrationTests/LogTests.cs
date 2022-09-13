@@ -82,6 +82,7 @@ public class LogTests : TestHelper
         {
             var assert = () =>
             {
+                success.Should().BeTrue();
                 var logRequests = collector.WaitForLogs(1, TimeSpan.FromSeconds(5));
                 var logs = logRequests.SelectMany(r => r.ResourceLogs).Where(s => s.ScopeLogs.Count > 0).FirstOrDefault();
                 var logRecords = logs.ScopeLogs.FirstOrDefault().LogRecords;
