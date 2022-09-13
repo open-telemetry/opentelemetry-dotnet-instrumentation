@@ -167,4 +167,4 @@ instrument:
 ## References
 
 * [OpenTelemetry Project](https://opentelemetry.io/)
-* [OpenTelemetry Contrib WCF docs](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/main/src/OpenTelemetry.Instrumentation.Wcf/README.md)
+* [OpenTelemetry Contrib WCF docs](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/Instrumentation.Wcf-1.0.0-rc.7/src/OpenTelemetry.Instrumentation.Wcf/README.md)
