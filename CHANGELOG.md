@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
-- WCF traces instrumentation (server side for .NET Framework, client side
+- Add WCF traces instrumentation (server-side for .NET Framework, client-side
   for both .NET Core and .NET Framework).
 - Support for ASP.NET Core OpenTelemetry Log exporter related environment variables:
   - `OTEL_LOGS_EXPORTER`,
