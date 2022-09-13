@@ -99,6 +99,7 @@ public class EnvironmentHelper
             "CORECLR_PROFILER_PATH_32",
             "CORECLR_PROFILER_PATH_64",
             "DOTNET_STARTUP_HOOKS",
+            "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES",
 
             // .NET Framework
             "COR_ENABLE_PROFILING",
@@ -114,9 +115,12 @@ public class EnvironmentHelper
             "OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES",
             "OTEL_TRACES_EXPORTER",
             "OTEL_METRICS_EXPORTER",
+            "OTEL_LOGS_EXPORTER",
             "OTEL_EXPORTER_ZIPKIN_ENDPOINT",
             "OTEL_EXPORTER_OTLP_ENDPOINT",
             "OTEL_PROPAGATORS",
+            "OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES",
+            "OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE",
 
             // Auto Instrumentation
             "OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS",
