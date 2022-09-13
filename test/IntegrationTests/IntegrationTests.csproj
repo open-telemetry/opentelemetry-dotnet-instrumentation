@@ -5,6 +5,10 @@
     <DisableStrongNamer Condition="!$(TargetFramework.StartsWith('net4'))">true</DisableStrongNamer>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
+    <DefineConstants>_WINDOWS</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.21.5" />
     <PackageReference Include="Grpc.Tools" Version="2.48.1" PrivateAssets="all" />
