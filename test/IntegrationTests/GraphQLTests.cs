@@ -32,42 +32,33 @@ public class GraphQLTests : TestHelper
 {
     private const string ServiceName = "TestApplication.GraphQL";
 
-    private static readonly string _graphQLValidateOperationName = "graphql.validate";
-    private static readonly string _graphQLExecuteOperationName = "graphql.execute";
-
     private static readonly List<RequestInfo> _requests;
     private static readonly List<WebServerSpanExpectation> _expectations;
-    private static int _expectedGraphQLValidateSpanCount;
     private static int _expectedGraphQLExecuteSpanCount;
 
     static GraphQLTests()
     {
         _requests = new List<RequestInfo>(0);
         _expectations = new List<WebServerSpanExpectation>();
-        _expectedGraphQLValidateSpanCount = 0;
         _expectedGraphQLExecuteSpanCount = 0;
 
         // SUCCESS: query using GET
-        CreateGraphQLRequestsAndExpectations(url: "/graphql?query=" + WebUtility.UrlEncode("query{hero{name appearsIn}}"), httpMethod: "GET", resourceName: "Query operation", graphQLRequestBody: null, graphQLOperationType: "Query", graphQLOperationName: null, graphQLSource: "query{hero{name appearsIn} }");
+        CreateGraphQLRequestsAndExpectations(url: "/graphql?query=" + WebUtility.UrlEncode("query{hero{name appearsIn}}"), httpMethod: "GET", operationName: "query", graphQLRequestBody: null, graphQLOperationType: "query", graphQLOperationName: null, graphQLDocument: "query{hero{name appearsIn} }");
 
         // SUCCESS: query using POST (default)
-        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", resourceName: "Query HeroQuery", graphQLRequestBody: @"{""query"":""query HeroQuery{hero {name appearsIn}}"",""operationName"": ""HeroQuery""}", graphQLOperationType: "Query", graphQLOperationName: "HeroQuery", graphQLSource: "query HeroQuery{hero{name appearsIn}}");
+        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", operationName: "query HeroQuery", graphQLRequestBody: @"{""query"":""query HeroQuery{hero {name appearsIn}}"",""operationName"": ""HeroQuery""}", graphQLOperationType: "query", graphQLOperationName: "HeroQuery", graphQLDocument: "query HeroQuery{hero{name appearsIn}}");
 
         // SUCCESS: mutation
-        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", resourceName: "Mutation AddBobaFett", graphQLRequestBody: @"{""query"":""mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}"",""variables"":{""human"":{""name"": ""Boba Fett""}}}", graphQLOperationType: "Mutation", graphQLOperationName: "AddBobaFett", graphQLSource: "mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}");
+        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", operationName: "mutation AddBobaFett", graphQLRequestBody: @"{""query"":""mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}"",""variables"":{""human"":{""name"": ""Boba Fett""}}}", graphQLOperationType: "mutation", graphQLOperationName: "AddBobaFett", graphQLDocument: "mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}");
 
         // SUCCESS: subscription
-        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", resourceName: "Subscription HumanAddedSub", graphQLRequestBody: @"{ ""query"":""subscription HumanAddedSub{humanAdded{name}}""}", graphQLOperationType: "Subscription", graphQLOperationName: "HumanAddedSub", graphQLSource: "subscription HumanAddedSub{humanAdded{name}}");
-
-        // TODO: When parse is implemented, add a test that fails 'parse' step
+        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", operationName: "subscription HumanAddedSub", graphQLRequestBody: @"{ ""query"":""subscription HumanAddedSub{humanAdded{name}}""}", graphQLOperationType: "subscription", graphQLOperationName: "HumanAddedSub", graphQLDocument: "subscription HumanAddedSub{humanAdded{name}}");
 
         // FAILURE: query fails 'validate' step
-        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", resourceName: "Query HumanError", graphQLRequestBody: @"{""query"":""query HumanError{human(id:1){name apearsIn}}""}", graphQLOperationType: "Query", graphQLOperationName: null, failsValidation: true, graphQLSource: "query HumanError{human(id:1){name apearsIn}}");
+        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", operationName: "query HumanError", graphQLRequestBody: @"{""query"":""query HumanError{human(id:1){name apearsIn}}""}", graphQLOperationType: "query", graphQLOperationName: null, failsValidation: true, graphQLDocument: "query HumanError{human(id:1){name apearsIn}}");
 
         // FAILURE: query fails 'execute' step
-        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", resourceName: "Subscription NotImplementedSub", graphQLRequestBody: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}", graphQLOperationType: "Subscription", graphQLOperationName: "NotImplementedSub", graphQLSource: "subscription NotImplementedSub{throwNotImplementedException{name}}", failsExecution: true);
-
-        // TODO: When parse is implemented, add a test that fails 'resolve' step
+        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", operationName: "subscription NotImplementedSub", graphQLRequestBody: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", failsExecution: true);
     }
 
     public GraphQLTests(ITestOutputHelper output)
@@ -151,32 +142,30 @@ public class GraphQLTests : TestHelper
         var testStart = DateTime.Now;
 
         SubmitRequests(aspNetCorePort);
-        var graphQLValidateSpans = (await agent.WaitForSpansAsync(_expectedGraphQLValidateSpanCount, operationName: _graphQLValidateOperationName, returnAllOperations: false))
+
+        var count = _expectedGraphQLExecuteSpanCount;
+        var spans = (await agent.WaitForSpansAsync(count, instrumentationType: "graphql", returnAllOperations: false))
             .GroupBy(s => s.SpanId)
             .Select(grp => grp.First())
-            .OrderBy(s => s.Start);
-        var graphQLExecuteSpans = (await agent.WaitForSpansAsync(_expectedGraphQLExecuteSpanCount, operationName: _graphQLExecuteOperationName, returnAllOperations: false))
-            .GroupBy(s => s.SpanId)
-            .Select(grp => grp.First())
-            .OrderBy(s => s.Start);
+            .OrderBy(s => s.Start)
+            .ToList();
 
         if (!process.HasExited)
         {
             process.Kill();
         }
 
-        var spans = graphQLValidateSpans.Concat(graphQLExecuteSpans).ToList();
         SpanTestHelpers.AssertExpectationsMet(_expectations, spans);
     }
 
     private static void CreateGraphQLRequestsAndExpectations(
         string url,
         string httpMethod,
-        string resourceName,
+        string operationName,
         string graphQLRequestBody,
         string graphQLOperationType,
         string graphQLOperationName,
-        string graphQLSource,
+        string graphQLDocument,
         bool failsValidation = false,
         bool failsExecution = false)
     {
@@ -187,29 +176,16 @@ public class GraphQLTests : TestHelper
             RequestBody = graphQLRequestBody,
         });
 
-        // Expect a 'validate' span
-        _expectations.Add(new GraphQLSpanExpectation(ServiceName, _graphQLValidateOperationName, _graphQLValidateOperationName)
-        {
-            OriginalUri = url,
-            GraphQLRequestBody = graphQLRequestBody,
-            GraphQLOperationType = null,
-            GraphQLOperationName = graphQLOperationName,
-            GraphQLSource = graphQLSource,
-            IsGraphQLError = failsValidation,
-            ServiceVersion = null
-        });
-        _expectedGraphQLValidateSpanCount++;
-
         if (failsValidation) { return; }
 
         // Expect an 'execute' span
-        _expectations.Add(new GraphQLSpanExpectation(ServiceName, _graphQLExecuteOperationName, resourceName)
+        _expectations.Add(new GraphQLSpanExpectation(ServiceName, operationName, operationName)
         {
             OriginalUri = url,
             GraphQLRequestBody = graphQLRequestBody,
             GraphQLOperationType = graphQLOperationType,
             GraphQLOperationName = graphQLOperationName,
-            GraphQLSource = graphQLSource,
+            GraphQLDocument = graphQLDocument,
             IsGraphQLError = failsExecution,
             ServiceVersion = null
         });

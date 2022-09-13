@@ -91,18 +91,18 @@ public static class Tags
     public static class GraphQL
     {
         /// <summary>
-        /// The operation name of the GraphQL request.
+        /// The name of the operation being executed.
         /// </summary>
         public const string OperationName = "graphql.operation.name";
 
         /// <summary>
-        /// The operation type of the GraphQL request.
+        /// The type of the operation being executed.
         /// </summary>
         public const string OperationType = "graphql.operation.type";
 
         /// <summary>
-        /// The source defining the GraphQL request.
+        /// The GraphQL document being executed.
         /// </summary>
-        public const string Source = "graphql.source";
+        public const string Document = "graphql.document";
     }
 }
