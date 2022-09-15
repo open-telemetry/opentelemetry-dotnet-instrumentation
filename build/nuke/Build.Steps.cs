@@ -295,14 +295,18 @@ partial class Build
                 Solution.GetProject(Projects.Tests.AutoInstrumentationTests)
             };
 
-            DotNetTest(config => config
-                .SetConfiguration(BuildConfiguration)
-                .SetTargetPlatformAnyCPU()
-                .EnableNoRestore()
-                .EnableNoBuild()
-                .CombineWith(unitTestProjects, (s, project) => s
-                    .EnableTrxLogOutput(GetResultsDirectory(project))
-                    .SetProjectFile(project)), degreeOfParallelism: 4);
+            for (int i = 0; i < TestCount; i++)
+            {
+                DotNetTest(config => config
+                    .SetConfiguration(BuildConfiguration)
+                    .SetTargetPlatformAnyCPU()
+                    .SetFilter(TestNameFilter())
+                    .EnableNoRestore()
+                    .EnableNoBuild()
+                    .CombineWith(unitTestProjects, (s, project) => s
+                        .EnableTrxLogOutput(GetResultsDirectory(project))
+                        .SetProjectFile(project)), degreeOfParallelism: 4);
+            }
         });
 
     Target RunManagedIntegrationTests => _ => _
@@ -314,17 +318,20 @@ partial class Build
 
             IEnumerable<TargetFramework> frameworks = IsWin ? TestFrameworks : TestFrameworks.ExceptNetFramework();
 
-            DotNetTest(config => config
-                .SetConfiguration(BuildConfiguration)
-                .SetTargetPlatform(Platform)
-                .SetFilter(ContainersTestFilter())
-                .EnableTrxLogOutput(GetResultsDirectory(project))
-                .SetProjectFile(project)
-                .EnableNoRestore()
-                .EnableNoBuild()
-                .CombineWith(frameworks, (s, fx) => s
-                    .SetFramework(fx)
-                ));
+            for (int i = 0; i < TestCount; i++)
+            {
+                DotNetTest(config => config
+                    .SetConfiguration(BuildConfiguration)
+                    .SetTargetPlatform(Platform)
+                    .SetFilter(AndFilter(TestNameFilter(), ContainersFilter()))
+                    .EnableTrxLogOutput(GetResultsDirectory(project))
+                    .SetProjectFile(project)
+                    .EnableNoRestore()
+                    .EnableNoBuild()
+                    .CombineWith(frameworks, (s, fx) => s
+                        .SetFramework(fx)
+                    ));
+            }
         });
 
     Target CopyAdditionalDeps => _ => _
@@ -414,19 +421,22 @@ partial class Build
             "Initialize_WithDefaultFlag_CreatesTracerProvider",
             "Initialize_WithEnabledFlag_CreatesTracerProvider",
             "Initialize_WithPreviouslyCreatedTracerProvider_WorksCorrectly"
-        }.Select(name => $"{testPrefix}.{name}");
+        }.Select(name => $"FullyQualifiedName~{testPrefix}.{name}");
 
-        foreach (var testName in testNames)
+        for (int i = 0; i < TestCount; i++)
         {
-            DotNetTest(config => config
-                .SetConfiguration(BuildConfiguration)
-                .SetTargetPlatformAnyCPU()
-                .EnableNoRestore()
-                .EnableNoBuild()
-                .EnableTrxLogOutput(GetResultsDirectory(project))
-                .SetProjectFile(project)
-                .SetFilter(testName)
-                .SetProcessEnvironmentVariable("BOOSTRAPPING_TESTS", "true"));
+            foreach (var testName in testNames)
+            {
+                DotNetTest(config => config
+                    .SetConfiguration(BuildConfiguration)
+                    .SetTargetPlatformAnyCPU()
+                    .EnableNoRestore()
+                    .EnableNoBuild()
+                    .EnableTrxLogOutput(GetResultsDirectory(project))
+                    .SetProjectFile(project)
+                    .SetFilter(AndFilter(TestNameFilter(), testName))
+                    .SetProcessEnvironmentVariable("BOOSTRAPPING_TESTS", "true"));
+            }
         }
     }
 }
