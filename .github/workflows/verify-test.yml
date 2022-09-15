@@ -31,21 +31,21 @@ jobs:
       - run: |
           for ($i=1; $i -le ${{ github.event.inputs.count }}; $i++) {
             Write-Host "Execution count: $i"
-            ./build.cmd RunManagedTests --containers windows --test-name ${{ github.event.inputs.testName }}"
+            ./build.cmd RunManagedTests --containers windows --test-name "${{ github.event.inputs.testName }}"
           }
         if: ${{ runner.os == 'Windows' }}
 
       - run: |
           for (( i=1; i<=${{ github.event.inputs.count }}; i++ )); do
             echo "Execution count: $i"
-            ./build.cmd RunManagedTests --containers linux --test-name ${{ github.event.inputs.testName }}"
+            ./build.cmd RunManagedTests --containers linux --test-name "${{ github.event.inputs.testName }}"
           done
         if: ${{ runner.os == 'Linux' }}
       
       - run: |
           for (( i=1; i<=${{ github.event.inputs.count }}; i++ )); do
             echo "Execution count: $i"
-            ./build.cmd RunManagedTests --containers none --test-name ${{ github.event.inputs.testName }}"
+            ./build.cmd RunManagedTests --containers none --test-name "${{ github.event.inputs.testName }}"
           done
         if: ${{ runner.os == 'macOS' }}
 
