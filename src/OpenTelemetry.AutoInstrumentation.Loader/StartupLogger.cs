@@ -137,12 +137,12 @@ internal static class StartupLogger
             using var process = Process.GetCurrentProcess();
             var appDomainName = AppDomain.CurrentDomain.FriendlyName;
             // Do our best to not block other processes on write
-            return Path.Combine(LogDirectory, $"dotnet-tracer-loader-{appDomainName}-{process.Id}.log");
+            return Path.Combine(LogDirectory, $"otel-dotnet-auto-loader-{appDomainName}-{process.Id}.log");
         }
         catch
         {
             // We can't get the process info
-            return Path.Combine(LogDirectory, $"dotnet-tracer-loader-{Guid.NewGuid()}.log");
+            return Path.Combine(LogDirectory, $"otel-dotnet-auto-loader-{Guid.NewGuid()}.log");
         }
     }
 
