@@ -65,12 +65,12 @@ internal static class OtelLogging
             using var process = Process.GetCurrentProcess();
             var appDomainName = AppDomain.CurrentDomain.FriendlyName;
 
-            return $"dotnet-tracer-managed-{appDomainName}-{process.Id}.log";
+            return $"otel-dotnet-auto-{appDomainName}-{process.Id}.log";
         }
         catch
         {
             // We can't get the process info
-            return $"dotnet-tracer-managed-{Guid.NewGuid()}.log";
+            return $"otel-dotnet-auto-{Guid.NewGuid()}.log";
         }
     }
 
