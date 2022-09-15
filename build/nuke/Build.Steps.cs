@@ -298,6 +298,7 @@ partial class Build
             DotNetTest(config => config
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
+                .SetFilter(TestName)
                 .EnableNoRestore()
                 .EnableNoBuild()
                 .CombineWith(unitTestProjects, (s, project) => s
@@ -317,7 +318,7 @@ partial class Build
             DotNetTest(config => config
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatform(Platform)
-                .SetFilter(ContainersTestFilter())
+                .SetFilter(FilterExpression(TestName, ContainersTestFilter()))
                 .EnableTrxLogOutput(GetResultsDirectory(project))
                 .SetProjectFile(project)
                 .EnableNoRestore()
@@ -414,7 +415,7 @@ partial class Build
             "Initialize_WithDefaultFlag_CreatesTracerProvider",
             "Initialize_WithEnabledFlag_CreatesTracerProvider",
             "Initialize_WithPreviouslyCreatedTracerProvider_WorksCorrectly"
-        }.Select(name => $"{testPrefix}.{name}");
+        }.Select(name => $"FullyQualifiedName~{testPrefix}.{name}");
 
         foreach (var testName in testNames)
         {
@@ -425,7 +426,7 @@ partial class Build
                 .EnableNoBuild()
                 .EnableTrxLogOutput(GetResultsDirectory(project))
                 .SetProjectFile(project)
-                .SetFilter(testName)
+                .SetFilter(FilterExpression(TestName, testName))
                 .SetProcessEnvironmentVariable("BOOSTRAPPING_TESTS", "true"));
         }
     }

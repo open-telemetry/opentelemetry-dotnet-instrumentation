@@ -25,6 +25,8 @@ partial class Build : NukeBuild
     const string ContainersLinux = "linux";
     const string ContainersWindows = "windows";
 
+    [Parameter("Test name to be run. Optional.")]
+    readonly string TestName;
 
     [Parameter("Windows Server Core container version. Use it if your Windows does not support the default value. Default is 'ltsc2022'")]
     readonly string WindowsContainerVersion = "ltsc2022";
@@ -119,5 +121,30 @@ partial class Build : NukeBuild
             default:
                 throw new InvalidOperationException($"Container={Containers} is not supported");
         }
+    }
+
+    string FilterExpression(params string[] args)
+    {
+        var result = string.Empty;
+        var first = true;
+
+        foreach (var arg in args)
+        {
+            if (string.IsNullOrEmpty(arg))
+            {
+                continue;
+            }
+
+            if (first)
+            {
+                result = arg;
+                first = true;
+                continue;
+            }
+
+            result += "&" + arg;
+        }
+
+        return result;
     }
 }
