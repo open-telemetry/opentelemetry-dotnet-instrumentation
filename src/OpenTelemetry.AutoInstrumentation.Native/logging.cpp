@@ -14,24 +14,9 @@ namespace trace {
 bool debug_logging_enabled = false;
 bool dump_il_rewrite_enabled = false;
 
-#ifndef _WIN32
-// for linux and osx we need a function to get the path from a filepath
-std::string getPathName(const std::string& s) {
-  char sep = '/';
-  size_t i = s.rfind(sep, s.length());
-  if (i != std::string::npos) {
-    return s.substr(0, i);
-  }
-  return "";
-}
-#endif
-
 std::string Logger::GetLogPath(const std::string& file_name_suffix) {
   const auto path = ToString(DatadogLogFilePath(file_name_suffix));
 
-#ifdef _WIN32
-  // on VC++, use std::filesystem (C++ 17) to
-  // create directory if missing
   const auto log_path = std::filesystem::path(path);
 
   if (log_path.has_parent_path()) {
@@ -41,14 +26,6 @@ std::string Logger::GetLogPath(const std::string& file_name_suffix) {
       std::filesystem::create_directories(parent_path);
     }
   }
-#else
-  // on linux and osx we use the basic C approach
-  const auto log_path = getPathName(path);
-  Stat st;
-  if (log_path != "" && stat(log_path.c_str(), &st) != 0) {
-    mkdir(log_path.c_str(), 0777);
-  }
-#endif
 
   return path;
 }
