@@ -12,10 +12,10 @@ partial class Build : NukeBuild
 {
     public static int Main() => Execute<Build>(x => x.BuildTracer);
 
-    [Parameter("Configuration to build - Default is 'Release'")]
+    [Parameter("Configuration to build. Default is 'Release'")]
     readonly Configuration BuildConfiguration = Configuration.Release;
 
-    [Parameter("Platform to build - x86 or x64. Default is x64")]
+    [Parameter("Platform to build - x86 or x64. Default is 'x64'")]
     readonly MSBuildTargetPlatform Platform = MSBuildTargetPlatform.x64;
 
     [Parameter($"Docker containers type to be used. One of '{ContainersNone}', '{ContainersLinux}', '{ContainersWindows}'. Default is '{ContainersLinux}'")]
@@ -25,18 +25,21 @@ partial class Build : NukeBuild
     const string ContainersLinux = "linux";
     const string ContainersWindows = "windows";
 
-    [Parameter("Test name to be run. Optional.")]
+    [Parameter("Test name to be run. Optional")]
     readonly string TestName;
+
+    [Parameter("Number of times each dotnet test is run. Default is '1'")]
+    readonly int TestCount = 1;
 
     [Parameter("Windows Server Core container version. Use it if your Windows does not support the default value. Default is 'ltsc2022'")]
     readonly string WindowsContainerVersion = "ltsc2022";
 
-    [Parameter("The location to create the tracer home directory. Default is ./bin/tracer-home ")]
+    [Parameter("The location to create the tracer home directory. Default is './bin/tracer-home'")]
     readonly AbsolutePath TracerHome;
-    [Parameter("The location to place NuGet packages and other packages. Default is ./bin/artifacts ")]
+    [Parameter("The location to place NuGet packages and other packages. Default is './bin/artifacts'")]
     readonly AbsolutePath Artifacts;
 
-    [Parameter("The location to restore Nuget packages (optional) ")]
+    [Parameter("The location to restore Nuget packages. Optional")]
     readonly AbsolutePath NugetPackageDirectory;
 
     Target Clean => _ => _
@@ -108,7 +111,7 @@ partial class Build : NukeBuild
         .Description("Build the Examples")
         .DependsOn(CompileExamples);
 
-    string ContainersTestFilter()
+    string ContainersFilter()
     {
         switch (Containers)
         {
@@ -123,7 +126,17 @@ partial class Build : NukeBuild
         }
     }
 
-    string FilterExpression(params string[] args)
+    string TestNameFilter()
+    {
+        if (string.IsNullOrEmpty(TestName))
+        {
+            return null;
+        }
+
+        return "FullyQualifiedName~" + TestName; 
+    }
+
+    string AndFilter(params string[] args)
     {
         var result = string.Empty;
         var first = true;
@@ -138,7 +151,7 @@ partial class Build : NukeBuild
             if (first)
             {
                 result = arg;
-                first = true;
+                first = false;
                 continue;
             }
 

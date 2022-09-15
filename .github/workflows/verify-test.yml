@@ -16,7 +16,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        machine: [ windows-2022, ubuntu-20.04, macos-11 ]
+        include:
+          - machine: windows-2022
+            containers: windows
+          - machine: ubuntu-20.04
+            containers: linux
+          - machine: macos-11
+            containers: none
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.0.2
@@ -25,45 +31,7 @@ jobs:
           dotnet-version: | 
             3.1.x
             6.0.x
-
-      - name: Windows - build and test ${{ github.event.inputs.testName }} ${{ github.event.inputs.count }} times
-        run: |
-          ./build.cmd BuildTracer ManagedTests --skip RunManagedTests
-          if ($global:LASTEXITCODE -ne 0) { 
-            exit $global:LASTEXITCODE
-          }
-          
-          for ($i=1; $i -le ${{ github.event.inputs.count }}; $i++) {
-            Write-Host "Execution count: $i"
-            ./build.cmd RunManagedTests --containers windows --test-name "${{ github.event.inputs.testName }}"
-            if ($global:LASTEXITCODE -ne 0) { 
-              exit $global:LASTEXITCODE
-            }
-          }
-        if: ${{ runner.os == 'Windows' }}
-
-      - name: Linux - build and test ${{ github.event.inputs.testName }} ${{ github.event.inputs.count }} times
-        run: |
-          set -e
-          ./build.cmd BuildTracer ManagedTests --skip RunManagedTests
-          
-          for (( i=1; i<=${{ github.event.inputs.count }}; i++ )); do
-            echo "Execution count: $i"
-            ./build.cmd RunManagedTests --containers linux --test-name "${{ github.event.inputs.testName }}"
-          done
-        if: ${{ runner.os == 'Linux' }}
-      
-      - name: macOS - build and test ${{ github.event.inputs.testName }} ${{ github.event.inputs.count }} times
-        run: |
-          set -e
-          ./build.cmd BuildTracer ManagedTests --skip RunManagedTests
-          
-          for (( i=1; i<=${{ github.event.inputs.count }}; i++ )); do
-            echo "Execution count: $i"
-            ./build.cmd RunManagedTests --containers none --test-name "${{ github.event.inputs.testName }}"
-          done
-        if: ${{ runner.os == 'macOS' }}
-
+      - run: ./build.cmd BuildTracer ManagedTests --containers ${{ matrix.containers }} --test-name "${{ github.event.inputs.testName }}" --test-count ${{ github.event.inputs.count }}
       - name: Upload logs
         uses: actions/upload-artifact@v3.1.0
         if: always()
