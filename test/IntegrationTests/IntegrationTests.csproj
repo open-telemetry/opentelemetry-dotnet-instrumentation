@@ -2,12 +2,15 @@
 
   <PropertyGroup>
     <AddTestStrongNameAssemblyKeyOnNetFramework>true</AddTestStrongNameAssemblyKeyOnNetFramework>
-    <DisableStrongNamer Condition="!$(TargetFramework.StartsWith('net4'))">true</DisableStrongNamer>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
     <DefineConstants>_WINDOWS</DefineConstants>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.EnterpriseServices" Condition="$(TargetFramework.StartsWith('net4'))" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.21.6" />
