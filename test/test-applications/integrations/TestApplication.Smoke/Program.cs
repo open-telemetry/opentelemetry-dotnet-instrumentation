@@ -59,14 +59,14 @@ public class Program
             activity?.SetTag("baz", new int[] { 1, 2, 3 });
         }
 
+        var client = new HttpClient();
         try
         {
-            var client = new HttpClient();
             client.GetStringAsync("http://httpstat.us/200").Wait();
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine(e);
+            Console.WriteLine(ex);
         }
     }
 
