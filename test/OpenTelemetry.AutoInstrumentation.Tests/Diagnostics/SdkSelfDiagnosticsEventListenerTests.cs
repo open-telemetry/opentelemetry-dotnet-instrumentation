@@ -32,7 +32,7 @@ public class SdkSelfDiagnosticsEventListenerTests
     {
         var testSink = new TestSink();
         var logger = new Logger(testSink);
-        var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Error, logger);
+        using var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Error, logger);
 
         // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
         AspNetTelemetryEventSource.Log.ActivityRestored("123");
@@ -46,7 +46,7 @@ public class SdkSelfDiagnosticsEventListenerTests
     {
         var testSink = new TestSink();
         var logger = new Logger(testSink);
-        var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Verbose, logger);
+        using var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Verbose, logger);
 
         // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
         AspNetTelemetryEventSource.Log.ActivityRestored("123");
