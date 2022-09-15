@@ -19,6 +19,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using Xunit;
@@ -35,8 +36,8 @@ public class SdkSelfDiagnosticsEventListenerTests
         using var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Error, logger);
 
         // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
-        AspNetTelemetryEventSource.Log.ActivityRestored("123");
-        OpenTelemetrySdkEventSource.Log.ActivityStarted("Activity started", "1");
+        AspNetTelemetryEventSourceForTests.Log.ActivityRestored("123");
+        OpenTelemetrySdkEventSourceForTests.Log.ActivityStarted("Activity started", "1");
 
         testSink.Messages.Should().BeEmpty("events with lower severity than error should not be written.");
     }
@@ -49,17 +50,24 @@ public class SdkSelfDiagnosticsEventListenerTests
         using var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Verbose, logger);
 
         // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
-        AspNetTelemetryEventSource.Log.ActivityRestored("123");
-        OpenTelemetrySdkEventSource.Log.ActivityStarted("Activity started", "1");
+        AspNetTelemetryEventSourceForTests.Log.ActivityRestored("123");
+        OpenTelemetrySdkEventSourceForTests.Log.ActivityStarted("Activity started", "1");
 
-        testSink.Messages.Should().Contain(msg => msg.Contains("EventSource=OpenTelemetry-Instrumentation-AspNet-Telemetry, Message=Activity restored, Id='123'"));
-        testSink.Messages.Should().Contain(msg => msg.Contains("EventSource=OpenTelemetry-Sdk, Message=Activity started."));
+        using (new AssertionScope())
+        {
+            testSink.Messages.Should().Contain(msg => msg.Contains("EventSource=OpenTelemetry-Instrumentation-AspNet-Telemetry-For-Tests, Message=Activity restored, Id='123'"));
+            testSink.Messages.Should().Contain(msg => msg.Contains("EventSource=OpenTelemetry-Sdk-For-Tests, Message=Activity started."));
+        }
     }
 
-    [EventSource(Name = "OpenTelemetry-Instrumentation-AspNet-Telemetry", Guid = "1de158cc-f7ce-4293-bd19-2358c93c8186")]
-    internal sealed class AspNetTelemetryEventSource : EventSource
+    [EventSource(Name = "OpenTelemetry-Instrumentation-AspNet-Telemetry-For-Tests")]
+    internal sealed class AspNetTelemetryEventSourceForTests : EventSource
     {
-        public static readonly AspNetTelemetryEventSource Log = new();
+        public static readonly AspNetTelemetryEventSourceForTests Log = new();
+
+        private AspNetTelemetryEventSourceForTests()
+        {
+        }
 
         [Event(4, Message = "Activity restored, Id='{0}'", Level = EventLevel.Informational)]
         public void ActivityRestored(string id)
@@ -68,10 +76,14 @@ public class SdkSelfDiagnosticsEventListenerTests
         }
     }
 
-    [EventSource(Name = "OpenTelemetry-Sdk")]
-    internal class OpenTelemetrySdkEventSource : EventSource
+    [EventSource(Name = "OpenTelemetry-Sdk-For-Tests")]
+    internal class OpenTelemetrySdkEventSourceForTests : EventSource
     {
-        public static readonly OpenTelemetrySdkEventSource Log = new();
+        public static readonly OpenTelemetrySdkEventSourceForTests Log = new();
+
+        private OpenTelemetrySdkEventSourceForTests()
+        {
+        }
 
         [Event(24, Message = "Activity started. OperationName = '{0}', Id = '{1}'.", Level = EventLevel.Verbose)]
         public void ActivityStarted(string operationName, string id)
