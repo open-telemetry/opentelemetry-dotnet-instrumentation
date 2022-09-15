@@ -37,12 +37,6 @@ partial class Build
         .After(CompileNativeSrc, PublishManagedProfiler)
         .Executes(() =>
         {
-            // copy createLogPath.sh
-            CopyFileToDirectory(
-                RootDirectory / "build" / "artifacts" / "createLogPath.sh",
-                TracerHomeDirectory,
-                FileExistsPolicy.Overwrite);
-
             // Copy Native file
             CopyFileToDirectory(
                 NativeProfilerProject.Directory / "build" / "bin" / $"{NativeProfilerProject.Name}.so",
