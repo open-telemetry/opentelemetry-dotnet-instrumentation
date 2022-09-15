@@ -171,6 +171,10 @@ are used to test against higher library versions when they are released.
 > `TestApplication.AspNet` references the latest versions
 > of the ASP.NET packages.
 
+To verify that a test is not flaky,
+you can [manually trigger](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow)
+the [verify-test.yml](../.github/workflows/verify-test.yml) GitHub workflow.
+
 ## Debug the .NET runtime on Linux
 
 - [Requirements](https://github.com/dotnet/runtime/blob/main/docs/workflow/requirements/linux-requirements.md)
