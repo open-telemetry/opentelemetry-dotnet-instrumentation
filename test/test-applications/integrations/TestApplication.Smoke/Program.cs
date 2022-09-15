@@ -60,7 +60,14 @@ public class Program
         }
 
         var client = new HttpClient();
-        client.GetStringAsync("http://httpstat.us/200").Wait();
+        try
+        {
+            client.GetStringAsync("http://httpstat.us/200").Wait();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     private static void EmitMetrics()
