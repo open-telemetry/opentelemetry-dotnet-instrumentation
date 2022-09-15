@@ -133,7 +133,7 @@ partial class Build : NukeBuild
             return null;
         }
 
-        return "FullyQualifiedName~" + TestName; 
+        return "FullyQualifiedName~" + TestName;
     }
 
     string AndFilter(params string[] args)

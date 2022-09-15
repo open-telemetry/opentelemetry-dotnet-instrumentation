@@ -305,7 +305,7 @@ partial class Build
                     .EnableNoBuild()
                     .CombineWith(unitTestProjects, (s, project) => s
                         .EnableTrxLogOutput(GetResultsDirectory(project))
-                        .SetProjectFile(project)), degreeOfParallelism: 4); 
+                        .SetProjectFile(project)), degreeOfParallelism: 4);
             }
         });
 
