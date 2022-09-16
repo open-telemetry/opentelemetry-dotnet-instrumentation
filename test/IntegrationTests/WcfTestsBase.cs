@@ -15,6 +15,7 @@
 // </copyright>
 
 using System;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -41,6 +42,7 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
 
         var serverHelper = new WcfServerTestHelper(Output);
         _serverProcess = serverHelper.RunWcfServer(agent.Port);
+        await WaitForServer();
 
         RunTestApplication(agent.Port);
 
@@ -71,5 +73,31 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         Output.WriteLine($"ProcessId: " + _serverProcess.Process.Id);
         Output.WriteLine($"Exit Code: " + _serverProcess.Process.ExitCode);
         Output.WriteResult(_serverProcess);
+    }
+
+    private async Task WaitForServer()
+    {
+        const int tcpPort = 9090;
+        using var tcpClient = new TcpClient();
+        var retries = 0;
+
+        while (retries < 60)
+        {
+            try
+            {
+                await tcpClient.ConnectAsync("127.0.0.1", tcpPort);
+                Output.WriteLine("WCF Server is running.");
+                return;
+            }
+            catch (Exception)
+            {
+                retries++;
+
+                Output.WriteLine("Waiting for WCF Server to open ports.");
+                await Task.Delay(500);
+            }
+        }
+
+        Assert.Fail("WCF Server did not open the port.");
     }
 }
