@@ -27,12 +27,12 @@ namespace IntegrationTests.Helpers.Models;
 /// </summary>
 public class SpanExpectation
 {
-    public SpanExpectation(string serviceName, string serviceVersion, string operationName, string type)
+    public SpanExpectation(string serviceName, string serviceVersion, string operationName, string library)
     {
         ServiceName = serviceName;
         ServiceVersion = serviceVersion;
         OperationName = operationName;
-        Library = type;
+        Library = library;
 
         // Expectations for all spans regardless of type should go here
         RegisterDelegateExpectation(ExpectBasicSpanDataExists);

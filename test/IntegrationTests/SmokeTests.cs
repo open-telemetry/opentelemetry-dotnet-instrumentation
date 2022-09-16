@@ -202,8 +202,8 @@ public class SmokeTests : TestHelper
             var spanList = spans.ToList();
 
             var expectations = new List<WebServerSpanExpectation>();
-            expectations.Add(new WebServerSpanExpectation(ServiceName, null, "SayHello", "SayHello", null));
-            expectations.Add(new WebServerSpanExpectation(ServiceName, null, "HTTP GET", "HTTP GET", null, "GET"));
+            expectations.Add(new WebServerSpanExpectation(ServiceName, "SayHello", "SayHello", "MyCompany.MyProduct.MyLibrary"));
+            expectations.Add(new WebServerSpanExpectation(ServiceName, "HTTP GET", "HTTP GET", "OpenTelemetry.Instrumentation.Http", httpMethod: "GET"));
 
             AssertSpanExpectations(expectations, spanList);
         }
