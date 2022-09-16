@@ -96,7 +96,7 @@ public class MockZipkinCollector : IDisposable
                     .Where(s => s.Start > minimumOffset)
                     .ToImmutableList();
 
-            if (relevantSpans.Count(s => s.Library == instrumentationLibrary) >= count)
+            if (relevantSpans.Count(s => instrumentationLibrary == null || s.Library == instrumentationLibrary) >= count)
             {
                 break;
             }
@@ -108,7 +108,7 @@ public class MockZipkinCollector : IDisposable
         {
             relevantSpans =
                 relevantSpans
-                    .Where(s => s.Library == instrumentationLibrary)
+                    .Where(s => instrumentationLibrary == null || s.Library == instrumentationLibrary)
                     .ToImmutableList();
         }
 
