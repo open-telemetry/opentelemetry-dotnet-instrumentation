@@ -25,6 +25,9 @@ partial class Build : NukeBuild
     const string ContainersLinux = "linux";
     const string ContainersWindows = "windows";
 
+    [Parameter("Test project to be run. Optional, default matches all test projects. The project will be selected if the string is part of its name.")]
+    readonly string TestProject = "";
+
     [Parameter("Test name to be run. Optional")]
     readonly string TestName;
 

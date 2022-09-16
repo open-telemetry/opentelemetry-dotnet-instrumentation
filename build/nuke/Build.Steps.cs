@@ -295,6 +295,17 @@ partial class Build
                 Solution.GetProject(Projects.Tests.AutoInstrumentationTests)
             };
 
+            if (!string.IsNullOrWhiteSpace(TestProject))
+            {
+                unitTestProjects = unitTestProjects
+                    .Where(p => p.Name.Contains(TestProject, StringComparison.OrdinalIgnoreCase))
+                    .ToArray();
+                if (unitTestProjects.Length == 0)
+                {
+                    return;
+                }
+            }
+
             for (int i = 0; i < TestCount; i++)
             {
                 DotNetTest(config => config
@@ -315,6 +326,10 @@ partial class Build
         .Executes(() =>
         {
             var project = Solution.GetProject("IntegrationTests");
+            if (!string.IsNullOrWhiteSpace(TestProject) && !project.Name.Contains(TestProject, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
 
             IEnumerable<TargetFramework> frameworks = IsWin ? TestFrameworks : TestFrameworks.ExceptNetFramework();
 
@@ -414,6 +429,11 @@ partial class Build
     private void RunBootstrappingTests()
     {
         var project = Solution.GetProject(Projects.Tests.AutoInstrumentationBootstrappingTests);
+        if (!string.IsNullOrWhiteSpace(TestProject) && !project.Name.Contains(TestProject, StringComparison.OrdinalIgnoreCase))
+        {
+            // Test project was not selected.
+            return;
+        }
 
         const string testPrefix = "OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests.InstrumentationTests";
         var testNames = new[] {
