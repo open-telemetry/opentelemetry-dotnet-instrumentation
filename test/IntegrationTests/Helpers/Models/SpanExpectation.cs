@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using IntegrationTests.Helpers.Mocks;
 using OpenTelemetry.AutoInstrumentation.Tagging;
@@ -28,26 +27,19 @@ namespace IntegrationTests.Helpers.Models;
 /// </summary>
 public class SpanExpectation
 {
-    public SpanExpectation(string serviceName, string serviceVersion, string operationName, string resourceName, string type)
+    public SpanExpectation(string serviceName, string serviceVersion, string operationName, string type)
     {
         ServiceName = serviceName;
         ServiceVersion = serviceVersion;
         OperationName = operationName;
-        ResourceName = resourceName;
-        Type = type;
+        Library = type;
 
         // Expectations for all spans regardless of type should go here
         RegisterDelegateExpectation(ExpectBasicSpanDataExists);
 
         RegisterCustomExpectation(nameof(OperationName), actual: s => s.Name, expected: OperationName);
         RegisterCustomExpectation(nameof(ServiceName), actual: s => s.Service, expected: ServiceName);
-        RegisterCustomExpectation(nameof(ResourceName), actual: s => s.Resource.TrimEnd(), expected: ResourceName);
-        RegisterCustomExpectation(nameof(Type), actual: s => s.Type, expected: Type);
-
-        RegisterTagExpectation(
-            key: Tags.Language,
-            expected: OpenTelemetry.AutoInstrumentation.Constants.Tracer.Language,
-            when: s => GetTag(s, Tags.SpanKind) != nameof(ActivityKind.Client));
+        RegisterCustomExpectation(nameof(Library), actual: s => s.Library, expected: Library);
 
         RegisterTagExpectation(
             key: Tags.Version,
@@ -60,9 +52,7 @@ public class SpanExpectation
 
     public bool IsTopLevel { get; set; } = true;
 
-    public string Type { get; set; }
-
-    public string ResourceName { get; set; }
+    public string Library { get; set; }
 
     public string OperationName { get; set; }
 
@@ -78,7 +68,7 @@ public class SpanExpectation
 
     public override string ToString()
     {
-        return $"service={ServiceName}, operation={OperationName}, type={Type}, resource={ResourceName}";
+        return $"service={ServiceName}, operation={OperationName}, library={Library}";
     }
 
     /// <summary>
@@ -90,7 +80,7 @@ public class SpanExpectation
     {
         return span.Service == ServiceName
                && span.Name == OperationName
-               && span.Type == Type;
+               && span.Library == Library;
     }
 
     /// <summary>
@@ -206,12 +196,7 @@ public class SpanExpectation
 
     private IEnumerable<string> ExpectBasicSpanDataExists(IMockSpan span)
     {
-        if (string.IsNullOrWhiteSpace(span.Resource))
-        {
-            yield return "Resource must be set.";
-        }
-
-        if (string.IsNullOrWhiteSpace(span.Type))
+        if (string.IsNullOrWhiteSpace(span.Library))
         {
             yield return "Type must be set.";
         }

@@ -71,14 +71,14 @@ public class MockZipkinCollector : IDisposable
     /// </summary>
     /// <param name="count">The expected number of spans.</param>
     /// <param name="timeout">The timeout</param>
-    /// <param name="instrumentationType">The integration we're testing</param>
+    /// <param name="instrumentationLibrary">The integration we're testing</param>
     /// <param name="minDateTime">Minimum time to check for spans from</param>
     /// <param name="returnAllOperations">When true, returns every span regardless of operation name</param>
     /// <returns>The list of spans.</returns>
     public async Task<IImmutableList<IMockSpan>> WaitForSpansAsync(
         int count,
         TimeSpan? timeout = null,
-        string instrumentationType = null,
+        string instrumentationLibrary = null,
         DateTimeOffset? minDateTime = null,
         bool returnAllOperations = false)
     {
@@ -96,7 +96,7 @@ public class MockZipkinCollector : IDisposable
                     .Where(s => s.Start > minimumOffset)
                     .ToImmutableList();
 
-            if (relevantSpans.Count(s => s.Type == instrumentationType) >= count)
+            if (relevantSpans.Count(s => s.Library == instrumentationLibrary) >= count)
             {
                 break;
             }
@@ -108,7 +108,7 @@ public class MockZipkinCollector : IDisposable
         {
             relevantSpans =
                 relevantSpans
-                    .Where(s => s.Type == instrumentationType)
+                    .Where(s => s.Library == instrumentationLibrary)
                     .ToImmutableList();
         }
 

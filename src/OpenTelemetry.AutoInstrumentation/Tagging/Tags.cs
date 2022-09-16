@@ -34,22 +34,6 @@ public static class Tags
     public const string Version = "version";
 
     /// <summary>
-    /// Language tag, applied to root spans that are .NET runtime (e.g., ASP.NET)
-    /// </summary>
-    public const string Language = "language";
-
-    /// <summary>
-    /// The name of the integration that generated the span.
-    /// Use OpenTracing tag "component"
-    /// </summary>
-    public const string InstrumentationName = "component";
-
-    /// <summary>
-    /// The span.Resource for span encoding without applicable field.
-    /// </summary>
-    public const string ResourceName = "resource.name";
-
-    /// <summary>
     /// The kind of span (e.g. client, server).
     /// </summary>
     /// <seealso cref="Activity.Kind"/>

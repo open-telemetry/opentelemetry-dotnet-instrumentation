@@ -31,6 +31,7 @@ namespace IntegrationTests;
 public class GraphQLTests : TestHelper
 {
     private const string ServiceName = "TestApplication.GraphQL";
+    private const string Library = "OpenTelemetry.AutoInstrumentation.GraphQL";
 
     private static readonly List<RequestInfo> _requests;
     private static readonly List<WebServerSpanExpectation> _expectations;
@@ -143,8 +144,7 @@ public class GraphQLTests : TestHelper
 
         SubmitRequests(aspNetCorePort);
 
-        var count = _expectedGraphQLExecuteSpanCount;
-        var spans = (await agent.WaitForSpansAsync(count, instrumentationType: "graphql", returnAllOperations: false))
+        var spans = (await agent.WaitForSpansAsync(_expectedGraphQLExecuteSpanCount, instrumentationLibrary: Library, returnAllOperations: false))
             .GroupBy(s => s.SpanId)
             .Select(grp => grp.First())
             .OrderBy(s => s.Start)
@@ -179,7 +179,7 @@ public class GraphQLTests : TestHelper
         if (failsValidation) { return; }
 
         // Expect an 'execute' span
-        _expectations.Add(new GraphQLSpanExpectation(ServiceName, operationName, operationName)
+        _expectations.Add(new GraphQLSpanExpectation(ServiceName, operationName)
         {
             OriginalUri = url,
             GraphQLRequestBody = graphQLRequestBody,

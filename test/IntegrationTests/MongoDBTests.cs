@@ -52,7 +52,7 @@ public class MongoDBTests : TestHelper
 
         // Check for manual trace
         Assert.Equal("Main()", rootSpan.Name);
-        Assert.Null(rootSpan.Type);
+        Assert.Null(rootSpan.Library);
 
         var spansWithStatement = 0;
 

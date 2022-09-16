@@ -22,7 +22,6 @@ public class WebServerSpanExpectation : SpanExpectation
         string serviceName,
         string serviceVersion,
         string operationName,
-        string resourceName,
         string component = "Web",
         string statusCode = null,
         string httpMethod = null)
@@ -30,7 +29,6 @@ public class WebServerSpanExpectation : SpanExpectation
             serviceName,
             serviceVersion,
             operationName,
-            resourceName,
             component)
     {
         StatusCode = statusCode;

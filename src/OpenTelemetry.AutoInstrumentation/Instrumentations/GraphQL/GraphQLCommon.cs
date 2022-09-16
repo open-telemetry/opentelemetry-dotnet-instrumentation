@@ -57,7 +57,6 @@ internal class GraphQLCommon
             tags.OperationType = operationType;
 
             activity = ActivitySource.StartActivityWithTags(operation, tags);
-            activity.SetResourceName(operation);
         }
         catch (Exception ex)
         {
