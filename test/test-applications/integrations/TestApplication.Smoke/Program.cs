@@ -29,22 +29,31 @@ public class Program
 
     public static void Main(string[] args)
     {
-        ConsoleHelper.WriteSplashScreen(args);
-
-        EmitTraces();
-        EmitMetrics();
-
-        // The "LONG_RUNNING" environment variable is used by tests that access/receive
-        // data that takes time to be produced.
-        var longRunning = Environment.GetEnvironmentVariable("LONG_RUNNING");
-        if (longRunning == "true")
+        try
         {
-            // In this case it is necessary to ensure that the test has a chance to read the
-            // expected data, only by keeping the application alive for some time that can
-            // be ensured. Anyway, tests that set "LONG_RUNNING" env var to true are expected
-            // to kill the process directly.
-            Console.WriteLine("LONG_RUNNING is true, waiting for process to be killed...");
-            Process.GetCurrentProcess().WaitForExit();
+            ConsoleHelper.WriteSplashScreen(args);
+
+            EmitTraces();
+            EmitMetrics();
+
+            // The "LONG_RUNNING" environment variable is used by tests that access/receive
+            // data that takes time to be produced.
+            var longRunning = Environment.GetEnvironmentVariable("LONG_RUNNING");
+            if (longRunning == "true")
+            {
+                // In this case it is necessary to ensure that the test has a chance to read the
+                // expected data, only by keeping the application alive for some time that can
+                // be ensured. Anyway, tests that set "LONG_RUNNING" env var to true are expected
+                // to kill the process directly.
+                Console.WriteLine($"[{DateTime.Now}] LONG_RUNNING is true, waiting for process to be killed...");
+                Process.GetCurrentProcess().WaitForExit();
+                Console.WriteLine($"[{DateTime.Now}] exiting...");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Main Exception: [{DateTime.Now}] {ex}");
+            throw;
         }
     }
 
@@ -63,18 +72,29 @@ public class Program
         try
         {
             client.GetStringAsync("http://httpstat.us/200").Wait();
+            Console.WriteLine($"EmitTraces: [{DateTime.Now}] GetStringAsync completed");
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Console.WriteLine($"EmitTraces Exception: [{DateTime.Now}] {ex}");
+            throw;
         }
     }
 
     private static void EmitMetrics()
     {
-        var myMeter = new Meter(SourceName, "1.0");
-        var myFruitCounter = myMeter.CreateCounter<int>("MyFruitCounter");
+        try
+        {
+            var myMeter = new Meter(SourceName, "1.0");
+            var myFruitCounter = myMeter.CreateCounter<int>("MyFruitCounter");
 
-        myFruitCounter.Add(1, new KeyValuePair<string, object>("name", "apple"));
+            myFruitCounter.Add(1, new KeyValuePair<string, object>("name", "apple"));
+            Console.WriteLine("EmitMetrics: [{DateTime.Now}] Counter.Add completed");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"EmitMetrics Exception: [{DateTime.Now}] {ex}");
+            throw;
+        }
     }
 }
