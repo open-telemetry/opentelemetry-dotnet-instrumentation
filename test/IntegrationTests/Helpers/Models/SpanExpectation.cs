@@ -198,7 +198,7 @@ public class SpanExpectation
     {
         if (string.IsNullOrWhiteSpace(span.Library))
         {
-            yield return "Type must be set.";
+            yield return "Library must be set.";
         }
 
         if (string.IsNullOrWhiteSpace(span.Name))
