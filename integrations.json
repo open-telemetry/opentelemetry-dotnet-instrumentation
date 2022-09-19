@@ -282,5 +282,60 @@
         }
       }
     ]
-  }
+  },
+  {
+    "name": "Logging",
+    "method_replacements": [
+      {
+        "caller": {},
+        "target": {
+          "assembly": "Microsoft.Extensions.Logging",
+          "type": "Microsoft.Extensions.DependencyInjection.LoggingServiceCollectionExtensions",
+          "method": "AddLogging",
+          "signature_types": [
+            "Microsoft.Extensions.DependencyInjection.IServiceCollection",
+            "Microsoft.Extensions.DependencyInjection.IServiceCollection",
+            "System.Action`1[Microsoft.Extensions.Logging.ILoggingBuilder]"
+          ],
+          "minimum_major": 3,
+          "minimum_minor": 1,
+          "minimum_patch": 0,
+          "maximum_major": 6,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation",
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LogClientIntegration",
+          "action": "CallTargetModification"
+        }
+      },
+  {
+    "name": "Logging",
+    "method_replacements": [
+      {
+        "caller": {},
+        "target": {
+          "assembly": "Microsoft.Extensions.Logging",
+          "type": "Microsoft.Extensions.DependencyInjection.LoggingServiceCollectionExtensions",
+          "method": "AddLogging",
+          "signature_types": [
+            "Microsoft.Extensions.DependencyInjection.IServiceCollection",
+            "Microsoft.Extensions.DependencyInjection.IServiceCollection",
+          ],
+          "minimum_major": 3,
+          "minimum_minor": 1,
+          "minimum_patch": 0,
+          "maximum_major": 6,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation",
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LogClientIntegration",
+          "action": "CallTargetModification"
+        }
+      }	  
+    ]
+  }  
 ]
