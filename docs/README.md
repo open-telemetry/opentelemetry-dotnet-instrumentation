@@ -139,8 +139,8 @@ OTEL_SERVICE_NAME=my-service
 OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0
 ```
 
-If you do not need bytecode instrumenations (see [here](config.md#instrumentations)),
-then you do not specify following environment variables:
+If bytecode instrumentations (see [here](config.md#instrumentations)) is not needed,
+then you do not have to set the following environment variables:
 
 ```env
 COR_ENABLE_PROFILING
