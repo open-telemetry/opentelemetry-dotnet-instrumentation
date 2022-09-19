@@ -72,7 +72,7 @@ public class Program
 
     private static void EmitMetrics()
     {
-        var myMeter = new Meter(SourceName, "1.0");
+        var myMeter = new Meter(SourceName, "1.0.0");
         var myFruitCounter = myMeter.CreateCounter<int>("MyFruitCounter");
 
         myFruitCounter.Add(1, new KeyValuePair<string, object>("name", "apple"));

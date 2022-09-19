@@ -42,7 +42,7 @@ public class SpanExpectation
         RegisterCustomExpectation(nameof(Library), actual: s => s.Library, expected: Library);
 
         RegisterTagExpectation(
-            key: Tags.Version,
+            key: "otel.library.version",
             expected: ServiceVersion);
     }
 
@@ -68,7 +68,7 @@ public class SpanExpectation
 
     public override string ToString()
     {
-        return $"service={ServiceName}, operation={OperationName}, library={Library}";
+        return $"service={ServiceName}, operation={OperationName}, library={Library}, version={ServiceVersion}";
     }
 
     /// <summary>

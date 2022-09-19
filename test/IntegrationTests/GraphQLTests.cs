@@ -31,6 +31,7 @@ namespace IntegrationTests;
 public class GraphQLTests : TestHelper
 {
     private const string ServiceName = "TestApplication.GraphQL";
+    private const string ServiceVersion = OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version;
     private const string Library = "OpenTelemetry.AutoInstrumentation.GraphQL";
 
     private static readonly List<RequestInfo> _requests;
@@ -179,15 +180,14 @@ public class GraphQLTests : TestHelper
         if (failsValidation) { return; }
 
         // Expect an 'execute' span
-        _expectations.Add(new GraphQLSpanExpectation(ServiceName, operationName)
+        _expectations.Add(new GraphQLSpanExpectation(ServiceName, ServiceVersion, operationName)
         {
             OriginalUri = url,
             GraphQLRequestBody = graphQLRequestBody,
             GraphQLOperationType = graphQLOperationType,
             GraphQLOperationName = graphQLOperationName,
             GraphQLDocument = graphQLDocument,
-            IsGraphQLError = failsExecution,
-            ServiceVersion = null
+            IsGraphQLError = failsExecution
         });
         _expectedGraphQLExecuteSpanCount++;
 

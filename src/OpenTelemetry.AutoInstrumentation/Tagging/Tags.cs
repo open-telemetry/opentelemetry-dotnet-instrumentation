@@ -24,16 +24,6 @@ namespace OpenTelemetry.AutoInstrumentation.Tagging;
 public static class Tags
 {
     /// <summary>
-    /// The environment of the profiled service.
-    /// </summary>
-    public const string Env = "env";
-
-    /// <summary>
-    /// The version of the profiled service.
-    /// </summary>
-    public const string Version = "version";
-
-    /// <summary>
     /// The kind of span (e.g. client, server).
     /// </summary>
     /// <seealso cref="Activity.Kind"/>

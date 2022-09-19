@@ -25,8 +25,8 @@ public class GraphQLSpanExpectation : WebServerSpanExpectation
 {
     private const string ExpectedLibrary = "OpenTelemetry.AutoInstrumentation.GraphQL";
 
-    public GraphQLSpanExpectation(string serviceName, string operationName)
-        : base(serviceName, serviceVersion: null, operationName, ExpectedLibrary)
+    public GraphQLSpanExpectation(string serviceName, string serviceVersion, string operationName)
+        : base(serviceName, serviceVersion, operationName, ExpectedLibrary)
     {
         RegisterDelegateExpectation(ExpectErrorMatch);
         RegisterTagExpectation(nameof(Tags.GraphQL.Document), expected: GraphQLDocument);
