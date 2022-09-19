@@ -85,6 +85,7 @@ jobs:
             flavour: macos
     runs-on: ${{ matrix.machine }}
     steps:
+      - run: echo $GITHUB_SHA
       - name: Run convenient installation Bash script
         shell: bash
         run: |
