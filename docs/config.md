@@ -197,9 +197,9 @@ for more information.
 |-|-|-|-|
 | `COR_ENABLE_PROFILING` | `CORECLR_ENABLE_PROFILING` | Enables the profiler. | `1` |
 | `COR_PROFILER` | `CORECLR_PROFILER` | CLSID of the profiler. | `{918728DD-259F-4A6A-AC2B-B85E1B658318}` |
-| `COR_PROFILER_PATH` | `CORECLR_PROFILER_PATH` | Path to the profiler. | `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows, `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.so` for Linux, `%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.dylib` for macOS |
-| `COR_PROFILER_PATH_32` | `CORECLR_PROFILER_PATH_32` | Path to the 32-bit profiler. Bitness-specific paths take precedence over generic paths. | `%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
-| `COR_PROFILER_PATH_64` | `CORECLR_PROFILER_PATH_64` | Path to the 64-bit profiler. Bitness-specific paths take precedence over generic paths. | `%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
+| `COR_PROFILER_PATH` | `CORECLR_PROFILER_PATH` | Path to the profiler. | `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows, `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.so` for Linux, `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.dylib` for macOS |
+| `COR_PROFILER_PATH_32` | `CORECLR_PROFILER_PATH_32` | Path to the 32-bit profiler. Bitness-specific paths take precedence over generic paths. | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
+| `COR_PROFILER_PATH_64` | `CORECLR_PROFILER_PATH_64` | Path to the 64-bit profiler. Bitness-specific paths take precedence over generic paths. | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows |
 
 ## .NET Runtime
 
@@ -212,7 +212,7 @@ are used to mitigate assembly version conflicts in .NET Core.
 
 | Environment variable | Required value |
 |-|-|
-| `DOTNET_STARTUP_HOOKS` | `%InstallationLocation%/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
-| `DOTNET_ADDITIONAL_DEPS` | `%InstallationLocation%/AdditionalDeps` |
-| `DOTNET_SHARED_STORE` | `%InstallationLocation%/store` |
+| `DOTNET_STARTUP_HOOKS` | `$INSTALL_DIR/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
+| `DOTNET_ADDITIONAL_DEPS` | `$INSTALL_DIR/AdditionalDeps` |
+| `DOTNET_SHARED_STORE` | `$INSTALL_DIR/store` |
 | `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` | `OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper` |

@@ -69,3 +69,34 @@ jobs:
         path: bin/tracer-home
       if: (${{ job.status }} != 'cancelled')
       continue-on-error: true
+
+  install-script:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - machine: windows-2022
+            flavour: windows
+          - machine: ubuntu-20.04
+            flavour: linux-glibc
+          - machine: ubuntu-20.04
+            flavour: linux-musl
+          - machine: macos-11
+            flavour: macos
+    runs-on: ${{ matrix.machine }}
+    steps:
+      - name: Run convenient installation Bash script
+        shell: bash
+        run: |
+          set -o pipefail
+          curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/install.sh |
+            VERSION=v0.3.1-beta.1 FLAVOUR=${{ matrix.flavour }} bash -s
+      - name: Test if ./otel-dotnet-auto contains any files
+        shell: bash
+        run: |
+          if [ -z "$(ls -A ./otel-dotnet-auto)" ]; then
+            echo "Empty"
+            exit 1
+          else
+            echo "otel-dotnet-auto is installed"
+          fi
