@@ -50,9 +50,6 @@ public class DomainNeutralTests : TestHelper
         File.Exists(instrumentationAssembly).Should().BeTrue();
         using var gacEntry = new GacEntry(instrumentationAssembly);
 
-        // GAC Entry is not immediately visible, give it some time to process in the background.
-        System.Threading.Thread.Sleep(20_000);
-
         // Domain-neutral depends on strong named assemblies to work, leverage some assets from
         // strong name testing in the current test.
         var assemblyPath = GetTestAssemblyPath();
