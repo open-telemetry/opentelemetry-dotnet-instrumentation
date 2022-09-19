@@ -139,7 +139,7 @@ OTEL_SERVICE_NAME=my-service
 OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0
 ```
 
-If bytecode instrumentations (see [here](config.md#instrumentations)) is not needed,
+If bytecode instrumentations (see [here](config.md#instrumentations)) are not needed,
 then you do not have to set the following environment variables:
 
 ```env
