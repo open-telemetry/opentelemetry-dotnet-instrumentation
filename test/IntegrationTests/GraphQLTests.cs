@@ -16,9 +16,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using IntegrationTests.Helpers;
@@ -113,6 +113,7 @@ public class GraphQLTests : TestHelper
         var intervalMilliseconds = 500;
         var intervals = maxMillisecondsToWait / intervalMilliseconds;
         var serverReady = false;
+        var client = new HttpClient();
 
         // wait for server to be ready to receive requests
         while (intervals-- > 0)
@@ -120,7 +121,9 @@ public class GraphQLTests : TestHelper
             var aliveCheckRequest = new RequestInfo() { HttpMethod = "GET", Url = "/alive-check" };
             try
             {
-                serverReady = SubmitRequest(aspNetCorePort, aliveCheckRequest, false) == HttpStatusCode.OK;
+                var responseCode = await SubmitRequestAsync(client, aspNetCorePort, aliveCheckRequest, false);
+
+                serverReady = responseCode == HttpStatusCode.OK;
             }
             catch
             {
@@ -143,7 +146,7 @@ public class GraphQLTests : TestHelper
 
         var testStart = DateTime.Now;
 
-        SubmitRequests(aspNetCorePort);
+        await SubmitRequestsAsync(client, aspNetCorePort);
 
         var spans = await agent.WaitForSpansAsync(_expectedGraphQLExecuteSpanCount, instrumentationLibrary: Library);
 
@@ -190,76 +193,56 @@ public class GraphQLTests : TestHelper
         if (failsExecution) { return; }
     }
 
-    private void SubmitRequests(int aspNetCorePort)
+    private async Task SubmitRequestsAsync(HttpClient client, int aspNetCorePort)
     {
         foreach (RequestInfo requestInfo in _requests)
         {
-            SubmitRequest(aspNetCorePort, requestInfo);
+            await SubmitRequestAsync(client, aspNetCorePort, requestInfo);
         }
     }
 
-    private HttpStatusCode SubmitRequest(int aspNetCorePort, RequestInfo requestInfo, bool printResponseText = true)
+    private async Task<HttpStatusCode> SubmitRequestAsync(HttpClient client, int aspNetCorePort, RequestInfo requestInfo, bool printResponseText = true)
     {
         try
         {
-#pragma warning disable SYSLIB0014 // suppress error SYSLIB0014: 'WebRequest.Create(string)' is obsolete: 'WebRequest, HttpWebRequest, ServicePoint, and WebClient are obsolete. Use HttpClient instead
-            var request = WebRequest.Create($"http://localhost:{aspNetCorePort}{requestInfo.Url}");
-#pragma warning restore SYSLIB0014
+            var url = $"http://localhost:{aspNetCorePort}{requestInfo.Url}";
+            var method = requestInfo.HttpMethod;
 
-            request.Method = requestInfo.HttpMethod;
+            HttpResponseMessage response;
 
-            if (requestInfo.RequestBody != null)
+            if (method == "GET")
             {
-                byte[] requestBytes = System.Text.Encoding.UTF8.GetBytes(requestInfo.RequestBody);
-
-                request.ContentType = "application/json";
-                request.ContentLength = requestBytes.Length;
-
-                using (var dataStream = request.GetRequestStream())
-                {
-                    dataStream.Write(requestBytes, 0, requestBytes.Length);
-                }
+                response = await client.GetAsync(url);
+            }
+            else if (method == "POST")
+            {
+                response = await client.PostAsync(url, new StringContent(requestInfo.RequestBody, Encoding.UTF8, "application/json"));
+            }
+            else
+            {
+                // If additional logic is needed, implement it here.
+                throw new NotImplementedException($"{method} is not supported.");
             }
 
-            using (var response = (HttpWebResponse)request.GetResponse())
-            using (var stream = response.GetResponseStream())
-            using (var reader = new StreamReader(stream))
+            if (printResponseText)
             {
-                string responseText;
-                try
-                {
-                    responseText = reader.ReadToEnd();
-                }
-                catch (Exception ex)
-                {
-                    responseText = "ENCOUNTERED AN ERROR WHEN READING RESPONSE.";
-                    Output.WriteLine(ex.ToString());
-                }
+                string content = await response.Content.ReadAsStringAsync();
 
-                if (printResponseText)
-                {
-                    Output.WriteLine($"[http] {response.StatusCode} {responseText}");
-                }
-
-                return response.StatusCode;
+                Output.WriteLine($"[http] {response.StatusCode} {content}");
             }
+
+            return response.StatusCode;
         }
-        catch (WebException wex)
+        catch (HttpRequestException ex)
         {
-            Output.WriteLine($"[http] exception: {wex}");
-            if (wex.Response is HttpWebResponse response)
-            {
-                using (var stream = response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
-                {
-                    Output.WriteLine($"[http] {response.StatusCode} {reader.ReadToEnd()}");
-                }
+            Output.WriteLine($"[http] exception: {ex}");
 
-                return response.StatusCode;
-            }
+#if NET6_0_OR_GREATER
+            return ex.StatusCode.Value;
+#else
+            return HttpStatusCode.BadRequest;
+#endif
         }
-
-        return HttpStatusCode.BadRequest;
     }
 
     private class RequestInfo
