@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using IntegrationTests.Helpers.Mocks;
 using IntegrationTests.Helpers.Models;
@@ -26,8 +27,8 @@ namespace IntegrationTests.Helpers;
 public class SpanTestHelpers
 {
     public static void AssertExpectationsMet<T>(
-        List<T> expectations,
-        List<IMockSpan> spans)
+        IList<T> expectations,
+        IImmutableList<IMockSpan> spans)
         where T : SpanExpectation
     {
         Assert.True(spans.Count >= expectations.Count, $"Expected at least {expectations.Count} spans, received {spans.Count}");

@@ -145,11 +145,7 @@ public class GraphQLTests : TestHelper
 
         SubmitRequests(aspNetCorePort);
 
-        var spans = (await agent.WaitForSpansAsync(_expectedGraphQLExecuteSpanCount, instrumentationLibrary: Library, returnAllOperations: false))
-            .GroupBy(s => s.SpanId)
-            .Select(grp => grp.First())
-            .OrderBy(s => s.Start)
-            .ToList();
+        var spans = await agent.WaitForSpansAsync(_expectedGraphQLExecuteSpanCount, instrumentationLibrary: Library);
 
         if (!process.HasExited)
         {

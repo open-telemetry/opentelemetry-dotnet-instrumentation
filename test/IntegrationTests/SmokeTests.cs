@@ -199,8 +199,6 @@ public class SmokeTests : TestHelper
         {
             Assert.Single(spans.Select(s => s.Service).Distinct());
 
-            var spanList = spans.ToList();
-
             var expectations = new List<WebServerSpanExpectation>();
             expectations.Add(new WebServerSpanExpectation(ServiceName, "1.0.0", "SayHello", "MyCompany.MyProduct.MyLibrary"));
 
@@ -210,7 +208,7 @@ public class SmokeTests : TestHelper
             expectations.Add(new WebServerSpanExpectation(ServiceName, "1.0.0.0", "HTTP GET", "OpenTelemetry.Instrumentation.Http", httpMethod: "GET"));
 #endif
 
-            SpanTestHelpers.AssertExpectationsMet(expectations, spanList);
+            SpanTestHelpers.AssertExpectationsMet(expectations, spans);
         }
     }
 
