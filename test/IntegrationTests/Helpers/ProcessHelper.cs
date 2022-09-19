@@ -31,10 +31,10 @@ public class ProcessHelper : IDisposable
     private readonly ManualResetEventSlim _outputMutex = new();
     private readonly StringBuilder _outputBuffer = new();
     private readonly StringBuilder _errorBuffer = new();
+    private readonly object _outputLock = new();
 
     private bool _isStdOutputDrained;
     private bool _isErrOutputDrained;
-    private object _outputLock = new object();
 
     public ProcessHelper(Process process)
     {
