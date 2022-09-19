@@ -203,7 +203,12 @@ public class SmokeTests : TestHelper
 
             var expectations = new List<WebServerSpanExpectation>();
             expectations.Add(new WebServerSpanExpectation(ServiceName, "SayHello", "SayHello", "MyCompany.MyProduct.MyLibrary"));
+
+#if NETFRAMEWORK
+            expectations.Add(new WebServerSpanExpectation(ServiceName, "HTTP GET", "HTTP GET", "OpenTelemetry.HttpWebRequest", httpMethod: "GET"));
+#else
             expectations.Add(new WebServerSpanExpectation(ServiceName, "HTTP GET", "HTTP GET", "OpenTelemetry.Instrumentation.Http", httpMethod: "GET"));
+#endif
 
             AssertSpanExpectations(expectations, spanList);
         }
