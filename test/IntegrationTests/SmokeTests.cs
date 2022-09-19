@@ -156,9 +156,10 @@ public class SmokeTests : TestHelper
         SetEnvironmentVariable("LONG_RUNNING", "true");
         SetEnvironmentVariable("OTEL_METRICS_EXPORTER", "prometheus");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
-        string defaultPrometheusMetricsEndpoint = "http://localhost:9464/metrics";
+        const string defaultPrometheusMetricsEndpoint = "http://localhost:9464/metrics";
 
         using var process = StartTestApplication();
+        using var helper = new ProcessHelper(process);
 
         try
         {
@@ -182,13 +183,21 @@ public class SmokeTests : TestHelper
         }
         finally
         {
-            process.Kill();
+            if (!helper.Process.HasExited)
+            {
+                helper.Process.Kill();
+                helper.Process.WaitForExit();
+            }
+
+            Output.WriteLine("ProcessId: " + helper.Process.Id);
+            Output.WriteLine("Exit Code: " + helper.Process.ExitCode);
+            Output.WriteResult(helper);
         }
     }
 
     private static void AssertNoSpansReceived(IImmutableList<IMockSpan> spans)
     {
-        Assert.True(spans.Count() == 0, $"Expecting no spans, received {spans.Count()}");
+        Assert.True(spans.Count == 0, $"Expecting no spans, received {spans.Count}");
     }
 
     private static void AssertAllSpansReceived(IImmutableList<IMockSpan> spans)
