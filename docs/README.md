@@ -114,10 +114,10 @@ OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
 On **Windows** you need to additionally set:
 
 ```env
-COR_PROFILER_PATH_64=%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll
 COR_PROFILER_PATH_32=%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll
-CORECLR_PROFILER_PATH_64=%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll
+COR_PROFILER_PATH_64=%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll
 CORECLR_PROFILER_PATH_32=%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll
+CORECLR_PROFILER_PATH_64=%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll
 ```
 
 On **Linux** you need to additionally set:
@@ -137,6 +137,22 @@ Configure application's resources. For example:
 ```env
 OTEL_SERVICE_NAME=my-service
 OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0
+```
+
+If you do not need bytecode instrumenations (see [here](config.md#instrumentations)),
+then you do not specify following environment variables:
+
+```env
+COR_ENABLE_PROFILING
+COR_PROFILER
+COR_PROFILER_PATH_32
+COR_PROFILER_PATH_64
+CORECLR_ENABLE_PROFILING
+CORECLR_PROFILER
+CORECLR_PROFILER_PATH
+CORECLR_PROFILER_PATH_32
+CORECLR_PROFILER_PATH_64
+OTEL_DOTNET_AUTO_INTEGRATIONS_FILE
 ```
 
 ## Instrument a Windows Service running a .NET application
