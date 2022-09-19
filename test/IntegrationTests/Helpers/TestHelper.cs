@@ -220,8 +220,8 @@ public abstract class TestHelper
             process.Kill();
         }
 
-        Output.WriteLine($"ProcessId: " + process.Id);
-        Output.WriteLine($"Exit Code: " + process.ExitCode);
+        Output.WriteLine("ProcessId: " + process.Id);
+        Output.WriteLine("Exit Code: " + process.ExitCode);
         Output.WriteResult(helper);
 
         processTimeout.Should().BeFalse("Test application timed out");

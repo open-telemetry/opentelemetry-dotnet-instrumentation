@@ -94,14 +94,6 @@ Download and extract the appropriate binaries from
 
 > The path where you put the binaries is referenced as `%InstallationLocation%`
 
-On Linux, you can optionally create the default log directory
-after installation by running the following commands:
-
-```sh
-sudo mkdir -p /var/log/opentelemetry/dotnet
-sudo chmod a+rwx /var/log/opentelemetry/dotnet
-```
-
 ### Instrument a .NET application
 
 Before running your application, set the following environment variables:

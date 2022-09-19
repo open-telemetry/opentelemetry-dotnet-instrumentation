@@ -12,7 +12,7 @@ namespace trace
 
 struct TracerLoggerPolicy
 {
-    inline static const std::string file_name = "dotnet-tracer-native";
+    inline static const std::string file_name = "otel-dotnet-auto-native";
 #ifdef _WIN32
     // this field will be removed once merged with the profiler in order to have
     // the same product folder name
