@@ -110,7 +110,7 @@ Parameters:
 
 ```sh
 ( set -o pipefail
-curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/install.sh |
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/download.sh |
   VERSION=v0.3.1-beta.1 FLAVOUR=linux-glibc bash -s )
 ```
 
