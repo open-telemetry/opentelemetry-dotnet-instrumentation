@@ -89,7 +89,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/install.sh |
+          curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/$GITHUB_SHA/install.sh |
             VERSION=v0.3.1-beta.1 FLAVOUR=${{ matrix.flavour }} bash -s
       - name: Test if ./otel-dotnet-auto contains any files
         shell: bash
