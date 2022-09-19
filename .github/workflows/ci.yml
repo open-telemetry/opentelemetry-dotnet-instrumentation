@@ -85,7 +85,10 @@ jobs:
             flavour: macos
     runs-on: ${{ matrix.machine }}
     steps:
-      - run: echo $GITHUB_SHA
+      - run: |
+          echo ${{ github.event.pull_request.head.sha }}
+          echo ${{ github.sha }}
+          echo ${{ github.repository }}
       - name: Run convenient installation Bash script
         shell: bash
         run: |
