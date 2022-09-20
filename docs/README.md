@@ -96,13 +96,13 @@ Download and extract the appropriate binaries from
 
 You can also use the [download.sh](../download.sh) script with the following parameters:
 
-| Parameter | Description | Required | Default value |
-|-|-|-|-|
-| `DISTRIBUTION` | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`. | Yes | |
-| `INSTALL_DIR` | Location where binaries are to be installed | No | `./otel-dotnet-auto` |
-| `RELEASES_URL` | GitHub releases URL | No | `https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases` |
-| `TMPDIR` | Temporary directory used when downloading the files | No | `$(mktemp -d)` |
-| `VERSION` | Version to download | Yes | |
+| Parameter      | Description                                                       | Required | Default value                                                                     |
+|----------------|-------------------------------------------------------------------|----------|-----------------------------------------------------------------------------------|
+| `DISTRIBUTION` | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`. | Yes      |                                                                                   |
+| `INSTALL_DIR`  | Location where binaries are to be installed                       | No       | `./otel-dotnet-auto`                                                              |
+| `RELEASES_URL` | GitHub releases URL                                               | No       | `https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases` |
+| `TMPDIR`       | Temporary directory used when downloading the files               | No       | `$(mktemp -d)`                                                                    |
+| `VERSION`      | Version to download                                               | Yes      |                                                                                   |
 
 ```sh
 ( set -o pipefail
