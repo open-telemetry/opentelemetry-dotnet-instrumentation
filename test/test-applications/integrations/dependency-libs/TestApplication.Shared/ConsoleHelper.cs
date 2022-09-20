@@ -15,6 +15,9 @@
 // </copyright>
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace TestApplication.Shared;
 
@@ -23,8 +26,21 @@ public static class ConsoleHelper
     public static void WriteSplashScreen(string[] args)
     {
         Console.WriteLine($"Command line: {string.Join(" ", args)}");
-        var (isProfilerAttached, additionalMessage) = ProfilerHelper.IsProfilerAttached();
-        Console.WriteLine($"Profiler attached: {(isProfilerAttached.HasValue ? isProfilerAttached.Value.ToString() : additionalMessage)}");
         Console.WriteLine($"Platform: {(Environment.Is64BitProcess ? "x64" : "x32")}");
+
+        var prefixes = new[] { "COR_", "CORECLR_", "DOTNET_", "OTEL_" };
+
+        var envVars = from envVar in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>()
+                      from prefix in prefixes
+                      let key = (envVar.Key as string)?.ToUpperInvariant()
+                      let value = envVar.Value as string
+                      where key.StartsWith(prefix)
+                      orderby key
+                      select new KeyValuePair<string, string>(key, value);
+        Console.WriteLine("Environment variables:");
+        foreach (var entry in envVars)
+        {
+            Console.WriteLine($"\t{entry.Key} = {entry.Value}");
+        }
     }
 }
