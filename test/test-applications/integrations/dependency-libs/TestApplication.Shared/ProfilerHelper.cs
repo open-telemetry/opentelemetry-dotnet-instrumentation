@@ -15,24 +15,26 @@
 // </copyright>
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace TestApplication.Shared;
 
 public static class ProfilerHelper
 {
-    public static (bool? Attached, string Message) IsProfilerAttached()
+    public static IEnumerable<KeyValuePair<string, string>> GetEnvironmentConfiguration()
     {
-        var instrumentationType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation", throwOnError: false);
+        var prefixes = new[] { "COR_", "CORECLR_", "DOTNET_", "OTEL_" };
 
-        if (instrumentationType == null)
-        {
-            return (null, "OpenTelemetry.AutoInstrumentation.Instrumentation is not loaded");
-        }
+        var envVars = from envVar in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>()
+                      from prefix in prefixes
+                      let key = (envVar.Key as string)?.ToUpperInvariant()
+                      let value = envVar.Value as string
+                      where key.StartsWith(prefix)
+                      orderby key
+                      select new KeyValuePair<string, string>(key, value);
 
-        var property = instrumentationType.GetProperty("ProfilerAttached");
-
-        var isAttached = property?.GetValue(null) as bool?;
-
-        return (isAttached ?? false, null);
+        return envVars;
     }
 }
