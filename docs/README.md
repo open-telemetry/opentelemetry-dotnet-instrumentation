@@ -94,24 +94,20 @@ Download and extract the appropriate binaries from
 
 > The path where you put the binaries is referenced as `$INSTALL_DIR`
 
-You can use a convenient Bash script to do it.
-Parameters:
+You can also use the [download.sh](../download.sh) script with the following parameters:
 
-- `INSTALL_DIR` - location where binaries are to be installed;
-  default: `./otel-dotnet-auto`
-- `FLAVOUR` - possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`;
-  required
-- `RELEASES_URL` - GitHub releases URL;
-  default: `https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases`
-- `TMPDIR` - temporary directory used when downloading the files;
-  default: `$(mktemp -d)`  
-- `VERSION` - version to download;
-  required
+| Parameter | Description | Required | Default value |
+|-|-|-|-|
+| `DISTRIBUTION` | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`. | Yes | |
+| `INSTALL_DIR` | Location where binaries are to be installed | No | `./otel-dotnet-auto` |
+| `RELEASES_URL` | GitHub releases URL | No | `https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases` |
+| `TMPDIR` | Temporary directory used when downloading the files | No | `$(mktemp -d)` |
+| `VERSION` | Version to download | Yes | |
 
 ```sh
 ( set -o pipefail
 curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/download.sh |
-  VERSION=v0.3.1-beta.1 FLAVOUR=linux-glibc bash -s )
+  VERSION=v0.3.1-beta.1 DISTRIBUTION=linux-glibc bash -s )
 ```
 
 ### Instrument a .NET application
