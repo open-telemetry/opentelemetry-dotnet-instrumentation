@@ -46,16 +46,32 @@ public class StrongNamedTests : TestHelper
 
         using var agent = new MockZipkinCollector(Output);
 
-        RunTestApplication(agent.Port);
+        using var process = StartTestApplication(agent.Port);
+        using var helper = new ProcessHelper(process);
 
         const int expectedSpansCount = 1;
         var spans = await agent.WaitForSpansAsync(expectedSpansCount, TimeSpan.FromSeconds(5));
 
-        using (new AssertionScope())
+        try
         {
-            spans.Count.Should().Be(expectedSpansCount);
+            using (new AssertionScope())
+            {
+                spans.Count.Should().Be(expectedSpansCount);
 
-            spans.Count(s => s.Tags["validation"] == "StrongNamedValidation").Should().Be(1);
+                spans.Count(s => s.Tags["validation"] == "StrongNamedValidation").Should().Be(1);
+            }
+        }
+        finally
+        {
+            if (!helper.Process.HasExited)
+            {
+                helper.Process.Kill();
+                helper.Process.WaitForExit();
+            }
+
+            Output.WriteLine("ProcessId: " + helper.Process.Id);
+            Output.WriteLine("Exit Code: " + helper.Process.ExitCode);
+            Output.WriteResult(helper);
         }
     }
 }
