@@ -26,8 +26,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Validations
     /// is added we can remove this instrumentation.
     /// </summary>
     [InstrumentMethod(
-        AssemblyName = "TestApplication.StrongNamed",
-        TypeName = "TestApplication.StrongNamed.Command",
+        AssemblyName = "TestLibrary.InstrumentationTarget",
+        TypeName = "TestLibrary.InstrumentationTarget.Command",
         MethodName = "Execute",
         ReturnTypeName = ClrNames.Void,
         ParameterTypeNames = new string[0],

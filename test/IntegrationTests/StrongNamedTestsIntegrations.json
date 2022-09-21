@@ -5,8 +5,8 @@
       {
         "caller": {},
         "target": {
-          "assembly": "TestApplication.StrongNamed",
-          "type": "TestApplication.StrongNamed.Command",
+          "assembly": "TestLibrary.InstrumentationTarget",
+          "type": "TestLibrary.InstrumentationTarget.Command",
           "method": "Execute",
           "signature_types": [
             "System.Void"
