@@ -149,7 +149,7 @@ public class SmokeTests : TestHelper
         }
     }
 
-    [Fact(Skip ="Very flaky. See: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1123 and https://github.com/open-telemetry/opentelemetry-dotnet/issues/3679")]
+    [Fact(Skip = "Very flaky. See: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1123 and https://github.com/open-telemetry/opentelemetry-dotnet/issues/3679")]
     [Trait("Category", "EndToEnd")]
     public async Task PrometheusExporter()
     {
