@@ -454,7 +454,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
     if (Logger::IsDebugEnabled())
     {
         Logger::Debug("ModuleLoadFinished: ", module_id, " ", module_info.assembly.name, " AppDomain ",
-                      module_info.assembly.app_domain_id, " ", module_info.assembly.app_domain_name,
+                      module_info.assembly.app_domain_id, " [", module_info.assembly.app_domain_name, "] ",
                       std::boolalpha,
                       " | IsNGEN = ", module_info.IsNGEN(),
                       " | IsDynamic = ", module_info.IsDynamic(),
@@ -511,8 +511,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
     // In this case, do not insert another startup hook into that non-shared AppDomain
     if (module_info.assembly.name == opentelemetry_autoinstrumentation_loader_assemblyName)
     {
-        Logger::Info("ModuleLoadFinished: OpenTelemetry.AutoInstrumentation.Loader loaded into AppDomain ", app_domain_id, " ",
-                     module_info.assembly.app_domain_name);
+        Logger::Info("ModuleLoadFinished: OpenTelemetry.AutoInstrumentation.Loader loaded into AppDomain ", app_domain_id, " [",
+                     module_info.assembly.app_domain_name, "]");
         first_jit_compilation_app_domains.insert(app_domain_id);
         return S_OK;
     }
@@ -583,7 +583,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
     CallTarget_RequestRejitForModule(module_id, module_metadata, integration_methods_);
 
     Logger::Debug("ModuleLoadFinished stored metadata for ", module_id, " ", module_info.assembly.name, " AppDomain ",
-                  module_info.assembly.app_domain_id, " ", module_info.assembly.app_domain_name);
+                  module_info.assembly.app_domain_id, " [", module_info.assembly.app_domain_name, "]");
 
 #ifndef _WIN32
     // Fix PInvokeMap (Non windows only)
@@ -614,7 +614,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id)
         if (module_info.IsValid())
         {
             Logger::Debug("ModuleUnloadStarted: ", module_id, " ", module_info.assembly.name, " AppDomain ",
-                          module_info.assembly.app_domain_id, " ", module_info.assembly.app_domain_name);
+                          module_info.assembly.app_domain_id, " [", module_info.assembly.app_domain_name, "]");
         }
         else
         {
