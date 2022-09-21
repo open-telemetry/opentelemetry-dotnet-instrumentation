@@ -126,7 +126,7 @@ public class SmokeTests : TestHelper
 
         using var collector = new MockMetricsCollector(Output);
         RunTestApplication(metricsAgentPort: collector.Port);
-        var metricRequests = collector.WaitForMetrics(expectedMetricRequests, TimeSpan.FromSeconds(5));
+        var metricRequests = collector.WaitForMetrics(expectedMetricRequests);
 
         using (new AssertionScope())
         {
@@ -175,7 +175,7 @@ public class SmokeTests : TestHelper
                 var content = await response.Content.ReadAsStringAsync();
                 Output.WriteLine("Raw metrics from Prometheus:");
                 Output.WriteLine(content);
-                content.Should().Contain("TYPE MyFruitCounter counter");
+                content.Should().Contain("TYPE ", "should export any metric");
             };
             await assert.Should().NotThrowAfterAsync(
                 waitTime: 30.Seconds(),
@@ -208,37 +208,17 @@ public class SmokeTests : TestHelper
         {
             Assert.Single(spans.Select(s => s.Service).Distinct());
 
-            var spanList = spans.ToList();
-
             var expectations = new List<WebServerSpanExpectation>();
-            expectations.Add(new WebServerSpanExpectation(ServiceName, null, "SayHello", "SayHello", null));
-            expectations.Add(new WebServerSpanExpectation(ServiceName, null, "HTTP GET", "HTTP GET", null, "GET"));
+            expectations.Add(new WebServerSpanExpectation(ServiceName, "1.0.0", "SayHello", "MyCompany.MyProduct.MyLibrary"));
 
-            AssertSpanExpectations(expectations, spanList);
+#if NETFRAMEWORK
+            expectations.Add(new WebServerSpanExpectation(ServiceName, "1.0.0.0", "HTTP GET", "OpenTelemetry.HttpWebRequest", httpMethod: "GET"));
+#else
+            expectations.Add(new WebServerSpanExpectation(ServiceName, "1.0.0.0", "HTTP GET", "OpenTelemetry.Instrumentation.Http", httpMethod: "GET"));
+#endif
+
+            SpanTestHelpers.AssertExpectationsMet(expectations, spans);
         }
-    }
-
-    private static void AssertSpanExpectations(List<WebServerSpanExpectation> expectations, List<IMockSpan> spans)
-    {
-        List<IMockSpan> remainingSpans = spans.Select(s => s).ToList();
-        List<string> failures = new List<string>();
-
-        foreach (SpanExpectation expectation in expectations)
-        {
-            List<IMockSpan> possibleSpans =
-                remainingSpans
-                    .Where(s => expectation.Matches(s))
-                    .ToList();
-
-            if (possibleSpans.Count == 0)
-            {
-                failures.Add($"No spans for: {expectation}");
-                continue;
-            }
-        }
-
-        string finalMessage = Environment.NewLine + string.Join(Environment.NewLine, failures.Select(f => " - " + f));
-        Assert.True(!failures.Any(), finalMessage);
     }
 
     private async Task<IImmutableList<IMockSpan>> RunTestApplicationAsync(bool enableStartupHook = true)
@@ -248,6 +228,6 @@ public class SmokeTests : TestHelper
         using var agent = new MockZipkinCollector(Output);
         RunTestApplication(agent.Port, enableStartupHook: enableStartupHook);
 
-        return await agent.WaitForSpansAsync(2, TimeSpan.FromSeconds(5));
+        return await agent.WaitForSpansAsync(2);
     }
 }

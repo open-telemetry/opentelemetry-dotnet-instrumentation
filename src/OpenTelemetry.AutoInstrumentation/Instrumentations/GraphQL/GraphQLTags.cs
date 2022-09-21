@@ -24,19 +24,13 @@ internal class GraphQLTags : InstrumentationTags
 {
     protected static readonly IProperty<string>[] GraphQLTagsProperties =
         InstrumentationTagsProperties.Concat(
-            new ReadOnlyProperty<GraphQLTags, string>(Tags.InstrumentationName, t => t.InstrumentationName),
-            new Property<GraphQLTags, string>(Tags.GraphQL.Source, t => t.Source, (t, v) => t.Source = v),
+            new Property<GraphQLTags, string>(Tags.GraphQL.Document, t => t.Document, (t, v) => t.Document = v),
             new Property<GraphQLTags, string>(Tags.GraphQL.OperationName, t => t.OperationName, (t, v) => t.OperationName = v),
-            new Property<GraphQLTags, string>(Tags.GraphQL.OperationType, t => t.OperationType, (t, v) => t.OperationType = v),
-            new ReadOnlyProperty<GraphQLTags, string>(Tags.Language, t => t.Language));
+            new Property<GraphQLTags, string>(Tags.GraphQL.OperationType, t => t.OperationType, (t, v) => t.OperationType = v));
 
     public override ActivityKind Kind => ActivityKind.Server;
 
-    public string InstrumentationName => GraphQLCommon.IntegrationName;
-
-    public string Language => Constants.Tracer.Language;
-
-    public string Source { get; set; }
+    public string Document { get; set; }
 
     public string OperationName { get; set; }
 

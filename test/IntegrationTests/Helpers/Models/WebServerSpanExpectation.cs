@@ -22,16 +22,14 @@ public class WebServerSpanExpectation : SpanExpectation
         string serviceName,
         string serviceVersion,
         string operationName,
-        string resourceName,
-        string component = "Web",
+        string library,
         string statusCode = null,
         string httpMethod = null)
         : base(
             serviceName,
             serviceVersion,
             operationName,
-            resourceName,
-            component)
+            library)
     {
         StatusCode = statusCode;
         HttpMethod = httpMethod;

@@ -33,6 +33,7 @@ public class MockMetricsCollector : IDisposable
 {
     private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromSeconds(20);
 
+    private readonly object _syncRoot = new object();
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
 
@@ -61,9 +62,9 @@ public class MockMetricsCollector : IDisposable
     /// </summary>
     public List<Func<ExportMetricsServiceRequest, bool>> MetricFilters { get; private set; } = new List<Func<ExportMetricsServiceRequest, bool>>();
 
-    public IImmutableList<ExportMetricsServiceRequest> MetricsMessages { get; private set; } = ImmutableList<ExportMetricsServiceRequest>.Empty;
+    private IImmutableList<ExportMetricsServiceRequest> MetricsMessages { get; set; } = ImmutableList<ExportMetricsServiceRequest>.Empty;
 
-    public IImmutableList<NameValueCollection> RequestHeaders { get; private set; } = ImmutableList<NameValueCollection>.Empty;
+    private IImmutableList<NameValueCollection> RequestHeaders { get; set; } = ImmutableList<NameValueCollection>.Empty;
 
     /// <summary>
     /// Wait for the given number of metric requests to appear.
@@ -82,10 +83,13 @@ public class MockMetricsCollector : IDisposable
 
         while (DateTime.Now < deadline)
         {
-            relevantMetricRequests =
-                MetricsMessages
-                    .Where(m => MetricFilters.All(shouldReturn => shouldReturn(m)))
-                    .ToImmutableList();
+            lock (_syncRoot)
+            {
+                relevantMetricRequests =
+                    MetricsMessages
+                        .Where(m => MetricFilters.All(shouldReturn => shouldReturn(m)))
+                        .ToImmutableList();
+            }
 
             if (relevantMetricRequests.Count >= count)
             {
@@ -100,7 +104,11 @@ public class MockMetricsCollector : IDisposable
 
     public void Dispose()
     {
-        WriteOutput($"Shutting down. Total metric requests received: '{MetricsMessages.Count}'");
+        lock (_syncRoot)
+        {
+            WriteOutput($"Shutting down. Total metric requests received: '{MetricsMessages.Count}'");
+        }
+
         _listener.Dispose();
     }
 
@@ -131,10 +139,8 @@ public class MockMetricsCollector : IDisposable
                 var metricsMessage = ExportMetricsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
                 OnRequestDeserialized(metricsMessage);
 
-                lock (this)
+                lock (_syncRoot)
                 {
-                    // we only need to lock when replacing the metric collection,
-                    // not when reading it because it is immutable
                     MetricsMessages = MetricsMessages.Add(metricsMessage);
                     RequestHeaders = RequestHeaders.Add(new NameValueCollection(ctx.Request.Headers));
                 }

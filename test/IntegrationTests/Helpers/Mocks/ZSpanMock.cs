@@ -29,7 +29,7 @@ using IntegrationTests.Helpers.Compatibility;
 
 namespace IntegrationTests.Helpers.Mocks;
 
-[DebuggerDisplay("TraceId={TraceId}, SpanId={SpanId}, Service={Service}, Name={Name}, Resource={Resource}")]
+[DebuggerDisplay("TraceId={TraceId}, SpanId={SpanId}, Service={Service}, Name={Name}")]
 internal class ZSpanMock : IMockSpan
 {
     [JsonExtensionData]
@@ -52,14 +52,12 @@ internal class ZSpanMock : IMockSpan
 
     public string Name { get; set; }
 
-    public string Resource { get; set; }
-
     public string Service
     {
         get => _zipkinData["localEndpoint"]["serviceName"].ToString();
     }
 
-    public string Type { get; set; }
+    public string Library { get; set; }
 
     public long Start
     {
@@ -111,8 +109,7 @@ internal class ZSpanMock : IMockSpan
         sb.AppendLine($"SpanId: {SpanId}");
         sb.AppendLine($"Service: {Service}");
         sb.AppendLine($"Name: {Name}");
-        sb.AppendLine($"Resource: {Resource}");
-        sb.AppendLine($"Type: {Type}");
+        sb.AppendLine($"Library: {Library}");
         sb.AppendLine($"Start: {Start}");
         sb.AppendLine($"Duration: {Duration}");
         sb.AppendLine($"Error: {Error}");
@@ -142,12 +139,11 @@ internal class ZSpanMock : IMockSpan
     [OnDeserialized]
     private void OnDeserialized(StreamingContext context)
     {
-        var resourceNameTag = Tags.GetValueOrDefault("resource.name");
-        // If resource.name tag not set, it matches the operation name
-        Resource = string.IsNullOrEmpty(resourceNameTag) ? Name : resourceNameTag;
-        Type = Tags.GetValueOrDefault("component");
+        Library = Tags.GetValueOrDefault("otel.library.name");
+
         var error = Tags.GetValueOrDefault("error") ?? "false";
         Error = (byte)(error.ToLowerInvariant().Equals("true") ? 1 : 0);
+
         var spanKind = _zipkinData.GetValueOrDefault("kind")?.ToString();
         if (spanKind != null)
         {

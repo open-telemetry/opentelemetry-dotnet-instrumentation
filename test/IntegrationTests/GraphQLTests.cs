@@ -16,9 +16,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using IntegrationTests.Helpers;
@@ -31,43 +31,36 @@ namespace IntegrationTests;
 public class GraphQLTests : TestHelper
 {
     private const string ServiceName = "TestApplication.GraphQL";
-
-    private static readonly string _graphQLValidateOperationName = "graphql.validate";
-    private static readonly string _graphQLExecuteOperationName = "graphql.execute";
+    private const string ServiceVersion = OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version;
+    private const string Library = "OpenTelemetry.AutoInstrumentation.GraphQL";
 
     private static readonly List<RequestInfo> _requests;
     private static readonly List<WebServerSpanExpectation> _expectations;
-    private static int _expectedGraphQLValidateSpanCount;
     private static int _expectedGraphQLExecuteSpanCount;
 
     static GraphQLTests()
     {
         _requests = new List<RequestInfo>(0);
         _expectations = new List<WebServerSpanExpectation>();
-        _expectedGraphQLValidateSpanCount = 0;
         _expectedGraphQLExecuteSpanCount = 0;
 
         // SUCCESS: query using GET
-        CreateGraphQLRequestsAndExpectations(url: "/graphql?query=" + WebUtility.UrlEncode("query{hero{name appearsIn}}"), httpMethod: "GET", resourceName: "Query operation", graphQLRequestBody: null, graphQLOperationType: "Query", graphQLOperationName: null, graphQLSource: "query{hero{name appearsIn} }");
+        CreateGraphQLRequestsAndExpectations(url: "/graphql?query=" + WebUtility.UrlEncode("query{hero{name appearsIn}}"), httpMethod: "GET", operationName: "query", graphQLRequestBody: null, graphQLOperationType: "query", graphQLOperationName: null, graphQLDocument: "query{hero{name appearsIn} }");
 
         // SUCCESS: query using POST (default)
-        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", resourceName: "Query HeroQuery", graphQLRequestBody: @"{""query"":""query HeroQuery{hero {name appearsIn}}"",""operationName"": ""HeroQuery""}", graphQLOperationType: "Query", graphQLOperationName: "HeroQuery", graphQLSource: "query HeroQuery{hero{name appearsIn}}");
+        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", operationName: "query HeroQuery", graphQLRequestBody: @"{""query"":""query HeroQuery{hero {name appearsIn}}"",""operationName"": ""HeroQuery""}", graphQLOperationType: "query", graphQLOperationName: "HeroQuery", graphQLDocument: "query HeroQuery{hero{name appearsIn}}");
 
         // SUCCESS: mutation
-        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", resourceName: "Mutation AddBobaFett", graphQLRequestBody: @"{""query"":""mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}"",""variables"":{""human"":{""name"": ""Boba Fett""}}}", graphQLOperationType: "Mutation", graphQLOperationName: "AddBobaFett", graphQLSource: "mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}");
+        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", operationName: "mutation AddBobaFett", graphQLRequestBody: @"{""query"":""mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}"",""variables"":{""human"":{""name"": ""Boba Fett""}}}", graphQLOperationType: "mutation", graphQLOperationName: "AddBobaFett", graphQLDocument: "mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}");
 
         // SUCCESS: subscription
-        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", resourceName: "Subscription HumanAddedSub", graphQLRequestBody: @"{ ""query"":""subscription HumanAddedSub{humanAdded{name}}""}", graphQLOperationType: "Subscription", graphQLOperationName: "HumanAddedSub", graphQLSource: "subscription HumanAddedSub{humanAdded{name}}");
-
-        // TODO: When parse is implemented, add a test that fails 'parse' step
+        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", operationName: "subscription HumanAddedSub", graphQLRequestBody: @"{ ""query"":""subscription HumanAddedSub{humanAdded{name}}""}", graphQLOperationType: "subscription", graphQLOperationName: "HumanAddedSub", graphQLDocument: "subscription HumanAddedSub{humanAdded{name}}");
 
         // FAILURE: query fails 'validate' step
-        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", resourceName: "Query HumanError", graphQLRequestBody: @"{""query"":""query HumanError{human(id:1){name apearsIn}}""}", graphQLOperationType: "Query", graphQLOperationName: null, failsValidation: true, graphQLSource: "query HumanError{human(id:1){name apearsIn}}");
+        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", operationName: "query HumanError", graphQLRequestBody: @"{""query"":""query HumanError{human(id:1){name apearsIn}}""}", graphQLOperationType: "query", graphQLOperationName: null, failsValidation: true, graphQLDocument: "query HumanError{human(id:1){name apearsIn}}");
 
         // FAILURE: query fails 'execute' step
-        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", resourceName: "Subscription NotImplementedSub", graphQLRequestBody: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}", graphQLOperationType: "Subscription", graphQLOperationName: "NotImplementedSub", graphQLSource: "subscription NotImplementedSub{throwNotImplementedException{name}}", failsExecution: true);
-
-        // TODO: When parse is implemented, add a test that fails 'resolve' step
+        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", operationName: "subscription NotImplementedSub", graphQLRequestBody: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", failsExecution: true);
     }
 
     public GraphQLTests(ITestOutputHelper output)
@@ -120,6 +113,7 @@ public class GraphQLTests : TestHelper
         var intervalMilliseconds = 500;
         var intervals = maxMillisecondsToWait / intervalMilliseconds;
         var serverReady = false;
+        var client = new HttpClient();
 
         // wait for server to be ready to receive requests
         while (intervals-- > 0)
@@ -127,7 +121,9 @@ public class GraphQLTests : TestHelper
             var aliveCheckRequest = new RequestInfo() { HttpMethod = "GET", Url = "/alive-check" };
             try
             {
-                serverReady = SubmitRequest(aspNetCorePort, aliveCheckRequest, false) == HttpStatusCode.OK;
+                var responseCode = await SubmitRequestAsync(client, aspNetCorePort, aliveCheckRequest, false);
+
+                serverReady = responseCode == HttpStatusCode.OK;
             }
             catch
             {
@@ -150,33 +146,26 @@ public class GraphQLTests : TestHelper
 
         var testStart = DateTime.Now;
 
-        SubmitRequests(aspNetCorePort);
-        var graphQLValidateSpans = (await agent.WaitForSpansAsync(_expectedGraphQLValidateSpanCount, operationName: _graphQLValidateOperationName, returnAllOperations: false))
-            .GroupBy(s => s.SpanId)
-            .Select(grp => grp.First())
-            .OrderBy(s => s.Start);
-        var graphQLExecuteSpans = (await agent.WaitForSpansAsync(_expectedGraphQLExecuteSpanCount, operationName: _graphQLExecuteOperationName, returnAllOperations: false))
-            .GroupBy(s => s.SpanId)
-            .Select(grp => grp.First())
-            .OrderBy(s => s.Start);
+        await SubmitRequestsAsync(client, aspNetCorePort);
+
+        var spans = await agent.WaitForSpansAsync(_expectedGraphQLExecuteSpanCount, instrumentationLibrary: Library);
 
         if (!process.HasExited)
         {
             process.Kill();
         }
 
-        var spans = graphQLValidateSpans.Concat(graphQLExecuteSpans).ToList();
         SpanTestHelpers.AssertExpectationsMet(_expectations, spans);
     }
 
     private static void CreateGraphQLRequestsAndExpectations(
         string url,
         string httpMethod,
-        string resourceName,
+        string operationName,
         string graphQLRequestBody,
         string graphQLOperationType,
         string graphQLOperationName,
-        string graphQLSource,
+        string graphQLDocument,
         bool failsValidation = false,
         bool failsExecution = false)
     {
@@ -187,107 +176,73 @@ public class GraphQLTests : TestHelper
             RequestBody = graphQLRequestBody,
         });
 
-        // Expect a 'validate' span
-        _expectations.Add(new GraphQLSpanExpectation(ServiceName, _graphQLValidateOperationName, _graphQLValidateOperationName)
-        {
-            OriginalUri = url,
-            GraphQLRequestBody = graphQLRequestBody,
-            GraphQLOperationType = null,
-            GraphQLOperationName = graphQLOperationName,
-            GraphQLSource = graphQLSource,
-            IsGraphQLError = failsValidation,
-            ServiceVersion = null
-        });
-        _expectedGraphQLValidateSpanCount++;
-
         if (failsValidation) { return; }
 
         // Expect an 'execute' span
-        _expectations.Add(new GraphQLSpanExpectation(ServiceName, _graphQLExecuteOperationName, resourceName)
+        _expectations.Add(new GraphQLSpanExpectation(ServiceName, ServiceVersion, operationName)
         {
             OriginalUri = url,
             GraphQLRequestBody = graphQLRequestBody,
             GraphQLOperationType = graphQLOperationType,
             GraphQLOperationName = graphQLOperationName,
-            GraphQLSource = graphQLSource,
-            IsGraphQLError = failsExecution,
-            ServiceVersion = null
+            GraphQLDocument = graphQLDocument,
+            IsGraphQLError = failsExecution
         });
         _expectedGraphQLExecuteSpanCount++;
 
         if (failsExecution) { return; }
     }
 
-    private void SubmitRequests(int aspNetCorePort)
+    private async Task SubmitRequestsAsync(HttpClient client, int aspNetCorePort)
     {
         foreach (RequestInfo requestInfo in _requests)
         {
-            SubmitRequest(aspNetCorePort, requestInfo);
+            await SubmitRequestAsync(client, aspNetCorePort, requestInfo);
         }
     }
 
-    private HttpStatusCode SubmitRequest(int aspNetCorePort, RequestInfo requestInfo, bool printResponseText = true)
+    private async Task<HttpStatusCode> SubmitRequestAsync(HttpClient client, int aspNetCorePort, RequestInfo requestInfo, bool printResponseText = true)
     {
         try
         {
-#pragma warning disable SYSLIB0014 // suppress error SYSLIB0014: 'WebRequest.Create(string)' is obsolete: 'WebRequest, HttpWebRequest, ServicePoint, and WebClient are obsolete. Use HttpClient instead
-            var request = WebRequest.Create($"http://localhost:{aspNetCorePort}{requestInfo.Url}");
-#pragma warning restore SYSLIB0014
+            var url = $"http://localhost:{aspNetCorePort}{requestInfo.Url}";
+            var method = requestInfo.HttpMethod;
 
-            request.Method = requestInfo.HttpMethod;
+            HttpResponseMessage response;
 
-            if (requestInfo.RequestBody != null)
+            if (method == "GET")
             {
-                byte[] requestBytes = System.Text.Encoding.UTF8.GetBytes(requestInfo.RequestBody);
-
-                request.ContentType = "application/json";
-                request.ContentLength = requestBytes.Length;
-
-                using (var dataStream = request.GetRequestStream())
-                {
-                    dataStream.Write(requestBytes, 0, requestBytes.Length);
-                }
+                response = await client.GetAsync(url);
+            }
+            else if (method == "POST")
+            {
+                response = await client.PostAsync(url, new StringContent(requestInfo.RequestBody, Encoding.UTF8, "application/json"));
+            }
+            else
+            {
+                // If additional logic is needed, implement it here.
+                throw new NotImplementedException($"{method} is not supported.");
             }
 
-            using (var response = (HttpWebResponse)request.GetResponse())
-            using (var stream = response.GetResponseStream())
-            using (var reader = new StreamReader(stream))
+            if (printResponseText)
             {
-                string responseText;
-                try
-                {
-                    responseText = reader.ReadToEnd();
-                }
-                catch (Exception ex)
-                {
-                    responseText = "ENCOUNTERED AN ERROR WHEN READING RESPONSE.";
-                    Output.WriteLine(ex.ToString());
-                }
+                string content = await response.Content.ReadAsStringAsync();
 
-                if (printResponseText)
-                {
-                    Output.WriteLine($"[http] {response.StatusCode} {responseText}");
-                }
-
-                return response.StatusCode;
+                Output.WriteLine($"[http] {response.StatusCode} {content}");
             }
+
+            return response.StatusCode;
         }
-        catch (WebException wex)
+        catch (HttpRequestException ex)
         {
-            Output.WriteLine($"[http] exception: {wex}");
-            if (wex.Response is HttpWebResponse response)
-            {
-                using (var stream = response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
-                {
-                    Output.WriteLine($"[http] {response.StatusCode} {reader.ReadToEnd()}");
-                }
+            Output.WriteLine($"[http] exception: {ex}");
 
-                return response.StatusCode;
-            }
+#if NET6_0_OR_GREATER
+            return ex.StatusCode.Value;
+#else
+            return HttpStatusCode.BadRequest;
+#endif
         }
-
-        return HttpStatusCode.BadRequest;
     }
 
     private class RequestInfo

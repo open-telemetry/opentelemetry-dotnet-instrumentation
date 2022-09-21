@@ -26,11 +26,9 @@ public interface IMockSpan
 
     public string Name { get; set; }
 
-    public string Resource { get; set; }
-
     public string Service { get; }
 
-    public string Type { get; set; }
+    public string Library { get; set; }
 
     public long Start { get; }
 

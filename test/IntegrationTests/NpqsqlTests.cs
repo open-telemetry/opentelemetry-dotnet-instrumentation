@@ -45,7 +45,7 @@ public class NpqsqlTests : TestHelper
         using var agent = new MockZipkinCollector(Output);
 
         RunTestApplication(agent.Port, arguments: $"--postgres {_postgres.Port}", enableClrProfiler: !IsCoreClr());
-        var spans = await agent.WaitForSpansAsync(1, TimeSpan.FromSeconds(5));
+        var spans = await agent.WaitForSpansAsync(1);
 
         spans.Count.Should().Be(1);
         spans.First().Tags["db.statement"].Should().Be("SELECT 123;");
