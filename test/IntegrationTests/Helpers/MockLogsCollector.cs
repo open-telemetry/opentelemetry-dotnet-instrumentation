@@ -31,6 +31,8 @@ namespace IntegrationTests.Helpers;
 
 public class MockLogsCollector : IDisposable
 {
+    private readonly object _syncRoot = new object();
+
     private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromSeconds(20);
 
     private readonly ITestOutputHelper _output;
@@ -61,9 +63,9 @@ public class MockLogsCollector : IDisposable
     /// </summary>
     public List<Func<ExportLogsServiceRequest, bool>> LogFilters { get; private set; } = new List<Func<ExportLogsServiceRequest, bool>>();
 
-    public IImmutableList<ExportLogsServiceRequest> LogMessages { get; private set; } = ImmutableList<ExportLogsServiceRequest>.Empty;
+    private IImmutableList<ExportLogsServiceRequest> LogMessages { get; set; } = ImmutableList<ExportLogsServiceRequest>.Empty;
 
-    public IImmutableList<NameValueCollection> RequestHeaders { get; private set; } = ImmutableList<NameValueCollection>.Empty;
+    private IImmutableList<NameValueCollection> RequestHeaders { get; set; } = ImmutableList<NameValueCollection>.Empty;
 
     /// <summary>
     /// Wait for the given number of logs to appear.
@@ -82,10 +84,13 @@ public class MockLogsCollector : IDisposable
 
         while (DateTime.Now < deadline)
         {
-            relevantLogs =
-                LogMessages
-                    .Where(m => LogFilters.All(shouldReturn => shouldReturn(m)))
-                    .ToImmutableList();
+            lock (_syncRoot)
+            {
+                relevantLogs =
+                    LogMessages
+                        .Where(m => LogFilters.All(shouldReturn => shouldReturn(m)))
+                        .ToImmutableList();
+            }
 
             if (relevantLogs.Count >= count)
             {
@@ -100,7 +105,10 @@ public class MockLogsCollector : IDisposable
 
     public void Dispose()
     {
-        WriteOutput($"Shutting down. Total logs requests received: '{LogMessages.Count}'");
+        lock (_syncRoot)
+        {
+            WriteOutput($"Shutting down. Total logs requests received: '{LogMessages.Count}'");
+        }
         _listener.Dispose();
     }
 
@@ -131,10 +139,8 @@ public class MockLogsCollector : IDisposable
                 var logsMessage = ExportLogsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
                 OnRequestDeserialized(logsMessage);
 
-                lock (this)
+                lock (_syncRoot)
                 {
-                    // we only need to lock when replacing the logs collection,
-                    // not when reading it because it is immutable
                     LogMessages = LogMessages.Add(logsMessage);
                     RequestHeaders = RequestHeaders.Add(new NameValueCollection(ctx.Request.Headers));
                 }
