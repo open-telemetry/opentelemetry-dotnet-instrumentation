@@ -109,7 +109,7 @@ internal class ZSpanMock : IMockSpan
         sb.AppendLine($"SpanId: {SpanId}");
         sb.AppendLine($"Service: {Service}");
         sb.AppendLine($"Name: {Name}");
-        sb.AppendLine($"Type: {Library}");
+        sb.AppendLine($"Library: {Library}");
         sb.AppendLine($"Start: {Start}");
         sb.AppendLine($"Duration: {Duration}");
         sb.AppendLine($"Error: {Error}");
