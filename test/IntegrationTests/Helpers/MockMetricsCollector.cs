@@ -109,6 +109,7 @@ public class MockMetricsCollector : IDisposable
         {
             WriteOutput($"Shutting down. Total metric requests received: '{MetricsMessages.Count}'");
         }
+
         _listener.Dispose();
     }
 

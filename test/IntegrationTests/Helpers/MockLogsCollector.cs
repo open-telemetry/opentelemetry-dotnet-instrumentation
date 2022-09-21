@@ -109,6 +109,7 @@ public class MockLogsCollector : IDisposable
         {
             WriteOutput($"Shutting down. Total logs requests received: '{LogMessages.Count}'");
         }
+
         _listener.Dispose();
     }
 

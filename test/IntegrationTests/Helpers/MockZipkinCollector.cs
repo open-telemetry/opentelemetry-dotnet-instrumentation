@@ -126,6 +126,7 @@ public class MockZipkinCollector : IDisposable
         {
             WriteOutput($"Shutting down. Total spans received: '{Spans.Count}'");
         }
+
         _listener.Dispose();
     }
 
