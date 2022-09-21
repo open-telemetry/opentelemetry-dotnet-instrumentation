@@ -31,10 +31,9 @@ namespace IntegrationTests.Helpers;
 
 public class MockMetricsCollector : IDisposable
 {
-    private readonly object _syncRoot = new object();
-
     private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromSeconds(20);
 
+    private readonly object _syncRoot = new object();
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
 
@@ -61,11 +60,11 @@ public class MockMetricsCollector : IDisposable
     /// <summary>
     /// Gets the filters used to filter out metrics we don't want to look at for a test.
     /// </summary>
-    private List<Func<ExportMetricsServiceRequest, bool>> MetricFilters { get; set; } = new List<Func<ExportMetricsServiceRequest, bool>>();
+    public List<Func<ExportMetricsServiceRequest, bool>> MetricFilters { get; set; } = new List<Func<ExportMetricsServiceRequest, bool>>();
 
     private IImmutableList<ExportMetricsServiceRequest> MetricsMessages { get; set; } = ImmutableList<ExportMetricsServiceRequest>.Empty;
 
-    public IImmutableList<NameValueCollection> RequestHeaders { get; private set; } = ImmutableList<NameValueCollection>.Empty;
+    private IImmutableList<NameValueCollection> RequestHeaders { get; set; } = ImmutableList<NameValueCollection>.Empty;
 
     /// <summary>
     /// Wait for the given number of metric requests to appear.

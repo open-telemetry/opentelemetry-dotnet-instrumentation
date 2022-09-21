@@ -32,10 +32,9 @@ namespace IntegrationTests.Helpers;
 
 public class MockZipkinCollector : IDisposable
 {
-    private readonly object _syncRoot = new object();
-
     private static readonly TimeSpan DefaultSpanWaitTimeout = TimeSpan.FromSeconds(20);
 
+    private readonly object _syncRoot = new object();
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
 
