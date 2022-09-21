@@ -2,6 +2,8 @@
 
 1. Update the version in the following files:
 
+   - [`download.sh`](../download.sh)
+   - [`docs/README.md`](./README.md)
    - [`src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Loader.csproj`](../src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Loader.csproj)
    - [`src/OpenTelemetry.AutoInstrumentation.Native/CMakeLists.txt`](../src/OpenTelemetry.AutoInstrumentation.Native/CMakeLists.txt)
    - [`src/OpenTelemetry.AutoInstrumentation.Native/Resource.rc`](../src/OpenTelemetry.AutoInstrumentation.Native/Resource.rc)
@@ -9,9 +11,6 @@
    - [`src/OpenTelemetry.AutoInstrumentation.Native/version.h`](../src/OpenTelemetry.AutoInstrumentation.Native/version.h)
    - [`src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj`](../src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj)
    - ['src/OpenTelemetry.AutoInstrumentation\Constants.cs'](../src/OpenTelemetry.AutoInstrumentation\Constants.cs)
-     (Version tag)
-
-1. Update the documentation link on the [README.md](./README.md) file.
 
 1. Update the [CHANGELOG.md](../CHANGELOG.md) with the new release.
 
@@ -42,5 +41,7 @@
 
    - Use the [CHANGELOG.md](../CHANGELOG.md) content in the description.
    - Add the artifacts from [the `release` GitHub workflow](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/actions/workflows/release.yml).
+
+1. Update version in `install-script` job in [`.github/workflows/ci.yml`](../.github/workflows/ci.yml).
 
 1. Update version under [OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator/blob/main/autoinstrumentation/dotnet/version.txt).

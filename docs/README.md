@@ -92,7 +92,23 @@ See [config.md#instrumented-libraries-and-frameworks](config.md#instrumented-lib
 Download and extract the appropriate binaries from
 [the latest release](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest).
 
-> The path where you put the binaries is referenced as `%InstallationLocation%`
+> The path where you put the binaries is referenced as `$INSTALL_DIR`
+
+You can also use the [download.sh](../download.sh) script with the following parameters:
+
+| Parameter      | Description                                                       | Required | Default value                                                                     |
+|----------------|-------------------------------------------------------------------|----------|-----------------------------------------------------------------------------------|
+| `DISTRIBUTION` | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`. | Yes      |                                                                                   |
+| `INSTALL_DIR`  | Location where binaries are to be installed                       | No       | `./otel-dotnet-auto`                                                              |
+| `RELEASES_URL` | GitHub releases URL                                               | No       | `https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases` |
+| `TMPDIR`       | Temporary directory used when downloading the files               | No       | `$(mktemp -d)`                                                                    |
+| `VERSION`      | Version to download                                               | No       | `v0.3.1-beta.1`                                                                   |
+
+```sh
+( set -o pipefail
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/download.sh |
+  VERSION=v0.3.1-beta.1 DISTRIBUTION=linux-glibc bash -s )
+```
 
 ### Instrument a .NET application
 
@@ -104,32 +120,32 @@ COR_ENABLE_PROFILING=1
 COR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
 CORECLR_ENABLE_PROFILING=1
 CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
-DOTNET_ADDITIONAL_DEPS=%InstallationLocation%/AdditionalDeps
-DOTNET_SHARED_STORE=%InstallationLocation%/store
-DOTNET_STARTUP_HOOKS=%InstallationLocation%/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll
-OTEL_DOTNET_AUTO_HOME=%InstallationLocation%
-OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%InstallationLocation%/integrations.json
+DOTNET_ADDITIONAL_DEPS=$INSTALL_DIR/AdditionalDeps
+DOTNET_SHARED_STORE=$INSTALL_DIR/store
+DOTNET_STARTUP_HOOKS=$INSTALL_DIR/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll
+OTEL_DOTNET_AUTO_HOME=$INSTALL_DIR
+OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=$INSTALL_DIR/integrations.json
 ```
 
 On **Windows** you need to additionally set:
 
 ```env
-COR_PROFILER_PATH_32=%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll
-COR_PROFILER_PATH_64=%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll
-CORECLR_PROFILER_PATH_32=%InstallationLocation%/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll
-CORECLR_PROFILER_PATH_64=%InstallationLocation%/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll
+COR_PROFILER_PATH_32=$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll
+COR_PROFILER_PATH_64=$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll
+CORECLR_PROFILER_PATH_32=$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll
+CORECLR_PROFILER_PATH_64=$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll
 ```
 
 On **Linux** you need to additionally set:
 
 ```env
-CORECLR_PROFILER_PATH=%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.so
+CORECLR_PROFILER_PATH=$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.so
 ```
 
 On **macOS** you need to additionally set:
 
 ```env
-CORECLR_PROFILER_PATH=%InstallationLocation%/OpenTelemetry.AutoInstrumentation.Native.dylib
+CORECLR_PROFILER_PATH=$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.dylib
 ```
 
 Configure application's resources. For example:
