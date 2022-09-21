@@ -90,7 +90,7 @@ jobs:
         run: |
           set -o pipefail
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh |
-            VERSION=v0.3.1-beta.1 DISTRIBUTION=${{ matrix.distribution }} bash -s
+            DISTRIBUTION=${{ matrix.distribution }} bash -s
       - name: Test if ./otel-dotnet-auto contains any files
         shell: bash
         run: |

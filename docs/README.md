@@ -102,7 +102,7 @@ You can also use the [download.sh](../download.sh) script with the following par
 | `INSTALL_DIR`  | Location where binaries are to be installed                       | No       | `./otel-dotnet-auto`                                                              |
 | `RELEASES_URL` | GitHub releases URL                                               | No       | `https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases` |
 | `TMPDIR`       | Temporary directory used when downloading the files               | No       | `$(mktemp -d)`                                                                    |
-| `VERSION`      | Version to download                                               | Yes      |                                                                                   |
+| `VERSION`      | Version to download                                               | No       | `v0.3.1-beta.1`                                                                   |
 
 ```sh
 ( set -o pipefail
