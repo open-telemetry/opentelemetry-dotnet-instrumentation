@@ -155,7 +155,8 @@ OTEL_SERVICE_NAME=my-service
 OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0
 ```
 
-If you don't need [bytecode instrumentations](config.md#instrumentations),
+On [.NET (Core)](https://dotnet.microsoft.com/download/dotnet),
+if you don't need [bytecode instrumentations](config.md#instrumentations),
 you can unset or remove the following environment variables:
 
 ```env

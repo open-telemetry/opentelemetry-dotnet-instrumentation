@@ -32,7 +32,7 @@ jobs:
         if: always()
         with:
           name: logs-${{ matrix.machine }}
-          path: build_data/profiler-logs/
+          path: build_data/
       - name: Upload binaries
         uses: actions/upload-artifact@v3.1.0
         if: always()
