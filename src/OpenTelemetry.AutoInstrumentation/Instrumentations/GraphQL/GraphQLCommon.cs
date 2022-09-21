@@ -32,11 +32,6 @@ internal class GraphQLCommon
     internal const string Major2 = "2";
     internal const string Major2Minor3 = "2.3";
 
-    internal const string ParseOperationName = "graphql.parse"; // Instrumentation not yet implemented
-    internal const string ValidateOperationName = "graphql.validate";
-    internal const string ExecuteOperationName = "graphql.execute";
-    internal const string ResolveOperationName = "graphql.resolve"; // Instrumentation not yet implemented
-
     internal const string IntegrationName = nameof(TracerInstrumentation.GraphQL);
     internal static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(IntegrationName);
 
@@ -45,42 +40,23 @@ internal class GraphQLCommon
 
     private static readonly ILogger Log = OtelLogging.GetLogger();
 
-    internal static Activity CreateActivityFromValidate(IDocument document)
-    {
-        Activity activity = null;
-
-        try
-        {
-            var tags = new GraphQLTags();
-            activity = ActivitySource.StartActivityWithTags(ValidateOperationName, tags);
-
-            tags.Source = document.OriginalQuery;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Error creating or populating scope.");
-        }
-
-        return activity;
-    }
-
     internal static Activity CreateActivityFromExecuteAsync(IExecutionContext executionContext)
     {
         Activity activity = null;
 
         try
         {
-            string source = executionContext.Document.OriginalQuery;
+            string query = executionContext.Document.OriginalQuery;
             string operationName = executionContext.Operation.Name;
-            string operationType = executionContext.Operation.OperationType.ToString();
+            string operationType = executionContext.Operation.OperationType.ToString().ToLowerInvariant();
+            string operation = GetOperation(operationName, operationType);
 
             var tags = new GraphQLTags();
-            activity = ActivitySource.StartActivityWithTags(ExecuteOperationName, tags);
-            activity.SetResourceName($"{operationType} {operationName ?? "operation"}");
-
-            tags.Source = source;
+            tags.Document = query; // TODO: Sanitization is recommended.
             tags.OperationName = operationName;
             tags.OperationType = operationType;
+
+            activity = ActivitySource.StartActivityWithTags(operation, tags);
         }
         catch (Exception ex)
         {
@@ -170,5 +146,22 @@ internal class GraphQLCommon
         }
 
         return builder.ToString();
+    }
+
+    private static string GetOperation(string operationName, string operationType)
+    {
+        bool hasOperationType = !string.IsNullOrWhiteSpace(operationType);
+        bool hasOperationName = !string.IsNullOrWhiteSpace(operationName);
+
+        if (hasOperationType && hasOperationName)
+        {
+            return $"{operationType} {operationName}";
+        }
+        else if (hasOperationType)
+        {
+            return operationType;
+        }
+
+        return "GraphQL Operation";
     }
 }
