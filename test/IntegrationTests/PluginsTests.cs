@@ -39,7 +39,7 @@ public class PluginsTests : TestHelper
 
         using var collector = new MockZipkinCollector(Output);
         RunTestApplication(collector.Port);
-        var spans = await collector.WaitForSpansAsync(1, TimeSpan.FromSeconds(5));
+        var spans = await collector.WaitForSpansAsync(1);
 
         spans.Should().Contain(x => x.Name == "SayHello");
     }
@@ -52,7 +52,7 @@ public class PluginsTests : TestHelper
 
         using var collector = new MockMetricsCollector(Output);
         RunTestApplication(metricsAgentPort: collector.Port);
-        var metricRequests = collector.WaitForMetrics(1, TimeSpan.FromSeconds(5));
+        var metricRequests = collector.WaitForMetrics(1);
 
         var metrics = metricRequests.Should().NotBeEmpty().And.Subject.First().ResourceMetrics.Should().ContainSingle().Subject.ScopeMetrics;
         metrics.Should().Contain(x => x.Scope.Name == "MyCompany.MyProduct.MyLibrary");

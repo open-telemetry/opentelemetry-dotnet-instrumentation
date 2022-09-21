@@ -126,7 +126,7 @@ public class SmokeTests : TestHelper
 
         using var collector = new MockMetricsCollector(Output);
         RunTestApplication(metricsAgentPort: collector.Port);
-        var metricRequests = collector.WaitForMetrics(expectedMetricRequests, TimeSpan.FromSeconds(5));
+        var metricRequests = collector.WaitForMetrics(expectedMetricRequests);
 
         using (new AssertionScope())
         {
@@ -248,6 +248,6 @@ public class SmokeTests : TestHelper
         using var agent = new MockZipkinCollector(Output);
         RunTestApplication(agent.Port, enableStartupHook: enableStartupHook);
 
-        return await agent.WaitForSpansAsync(2, TimeSpan.FromSeconds(5));
+        return await agent.WaitForSpansAsync(2);
     }
 }

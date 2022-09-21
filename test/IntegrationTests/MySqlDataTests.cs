@@ -48,7 +48,7 @@ public class MySqlDataTests : TestHelper
 
         RunTestApplication(agent.Port, arguments: $"--mysql {_mySql.Port}", enableClrProfiler: !IsCoreClr());
 
-        var spans = await agent.WaitForSpansAsync(1, TimeSpan.FromSeconds(5));
+        var spans = await agent.WaitForSpansAsync(1);
 
         using (new AssertionScope())
         {
