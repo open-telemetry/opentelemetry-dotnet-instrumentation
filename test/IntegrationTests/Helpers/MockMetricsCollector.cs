@@ -60,7 +60,7 @@ public class MockMetricsCollector : IDisposable
     /// <summary>
     /// Gets the filters used to filter out metrics we don't want to look at for a test.
     /// </summary>
-    public List<Func<ExportMetricsServiceRequest, bool>> MetricFilters { get; set; } = new List<Func<ExportMetricsServiceRequest, bool>>();
+    public List<Func<ExportMetricsServiceRequest, bool>> MetricFilters { get; private set; } = new List<Func<ExportMetricsServiceRequest, bool>>();
 
     private IImmutableList<ExportMetricsServiceRequest> MetricsMessages { get; set; } = ImmutableList<ExportMetricsServiceRequest>.Empty;
 
