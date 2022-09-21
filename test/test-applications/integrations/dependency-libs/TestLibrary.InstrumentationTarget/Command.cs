@@ -14,14 +14,12 @@
 // limitations under the License.
 // </copyright>
 
-using System.Threading;
-
 namespace TestLibrary.InstrumentationTarget;
 
 public class Command
 {
     public void Execute()
     {
-        Thread.Yield(); // Just to have some call to outside code.
+        System.Console.WriteLine("Hello there"); // Just to have some call to outside code that should not be optimized (syscall).
     }
 }
