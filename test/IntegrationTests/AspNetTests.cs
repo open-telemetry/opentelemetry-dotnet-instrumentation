@@ -102,7 +102,7 @@ public class AspNetTests : TestHelper
         Output.WriteLine("Sample response:");
         Output.WriteLine(content);
 
-        var metricRequests = collector.WaitForMetrics(expectedMetricRequests, TimeSpan.FromSeconds(5));
+        var metricRequests = collector.WaitForMetrics(expectedMetricRequests);
 
         using (new AssertionScope())
         {

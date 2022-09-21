@@ -45,7 +45,7 @@ public class GrpcNetClientTests : TestHelper
         RunTestApplication(agent.Port, enableClrProfiler: !IsCoreClr());
 
         const int expectedSpansCount = 1;
-        var spans = await agent.WaitForSpansAsync(expectedSpansCount, TimeSpan.FromSeconds(5));
+        var spans = await agent.WaitForSpansAsync(expectedSpansCount);
 
         using (new AssertionScope())
         {

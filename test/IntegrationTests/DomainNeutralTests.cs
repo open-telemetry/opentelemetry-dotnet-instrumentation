@@ -63,7 +63,7 @@ public class DomainNeutralTests : TestHelper
         RunTestApplication(agent.Port);
 
         const int expectedSpansCount = 1;
-        var spans = await agent.WaitForSpansAsync(expectedSpansCount, TimeSpan.FromSeconds(5));
+        var spans = await agent.WaitForSpansAsync(expectedSpansCount);
 
         using (new AssertionScope())
         {

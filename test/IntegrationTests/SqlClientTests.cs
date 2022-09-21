@@ -48,7 +48,7 @@ public class SqlClientTests : TestHelper
         const int expectedSpanCount = 8;
 
         RunTestApplication(agent.Port, arguments: $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}", enableClrProfiler: !IsCoreClr());
-        var spans = await agent.WaitForSpansAsync(expectedSpanCount, TimeSpan.FromSeconds(5));
+        var spans = await agent.WaitForSpansAsync(expectedSpanCount);
 
         using (new AssertionScope())
         {

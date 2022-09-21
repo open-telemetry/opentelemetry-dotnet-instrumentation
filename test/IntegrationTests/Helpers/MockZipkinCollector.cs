@@ -34,6 +34,7 @@ public class MockZipkinCollector : IDisposable
 {
     private static readonly TimeSpan DefaultSpanWaitTimeout = TimeSpan.FromSeconds(20);
 
+    private readonly object _syncRoot = new object();
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
 
@@ -62,9 +63,9 @@ public class MockZipkinCollector : IDisposable
     /// </summary>
     public List<Func<IMockSpan, bool>> SpanFilters { get; private set; } = new List<Func<IMockSpan, bool>>();
 
-    public IImmutableList<IMockSpan> Spans { get; private set; } = ImmutableList<IMockSpan>.Empty;
+    private IImmutableList<IMockSpan> Spans { get; set; } = ImmutableList<IMockSpan>.Empty;
 
-    public IImmutableList<NameValueCollection> RequestHeaders { get; private set; } = ImmutableList<NameValueCollection>.Empty;
+    private IImmutableList<NameValueCollection> RequestHeaders { get; set; } = ImmutableList<NameValueCollection>.Empty;
 
     /// <summary>
     /// Wait for the given number of spans to appear.
@@ -90,11 +91,14 @@ public class MockZipkinCollector : IDisposable
 
         while (DateTime.Now < deadline)
         {
-            relevantSpans =
-                Spans
-                    .Where(s => SpanFilters.All(shouldReturn => shouldReturn(s)))
-                    .Where(s => s.Start > minimumOffset)
-                    .ToImmutableList();
+            lock (_syncRoot)
+            {
+                relevantSpans =
+                    Spans
+                        .Where(s => SpanFilters.All(shouldReturn => shouldReturn(s)))
+                        .Where(s => s.Start > minimumOffset)
+                        .ToImmutableList();
+            }
 
             if (relevantSpans.Count(s => instrumentationLibrary == null || s.Library == instrumentationLibrary) >= count)
             {
@@ -117,7 +121,11 @@ public class MockZipkinCollector : IDisposable
 
     public void Dispose()
     {
-        WriteOutput($"Shutting down. Total spans received: '{Spans.Count}'");
+        lock (_syncRoot)
+        {
+            WriteOutput($"Shutting down. Total spans received: '{Spans.Count}'");
+        }
+
         _listener.Dispose();
     }
 
@@ -149,10 +157,8 @@ public class MockZipkinCollector : IDisposable
                     IList<IMockSpan> spans = zspans.ConvertAll(x => (IMockSpan)x);
                     OnRequestDeserialized(spans);
 
-                    lock (this)
+                    lock (_syncRoot)
                     {
-                        // we only need to lock when replacing the span collection,
-                        // not when reading it because it is immutable
                         Spans = Spans.AddRange(spans);
                         RequestHeaders = RequestHeaders.Add(new NameValueCollection(ctx.Request.Headers));
                     }

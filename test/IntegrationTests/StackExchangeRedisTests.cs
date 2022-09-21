@@ -50,7 +50,7 @@ public class StackExchangeRedisTests : TestHelper
 
         const int expectedSpansCount = 8;
 
-        var spans = await agent.WaitForSpansAsync(expectedSpansCount, TimeSpan.FromSeconds(5));
+        var spans = await agent.WaitForSpansAsync(expectedSpansCount);
 
         using (new AssertionScope())
         {

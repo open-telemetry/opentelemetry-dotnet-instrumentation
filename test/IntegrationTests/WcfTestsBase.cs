@@ -48,7 +48,7 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
 
         // wait so the spans from server are delivered
         await Task.Delay(2000);
-        var spans = await agent.WaitForSpansAsync(4, TimeSpan.FromSeconds(5));
+        var spans = await agent.WaitForSpansAsync(4);
 
         using var scope = new AssertionScope();
         spans.Count.Should().Be(4);
