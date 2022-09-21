@@ -83,7 +83,7 @@ public class LogTests : TestHelper
             success.Should().BeTrue();
             var assert = () =>
             {
-                var logRequests = collector.WaitForLogs(1, TimeSpan.FromSeconds(5));
+                var logRequests = collector.WaitForLogs(1);
                 var logs = logRequests.SelectMany(r => r.ResourceLogs).Where(s => s.ScopeLogs.Count > 0).FirstOrDefault();
                 var logRecords = logs.ScopeLogs.FirstOrDefault().LogRecords;
                 if (parseStateValues || includeFormattedMessage)

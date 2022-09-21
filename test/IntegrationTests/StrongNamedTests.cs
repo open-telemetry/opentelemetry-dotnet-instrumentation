@@ -50,7 +50,7 @@ public class StrongNamedTests : TestHelper
         using var helper = new ProcessHelper(process);
 
         const int expectedSpansCount = 1;
-        var spans = await agent.WaitForSpansAsync(expectedSpansCount, TimeSpan.FromSeconds(5));
+        var spans = await agent.WaitForSpansAsync(expectedSpansCount);
 
         try
         {

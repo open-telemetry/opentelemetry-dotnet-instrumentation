@@ -45,7 +45,7 @@ public class MongoDBTests : TestHelper
     {
         using var agent = new MockZipkinCollector(Output);
         RunTestApplication(agent.Port, arguments: $"--mongo-db {_mongoDB.Port}");
-        var spans = await agent.WaitForSpansAsync(3, TimeSpan.FromSeconds(5));
+        var spans = await agent.WaitForSpansAsync(3);
         Assert.True(spans.Count >= 3, $"Expecting at least 3 spans, only received {spans.Count}");
 
         var rootSpan = spans.Single(s => s.ParentId == null);
