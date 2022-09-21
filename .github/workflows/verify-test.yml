@@ -40,4 +40,4 @@ jobs:
         if: always()
         with:
           name: logs-${{ matrix.machine }}
-          path: build_data/profiler-logs/
+          path: build_data/

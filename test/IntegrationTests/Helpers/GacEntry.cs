@@ -1,4 +1,4 @@
-// <copyright file="Command.cs" company="OpenTelemetry Authors">
+// <copyright file="GacEntry.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,15 +14,26 @@
 // limitations under the License.
 // </copyright>
 
+#if NETFRAMEWORK
 using System;
-using System.Threading;
+using System.EnterpriseServices.Internal;
 
-namespace TestApplication.StrongNamed;
+namespace IntegrationTests.Helpers;
 
-public class Command
+public class GacEntry : IDisposable
 {
-    public void Execute()
+    private readonly string _assemblyPath;
+    private readonly Publish _publish = new Publish();
+
+    public GacEntry(string assemblyPath)
     {
-        Thread.Yield(); // Just to have some call to outside code.
+        _assemblyPath = assemblyPath;
+        _publish.GacInstall(assemblyPath);
+    }
+
+    public void Dispose()
+    {
+        _publish.GacRemove(_assemblyPath);
     }
 }
+#endif

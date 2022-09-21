@@ -1,4 +1,4 @@
-// <copyright file="Program.cs" company="OpenTelemetry Authors">
+// <copyright file="Command.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,15 +14,14 @@
 // limitations under the License.
 // </copyright>
 
-using TestLibrary.InstrumentationTarget;
+using System.Threading;
 
-namespace TestApplication.StrongNamed;
+namespace TestLibrary.InstrumentationTarget;
 
-public static class Program
+public class Command
 {
-    public static void Main(string[] args)
+    public void Execute()
     {
-        var command = new Command();
-        command.Execute();
+        Thread.Yield(); // Just to have some call to outside code.
     }
 }

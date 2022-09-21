@@ -32,7 +32,7 @@ jobs:
         if: always()
         with:
           name: logs-${{ matrix.machine }}
-          path: build_data/profiler-logs/
+          path: build_data/
       - name: Upload binaries
         uses: actions/upload-artifact@v3.1.0
         if: always()
@@ -69,3 +69,34 @@ jobs:
         path: bin/tracer-home
       if: (${{ job.status }} != 'cancelled')
       continue-on-error: true
+
+  install-script:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - machine: windows-2022
+            distribution: windows
+          - machine: ubuntu-20.04
+            distribution: linux-glibc
+          - machine: ubuntu-20.04
+            distribution: linux-musl
+          - machine: macos-11
+            distribution: macos
+    runs-on: ${{ matrix.machine }}
+    steps:
+      - name: Run convenient installation Bash script
+        shell: bash
+        run: |
+          set -o pipefail
+          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh |
+            DISTRIBUTION=${{ matrix.distribution }} bash -s
+      - name: Test if ./otel-dotnet-auto contains any files
+        shell: bash
+        run: |
+          if [ -z "$(ls -A ./otel-dotnet-auto)" ]; then
+            echo "Empty"
+            exit 1
+          else
+            echo "otel-dotnet-auto is installed"
+          fi
