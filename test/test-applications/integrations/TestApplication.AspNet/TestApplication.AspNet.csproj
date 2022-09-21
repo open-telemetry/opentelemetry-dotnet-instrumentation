@@ -91,6 +91,7 @@
     </Compile>
     <Compile Include="Helpers\AssembliesHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\dependency-libs\TestApplication.Shared\ProfilerHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
