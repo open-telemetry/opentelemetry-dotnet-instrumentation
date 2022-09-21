@@ -36,6 +36,8 @@ public class StrongNamedTests : TestHelper
     [Fact]
     public async Task SubmitsTraces()
     {
+        SetEnvironmentVariable("LONG_RUNNING", "true");
+
         var assemblyPath = GetTestAssemblyPath();
         var integrationsFile = Path.Combine(assemblyPath, "StrongNamedTestsIntegrations.json");
         File.Exists(integrationsFile).Should().BeTrue();
