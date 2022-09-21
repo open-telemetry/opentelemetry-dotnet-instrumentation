@@ -24,32 +24,6 @@ namespace OpenTelemetry.AutoInstrumentation.Tagging;
 public static class Tags
 {
     /// <summary>
-    /// The environment of the profiled service.
-    /// </summary>
-    public const string Env = "env";
-
-    /// <summary>
-    /// The version of the profiled service.
-    /// </summary>
-    public const string Version = "version";
-
-    /// <summary>
-    /// Language tag, applied to root spans that are .NET runtime (e.g., ASP.NET)
-    /// </summary>
-    public const string Language = "language";
-
-    /// <summary>
-    /// The name of the integration that generated the span.
-    /// Use OpenTracing tag "component"
-    /// </summary>
-    public const string InstrumentationName = "component";
-
-    /// <summary>
-    /// The span.Resource for span encoding without applicable field.
-    /// </summary>
-    public const string ResourceName = "resource.name";
-
-    /// <summary>
     /// The kind of span (e.g. client, server).
     /// </summary>
     /// <seealso cref="Activity.Kind"/>
@@ -91,18 +65,18 @@ public static class Tags
     public static class GraphQL
     {
         /// <summary>
-        /// The operation name of the GraphQL request.
+        /// The name of the operation being executed.
         /// </summary>
         public const string OperationName = "graphql.operation.name";
 
         /// <summary>
-        /// The operation type of the GraphQL request.
+        /// The type of the operation being executed.
         /// </summary>
         public const string OperationType = "graphql.operation.type";
 
         /// <summary>
-        /// The source defining the GraphQL request.
+        /// The GraphQL document being executed.
         /// </summary>
-        public const string Source = "graphql.source";
+        public const string Document = "graphql.document";
     }
 }
