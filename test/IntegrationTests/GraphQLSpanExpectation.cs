@@ -23,11 +23,13 @@ namespace IntegrationTests;
 
 public class GraphQLSpanExpectation : WebServerSpanExpectation
 {
-    public GraphQLSpanExpectation(string serviceName, string operationName, string resourceName)
-        : base(serviceName, serviceVersion: null, operationName, resourceName, /* SpanTypes.GraphQL */ "GraphQL")
+    private const string ExpectedLibrary = "OpenTelemetry.AutoInstrumentation.GraphQL";
+
+    public GraphQLSpanExpectation(string serviceName, string serviceVersion, string operationName)
+        : base(serviceName, serviceVersion, operationName, ExpectedLibrary)
     {
         RegisterDelegateExpectation(ExpectErrorMatch);
-        RegisterTagExpectation(nameof(Tags.GraphQL.Source), expected: GraphQLSource);
+        RegisterTagExpectation(nameof(Tags.GraphQL.Document), expected: GraphQLDocument);
         RegisterTagExpectation(nameof(Tags.GraphQL.OperationType), expected: GraphQLOperationType);
     }
 
@@ -37,7 +39,7 @@ public class GraphQLSpanExpectation : WebServerSpanExpectation
 
     public string GraphQLOperationName { get; set; }
 
-    public string GraphQLSource { get; set; }
+    public string GraphQLDocument { get; set; }
 
     public bool IsGraphQLError { get; set; }
 
