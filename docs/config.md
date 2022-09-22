@@ -63,7 +63,7 @@ Instrumentation. Recommended option for ASP.NET Core is to use HostingStartup.
 For other .NET Core apps logs could be collected only through .NET CLR Profiler
 Instrumentation.
 
-### Enable Logs using HostingStartup 
+### Enable Logs using HostingStartup
 
 | Environment variable | Required value |
 |-|-|
@@ -71,7 +71,7 @@ Instrumentation.
 
 ### Enable Logs using .NET CLR Profiler
 
-Please follow [Instructions](config.md#net-clr-profiler) here to collect logs
+Please follow [instructions](config.md#net-clr-profiler) here to collect logs
 using .NET CLR Profiler.
 
 ### Logs Parse and Format Options
