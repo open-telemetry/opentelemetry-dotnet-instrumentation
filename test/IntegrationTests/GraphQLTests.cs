@@ -73,6 +73,7 @@ public class GraphQLTests : TestHelper
     public async Task SubmitsTraces()
     {
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_ENABLE_DOCUMENT_TAG", bool.TrueString);
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
         using var agent = new MockZipkinCollector(Output);
