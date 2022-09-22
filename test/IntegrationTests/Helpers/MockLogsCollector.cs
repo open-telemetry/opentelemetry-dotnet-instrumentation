@@ -31,9 +31,10 @@ public class MockLogsCollector : IDisposable
 {
     private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromMinutes(1);
 
-    private readonly BlockingCollection<string> _logs = new(100); // bounded to avoid memory leak
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
+    private readonly BlockingCollection<global::OpenTelemetry.Proto.Logs.V1.LogRecord> _logs = new(100); // bounded to avoid memory leak
+    private List<Expectation> _expectations = new();
 
     public MockLogsCollector(ITestOutputHelper output, string host = "localhost")
     {
@@ -46,9 +47,10 @@ public class MockLogsCollector : IDisposable
     /// </summary>
     public int Port { get => _listener.Port; }
 
+    /// <summary>
+    /// IsStrict defines if all entries must be expected.
+    /// </summary>
     public bool IsStrict { get; set; }
-
-    public List<string> Expectations { get; set; } = new List<string>();
 
     public void Dispose()
     {
@@ -57,27 +59,33 @@ public class MockLogsCollector : IDisposable
         _logs.Dispose();
     }
 
+    public void Expect(Func<global::OpenTelemetry.Proto.Logs.V1.LogRecord, bool> predicate, string description = null)
+    {
+        _expectations.Add(new Expectation { Predicate = predicate, Description = description });
+    }
+
     public void AssertExpectations(TimeSpan? timeout = null)
     {
-        if (Expectations.Count == 0)
+        if (_expectations.Count == 0)
         {
             throw new InvalidOperationException("Expectations were not set");
         }
 
-        var missingExpectations = new List<string>(Expectations);
-        var expectationsMet = new List<string>();
-        var additionalEntries = new List<string>();
+        var missingExpectations = new List<Expectation>(_expectations);
+        var expectationsMet = new List<global::OpenTelemetry.Proto.Logs.V1.LogRecord>();
+        var additionalEntries = new List<global::OpenTelemetry.Proto.Logs.V1.LogRecord>();
         var fail = () =>
         {
             var message = new StringBuilder();
+            message.AppendLine();
 
             message.AppendLine("Missing expectations:");
             foreach (var logline in missingExpectations)
             {
-                message.AppendLine($"  - \"{logline}\"");
+                message.AppendLine($"  - \"{logline.Description ?? "<no description>"}\"");
             }
 
-            message.AppendLine("Expectations met:");
+            message.AppendLine("Entries meeting expectations:");
             foreach (var logline in expectationsMet)
             {
                 message.AppendLine($"    \"{logline}\"");
@@ -98,15 +106,25 @@ public class MockLogsCollector : IDisposable
         try
         {
             cts.CancelAfter(timeout.Value);
-            foreach (var logline in _logs.GetConsumingEnumerable(cts.Token))
+            foreach (var logRecord in _logs.GetConsumingEnumerable(cts.Token))
             {
-                if (missingExpectations.Remove(logline))
+                bool found = false;
+                for (int i = 0; i < missingExpectations.Count; i++)
                 {
-                    expectationsMet.Add(logline);
+                    if (!missingExpectations[i].Predicate(logRecord))
+                    {
+                        continue;
+                    }
+
+                    expectationsMet.Add(logRecord);
+                    missingExpectations.RemoveAt(i);
+                    found = true;
                 }
-                else
+
+                if (!found)
                 {
-                    additionalEntries.Add(logline);
+                    additionalEntries.Add(logRecord);
+                    continue;
                 }
 
                 if (missingExpectations.Count == 0)
@@ -122,7 +140,7 @@ public class MockLogsCollector : IDisposable
         }
         catch (ArgumentOutOfRangeException)
         {
-            // CancelAfter for negative value
+            // CancelAfter called with non-positive value
             fail();
         }
         catch (OperationCanceledException)
@@ -143,13 +161,22 @@ public class MockLogsCollector : IDisposable
         if (ctx.Request.RawUrl.Equals("/v1/logs", StringComparison.OrdinalIgnoreCase))
         {
             var logsMessage = ExportLogsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
-            foreach (var rLogs in logsMessage.ResourceLogs)
+            if (logsMessage.ResourceLogs != null)
             {
-                foreach (var sLogs in rLogs.ScopeLogs)
+                foreach (var rLogs in logsMessage.ResourceLogs)
                 {
-                    foreach (var logRecord in sLogs.LogRecords)
+                    if (rLogs.ScopeLogs != null)
                     {
-                        _logs.Add(logRecord.Body.ToString());
+                        foreach (var sLogs in rLogs.ScopeLogs)
+                        {
+                            if (sLogs.LogRecords != null)
+                            {
+                                foreach (var logRecord in sLogs.LogRecords)
+                                {
+                                    _logs.Add(logRecord);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -184,5 +211,12 @@ public class MockLogsCollector : IDisposable
     {
         const string name = nameof(MockLogsCollector);
         _output.WriteLine($"[{name}]: {msg}");
+    }
+
+    private class Expectation
+    {
+        public Func<global::OpenTelemetry.Proto.Logs.V1.LogRecord, bool> Predicate { get; set; }
+
+        public string Description { get; set; }
     }
 }

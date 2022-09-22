@@ -35,22 +35,34 @@ public class LogTests : TestHelper
     }
 
     [Theory]
-    [InlineData(true, true, "{ \"stringValue\": \"Information from Test App.\" }")]
-    [InlineData(true, false, "{ \"stringValue\": \"Information from Test App.\" }")]
-    [InlineData(false, true, "{ \"stringValue\": \"Information from Test App.\" }")]
-    [InlineData(false, false, "TestApplication.Logs.Controllers.TestController")] // When parseStateValues and includeFormattedMessage are set to false, LogRecord is not parsed and body will not have data. This is a collector behavior.
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
     [Trait("Category", "EndToEnd")]
-    public void SubmitLogs(bool parseStateValues, bool includeFormattedMessage, string expectedLog)
+    public void SubmitLogs(bool parseStateValues, bool includeFormattedMessage)
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES", parseStateValues.ToString());
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", includeFormattedMessage.ToString());
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
-        using var collector = new MockLogsCollector(Output) { Expectations = new() { expectedLog } };
+        using var collector = new MockLogsCollector(Output);
+        if (parseStateValues || includeFormattedMessage)
+        {
+            collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Information from Test App.\" }");
+        }
+        else
+        {
+            // When parseStateValues and includeFormattedMessage are set to false
+            // LogRecord is not parsed and body will not have data.
+            // This is a collector behavior.
+            collector.Expect(logRecord => Convert.ToString(logRecord).Contains("TestApplication.Logs.Controllers.TestController"));
+        }
+
         using var process = StartTestApplication(logsAgentPort: collector.Port, aspNetCorePort: aspNetCorePort, enableClrProfiler: !IsCoreClr());
         try
         {
-            // Send a request to server (retry to avoid flakyness).
+            // Send a request to server (retry to avoid flakyness)
             var sendRequest = () => SubmitRequest(aspNetCorePort);
             sendRequest.Should().NotThrowAfter(
                 waitTime: 15.Seconds(),
