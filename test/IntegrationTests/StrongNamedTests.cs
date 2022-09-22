@@ -33,7 +33,7 @@ public class StrongNamedTests : TestHelper
     {
     }
 
-    [Fact]
+    [Fact(Skip = "Very flaky. See: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1242")]
     public async Task SubmitsTraces()
     {
         var assemblyPath = GetTestAssemblyPath();
