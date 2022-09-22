@@ -25,7 +25,7 @@ namespace OpenTelemetry.AutoInstrumentation;
 internal class AutoInstrumentationEventSource : EventSource
 {
 #pragma warning disable SA1401 // Fields should be private
-    public static AutoInstrumentationEventSource Log = new AutoInstrumentationEventSource();
+    public static readonly AutoInstrumentationEventSource Log = new AutoInstrumentationEventSource();
 #pragma warning restore SA1401 // Fields should be private
 
     /// <summary>Logs as Trace level message.</summary>
