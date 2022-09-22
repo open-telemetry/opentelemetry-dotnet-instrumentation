@@ -34,23 +34,31 @@ public class LogTests : TestHelper
     public LogTests(ITestOutputHelper output)
         : base("Logs", output)
     {
-        SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
     }
 
     [Theory]
-    [InlineData(true, true)]
-    [InlineData(true, false)]
-    [InlineData(false, true)]
-    [InlineData(false, false)]
+    [InlineData(false, true, true)]
+    [InlineData(false, true, false)]
+    [InlineData(false, false, true)]
+    [InlineData(false, false, false)]
+    [InlineData(true, true, true)]
+    [InlineData(true, true, false)]
+    [InlineData(true, false, true)]
+    [InlineData(true, false, false)]
     [Trait("Category", "EndToEnd")]
-    public void SubmitLogs(bool parseStateValues, bool includeFormattedMessage)
+    public void SubmitLogs(bool enableClrProfiler, bool parseStateValues, bool includeFormattedMessage)
     {
+        if (!enableClrProfiler)
+        {
+            SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
+        }
+
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES", parseStateValues.ToString());
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", includeFormattedMessage.ToString());
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
         using var collector = new MockLogsCollector(Output);
-        using var process = StartTestApplication(logsAgentPort: collector.Port, aspNetCorePort: aspNetCorePort, enableClrProfiler: !IsCoreClr());
+        using var process = StartTestApplication(logsAgentPort: collector.Port, aspNetCorePort: aspNetCorePort, enableClrProfiler: enableClrProfiler);
 
         var maxMillisecondsToWait = 15_000;
         var intervalMilliseconds = 500;
