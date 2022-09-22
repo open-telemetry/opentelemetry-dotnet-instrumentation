@@ -178,8 +178,8 @@ public class SmokeTests : TestHelper
                 content.Should().Contain("TYPE ", "should export any metric");
             };
             await assert.Should().NotThrowAfterAsync(
-                waitTime: 30.Seconds(),
-                pollInterval: 1.Seconds());
+                waitTime: 1.Minutes(),
+                pollInterval: 3.Seconds());
         }
         finally
         {

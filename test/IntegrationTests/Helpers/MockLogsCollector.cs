@@ -31,7 +31,7 @@ namespace IntegrationTests.Helpers;
 
 public class MockLogsCollector : IDisposable
 {
-    private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromSeconds(20);
+    private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromMinutes(1);
 
     private readonly object _syncRoot = new object();
     private readonly ITestOutputHelper _output;
