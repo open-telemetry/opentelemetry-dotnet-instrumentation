@@ -23,11 +23,11 @@ public class InstrumentationOptions
 {
     internal InstrumentationOptions(IConfigurationSource source)
     {
-        GraphQLEnableDocument = source.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.GraphQLEnableDocumentTag) ?? false;
+        GraphQLSetDocument = source.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.GraphQLSetDocument) ?? false;
     }
 
     /// <summary>
     /// Gets a value indicating whether GraphQL query can be passed as a Document tag.
     /// </summary>
-    public bool GraphQLEnableDocument { get; }
+    public bool GraphQLSetDocument { get; }
 }

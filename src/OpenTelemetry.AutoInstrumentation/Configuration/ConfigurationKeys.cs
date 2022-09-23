@@ -107,7 +107,7 @@ public static class ConfigurationKeys
             /// Configuration key for GraphQL instrumentation to enable passing query as a document attribute.
             /// See <see cref="GraphQLTags.Document"/>.
             /// </summary>
-            public const string GraphQLEnableDocumentTag = "OTEL_DOTNET_AUTO_GRAPHQL_ENABLE_DOCUMENT_TAG";
+            public const string GraphQLSetDocument = "OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT";
         }
     }
 

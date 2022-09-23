@@ -56,7 +56,7 @@ internal class GraphQLCommon
             tags.OperationName = operationName;
             tags.OperationType = operationType;
 
-            if (options.GraphQLEnableDocument)
+            if (options.GraphQLSetDocument)
             {
                 tags.Document = query;
             }
