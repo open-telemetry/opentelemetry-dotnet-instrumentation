@@ -74,7 +74,7 @@ Instrumentation.
 Please follow [instructions](config.md#net-clr-profiler) here to collect logs
 using .NET CLR Profiler.
 
-### Logs Parse and Format Options
+### Parsing and Format Options for Logs
 
 These options could be used with both HostingStartup and .NET CLR Profiler logs
 enablement.

@@ -16,7 +16,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED`,
   - `OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES`,
   - `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE`.
-- Adds CLR Profiler based OpenTelemetry Logs support from .NET Core 3.1+.  
+- Adds CLR Profiler based OpenTelemetry Logs support for .NET Core 3.1+.  
 
 ### Changed
 
