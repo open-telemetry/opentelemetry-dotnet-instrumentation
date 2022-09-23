@@ -42,7 +42,7 @@ public class NpqsqlTests : TestHelper
     [Trait("Containers", "Linux")]
     public async Task SubmitsTraces()
     {
-        using var agent = new MockZipkinCollector(Output);
+        using var agent = await MockZipkinCollector.Start(Output);
 
         RunTestApplication(agent.Port, arguments: $"--postgres {_postgres.Port}", enableClrProfiler: !IsCoreClr());
         var spans = await agent.WaitForSpansAsync(1);

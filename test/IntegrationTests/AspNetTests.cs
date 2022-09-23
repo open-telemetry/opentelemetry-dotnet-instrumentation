@@ -45,7 +45,7 @@ public class AspNetTests : TestHelper
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
-        using var agent = new MockZipkinCollector(Output, host: "*");
+        using var agent = await MockZipkinCollector.Start(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(agent.Port, Output);
         var testSettings = new TestSettings
         {

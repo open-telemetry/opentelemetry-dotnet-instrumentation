@@ -28,7 +28,7 @@ public class TestHttpListener : IDisposable
     private readonly HttpListener _listener;
     private readonly Thread _listenerThread;
 
-    public TestHttpListener(ITestOutputHelper output, Action<HttpListenerContext> requestHandler, string host = "localhost", string sufix = "/")
+    public TestHttpListener(ITestOutputHelper output, Action<HttpListenerContext> requestHandler, string host, string sufix = "/")
     {
         _output = output;
         _requestHandler = requestHandler;

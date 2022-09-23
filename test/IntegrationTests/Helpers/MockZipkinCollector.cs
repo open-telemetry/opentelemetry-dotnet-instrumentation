@@ -38,7 +38,7 @@ public class MockZipkinCollector : IDisposable
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
 
-    public MockZipkinCollector(ITestOutputHelper output, string host = "localhost")
+    private MockZipkinCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
         _listener = new(output, HandleHttpRequests, host, "/api/v2/spans/");
@@ -66,6 +66,23 @@ public class MockZipkinCollector : IDisposable
     private IImmutableList<IMockSpan> Spans { get; set; } = ImmutableList<IMockSpan>.Empty;
 
     private IImmutableList<NameValueCollection> RequestHeaders { get; set; } = ImmutableList<NameValueCollection>.Empty;
+
+    public static async Task<MockZipkinCollector> Start(ITestOutputHelper output, string host = "localhost")
+    {
+        var collector = new MockZipkinCollector(output, host);
+
+        var healhtzEndpoint = $"http://{(host == "*" ? "localhost" : host)}:{collector.Port}/api/v2/spans/healthz";
+
+        var healthzResult = await HealthzHelper.TestHealtzAsync(healhtzEndpoint, nameof(MockZipkinCollector), output).ConfigureAwait(false);
+
+        if (!healthzResult)
+        {
+            collector.Dispose();
+            throw new InvalidOperationException($"Cannot start {nameof(MockZipkinCollector)}!");
+        }
+
+        return collector;
+    }
 
     /// <summary>
     /// Wait for the given number of spans to appear.
@@ -141,7 +158,7 @@ public class MockZipkinCollector : IDisposable
 
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        if (ctx.Request.RawUrl.Equals("/healthz", StringComparison.OrdinalIgnoreCase))
+        if (ctx.Request.RawUrl.EndsWith("/healthz", StringComparison.OrdinalIgnoreCase))
         {
             CreateHealthResponse(ctx);
             return;

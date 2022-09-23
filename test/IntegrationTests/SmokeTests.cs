@@ -225,7 +225,7 @@ public class SmokeTests : TestHelper
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
 
-        using var agent = new MockZipkinCollector(Output);
+        using var agent = await MockZipkinCollector.Start(Output);
         RunTestApplication(agent.Port, enableStartupHook: enableStartupHook);
 
         return await agent.WaitForSpansAsync(2);
