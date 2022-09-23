@@ -16,6 +16,7 @@
 
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using IntegrationTests.Helpers;
@@ -35,9 +36,9 @@ public class RuntimeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitMetrics()
+    public async Task SubmitMetrics()
     {
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.Start(Output);
         using var process = StartTestApplication(metricsAgentPort: collector.Port, enableClrProfiler: !IsCoreClr());
 
         try

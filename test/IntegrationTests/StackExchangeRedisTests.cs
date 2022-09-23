@@ -44,7 +44,7 @@ public class StackExchangeRedisTests : TestHelper
     [Trait("Containers", "Linux")]
     public async Task SubmitsTraces()
     {
-        using var agent = new MockZipkinCollector(Output);
+        using var agent = await MockZipkinCollector.Start(Output);
 
         RunTestApplication(agent.Port, arguments: $"--redis {_redis.Port}");
 

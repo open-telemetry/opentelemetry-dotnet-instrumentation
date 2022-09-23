@@ -22,6 +22,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Google.Protobuf;
 using IntegrationTests.Helpers.Models;
 using OpenTelemetry.Proto.Collector.Metrics.V1;
@@ -37,7 +38,7 @@ public class MockMetricsCollector : IDisposable
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
 
-    public MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
+    private MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
         _listener = new(output, HandleHttpRequests, host);
@@ -65,6 +66,21 @@ public class MockMetricsCollector : IDisposable
     private IImmutableList<ExportMetricsServiceRequest> MetricsMessages { get; set; } = ImmutableList<ExportMetricsServiceRequest>.Empty;
 
     private IImmutableList<NameValueCollection> RequestHeaders { get; set; } = ImmutableList<NameValueCollection>.Empty;
+
+    public static async Task<MockMetricsCollector> Start(ITestOutputHelper output, string host = "localhost")
+    {
+        var collector = new MockMetricsCollector(output, host);
+
+        var healthzResult = await collector._listener.VerifyHealthzAsync();
+
+        if (!healthzResult)
+        {
+            collector.Dispose();
+            throw new InvalidOperationException($"Cannot start {nameof(MockLogsCollector)}!");
+        }
+
+        return collector;
+    }
 
     /// <summary>
     /// Wait for the given number of metric requests to appear.
@@ -126,12 +142,6 @@ public class MockMetricsCollector : IDisposable
     {
         OnRequestReceived(ctx);
 
-        if (ctx.Request.RawUrl.Equals("/healthz", StringComparison.OrdinalIgnoreCase))
-        {
-            CreateHealthResponse(ctx);
-            return;
-        }
-
         if (ctx.Request.RawUrl.Equals("/v1/metrics", StringComparison.OrdinalIgnoreCase))
         {
             if (ShouldDeserializeMetrics)
@@ -159,16 +169,6 @@ public class MockMetricsCollector : IDisposable
 
         // We received an unsupported request
         ctx.Response.StatusCode = (int)HttpStatusCode.NotImplemented;
-        ctx.Response.Close();
-    }
-
-    private void CreateHealthResponse(HttpListenerContext ctx)
-    {
-        ctx.Response.ContentType = "text/plain";
-        var buffer = Encoding.UTF8.GetBytes("OK");
-        ctx.Response.ContentLength64 = buffer.LongLength;
-        ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
-        ctx.Response.StatusCode = (int)HttpStatusCode.OK;
         ctx.Response.Close();
     }
 

@@ -38,7 +38,7 @@ public class MockZipkinCollector : IDisposable
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
 
-    public MockZipkinCollector(ITestOutputHelper output, string host = "localhost")
+    private MockZipkinCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
         _listener = new(output, HandleHttpRequests, host, "/api/v2/spans/");
@@ -66,6 +66,21 @@ public class MockZipkinCollector : IDisposable
     private IImmutableList<IMockSpan> Spans { get; set; } = ImmutableList<IMockSpan>.Empty;
 
     private IImmutableList<NameValueCollection> RequestHeaders { get; set; } = ImmutableList<NameValueCollection>.Empty;
+
+    public static async Task<MockZipkinCollector> Start(ITestOutputHelper output, string host = "localhost")
+    {
+        var collector = new MockZipkinCollector(output, host);
+
+        var healthzResult = await collector._listener.VerifyHealthzAsync();
+
+        if (!healthzResult)
+        {
+            collector.Dispose();
+            throw new InvalidOperationException($"Cannot start {nameof(MockLogsCollector)}!");
+        }
+
+        return collector;
+    }
 
     /// <summary>
     /// Wait for the given number of spans to appear.
@@ -141,12 +156,6 @@ public class MockZipkinCollector : IDisposable
 
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        if (ctx.Request.RawUrl.Equals("/healthz", StringComparison.OrdinalIgnoreCase))
-        {
-            CreateHealthResponse(ctx);
-            return;
-        }
-
         if (ShouldDeserializeTraces)
         {
             using (var reader = new StreamReader(ctx.Request.InputStream))
@@ -173,16 +182,6 @@ public class MockZipkinCollector : IDisposable
         var buffer = Encoding.UTF8.GetBytes("{}");
         ctx.Response.ContentLength64 = buffer.LongLength;
         ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
-        ctx.Response.Close();
-    }
-
-    private void CreateHealthResponse(HttpListenerContext ctx)
-    {
-        ctx.Response.ContentType = "text/plain";
-        var buffer = Encoding.UTF8.GetBytes("OK");
-        ctx.Response.ContentLength64 = buffer.LongLength;
-        ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
-        ctx.Response.StatusCode = (int)HttpStatusCode.OK;
         ctx.Response.Close();
     }
 

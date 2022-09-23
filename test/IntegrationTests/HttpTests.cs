@@ -46,7 +46,7 @@ public class HttpTests : TestHelper
         SetEnvironmentVariable("OTEL_PROPAGATORS", propagators);
         SetEnvironmentVariable("DISABLE_DistributedContextPropagator", "true");
 
-        using var agent = new MockZipkinCollector(Output);
+        using var agent = await MockZipkinCollector.Start(Output);
 
         const int expectedSpanCount = 3;
 
@@ -91,11 +91,11 @@ public class HttpTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitMetrics()
+    public async Task SubmitMetrics()
     {
         const int expectedMetricRequests = 1;
 
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.Start(Output);
         RunTestApplication(metricsAgentPort: collector.Port, enableClrProfiler: !IsCoreClr());
         var metricRequests = collector.WaitForMetrics(expectedMetricRequests);
 

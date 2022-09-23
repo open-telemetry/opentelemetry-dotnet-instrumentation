@@ -36,7 +36,7 @@ public class GrpcNetClientTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task SubmitsTraces()
     {
-        using var agent = new MockZipkinCollector(Output);
+        using var agent = await MockZipkinCollector.Start(Output);
 
         // Grpc.Net.Client is using various version of http communication under the hood.
         // Disabling HttpClient instrumentation to have consistent set of spans.

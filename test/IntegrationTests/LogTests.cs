@@ -18,6 +18,7 @@
 
 using System;
 using System.Net.Http;
+using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using IntegrationTests.Helpers;
@@ -43,7 +44,7 @@ public class LogTests : TestHelper
     [InlineData(true, false, true)]
     [InlineData(true, false, false)]
     [Trait("Category", "EndToEnd")]
-    public void SubmitLogs(bool enableClrProfiler, bool parseStateValues, bool includeFormattedMessage)
+    public async Task SubmitLogs(bool enableClrProfiler, bool parseStateValues, bool includeFormattedMessage)
     {
         if (!enableClrProfiler)
         {
@@ -54,7 +55,7 @@ public class LogTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", includeFormattedMessage.ToString());
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.Start(Output);
         if (parseStateValues || includeFormattedMessage)
         {
             collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Information from Test App.\" }");
@@ -85,14 +86,14 @@ public class LogTests : TestHelper
     }
 
     [Fact]
-    public void EnableLogsWithCLRAndHostingStartup()
+    public async Task EnableLogsWithCLRAndHostingStartup()
     {
         SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES", "true");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.Start(Output);
         collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Information from Test App.\" }");
 
         using var process = StartTestApplication(
