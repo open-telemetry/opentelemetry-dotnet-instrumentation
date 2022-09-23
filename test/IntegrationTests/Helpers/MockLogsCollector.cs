@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Google.Protobuf;
 using OpenTelemetry.Proto.Collector.Logs.V1;
 using Xunit;
@@ -36,7 +37,7 @@ public class MockLogsCollector : IDisposable
     private readonly BlockingCollection<global::OpenTelemetry.Proto.Logs.V1.LogRecord> _logs = new(100); // bounded to avoid memory leak
     private List<Expectation> _expectations = new();
 
-    public MockLogsCollector(ITestOutputHelper output, string host = "localhost")
+    private MockLogsCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
         _listener = new(output, HandleHttpRequests, host);
@@ -51,6 +52,23 @@ public class MockLogsCollector : IDisposable
     /// IsStrict defines if all entries must be expected.
     /// </summary>
     public bool IsStrict { get; set; }
+
+    public static async Task<MockLogsCollector> Start(ITestOutputHelper output, string host = "localhost")
+    {
+        var collector = new MockLogsCollector(output, host);
+
+        var healhtzEndpoint = $"http://{(host == "*" ? "localhost" : host)}:{collector.Port}/healthz";
+
+        var healthzResult = await HealthzHelper.TestHealtzAsync(healhtzEndpoint, nameof(MockLogsCollector), output).ConfigureAwait(false);
+
+        if (!healthzResult)
+        {
+            collector.Dispose();
+            throw new InvalidOperationException($"Cannot start {nameof(MockLogsCollector)}!");
+        }
+
+        return collector;
+    }
 
     public void Dispose()
     {
@@ -152,7 +170,7 @@ public class MockLogsCollector : IDisposable
 
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        if (ctx.Request.RawUrl.Equals("/healthz", StringComparison.OrdinalIgnoreCase))
+        if (ctx.Request.RawUrl.EndsWith("/healthz", StringComparison.OrdinalIgnoreCase))
         {
             CreateHealthResponse(ctx);
             return;
