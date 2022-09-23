@@ -119,6 +119,30 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
+    public async Task ResourceTests()
+    {
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
+        const int expectedMetricRequests = 1;
+
+        using var collector = await MockMetricsCollector.Start(Output);
+        RunTestApplication(metricsAgentPort: collector.Port);
+        var metricRequests = collector.WaitForMetrics(expectedMetricRequests);
+
+        using (new AssertionScope())
+        {
+            metricRequests.Count.Should().Be(expectedMetricRequests);
+
+            var resourceMetrics = metricRequests.Single().ResourceMetrics.Single();
+
+            var expectedServiceNameAttribute = new KeyValue { Key = "service.name", Value = new AnyValue { StringValue = ServiceName } };
+            resourceMetrics.Resource.Attributes.Should().ContainEquivalentOf(expectedServiceNameAttribute);
+
+            resourceMetrics.Resource.Attributes.Where(a => a.Key.StartsWith("telemetry.sdk.")).Should().HaveCount(3);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
     public async Task SubmitMetrics()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");

@@ -110,6 +110,8 @@ public static class Instrumentation
                 }
 
                 EnvironmentConfigurationSdkHelper.UseEnvironmentVariables(SdkSettings);
+
+                _resourceBuilder.AddTelemetrySdk();
             }
 
             if (TracerSettings.LoadTracerAtStartup)
