@@ -58,7 +58,7 @@ public class DomainNeutralTests : TestHelper
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE", integrationsFile);
 
-        using var agent = new MockZipkinCollector(Output);
+        using var agent = await MockZipkinCollector.Start(Output);
 
         RunTestApplication(agent.Port);
 

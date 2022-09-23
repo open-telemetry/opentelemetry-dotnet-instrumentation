@@ -75,7 +75,7 @@ public class GraphQLTests : TestHelper
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
-        using var agent = new MockZipkinCollector(Output);
+        using var agent = await MockZipkinCollector.Start(Output);
         using var process = StartTestApplication(agent.Port, aspNetCorePort: aspNetCorePort);
         if (process.HasExited)
         {

@@ -16,7 +16,9 @@
 
 using System;
 using System.Net;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
@@ -27,8 +29,9 @@ public class TestHttpListener : IDisposable
     private readonly Action<HttpListenerContext> _requestHandler;
     private readonly HttpListener _listener;
     private readonly Thread _listenerThread;
+    private readonly string _prefix;
 
-    public TestHttpListener(ITestOutputHelper output, Action<HttpListenerContext> requestHandler, string host = "localhost", string sufix = "/")
+    public TestHttpListener(ITestOutputHelper output, Action<HttpListenerContext> requestHandler, string host, string sufix = "/")
     {
         _output = output;
         _requestHandler = requestHandler;
@@ -48,13 +51,13 @@ public class TestHttpListener : IDisposable
                 // See https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistenerprefixcollection.add?redirectedfrom=MSDN&view=net-6.0#remarks
                 // for info about the host value.
                 Port = TcpPortProvider.GetOpenPort();
-                string prefix = new UriBuilder("http", host, Port, sufix).ToString();
-                _listener.Prefixes.Add(prefix);
+                _prefix = new UriBuilder("http", host, Port, sufix).ToString();
+                _listener.Prefixes.Add(_prefix);
 
                 // successfully listening
                 _listenerThread = new Thread(HandleHttpRequests);
                 _listenerThread.Start();
-                WriteOutput($"Listening on '{prefix}'");
+                WriteOutput($"Listening on '{_prefix}'");
 
                 return;
             }
@@ -76,6 +79,13 @@ public class TestHttpListener : IDisposable
     /// </summary>
     public int Port { get; }
 
+    public Task<bool> VerifyHealthzAsync()
+    {
+        var healhtzEndpoint = $"{_prefix.Replace("*", "localhost")}/healthz";
+
+        return HealthzHelper.TestHealtzAsync(healhtzEndpoint, nameof(MockLogsCollector), _output);
+    }
+
     public void Dispose()
     {
         WriteOutput($"Listener is shutting down.");
@@ -89,6 +99,13 @@ public class TestHttpListener : IDisposable
             try
             {
                 var ctx = _listener.GetContext();
+
+                if (ctx.Request.RawUrl.EndsWith("/healthz", StringComparison.OrdinalIgnoreCase))
+                {
+                    CreateHealthResponse(ctx);
+                    continue;
+                }
+
                 _requestHandler(ctx);
             }
             catch (HttpListenerException)
@@ -110,6 +127,16 @@ public class TestHttpListener : IDisposable
                 // we don't care about any exception when listener is stopped
             }
         }
+    }
+
+    private void CreateHealthResponse(HttpListenerContext ctx)
+    {
+        ctx.Response.ContentType = "text/plain";
+        var buffer = Encoding.UTF8.GetBytes("OK");
+        ctx.Response.ContentLength64 = buffer.LongLength;
+        ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
+        ctx.Response.StatusCode = (int)HttpStatusCode.OK;
+        ctx.Response.Close();
     }
 
     private void WriteOutput(string msg)
