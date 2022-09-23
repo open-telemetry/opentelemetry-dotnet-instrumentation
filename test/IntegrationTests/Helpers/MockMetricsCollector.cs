@@ -22,6 +22,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Google.Protobuf;
 using IntegrationTests.Helpers.Models;
 using OpenTelemetry.Proto.Collector.Metrics.V1;
@@ -37,7 +38,7 @@ public class MockMetricsCollector : IDisposable
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
 
-    public MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
+    private MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
         _listener = new(output, HandleHttpRequests, host);
@@ -65,6 +66,23 @@ public class MockMetricsCollector : IDisposable
     private IImmutableList<ExportMetricsServiceRequest> MetricsMessages { get; set; } = ImmutableList<ExportMetricsServiceRequest>.Empty;
 
     private IImmutableList<NameValueCollection> RequestHeaders { get; set; } = ImmutableList<NameValueCollection>.Empty;
+
+    public static async Task<MockMetricsCollector> Start(ITestOutputHelper output, string host = "localhost")
+    {
+        var collector = new MockMetricsCollector(output, host);
+
+        var healhtzEndpoint = $"http://{(host == "*" ? "localhost" : host)}:{collector.Port}/healthz";
+
+        var healthzResult = await HealthzHelper.TestHealtzAsync(healhtzEndpoint, nameof(MockMetricsCollector), output).ConfigureAwait(false);
+
+        if (!healthzResult)
+        {
+            collector.Dispose();
+            throw new InvalidOperationException($"Cannot start {nameof(MockMetricsCollector)}!");
+        }
+
+        return collector;
+    }
 
     /// <summary>
     /// Wait for the given number of metric requests to appear.
@@ -126,7 +144,7 @@ public class MockMetricsCollector : IDisposable
     {
         OnRequestReceived(ctx);
 
-        if (ctx.Request.RawUrl.Equals("/healthz", StringComparison.OrdinalIgnoreCase))
+        if (ctx.Request.RawUrl.EndsWith("/healthz", StringComparison.OrdinalIgnoreCase))
         {
             CreateHealthResponse(ctx);
             return;

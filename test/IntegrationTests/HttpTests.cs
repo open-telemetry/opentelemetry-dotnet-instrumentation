@@ -91,11 +91,11 @@ public class HttpTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitMetrics()
+    public async Task SubmitMetrics()
     {
         const int expectedMetricRequests = 1;
 
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.Start(Output);
         RunTestApplication(metricsAgentPort: collector.Port, enableClrProfiler: !IsCoreClr());
         var metricRequests = collector.WaitForMetrics(expectedMetricRequests);
 

@@ -119,12 +119,12 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitMetrics()
+    public async Task SubmitMetrics()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
         const int expectedMetricRequests = 1;
 
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.Start(Output);
         RunTestApplication(metricsAgentPort: collector.Port);
         var metricRequests = collector.WaitForMetrics(expectedMetricRequests);
 

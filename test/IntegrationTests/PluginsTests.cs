@@ -46,11 +46,11 @@ public class PluginsTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitMetrics()
+    public async Task SubmitMetrics()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
 
-        using var collector = new MockMetricsCollector(Output);
+        using var collector = await MockMetricsCollector.Start(Output);
         RunTestApplication(metricsAgentPort: collector.Port);
         var metricRequests = collector.WaitForMetrics(1);
 
