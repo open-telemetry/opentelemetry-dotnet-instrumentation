@@ -74,7 +74,11 @@ internal static class EnvironmentConfigurationMetricHelper
         switch (settings.MetricExporter)
         {
             case MetricsExporter.Prometheus:
-                builder.AddPrometheusExporter(options => { options.StartHttpListener = true; });
+                builder.AddPrometheusExporter(options =>
+                {
+                    options.StartHttpListener = true;
+                    options.ScrapeResponseCacheDurationMilliseconds = 300;
+                });
                 break;
             case MetricsExporter.Otlp:
 #if NETCOREAPP3_1
