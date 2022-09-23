@@ -71,14 +71,12 @@ public class MockZipkinCollector : IDisposable
     {
         var collector = new MockZipkinCollector(output, host);
 
-        var healhtzEndpoint = $"http://{(host == "*" ? "localhost" : host)}:{collector.Port}/api/v2/spans/healthz";
-
-        var healthzResult = await HealthzHelper.TestHealtzAsync(healhtzEndpoint, nameof(MockZipkinCollector), output).ConfigureAwait(false);
+        var healthzResult = await collector._listener.VerifyHealthzAsync();
 
         if (!healthzResult)
         {
             collector.Dispose();
-            throw new InvalidOperationException($"Cannot start {nameof(MockZipkinCollector)}!");
+            throw new InvalidOperationException($"Cannot start {nameof(MockLogsCollector)}!");
         }
 
         return collector;
@@ -158,12 +156,6 @@ public class MockZipkinCollector : IDisposable
 
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        if (ctx.Request.RawUrl.EndsWith("/healthz", StringComparison.OrdinalIgnoreCase))
-        {
-            CreateHealthResponse(ctx);
-            return;
-        }
-
         if (ShouldDeserializeTraces)
         {
             using (var reader = new StreamReader(ctx.Request.InputStream))
@@ -190,16 +182,6 @@ public class MockZipkinCollector : IDisposable
         var buffer = Encoding.UTF8.GetBytes("{}");
         ctx.Response.ContentLength64 = buffer.LongLength;
         ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
-        ctx.Response.Close();
-    }
-
-    private void CreateHealthResponse(HttpListenerContext ctx)
-    {
-        ctx.Response.ContentType = "text/plain";
-        var buffer = Encoding.UTF8.GetBytes("OK");
-        ctx.Response.ContentLength64 = buffer.LongLength;
-        ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
-        ctx.Response.StatusCode = (int)HttpStatusCode.OK;
         ctx.Response.Close();
     }
 
