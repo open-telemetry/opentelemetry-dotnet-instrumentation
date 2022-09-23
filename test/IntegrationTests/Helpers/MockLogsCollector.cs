@@ -15,27 +15,26 @@
 // </copyright>
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Collections.Specialized;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
 using Google.Protobuf;
-using IntegrationTests.Helpers.Models;
 using OpenTelemetry.Proto.Collector.Logs.V1;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
 public class MockLogsCollector : IDisposable
 {
-    private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromSeconds(20);
+    private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromMinutes(1);
 
-    private readonly object _syncRoot = new object();
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
+    private readonly BlockingCollection<global::OpenTelemetry.Proto.Logs.V1.LogRecord> _logs = new(100); // bounded to avoid memory leak
+    private List<Expectation> _expectations = new();
 
     public MockLogsCollector(ITestOutputHelper output, string host = "localhost")
     {
@@ -43,89 +42,116 @@ public class MockLogsCollector : IDisposable
         _listener = new(output, HandleHttpRequests, host);
     }
 
-    public event EventHandler<EventArgs<HttpListenerContext>> RequestReceived;
-
-    public event EventHandler<EventArgs<ExportLogsServiceRequest>> RequestDeserialized;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether to skip deserialization of logs.
-    /// </summary>
-    public bool ShouldDeserializeLogs { get; set; } = true;
-
     /// <summary>
     /// Gets the TCP port that this collector is listening on.
     /// </summary>
     public int Port { get => _listener.Port; }
 
     /// <summary>
-    /// Gets the filters used to filter out logs we don't want to look at for a test.
+    /// IsStrict defines if all entries must be expected.
     /// </summary>
-    public List<Func<ExportLogsServiceRequest, bool>> LogFilters { get; private set; } = new List<Func<ExportLogsServiceRequest, bool>>();
-
-    private IImmutableList<ExportLogsServiceRequest> LogMessages { get; set; } = ImmutableList<ExportLogsServiceRequest>.Empty;
-
-    private IImmutableList<NameValueCollection> RequestHeaders { get; set; } = ImmutableList<NameValueCollection>.Empty;
-
-    /// <summary>
-    /// Wait for the given number of logs to appear.
-    /// </summary>
-    /// <param name="count">The expected number of logs.</param>
-    /// <param name="timeout">The timeout</param>
-    /// <returns>The list of logs.</returns>
-    public IImmutableList<ExportLogsServiceRequest> WaitForLogs(
-        int count,
-        TimeSpan? timeout = null)
-    {
-        timeout ??= DefaultWaitTimeout;
-        var deadline = DateTime.Now.Add(timeout.Value);
-
-        IImmutableList<ExportLogsServiceRequest> relevantLogs = ImmutableList<ExportLogsServiceRequest>.Empty;
-
-        while (DateTime.Now < deadline)
-        {
-            lock (_syncRoot)
-            {
-                relevantLogs =
-                    LogMessages
-                        .Where(m => LogFilters.All(shouldReturn => shouldReturn(m)))
-                        .ToImmutableList();
-            }
-
-            if (relevantLogs.Count >= count)
-            {
-                break;
-            }
-
-            Thread.Sleep(500);
-        }
-
-        return relevantLogs;
-    }
+    public bool IsStrict { get; set; }
 
     public void Dispose()
     {
-        lock (_syncRoot)
+        _listener.Dispose();
+        WriteOutput($"Shutting down. Total logs requests received: '{_logs.Count}'");
+        _logs.Dispose();
+    }
+
+    public void Expect(Func<global::OpenTelemetry.Proto.Logs.V1.LogRecord, bool> predicate, string description = null)
+    {
+        _expectations.Add(new Expectation { Predicate = predicate, Description = description });
+    }
+
+    public void AssertExpectations(TimeSpan? timeout = null)
+    {
+        if (_expectations.Count == 0)
         {
-            WriteOutput($"Shutting down. Total logs requests received: '{LogMessages.Count}'");
+            throw new InvalidOperationException("Expectations were not set");
         }
 
-        _listener.Dispose();
-    }
+        var missingExpectations = new List<Expectation>(_expectations);
+        var expectationsMet = new List<global::OpenTelemetry.Proto.Logs.V1.LogRecord>();
+        var additionalEntries = new List<global::OpenTelemetry.Proto.Logs.V1.LogRecord>();
+        var fail = () =>
+        {
+            var message = new StringBuilder();
+            message.AppendLine();
 
-    protected virtual void OnRequestReceived(HttpListenerContext context)
-    {
-        RequestReceived?.Invoke(this, new EventArgs<HttpListenerContext>(context));
-    }
+            message.AppendLine("Missing expectations:");
+            foreach (var logline in missingExpectations)
+            {
+                message.AppendLine($"  - \"{logline.Description ?? "<no description>"}\"");
+            }
 
-    protected virtual void OnRequestDeserialized(ExportLogsServiceRequest logsRequest)
-    {
-        RequestDeserialized?.Invoke(this, new EventArgs<ExportLogsServiceRequest>(logsRequest));
+            message.AppendLine("Entries meeting expectations:");
+            foreach (var logline in expectationsMet)
+            {
+                message.AppendLine($"    \"{logline}\"");
+            }
+
+            message.AppendLine("Additional entries:");
+            foreach (var logline in additionalEntries)
+            {
+                message.AppendLine($"  + \"{logline}\"");
+            }
+
+            Assert.Fail(message.ToString());
+        };
+
+        timeout ??= DefaultWaitTimeout;
+        var cts = new CancellationTokenSource();
+
+        try
+        {
+            cts.CancelAfter(timeout.Value);
+            foreach (var logRecord in _logs.GetConsumingEnumerable(cts.Token))
+            {
+                bool found = false;
+                for (int i = 0; i < missingExpectations.Count; i++)
+                {
+                    if (!missingExpectations[i].Predicate(logRecord))
+                    {
+                        continue;
+                    }
+
+                    expectationsMet.Add(logRecord);
+                    missingExpectations.RemoveAt(i);
+                    found = true;
+                }
+
+                if (!found)
+                {
+                    additionalEntries.Add(logRecord);
+                    continue;
+                }
+
+                if (missingExpectations.Count == 0)
+                {
+                    if (IsStrict && additionalEntries.Count > 0)
+                    {
+                        fail();
+                    }
+
+                    return;
+                }
+            }
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            // CancelAfter called with non-positive value
+            fail();
+        }
+        catch (OperationCanceledException)
+        {
+            // timeout
+            fail();
+        }
     }
 
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        OnRequestReceived(ctx);
-
         if (ctx.Request.RawUrl.Equals("/healthz", StringComparison.OrdinalIgnoreCase))
         {
             CreateHealthResponse(ctx);
@@ -134,15 +160,24 @@ public class MockLogsCollector : IDisposable
 
         if (ctx.Request.RawUrl.Equals("/v1/logs", StringComparison.OrdinalIgnoreCase))
         {
-            if (ShouldDeserializeLogs)
+            var logsMessage = ExportLogsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
+            if (logsMessage.ResourceLogs != null)
             {
-                var logsMessage = ExportLogsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
-                OnRequestDeserialized(logsMessage);
-
-                lock (_syncRoot)
+                foreach (var rLogs in logsMessage.ResourceLogs)
                 {
-                    LogMessages = LogMessages.Add(logsMessage);
-                    RequestHeaders = RequestHeaders.Add(new NameValueCollection(ctx.Request.Headers));
+                    if (rLogs.ScopeLogs != null)
+                    {
+                        foreach (var sLogs in rLogs.ScopeLogs)
+                        {
+                            if (sLogs.LogRecords != null)
+                            {
+                                foreach (var logRecord in sLogs.LogRecords)
+                                {
+                                    _logs.Add(logRecord);
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -176,5 +211,12 @@ public class MockLogsCollector : IDisposable
     {
         const string name = nameof(MockLogsCollector);
         _output.WriteLine($"[{name}]: {msg}");
+    }
+
+    private class Expectation
+    {
+        public Func<global::OpenTelemetry.Proto.Logs.V1.LogRecord, bool> Predicate { get; set; }
+
+        public string Description { get; set; }
     }
 }

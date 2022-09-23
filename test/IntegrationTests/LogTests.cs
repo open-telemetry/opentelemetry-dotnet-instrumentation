@@ -17,10 +17,7 @@
 #if !NETFRAMEWORK
 
 using System;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Threading;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using IntegrationTests.Helpers;
@@ -50,58 +47,28 @@ public class LogTests : TestHelper
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
         using var collector = new MockLogsCollector(Output);
-        using var process = StartTestApplication(logsAgentPort: collector.Port, aspNetCorePort: aspNetCorePort, enableClrProfiler: !IsCoreClr());
-
-        var maxMillisecondsToWait = 15_000;
-        var intervalMilliseconds = 500;
-        var intervals = maxMillisecondsToWait / intervalMilliseconds;
-        var success = false;
-
-        // Send a request to server.
-        while (intervals-- > 0)
+        if (parseStateValues || includeFormattedMessage)
         {
-            try
-            {
-                success = SubmitRequest(aspNetCorePort) == HttpStatusCode.OK;
-            }
-            catch
-            {
-                // ignore
-            }
-
-            if (success)
-            {
-                Output.WriteLine("Received response from server.");
-                break;
-            }
-
-            Thread.Sleep(intervalMilliseconds);
+            collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Information from Test App.\" }");
+        }
+        else
+        {
+            // When parseStateValues and includeFormattedMessage are set to false
+            // LogRecord is not parsed and body will not have data.
+            // This is a collector behavior.
+            collector.Expect(logRecord => Convert.ToString(logRecord).Contains("TestApplication.Logs.Controllers.TestController"));
         }
 
+        using var process = StartTestApplication(logsAgentPort: collector.Port, aspNetCorePort: aspNetCorePort, enableClrProfiler: !IsCoreClr());
         try
         {
-            success.Should().BeTrue();
-            var assert = () =>
-            {
-                var logRequests = collector.WaitForLogs(1);
-                var logs = logRequests.SelectMany(r => r.ResourceLogs).Where(s => s.ScopeLogs.Count > 0).FirstOrDefault();
-                var logRecords = logs.ScopeLogs.FirstOrDefault().LogRecords;
-                if (parseStateValues || includeFormattedMessage)
-                {
-                    logRecords.Should().ContainSingle(x => Convert.ToString(x.Body) == "{ \"stringValue\": \"Information from Test App.\" }");
-                }
-                else
-                {
-                    // When parseStateValues and includeFormattedMessage are set to false
-                    // LogRecord is not parsed and body will not have data.
-                    // This is a collector behavior.
-                    logRecords.Should().ContainSingle(x => Convert.ToString(x).Contains("TestApplication.Logs.Controllers.TestController"));
-                }
-            };
+            // Send a request to server (retry to avoid flakyness)
+            var sendRequest = () => SubmitRequest(aspNetCorePort);
+            sendRequest.Should().NotThrowAfter(
+                waitTime: 15.Seconds(),
+                pollInterval: 0.5.Seconds());
 
-            assert.Should().NotThrowAfter(
-                waitTime: 30.Seconds(),
-                pollInterval: 1.Seconds());
+            collector.AssertExpectations();
         }
         finally
         {
@@ -109,28 +76,17 @@ public class LogTests : TestHelper
         }
     }
 
-    private HttpStatusCode SubmitRequest(int aspNetCorePort)
+    private void SubmitRequest(int aspNetCorePort)
     {
-        try
+        using var client = new HttpClient();
+        var request = new HttpRequestMessage
         {
-            using var client = new HttpClient();
-            var request = new HttpRequestMessage
-            {
-                Method = HttpMethod.Get,
-                RequestUri = new Uri($"http://localhost:{aspNetCorePort}/test"),
-            };
+            Method = HttpMethod.Get,
+            RequestUri = new Uri($"http://localhost:{aspNetCorePort}/test"),
+        };
 
-            var response = client.SendAsync(request).Result;
-            response.EnsureSuccessStatusCode();
-
-            return response.StatusCode;
-        }
-        catch (Exception ex)
-        {
-            Output.WriteLine($"Exception: {ex}");
-        }
-
-        return HttpStatusCode.BadRequest;
+        var response = client.SendAsync(request).Result;
+        response.EnsureSuccessStatusCode();
     }
 }
 #endif
