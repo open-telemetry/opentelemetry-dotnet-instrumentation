@@ -179,7 +179,7 @@ public class SmokeTests : TestHelper
             };
             await assert.Should().NotThrowAfterAsync(
                 waitTime: 1.Minutes(),
-                pollInterval: 3.Seconds());
+                pollInterval: 1.Seconds());
         }
         finally
         {
