@@ -38,7 +38,7 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
     [Trait("Category", "EndToEnd")]
     public async Task SubmitsTraces()
     {
-        using var agent = new MockZipkinCollector(Output);
+        using var agent = await MockZipkinCollector.Start(Output);
 
         var serverHelper = new WcfServerTestHelper(Output);
         _serverProcess = serverHelper.RunWcfServer(agent.Port);

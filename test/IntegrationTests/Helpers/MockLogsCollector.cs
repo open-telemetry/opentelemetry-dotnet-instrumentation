@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Google.Protobuf;
 using OpenTelemetry.Proto.Collector.Logs.V1;
 using Xunit;
@@ -34,9 +35,9 @@ public class MockLogsCollector : IDisposable
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
     private readonly BlockingCollection<global::OpenTelemetry.Proto.Logs.V1.LogRecord> _logs = new(100); // bounded to avoid memory leak
-    private List<Expectation> _expectations = new();
+    private readonly List<Expectation> _expectations = new();
 
-    public MockLogsCollector(ITestOutputHelper output, string host = "localhost")
+    private MockLogsCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
         _listener = new(output, HandleHttpRequests, host);
@@ -51,6 +52,21 @@ public class MockLogsCollector : IDisposable
     /// IsStrict defines if all entries must be expected.
     /// </summary>
     public bool IsStrict { get; set; }
+
+    public static async Task<MockLogsCollector> Start(ITestOutputHelper output, string host = "localhost")
+    {
+        var collector = new MockLogsCollector(output, host);
+
+        var healthzResult = await collector._listener.VerifyHealthzAsync();
+
+        if (!healthzResult)
+        {
+            collector.Dispose();
+            throw new InvalidOperationException($"Cannot start {nameof(MockLogsCollector)}!");
+        }
+
+        return collector;
+    }
 
     public void Dispose()
     {
@@ -152,12 +168,6 @@ public class MockLogsCollector : IDisposable
 
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        if (ctx.Request.RawUrl.Equals("/healthz", StringComparison.OrdinalIgnoreCase))
-        {
-            CreateHealthResponse(ctx);
-            return;
-        }
-
         if (ctx.Request.RawUrl.Equals("/v1/logs", StringComparison.OrdinalIgnoreCase))
         {
             var logsMessage = ExportLogsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
@@ -194,16 +204,6 @@ public class MockLogsCollector : IDisposable
 
         // We received an unsupported request
         ctx.Response.StatusCode = (int)HttpStatusCode.NotImplemented;
-        ctx.Response.Close();
-    }
-
-    private void CreateHealthResponse(HttpListenerContext ctx)
-    {
-        ctx.Response.ContentType = "text/plain";
-        var buffer = Encoding.UTF8.GetBytes("OK");
-        ctx.Response.ContentLength64 = buffer.LongLength;
-        ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
-        ctx.Response.StatusCode = (int)HttpStatusCode.OK;
         ctx.Response.Close();
     }
 

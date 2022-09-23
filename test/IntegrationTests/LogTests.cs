@@ -18,6 +18,7 @@
 
 using System;
 using System.Net.Http;
+using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using IntegrationTests.Helpers;
@@ -40,13 +41,13 @@ public class LogTests : TestHelper
     [InlineData(false, true)]
     [InlineData(false, false)]
     [Trait("Category", "EndToEnd")]
-    public void SubmitLogs(bool parseStateValues, bool includeFormattedMessage)
+    public async Task SubmitLogs(bool parseStateValues, bool includeFormattedMessage)
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES", parseStateValues.ToString());
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", includeFormattedMessage.ToString());
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
-        using var collector = new MockLogsCollector(Output);
+        using var collector = await MockLogsCollector.Start(Output);
         if (parseStateValues || includeFormattedMessage)
         {
             collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Information from Test App.\" }");
