@@ -84,6 +84,37 @@ public class LogTests : TestHelper
         }
     }
 
+    [Fact]
+    public void EnableLogsWithCLRAndHostingStartup()
+    {
+        SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES", "true");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
+
+        int aspNetCorePort = TcpPortProvider.GetOpenPort();
+        using var collector = new MockLogsCollector(Output);
+        collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Information from Test App.\" }");
+
+        using var process = StartTestApplication(
+                            logsAgentPort: collector.Port,
+                            aspNetCorePort: aspNetCorePort,
+                            enableClrProfiler: true);
+        try
+        {
+            // Send a request to server (retry to avoid flakyness)
+            var sendRequest = () => SubmitRequest(aspNetCorePort);
+            sendRequest.Should().NotThrowAfter(
+                waitTime: 15.Seconds(),
+                pollInterval: 0.5.Seconds());
+
+            collector.AssertExpectations();
+        }
+        finally
+        {
+            process.Kill();
+        }
+    }
+
     private void SubmitRequest(int aspNetCorePort)
     {
         using var client = new HttpClient();
