@@ -118,7 +118,8 @@ void RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
             methodEnum = nullptr;
             if (total > 0)
             {
-                handler->EnqueueForRejit(modules, methods);
+                // handler->EnqueueForRejit(modules, methods);
+                handler->RequestRejit(modules, methods);
                 Logger::Info("NGEN:: Processed with ", total, " inliners [ModuleId=", currentModuleId,
                              ",MethodDef=", currentMethodDef, "]");
             }
@@ -368,6 +369,47 @@ void RejitHandler::AddNGenModule(ModuleID moduleId)
     std::lock_guard<std::mutex> guard(m_ngenModules_lock);
     m_ngenModules.push_back(moduleId);
     RequestRejitForInlinersInModule(moduleId);
+}
+
+void RejitHandler::RequestRejit(const std::vector<ModuleID>& modulesVector, const std::vector<mdMethodDef>& modulesMethodDef)
+{
+    const size_t length = modulesMethodDef.size();
+
+    auto moduleIds = new ModuleID[length];
+    std::copy(modulesVector.begin(), modulesVector.end(), moduleIds);
+
+    auto mDefs = new mdMethodDef[length];
+    std::copy(modulesMethodDef.begin(), modulesMethodDef.end(), mDefs);
+
+    // Create module and methods metadata.
+    for (size_t i = 0; i < length; i++)
+    {
+        GetOrAddModule(moduleIds[i])->GetOrAddMethod(mDefs[i]);
+    }
+
+    auto item = std::make_unique<RejitItem>((int) length, std::unique_ptr<ModuleID>(moduleIds),
+                                                    std::unique_ptr<mdMethodDef>(mDefs));
+
+    HRESULT hr;
+    auto profilerInfo = m_profilerInfo;
+    auto profilerInfo10 = m_profilerInfo10;
+
+    if (profilerInfo10 != nullptr)
+    {
+        hr = profilerInfo10->RequestReJIT((ULONG) item->m_length, item->m_modulesId.get(), item->m_methodDefs.get());
+    }
+    else
+    {
+        hr = profilerInfo->RequestReJIT((ULONG) item->m_length, item->m_modulesId.get(), item->m_methodDefs.get());
+    }
+    if (SUCCEEDED(hr))
+    {
+        Logger::Info("Request ReJIT done for ", item->m_length, " methods");
+    }
+    else
+    {
+        Logger::Warn("Error requesting ReJIT for ", item->m_length, " methods");
+    }
 }
 
 void RejitHandler::EnqueueForRejit(std::vector<ModuleID>& modulesVector, std::vector<mdMethodDef>& modulesMethodDef)

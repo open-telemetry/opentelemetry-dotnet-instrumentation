@@ -33,7 +33,7 @@ public class StrongNamedTests : TestHelper
     {
     }
 
-    [Fact(Skip = "Bug in product. See: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1242")]
+    [Fact]
     public async Task SubmitsTraces()
     {
         var assemblyPath = GetTestAssemblyPath();
