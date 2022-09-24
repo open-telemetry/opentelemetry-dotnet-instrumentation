@@ -138,6 +138,9 @@ public class SmokeTests : TestHelper
             resourceMetrics.Resource.Attributes.Should().ContainEquivalentOf(expectedServiceNameAttribute);
 
             resourceMetrics.Resource.Attributes.Where(a => a.Key.StartsWith("telemetry.sdk.")).Should().HaveCount(3);
+
+            var expectedTelemetryAutoVersionAttribute = new KeyValue { Key = "telemetry.auto.version", Value = new AnyValue { StringValue = OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version } };
+            resourceMetrics.Resource.Attributes.Should().ContainEquivalentOf(expectedTelemetryAutoVersionAttribute);
         }
     }
 
