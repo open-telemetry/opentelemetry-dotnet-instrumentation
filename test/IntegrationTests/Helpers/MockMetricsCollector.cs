@@ -93,8 +93,8 @@ public class MockMetricsCollector : IDisposable
         }
 
         var missingExpectations = new List<Expectation>(_expectations);
-        var expectationsMet = new List<global::OpenTelemetry.Proto.Metrics.V1.Metric>();
-        var additionalEntries = new List<global::OpenTelemetry.Proto.Metrics.V1.Metric>();
+        var expectationsMet = new List<Collected>();
+        var additionalEntries = new List<Collected>();
 
         timeout ??= DefaultWaitTimeout;
         var cts = new CancellationTokenSource();
@@ -112,27 +112,33 @@ public class MockMetricsCollector : IDisposable
                 {
                     foreach (var metric in scopeMetrics.Metrics)
                     {
+                        var colleted =  new Collected
+                        {
+                            InstrumentationScopeName = scopeMetrics.Scope.Name,
+                            Metric = metric
+                        };
+
                         bool found = false;
                         for (int i = 0; i < missingExpectations.Count; i++)
                         {
-                            if (metric.Name == missingExpectations[i].InstrumentationScopeName)
+                            if (colleted.InstrumentationScopeName != missingExpectations[i].InstrumentationScopeName)
                             {
                                 continue;
                             }
 
-                            if (!missingExpectations[i].Predicate(metric))
+                            if (!missingExpectations[i].Predicate(colleted.Metric))
                             {
                                 continue;
                             }
 
-                            expectationsMet.Add(metric);
+                            expectationsMet.Add(colleted);
                             missingExpectations.RemoveAt(i);
                             found = true;
                         }
 
                         if (!found)
                         {
-                            additionalEntries.Add(metric);
+                            additionalEntries.Add(colleted);
                             continue;
                         }
 
@@ -163,8 +169,8 @@ public class MockMetricsCollector : IDisposable
 
     private static void FailExpectations(
         List<Expectation> missingExpectations,
-        List<global::OpenTelemetry.Proto.Metrics.V1.Metric> expectationsMet,
-        List<global::OpenTelemetry.Proto.Metrics.V1.Metric> additionalEntries)
+        List<Collected> expectationsMet,
+        List<Collected> additionalEntries)
     {
         var message = new StringBuilder();
         message.AppendLine();
@@ -232,5 +238,17 @@ public class MockMetricsCollector : IDisposable
         public Func<global::OpenTelemetry.Proto.Metrics.V1.Metric, bool> Predicate { get; set; }
 
         public string Description { get; set; }
+    }
+
+    private class Collected
+    {
+        public string InstrumentationScopeName { get; set; }
+
+        public global::OpenTelemetry.Proto.Metrics.V1.Metric Metric { get; set; }
+
+        public override string ToString()
+        {
+            return $"InstrumentationScopeName = {InstrumentationScopeName}, Metric = {Metric}";
+        }
     }
 }
