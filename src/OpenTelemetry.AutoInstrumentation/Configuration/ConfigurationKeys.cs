@@ -16,6 +16,7 @@
 
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
 using OpenTelemetry.Logs;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
@@ -23,7 +24,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Configuration keys
 /// </summary>
-public class ConfigurationKeys
+public static class ConfigurationKeys
 {
     /// <summary>
     /// Configuration key for the OTLP protocol to be used.
@@ -96,6 +97,18 @@ public class ConfigurationKeys
         /// Configuration key for legacy source names to be added to the tracer at the startup.
         /// </summary>
         public const string LegacySources = "OTEL_DOTNET_AUTO_LEGACY_SOURCES";
+
+        /// <summary>
+        /// Configuration keys for instrumentation options.
+        /// </summary>
+        public static class InstrumentationOptions
+        {
+            /// <summary>
+            /// Configuration key for GraphQL instrumentation to enable passing query as a document attribute.
+            /// See <see cref="GraphQLTags.Document"/>.
+            /// </summary>
+            public const string GraphQLSetDocument = "OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT";
+        }
     }
 
     /// <summary>

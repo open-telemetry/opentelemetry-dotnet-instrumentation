@@ -63,6 +63,9 @@ public class SettingsTests : IDisposable
             settings.LegacySources.Should().BeEmpty();
             settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
             settings.FlushOnUnhandledException.Should().BeFalse();
+
+            // Instrumentation options tests
+            settings.InstrumentationOptions.GraphQLSetDocument.Should().BeFalse();
         }
     }
 
@@ -309,6 +312,7 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.DisabledInstrumentations, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.GraphQLSetDocument, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Http2UnencryptedSupportEnabled, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, null);
