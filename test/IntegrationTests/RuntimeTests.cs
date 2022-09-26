@@ -39,20 +39,12 @@ public class RuntimeTests : TestHelper
     public async Task SubmitMetrics()
     {
         using var collector = await MockMetricsCollector.Start(Output);
-        using var process = StartTestApplication(metricsAgentPort: collector.Port, enableClrProfiler: !IsCoreClr());
+        collector.Expect("OpenTelemetry.Instrumentation.Runtime");
 
+        using var process = StartTestApplication(metricsAgentPort: collector.Port, enableClrProfiler: !IsCoreClr());
         try
         {
-            var assert = () =>
-            {
-                var metricRequests = collector.WaitForMetrics(1);
-                var metrics = metricRequests.SelectMany(r => r.ResourceMetrics).Where(s => s.ScopeMetrics.Count > 0).FirstOrDefault();
-                metrics.ScopeMetrics.Should().ContainSingle(x => x.Scope.Name == "OpenTelemetry.Instrumentation.Runtime");
-            };
-
-            assert.Should().NotThrowAfter(
-                waitTime: 30.Seconds(),
-                pollInterval: 1.Seconds());
+            collector.AssertExpectations();
         }
         finally
         {
