@@ -11,11 +11,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Add WCF traces instrumentation (server-side for .NET Framework, client-side
   for both .NET Core and .NET Framework).
-- Support for ASP.NET Core OpenTelemetry Log exporter related environment variables:
+- Support ASP.NET Core OpenTelemetry Log exporter related environment variables:
   - `OTEL_LOGS_EXPORTER`,
   - `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED`,
   - `OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES`,
   - `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE`,
+- Support `OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT` (default value: `false`)
+  environment variable which controls whether `graphql.document` attribute is set. 
 
 ### Changed
 
@@ -100,7 +102,7 @@ You can find all OpenTelemetry references in
 
 ### Added
 
-- Adds MongoDB instrumentation support from .NET Core 3.1+.
+- Add MongoDB instrumentation support from .NET Core 3.1+.
 - Support for OpenTelemetry metric exporter related environment variables:
   - `OTEL_DOTNET_AUTO_METRICS_ENABLED`,
   - `OTEL_DOTNET_AUTO_LOAD_METER_AT_STARTUP`,
