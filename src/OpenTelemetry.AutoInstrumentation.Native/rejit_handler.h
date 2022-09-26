@@ -103,13 +103,8 @@ private:
     ICorProfilerInfo10* m_profilerInfo10;
     std::function<HRESULT(RejitHandlerModule*, RejitHandlerModuleMethod*)> m_rewriteCallback;
 
-    std::unique_ptr<UniqueBlockingQueue<RejitItem>> m_rejit_queue;
-    std::unique_ptr<std::thread> m_rejit_queue_thread;
-
     std::mutex m_ngenModules_lock;
     std::vector<ModuleID> m_ngenModules;
-
-    static void EnqueueThreadLoop(RejitHandler* handler);
 
     void RequestRejitForInlinersInModule(ModuleID moduleId);
 
