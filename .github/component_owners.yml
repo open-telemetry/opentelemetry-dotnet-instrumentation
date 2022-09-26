@@ -1,0 +1,9 @@
+# This file is used by .github/workflows/assign-reviewers.yml
+
+# Each component identified by its path prefix has a list of users
+# Please add the entries in alphabetically sorted order
+components:
+  CHANGELOG.md:
+    - theletterf
+  docs/:
+    - theletterf
