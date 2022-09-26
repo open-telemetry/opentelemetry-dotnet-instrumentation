@@ -19,6 +19,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Support `OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT` (default value: `false`)
   environment variable which controls whether `graphql.document` attribute
   is set.
+- Add [telemetry resource attributes](https://github.com/open-telemetry/opentelemetry-specification/tree/77856ebe90ea7503c793a3140a1dce3383f45126/specification/resource/semantic_conventions#telemetry-sdk).
 
 ### Changed
 
