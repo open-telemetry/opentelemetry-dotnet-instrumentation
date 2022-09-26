@@ -2397,7 +2397,6 @@ size_t CorProfiler::CallTarget_RequestRejitForModule(ModuleID module_id, ModuleM
     // Request the ReJIT for all integrations found in the module.
     if (!vtMethodDefs.empty())
     {
-        // this->rejit_handler->EnqueueForRejit(vtModules, vtMethodDefs);
         this->rejit_handler->RequestRejit(vtModules, vtMethodDefs);
         this->rejit_handler->RequestRejitForNGenInliners();
     }

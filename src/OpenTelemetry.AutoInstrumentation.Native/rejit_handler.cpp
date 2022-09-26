@@ -118,7 +118,6 @@ void RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
             methodEnum = nullptr;
             if (total > 0)
             {
-                // handler->EnqueueForRejit(modules, methods);
                 handler->RequestRejit(modules, methods);
                 Logger::Info("NGEN:: Processed with ", total, " inliners [ModuleId=", currentModuleId,
                              ",MethodDef=", currentMethodDef, "]");
@@ -410,27 +409,6 @@ void RejitHandler::RequestRejit(const std::vector<ModuleID>& modulesVector, cons
     {
         Logger::Warn("Error requesting ReJIT for ", item->m_length, " methods");
     }
-}
-
-void RejitHandler::EnqueueForRejit(std::vector<ModuleID>& modulesVector, std::vector<mdMethodDef>& modulesMethodDef)
-{
-    const size_t length = modulesMethodDef.size();
-
-    auto moduleIds = new ModuleID[length];
-    std::copy(modulesVector.begin(), modulesVector.end(), moduleIds);
-
-    auto mDefs = new mdMethodDef[length];
-    std::copy(modulesMethodDef.begin(), modulesMethodDef.end(), mDefs);
-
-    // Create module and methods metadata.
-    for (size_t i = 0; i < length; i++)
-    {
-        GetOrAddModule(moduleIds[i])->GetOrAddMethod(mDefs[i]);
-    }
-
-    // Enqueue rejit
-    m_rejit_queue->push(std::make_unique<RejitItem>((int) length, std::unique_ptr<ModuleID>(moduleIds),
-                                                    std::unique_ptr<mdMethodDef>(mDefs)));
 }
 
 void RejitHandler::Shutdown()
