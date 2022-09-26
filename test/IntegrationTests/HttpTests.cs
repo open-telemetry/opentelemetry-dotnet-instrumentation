@@ -93,49 +93,13 @@ public class HttpTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task SubmitMetrics()
     {
-        const int expectedMetricRequests = 1;
-
         using var collector = await MockMetricsCollector.Start(Output);
+        collector.Expect("OpenTelemetry.Instrumentation.Http");
+        collector.Expect("OpenTelemetry.Instrumentation.AspNetCore");
+
         RunTestApplication(metricsAgentPort: collector.Port, enableClrProfiler: !IsCoreClr());
-        var metricRequests = collector.WaitForMetrics(expectedMetricRequests);
 
-        using (new AssertionScope())
-        {
-            metricRequests.Count.Should().Be(expectedMetricRequests);
-
-            var resourceMetrics = metricRequests.Single().ResourceMetrics.Single();
-
-            var expectedServiceNameAttribute = new KeyValue { Key = "service.name", Value = new AnyValue { StringValue = ServiceName } };
-            resourceMetrics.Resource.Attributes.Should().ContainEquivalentOf(expectedServiceNameAttribute);
-
-            var httpclientScope = resourceMetrics.ScopeMetrics.Single(rm => rm.Scope.Name.Equals("OpenTelemetry.Instrumentation.Http", StringComparison.OrdinalIgnoreCase));
-            var aspnetcoreScope = resourceMetrics.ScopeMetrics.Single(rm => rm.Scope.Name.Equals("OpenTelemetry.Instrumentation.AspNetCore", StringComparison.OrdinalIgnoreCase));
-
-            var httpClientDurationMetric = httpclientScope.Metrics.FirstOrDefault(m => m.Name.Equals("http.client.duration", StringComparison.OrdinalIgnoreCase));
-            var httpServerDurationMetric = aspnetcoreScope.Metrics.FirstOrDefault(m => m.Name.Equals("http.server.duration", StringComparison.OrdinalIgnoreCase));
-
-            httpClientDurationMetric.Should().NotBeNull();
-            httpServerDurationMetric.Should().NotBeNull();
-
-            httpClientDurationMetric.DataCase.Should().Be(OpenTelemetry.Proto.Metrics.V1.Metric.DataOneofCase.Histogram);
-            httpServerDurationMetric.DataCase.Should().Be(OpenTelemetry.Proto.Metrics.V1.Metric.DataOneofCase.Histogram);
-
-            var httpClientDurationAttributes = httpClientDurationMetric.Histogram.DataPoints.Single().Attributes;
-            var httpServerDurationAttributes = httpServerDurationMetric.Histogram.DataPoints.Single().Attributes;
-
-            httpClientDurationAttributes.Count.Should().Be(4);
-            httpClientDurationAttributes.Single(a => a.Key == "http.method").Value.StringValue.Should().Be("GET");
-            httpClientDurationAttributes.Single(a => a.Key == "http.scheme").Value.StringValue.Should().Be("http");
-            httpClientDurationAttributes.Single(a => a.Key == "http.flavor").Value.StringValue.Should().Be("1.1");
-            httpClientDurationAttributes.Single(a => a.Key == "http.status_code").Value.IntValue.Should().Be(200);
-
-            httpServerDurationAttributes.Count.Should().Be(5);
-            httpServerDurationAttributes.Single(a => a.Key == "http.method").Value.StringValue.Should().Be("GET");
-            httpClientDurationAttributes.Single(a => a.Key == "http.scheme").Value.StringValue.Should().Be("http");
-            httpClientDurationAttributes.Single(a => a.Key == "http.flavor").Value.StringValue.Should().Be("1.1");
-            httpServerDurationAttributes.Single(a => a.Key == "http.host").Value.StringValue.Should().StartWith("localhost");
-            httpClientDurationAttributes.Single(a => a.Key == "http.status_code").Value.IntValue.Should().Be(200);
-        }
+        collector.AssertExpectations();
     }
 }
 #endif

@@ -126,6 +126,12 @@ public class TestHttpListener : IDisposable
             {
                 // we don't care about any exception when listener is stopped
             }
+            catch (Exception ex)
+            {
+                // somethig unexpected happened
+                // log instead of crashing the thread
+                WriteOutput(ex.ToString());
+            }
         }
     }
 

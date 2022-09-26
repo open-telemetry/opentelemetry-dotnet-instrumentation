@@ -15,17 +15,17 @@
 // </copyright>
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
-using IntegrationTests.Helpers.Models;
 using OpenTelemetry.Proto.Collector.Metrics.V1;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
@@ -34,9 +34,10 @@ public class MockMetricsCollector : IDisposable
 {
     private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromMinutes(1);
 
-    private readonly object _syncRoot = new object();
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
+    private readonly BlockingCollection<global::OpenTelemetry.Proto.Metrics.V1.ResourceMetrics> _metrics = new(10); // bounded to avoid memory leak
+    private readonly List<Expectation> _expectations = new();
 
     private MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
     {
@@ -44,28 +45,15 @@ public class MockMetricsCollector : IDisposable
         _listener = new(output, HandleHttpRequests, host);
     }
 
-    public event EventHandler<EventArgs<HttpListenerContext>> RequestReceived;
-
-    public event EventHandler<EventArgs<ExportMetricsServiceRequest>> RequestDeserialized;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether to skip deserialization of metrics.
-    /// </summary>
-    public bool ShouldDeserializeMetrics { get; set; } = true;
-
     /// <summary>
     /// Gets the TCP port that this collector is listening on.
     /// </summary>
     public int Port { get => _listener.Port; }
 
     /// <summary>
-    /// Gets the filters used to filter out metrics we don't want to look at for a test.
+    /// IsStrict defines if all entries must be expected.
     /// </summary>
-    public List<Func<ExportMetricsServiceRequest, bool>> MetricFilters { get; private set; } = new List<Func<ExportMetricsServiceRequest, bool>>();
-
-    private IImmutableList<ExportMetricsServiceRequest> MetricsMessages { get; set; } = ImmutableList<ExportMetricsServiceRequest>.Empty;
-
-    private IImmutableList<NameValueCollection> RequestHeaders { get; set; } = ImmutableList<NameValueCollection>.Empty;
+    public bool IsStrict { get; set; }
 
     public static async Task<MockMetricsCollector> Start(ITestOutputHelper output, string host = "localhost")
     {
@@ -82,77 +70,146 @@ public class MockMetricsCollector : IDisposable
         return collector;
     }
 
-    /// <summary>
-    /// Wait for the given number of metric requests to appear.
-    /// </summary>
-    /// <param name="count">The expected number of metric requests.</param>
-    /// <param name="timeout">The timeout</param>
-    /// <returns>The list of metric requests.</returns>
-    public IImmutableList<ExportMetricsServiceRequest> WaitForMetrics(
-        int count,
-        TimeSpan? timeout = null)
-    {
-        timeout ??= DefaultWaitTimeout;
-        var deadline = DateTime.Now.Add(timeout.Value);
-
-        IImmutableList<ExportMetricsServiceRequest> relevantMetricRequests = ImmutableList<ExportMetricsServiceRequest>.Empty;
-
-        while (DateTime.Now < deadline)
-        {
-            lock (_syncRoot)
-            {
-                relevantMetricRequests =
-                    MetricsMessages
-                        .Where(m => MetricFilters.All(shouldReturn => shouldReturn(m)))
-                        .ToImmutableList();
-            }
-
-            if (relevantMetricRequests.Count >= count)
-            {
-                break;
-            }
-
-            Thread.Sleep(500);
-        }
-
-        return relevantMetricRequests;
-    }
-
     public void Dispose()
     {
-        lock (_syncRoot)
-        {
-            WriteOutput($"Shutting down. Total metric requests received: '{MetricsMessages.Count}'");
-        }
-
+        WriteOutput($"Shutting down.");
+        _metrics.Dispose();
         _listener.Dispose();
     }
 
-    protected virtual void OnRequestReceived(HttpListenerContext context)
+    public void Expect(string instrumentationScopeName, Func<global::OpenTelemetry.Proto.Metrics.V1.Metric, bool> predicate = null, string description = null)
     {
-        RequestReceived?.Invoke(this, new EventArgs<HttpListenerContext>(context));
+        predicate ??= x => true;
+        description ??= instrumentationScopeName;
+
+        _expectations.Add(new Expectation { InstrumentationScopeName = instrumentationScopeName, Predicate = predicate, Description = description });
     }
 
-    protected virtual void OnRequestDeserialized(ExportMetricsServiceRequest metricsRequest)
+    public void AssertExpectations(TimeSpan? timeout = null)
     {
-        RequestDeserialized?.Invoke(this, new EventArgs<ExportMetricsServiceRequest>(metricsRequest));
+        if (_expectations.Count == 0)
+        {
+            throw new InvalidOperationException("Expectations were not set");
+        }
+
+        var missingExpectations = new List<Expectation>(_expectations);
+        var expectationsMet = new List<Collected>();
+        var additionalEntries = new List<Collected>();
+
+        timeout ??= DefaultWaitTimeout;
+        var cts = new CancellationTokenSource();
+
+        try
+        {
+            cts.CancelAfter(timeout.Value);
+
+            // loop until expectations met or timeout
+            while (true)
+            {
+                var resourceMetrics = _metrics.Take(cts.Token); // get the metrics snapshot
+
+                missingExpectations = new List<Expectation>(_expectations);
+                expectationsMet = new List<Collected>();
+                additionalEntries = new List<Collected>();
+
+                foreach (var scopeMetrics in resourceMetrics.ScopeMetrics)
+                {
+                    foreach (var metric in scopeMetrics.Metrics)
+                    {
+                        var colleted = new Collected
+                        {
+                            InstrumentationScopeName = scopeMetrics.Scope.Name,
+                            Metric = metric
+                        };
+
+                        bool found = false;
+                        for (int i = missingExpectations.Count - 1; i >= 0; i--)
+                        {
+                            if (colleted.InstrumentationScopeName != missingExpectations[i].InstrumentationScopeName)
+                            {
+                                continue;
+                            }
+
+                            if (!missingExpectations[i].Predicate(colleted.Metric))
+                            {
+                                continue;
+                            }
+
+                            expectationsMet.Add(colleted);
+                            missingExpectations.RemoveAt(i);
+                            found = true;
+                            break;
+                        }
+
+                        if (!found)
+                        {
+                            additionalEntries.Add(colleted);
+                        }
+                    }
+                }
+
+                if (missingExpectations.Count == 0)
+                {
+                    if (IsStrict && additionalEntries.Count > 0)
+                    {
+                        FailExpectations(missingExpectations, expectationsMet, additionalEntries);
+                    }
+
+                    return;
+                }
+            }
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            // CancelAfter called with non-positive value
+            FailExpectations(missingExpectations, expectationsMet, additionalEntries);
+        }
+        catch (OperationCanceledException)
+        {
+            // timeout
+            FailExpectations(missingExpectations, expectationsMet, additionalEntries);
+        }
+    }
+
+    private static void FailExpectations(
+        List<Expectation> missingExpectations,
+        List<Collected> expectationsMet,
+        List<Collected> additionalEntries)
+    {
+        var message = new StringBuilder();
+        message.AppendLine();
+
+        message.AppendLine("Missing expectations:");
+        foreach (var logline in missingExpectations)
+        {
+            message.AppendLine($"  - \"{logline.Description}\"");
+        }
+
+        message.AppendLine("Entries meeting expectations:");
+        foreach (var logline in expectationsMet)
+        {
+            message.AppendLine($"    \"{logline}\"");
+        }
+
+        message.AppendLine("Additional entries:");
+        foreach (var logline in additionalEntries)
+        {
+            message.AppendLine($"  + \"{logline}\"");
+        }
+
+        Assert.Fail(message.ToString());
     }
 
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        OnRequestReceived(ctx);
-
         if (ctx.Request.RawUrl.Equals("/v1/metrics", StringComparison.OrdinalIgnoreCase))
         {
-            if (ShouldDeserializeMetrics)
+            var metricsMessage = ExportMetricsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
+            if (metricsMessage.ResourceMetrics != null)
             {
-                var metricsMessage = ExportMetricsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
-                OnRequestDeserialized(metricsMessage);
-
-                lock (_syncRoot)
+                foreach (var metrics in metricsMessage.ResourceMetrics)
                 {
-                    MetricsMessages = MetricsMessages.Add(metricsMessage);
-                    RequestHeaders = RequestHeaders.Add(new NameValueCollection(ctx.Request.Headers));
+                    _metrics.Add(metrics);
                 }
             }
 
@@ -176,5 +233,26 @@ public class MockMetricsCollector : IDisposable
     {
         const string name = nameof(MockMetricsCollector);
         _output.WriteLine($"[{name}]: {msg}");
+    }
+
+    private class Expectation
+    {
+        public string InstrumentationScopeName { get; set; }
+
+        public Func<global::OpenTelemetry.Proto.Metrics.V1.Metric, bool> Predicate { get; set; }
+
+        public string Description { get; set; }
+    }
+
+    private class Collected
+    {
+        public string InstrumentationScopeName { get; set; }
+
+        public global::OpenTelemetry.Proto.Metrics.V1.Metric Metric { get; set; }
+
+        public override string ToString()
+        {
+            return $"InstrumentationScopeName = {InstrumentationScopeName}, Metric = {Metric}";
+        }
     }
 }
