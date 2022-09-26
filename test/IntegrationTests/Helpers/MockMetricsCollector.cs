@@ -145,17 +145,17 @@ public class MockMetricsCollector : IDisposable
                             additionalEntries.Add(colleted);
                             continue;
                         }
-
-                        if (missingExpectations.Count == 0)
-                        {
-                            if (IsStrict && additionalEntries.Count > 0)
-                            {
-                                FailExpectations(missingExpectations, expectationsMet, additionalEntries);
-                            }
-
-                            return;
-                        }
                     }
+                }
+
+                if (missingExpectations.Count == 0)
+                {
+                    if (IsStrict && additionalEntries.Count > 0)
+                    {
+                        FailExpectations(missingExpectations, expectationsMet, additionalEntries);
+                    }
+
+                    return;
                 }
             }
         }
