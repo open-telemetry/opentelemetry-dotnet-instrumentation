@@ -138,12 +138,12 @@ public class MockMetricsCollector : IDisposable
                             expectationsMet.Add(colleted);
                             missingExpectations.RemoveAt(i);
                             found = true;
+                            break;
                         }
 
                         if (!found)
                         {
                             additionalEntries.Add(colleted);
-                            continue;
                         }
                     }
                 }

@@ -112,6 +112,7 @@ public class MockLogsCollector : IDisposable
                     expectationsMet.Add(logRecord);
                     missingExpectations.RemoveAt(i);
                     found = true;
+                    break;
                 }
 
                 if (!found)
