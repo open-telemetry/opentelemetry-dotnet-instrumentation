@@ -80,7 +80,7 @@ public class MockMetricsCollector : IDisposable
     public void Expect(string instrumentationScopeName, Func<global::OpenTelemetry.Proto.Metrics.V1.Metric, bool> predicate = null, string description = null)
     {
         predicate ??= x => true;
-        description ??= "<no description>";
+        description ??= instrumentationScopeName;
 
         _expectations.Add(new Expectation { InstrumentationScopeName = instrumentationScopeName, Predicate = predicate, Description = description });
     }

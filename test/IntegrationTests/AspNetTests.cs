@@ -83,6 +83,7 @@ public class AspNetTests : TestHelper
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
         using var collector = await MockMetricsCollector.Start(Output, host: "*");
+        collector.Expect("OpenTelemetry.Instrumentation.Http");
         collector.Expect("OpenTelemetry.Instrumentation.AspNet");
 
         // Helps to reduce noise by enabling only AspNet metrics.
