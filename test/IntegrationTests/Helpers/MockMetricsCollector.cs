@@ -72,9 +72,9 @@ public class MockMetricsCollector : IDisposable
 
     public void Dispose()
     {
-        _listener.Dispose();
         WriteOutput($"Shutting down.");
         _metrics.Dispose();
+        _listener.Dispose();
     }
 
     public void Expect(string instrumentationScopeName, Func<global::OpenTelemetry.Proto.Metrics.V1.Metric, bool> predicate = null, string description = null)

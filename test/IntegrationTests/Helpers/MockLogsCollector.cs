@@ -70,9 +70,9 @@ public class MockLogsCollector : IDisposable
 
     public void Dispose()
     {
-        _listener.Dispose();
         WriteOutput($"Shutting down. Total logs requests received: '{_logs.Count}'");
         _logs.Dispose();
+        _listener.Dispose();
     }
 
     public void Expect(Func<global::OpenTelemetry.Proto.Logs.V1.LogRecord, bool> predicate, string description = null)
