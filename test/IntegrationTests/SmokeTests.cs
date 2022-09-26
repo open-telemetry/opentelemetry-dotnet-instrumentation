@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -22,12 +21,10 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
-using FluentAssertions.Execution;
 using FluentAssertions.Extensions;
 using IntegrationTests.Helpers;
 using IntegrationTests.Helpers.Mocks;
 using IntegrationTests.Helpers.Models;
-using OpenTelemetry.Proto.Common.V1;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using IntegrationTests.Helpers;

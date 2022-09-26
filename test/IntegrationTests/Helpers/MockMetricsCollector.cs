@@ -108,6 +108,10 @@ public class MockMetricsCollector : IDisposable
             {
                 var resourceMetrics = _metrics.Take(cts.Token); // get the latest metrics
 
+                missingExpectations = new List<Expectation>(_expectations);
+                expectationsMet = new List<Collected>();
+                additionalEntries = new List<Collected>();
+
                 foreach (var scopeMetrics in resourceMetrics.ScopeMetrics)
                 {
                     foreach (var metric in scopeMetrics.Metrics)
