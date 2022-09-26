@@ -123,7 +123,7 @@ public class MockMetricsCollector : IDisposable
                         };
 
                         bool found = false;
-                        for (int i = 0; i < missingExpectations.Count; i++)
+                        for (int i = missingExpectations.Count - 1; i >= 0; i--)
                         {
                             if (colleted.InstrumentationScopeName != missingExpectations[i].InstrumentationScopeName)
                             {

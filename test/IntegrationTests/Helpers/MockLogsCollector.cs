@@ -102,7 +102,7 @@ public class MockLogsCollector : IDisposable
             foreach (var logRecord in _logs.GetConsumingEnumerable(cts.Token))
             {
                 bool found = false;
-                for (int i = 0; i < missingExpectations.Count; i++)
+                for (int i = missingExpectations.Count - 1; i >= 0; i--)
                 {
                     if (!missingExpectations[i].Predicate(logRecord))
                     {
