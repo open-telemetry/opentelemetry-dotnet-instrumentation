@@ -17,7 +17,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - `OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES`,
   - `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE`,
 - Support `OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT` (default value: `false`)
-  environment variable which controls whether `graphql.document` attribute is set. 
+  environment variable which controls whether `graphql.document` attribute
+  is set. 
 
 ### Changed
 
