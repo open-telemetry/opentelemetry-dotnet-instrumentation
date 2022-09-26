@@ -61,6 +61,8 @@ public class TracerSettings : Settings
         }
 
         LoadTracerAtStartup = source.GetBool(ConfigurationKeys.Traces.LoadTracerAtStartup) ?? true;
+
+        InstrumentationOptions = new InstrumentationOptions(source);
     }
 
     /// <summary>
@@ -92,6 +94,11 @@ public class TracerSettings : Settings
     /// Gets the list of legacy sources to be added to the tracer at the startup.
     /// </summary>
     public IList<string> LegacySources { get; } = new List<string>();
+
+    /// <summary>
+    /// Gets the instrumentation options.
+    /// </summary>
+    public InstrumentationOptions InstrumentationOptions { get; private set; }
 
     internal static TracerSettings FromDefaultSources()
     {

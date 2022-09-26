@@ -43,6 +43,7 @@ internal class GraphQLCommon
     internal static Activity CreateActivityFromExecuteAsync(IExecutionContext executionContext)
     {
         Activity activity = null;
+        InstrumentationOptions options = Instrumentation.TracerSettings.InstrumentationOptions;
 
         try
         {
@@ -52,9 +53,13 @@ internal class GraphQLCommon
             string operation = GetOperation(operationName, operationType);
 
             var tags = new GraphQLTags();
-            tags.Document = query; // TODO: Sanitization is recommended.
             tags.OperationName = operationName;
             tags.OperationType = operationType;
+
+            if (options.GraphQLSetDocument)
+            {
+                tags.Document = query;
+            }
 
             activity = ActivitySource.StartActivityWithTags(operation, tags);
         }

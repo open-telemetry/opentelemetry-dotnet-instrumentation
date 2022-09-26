@@ -35,13 +35,15 @@ public class GraphQLTests : TestHelper
     private const string Library = "OpenTelemetry.AutoInstrumentation.GraphQL";
 
     private static readonly List<RequestInfo> _requests;
-    private static readonly List<WebServerSpanExpectation> _expectations;
+    private static readonly List<WebServerSpanExpectation> _expectationsAll; // Full expectations
+    private static readonly List<WebServerSpanExpectation> _expectationsSafe; // PII protected expectations
     private static int _expectedGraphQLExecuteSpanCount;
 
     static GraphQLTests()
     {
         _requests = new List<RequestInfo>(0);
-        _expectations = new List<WebServerSpanExpectation>();
+        _expectationsAll = new List<WebServerSpanExpectation>();
+        _expectationsSafe = new List<WebServerSpanExpectation>();
         _expectedGraphQLExecuteSpanCount = 0;
 
         // SUCCESS: query using GET
@@ -68,11 +70,14 @@ public class GraphQLTests : TestHelper
     {
     }
 
-    [Fact]
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
     [Trait("Category", "EndToEnd")]
-    public async Task SubmitsTraces()
+    public async Task SubmitsTraces(bool setDocument)
     {
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
         using var agent = await MockZipkinCollector.Start(Output);
@@ -155,7 +160,14 @@ public class GraphQLTests : TestHelper
             process.Kill();
         }
 
-        SpanTestHelpers.AssertExpectationsMet(_expectations, spans);
+        if (setDocument)
+        {
+            SpanTestHelpers.AssertExpectationsMet(_expectationsAll, spans);
+        }
+        else
+        {
+            SpanTestHelpers.AssertExpectationsMet(_expectationsSafe, spans);
+        }
     }
 
     private static void CreateGraphQLRequestsAndExpectations(
@@ -178,8 +190,7 @@ public class GraphQLTests : TestHelper
 
         if (failsValidation) { return; }
 
-        // Expect an 'execute' span
-        _expectations.Add(new GraphQLSpanExpectation(ServiceName, ServiceVersion, operationName)
+        _expectationsAll.Add(new GraphQLSpanExpectation(ServiceName, ServiceVersion, operationName)
         {
             OriginalUri = url,
             GraphQLRequestBody = graphQLRequestBody,
@@ -188,9 +199,18 @@ public class GraphQLTests : TestHelper
             GraphQLDocument = graphQLDocument,
             IsGraphQLError = failsExecution
         });
-        _expectedGraphQLExecuteSpanCount++;
 
-        if (failsExecution) { return; }
+        _expectationsSafe.Add(new GraphQLSpanExpectation(ServiceName, ServiceVersion, operationName)
+        {
+            OriginalUri = url,
+            GraphQLRequestBody = graphQLRequestBody,
+            GraphQLOperationType = graphQLOperationType,
+            GraphQLOperationName = graphQLOperationName,
+            GraphQLDocument = null,
+            IsGraphQLError = failsExecution
+        });
+
+        _expectedGraphQLExecuteSpanCount++;
     }
 
     private async Task SubmitRequestsAsync(HttpClient client, int aspNetCorePort)
