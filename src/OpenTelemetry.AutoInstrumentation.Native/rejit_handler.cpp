@@ -6,22 +6,6 @@ namespace trace
 {
 
 //
-// RejitItem
-//
-
-RejitItem::RejitItem(int length, std::unique_ptr<ModuleID>&& modulesId, std::unique_ptr<mdMethodDef>&& methodDefs)
-{
-    m_length = length;
-    m_modulesId = std::move(modulesId);
-    m_methodDefs = std::move(methodDefs);
-}
-
-std::unique_ptr<RejitItem> RejitItem::CreateEndRejitThread()
-{
-    return std::make_unique<RejitItem>(RejitItem(-1, std::unique_ptr<ModuleID>(), std::unique_ptr<mdMethodDef>()));
-}
-
-//
 // RejitHandlerModuleMethod
 //
 
@@ -304,24 +288,15 @@ void RejitHandler::AddNGenModule(ModuleID moduleId)
     RequestRejitForInlinersInModule(moduleId);
 }
 
-void RejitHandler::RequestRejit(const std::vector<ModuleID>& modulesVector, const std::vector<mdMethodDef>& modulesMethodDef)
+void RejitHandler::RequestRejit(std::vector<ModuleID>& modulesVector, std::vector<mdMethodDef>& modulesMethodDef)
 {
     const size_t length = modulesMethodDef.size();
-
-    auto moduleIds = new ModuleID[length];
-    std::copy(modulesVector.begin(), modulesVector.end(), moduleIds);
-
-    auto mDefs = new mdMethodDef[length];
-    std::copy(modulesMethodDef.begin(), modulesMethodDef.end(), mDefs);
 
     // Create module and methods metadata.
     for (size_t i = 0; i < length; i++)
     {
-        GetOrAddModule(moduleIds[i])->GetOrAddMethod(mDefs[i]);
+        GetOrAddModule(modulesVector[i])->GetOrAddMethod(modulesMethodDef[i]);
     }
-
-    auto item = std::make_unique<RejitItem>((int) length, std::unique_ptr<ModuleID>(moduleIds),
-                                                    std::unique_ptr<mdMethodDef>(mDefs));
 
     HRESULT hr;
     auto profilerInfo = m_profilerInfo;
@@ -329,19 +304,20 @@ void RejitHandler::RequestRejit(const std::vector<ModuleID>& modulesVector, cons
 
     if (profilerInfo10 != nullptr)
     {
-        hr = profilerInfo10->RequestReJIT((ULONG) item->m_length, item->m_modulesId.get(), item->m_methodDefs.get());
+        hr = profilerInfo10->RequestReJIT((ULONG) length, modulesVector.data(), modulesMethodDef.data());
     }
     else
     {
-        hr = profilerInfo->RequestReJIT((ULONG) item->m_length, item->m_modulesId.get(), item->m_methodDefs.get());
+        hr = profilerInfo->RequestReJIT((ULONG) length, modulesVector.data(), modulesMethodDef.data());
     }
+
     if (SUCCEEDED(hr))
     {
-        Logger::Info("Request ReJIT done for ", item->m_length, " methods");
+        Logger::Info("Request ReJIT done for ", length, " methods");
     }
     else
     {
-        Logger::Warn("Error requesting ReJIT for ", item->m_length, " methods");
+        Logger::Warn("Error requesting ReJIT for ", length, " methods");
     }
 }
 

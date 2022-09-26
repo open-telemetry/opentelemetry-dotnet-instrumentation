@@ -14,16 +14,6 @@
 namespace trace
 {
 
-struct RejitItem
-{
-    int m_length = 0;
-    std::unique_ptr<ModuleID> m_modulesId = nullptr;
-    std::unique_ptr<mdMethodDef> m_methodDefs = nullptr;
-
-    RejitItem(int length, std::unique_ptr<ModuleID>&& modulesId, std::unique_ptr<mdMethodDef>&& methodDefs);
-    static std::unique_ptr<RejitItem> CreateEndRejitThread();
-};
-
 // forward declarations...
 class RejitHandlerModule;
 class RejitHandler;
@@ -123,7 +113,7 @@ public:
 
     void AddNGenModule(ModuleID moduleId);
 
-    void RequestRejit(const std::vector<ModuleID>& modulesVector, const std::vector<mdMethodDef>& modulesMethodDef);
+    void RequestRejit(std::vector<ModuleID>& modulesVector, std::vector<mdMethodDef>& modulesMethodDef);
 
     void Shutdown();
 
