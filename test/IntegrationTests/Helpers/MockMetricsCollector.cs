@@ -112,7 +112,7 @@ public class MockMetricsCollector : IDisposable
                 {
                     foreach (var metric in scopeMetrics.Metrics)
                     {
-                        var colleted =  new Collected
+                        var colleted = new Collected
                         {
                             InstrumentationScopeName = scopeMetrics.Scope.Name,
                             Metric = metric
