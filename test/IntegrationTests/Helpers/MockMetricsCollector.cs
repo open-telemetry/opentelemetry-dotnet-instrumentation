@@ -106,7 +106,7 @@ public class MockMetricsCollector : IDisposable
             // loop until expectations met or timeout
             while (true)
             {
-                var resourceMetrics = _metrics.Take(cts.Token); // get the latest metrics
+                var resourceMetrics = _metrics.Take(cts.Token); // get the metrics snapshot
 
                 missingExpectations = new List<Expectation>(_expectations);
                 expectationsMet = new List<Collected>();
