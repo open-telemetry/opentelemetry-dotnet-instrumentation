@@ -1,4 +1,4 @@
-// <copyright file="Logger.cs" company="OpenTelemetry Authors">
+// <copyright file="CustomLogger.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,13 +19,13 @@ using System.Runtime.CompilerServices;
 
 namespace OpenTelemetry.AutoInstrumentation.Logging;
 
-internal class Logger : ILogger
+internal class CustomLogger : ILogger
 {
     private static readonly object[] NoPropertyValues = Array.Empty<object>();
 
     private readonly ISink _sink;
 
-    internal Logger(ISink sink)
+    internal CustomLogger(ISink sink)
     {
         _sink = sink ?? throw new ArgumentNullException(nameof(sink));
     }

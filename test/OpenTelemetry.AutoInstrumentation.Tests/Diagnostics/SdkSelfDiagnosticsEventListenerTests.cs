@@ -32,7 +32,7 @@ public class SdkSelfDiagnosticsEventListenerTests
     public void EventSourceSetup_LowerSeverity()
     {
         var testSink = new TestSink();
-        var logger = new Logger(testSink);
+        var logger = new CustomLogger(testSink);
         using var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Error, logger);
 
         // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
@@ -46,7 +46,7 @@ public class SdkSelfDiagnosticsEventListenerTests
     public void EventSourceSetup_HigherSeverity()
     {
         var testSink = new TestSink();
-        var logger = new Logger(testSink);
+        var logger = new CustomLogger(testSink);
         using var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Verbose, logger);
 
         // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
