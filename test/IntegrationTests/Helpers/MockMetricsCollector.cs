@@ -184,16 +184,15 @@ public class MockMetricsCollector : IDisposable
             throw new InvalidOperationException("Currently you can only assert for metrics or resouce attributes");
         }
 
-        var missingExpectations = new List<ResourceExpectation>(_resourceExpectations);
-
         timeout ??= DefaultWaitTimeout;
         var cts = new CancellationTokenSource();
 
         try
         {
             cts.CancelAfter(timeout.Value);
-            var resourceMetrics = _metrics.Take(cts.Token); // get the metrics snapshot
+            var resourceMetrics = _metrics.Take(cts.Token); // get the metrics snapshot, each contains the same resources 
 
+            var missingExpectations = new List<ResourceExpectation>(_resourceExpectations);
             foreach (var resourceAttribute in resourceMetrics.Resource.Attributes)
             {
                 for (int i = missingExpectations.Count - 1; i >= 0; i--)
@@ -221,12 +220,12 @@ public class MockMetricsCollector : IDisposable
         catch (ArgumentOutOfRangeException)
         {
             // CancelAfter called with non-positive value
-            FailResourceExpectations(missingExpectations, null);
+            FailResourceExpectations(_resourceExpectations, null);
         }
         catch (OperationCanceledException)
         {
             // timeout
-            FailResourceExpectations(missingExpectations, null);
+            FailResourceExpectations(_resourceExpectations, null);
         }
     }
 
