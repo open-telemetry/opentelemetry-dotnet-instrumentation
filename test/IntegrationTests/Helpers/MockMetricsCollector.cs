@@ -25,6 +25,7 @@ using Google.Protobuf;
 using Google.Protobuf.Collections;
 using OpenTelemetry.Proto.Collector.Metrics.V1;
 using OpenTelemetry.Proto.Common.V1;
+using OpenTelemetry.Proto.Metrics.V1;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -158,12 +159,12 @@ public class MockMetricsCollector : IDisposable
         catch (ArgumentOutOfRangeException)
         {
             // CancelAfter called with non-positive value
-            FailExpectations(missingExpectations, expectationsMet, additionalEntries);
+            FailMetrics(missingExpectations, expectationsMet, additionalEntries);
         }
         catch (OperationCanceledException)
         {
             // timeout
-            FailExpectations(missingExpectations, expectationsMet, additionalEntries);
+            FailMetrics(missingExpectations, expectationsMet, additionalEntries);
         }
     }
 
@@ -190,46 +191,50 @@ public class MockMetricsCollector : IDisposable
         try
         {
             cts.CancelAfter(timeout.Value);
-            var resourceMetrics = _metrics.Take(cts.Token); // get the metrics snapshot, each contains the same resources 
-
-            var missingExpectations = new List<ResourceExpectation>(_resourceExpectations);
-            foreach (var resourceAttribute in resourceMetrics.Resource.Attributes)
-            {
-                for (int i = missingExpectations.Count - 1; i >= 0; i--)
-                {
-                    if (resourceAttribute.Key != missingExpectations[i].Key)
-                    {
-                        continue;
-                    }
-
-                    if (resourceAttribute.Value.StringValue != missingExpectations[i].Value)
-                    {
-                        continue;
-                    }
-
-                    missingExpectations.RemoveAt(i);
-                    break;
-                }
-            }
-
-            if (missingExpectations.Count > 0)
-            {
-                FailResourceExpectations(missingExpectations, resourceMetrics.Resource.Attributes);
-            }
+            var resourceMetrics = _metrics.Take(cts.Token); // get the metrics snapshot, each contains the same resources
+            AssertResourceMetrics(_resourceExpectations, resourceMetrics);
         }
         catch (ArgumentOutOfRangeException)
         {
             // CancelAfter called with non-positive value
-            FailResourceExpectations(_resourceExpectations, null);
+            FailResourceMetrics(_resourceExpectations, null);
         }
         catch (OperationCanceledException)
         {
             // timeout
-            FailResourceExpectations(_resourceExpectations, null);
+            FailResourceMetrics(_resourceExpectations, null);
         }
     }
 
-    private static void FailExpectations(
+    private static void AssertResourceMetrics(List<ResourceExpectation> resourceExpectations, ResourceMetrics resourceMetrics)
+    {
+        var missingExpectations = new List<ResourceExpectation>(resourceExpectations);
+        foreach (var resourceAttribute in resourceMetrics.Resource.Attributes)
+        {
+            for (int i = missingExpectations.Count - 1; i >= 0; i--)
+            {
+                if (resourceAttribute.Key != missingExpectations[i].Key)
+                {
+                    continue;
+                }
+
+                if (resourceAttribute.Value.StringValue != missingExpectations[i].Value)
+                {
+                    continue;
+                }
+
+                missingExpectations.RemoveAt(i);
+                break;
+            }
+        }
+
+        if (missingExpectations.Count > 0)
+        {
+            FailResourceMetrics(missingExpectations, resourceMetrics.Resource.Attributes);
+        }
+    }
+
+    private static void FailMetrics(
         List<Expectation> missingExpectations,
         List<Collected> expectationsMet,
         List<Collected> additionalEntries)
@@ -258,7 +263,7 @@ public class MockMetricsCollector : IDisposable
         Assert.Fail(message.ToString());
     }
 
-    private void FailResourceExpectations(List<ResourceExpectation> missingExpectations, RepeatedField<KeyValue> attributes)
+    private static void FailResourceMetrics(List<ResourceExpectation> missingExpectations, RepeatedField<KeyValue> attributes)
     {
         attributes ??= new();
 
