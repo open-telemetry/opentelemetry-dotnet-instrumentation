@@ -129,6 +129,19 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
+    public async Task ResourceMetrics()
+    {
+        using var collector = await MockMetricsCollector.Start(Output);
+        collector.ExpectResourceAttribute("service.name", ServiceName);
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
+        RunTestApplication(metricsAgentPort: collector.Port);
+
+        collector.AssertResourceExpectations();
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
     public async Task PrometheusExporter()
     {
         SetEnvironmentVariable("LONG_RUNNING", "true");

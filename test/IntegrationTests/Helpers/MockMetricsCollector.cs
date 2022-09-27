@@ -17,14 +17,14 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
+using Google.Protobuf.Collections;
 using OpenTelemetry.Proto.Collector.Metrics.V1;
+using OpenTelemetry.Proto.Common.V1;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -38,6 +38,7 @@ public class MockMetricsCollector : IDisposable
     private readonly TestHttpListener _listener;
     private readonly BlockingCollection<global::OpenTelemetry.Proto.Metrics.V1.ResourceMetrics> _metrics = new(10); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
+    private readonly List<ResourceExpectation> _resourceExpectations = new();
 
     private MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
     {
@@ -49,11 +50,6 @@ public class MockMetricsCollector : IDisposable
     /// Gets the TCP port that this collector is listening on.
     /// </summary>
     public int Port { get => _listener.Port; }
-
-    /// <summary>
-    /// IsStrict defines if all entries must be expected.
-    /// </summary>
-    public bool IsStrict { get; set; }
 
     public static async Task<MockMetricsCollector> Start(ITestOutputHelper output, string host = "localhost")
     {
@@ -90,6 +86,11 @@ public class MockMetricsCollector : IDisposable
         if (_expectations.Count == 0)
         {
             throw new InvalidOperationException("Expectations were not set");
+        }
+
+        if (_resourceExpectations.Count > 0)
+        {
+            throw new InvalidOperationException("Currently you can only assert for metrics or resouce attributes");
         }
 
         var missingExpectations = new List<Expectation>(_expectations);
@@ -150,11 +151,6 @@ public class MockMetricsCollector : IDisposable
 
                 if (missingExpectations.Count == 0)
                 {
-                    if (IsStrict && additionalEntries.Count > 0)
-                    {
-                        FailExpectations(missingExpectations, expectationsMet, additionalEntries);
-                    }
-
                     return;
                 }
             }
@@ -168,6 +164,69 @@ public class MockMetricsCollector : IDisposable
         {
             // timeout
             FailExpectations(missingExpectations, expectationsMet, additionalEntries);
+        }
+    }
+
+    public void ExpectResourceAttribute(string key, string value)
+    {
+        _resourceExpectations.Add(new ResourceExpectation { Key = key, Value = value });
+    }
+
+    public void AssertResourceExpectations(TimeSpan? timeout = null)
+    {
+        if (_resourceExpectations.Count == 0)
+        {
+            throw new InvalidOperationException("Expectations were not set");
+        }
+
+        if (_expectations.Count > 0)
+        {
+            throw new InvalidOperationException("Currently you can only assert for metrics or resouce attributes");
+        }
+
+        var missingExpectations = new List<ResourceExpectation>(_resourceExpectations);
+
+        timeout ??= DefaultWaitTimeout;
+        var cts = new CancellationTokenSource();
+
+        try
+        {
+            cts.CancelAfter(timeout.Value);
+            var resourceMetrics = _metrics.Take(cts.Token); // get the metrics snapshot
+
+            foreach (var resourceAttribute in resourceMetrics.Resource.Attributes)
+            {
+                for (int i = missingExpectations.Count - 1; i >= 0; i--)
+                {
+                    if (resourceAttribute.Key != missingExpectations[i].Key)
+                    {
+                        continue;
+                    }
+
+                    if (resourceAttribute.Value.StringValue != missingExpectations[i].Value)
+                    {
+                        continue;
+                    }
+
+                    missingExpectations.RemoveAt(i);
+                    break;
+                }
+            }
+
+            if (missingExpectations.Count > 0)
+            {
+                FailResourceExpectations(missingExpectations, resourceMetrics.Resource.Attributes);
+            }
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            // CancelAfter called with non-positive value
+            FailResourceExpectations(missingExpectations, null);
+        }
+        catch (OperationCanceledException)
+        {
+            // timeout
+            FailResourceExpectations(missingExpectations, null);
         }
     }
 
@@ -195,6 +254,28 @@ public class MockMetricsCollector : IDisposable
         foreach (var logline in additionalEntries)
         {
             message.AppendLine($"  + \"{logline}\"");
+        }
+
+        Assert.Fail(message.ToString());
+    }
+
+    private void FailResourceExpectations(List<ResourceExpectation> missingExpectations, RepeatedField<KeyValue> attributes)
+    {
+        attributes ??= new();
+
+        var message = new StringBuilder();
+        message.AppendLine();
+
+        message.AppendLine("Missing resource expectations:");
+        foreach (var expectation in missingExpectations)
+        {
+            message.AppendLine($"  - \"{expectation.Key}={expectation.Value}\"");
+        }
+
+        message.AppendLine("Actual resource attributes:");
+        foreach (var attribute in attributes)
+        {
+            message.AppendLine($"  + \"{attribute.Key}={attribute.Value.StringValue}\"");
         }
 
         Assert.Fail(message.ToString());
@@ -242,6 +323,13 @@ public class MockMetricsCollector : IDisposable
         public Func<global::OpenTelemetry.Proto.Metrics.V1.Metric, bool> Predicate { get; set; }
 
         public string Description { get; set; }
+    }
+
+    private class ResourceExpectation
+    {
+        public string Key { get; set; }
+
+        public string Value { get; set; }
     }
 
     private class Collected
