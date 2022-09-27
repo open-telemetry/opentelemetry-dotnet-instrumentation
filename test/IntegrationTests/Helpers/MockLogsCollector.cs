@@ -70,13 +70,15 @@ public class MockLogsCollector : IDisposable
 
     public void Dispose()
     {
-        _listener.Dispose();
         WriteOutput($"Shutting down. Total logs requests received: '{_logs.Count}'");
         _logs.Dispose();
+        _listener.Dispose();
     }
 
     public void Expect(Func<global::OpenTelemetry.Proto.Logs.V1.LogRecord, bool> predicate, string description = null)
     {
+        description ??= "<no description>";
+
         _expectations.Add(new Expectation { Predicate = predicate, Description = description });
     }
 
@@ -90,31 +92,6 @@ public class MockLogsCollector : IDisposable
         var missingExpectations = new List<Expectation>(_expectations);
         var expectationsMet = new List<global::OpenTelemetry.Proto.Logs.V1.LogRecord>();
         var additionalEntries = new List<global::OpenTelemetry.Proto.Logs.V1.LogRecord>();
-        var fail = () =>
-        {
-            var message = new StringBuilder();
-            message.AppendLine();
-
-            message.AppendLine("Missing expectations:");
-            foreach (var logline in missingExpectations)
-            {
-                message.AppendLine($"  - \"{logline.Description ?? "<no description>"}\"");
-            }
-
-            message.AppendLine("Entries meeting expectations:");
-            foreach (var logline in expectationsMet)
-            {
-                message.AppendLine($"    \"{logline}\"");
-            }
-
-            message.AppendLine("Additional entries:");
-            foreach (var logline in additionalEntries)
-            {
-                message.AppendLine($"  + \"{logline}\"");
-            }
-
-            Assert.Fail(message.ToString());
-        };
 
         timeout ??= DefaultWaitTimeout;
         var cts = new CancellationTokenSource();
@@ -125,7 +102,7 @@ public class MockLogsCollector : IDisposable
             foreach (var logRecord in _logs.GetConsumingEnumerable(cts.Token))
             {
                 bool found = false;
-                for (int i = 0; i < missingExpectations.Count; i++)
+                for (int i = missingExpectations.Count - 1; i >= 0; i--)
                 {
                     if (!missingExpectations[i].Predicate(logRecord))
                     {
@@ -135,6 +112,7 @@ public class MockLogsCollector : IDisposable
                     expectationsMet.Add(logRecord);
                     missingExpectations.RemoveAt(i);
                     found = true;
+                    break;
                 }
 
                 if (!found)
@@ -147,7 +125,7 @@ public class MockLogsCollector : IDisposable
                 {
                     if (IsStrict && additionalEntries.Count > 0)
                     {
-                        fail();
+                        FailExpectations(missingExpectations, expectationsMet, additionalEntries);
                     }
 
                     return;
@@ -157,13 +135,42 @@ public class MockLogsCollector : IDisposable
         catch (ArgumentOutOfRangeException)
         {
             // CancelAfter called with non-positive value
-            fail();
+            FailExpectations(missingExpectations, expectationsMet, additionalEntries);
         }
         catch (OperationCanceledException)
         {
             // timeout
-            fail();
+            FailExpectations(missingExpectations, expectationsMet, additionalEntries);
         }
+    }
+
+    private static void FailExpectations(
+        List<Expectation> missingExpectations,
+        List<global::OpenTelemetry.Proto.Logs.V1.LogRecord> expectationsMet,
+        List<global::OpenTelemetry.Proto.Logs.V1.LogRecord> additionalEntries)
+    {
+        var message = new StringBuilder();
+        message.AppendLine();
+
+        message.AppendLine("Missing expectations:");
+        foreach (var logline in missingExpectations)
+        {
+            message.AppendLine($"  - \"{logline.Description}\"");
+        }
+
+        message.AppendLine("Entries meeting expectations:");
+        foreach (var logline in expectationsMet)
+        {
+            message.AppendLine($"    \"{logline}\"");
+        }
+
+        message.AppendLine("Additional entries:");
+        foreach (var logline in additionalEntries)
+        {
+            message.AppendLine($"  + \"{logline}\"");
+        }
+
+        Assert.Fail(message.ToString());
     }
 
     private void HandleHttpRequests(HttpListenerContext ctx)

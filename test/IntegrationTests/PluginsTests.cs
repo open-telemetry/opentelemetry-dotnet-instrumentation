@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using IntegrationTests.Helpers;
@@ -48,13 +46,12 @@ public class PluginsTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task SubmitMetrics()
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
-
         using var collector = await MockMetricsCollector.Start(Output);
-        RunTestApplication(metricsAgentPort: collector.Port);
-        var metricRequests = collector.WaitForMetrics(1);
+        collector.Expect("MyCompany.MyProduct.MyLibrary");
 
-        var metrics = metricRequests.Should().NotBeEmpty().And.Subject.First().ResourceMetrics.Should().ContainSingle().Subject.ScopeMetrics;
-        metrics.Should().Contain(x => x.Scope.Name == "MyCompany.MyProduct.MyLibrary");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+        RunTestApplication(metricsAgentPort: collector.Port);
+
+        collector.AssertExpectations();
     }
 }

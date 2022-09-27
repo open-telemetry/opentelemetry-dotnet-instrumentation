@@ -182,6 +182,12 @@ Important environment variables include:
 |-|-|-|
 | `OTEL_EXPORTER_ZIPKIN_ENDPOINT` | Zipkin URL. | `http://localhost:8126` |
 
+## Instrumentation options
+
+| Environment variable | Description | Default value |
+|-|-|-|
+| `OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT` | Whether GraphQL instrumentation can pass raw queries as `graphql.document` attribute. This may contain sensitive information and therefore is disabled by default. | `false` |
+
 ## Additional settings
 
 | Environment variable | Description | Default value |
