@@ -57,11 +57,10 @@ for more details.
 
 ## Logs
 
-Logs from ASP.NET Core apps could be captured using two options. First option is
-to use HostingStartup and the second option is to rely on CLR Profiler
-Instrumentation. Recommended option for ASP.NET Core is to use HostingStartup.
-For other .NET Core apps logs could be collected only through .NET CLR Profiler
-Instrumentation.
+Logs from ASP.NET Core apps can be captured in two ways: The first option is to
+use `HostingStartup`, and the second is to rely on CLR Profiler Instrumentation.
+For ASP.NET Core, use `HostingStartup`. For other .NET Core apps, you can only
+collect logs through .NET CLR Profiler Instrumentation.
 
 ### Enable Logs using HostingStartup
 
