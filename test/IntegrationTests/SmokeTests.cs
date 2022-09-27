@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -22,12 +21,10 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
-using FluentAssertions.Execution;
 using FluentAssertions.Extensions;
 using IntegrationTests.Helpers;
 using IntegrationTests.Helpers.Mocks;
 using IntegrationTests.Helpers.Models;
-using OpenTelemetry.Proto.Common.V1;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -121,32 +118,13 @@ public class SmokeTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task SubmitMetrics()
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
-        const int expectedMetricRequests = 1;
-
         using var collector = await MockMetricsCollector.Start(Output);
+        collector.Expect("MyCompany.MyProduct.MyLibrary", metric => metric.Name == "MyFruitCounter");
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
         RunTestApplication(metricsAgentPort: collector.Port);
-        var metricRequests = collector.WaitForMetrics(expectedMetricRequests);
 
-        using (new AssertionScope())
-        {
-            metricRequests.Count.Should().Be(expectedMetricRequests);
-
-            var resourceMetrics = metricRequests.Single().ResourceMetrics.Single();
-
-            var expectedServiceNameAttribute = new KeyValue { Key = "service.name", Value = new AnyValue { StringValue = ServiceName } };
-            resourceMetrics.Resource.Attributes.Should().ContainEquivalentOf(expectedServiceNameAttribute);
-
-            var customClientScope = resourceMetrics.ScopeMetrics.Single(rm => rm.Scope.Name.Equals("MyCompany.MyProduct.MyLibrary", StringComparison.OrdinalIgnoreCase));
-            var myFruitCounterMetric = customClientScope.Metrics.FirstOrDefault(m => m.Name.Equals("MyFruitCounter", StringComparison.OrdinalIgnoreCase));
-            myFruitCounterMetric.Should().NotBeNull();
-            myFruitCounterMetric.DataCase.Should().Be(OpenTelemetry.Proto.Metrics.V1.Metric.DataOneofCase.Sum);
-            myFruitCounterMetric.Sum.DataPoints.Count.Should().Be(1);
-
-            var myFruitCounterAttributes = myFruitCounterMetric.Sum.DataPoints[0].Attributes;
-            myFruitCounterAttributes.Count.Should().Be(1);
-            myFruitCounterAttributes.Single(a => a.Key == "name").Value.StringValue.Should().Be("apple");
-        }
+        collector.AssertExpectations();
     }
 
     [Fact]

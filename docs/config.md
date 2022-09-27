@@ -55,6 +55,34 @@ for more details.
 | `HttpClient` | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | * | source |
 | `NetRuntime` | [OpenTelemetry.Instrumentation.Runtime](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.Runtime) | * | source |
 
+## Logs
+
+Logs from ASP.NET Core apps can be captured in two ways: The first option is to
+use `HostingStartup`, and the second is to rely on CLR Profiler Instrumentation.
+For ASP.NET Core, use `HostingStartup`. For other .NET Core apps, you can only
+collect logs through .NET CLR Profiler Instrumentation.
+
+### Enable Logs using HostingStartup
+
+| Environment variable | Required value |
+|-|-|
+| `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` | `OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper` |
+
+### Enable Logs using .NET CLR Profiler
+
+Please follow [instructions](config.md#net-clr-profiler) here to collect logs
+using .NET CLR Profiler.
+
+### Parsing and Format Options for Logs
+
+These options could be used with both HostingStartup and .NET CLR Profiler logs
+enablement.
+
+| Environment variable | Description | Default value |
+|-|-|-|
+| `OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES` | Whether the log state should be parsed. | `false` |
+| `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE` | Whether the log state should be formatted. | `false` |
+
 ## Logging
 
 The default log directory paths are:
@@ -185,7 +213,7 @@ public OpenTelemetry.Metrics.MeterProviderBuilder ConfigureMeterProvider(OpenTel
 ```
 
 ```csharp
-public OpenTelemetryLoggerOptions ConfigureLoggerOptions(OpenTelemetryLoggerOptions builder)
+public OpenTelemetry.Logs.OpenTelemetryLoggerOptions ConfigureLoggerOptions(OpenTelemetry.Logs.OpenTelemetryLoggerOptions builder)
 ```
 
 The plugin must use the same version of the `OpenTelemetry` as the

@@ -15,10 +15,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - `OTEL_LOGS_EXPORTER`,
   - `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED`,
   - `OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES`,
-  - `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE`,
+  - `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE`.
 - Support `OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT` (default value: `false`)
   environment variable which controls whether `graphql.document` attribute
   is set.
+- Add ILogger logging instrumentation for .NET Core 3.1+.  
 
 ### Changed
 

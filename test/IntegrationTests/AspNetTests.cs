@@ -16,12 +16,14 @@
 
 #if NETFRAMEWORK
 using System;
-using System.Linq;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Containers;
 using FluentAssertions;
-using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
+using IntegrationTests.Helpers.Models;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -74,18 +76,17 @@ public class AspNetTests : TestHelper
     [Trait("Containers", "Windows")]
     public async Task SubmitMetrics()
     {
-        // Helps to reduce noise by enabling only AspNet metrics.
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "AspNet");
-
         Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
-
-        const int expectedMetricRequests = 1;
 
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
         using var collector = await MockMetricsCollector.Start(Output, host: "*");
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet");
+
+        // Helps to reduce noise by enabling only AspNet metrics.
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "AspNet");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
         var testSettings = new TestSettings
         {
@@ -95,22 +96,81 @@ public class AspNetTests : TestHelper
         using var container = await StartContainerAsync(testSettings, webPort);
 
         var client = new HttpClient();
-
         var response = await client.GetAsync($"http://localhost:{webPort}");
         var content = await response.Content.ReadAsStringAsync();
-
         Output.WriteLine("Sample response:");
         Output.WriteLine(content);
 
-        var metricRequests = collector.WaitForMetrics(expectedMetricRequests);
+        collector.AssertExpectations();
+    }
 
-        using (new AssertionScope())
+    private async Task<Container> StartContainerAsync(TestSettings testSettings, int webPort)
+    {
+        // get path to test application that the profiler will attach to
+        string testApplicationName = $"testapplication-{EnvironmentHelper.TestApplicationName.ToLowerInvariant()}";
+
+        string networkName = DockerNetworkHelper.IntegrationTestsNetworkName;
+        string networkId = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
+
+        string logPath = EnvironmentHelper.IsRunningOnCI()
+            ? Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "build_data", "profiler-logs")
+            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OpenTelemetry .NET AutoInstrumentation", "logs");
+
+        Directory.CreateDirectory(logPath);
+
+        Output.WriteLine("Collecting docker logs to: " + logPath);
+
+        var agentPort = testSettings.TracesSettings?.Port ?? testSettings.MetricsSettings?.Port;
+        var builder = new TestcontainersBuilder<TestcontainersContainer>()
+            .WithImage(testApplicationName)
+            .WithCleanUp(cleanUp: true)
+            .WithOutputConsumer(Consume.RedirectStdoutAndStderrToConsole())
+            .WithName($"{testApplicationName}-{agentPort}-{webPort}")
+            .WithNetwork(networkId, networkName)
+            .WithPortBinding(webPort, 80)
+            .WithBindMount(logPath, "c:/inetpub/wwwroot/logs")
+            .WithBindMount(EnvironmentHelper.GetNukeBuildOutput(), "c:/opentelemetry");
+
+        string agentBaseUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{agentPort}";
+        string agentHealthzUrl = $"{agentBaseUrl}/healthz";
+
+        if (testSettings.TracesSettings != null)
         {
-            metricRequests.Count.Should().BeGreaterThanOrEqualTo(expectedMetricRequests);
-            var resourceMetrics = metricRequests.SelectMany(r => r.ResourceMetrics).Where(s => s.ScopeMetrics.Count > 0).FirstOrDefault();
-            var aspnetMetrics = resourceMetrics.ScopeMetrics.Should().ContainSingle(x => x.Scope.Name == "OpenTelemetry.Instrumentation.AspNet").Which.Metrics;
-            aspnetMetrics.Should().ContainSingle(x => x.Name == "http.server.duration");
+            string zipkinEndpoint = $"{agentBaseUrl}/api/v2/spans";
+            Output.WriteLine($"Zipkin Endpoint: {zipkinEndpoint}");
+
+            builder = builder.WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", zipkinEndpoint);
         }
+
+        if (testSettings.MetricsSettings != null)
+        {
+            Output.WriteLine($"Otlp Endpoint: {agentBaseUrl}");
+            builder = builder.WithEnvironment("OTEL_EXPORTER_OTLP_ENDPOINT", agentBaseUrl);
+            builder = builder.WithEnvironment("OTEL_METRIC_EXPORT_INTERVAL", "1000");
+        }
+
+        foreach (var env in EnvironmentHelper.CustomEnvironmentVariables)
+        {
+            builder = builder.WithEnvironment(env.Key, env.Value);
+        }
+
+        var container = builder.Build();
+        var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
+
+        wasStarted.Should().BeTrue($"Container based on {testApplicationName} has to be operational for the test.");
+
+        Output.WriteLine($"Container was started successfully.");
+
+        PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {agentHealthzUrl}", Output);
+
+        var webAppHealthzUrl = $"http://localhost:{webPort}/healthz";
+        var webAppHealthzResult = await HealthzHelper.TestHealtzAsync(webAppHealthzUrl, "IIS WebApp", Output);
+
+        webAppHealthzResult.Should().BeTrue("IIS WebApp health check never returned OK.");
+
+        Output.WriteLine($"IIS WebApp was started successfully.");
+
+        return new Container(container);
     }
 }
 #endif

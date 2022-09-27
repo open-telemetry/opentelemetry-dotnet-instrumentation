@@ -16,9 +16,8 @@
 
 using System;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
 using OpenTelemetry.AutoInstrumentation.Configuration;
-using OpenTelemetry.Logs;
+using OpenTelemetry.AutoInstrumentation.Logger;
 
 [assembly: HostingStartup(typeof(OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper.BootstrapperHostingStartup))]
 
@@ -47,47 +46,7 @@ public class BootstrapperHostingStartup : IHostingStartup
     {
         try
         {
-            builder.ConfigureLogging(logging => logging.AddOpenTelemetry(options =>
-            {
-                if (settings.Plugins.Count > 0)
-                {
-                    options.InvokePlugins(settings.Plugins);
-                }
-
-                if (settings.ConsoleExporterEnabled)
-                {
-                    options.AddConsoleExporter();
-                }
-
-                switch (settings.LogExporter)
-                {
-                    case LogExporter.Otlp:
-#if NETCOREAPP3_1
-                        if (settings.Http2UnencryptedSupportEnabled)
-                        {
-                            // Adding the OtlpExporter creates a GrpcChannel.
-                            // This switch must be set before creating a GrpcChannel/HttpClient when calling an insecure gRPC service.
-                            // See: https://docs.microsoft.com/aspnet/core/grpc/troubleshoot#call-insecure-grpc-services-with-net-core-client
-                            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-                        }
-#endif
-                        options.AddOtlpExporter(options =>
-                        {
-                            if (settings.OtlpExportProtocol.HasValue)
-                            {
-                                options.Protocol = settings.OtlpExportProtocol.Value;
-                            }
-                        });
-                        break;
-                    case LogExporter.None:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException($"Traces exporter '{settings.LogExporter}' is incorrect");
-                }
-
-                options.ParseStateValues = settings.ParseStateValues;
-                options.IncludeFormattedMessage = settings.IncludeFormattedMessage;
-            }));
+            builder.ConfigureLogging(logging => logging.AddOpenTelemetryLogs());
 
             var applicationName = GetApplicationName();
             BootstrapperEventSource.Log.Trace($"BootstrapperHostingStartup loaded for application with name {applicationName}.");

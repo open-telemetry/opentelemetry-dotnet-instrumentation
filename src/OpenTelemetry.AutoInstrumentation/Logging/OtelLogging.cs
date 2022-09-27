@@ -53,7 +53,7 @@ internal static class OtelLogging
             sink = new NoopSink();
         }
 
-        Logger = new Logger(sink);
+        Logger = new CustomLogger(sink);
     }
 
     internal static ILogger GetLogger() => Logger;

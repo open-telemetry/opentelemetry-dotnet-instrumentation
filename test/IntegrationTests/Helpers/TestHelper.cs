@@ -18,11 +18,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Threading.Tasks;
-using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Containers;
 using FluentAssertions;
-using IntegrationTests.Helpers.Models;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
@@ -63,75 +59,6 @@ public abstract class TestHelper
 #else
         return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 #endif
-    }
-
-    public async Task<Container> StartContainerAsync(TestSettings testSettings, int webPort)
-    {
-        // get path to test application that the profiler will attach to
-        string testApplicationName = $"testapplication-{EnvironmentHelper.TestApplicationName.ToLowerInvariant()}";
-
-        string networkName = DockerNetworkHelper.IntegrationTestsNetworkName;
-        string networkId = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
-
-        string logPath = EnvironmentHelper.IsRunningOnCI()
-            ? Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "build_data", "profiler-logs")
-            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OpenTelemetry .NET AutoInstrumentation", "logs");
-
-        Directory.CreateDirectory(logPath);
-
-        Output.WriteLine("Collecting docker logs to: " + logPath);
-
-        var agentPort = testSettings.TracesSettings?.Port ?? testSettings.MetricsSettings?.Port;
-        var builder = new TestcontainersBuilder<TestcontainersContainer>()
-            .WithImage(testApplicationName)
-            .WithCleanUp(cleanUp: true)
-            .WithOutputConsumer(Consume.RedirectStdoutAndStderrToConsole())
-            .WithName($"{testApplicationName}-{agentPort}-{webPort}")
-            .WithNetwork(networkId, networkName)
-            .WithPortBinding(webPort, 80)
-            .WithBindMount(logPath, "c:/inetpub/wwwroot/logs")
-            .WithBindMount(EnvironmentHelper.GetNukeBuildOutput(), "c:/opentelemetry");
-
-        string agentBaseUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{agentPort}";
-        string agentHealthzUrl = $"{agentBaseUrl}/healthz";
-
-        if (testSettings.TracesSettings != null)
-        {
-            string zipkinEndpoint = $"{agentBaseUrl}/api/v2/spans";
-            Output.WriteLine($"Zipkin Endpoint: {zipkinEndpoint}");
-
-            builder = builder.WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", zipkinEndpoint);
-        }
-
-        if (testSettings.MetricsSettings != null)
-        {
-            Output.WriteLine($"Otlp Endpoint: {agentBaseUrl}");
-            builder = builder.WithEnvironment("OTEL_EXPORTER_OTLP_ENDPOINT", agentBaseUrl);
-            builder = builder.WithEnvironment("OTEL_METRIC_EXPORT_INTERVAL", "1000");
-        }
-
-        foreach (var env in EnvironmentHelper.CustomEnvironmentVariables)
-        {
-            builder = builder.WithEnvironment(env.Key, env.Value);
-        }
-
-        var container = builder.Build();
-        var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
-
-        wasStarted.Should().BeTrue($"Container based on {testApplicationName} has to be operational for the test.");
-
-        Output.WriteLine($"Container was started successfully.");
-
-        PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {agentHealthzUrl}", Output);
-
-        var webAppHealthzUrl = $"http://localhost:{webPort}/healthz";
-        var webAppHealthzResult = await HealthzHelper.TestHealtzAsync(webAppHealthzUrl, "IIS WebApp", Output);
-
-        webAppHealthzResult.Should().BeTrue("IIS WebApp health check never returned OK.");
-
-        Output.WriteLine($"IIS WebApp was started successfully.");
-
-        return new Container(container);
     }
 
     /// <summary>
