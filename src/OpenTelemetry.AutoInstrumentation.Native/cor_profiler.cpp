@@ -189,9 +189,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         return this->CallTarget_RewriterCallback(mod, method);
     };
 
-    rejit_handler =
-        info10 != nullptr ? new RejitHandler(info10, callback)
-                          : new RejitHandler(info6, callback);
+    rejit_handler = new RejitHandler(info6, callback);
 
     // load all integrations from JSON files
     LoadIntegrationsFromEnvironment(integration_methods_, GetEnvironmentValues(environment::disabled_integrations));
@@ -2397,7 +2395,7 @@ size_t CorProfiler::CallTarget_RequestRejitForModule(ModuleID module_id, ModuleM
     // Request the ReJIT for all integrations found in the module.
     if (!vtMethodDefs.empty())
     {
-        this->rejit_handler->EnqueueForRejit(vtModules, vtMethodDefs);
+        this->rejit_handler->RequestRejit(vtModules, vtMethodDefs);
         this->rejit_handler->RequestRejitForNGenInliners();
     }
 

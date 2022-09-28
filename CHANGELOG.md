@@ -15,11 +15,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - `OTEL_LOGS_EXPORTER`,
   - `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED`,
   - `OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES`,
-  - `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE`,
+  - `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE`.
 - Support `OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT` (default value: `false`)
   environment variable which controls whether `graphql.document` attribute
   is set.
-- Add [telemetry resource attributes](https://github.com/open-telemetry/opentelemetry-specification/tree/77856ebe90ea7503c793a3140a1dce3383f45126/specification/resource/semantic_conventions#telemetry-sdk).
+- Add ILogger logging instrumentation for .NET Core 3.1+.  
+- Add [telemetry resource attributes](https://github.com/open-telemetry/opentelemetry-specification/tree/v1.13.0/specification/resource/semantic_conventions#telemetry-sdk).
 
 ### Changed
 
@@ -30,6 +31,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Log folder structure is fully created on Linux.
 - Update GraphQL instrumentation to follow the [OpenTelemetry semantic conventions](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.13.0/specification/trace/semantic_conventions/instrumentation/graphql.md).
+- Fixed the race between requesting ReJIT of methods targeted for bytecode
+ instrumentation and their first execution. The race allowed, in rare occasions,
+ for the first few executions of the method to not be instrumented. See
+ issue [#1242](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1242).
 
 ## [0.3.1-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.3.1-beta.1)
 
