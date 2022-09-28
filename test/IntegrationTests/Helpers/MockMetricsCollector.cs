@@ -186,7 +186,7 @@ public class MockMetricsCollector : IDisposable
         }
         catch (ArgumentOutOfRangeException)
         {
-            // CancelAfter called with non-positive value
+            // WaitOne called with non-positive value
             FailResourceMetrics(_resourceExpectations, null);
         }
     }
