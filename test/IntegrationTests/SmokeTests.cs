@@ -19,6 +19,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
@@ -116,33 +117,6 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task ResourceTests()
-    {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
-        const int expectedMetricRequests = 1;
-
-        using var collector = await MockMetricsCollector.Start(Output);
-        RunTestApplication(metricsAgentPort: collector.Port);
-        var metricRequests = collector.WaitForMetrics(expectedMetricRequests);
-
-        using (new AssertionScope())
-        {
-            metricRequests.Count.Should().Be(expectedMetricRequests);
-
-            var resourceMetrics = metricRequests.Single().ResourceMetrics.Single();
-
-            var expectedServiceNameAttribute = new KeyValue { Key = "service.name", Value = new AnyValue { StringValue = ServiceName } };
-            resourceMetrics.Resource.Attributes.Should().ContainEquivalentOf(expectedServiceNameAttribute);
-
-            resourceMetrics.Resource.Attributes.Where(a => a.Key.StartsWith("telemetry.sdk.")).Should().HaveCount(3);
-
-            var expectedTelemetryAutoVersionAttribute = new KeyValue { Key = "telemetry.auto.version", Value = new AnyValue { StringValue = OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version } };
-            resourceMetrics.Resource.Attributes.Should().ContainEquivalentOf(expectedTelemetryAutoVersionAttribute);
-        }
-    }
-
-    [Fact]
-    [Trait("Category", "EndToEnd")]
     public async Task SubmitMetrics()
     {
         using var collector = await MockMetricsCollector.Start(Output);
@@ -160,6 +134,10 @@ public class SmokeTests : TestHelper
     {
         using var collector = await MockMetricsCollector.Start(Output);
         collector.ExpectResourceAttribute("service.name", ServiceName);
+        collector.ExpectResourceAttribute("telemetry.sdk.name", "opentelemetry");
+        collector.ExpectResourceAttribute("telemetry.sdk.language", "dotnet");
+        collector.ExpectResourceAttribute("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
+        collector.ExpectResourceAttribute("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
         RunTestApplication(metricsAgentPort: collector.Port);
