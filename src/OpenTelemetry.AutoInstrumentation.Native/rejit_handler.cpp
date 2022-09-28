@@ -209,40 +209,17 @@ void RejitHandlerModule::RequestRejitForInlinersInModule(ModuleID moduleId)
 
 void RejitHandler::RequestRejitForInlinersInModule(ModuleID moduleId)
 {
-    if (m_profilerInfo6 != nullptr)
+    std::lock_guard<std::mutex> guard(m_modules_lock);
+    for (const auto& mod : m_modules)
     {
-        std::lock_guard<std::mutex> guard(m_modules_lock);
-        for (const auto& mod : m_modules)
-        {
-            mod.second->RequestRejitForInlinersInModule(moduleId);
-        }
+        mod.second->RequestRejitForInlinersInModule(moduleId);
     }
-}
-
-RejitHandler::RejitHandler(ICorProfilerInfo4* pInfo,
-                           std::function<HRESULT(RejitHandlerModule*, RejitHandlerModuleMethod*)> rewriteCallback)
-{
-    m_profilerInfo = pInfo;
-    m_profilerInfo6 = nullptr;
-    m_profilerInfo10 = nullptr;
-    m_rewriteCallback = rewriteCallback;
 }
 
 RejitHandler::RejitHandler(ICorProfilerInfo6* pInfo,
                            std::function<HRESULT(RejitHandlerModule*, RejitHandlerModuleMethod*)> rewriteCallback)
 {
-    m_profilerInfo = pInfo;
     m_profilerInfo6 = pInfo;
-    m_profilerInfo10 = nullptr;
-    m_rewriteCallback = rewriteCallback;
-}
-
-RejitHandler::RejitHandler(ICorProfilerInfo10* pInfo,
-                           std::function<HRESULT(RejitHandlerModule*, RejitHandlerModuleMethod*)> rewriteCallback)
-{
-    m_profilerInfo = pInfo;
-    m_profilerInfo6 = pInfo;
-    m_profilerInfo10 = pInfo;
     m_rewriteCallback = rewriteCallback;
 }
 
@@ -298,19 +275,12 @@ void RejitHandler::RequestRejit(std::vector<ModuleID>& modulesVector, std::vecto
         GetOrAddModule(modulesVector[i])->GetOrAddMethod(modulesMethodDef[i]);
     }
 
-    HRESULT hr;
-    auto profilerInfo = m_profilerInfo;
-    auto profilerInfo10 = m_profilerInfo10;
-
-    if (profilerInfo10 != nullptr)
-    {
-        hr = profilerInfo10->RequestReJIT((ULONG) length, modulesVector.data(), modulesMethodDef.data());
-    }
-    else
-    {
-        hr = profilerInfo->RequestReJIT((ULONG) length, modulesVector.data(), modulesMethodDef.data());
-    }
-
+    // Even if ICorProfilerInfo10, or later, is available the code leverages the fact
+    // that this is a startup profiler so there is no need to handle an attach scenario.
+    // Instead of using RequestReJITWithInliners to handle inlined methods that are targeted
+    // for instrumentation the code uses the ICorProfilerCallback::JITInlining callback instead.
+    // On the callback the profiler blocks the inlining of any method targeted for instrumentation.
+    HRESULT hr = m_profilerInfo6->RequestReJIT((ULONG) length, modulesVector.data(), modulesMethodDef.data());
     if (SUCCEEDED(hr))
     {
         Logger::Info("Request ReJIT done for ", length, " methods");
@@ -324,7 +294,7 @@ void RejitHandler::RequestRejit(std::vector<ModuleID>& modulesVector, std::vecto
 void RejitHandler::Shutdown()
 {
     m_modules.clear();
-    m_profilerInfo = nullptr;
+    m_profilerInfo6 = nullptr;
     m_rewriteCallback = nullptr;
 }
 
@@ -391,11 +361,6 @@ HRESULT RejitHandler::NotifyReJITParameters(ModuleID moduleId, mdMethodDef metho
 HRESULT RejitHandler::NotifyReJITCompilationStarted(FunctionID functionId, ReJITID rejitId)
 {
     return S_OK;
-}
-
-ICorProfilerInfo4* RejitHandler::GetCorProfilerInfo()
-{
-    return m_profilerInfo;
 }
 
 ICorProfilerInfo6* RejitHandler::GetCorProfilerInfo6()
