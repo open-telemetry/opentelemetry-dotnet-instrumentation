@@ -105,7 +105,7 @@ public class LogTests : TestHelper
             // Send a request to server (retry to avoid flakyness)
             var sendRequest = () => SubmitRequest(aspNetCorePort);
             sendRequest.Should().NotThrowAfter(
-                waitTime: 15.Seconds(),
+                waitTime: 30.Seconds(),
                 pollInterval: 0.5.Seconds());
 
             collector.AssertExpectations();
@@ -118,7 +118,10 @@ public class LogTests : TestHelper
 
     private void SubmitRequest(int aspNetCorePort)
     {
-        using var client = new HttpClient();
+        using var client = new HttpClient
+        {
+            Timeout = 3.Seconds()
+        };
         var request = new HttpRequestMessage
         {
             Method = HttpMethod.Get,
