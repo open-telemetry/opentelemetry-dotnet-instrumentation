@@ -17,10 +17,7 @@
 #if !NETFRAMEWORK
 
 using System;
-using System.Net.Http;
 using System.Threading.Tasks;
-using FluentAssertions;
-using FluentAssertions.Extensions;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -46,15 +43,6 @@ public class LogTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task SubmitLogs(bool enableClrProfiler, bool parseStateValues, bool includeFormattedMessage)
     {
-        if (!enableClrProfiler)
-        {
-            SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
-        }
-
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES", parseStateValues.ToString());
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", includeFormattedMessage.ToString());
-
-        int aspNetCorePort = TcpPortProvider.GetOpenPort();
         using var collector = await MockLogsCollector.Start(Output);
         if (parseStateValues || includeFormattedMessage)
         {
@@ -68,68 +56,30 @@ public class LogTests : TestHelper
             collector.Expect(logRecord => Convert.ToString(logRecord).Contains("TestApplication.Logs.Controllers.TestController"));
         }
 
-        using var process = StartTestApplication(logsAgentPort: collector.Port, aspNetCorePort: aspNetCorePort, enableClrProfiler: enableClrProfiler);
-        try
+        if (!enableClrProfiler)
         {
-            // Send a request to server (retry to avoid flakyness)
-            var sendRequest = () => SubmitRequest(aspNetCorePort);
-            sendRequest.Should().NotThrowAfter(
-                waitTime: 15.Seconds(),
-                pollInterval: 0.5.Seconds());
+            SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
+        }
 
-            collector.AssertExpectations();
-        }
-        finally
-        {
-            process.Kill();
-        }
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES", parseStateValues.ToString());
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", includeFormattedMessage.ToString());
+        RunTestApplication(logsAgentPort: collector.Port, enableClrProfiler: enableClrProfiler);
+
+        collector.AssertExpectations();
     }
 
     [Fact]
     public async Task EnableLogsWithCLRAndHostingStartup()
     {
-        SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES", "true");
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
-
-        int aspNetCorePort = TcpPortProvider.GetOpenPort();
         using var collector = await MockLogsCollector.Start(Output);
         collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Information from Test App.\" }");
 
-        using var process = StartTestApplication(
-                            logsAgentPort: collector.Port,
-                            aspNetCorePort: aspNetCorePort,
-                            enableClrProfiler: true);
-        try
-        {
-            // Send a request to server (retry to avoid flakyness)
-            var sendRequest = () => SubmitRequest(aspNetCorePort);
-            sendRequest.Should().NotThrowAfter(
-                waitTime: 30.Seconds(),
-                pollInterval: 0.5.Seconds());
+        SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES", "true");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
+        RunTestApplication(logsAgentPort: collector.Port, enableClrProfiler: true);
 
-            collector.AssertExpectations();
-        }
-        finally
-        {
-            process.Kill();
-        }
-    }
-
-    private void SubmitRequest(int aspNetCorePort)
-    {
-        using var client = new HttpClient
-        {
-            Timeout = 3.Seconds()
-        };
-        var request = new HttpRequestMessage
-        {
-            Method = HttpMethod.Get,
-            RequestUri = new Uri($"http://localhost:{aspNetCorePort}/test"),
-        };
-
-        var response = client.SendAsync(request).Result;
-        response.EnsureSuccessStatusCode();
+        collector.AssertExpectations();
     }
 }
 #endif
