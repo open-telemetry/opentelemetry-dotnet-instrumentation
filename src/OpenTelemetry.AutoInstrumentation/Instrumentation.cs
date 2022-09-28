@@ -114,7 +114,7 @@ public static class Instrumentation
 
                 _resourceBuilder
                     .AddTelemetrySdk()
-                    .AddAttributes(new[] { new KeyValuePair<string, object>(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version) });
+                    .AddAttributes(new KeyValuePair<string, object>[] { new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version) });
             }
 
             if (TracerSettings.LoadTracerAtStartup)
