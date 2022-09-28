@@ -5,6 +5,10 @@ on:
   # the github token will not have sufficient permission to update the PR.
   pull_request_target:
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   assign:
     runs-on: ubuntu-latest
