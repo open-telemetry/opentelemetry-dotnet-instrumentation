@@ -88,7 +88,7 @@ private:
     std::mutex m_modules_lock;
     std::unordered_map<ModuleID, std::unique_ptr<RejitHandlerModule>> m_modules;
 
-    ICorProfilerInfo6* m_profilerInfo6;
+    ICorProfilerInfo7* m_profilerInfo7;
 
     std::function<HRESULT(RejitHandlerModule*, RejitHandlerModuleMethod*)> m_rewriteCallback;
 
@@ -98,7 +98,7 @@ private:
     void RequestRejitForInlinersInModule(ModuleID moduleId);
 
 public:
-    RejitHandler(ICorProfilerInfo6* pInfo,
+    RejitHandler(ICorProfilerInfo7* pInfo,
                  std::function<HRESULT(RejitHandlerModule*, RejitHandlerModuleMethod*)> rewriteCallback);
 
     RejitHandlerModule* GetOrAddModule(ModuleID moduleId);
@@ -116,7 +116,7 @@ public:
                                   ICorProfilerFunctionControl* pFunctionControl, ModuleMetadata* metadata);
     HRESULT NotifyReJITCompilationStarted(FunctionID functionId, ReJITID rejitId);
 
-    ICorProfilerInfo6* GetCorProfilerInfo6();
+    ICorProfilerInfo7* GetCorProfilerInfo7();
 
     void RequestRejitForNGenInliners();
 };
