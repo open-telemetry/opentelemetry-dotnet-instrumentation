@@ -13,7 +13,7 @@
 namespace trace
 {
 
-RuntimeInformation GetRuntimeInformation(ICorProfilerInfo4* info)
+RuntimeInformation GetRuntimeInformation(ICorProfilerInfo7* info)
 {
     COR_PRF_RUNTIME_TYPE runtime_type;
     USHORT major_version;
@@ -31,7 +31,7 @@ RuntimeInformation GetRuntimeInformation(ICorProfilerInfo4* info)
     return {runtime_type, major_version, minor_version, build_version, qfe_version};
 }
 
-AssemblyInfo GetAssemblyInfo(ICorProfilerInfo4* info, const AssemblyID& assembly_id)
+AssemblyInfo GetAssemblyInfo(ICorProfilerInfo7* info, const AssemblyID& assembly_id)
 {
     WCHAR assembly_name[kNameMaxSize];
     DWORD assembly_name_len = 0;
@@ -188,7 +188,7 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
             FunctionMethodSignature(raw_signature, raw_signature_len)};
 }
 
-ModuleInfo GetModuleInfo(ICorProfilerInfo4* info, const ModuleID& module_id)
+ModuleInfo GetModuleInfo(ICorProfilerInfo7* info, const ModuleID& module_id)
 {
     const DWORD module_path_size = 260;
     WCHAR module_path[module_path_size]{};

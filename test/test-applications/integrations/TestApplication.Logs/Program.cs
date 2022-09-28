@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System.Net.Http;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
@@ -23,13 +24,19 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        CreateHostBuilder(args).Build().Run();
+        var port = IntegrationTests.Helpers.TcpPortProvider.GetOpenPort();
+        using var host = CreateHostBuilder(args, port).Build();
+        host.Start();
+
+        using var httpClient = new HttpClient();
+        httpClient.GetAsync($"http://localhost:{port}/test").Wait();
     }
 
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
+    public static IHostBuilder CreateHostBuilder(string[] args, int port) =>
         Host.CreateDefaultBuilder(args)
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 webBuilder.UseStartup<Startup>();
+                webBuilder.UseUrls($"http://localhost:{port}");
             });
 }

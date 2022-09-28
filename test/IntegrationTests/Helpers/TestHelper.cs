@@ -100,7 +100,7 @@ public abstract class TestHelper
     /// RunTestApplication starts the test application, wait up to DefaultProcessTimeout.
     /// Assertion exceptions are thrown if it timed out or the exit code is non-zero.
     /// </summary>
-    public void RunTestApplication(int traceAgentPort = 0, int metricsAgentPort = 0, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000, bool enableStartupHook = true, bool enableClrProfiler = true)
+    public void RunTestApplication(int traceAgentPort = 0, int metricsAgentPort = 0, int logsAgentPort = 0, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000, bool enableStartupHook = true, bool enableClrProfiler = true)
     {
         var testSettings = new TestSettings
         {
@@ -120,6 +120,11 @@ public abstract class TestHelper
         if (metricsAgentPort != 0)
         {
             testSettings.MetricsSettings = new() { Port = metricsAgentPort };
+        }
+
+        if (logsAgentPort != 0)
+        {
+            testSettings.LogSettings = new() { Port = logsAgentPort };
         }
 
         RunTestApplication(testSettings);
