@@ -74,7 +74,7 @@ void RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
     ModuleID currentModuleId = m_module->GetModuleId();
     mdMethodDef currentMethodDef = m_methodDef;
     RejitHandler* handler = m_module->GetHandler();
-    ICorProfilerInfo6* pInfo = handler->GetCorProfilerInfo6();
+    ICorProfilerInfo7* pInfo = handler->GetCorProfilerInfo7();
 
     if (pInfo != nullptr)
     {
@@ -216,10 +216,10 @@ void RejitHandler::RequestRejitForInlinersInModule(ModuleID moduleId)
     }
 }
 
-RejitHandler::RejitHandler(ICorProfilerInfo6* pInfo,
+RejitHandler::RejitHandler(ICorProfilerInfo7* pInfo,
                            std::function<HRESULT(RejitHandlerModule*, RejitHandlerModuleMethod*)> rewriteCallback)
 {
-    m_profilerInfo6 = pInfo;
+    m_profilerInfo7 = pInfo;
     m_rewriteCallback = rewriteCallback;
 }
 
@@ -280,7 +280,7 @@ void RejitHandler::RequestRejit(std::vector<ModuleID>& modulesVector, std::vecto
     // Instead of using RequestReJITWithInliners to handle inlined methods that are targeted
     // for instrumentation the code uses the ICorProfilerCallback::JITInlining callback instead.
     // On the callback the profiler blocks the inlining of any method targeted for instrumentation.
-    HRESULT hr = m_profilerInfo6->RequestReJIT((ULONG) length, modulesVector.data(), modulesMethodDef.data());
+    HRESULT hr = m_profilerInfo7->RequestReJIT((ULONG) length, modulesVector.data(), modulesMethodDef.data());
     if (SUCCEEDED(hr))
     {
         Logger::Info("Request ReJIT done for ", length, " methods");
@@ -294,7 +294,7 @@ void RejitHandler::RequestRejit(std::vector<ModuleID>& modulesVector, std::vecto
 void RejitHandler::Shutdown()
 {
     m_modules.clear();
-    m_profilerInfo6 = nullptr;
+    m_profilerInfo7 = nullptr;
     m_rewriteCallback = nullptr;
 }
 
@@ -363,14 +363,14 @@ HRESULT RejitHandler::NotifyReJITCompilationStarted(FunctionID functionId, ReJIT
     return S_OK;
 }
 
-ICorProfilerInfo6* RejitHandler::GetCorProfilerInfo6()
+ICorProfilerInfo7* RejitHandler::GetCorProfilerInfo7()
 {
-    return m_profilerInfo6;
+    return m_profilerInfo7;
 }
 
 void RejitHandler::RequestRejitForNGenInliners()
 {
-    if (m_profilerInfo6 != nullptr)
+    if (m_profilerInfo7 != nullptr)
     {
         std::lock_guard<std::mutex> guard(m_ngenModules_lock);
         for (const auto& mod : m_ngenModules)
