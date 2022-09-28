@@ -19,6 +19,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Extensions;
@@ -133,6 +134,10 @@ public class SmokeTests : TestHelper
     {
         using var collector = await MockMetricsCollector.Start(Output);
         collector.ExpectResourceAttribute("service.name", ServiceName);
+        collector.ExpectResourceAttribute("telemetry.sdk.name", "opentelemetry");
+        collector.ExpectResourceAttribute("telemetry.sdk.language", "dotnet");
+        collector.ExpectResourceAttribute("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
+        collector.ExpectResourceAttribute("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
         RunTestApplication(metricsAgentPort: collector.Port);

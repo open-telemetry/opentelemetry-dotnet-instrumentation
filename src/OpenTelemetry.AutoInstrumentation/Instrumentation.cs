@@ -15,6 +15,7 @@
 // </copyright>
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Configuration;
@@ -110,6 +111,10 @@ public static class Instrumentation
                 }
 
                 EnvironmentConfigurationSdkHelper.UseEnvironmentVariables(SdkSettings);
+
+                _resourceBuilder
+                    .AddTelemetrySdk()
+                    .AddAttributes(new KeyValuePair<string, object>[] { new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version) });
             }
 
             if (TracerSettings.LoadTracerAtStartup)

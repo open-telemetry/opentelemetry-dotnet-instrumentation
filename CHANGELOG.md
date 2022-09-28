@@ -20,6 +20,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   environment variable which controls whether `graphql.document` attribute
   is set.
 - Add ILogger logging instrumentation for .NET Core 3.1+.  
+- Add [telemetry resource attributes](https://github.com/open-telemetry/opentelemetry-specification/tree/v1.13.0/specification/resource/semantic_conventions#telemetry-sdk).
 
 ### Changed
 
