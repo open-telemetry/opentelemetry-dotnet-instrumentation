@@ -41,10 +41,10 @@ public class MockMetricsCollector : IDisposable
     private readonly List<Expectation> _expectations = new();
     private readonly List<ResourceExpectation> _resourceExpectations = new();
 
-    private readonly BlockingCollection<List<Collected>> _metricsSnapshots = new(10); // bounded to avoid memory leak
+    private readonly BlockingCollection<List<CollectedMetric>> _metricsSnapshots = new(10); // bounded to avoid memory leak; contains protobuf type
 
     private readonly ManualResetEvent _resourceAttributesEvent = new(false); // synchronizes access to _resourceAttributes
-    private RepeatedField<KeyValue> _resourceAttributes;
+    private RepeatedField<KeyValue> _resourceAttributes; // protobuf type
 
     private MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
     {
@@ -96,8 +96,8 @@ public class MockMetricsCollector : IDisposable
         }
 
         var missingExpectations = new List<Expectation>(_expectations);
-        var expectationsMet = new List<Collected>();
-        var additionalEntries = new List<Collected>();
+        var expectationsMet = new List<CollectedMetric>();
+        var additionalEntries = new List<CollectedMetric>();
 
         timeout ??= DefaultWaitTimeout;
         var cts = new CancellationTokenSource();
@@ -112,25 +112,25 @@ public class MockMetricsCollector : IDisposable
                 var metrics = _metricsSnapshots.Take(cts.Token); // get the metrics snapshot
 
                 missingExpectations = new List<Expectation>(_expectations);
-                expectationsMet = new List<Collected>();
-                additionalEntries = new List<Collected>();
+                expectationsMet = new List<CollectedMetric>();
+                additionalEntries = new List<CollectedMetric>();
 
-                foreach (var colleted in metrics)
+                foreach (var metric in metrics)
                 {
                     bool found = false;
                     for (int i = missingExpectations.Count - 1; i >= 0; i--)
                     {
-                        if (colleted.InstrumentationScopeName != missingExpectations[i].InstrumentationScopeName)
+                        if (metric.InstrumentationScopeName != missingExpectations[i].InstrumentationScopeName)
                         {
                             continue;
                         }
 
-                        if (!missingExpectations[i].Predicate(colleted.Metric))
+                        if (!missingExpectations[i].Predicate(metric.Metric))
                         {
                             continue;
                         }
 
-                        expectationsMet.Add(colleted);
+                        expectationsMet.Add(metric);
                         missingExpectations.RemoveAt(i);
                         found = true;
                         break;
@@ -138,7 +138,7 @@ public class MockMetricsCollector : IDisposable
 
                     if (!found)
                     {
-                        additionalEntries.Add(colleted);
+                        additionalEntries.Add(metric);
                     }
                 }
 
@@ -221,8 +221,8 @@ public class MockMetricsCollector : IDisposable
 
     private static void FailMetrics(
         List<Expectation> missingExpectations,
-        List<Collected> expectationsMet,
-        List<Collected> additionalEntries)
+        List<CollectedMetric> expectationsMet,
+        List<CollectedMetric> additionalEntries)
     {
         var message = new StringBuilder();
         message.AppendLine();
@@ -277,28 +277,28 @@ public class MockMetricsCollector : IDisposable
             var metricsMessage = ExportMetricsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
             if (metricsMessage.ResourceMetrics != null)
             {
-                foreach (var rMetrics in metricsMessage.ResourceMetrics)
+                foreach (var resourceMetric in metricsMessage.ResourceMetrics)
                 {
-                    if (rMetrics.ScopeMetrics != null)
+                    if (resourceMetric.ScopeMetrics != null)
                     {
                         // resource metrics are always the same. set them only once.
                         if (_resourceAttributes == null)
                         {
-                            _resourceAttributes = rMetrics.Resource.Attributes;
+                            _resourceAttributes = resourceMetric.Resource.Attributes;
                             _resourceAttributesEvent.Set();
                         }
 
                         // process metrics snapshot
-                        var metricsSnapshot = new List<Collected>();
-                        foreach (var sMetrics in rMetrics.ScopeMetrics)
+                        var metricsSnapshot = new List<CollectedMetric>();
+                        foreach (var scopeMetrics in resourceMetric.ScopeMetrics)
                         {
-                            if (sMetrics.Metrics != null)
+                            if (scopeMetrics.Metrics != null)
                             {
-                                foreach (var metric in sMetrics.Metrics)
+                                foreach (var metric in scopeMetrics.Metrics)
                                 {
-                                    metricsSnapshot.Add(new Collected
+                                    metricsSnapshot.Add(new CollectedMetric
                                     {
-                                        InstrumentationScopeName = sMetrics.Scope.Name,
+                                        InstrumentationScopeName = scopeMetrics.Scope.Name,
                                         Metric = metric
                                     });
                                 }
@@ -348,11 +348,11 @@ public class MockMetricsCollector : IDisposable
         public string Value { get; set; }
     }
 
-    private class Collected
+    private class CollectedMetric
     {
         public string InstrumentationScopeName { get; set; }
 
-        public Metric Metric { get; set; }
+        public Metric Metric { get; set; } // protobuf type
 
         public override string ToString()
         {
