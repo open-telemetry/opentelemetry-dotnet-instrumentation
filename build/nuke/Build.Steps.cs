@@ -295,10 +295,10 @@ partial class Build
                 Solution.GetProject(Projects.Tests.AutoInstrumentationTests)
             };
 
-            if (!string.IsNullOrWhiteSpace(TestProjectFilter))
+            if (!string.IsNullOrWhiteSpace(TestProject))
             {
                 unitTestProjects = unitTestProjects
-                    .Where(p => p.Name.Contains(TestProjectFilter, StringComparison.OrdinalIgnoreCase))
+                    .Where(p => p.Name.Contains(TestProject, StringComparison.OrdinalIgnoreCase))
                     .ToArray();
                 if (unitTestProjects.Length == 0)
                 {
@@ -326,7 +326,7 @@ partial class Build
         .Executes(() =>
         {
             var project = Solution.GetProject("IntegrationTests");
-            if (!string.IsNullOrWhiteSpace(TestProjectFilter) && !project.Name.Contains(TestProjectFilter, StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrWhiteSpace(TestProject) && !project.Name.Contains(TestProject, StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
@@ -429,7 +429,7 @@ partial class Build
     private void RunBootstrappingTests()
     {
         var project = Solution.GetProject(Projects.Tests.AutoInstrumentationBootstrappingTests);
-        if (!string.IsNullOrWhiteSpace(TestProjectFilter) && !project.Name.Contains(TestProjectFilter, StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrWhiteSpace(TestProject) && !project.Name.Contains(TestProject, StringComparison.OrdinalIgnoreCase))
         {
             // Test project was not selected.
             return;
