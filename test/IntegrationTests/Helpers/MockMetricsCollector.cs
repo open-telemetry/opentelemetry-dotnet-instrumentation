@@ -289,11 +289,11 @@ public class MockMetricsCollector : IDisposable
                         }
 
                         // process metrics snapshot
+                        var metricsSnapshot = new List<Collected>();
                         foreach (var sMetrics in rMetrics.ScopeMetrics)
                         {
                             if (sMetrics.Metrics != null)
                             {
-                                var metricsSnapshot = new List<Collected>(sMetrics.Metrics.Count);
                                 foreach (var metric in sMetrics.Metrics)
                                 {
                                     metricsSnapshot.Add(new Collected
@@ -302,10 +302,10 @@ public class MockMetricsCollector : IDisposable
                                         Metric = metric
                                     });
                                 }
-
-                                _metricsSnapshots.Add(metricsSnapshot);
                             }
                         }
+
+                        _metricsSnapshots.Add(metricsSnapshot);
                     }
                 }
             }
