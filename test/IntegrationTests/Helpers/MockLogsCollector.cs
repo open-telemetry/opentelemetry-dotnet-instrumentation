@@ -48,11 +48,6 @@ public class MockLogsCollector : IDisposable
     /// </summary>
     public int Port { get => _listener.Port; }
 
-    /// <summary>
-    /// IsStrict defines if all entries must be expected.
-    /// </summary>
-    public bool IsStrict { get; set; }
-
     public static async Task<MockLogsCollector> Start(ITestOutputHelper output, string host = "localhost")
     {
         var collector = new MockLogsCollector(output, host);
@@ -123,11 +118,6 @@ public class MockLogsCollector : IDisposable
 
                 if (missingExpectations.Count == 0)
                 {
-                    if (IsStrict && additionalEntries.Count > 0)
-                    {
-                        FailExpectations(missingExpectations, expectationsMet, additionalEntries);
-                    }
-
                     return;
                 }
             }
