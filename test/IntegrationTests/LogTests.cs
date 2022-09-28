@@ -118,7 +118,10 @@ public class LogTests : TestHelper
 
     private void SubmitRequest(int aspNetCorePort)
     {
-        using var client = new HttpClient();
+        using var client = new HttpClient
+        {
+            Timeout = 3.Seconds()
+        };
         var request = new HttpRequestMessage
         {
             Method = HttpMethod.Get,
