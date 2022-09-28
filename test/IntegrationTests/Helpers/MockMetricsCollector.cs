@@ -37,9 +37,14 @@ public class MockMetricsCollector : IDisposable
 
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
-    private readonly BlockingCollection<global::OpenTelemetry.Proto.Metrics.V1.ResourceMetrics> _metrics = new(10); // bounded to avoid memory leak
+
     private readonly List<Expectation> _expectations = new();
     private readonly List<ResourceExpectation> _resourceExpectations = new();
+
+    private readonly BlockingCollection<List<Collected>> _metricsSnapshots = new(10); // bounded to avoid memory leak
+
+    private readonly ManualResetEvent _resourceAttributesEvent = new(false); // synchronizes access to _resourceAttributes
+    private RepeatedField<KeyValue> _resourceAttributes;
 
     private MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
     {
@@ -70,11 +75,12 @@ public class MockMetricsCollector : IDisposable
     public void Dispose()
     {
         WriteOutput($"Shutting down.");
-        _metrics.Dispose();
+        _metricsSnapshots.Dispose();
+        _resourceAttributesEvent.Dispose();
         _listener.Dispose();
     }
 
-    public void Expect(string instrumentationScopeName, Func<global::OpenTelemetry.Proto.Metrics.V1.Metric, bool> predicate = null, string description = null)
+    public void Expect(string instrumentationScopeName, Func<Metric, bool> predicate = null, string description = null)
     {
         predicate ??= x => true;
         description ??= instrumentationScopeName;
@@ -87,11 +93,6 @@ public class MockMetricsCollector : IDisposable
         if (_expectations.Count == 0)
         {
             throw new InvalidOperationException("Expectations were not set");
-        }
-
-        if (_resourceExpectations.Count > 0)
-        {
-            throw new InvalidOperationException("Currently you can only assert for metrics or resouce attributes");
         }
 
         var missingExpectations = new List<Expectation>(_expectations);
@@ -108,45 +109,36 @@ public class MockMetricsCollector : IDisposable
             // loop until expectations met or timeout
             while (true)
             {
-                var resourceMetrics = _metrics.Take(cts.Token); // get the metrics snapshot
+                var metrics = _metricsSnapshots.Take(cts.Token); // get the metrics snapshot
 
                 missingExpectations = new List<Expectation>(_expectations);
                 expectationsMet = new List<Collected>();
                 additionalEntries = new List<Collected>();
 
-                foreach (var scopeMetrics in resourceMetrics.ScopeMetrics)
+                foreach (var colleted in metrics)
                 {
-                    foreach (var metric in scopeMetrics.Metrics)
+                    bool found = false;
+                    for (int i = missingExpectations.Count - 1; i >= 0; i--)
                     {
-                        var colleted = new Collected
+                        if (colleted.InstrumentationScopeName != missingExpectations[i].InstrumentationScopeName)
                         {
-                            InstrumentationScopeName = scopeMetrics.Scope.Name,
-                            Metric = metric
-                        };
-
-                        bool found = false;
-                        for (int i = missingExpectations.Count - 1; i >= 0; i--)
-                        {
-                            if (colleted.InstrumentationScopeName != missingExpectations[i].InstrumentationScopeName)
-                            {
-                                continue;
-                            }
-
-                            if (!missingExpectations[i].Predicate(colleted.Metric))
-                            {
-                                continue;
-                            }
-
-                            expectationsMet.Add(colleted);
-                            missingExpectations.RemoveAt(i);
-                            found = true;
-                            break;
+                            continue;
                         }
 
-                        if (!found)
+                        if (!missingExpectations[i].Predicate(colleted.Metric))
                         {
-                            additionalEntries.Add(colleted);
+                            continue;
                         }
+
+                        expectationsMet.Add(colleted);
+                        missingExpectations.RemoveAt(i);
+                        found = true;
+                        break;
+                    }
+
+                    if (!found)
+                    {
+                        additionalEntries.Add(colleted);
                     }
                 }
 
@@ -180,36 +172,29 @@ public class MockMetricsCollector : IDisposable
             throw new InvalidOperationException("Expectations were not set");
         }
 
-        if (_expectations.Count > 0)
-        {
-            throw new InvalidOperationException("Currently you can only assert for metrics or resouce attributes");
-        }
-
         timeout ??= DefaultWaitTimeout;
-        var cts = new CancellationTokenSource();
 
         try
         {
-            cts.CancelAfter(timeout.Value);
-            var resourceMetrics = _metrics.Take(cts.Token); // get the metrics snapshot, each contains the same resources
-            AssertResourceMetrics(_resourceExpectations, resourceMetrics);
+            if (!_resourceAttributesEvent.WaitOne(timeout.Value))
+            {
+                FailResourceMetrics(_resourceExpectations, null);
+                return;
+            }
+
+            AssertResourceMetrics(_resourceExpectations, _resourceAttributes);
         }
         catch (ArgumentOutOfRangeException)
         {
             // CancelAfter called with non-positive value
             FailResourceMetrics(_resourceExpectations, null);
         }
-        catch (OperationCanceledException)
-        {
-            // timeout
-            FailResourceMetrics(_resourceExpectations, null);
-        }
     }
 
-    private static void AssertResourceMetrics(List<ResourceExpectation> resourceExpectations, ResourceMetrics resourceMetrics)
+    private static void AssertResourceMetrics(List<ResourceExpectation> resourceExpectations, RepeatedField<KeyValue> actualResourceAttributes)
     {
         var missingExpectations = new List<ResourceExpectation>(resourceExpectations);
-        foreach (var resourceAttribute in resourceMetrics.Resource.Attributes)
+        foreach (var resourceAttribute in actualResourceAttributes)
         {
             for (int i = missingExpectations.Count - 1; i >= 0; i--)
             {
@@ -230,7 +215,7 @@ public class MockMetricsCollector : IDisposable
 
         if (missingExpectations.Count > 0)
         {
-            FailResourceMetrics(missingExpectations, resourceMetrics.Resource.Attributes);
+            FailResourceMetrics(missingExpectations, actualResourceAttributes);
         }
     }
 
@@ -292,9 +277,36 @@ public class MockMetricsCollector : IDisposable
             var metricsMessage = ExportMetricsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
             if (metricsMessage.ResourceMetrics != null)
             {
-                foreach (var metrics in metricsMessage.ResourceMetrics)
+                foreach (var rMetrics in metricsMessage.ResourceMetrics)
                 {
-                    _metrics.Add(metrics);
+                    if (rMetrics.ScopeMetrics != null)
+                    {
+                        // resource metrics are always the same. set them only once.
+                        if (_resourceAttributes == null)
+                        {
+                            _resourceAttributes = rMetrics.Resource.Attributes;
+                            _resourceAttributesEvent.Set();
+                        }
+
+                        // process metrics snapshot
+                        foreach (var sMetrics in rMetrics.ScopeMetrics)
+                        {
+                            if (sMetrics.Metrics != null)
+                            {
+                                var metricsSnapshot = new List<Collected>(sMetrics.Metrics.Count);
+                                foreach (var metric in sMetrics.Metrics)
+                                {
+                                    metricsSnapshot.Add(new Collected
+                                    {
+                                        InstrumentationScopeName = sMetrics.Scope.Name,
+                                        Metric = metric
+                                    });
+                                }
+
+                                _metricsSnapshots.Add(metricsSnapshot);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -324,7 +336,7 @@ public class MockMetricsCollector : IDisposable
     {
         public string InstrumentationScopeName { get; set; }
 
-        public Func<global::OpenTelemetry.Proto.Metrics.V1.Metric, bool> Predicate { get; set; }
+        public Func<Metric, bool> Predicate { get; set; }
 
         public string Description { get; set; }
     }
@@ -340,7 +352,7 @@ public class MockMetricsCollector : IDisposable
     {
         public string InstrumentationScopeName { get; set; }
 
-        public global::OpenTelemetry.Proto.Metrics.V1.Metric Metric { get; set; }
+        public Metric Metric { get; set; }
 
         public override string ToString()
         {
