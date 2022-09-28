@@ -4,4 +4,8 @@
     <TargetFrameworks>netcoreapp3.1;net6.0</TargetFrameworks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Include="..\..\..\IntegrationTests\Helpers\TcpPortProvider.cs" />
+  </ItemGroup>
+
 </Project>
