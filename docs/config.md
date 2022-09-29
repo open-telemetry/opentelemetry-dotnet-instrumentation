@@ -40,10 +40,10 @@ for more details.
 | `GrpcNetClient`      | [Grpc.Net.Client](https://www.nuget.org/packages/Grpc.Net.Client)                                                                                                                                 | ≥2.43.0 & < 3.0.0  | source               |
 | `HttpClient`         | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest)   | *                  | source               |
 | `MongoDB`            | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core) **Not supported on .NET Framework**                                                                                     | ≥2.3.0 & < 3.0.0   | source & bytecode    |
-| `MySqlData`          | [MySql.Data](https://www.nuget.org/packages/MySql.Data)  **Not supported on .NET Framework**                                                                                                      | ≥6.10.7            | source               |
+| `MySqlData`          | [MySql.Data](https://www.nuget.org/packages/MySql.Data) **Not supported on .NET Framework**                                                                                                       | ≥6.10.7            | source               |
 | `Npgsql`             | [Npgsql](https://www.nuget.org/packages/Npgsql)                                                                                                                                                   | ≥6.0.0             | source               |
 | `SqlClient`          | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient)                             | *                  | source               |
-| `StackExchangeRedis` | [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis)  **Not supported on .NET Framework**                                                                                    | ≥2.0.405 < 3.0.0   | source & bytecode    |
+| `StackExchangeRedis` | [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis) **Not supported on .NET Framework**                                                                                     | ≥2.0.405 < 3.0.0   | source & bytecode    |
 | `Wcf`                | [System.ServiceModel](https://www.nuget.org/packages/System.ServiceModel) **No support for server side on .NET (Core)**. For configuration see [WCF Instrumentation Configuration](wcf-config.md) | *                  | source               |
 
 ### Metrics instrumentations
@@ -57,9 +57,9 @@ for more details.
 
 ### Logs instrumentations
 
-| ID               | Instrumented library                                                                        | Supported versions | Instrumentation type   |
-|------------------|---------------------------------------------------------------------------------------------|--------------------|------------------------|
-| `LoggingBuilder` | [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging) | ≥6.0.0             | bytecode or source [1] |
+| ID | Instrumented library                                                                                                            | Supported versions | Instrumentation type   |
+|----|---------------------------------------------------------------------------------------------------------------------------------|--------------------|------------------------|
+|    | [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging) **Not supported on .NET Framework** | ≥6.0.0             | bytecode or source [1] |
 
 **[1]**: For ASP.NET Core applications, the `LoggingBuilder` instrumentation
 can be enabled without using the .NET CLR Profiler by setting
