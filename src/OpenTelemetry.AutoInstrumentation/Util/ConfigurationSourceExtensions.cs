@@ -61,7 +61,14 @@ internal static class ConfigurationSourceExtensions
         {
             foreach (var instrumentation in disabledInstrumentations.Split(Constants.ConfigurationValues.Separator))
             {
-                instrumentations.Remove(instrumentation);
+                if (Enum.TryParse(instrumentation, out TEnum _))
+                {
+                    instrumentations.Remove(instrumentation);
+                }
+                else
+                {
+                    throw new FormatException(string.Format(error, instrumentation));
+                }
             }
         }
 
