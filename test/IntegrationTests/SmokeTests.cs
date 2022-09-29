@@ -200,7 +200,6 @@ public class SmokeTests : TestHelper
         using var collector = await MockLogsCollector.Start(Output);
         collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Example log message\" }");
 
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES", "true");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
         RunTestApplication(logsAgentPort: collector.Port, enableClrProfiler: true);
 
