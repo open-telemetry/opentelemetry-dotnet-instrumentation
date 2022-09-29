@@ -32,27 +32,23 @@ public class LogTests : TestHelper
     }
 
     [Theory]
-    [InlineData(false, true, true)]
-    [InlineData(false, true, false)]
-    [InlineData(false, false, true)]
-    [InlineData(false, false, false)]
-    [InlineData(true, true, true)]
-    [InlineData(true, true, false)]
-    [InlineData(true, false, true)]
-    [InlineData(true, false, false)]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
     [Trait("Category", "EndToEnd")]
-    public async Task SubmitLogs(bool enableClrProfiler, bool parseStateValues, bool includeFormattedMessage)
+    public async Task SubmitLogs(bool enableClrProfiler, bool includeFormattedMessage)
     {
         using var collector = await MockLogsCollector.Start(Output);
-        if (parseStateValues || includeFormattedMessage)
+        if (includeFormattedMessage)
         {
             collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Information from Test App.\" }");
         }
         else
         {
-            // When parseStateValues and includeFormattedMessage are set to false
+            // When includeFormattedMessage is set to false
             // LogRecord is not parsed and body will not have data.
-            // This is a collector behavior.
+            // This is a default collector behavior.
             collector.Expect(logRecord => Convert.ToString(logRecord).Contains("TestApplication.Logs.Controllers.TestController"));
         }
 
@@ -61,7 +57,6 @@ public class LogTests : TestHelper
             SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
         }
 
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES", parseStateValues.ToString());
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", includeFormattedMessage.ToString());
         RunTestApplication(logsAgentPort: collector.Port, enableClrProfiler: enableClrProfiler);
 
@@ -75,7 +70,6 @@ public class LogTests : TestHelper
         collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Information from Test App.\" }");
 
         SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES", "true");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
         RunTestApplication(logsAgentPort: collector.Port, enableClrProfiler: true);
 

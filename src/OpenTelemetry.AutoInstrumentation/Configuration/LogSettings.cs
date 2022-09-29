@@ -34,7 +34,6 @@ public class LogSettings : Settings
     {
         LogExporter = ParseLogExporter(source);
         ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.Logs.ConsoleExporterEnabled) ?? false;
-        ParseStateValues = source.GetBool(ConfigurationKeys.Logs.ParseStateValues) ?? false;
         IncludeFormattedMessage = source.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
     }
 
@@ -42,11 +41,6 @@ public class LogSettings : Settings
     /// Gets the logs exporter.
     /// </summary>
     public LogExporter LogExporter { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the ParseStateValues is enabled.
-    /// </summary>
-    public bool ParseStateValues { get; }
 
     /// <summary>
     /// Gets a value indicating whether the IncludeFormattedMessage is enabled.
