@@ -1,0 +1,154 @@
+const OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute.DefaultFlags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.FlattenHierarchy -> System.Reflection.BindingFlags
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn.CallTargetReturn() -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.CallTargetReturn() -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.CallTargetReturn(T returnValue) -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.GetReturnValue() -> T
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.Activity.get -> System.Diagnostics.Activity
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState() -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity activity) -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity activity, object state) -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity activity, object state, System.DateTimeOffset? startTime) -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.StartTime.get -> System.DateTimeOffset?
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.State.get -> object
+OpenTelemetry.AutoInstrumentation.DuckTyping.CreateProxyInstance<T>
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute.BindingFlags.get -> System.Reflection.BindingFlags
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute.BindingFlags.set -> void
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute.DuckAttribute() -> void
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute.ExplicitInterfaceTypeName.get -> string
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute.ExplicitInterfaceTypeName.set -> void
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute.GenericParameterTypeNames.get -> string[]
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute.GenericParameterTypeNames.set -> void
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute.Kind.get -> OpenTelemetry.AutoInstrumentation.DuckTyping.DuckKind
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute.Kind.set -> void
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute.Name.get -> string
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute.Name.set -> void
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute.ParameterTypeNames.get -> string[]
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute.ParameterTypeNames.set -> void
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckCopyAttribute
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckCopyAttribute.DuckCopyAttribute() -> void
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckFieldAttribute
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckFieldAttribute.DuckFieldAttribute() -> void
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckIgnoreAttribute
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckIgnoreAttribute.DuckIgnoreAttribute() -> void
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckIncludeAttribute
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckIncludeAttribute.DuckIncludeAttribute() -> void
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckKind
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckKind.Field = 1 -> OpenTelemetry.AutoInstrumentation.DuckTyping.DuckKind
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckKind.Property = 0 -> OpenTelemetry.AutoInstrumentation.DuckTyping.DuckKind
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckReverseMethodAttribute
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckReverseMethodAttribute.Arguments.get -> string[]
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckReverseMethodAttribute.DuckReverseMethodAttribute() -> void
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckReverseMethodAttribute.DuckReverseMethodAttribute(params string[] arguments) -> void
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateCache<T>
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult.CanCreate() -> bool
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult.CreateInstance<T>(object instance) -> T
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult.CreateTypeResult() -> void
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult.ProxyType.get -> System.Type
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.DelegateCache<TProxyDelegate>
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeException
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeExtensions
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeFieldIsReadonlyException
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeInvalidTypeConversionException
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypePropertyArgumentsLengthException
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypePropertyCantBeReadException
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypePropertyCantBeWrittenException
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypePropertyOrFieldNotFoundException
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeProxyAndTargetMethodParameterSignatureMismatchException
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeProxyMethodParameterIsMissingException
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeProxyMethodsWithGenericParametersNotSupportedInNonPublicInstancesException
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeProxyTypeDefinitionIsNull
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeStructMembersCannotBeChangedException
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeTargetMethodAmbiguousMatchException
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeTargetMethodNotFoundException
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeTargetObjectInstanceIsNull
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeTypeIsNotPublicException
+OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType
+OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.Instance.get -> object
+OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.Type.get -> System.Type
+OpenTelemetry.AutoInstrumentation.DuckTyping.IgnoresAccessChecksToAttribute
+OpenTelemetry.AutoInstrumentation.DuckTyping.IgnoresAccessChecksToAttribute.AssemblyName.get -> string
+OpenTelemetry.AutoInstrumentation.DuckTyping.IgnoresAccessChecksToAttribute.IgnoresAccessChecksToAttribute(string assemblyName) -> void
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ErrorLocationStruct
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ErrorLocationStruct.Column -> int
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ErrorLocationStruct.ErrorLocationStruct() -> void
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ErrorLocationStruct.Line -> int
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration.ExecuteAsyncIntegration() -> void
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IDocument
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IDocument.OriginalQuery.get -> string
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionContext
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionContext.Document.get -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IDocument
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionContext.Errors.get -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionErrors
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionContext.Operation.get -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IOperation
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError.Code.get -> string
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError.Locations.get -> System.Collections.Generic.IEnumerable<object>
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError.Message.get -> string
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError.Path.get -> System.Collections.Generic.IEnumerable<string>
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionErrors
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionErrors.Count.get -> int
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionErrors.this[int index].get -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IOperation
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IOperation.Name.get -> string
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IOperation.OperationType.get -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy.Mutation = 1 -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy.Query = 0 -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy.Subscription = 2 -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy
+OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration.LoggingBuilderIntegration() -> void
+OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration.MongoClientIntegration() -> void
+OpenTelemetry.AutoInstrumentation.Instrumentations.Validations.StrongNamedValidation
+OpenTelemetry.AutoInstrumentation.Instrumentations.Validations.StrongNamedValidation.StrongNamedValidation() -> void
+override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.ToString() -> string
+override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.ToString() -> string
+readonly OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult.Success -> bool
+readonly OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult.TargetType -> System.Type
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8>(TTarget instance, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, TArg5 arg5, TArg6 arg6, TArg7 arg7, TArg8 arg8) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7>(TTarget instance, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, TArg5 arg5, TArg6 arg6, TArg7 arg7) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6>(TTarget instance, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, TArg5 arg5, TArg6 arg6) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5>(TTarget instance, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, TArg5 arg5) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4>(TTarget instance, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3>(TTarget instance, TArg1 arg1, TArg2 arg2, TArg3 arg3) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2>(TTarget instance, TArg1 arg1, TArg2 arg2) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1>(TTarget instance, TArg1 arg1) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget>(TTarget instance) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget>(TTarget instance, object[] arguments) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.EndMethod<TIntegration, TTarget, TReturn>(TTarget instance, TReturn returnValue, System.Exception exception, OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState state) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<TReturn>
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.EndMethod<TIntegration, TTarget>(TTarget instance, System.Exception exception, OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState state) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.GetDefaultValue<T>() -> T
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.LogException<TIntegration, TTarget>(System.Exception exception) -> void
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn.GetDefault() -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.GetDefault() -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>
+static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.GetDefault() -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CanCreate(System.Type proxyType, object instance) -> bool
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CanCreate<T>(object instance) -> bool
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.Create(System.Type proxyType, object instance) -> OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.Create<T>(object instance) -> T
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateCache<T>.CanCreate(object instance) -> bool
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateCache<T>.Create(object instance) -> T
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateCache<T>.GetProxy(System.Type targetType) -> OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.DelegateCache<TProxyDelegate>.GetDelegate() -> TProxyDelegate
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.GetOrCreateProxyType(System.Type proxyType, System.Type targetType) -> OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeExtensions.DuckAs(this object instance, System.Type targetType) -> object
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeExtensions.DuckAs<T>(this object instance) -> T
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeExtensions.DuckCast(this object instance, System.Type targetType) -> object
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeExtensions.DuckCast<T>(this object instance) -> T
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeExtensions.DuckIs(this object instance, System.Type targetType) -> bool
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeExtensions.DuckIs<T>(this object instance) -> bool
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeExtensions.TryDuckCast(this object instance, System.Type targetType, out object value) -> bool
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckTypeExtensions.TryDuckCast<T>(this object instance, out T value) -> bool
+static OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration.OnAsyncMethodEnd<TTarget, TExecutionResult>(TTarget instance, TExecutionResult executionResult, System.Exception exception, OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState state) -> TExecutionResult
+static OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration.OnMethodBegin<TTarget, TContext>(TTarget instance, TContext context) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
+static readonly OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateCache<T>.IsVisible -> bool
+static readonly OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateCache<T>.Type -> System.Type
+static readonly OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.EnumToObjectMethodInfo -> System.Reflection.MethodInfo
+static readonly OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.GetTypeFromHandleMethodInfo -> System.Reflection.MethodInfo
