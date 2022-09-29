@@ -109,4 +109,21 @@ public class ConfigurationSourceExtensionsTests
         act.Should().Throw<FormatException>()
             .WithMessage("Invalid enum value: invalid");
     }
+
+    [Fact]
+    public void ParseDisabledEnumList_Invalid()
+    {
+        var source = new NameValueConfigurationSource(new NameValueCollection()
+        {
+            { "TEST_DISABLED_VALUES", "invalid" }
+        });
+
+        var act = () => source.ParseEnabledEnumList<TestEnum>(
+            enabledConfiguration: "TEST_ENABLED_VALUES",
+            disabledConfiguration: "TEST_DISABLED_VALUES",
+            error: "Invalid enum value: {0}");
+
+        act.Should().Throw<FormatException>()
+            .WithMessage("Invalid enum value: invalid");
+    }
 }

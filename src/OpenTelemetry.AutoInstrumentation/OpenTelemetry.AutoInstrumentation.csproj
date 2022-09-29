@@ -27,7 +27,7 @@
     <Reference Include="System.ServiceModel" ExcludeAssets="all" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNet" Version="1.0.0-rc9.5" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNet" Version="1.0.0-rc9.6" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">

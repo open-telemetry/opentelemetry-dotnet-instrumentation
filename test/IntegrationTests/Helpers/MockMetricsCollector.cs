@@ -66,7 +66,7 @@ public class MockMetricsCollector : IDisposable
         if (!healthzResult)
         {
             collector.Dispose();
-            throw new InvalidOperationException($"Cannot start {nameof(MockLogsCollector)}!");
+            throw new InvalidOperationException($"Cannot start {nameof(MockMetricsCollector)}!");
         }
 
         return collector;
