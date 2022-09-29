@@ -339,6 +339,7 @@ partial class Build
                     .SetConfiguration(BuildConfiguration)
                     .SetTargetPlatform(Platform)
                     .SetFilter(AndFilter(TestNameFilter(), ContainersFilter()))
+                    .SetBlameHangTimeout("3m")
                     .EnableTrxLogOutput(GetResultsDirectory(project))
                     .SetProjectFile(project)
                     .EnableNoRestore()
