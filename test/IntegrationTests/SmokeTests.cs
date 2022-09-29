@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -190,6 +191,22 @@ public class SmokeTests : TestHelper
             Output.WriteResult(helper);
         }
     }
+
+#if !NETFRAMEWORK
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public async Task SubmitLogs()
+    {
+        using var collector = await MockLogsCollector.Start(Output);
+        collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Example log message\" }");
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES", "true");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
+        RunTestApplication(logsAgentPort: collector.Port, enableClrProfiler: true);
+
+        collector.AssertExpectations();
+    }
+#endif
 
     private static void AssertNoSpansReceived(IImmutableList<IMockSpan> spans)
     {
