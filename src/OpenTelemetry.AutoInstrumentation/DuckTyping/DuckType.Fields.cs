@@ -23,7 +23,7 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// <summary>
 /// Duck Type
 /// </summary>
-internal static partial class DuckType
+public static partial class DuckType
 {
     private static MethodBuilder GetFieldGetMethod(TypeBuilder proxyTypeBuilder, Type targetType, MemberInfo proxyMember, FieldInfo targetField, FieldInfo instanceField)
     {

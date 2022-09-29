@@ -34,7 +34,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Validations;
     MinimumVersion = "1.0.0",
     MaximumVersion = "1.65535.65535",
     IntegrationName = "StrongNamedValidation")]
-internal class StrongNamedValidation
+public class StrongNamedValidation
 {
     private static readonly ActivitySource ValidationActivitySource = new ActivitySource("TestApplication.StrongNamedValidation");
 
@@ -44,7 +44,7 @@ internal class StrongNamedValidation
     /// <typeparam name="TTarget">Type of the target</typeparam>
     /// <param name="instance">Instance value, aka `this` of the instrumented method.</param>
     /// <returns>Calltarget state value</returns>
-    public static CallTargetState OnMethodBegin<TTarget>(TTarget instance)
+    internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance)
     {
         using var activity = ValidationActivitySource.StartActivity(nameof(StrongNamedValidation));
         activity.AddTag("validation", nameof(StrongNamedValidation));

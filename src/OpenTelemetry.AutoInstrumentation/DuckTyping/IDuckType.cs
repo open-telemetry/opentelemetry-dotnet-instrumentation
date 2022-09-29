@@ -21,7 +21,7 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// <summary>
 /// Duck type interface
 /// </summary>
-internal interface IDuckType
+public interface IDuckType
 {
     /// <summary>
     /// Gets instance

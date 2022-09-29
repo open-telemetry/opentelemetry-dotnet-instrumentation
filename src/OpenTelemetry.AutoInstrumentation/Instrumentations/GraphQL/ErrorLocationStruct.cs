@@ -22,7 +22,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
 /// GraphQL.ErrorLocation interface for ducktyping
 /// </summary>
 [DuckCopy]
-internal struct ErrorLocationStruct
+public struct ErrorLocationStruct
 {
     /// <summary>
     /// Gets the line number of the document where the error occurred

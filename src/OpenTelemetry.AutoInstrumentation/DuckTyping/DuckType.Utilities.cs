@@ -24,7 +24,7 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// <summary>
 /// Duck Type
 /// </summary>
-internal static partial class DuckType
+public static partial class DuckType
 {
     /// <summary>
     /// Checks and ensures the arguments for the Create methods

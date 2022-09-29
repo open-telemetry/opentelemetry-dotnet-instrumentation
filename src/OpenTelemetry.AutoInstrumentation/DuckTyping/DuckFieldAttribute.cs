@@ -19,7 +19,7 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// <summary>
 /// Duck attribute where the underlying member is a field
 /// </summary>
-internal class DuckFieldAttribute : DuckAttribute
+public class DuckFieldAttribute : DuckAttribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="DuckFieldAttribute"/> class.

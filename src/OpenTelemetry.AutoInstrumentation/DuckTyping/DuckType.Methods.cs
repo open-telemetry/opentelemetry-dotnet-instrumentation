@@ -25,7 +25,7 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// <summary>
 /// Duck Type
 /// </summary>
-internal static partial class DuckType
+public static partial class DuckType
 {
     private static List<MethodInfo> GetMethods(Type baseType)
     {

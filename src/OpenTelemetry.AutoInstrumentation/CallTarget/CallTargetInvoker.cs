@@ -26,7 +26,7 @@ namespace OpenTelemetry.AutoInstrumentation.CallTarget;
 /// </summary>
 [Browsable(false)]
 [EditorBrowsable(EditorBrowsableState.Never)]
-internal static class CallTargetInvoker
+public static class CallTargetInvoker
 {
     /// <summary>
     /// Begin Method Invoker

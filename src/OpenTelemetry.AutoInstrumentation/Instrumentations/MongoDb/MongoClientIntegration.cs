@@ -37,7 +37,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
     MinimumVersion = "2.3.0",
     MaximumVersion = "2.65535.65535",
     IntegrationName = "MongoDB")]
-internal class MongoClientIntegration
+public class MongoClientIntegration
 {
 #if NETCOREAPP3_1_OR_GREATER
     private static Delegate _setActivityListener;
@@ -51,7 +51,7 @@ internal class MongoClientIntegration
     /// <param name="instance">Instance value, aka `this` of the instrumented method.</param>
     /// <param name="settings">The source of the original GraphQL query</param>
     /// <returns>Calltarget state value</returns>
-    public static CallTargetState OnMethodBegin<TTarget, TMongoClientSettings>(TTarget instance, TMongoClientSettings settings)
+    internal static CallTargetState OnMethodBegin<TTarget, TMongoClientSettings>(TTarget instance, TMongoClientSettings settings)
     {
         // Additional deps doesn't support .NET FX
         // TODO: Find another way how to ship & load "MongoDB.Driver.Core.Extensions.DiagnosticSources"

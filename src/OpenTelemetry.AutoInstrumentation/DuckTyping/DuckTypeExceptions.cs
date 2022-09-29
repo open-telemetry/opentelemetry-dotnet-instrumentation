@@ -26,7 +26,7 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// <summary>
 /// DuckType Exception
 /// </summary>
-internal class DuckTypeException : Exception
+public class DuckTypeException : Exception
 {
     internal DuckTypeException(string message)
         : base(message)
@@ -37,7 +37,7 @@ internal class DuckTypeException : Exception
 /// <summary>
 /// DuckType proxy type definition is null
 /// </summary>
-internal class DuckTypeProxyTypeDefinitionIsNull : DuckTypeException
+public class DuckTypeProxyTypeDefinitionIsNull : DuckTypeException
 {
     private DuckTypeProxyTypeDefinitionIsNull()
         : base($"The proxy type definition is null.")
@@ -54,7 +54,7 @@ internal class DuckTypeProxyTypeDefinitionIsNull : DuckTypeException
 /// <summary>
 /// DuckType target object instance is null
 /// </summary>
-internal class DuckTypeTargetObjectInstanceIsNull : DuckTypeException
+public class DuckTypeTargetObjectInstanceIsNull : DuckTypeException
 {
     private DuckTypeTargetObjectInstanceIsNull()
         : base($"The target object instance is null.")
@@ -71,7 +71,7 @@ internal class DuckTypeTargetObjectInstanceIsNull : DuckTypeException
 /// <summary>
 /// DuckType invalid type conversion exception
 /// </summary>
-internal class DuckTypeInvalidTypeConversionException : DuckTypeException
+public class DuckTypeInvalidTypeConversionException : DuckTypeException
 {
     private DuckTypeInvalidTypeConversionException(Type actualType, Type expectedType)
         : base($"Invalid type conversion from {actualType.FullName} to {expectedType.FullName}")
@@ -88,7 +88,7 @@ internal class DuckTypeInvalidTypeConversionException : DuckTypeException
 /// <summary>
 /// DuckType property can't be read
 /// </summary>
-internal class DuckTypePropertyCantBeReadException : DuckTypeException
+public class DuckTypePropertyCantBeReadException : DuckTypeException
 {
     private DuckTypePropertyCantBeReadException(PropertyInfo property)
         : base($"The property '{property.Name}' can't be read, you should remove the getter from the proxy definition base type class or interface.")
@@ -105,7 +105,7 @@ internal class DuckTypePropertyCantBeReadException : DuckTypeException
 /// <summary>
 /// DuckType property can't be written
 /// </summary>
-internal class DuckTypePropertyCantBeWrittenException : DuckTypeException
+public class DuckTypePropertyCantBeWrittenException : DuckTypeException
 {
     private DuckTypePropertyCantBeWrittenException(PropertyInfo property)
         : base($"The property '{property.Name}' can't be written, you should remove the setter from the proxy definition base type class or interface.")
@@ -122,7 +122,7 @@ internal class DuckTypePropertyCantBeWrittenException : DuckTypeException
 /// <summary>
 /// DuckType property argument doesn't have the same argument length
 /// </summary>
-internal class DuckTypePropertyArgumentsLengthException : DuckTypeException
+public class DuckTypePropertyArgumentsLengthException : DuckTypeException
 {
     private DuckTypePropertyArgumentsLengthException(PropertyInfo property)
         : base($"The property '{property.Name}' doesn't have the same number of arguments as the original property.")
@@ -139,7 +139,7 @@ internal class DuckTypePropertyArgumentsLengthException : DuckTypeException
 /// <summary>
 /// DuckType field is readonly
 /// </summary>
-internal class DuckTypeFieldIsReadonlyException : DuckTypeException
+public class DuckTypeFieldIsReadonlyException : DuckTypeException
 {
     private DuckTypeFieldIsReadonlyException(FieldInfo field)
         : base($"The field '{field.Name}' is marked as readonly, you should remove the setter from the base type class or interface.")
@@ -156,7 +156,7 @@ internal class DuckTypeFieldIsReadonlyException : DuckTypeException
 /// <summary>
 /// DuckType property or field not found
 /// </summary>
-internal class DuckTypePropertyOrFieldNotFoundException : DuckTypeException
+public class DuckTypePropertyOrFieldNotFoundException : DuckTypeException
 {
     private DuckTypePropertyOrFieldNotFoundException(string name, string duckAttributeName)
         : base($"The property or field '{duckAttributeName}' for the proxy property '{name}' was not found in the instance.")
@@ -173,7 +173,7 @@ internal class DuckTypePropertyOrFieldNotFoundException : DuckTypeException
 /// <summary>
 /// DuckType type is not public exception
 /// </summary>
-internal class DuckTypeTypeIsNotPublicException : DuckTypeException
+public class DuckTypeTypeIsNotPublicException : DuckTypeException
 {
     private DuckTypeTypeIsNotPublicException(Type type, string argumentName)
         : base($"The type '{type.FullName}' must be public, argument: '{argumentName}'")
@@ -190,7 +190,7 @@ internal class DuckTypeTypeIsNotPublicException : DuckTypeException
 /// <summary>
 /// DuckType struct members cannot be changed exception
 /// </summary>
-internal class DuckTypeStructMembersCannotBeChangedException : DuckTypeException
+public class DuckTypeStructMembersCannotBeChangedException : DuckTypeException
 {
     private DuckTypeStructMembersCannotBeChangedException(Type type)
         : base($"Modifying struct members is not supported. [{type.FullName}]")
@@ -207,7 +207,7 @@ internal class DuckTypeStructMembersCannotBeChangedException : DuckTypeException
 /// <summary>
 /// DuckType target method can not be found exception
 /// </summary>
-internal class DuckTypeTargetMethodNotFoundException : DuckTypeException
+public class DuckTypeTargetMethodNotFoundException : DuckTypeException
 {
     private DuckTypeTargetMethodNotFoundException(MethodInfo method)
         : base($"The target method for the proxy method '{method}' was not found.")
@@ -224,7 +224,7 @@ internal class DuckTypeTargetMethodNotFoundException : DuckTypeException
 /// <summary>
 /// DuckType proxy method parameter is missing exception
 /// </summary>
-internal class DuckTypeProxyMethodParameterIsMissingException : DuckTypeException
+public class DuckTypeProxyMethodParameterIsMissingException : DuckTypeException
 {
     private DuckTypeProxyMethodParameterIsMissingException(MethodInfo proxyMethod, ParameterInfo targetParameterInfo)
         : base($"The proxy method '{proxyMethod.Name}' is missing parameter '{targetParameterInfo.Name}' declared in the target method.")
@@ -241,7 +241,7 @@ internal class DuckTypeProxyMethodParameterIsMissingException : DuckTypeExceptio
 /// <summary>
 /// DuckType parameter signature mismatch between proxy and target method
 /// </summary>
-internal class DuckTypeProxyAndTargetMethodParameterSignatureMismatchException : DuckTypeException
+public class DuckTypeProxyAndTargetMethodParameterSignatureMismatchException : DuckTypeException
 {
     private DuckTypeProxyAndTargetMethodParameterSignatureMismatchException(MethodInfo proxyMethod, MethodInfo targetMethod)
         : base($"Parameter signature mismatch between proxy '{proxyMethod}' and target method '{targetMethod}'")
@@ -258,7 +258,7 @@ internal class DuckTypeProxyAndTargetMethodParameterSignatureMismatchException :
 /// <summary>
 /// DuckType proxy methods with generic parameters are not supported in non public instances exception
 /// </summary>
-internal class DuckTypeProxyMethodsWithGenericParametersNotSupportedInNonPublicInstancesException : DuckTypeException
+public class DuckTypeProxyMethodsWithGenericParametersNotSupportedInNonPublicInstancesException : DuckTypeException
 {
     private DuckTypeProxyMethodsWithGenericParametersNotSupportedInNonPublicInstancesException(MethodInfo proxyMethod)
         : base($"The proxy method with generic parameters '{proxyMethod}' are not supported on non public instances")
@@ -275,7 +275,7 @@ internal class DuckTypeProxyMethodsWithGenericParametersNotSupportedInNonPublicI
 /// <summary>
 /// DuckType proxy method has an ambiguous match in the target type exception
 /// </summary>
-internal class DuckTypeTargetMethodAmbiguousMatchException : DuckTypeException
+public class DuckTypeTargetMethodAmbiguousMatchException : DuckTypeException
 {
     private DuckTypeTargetMethodAmbiguousMatchException(MethodInfo proxyMethod, MethodInfo targetMethod, MethodInfo targetMethod2)
         : base($"The proxy method '{proxyMethod}' matches at least two methods in the target type. Method1 = '{targetMethod}' and Method2 = '{targetMethod2}'")

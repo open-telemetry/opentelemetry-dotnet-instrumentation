@@ -22,7 +22,7 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// <summary>
 /// Duck kind
 /// </summary>
-internal enum DuckKind
+public enum DuckKind
 {
     /// <summary>
     /// Property
@@ -39,7 +39,7 @@ internal enum DuckKind
 /// Duck attribute
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Field, AllowMultiple = false)]
-internal class DuckAttribute : Attribute
+public class DuckAttribute : Attribute
 {
     /// <summary>
     /// Default BindingFlags

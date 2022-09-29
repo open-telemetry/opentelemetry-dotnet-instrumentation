@@ -25,7 +25,7 @@ namespace OpenTelemetry.AutoInstrumentation.CallTarget;
 /// <typeparam name="T">Type of the return value</typeparam>
 [Browsable(false)]
 [EditorBrowsable(EditorBrowsableState.Never)]
-internal readonly struct CallTargetReturn<T>
+public readonly struct CallTargetReturn<T>
 {
     private readonly T _returnValue;
 
@@ -70,7 +70,7 @@ internal readonly struct CallTargetReturn<T>
 /// </summary>
 [Browsable(false)]
 [EditorBrowsable(EditorBrowsableState.Never)]
-internal readonly struct CallTargetReturn
+public readonly struct CallTargetReturn
 {
     /// <summary>
     /// Gets the default call target return value (used by the native side to initialize the locals)

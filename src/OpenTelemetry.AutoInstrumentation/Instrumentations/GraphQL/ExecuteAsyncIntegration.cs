@@ -34,7 +34,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
     TypeName = "GraphQL.Execution.SubscriptionExecutionStrategy",
     MinimumVersion = GraphQLCommon.Major2Minor3,
     MaximumVersion = GraphQLCommon.Major2)]
-internal class ExecuteAsyncIntegration
+public class ExecuteAsyncIntegration
 {
     private const string ErrorType = "GraphQL.ExecutionError";
 

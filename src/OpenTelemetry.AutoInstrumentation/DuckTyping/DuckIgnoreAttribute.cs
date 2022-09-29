@@ -22,6 +22,6 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// Ignores the member when DuckTyping
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Field, AllowMultiple = false)]
-internal class DuckIgnoreAttribute : Attribute
+public class DuckIgnoreAttribute : Attribute
 {
 }

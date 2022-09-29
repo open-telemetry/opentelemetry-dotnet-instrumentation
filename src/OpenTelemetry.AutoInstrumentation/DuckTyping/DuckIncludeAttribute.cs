@@ -22,6 +22,6 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// Use to include a member that would normally be ignored
 /// </summary>
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-internal class DuckIncludeAttribute : Attribute
+public class DuckIncludeAttribute : Attribute
 {
 }

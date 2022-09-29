@@ -22,7 +22,7 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// <summary>
 /// Duck type extensions
 /// </summary>
-internal static class DuckTypeExtensions
+public static class DuckTypeExtensions
 {
     /// <summary>
     /// Gets the duck type instance for the object implementing a base class or interface T

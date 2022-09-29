@@ -22,7 +22,7 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// This attribute is recognized by the CLR and allow us to disable visibility checks for certain assemblies (only from 4.6+)
 /// </summary>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-internal class IgnoresAccessChecksToAttribute : Attribute
+public class IgnoresAccessChecksToAttribute : Attribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="IgnoresAccessChecksToAttribute"/> class.

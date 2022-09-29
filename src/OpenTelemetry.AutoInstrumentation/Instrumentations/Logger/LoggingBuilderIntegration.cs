@@ -31,7 +31,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Logger;
     MinimumVersion = "3.1.0",
     MaximumVersion = "6.*.*",
     IntegrationName = "LoggingBuilder")]
-internal class LoggingBuilderIntegration
+public class LoggingBuilderIntegration
 {
     /// <summary>
     /// OnMethodEnd callback
@@ -41,7 +41,7 @@ internal class LoggingBuilderIntegration
     /// <param name="exception">Exception instance in case the original code threw an exception.</param>
     /// <param name="state">Calltarget state value</param>
     /// <returns>A default CallTargetReturn to satisfy the CallTarget contract</returns>
-    public static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception exception, CallTargetState state)
+    internal static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception exception, CallTargetState state)
     {
 #if !NETFRAMEWORK
         if (instance is not null)
