@@ -100,7 +100,6 @@ public class SettingsTests : IDisposable
             settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.Plugins.Should().BeEmpty();
             settings.IncludeFormattedMessage.Should().BeFalse();
-            settings.ParseStateValues.Should().BeFalse();
             settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
             settings.FlushOnUnhandledException.Should().BeFalse();
         }
@@ -230,18 +229,6 @@ public class SettingsTests : IDisposable
     [Theory]
     [InlineData("true", true)]
     [InlineData("false", false)]
-    public void ParseStateValues_DependsOnCorrespondingEnvVariable(string parseStateValue, bool expectedValue)
-    {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.ParseStateValues, parseStateValue);
-
-        var settings = LogSettings.FromDefaultSources();
-
-        settings.ParseStateValues.Should().Be(expectedValue);
-    }
-
-    [Theory]
-    [InlineData("true", true)]
-    [InlineData("false", false)]
     public void IncludeFormattedMessage_DependsOnCorrespondingEnvVariable(string includeFormattedMessage, bool expectedValue)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.IncludeFormattedMessage, includeFormattedMessage);
@@ -305,7 +292,6 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.IncludeFormattedMessage, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.ParseStateValues, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.DisabledInstrumentations, null);
