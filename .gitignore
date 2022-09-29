@@ -302,5 +302,8 @@ src/OpenTelemetry.AutoInstrumentation.Native/cmake_install.cmake
 # ignore verify .received files
 *.received.*
 
+# profiler and test logs
+/build_data
+
 # install.sh downloaded artifacts
 /otel-dotnet-auto/

@@ -80,7 +80,6 @@ enablement.
 
 | Environment variable | Description | Default value |
 |-|-|-|
-| `OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES` | Whether the log state should be parsed. | `false` |
 | `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE` | Whether the log state should be formatted. | `false` |
 
 ## Logging
@@ -102,7 +101,6 @@ instead.
 | `OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED` | Whether the traces console exporter is enabled or not. | `false` |
 | `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED` | Whether the metrics console exporter is enabled or not. | `false` |
 | `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED` | Whether the logs console exporter is enabled or not. | `false` |
-| `OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES` | Whether the log state should be parsed. | `false` |
 | `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE` | Whether the log state should be formatted. | `false` |
 
 ## Propagators

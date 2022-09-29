@@ -486,9 +486,9 @@ struct FunctionInfo
     }
 };
 
-RuntimeInformation GetRuntimeInformation(ICorProfilerInfo4* info);
+RuntimeInformation GetRuntimeInformation(ICorProfilerInfo7* info);
 
-AssemblyInfo GetAssemblyInfo(ICorProfilerInfo4* info, const AssemblyID& assembly_id);
+AssemblyInfo GetAssemblyInfo(ICorProfilerInfo7* info, const AssemblyID& assembly_id);
 
 AssemblyMetadata GetAssemblyImportMetadata(const ComPtr<IMetaDataAssemblyImport>& assembly_import);
 
@@ -497,7 +497,7 @@ AssemblyMetadata GetReferencedAssemblyMetadata(const ComPtr<IMetaDataAssemblyImp
 
 FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdToken& token);
 
-ModuleInfo GetModuleInfo(ICorProfilerInfo4* info, const ModuleID& module_id);
+ModuleInfo GetModuleInfo(ICorProfilerInfo7* info, const ModuleID& module_id);
 
 TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdToken& token);
 
