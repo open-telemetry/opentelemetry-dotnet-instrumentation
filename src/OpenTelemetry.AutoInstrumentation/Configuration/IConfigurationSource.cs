@@ -19,7 +19,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// A source of configuration settings, identifiable by a string key.
 /// </summary>
-public interface IConfigurationSource
+internal interface IConfigurationSource
 {
     /// <summary>
     /// Gets the <see cref="string"/> value of

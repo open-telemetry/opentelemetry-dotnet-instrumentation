@@ -18,40 +18,39 @@ using System;
 using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Validations
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Validations;
+
+/// <summary>
+/// Instrumentation targeting the test application used to validate the strong name scenario.
+/// When an actual bytecode instrumentation targeting a strong named assembly on .NET Framework
+/// is added we can remove this instrumentation.
+/// </summary>
+[InstrumentMethod(
+    AssemblyName = "TestLibrary.InstrumentationTarget",
+    TypeName = "TestLibrary.InstrumentationTarget.Command",
+    MethodName = "Execute",
+    ReturnTypeName = ClrNames.Void,
+    ParameterTypeNames = new string[0],
+    MinimumVersion = "1.0.0",
+    MaximumVersion = "1.65535.65535",
+    IntegrationName = "StrongNamedValidation")]
+internal class StrongNamedValidation
 {
+    private static readonly ActivitySource ValidationActivitySource = new ActivitySource("TestApplication.StrongNamedValidation");
+
     /// <summary>
-    /// Instrumentation targeting the test application used to validate the strong name scenario.
-    /// When an actual bytecode instrumentation targeting a strong named assembly on .NET Framework
-    /// is added we can remove this instrumentation.
+    /// OnMethodBegin callback.
     /// </summary>
-    [InstrumentMethod(
-        AssemblyName = "TestLibrary.InstrumentationTarget",
-        TypeName = "TestLibrary.InstrumentationTarget.Command",
-        MethodName = "Execute",
-        ReturnTypeName = ClrNames.Void,
-        ParameterTypeNames = new string[0],
-        MinimumVersion = "1.0.0",
-        MaximumVersion = "1.65535.65535",
-        IntegrationName = "StrongNamedValidation")]
-    public class StrongNamedValidation
+    /// <typeparam name="TTarget">Type of the target</typeparam>
+    /// <param name="instance">Instance value, aka `this` of the instrumented method.</param>
+    /// <returns>Calltarget state value</returns>
+    public static CallTargetState OnMethodBegin<TTarget>(TTarget instance)
     {
-        private static readonly ActivitySource ValidationActivitySource = new ActivitySource("TestApplication.StrongNamedValidation");
+        using var activity = ValidationActivitySource.StartActivity(nameof(StrongNamedValidation));
+        activity.AddTag("validation", nameof(StrongNamedValidation));
 
-        /// <summary>
-        /// OnMethodBegin callback.
-        /// </summary>
-        /// <typeparam name="TTarget">Type of the target</typeparam>
-        /// <param name="instance">Instance value, aka `this` of the instrumented method.</param>
-        /// <returns>Calltarget state value</returns>
-        public static CallTargetState OnMethodBegin<TTarget>(TTarget instance)
-        {
-            using var activity = ValidationActivitySource.StartActivity(nameof(StrongNamedValidation));
-            activity.AddTag("validation", nameof(StrongNamedValidation));
+        Console.WriteLine($"Validation: {nameof(StrongNamedValidation)}");
 
-            Console.WriteLine($"Validation: {nameof(StrongNamedValidation)}");
-
-            return CallTargetState.GetDefault();
-        }
+        return CallTargetState.GetDefault();
     }
 }

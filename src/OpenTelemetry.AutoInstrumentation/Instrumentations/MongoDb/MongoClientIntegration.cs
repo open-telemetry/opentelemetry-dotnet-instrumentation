@@ -37,7 +37,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
     MinimumVersion = "2.3.0",
     MaximumVersion = "2.65535.65535",
     IntegrationName = "MongoDB")]
-public class MongoClientIntegration
+internal class MongoClientIntegration
 {
 #if NETCOREAPP3_1_OR_GREATER
     private static Delegate _setActivityListener;

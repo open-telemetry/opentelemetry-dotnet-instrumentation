@@ -60,7 +60,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
     MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
     MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
     IntegrationName = StackExchangeRedisConstants.IntegrationName)]
-public class StackExchangeRedisIntegration
+internal class StackExchangeRedisIntegration
 {
     /// <summary>
     /// OnMethodEnd callback

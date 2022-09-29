@@ -21,7 +21,7 @@ namespace OpenTelemetry.AutoInstrumentation.Tagging;
 /// <summary>
 /// Standard span tags used by integrations.
 /// </summary>
-public static class Tags
+internal static class Tags
 {
     /// <summary>
     /// The kind of span (e.g. client, server).

@@ -22,7 +22,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
 /// to be decorated with the correct operation. Since the original type is public,
 /// we not expect changes between minor versions of the GraphQL library.
 /// </summary>
-public enum OperationTypeProxy
+internal enum OperationTypeProxy
 {
     /// <summary>
     /// A query operation.

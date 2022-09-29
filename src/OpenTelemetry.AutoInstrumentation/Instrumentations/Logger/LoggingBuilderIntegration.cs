@@ -31,7 +31,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Logger;
     MinimumVersion = "3.1.0",
     MaximumVersion = "6.*.*",
     IntegrationName = "LoggingBuilder")]
-public class LoggingBuilderIntegration
+internal class LoggingBuilderIntegration
 {
     /// <summary>
     /// OnMethodEnd callback

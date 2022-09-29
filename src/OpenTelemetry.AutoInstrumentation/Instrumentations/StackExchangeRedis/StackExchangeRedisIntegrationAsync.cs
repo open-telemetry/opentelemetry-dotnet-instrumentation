@@ -51,7 +51,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
     MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
     MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
     IntegrationName = StackExchangeRedisConstants.IntegrationName)]
-public class StackExchangeRedisIntegrationAsync
+internal class StackExchangeRedisIntegrationAsync
 {
     /// <summary>
     /// OnAsyncMethodEnd callback

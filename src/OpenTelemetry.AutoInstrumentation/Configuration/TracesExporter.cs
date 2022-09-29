@@ -19,7 +19,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Enum representing supported trace exporters.
 /// </summary>
-public enum TracesExporter
+internal enum TracesExporter
 {
     /// <summary>
     /// None exporter.

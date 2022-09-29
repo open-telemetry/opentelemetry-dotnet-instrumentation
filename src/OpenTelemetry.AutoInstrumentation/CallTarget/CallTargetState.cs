@@ -23,7 +23,7 @@ namespace OpenTelemetry.AutoInstrumentation.CallTarget;
 /// <summary>
 /// Call target execution state
 /// </summary>
-public readonly struct CallTargetState
+internal readonly struct CallTargetState
 {
     private readonly Activity _previousActivity;
     private readonly Activity _activity;

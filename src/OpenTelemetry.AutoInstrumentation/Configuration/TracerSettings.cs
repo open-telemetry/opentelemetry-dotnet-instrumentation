@@ -24,7 +24,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Tracer Settings
 /// </summary>
-public class TracerSettings : Settings
+internal class TracerSettings : Settings
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="TracerSettings"/> class

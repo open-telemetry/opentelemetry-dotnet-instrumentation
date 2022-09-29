@@ -19,7 +19,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Enum representing supported propagators.
 /// </summary>
-public enum Propagator
+internal enum Propagator
 {
     /// <summary>
     /// W3C Trace Context propagator.
