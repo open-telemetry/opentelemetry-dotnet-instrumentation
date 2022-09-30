@@ -66,26 +66,11 @@ can be enabled without using the .NET CLR Profiler by setting
 the `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` environment variable to
 `OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper`.
 
-## Logging
+### Instrumentation options
 
-The default log directory paths are:
-
-- Windows: `%ProgramData%\OpenTelemetry .NET AutoInstrumentation\logs`
-- Linux: `/var/log/opentelemetry/dotnet`
-- macOS: `/var/log/opentelemetry/dotnet`
-
-If the default log directories can't be created,
-the instrumentation uses the path of the current user's [temporary folder](https://docs.microsoft.com/en-us/dotnet/api/System.IO.Path.GetTempPath?view=net-6.0)
-instead.
-
-| Environment variable                                | Description                                             | Default value                            |
-|-----------------------------------------------------|---------------------------------------------------------|------------------------------------------|
-| `OTEL_DOTNET_AUTO_LOG_DIRECTORY`                    | Directory of the .NET Tracer logs.                      | _See the previous note on default paths_ |
-| `OTEL_DOTNET_AUTO_DEBUG`                            | Enables debugging mode for the tracer.                  | `false`                                  |
-| `OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED`  | Whether the traces console exporter is enabled or not.  | `false`                                  |
-| `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED` | Whether the metrics console exporter is enabled or not. | `false`                                  |
-| `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED`    | Whether the logs console exporter is enabled or not.    | `false`                                  |
-| `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE`   | Whether the log state should be formatted.              | `false`                                  |
+| Environment variable                    | Description                                                                                                                                                        | Default value |
+|-----------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| `OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT` | Whether GraphQL instrumentation can pass raw queries as `graphql.document` attribute. This may contain sensitive information and therefore is disabled by default. | `false`       |
 
 ## Propagators
 
@@ -100,17 +85,20 @@ for more details.
 
 Exporters output the telemetry.
 
-| Environment variable          | Description                                                                                            | Default value                                           |
-|-------------------------------|--------------------------------------------------------------------------------------------------------|---------------------------------------------------------|
-| `OTEL_TRACES_EXPORTER`        | Traces exporter to be used. The value can be one of the following: `zipkin`, `jaeger`, `otlp`, `none`. | `otlp`                                                  |
-| `OTEL_METRICS_EXPORTER`       | Metrics exporter to be used. The value can be one of the following: `otlp`, `prometheus`, `none`.      | `otlp`                                                  |
-| `OTEL_METRIC_EXPORT_INTERVAL` | The time interval (in milliseconds) between the start of two export attempts.                          | `60000` for OTLP exporter, `10000` for console exporter |
-| `OTEL_LOGS_EXPORTER`          | Logs exporter to be used. The value can be one of the following: `otlp`, `none`.                       | `otlp`                                                  |
+| Environment variable                              | Description                                                                                            | Default value                                           |
+|---------------------------------------------------|--------------------------------------------------------------------------------------------------------|---------------------------------------------------------|
+| `OTEL_TRACES_EXPORTER`                            | Traces exporter to be used. The value can be one of the following: `zipkin`, `jaeger`, `otlp`, `none`. | `otlp`                                                  |
+| `OTEL_METRICS_EXPORTER`                           | Metrics exporter to be used. The value can be one of the following: `otlp`, `prometheus`, `none`.      | `otlp`                                                  |
+| `OTEL_METRIC_EXPORT_INTERVAL`                     | The time interval (in milliseconds) between the start of two export attempts.                          | `60000` for OTLP exporter, `10000` for console exporter |
+| `OTEL_LOGS_EXPORTER`                              | Logs exporter to be used. The value can be one of the following: `otlp`, `none`.                       | `otlp`                                                  |
+| `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE` | Whether the formatted log message should be set or not.                                                | `false`                                                 |
 
 ### Jaeger
 
 To enable the Jaeger exporter, set the `OTEL_TRACES_EXPORTER` environment variable
-to `jaeger`. To customize the Jaeger exporter using environment variables, see the
+to `jaeger`.
+
+To customize the Jaeger exporter using environment variables, see the
 [Jaeger exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.3.0/src/OpenTelemetry.Exporter.Jaeger#environment-variables).
 Important environment variables include:
 
@@ -123,8 +111,10 @@ Important environment variables include:
 
 ### OTLP
 
-To enable the OTLP exporter, set the `OTEL_TRACES_EXPORTER` environment variable
-to `otlp`. To customize the OTLP exporter using environment variables, see the
+To enable the OTLP exporter, set the `OTEL_TRACES_EXPORTER`/`OTEL_METRICS_EXPORTER`
+environment variable to `otlp`.
+
+To customize the OTLP exporter using environment variables, see the
 [OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.3.0/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables).
 Important environment variables include:
 
@@ -151,23 +141,26 @@ environment variables for the OTLP exporter:
 |----------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
 | `OTEL_DOTNET_AUTO_HTTP2UNENCRYPTEDSUPPORT_ENABLED` | Enables `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`. Required when instrumenting .NET Core 3.x applications while using a non-TLS endpoint for gRPC OTLP. See the [official Microsoft documentation](https://docs.microsoft.com/en-us/aspnet/core/grpc/troubleshoot?view=aspnetcore-6.0#call-insecure-grpc-services-with-net-core-client) for more details. | `false`       |
 
+### Prometheus
+
+To enable the Prometheus exporter, set the `OTEL_METRICS_EXPORTER` environment
+variable to `prometheus`.
+
+The exporter exposes the metrics HTTP endpoint on `http://localhost:9464/metrics`
+and it caches the responses for 300 milliseconds.
+
 ### Zipkin
 
 To enable the Zipkin exporter, set the `OTEL_TRACES_EXPORTER` environment
-variable to `zipkin`. To customize the Zipkin exporter using environment
-variables, see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.3.0/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
+variable to `zipkin`.
+
+To customize the Zipkin exporter using environment variables,
+see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.3.0/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
 Important environment variables include:
 
 | Environment variable            | Description | Default value           |
 |---------------------------------|-------------|-------------------------|
 | `OTEL_EXPORTER_ZIPKIN_ENDPOINT` | Zipkin URL. | `http://localhost:8126` |
-
-## Instrumentation options
-
-| Environment variable                              | Description                                                                                                                                                        | Default value |
-|---------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| `OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT`           | Whether GraphQL instrumentation can pass raw queries as `graphql.document` attribute. This may contain sensitive information and therefore is disabled by default. | `false`       |
-| `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE` | Whether the formatted log message should be set or not.                                                                                                            | `false`       |
 
 ## Additional settings
 
@@ -237,3 +230,24 @@ environment variable are used to mitigate assembly version conflicts in .NET (Co
 | `DOTNET_STARTUP_HOOKS`   | `$INSTALL_DIR/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
 | `DOTNET_ADDITIONAL_DEPS` | `$INSTALL_DIR/AdditionalDeps`                                                  |
 | `DOTNET_SHARED_STORE`    | `$INSTALL_DIR/store`                                                           |
+
+## Internal logs
+
+The default directory paths for internal logs are:
+
+- Windows: `%ProgramData%\OpenTelemetry .NET AutoInstrumentation\logs`
+- Linux: `/var/log/opentelemetry/dotnet`
+- macOS: `/var/log/opentelemetry/dotnet`
+
+If the default log directories can't be created,
+the instrumentation uses the path of the current user's [temporary folder](https://docs.microsoft.com/en-us/dotnet/api/System.IO.Path.GetTempPath?view=net-6.0)
+instead.
+
+| Environment variable                                | Description                                             | Default value                            |
+|-----------------------------------------------------|---------------------------------------------------------|------------------------------------------|
+| `OTEL_DOTNET_AUTO_LOG_DIRECTORY`                    | Directory of the .NET Tracer logs.                      | _See the previous note on default paths_ |
+| `OTEL_DOTNET_AUTO_DEBUG`                            | Enables debugging mode for the tracer.                  | `false`                                  |
+| `OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED`  | Whether the traces console exporter is enabled or not.  | `false`                                  |
+| `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED` | Whether the metrics console exporter is enabled or not. | `false`                                  |
+| `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED`    | Whether the logs console exporter is enabled or not.    | `false`                                  |
+| `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE`   | Whether the log state should be formatted.              | `false`                                  |
