@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -70,7 +71,7 @@ public class SmokeTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task ApplicationIsNotExcluded()
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", "dotnet,dotnet.exe");
 
         var spans = await RunTestApplicationAsync();
 
@@ -92,7 +93,7 @@ public class SmokeTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task ApplicationIsNotIncluded()
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES", $"dotnet,dotnet.exe");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES", "dotnet,dotnet.exe");
 
         var spans = await RunTestApplicationAsync();
 
@@ -220,13 +221,13 @@ public class SmokeTests : TestHelper
         {
             Assert.Single(spans.Select(s => s.Service).Distinct());
 
-            var expectations = new List<WebServerSpanExpectation>();
-            expectations.Add(new WebServerSpanExpectation(ServiceName, "1.0.0", "SayHello", "MyCompany.MyProduct.MyLibrary"));
+            var expectations = new List<SpanExpectation>();
+            expectations.Add(new SpanExpectation(ServiceName, "1.0.0", "SayHello", "MyCompany.MyProduct.MyLibrary", ActivityKind.Internal));
 
 #if NETFRAMEWORK
-            expectations.Add(new WebServerSpanExpectation(ServiceName, "1.0.0.0", "HTTP GET", "OpenTelemetry.HttpWebRequest", httpMethod: "GET"));
+            expectations.Add(new SpanExpectation(ServiceName, "1.0.0.0", "HTTP GET", "OpenTelemetry.HttpWebRequest", ActivityKind.Client));
 #else
-            expectations.Add(new WebServerSpanExpectation(ServiceName, "1.0.0.0", "HTTP GET", "OpenTelemetry.Instrumentation.Http", httpMethod: "GET"));
+            expectations.Add(new SpanExpectation(ServiceName, "1.0.0.0", "HTTP GET", "OpenTelemetry.Instrumentation.Http", ActivityKind.Client));
 #endif
 
             SpanTestHelpers.AssertExpectationsMet(expectations, spans);

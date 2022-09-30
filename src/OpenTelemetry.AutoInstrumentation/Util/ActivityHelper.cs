@@ -37,20 +37,9 @@ internal static class ActivityHelper
         }
     }
 
-    public static Activity StartActivityWithTags(this ActivitySource activitySource, string operationName, ITags tags)
+    public static Activity StartServerActivityWithTags(this ActivitySource activitySource, string operationName, ITags tags)
     {
-        var activity = activitySource.StartActivity(operationName);
-
-        // Apply tags
-        if (tags != null)
-        {
-            foreach (var entry in tags.GetAllTags())
-            {
-                activity.SetTag(entry.Key, entry.Value);
-            }
-        }
-
-        return activity;
+        return activitySource.StartActivityWithTags(operationName, ActivityKind.Server, tags);
     }
 
     internal static void DisposeWithException(this Activity activity, Exception exception)
@@ -69,5 +58,21 @@ internal static class ActivityHelper
                 activity.Dispose();
             }
         }
+    }
+
+    private static Activity StartActivityWithTags(this ActivitySource activitySource, string operationName, ActivityKind kind, ITags tags)
+    {
+        var activity = activitySource.StartActivity(operationName, kind);
+
+        // Apply tags
+        if (tags != null)
+        {
+            foreach (var entry in tags.GetAllTags())
+            {
+                activity.SetTag(entry.Key, entry.Value);
+            }
+        }
+
+        return activity;
     }
 }

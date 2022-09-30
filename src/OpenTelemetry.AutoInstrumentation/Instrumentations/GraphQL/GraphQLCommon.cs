@@ -61,7 +61,7 @@ internal class GraphQLCommon
                 tags.Document = query;
             }
 
-            activity = ActivitySource.StartActivityWithTags(operation, tags);
+            activity = ActivitySource.StartServerActivityWithTags(operation, tags);
         }
         catch (Exception ex)
         {

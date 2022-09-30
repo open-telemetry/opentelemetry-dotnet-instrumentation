@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using IntegrationTests.Helpers.Mocks;
 using OpenTelemetry.AutoInstrumentation.Tagging;
@@ -27,12 +28,13 @@ namespace IntegrationTests.Helpers.Models;
 /// </summary>
 public class SpanExpectation
 {
-    public SpanExpectation(string serviceName, string serviceVersion, string operationName, string library)
+    public SpanExpectation(string serviceName, string serviceVersion, string operationName, string library, ActivityKind kind)
     {
         ServiceName = serviceName;
         ServiceVersion = serviceVersion;
         OperationName = operationName;
         Library = library;
+        Kind = kind;
 
         // Expectations for all spans regardless of type should go here
         RegisterDelegateExpectation(ExpectBasicSpanDataExists);
@@ -40,6 +42,7 @@ public class SpanExpectation
         RegisterCustomExpectation(nameof(OperationName), actual: s => s.Name, expected: OperationName);
         RegisterCustomExpectation(nameof(ServiceName), actual: s => s.Service, expected: ServiceName);
         RegisterCustomExpectation(nameof(Library), actual: s => s.Library, expected: Library);
+        RegisterCustomExpectation(nameof(Kind), actual: s => s.Kind, expected: Kind);
 
         RegisterTagExpectation(
             key: "otel.library.version",
@@ -51,6 +54,8 @@ public class SpanExpectation
     public List<Func<IMockSpan, string>> Assertions { get; } = new List<Func<IMockSpan, string>>();
 
     public bool IsTopLevel { get; set; } = true;
+
+    public ActivityKind Kind { get; set; }
 
     public string Library { get; set; }
 
@@ -146,16 +151,16 @@ public class SpanExpectation
         });
     }
 
-    public void RegisterCustomExpectation(
+    public void RegisterCustomExpectation<T>(
         string keyForMessage,
-        Func<IMockSpan, string> actual,
-        string expected)
+        Func<IMockSpan, T> actual,
+        T expected)
     {
         Assertions.Add(span =>
         {
             var actualValue = actual(span);
 
-            if (expected != null && actualValue != expected)
+            if (expected != null && !actualValue.Equals(expected))
             {
                 return FailureMessage(name: keyForMessage, actual: actualValue, expected: expected);
             }
@@ -189,9 +194,9 @@ public class SpanExpectation
         });
     }
 
-    protected string FailureMessage(string name, string actual, string expected)
+    protected string FailureMessage<T>(string name, T actual, T expected)
     {
-        return $"({name} mismatch: actual: {actual ?? "NULL"}, expected: {expected ?? "NULL"})";
+        return $"({name} mismatch: actual: {actual?.ToString() ?? "NULL"}, expected: {expected?.ToString() ?? "NULL"})";
     }
 
     private IEnumerable<string> ExpectBasicSpanDataExists(IMockSpan span)

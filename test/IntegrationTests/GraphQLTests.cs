@@ -35,15 +35,15 @@ public class GraphQLTests : TestHelper
     private const string Library = "OpenTelemetry.AutoInstrumentation.GraphQL";
 
     private static readonly List<RequestInfo> _requests;
-    private static readonly List<WebServerSpanExpectation> _expectationsAll; // Full expectations
-    private static readonly List<WebServerSpanExpectation> _expectationsSafe; // PII protected expectations
+    private static readonly List<SpanExpectation> _expectationsAll; // Full expectations
+    private static readonly List<SpanExpectation> _expectationsSafe; // PII protected expectations
     private static int _expectedGraphQLExecuteSpanCount;
 
     static GraphQLTests()
     {
         _requests = new List<RequestInfo>(0);
-        _expectationsAll = new List<WebServerSpanExpectation>();
-        _expectationsSafe = new List<WebServerSpanExpectation>();
+        _expectationsAll = new List<SpanExpectation>();
+        _expectationsSafe = new List<SpanExpectation>();
         _expectedGraphQLExecuteSpanCount = 0;
 
         // SUCCESS: query using GET
@@ -76,6 +76,7 @@ public class GraphQLTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task SubmitsTraces(bool setDocument)
     {
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED", "true");
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
 
@@ -123,7 +124,7 @@ public class GraphQLTests : TestHelper
         // wait for server to be ready to receive requests
         while (intervals-- > 0)
         {
-            var aliveCheckRequest = new RequestInfo() { HttpMethod = "GET", Url = "/alive-check" };
+            var aliveCheckRequest = new RequestInfo { HttpMethod = "GET", Url = "/alive-check" };
             try
             {
                 var responseCode = await SubmitRequestAsync(client, aspNetCorePort, aliveCheckRequest, false);
@@ -181,7 +182,7 @@ public class GraphQLTests : TestHelper
         bool failsValidation = false,
         bool failsExecution = false)
     {
-        _requests.Add(new RequestInfo()
+        _requests.Add(new RequestInfo
         {
             Url = url,
             HttpMethod = httpMethod,
@@ -192,7 +193,6 @@ public class GraphQLTests : TestHelper
 
         _expectationsAll.Add(new GraphQLSpanExpectation(ServiceName, ServiceVersion, operationName)
         {
-            OriginalUri = url,
             GraphQLRequestBody = graphQLRequestBody,
             GraphQLOperationType = graphQLOperationType,
             GraphQLOperationName = graphQLOperationName,
@@ -202,7 +202,6 @@ public class GraphQLTests : TestHelper
 
         _expectationsSafe.Add(new GraphQLSpanExpectation(ServiceName, ServiceVersion, operationName)
         {
-            OriginalUri = url,
             GraphQLRequestBody = graphQLRequestBody,
             GraphQLOperationType = graphQLOperationType,
             GraphQLOperationName = graphQLOperationName,

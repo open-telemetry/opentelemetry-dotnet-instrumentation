@@ -28,8 +28,6 @@ internal class GraphQLTags : InstrumentationTags
             new Property<GraphQLTags, string>(Tags.GraphQL.OperationName, t => t.OperationName, (t, v) => t.OperationName = v),
             new Property<GraphQLTags, string>(Tags.GraphQL.OperationType, t => t.OperationType, (t, v) => t.OperationType = v));
 
-    public override ActivityKind Kind => ActivityKind.Server;
-
     public string Document { get; set; }
 
     public string OperationName { get; set; }

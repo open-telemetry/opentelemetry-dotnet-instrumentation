@@ -59,6 +59,19 @@ internal class ZSpanMock : IMockSpan
 
     public string Library { get; set; }
 
+    public ActivityKind Kind
+    {
+        get
+        {
+            if (_zipkinData.TryGetValue("kind", out var value))
+            {
+                return (ActivityKind)Enum.Parse(typeof(ActivityKind), value.ToString(), true);
+            }
+
+            return ActivityKind.Internal;
+        }
+    }
+
     public long Start
     {
         get => Convert.ToInt64(_zipkinData["timestamp"].ToString());
@@ -110,6 +123,7 @@ internal class ZSpanMock : IMockSpan
         sb.AppendLine($"Service: {Service}");
         sb.AppendLine($"Name: {Name}");
         sb.AppendLine($"Library: {Library}");
+        sb.AppendLine($"Kind: {Kind}");
         sb.AppendLine($"Start: {Start}");
         sb.AppendLine($"Duration: {Duration}");
         sb.AppendLine($"Error: {Error}");
