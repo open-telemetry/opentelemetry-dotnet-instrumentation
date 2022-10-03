@@ -24,12 +24,6 @@ namespace OpenTelemetry.AutoInstrumentation.Tagging;
 internal static class Tags
 {
     /// <summary>
-    /// The kind of span (e.g. client, server).
-    /// </summary>
-    /// <seealso cref="Activity.Kind"/>
-    public const string SpanKind = "span.kind";
-
-    /// <summary>
     /// The error message of an exception
     /// </summary>
     public const string ErrorMsg = "error.msg";

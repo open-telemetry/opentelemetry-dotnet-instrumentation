@@ -14,18 +14,13 @@
 // limitations under the License.
 // </copyright>
 
-using System.Diagnostics;
-
 namespace OpenTelemetry.AutoInstrumentation.Tagging;
 
 internal abstract class InstrumentationTags : TagsList
 {
     protected static readonly IProperty<string>[] InstrumentationTagsProperties =
     {
-        new ReadOnlyProperty<InstrumentationTags, string>(Tags.SpanKind, t => t.Kind.ToString())
     };
-
-    public abstract ActivityKind Kind { get; }
 
     protected override IProperty<string>[] GetAdditionalTags() => InstrumentationTagsProperties;
 }
