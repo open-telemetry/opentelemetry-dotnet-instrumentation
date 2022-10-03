@@ -108,6 +108,39 @@ void LoadIntegrationsFromStream(
 
 namespace
 {
+    bool InstrumentationEnabled(const WSTRING name, const std::vector<WSTRING>& enabledIntegrationNames, const std::vector<WSTRING>& disabledIntegrationNames)
+    {
+        // LoggingBuilder has to be always enabled/
+        // Technically it is  non-instrumentation but
+        // it is using the same functionality.
+        // See https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1310.
+        if (name == WStr("LoggingBuilder"))
+        {
+            return true;
+        }
+
+        // check if the integration is disabled
+        for (const WSTRING& disabledName : disabledIntegrationNames)
+        {
+          if (name == disabledName) {
+            return false;
+          }
+        }
+
+        if (enabledIntegrationNames.empty())
+        {
+            return true;
+        }
+        // check if the integration is enabled
+        for (const WSTRING& enabledName : enabledIntegrationNames)
+        {
+            if (name == enabledName)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     void IntegrationFromJson(const json::value_type& src,
                          std::vector<IntegrationMethod>& integrationMethods,
@@ -127,39 +160,9 @@ namespace
             return;
         }
 
-        // ignore LoggingBuilder, it is technically non-instrumentation
-        // it is using only the same functionality
-        // see https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1310
-        if (name != WStr("LoggingBuilder"))
+        if (!InstrumentationEnabled(name, enabledIntegrationNames, disabledIntegrationNames))
         {
-            if (!enabledIntegrationNames.empty())
-            {
-                bool found = false;
-
-                // check if the integration is enabled
-                for (const WSTRING& enabledName : enabledIntegrationNames)
-                {
-                    if (name == enabledName)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found)
-                {
-                    return;
-                }
-            }
-
-            // check if the integration is disabled
-            for (const WSTRING& disabledName : disabledIntegrationNames)
-            {
-                if (name == disabledName)
-                {
-                    return;
-                }
-            }
+            return;
         }
 
         auto arr = src.value("method_replacements", json::array());
