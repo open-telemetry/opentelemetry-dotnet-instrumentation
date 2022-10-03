@@ -52,22 +52,4 @@ internal static class ActivityHelper
 
         return activity;
     }
-
-    internal static void DisposeWithException(this Activity activity, Exception exception)
-    {
-        if (activity != null)
-        {
-            try
-            {
-                if (exception != null)
-                {
-                    activity.SetException(exception);
-                }
-            }
-            finally
-            {
-                activity.Dispose();
-            }
-        }
-    }
 }
