@@ -2,6 +2,7 @@ AWSSDK
 bitness
 bytecode
 cmake
+coreutils
 Couchbase
 distro
 ducktype
