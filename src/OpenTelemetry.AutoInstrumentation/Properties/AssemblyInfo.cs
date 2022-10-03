@@ -20,4 +20,5 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper")]
 [assembly: InternalsVisibleTo("OpenTelemetry.AutoInstrumentation.Tests")]
 [assembly: InternalsVisibleTo("IntegrationTests")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 #endif

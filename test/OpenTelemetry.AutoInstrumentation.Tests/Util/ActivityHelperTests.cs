@@ -15,9 +15,13 @@
 // </copyright>
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using Moq;
+using OpenTelemetry.AutoInstrumentation.Tagging;
 using OpenTelemetry.AutoInstrumentation.Util;
 using Xunit;
 
@@ -26,7 +30,7 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Util;
 public class ActivityHelperTests : IDisposable
 {
     private static ActivitySamplingResult _activitySamplingResult = ActivitySamplingResult.None;
-    private static bool _shouldSample = false;
+    private static bool _shouldSample;
 
     static ActivityHelperTests()
     {
@@ -34,6 +38,42 @@ public class ActivityHelperTests : IDisposable
         listener.ShouldListenTo = _ => _shouldSample;
         listener.Sample = (ref ActivityCreationOptions<ActivityContext> _) => _activitySamplingResult;
         ActivitySource.AddActivityListener(listener);
+    }
+
+    [Fact]
+    public void SetException_NotThrow_WhenActivityIsNull()
+    {
+        const Activity activity = null;
+
+        var action = () => activity.SetException(new Exception());
+
+        action.Should().NotThrow();
+    }
+
+    [Fact]
+    public void SetException_NotThrow_WhenExceptionIsNull()
+    {
+        var activity = new Activity("test-operation");
+
+        var action = () => activity.SetException(null);
+
+        action.Should().NotThrow();
+    }
+
+    [Fact]
+    public void SetException_SetsExceptionDetails()
+    {
+        var activity = new Activity("test-operation");
+
+        var exceptionMessage = "test-message";
+        activity.SetException(new Exception(exceptionMessage));
+
+        using (new AssertionScope())
+        {
+            activity.Tags.First(x => x.Key == "otel.status_code").Value.Should().Be("ERROR");
+            activity.Tags.First(x => x.Key == "otel.status_description").Value.Should().Be(exceptionMessage);
+            activity.Events.Should().HaveCount(1);
+        }
     }
 
     [Fact]
@@ -78,6 +118,33 @@ public class ActivityHelperTests : IDisposable
             activitySource.HasListeners().Should().BeTrue();
             activity.Should().NotBeNull();
             activity.Kind.Should().Be(kind);
+        }
+    }
+
+    [Fact]
+    public void StartActivityWithTags_SetsCorrectTags()
+    {
+        EnableActivityListener();
+
+        var tags = new List<KeyValuePair<string, string>>
+        {
+            new("key1", "value1"),
+            new("key2", "value2")
+        };
+
+        var tagsMock = new Mock<ITags>();
+        tagsMock.Setup(x => x.GetAllTags()).Returns(tags);
+
+        var activitySource = new ActivitySource("test-source");
+        var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, tagsMock.Object);
+
+        tagsMock.Setup(x => x.GetAllTags()).Returns(tags);
+
+        using (new AssertionScope())
+        {
+            activitySource.HasListeners().Should().BeTrue();
+            activity.Should().NotBeNull();
+            activity.Tags.Should().BeEquivalentTo(tags);
         }
     }
 
