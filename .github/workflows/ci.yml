@@ -111,7 +111,6 @@ jobs:
           set -e
           curl -fL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
           DISTRIBUTION=${{ matrix.distribution }} source ./instrument.sh
-          test "$OTEL_DOTNET_AUTO_HOME"
           dotnet help
       - name: Test instrument.sh result
         if: ${{ matrix.test-instrument != 'false' }}
