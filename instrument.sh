@@ -33,7 +33,11 @@ if [ -z "$(ls -A $INSTALL_DIR)" ]; then
   echo "There are no files under the location specified via INSTALL_DIR."
   return 1
 fi
-OTEL_DIR=$(readlink -fn $INSTALL_DIR)
+if [ "$DISTRIBUTION" == "macos" ]; then
+  OTEL_DIR=$(greadlink -fn $INSTALL_DIR)
+else
+  OTEL_DIR=$(readlink -fn $INSTALL_DIR)
+fi
 if [ -z "$OTEL_DIR" ]; then
   echo "Failed to get INSTALL_DIR absolute path. "
   return 1

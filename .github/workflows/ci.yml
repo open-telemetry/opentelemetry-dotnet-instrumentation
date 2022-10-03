@@ -90,6 +90,8 @@ jobs:
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
+      - run: brew install coreutils
+        if: ${{ runner.os == 'macOS' }}
       - name: Run download.sh
         shell: bash
         run: |
