@@ -97,9 +97,10 @@ public class ActivityHelperTests
     [InlineData(ActivityKind.Consumer)]
     public void StartActivityWithTags_ReturnsActivity_WhenThereIsActivityListener(ActivityKind kind)
     {
-        using var listener = CreateActivityListener();
-
         var activitySource = new ActivitySource("test-source");
+
+        using var listener = CreateActivityListener(activitySource);
+
         var activity = activitySource.StartActivityWithTags("test-operation", kind, null);
 
         using (new AssertionScope())
@@ -113,8 +114,6 @@ public class ActivityHelperTests
     [Fact]
     public void StartActivityWithTags_SetsCorrectTags()
     {
-        using var listener = CreateActivityListener();
-
         var tags = new List<KeyValuePair<string, string>>
         {
             new("key1", "value1"),
@@ -125,6 +124,9 @@ public class ActivityHelperTests
         tagsMock.Setup(x => x.GetAllTags()).Returns(tags);
 
         var activitySource = new ActivitySource("test-source");
+
+        using var listener = CreateActivityListener(activitySource);
+
         var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, tagsMock.Object);
 
         tagsMock.Setup(x => x.GetAllTags()).Returns(tags);
@@ -137,10 +139,10 @@ public class ActivityHelperTests
         }
     }
 
-    private static ActivityListener CreateActivityListener()
+    private static ActivityListener CreateActivityListener(ActivitySource activitySource)
     {
         var listener = new ActivityListener();
-        listener.ShouldListenTo = _ => true;
+        listener.ShouldListenTo = source => source == activitySource;
         listener.Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllData;
         ActivitySource.AddActivityListener(listener);
 
