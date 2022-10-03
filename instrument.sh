@@ -38,6 +38,9 @@ if [ "$DISTRIBUTION" == "macos" ]; then
 else
   OTEL_DIR=$(readlink -fn $INSTALL_DIR)
 fi
+if [ "$DISTRIBUTION" == "windows" ]; then
+  OTEL_DIR=$(cygpath -w $OTEL_DIR)
+fi
 if [ -z "$OTEL_DIR" ]; then
   echo "Failed to get INSTALL_DIR absolute path. "
   return 1
