@@ -27,19 +27,8 @@ using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Util;
 
-public class ActivityHelperTests : IDisposable
+public class ActivityHelperTests
 {
-    private static ActivitySamplingResult _activitySamplingResult = ActivitySamplingResult.None;
-    private static bool _shouldSample;
-
-    static ActivityHelperTests()
-    {
-        var listener = new ActivityListener();
-        listener.ShouldListenTo = _ => _shouldSample;
-        listener.Sample = (ref ActivityCreationOptions<ActivityContext> _) => _activitySamplingResult;
-        ActivitySource.AddActivityListener(listener);
-    }
-
     [Fact]
     public void SetException_NotThrow_WhenActivityIsNull()
     {
@@ -108,7 +97,7 @@ public class ActivityHelperTests : IDisposable
     [InlineData(ActivityKind.Consumer)]
     public void StartActivityWithTags_ReturnsActivity_WhenThereIsActivityListener(ActivityKind kind)
     {
-        EnableActivityListener();
+        using var listener = CreateActivityListener();
 
         var activitySource = new ActivitySource("test-source");
         var activity = activitySource.StartActivityWithTags("test-operation", kind, null);
@@ -124,7 +113,7 @@ public class ActivityHelperTests : IDisposable
     [Fact]
     public void StartActivityWithTags_SetsCorrectTags()
     {
-        EnableActivityListener();
+        using var listener = CreateActivityListener();
 
         var tags = new List<KeyValuePair<string, string>>
         {
@@ -148,15 +137,13 @@ public class ActivityHelperTests : IDisposable
         }
     }
 
-    public void Dispose()
+    private static ActivityListener CreateActivityListener()
     {
-        _activitySamplingResult = ActivitySamplingResult.None;
-        _shouldSample = false;
-    }
+        var listener = new ActivityListener();
+        listener.ShouldListenTo = _ => true;
+        listener.Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllData;
+        ActivitySource.AddActivityListener(listener);
 
-    private static void EnableActivityListener()
-    {
-        _shouldSample = true;
-        _activitySamplingResult = ActivitySamplingResult.AllData;
+        return listener;
     }
 }
