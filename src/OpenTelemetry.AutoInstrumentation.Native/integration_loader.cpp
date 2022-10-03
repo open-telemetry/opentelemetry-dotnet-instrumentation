@@ -12,24 +12,32 @@ namespace trace
 
 using json = nlohmann::json;
 
-void LoadIntegrationsFromEnvironment(std::vector<IntegrationMethod>& integrationMethods, const std::vector<WSTRING>& disabledIntegrationNames)
-{
+void LoadIntegrationsFromEnvironment(
+    std::vector<IntegrationMethod>& integrationMethods,
+    const std::vector<WSTRING>& enabledIntegrationNames,
+    const std::vector<WSTRING>& disabledIntegrationNames) {
     for (const WSTRING& filePath : GetEnvironmentValues(environment::integrations_path, ENV_VAR_PATH_SEPARATOR))
     {
         Logger::Debug("Loading integrations from file: ", filePath);
-        LoadIntegrationsFromFile(filePath, integrationMethods, disabledIntegrationNames);
+      LoadIntegrationsFromFile(filePath, integrationMethods, enabledIntegrationNames, disabledIntegrationNames);
     }
 }
 
-void LoadIntegrationsFromFile(const WSTRING& file_path, std::vector<IntegrationMethod>& integrationMethods, const std::vector<WSTRING>& disabledIntegrationNames)
-{
+void LoadIntegrationsFromFile(
+    const WSTRING& file_path,
+    std::vector<IntegrationMethod>& integrationMethods,
+    const std::vector<WSTRING>& enabledIntegrationNames,
+    const std::vector<WSTRING>& disabledIntegrationNames) {
     try
     {
         std::ifstream stream(ToString(file_path));
 
         if (static_cast<bool>(stream))
         {
-            LoadIntegrationsFromStream(stream, integrationMethods, disabledIntegrationNames);
+          LoadIntegrationsFromStream(stream,
+                                     integrationMethods,
+                                     enabledIntegrationNames,
+                                     disabledIntegrationNames);
         }
         else
         {
@@ -55,8 +63,10 @@ void LoadIntegrationsFromFile(const WSTRING& file_path, std::vector<IntegrationM
     }
 }
 
-void LoadIntegrationsFromStream(std::istream& stream, std::vector<IntegrationMethod>& integrationMethods, const std::vector<WSTRING>& disabledIntegrationNames)
-{
+void LoadIntegrationsFromStream(
+    std::istream& stream, std::vector<IntegrationMethod>& integrationMethods,
+    const std::vector<WSTRING>& enabledIntegrationNames,
+    const std::vector<WSTRING>& disabledIntegrationNames) {
     try
     {
         json j;
@@ -67,7 +77,7 @@ void LoadIntegrationsFromStream(std::istream& stream, std::vector<IntegrationMet
 
         for (const auto& el : j)
         {
-            IntegrationFromJson(el, integrationMethods, disabledIntegrationNames);
+            IntegrationFromJson(el, integrationMethods, enabledIntegrationNames, disabledIntegrationNames);
         }
 
     }
@@ -99,7 +109,10 @@ void LoadIntegrationsFromStream(std::istream& stream, std::vector<IntegrationMet
 namespace
 {
 
-    void IntegrationFromJson(const json::value_type& src, std::vector<IntegrationMethod>& integrationMethods, const std::vector<WSTRING>& disabledIntegrationNames)
+    void IntegrationFromJson(const json::value_type& src,
+                         std::vector<IntegrationMethod>& integrationMethods,
+                         const std::vector<WSTRING>& enabledIntegrationNames,
+                         const std::vector<WSTRING>& disabledIntegrationNames)
     {
         if (!src.is_object())
         {
@@ -112,6 +125,25 @@ namespace
         {
             Logger::Warn("Integration name is missing for integration: ", src.dump());
             return;
+        }
+
+        if (!enabledIntegrationNames.empty())
+        {
+            bool found = false;
+
+             // check if the integration is enabled
+            for (const WSTRING& enabledName : enabledIntegrationNames)
+            {
+                if (name == enabledName) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                return;
+            }
         }
 
         // check if the integration is disabled
