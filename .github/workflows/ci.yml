@@ -77,14 +77,17 @@ jobs:
         include:
           - machine: windows-2022
             distribution: windows
+            log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
           - machine: ubuntu-20.04
             distribution: linux-glibc
             test-instrument: "true"
+            log-dir: "/var/log/opentelemetry/dotnet"
           - machine: ubuntu-20.04
             distribution: linux-musl
           - machine: macos-11
             distribution: macos
             test-instrument: "true"
+            log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
       - name: Run download.sh script
@@ -117,10 +120,10 @@ jobs:
         if: ${{ matrix.test-instrument == 'true' }}
         shell: bash
         run: |
-          if [ -z "$(ls -A /var/log/opentelemetry/dotnet)" ]; then
+          if [ -z "$(ls -A ${{ matrix.log-dir }})" ]; then
             echo "Empty"
             exit 1
           else
-            echo "/var/log/opentelemetry/dotnet contains log files"
+            echo "${{ matrix.log-dir }} contains log files"
           fi
 
