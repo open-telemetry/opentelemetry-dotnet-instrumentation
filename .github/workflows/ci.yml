@@ -90,41 +90,30 @@ jobs:
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
-      - name: Run download.sh script
+      - name: Run download.sh
         shell: bash
         run: |
           set -o pipefail
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh |
             DISTRIBUTION=${{ matrix.distribution }} bash -s
-      - name: Test if ./otel-dotnet-auto contains any files
+      - name: Test download.sh
         shell: bash
         run: |
-          if [ -z "$(ls -A ./otel-dotnet-auto)" ]; then
-            echo "Empty"
-            exit 1
-          else
-            echo "otel-dotnet-auto is installed"
-          fi
+          test -z "$(ls -A ./otel-dotnet-auto)" && { echo "download.sh has not downloaded files"; exit 1; }
       - uses: actions/setup-dotnet@v2.1.1
         with:
           dotnet-version: 6.0.x
-      - name: Instrument using instrument.sh script
+      - name: Instrument using instrument.sh
         if: ${{ matrix.test-instrument == 'true' }}
         shell: bash
         run: |
           set -e
           curl -fL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
           DISTRIBUTION=${{ matrix.distribution }} source ./instrument.sh
-          test -z $OTEL_DOTNET_AUTO_HOME && ( echo "instrument.sh failed"; exit 1; )
+          test -z $OTEL_DOTNET_AUTO_HOME && { echo "instrument.sh has not set the env vars"; exit 1; }
           dotnet help
-      - name: Test if log folder contains any files
+      - name: Test instrument.sh
         if: ${{ matrix.test-instrument == 'true' }}
         shell: bash
         run: |
-          if [ -z "$(ls -A ${{ matrix.log-dir }})" ]; then
-            echo "Empty"
-            exit 1
-          else
-            echo "${{ matrix.log-dir }} contains log files"
-          fi
-
+          test -z "$(ls -A ${{ matrix.log-dir }})" && { echo "no OTel log files"; exit 1; }
