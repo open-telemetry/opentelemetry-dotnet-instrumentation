@@ -116,5 +116,5 @@ jobs:
       - name: Test instrument.sh result
         if: ${{ matrix.test-instrument != 'false' }}
         shell: bash
-        run: test "$(ls -A ${{ matrix.log-dir }})"
+        run: test "$(ls -A '${{ matrix.log-dir }}' )"
 
