@@ -94,7 +94,8 @@ Download and extract the appropriate binaries from
 
 > The path where you put the binaries is referenced as `$INSTALL_DIR`
 
-You can also use the [download.sh](../download.sh) script with the following parameters:
+You can also use the [download.sh](../download.sh) script which uses following
+environment variables as parameters:
 
 | Parameter      | Description                                                       | Required | Default value                                                                     |
 |----------------|-------------------------------------------------------------------|----------|-----------------------------------------------------------------------------------|
