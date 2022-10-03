@@ -122,8 +122,9 @@ namespace
         // check if the integration is disabled
         for (const WSTRING& disabledName : disabledIntegrationNames)
         {
-          if (name == disabledName) {
-            return false;
+          if (name == disabledName) 
+          {
+              return false;
           }
         }
 
