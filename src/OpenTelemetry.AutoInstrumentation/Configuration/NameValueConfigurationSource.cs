@@ -22,7 +22,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// Represents a configuration source that retrieves
 /// values from the provided <see cref="NameValueCollection"/>.
 /// </summary>
-public class NameValueConfigurationSource : StringConfigurationSource
+internal class NameValueConfigurationSource : StringConfigurationSource
 {
     private readonly NameValueCollection _nameValueCollection;
 

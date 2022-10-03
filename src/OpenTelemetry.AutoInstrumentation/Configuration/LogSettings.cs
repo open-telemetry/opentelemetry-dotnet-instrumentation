@@ -22,7 +22,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Log Settings
 /// </summary>
-public class LogSettings : Settings
+internal class LogSettings : Settings
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="LogSettings"/> class

@@ -47,7 +47,7 @@ public class SettingsTests : IDisposable
     }
 
     [Fact]
-    public void TracerSettings_DefaultValues()
+    internal void TracerSettings_DefaultValues()
     {
         var settings = TracerSettings.FromDefaultSources();
 
@@ -70,7 +70,7 @@ public class SettingsTests : IDisposable
     }
 
     [Fact]
-    public void MeterSettings_DefaultValues()
+    internal void MeterSettings_DefaultValues()
     {
         var settings = MetricSettings.FromDefaultSources();
 
@@ -89,7 +89,7 @@ public class SettingsTests : IDisposable
     }
 
     [Fact]
-    public void LogSettings_DefaultValues()
+    internal void LogSettings_DefaultValues()
     {
         var settings = LogSettings.FromDefaultSources();
 
@@ -106,7 +106,7 @@ public class SettingsTests : IDisposable
     }
 
     [Fact]
-    public void SdkSettings_DefaultValues()
+    internal void SdkSettings_DefaultValues()
     {
         var settings = SdkSettings.FromDefaultSources();
 
@@ -121,7 +121,7 @@ public class SettingsTests : IDisposable
     [InlineData("jaeger", TracesExporter.Jaeger)]
     [InlineData("otlp", TracesExporter.Otlp)]
     [InlineData("zipkin", TracesExporter.Zipkin)]
-    public void TracesExporter_SupportedValues(string tracesExporter, TracesExporter expectedTracesExporter)
+    internal void TracesExporter_SupportedValues(string tracesExporter, TracesExporter expectedTracesExporter)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, tracesExporter);
 
@@ -134,7 +134,7 @@ public class SettingsTests : IDisposable
     [InlineData("none", MetricsExporter.None)]
     [InlineData("otlp", MetricsExporter.Otlp)]
     [InlineData("prometheus", MetricsExporter.Prometheus)]
-    public void MetricExporter_SupportedValues(string metricExporter, MetricsExporter expectedMetricsExporter)
+    internal void MetricExporter_SupportedValues(string metricExporter, MetricsExporter expectedMetricsExporter)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, metricExporter);
 
@@ -146,7 +146,7 @@ public class SettingsTests : IDisposable
     [Theory]
     [InlineData("none", LogExporter.None)]
     [InlineData("otlp", LogExporter.Otlp)]
-    public void LogExporter_SupportedValues(string logExporter, LogExporter expectedLogExporter)
+    internal void LogExporter_SupportedValues(string logExporter, LogExporter expectedLogExporter)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, logExporter);
 
@@ -161,7 +161,7 @@ public class SettingsTests : IDisposable
     [InlineData("baggage", new[] { Propagator.W3CBaggage })]
     [InlineData("b3multi", new[] { Propagator.B3Multi })]
     [InlineData("tracecontext,baggage,b3multi", new[] { Propagator.W3CTraceContext, Propagator.W3CBaggage, Propagator.B3Multi })]
-    public void Propagators_SupportedValues(string propagators, Propagator[] expectedPropagators)
+    internal void Propagators_SupportedValues(string propagators, Propagator[] expectedPropagators)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, propagators);
 
@@ -182,7 +182,7 @@ public class SettingsTests : IDisposable
     [InlineData(nameof(TracerInstrumentation.Npgsql), TracerInstrumentation.Npgsql)]
     [InlineData(nameof(TracerInstrumentation.SqlClient), TracerInstrumentation.SqlClient)]
     [InlineData(nameof(TracerInstrumentation.GrpcNetClient), TracerInstrumentation.GrpcNetClient)]
-    public void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
+    internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, tracerInstrumentation);
 
@@ -192,7 +192,7 @@ public class SettingsTests : IDisposable
     }
 
     [Fact]
-    public void TracerSettings_DisabledInstrumentations()
+    internal void TracerSettings_DisabledInstrumentations()
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, $"{nameof(TracerInstrumentation.AspNet)},{nameof(TracerInstrumentation.GraphQL)}");
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.DisabledInstrumentations, nameof(TracerInstrumentation.GraphQL));
@@ -206,7 +206,7 @@ public class SettingsTests : IDisposable
     [InlineData(nameof(MetricInstrumentation.NetRuntime), MetricInstrumentation.NetRuntime)]
     [InlineData(nameof(MetricInstrumentation.AspNet), MetricInstrumentation.AspNet)]
     [InlineData(nameof(MetricInstrumentation.HttpClient), MetricInstrumentation.HttpClient)]
-    public void MeterSettings_Instrumentations_SupportedValues(string meterInstrumentation, MetricInstrumentation expectedMetricInstrumentation)
+    internal void MeterSettings_Instrumentations_SupportedValues(string meterInstrumentation, MetricInstrumentation expectedMetricInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, meterInstrumentation);
 
@@ -216,7 +216,7 @@ public class SettingsTests : IDisposable
     }
 
     [Fact]
-    public void MeterSettings_DisabledInstrumentations()
+    internal void MeterSettings_DisabledInstrumentations()
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, $"{nameof(MetricInstrumentation.NetRuntime)},{nameof(MetricInstrumentation.AspNet)}");
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.DisabledInstrumentations, nameof(MetricInstrumentation.AspNet));
@@ -229,7 +229,7 @@ public class SettingsTests : IDisposable
     [Theory]
     [InlineData("true", true)]
     [InlineData("false", false)]
-    public void IncludeFormattedMessage_DependsOnCorrespondingEnvVariable(string includeFormattedMessage, bool expectedValue)
+    internal void IncludeFormattedMessage_DependsOnCorrespondingEnvVariable(string includeFormattedMessage, bool expectedValue)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.IncludeFormattedMessage, includeFormattedMessage);
 
@@ -240,7 +240,7 @@ public class SettingsTests : IDisposable
 
     [Theory]
     [MemberData(nameof(ExporterEnvVarAndLoadSettingsAction))]
-    public void UnsupportedExporterValues(string exporterEnvVar, Action loadSettingsAction)
+    internal void UnsupportedExporterValues(string exporterEnvVar, Action loadSettingsAction)
     {
         Environment.SetEnvironmentVariable(exporterEnvVar, "not-existing");
         loadSettingsAction.Should().Throw<FormatException>();
@@ -252,7 +252,7 @@ public class SettingsTests : IDisposable
     [InlineData("http/protobuf", null)]
     [InlineData("grpc", null)]
     [InlineData("nonExistingProtocol", null)]
-    public void OtlpExportProtocol_DependsOnCorrespondingEnvVariable(string otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol)
+    internal void OtlpExportProtocol_DependsOnCorrespondingEnvVariable(string otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, otlpProtocol);
 
@@ -266,7 +266,7 @@ public class SettingsTests : IDisposable
     [InlineData("true", true)]
     [InlineData("false", false)]
     [InlineData(null, false)]
-    public void Http2UnencryptedSupportEnabled_DependsOnCorrespondingEnvVariable(string http2UnencryptedSupportEnabled, bool expectedValue)
+    internal void Http2UnencryptedSupportEnabled_DependsOnCorrespondingEnvVariable(string http2UnencryptedSupportEnabled, bool expectedValue)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Http2UnencryptedSupportEnabled, http2UnencryptedSupportEnabled);
 
@@ -279,7 +279,7 @@ public class SettingsTests : IDisposable
     [InlineData("true", true)]
     [InlineData("false", false)]
     [InlineData(null, false)]
-    public void FlushOnUnhandledException_DependsOnCorrespondingEnvVariable(string flushOnUnhandledException, bool expectedValue)
+    internal void FlushOnUnhandledException_DependsOnCorrespondingEnvVariable(string flushOnUnhandledException, bool expectedValue)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, flushOnUnhandledException);
 
