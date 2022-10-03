@@ -92,6 +92,8 @@ jobs:
     steps:
       - run: brew install coreutils
         if: ${{ runner.os == 'macOS' }}
+      - run: mkdir -p ${{ matrix.log-dir }} && chmod a+rwx ${{ matrix.log-dir }}  # workaround before next release
+        if: ${{ runner.os != 'Windows' }}
       - name: Run download.sh
         shell: bash
         run: |
