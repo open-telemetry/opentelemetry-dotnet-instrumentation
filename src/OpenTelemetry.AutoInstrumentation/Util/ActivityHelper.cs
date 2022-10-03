@@ -30,11 +30,13 @@ internal static class ActivityHelper
     /// <param name="exception">The exception.</param>
     public static void SetException(this Activity activity, Exception exception)
     {
-        if (exception != null)
+        if (activity == null || exception == null)
         {
-            activity.SetStatus(Status.Error.WithDescription(exception.Message));
-            activity.RecordException(exception);
+            return;
         }
+
+        activity.SetStatus(Status.Error.WithDescription(exception.Message));
+        activity.RecordException(exception);
     }
 
     public static Activity StartActivityWithTags(this ActivitySource activitySource, string operationName, ActivityKind kind, ITags tags)
