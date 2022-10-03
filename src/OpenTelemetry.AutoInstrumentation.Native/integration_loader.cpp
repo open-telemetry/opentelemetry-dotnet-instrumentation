@@ -127,31 +127,37 @@ namespace
             return;
         }
 
-        if (!enabledIntegrationNames.empty())
+        // ignore LoggingBuilder, it is technically non-instrumentation
+        // it is using only the same functionality
+        if (name != WStr("LoggingBuilder"))
         {
-            bool found = false;
-
-             // check if the integration is enabled
-            for (const WSTRING& enabledName : enabledIntegrationNames)
+            if (!enabledIntegrationNames.empty())
             {
-                if (name == enabledName) {
-                    found = true;
-                    break;
+                bool found = false;
+
+                // check if the integration is enabled
+                for (const WSTRING& enabledName : enabledIntegrationNames)
+                {
+                    if (name == enabledName)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    return;
                 }
             }
 
-            if (!found)
+            // check if the integration is disabled
+            for (const WSTRING& disabledName : disabledIntegrationNames)
             {
-                return;
-            }
-        }
-
-        // check if the integration is disabled
-        for (const WSTRING& disabledName : disabledIntegrationNames)
-        {
-            if (name == disabledName)
-            {
-                return;
+                if (name == disabledName)
+                {
+                    return;
+                }
             }
         }
 
