@@ -92,7 +92,7 @@ TEST(IntegrationLoaderTest, DoesNotCrashWithOutOfRangeVersion)
     EXPECT_EQ(1, integrations.size());
     EXPECT_STREQ(L"test-integration", integrations[0].integration_name.c_str());
 
-    auto mr = integrations[0].replacement;
+    const auto mr = integrations[0].replacement;
     EXPECT_STREQ(L"", mr.caller_method.assembly.name.c_str());
     EXPECT_STREQ(L"", mr.caller_method.type_name.c_str());
     EXPECT_STREQ(L"", mr.caller_method.method_name.c_str());
@@ -167,21 +167,21 @@ TEST(IntegrationLoaderTest, HandlesSingleIntegrationWithInvalidTarget)
 
 TEST(IntegrationLoaderTest, LoadsFromEnvironment)
 {
-    auto tmpname1 = std::filesystem::temp_directory_path() / "test-1.json";
-    auto tmpname2 = std::filesystem::temp_directory_path() / "test-2.json";
+    auto temp_name1 = std::filesystem::temp_directory_path() / "test-1.json";
+    auto temp_name2 = std::filesystem::temp_directory_path() / "test-2.json";
     std::ofstream f;
-    f.open(tmpname1);
+    f.open(temp_name1);
     f << R"TEXT(
         [{ "name": "test-integration-1", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }]
     )TEXT";
     f.close();
-    f.open(tmpname2);
+    f.open(temp_name2);
     f << R"TEXT(
         [{ "name": "test-integration-2", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }]
     )TEXT";
     f.close();
 
-    auto name = tmpname1.wstring() + L";" + tmpname2.wstring();
+    auto name = temp_name1.wstring() + L";" + temp_name2.wstring();
 
     SetEnvironmentVariableW(trace::environment::integrations_path.data(), name.data());
 
@@ -195,8 +195,8 @@ TEST(IntegrationLoaderTest, LoadsFromEnvironment)
     }
     EXPECT_EQ(expected_names, actual_names);
 
-    std::filesystem::remove(tmpname1);
-    std::filesystem::remove(tmpname2);
+    std::filesystem::remove(temp_name1);
+    std::filesystem::remove(temp_name2);
 }
 
 TEST(IntegrationLoaderTest, DeserializesSignatureTypeArray)
