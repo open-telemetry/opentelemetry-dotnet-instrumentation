@@ -35,7 +35,7 @@ Steps to reproduce the behavior:
  3. etc
 
 <!--
-NOTE: If possible, also include the internal log files found (by default) in:
+NOTE: If possible, also include the log files found (by default) in:
 Windows: %ProgramData%\OpenTelemetry .NET AutoInstrumentation\logs\
 Linux and macOS: /var/log/opentelemetry/dotnet/
 --!>
