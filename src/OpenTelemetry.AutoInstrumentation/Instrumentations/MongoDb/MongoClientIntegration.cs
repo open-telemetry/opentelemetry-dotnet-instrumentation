@@ -51,7 +51,7 @@ public class MongoClientIntegration
     /// <param name="instance">Instance value, aka `this` of the instrumented method.</param>
     /// <param name="settings">The source of the original GraphQL query</param>
     /// <returns>Calltarget state value</returns>
-    public static CallTargetState OnMethodBegin<TTarget, TMongoClientSettings>(TTarget instance, TMongoClientSettings settings)
+    internal static CallTargetState OnMethodBegin<TTarget, TMongoClientSettings>(TTarget instance, TMongoClientSettings settings)
     {
         // Additional deps doesn't support .NET FX
         // TODO: Find another way how to ship & load "MongoDB.Driver.Core.Extensions.DiagnosticSources"

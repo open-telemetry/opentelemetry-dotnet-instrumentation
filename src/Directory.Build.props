@@ -5,6 +5,7 @@
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">net462;netcoreapp3.1</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netcoreapp3.1</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <EnablePublicApi>true</EnablePublicApi>
 
     <!-- NuGet packages -->
     <IsPackable>true</IsPackable>
@@ -31,5 +32,18 @@
 
     <!-- reference assemblies let us target .NET Framework without the SDK (for example, on non-Windows) -->
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!--PublicApi Analyzer-->
+  <ItemGroup Condition="'$(EnablePublicApi)'=='true'">
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+
+    <AdditionalFiles Include=".publicApi\$(TargetFramework)\PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include=".publicApi\$(TargetFramework)\PublicAPI.Unshipped.txt" />
+    <None Include=".publicApi\*\PublicAPI.Shipped.txt" />
+    <None Include=".publicApi\*\PublicAPI.Unshipped.txt" />
   </ItemGroup>
 </Project>

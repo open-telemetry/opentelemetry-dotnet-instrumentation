@@ -19,7 +19,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Enum representing supported meter instrumentations.
 /// </summary>
-public enum MetricInstrumentation
+internal enum MetricInstrumentation
 {
     /// <summary>
     /// ASP.NET instrumentation.

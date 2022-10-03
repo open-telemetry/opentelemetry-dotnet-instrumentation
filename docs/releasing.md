@@ -14,6 +14,8 @@
 
 1. Update the [CHANGELOG.md](../CHANGELOG.md) with the new release.
 
+1. Stable release only! Update `PublicAPI.Shipped.txt` based on corresponding `PublicAPI.Unshipped.txt`.
+
 1. Create a pull request on GitHub with the changes described in the changelog.
 
 1. Run the integration tests with Linux containers on Windows and macOS

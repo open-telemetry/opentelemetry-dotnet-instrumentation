@@ -26,7 +26,7 @@ namespace OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper;
 /// <summary>
 /// Add summary.
 /// </summary>
-public class BootstrapperHostingStartup : IHostingStartup
+internal class BootstrapperHostingStartup : IHostingStartup
 {
     private readonly LogSettings settings;
 
