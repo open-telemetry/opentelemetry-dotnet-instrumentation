@@ -91,13 +91,13 @@ jobs:
     steps:
       - run: brew install coreutils
         if: ${{ runner.os == 'macOS' }}
-      - name: Run download.sh
+      - name: Download OTel .NET AutoInstrumentation using download.sh
         shell: bash
         run: |
           set -o pipefail
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh |
             DISTRIBUTION=${{ matrix.distribution }} bash -s
-      - name: Test download.sh result
+      - name: Test download.sh - verify if binaries are downloaded
         shell: bash
         run: test "$(ls -A ./otel-dotnet-auto)"
       - uses: actions/setup-dotnet@v2.1.1
@@ -105,14 +105,14 @@ jobs:
           dotnet-version: 6.0.x
       - run: sudo mkdir -p ${{ matrix.log-dir }} && sudo chmod a+rwx ${{ matrix.log-dir }}  # workaround before next release
         if: ${{ runner.os != 'Windows' && matrix.test-instrument != 'false' }}
-      - name: Instrument using instrument.sh
+      - name: Instrument dotnet using instrument.sh
         shell: bash
         run: |
           set -e
           curl -fL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
           DISTRIBUTION=${{ matrix.distribution }} source ./instrument.sh
           dotnet help
-      - name: Test instrument.sh result
+      - name: Test instrument.sh - verify if internal logs are created
         if: ${{ matrix.test-instrument != 'false' }}
         shell: bash
         run: test "$(ls -A '${{ matrix.log-dir }}' )"
