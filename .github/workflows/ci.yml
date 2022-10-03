@@ -98,10 +98,9 @@ jobs:
           set -o pipefail
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh |
             DISTRIBUTION=${{ matrix.distribution }} bash -s
-      - name: Test download.sh
+      - name: Test download.sh result
         shell: bash
-        run: |
-          test -z "$(ls -A ./otel-dotnet-auto)" && { echo "download.sh has not downloaded files"; exit 1; }
+        run: test "$(ls -A ./otel-dotnet-auto)"
       - uses: actions/setup-dotnet@v2.1.1
         with:
           dotnet-version: 6.0.x
@@ -114,10 +113,10 @@ jobs:
           set -e
           curl -fL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
           DISTRIBUTION=${{ matrix.distribution }} source ./instrument.sh
-          test -z $OTEL_DOTNET_AUTO_HOME && { echo "instrument.sh has not set the env vars"; exit 1; }
+          test "$OTEL_DOTNET_AUTO_HOME"
           dotnet help
-      - name: Test instrument.sh
+      - name: Test instrument.sh result
         if: ${{ matrix.test-instrument == 'true' }}
         shell: bash
-        run: |
-          test -z "$(ls -A ${{ matrix.log-dir }})" && { echo "no OTel log files"; exit 1; }
+        run: test "$(ls -A ${{ matrix.log-dir }})"
+
