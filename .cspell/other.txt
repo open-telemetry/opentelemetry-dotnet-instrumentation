@@ -13,6 +13,7 @@ metricsexporter
 mkdir
 mktemp
 MSMQ
+myapp
 Npgsql
 omnisharp
 OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION
