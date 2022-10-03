@@ -129,6 +129,7 @@ namespace
 
         // ignore LoggingBuilder, it is technically non-instrumentation
         // it is using only the same functionality
+        // see https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1310
         if (name != WStr("LoggingBuilder"))
         {
             if (!enabledIntegrationNames.empty())
