@@ -39,15 +39,17 @@ internal static class ActivityHelper
 
     public static Activity StartActivityWithTags(this ActivitySource activitySource, string operationName, ActivityKind kind, ITags tags)
     {
-        var activity = activitySource.StartActivity(operationName, kind);
+        var activity = activitySource?.StartActivity(operationName, kind);
+
+        if (activity == null || tags == null)
+        {
+            return activity;
+        }
 
         // Apply tags
-        if (tags != null)
+        foreach (var entry in tags.GetAllTags())
         {
-            foreach (var entry in tags.GetAllTags())
-            {
-                activity.SetTag(entry.Key, entry.Value);
-            }
+            activity.SetTag(entry.Key, entry.Value);
         }
 
         return activity;
