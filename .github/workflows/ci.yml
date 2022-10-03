@@ -79,10 +79,12 @@ jobs:
             distribution: windows
           - machine: ubuntu-20.04
             distribution: linux-glibc
+            test-instrument: "true"
           - machine: ubuntu-20.04
             distribution: linux-musl
           - machine: macos-11
             distribution: macos
+            test-instrument: "true"
     runs-on: ${{ matrix.machine }}
     steps:
       - name: Run download.sh script
@@ -104,15 +106,15 @@ jobs:
         with:
           dotnet-version: 6.0.x
       - name: Instrument using instrument.sh script
-        if: ${{ matrix.distribution != 'windows' }}
+        if: ${{ matrix.test-instrument == 'true' }}
         shell: bash
         run: |
           set -e
-          curl -fL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.cmd -O
+          curl -fL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
           DISTRIBUTION=${{ matrix.distribution }} source ./instrument.sh
           dotnet help
       - name: Test if log folder contains any files
-        if: ${{ matrix.distribution != 'windows' }}
+        if: ${{ matrix.test-instrument == 'true' }}
         shell: bash
         run: |
           if [ -z "$(ls -A /var/log/opentelemetry/dotnet)" ]; then
