@@ -85,7 +85,7 @@ jobs:
             distribution: macos
     runs-on: ${{ matrix.machine }}
     steps:
-      - name: Run convenient installation Bash script
+      - name: Run download.sh script
         shell: bash
         run: |
           set -o pipefail
@@ -100,3 +100,25 @@ jobs:
           else
             echo "otel-dotnet-auto is installed"
           fi
+      - uses: actions/setup-dotnet@v2.1.1
+        with:
+          dotnet-version: 6.0.x
+      - name: Instrument using instrument.sh script
+        if: ${{ matrix.distribution != 'windows' }}
+        shell: bash
+        run: |
+          set -e
+          curl -fL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.cmd -O
+          DISTRIBUTION=${{ matrix.distribution }} source ./instrument.sh
+          dotnet help
+      - name: Test if log folder contains any files
+        if: ${{ matrix.distribution != 'windows' }}
+        shell: bash
+        run: |
+          if [ -z "$(ls -A /var/log/opentelemetry/dotnet)" ]; then
+            echo "Empty"
+            exit 1
+          else
+            echo "/var/log/opentelemetry/dotnet contains log files"
+          fi
+

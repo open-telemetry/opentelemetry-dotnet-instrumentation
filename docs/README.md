@@ -97,13 +97,13 @@ Download and extract the appropriate binaries from
 You can also use the [download.sh](../download.sh) script which uses following
 environment variables as parameters:
 
-| Parameter      | Description                                                       | Required | Default value                                                                     |
-|----------------|-------------------------------------------------------------------|----------|-----------------------------------------------------------------------------------|
-| `DISTRIBUTION` | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`. | Yes      |                                                                                   |
-| `INSTALL_DIR`  | Location where binaries are to be installed                       | No       | `./otel-dotnet-auto`                                                              |
-| `RELEASES_URL` | GitHub releases URL                                               | No       | `https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases` |
-| `TMPDIR`       | Temporary directory used when downloading the files               | No       | `$(mktemp -d)`                                                                    |
-| `VERSION`      | Version to download                                               | No       | `v0.3.1-beta.1`                                                                   |
+| Parameter      | Description                                                      | Required | Default value                                                                     |
+|----------------|------------------------------------------------------------------|----------|-----------------------------------------------------------------------------------|
+| `DISTRIBUTION` | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | Yes      |                                                                                   |
+| `INSTALL_DIR`  | Location where binaries are to be installed                      | No       | `./otel-dotnet-auto`                                                              |
+| `RELEASES_URL` | GitHub releases URL                                              | No       | `https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases` |
+| `TMPDIR`       | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`                                                                    |
+| `VERSION`      | Version to download                                              | No       | `v0.3.1-beta.1`                                                                   |
 
 ```sh
 ( set -o pipefail
@@ -158,7 +158,8 @@ OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0
 
 On [.NET (Core)](https://dotnet.microsoft.com/download/dotnet),
 if you don't need [bytecode instrumentations](config.md#instrumentations),
-you can unset or remove the following environment variables:
+you can unset or remove the following environment variables
+to not set the [.NET CLR Profiler](config.md#net-clr-profiler):
 
 ```env
 COR_ENABLE_PROFILING
@@ -171,6 +172,21 @@ CORECLR_PROFILER_PATH
 CORECLR_PROFILER_PATH_32
 CORECLR_PROFILER_PATH_64
 OTEL_DOTNET_AUTO_INTEGRATIONS_FILE
+```
+
+You can also use the [instrument.sh](../instrument.sh) script which uses following
+environment variables as parameters:
+
+| Parameter          | Description                                                            | Required | Default value        |
+|--------------------|------------------------------------------------------------------------|----------|----------------------|
+| `DISTRIBUTION`     | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`       | Yes      |                      |
+| `ENABLE_PROFILING` | Whether to set the .NET CLR Profiler, possible values: `true`, `false` | No       | `true`               |
+| `INSTALL_DIR`      | Location where binaries are to be installed                            | No       | `./otel-dotnet-auto` |
+
+```sh
+curl -fL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/instrument.sh -O
+DISTRIBUTION=linux-glibc source ./instrument.sh
+OTEL_SERVICE_NAME=myapp dotnet run
 ```
 
 ## Instrument a Windows Service running a .NET application
