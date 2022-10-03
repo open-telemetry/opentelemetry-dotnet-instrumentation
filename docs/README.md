@@ -183,6 +183,8 @@ environment variables as parameters:
 | `ENABLE_PROFILING` | Whether to set the .NET CLR Profiler, possible values: `true`, `false` | No       | `true`               |
 | `INSTALL_DIR`      | Location where binaries are to be installed                            | No       | `./otel-dotnet-auto` |
 
+> On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
+
 ```sh
 curl -fL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/instrument.sh -O
 DISTRIBUTION=linux-glibc source ./instrument.sh
