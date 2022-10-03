@@ -15,6 +15,7 @@
 // </copyright>
 
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace IntegrationTests.Helpers.Mocks;
 
@@ -24,19 +25,19 @@ public interface IMockSpan
 
     public ulong SpanId { get; }
 
-    public string Name { get; set; }
+    public string Name { get; }
 
     public string Service { get; }
 
-    public string Library { get; set; }
+    public string Library { get; }
+
+    public ActivityKind Kind { get; }
 
     public long Start { get; }
 
-    public long Duration { get; set; }
-
     public ulong? ParentId { get; }
 
-    public byte Error { get; set; }
+    public byte Error { get; }
 
-    public Dictionary<string, string> Tags { get; set; }
+    public Dictionary<string, string> Tags { get; }
 }
