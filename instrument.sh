@@ -65,7 +65,7 @@ if [ "$ENABLE_PROFILING" = "true" ]; then
   # Enable .NET Framework Profiling API
   if [ "$DISTRIBUTION" == "windows" ]
   then
-    export COR_ENABLE_PROFILING="$ENABLE_PROFILING"
+    export COR_ENABLE_PROFILING="1"
     export COR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
     # Set paths for both bitness on Windows, see https://docs.microsoft.com/en-us/dotnet/core/run-time-config/debugging-profiling#profiler-location
     export COR_PROFILER_PATH_64="$OTEL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.$SUFIX"
@@ -73,7 +73,7 @@ if [ "$ENABLE_PROFILING" = "true" ]; then
   fi
 
   # Enable .NET Core Profiling API
-  export CORECLR_ENABLE_PROFILING="${ENABLE_PROFILING}"
+  export CORECLR_ENABLE_PROFILING="1"
   export CORECLR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
   if [ "$DISTRIBUTION" == "windows" ]
   then
