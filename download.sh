@@ -1,11 +1,11 @@
 #!/bin/sh
 set -e
 
-case "$DISTRIBUTION" in
+case "$OS_TYPE" in
   "linux-glibc"|"linux-musl"|"macos"|"windows")
     ;;
   *)
-    echo "Please specify the distribution by setting the DISTRIBUTION env var. Supported values: linux-glibc, linux-musl, macos, windows." >&2
+    echo "Set the operating system type using the OS_TYPE environment variable. Supported values: linux-glibc, linux-musl, macos, windows." >&2
     exit 1
     ;;
 esac
@@ -15,12 +15,12 @@ test -z "$RELEASES_URL" && RELEASES_URL="https://github.com/open-telemetry/opent
 test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"
 test -z "$VERSION" && VERSION="v0.3.1-beta.1"
 
-ARCHIVE="opentelemetry-dotnet-instrumentation-$DISTRIBUTION.zip"
+ARCHIVE="opentelemetry-dotnet-instrumentation-$OS_TYPE.zip"
 TMPFILE="$TMPDIR/$ARCHIVE"
 
 (
   cd "$TMPDIR"
-  echo "Downloading $VERSION for $DISTRIBUTION..."
+  echo "Downloading $VERSION for $OS_TYPE..."
   curl -sSfLo "$TMPFILE" "$RELEASES_URL/download/$VERSION/$ARCHIVE"
 )
 
