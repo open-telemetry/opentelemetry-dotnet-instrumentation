@@ -103,6 +103,6 @@ jobs:
           sh ./download.sh
             test "$(ls -A ./otel-dotnet-auto)"
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
-          source ./instrument.sh
+          . ./instrument.sh
           dotnet help
             test "$(ls -A '${{ matrix.log-dir }}' )"
