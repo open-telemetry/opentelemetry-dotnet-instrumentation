@@ -99,8 +99,8 @@ environment variables as parameters:
 
 | Parameter      | Description                                                      | Required | Default value                                                                     |
 |----------------|------------------------------------------------------------------|----------|-----------------------------------------------------------------------------------|
-| `DISTRIBUTION` | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | Yes      |                                                                                   |
 | `INSTALL_DIR`  | Location where binaries are to be installed                      | No       | `./otel-dotnet-auto`                                                              |
+| `OS_TYPE`      | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | Yes      |                                                                                   |
 | `RELEASES_URL` | GitHub releases URL                                              | No       | `https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases` |
 | `TMPDIR`       | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`                                                                    |
 | `VERSION`      | Version to download                                              | No       | `v0.3.1-beta.1`                                                                   |
@@ -108,7 +108,7 @@ environment variables as parameters:
 ```sh
 ( set -o pipefail
 curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/download.sh |
-  VERSION=v0.3.1-beta.1 DISTRIBUTION=linux-glibc bash -s )
+  VERSION=v0.3.1-beta.1 OS_TYPE=linux-glibc bash -s )
 ```
 
 ### Instrument a .NET application
@@ -179,15 +179,15 @@ environment variables as parameters:
 
 | Parameter          | Description                                                            | Required | Default value        |
 |--------------------|------------------------------------------------------------------------|----------|----------------------|
-| `DISTRIBUTION`     | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`       | Yes      |                      |
 | `ENABLE_PROFILING` | Whether to set the .NET CLR Profiler, possible values: `true`, `false` | No       | `true`               |
 | `INSTALL_DIR`      | Location where binaries are to be installed                            | No       | `./otel-dotnet-auto` |
+| `OS_TYPE`          | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`       | Yes      |                      |
 
 > On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
 
 ```sh
 curl -fL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/instrument.sh -O
-DISTRIBUTION=linux-glibc source ./instrument.sh
+OS_TYPE=linux-glibc source ./instrument.sh
 OTEL_SERVICE_NAME=myapp dotnet run
 ```
 
