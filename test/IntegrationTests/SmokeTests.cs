@@ -241,6 +241,8 @@ public class SmokeTests : TestHelper
         using var agent = await MockZipkinCollector.Start(Output);
         RunTestApplication(agent.Port, enableStartupHook: enableStartupHook);
 
-        return await agent.WaitForSpansAsync(2);
+        // The process emitting the spans already finished by this time, there is no need to wait more,
+        // just get the spans received so far.
+        return await agent.WaitForSpansAsync(count: 2, timeout: TimeSpan.Zero);
     }
 }
