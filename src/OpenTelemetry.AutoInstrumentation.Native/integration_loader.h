@@ -38,7 +38,6 @@ void LoadIntegrationsFromStream(
 
 namespace
 {
-
     void IntegrationFromJson(const json::value_type& src,
                          std::vector<IntegrationMethod>& integrationMethods,
                          const std::vector<WSTRING>& enabledIntegrationNames,

@@ -41,7 +41,8 @@ const WSTRING enabled_integrations =
     WStr("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS");
 
 // Sets a list of integrations to disable. Status of other integrations will remain
-// unchanged. Calculation order: OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS then OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS.
+// unchanged. Calculation order: OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS
+// then if instrumentation is not explicitly disabled OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS is checked.
 // Supports multiple values separated with comma, for example:
 // "ElasticsearchNet,AspNetWebApi2"
 const WSTRING disabled_integrations =

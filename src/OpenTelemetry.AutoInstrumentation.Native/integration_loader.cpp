@@ -34,7 +34,7 @@ void LoadIntegrationsFromFile(
 
         if (static_cast<bool>(stream))
         {
-          LoadIntegrationsFromStream(stream,
+            LoadIntegrationsFromStream(stream,
                                      integrationMethods,
                                      enabledIntegrationNames,
                                      disabledIntegrationNames);
@@ -64,7 +64,8 @@ void LoadIntegrationsFromFile(
 }
 
 void LoadIntegrationsFromStream(
-    std::istream& stream, std::vector<IntegrationMethod>& integrationMethods,
+    std::istream& stream,
+    std::vector<IntegrationMethod>& integrationMethods,
     const std::vector<WSTRING>& enabledIntegrationNames,
     const std::vector<WSTRING>& disabledIntegrationNames) {
     try
@@ -108,7 +109,10 @@ void LoadIntegrationsFromStream(
 
 namespace
 {
-    bool InstrumentationEnabled(const WSTRING name, const std::vector<WSTRING>& enabledIntegrationNames, const std::vector<WSTRING>& disabledIntegrationNames)
+    bool InstrumentationEnabled(
+        const WSTRING name,
+        const std::vector<WSTRING>& enabledIntegrationNames,
+        const std::vector<WSTRING>& disabledIntegrationNames)
     {
         // LoggingBuilder has to be always enabled.
         // Technically it is not an instrumentation but
@@ -122,16 +126,17 @@ namespace
         // check if the integration is disabled
         for (const WSTRING& disabledName : disabledIntegrationNames)
         {
-          if (name == disabledName) 
-          {
-              return false;
-          }
+            if (name == disabledName) 
+            {
+                return false;
+            }
         }
 
         if (enabledIntegrationNames.empty())
         {
             return true;
         }
+
         // check if the integration is enabled
         for (const WSTRING& enabledName : enabledIntegrationNames)
         {
