@@ -104,7 +104,10 @@ public class MockZipkinCollector : IDisposable
 
         IImmutableList<IMockSpan> relevantSpans = ImmutableList<IMockSpan>.Empty;
 
-        while (DateTime.Now < deadline)
+        // Use a do-while to ensure at least one attempt at reading the data already
+        // received. This is helpful for negative tests, ie.: no spans generated, when
+        // the process emitting the spans already finished.
+        do
         {
             lock (_syncRoot)
             {
@@ -122,6 +125,7 @@ public class MockZipkinCollector : IDisposable
 
             await Task.Delay(500);
         }
+        while (DateTime.Now < deadline);
 
         if (!returnAllOperations)
         {
