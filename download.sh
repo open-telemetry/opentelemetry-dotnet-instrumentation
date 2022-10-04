@@ -1,15 +1,15 @@
 #!/bin/sh
 set -e
 
-test -z "$DISTRIBUTION" && {
-  echo "Please specify the distribution by setting the DISTRIBUTION env var." >&2
-  echo "Supported values:" >&2
-  echo "    linux-glibc" >&2
-  echo "    linux-musl" >&2
-  echo "    macos" >&2
-  echo "    windows" >&2
-	exit 1
-}
+case "$DISTRIBUTION" in
+  "linux-glibc"|"linux-musl"|"macos"|"windows")
+    ;;
+  *)
+    echo "Please specify the distribution by setting the DISTRIBUTION env var. Supported values: linux-glibc, linux-musl, macos, windows." >&2
+    exit 1
+    ;;
+esac
+
 test -z "$INSTALL_DIR" && INSTALL_DIR="./otel-dotnet-auto"
 test -z "$RELEASES_URL" && RELEASES_URL="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases"
 test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"

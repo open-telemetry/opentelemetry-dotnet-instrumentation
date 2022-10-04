@@ -77,26 +77,43 @@ jobs:
         include:
           - machine: windows-2022
             distribution: windows
+            log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
           - machine: ubuntu-20.04
             distribution: linux-glibc
+            log-dir: "/var/log/opentelemetry/dotnet"
           - machine: ubuntu-20.04
             distribution: linux-musl
+            test-instrument: "false"
           - machine: macos-11
             distribution: macos
+            log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
-      - name: Run convenient installation Bash script
+      - run: brew install coreutils
+        if: ${{ runner.os == 'macOS' }}
+      - name: Download OTel .NET AutoInstrumentation using download.sh
         shell: bash
         run: |
           set -o pipefail
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh |
             DISTRIBUTION=${{ matrix.distribution }} bash -s
-      - name: Test if ./otel-dotnet-auto contains any files
+      - name: Test download.sh - verify if binaries are downloaded
+        shell: bash
+        run: test "$(ls -A ./otel-dotnet-auto)"
+      - uses: actions/setup-dotnet@v2.1.1
+        with:
+          dotnet-version: 6.0.x
+      - run: sudo mkdir -p ${{ matrix.log-dir }} && sudo chmod a+rwx ${{ matrix.log-dir }}  # workaround before next release
+        if: ${{ runner.os != 'Windows' && matrix.test-instrument != 'false' }}
+      - name: Instrument dotnet using instrument.sh
         shell: bash
         run: |
-          if [ -z "$(ls -A ./otel-dotnet-auto)" ]; then
-            echo "Empty"
-            exit 1
-          else
-            echo "otel-dotnet-auto is installed"
-          fi
+          set -e
+          curl -fL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
+          DISTRIBUTION=${{ matrix.distribution }} source ./instrument.sh
+          dotnet help
+      - name: Test instrument.sh - verify if internal logs are created
+        if: ${{ matrix.test-instrument != 'false' }}
+        shell: bash
+        run: test "$(ls -A '${{ matrix.log-dir }}' )"
+
