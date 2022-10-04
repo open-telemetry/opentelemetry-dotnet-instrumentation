@@ -19,7 +19,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Instrumentation options
 /// </summary>
-public class InstrumentationOptions
+internal class InstrumentationOptions
 {
     internal InstrumentationOptions(IConfigurationSource source)
     {

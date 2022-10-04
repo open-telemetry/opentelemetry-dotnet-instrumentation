@@ -23,7 +23,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Metric Settings
 /// </summary>
-public class MetricSettings : Settings
+internal class MetricSettings : Settings
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="MetricSettings"/> class

@@ -23,7 +23,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// <summary>
 /// A class that attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
 /// </summary>
-public partial class Startup
+internal partial class Startup
 {
     private static readonly string ManagedProfilerDirectory;
 

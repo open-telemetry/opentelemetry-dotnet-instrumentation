@@ -22,7 +22,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Propagator Settings
 /// </summary>
-public class SdkSettings
+internal class SdkSettings
 {
     private SdkSettings(CompositeConfigurationSource source)
     {
