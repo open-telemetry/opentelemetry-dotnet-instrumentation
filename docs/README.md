@@ -123,7 +123,7 @@ Additionally, set the [resources](config.md#resources) when running your applica
 ### Shell scripts
 
 You can install OpenTelemetry .NET Automatic Instrumentation
-and instument your application using the provided Shell scripts.
+and instrument your .NET application using the provided Shell scripts.
 Example usage:
 
 ```sh
