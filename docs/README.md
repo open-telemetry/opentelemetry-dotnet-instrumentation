@@ -98,8 +98,8 @@ Download and extract the appropriate binaries from
 
 When running your application, make sure to:
 
-1. set the [resources](config.md#resources)
-2. set the environment variables from the table below.
+1. Set the [resources](config.md#resources).
+2. Set the environment variables from the table below.
 
 | Environment variable                 | .NET version           | Value                                                                               |
 |--------------------------------------|------------------------|-------------------------------------------------------------------------------------|
