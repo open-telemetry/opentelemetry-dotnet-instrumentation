@@ -44,7 +44,11 @@ public class ActivityHelperTests
     {
         var activity = new Activity("test-operation");
 
-        var action = () => activity.SetException(null);
+        var action = () =>
+        {
+            activity.SetException(null);
+            activity.Dispose();
+        };
 
         action.Should().NotThrow();
     }
@@ -52,7 +56,7 @@ public class ActivityHelperTests
     [Fact]
     public void SetException_SetsExceptionDetails()
     {
-        var activity = new Activity("test-operation");
+        using var activity = new Activity("test-operation");
 
         var exceptionMessage = "test-message";
         activity.SetException(new Exception(exceptionMessage));
@@ -70,7 +74,7 @@ public class ActivityHelperTests
     {
         const ActivitySource activitySource = null;
 
-        var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, null);
+        using var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, null);
 
         activity.Should().BeNull();
     }
@@ -78,9 +82,9 @@ public class ActivityHelperTests
     [Fact]
     public void StartActivityWithTags_ReturnsNull_WhenActivitySourceDoesNotHaveListener()
     {
-        var activitySource = new ActivitySource("test-source");
+        using var activitySource = new ActivitySource("test-source");
 
-        var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, null);
+        using var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, null);
 
         using (new AssertionScope())
         {
@@ -97,11 +101,11 @@ public class ActivityHelperTests
     [InlineData(ActivityKind.Consumer)]
     public void StartActivityWithTags_ReturnsActivity_WhenThereIsActivityListener(ActivityKind kind)
     {
-        var activitySource = new ActivitySource("test-source");
+        using var activitySource = new ActivitySource("test-source");
 
         using var listener = CreateActivityListener(activitySource);
 
-        var activity = activitySource.StartActivityWithTags("test-operation", kind, null);
+        using var activity = activitySource.StartActivityWithTags("test-operation", kind, null);
 
         using (new AssertionScope())
         {
@@ -123,11 +127,11 @@ public class ActivityHelperTests
         var tagsMock = new Mock<ITags>();
         tagsMock.Setup(x => x.GetAllTags()).Returns(tags);
 
-        var activitySource = new ActivitySource("test-source");
+        using var activitySource = new ActivitySource("test-source");
 
         using var listener = CreateActivityListener(activitySource);
 
-        var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, tagsMock.Object);
+        using var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, tagsMock.Object);
 
         tagsMock.Setup(x => x.GetAllTags()).Returns(tags);
 
