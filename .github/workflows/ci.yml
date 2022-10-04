@@ -94,9 +94,9 @@ jobs:
       - name: Download OTel .NET AutoInstrumentation using download.sh
         shell: bash
         run: |
-          set -o pipefail
-          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh |
-            DISTRIBUTION=${{ matrix.distribution }} bash -s
+          set -e
+          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh -O
+          DISTRIBUTION=${{ matrix.distribution }} ./download.sh
       - name: Test download.sh - verify if binaries are downloaded
         shell: bash
         run: test "$(ls -A ./otel-dotnet-auto)"
@@ -109,7 +109,7 @@ jobs:
         shell: bash
         run: |
           set -e
-          curl -fL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
+          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
           DISTRIBUTION=${{ matrix.distribution }} source ./instrument.sh
           dotnet help
       - name: Test instrument.sh - verify if internal logs are created

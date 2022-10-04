@@ -94,7 +94,9 @@ Download and extract the appropriate binaries from
 
 > The path where you put the binaries is referenced as `$INSTALL_DIR`
 
-You can do it in Bash by using the [download.sh](../download.sh) script
+#### Install using `download.sh`
+
+You can do it in Shell by using the [download.sh](../download.sh) script
 which uses following environment variables as parameters:
 
 | Parameter      | Description                                                      | Required | Default value                                                                     |
@@ -108,9 +110,8 @@ which uses following environment variables as parameters:
 Example usage:
 
 ```sh
-( set -o pipefail
-curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/download.sh |
-  VERSION=v0.3.1-beta.1 DISTRIBUTION=linux-glibc bash -s )
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/download.sh -O && \
+VERSION=v0.3.1-beta.1 DISTRIBUTION=linux-glibc ./download.sh
 ```
 
 ### Instrument a .NET application
@@ -137,6 +138,10 @@ Before running your application, set the following environment variables:
 
 > Some configuration can be omitted on .NET (Core). More info [here](config.md#net-clr-profiler).
 
+Additionally, set the [resources](config.md#resources) when running your application.
+
+#### Instrument a .NET application using `instrument.sh`
+
 You can set them in Shell by using the [instrument.sh](../instrument.sh)
 script which uses following environment variables as parameters:
 
@@ -151,14 +156,8 @@ script which uses following environment variables as parameters:
 Example usage:
 
 ```sh
-curl -fL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/instrument.sh -O
-DISTRIBUTION=linux-glibc source ./instrument.sh
-```
-
-Set the [resources](config.md#resources) when running your application.
-Example in Shell:
-
-```sh
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/instrument.sh -O && \
+DISTRIBUTION=linux-glibc source ./instrument.sh && \
 OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 dotnet run
 ```
 
