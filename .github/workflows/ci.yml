@@ -76,13 +76,13 @@ jobs:
       matrix:
         include:
           - machine: windows-2022
-            distribution: windows
+            os_type: windows
             log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
           - machine: ubuntu-20.04
-            distribution: linux-glibc
+            os_type: linux-glibc
             log-dir: "/var/log/opentelemetry/dotnet"
           - machine: macos-11
-            distribution: macos
+            os_type: macos
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
@@ -98,7 +98,7 @@ jobs:
         shell: bash
         run: |
           set -e
-          export DISTRIBUTION=${{ matrix.distribution }} 
+          export OS_TYPE=${{ matrix.os_type }} 
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh -O
           sh ./download.sh
             test "$(ls -A ./otel-dotnet-auto)"

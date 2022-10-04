@@ -128,7 +128,7 @@ and instrument your .NET application using the provided Shell scripts.
 Example usage:
 
 ```sh
-export DISTRIBUTION=linux-glibc
+export OS_TYPE=linux-glibc
 curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/download.sh -O
 sh ./download.sh
 curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/instrument.sh
@@ -140,8 +140,8 @@ OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,
 
 | Parameter      | Description                                                      | Required | Default value                                                                     |
 |----------------|------------------------------------------------------------------|----------|-----------------------------------------------------------------------------------|
-| `DISTRIBUTION` | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | Yes      |                                                                                   |
 | `INSTALL_DIR`  | Location where binaries are to be installed                      | No       | `./otel-dotnet-auto`                                                              |
+| `OS_TYPE`      | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | Yes      |                                                                                   |
 | `RELEASES_URL` | GitHub releases URL                                              | No       | `https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases` |
 | `TMPDIR`       | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`                                                                    |
 | `VERSION`      | Version to download                                              | No       | `v0.3.1-beta.1`                                                                   |
@@ -150,9 +150,9 @@ OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,
 
 | Parameter          | Description                                                            | Required | Default value        |
 |--------------------|------------------------------------------------------------------------|----------|----------------------|
-| `DISTRIBUTION`     | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`       | Yes      |                      |
 | `ENABLE_PROFILING` | Whether to set the .NET CLR Profiler, possible values: `true`, `false` | No       | `true`               |
 | `INSTALL_DIR`      | Location where binaries are to be installed                            | No       | `./otel-dotnet-auto` |
+| `OS_TYPE`          | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`       | Yes      |                      |
 
 > On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
 
