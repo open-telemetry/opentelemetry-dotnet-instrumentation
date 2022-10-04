@@ -113,10 +113,10 @@ Before running your application, set the following environment variables:
 | `DOTNET_ADDITIONAL_DEPS`             | .NET (Core)            | `$INSTALL_DIR/AdditionalDeps`                                                       |
 | `DOTNET_SHARED_STORE`                | .NET (Core)            | `$INSTALL_DIR/store`                                                                |
 | `DOTNET_STARTUP_HOOKS`               | .NET (Core)            | `$INSTALL_DIR/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll`      |
-| `OTEL_DOTNET_AUTO_HOME`              | all                    | `$INSTALL_DIR`                                                                      |
-| `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | all                    | `$INSTALL_DIR/integrations.json`                                                    |
+| `OTEL_DOTNET_AUTO_HOME`              | All versions           | `$INSTALL_DIR`                                                                      |
+| `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | All versions           | `$INSTALL_DIR/integrations.json`                                                    |
 
-> Some configuration can be omitted on .NET (Core). More info [here](config.md#net-clr-profiler).
+> Some settings can be omitted on .NET (Core). For more information, see [config.md](config.md#net-clr-profiler).
 
 Additionally, set the [resources](config.md#resources) when running your application.
 
