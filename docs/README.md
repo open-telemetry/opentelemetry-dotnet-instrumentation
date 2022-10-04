@@ -94,22 +94,24 @@ Download and extract the appropriate binaries from
 
 > The path where you put the binaries is referenced as `$INSTALL_DIR`
 
-> You can do it in Bash by using the [download.sh](../download.sh) script
-> which uses following environment variables as parameters:
->
-> | Parameter      | Description                                                      | Required | Default value                                                                     |
-> |----------------|------------------------------------------------------------------|----------|-----------------------------------------------------------------------------------|
-> | `DISTRIBUTION` | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | Yes      |                                                                                   |
-> | `INSTALL_DIR`  | Location where binaries are to be installed                      | No       | `./otel-dotnet-auto`                                                              |
-> | `RELEASES_URL` | GitHub releases URL                                              | No       | `https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases` |
-> | `TMPDIR`       | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`                                                                    |
-> | `VERSION`      | Version to download                                              | No       | `v0.3.1-beta.1`                                                                   |
->
-> ```sh
-> ( set -o pipefail
-> curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/download.sh |
->   VERSION=v0.3.1-beta.1 DISTRIBUTION=linux-glibc bash -s )
-> ```
+You can do it in Bash by using the [download.sh](../download.sh) script
+which uses following environment variables as parameters:
+
+| Parameter      | Description                                                      | Required | Default value                                                                     |
+|----------------|------------------------------------------------------------------|----------|-----------------------------------------------------------------------------------|
+| `DISTRIBUTION` | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | Yes      |                                                                                   |
+| `INSTALL_DIR`  | Location where binaries are to be installed                      | No       | `./otel-dotnet-auto`                                                              |
+| `RELEASES_URL` | GitHub releases URL                                              | No       | `https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases` |
+| `TMPDIR`       | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`                                                                    |
+| `VERSION`      | Version to download                                              | No       | `v0.3.1-beta.1`                                                                   |
+
+Example usage:
+
+```sh
+( set -o pipefail
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/download.sh |
+  VERSION=v0.3.1-beta.1 DISTRIBUTION=linux-glibc bash -s )
+```
 
 ### Instrument a .NET application
 
@@ -133,25 +135,25 @@ Before running your application, set the following environment variables:
 | `OTEL_DOTNET_AUTO_HOME`              | all                    | `$INSTALL_DIR`                                                                      |
 | `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | all                    | `$INSTALL_DIR/integrations.json`                                                    |
 
-> Some configuration can be omited on .NET (Core). More info [here](config.md#net-clr-profiler).
+> Some configuration can be omitted on .NET (Core). More info [here](config.md#net-clr-profiler).
 
-> You can set them in Shell by using the [instrument.sh](../instrument.sh)
+You can set them in Shell by using the [instrument.sh](../instrument.sh)
 script which uses following environment variables as parameters:
->
-> | Parameter          | Description                                                            | Required | Default value        |
-> |--------------------|------------------------------------------------------------------------|----------|----------------------|
-> | `DISTRIBUTION`     | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`       | Yes      |                      |
-> | `ENABLE_PROFILING` | Whether to set the .NET CLR Profiler, possible values: `true`, `false` | No       | `true`               |
-> | `INSTALL_DIR`      | Location where binaries are to be installed                            | No       | `./otel-dotnet-auto` |
->
+
+| Parameter          | Description                                                            | Required | Default value        |
+|--------------------|------------------------------------------------------------------------|----------|----------------------|
+| `DISTRIBUTION`     | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`       | Yes      |                      |
+| `ENABLE_PROFILING` | Whether to set the .NET CLR Profiler, possible values: `true`, `false` | No       | `true`               |
+| `INSTALL_DIR`      | Location where binaries are to be installed                            | No       | `./otel-dotnet-auto` |
+
 > On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
->
-> Example usage:
->
-> ```sh
-> curl -fL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/instrument.sh -O
-> DISTRIBUTION=linux-glibc source ./instrument.sh
-> ```
+
+Example usage:
+
+```sh
+curl -fL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/instrument.sh -O
+DISTRIBUTION=linux-glibc source ./instrument.sh
+```
 
 Set the [resources](config.md#resources) when running your application.
 Example in Shell:
