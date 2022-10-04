@@ -96,7 +96,10 @@ Download and extract the appropriate binaries from
 
 ### Instrument a .NET application
 
-Before running your application, set the following environment variables:
+When running your application, make sure to:
+
+1. set the [resources](config.md#resources)
+2. set the environment variables from the table below.
 
 | Environment variable                 | .NET version           | Value                                                                               |
 |--------------------------------------|------------------------|-------------------------------------------------------------------------------------|
@@ -117,8 +120,6 @@ Before running your application, set the following environment variables:
 | `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | All versions           | `$INSTALL_DIR/integrations.json`                                                    |
 
 > Some settings can be omitted on .NET (Core). For more information, see [config.md](config.md#net-clr-profiler).
-
-Additionally, set the [resources](config.md#resources) when running your application.
 
 ### Shell scripts
 
