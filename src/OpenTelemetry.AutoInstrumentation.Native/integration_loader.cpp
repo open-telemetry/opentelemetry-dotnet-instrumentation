@@ -19,7 +19,7 @@ void LoadIntegrationsFromEnvironment(
     for (const WSTRING& filePath : GetEnvironmentValues(environment::integrations_path, ENV_VAR_PATH_SEPARATOR))
     {
         Logger::Debug("Loading integrations from file: ", filePath);
-      LoadIntegrationsFromFile(filePath, integrationMethods, enabledIntegrationNames, disabledIntegrationNames);
+        LoadIntegrationsFromFile(filePath, integrationMethods, enabledIntegrationNames, disabledIntegrationNames);
     }
 }
 
@@ -110,8 +110,8 @@ namespace
 {
     bool InstrumentationEnabled(const WSTRING name, const std::vector<WSTRING>& enabledIntegrationNames, const std::vector<WSTRING>& disabledIntegrationNames)
     {
-        // LoggingBuilder has to be always enabled/
-        // Technically it is  non-instrumentation but
+        // LoggingBuilder has to be always enabled.
+        // Technically it is not an instrumentation but
         // it is using the same functionality.
         // See https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1310.
         if (name == WStr("LoggingBuilder"))

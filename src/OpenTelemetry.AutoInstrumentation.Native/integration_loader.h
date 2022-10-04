@@ -31,7 +31,8 @@ void LoadIntegrationsFromFile(
 
 // LoadIntegrationsFromFile loads the integrations from a stream
 void LoadIntegrationsFromStream(
-    std::istream& stream, std::vector<IntegrationMethod>& integrationMethods,
+    std::istream& stream,
+    std::vector<IntegrationMethod>& integrationMethods,
     const std::vector<WSTRING>& enabledIntegrationNames,
     const std::vector<WSTRING>& disabledIntegrationNames);
 
