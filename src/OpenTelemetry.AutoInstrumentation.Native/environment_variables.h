@@ -34,9 +34,16 @@ const WSTRING include_process_names = WStr("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES")
 // "MyApp.exe,dotnet.exe"
 const WSTRING exclude_process_names = WStr("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES");
 
-// Sets a list of integrations to disable. All other integrations will remain
-// enabled. If not set (default), all integrations are enabled. Supports
-// multiple values separated with comma, for example:
+// Sets a list of integrations to enable. If not set (default), all integrations are enabled.
+// Supports multiple values separated with comma, for example:
+// "ElasticsearchNet,AspNetWebApi2"
+const WSTRING enabled_integrations =
+    WStr("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS");
+
+// Sets a list of integrations to disable. Status of other integrations will remain
+// unchanged. Calculation order: OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS
+// then if instrumentation is not explicitly disabled OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS is checked.
+// Supports multiple values separated with comma, for example:
 // "ElasticsearchNet,AspNetWebApi2"
 const WSTRING disabled_integrations =
     WStr("OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS");

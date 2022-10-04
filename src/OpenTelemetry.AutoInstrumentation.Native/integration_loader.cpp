@@ -12,24 +12,32 @@ namespace trace
 
 using json = nlohmann::json;
 
-void LoadIntegrationsFromEnvironment(std::vector<IntegrationMethod>& integrationMethods, const std::vector<WSTRING>& disabledIntegrationNames)
-{
+void LoadIntegrationsFromEnvironment(
+    std::vector<IntegrationMethod>& integrationMethods,
+    const std::vector<WSTRING>& enabledIntegrationNames,
+    const std::vector<WSTRING>& disabledIntegrationNames) {
     for (const WSTRING& filePath : GetEnvironmentValues(environment::integrations_path, ENV_VAR_PATH_SEPARATOR))
     {
         Logger::Debug("Loading integrations from file: ", filePath);
-        LoadIntegrationsFromFile(filePath, integrationMethods, disabledIntegrationNames);
+        LoadIntegrationsFromFile(filePath, integrationMethods, enabledIntegrationNames, disabledIntegrationNames);
     }
 }
 
-void LoadIntegrationsFromFile(const WSTRING& file_path, std::vector<IntegrationMethod>& integrationMethods, const std::vector<WSTRING>& disabledIntegrationNames)
-{
+void LoadIntegrationsFromFile(
+    const WSTRING& file_path,
+    std::vector<IntegrationMethod>& integrationMethods,
+    const std::vector<WSTRING>& enabledIntegrationNames,
+    const std::vector<WSTRING>& disabledIntegrationNames) {
     try
     {
         std::ifstream stream(ToString(file_path));
 
         if (static_cast<bool>(stream))
         {
-            LoadIntegrationsFromStream(stream, integrationMethods, disabledIntegrationNames);
+            LoadIntegrationsFromStream(stream,
+                                     integrationMethods,
+                                     enabledIntegrationNames,
+                                     disabledIntegrationNames);
         }
         else
         {
@@ -55,8 +63,11 @@ void LoadIntegrationsFromFile(const WSTRING& file_path, std::vector<IntegrationM
     }
 }
 
-void LoadIntegrationsFromStream(std::istream& stream, std::vector<IntegrationMethod>& integrationMethods, const std::vector<WSTRING>& disabledIntegrationNames)
-{
+void LoadIntegrationsFromStream(
+    std::istream& stream,
+    std::vector<IntegrationMethod>& integrationMethods,
+    const std::vector<WSTRING>& enabledIntegrationNames,
+    const std::vector<WSTRING>& disabledIntegrationNames) {
     try
     {
         json j;
@@ -67,7 +78,7 @@ void LoadIntegrationsFromStream(std::istream& stream, std::vector<IntegrationMet
 
         for (const auto& el : j)
         {
-            IntegrationFromJson(el, integrationMethods, disabledIntegrationNames);
+            IntegrationFromJson(el, integrationMethods, enabledIntegrationNames, disabledIntegrationNames);
         }
 
     }
@@ -98,8 +109,49 @@ void LoadIntegrationsFromStream(std::istream& stream, std::vector<IntegrationMet
 
 namespace
 {
+    bool InstrumentationEnabled(
+        const WSTRING name,
+        const std::vector<WSTRING>& enabledIntegrationNames,
+        const std::vector<WSTRING>& disabledIntegrationNames)
+    {
+        // LoggingBuilder has to be always enabled.
+        // Technically it is not an instrumentation but
+        // it is using the same functionality.
+        // See https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1310.
+        if (name == WStr("LoggingBuilder"))
+        {
+            return true;
+        }
 
-    void IntegrationFromJson(const json::value_type& src, std::vector<IntegrationMethod>& integrationMethods, const std::vector<WSTRING>& disabledIntegrationNames)
+        // check if the integration is disabled
+        for (const WSTRING& disabledName : disabledIntegrationNames)
+        {
+            if (name == disabledName) 
+            {
+                return false;
+            }
+        }
+
+        if (enabledIntegrationNames.empty())
+        {
+            return true;
+        }
+
+        // check if the integration is enabled
+        for (const WSTRING& enabledName : enabledIntegrationNames)
+        {
+            if (name == enabledName)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void IntegrationFromJson(const json::value_type& src,
+                         std::vector<IntegrationMethod>& integrationMethods,
+                         const std::vector<WSTRING>& enabledIntegrationNames,
+                         const std::vector<WSTRING>& disabledIntegrationNames)
     {
         if (!src.is_object())
         {
@@ -114,13 +166,9 @@ namespace
             return;
         }
 
-        // check if the integration is disabled
-        for (const WSTRING& disabledName : disabledIntegrationNames)
+        if (!InstrumentationEnabled(name, enabledIntegrationNames, disabledIntegrationNames))
         {
-            if (name == disabledName)
-            {
-                return;
-            }
+            return;
         }
 
         auto arr = src.value("method_replacements", json::array());
