@@ -19,7 +19,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Enum representing supported instrumentations.
 /// </summary>
-public enum TracerInstrumentation
+internal enum TracerInstrumentation
 {
     /// <summary>
     /// HttpClient instrumentation.

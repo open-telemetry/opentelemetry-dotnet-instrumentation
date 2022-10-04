@@ -24,7 +24,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// A base <see cref="IConfigurationSource"/> implementation
 /// for string-only configuration sources.
 /// </summary>
-public abstract class StringConfigurationSource : IConfigurationSource
+internal abstract class StringConfigurationSource : IConfigurationSource
 {
     /// <inheritdoc />
     public abstract string GetString(string key);

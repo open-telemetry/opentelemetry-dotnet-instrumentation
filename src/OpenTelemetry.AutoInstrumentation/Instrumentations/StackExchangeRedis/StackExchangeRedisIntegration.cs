@@ -71,7 +71,7 @@ public class StackExchangeRedisIntegration
     /// <typeparam name="TTarget">Type of the target</typeparam>
     /// <typeparam name="TReturn">Return type</typeparam>
     /// <returns>A response value, in an async scenario will be T of Task of T</returns>
-    public static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TReturn returnValue, Exception exception, CallTargetState state)
+    internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TReturn returnValue, Exception exception, CallTargetState state)
     {
         StackExchangeRedisInitializer.Initialize(returnValue);
 

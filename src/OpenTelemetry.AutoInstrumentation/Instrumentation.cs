@@ -36,7 +36,7 @@ namespace OpenTelemetry.AutoInstrumentation;
 /// <summary>
 /// Instrumentation
 /// </summary>
-public static class Instrumentation
+internal static class Instrumentation
 {
     private static readonly ILogger Logger = OtelLogging.GetLogger();
     private static readonly ResourceBuilder _resourceBuilder = ResourceBuilder.CreateDefault();

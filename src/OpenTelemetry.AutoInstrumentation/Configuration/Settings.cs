@@ -23,7 +23,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Global Settings
 /// </summary>
-public abstract class Settings
+internal abstract class Settings
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="Settings"/> class

@@ -19,7 +19,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Enum representing supported log exporters.
 /// </summary>
-public enum LogExporter
+internal enum LogExporter
 {
     /// <summary>
     /// None exporter.
