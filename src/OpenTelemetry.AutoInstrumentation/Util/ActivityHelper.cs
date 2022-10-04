@@ -50,7 +50,13 @@ internal static class ActivityHelper
 
     public static Activity StartActivityWithTags(this ActivitySource activitySource, string operationName, ActivityKind kind, ITags tags)
     {
-        var activity = activitySource?.StartActivity(operationName, kind);
+        if (activitySource == null)
+        {
+            Log.Debug("Trying to start activity on null activity source.");
+            return null;
+        }
+
+        var activity = activitySource.StartActivity(operationName, kind);
 
         if (activity == null || tags == null)
         {
