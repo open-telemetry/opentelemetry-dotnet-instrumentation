@@ -132,7 +132,7 @@ export DISTRIBUTION=linux-glibc
 curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/download.sh -O
 sh ./download.sh
 curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/instrument.sh
-source ./instrument.sh
+. ./instrument.sh
 OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 dotnet run
 ```
 
