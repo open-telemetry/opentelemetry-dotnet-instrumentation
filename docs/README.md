@@ -107,7 +107,7 @@ environment variables as parameters:
 
 ```sh
 ( set -o pipefail
-curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/download.sh |
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.3.1-beta.1/download.sh |
   VERSION=v0.3.1-beta.1 DISTRIBUTION=linux-glibc bash -s )
 ```
 
@@ -186,7 +186,7 @@ environment variables as parameters:
 > On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
 
 ```sh
-curl -fL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/instrument.sh -O
+curl -fL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.3.1-beta.1/instrument.sh -O
 DISTRIBUTION=linux-glibc source ./instrument.sh
 OTEL_SERVICE_NAME=myapp dotnet run
 ```
