@@ -94,31 +94,11 @@ Download and extract the appropriate binaries from
 
 > The path where you put the binaries is referenced as `$INSTALL_DIR`
 
-#### Install using `download.sh`
-
-You can do it in Shell by using the [download.sh](../download.sh) script
-which uses following environment variables as parameters:
-
-| Parameter      | Description                                                      | Required | Default value                                                                     |
-|----------------|------------------------------------------------------------------|----------|-----------------------------------------------------------------------------------|
-| `DISTRIBUTION` | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | Yes      |                                                                                   |
-| `INSTALL_DIR`  | Location where binaries are to be installed                      | No       | `./otel-dotnet-auto`                                                              |
-| `RELEASES_URL` | GitHub releases URL                                              | No       | `https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases` |
-| `TMPDIR`       | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`                                                                    |
-| `VERSION`      | Version to download                                              | No       | `v0.3.1-beta.1`                                                                   |
-
-Example usage:
-
-```sh
-curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/download.sh -O && \
-DISTRIBUTION=linux-glibc sh ./download.sh
-```
-
 ### Instrument a .NET application
 
 Before running your application, set the following environment variables:
 
-| Environment variable                 | For                    | Value                                                                               |
+| Environment variable                 | .NET version           | Value                                                                               |
 |--------------------------------------|------------------------|-------------------------------------------------------------------------------------|
 | `COR_ENABLE_PROFILING`               | .NET Framework         | `1`                                                                                 |
 | `COR_PROFILER`                       | .NET Framework         | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                                            |
@@ -140,10 +120,32 @@ Before running your application, set the following environment variables:
 
 Additionally, set the [resources](config.md#resources) when running your application.
 
-#### Instrument a .NET application using `instrument.sh`
+### Shell scripts
 
-You can set them in Shell by using the [instrument.sh](../instrument.sh)
-script which uses following environment variables as parameters:
+You can install OpenTelemetry .NET Automatic Instrumentation
+and instument your application using the provided Shell scripts.
+Example usage:
+
+```sh
+export DISTRIBUTION=linux-glibc
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/download.sh -O
+sh ./download.sh
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/instrument.sh
+source ./instrument.sh
+OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 dotnet run
+```
+
+[download.sh](../download.sh) script uses environment variables as parameters:
+
+| Parameter      | Description                                                      | Required | Default value                                                                     |
+|----------------|------------------------------------------------------------------|----------|-----------------------------------------------------------------------------------|
+| `DISTRIBUTION` | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | Yes      |                                                                                   |
+| `INSTALL_DIR`  | Location where binaries are to be installed                      | No       | `./otel-dotnet-auto`                                                              |
+| `RELEASES_URL` | GitHub releases URL                                              | No       | `https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases` |
+| `TMPDIR`       | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`                                                                    |
+| `VERSION`      | Version to download                                              | No       | `v0.3.1-beta.1`                                                                   |
+
+[instrument.sh](../instrument.sh) script uses environment variables as parameters:
 
 | Parameter          | Description                                                            | Required | Default value        |
 |--------------------|------------------------------------------------------------------------|----------|----------------------|
@@ -152,14 +154,6 @@ script which uses following environment variables as parameters:
 | `INSTALL_DIR`      | Location where binaries are to be installed                            | No       | `./otel-dotnet-auto` |
 
 > On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
-
-Example usage:
-
-```sh
-curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/instrument.sh -O && \
-DISTRIBUTION=linux-glibc source ./instrument.sh && \
-OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 dotnet run
-```
 
 ## Instrument a Windows Service running a .NET application
 
