@@ -16,6 +16,7 @@
 
 using System;
 using System.Diagnostics;
+using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Tagging;
 using OpenTelemetry.Trace;
 
@@ -23,6 +24,8 @@ namespace OpenTelemetry.AutoInstrumentation.Util;
 
 internal static class ActivityHelper
 {
+    private static readonly ILogger Log = OtelLogging.GetLogger();
+
     /// <summary>
     /// Add the StackTrace and other exception metadata to the span
     /// </summary>
@@ -30,7 +33,13 @@ internal static class ActivityHelper
     /// <param name="exception">The exception.</param>
     public static void SetException(this Activity activity, Exception exception)
     {
-        if (activity == null || exception == null)
+        if (activity == null)
+        {
+            Log.Debug("Trying to set exception on null activity.");
+            return;
+        }
+
+        if (exception == null)
         {
             return;
         }
