@@ -5,7 +5,7 @@ case "$OS_TYPE" in
   "linux-glibc"|"linux-musl"|"macos"|"windows")
     ;;
   *)
-    echo "Please specify the operating system type by setting the OS_TYPE environment variable. Supported values: linux-glibc, linux-musl, macos, windows." >&2
+    echo "Set the operating system type using the OS_TYPE environment variable. Supported values: linux-glibc, linux-musl, macos, windows." >&2
     exit 1
     ;;
 esac

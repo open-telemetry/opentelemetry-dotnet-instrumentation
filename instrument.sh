@@ -5,7 +5,7 @@ case "$OS_TYPE" in
   "linux-glibc"|"linux-musl"|"macos"|"windows")
     ;;
   *)
-    echo "Please specify the operating system type by setting the OS_TYPE environment variable. Supported values: linux-glibc, linux-musl, macos, windows." >&2
+    echo "Set the operating system type using the OS_TYPE environment variable. Supported values: linux-glibc, linux-musl, macos, windows." >&2
     return 2
     ;;
 esac
@@ -57,7 +57,7 @@ if [ "$ENABLE_PROFILING" = "true" ]; then
       SUFIX="dll"
       ;;
     *)
-      echo "BUG: Invalid OS_TYPE. Please submit an issue in https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation." >&2
+      echo "BUG: Invalid OS_TYPE. Submit an issue in https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation." >&2
       return 1
       ;;
   esac
