@@ -76,16 +76,16 @@ jobs:
       matrix:
         include:
           - machine: windows-2022
-            distribution: windows
+            os_type: windows
             log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
           - machine: ubuntu-20.04
-            distribution: linux-glibc
+            os_type: linux-glibc
             log-dir: "/var/log/opentelemetry/dotnet"
           - machine: ubuntu-20.04
-            distribution: linux-musl
+            os_type: linux-musl
             test-instrument: "false"
           - machine: macos-11
-            distribution: macos
+            os_type: macos
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
@@ -96,7 +96,7 @@ jobs:
         run: |
           set -o pipefail
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh |
-            DISTRIBUTION=${{ matrix.distribution }} bash -s
+            OS_TYPE=${{ matrix.os_type }} bash -s
       - name: Test download.sh - verify if binaries are downloaded
         shell: bash
         run: test "$(ls -A ./otel-dotnet-auto)"
@@ -110,10 +110,9 @@ jobs:
         run: |
           set -e
           curl -fL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
-          DISTRIBUTION=${{ matrix.distribution }} source ./instrument.sh
+          OS_TYPE=${{ matrix.os_type }} source ./instrument.sh
           dotnet help
       - name: Test instrument.sh - verify if internal logs are created
         if: ${{ matrix.test-instrument != 'false' }}
         shell: bash
         run: test "$(ls -A '${{ matrix.log-dir }}' )"
-

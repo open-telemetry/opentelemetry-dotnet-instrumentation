@@ -1,11 +1,11 @@
 #!/bin/sh
 
 # validate input
-case "$DISTRIBUTION" in
+case "$OS_TYPE" in
   "linux-glibc"|"linux-musl"|"macos"|"windows")
     ;;
   *)
-    echo "Please specify the distribution by setting the DISTRIBUTION env var. Supported values: linux-glibc, linux-musl, macos, windows." >&2
+    echo "Set the operating system type using the OS_TYPE environment variable. Supported values: linux-glibc, linux-musl, macos, windows." >&2
     return 2
     ;;
 esac
@@ -17,7 +17,7 @@ case "$ENABLE_PROFILING" in
     ENABLE_PROFILING="true"
     ;;
   *)
-    echo "Invalid ENABLE_PROFILING env var. Supported values: true, false." >&2
+    echo "Invalid ENABLE_PROFILING. Supported values: true, false." >&2
     return 2
     ;;
 esac
@@ -31,12 +31,12 @@ if [ -z "$(ls -A $INSTALL_DIR)" ]; then
   echo "There are no files under the location specified via INSTALL_DIR."
   return 1
 fi
-if [ "$DISTRIBUTION" == "macos" ]; then
+if [ "$OS_TYPE" == "macos" ]; then
   OTEL_DIR=$(greadlink -fn $INSTALL_DIR)
 else
   OTEL_DIR=$(readlink -fn $INSTALL_DIR)
 fi
-if [ "$DISTRIBUTION" == "windows" ]; then
+if [ "$OS_TYPE" == "windows" ]; then
   OTEL_DIR=$(cygpath -w $OTEL_DIR)
 fi
 if [ -z "$OTEL_DIR" ]; then
@@ -46,7 +46,7 @@ fi
 
 if [ "$ENABLE_PROFILING" = "true" ]; then
   # Set the .NET CLR Profiler file sufix
-  case "$DISTRIBUTION" in
+  case "$OS_TYPE" in
     "linux-glibc"|"linux-musl")
       SUFIX="so"
       ;;
@@ -57,13 +57,13 @@ if [ "$ENABLE_PROFILING" = "true" ]; then
       SUFIX="dll"
       ;;
     *)
-      echo "BUG: Unknown distribution. Please submit an issue in https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation." >&2
+      echo "BUG: Invalid OS_TYPE. Submit an issue in https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation." >&2
       return 1
       ;;
   esac
 
   # Enable .NET Framework Profiling API
-  if [ "$DISTRIBUTION" == "windows" ]
+  if [ "$OS_TYPE" == "windows" ]
   then
     export COR_ENABLE_PROFILING="1"
     export COR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
@@ -75,7 +75,7 @@ if [ "$ENABLE_PROFILING" = "true" ]; then
   # Enable .NET Core Profiling API
   export CORECLR_ENABLE_PROFILING="1"
   export CORECLR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
-  if [ "$DISTRIBUTION" == "windows" ]
+  if [ "$OS_TYPE" == "windows" ]
   then
     # Set paths for both bitness on Windows, see https://docs.microsoft.com/en-us/dotnet/core/run-time-config/debugging-profiling#profiler-location
     export CORECLR_PROFILER_PATH_64="$OTEL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.$SUFIX"
