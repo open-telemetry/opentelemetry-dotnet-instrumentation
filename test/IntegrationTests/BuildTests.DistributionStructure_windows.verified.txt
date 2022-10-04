@@ -1,10 +1,6 @@
 ﻿[
   \AdditionalDeps\shared\Microsoft.NETCore.App\3.1.0\OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
-  \AdditionalDeps\shared\Microsoft.NETCore.App\3.1.0\runtimes\linux\native\libmongocrypt.so,
-  \AdditionalDeps\shared\Microsoft.NETCore.App\3.1.0\runtimes\osx\native\libmongocrypt.dylib,
   \AdditionalDeps\shared\Microsoft.NETCore.App\6.0.0\OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
-  \AdditionalDeps\shared\Microsoft.NETCore.App\6.0.0\runtimes\linux\native\libmongocrypt.so,
-  \AdditionalDeps\shared\Microsoft.NETCore.App\6.0.0\runtimes\osx\native\libmongocrypt.dylib,
   \integrations.json,
   \net462\Google.Protobuf.dll,
   \net462\Grpc.Core.Api.dll,

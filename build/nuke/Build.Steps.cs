@@ -372,7 +372,8 @@ partial class Build
                     // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
                     .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
 
-            AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml").ForEach(DeleteFile);
+            AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml", "**/*.dylib", "**/*.so").ForEach(DeleteFile);
+            AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(DeleteDirectory);
             AdditionalDepsDirectory.GlobFiles("**/*deps.json")
                                    .ForEach(file =>
                                    {
