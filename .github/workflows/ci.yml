@@ -96,7 +96,7 @@ jobs:
         run: |
           set -e
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh -O
-          DISTRIBUTION=${{ matrix.distribution }} ./download.sh
+          DISTRIBUTION=${{ matrix.distribution }} sh ./download.sh
       - name: Test download.sh - verify if binaries are downloaded
         shell: bash
         run: test "$(ls -A ./otel-dotnet-auto)"

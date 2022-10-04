@@ -111,7 +111,7 @@ Example usage:
 
 ```sh
 curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/download.sh -O && \
-VERSION=v0.3.1-beta.1 DISTRIBUTION=linux-glibc ./download.sh
+DISTRIBUTION=linux-glibc sh ./download.sh
 ```
 
 ### Instrument a .NET application
