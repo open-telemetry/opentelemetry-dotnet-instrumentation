@@ -224,7 +224,6 @@ partial class Build
                 .SetProject(Solution.GetProject(Projects.AutoInstrumentation))
                 .SetConfiguration(BuildConfiguration)
                 .SetProperty("NuspecFile", dest / "OpenTelemetry.AutoInstrumentation.nuspec")
-                .SetProperty("NoWarn", " \"NU5100;NU5104;NU5123;NU5128\" ")
                 .EnableNoBuild()
                 .EnableNoRestore()
                 .SetOutputDirectory(dest));
