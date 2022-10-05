@@ -155,20 +155,23 @@ public class AspNetTests : TestHelper
         }
 
         var container = builder.Build();
-        var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
+        try
+        {
+            var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
+            wasStarted.Should().BeTrue($"Container based on {testApplicationName} has to be operational for the test.");
+            Output.WriteLine($"Container was started successfully.");
 
-        wasStarted.Should().BeTrue($"Container based on {testApplicationName} has to be operational for the test.");
-
-        Output.WriteLine($"Container was started successfully.");
-
-        PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {agentHealthzUrl}", Output);
-
-        var webAppHealthzUrl = $"http://localhost:{webPort}/healthz";
-        var webAppHealthzResult = await HealthzHelper.TestHealtzAsync(webAppHealthzUrl, "IIS WebApp", Output);
-
-        webAppHealthzResult.Should().BeTrue("IIS WebApp health check never returned OK.");
-
-        Output.WriteLine($"IIS WebApp was started successfully.");
+            PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {agentHealthzUrl}", Output);
+            var webAppHealthzUrl = $"http://localhost:{webPort}/healthz";
+            var webAppHealthzResult = await HealthzHelper.TestHealtzAsync(webAppHealthzUrl, "IIS WebApp", Output);
+            webAppHealthzResult.Should().BeTrue("IIS WebApp health check never returned OK.");
+            Output.WriteLine($"IIS WebApp was started successfully.");
+        }
+        catch
+        {
+            await container.DisposeAsync();
+            throw;
+        }
 
         return container;
     }
