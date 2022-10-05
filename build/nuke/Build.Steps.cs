@@ -214,6 +214,20 @@ partial class Build
                 .EnableNoRestore()
                 .SetFramework(TargetFramework.NETCOREAPP3_1)
                 .SetOutput(TracerHomeDirectory / TargetFramework.NETCOREAPP3_1));
+
+            var source = RootDirectory / "OpenTelemetry.AutoInstrumentation.nuspec";
+            var dest = OutputDirectory / "nuget";
+
+            CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
+
+            DotNetPack(s => s
+                .SetProject(Solution.GetProject(Projects.AutoInstrumentation))
+                .SetConfiguration(BuildConfiguration)
+                .SetProperty("NuspecFile", dest / "OpenTelemetry.AutoInstrumentation.nuspec")
+                .SetProperty("NoWarn", " \"NU5100;NU5104;NU5123;NU5128\" ")
+                .EnableNoBuild()
+                .EnableNoRestore()
+                .SetOutputDirectory(dest));
         });
 
     Target PublishNativeProfiler => _ => _
