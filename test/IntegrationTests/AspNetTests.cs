@@ -54,7 +54,7 @@ public class AspNetTests : TestHelper
             TracesSettings = new TracesSettings { Port = agent.Port }
         };
         var webPort = TcpPortProvider.GetOpenPort();
-        using var container = await StartContainerAsync(testSettings, webPort);
+        await using var container = await StartContainerAsync(testSettings, webPort);
 
         var client = new HttpClient();
 
@@ -93,7 +93,7 @@ public class AspNetTests : TestHelper
             MetricsSettings = new MetricsSettings { Port = collector.Port },
         };
         var webPort = TcpPortProvider.GetOpenPort();
-        using var container = await StartContainerAsync(testSettings, webPort);
+        await using var container = await StartContainerAsync(testSettings, webPort);
 
         var client = new HttpClient();
         var response = await client.GetAsync($"http://localhost:{webPort}");
@@ -104,7 +104,7 @@ public class AspNetTests : TestHelper
         collector.AssertExpectations();
     }
 
-    private async Task<Container> StartContainerAsync(TestSettings testSettings, int webPort)
+    private async Task<TestcontainersContainer> StartContainerAsync(TestSettings testSettings, int webPort)
     {
         // get path to test application that the profiler will attach to
         string testApplicationName = $"testapplication-{EnvironmentHelper.TestApplicationName.ToLowerInvariant()}";
@@ -170,7 +170,7 @@ public class AspNetTests : TestHelper
 
         Output.WriteLine($"IIS WebApp was started successfully.");
 
-        return new Container(container);
+        return container;
     }
 }
 #endif
