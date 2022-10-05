@@ -214,19 +214,6 @@ partial class Build
                 .EnableNoRestore()
                 .SetFramework(TargetFramework.NETCOREAPP3_1)
                 .SetOutput(TracerHomeDirectory / TargetFramework.NETCOREAPP3_1));
-
-            var source = RootDirectory / "OpenTelemetry.AutoInstrumentation.nuspec";
-            var dest = OutputDirectory / "nuget";
-
-            CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
-
-            DotNetPack(s => s
-                .SetProject(Solution.GetProject(Projects.AutoInstrumentation))
-                .SetConfiguration(BuildConfiguration)
-                .SetProperty("NuspecFile", dest / "OpenTelemetry.AutoInstrumentation.nuspec")
-                .EnableNoBuild()
-                .EnableNoRestore()
-                .SetOutputDirectory(dest));
         });
 
     Target PublishNativeProfiler => _ => _
@@ -247,6 +234,27 @@ partial class Build
             Log.Information($"Copying '{source}' to '{dest}'");
             CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
         });
+
+    Target PublishNugetPackage => _ => _
+            .Unlisted()
+            .After(PublishNativeProfiler)
+            .After(PublishManagedProfiler)
+            .After(CopyIntegrationsJson)
+            .Executes(() =>
+            {
+                var source = RootDirectory / "OpenTelemetry.AutoInstrumentation.nuspec";
+                var dest = OutputDirectory / "nuget";
+
+                CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
+
+                DotNetPack(s => s
+                    .SetProject(Solution.GetProject(Projects.AutoInstrumentation))
+                    .SetConfiguration(BuildConfiguration)
+                    .SetProperty("NuspecFile", dest / "OpenTelemetry.AutoInstrumentation.nuspec")
+                    .EnableNoBuild()
+                    .EnableNoRestore()
+                    .SetOutputDirectory(dest));
+            });
 
     Target RunNativeTests => _ => _
         .Unlisted()
