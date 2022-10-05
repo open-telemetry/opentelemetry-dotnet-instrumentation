@@ -16,8 +16,11 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Hosting;
 
 namespace TestApplication.Http;
@@ -26,25 +29,27 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        var port = IntegrationTests.Helpers.TcpPortProvider.GetOpenPort();
         var disableDistributedContextPropagator = Environment.GetEnvironmentVariable("DISABLE_DistributedContextPropagator") == "true";
         if (disableDistributedContextPropagator)
         {
             DistributedContextPropagator.Current = DistributedContextPropagator.CreateNoOutputPropagator();
         }
 
-        using var host = CreateHostBuilder(args, port).Build();
+        using var host = CreateHostBuilder(args).Build();
         host.Start();
 
+        var server = (IServer)host.Services.GetService(typeof(IServer));
+        var addressFeature = server.Features.Get<IServerAddressesFeature>();
+        var address = addressFeature.Addresses.First();
         using var httpClient = new HttpClient();
-        httpClient.GetAsync($"http://localhost:{port}/test").Wait();
+        httpClient.GetAsync($"{address}/test").Wait();
     }
 
-    public static IHostBuilder CreateHostBuilder(string[] args, int port) =>
+    public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 webBuilder.UseStartup<Startup>();
-                webBuilder.UseUrls($"http://localhost:{port}");
+                webBuilder.UseUrls($"http://127.0.0.1:0");
             });
 }
