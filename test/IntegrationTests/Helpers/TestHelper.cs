@@ -31,12 +31,12 @@ public abstract class TestHelper
     protected TestHelper(string testApplicationName, ITestOutputHelper output)
     {
         Output = output;
-        EnvironmentHelper = new EnvironmentHelper(testApplicationName, typeof(TestHelper), output);
+        EnvironmentHelper = new EnvironmentHelper(testApplicationName, output);
 
         output.WriteLine($"Platform: {EnvironmentTools.GetPlatform()}");
         output.WriteLine($"Configuration: {EnvironmentTools.GetBuildConfiguration()}");
-        output.WriteLine($"TargetFramework: {EnvironmentHelper.GetTargetFramework()}");
-        output.WriteLine($".NET Core: {EnvironmentHelper.IsCoreClr()}");
+        output.WriteLine($"TargetFramework: {EnvironmentHelper.TestApplicationTargetFramework}");
+        output.WriteLine($".NET Core: {EnvironmentHelper.IsTestApplicationCoreClr}");
         output.WriteLine($"Profiler DLL: {EnvironmentHelper.GetProfilerPath()}");
     }
 
@@ -130,9 +130,9 @@ public abstract class TestHelper
         RunTestApplication(testSettings);
     }
 
-    protected bool IsCoreClr()
+    protected bool IsTestApplicationCoreClr()
     {
-        return EnvironmentHelper.IsCoreClr();
+        return EnvironmentHelper.IsTestApplicationCoreClr;
     }
 
     protected void SetEnvironmentVariable(string key, string value)
@@ -170,8 +170,8 @@ public abstract class TestHelper
         }
 
         Output.WriteLine($"Starting Application: {testApplicationPath}");
-        var executable = EnvironmentHelper.IsCoreClr() ? EnvironmentHelper.GetTestApplicationExecutionSource() : testApplicationPath;
-        var args = EnvironmentHelper.IsCoreClr() ? $"{testApplicationPath} {testSettings.Arguments ?? string.Empty}" : testSettings.Arguments;
+        var executable = EnvironmentHelper.IsTestApplicationCoreClr ? EnvironmentHelper.GetTestApplicationExecutionSource() : testApplicationPath;
+        var args = EnvironmentHelper.IsTestApplicationCoreClr ? $"{testApplicationPath} {testSettings.Arguments ?? string.Empty}" : testSettings.Arguments;
 
         return InstrumentedProcessHelper.StartInstrumentedProcess(
             executable,

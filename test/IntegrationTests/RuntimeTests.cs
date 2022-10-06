@@ -37,7 +37,7 @@ public class RuntimeTests : TestHelper
         using var collector = await MockMetricsCollector.Start(Output);
         collector.Expect("OpenTelemetry.Instrumentation.Runtime");
 
-        using var process = StartTestApplication(metricsAgentPort: collector.Port, enableClrProfiler: !IsCoreClr());
+        using var process = StartTestApplication(metricsAgentPort: collector.Port, enableClrProfiler: !IsTestApplicationCoreClr());
         try
         {
             collector.AssertExpectations();

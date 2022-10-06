@@ -48,7 +48,7 @@ public class HttpTests : TestHelper
 
         const int expectedSpanCount = 3;
 
-        RunTestApplication(agent.Port, enableClrProfiler: !IsCoreClr());
+        RunTestApplication(agent.Port, enableClrProfiler: !IsTestApplicationCoreClr());
         var spans = await agent.WaitForSpansAsync(expectedSpanCount);
 
         using (new AssertionScope())
@@ -95,7 +95,7 @@ public class HttpTests : TestHelper
         collector.Expect("OpenTelemetry.Instrumentation.Http");
         collector.Expect("OpenTelemetry.Instrumentation.AspNetCore");
 
-        RunTestApplication(metricsAgentPort: collector.Port, enableClrProfiler: !IsCoreClr());
+        RunTestApplication(metricsAgentPort: collector.Port, enableClrProfiler: !IsTestApplicationCoreClr());
 
         collector.AssertExpectations();
     }
