@@ -31,7 +31,7 @@ Instrumentation does the following:
 
 1. Injects and configures the [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#opentelemetry-net-sdk)
    into the application.
-2. Adds [OpenTelemetry Instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/)
+1. Adds [OpenTelemetry Instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/)
    to key packages and APIs used by the application.
 
 You can enable the OpenTelemetry .NET Automatic Instrumentation as a .NET Profiler
@@ -99,7 +99,7 @@ Download and extract the appropriate binaries from
 When running your application, make sure to:
 
 1. Set the [resources](config.md#resources).
-2. Set the environment variables from the table below.
+1. Set the environment variables from the table below.
 
 | Environment variable                 | .NET version           | Value                                                                               |
 |--------------------------------------|------------------------|-------------------------------------------------------------------------------------|
