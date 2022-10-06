@@ -10,19 +10,18 @@ case "$OS_TYPE" in
     ;;
 esac
 
-test -z "$INSTALL_DIR" && INSTALL_DIR="./otel-dotnet-auto"
-test -z "$RELEASES_URL" && RELEASES_URL="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases"
+test -z "$OTEL_DOTNET_AUTO_HOME" && OTEL_DOTNET_AUTO_HOME="$HOME/.otel-dotnet-auto"
 test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"
 test -z "$VERSION" && VERSION="v0.3.1-beta.1"
 
+RELEASES_URL="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases"
 ARCHIVE="opentelemetry-dotnet-instrumentation-$OS_TYPE.zip"
-TMPFILE="$TMPDIR/$ARCHIVE"
 
+TMPFILE="$TMPDIR/$ARCHIVE"
 (
   cd "$TMPDIR"
   echo "Downloading $VERSION for $OS_TYPE..."
   curl -sSfLo "$TMPFILE" "$RELEASES_URL/download/$VERSION/$ARCHIVE"
 )
-
-rm -rf "$INSTALL_DIR"
-unzip -q "$TMPFILE" -d "$INSTALL_DIR" 
+rm -rf "$OTEL_DOTNET_AUTO_HOME"
+unzip -q "$TMPFILE" -d "$OTEL_DOTNET_AUTO_HOME" 
