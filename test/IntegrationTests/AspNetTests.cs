@@ -54,7 +54,7 @@ public class AspNetTests : TestHelper
             TracesSettings = new TracesSettings { Port = agent.Port }
         };
         var webPort = TcpPortProvider.GetOpenPort();
-        using var container = await StartContainerAsync(testSettings, webPort);
+        await using var container = await StartContainerAsync(testSettings, webPort);
 
         var client = new HttpClient();
 
@@ -93,7 +93,7 @@ public class AspNetTests : TestHelper
             MetricsSettings = new MetricsSettings { Port = collector.Port },
         };
         var webPort = TcpPortProvider.GetOpenPort();
-        using var container = await StartContainerAsync(testSettings, webPort);
+        await using var container = await StartContainerAsync(testSettings, webPort);
 
         var client = new HttpClient();
         var response = await client.GetAsync($"http://localhost:{webPort}");
@@ -104,7 +104,7 @@ public class AspNetTests : TestHelper
         collector.AssertExpectations();
     }
 
-    private async Task<Container> StartContainerAsync(TestSettings testSettings, int webPort)
+    private async Task<TestcontainersContainer> StartContainerAsync(TestSettings testSettings, int webPort)
     {
         // get path to test application that the profiler will attach to
         string testApplicationName = $"testapplication-{EnvironmentHelper.TestApplicationName.ToLowerInvariant()}";
@@ -155,22 +155,25 @@ public class AspNetTests : TestHelper
         }
 
         var container = builder.Build();
-        var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
+        try
+        {
+            var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
+            wasStarted.Should().BeTrue($"Container based on {testApplicationName} has to be operational for the test.");
+            Output.WriteLine($"Container was started successfully.");
 
-        wasStarted.Should().BeTrue($"Container based on {testApplicationName} has to be operational for the test.");
+            PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {agentHealthzUrl}", Output);
+            var webAppHealthzUrl = $"http://localhost:{webPort}/healthz";
+            var webAppHealthzResult = await HealthzHelper.TestHealtzAsync(webAppHealthzUrl, "IIS WebApp", Output);
+            webAppHealthzResult.Should().BeTrue("IIS WebApp health check never returned OK.");
+            Output.WriteLine($"IIS WebApp was started successfully.");
+        }
+        catch
+        {
+            await container.DisposeAsync();
+            throw;
+        }
 
-        Output.WriteLine($"Container was started successfully.");
-
-        PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {agentHealthzUrl}", Output);
-
-        var webAppHealthzUrl = $"http://localhost:{webPort}/healthz";
-        var webAppHealthzResult = await HealthzHelper.TestHealtzAsync(webAppHealthzUrl, "IIS WebApp", Output);
-
-        webAppHealthzResult.Should().BeTrue("IIS WebApp health check never returned OK.");
-
-        Output.WriteLine($"IIS WebApp was started successfully.");
-
-        return new Container(container);
+        return container;
     }
 }
 #endif

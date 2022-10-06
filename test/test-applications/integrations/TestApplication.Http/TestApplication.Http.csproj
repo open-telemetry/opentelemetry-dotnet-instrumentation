@@ -7,9 +7,5 @@
   <ItemGroup>
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="..\..\..\IntegrationTests\Helpers\TcpPortProvider.cs" />
-  </ItemGroup>
   
 </Project>

@@ -28,7 +28,7 @@ jobs:
             containers: none
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/checkout@v3.0.2
+      - uses: actions/checkout@v3.1.0
       - uses: actions/setup-dotnet@v2.1.1
         with:
           dotnet-version: | 
