@@ -98,16 +98,7 @@ public class MockZipkinCollector : IDisposable
     public static async Task<MockZipkinCollector> Start(ITestOutputHelper output)
     {
         var collector = new MockZipkinCollector(output);
-
-        collector.Start();
-
-        var healthzResult = await collector.VerifyHealthzAsync();
-
-        if (!healthzResult)
-        {
-            collector.Dispose();
-            throw new InvalidOperationException($"Cannot start {nameof(MockLogsCollector)}!");
-        }
+        await collector._listener.StartAsync();
 
         return collector;
     }
@@ -168,11 +159,6 @@ public class MockZipkinCollector : IDisposable
         return relevantSpans;
     }
 
-    public void Start()
-    {
-        _listener.Start();
-    }
-
     public void Dispose()
     {
         lock (_syncRoot)
@@ -228,13 +214,6 @@ public class MockZipkinCollector : IDisposable
 
         ctx.Response.ContentType = "application/json";
         await ctx.Response.WriteAsync("{}");
-    }
-
-    private Task<bool> VerifyHealthzAsync()
-    {
-        var healhtzEndpoint = $"http://localhost:{Port}/healthz";
-
-        return HealthzHelper.TestHealtzAsync(healhtzEndpoint, nameof(MockLogsCollector), _output);
     }
 
     private void WriteOutput(string msg)
