@@ -101,7 +101,7 @@ jobs:
           export OS_TYPE=${{ matrix.os_type }} 
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh -O
           sh ./download.sh
-            test "$(ls -A ./otel-dotnet-auto)"
+            test "$(ls -A "$HOME/.otel-dotnet-auto")"
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
           . ./instrument.sh
           dotnet help
