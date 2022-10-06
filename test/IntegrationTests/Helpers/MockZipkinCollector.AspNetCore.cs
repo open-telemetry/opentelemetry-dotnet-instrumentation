@@ -1,4 +1,4 @@
-// <copyright file="MockZipkinCollector.cs" company="OpenTelemetry Authors">
+// <copyright file="MockZipkinCollector.AspNetCore.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-#if NETFRAMEWORK
+#if NETCOREAPP3_1_OR_GREATER
 
 using System;
 using System.Collections.Generic;
@@ -23,9 +23,12 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using IntegrationTests.Helpers.Mocks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Xunit.Abstractions;
 
@@ -37,12 +40,28 @@ public class MockZipkinCollector : IDisposable
 
     private readonly object _syncRoot = new object();
     private readonly ITestOutputHelper _output;
-    private readonly TestHttpListener _listener;
+    private readonly IWebHost _listener;
 
-    private MockZipkinCollector(ITestOutputHelper output, string host = "localhost")
+    private MockZipkinCollector(ITestOutputHelper output)
     {
         _output = output;
-        _listener = new(output, HandleHttpRequests, host, "/api/v2/spans/");
+
+        _listener = new WebHostBuilder()
+            .UseKestrel(options =>
+                options.Listen(IPAddress.Loopback, 0)) // dynamic port
+            .Configure(x =>
+            {
+                x.Map("/api/v2/spans", x =>
+                {
+                    x.Run(HandleHttpRequests);
+                });
+
+                x.Map("/healthz", x =>
+                {
+                    x.Run(HandleHealtz);
+                });
+            })
+            .Build();
     }
 
     /// <summary>
@@ -53,7 +72,19 @@ public class MockZipkinCollector : IDisposable
     /// <summary>
     /// Gets the TCP port that this collector is listening on.
     /// </summary>
-    public int Port { get => _listener.Port; }
+    public int Port
+    {
+        get
+        {
+            string address = _listener.ServerFeatures
+                .Get<IServerAddressesFeature>()
+                .Addresses
+                .First();
+            int port = int.Parse(address.Split(':').Last());
+
+            return port;
+        }
+    }
 
     /// <summary>
     /// Gets the filters used to filter out spans we don't want to look at for a test.
@@ -64,11 +95,13 @@ public class MockZipkinCollector : IDisposable
 
     private IImmutableList<NameValueCollection> RequestHeaders { get; set; } = ImmutableList<NameValueCollection>.Empty;
 
-    public static async Task<MockZipkinCollector> Start(ITestOutputHelper output, string host = "localhost")
+    public static async Task<MockZipkinCollector> Start(ITestOutputHelper output)
     {
-        var collector = new MockZipkinCollector(output, host);
+        var collector = new MockZipkinCollector(output);
 
-        var healthzResult = await collector._listener.VerifyHealthzAsync();
+        collector.Start();
+
+        var healthzResult = await collector.VerifyHealthzAsync();
 
         if (!healthzResult)
         {
@@ -135,6 +168,11 @@ public class MockZipkinCollector : IDisposable
         return relevantSpans;
     }
 
+    public void Start()
+    {
+        _listener.Start();
+    }
+
     public void Dispose()
     {
         lock (_syncRoot)
@@ -145,13 +183,30 @@ public class MockZipkinCollector : IDisposable
         _listener.Dispose();
     }
 
-    private void HandleHttpRequests(HttpListenerContext ctx)
+    private async Task HandleHealtz(HttpContext ctx)
+    {
+        ctx.Response.StatusCode = 200;
+        ctx.Response.ContentType = "application/json";
+        await ctx.Response.WriteAsync("{}");
+    }
+
+    private async Task HandleHttpRequests(HttpContext ctx)
     {
         if (ShouldDeserializeTraces)
         {
-            using (var reader = new StreamReader(ctx.Request.InputStream))
+            if (!ctx.Request.Body.CanSeek)
             {
-                var zspans = JsonConvert.DeserializeObject<List<ZSpanMock>>(reader.ReadToEnd());
+                // We only do this if the stream isn't *already* seekable,
+                // as EnableBuffering will create a new stream instance
+                // each time it's called
+                ctx.Request.EnableBuffering();
+            }
+
+            ctx.Request.Body.Position = 0;
+
+            using (var reader = new StreamReader(ctx.Request.Body))
+            {
+                var zspans = JsonConvert.DeserializeObject<List<ZSpanMock>>(await reader.ReadToEndAsync());
                 if (zspans != null)
                 {
                     IList<IMockSpan> spans = zspans.ConvertAll(x => (IMockSpan)x);
@@ -159,20 +214,27 @@ public class MockZipkinCollector : IDisposable
                     lock (_syncRoot)
                     {
                         Spans = Spans.AddRange(spans);
-                        RequestHeaders = RequestHeaders.Add(new NameValueCollection(ctx.Request.Headers));
+                        RequestHeaders = RequestHeaders.Add(ctx.Request.Headers.Aggregate(
+                            new NameValueCollection(),
+                            (seed, current) =>
+                            {
+                                seed.Add(current.Key, current.Value);
+                                return seed;
+                            }));
                     }
                 }
             }
         }
 
-        // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
-        // (Setting content-length avoids that)
-
         ctx.Response.ContentType = "application/json";
-        var buffer = Encoding.UTF8.GetBytes("{}");
-        ctx.Response.ContentLength64 = buffer.LongLength;
-        ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
-        ctx.Response.Close();
+        await ctx.Response.WriteAsync("{}");
+    }
+
+    private Task<bool> VerifyHealthzAsync()
+    {
+        var healhtzEndpoint = $"http://localhost:{Port}/healthz";
+
+        return HealthzHelper.TestHealtzAsync(healhtzEndpoint, nameof(MockLogsCollector), _output);
     }
 
     private void WriteOutput(string msg)

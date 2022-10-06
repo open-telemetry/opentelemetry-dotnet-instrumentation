@@ -18,46 +18,62 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using Xunit.Abstractions;
-
-using static IntegrationTests.Helpers.RuntimeHelper;
 
 namespace IntegrationTests.Helpers;
 
 public class EnvironmentHelper
 {
-    private static readonly RuntimeInfo RuntimeInfo = GetCurrentRuntimeInfo();
+    private static readonly Assembly ExecutingAssembly = Assembly.GetExecutingAssembly();
+    private static readonly string RuntimeFrameworkDescription = RuntimeInformation.FrameworkDescription.ToLower();
     private static string _nukeOutputLocation;
 
-    private static Lazy<string> _testApplicationFramework = new(InitTestApplicationTargetFramework);
-    private static Lazy<bool> _isTestApplicationCoreClr = new(InitIsTestApplicationCoreClr);
-
     private readonly ITestOutputHelper _output;
+    private readonly int _major;
+    private readonly int _minor;
+    private readonly string _patch = null;
 
     private readonly string _appNamePrepend;
+    private readonly string _runtime;
+    private readonly bool _isCoreClr;
     private readonly string _testApplicationDirectory;
+    private readonly TargetFrameworkAttribute _targetFramework;
 
     private string _integrationsFileLocation;
     private string _profilerFileLocation;
 
     public EnvironmentHelper(
         string testApplicationName,
+        Type anchorType,
         ITestOutputHelper output,
         string testApplicationDirectory = null,
         bool prependTestApplicationToAppName = true)
     {
         TestApplicationName = testApplicationName;
         _testApplicationDirectory = testApplicationDirectory ?? Path.Combine("test", "test-applications", "integrations");
+        _targetFramework = Assembly.GetAssembly(anchorType).GetCustomAttribute<TargetFrameworkAttribute>();
         _output = output;
+
+        var parts = _targetFramework.FrameworkName.Split(',');
+        _runtime = parts[0];
+        _isCoreClr = _runtime.Equals(EnvironmentTools.CoreFramework);
+
+        var versionParts = parts[1].Replace("Version=v", string.Empty).Split('.');
+        _major = int.Parse(versionParts[0]);
+        _minor = int.Parse(versionParts[1]);
+
+        if (versionParts.Length == 3)
+        {
+            _patch = versionParts[2];
+        }
 
         _appNamePrepend = prependTestApplicationToAppName
             ? "TestApplication."
             : string.Empty;
     }
-
-    public static bool IsTestApplicationCoreClr => _isTestApplicationCoreClr.Value;
-
-    public static string TestApplicationTargetFramework => _testApplicationFramework.Value;
 
     public bool DebugModeEnabled { get; set; } = true;
 
@@ -66,6 +82,11 @@ public class EnvironmentHelper
     public string TestApplicationName { get; }
 
     public string FullTestApplicationName => $"{_appNamePrepend}{TestApplicationName}";
+
+    public static bool IsCoreClr()
+    {
+        return RuntimeFrameworkDescription.Contains("core") || Environment.Version.Major >= 5;
+    }
 
     public static void ClearProfilerEnvironmentVariables()
     {
@@ -154,7 +175,7 @@ public class EnvironmentHelper
     {
         string profilerPath = GetProfilerPath();
 
-        if (IsTestApplicationCoreClr)
+        if (IsCoreClr())
         {
             // enableStartupHook should be true by default, and the parameter should only be set
             // to false when testing the case that instrumentation should not be available.
@@ -281,7 +302,7 @@ public class EnvironmentHelper
     {
         string extension = "exe";
 
-        if (IsTestApplicationCoreClr || _testApplicationDirectory.Contains("aspnet"))
+        if (IsCoreClr() || _testApplicationDirectory.Contains("aspnet"))
         {
             extension = "dll";
         }
@@ -299,7 +320,7 @@ public class EnvironmentHelper
         {
             executor = $"C:\\Program Files{(Environment.Is64BitProcess ? string.Empty : " (x86)")}\\IIS Express\\iisexpress.exe";
         }
-        else if (IsTestApplicationCoreClr)
+        else if (IsCoreClr())
         {
             executor = EnvironmentTools.IsWindows() ? "dotnet.exe" : "dotnet";
         }
@@ -329,7 +350,7 @@ public class EnvironmentHelper
 
     public string GetTestApplicationApplicationOutputDirectory(string packageVersion = "", string framework = "")
     {
-        var targetFramework = string.IsNullOrEmpty(framework) ? TestApplicationTargetFramework : framework;
+        var targetFramework = string.IsNullOrEmpty(framework) ? GetTargetFramework() : framework;
         var binDir = Path.Combine(
             GetTestApplicationProjectDirectory(),
             "bin");
@@ -350,6 +371,21 @@ public class EnvironmentHelper
             targetFramework);
     }
 
+    public string GetTargetFramework()
+    {
+        if (_isCoreClr)
+        {
+            if (_major >= 5)
+            {
+                return $"net{_major}.{_minor}";
+            }
+
+            return $"netcoreapp{_major}.{_minor}";
+        }
+
+        return $"net{_major}{_minor}{_patch ?? string.Empty}";
+    }
+
     private static string GetStartupHookOutputPath()
     {
         string startupHookOutputPath = Path.Combine(
@@ -358,24 +394,6 @@ public class EnvironmentHelper
             "OpenTelemetry.AutoInstrumentation.StartupHook.dll");
 
         return startupHookOutputPath;
-    }
-
-    private static bool InitIsTestApplicationCoreClr()
-    {
-        // this assumes we only have net462, netcoreapp3.1, net6.0
-        return TestApplicationTargetFramework != "net462";
-    }
-
-    private static string InitTestApplicationTargetFramework()
-    {
-        var frameworkEnv = Environment.GetEnvironmentVariable("SAMPLE_FRAMEWORK");
-
-        if (!string.IsNullOrWhiteSpace(frameworkEnv))
-        {
-            return frameworkEnv;
-        }
-
-        return RuntimeInfo.TargetFramework;
     }
 
     private static string GetSharedStorePath()

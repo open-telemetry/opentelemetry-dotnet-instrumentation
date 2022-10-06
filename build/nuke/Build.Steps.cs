@@ -344,9 +344,8 @@ partial class Build
                     .SetProjectFile(project)
                     .EnableNoRestore()
                     .EnableNoBuild()
-                    .SetFramework(TargetFramework.NET6_0)
                     .CombineWith(frameworks, (s, fx) => s
-                        .SetProcessEnvironmentVariable("SAMPLE_FRAMEWORK", fx)
+                        .SetFramework(fx)
                     ));
             }
         });
