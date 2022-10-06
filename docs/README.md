@@ -109,8 +109,8 @@ When running your application, make sure to:
 | `COR_PROFILER_PATH_64`               | .NET Framework         | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll`                 |
 | `CORECLR_ENABLE_PROFILING`           | .NET (Core)            | `1`                                                                                 |
 | `CORECLR_PROFILER`                   | .NET (Core)            | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                                            |
-| `CORECLR_PROFILER_PATH`              | .NET (Core) on Linux   | `CORECLR_PROFILER_PATH=$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.so`    |
-| `CORECLR_PROFILER_PATH`              | .NET (Core) on macOS   | `CORECLR_PROFILER_PATH=$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.dylib` |
+| `CORECLR_PROFILER_PATH`              | .NET (Core) on Linux   | `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.so`    |
+| `CORECLR_PROFILER_PATH`              | .NET (Core) on macOS   | `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.dylib` |
 | `CORECLR_PROFILER_PATH_32`           | .NET (Core) on Windows | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll`                 |
 | `CORECLR_PROFILER_PATH_64`           | .NET (Core) on Windows | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll`                 |
 | `DOTNET_ADDITIONAL_DEPS`             | .NET (Core)            | `$INSTALL_DIR/AdditionalDeps`                                                       |
