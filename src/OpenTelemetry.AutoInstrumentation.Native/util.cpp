@@ -1,12 +1,14 @@
 #include "util.h"
 
-#include "miniutf.hpp"
 #include "pal.h"
 #include <cwctype>
 #include <iterator>
-#include <sstream>
-#include <string> //NOLINT
+#include <string>
 #include <vector>
+
+#ifdef MACOS
+extern char** environ;
+#endif
 
 namespace trace
 {
@@ -95,6 +97,53 @@ std::vector<WSTRING> GetEnvironmentValues(const WSTRING& name, const wchar_t del
 std::vector<WSTRING> GetEnvironmentValues(const WSTRING& name)
 {
     return GetEnvironmentValues(name, L',');
+}
+
+
+std::vector<WSTRING> GetEnvironmentVariables(const std::vector<WSTRING> &prefixes)
+{
+    std::vector<WSTRING> env_strings;
+#ifdef _WIN32
+    auto env_variables = GetEnvironmentStrings();
+    int prev = 0;
+    for (int i = 0;; i++) {
+        if (env_variables[i] == '\0')
+        {
+            auto env_variable = WSTRING(env_variables + prev, env_variables + i);
+            for (const auto& prefix : prefixes)
+            {
+                if (env_variable.find(prefix) == 0)
+                {
+                  env_strings.push_back(env_variable);
+                  break;
+                }
+            }
+
+            prev = i + 1;
+            if (env_variables[i + 1] == '\0')
+            {
+                break;
+            }
+        }
+    }
+
+    FreeEnvironmentStrings(env_variables);
+#else
+    const auto env_variables = environ;
+    for (char** current = environ; *current; current++)
+    {
+        auto env_variable = ToWSTRING(ToString(*current));
+        for (const auto& prefix : prefixes)
+        {
+            if (env_variable.find(prefix) == 0)
+            {
+                env_strings.push_back(env_variable);
+                break;
+            }
+        }
+    }
+#endif
+    return env_strings;
 }
 
 constexpr char HexMap[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
