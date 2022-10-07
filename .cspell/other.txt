@@ -2,6 +2,7 @@ AWSSDK
 bitness
 bytecode
 cmake
+coreutils
 Couchbase
 distro
 ducktype
@@ -13,6 +14,7 @@ metricsexporter
 mkdir
 mktemp
 MSMQ
+myapp
 Npgsql
 omnisharp
 OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION

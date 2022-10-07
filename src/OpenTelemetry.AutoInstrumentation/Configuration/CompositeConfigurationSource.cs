@@ -24,7 +24,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Represents one or more configuration sources.
 /// </summary>
-public class CompositeConfigurationSource : IConfigurationSource, IEnumerable<IConfigurationSource>
+internal class CompositeConfigurationSource : IConfigurationSource, IEnumerable<IConfigurationSource>
 {
     private readonly List<IConfigurationSource> _sources = new List<IConfigurationSource>();
 

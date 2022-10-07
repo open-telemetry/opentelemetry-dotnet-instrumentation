@@ -14,8 +14,10 @@
 // limitations under the License.
 // </copyright>
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -67,9 +69,23 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
+    public async Task WhenClrProfilerIsNotEnabled()
+    {
+        var spans = await RunTestApplicationAsync(enableClrProfiler: false);
+
+#if NETFRAMEWORK
+        // on .NET Framework it is required to set the CLR .NET Profiler
+        AssertNoSpansReceived(spans);
+#else
+        AssertAllSpansReceived(spans);
+#endif
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
     public async Task ApplicationIsNotExcluded()
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", "dotnet,dotnet.exe");
 
         var spans = await RunTestApplicationAsync();
 
@@ -91,14 +107,14 @@ public class SmokeTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task ApplicationIsNotIncluded()
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES", $"dotnet,dotnet.exe");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES", "dotnet,dotnet.exe");
 
         var spans = await RunTestApplicationAsync();
 
 #if NETFRAMEWORK
         AssertNoSpansReceived(spans);
 #else
-        // FIXME: OTEL_DOTNET_AUTO_INCLUDE_PROCESSES does on .NET Core.
+        // FIXME: OTEL_DOTNET_AUTO_INCLUDE_PROCESSES does not work on .NET Core.
         // https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/895
         AssertAllSpansReceived(spans);
 #endif
@@ -145,6 +161,7 @@ public class SmokeTests : TestHelper
         collector.AssertResourceExpectations();
     }
 
+#if NETFRAMEWORK // The test is flaky on Linux and macOS, becasue of https://github.com/dotnet/runtime/issues/28658#issuecomment-462062760
     [Fact]
     [Trait("Category", "EndToEnd")]
     public async Task PrometheusExporter()
@@ -190,6 +207,22 @@ public class SmokeTests : TestHelper
             Output.WriteResult(helper);
         }
     }
+#endif
+
+#if !NETFRAMEWORK // The feature is not supported on .NET Framework
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public async Task SubmitLogs()
+    {
+        using var collector = await MockLogsCollector.Start(Output);
+        collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Example log message\" }");
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
+        RunTestApplication(logsAgentPort: collector.Port, enableClrProfiler: true);
+
+        collector.AssertExpectations();
+    }
+#endif
 
     private static void AssertNoSpansReceived(IImmutableList<IMockSpan> spans)
     {
@@ -204,26 +237,28 @@ public class SmokeTests : TestHelper
         {
             Assert.Single(spans.Select(s => s.Service).Distinct());
 
-            var expectations = new List<WebServerSpanExpectation>();
-            expectations.Add(new WebServerSpanExpectation(ServiceName, "1.0.0", "SayHello", "MyCompany.MyProduct.MyLibrary"));
+            var expectations = new List<SpanExpectation>();
+            expectations.Add(new SpanExpectation(ServiceName, "1.0.0", "SayHello", "MyCompany.MyProduct.MyLibrary", ActivityKind.Internal));
 
 #if NETFRAMEWORK
-            expectations.Add(new WebServerSpanExpectation(ServiceName, "1.0.0.0", "HTTP GET", "OpenTelemetry.HttpWebRequest", httpMethod: "GET"));
+            expectations.Add(new SpanExpectation(ServiceName, "1.0.0.0", "HTTP GET", "OpenTelemetry.HttpWebRequest", ActivityKind.Client));
 #else
-            expectations.Add(new WebServerSpanExpectation(ServiceName, "1.0.0.0", "HTTP GET", "OpenTelemetry.Instrumentation.Http", httpMethod: "GET"));
+            expectations.Add(new SpanExpectation(ServiceName, "1.0.0.0", "HTTP GET", "OpenTelemetry.Instrumentation.Http", ActivityKind.Client));
 #endif
 
             SpanTestHelpers.AssertExpectationsMet(expectations, spans);
         }
     }
 
-    private async Task<IImmutableList<IMockSpan>> RunTestApplicationAsync(bool enableStartupHook = true)
+    private async Task<IImmutableList<IMockSpan>> RunTestApplicationAsync(bool enableStartupHook = true, bool enableClrProfiler = true)
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
 
         using var agent = await MockZipkinCollector.Start(Output);
-        RunTestApplication(agent.Port, enableStartupHook: enableStartupHook);
+        RunTestApplication(agent.Port, enableStartupHook: enableStartupHook, enableClrProfiler: enableClrProfiler);
 
-        return await agent.WaitForSpansAsync(2);
+        // The process emitting the spans already finished by this time, there is no need to wait more,
+        // just get the spans received so far.
+        return await agent.WaitForSpansAsync(count: 2, timeout: TimeSpan.Zero);
     }
 }

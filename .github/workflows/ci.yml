@@ -20,7 +20,7 @@ jobs:
             containers: none
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/checkout@v3.0.2
+      - uses: actions/checkout@v3.1.0
       - uses: actions/setup-dotnet@v2.1.1
         with:
           dotnet-version: | 
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 60
     steps:
-    - uses: actions/checkout@v3.0.2
+    - uses: actions/checkout@v3.1.0
     - name: Build Docker image
       run: |
         docker build \
@@ -70,33 +70,39 @@ jobs:
       if: (${{ job.status }} != 'cancelled')
       continue-on-error: true
 
-  install-script:
+  shell-scripts:
     strategy:
       fail-fast: false
       matrix:
         include:
           - machine: windows-2022
-            distribution: windows
+            os_type: windows
+            log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
           - machine: ubuntu-20.04
-            distribution: linux-glibc
-          - machine: ubuntu-20.04
-            distribution: linux-musl
+            os_type: linux-glibc
+            log-dir: "/var/log/opentelemetry/dotnet"
           - machine: macos-11
-            distribution: macos
+            os_type: macos
+            log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
-      - name: Run convenient installation Bash script
+      - uses: actions/setup-dotnet@v2.1.1
+        with:
+          dotnet-version: 6.0.x
+      - run: brew install coreutils
+        if: ${{ runner.os == 'macOS' }}
+      - name: Create test directory
+        run: sudo mkdir -p ${{ matrix.log-dir }} && sudo chmod a+rwx ${{ matrix.log-dir }}  # workaround before next release
+        if: ${{ runner.os != 'Windows' }}
+      - name: Test the Shell scripts from README.md
         shell: bash
         run: |
-          set -o pipefail
-          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh |
-            DISTRIBUTION=${{ matrix.distribution }} bash -s
-      - name: Test if ./otel-dotnet-auto contains any files
-        shell: bash
-        run: |
-          if [ -z "$(ls -A ./otel-dotnet-auto)" ]; then
-            echo "Empty"
-            exit 1
-          else
-            echo "otel-dotnet-auto is installed"
-          fi
+          set -e
+          export OS_TYPE=${{ matrix.os_type }} 
+          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh -O
+          sh ./download.sh
+            test "$(ls -A "$HOME/.otel-dotnet-auto")"
+          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
+          . ./instrument.sh
+          dotnet help
+            test "$(ls -A '${{ matrix.log-dir }}' )"

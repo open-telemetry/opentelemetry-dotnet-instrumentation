@@ -16,4 +16,4 @@
 
 using System.Reflection;
 
-[assembly: AssemblyKeyFileAttribute("test-keypair.snk")]
+[assembly: AssemblyKeyFile("test-keypair.snk")]

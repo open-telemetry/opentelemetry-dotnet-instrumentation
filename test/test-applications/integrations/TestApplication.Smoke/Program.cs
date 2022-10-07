@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Net.Http;
+using Microsoft.Extensions.Logging;
 using TestApplication.Shared;
 
 namespace TestApplication.Smoke;
@@ -30,9 +31,9 @@ public class Program
     public static void Main(string[] args)
     {
         ConsoleHelper.WriteSplashScreen(args);
-
         EmitTraces();
         EmitMetrics();
+        EmitLogs();
 
         // The "LONG_RUNNING" environment variable is used by tests that access/receive
         // data that takes time to be produced.
@@ -76,5 +77,17 @@ public class Program
         var myFruitCounter = myMeter.CreateCounter<int>("MyFruitCounter");
 
         myFruitCounter.Add(1, new KeyValuePair<string, object>("name", "apple"));
+    }
+
+    private static void EmitLogs()
+    {
+        using var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder
+                .AddFilter("Microsoft", LogLevel.Warning);
+        });
+
+        ILogger logger = loggerFactory.CreateLogger<Program>();
+        logger.LogInformation("Example log message");
     }
 }

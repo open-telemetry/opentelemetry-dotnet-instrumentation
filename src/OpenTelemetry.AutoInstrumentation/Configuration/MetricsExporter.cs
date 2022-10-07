@@ -19,7 +19,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Enum representing supported metrics exporters.
 /// </summary>
-public enum MetricsExporter
+internal enum MetricsExporter
 {
     /// <summary>
     /// None exporter.

@@ -33,7 +33,6 @@ internal class GraphQLCommon
     internal const string Major2Minor3 = "2.3";
 
     internal const string IntegrationName = nameof(TracerInstrumentation.GraphQL);
-    internal static readonly IntegrationInfo IntegrationId = IntegrationRegistry.GetIntegrationInfo(IntegrationName);
 
     internal static readonly ActivitySource ActivitySource = new ActivitySource(
         "OpenTelemetry.AutoInstrumentation.GraphQL", Constants.Tracer.Version);
@@ -52,16 +51,18 @@ internal class GraphQLCommon
             string operationType = executionContext.Operation.OperationType.ToString().ToLowerInvariant();
             string operation = GetOperation(operationName, operationType);
 
-            var tags = new GraphQLTags();
-            tags.OperationName = operationName;
-            tags.OperationType = operationType;
+            var tags = new GraphQLTags
+            {
+                OperationName = operationName,
+                OperationType = operationType
+            };
 
             if (options.GraphQLSetDocument)
             {
                 tags.Document = query;
             }
 
-            activity = ActivitySource.StartActivityWithTags(operation, tags);
+            activity = ActivitySource.StartActivityWithTags(operation, ActivityKind.Server, tags);
         }
         catch (Exception ex)
         {

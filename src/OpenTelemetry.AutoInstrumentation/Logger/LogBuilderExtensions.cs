@@ -46,6 +46,8 @@ internal static class LogBuilderExtensions
             var settings = LogSettings.FromDefaultSources();
             builder.AddOpenTelemetry(options =>
             {
+                options.IncludeFormattedMessage = settings.IncludeFormattedMessage;
+
                 if (settings.Plugins.Count > 0)
                 {
                     options.InvokePlugins(settings.Plugins);
@@ -81,9 +83,6 @@ internal static class LogBuilderExtensions
                     default:
                         throw new ArgumentOutOfRangeException($"Traces exporter '{settings.LogExporter}' is incorrect");
                 }
-
-                options.ParseStateValues = settings.ParseStateValues;
-                options.IncludeFormattedMessage = settings.IncludeFormattedMessage;
             });
 
             AutoInstrumentationEventSource.Log.Trace($"Logs: Loaded AddOpenTelemetry from LoggingBuilder.");

@@ -94,11 +94,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         return E_FAIL;
     }
 
-    // get Profiler interface
-    HRESULT hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo4), (void**) &this->info_);
+    // get ICorProfilerInfo7 interface for .NET Framework >= 4.6.1 and any .NET (Core) 
+    HRESULT hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo7), (void**) &this->info_);
     if (FAILED(hr))
     {
-        Logger::Warn("OpenTelemetry TRACER DIAGNOSTICS - Failed to attach profiler: interface ICorProfilerInfo4 not found.");
+        Logger::Warn("OpenTelemetry TRACER DIAGNOSTICS - Failed to attach profiler: interface ICorProfilerInfo7 not found.");
         return E_FAIL;
     }
 
@@ -107,17 +107,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     if (process_name == WStr("w3wp.exe") || process_name == WStr("iisexpress.exe"))
     {
         is_desktop_iis = runtime_information_.is_desktop();
-    }
-
-    // get ICorProfilerInfo6 for net46+
-    ICorProfilerInfo6* info6;
-    hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo6), (void**)&info6);
-
-    // Fail if net46+ not detected
-    // TODO: Update this to ICorProfilerInfo7 which corresponds to net462 and make CorProfilerBase.info_ have type ICorProfilerInfo7*
-    if (FAILED(hr)) {
-        Logger::Warn("OpenTelemetry TRACER DIAGNOSTICS - Failed to attach profiler: interface ICorProfilerInfo6 not found.");
-        return E_FAIL;
     }
 
     // get ICorProfilerInfo10 for >= .NET Core 3.0
@@ -132,10 +121,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         // and the necessary dependencies are not available yet.
         use_dotnet_startuphook_bootstrapper = true;
     }
-    else
-    {
-        info10 = nullptr;
-    }
+    info10 = nullptr;
 
     Logger::Info("Environment variables:");
     for (auto&& env_var : env_vars_to_display)
@@ -189,10 +175,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         return this->CallTarget_RewriterCallback(mod, method);
     };
 
-    rejit_handler = new RejitHandler(info6, callback);
+    rejit_handler = new RejitHandler(this->info_, callback);
 
     // load all integrations from JSON files
-    LoadIntegrationsFromEnvironment(integration_methods_, GetEnvironmentValues(environment::disabled_integrations));
+    LoadIntegrationsFromEnvironment(integration_methods_, GetEnvironmentValues(environment::enabled_integrations), GetEnvironmentValues(environment::disabled_integrations));
 
     Logger::Debug("Number of Integrations loaded: ", integration_methods_.size());
 
@@ -230,7 +216,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     }
 
     // set event mask to subscribe to events and disable NGEN images
-    hr = info6->SetEventMask2(event_mask, COR_PRF_HIGH_ADD_ASSEMBLY_REFERENCES);
+    hr = this->info_->SetEventMask2(event_mask, COR_PRF_HIGH_ADD_ASSEMBLY_REFERENCES);
     if (FAILED(hr))
     {
         Logger::Warn("OpenTelemetry TRACER DIAGNOSTICS - Failed to attach profiler: unable to set event mask.");

@@ -24,7 +24,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Configuration keys
 /// </summary>
-public static class ConfigurationKeys
+internal static class ConfigurationKeys
 {
     /// <summary>
     /// Configuration key for the OTLP protocol to be used.
@@ -168,12 +168,6 @@ public static class ConfigurationKeys
         /// Configuration key for whether the logs console exporter is enabled.
         /// </summary>
         public const string ConsoleExporterEnabled = "OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED";
-
-        /// <summary>
-        /// Configuration key for whether or not log state should be parsed into
-        /// <see cref="LogRecord.StateValues"/> on generated <see cref="LogRecord"/>s.
-        /// </summary>
-        public const string ParseStateValues = "OTEL_DOTNET_AUTO_LOGS_PARSE_STATE_VALUES";
 
         /// <summary>
         /// Configuration key for whether or not formatted log message

@@ -24,7 +24,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Tracer Settings
 /// </summary>
-public class TracerSettings : Settings
+internal class TracerSettings : Settings
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="TracerSettings"/> class
@@ -40,7 +40,7 @@ public class TracerSettings : Settings
         EnabledInstrumentations = source.ParseEnabledEnumList<TracerInstrumentation>(
             enabledConfiguration: ConfigurationKeys.Traces.Instrumentations,
             disabledConfiguration: ConfigurationKeys.Traces.DisabledInstrumentations,
-            error: "The \"{0}\" is not recognized as supported trace instrumentation and cannot be enabled");
+            error: "The \"{0}\" is not recognized as supported trace instrumentation and cannot be enabled or disabled.");
 
         var additionalSources = source.GetString(ConfigurationKeys.Traces.AdditionalSources);
         if (additionalSources != null)

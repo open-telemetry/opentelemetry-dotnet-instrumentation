@@ -22,7 +22,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// Represents a configuration source that
 /// retrieves values from environment variables.
 /// </summary>
-public class EnvironmentConfigurationSource : StringConfigurationSource
+internal class EnvironmentConfigurationSource : StringConfigurationSource
 {
     /// <inheritdoc />
     public override string GetString(string key)

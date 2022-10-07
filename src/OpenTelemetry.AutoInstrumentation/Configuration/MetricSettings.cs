@@ -23,7 +23,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Metric Settings
 /// </summary>
-public class MetricSettings : Settings
+internal class MetricSettings : Settings
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="MetricSettings"/> class
@@ -39,7 +39,7 @@ public class MetricSettings : Settings
         EnabledInstrumentations = source.ParseEnabledEnumList<MetricInstrumentation>(
             enabledConfiguration: ConfigurationKeys.Metrics.Instrumentations,
             disabledConfiguration: ConfigurationKeys.Metrics.DisabledInstrumentations,
-            error: "The \"{0}\" is not recognized as supported metrics instrumentation and cannot be enabled");
+            error: "The \"{0}\" is not recognized as supported metrics instrumentation and cannot be enabled or disabled.");
 
         var additionalSources = source.GetString(ConfigurationKeys.Metrics.AdditionalSources);
         if (additionalSources != null)

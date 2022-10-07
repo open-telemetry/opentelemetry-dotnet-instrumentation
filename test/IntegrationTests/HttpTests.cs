@@ -15,13 +15,11 @@
 // </copyright>
 
 #if !NETFRAMEWORK
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
-using OpenTelemetry.Proto.Common.V1;
 using Xunit;
 using Xunit.Abstractions;
 

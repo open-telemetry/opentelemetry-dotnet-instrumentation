@@ -26,7 +26,7 @@ public static class ConsoleHelper
     public static void WriteSplashScreen(string[] args)
     {
         Console.WriteLine($"Command line: {string.Join(" ", args)}");
-        Console.WriteLine($"Platform: {(Environment.Is64BitProcess ? "x64" : "x32")}");
+        Console.WriteLine($"Platform: {(Environment.Is64BitProcess ? "x64" : "x86")}");
 
         Console.WriteLine("Environment variables:");
         foreach (var entry in ProfilerHelper.GetEnvironmentConfiguration())

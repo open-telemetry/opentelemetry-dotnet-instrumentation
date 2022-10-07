@@ -15,18 +15,19 @@
 // </copyright>
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using IntegrationTests.Helpers.Mocks;
 using IntegrationTests.Helpers.Models;
 using OpenTelemetry.AutoInstrumentation.Tagging;
 
 namespace IntegrationTests;
 
-public class GraphQLSpanExpectation : WebServerSpanExpectation
+public class GraphQLSpanExpectation : SpanExpectation
 {
     private const string ExpectedLibrary = "OpenTelemetry.AutoInstrumentation.GraphQL";
 
     public GraphQLSpanExpectation(string serviceName, string serviceVersion, string operationName)
-        : base(serviceName, serviceVersion, operationName, ExpectedLibrary)
+        : base(serviceName, serviceVersion, operationName, ExpectedLibrary, ActivityKind.Server)
     {
         RegisterDelegateExpectation(ExpectErrorMatch);
         RegisterTagExpectation(nameof(Tags.GraphQL.Document), expected: GraphQLDocument);
