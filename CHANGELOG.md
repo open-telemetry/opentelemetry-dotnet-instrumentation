@@ -31,7 +31,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Removed
 
 - Removed support for MongoDB integration for [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core)
-  older than 2.13.3.
+  prior to 2.13.3.
 
 ### Fixed
 
