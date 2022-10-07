@@ -415,35 +415,37 @@ partial class Build
 
                         foreach (var packages in target.EnumerateObject())
                         {
-                            if (packages.Value.TryGetProperty("runtimeTargets", out var runtimeTargets))
+                            if (!packages.Value.TryGetProperty("runtimeTargets", out var runtimeTargets))
                             {
-                                foreach (var runtimeDependency in runtimeTargets.EnumerateObject())
+                                continue;
+                            }
+
+                            foreach (var runtimeDependency in runtimeTargets.EnumerateObject())
+                            {
+                                var sourceFileName = Path.Combine(depsDirectory, runtimeDependency.Name);
+
+
+                                var targetFileNameX64 = Path.Combine(targetDirectory, "x64", folderRuntimeName,
+                                    packages.Name.ToLowerInvariant(), runtimeDependency.Name);
+                                var targetFileNameX86 = Path.Combine(targetDirectory, "x86", folderRuntimeName,
+                                    packages.Name.ToLowerInvariant(), runtimeDependency.Name);
+
+                                var targetDirectoryX64 = Path.GetDirectoryName(targetFileNameX64);
+                                var targetDirectoryX86 = Path.GetDirectoryName(targetFileNameX86);
+
+                                if (!Directory.Exists(targetDirectoryX64))
                                 {
-                                    var sourceFileName = Path.Combine(depsDirectory, runtimeDependency.Name);
-
-
-                                    var targetFileNameX64 = Path.Combine(targetDirectory, "x64", folderRuntimeName,
-                                        packages.Name.ToLowerInvariant(), runtimeDependency.Name);
-                                    var targetFileNameX86 = Path.Combine(targetDirectory, "x86", folderRuntimeName,
-                                        packages.Name.ToLowerInvariant(), runtimeDependency.Name);
-
-                                    var targetDirectoryX64 = Path.GetDirectoryName(targetFileNameX64);
-                                    var targetDirectoryX86 = Path.GetDirectoryName(targetFileNameX86);
-
-                                    if (!Directory.Exists(targetDirectoryX64))
-                                    {
-                                        Directory.CreateDirectory(targetDirectoryX64);
-                                    }
-
-                                    File.Copy(sourceFileName, targetFileNameX64);
-
-                                    if (!Directory.Exists(targetDirectoryX86))
-                                    {
-                                        Directory.CreateDirectory(targetDirectoryX86);
-                                    }
-
-                                    File.Copy(sourceFileName, targetFileNameX86);
+                                    Directory.CreateDirectory(targetDirectoryX64);
                                 }
+
+                                File.Copy(sourceFileName, targetFileNameX64);
+
+                                if (!Directory.Exists(targetDirectoryX86))
+                                {
+                                    Directory.CreateDirectory(targetDirectoryX86);
+                                }
+
+                                File.Copy(sourceFileName, targetFileNameX86);
                             }
                         }
                     }
