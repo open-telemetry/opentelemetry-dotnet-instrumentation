@@ -393,21 +393,13 @@ partial class Build
                     using var jsonDocument = JsonDocument.Parse(depsJsonContent);
 
                     var runtimeName = jsonDocument.RootElement.GetProperty("runtimeTarget").GetProperty("name").GetString();
-                    var folderRuntimeName = MapToFolderName(runtimeName);
-
-                    string MapToFolderName(string runtimeName)
+                    var folderRuntimeName = runtimeName switch
                     {
-                        switch (runtimeName)
-                        {
-                            case ".NETCoreApp,Version=v3.1":
-                                return "netcoreapp3.1";
-                            case ".NETCoreApp,Version=v6.0":
-                                return "net6.0";
-                        }
-
-                        throw new ArgumentOutOfRangeException(nameof(runtimeName), runtimeName,
-                            "This value is not supported. You have probably introduced new .NET version to AutoInstrumentation");
-                    }
+                        ".NETCoreApp,Version=v3.1" => "netcoreapp3.1",
+                        ".NETCoreApp,Version=v6.0" => "net6.0",
+                        _ => throw new ArgumentOutOfRangeException(nameof(runtimeName), runtimeName,
+                            "This value is not supported. You have probably introduced new .NET version to AutoInstrumentation")
+                    };
 
                     foreach (var targetProperty in jsonDocument.RootElement.GetProperty("targets").EnumerateObject())
                     {
