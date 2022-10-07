@@ -116,3 +116,21 @@ jobs:
         if: ${{ matrix.test-instrument != 'false' }}
         shell: bash
         run: test "$(ls -A '${{ matrix.log-dir }}' )"
+        
+  try-out:
+    name: Multiply by 9
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - name: Download math result for job 1
+        uses: actions/download-artifact@v3
+        with:
+          name: bin-windows-2022
+      - shell: bash
+        run: |
+          ls > math-homework.txt
+      - name: Upload math result for job 2
+        uses: actions/upload-artifact@v3
+        with:
+          name: homework
+          path: math-homework.txt       
