@@ -375,7 +375,6 @@ partial class Build
                         // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
                         .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
 
-
                 AdditionalDepsDirectory.GlobFiles("**/*deps.json")
                     .ForEach(file =>
                     {
@@ -415,7 +414,6 @@ partial class Build
                             foreach (var runtimeDependency in runtimeTargets.EnumerateObject())
                             {
                                 var sourceFileName = Path.Combine(depsDirectory, runtimeDependency.Name);
-
 
                                 var targetFileNameX64 = Path.Combine(targetDirectory, "x64", folderRuntimeName,
                                     packages.Name.ToLowerInvariant(), runtimeDependency.Name);
