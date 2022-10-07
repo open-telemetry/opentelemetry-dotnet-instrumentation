@@ -425,18 +425,10 @@ partial class Build
                                 var targetDirectoryX64 = Path.GetDirectoryName(targetFileNameX64);
                                 var targetDirectoryX86 = Path.GetDirectoryName(targetFileNameX86);
 
-                                if (!Directory.Exists(targetDirectoryX64))
-                                {
-                                    Directory.CreateDirectory(targetDirectoryX64);
-                                }
+                                Directory.CreateDirectory(targetDirectoryX64);
+                                Directory.CreateDirectory(targetDirectoryX86);
 
                                 File.Copy(sourceFileName, targetFileNameX64);
-
-                                if (!Directory.Exists(targetDirectoryX86))
-                                {
-                                    Directory.CreateDirectory(targetDirectoryX86);
-                                }
-
                                 File.Copy(sourceFileName, targetFileNameX86);
                             }
                         }
