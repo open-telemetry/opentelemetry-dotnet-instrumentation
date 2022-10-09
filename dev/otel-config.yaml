@@ -39,4 +39,8 @@ service:
       receivers: [otlp]
       processors: [batch]
       exporters: [prometheus, logging]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging]
   extensions: [health_check, zpages]
