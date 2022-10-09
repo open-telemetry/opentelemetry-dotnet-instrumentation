@@ -8,13 +8,6 @@ receivers:
     protocols:
       grpc:
       http:
-  jaeger:
-    protocols:
-      grpc:
-      thrift_binary:
-      thrift_compact:
-      thrift_http:
-  zipkin:
 
 processors:
   batch:
@@ -32,7 +25,7 @@ exporters:
 service:
   pipelines:
     traces:
-      receivers: [otlp, jaeger, zipkin]
+      receivers: [otlp]
       processors: [batch]
       exporters: [jaeger, logging]
     metrics:
