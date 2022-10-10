@@ -38,6 +38,7 @@ public class HttpTests : TestHelper
     [Theory]
     [InlineData("")] // equivalent of default value
     [InlineData("b3multi")]
+    [InlineData("b3")]
     [Trait("Category", "EndToEnd")]
     public async Task SubmitTraces(string propagators)
     {
