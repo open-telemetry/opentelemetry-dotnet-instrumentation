@@ -66,6 +66,8 @@ internal static class EnvironmentConfigurationSdkHelper
                 return new BaggagePropagator();
             case Propagator.B3Multi:
                 return new Extensions.Propagators.B3Propagator(singleHeader: false);
+            case Propagator.B3Single:
+                return new Extensions.Propagators.B3Propagator(singleHeader: true);
         }
 
         throw new ArgumentOutOfRangeException(nameof(propagator), propagator, "Propagator has an unexpected value.");

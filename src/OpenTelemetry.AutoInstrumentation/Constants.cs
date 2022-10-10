@@ -53,6 +53,7 @@ internal static class Constants
             public const string W3CTraceContext = "tracecontext";
             public const string W3CBaggage = "baggage";
             public const string B3Multi = "b3multi";
+            public const string B3Single = "b3";
         }
     }
 }
