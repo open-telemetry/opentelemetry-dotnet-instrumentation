@@ -145,7 +145,8 @@ environment variables for the OTLP exporter:
 
 > ⚠️ **Do NOT use in production.**
 >
-> Prometheus exporter uses [an unreliable, unmaintained legacy .NET component](https://github.com/dotnet/runtime/issues/28658#issuecomment-462062760).
+> Prometheus exporter [is intended for dev inner-loop,
+> there is no plan to make it production ready](https://github.com/open-telemetry/opentelemetry-dotnet/blob/622583c6ffaea2e3d83d4fcb8935c6a8dbc6f81f/src/OpenTelemetry.Exporter.Prometheus.HttpListener/README.md?plain=1#L10-L16).
 
 To enable the Prometheus exporter, set the `OTEL_METRICS_EXPORTER` environment
 variable to `prometheus`.
