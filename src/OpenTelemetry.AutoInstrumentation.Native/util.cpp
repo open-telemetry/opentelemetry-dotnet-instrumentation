@@ -107,23 +107,24 @@ std::vector<WSTRING> GetEnvironmentVariables(const std::vector<WSTRING> &prefixe
     auto env_variables = GetEnvironmentStrings();
     int prev = 0;
     for (int i = 0;; i++) {
-        if (env_variables[i] == '\0')
-        {
-            auto env_variable = WSTRING(env_variables + prev, env_variables + i);
-            for (const auto& prefix : prefixes)
-            {
-                if (env_variable.find(prefix) == 0)
-                {
-                  env_strings.push_back(env_variable);
-                  break;
-                }
-            }
+        if (env_variables[i] != '\0') {
+            continue;
+        }
 
-            prev = i + 1;
-            if (env_variables[i + 1] == '\0')
+        auto env_variable = WSTRING(env_variables + prev, env_variables + i);
+        for (const auto& prefix : prefixes)
+        {
+            if (env_variable.find(prefix) == 0)
             {
+                env_strings.push_back(env_variable);
                 break;
             }
+        }
+
+        prev = i + 1;
+        if (env_variables[i + 1] == '\0')
+        {
+            break;
         }
     }
 
