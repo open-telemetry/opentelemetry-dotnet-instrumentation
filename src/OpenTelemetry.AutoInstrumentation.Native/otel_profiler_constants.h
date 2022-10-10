@@ -4,30 +4,14 @@
 #include <string>
 
 #include "environment_variables.h"
-#include "logger.h"
 
 namespace trace
 {
-
-const WSTRING env_vars_to_display[]{environment::clr_profiler_enabled,
-                                    environment::debug_enabled,
-                                    environment::profiler_home_path,
-                                    environment::integrations_path,
-                                    environment::include_process_names,
-                                    environment::exclude_process_names,
-                                    environment::enabled_integrations,
-                                    environment::disabled_integrations,
-                                    environment::log_directory,
-                                    environment::clr_disable_optimizations,
-                                    environment::clr_enable_inlining,
-                                    environment::clr_enable_ngen,
-                                    environment::dump_il_rewrite_enabled,
-                                    environment::azure_app_services,
-                                    environment::azure_app_services_app_pool_id,
-                                    environment::azure_app_services_cli_telemetry_profile_value,
-                                    environment::dotnet_additional_deps,
-                                    environment::dotnet_shared_store,
-                                    environment::dotnet_startup_hooks};
+const std::vector env_vars_prefixes_to_display{environment::prefix_cor,
+                                               environment::prefix_coreclr,
+                                               environment::prefix_dotnet,
+                                               environment::prefix_otel,
+                                               environment::azure_app_services_app_pool_id};
 
 const WSTRING skip_assembly_prefixes[]{
     WStr("Microsoft.AI"),
