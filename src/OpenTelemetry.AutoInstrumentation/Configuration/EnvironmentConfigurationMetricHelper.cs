@@ -76,7 +76,7 @@ internal static class EnvironmentConfigurationMetricHelper
         switch (settings.MetricExporter)
         {
             case MetricsExporter.Prometheus:
-                Logger.Warning("Prometheus exporter is configured. It is intended for dev inner-loop, there is no plan to make it production ready.");
+                Logger.Warning("Prometheus exporter is configured. It is intended for the inner dev loop. Do NOT use in production");
                 builder.AddPrometheusExporter(options =>
                 {
                     options.StartHttpListener = true;
