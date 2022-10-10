@@ -5,6 +5,5 @@
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <LangVersion>10.0</LangVersion>
-	<NoWarn>NU5100,NU5104,NU5123,NU5128</NoWarn>
   </PropertyGroup>
 </Project>

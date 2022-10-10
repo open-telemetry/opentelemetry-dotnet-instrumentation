@@ -91,8 +91,7 @@ partial class Build : NukeBuild
         .DependsOn(PublishManagedProfiler)
         .DependsOn(CompileNativeSrc)
         .DependsOn(PublishNativeProfiler)
-        .DependsOn(CopyIntegrationsJson)
-        .DependsOn(PublishNugetPackage);
+        .DependsOn(CopyIntegrationsJson);
 
     Target NativeTests => _ => _
         .Description("Builds the native unit tests and runs them")

@@ -236,27 +236,6 @@ partial class Build
             CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
         });
 
-    Target PublishNugetPackage => _ => _
-            .Unlisted()
-            .After(PublishNativeProfiler)
-            .After(PublishManagedProfiler)
-            .After(CopyIntegrationsJson)
-            .Executes(() =>
-            {
-                var source = RootDirectory / "OpenTelemetry.AutoInstrumentation.nuspec";
-                var dest = OutputDirectory / "nuget";
-
-                CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
-
-                DotNetPack(s => s
-                    .SetProject(Solution.GetProject(Projects.AutoInstrumentation))
-                    .SetConfiguration(BuildConfiguration)
-                    .SetProperty("NuspecFile", dest / "OpenTelemetry.AutoInstrumentation.nuspec")
-                    .EnableNoBuild()
-                    .EnableNoRestore()
-                    .SetOutputDirectory(dest));
-            });
-
     Target RunNativeTests => _ => _
         .Unlisted()
         .DependsOn(RunNativeTestsWindows)

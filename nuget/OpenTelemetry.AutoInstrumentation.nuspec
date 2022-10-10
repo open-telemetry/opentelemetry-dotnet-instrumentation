@@ -51,18 +51,18 @@
     <frameworkAssemblies>
       <frameworkAssembly assemblyName="System.Configuration" targetFramework=".NETFramework4.6.2" />
       <frameworkAssembly assemblyName="System.Web" targetFramework=".NETFramework4.6.2" />
-      <frameworkAssembly assemblyName="System.ServiceModel" targetFramework=".NETFramework4.6.2" exclude="Build,Analyzers" />
+      <frameworkAssembly assemblyName="System.ServiceModel" targetFramework=".NETFramework4.6.2" />
     </frameworkAssemblies>
   </metadata>
   <files>
-    <file src="nuget/bin-windows-2022/AdditionalDeps/**/*.*" target="AdditionalDeps" />
-    <file src="nuget/bin-windows-2022/net462/**/*.*" target="net462" />
-    <file src="nuget/bin-windows-2022/netcoreapp3.1/**/*.*" target="netcoreapp3.1" />
-    <file src="nuget/bin-windows-2022/store/**/*.*" target="store" />
-    <file src="nuget/bin-windows-2022/win-x64/**/*.*" target="win-x64" />
-    <file src="nuget/bin-windows-2022/win-x86/**/*.*" target="win-x86" />
-    <file src="nuget/bin-windows-2022/integrations.json" target="integrations.json" />
-    <file src="nuget/bin-ubuntu-20.04/OpenTelemetry.AutoInstrumentation.Native.so" target="OpenTelemetry.AutoInstrumentation.Native.so" />
-    <file src="nuget/bin-macos-11/OpenTelemetry.AutoInstrumentation.Native.dylib" target="OpenTelemetry.AutoInstrumentation.Native.dylib" />
+    <file src="bin-ubuntu-20.04/AdditionalDeps/**/*.*" target="AdditionalDeps" />
+    <file src="bin-ubuntu-20.04/netcoreapp3.1/**/*.*" target="netcoreapp3.1" />
+    <file src="bin-ubuntu-20.04/store/**/*.*" target="store" />
+    <file src="bin-ubuntu-20.04/integrations.json" target="integrations.json" />
+    <file src="bin-ubuntu-20.04/OpenTelemetry.AutoInstrumentation.Native.so" target="OpenTelemetry.AutoInstrumentation.Native.so" />
+    <file src="bin-windows-2022/net462/**/*.*" target="net462" />
+    <file src="bin-windows-2022/win-x64/**/*.*" target="win-x64" />
+    <file src="bin-windows-2022/win-x86/**/*.*" target="win-x86" />
+    <file src="bin-macos-11/OpenTelemetry.AutoInstrumentation.Native.dylib" target="OpenTelemetry.AutoInstrumentation.Native.dylib" />
   </files>
 </package>
