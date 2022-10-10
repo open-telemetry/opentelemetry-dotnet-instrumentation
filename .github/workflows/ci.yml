@@ -54,8 +54,8 @@ jobs:
       run: |
         docker build \
           --tag otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
-          --file "./build/nuke/docker/${{ matrix.base-image }}.dockerfile" \
-          ./build/nuke
+          --file "./docker/${{ matrix.base-image }}.dockerfile" \
+          ./build
     - name: Build in Docker container
       run: |
         docker run --rm \

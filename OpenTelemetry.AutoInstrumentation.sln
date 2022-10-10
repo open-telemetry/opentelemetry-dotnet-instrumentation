@@ -71,7 +71,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.ExampleLibr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{36004B32-55EB-4591-B6D2-B99DE373D0B8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\nuke\_build.csproj", "{4DDEEB10-A6B5-4A46-96C1-1B7276B61E08}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{4DDEEB10-A6B5-4A46-96C1-1B7276B61E08}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{5C915382-C886-457D-8641-9E766D8E5A17}"
 	ProjectSection(SolutionItems) = preProject
