@@ -131,7 +131,6 @@ std::vector<WSTRING> GetEnvironmentVariables(const std::vector<WSTRING> &prefixe
 
     FreeEnvironmentStrings(env_variables);
 #else
-    const auto env_variables = environ;
     for (char** current = environ; *current; current++)
     {
         auto env_variable = ToWSTRING(ToString(*current));
