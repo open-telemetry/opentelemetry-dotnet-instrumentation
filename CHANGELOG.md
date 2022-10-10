@@ -26,6 +26,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Replaced `OTEL_DOTNET_AUTO_TRACES_PLUGINS` and `OTEL_DOTNET_AUTO_METRICS_PLUGINS`
   with new environment variable `OTEL_DOTNET_AUTO_PLUGINS`.
+- Adjusted tags for MongoDB integration. See [pull request](https://github.com/jbogard/MongoDB.Driver.Core.Extensions.DiagnosticSources/pull/18)
+  for more details.
+
+### Removed
+
+- Removed support for MongoDB integration for [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core)
+  prior to 2.13.3.
 
 ### Fixed
 

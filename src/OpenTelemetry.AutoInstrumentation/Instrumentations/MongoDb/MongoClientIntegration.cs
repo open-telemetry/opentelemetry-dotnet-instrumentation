@@ -34,7 +34,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
     MethodName = ".ctor",
     ReturnTypeName = ClrNames.Void,
     ParameterTypeNames = new[] { "MongoDB.Driver.MongoClientSettings" },
-    MinimumVersion = "2.3.0",
+    MinimumVersion = "2.13.3",
     MaximumVersion = "2.65535.65535",
     IntegrationName = "MongoDB")]
 public class MongoClientIntegration

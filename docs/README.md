@@ -31,7 +31,7 @@ Instrumentation does the following:
 
 1. Injects and configures the [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/README.md#opentelemetry-net-sdk)
    into the application.
-2. Adds [OpenTelemetry Instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/)
+1. Adds [OpenTelemetry Instrumentation](https://opentelemetry.io/docs/concepts/instrumenting/)
    to key packages and APIs used by the application.
 
 You can enable the OpenTelemetry .NET Automatic Instrumentation as a .NET Profiler
@@ -94,102 +94,66 @@ Download and extract the appropriate binaries from
 
 > The path where you put the binaries is referenced as `$INSTALL_DIR`
 
-You can also use the [download.sh](../download.sh) script which uses following
-environment variables as parameters:
-
-| Parameter      | Description                                                      | Required | Default value                                                                     |
-|----------------|------------------------------------------------------------------|----------|-----------------------------------------------------------------------------------|
-| `INSTALL_DIR`  | Location where binaries are to be installed                      | No       | `./otel-dotnet-auto`                                                              |
-| `OS_TYPE`      | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | Yes      |                                                                                   |
-| `RELEASES_URL` | GitHub releases URL                                              | No       | `https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases` |
-| `TMPDIR`       | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`                                                                    |
-| `VERSION`      | Version to download                                              | No       | `v0.3.1-beta.1`                                                                   |
-
-```sh
-( set -o pipefail
-curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/download.sh |
-  VERSION=v0.3.1-beta.1 OS_TYPE=linux-glibc bash -s )
-```
-
 ### Instrument a .NET application
 
-Before running your application, set the following environment variables:
+When running your application, make sure to:
 
-```env
-ASPNETCORE_HOSTINGSTARTUPASSEMBLIES=OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper
-COR_ENABLE_PROFILING=1
-COR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
-CORECLR_ENABLE_PROFILING=1
-CORECLR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
-DOTNET_ADDITIONAL_DEPS=$INSTALL_DIR/AdditionalDeps
-DOTNET_SHARED_STORE=$INSTALL_DIR/store
-DOTNET_STARTUP_HOOKS=$INSTALL_DIR/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll
-OTEL_DOTNET_AUTO_HOME=$INSTALL_DIR
-OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=$INSTALL_DIR/integrations.json
-```
+1. Set the [resources](config.md#resources).
+1. Set the environment variables from the table below.
 
-On **Windows** you need to additionally set:
+| Environment variable                 | .NET version           | Value                                                                          |
+|--------------------------------------|------------------------|--------------------------------------------------------------------------------|
+| `COR_ENABLE_PROFILING`               | .NET Framework         | `1`                                                                            |
+| `COR_PROFILER`                       | .NET Framework         | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                                       |
+| `COR_PROFILER_PATH_32`               | .NET Framework         | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll`            |
+| `COR_PROFILER_PATH_64`               | .NET Framework         | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll`            |
+| `CORECLR_ENABLE_PROFILING`           | .NET (Core)            | `1`                                                                            |
+| `CORECLR_PROFILER`                   | .NET (Core)            | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                                       |
+| `CORECLR_PROFILER_PATH`              | .NET (Core) on Linux   | `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.so`                     |
+| `CORECLR_PROFILER_PATH`              | .NET (Core) on macOS   | `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.dylib`                  |
+| `CORECLR_PROFILER_PATH_32`           | .NET (Core) on Windows | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll`            |
+| `CORECLR_PROFILER_PATH_64`           | .NET (Core) on Windows | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll`            |
+| `DOTNET_ADDITIONAL_DEPS`             | .NET (Core)            | `$INSTALL_DIR/AdditionalDeps`                                                  |
+| `DOTNET_SHARED_STORE`                | .NET (Core)            | `$INSTALL_DIR/store`                                                           |
+| `DOTNET_STARTUP_HOOKS`               | .NET (Core)            | `$INSTALL_DIR/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
+| `OTEL_DOTNET_AUTO_HOME`              | All versions           | `$INSTALL_DIR`                                                                 |
+| `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | All versions           | `$INSTALL_DIR/integrations.json`                                               |
 
-```env
-COR_PROFILER_PATH_32=$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll
-COR_PROFILER_PATH_64=$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll
-CORECLR_PROFILER_PATH_32=$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll
-CORECLR_PROFILER_PATH_64=$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll
-```
+> Some settings can be omitted on .NET (Core). For more information, see [config.md](config.md#net-clr-profiler).
 
-On **Linux** you need to additionally set:
+### Shell scripts
 
-```env
-CORECLR_PROFILER_PATH=$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.so
-```
-
-On **macOS** you need to additionally set:
-
-```env
-CORECLR_PROFILER_PATH=$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.dylib
-```
-
-Configure application's resources. For example:
-
-```env
-OTEL_SERVICE_NAME=my-service
-OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0
-```
-
-On [.NET (Core)](https://dotnet.microsoft.com/download/dotnet),
-if you don't need [bytecode instrumentations](config.md#instrumentations),
-you can unset or remove the following environment variables
-to not set the [.NET CLR Profiler](config.md#net-clr-profiler):
-
-```env
-COR_ENABLE_PROFILING
-COR_PROFILER
-COR_PROFILER_PATH_32
-COR_PROFILER_PATH_64
-CORECLR_ENABLE_PROFILING
-CORECLR_PROFILER
-CORECLR_PROFILER_PATH
-CORECLR_PROFILER_PATH_32
-CORECLR_PROFILER_PATH_64
-OTEL_DOTNET_AUTO_INTEGRATIONS_FILE
-```
-
-You can also use the [instrument.sh](../instrument.sh) script which uses following
-environment variables as parameters:
-
-| Parameter          | Description                                                            | Required | Default value        |
-|--------------------|------------------------------------------------------------------------|----------|----------------------|
-| `ENABLE_PROFILING` | Whether to set the .NET CLR Profiler, possible values: `true`, `false` | No       | `true`               |
-| `INSTALL_DIR`      | Location where binaries are to be installed                            | No       | `./otel-dotnet-auto` |
-| `OS_TYPE`          | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`       | Yes      |                      |
-
-> On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
+You can install OpenTelemetry .NET Automatic Instrumentation
+and instrument your .NET application using the provided Shell scripts.
+Example usage:
 
 ```sh
-curl -fL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/instrument.sh -O
-OS_TYPE=linux-glibc source ./instrument.sh
-OTEL_SERVICE_NAME=myapp dotnet run
+export OS_TYPE=linux-glibc
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/download.sh -O
+sh ./download.sh
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/instrument.sh
+. ./instrument.sh
+OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 dotnet run
 ```
+
+[download.sh](../download.sh) script uses environment variables as parameters:
+
+| Parameter               | Description                                                      | Required | Default value             |
+|-------------------------|------------------------------------------------------------------|----------|---------------------------|
+| `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                      | No       | `$HOME/.otel-dotnet-auto` |
+| `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | Yes      |                           |
+| `TMPDIR`                | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`            |
+| `VERSION`               | Version to download                                              | No       | `v0.3.1-beta.1`           |
+
+[instrument.sh](../instrument.sh) script uses environment variables as parameters:
+
+| Parameter               | Description                                                            | Required | Default value             |
+|-------------------------|------------------------------------------------------------------------|----------|---------------------------|
+| `ENABLE_PROFILING`      | Whether to set the .NET CLR Profiler, possible values: `true`, `false` | No       | `true`                    |
+| `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                            | No       | `$HOME/.otel-dotnet-auto` |
+| `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`       | Yes      |                           |
+
+> On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
 
 ## Instrument a Windows Service running a .NET application
 

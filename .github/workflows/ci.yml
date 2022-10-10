@@ -70,7 +70,7 @@ jobs:
       if: (${{ job.status }} != 'cancelled')
       continue-on-error: true
 
-  install-script:
+  shell-scripts:
     strategy:
       fail-fast: false
       matrix:
@@ -81,56 +81,28 @@ jobs:
           - machine: ubuntu-20.04
             os_type: linux-glibc
             log-dir: "/var/log/opentelemetry/dotnet"
-          - machine: ubuntu-20.04
-            os_type: linux-musl
-            test-instrument: "false"
           - machine: macos-11
             os_type: macos
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
-      - run: brew install coreutils
-        if: ${{ runner.os == 'macOS' }}
-      - name: Download OTel .NET AutoInstrumentation using download.sh
-        shell: bash
-        run: |
-          set -o pipefail
-          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh |
-            OS_TYPE=${{ matrix.os_type }} bash -s
-      - name: Test download.sh - verify if binaries are downloaded
-        shell: bash
-        run: test "$(ls -A ./otel-dotnet-auto)"
       - uses: actions/setup-dotnet@v2.1.1
         with:
           dotnet-version: 6.0.x
-      - run: sudo mkdir -p ${{ matrix.log-dir }} && sudo chmod a+rwx ${{ matrix.log-dir }}  # workaround before next release
-        if: ${{ runner.os != 'Windows' && matrix.test-instrument != 'false' }}
-      - name: Instrument dotnet using instrument.sh
+      - run: brew install coreutils
+        if: ${{ runner.os == 'macOS' }}
+      - name: Create test directory
+        run: sudo mkdir -p ${{ matrix.log-dir }} && sudo chmod a+rwx ${{ matrix.log-dir }}  # workaround before next release
+        if: ${{ runner.os != 'Windows' }}
+      - name: Test the Shell scripts from README.md
         shell: bash
         run: |
           set -e
-          curl -fL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
-          OS_TYPE=${{ matrix.os_type }} source ./instrument.sh
+          export OS_TYPE=${{ matrix.os_type }} 
+          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh -O
+          sh ./download.sh
+            test "$(ls -A "$HOME/.otel-dotnet-auto")"
+          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
+          . ./instrument.sh
           dotnet help
-      - name: Test instrument.sh - verify if internal logs are created
-        if: ${{ matrix.test-instrument != 'false' }}
-        shell: bash
-        run: test "$(ls -A '${{ matrix.log-dir }}' )"
-        
-  try-out:
-    name: Multiply by 9
-    needs: build
-    runs-on: windows-latest
-    steps:
-      - name: Download math result for job 1
-        uses: actions/download-artifact@v3
-        with:
-          name: bin-windows-2022
-      - shell: bash
-        run: |
-          ls > math-homework.txt
-      - name: Upload math result for job 2
-        uses: actions/upload-artifact@v3
-        with:
-          name: homework
-          path: math-homework.txt       
+            test "$(ls -A '${{ matrix.log-dir }}' )"

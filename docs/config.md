@@ -22,13 +22,13 @@ for more details.
 
 ## Instrumentations
 
-| Environment variable                                 | Description                                                                                                                                                                                                      | Default value                  |
-|------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|
-| `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE`                 | List of bytecode instrumentations JSON configuration filepaths, delimited by the platform-specific path separator (`;` on Windows, `:` on Linux and macOS). For example: `%ProfilerDirectory%/integrations.json` |                                |
-| `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS`   | Comma-separated list of traces source instrumentations you want to enable. Set `none` to disable all trace instrumentations.                                                                                     | all available instrumentations |
-| `OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS`  | Comma-separated list of traces source and bytecode instrumentations you want to disable.                                                                                                                         |                                |
-| `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS`  | Comma-separated list of metrics source instrumentations you want to enable. Set `none` to disable all metric instrumentations.                                                                                   | all available instrumentations |
-| `OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS` | Comma-separated list of metrics source instrumentations you want to disable.                                                                                                                                     |                                |
+| Environment variable                                 | Description                                                                                                                                                                                                                                                     | Default value                  |
+|------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|
+| `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE`                 | List of bytecode instrumentations JSON configuration filepaths, delimited by the platform-specific path separator (`;` on Windows, `:` on Linux and macOS). For example: `%ProfilerDirectory%/integrations.json`. It is required for bytecode instrumentations. |                                |
+| `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS`   | Comma-separated list of traces source instrumentations you want to enable. Set `none` to disable all trace instrumentations.                                                                                                                                    | all available instrumentations |
+| `OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS`  | Comma-separated list of traces source and bytecode instrumentations you want to disable.                                                                                                                                                                        |                                |
+| `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS`  | Comma-separated list of metrics source instrumentations you want to enable. Set `none` to disable all metric instrumentations.                                                                                                                                  | all available instrumentations |
+| `OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS` | Comma-separated list of metrics source instrumentations you want to disable.                                                                                                                                                                                    |                                |
 
 ### Traces instrumentations
 
@@ -39,7 +39,7 @@ for more details.
 | `GraphQL`            | [GraphQL](https://www.nuget.org/packages/GraphQL/)                                                                                                                                                | ≥2.3.0 & < 3.0.0   | bytecode             |
 | `GrpcNetClient`      | [Grpc.Net.Client](https://www.nuget.org/packages/Grpc.Net.Client)                                                                                                                                 | ≥2.43.0 & < 3.0.0  | source               |
 | `HttpClient`         | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest)   | *                  | source               |
-| `MongoDB`            | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core) **Not supported on .NET Framework**                                                                                     | ≥2.3.0 & < 3.0.0   | source & bytecode    |
+| `MongoDB`            | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core) **Not supported on .NET Framework**                                                                                     | ≥2.13.3 & < 3.0.0  | source & bytecode    |
 | `MySqlData`          | [MySql.Data](https://www.nuget.org/packages/MySql.Data) **Not supported on .NET Framework**                                                                                                       | ≥6.10.7            | source               |
 | `Npgsql`             | [Npgsql](https://www.nuget.org/packages/Npgsql)                                                                                                                                                   | ≥6.0.0             | source               |
 | `SqlClient`          | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient)                             | *                  | source               |
@@ -143,6 +143,10 @@ environment variables for the OTLP exporter:
 
 ### Prometheus
 
+> ⚠️ **Do NOT use in production.**
+>
+> Prometheus exporter uses [an unreliable, unmaintained legacy .NET component](https://github.com/dotnet/runtime/issues/28658#issuecomment-462062760).
+
 To enable the Prometheus exporter, set the `OTEL_METRICS_EXPORTER` environment
 variable to `prometheus`.
 
@@ -196,12 +200,6 @@ OpenTelemetry .NET Automatic Instrumentation.
 
 ## .NET CLR Profiler
 
-Setting OpenTelemetry .NET Automatic Instrumentation as a .NET CLR Profiler
-is always required for .NET Framework.
-
-On .NET (Core), the .NET CLR Profiler is used only to perform bytecode instrumentation.
-Therefore, do not have to set it if having just source instrumentation is acceptable.
-
 The CLR uses the following
 environment variables to set up the profiler. See
 [.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/profiling/Profiler%20Loading.md)
@@ -214,6 +212,26 @@ for more information.
 | `COR_PROFILER_PATH`                 | `CORECLR_PROFILER_PATH`          | Path to the profiler.                                                                   | `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows, `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.so` for Linux, `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.dylib` for macOS |
 | `COR_PROFILER_PATH_32`              | `CORECLR_PROFILER_PATH_32`       | Path to the 32-bit profiler. Bitness-specific paths take precedence over generic paths. | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows                                                                                                                                        |
 | `COR_PROFILER_PATH_64`              | `CORECLR_PROFILER_PATH_64`       | Path to the 64-bit profiler. Bitness-specific paths take precedence over generic paths. | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows                                                                                                                                        |
+
+Setting OpenTelemetry .NET Automatic Instrumentation as a .NET CLR Profiler
+is required for .NET Framework.
+
+On .NET (Core), the .NET CLR Profiler is used only for [bytecode instrumentation](#instrumentations).
+If having just [source instrumentation](#instrumentations) is acceptable,
+you can unset or remove the following environment variables:
+
+```env
+COR_ENABLE_PROFILING
+COR_PROFILER
+COR_PROFILER_PATH_32
+COR_PROFILER_PATH_64
+CORECLR_ENABLE_PROFILING
+CORECLR_PROFILER
+CORECLR_PROFILER_PATH
+CORECLR_PROFILER_PATH_32
+CORECLR_PROFILER_PATH_64
+OTEL_DOTNET_AUTO_INTEGRATIONS_FILE
+```
 
 ## .NET Runtime
 
