@@ -94,6 +94,11 @@ const WSTRING dotnet_shared_store = WStr("DOTNET_SHARED_STORE");
 // for more information about this environment variable.
 const WSTRING dotnet_startup_hooks = WStr("DOTNET_STARTUP_HOOKS");
 
+const WSTRING prefix_cor = WStr("COR_");
+const WSTRING prefix_coreclr = WStr("CORECLR_");
+const WSTRING prefix_dotnet = WStr("DOTNET_");
+const WSTRING prefix_otel = WStr("OTEL_");
+
 }  // namespace environment
 }  // namespace trace
 
