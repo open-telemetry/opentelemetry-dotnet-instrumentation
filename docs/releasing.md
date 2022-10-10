@@ -10,8 +10,8 @@
    - [`src/OpenTelemetry.AutoInstrumentation.Native/otel_profiler_constants.h`](../src/OpenTelemetry.AutoInstrumentation.Native/otel_profiler_constants.h)
    - [`src/OpenTelemetry.AutoInstrumentation.Native/version.h`](../src/OpenTelemetry.AutoInstrumentation.Native/version.h)
    - [`src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj`](../src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj)
-   - ['src/OpenTelemetry.AutoInstrumentation/Constants.cs'](../src/OpenTelemetry.AutoInstrumentation/Constants.cs)
-   - ['nuget/OpenTelemetry.AutoInstrumentation.nuspec'](../nuget/OpenTelemetry.AutoInstrumentation.nuspec)
+   - [`src/OpenTelemetry.AutoInstrumentation/Constants.cs`](../src/OpenTelemetry.AutoInstrumentation/Constants.cs)
+   - [`nuget/OpenTelemetry.AutoInstrumentation.nuspec`](../nuget/OpenTelemetry.AutoInstrumentation.nuspec)
 
 1. Update the [CHANGELOG.md](../CHANGELOG.md) with the new release.
 
