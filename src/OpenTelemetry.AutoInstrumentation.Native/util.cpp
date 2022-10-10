@@ -104,7 +104,8 @@ std::vector<WSTRING> GetEnvironmentVariables(const std::vector<WSTRING> &prefixe
 {
     std::vector<WSTRING> env_strings;
 #ifdef _WIN32
-    auto env_variables = GetEnvironmentStrings();
+    // Documentation for GetEnvironmentStrings: https://learn.microsoft.com/en-us/windows/win32/api/processenv/nf-processenv-getenvironmentstrings#remarks
+    const auto env_variables = GetEnvironmentStrings();
     int prev = 0;
     for (int i = 0;; i++) {
         if (env_variables[i] != '\0') {
