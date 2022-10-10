@@ -67,6 +67,8 @@ internal class SdkSettings
                 return Propagator.W3CBaggage;
             case Constants.ConfigurationValues.Propagators.B3Multi:
                 return Propagator.B3Multi;
+            case Constants.ConfigurationValues.Propagators.B3Single:
+                return Propagator.B3Single;
             default:
                 throw new FormatException($"Propagator '{propagator}' is not supported");
         }
