@@ -32,8 +32,12 @@ internal enum Propagator
     W3CBaggage,
 
     /// <summary>
-    /// Prometheus exporter.
     /// B3 multi propagator.
     /// </summary>
-    B3Multi
+    B3Multi,
+
+    /// <summary>
+    /// B3 single propagator.
+    /// </summary>
+    B3Single
 }

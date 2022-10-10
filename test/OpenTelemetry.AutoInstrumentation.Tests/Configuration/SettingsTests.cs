@@ -160,7 +160,8 @@ public class SettingsTests : IDisposable
     [InlineData("tracecontext", new[] { Propagator.W3CTraceContext })]
     [InlineData("baggage", new[] { Propagator.W3CBaggage })]
     [InlineData("b3multi", new[] { Propagator.B3Multi })]
-    [InlineData("tracecontext,baggage,b3multi", new[] { Propagator.W3CTraceContext, Propagator.W3CBaggage, Propagator.B3Multi })]
+    [InlineData("b3", new[] { Propagator.B3Single })]
+    [InlineData("tracecontext,baggage,b3multi,b3", new[] { Propagator.W3CTraceContext, Propagator.W3CBaggage, Propagator.B3Multi, Propagator.B3Single })]
     internal void Propagators_SupportedValues(string propagators, Propagator[] expectedPropagators)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, propagators);
