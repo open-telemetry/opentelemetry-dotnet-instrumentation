@@ -49,18 +49,10 @@ public class MockZipkinCollector : IDisposable
         _listener = new WebHostBuilder()
             .UseKestrel(options =>
                 options.Listen(IPAddress.Loopback, 0)) // dynamic port
-            .Configure(x =>
-            {
-                x.Map("/api/v2/spans", x =>
+            .Configure(x => x.Map("/api/v2/spans", x =>
                 {
                     x.Run(HandleHttpRequests);
-                });
-
-                x.Map("/healthz", x =>
-                {
-                    x.Run(HandleHealtz);
-                });
-            })
+                }))
             .Build();
     }
 
@@ -167,13 +159,6 @@ public class MockZipkinCollector : IDisposable
         }
 
         _listener.Dispose();
-    }
-
-    private async Task HandleHealtz(HttpContext ctx)
-    {
-        ctx.Response.StatusCode = 200;
-        ctx.Response.ContentType = "application/json";
-        await ctx.Response.WriteAsync("{}");
     }
 
     private async Task HandleHttpRequests(HttpContext ctx)
