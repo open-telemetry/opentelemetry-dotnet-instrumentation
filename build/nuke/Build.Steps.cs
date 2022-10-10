@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Extensions;
 using Nuke.Common;
@@ -350,40 +351,107 @@ partial class Build
             }
         });
 
-    Target CopyAdditionalDeps => _ => _
-        .Unlisted()
-        .Description("Creates AutoInstrumentation.AdditionalDeps and shared store in tracer-home")
-        .After(CompileManagedSrc)
-        .Executes(() =>
-        {
-            AdditionalDepsDirectory.GlobFiles("**/*deps.json").ForEach(DeleteFile);
+    Target CopyAdditionalDeps => _ =>
+    {
+        return _
+            .Unlisted()
+            .Description("Creates AutoInstrumentation.AdditionalDeps and shared store in tracer-home")
+            .After(CompileManagedSrc)
+            .Executes(() =>
+            {
+                AdditionalDepsDirectory.GlobFiles("**/*deps.json").ForEach(DeleteFile);
 
-            DotNetPublish(s => s
-                .SetProject(Solution.GetProject(Projects.AutoInstrumentationAdditionalDeps))
-                .SetConfiguration(BuildConfiguration)
-                .SetTargetPlatformAnyCPU()
-                .SetProperty("TracerHomePath", TracerHomeDirectory)
-                .EnableNoBuild()
-                .EnableNoRestore()
-                .CombineWith(TestFrameworks.ExceptNetFramework(), (p, framework) => p
-                    .SetFramework(framework)
-                    // Additional-deps probes the directory using SemVer format.
-                    // Example: For netcoreapp3.1 framework, additional-deps uses 3.1.0 or 3.1.1 and so on.
-                    // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
-                    .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
+                DotNetPublish(s => s
+                    .SetProject(Solution.GetProject(Projects.AutoInstrumentationAdditionalDeps))
+                    .SetConfiguration(BuildConfiguration)
+                    .SetTargetPlatformAnyCPU()
+                    .SetProperty("TracerHomePath", TracerHomeDirectory)
+                    .EnableNoBuild()
+                    .EnableNoRestore()
+                    .CombineWith(TestFrameworks.ExceptNetFramework(), (p, framework) => p
+                        .SetFramework(framework)
+                        // Additional-deps probes the directory using SemVer format.
+                        // Example: For netcoreapp3.1 framework, additional-deps uses 3.1.0 or 3.1.1 and so on.
+                        // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
+                        .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
 
-            AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml").ForEach(DeleteFile);
-            AdditionalDepsDirectory.GlobFiles("**/*deps.json")
-                                   .ForEach(file =>
-                                   {
-                                       string depsJsonContent = File.ReadAllText(file);
-                                       // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from target section.
-                                       depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+)AutoInstrumentation.AdditionalDeps.dll(.+?)}," + Environment.NewLine + "(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                                       // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from library section and write to file.
-                                       depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+?)}," + Environment.NewLine + "(.+?)\"", "\"", RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                                       File.WriteAllText(file, depsJsonContent);
-                                   });
-        });
+                AdditionalDepsDirectory.GlobFiles("**/*deps.json")
+                    .ForEach(file =>
+                    {
+                        var depsJsonContent = File.ReadAllText(file);
+                        CopyNativeDependenciesToStore(file, depsJsonContent);
+
+                        RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsFile(depsJsonContent, file);
+                    });
+                RemoveFilesFromAdditionalDepsDirectory();
+
+                void CopyNativeDependenciesToStore(AbsolutePath file, string depsJsonContent)
+                {
+                    var depsDirectory = file.Parent;
+                    var targetDirectory = Path.Combine(depsDirectory.Parent.Parent.Parent.Parent, "store");
+                    using var jsonDocument = JsonDocument.Parse(depsJsonContent);
+
+                    var runtimeName = jsonDocument.RootElement.GetProperty("runtimeTarget").GetProperty("name").GetString();
+                    var folderRuntimeName = runtimeName switch
+                    {
+                        ".NETCoreApp,Version=v3.1" => "netcoreapp3.1",
+                        ".NETCoreApp,Version=v6.0" => "net6.0",
+                        _ => throw new ArgumentOutOfRangeException(nameof(runtimeName), runtimeName,
+                            "This value is not supported. You have probably introduced new .NET version to AutoInstrumentation")
+                    };
+
+                    foreach (var targetProperty in jsonDocument.RootElement.GetProperty("targets").EnumerateObject())
+                    {
+                        var target = targetProperty.Value;
+
+                        foreach (var packages in target.EnumerateObject())
+                        {
+                            if (!packages.Value.TryGetProperty("runtimeTargets", out var runtimeTargets))
+                            {
+                                continue;
+                            }
+
+                            foreach (var runtimeDependency in runtimeTargets.EnumerateObject())
+                            {
+                                var sourceFileName = Path.Combine(depsDirectory, runtimeDependency.Name);
+
+                                var targetFileNameX64 = Path.Combine(targetDirectory, "x64", folderRuntimeName,
+                                    packages.Name.ToLowerInvariant(), runtimeDependency.Name);
+                                var targetFileNameX86 = Path.Combine(targetDirectory, "x86", folderRuntimeName,
+                                    packages.Name.ToLowerInvariant(), runtimeDependency.Name);
+
+                                var targetDirectoryX64 = Path.GetDirectoryName(targetFileNameX64);
+                                var targetDirectoryX86 = Path.GetDirectoryName(targetFileNameX86);
+
+                                Directory.CreateDirectory(targetDirectoryX64);
+                                Directory.CreateDirectory(targetDirectoryX86);
+
+                                File.Copy(sourceFileName, targetFileNameX64);
+                                File.Copy(sourceFileName, targetFileNameX86);
+                            }
+                        }
+                    }
+                }
+
+                void RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsFile(string depsJsonContent, AbsolutePath file)
+                {
+                    // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from target section.
+                    depsJsonContent = Regex.Replace(depsJsonContent,
+                        "\"OpenTelemetry(.+)AutoInstrumentation.AdditionalDeps.dll(.+?)}," + Environment.NewLine + "(.+?)\"", "\"",
+                        RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                    // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from library section and write to file.
+                    depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+?)}," + Environment.NewLine + "(.+?)\"", "\"",
+                        RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                    File.WriteAllText(file, depsJsonContent);
+                }
+
+                void RemoveFilesFromAdditionalDepsDirectory()
+                {
+                    AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml", "**/*.dylib", "**/*.so").ForEach(DeleteFile);
+                    AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(DeleteDirectory);
+                }
+            });
+    };
 
     Target InstallDocumentationTools => _ => _
         .Description("Installs markdownlint-cli and cspell locally. npm is required")

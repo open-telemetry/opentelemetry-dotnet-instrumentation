@@ -76,11 +76,8 @@ public static class Program
         collection.DeleteMany(allFilter);
         collection.InsertOne(newDocument);
 
-#if MONGODB_2_7
         var count = collection.CountDocuments(new BsonDocument());
-#else
-        var count = collection.Count(new BsonDocument());
-#endif
+
         Console.WriteLine($"Documents: {count}");
 
         var find = collection.Find(allFilter);
@@ -115,11 +112,7 @@ public static class Program
         await collection.DeleteManyAsync(allFilter);
         await collection.InsertOneAsync(newDocument);
 
-#if MONGODB_2_7
         var count = await collection.CountDocumentsAsync(new BsonDocument());
-#else
-        var count = await collection.CountAsync(new BsonDocument());
-#endif
 
         Console.WriteLine($"Documents: {count}");
 
