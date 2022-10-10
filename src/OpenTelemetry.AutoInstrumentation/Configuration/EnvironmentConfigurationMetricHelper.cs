@@ -17,12 +17,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Metrics;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 internal static class EnvironmentConfigurationMetricHelper
 {
+    private static readonly ILogger Logger = OtelLogging.GetLogger();
     private static readonly Dictionary<MetricInstrumentation, Action<MeterProviderBuilder>> AddMeters = new()
     {
         [MetricInstrumentation.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
@@ -74,6 +76,7 @@ internal static class EnvironmentConfigurationMetricHelper
         switch (settings.MetricExporter)
         {
             case MetricsExporter.Prometheus:
+                Logger.Warning("Prometheus exporter is configured. It is intended for the inner dev loop. Do NOT use in production");
                 builder.AddPrometheusExporter(options =>
                 {
                     options.StartHttpListener = true;

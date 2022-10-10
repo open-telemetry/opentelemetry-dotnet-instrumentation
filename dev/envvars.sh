@@ -34,11 +34,11 @@ OS=$(uname_os)
 ENABLE_PROFILING=${ENABLE_PROFILING:-1}
 
 # Enable .NET Framework Profiling API
-export COR_ENABLE_PROFILING="${ENABLE_PROFILING}"
-export COR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
-export COR_PROFILER_PATH="${CURDIR}/bin/tracer-home/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
 if [ "$OS" == "windows" ]
 then
+    export COR_ENABLE_PROFILING="${ENABLE_PROFILING}"
+    export COR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
+    export COR_PROFILER_PATH="${CURDIR}/bin/tracer-home/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
     # Set paths for both bitness on Windows, see https://docs.microsoft.com/en-us/dotnet/core/run-time-config/debugging-profiling#profiler-location
     export COR_PROFILER_PATH_64="${CURDIR}/bin/tracer-home/win-x64/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
     export COR_PROFILER_PATH_32="${CURDIR}/bin/tracer-home/win-x86/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
@@ -65,8 +65,8 @@ export OTEL_DOTNET_AUTO_HOME="${CURDIR}/bin/tracer-home"
 export OTEL_DOTNET_AUTO_INTEGRATIONS_FILE="${CURDIR}/bin/tracer-home/integrations.json"
 export OTEL_DOTNET_AUTO_DEBUG="1"
 export OTEL_DOTNET_AUTO_DUMP_ILREWRITE_ENABLED="0"
-export OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES="dotnet.exe,dotnet"
+export OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES=${OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES:-dotnet.exe,dotnet}
 
 # Enable console exporters
-export OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED="true"
-export OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED="true"
+export OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED=${OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED:-true}
+export OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED=${OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED:-true}

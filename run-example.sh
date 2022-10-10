@@ -12,15 +12,10 @@ keepContainers=${keepContainers:-false}
 # Defaults for selected dotnet CLI commands.
 configuration=${configuration:-Release}
 aspNetAppTargetFramework=${aspNetAppTargetFramework:-netcoreapp3.1}
+vendorPluginTargetFramework=${aspNetAppTargetFramework}
 exampleAppTargetFramework=${exampleAppTargetFramework:-netcoreapp3.1}
 exampleApp=${exampleApp:-ConsoleApp}
 
-if [[ $aspNetAppTargetFramework == net462 ]];
-then
-  vendorPluginTargetFramework=${exampleAppTargetFramework:-net462}
-else
-  vendorPluginTargetFramework=${exampleAppTargetFramework:-netcoreapp3.1}
-fi
 
 # Handle the differences between launching a dll and exe
 exampleAppExt="dll"
@@ -60,12 +55,12 @@ docker-compose -f ./dev/docker-compose.yaml -f ./examples/docker-compose.yaml up
 
 # instrument and run HTTP server app in background
 export OTEL_DOTNET_AUTO_PLUGINS="Examples.AspNetCoreMvc.OtelSdkPlugin, Examples.AspNetCoreMvc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null:Examples.Vendor.Distro.Plugin, Examples.Vendor.Distro, Version=0.0.1.0, Culture=neutral, PublicKeyToken=null"
-ENABLE_PROFILING=${enableProfiling} OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES="MyCompany.MyProduct.MyLibrary" OTEL_SERVICE_NAME="aspnet-server" OTEL_TRACES_EXPORTER=${tracesExporter} OTEL_METRICS_EXPORTER=${metricsExporter} ./dev/instrument.sh ASPNETCORE_URLS="http://127.0.0.1:8080/" dotnet ./examples/AspNetCoreMvc/bin/${configuration}/${aspNetAppTargetFramework}/Examples.AspNetCoreMvc.dll &
+ENABLE_PROFILING=${enableProfiling} OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES="MyCompany.MyProduct.MyLibrary" OTEL_SERVICE_NAME="aspnet-server" OTEL_TRACES_EXPORTER=${tracesExporter} OTEL_METRICS_EXPORTER=${metricsExporter} OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES=none ./dev/instrument.sh ASPNETCORE_URLS="http://127.0.0.1:8080/" dotnet ./examples/AspNetCoreMvc/bin/${configuration}/${aspNetAppTargetFramework}/Examples.AspNetCoreMvc.dll &
 unset OTEL_DOTNET_AUTO_PLUGINS
 ./dev/wait-local-port.sh 8080
 
 # instrument and run HTTP client app
-ENABLE_PROFILING=${enableProfiling} OTEL_SERVICE_NAME=${exampleApp} OTEL_TRACES_EXPORTER=${tracesExporter} OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP=${exampleAppInjectSDK} ./dev/instrument.sh $exampleAppDotnetCli ./examples/${exampleApp}/bin/$configuration/${exampleAppTargetFramework}/Examples.${exampleApp}.${exampleAppExt}
+ENABLE_PROFILING=${enableProfiling} OTEL_SERVICE_NAME=${exampleApp} OTEL_TRACES_EXPORTER=${tracesExporter} OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP=${exampleAppInjectSDK} OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES=none ./dev/instrument.sh $exampleAppDotnetCli ./examples/${exampleApp}/bin/$configuration/${exampleAppTargetFramework}/Examples.${exampleApp}.${exampleAppExt}
 
 # verify if it works
 {

@@ -123,13 +123,14 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     }
     info10 = nullptr;
 
-    Logger::Info("Environment variables:");
-    for (auto&& env_var : env_vars_to_display)
+    if (IsDebugEnabled())
     {
-        WSTRING env_var_value = GetEnvironmentValue(env_var);
-        if (IsDebugEnabled() || !env_var_value.empty())
+        const auto env_variables = GetEnvironmentVariables(env_vars_prefixes_to_display);
+        Logger::Info("Environment variables:");
+
+        for (const auto& env_variable : env_variables)
         {
-            Logger::Info("  ", env_var, "=", env_var_value);
+            Logger::Info("  ", env_variable);
         }
     }
 

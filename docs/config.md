@@ -78,8 +78,8 @@ Propagators allow applications to share context. See [the OpenTelemetry specific
 for more details.
 
 | Environment variable | Description                                                                                                                                                                                                                                                                                         | Default value          |
-|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
-| `OTEL_PROPAGATORS`   | Comma-separated list of propagators. Supported options: `tracecontext`, `baggage`, `b3multi`. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/sdk-environment-variables.md#general-sdk-configuration) for more details. | `tracecontext,baggage` |
+|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------|
+| `OTEL_PROPAGATORS`   | Comma-separated list of propagators. Supported options: `tracecontext`, `baggage`, `b3multi`, `b3`. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.14.0/specification/sdk-environment-variables.md#general-sdk-configuration) for more details. | `tracecontext,baggage` |
 
 ## Exporters
 
@@ -145,7 +145,11 @@ environment variables for the OTLP exporter:
 
 > ⚠️ **Do NOT use in production.**
 >
-> Prometheus exporter uses [an unreliable, unmaintained legacy .NET component](https://github.com/dotnet/runtime/issues/28658#issuecomment-462062760).
+> Prometheus exporter is intended for the inner dev loop.
+> Production environments can use a combination of OTLP exporter
+> with [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector-releases)
+> having [`otlp` receiver](https://github.com/open-telemetry/opentelemetry-collector/tree/v0.61.0/receiver/otlpreceiver)
+> and [`prometheus` exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/v0.61.0/exporter/prometheusexporter).
 
 To enable the Prometheus exporter, set the `OTEL_METRICS_EXPORTER` environment
 variable to `prometheus`.
