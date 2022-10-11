@@ -232,8 +232,17 @@ partial class Build
         {
             var source = RootDirectory / "integrations.json";
             var dest = TracerHomeDirectory;
+            CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
+        });
 
-            Log.Information($"Copying '{source}' to '{dest}'");
+    Target CopyInstrumentScripts => _ => _
+        .Unlisted()
+        .After(Clean)
+        .After(CreateRequiredDirectories)
+        .Executes(() =>
+        {
+            var source = RootDirectory / "instrument.sh";
+            var dest = TracerHomeDirectory;
             CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
         });
 
