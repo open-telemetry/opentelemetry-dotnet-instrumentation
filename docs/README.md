@@ -138,20 +138,20 @@ OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,
 
 [download.sh](../download.sh) script uses environment variables as parameters:
 
-| Parameter               | Description                                                      | Required | Default value             |
-|-------------------------|------------------------------------------------------------------|----------|---------------------------|
-| `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                      | No       | `$HOME/.otel-dotnet-auto` |
-| `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | Yes      |                           |
-| `TMPDIR`                | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`            |
-| `VERSION`               | Version to download                                              | No       | `v0.3.1-beta.1`           |
+| Parameter               | Description                                                      | Required             | Default value             |
+|-------------------------|------------------------------------------------------------------|----------------------|---------------------------|
+| `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                      | No                   | `$HOME/.otel-dotnet-auto` |
+| `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | No (but Recommended) | *Calculated*              |
+| `TMPDIR`                | Temporary directory used when downloading the files              | No                   | `$(mktemp -d)`            |
+| `VERSION`               | Version to download                                              | No                   | `v0.3.1-beta.1`           |
 
 [instrument.sh](../instrument.sh) script uses environment variables as parameters:
 
-| Parameter               | Description                                                            | Required | Default value             |
-|-------------------------|------------------------------------------------------------------------|----------|---------------------------|
-| `ENABLE_PROFILING`      | Whether to set the .NET CLR Profiler, possible values: `true`, `false` | No       | `true`                    |
-| `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                            | No       | `$HOME/.otel-dotnet-auto` |
-| `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`       | Yes      |                           |
+| Parameter               | Description                                                            | Required             | Default value             |
+|-------------------------|------------------------------------------------------------------------|----------------------|---------------------------|
+| `ENABLE_PROFILING`      | Whether to set the .NET CLR Profiler, possible values: `true`, `false` | No                   | `true`                    |
+| `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                            | No                   | `$HOME/.otel-dotnet-auto` |
+| `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`       | No (but Recommended) | *Calculated*              |
 
 > On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
 
