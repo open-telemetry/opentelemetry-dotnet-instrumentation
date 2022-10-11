@@ -117,16 +117,23 @@ function Setup-Windows-Service([string]$ServiceName) {
 $Version = "v0.3.1-beta.1"
 $SetupPath = Get-Install-Directory $InstallDir
 $TempDir = Get-Temp-Directory
+$DlPath = $null
 
-Write-Output $SetupPath
-Write-Output $TempDir
+try {
+    $DlPath = Download-OpenTelemetry $Version $TempDir
+    Prepare-Install-Directory $SetupPath
 
-$DlPath = Download-OpenTelemetry $Version $TempDir
-Prepare-Install-Directory $SetupPath
-
-Extract-OpenTelemetry $DlPath $SetupPath
-Setup-OpenTelemetry-Environment $SetupPath
-Setup-IIS-Environment
-
-# Cleanup
-Remove-Item $DlPath
+    Extract-OpenTelemetry $DlPath $SetupPath
+    Setup-OpenTelemetry-Environment $SetupPath
+    Setup-IIS-Environment
+} 
+catch {
+    $message = $_
+    Write-Error "Could not setup OpenTelemetry .NET Automatic Instrumentation! $message"
+} 
+finally {
+    if($DlPath -ne $null) {
+        # Cleanup
+        Remove-Item $DlPath
+    }
+}
