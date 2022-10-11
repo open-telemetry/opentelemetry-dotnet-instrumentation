@@ -50,13 +50,34 @@ if [ -z "$OTEL_DOTNET_AUTO_HOME" ]; then
   return 1
 fi
 
+# set the platform-specific path separator (; on Windows and : on others)
+if [ "$OS_TYPE" == "windows" ]; then
+  SEPARATOR=";"
+else
+  SEPARATOR=":"
+fi
+
 # Configure OpenTelemetry .NET Auto-Instrumentation
 export OTEL_DOTNET_AUTO_HOME
 
 # Configure .NET Core Runtime
-export DOTNET_ADDITIONAL_DEPS="$OTEL_DOTNET_AUTO_HOME/AdditionalDeps"
-export DOTNET_SHARED_STORE="$OTEL_DOTNET_AUTO_HOME/store"
-export DOTNET_STARTUP_HOOKS="$OTEL_DOTNET_AUTO_HOME/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
+if [ -z "$DOTNET_ADDITIONAL_DEPS" ]; then
+  export DOTNET_ADDITIONAL_DEPS="${OTEL_DOTNET_AUTO_HOME}/AdditionalDeps"
+else
+  export DOTNET_ADDITIONAL_DEPS="${OTEL_DOTNET_AUTO_HOME}/AdditionalDeps${SEPARATOR}${DOTNET_ADDITIONAL_DEPS}"
+fi
+
+if [ -z "$DOTNET_SHARED_STORE" ]; then
+  export DOTNET_SHARED_STORE="${OTEL_DOTNET_AUTO_HOME}/store"
+else
+  export DOTNET_SHARED_STORE="${OTEL_DOTNET_AUTO_HOME}/store${SEPARATOR}${DOTNET_SHARED_STORE}"
+fi
+
+if [ -z "$DOTNET_STARTUP_HOOKS" ]; then
+  export DOTNET_STARTUP_HOOKS="${OTEL_DOTNET_AUTO_HOME}/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
+else
+  export DOTNET_STARTUP_HOOKS="${OTEL_DOTNET_AUTO_HOME}/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll${SEPARATOR}${DOTNET_STARTUP_HOOKS}"
+fi
 
 # Configure .NET CLR Profiler
 if [ "$ENABLE_PROFILING" = "true" ]; then
