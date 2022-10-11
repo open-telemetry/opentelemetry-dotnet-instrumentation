@@ -183,6 +183,7 @@ public class SettingsTests : IDisposable
     [InlineData(nameof(TracerInstrumentation.Npgsql), TracerInstrumentation.Npgsql)]
     [InlineData(nameof(TracerInstrumentation.SqlClient), TracerInstrumentation.SqlClient)]
     [InlineData(nameof(TracerInstrumentation.GrpcNetClient), TracerInstrumentation.GrpcNetClient)]
+    [InlineData(nameof(TracerInstrumentation.MassTransit), TracerInstrumentation.MassTransit)]
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, tracerInstrumentation);

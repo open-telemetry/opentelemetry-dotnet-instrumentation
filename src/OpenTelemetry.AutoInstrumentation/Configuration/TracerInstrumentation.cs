@@ -73,5 +73,10 @@ internal enum TracerInstrumentation
     /// <summary>
     /// WCF instrumentation.
     /// </summary>
-    Wcf = 9
+    Wcf = 9,
+
+    /// <summary>
+    /// WCF instrumentation.
+    /// </summary>
+    MassTransit = 10
 }
