@@ -34,6 +34,7 @@ partial class Build
     AbsolutePath BuildDataDirectory => RootDirectory / "build_data";
     AbsolutePath ProfilerTestLogs => BuildDataDirectory / "profiler-logs";
     AbsolutePath AdditionalDepsDirectory => TracerHomeDirectory / "AdditionalDeps";
+    AbsolutePath StoreDirectory => TracerHomeDirectory / "store";
 
     Project NativeProfilerProject => Solution.GetProject(Projects.AutoInstrumentationNative);
 
@@ -359,7 +360,15 @@ partial class Build
             .After(CompileManagedSrc)
             .Executes(() =>
             {
-                AdditionalDepsDirectory.GlobFiles("**/*deps.json").ForEach(DeleteFile);
+                if (AdditionalDepsDirectory.DirectoryExists())
+                {
+                    Directory.Delete(AdditionalDepsDirectory, true);
+                }
+
+                if (StoreDirectory.DirectoryExists())
+                {
+                    Directory.Delete(StoreDirectory, true);
+                }
 
                 DotNetPublish(s => s
                     .SetProject(Solution.GetProject(Projects.AutoInstrumentationAdditionalDeps))
@@ -388,7 +397,6 @@ partial class Build
                 void CopyNativeDependenciesToStore(AbsolutePath file, string depsJsonContent)
                 {
                     var depsDirectory = file.Parent;
-                    var targetDirectory = Path.Combine(depsDirectory.Parent.Parent.Parent.Parent, "store");
                     using var jsonDocument = JsonDocument.Parse(depsJsonContent);
 
                     var runtimeName = jsonDocument.RootElement.GetProperty("runtimeTarget").GetProperty("name").GetString();
@@ -415,9 +423,9 @@ partial class Build
                             {
                                 var sourceFileName = Path.Combine(depsDirectory, runtimeDependency.Name);
 
-                                var targetFileNameX64 = Path.Combine(targetDirectory, "x64", folderRuntimeName,
+                                var targetFileNameX64 = Path.Combine(StoreDirectory, "x64", folderRuntimeName,
                                     packages.Name.ToLowerInvariant(), runtimeDependency.Name);
-                                var targetFileNameX86 = Path.Combine(targetDirectory, "x86", folderRuntimeName,
+                                var targetFileNameX86 = Path.Combine(StoreDirectory, "x86", folderRuntimeName,
                                     packages.Name.ToLowerInvariant(), runtimeDependency.Name);
 
                                 var targetDirectoryX64 = Path.GetDirectoryName(targetFileNameX64);
