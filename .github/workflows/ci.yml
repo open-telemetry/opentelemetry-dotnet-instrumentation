@@ -101,7 +101,7 @@ jobs:
           dotnet help
             test "$(ls -A '${{ matrix.log-dir }}' )"
 
- shell-scripts-container:
+  shell-scripts-container:
     strategy:
       fail-fast: false
       matrix:
