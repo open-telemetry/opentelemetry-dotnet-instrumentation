@@ -8,10 +8,10 @@ if [ -z "$OS_TYPE" ]; then
       OS_TYPE="windows"
       ;;
     linux*)
-      if [ -z "$(ldd /bin/ls | grep 'musl' | head -1 | cut -d ' ' -f1)" ]; then
-        OS_TYPE="linux-glibc"
-      else
+      if [ "$(ldd /bin/ls | grep -m1 'musl')" ]; then
         OS_TYPE="linux-musl"
+      else
+        OS_TYPE="linux-glibc"
       fi
       ;;
     darwin*)
