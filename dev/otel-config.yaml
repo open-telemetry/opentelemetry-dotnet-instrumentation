@@ -15,7 +15,7 @@ processors:
 exporters:
   logging:
     # logLevel: debug
-  jaeger:
+  otlp:
     endpoint: "${JAEGER_ENDPOINT}"
     tls:
       insecure: true
@@ -27,7 +27,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [jaeger, logging]
+      exporters: [otlp, logging]
     metrics:
       receivers: [otlp]
       processors: [batch]
