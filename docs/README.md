@@ -199,11 +199,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 [Emeritus
 Maintainer/Approver/Triager](https://github.com/open-telemetry/community/blob/main/community-membership.md#emeritus-maintainerapprovertriager):
 
-- [Colin Higgins](https://github.com/colin-higgins), Datadog
-- [Greg Paperin](https://github.com/macrogreg), Datadog
-- [Kevin Gosse](https://github.com/kevingosse), Datadog
-- [Lucas Pimentel-Ordyna](https://github.com/lucaspimentel), Datadog
-- [Mike Goldsmith](https://github.com/MikeGoldsmith), HoneyComb
-- [Tony Redondo](https://github.com/tonyredondo), Datadog
+- [Colin Higgins](https://github.com/colin-higgins)
+- [Greg Paperin](https://github.com/macrogreg)
+- [Kevin Gosse](https://github.com/kevingosse)
+- [Lucas Pimentel-Ordyna](https://github.com/lucaspimentel)
+- [Mike Goldsmith](https://github.com/MikeGoldsmith)
+- [Tony Redondo](https://github.com/tonyredondo)
 
 Learn more about roles in the [community repository](https://github.com/open-telemetry/community/blob/main/community-membership.md).
