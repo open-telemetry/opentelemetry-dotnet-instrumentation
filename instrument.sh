@@ -62,21 +62,21 @@ export OTEL_DOTNET_AUTO_HOME
 
 # Configure .NET Core Runtime
 if [ -z "$DOTNET_ADDITIONAL_DEPS" ]; then
-  export DOTNET_ADDITIONAL_DEPS="$OTEL_DOTNET_AUTO_HOME/AdditionalDeps"
+  export DOTNET_ADDITIONAL_DEPS="${OTEL_DOTNET_AUTO_HOME}/AdditionalDeps"
 else
-  export DOTNET_ADDITIONAL_DEPS="${DOTNET_ADDITIONAL_DEPS}${SEPARATOR}${OTEL_DOTNET_AUTO_HOME}/AdditionalDeps"
+  export DOTNET_ADDITIONAL_DEPS="${OTEL_DOTNET_AUTO_HOME}/AdditionalDeps${SEPARATOR}${DOTNET_ADDITIONAL_DEPS}"
 fi
 
 if [ -z "$DOTNET_SHARED_STORE" ]; then
-  export DOTNET_SHARED_STORE="$OTEL_DOTNET_AUTO_HOME/store"
+  export DOTNET_SHARED_STORE="${OTEL_DOTNET_AUTO_HOME}/store"
 else
-  export DOTNET_SHARED_STORE="${DOTNET_SHARED_STORE}${SEPARATOR}${OTEL_DOTNET_AUTO_HOME}/store"
+  export DOTNET_SHARED_STORE="${OTEL_DOTNET_AUTO_HOME}/store${SEPARATOR}${DOTNET_SHARED_STORE}"
 fi
 
 if [ -z "$DOTNET_STARTUP_HOOKS" ]; then
-  export DOTNET_STARTUP_HOOKS="$OTEL_DOTNET_AUTO_HOME/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
+  export DOTNET_STARTUP_HOOKS="${OTEL_DOTNET_AUTO_HOME}/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
 else
-  export DOTNET_STARTUP_HOOKS="${DOTNET_STARTUP_HOOKS}${SEPARATOR}${OTEL_DOTNET_AUTO_HOME}/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
+  export DOTNET_STARTUP_HOOKS="${OTEL_DOTNET_AUTO_HOME}/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll${SEPARATOR}${DOTNET_STARTUP_HOOKS}"
 fi
 
 # Configure .NET CLR Profiler
