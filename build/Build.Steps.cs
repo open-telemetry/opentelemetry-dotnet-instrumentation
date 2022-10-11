@@ -426,8 +426,8 @@ partial class Build
                                 Directory.CreateDirectory(targetDirectoryX64);
                                 Directory.CreateDirectory(targetDirectoryX86);
 
-                                File.Copy(sourceFileName, targetFileNameX64);
-                                File.Copy(sourceFileName, targetFileNameX86);
+                                File.Copy(sourceFileName, targetFileNameX64, true);
+                                File.Copy(sourceFileName, targetFileNameX86, true);
                             }
                         }
                     }
