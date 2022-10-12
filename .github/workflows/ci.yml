@@ -50,17 +50,11 @@ jobs:
     timeout-minutes: 60
     steps:
     - uses: actions/checkout@v3.1.0
-    - name: Build Docker image
-      run: |
-        docker build \
-          --tag otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
-          --file "./docker/${{ matrix.base-image }}.dockerfile" \
-          ./build
     - name: Build in Docker container
       run: |
-        docker run --rm \
-          --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project \
-          otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
+        set -e
+        docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
+        docker run --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
           ./build.sh Workflow --containers none
     - name: Publish Linux build
       uses: actions/upload-artifact@v3.1.0
@@ -106,3 +100,29 @@ jobs:
           . ./instrument.sh
           dotnet help
             test "$(ls -A '${{ matrix.log-dir }}' )"
+
+  shell-scripts-container:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - base-image: alpine
+            os_type: linux-musl
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3.1.0
+    - name: Test the Shell scripts from README.md in Docker container
+      run: |
+        set -e
+        docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
+        docker run --rm mybuildimage /bin/sh -c '
+          set -e
+          export OS_TYPE=${{ matrix.os_type }}
+          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh -O
+          sh ./download.sh
+            test "$(ls -A "$HOME/.otel-dotnet-auto")"
+          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
+          . ./instrument.sh
+          dotnet help
+            test "$(ls -A /var/log/opentelemetry/dotnet )"
+        '
