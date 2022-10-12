@@ -47,7 +47,7 @@ public class MockZipkinCollector : IDisposable
         _output = output;
 
 #if NETFRAMEWORK
-        _listener = new(output, HandleHttpRequests, host, "/api/v2/spans");
+        _listener = new(output, HandleHttpRequests, host, "/api/v2/spans/");
 #else
         _listener = new(output, HandleHttpRequests, "/api/v2/spans");
 #endif
