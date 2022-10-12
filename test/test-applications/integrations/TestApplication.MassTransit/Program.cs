@@ -15,7 +15,6 @@
 // </copyright>
 
 using System;
-using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,8 +29,6 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        Console.WriteLine(typeof(System.Text.Json.JsonEncodedText).Assembly);
-        Console.WriteLine(System.Text.Json.JsonEncodedText.Encode("test"));
         ConsoleHelper.WriteSplashScreen(args);
         var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(500));
         await CreateHostBuilder(args).Build().RunAsync(cancellationTokenSource.Token);
