@@ -128,10 +128,9 @@ and instrument your .NET application using the provided Shell scripts.
 Example usage:
 
 ```sh
-curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/download.sh -O
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.3.1-beta.1/download.sh -O
 sh ./download.sh
-curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/instrument.sh
-. ./instrument.sh
+. $HOME/.otel-dotnet-auto/instrument.sh
 OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 dotnet run
 ```
 
