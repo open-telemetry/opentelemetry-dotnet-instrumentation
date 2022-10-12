@@ -8,7 +8,7 @@ updates:
 
   # Maintain dependencies for Dockerfiles used in build pipeline
   - package-ecosystem: docker
-    directory: /build/nuke/docker
+    directory: /docker
     schedule:
       interval: "daily"
 
@@ -20,7 +20,7 @@ updates:
 
  
   - package-ecosystem: nuget
-    directory: /build/nuke
+    directory: /nuke
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
