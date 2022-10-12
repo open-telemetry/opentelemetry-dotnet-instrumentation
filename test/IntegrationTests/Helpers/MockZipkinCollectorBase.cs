@@ -1,4 +1,4 @@
-// <copyright file="MockZipkinCollector.cs" company="OpenTelemetry Authors">
+// <copyright file="MockZipkinCollectorBase.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,16 +14,11 @@
 // limitations under the License.
 // </copyright>
 
-#if NETFRAMEWORK
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.Specialized;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using IntegrationTests.Helpers.Mocks;
 using Newtonsoft.Json;
@@ -31,18 +26,16 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
-public class MockZipkinCollector : IDisposable
+public abstract class MockZipkinCollectorBase
 {
-    private static readonly TimeSpan DefaultSpanWaitTimeout = TimeSpan.FromMinutes(1);
+    protected static readonly TimeSpan DefaultSpanWaitTimeout = TimeSpan.FromMinutes(1);
 
     private readonly object _syncRoot = new object();
     private readonly ITestOutputHelper _output;
-    private readonly TestHttpListener _listener;
 
-    private MockZipkinCollector(ITestOutputHelper output, string host = "localhost")
+    protected MockZipkinCollectorBase(ITestOutputHelper output)
     {
         _output = output;
-        _listener = new(output, HandleHttpRequests, host, "/api/v2/spans/");
     }
 
     /// <summary>
@@ -53,31 +46,16 @@ public class MockZipkinCollector : IDisposable
     /// <summary>
     /// Gets the TCP port that this collector is listening on.
     /// </summary>
-    public int Port { get => _listener.Port; }
+    public abstract int Port { get; }
 
     /// <summary>
     /// Gets the filters used to filter out spans we don't want to look at for a test.
     /// </summary>
     public List<Func<IMockSpan, bool>> SpanFilters { get; private set; } = new List<Func<IMockSpan, bool>>();
 
-    private IImmutableList<IMockSpan> Spans { get; set; } = ImmutableList<IMockSpan>.Empty;
+    protected IImmutableList<IMockSpan> Spans { get; set; } = ImmutableList<IMockSpan>.Empty;
 
-    private IImmutableList<NameValueCollection> RequestHeaders { get; set; } = ImmutableList<NameValueCollection>.Empty;
-
-    public static async Task<MockZipkinCollector> Start(ITestOutputHelper output, string host = "localhost")
-    {
-        var collector = new MockZipkinCollector(output, host);
-
-        var healthzResult = await collector._listener.VerifyHealthzAsync();
-
-        if (!healthzResult)
-        {
-            collector.Dispose();
-            throw new InvalidOperationException($"Cannot start {nameof(MockLogsCollector)}!");
-        }
-
-        return collector;
-    }
+    protected IImmutableList<NameValueCollection> RequestHeaders { get; set; } = ImmutableList<NameValueCollection>.Empty;
 
     /// <summary>
     /// Wait for the given number of spans to appear.
@@ -135,44 +113,27 @@ public class MockZipkinCollector : IDisposable
         return relevantSpans;
     }
 
-    public void Dispose()
+    protected void Deserialize(string json, NameValueCollection headers)
+    {
+        var zspans = JsonConvert.DeserializeObject<List<ZSpanMock>>(json);
+        if (zspans != null)
+        {
+            IList<IMockSpan> spans = zspans.ConvertAll(x => (IMockSpan)x);
+
+            lock (_syncRoot)
+            {
+                Spans = Spans.AddRange(spans);
+                RequestHeaders = RequestHeaders.Add(headers);
+            }
+        }
+    }
+
+    protected void DisposeInternal()
     {
         lock (_syncRoot)
         {
             WriteOutput($"Shutting down. Total spans received: '{Spans.Count}'");
         }
-
-        _listener.Dispose();
-    }
-
-    private void HandleHttpRequests(HttpListenerContext ctx)
-    {
-        if (ShouldDeserializeTraces)
-        {
-            using (var reader = new StreamReader(ctx.Request.InputStream))
-            {
-                var zspans = JsonConvert.DeserializeObject<List<ZSpanMock>>(reader.ReadToEnd());
-                if (zspans != null)
-                {
-                    IList<IMockSpan> spans = zspans.ConvertAll(x => (IMockSpan)x);
-
-                    lock (_syncRoot)
-                    {
-                        Spans = Spans.AddRange(spans);
-                        RequestHeaders = RequestHeaders.Add(new NameValueCollection(ctx.Request.Headers));
-                    }
-                }
-            }
-        }
-
-        // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
-        // (Setting content-length avoids that)
-
-        ctx.Response.ContentType = "application/json";
-        var buffer = Encoding.UTF8.GetBytes("{}");
-        ctx.Response.ContentLength64 = buffer.LongLength;
-        ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
-        ctx.Response.Close();
     }
 
     private void WriteOutput(string msg)
@@ -181,5 +142,3 @@ public class MockZipkinCollector : IDisposable
         _output.WriteLine($"[{name}]: {msg}");
     }
 }
-
-#endif
