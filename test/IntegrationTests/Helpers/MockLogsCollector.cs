@@ -23,8 +23,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using OpenTelemetry.Proto.Collector.Logs.V1;
+using OpenTelemetry.Proto.Logs.V1;
 using Xunit;
 using Xunit.Abstractions;
+
+#if NETCOREAPP3_1_OR_GREATER
+using System.IO;
+using Microsoft.AspNetCore.Http;
+#endif
 
 namespace IntegrationTests.Helpers;
 
@@ -33,14 +39,19 @@ public class MockLogsCollector : IDisposable
     private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromMinutes(1);
 
     private readonly ITestOutputHelper _output;
-    private readonly TestHttpListener _listener;
-    private readonly BlockingCollection<global::OpenTelemetry.Proto.Logs.V1.LogRecord> _logs = new(100); // bounded to avoid memory leak
+    private readonly TestHttpServer _listener;
+    private readonly BlockingCollection<LogRecord> _logs = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
 
     private MockLogsCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
-        _listener = new(output, HandleHttpRequests, host);
+
+#if NETFRAMEWORK
+        _listener = new(output, HandleHttpRequests, host, "/v1/logs");
+#else
+        _listener = new(output, HandleHttpRequests, "/v1/logs");
+#endif
     }
 
     /// <summary>
@@ -52,6 +63,7 @@ public class MockLogsCollector : IDisposable
     {
         var collector = new MockLogsCollector(output, host);
 
+#if NETFRAMEWORK
         var healthzResult = await collector._listener.VerifyHealthzAsync();
 
         if (!healthzResult)
@@ -61,6 +73,9 @@ public class MockLogsCollector : IDisposable
         }
 
         return collector;
+#else
+        return await Task.FromResult(collector);
+#endif
     }
 
     public void Dispose()
@@ -136,8 +151,8 @@ public class MockLogsCollector : IDisposable
 
     private static void FailExpectations(
         List<Expectation> missingExpectations,
-        List<global::OpenTelemetry.Proto.Logs.V1.LogRecord> expectationsMet,
-        List<global::OpenTelemetry.Proto.Logs.V1.LogRecord> additionalEntries)
+        List<LogRecord> expectationsMet,
+        List<LogRecord> additionalEntries)
     {
         var message = new StringBuilder();
         message.AppendLine();
@@ -163,45 +178,85 @@ public class MockLogsCollector : IDisposable
         Assert.Fail(message.ToString());
     }
 
+#if NETFRAMEWORK
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        if (ctx.Request.RawUrl.Equals("/v1/logs", StringComparison.OrdinalIgnoreCase))
+        var logsMessage = ExportLogsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
+        HandleLogsMessage(logsMessage);
+
+        // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
+        // (Setting content-length avoids that)
+        ctx.Response.ContentType = "application/x-protobuf";
+        ctx.Response.StatusCode = (int)HttpStatusCode.OK;
+        var responseMessage = new ExportLogsServiceResponse();
+        ctx.Response.ContentLength64 = responseMessage.CalculateSize();
+        responseMessage.WriteTo(ctx.Response.OutputStream);
+        ctx.Response.Close();
+        return;
+    }
+#else
+    private async Task HandleHttpRequests(HttpContext ctx)
+    {
+        try
         {
-            var logsMessage = ExportLogsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
-            if (logsMessage.ResourceLogs != null)
+            if (!ctx.Request.Body.CanSeek)
             {
-                foreach (var rLogs in logsMessage.ResourceLogs)
+                // We only do this if the stream isn't *already* seekable,
+                // as EnableBuffering will create a new stream instance
+                // each time it's called
+                ctx.Request.EnableBuffering();
+            }
+
+            ctx.Request.Body.Position = 0;
+
+            using var inMemory = new MemoryStream();
+            await ctx.Request.Body.CopyToAsync(inMemory);
+
+            inMemory.Position = 0;
+
+            var metricsMessage = ExportLogsServiceRequest.Parser.ParseFrom(inMemory);
+            HandleLogsMessage(metricsMessage);
+
+            ctx.Response.ContentType = "application/x-protobuf";
+            ctx.Response.StatusCode = (int)HttpStatusCode.OK;
+            var responseMessage = new ExportLogsServiceResponse();
+            ctx.Response.ContentLength = responseMessage.CalculateSize();
+
+            using var outMemory = new MemoryStream();
+            responseMessage.WriteTo(outMemory);
+
+            await ctx.Response.Body.WriteAsync(outMemory.GetBuffer(), 0, (int)outMemory.Length);
+            await ctx.Response.CompleteAsync();
+        }
+        catch (Exception ex)
+        {
+            var msg = ex.Message;
+            throw;
+        }
+    }
+#endif
+
+    private void HandleLogsMessage(ExportLogsServiceRequest logsMessage)
+    {
+        if (logsMessage.ResourceLogs != null)
+        {
+            foreach (var rLogs in logsMessage.ResourceLogs)
+            {
+                if (rLogs.ScopeLogs != null)
                 {
-                    if (rLogs.ScopeLogs != null)
+                    foreach (var sLogs in rLogs.ScopeLogs)
                     {
-                        foreach (var sLogs in rLogs.ScopeLogs)
+                        if (sLogs.LogRecords != null)
                         {
-                            if (sLogs.LogRecords != null)
+                            foreach (var logRecord in sLogs.LogRecords)
                             {
-                                foreach (var logRecord in sLogs.LogRecords)
-                                {
-                                    _logs.Add(logRecord);
-                                }
+                                _logs.Add(logRecord);
                             }
                         }
                     }
                 }
             }
-
-            // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
-            // (Setting content-length avoids that)
-            ctx.Response.ContentType = "application/x-protobuf";
-            ctx.Response.StatusCode = (int)HttpStatusCode.OK;
-            var responseMessage = new ExportLogsServiceResponse();
-            ctx.Response.ContentLength64 = responseMessage.CalculateSize();
-            responseMessage.WriteTo(ctx.Response.OutputStream);
-            ctx.Response.Close();
-            return;
         }
-
-        // We received an unsupported request
-        ctx.Response.StatusCode = (int)HttpStatusCode.NotImplemented;
-        ctx.Response.Close();
     }
 
     private void WriteOutput(string msg)
@@ -212,7 +267,7 @@ public class MockLogsCollector : IDisposable
 
     private class Expectation
     {
-        public Func<global::OpenTelemetry.Proto.Logs.V1.LogRecord, bool> Predicate { get; set; }
+        public Func<LogRecord, bool> Predicate { get; set; }
 
         public string Description { get; set; }
     }

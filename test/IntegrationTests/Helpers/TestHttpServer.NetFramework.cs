@@ -1,4 +1,4 @@
-// <copyright file="TestHttpListener.cs" company="OpenTelemetry Authors">
+// <copyright file="TestHttpServer.NetFramework.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#if NETFRAMEWORK
+
 using System;
 using System.Net;
 using System.Text;
@@ -23,7 +25,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
-public class TestHttpListener : IDisposable
+public class TestHttpServer : IDisposable
 {
     private readonly ITestOutputHelper _output;
     private readonly Action<HttpListenerContext> _requestHandler;
@@ -31,7 +33,7 @@ public class TestHttpListener : IDisposable
     private readonly Thread _listenerThread;
     private readonly string _prefix;
 
-    public TestHttpListener(ITestOutputHelper output, Action<HttpListenerContext> requestHandler, string host, string sufix = "/")
+    public TestHttpServer(ITestOutputHelper output, Action<HttpListenerContext> requestHandler, string host, string sufix = "/")
     {
         _output = output;
         _requestHandler = requestHandler;
@@ -147,7 +149,9 @@ public class TestHttpListener : IDisposable
 
     private void WriteOutput(string msg)
     {
-        const string name = nameof(TestHttpListener);
+        const string name = nameof(TestHttpServer);
         _output.WriteLine($"[{name}]: {msg}");
     }
 }
+
+#endif
