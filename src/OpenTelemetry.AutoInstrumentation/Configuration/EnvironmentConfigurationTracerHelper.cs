@@ -37,7 +37,9 @@ internal static class EnvironmentConfigurationTracerHelper
 #endif
         [TracerInstrumentation.Npgsql] = builder => builder.AddSource("Npgsql"),
         [TracerInstrumentation.GrpcNetClient] = builder => builder.AddGrpcClientInstrumentation(options => options.SuppressDownstreamInstrumentation = !Instrumentation.TracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.HttpClient)),
+#if NETCOREAPP3_1_OR_GREATER
         [TracerInstrumentation.MassTransit] = builder => builder.AddSource("MassTransit")
+#endif
     };
 
     public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, TracerSettings settings)

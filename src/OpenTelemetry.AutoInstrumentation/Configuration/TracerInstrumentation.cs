@@ -75,8 +75,10 @@ internal enum TracerInstrumentation
     /// </summary>
     Wcf = 9,
 
+#if NETCOREAPP3_1_OR_GREATER
     /// <summary>
-    /// WCF instrumentation.
+    /// MassTransit instrumentation.
     /// </summary>
     MassTransit = 10
+#endif
 }
