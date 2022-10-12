@@ -101,9 +101,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - base-image: alpine
-            os_type: linux-musl
+        base-image: [ alpine ]
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v3.1.0
@@ -113,7 +111,6 @@ jobs:
         docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
         docker run --rm mybuildimage /bin/sh -c '
           set -e
-          export OS_TYPE=${{ matrix.os_type }}
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh -O
           sh ./download.sh
             test "$(ls -A "$HOME/.otel-dotnet-auto")"
