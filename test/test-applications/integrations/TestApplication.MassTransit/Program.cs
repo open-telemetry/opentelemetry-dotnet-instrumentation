@@ -30,7 +30,7 @@ public class Program
     public static async Task Main(string[] args)
     {
         ConsoleHelper.WriteSplashScreen(args);
-        var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(500));
+        var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         await CreateHostBuilder(args).Build().RunAsync(cancellationTokenSource.Token);
     }
 
