@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+#if !NETFRAMEWORK
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -52,3 +53,4 @@ public class MassTransitTests : TestHelper
         }
     }
 }
+#endif
