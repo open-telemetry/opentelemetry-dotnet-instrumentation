@@ -40,8 +40,7 @@ jobs:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
 
-  container-build:
-    name: Container Build 
+  build-container:
     strategy:
       fail-fast: false
       matrix:
@@ -70,13 +69,10 @@ jobs:
       matrix:
         include:
           - machine: windows-2022
-            os_type: windows
             log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
           - machine: ubuntu-20.04
-            os_type: linux-glibc
             log-dir: "/var/log/opentelemetry/dotnet"
           - machine: macos-11
-            os_type: macos
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
@@ -92,7 +88,6 @@ jobs:
         shell: bash
         run: |
           set -e
-          export OS_TYPE=${{ matrix.os_type }} 
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh -O
           sh ./download.sh
             test "$(ls -A "$HOME/.otel-dotnet-auto")"
@@ -105,9 +100,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - base-image: alpine
-            os_type: linux-musl
+        base-image: [ alpine ]
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v3.1.0
@@ -117,7 +110,6 @@ jobs:
         docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
         docker run --rm mybuildimage /bin/sh -c '
           set -e
-          export OS_TYPE=${{ matrix.os_type }}
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh -O
           sh ./download.sh
             test "$(ls -A "$HOME/.otel-dotnet-auto")"
