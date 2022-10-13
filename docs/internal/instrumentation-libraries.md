@@ -64,7 +64,7 @@ submit an issue to request its inclusion.
 | [RabbitMQ](https://www.nuget.org/packages/RabbitMQ.Client) | | | These is an [issue in the RabbitMQ repo](https://github.com/rabbitmq/rabbitmq-dotnet-client/issues/776) to add instrumentation directly into RabbitMQ. |
 | [Kafka](https://www.nuget.org/packages/Confluent.Kafka) | | | |
 | [NServiceBus](https://docs.particular.net/nservicebus/) | | | |
-| [MassTransit](https://masstransit-project.com/) | | | |
+| [MassTransit](https://masstransit-project.com/) | Yes | | |
 
 ### Logging
 
