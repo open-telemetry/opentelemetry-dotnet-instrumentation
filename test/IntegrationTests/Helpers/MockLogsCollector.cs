@@ -17,12 +17,14 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using OpenTelemetry.Proto.Collector.Logs.V1;
+using OpenTelemetry.Proto.Logs.V1;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -34,19 +36,21 @@ public class MockLogsCollector : IDisposable
 
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
-    private readonly BlockingCollection<global::OpenTelemetry.Proto.Logs.V1.LogRecord> _logs = new(100); // bounded to avoid memory leak
+    private readonly BlockingCollection<LogRecord> _logs = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
 
     private MockLogsCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
-        _listener = new(output, HandleHttpRequests, host);
+        _listener = new(output, HandleHttpRequests, host, "/v1/logs/");
     }
 
     /// <summary>
     /// Gets the TCP port that this collector is listening on.
     /// </summary>
     public int Port { get => _listener.Port; }
+
+    public OtlpResourceExpector ResourceExpector { get; } = new();
 
     public static async Task<MockLogsCollector> Start(ITestOutputHelper output, string host = "localhost")
     {
@@ -66,6 +70,7 @@ public class MockLogsCollector : IDisposable
     public void Dispose()
     {
         WriteOutput($"Shutting down. Total logs requests received: '{_logs.Count}'");
+        ResourceExpector.Dispose();
         _logs.Dispose();
         _listener.Dispose();
     }
@@ -165,42 +170,26 @@ public class MockLogsCollector : IDisposable
 
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        if (ctx.Request.RawUrl.Equals("/v1/logs", StringComparison.OrdinalIgnoreCase))
+        var logsMessage = ExportLogsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
+        foreach (var resourceLogs in logsMessage.ResourceLogs ?? Enumerable.Empty<ResourceLogs>())
         {
-            var logsMessage = ExportLogsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
-            if (logsMessage.ResourceLogs != null)
+            ResourceExpector.Collect(resourceLogs.Resource);
+            foreach (var scopeLogs in resourceLogs.ScopeLogs ?? Enumerable.Empty<ScopeLogs>())
             {
-                foreach (var rLogs in logsMessage.ResourceLogs)
+                foreach (var logRecord in scopeLogs.LogRecords ?? Enumerable.Empty<LogRecord>())
                 {
-                    if (rLogs.ScopeLogs != null)
-                    {
-                        foreach (var sLogs in rLogs.ScopeLogs)
-                        {
-                            if (sLogs.LogRecords != null)
-                            {
-                                foreach (var logRecord in sLogs.LogRecords)
-                                {
-                                    _logs.Add(logRecord);
-                                }
-                            }
-                        }
-                    }
+                    _logs.Add(logRecord);
                 }
             }
-
-            // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
-            // (Setting content-length avoids that)
-            ctx.Response.ContentType = "application/x-protobuf";
-            ctx.Response.StatusCode = (int)HttpStatusCode.OK;
-            var responseMessage = new ExportLogsServiceResponse();
-            ctx.Response.ContentLength64 = responseMessage.CalculateSize();
-            responseMessage.WriteTo(ctx.Response.OutputStream);
-            ctx.Response.Close();
-            return;
         }
 
-        // We received an unsupported request
-        ctx.Response.StatusCode = (int)HttpStatusCode.NotImplemented;
+        // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
+        // (Setting content-length avoids that)
+        ctx.Response.ContentType = "application/x-protobuf";
+        ctx.Response.StatusCode = (int)HttpStatusCode.OK;
+        var responseMessage = new ExportLogsServiceResponse();
+        ctx.Response.ContentLength64 = responseMessage.CalculateSize();
+        responseMessage.WriteTo(ctx.Response.OutputStream);
         ctx.Response.Close();
     }
 
@@ -212,7 +201,7 @@ public class MockLogsCollector : IDisposable
 
     private class Expectation
     {
-        public Func<global::OpenTelemetry.Proto.Logs.V1.LogRecord, bool> Predicate { get; set; }
+        public Func<LogRecord, bool> Predicate { get; set; }
 
         public string Description { get; set; }
     }

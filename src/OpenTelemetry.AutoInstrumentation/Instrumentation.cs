@@ -39,7 +39,6 @@ namespace OpenTelemetry.AutoInstrumentation;
 internal static class Instrumentation
 {
     private static readonly ILogger Logger = OtelLogging.GetLogger();
-    private static readonly ResourceBuilder _resourceBuilder = ResourceBuilder.CreateDefault();
 #if NETCOREAPP3_1_OR_GREATER
     private static readonly LazyInstrumentationLoader LazyInstrumentationLoader = new();
 #endif
@@ -111,10 +110,6 @@ internal static class Instrumentation
                 }
 
                 EnvironmentConfigurationSdkHelper.UseEnvironmentVariables(SdkSettings);
-
-                _resourceBuilder
-                    .AddTelemetrySdk()
-                    .AddAttributes(new KeyValuePair<string, object>[] { new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version) });
             }
 
             if (TracerSettings.LoadTracerAtStartup)
@@ -138,7 +133,7 @@ internal static class Instrumentation
 
                 var builder = Sdk
                     .CreateTracerProviderBuilder()
-                    .SetResourceBuilder(_resourceBuilder)
+                    .SetResourceBuilder(ResourceFactory.Create())
                     .UseEnvironmentVariables(TracerSettings)
                     .InvokePlugins(TracerSettings.Plugins);
 
@@ -158,7 +153,7 @@ internal static class Instrumentation
 
                 var builder = Sdk
                     .CreateMeterProviderBuilder()
-                    .SetResourceBuilder(_resourceBuilder)
+                    .SetResourceBuilder(ResourceFactory.Create())
                     .UseEnvironmentVariables(MetricSettings)
                     .InvokePlugins(MetricSettings.Plugins);
 
