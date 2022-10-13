@@ -46,10 +46,11 @@ public class MockMetricsCollector : IDisposable
     private readonly ManualResetEvent _resourceAttributesEvent = new(false); // synchronizes access to _resourceAttributes
     private RepeatedField<KeyValue> _resourceAttributes; // protobuf type
 
-    private MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
+    private MockMetricsCollector(ITestOutputHelper output, TestHttpListener listener)
     {
         _output = output;
-        _listener = new(output, HandleHttpRequests, host);
+        _listener = listener;
+        listener.Handler = HandleHttpRequests;
     }
 
     /// <summary>
@@ -59,17 +60,8 @@ public class MockMetricsCollector : IDisposable
 
     public static async Task<MockMetricsCollector> Start(ITestOutputHelper output, string host = "localhost")
     {
-        var collector = new MockMetricsCollector(output, host);
-
-        var healthzResult = await collector._listener.VerifyHealthzAsync();
-
-        if (!healthzResult)
-        {
-            collector.Dispose();
-            throw new InvalidOperationException($"Cannot start {nameof(MockMetricsCollector)}!");
-        }
-
-        return collector;
+        var listener = await TestHttpListener.Start(output, host);
+        return new(output, listener);
     }
 
     public void Dispose()

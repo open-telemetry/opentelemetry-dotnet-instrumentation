@@ -37,10 +37,11 @@ public class MockLogsCollector : IDisposable
     private readonly BlockingCollection<global::OpenTelemetry.Proto.Logs.V1.LogRecord> _logs = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
 
-    private MockLogsCollector(ITestOutputHelper output, string host = "localhost")
+    private MockLogsCollector(ITestOutputHelper output, TestHttpListener listener)
     {
         _output = output;
-        _listener = new(output, HandleHttpRequests, host);
+        _listener = listener;
+        listener.Handler = HandleHttpRequests;
     }
 
     /// <summary>
@@ -50,17 +51,8 @@ public class MockLogsCollector : IDisposable
 
     public static async Task<MockLogsCollector> Start(ITestOutputHelper output, string host = "localhost")
     {
-        var collector = new MockLogsCollector(output, host);
-
-        var healthzResult = await collector._listener.VerifyHealthzAsync();
-
-        if (!healthzResult)
-        {
-            collector.Dispose();
-            throw new InvalidOperationException($"Cannot start {nameof(MockLogsCollector)}!");
-        }
-
-        return collector;
+        var listener = await TestHttpListener.Start(output, host);
+        return new(output, listener);
     }
 
     public void Dispose()

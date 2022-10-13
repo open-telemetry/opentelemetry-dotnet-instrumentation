@@ -38,10 +38,11 @@ public class MockZipkinCollector : IDisposable
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
 
-    private MockZipkinCollector(ITestOutputHelper output, string host = "localhost")
+    private MockZipkinCollector(ITestOutputHelper output, TestHttpListener listener)
     {
         _output = output;
-        _listener = new(output, HandleHttpRequests, host, "/api/v2/spans/");
+        _listener = listener;
+        listener.Handler = HandleHttpRequests;
     }
 
     public event EventHandler<EventArgs<HttpListenerContext>> RequestReceived;
@@ -69,17 +70,8 @@ public class MockZipkinCollector : IDisposable
 
     public static async Task<MockZipkinCollector> Start(ITestOutputHelper output, string host = "localhost")
     {
-        var collector = new MockZipkinCollector(output, host);
-
-        var healthzResult = await collector._listener.VerifyHealthzAsync();
-
-        if (!healthzResult)
-        {
-            collector.Dispose();
-            throw new InvalidOperationException($"Cannot start {nameof(MockLogsCollector)}!");
-        }
-
-        return collector;
+        var listener = await TestHttpListener.Start(output, host, "/api/v2/spans/");
+        return new(output, listener);
     }
 
     /// <summary>

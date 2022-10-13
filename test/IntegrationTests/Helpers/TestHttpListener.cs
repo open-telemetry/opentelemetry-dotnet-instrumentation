@@ -26,15 +26,15 @@ namespace IntegrationTests.Helpers;
 public class TestHttpListener : IDisposable
 {
     private readonly ITestOutputHelper _output;
-    private readonly Action<HttpListenerContext> _requestHandler;
     private readonly HttpListener _listener;
     private readonly Thread _listenerThread;
-    private readonly string _prefix;
 
-    public TestHttpListener(ITestOutputHelper output, Action<HttpListenerContext> requestHandler, string host, string sufix = "/")
+    private readonly object _requestHandlerLocker = new();
+    private Action<HttpListenerContext> _requestHandler;
+
+    private TestHttpListener(ITestOutputHelper output, string host, string sufix)
     {
         _output = output;
-        _requestHandler = requestHandler;
 
         // try up to 5 consecutive ports before giving up
         int retries = 4;
@@ -51,13 +51,13 @@ public class TestHttpListener : IDisposable
                 // See https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistenerprefixcollection.add?redirectedfrom=MSDN&view=net-6.0#remarks
                 // for info about the host value.
                 Port = TcpPortProvider.GetOpenPort();
-                _prefix = new UriBuilder("http", host, Port, sufix).ToString();
-                _listener.Prefixes.Add(_prefix);
+                var prefix = new UriBuilder("http", host, Port, sufix).ToString();
+                _listener.Prefixes.Add(prefix);
 
                 // successfully listening
                 _listenerThread = new Thread(HandleHttpRequests);
                 _listenerThread.Start();
-                WriteOutput($"Listening on '{_prefix}'");
+                WriteOutput($"Listening on '{prefix}'");
 
                 return;
             }
@@ -79,11 +79,35 @@ public class TestHttpListener : IDisposable
     /// </summary>
     public int Port { get; }
 
-    public Task<bool> VerifyHealthzAsync()
+    public async static Task<TestHttpListener> Start(ITestOutputHelper output, string host, string sufix = "/")
     {
-        var healhtzEndpoint = $"{_prefix.Replace("*", "localhost")}/healthz";
+        var listener = new TestHttpListener(output, host, sufix);
+        var prefix = new UriBuilder("http", "localhost", listener.Port, sufix).ToString();
+        bool running = await HealthzHelper.TestHealtzAsync($"{prefix}/healthz", nameof(TestHttpListener), output);
+        if (running)
+        {
+            listener.Dispose();
+            throw new InvalidOperationException($"Cannot start {nameof(TestHttpListener)}!");
+        }
+        return listener;
+    }
 
-        return HealthzHelper.TestHealtzAsync(healhtzEndpoint, nameof(MockLogsCollector), _output);
+    public Action<HttpListenerContext> Handler
+    {
+        get
+        {
+            lock (_requestHandlerLocker)
+            {
+                return _requestHandler;
+            }
+        }
+        set
+        {
+            lock (_requestHandlerLocker)
+            {
+                _requestHandler = value;
+            }
+        }
     }
 
     public void Dispose()
@@ -102,11 +126,18 @@ public class TestHttpListener : IDisposable
 
                 if (ctx.Request.RawUrl.EndsWith("/healthz", StringComparison.OrdinalIgnoreCase))
                 {
-                    CreateHealthResponse(ctx);
+                    SendResponse(ctx, HttpStatusCode.OK, "OK");
                     continue;
                 }
 
-                _requestHandler(ctx);
+                var handler = Handler;
+                if (handler != null)
+                {
+                    handler(ctx);
+                    continue;
+                }
+
+                SendResponse(ctx, HttpStatusCode.NotFound, "404 Not Found");
             }
             catch (HttpListenerException)
             {
@@ -135,13 +166,13 @@ public class TestHttpListener : IDisposable
         }
     }
 
-    private void CreateHealthResponse(HttpListenerContext ctx)
+    private void SendResponse(HttpListenerContext ctx, HttpStatusCode httpStatusCode, string content)
     {
         ctx.Response.ContentType = "text/plain";
-        var buffer = Encoding.UTF8.GetBytes("OK");
+        var buffer = Encoding.UTF8.GetBytes(content);
         ctx.Response.ContentLength64 = buffer.LongLength;
         ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
-        ctx.Response.StatusCode = (int)HttpStatusCode.OK;
+        ctx.Response.StatusCode = (int)httpStatusCode;
         ctx.Response.Close();
     }
 
