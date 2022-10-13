@@ -102,8 +102,8 @@ public class TestHttpListener : IDisposable
     {
         var listener = new TestHttpListener(output, host, sufix);
         var prefix = new UriBuilder("http", "localhost", listener.Port, sufix).ToString();
-        bool running = await HealthzHelper.TestHealtzAsync($"{prefix}/healthz", nameof(TestHttpListener), output);
-        if (running)
+        bool running = await HealthzHelper.TestHealtzAsync(prefix + "healthz", nameof(TestHttpListener), output);
+        if (!running)
         {
             listener.Dispose();
             throw new InvalidOperationException($"Cannot start {nameof(TestHttpListener)}!");
