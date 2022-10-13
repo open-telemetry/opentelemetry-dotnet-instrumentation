@@ -4,6 +4,7 @@
 
    - [`download.sh`](../download.sh)
    - [`docs/README.md`](./README.md)
+   - [`nuget/OpenTelemetry.AutoInstrumentation.nuspec`](../nuget/OpenTelemetry.AutoInstrumentation.nuspec)
    - [`src/OpenTelemetry.AutoInstrumentation/Constants.cs`](../src/OpenTelemetry.AutoInstrumentation/Constants.cs)
    - [`src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj`](../src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj)
    - [`src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Loader.csproj`](../src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Loader.csproj)

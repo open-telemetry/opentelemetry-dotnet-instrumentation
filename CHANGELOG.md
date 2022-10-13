@@ -22,6 +22,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Add [telemetry resource attributes](https://github.com/open-telemetry/opentelemetry-specification/tree/v1.13.0/specification/resource/semantic_conventions#telemetry-sdk).
 - Add support for the `b3` propagator.
 - Add MassTransit traces instrumentation.
+- Add `OpenTelemetry.AutoInstrumentation` Nuget package.
 
 ### Changed
 
