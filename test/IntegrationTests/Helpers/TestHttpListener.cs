@@ -79,19 +79,6 @@ public class TestHttpListener : IDisposable
     /// </summary>
     public int Port { get; }
 
-    public async static Task<TestHttpListener> Start(ITestOutputHelper output, string host, string sufix = "/")
-    {
-        var listener = new TestHttpListener(output, host, sufix);
-        var prefix = new UriBuilder("http", "localhost", listener.Port, sufix).ToString();
-        bool running = await HealthzHelper.TestHealtzAsync($"{prefix}/healthz", nameof(TestHttpListener), output);
-        if (running)
-        {
-            listener.Dispose();
-            throw new InvalidOperationException($"Cannot start {nameof(TestHttpListener)}!");
-        }
-        return listener;
-    }
-
     public Action<HttpListenerContext> Handler
     {
         get
@@ -101,6 +88,7 @@ public class TestHttpListener : IDisposable
                 return _requestHandler;
             }
         }
+
         set
         {
             lock (_requestHandlerLocker)
@@ -108,6 +96,20 @@ public class TestHttpListener : IDisposable
                 _requestHandler = value;
             }
         }
+    }
+
+    public static async Task<TestHttpListener> Start(ITestOutputHelper output, string host, string sufix = "/")
+    {
+        var listener = new TestHttpListener(output, host, sufix);
+        var prefix = new UriBuilder("http", "localhost", listener.Port, sufix).ToString();
+        bool running = await HealthzHelper.TestHealtzAsync($"{prefix}/healthz", nameof(TestHttpListener), output);
+        if (running)
+        {
+            listener.Dispose();
+            throw new InvalidOperationException($"Cannot start {nameof(TestHttpListener)}!");
+        }
+
+        return listener;
     }
 
     public void Dispose()
