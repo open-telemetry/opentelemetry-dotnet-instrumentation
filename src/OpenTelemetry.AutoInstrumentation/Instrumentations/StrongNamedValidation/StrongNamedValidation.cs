@@ -33,7 +33,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Validations;
     ParameterTypeNames = new string[0],
     MinimumVersion = "1.0.0",
     MaximumVersion = "1.65535.65535",
-    IntegrationName = "StrongNamedValidation")]
+    IntegrationName = "StrongNamedValidation",
+    Type = InstrumentationType.Trace)]
 public class StrongNamedValidation
 {
     private static readonly ActivitySource ValidationActivitySource = new ActivitySource("TestApplication.StrongNamedValidation");

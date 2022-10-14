@@ -30,7 +30,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Logger;
     ParameterTypeNames = new[] { "Microsoft.Extensions.DependencyInjection.IServiceCollection" },
     MinimumVersion = "3.1.0",
     MaximumVersion = "6.*.*",
-    IntegrationName = "LoggingBuilder")]
+    IntegrationName = "LoggingBuilder",
+    Type = InstrumentationType.Log)]
 public class LoggingBuilderIntegration
 {
     /// <summary>
