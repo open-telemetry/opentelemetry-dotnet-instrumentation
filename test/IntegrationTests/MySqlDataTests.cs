@@ -46,7 +46,7 @@ public class MySqlDataTests : TestHelper
     {
         using var agent = await MockZipkinCollector.Start(Output);
 
-        RunTestApplication(agent.Port, arguments: $"--mysql {_mySql.Port}", enableClrProfiler: !IsCoreClr());
+        RunTestApplication(agent.Port, arguments: $"--mysql {_mySql.Port}");
 
         var spans = await agent.WaitForSpansAsync(1);
 
