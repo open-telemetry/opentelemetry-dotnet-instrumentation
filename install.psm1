@@ -174,7 +174,6 @@ param(
 
         Extract-OpenTelemetry $DlPath $SetupPath
         Setup-OpenTelemetry-Environment $SetupPath
-        Setup-IIS-Environment
     } 
     catch {
         $message = $_
