@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#if !NETFRAMEWORK
+
 using System;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 
@@ -43,15 +45,14 @@ public class LoggingBuilderIntegration
     /// <returns>A default CallTargetReturn to satisfy the CallTarget contract</returns>
     internal static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception exception, CallTargetState state)
     {
-#if !NETFRAMEWORK
         if (instance is not null)
         {
             var logBuilderExtensionsType = Type.GetType("OpenTelemetry.AutoInstrumentation.Logger.LogBuilderExtensions, OpenTelemetry.AutoInstrumentation");
             var methodInfo = logBuilderExtensionsType?.GetMethod("AddOpenTelemetryLogs");
             methodInfo?.Invoke(null, new[] { (object)instance });
         }
-#endif
 
         return CallTargetReturn.GetDefault();
     }
 }
+#endif

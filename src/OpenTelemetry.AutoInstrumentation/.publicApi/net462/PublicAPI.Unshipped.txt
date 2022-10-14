@@ -102,8 +102,6 @@ OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy
 OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy.Mutation = 1 -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy
 OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy.Query = 0 -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy
 OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy.Subscription = 2 -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy
-OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration.LoggingBuilderIntegration() -> void
 OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration.MongoClientIntegration() -> void
 OpenTelemetry.AutoInstrumentation.Instrumentations.Validations.StrongNamedValidation
