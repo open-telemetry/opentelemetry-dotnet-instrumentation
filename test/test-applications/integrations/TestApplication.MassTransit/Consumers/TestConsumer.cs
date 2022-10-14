@@ -1,4 +1,4 @@
-// <copyright file="ConsoleHelper.cs" company="OpenTelemetry Authors">
+// <copyright file="TestConsumer.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,21 +14,26 @@
 // limitations under the License.
 // </copyright>
 
-using System;
+using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.Logging;
+using TestApplication.MassTransit.Contracts;
 
-namespace TestApplication.Shared;
+namespace TestApplication.MassTransit.Consumers;
 
-public static class ConsoleHelper
+public class TestConsumer :
+    IConsumer<TestMessage>
 {
-    public static void WriteSplashScreen(string[] args)
-    {
-        Console.WriteLine($"Command line: {string.Join(" ", args)}");
-        Console.WriteLine($"Platform: {(Environment.Is64BitProcess ? "x64" : "x86")}");
+    private readonly ILogger<TestConsumer> _logger;
 
-        Console.WriteLine("Environment variables:");
-        foreach (var entry in ProfilerHelper.GetEnvironmentConfiguration())
-        {
-            Console.WriteLine($"\t{entry.Key} = {entry.Value}");
-        }
+    public TestConsumer(ILogger<TestConsumer> logger)
+    {
+        _logger = logger;
+    }
+
+    public Task Consume(ConsumeContext<TestMessage> context)
+    {
+        _logger.LogInformation("Received Text: {Text}", context.Message.Value);
+        return Task.CompletedTask;
     }
 }

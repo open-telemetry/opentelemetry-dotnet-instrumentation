@@ -1,5 +1,24 @@
 #!/bin/sh
 
+# guess OS_TYPE if not provided
+if [ -z "$OS_TYPE" ]; then
+  case "$(uname -s | tr '[:upper:]' '[:lower:]')" in
+    cygwin_nt*|mingw*|msys_nt*)
+      OS_TYPE="windows"
+      ;;
+    linux*)
+      if [ "$(ldd /bin/ls | grep -m1 'musl')" ]; then
+        OS_TYPE="linux-musl"
+      else
+        OS_TYPE="linux-glibc"
+      fi
+      ;;
+    darwin*)
+      OS_TYPE="macos"
+      ;;
+  esac
+fi
+
 # validate input
 case "$OS_TYPE" in
   "linux-glibc"|"linux-musl"|"macos"|"windows")

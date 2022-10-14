@@ -40,8 +40,7 @@ jobs:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
 
-  container-build:
-    name: Container Build 
+  build-container:
     strategy:
       fail-fast: false
       matrix:
@@ -50,17 +49,11 @@ jobs:
     timeout-minutes: 60
     steps:
     - uses: actions/checkout@v3.1.0
-    - name: Build Docker image
-      run: |
-        docker build \
-          --tag otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
-          --file "./docker/${{ matrix.base-image }}.dockerfile" \
-          ./build
     - name: Build in Docker container
       run: |
-        docker run --rm \
-          --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project \
-          otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
+        set -e
+        docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
+        docker run --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
           ./build.sh Workflow --containers none
     - name: Publish Linux build
       uses: actions/upload-artifact@v3.1.0
@@ -76,13 +69,10 @@ jobs:
       matrix:
         include:
           - machine: windows-2022
-            os_type: windows
             log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
           - machine: ubuntu-20.04
-            os_type: linux-glibc
             log-dir: "/var/log/opentelemetry/dotnet"
           - machine: macos-11
-            os_type: macos
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
@@ -98,7 +88,6 @@ jobs:
         shell: bash
         run: |
           set -e
-          export OS_TYPE=${{ matrix.os_type }} 
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh -O
           sh ./download.sh
             test "$(ls -A "$HOME/.otel-dotnet-auto")"
@@ -106,3 +95,62 @@ jobs:
           . ./instrument.sh
           dotnet help
             test "$(ls -A '${{ matrix.log-dir }}' )"
+
+  shell-scripts-container:
+    strategy:
+      fail-fast: false
+      matrix:
+        base-image: [ alpine ]
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3.1.0
+    - name: Test the Shell scripts from README.md in Docker container
+      run: |
+        set -e
+        docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
+        docker run --rm mybuildimage /bin/sh -c '
+          set -e
+          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh -O
+          sh ./download.sh
+            test "$(ls -A "$HOME/.otel-dotnet-auto")"
+          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
+          . ./instrument.sh
+          dotnet help
+            test "$(ls -A /var/log/opentelemetry/dotnet )"
+        '
+
+  pack:
+    needs: build
+
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - uses: nuget/setup-nuget@v1.0.7
+
+      - name: Download Windows Artifacts from build job
+        uses: actions/download-artifact@v3.0.0
+        with:
+          name: bin-windows-2022
+          path: nuget/bin-windows
+
+      - name: Download Ubuntu Artifacts from build job
+        uses: actions/download-artifact@v3.0.0
+        with:
+          name: bin-ubuntu-20.04
+          path: nuget/bin-linux-glibc 
+
+      - name: Download Mac-OS Artifacts from build job
+        uses: actions/download-artifact@v3.0.0
+        with:
+          name: bin-macos-11
+          path: nuget/bin-macos
+
+      - name: Build NuGet package
+        run: nuget pack OpenTelemetry.AutoInstrumentation.nuspec -Properties NoWarn=NU5100,NU5123,NU5128
+        working-directory: nuget
+
+      - name: Upload Nuget
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: OpenTelemetry.AutoInstrumentation.Nuget
+          path: nuget/*.nupkg
