@@ -22,9 +22,7 @@ using OpenTelemetry.AutoInstrumentation.CallTarget;
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData;
 
 /// <summary>
-/// Instrumentation targeting the test application used to validate the strong name scenario.
-/// When an actual bytecode instrumentation targeting a strong named assembly on .NET Framework
-/// is added we can remove this instrumentation.
+/// MySql.Data.MySqlClient.MySqlConnectionStringBuilder calltarget instrumentation
 /// </summary>
 [InstrumentMethod(
     AssemblyName = "MySql.Data",
