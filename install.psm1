@@ -227,9 +227,9 @@ function Register-OpenTelemetryForIIS() {
 function Register-OpenTelemetryForWindowsService() {
 param(
     [Parameter(Mandatory=$true)]
-    [string]$ServiceName,
+    [string]$WindowsServiceName,
     [Parameter(Mandatory=$true)]
-    [string]$DisplayName
+    [string]$OTelServiceName
 )
     $homeDir = [System.Environment]::GetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME","Machine")
 
@@ -237,7 +237,7 @@ param(
         throw "OpenTelemetry Core must be setup first. Run 'Install-OpenTelemetryCore' to setup Opentelemetry Core."
     }
 
-    Setup-Windows-Service -HomeDir $homeDir -ServiceName $ServiceName -DisplayName $DisplayName
+    Setup-Windows-Service -HomeDir $homeDir -ServiceName $WindowsServiceName -DisplayName $OTelServiceName
 }
 
 function Unregister-OpenTelemetryForIIS() {
