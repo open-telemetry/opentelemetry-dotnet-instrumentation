@@ -44,7 +44,7 @@ public class MySqlDataTests : TestHelper
     [Trait("Containers", "Linux")]
     public async Task SubmitsTraces()
     {
-        using var agent = await MockZipkinCollector.Start(Output);
+        using var agent = await LegacyMockZipkinCollector.Start(Output);
 
         RunTestApplication(agent.Port, arguments: $"--mysql {_mySql.Port}", enableClrProfiler: !IsCoreClr());
 

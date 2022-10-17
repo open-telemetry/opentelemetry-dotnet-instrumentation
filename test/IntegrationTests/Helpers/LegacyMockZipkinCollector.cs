@@ -1,4 +1,4 @@
-// <copyright file="MockZipkinCollector.cs" company="OpenTelemetry Authors">
+// <copyright file="LegacyMockZipkinCollector.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +30,7 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
-public class MockZipkinCollector : IDisposable
+public class LegacyMockZipkinCollector : IDisposable
 {
     private static readonly TimeSpan DefaultSpanWaitTimeout = TimeSpan.FromMinutes(1);
 
@@ -38,7 +38,7 @@ public class MockZipkinCollector : IDisposable
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
 
-    private MockZipkinCollector(ITestOutputHelper output, string host = "localhost")
+    private LegacyMockZipkinCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
         _listener = new(output, HandleHttpRequests, host, "/api/v2/spans/");
@@ -67,9 +67,9 @@ public class MockZipkinCollector : IDisposable
 
     private IImmutableList<NameValueCollection> RequestHeaders { get; set; } = ImmutableList<NameValueCollection>.Empty;
 
-    public static async Task<MockZipkinCollector> Start(ITestOutputHelper output, string host = "localhost")
+    public static async Task<LegacyMockZipkinCollector> Start(ITestOutputHelper output, string host = "localhost")
     {
-        var collector = new MockZipkinCollector(output, host);
+        var collector = new LegacyMockZipkinCollector(output, host);
 
         var healthzResult = await collector._listener.VerifyHealthzAsync();
 
@@ -191,7 +191,7 @@ public class MockZipkinCollector : IDisposable
 
     private void WriteOutput(string msg)
     {
-        const string name = nameof(MockZipkinCollector);
+        const string name = nameof(LegacyMockZipkinCollector);
         _output.WriteLine($"[{name}]: {msg}");
     }
 }
