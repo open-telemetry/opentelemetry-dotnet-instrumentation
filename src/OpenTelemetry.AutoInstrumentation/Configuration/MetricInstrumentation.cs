@@ -35,4 +35,9 @@ internal enum MetricInstrumentation
     /// .NET Runtime Metrics instrumentation.
     /// </summary>
     NetRuntime,
+
+    /// <summary>
+    /// Process instrumentation.
+    /// </summary>
+    Process
 }
