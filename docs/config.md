@@ -47,7 +47,7 @@ for more details.
 | `StackExchangeRedis` | [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis) **Not supported on .NET Framework**                                                                                     | ≥2.0.405 < 3.0.0   | source & bytecode     |
 | `Wcf`                | [System.ServiceModel](https://www.nuget.org/packages/System.ServiceModel) **No support for server side on .NET (Core)**. For configuration see [WCF Instrumentation Configuration](wcf-config.md) | *                  | source                |
 
-[1]: MySql.Data 8.0.31+ require bytecode instrumentation. Older versions work without bytecode instrumentation.
+[1]: MySql.Data 8.0.31 and higher requires bytecode instrumentation.
 
 ### Metrics instrumentations
 
