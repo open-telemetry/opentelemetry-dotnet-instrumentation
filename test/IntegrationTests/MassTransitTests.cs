@@ -36,7 +36,7 @@ public class MassTransitTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task SubmitsTraces()
     {
-        using var agent = await MockZipkinCollector.Start(Output);
+        using var agent = await LegacyMockZipkinCollector.Start(Output);
         RunTestApplication(agent.Port);
 
         const int expectedSpans = 3;

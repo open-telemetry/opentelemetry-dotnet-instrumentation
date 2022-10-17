@@ -302,7 +302,7 @@ public class SmokeTests : TestHelper
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
 
-        using var agent = await MockZipkinCollector.Start(Output);
+        using var agent = await LegacyMockZipkinCollector.Start(Output);
         RunTestApplication(agent.Port, enableStartupHook: enableStartupHook, enableClrProfiler: enableClrProfiler);
 
         // The process emitting the spans already finished by this time, there is no need to wait more,
