@@ -146,19 +146,67 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task ResourceMetrics()
+    public async Task TracesResource()
+    {
+        using var collector = await MockSpansCollector.Start(Output);
+        collector.ResourceExpector.Expect("service.name", ServiceName);
+        collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
+        collector.ResourceExpector.Expect("telemetry.sdk.language", "dotnet");
+        collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
+        collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
+        RunTestApplication(otlpTraceCollectorPort: collector.Port);
+
+        collector.ResourceExpector.AssertExpectations();
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public async Task MetricsResource()
     {
         using var collector = await MockMetricsCollector.Start(Output);
-        collector.ExpectResourceAttribute("service.name", ServiceName);
-        collector.ExpectResourceAttribute("telemetry.sdk.name", "opentelemetry");
-        collector.ExpectResourceAttribute("telemetry.sdk.language", "dotnet");
-        collector.ExpectResourceAttribute("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
-        collector.ExpectResourceAttribute("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
+        collector.ResourceExpector.Expect("service.name", ServiceName);
+        collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
+        collector.ResourceExpector.Expect("telemetry.sdk.language", "dotnet");
+        collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
+        collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
         RunTestApplication(metricsAgentPort: collector.Port);
 
-        collector.AssertResourceExpectations();
+        collector.ResourceExpector.AssertExpectations();
+    }
+
+#if !NETFRAMEWORK // The feature is not supported on .NET Framework
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public async Task LogsResource()
+    {
+        using var collector = await MockLogsCollector.Start(Output);
+        collector.ResourceExpector.Expect("service.name", ServiceName);
+        collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
+        collector.ResourceExpector.Expect("telemetry.sdk.language", "dotnet");
+        collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
+        collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
+
+        RunTestApplication(logsAgentPort: collector.Port);
+
+        collector.ResourceExpector.AssertExpectations();
+    }
+#endif
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public async Task OtlpTracesExporter()
+    {
+        using var collector = await MockSpansCollector.Start(Output);
+        collector.Expect("MyCompany.MyProduct.MyLibrary", span => span.Name == "SayHello");
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
+        RunTestApplication(otlpTraceCollectorPort: collector.Port);
+
+        collector.AssertExpectations();
     }
 
 #if NETFRAMEWORK // The test is flaky on Linux and macOS, becasue of https://github.com/dotnet/runtime/issues/28658#issuecomment-462062760
