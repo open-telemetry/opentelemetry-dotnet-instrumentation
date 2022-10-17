@@ -23,6 +23,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Add support for the `b3` propagator.
 - Add MassTransit traces instrumentation.
 - Add `OpenTelemetry.AutoInstrumentation` Nuget package.
+- Support for Process metrics collection using
+  the `OpenTelemetry.Instrumentation.Process` package.
 
 ### Changed
 

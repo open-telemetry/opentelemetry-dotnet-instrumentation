@@ -210,6 +210,7 @@ public class SettingsTests : IDisposable
     [InlineData(nameof(MetricInstrumentation.NetRuntime), MetricInstrumentation.NetRuntime)]
     [InlineData(nameof(MetricInstrumentation.AspNet), MetricInstrumentation.AspNet)]
     [InlineData(nameof(MetricInstrumentation.HttpClient), MetricInstrumentation.HttpClient)]
+    [InlineData(nameof(MetricInstrumentation.Process), MetricInstrumentation.Process)]
     internal void MeterSettings_Instrumentations_SupportedValues(string meterInstrumentation, MetricInstrumentation expectedMetricInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, meterInstrumentation);
