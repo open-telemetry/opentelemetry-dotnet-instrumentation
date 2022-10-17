@@ -72,7 +72,7 @@ function Setup-OpenTelemetry-Environment([string] $InstallPath) {
     [System.Environment]::SetEnvironmentVariable('OTEL_DOTNET_AUTO_INTEGRATIONS_FILE', (Join-Path $InstallPath "integrations.json"), $target)
 }
 
-function Setup-Windows-Service([string]$HomeDir, [string]$ServiceName, [string]$DisplayName) {
+function Setup-Windows-Service([string]$HomeDir, [string]$WindowsServiceName, [string]$OTelServiceName) {
     $DOTNET_ADDITIONAL_DEPS = Join-Path $HomeDir "AdditionalDeps"
     $DOTNET_SHARED_STORE = Join-Path $HomeDir "store"
     $DOTNET_STARTUP_HOOKS = Join-Path $HomeDir "netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
@@ -88,21 +88,21 @@ function Setup-Windows-Service([string]$HomeDir, [string]$ServiceName, [string]$
        "DOTNET_STARTUP_HOOKS=$DOTNET_STARTUP_HOOKS"
     )
 
-    if(-not [string]::IsNullOrEmpty($DisplayName)) {
-        $vars += "OTEL_SERVICE_NAME=$DisplayName"
+    if(-not [string]::IsNullOrEmpty($OTelServiceName)) {
+        $vars += "OTEL_SERVICE_NAME=$OTelServiceName"
     }
 
     $regPath = "HKLM:SYSTEM\CurrentControlSet\Services\"
-    $regKey = Join-Path $regPath $ServiceName
+    $regKey = Join-Path $regPath $WindowsServiceName
    
     if(Test-Path $regKey) {
         Set-ItemProperty $regKey -Name Environment -Value $vars
     } else {
-        throw "Invalid service '$ServiceName'. Service does not exist."
+        throw "Invalid service '$WindowsServiceName'. Service does not exist."
     }
 }
 
-function Remove-Windows-Service([string]$ServiceName) {
+function Remove-Windows-Service([string]$WindowsServiceName) {
     [string[]] $filters = @(
        "COR_ENABLE_PROFILING",
        "CORECLR_ENABLE_PROFILING",
@@ -117,7 +117,7 @@ function Remove-Windows-Service([string]$ServiceName) {
     )
 
     $regPath = "HKLM:SYSTEM\CurrentControlSet\Services\"
-    $regKey = Join-Path $regPath $ServiceName
+    $regKey = Join-Path $regPath $WindowsServiceName
    
     if(Test-Path $regKey) {
         $values = Get-ItemPropertyValue $regKey -Name Environment
@@ -125,7 +125,7 @@ function Remove-Windows-Service([string]$ServiceName) {
         
         Set-ItemProperty $regKey -Name Environment -Value $vars
     } else {
-        throw "Invalid service '$ServiceName'. Service does not exist."
+        throw "Invalid service '$WindowsServiceName'. Service does not exist."
     }
 }
 
@@ -220,8 +220,8 @@ function Register-OpenTelemetryForIIS() {
         throw "OpenTelemetry Core must be setup first. Run 'Install-OpenTelemetryCore' to setup Opentelemetry Core."
     }
 
-    Setup-Windows-Service -HomeDir $homeDir -ServiceName "W3SVC"
-    Setup-Windows-Service -HomeDir $homeDir -ServiceName "WAS"
+    Setup-Windows-Service -HomeDir $homeDir -WindowsServiceName "W3SVC"
+    Setup-Windows-Service -HomeDir $homeDir -WindowsServiceName "WAS"
 }
 
 function Register-OpenTelemetryForWindowsService() {
@@ -237,21 +237,21 @@ param(
         throw "OpenTelemetry Core must be setup first. Run 'Install-OpenTelemetryCore' to setup Opentelemetry Core."
     }
 
-    Setup-Windows-Service -HomeDir $homeDir -ServiceName $WindowsServiceName -DisplayName $OTelServiceName
+    Setup-Windows-Service -HomeDir $homeDir -WindowsServiceName $WindowsServiceName -OTelServiceName $OTelServiceName
 }
 
 function Unregister-OpenTelemetryForIIS() {
-    Unregister-OpenTelemetryForWindowsService -ServiceName "W3SVC"
-    Unregister-OpenTelemetryForWindowsService -ServiceName "WAS"
+    Unregister-OpenTelemetryForWindowsService -WindowsServiceName "W3SVC"
+    Unregister-OpenTelemetryForWindowsService -WindowsServiceName "WAS"
 }
 
 function Unregister-OpenTelemetryForWindowsService() {
 param(
     [Parameter(Mandatory=$true)]
-    [string]$ServiceName
+    [string]$WindowsServiceName
 )  
 
-    Remove-Windows-Service -ServiceName $ServiceName
+    Remove-Windows-Service -WindowsServiceName $WindowsServiceName
 }
 
 Export-ModuleMember -Function Install-OpenTelemetryCore
