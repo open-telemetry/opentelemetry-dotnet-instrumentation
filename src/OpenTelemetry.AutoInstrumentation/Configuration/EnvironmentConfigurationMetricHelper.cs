@@ -30,6 +30,7 @@ internal static class EnvironmentConfigurationMetricHelper
         [MetricInstrumentation.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
         [MetricInstrumentation.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
         [MetricInstrumentation.NetRuntime] = builder => builder.AddRuntimeInstrumentation(),
+        [MetricInstrumentation.Process] = builder => builder.AddProcessInstrumentation(),
     };
 
     public static MeterProviderBuilder UseEnvironmentVariables(this MeterProviderBuilder builder, MetricSettings settings)

@@ -1,4 +1,4 @@
-// <copyright file="MetricInstrumentation.cs" company="OpenTelemetry Authors">
+// <copyright file="ResourceFactory.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,30 +14,17 @@
 // limitations under the License.
 // </copyright>
 
+using System.Collections.Generic;
+using OpenTelemetry.Resources;
+
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
-/// <summary>
-/// Enum representing supported meter instrumentations.
-/// </summary>
-internal enum MetricInstrumentation
+internal static class ResourceFactory
 {
-    /// <summary>
-    /// ASP.NET instrumentation.
-    /// </summary>
-    AspNet,
-
-    /// <summary>
-    /// HttpClient instrumentation.
-    /// </summary>
-    HttpClient,
-
-    /// <summary>
-    /// .NET Runtime Metrics instrumentation.
-    /// </summary>
-    NetRuntime,
-
-    /// <summary>
-    /// Process instrumentation.
-    /// </summary>
-    Process
+    public static ResourceBuilder Create()
+    {
+        return ResourceBuilder.CreateDefault()
+            .AddTelemetrySdk()
+            .AddAttributes(new KeyValuePair<string, object>[] { new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version) });
+    }
 }

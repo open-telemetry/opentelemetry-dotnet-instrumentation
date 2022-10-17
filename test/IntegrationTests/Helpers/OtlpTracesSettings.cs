@@ -1,4 +1,4 @@
-// <copyright file="MetricInstrumentation.cs" company="OpenTelemetry Authors">
+// <copyright file="OtlpTracesSettings.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,30 +14,11 @@
 // limitations under the License.
 // </copyright>
 
-namespace OpenTelemetry.AutoInstrumentation.Configuration;
+namespace IntegrationTests.Helpers;
 
-/// <summary>
-/// Enum representing supported meter instrumentations.
-/// </summary>
-internal enum MetricInstrumentation
+public class OtlpTracesSettings
 {
-    /// <summary>
-    /// ASP.NET instrumentation.
-    /// </summary>
-    AspNet,
+    public string Exporter => "otlp";
 
-    /// <summary>
-    /// HttpClient instrumentation.
-    /// </summary>
-    HttpClient,
-
-    /// <summary>
-    /// .NET Runtime Metrics instrumentation.
-    /// </summary>
-    NetRuntime,
-
-    /// <summary>
-    /// Process instrumentation.
-    /// </summary>
-    Process
+    public int Port { get; set; }
 }

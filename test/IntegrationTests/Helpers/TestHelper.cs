@@ -66,7 +66,7 @@ public abstract class TestHelper
     /// and returns the Process instance for further interaction.
     /// </summary>
     /// <returns>Test application process</returns>
-    public Process StartTestApplication(int traceAgentPort = 0, int metricsAgentPort = 0, int logsAgentPort = 0, string arguments = null, string packageVersion = "", int aspNetCorePort = 0, string framework = "", bool enableStartupHook = true, bool enableClrProfiler = true)
+    public Process StartTestApplication(int traceAgentPort = 0, int otlpTraceCollectorPort = 0, int metricsAgentPort = 0, int logsAgentPort = 0, string arguments = null, string packageVersion = "", int aspNetCorePort = 0, string framework = "", bool enableStartupHook = true, bool enableClrProfiler = true)
     {
         var testSettings = new TestSettings
         {
@@ -81,6 +81,11 @@ public abstract class TestHelper
         if (traceAgentPort != 0)
         {
             testSettings.TracesSettings = new() { Port = traceAgentPort };
+        }
+
+        if (otlpTraceCollectorPort != 0)
+        {
+            testSettings.OtlpTracesSettings = new() { Port = otlpTraceCollectorPort };
         }
 
         if (metricsAgentPort != 0)
@@ -100,7 +105,7 @@ public abstract class TestHelper
     /// RunTestApplication starts the test application, wait up to DefaultProcessTimeout.
     /// Assertion exceptions are thrown if it timed out or the exit code is non-zero.
     /// </summary>
-    public void RunTestApplication(int traceAgentPort = 0, int metricsAgentPort = 0, int logsAgentPort = 0, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000, bool enableStartupHook = true, bool enableClrProfiler = true)
+    public void RunTestApplication(int traceAgentPort = 0, int otlpTraceCollectorPort = 0, int metricsAgentPort = 0, int logsAgentPort = 0, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000, bool enableStartupHook = true, bool enableClrProfiler = true)
     {
         var testSettings = new TestSettings
         {
@@ -115,6 +120,11 @@ public abstract class TestHelper
         if (traceAgentPort != 0)
         {
             testSettings.TracesSettings = new() { Port = traceAgentPort };
+        }
+
+        if (otlpTraceCollectorPort != 0)
+        {
+            testSettings.OtlpTracesSettings = new() { Port = otlpTraceCollectorPort };
         }
 
         if (metricsAgentPort != 0)

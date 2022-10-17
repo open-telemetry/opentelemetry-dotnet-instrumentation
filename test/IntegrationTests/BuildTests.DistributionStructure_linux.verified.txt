@@ -39,6 +39,7 @@
   /netcoreapp3.1/OpenTelemetry.Instrumentation.GrpcNetClient.dll,
   /netcoreapp3.1/OpenTelemetry.Instrumentation.Http.dll,
   /netcoreapp3.1/OpenTelemetry.Instrumentation.MySqlData.dll,
+  /netcoreapp3.1/OpenTelemetry.Instrumentation.Process.dll,
   /netcoreapp3.1/OpenTelemetry.Instrumentation.Runtime.dll,
   /netcoreapp3.1/OpenTelemetry.Instrumentation.SqlClient.dll,
   /netcoreapp3.1/OpenTelemetry.Instrumentation.StackExchangeRedis.dll,

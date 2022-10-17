@@ -20,6 +20,8 @@ public class TestSettings
 {
     public TracesSettings TracesSettings { get; set; } = null;
 
+    public OtlpTracesSettings OtlpTracesSettings { get; set; } = null;
+
     public MetricsSettings MetricsSettings { get; set; } = null;
 
     public LogSettings LogSettings { get; set; } = null;

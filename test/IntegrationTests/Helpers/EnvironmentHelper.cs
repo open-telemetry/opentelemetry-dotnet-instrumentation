@@ -224,6 +224,12 @@ public class EnvironmentHelper
             environmentVariables["OTEL_EXPORTER_ZIPKIN_ENDPOINT"] = $"http://localhost:{testSettings.TracesSettings.Port}/api/v2/spans";
         }
 
+        if (testSettings.OtlpTracesSettings != null)
+        {
+            environmentVariables["OTEL_TRACES_EXPORTER"] = testSettings.OtlpTracesSettings.Exporter;
+            environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = $"http://localhost:{testSettings.OtlpTracesSettings.Port}";
+        }
+
         if (testSettings.MetricsSettings != null)
         {
             environmentVariables["OTEL_METRICS_EXPORTER"] = testSettings.MetricsSettings.Exporter;
