@@ -101,9 +101,4 @@ internal class InstrumentMethodAttribute : Attribute
     /// Gets or sets the integration name. Allows to group several integration with a single integration name.
     /// </summary>
     public string IntegrationName { get; set; }
-
-    /// <summary>
-    /// Gets or sets the CallTarget Class used to instrument the method
-    /// </summary>
-    public Type CallTargetType { get; set; }
 }
