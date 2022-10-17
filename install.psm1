@@ -228,6 +228,7 @@ function Register-OpenTelemetryForWindowsService() {
 param(
     [Parameter(Mandatory=$true)]
     [string]$ServiceName,
+    [Parameter(Mandatory=$true)]
     [string]$DisplayName
 )
     $homeDir = [System.Environment]::GetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME","Machine")
