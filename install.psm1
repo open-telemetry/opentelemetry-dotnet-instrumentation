@@ -23,7 +23,7 @@ function Get-Install-Directory([string]$InstallDir) {
         return (Join-Path $env:LOCALAPPDATA "Programs" | Join-Path -ChildPath $dir)
     }
     elseif($InstallDir -eq "ProgramFiles"){
-        return (Join-Path "C:\Program Files\" $dir)
+        return (Join-Path $Env:ProgramFiles $dir)
     } 
     elseif(Test-Path $InstallDir -IsValid) {
         return $InstallDir
