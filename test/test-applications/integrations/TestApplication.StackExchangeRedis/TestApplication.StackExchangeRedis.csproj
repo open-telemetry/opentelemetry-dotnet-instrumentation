@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.70" />
     <!-- Workaround! System.Runtime.CompilerServices.Unsafe v.6.0.0 is minimal version supported by auto instrumentation.
     Prior StackExchange.Redis v.2.2.3 indirectly references older version. It prevents to use older version during runtime.-->
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" Condition=" '$(TargetFramework)' == 'netcoreapp3.1' " />
