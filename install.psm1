@@ -159,7 +159,7 @@ function Filter-Env-List([string[]]$EnvValues, [string[]]$Filters) {
 
 <#
     .SYNOPSIS
-    Installs OpenTelemetry .NET Automatic Instrumentation 
+    Installs OpenTelemetry .NET Automatic Instrumentation.
     .PARAMETER InstallDir
     Default: <auto> - the default value is AppData
     Install path of the OpenTelemetry .NET Automatic Instrumentation
@@ -194,6 +194,10 @@ function Install-OpenTelemetryCore() {
     }
 }
 
+<#
+    .SYNOPSIS
+    Uninstalls OpenTelemetry .NET Automatic Instrumentation.
+#>
 function Uninstall-OpenTelemetryCore() {
     $homeDir = [System.Environment]::GetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", "Machine")
 
@@ -220,6 +224,10 @@ function Uninstall-OpenTelemetryCore() {
     [System.Environment]::SetEnvironmentVariable('OTEL_DOTNET_AUTO_INTEGRATIONS_FILE', $null, $target)
 }
 
+<#
+    .SYNOPSIS
+    Setups IIS environment variables to enable automatic instrumentation.
+#>
 function Register-OpenTelemetryForIIS() {
     $homeDir = [System.Environment]::GetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", "Machine")
 
@@ -231,6 +239,14 @@ function Register-OpenTelemetryForIIS() {
     Setup-Windows-Service -HomeDir $homeDir -WindowsServiceName "WAS"
 }
 
+<#
+    .SYNOPSIS
+    Setups specific Windows service environment variables to enable automatic instrumentation.
+    .PARAMETER WindowsServiceName
+    Actual Windows service name in registry.
+    .PARAMETER OTelServiceName
+    Specifies OpenTelemetry service name to identify your service.
+#>
 function Register-OpenTelemetryForWindowsService() {
     param(
         [Parameter(Mandatory = $true)]
@@ -247,11 +263,21 @@ function Register-OpenTelemetryForWindowsService() {
     Setup-Windows-Service -HomeDir $homeDir -WindowsServiceName $WindowsServiceName -OTelServiceName $OTelServiceName
 }
 
+<#
+    .SYNOPSIS
+    Removes IIS environment variables to disable automatic instrumentation.
+#>
 function Unregister-OpenTelemetryForIIS() {
     Unregister-OpenTelemetryForWindowsService -WindowsServiceName "W3SVC"
     Unregister-OpenTelemetryForWindowsService -WindowsServiceName "WAS"
 }
 
+<#
+    .SYNOPSIS
+    Removes specific Windows service environment variables to disable automatic instrumentation.
+    .PARAMETER WindowsServiceName
+    Actual Windows service Name in registry.
+#>
 function Unregister-OpenTelemetryForWindowsService() {
     param(
         [Parameter(Mandatory = $true)]
