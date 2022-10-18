@@ -115,7 +115,7 @@ public class AspNetTests : TestHelper
 
         Output.WriteLine("Collecting docker logs to: " + logPath);
 
-        var agentPort = testSettings.TracesSettings?.Port ?? testSettings.MetricsSettings?.Port;
+        var agentPort = testSettings.TracesSettings?.Port ?? testSettings.OtlpTracesSettings?.Port ?? testSettings.MetricsSettings?.Port;
         var builder = new TestcontainersBuilder<TestcontainersContainer>()
             .WithImage(testApplicationName)
             .WithCleanUp(cleanUp: true)
