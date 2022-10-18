@@ -23,7 +23,6 @@ using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using FluentAssertions;
 using IntegrationTests.Helpers;
-using IntegrationTests.Helpers.Models;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -47,28 +46,24 @@ public class AspNetTests : TestHelper
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
-        using var agent = await LegacyMockZipkinCollector.Start(Output, host: "*");
-        using var fwPort = FirewallHelper.OpenWinPort(agent.Port, Output);
+        using var collector = await MockSpansCollector.Start(Output, host: "*");
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet");
+
+        using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
         var testSettings = new TestSettings
         {
-            TracesSettings = new TracesSettings { Port = agent.Port }
+            OtlpTracesSettings = new OtlpTracesSettings { Port = collector.Port }
         };
         var webPort = TcpPortProvider.GetOpenPort();
         await using var container = await StartContainerAsync(testSettings, webPort);
 
-        var client = new HttpClient();
-
+        using var client = new HttpClient();
         var response = await client.GetAsync($"http://localhost:{webPort}");
         var content = await response.Content.ReadAsStringAsync();
-
         Output.WriteLine("Sample response:");
         Output.WriteLine(content);
 
-        agent.SpanFilters.Add(x => x.Name != "healthz");
-
-        var spans = await agent.WaitForSpansAsync(1);
-
-        Assert.True(spans.Count >= 1, $"Expecting at least 1 span, only received {spans.Count}");
+        collector.AssertExpectations();
     }
 
     [Fact]
@@ -95,7 +90,7 @@ public class AspNetTests : TestHelper
         var webPort = TcpPortProvider.GetOpenPort();
         await using var container = await StartContainerAsync(testSettings, webPort);
 
-        var client = new HttpClient();
+        using var client = new HttpClient();
         var response = await client.GetAsync($"http://localhost:{webPort}");
         var content = await response.Content.ReadAsStringAsync();
         Output.WriteLine("Sample response:");
