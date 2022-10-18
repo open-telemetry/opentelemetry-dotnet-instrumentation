@@ -15,57 +15,41 @@
 // </copyright>
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using IntegrationTests.Helpers.Mocks;
-using IntegrationTests.Helpers.Models;
 using Newtonsoft.Json;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
 public class MockZipkinCollector : IDisposable
 {
-    private static readonly TimeSpan DefaultSpanWaitTimeout = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromMinutes(1);
 
-    private readonly object _syncRoot = new object();
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
+
+    private readonly BlockingCollection<ZSpanMock> _spans = new(100); // bounded to avoid memory leak
+    private readonly List<Expectation> _expectations = new();
 
     private MockZipkinCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
-        _listener = new(output, HandleHttpRequests, host, "/api/v2/spans/");
+        _listener = new TestHttpListener(output, HandleHttpRequests, host, "/api/v2/spans/");
     }
-
-    public event EventHandler<EventArgs<HttpListenerContext>> RequestReceived;
-
-    public event EventHandler<EventArgs<IList<IMockSpan>>> RequestDeserialized;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether to skip serialization of traces.
-    /// </summary>
-    public bool ShouldDeserializeTraces { get; set; } = true;
 
     /// <summary>
     /// Gets the TCP port that this collector is listening on.
     /// </summary>
     public int Port { get => _listener.Port; }
-
-    /// <summary>
-    /// Gets the filters used to filter out spans we don't want to look at for a test.
-    /// </summary>
-    public List<Func<IMockSpan, bool>> SpanFilters { get; private set; } = new List<Func<IMockSpan, bool>>();
-
-    private IImmutableList<IMockSpan> Spans { get; set; } = ImmutableList<IMockSpan>.Empty;
-
-    private IImmutableList<NameValueCollection> RequestHeaders { get; set; } = ImmutableList<NameValueCollection>.Empty;
 
     public static async Task<MockZipkinCollector> Start(ITestOutputHelper output, string host = "localhost")
     {
@@ -76,112 +60,124 @@ public class MockZipkinCollector : IDisposable
         if (!healthzResult)
         {
             collector.Dispose();
-            throw new InvalidOperationException($"Cannot start {nameof(MockLogsCollector)}!");
+            throw new InvalidOperationException($"Cannot start {nameof(MockZipkinCollector)}!");
         }
 
         return collector;
     }
 
-    /// <summary>
-    /// Wait for the given number of spans to appear.
-    /// </summary>
-    /// <param name="count">The expected number of spans.</param>
-    /// <param name="timeout">The timeout</param>
-    /// <param name="instrumentationLibrary">The integration we're testing</param>
-    /// <param name="minDateTime">Minimum time to check for spans from</param>
-    /// <param name="returnAllOperations">When true, returns every span regardless of operation name</param>
-    /// <returns>The list of spans.</returns>
-    public async Task<IImmutableList<IMockSpan>> WaitForSpansAsync(
-        int count,
-        TimeSpan? timeout = null,
-        string instrumentationLibrary = null,
-        DateTimeOffset? minDateTime = null,
-        bool returnAllOperations = false)
-    {
-        timeout ??= DefaultSpanWaitTimeout;
-        var deadline = DateTime.Now.Add(timeout.Value);
-        var minimumOffset = (minDateTime ?? DateTimeOffset.MinValue).ToUnixTimeNanoseconds();
-
-        IImmutableList<IMockSpan> relevantSpans = ImmutableList<IMockSpan>.Empty;
-
-        // Use a do-while to ensure at least one attempt at reading the data already
-        // received. This is helpful for negative tests, ie.: no spans generated, when
-        // the process emitting the spans already finished.
-        do
-        {
-            lock (_syncRoot)
-            {
-                relevantSpans =
-                    Spans
-                        .Where(s => SpanFilters.All(shouldReturn => shouldReturn(s)))
-                        .Where(s => s.Start > minimumOffset)
-                        .ToImmutableList();
-            }
-
-            if (relevantSpans.Count(s => instrumentationLibrary == null || s.Library == instrumentationLibrary) >= count)
-            {
-                break;
-            }
-
-            await Task.Delay(500);
-        }
-        while (DateTime.Now < deadline);
-
-        if (!returnAllOperations)
-        {
-            relevantSpans =
-                relevantSpans
-                    .Where(s => instrumentationLibrary == null || s.Library == instrumentationLibrary)
-                    .ToImmutableList();
-        }
-
-        return relevantSpans;
-    }
-
     public void Dispose()
     {
-        lock (_syncRoot)
-        {
-            WriteOutput($"Shutting down. Total spans received: '{Spans.Count}'");
-        }
-
+        WriteOutput("Shutting down.");
+        _spans.Dispose();
         _listener.Dispose();
     }
 
-    protected virtual void OnRequestReceived(HttpListenerContext context)
+    public void Expect(Func<ZSpanMock, bool> predicate = null, string description = null)
     {
-        RequestReceived?.Invoke(this, new EventArgs<HttpListenerContext>(context));
+        predicate ??= x => true;
+        description ??= "<no description>";
+
+        _expectations.Add(new Expectation { Predicate = predicate, Description = description });
     }
 
-    protected virtual void OnRequestDeserialized(IList<IMockSpan> trace)
+    public void AssertExpectations(TimeSpan? timeout = null)
     {
-        RequestDeserialized?.Invoke(this, new EventArgs<IList<IMockSpan>>(trace));
+        if (_expectations.Count == 0)
+        {
+            throw new InvalidOperationException("Expectations were not set");
+        }
+
+        var missingExpectations = new List<Expectation>(_expectations);
+        var expectationsMet = new List<ZSpanMock>();
+        var additionalEntries = new List<ZSpanMock>();
+
+        timeout ??= DefaultWaitTimeout;
+        var cts = new CancellationTokenSource();
+
+        try
+        {
+            cts.CancelAfter(timeout.Value);
+            foreach (var span in _spans.GetConsumingEnumerable(cts.Token))
+            {
+                var found = false;
+                for (var i = missingExpectations.Count - 1; i >= 0; i--)
+                {
+                    if (!missingExpectations[i].Predicate(span))
+                    {
+                        continue;
+                    }
+
+                    expectationsMet.Add(span);
+                    missingExpectations.RemoveAt(i);
+                    found = true;
+                    break;
+                }
+
+                if (!found)
+                {
+                    additionalEntries.Add(span);
+                    continue;
+                }
+
+                if (missingExpectations.Count == 0)
+                {
+                    return;
+                }
+            }
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            // CancelAfter called with non-positive value
+            FailExpectations(missingExpectations, expectationsMet, additionalEntries);
+        }
+        catch (OperationCanceledException)
+        {
+            // timeout
+            FailExpectations(missingExpectations, expectationsMet, additionalEntries);
+        }
+    }
+
+    private static void FailExpectations(
+        List<Expectation> missingExpectations,
+        List<ZSpanMock> expectationsMet,
+        List<ZSpanMock> additionalEntries)
+    {
+        var message = new StringBuilder();
+        message.AppendLine();
+
+        message.AppendLine("Missing expectations:");
+        foreach (var logline in missingExpectations)
+        {
+            message.AppendLine($"  - \"{logline.Description}\"");
+        }
+
+        message.AppendLine("Entries meeting expectations:");
+        foreach (var logline in expectationsMet)
+        {
+            message.AppendLine($"    \"{logline}\"");
+        }
+
+        message.AppendLine("Additional entries:");
+        foreach (var logline in additionalEntries)
+        {
+            message.AppendLine($"  + \"{logline}\"");
+        }
+
+        Assert.Fail(message.ToString());
     }
 
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        if (ShouldDeserializeTraces)
+        using var reader = new StreamReader(ctx.Request.InputStream);
+        var zspans = JsonConvert.DeserializeObject<List<ZSpanMock>>(reader.ReadToEnd());
+        foreach (var span in zspans ?? Enumerable.Empty<ZSpanMock>())
         {
-            using (var reader = new StreamReader(ctx.Request.InputStream))
-            {
-                var zspans = JsonConvert.DeserializeObject<List<ZSpanMock>>(reader.ReadToEnd());
-                if (zspans != null)
-                {
-                    IList<IMockSpan> spans = zspans.ConvertAll(x => (IMockSpan)x);
-                    OnRequestDeserialized(spans);
-
-                    lock (_syncRoot)
-                    {
-                        Spans = Spans.AddRange(spans);
-                        RequestHeaders = RequestHeaders.Add(new NameValueCollection(ctx.Request.Headers));
-                    }
-                }
-            }
+            _spans.Add(span);
         }
 
         // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
         // (Setting content-length avoids that)
-
         ctx.Response.ContentType = "application/json";
         var buffer = Encoding.UTF8.GetBytes("{}");
         ctx.Response.ContentLength64 = buffer.LongLength;
@@ -193,5 +189,12 @@ public class MockZipkinCollector : IDisposable
     {
         const string name = nameof(MockZipkinCollector);
         _output.WriteLine($"[{name}]: {msg}");
+    }
+
+    private class Expectation
+    {
+        public Func<ZSpanMock, bool> Predicate { get; set; }
+
+        public string Description { get; set; }
     }
 }

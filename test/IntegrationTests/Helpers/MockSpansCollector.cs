@@ -105,6 +105,11 @@ public class MockSpansCollector : IDisposable
                 var found = false;
                 for (var i = missingExpectations.Count - 1; i >= 0; i--)
                 {
+                    if (missingExpectations[i].InstrumentationScopeName != resourceSpans.InstrumentationScopeName)
+                    {
+                        continue;
+                    }
+
                     if (!missingExpectations[i].Predicate(resourceSpans.Span))
                     {
                         continue;

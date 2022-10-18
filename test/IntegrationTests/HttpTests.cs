@@ -45,7 +45,7 @@ public class HttpTests : TestHelper
         SetEnvironmentVariable("OTEL_PROPAGATORS", propagators);
         SetEnvironmentVariable("DISABLE_DistributedContextPropagator", "true");
 
-        using var agent = await MockZipkinCollector.Start(Output);
+        using var agent = await LegacyMockZipkinCollector.Start(Output);
 
         const int expectedSpanCount = 3;
 

@@ -35,7 +35,7 @@ public class PluginsTests : TestHelper
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
 
-        using var collector = await MockZipkinCollector.Start(Output);
+        using var collector = await LegacyMockZipkinCollector.Start(Output);
         RunTestApplication(collector.Port);
         var spans = await collector.WaitForSpansAsync(1);
 

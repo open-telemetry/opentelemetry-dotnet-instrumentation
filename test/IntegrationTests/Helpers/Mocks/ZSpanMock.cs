@@ -30,7 +30,7 @@ using IntegrationTests.Helpers.Compatibility;
 namespace IntegrationTests.Helpers.Mocks;
 
 [DebuggerDisplay("TraceId={TraceId}, SpanId={SpanId}, Service={Service}, Name={Name}")]
-internal class ZSpanMock : IMockSpan
+public class ZSpanMock : IMockSpan
 {
     [JsonExtensionData]
     private Dictionary<string, JToken> _zipkinData;

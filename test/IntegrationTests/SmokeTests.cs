@@ -31,6 +31,10 @@ using IntegrationTests.Helpers.Models;
 using Xunit;
 using Xunit.Abstractions;
 
+#if NETFRAMEWORK
+using IntegrationTests.Helpers.Compatibility;
+#endif
+
 namespace IntegrationTests;
 
 public class SmokeTests : TestHelper
@@ -209,6 +213,21 @@ public class SmokeTests : TestHelper
         collector.AssertExpectations();
     }
 
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public async Task ZipkinExporter()
+    {
+        using var collector = await MockZipkinCollector.Start(Output);
+        collector.Expect(span => span.Name == "SayHello" && span.Tags.GetValueOrDefault("otel.library.name") == "MyCompany.MyProduct.MyLibrary");
+
+        SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "zipkin");
+        SetEnvironmentVariable("OTEL_EXPORTER_ZIPKIN_ENDPOINT", $"http://localhost:{collector.Port}/api/v2/spans");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
+        RunTestApplication();
+
+        collector.AssertExpectations();
+    }
+
 #if NETFRAMEWORK // The test is flaky on Linux and macOS, becasue of https://github.com/dotnet/runtime/issues/28658#issuecomment-462062760
     [Fact]
     [Trait("Category", "EndToEnd")]
@@ -302,7 +321,7 @@ public class SmokeTests : TestHelper
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
 
-        using var agent = await MockZipkinCollector.Start(Output);
+        using var agent = await LegacyMockZipkinCollector.Start(Output);
         RunTestApplication(agent.Port, enableStartupHook: enableStartupHook, enableClrProfiler: enableClrProfiler);
 
         // The process emitting the spans already finished by this time, there is no need to wait more,
