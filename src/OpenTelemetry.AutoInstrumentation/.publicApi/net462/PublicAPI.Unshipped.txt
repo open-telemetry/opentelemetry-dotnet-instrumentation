@@ -106,6 +106,8 @@ OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegrat
 OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration.LoggingBuilderIntegration() -> void
 OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration.MongoClientIntegration() -> void
+OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData.MySqlConnectionStringBuilderIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData.MySqlConnectionStringBuilderIntegration.MySqlConnectionStringBuilderIntegration() -> void
 OpenTelemetry.AutoInstrumentation.Instrumentations.Validations.StrongNamedValidation
 OpenTelemetry.AutoInstrumentation.Instrumentations.Validations.StrongNamedValidation.StrongNamedValidation() -> void
 override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.ToString() -> string
