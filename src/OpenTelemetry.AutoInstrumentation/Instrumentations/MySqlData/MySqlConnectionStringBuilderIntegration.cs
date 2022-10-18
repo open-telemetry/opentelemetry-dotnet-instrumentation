@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-#if !NETFRAMEWORK
-
 using System;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 
@@ -49,9 +47,12 @@ public class MySqlConnectionStringBuilderIntegration
     internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TReturn returnValue, Exception exception, CallTargetState state)
         where TTarget : struct
     {
+#if !NETFRAMEWORK
         var alwaysReturnTrue = (TReturn)TrueAsObject;
 
         return new CallTargetReturn<TReturn>(alwaysReturnTrue);
+#else
+        return new CallTargetReturn<TReturn>(returnValue);
+#endif
     }
 }
-#endif
