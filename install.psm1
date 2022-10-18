@@ -37,6 +37,11 @@ function Get-Temp-Directory() {
 }
 
 function Prepare-Install-Directory([string]$InstallDir) {
+    if (Test-Path $InstallDir) {
+        # Cleanup old directory
+        Remove-Item -LiteralPath $InstallDir -Force -Recurse
+    }
+
     New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
 }
 
