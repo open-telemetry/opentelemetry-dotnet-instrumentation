@@ -88,7 +88,7 @@ function Setup-Windows-Service([string]$HomeDir, [string]$WindowsServiceName, [s
         "DOTNET_STARTUP_HOOKS=$DOTNET_STARTUP_HOOKS"
     )
 
-    if (-not [string]::IsNullOrEmpty($OTelServiceName)) {
+    if (-not [string]::IsNullOrWhiteSpace($OTelServiceName)) {
         $vars += "OTEL_SERVICE_NAME=$OTelServiceName"
     }
 
@@ -192,7 +192,7 @@ function Install-OpenTelemetryCore() {
 function Uninstall-OpenTelemetryCore() {
     $homeDir = [System.Environment]::GetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", "Machine")
 
-    if ([string]::IsNullOrEmpty($homeDir)) {
+    if (-not $homeDir) {
         throw "OpenTelemetry Core is already removed."
     }
 
@@ -218,7 +218,7 @@ function Uninstall-OpenTelemetryCore() {
 function Register-OpenTelemetryForIIS() {
     $homeDir = [System.Environment]::GetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", "Machine")
 
-    if ([string]::IsNullOrEmpty($homeDir)) {
+    if (-not $homeDir) {
         throw "OpenTelemetry Core must be setup first. Run 'Install-OpenTelemetryCore' to setup Opentelemetry Core."
     }
 
@@ -235,7 +235,7 @@ function Register-OpenTelemetryForWindowsService() {
     )
     $homeDir = [System.Environment]::GetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", "Machine")
 
-    if ([string]::IsNullOrEmpty($homeDir)) {
+    if (-not $homeDir) {
         throw "OpenTelemetry Core must be setup first. Run 'Install-OpenTelemetryCore' to setup Opentelemetry Core."
     }
 
