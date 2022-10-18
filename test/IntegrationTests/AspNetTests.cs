@@ -141,7 +141,7 @@ public class AspNetTests : TestHelper
         {
             builder = builder.WithEnvironment("OTEL_TRACES_EXPORTER", testSettings.OtlpTracesSettings.Exporter);
             Output.WriteLine($"OTLP endpoint: {agentBaseUrl}");
-            builder = builder.WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", agentBaseUrl);
+            builder = builder.WithEnvironment("OTEL_EXPORTER_OTLP_ENDPOINT", agentBaseUrl);
         }
 
         if (testSettings.MetricsSettings != null)
