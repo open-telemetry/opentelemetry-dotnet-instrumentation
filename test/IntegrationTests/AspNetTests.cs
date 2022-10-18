@@ -131,15 +131,23 @@ public class AspNetTests : TestHelper
 
         if (testSettings.TracesSettings != null)
         {
+            builder = builder.WithEnvironment("OTEL_TRACES_EXPORTER", testSettings.TracesSettings.Exporter);
             string zipkinEndpoint = $"{agentBaseUrl}/api/v2/spans";
-            Output.WriteLine($"Zipkin Endpoint: {zipkinEndpoint}");
-
+            Output.WriteLine($"Zipkin endpoint: {zipkinEndpoint}");
             builder = builder.WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", zipkinEndpoint);
+        }
+
+        if (testSettings.OtlpTracesSettings != null)
+        {
+            builder = builder.WithEnvironment("OTEL_TRACES_EXPORTER", testSettings.OtlpTracesSettings.Exporter);
+            Output.WriteLine($"OTLP endpoint: {agentBaseUrl}");
+            builder = builder.WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", agentBaseUrl);
         }
 
         if (testSettings.MetricsSettings != null)
         {
-            Output.WriteLine($"Otlp Endpoint: {agentBaseUrl}");
+            builder = builder.WithEnvironment("OTEL_METRICS_EXPORTER", testSettings.MetricsSettings.Exporter);
+            Output.WriteLine($"OTLP endpoint: {agentBaseUrl}");
             builder = builder.WithEnvironment("OTEL_EXPORTER_OTLP_ENDPOINT", agentBaseUrl);
             builder = builder.WithEnvironment("OTEL_METRIC_EXPORT_INTERVAL", "1000");
         }

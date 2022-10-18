@@ -9,7 +9,6 @@ ENV COR_ENABLE_PROFILING=1 `
     COR_PROFILER_PATH=C:\opentelemetry\win-${platform}\OpenTelemetry.AutoInstrumentation.Native.dll `
     OTEL_DOTNET_AUTO_HOME=C:\opentelemetry\ `
     OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=C:\opentelemetry\integrations.json `
-    OTEL_TRACES_EXPORTER=zipkin `
     OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES=TestApplication.* `
     OTEL_SERVICE_NAME=TestApplication.AspNet `
     OTEL_DOTNET_AUTO_DEBUG=1 `
