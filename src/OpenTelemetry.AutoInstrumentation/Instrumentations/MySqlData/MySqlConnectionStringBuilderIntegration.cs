@@ -35,6 +35,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData;
     IntegrationName = "MySqlData")]
 public class MySqlConnectionStringBuilderIntegration
 {
+    private static readonly object TrueAsObject = true;
+
     /// <summary>
     /// OnMethodEnd callback
     /// </summary>
@@ -47,7 +49,7 @@ public class MySqlConnectionStringBuilderIntegration
     internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TReturn returnValue, Exception exception, CallTargetState state)
         where TTarget : struct
     {
-        var alwaysReturnTrue = (TReturn)(object)true;
+        var alwaysReturnTrue = (TReturn)TrueAsObject;
 
         return new CallTargetReturn<TReturn>(alwaysReturnTrue);
     }
