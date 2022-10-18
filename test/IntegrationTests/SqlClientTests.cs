@@ -43,7 +43,7 @@ public class SqlClientTests : TestHelper
     [Trait("Containers", "Linux")]
     public async Task SubmitTraces()
     {
-        using var agent = await MockZipkinCollector.Start(Output);
+        using var agent = await LegacyMockZipkinCollector.Start(Output);
 
         const int expectedSpanCount = 8;
 

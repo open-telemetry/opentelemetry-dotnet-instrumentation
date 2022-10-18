@@ -1,4 +1,4 @@
-// <copyright file="MockMetricsCollector.cs" company="OpenTelemetry Authors">
+// <copyright file="MockSpansCollector.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,27 +23,27 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
-using OpenTelemetry.Proto.Collector.Metrics.V1;
-using OpenTelemetry.Proto.Metrics.V1;
+using OpenTelemetry.Proto.Collector.Trace.V1;
+using OpenTelemetry.Proto.Trace.V1;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
-public class MockMetricsCollector : IDisposable
+public class MockSpansCollector : IDisposable
 {
     private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromMinutes(1);
 
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
 
+    private readonly BlockingCollection<Collected> _spans = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
-    private readonly BlockingCollection<List<Collected>> _metricsSnapshots = new(10); // bounded to avoid memory leak; contains protobuf type
 
-    private MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
+    private MockSpansCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
-        _listener = new(output, HandleHttpRequests, host, "/v1/metrics/");
+        _listener = new TestHttpListener(output, HandleHttpRequests, host, "/v1/traces/");
     }
 
     /// <summary>
@@ -53,16 +53,16 @@ public class MockMetricsCollector : IDisposable
 
     public OtlpResourceExpector ResourceExpector { get; } = new();
 
-    public static async Task<MockMetricsCollector> Start(ITestOutputHelper output, string host = "localhost")
+    public static async Task<MockSpansCollector> Start(ITestOutputHelper output, string host = "localhost")
     {
-        var collector = new MockMetricsCollector(output, host);
+        var collector = new MockSpansCollector(output, host);
 
         var healthzResult = await collector._listener.VerifyHealthzAsync();
 
         if (!healthzResult)
         {
             collector.Dispose();
-            throw new InvalidOperationException($"Cannot start {nameof(MockMetricsCollector)}!");
+            throw new InvalidOperationException($"Cannot start {nameof(MockSpansCollector)}!");
         }
 
         return collector;
@@ -70,16 +70,15 @@ public class MockMetricsCollector : IDisposable
 
     public void Dispose()
     {
-        WriteOutput($"Shutting down.");
-        ResourceExpector.Dispose();
-        _metricsSnapshots.Dispose();
+        WriteOutput("Shutting down.");
+        _spans.Dispose();
         _listener.Dispose();
     }
 
-    public void Expect(string instrumentationScopeName, Func<Metric, bool> predicate = null, string description = null)
+    public void Expect(string instrumentationScopeName, Func<Span, bool> predicate = null, string description = null)
     {
         predicate ??= x => true;
-        description ??= instrumentationScopeName;
+        description ??= "<no description>";
 
         _expectations.Add(new Expectation { InstrumentationScopeName = instrumentationScopeName, Predicate = predicate, Description = description });
     }
@@ -101,37 +100,26 @@ public class MockMetricsCollector : IDisposable
         try
         {
             cts.CancelAfter(timeout.Value);
-            foreach (var collectedMetricsSnapshot in _metricsSnapshots.GetConsumingEnumerable(cts.Token))
+            foreach (var resourceSpans in _spans.GetConsumingEnumerable(cts.Token))
             {
-                missingExpectations = new List<Expectation>(_expectations);
-                expectationsMet = new List<Collected>();
-                additionalEntries = new List<Collected>();
-
-                foreach (var collected in collectedMetricsSnapshot)
+                var found = false;
+                for (var i = missingExpectations.Count - 1; i >= 0; i--)
                 {
-                    bool found = false;
-                    for (int i = missingExpectations.Count - 1; i >= 0; i--)
+                    if (!missingExpectations[i].Predicate(resourceSpans.Span))
                     {
-                        if (collected.InstrumentationScopeName != missingExpectations[i].InstrumentationScopeName)
-                        {
-                            continue;
-                        }
-
-                        if (!missingExpectations[i].Predicate(collected.Metric))
-                        {
-                            continue;
-                        }
-
-                        expectationsMet.Add(collected);
-                        missingExpectations.RemoveAt(i);
-                        found = true;
-                        break;
+                        continue;
                     }
 
-                    if (!found)
-                    {
-                        additionalEntries.Add(collected);
-                    }
+                    expectationsMet.Add(resourceSpans);
+                    missingExpectations.RemoveAt(i);
+                    found = true;
+                    break;
+                }
+
+                if (!found)
+                {
+                    additionalEntries.Add(resourceSpans);
+                    continue;
                 }
 
                 if (missingExpectations.Count == 0)
@@ -143,16 +131,16 @@ public class MockMetricsCollector : IDisposable
         catch (ArgumentOutOfRangeException)
         {
             // CancelAfter called with non-positive value
-            FailMetrics(missingExpectations, expectationsMet, additionalEntries);
+            FailExpectations(missingExpectations, expectationsMet, additionalEntries);
         }
         catch (OperationCanceledException)
         {
             // timeout
-            FailMetrics(missingExpectations, expectationsMet, additionalEntries);
+            FailExpectations(missingExpectations, expectationsMet, additionalEntries);
         }
     }
 
-    private static void FailMetrics(
+    private static void FailExpectations(
         List<Expectation> missingExpectations,
         List<Collected> expectationsMet,
         List<Collected> additionalEntries)
@@ -183,33 +171,28 @@ public class MockMetricsCollector : IDisposable
 
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        var metricsMessage = ExportMetricsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
-        foreach (var resourceMetric in metricsMessage.ResourceMetrics ?? Enumerable.Empty<ResourceMetrics>())
+        var message = ExportTraceServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
+        foreach (var resourceSpan in message.ResourceSpans ?? Enumerable.Empty<ResourceSpans>())
         {
-            ResourceExpector.Collect(resourceMetric.Resource);
-
-            // process metrics snapshot
-            var metricsSnapshot = new List<Collected>();
-            foreach (var scopeMetrics in resourceMetric.ScopeMetrics ?? Enumerable.Empty<ScopeMetrics>())
+            ResourceExpector.Collect(resourceSpan.Resource);
+            foreach (var scopeSpans in resourceSpan.ScopeSpans ?? Enumerable.Empty<ScopeSpans>())
             {
-                foreach (var metric in scopeMetrics.Metrics ?? Enumerable.Empty<Metric>())
+                foreach (var span in scopeSpans.Spans ?? Enumerable.Empty<Span>())
                 {
-                    metricsSnapshot.Add(new Collected
+                    _spans.Add(new Collected
                     {
-                        InstrumentationScopeName = scopeMetrics.Scope.Name,
-                        Metric = metric
+                        InstrumentationScopeName = scopeSpans.Scope.Name,
+                        Span = span
                     });
                 }
             }
-
-            _metricsSnapshots.Add(metricsSnapshot);
         }
 
         // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
         // (Setting content-length avoids that)
         ctx.Response.ContentType = "application/x-protobuf";
         ctx.Response.StatusCode = (int)HttpStatusCode.OK;
-        var responseMessage = new ExportMetricsServiceResponse();
+        var responseMessage = new ExportTraceServiceResponse();
         ctx.Response.ContentLength64 = responseMessage.CalculateSize();
         responseMessage.WriteTo(ctx.Response.OutputStream);
         ctx.Response.Close();
@@ -217,7 +200,7 @@ public class MockMetricsCollector : IDisposable
 
     private void WriteOutput(string msg)
     {
-        const string name = nameof(MockMetricsCollector);
+        const string name = nameof(MockSpansCollector);
         _output.WriteLine($"[{name}]: {msg}");
     }
 
@@ -225,7 +208,7 @@ public class MockMetricsCollector : IDisposable
     {
         public string InstrumentationScopeName { get; set; }
 
-        public Func<Metric, bool> Predicate { get; set; }
+        public Func<Span, bool> Predicate { get; set; }
 
         public string Description { get; set; }
     }
@@ -234,11 +217,11 @@ public class MockMetricsCollector : IDisposable
     {
         public string InstrumentationScopeName { get; set; }
 
-        public Metric Metric { get; set; } // protobuf type
+        public Span Span { get; set; } // protobuf type
 
         public override string ToString()
         {
-            return $"InstrumentationScopeName = {InstrumentationScopeName}, Metric = {Metric}";
+            return $"InstrumentationScopeName = {InstrumentationScopeName}, Span = {Span}";
         }
     }
 }
