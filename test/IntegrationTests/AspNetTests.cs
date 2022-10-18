@@ -23,7 +23,6 @@ using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using FluentAssertions;
 using IntegrationTests.Helpers;
-using IntegrationTests.Helpers.Models;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -47,28 +46,18 @@ public class AspNetTests : TestHelper
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
-        using var agent = await LegacyMockZipkinCollector.Start(Output, host: "*");
-        using var fwPort = FirewallHelper.OpenWinPort(agent.Port, Output);
-        var testSettings = new TestSettings
-        {
-            TracesSettings = new TracesSettings { Port = agent.Port }
-        };
+        using var collector = await MockSpansCollector.Start(Output, host: "*");
+        using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry");
+
+        string collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
+        SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "otlp");
+        SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", collectorUrl);
         var webPort = TcpPortProvider.GetOpenPort();
-        await using var container = await StartContainerAsync(testSettings, webPort);
+        await using var container = await StartContainerAsync(webPort);
+        await CallTestApplicationEndpoint(webPort);
 
-        var client = new HttpClient();
-
-        var response = await client.GetAsync($"http://localhost:{webPort}");
-        var content = await response.Content.ReadAsStringAsync();
-
-        Output.WriteLine("Sample response:");
-        Output.WriteLine(content);
-
-        agent.SpanFilters.Add(x => x.Name != "healthz");
-
-        var spans = await agent.WaitForSpansAsync(1);
-
-        Assert.True(spans.Count >= 1, $"Expecting at least 1 span, only received {spans.Count}");
+        collector.AssertExpectations();
     }
 
     [Fact]
@@ -83,28 +72,22 @@ public class AspNetTests : TestHelper
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
         using var collector = await MockMetricsCollector.Start(Output, host: "*");
+        using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
         collector.Expect("OpenTelemetry.Instrumentation.AspNet");
 
-        // Helps to reduce noise by enabling only AspNet metrics.
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "AspNet");
-        using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
-        var testSettings = new TestSettings
-        {
-            MetricsSettings = new MetricsSettings { Port = collector.Port },
-        };
+        string collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
+        SetEnvironmentVariable("OTEL_METRICS_EXPORTER", "otlp");
+        SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", collectorUrl);
+        SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "1000");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "AspNet"); // Helps to reduce noise by enabling only AspNet metrics.
         var webPort = TcpPortProvider.GetOpenPort();
-        await using var container = await StartContainerAsync(testSettings, webPort);
-
-        var client = new HttpClient();
-        var response = await client.GetAsync($"http://localhost:{webPort}");
-        var content = await response.Content.ReadAsStringAsync();
-        Output.WriteLine("Sample response:");
-        Output.WriteLine(content);
+        await using var container = await StartContainerAsync(webPort);
+        await CallTestApplicationEndpoint(webPort);
 
         collector.AssertExpectations();
     }
 
-    private async Task<TestcontainersContainer> StartContainerAsync(TestSettings testSettings, int webPort)
+    private async Task<TestcontainersContainer> StartContainerAsync(int webPort)
     {
         // get path to test application that the profiler will attach to
         string testApplicationName = $"testapplication-{EnvironmentHelper.TestApplicationName.ToLowerInvariant()}";
@@ -115,39 +98,18 @@ public class AspNetTests : TestHelper
         string logPath = EnvironmentHelper.IsRunningOnCI()
             ? Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "build_data", "profiler-logs")
             : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OpenTelemetry .NET AutoInstrumentation", "logs");
-
         Directory.CreateDirectory(logPath);
-
         Output.WriteLine("Collecting docker logs to: " + logPath);
 
-        var agentPort = testSettings.TracesSettings?.Port ?? testSettings.MetricsSettings?.Port;
         var builder = new TestcontainersBuilder<TestcontainersContainer>()
             .WithImage(testApplicationName)
             .WithCleanUp(cleanUp: true)
             .WithOutputConsumer(Consume.RedirectStdoutAndStderrToConsole())
-            .WithName($"{testApplicationName}-{agentPort}-{webPort}")
+            .WithName($"{testApplicationName}-{webPort}")
             .WithNetwork(networkId, networkName)
             .WithPortBinding(webPort, 80)
             .WithBindMount(logPath, "c:/inetpub/wwwroot/logs")
             .WithBindMount(EnvironmentHelper.GetNukeBuildOutput(), "c:/opentelemetry");
-
-        string agentBaseUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{agentPort}";
-        string agentHealthzUrl = $"{agentBaseUrl}/healthz";
-
-        if (testSettings.TracesSettings != null)
-        {
-            string zipkinEndpoint = $"{agentBaseUrl}/api/v2/spans";
-            Output.WriteLine($"Zipkin Endpoint: {zipkinEndpoint}");
-
-            builder = builder.WithEnvironment("OTEL_EXPORTER_ZIPKIN_ENDPOINT", zipkinEndpoint);
-        }
-
-        if (testSettings.MetricsSettings != null)
-        {
-            Output.WriteLine($"Otlp Endpoint: {agentBaseUrl}");
-            builder = builder.WithEnvironment("OTEL_EXPORTER_OTLP_ENDPOINT", agentBaseUrl);
-            builder = builder.WithEnvironment("OTEL_METRIC_EXPORT_INTERVAL", "1000");
-        }
 
         foreach (var env in EnvironmentHelper.CustomEnvironmentVariables)
         {
@@ -161,7 +123,6 @@ public class AspNetTests : TestHelper
             wasStarted.Should().BeTrue($"Container based on {testApplicationName} has to be operational for the test.");
             Output.WriteLine($"Container was started successfully.");
 
-            PowershellHelper.RunCommand($"docker exec {container.Name} curl -v {agentHealthzUrl}", Output);
             var webAppHealthzUrl = $"http://localhost:{webPort}/healthz";
             var webAppHealthzResult = await HealthzHelper.TestHealtzAsync(webAppHealthzUrl, "IIS WebApp", Output);
             webAppHealthzResult.Should().BeTrue("IIS WebApp health check never returned OK.");
@@ -174,6 +135,15 @@ public class AspNetTests : TestHelper
         }
 
         return container;
+    }
+
+    private async Task CallTestApplicationEndpoint(int webPort)
+    {
+        var client = new HttpClient();
+        var response = await client.GetAsync($"http://localhost:{webPort}");
+        var content = await response.Content.ReadAsStringAsync();
+        Output.WriteLine("Response:");
+        Output.WriteLine(content);
     }
 }
 #endif
