@@ -1,4 +1,4 @@
-// <copyright file="MockSpansCollector.cs" company="OpenTelemetry Authors">
+// <copyright file="MockZipkinCollector.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,33 +17,33 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Google.Protobuf;
-using OpenTelemetry.Proto.Collector.Trace.V1;
-using OpenTelemetry.Proto.Trace.V1;
+using IntegrationTests.Helpers.Mocks;
+using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
 
-public class MockSpansCollector : IDisposable
+public class MockZipkinCollector : IDisposable
 {
     private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromMinutes(1);
 
     private readonly ITestOutputHelper _output;
     private readonly TestHttpListener _listener;
 
-    private readonly BlockingCollection<Collected> _spans = new(100); // bounded to avoid memory leak
+    private readonly BlockingCollection<ZSpanMock> _spans = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
 
-    private MockSpansCollector(ITestOutputHelper output, string host = "localhost")
+    private MockZipkinCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
-        _listener = new TestHttpListener(output, HandleHttpRequests, host, "/v1/traces/");
+        _listener = new TestHttpListener(output, HandleHttpRequests, host, "/api/v2/spans/");
     }
 
     /// <summary>
@@ -51,18 +51,16 @@ public class MockSpansCollector : IDisposable
     /// </summary>
     public int Port { get => _listener.Port; }
 
-    public OtlpResourceExpector ResourceExpector { get; } = new();
-
-    public static async Task<MockSpansCollector> Start(ITestOutputHelper output, string host = "localhost")
+    public static async Task<MockZipkinCollector> Start(ITestOutputHelper output, string host = "localhost")
     {
-        var collector = new MockSpansCollector(output, host);
+        var collector = new MockZipkinCollector(output, host);
 
         var healthzResult = await collector._listener.VerifyHealthzAsync();
 
         if (!healthzResult)
         {
             collector.Dispose();
-            throw new InvalidOperationException($"Cannot start {nameof(MockSpansCollector)}!");
+            throw new InvalidOperationException($"Cannot start {nameof(MockZipkinCollector)}!");
         }
 
         return collector;
@@ -75,12 +73,12 @@ public class MockSpansCollector : IDisposable
         _listener.Dispose();
     }
 
-    public void Expect(string instrumentationScopeName, Func<Span, bool> predicate = null, string description = null)
+    public void Expect(Func<ZSpanMock, bool> predicate = null, string description = null)
     {
         predicate ??= x => true;
         description ??= "<no description>";
 
-        _expectations.Add(new Expectation { InstrumentationScopeName = instrumentationScopeName, Predicate = predicate, Description = description });
+        _expectations.Add(new Expectation { Predicate = predicate, Description = description });
     }
 
     public void AssertExpectations(TimeSpan? timeout = null)
@@ -91,8 +89,8 @@ public class MockSpansCollector : IDisposable
         }
 
         var missingExpectations = new List<Expectation>(_expectations);
-        var expectationsMet = new List<Collected>();
-        var additionalEntries = new List<Collected>();
+        var expectationsMet = new List<ZSpanMock>();
+        var additionalEntries = new List<ZSpanMock>();
 
         timeout ??= DefaultWaitTimeout;
         var cts = new CancellationTokenSource();
@@ -100,22 +98,17 @@ public class MockSpansCollector : IDisposable
         try
         {
             cts.CancelAfter(timeout.Value);
-            foreach (var resourceSpans in _spans.GetConsumingEnumerable(cts.Token))
+            foreach (var span in _spans.GetConsumingEnumerable(cts.Token))
             {
                 var found = false;
                 for (var i = missingExpectations.Count - 1; i >= 0; i--)
                 {
-                    if (missingExpectations[i].InstrumentationScopeName != resourceSpans.InstrumentationScopeName)
+                    if (!missingExpectations[i].Predicate(span))
                     {
                         continue;
                     }
 
-                    if (!missingExpectations[i].Predicate(resourceSpans.Span))
-                    {
-                        continue;
-                    }
-
-                    expectationsMet.Add(resourceSpans);
+                    expectationsMet.Add(span);
                     missingExpectations.RemoveAt(i);
                     found = true;
                     break;
@@ -123,7 +116,7 @@ public class MockSpansCollector : IDisposable
 
                 if (!found)
                 {
-                    additionalEntries.Add(resourceSpans);
+                    additionalEntries.Add(span);
                     continue;
                 }
 
@@ -147,8 +140,8 @@ public class MockSpansCollector : IDisposable
 
     private static void FailExpectations(
         List<Expectation> missingExpectations,
-        List<Collected> expectationsMet,
-        List<Collected> additionalEntries)
+        List<ZSpanMock> expectationsMet,
+        List<ZSpanMock> additionalEntries)
     {
         var message = new StringBuilder();
         message.AppendLine();
@@ -176,57 +169,32 @@ public class MockSpansCollector : IDisposable
 
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        var message = ExportTraceServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
-        foreach (var resourceSpan in message.ResourceSpans ?? Enumerable.Empty<ResourceSpans>())
+        using var reader = new StreamReader(ctx.Request.InputStream);
+        var zspans = JsonConvert.DeserializeObject<List<ZSpanMock>>(reader.ReadToEnd());
+        foreach (var span in zspans ?? Enumerable.Empty<ZSpanMock>())
         {
-            ResourceExpector.Collect(resourceSpan.Resource);
-            foreach (var scopeSpans in resourceSpan.ScopeSpans ?? Enumerable.Empty<ScopeSpans>())
-            {
-                foreach (var span in scopeSpans.Spans ?? Enumerable.Empty<Span>())
-                {
-                    _spans.Add(new Collected
-                    {
-                        InstrumentationScopeName = scopeSpans.Scope.Name,
-                        Span = span
-                    });
-                }
-            }
+            _spans.Add(span);
         }
 
         // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
         // (Setting content-length avoids that)
-        ctx.Response.ContentType = "application/x-protobuf";
-        ctx.Response.StatusCode = (int)HttpStatusCode.OK;
-        var responseMessage = new ExportTraceServiceResponse();
-        ctx.Response.ContentLength64 = responseMessage.CalculateSize();
-        responseMessage.WriteTo(ctx.Response.OutputStream);
+        ctx.Response.ContentType = "application/json";
+        var buffer = Encoding.UTF8.GetBytes("{}");
+        ctx.Response.ContentLength64 = buffer.LongLength;
+        ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
         ctx.Response.Close();
     }
 
     private void WriteOutput(string msg)
     {
-        const string name = nameof(MockSpansCollector);
+        const string name = nameof(MockZipkinCollector);
         _output.WriteLine($"[{name}]: {msg}");
     }
 
     private class Expectation
     {
-        public string InstrumentationScopeName { get; set; }
-
-        public Func<Span, bool> Predicate { get; set; }
+        public Func<ZSpanMock, bool> Predicate { get; set; }
 
         public string Description { get; set; }
-    }
-
-    private class Collected
-    {
-        public string InstrumentationScopeName { get; set; }
-
-        public Span Span { get; set; } // protobuf type
-
-        public override string ToString()
-        {
-            return $"InstrumentationScopeName = {InstrumentationScopeName}, Span = {Span}";
-        }
     }
 }

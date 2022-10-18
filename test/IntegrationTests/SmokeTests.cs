@@ -31,6 +31,10 @@ using IntegrationTests.Helpers.Models;
 using Xunit;
 using Xunit.Abstractions;
 
+#if NETFRAMEWORK
+using IntegrationTests.Helpers.Compatibility;
+#endif
+
 namespace IntegrationTests;
 
 public class SmokeTests : TestHelper
@@ -205,6 +209,21 @@ public class SmokeTests : TestHelper
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
         RunTestApplication(otlpTraceCollectorPort: collector.Port);
+
+        collector.AssertExpectations();
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public async Task ZipkinExporter()
+    {
+        using var collector = await MockZipkinCollector.Start(Output);
+        collector.Expect(span => span.Name == "SayHello" && span.Tags.GetValueOrDefault("otel.library.name") == "MyCompany.MyProduct.MyLibrary");
+
+        SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "zipkin");
+        SetEnvironmentVariable("OTEL_EXPORTER_ZIPKIN_ENDPOINT", $"http://localhost:{collector.Port}/api/v2/spans");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
+        RunTestApplication();
 
         collector.AssertExpectations();
     }
