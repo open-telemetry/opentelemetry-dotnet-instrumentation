@@ -23,11 +23,8 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Google.Protobuf;
 using IntegrationTests.Helpers.Mocks;
 using Newtonsoft.Json;
-using OpenTelemetry.Proto.Collector.Trace.V1;
-using OpenTelemetry.Proto.Trace.V1;
 using Xunit;
 using Xunit.Abstractions;
 
