@@ -182,9 +182,8 @@ Get-Command -Module install
 Get-Help Install-OpenTelemetryCore -Detailed
 ```
 
-⚠️ You have to restart the IIS and instrumented services
+⚠️ You have to reboot the machine
 after setting up the instrumentation.
-Alternatively, you can reboot the whole machine.
 
 ## Instrument a Windows Service running a .NET application
 
