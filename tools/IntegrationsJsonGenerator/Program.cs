@@ -49,7 +49,8 @@ foreach (var typeInfo in autoInstrumentationLib.GetTypes())
                 integration.IntegrationName,
                 new Integration
                 {
-                    Name = integration.IntegrationName, MethodReplacements = new List<MethodReplacement> { integration.MethodReplacement }
+                    Name = integration.IntegrationName,
+                    MethodReplacements = new List<MethodReplacement> { integration.MethodReplacement }
                 });
         }
         else
