@@ -121,36 +121,6 @@ When running your application, make sure to:
 
 > Some settings can be omitted on .NET (Core). For more information, see [config.md](config.md#net-clr-profiler).
 
-### PowerShell module
-
-You can install OpenTelemetry .NET Automatic Instrumentation
-and instrument your .NET application using the provided PowerShell module.
-Example usage:
-
-```powershell
-$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/install.psm1"
-$download_path = Join-Path $env:temp "install.psm1"
-
-Invoke-WebRequest -Uri $module_url -OutFile $download_path
-
-Import-Module $download_path
-
-# Install core files
-Install-OpenTelemetryCore
-
-# Setup IIS
-Register-OpenTelemetryForIIS
-
-# Setup your Windows Service (if any)
-Register-OpenTelemetryForWindowsService -WindowsServiceName "MyServiceName" -OTelServiceName "MyServiceDisplayName"
-
-# List all available commands
-Get-Command -Module install
-
-# Get help with command
-Get-Help Install-OpenTelemetryCore -Detailed
-```
-
 ### Shell scripts
 
 You can install OpenTelemetry .NET Automatic Instrumentation
@@ -182,6 +152,39 @@ OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,
 | `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`       | No       | *Calculated*              |
 
 > On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
+
+### PowerShell module (Windows)
+
+On Windows, you can install OpenTelemetry .NET Automatic Instrumentation
+and instrument your .NET application using the provided PowerShell module.
+Example usage:
+
+```powershell
+# Download and import the module
+$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/main/install.psm1"
+$download_path = Join-Path $env:temp "install.psm1"
+Invoke-WebRequest -Uri $module_url -OutFile $download_path
+Import-Module $download_path
+
+# Install core files
+Install-OpenTelemetryCore
+
+# Setup IIS instrumentation
+Register-OpenTelemetryForIIS
+
+# Setup your Windows Service instrumentation
+Register-OpenTelemetryForWindowsService -WindowsServiceName "MyServiceName" -OTelServiceName "MyServiceDisplayName"
+
+# List all available commands
+Get-Command -Module install
+
+# Get command's usage information
+Get-Help Install-OpenTelemetryCore -Detailed
+```
+
+⚠️ You have to restart the IIS and instrumented services
+after setting up the instrumentation.
+Alternatively, you can reboot the whole machine.
 
 ## Instrument a Windows Service running a .NET application
 
