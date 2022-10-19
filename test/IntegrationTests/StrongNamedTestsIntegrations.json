@@ -1,6 +1,6 @@
 [
   {
-    "name": "StrongNamedTests",
+    "name": "StrongNamedValidation",
     "method_replacements": [
       {
         "caller": {},
