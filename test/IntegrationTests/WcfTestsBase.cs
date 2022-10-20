@@ -39,10 +39,10 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
     {
         using var collector = await MockSpansCollector.Start(Output);
         // the test app makes 2 calls (therefore we exepct 4 spans)
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server);
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client);
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server);
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client);
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 1");
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 1");
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 2");
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 2");
 
         var serverHelper = new WcfServerTestHelper(Output);
         _serverProcess = serverHelper.RunWcfServer(collector.Port);
