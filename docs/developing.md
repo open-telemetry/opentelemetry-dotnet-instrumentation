@@ -96,6 +96,21 @@ nuke MarkdownLintFix
 
 All MarkdownLint tasks require [Node.js](https://nodejs.org/) installed locally.
 
+## Maintain integrations.json
+
+[`integrations.json`](../integrations.json) can be regenerated using
+[`Integrations Json Generator`](../tools/IntegrationsJsonGenerator) project.
+
+To update this file you should
+
+1. Modify bytecode instrumentation (especially [`InstrumentMethodAttribute`](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/InstrumentMethodAttribute.cs)s).
+1. Execute `nuke BuildTracer` to generate auto instrumentation library - source
+   for the generator.
+1. Execute [`Integrations Json Generator`](../tools/IntegrationsJsonGenerator).
+1. Execute `nuke BuildTracer` to apply changes in `integrations.json`.
+
+Remember to commit changes in `integrations.json`.
+
 ## Manual testing
 
 ### Test environment
