@@ -55,6 +55,10 @@ function Prepare-Install-Directory([string]$InstallDir) {
     New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
 }
 
+function Reset-IIS() {    
+    Start-Process "iisreset.exe" -NoNewWindow -Wait
+}
+
 function Download-OpenTelemetry([string]$Version, [string]$Path) {
     $archive = "opentelemetry-dotnet-instrumentation-windows.zip"
     $dlUrl = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/$Version/$archive"
@@ -237,7 +241,7 @@ function Uninstall-OpenTelemetryCore() {
 
 <#
     .SYNOPSIS
-    Setups IIS environment variables to enable automatic instrumentation.
+    Setups environment variables to enable automatic instrumentation started from the current PowerShell session.
     .PARAMETER OTelServiceName
     Specifies OpenTelemetry service name to identify your service.
 #>
@@ -263,6 +267,7 @@ function Register-OpenTelemetryForCurrentSession() {
 <#
     .SYNOPSIS
     Setups IIS environment variables to enable automatic instrumentation.
+    Performs IIS reset after registration.
 #>
 function Register-OpenTelemetryForIIS() {
     $installDir = Get-Current-InstallDir
@@ -273,11 +278,14 @@ function Register-OpenTelemetryForIIS() {
 
     Setup-Windows-Service -InstallDir $installDir -WindowsServiceName "W3SVC"
     Setup-Windows-Service -InstallDir $installDir -WindowsServiceName "WAS"
+
+    Reset-IIS
 }
 
 <#
     .SYNOPSIS
     Setups specific Windows service environment variables to enable automatic instrumentation.
+    Performs service restart after registration.
     .PARAMETER WindowsServiceName
     Actual Windows service name in registry.
     .PARAMETER OTelServiceName
@@ -298,20 +306,53 @@ function Register-OpenTelemetryForWindowsService() {
     }
 
     Setup-Windows-Service -InstallDir $installDir -WindowsServiceName $WindowsServiceName -OTelServiceName $OTelServiceName
+    Restart-Service -Name $WindowsServiceName -Force
+}
+
+<#
+    .SYNOPSIS
+    Removes environment variables to disable automatic instrumentation started from the current PowerShell session.
+#>
+function Unregister-OpenTelemetryForCurrentSession() {
+    # .NET Framework
+    $env:COR_ENABLE_PROFILING = $null
+    $env:COR_PROFILER = $null
+    $env:COR_PROFILER_PATH_32 = $null
+    $env:COR_PROFILER_PATH_64 = $null
+
+    # .NET Core
+    $env:CORECLR_ENABLE_PROFILING = $null
+    $env:CORECLR_PROFILER = $null
+    $env:CORECLR_PROFILER_PATH_32 = $null
+    $env:CORECLR_PROFILER_PATH_64 = $null
+
+    # ASP.NET Core
+    $env:ASPNETCORE_HOSTINGSTARTUPASSEMBLIES = $null
+
+    # .NET Common
+    $env:DOTNET_ADDITIONAL_DEPS = $null
+    $env:DOTNET_SHARED_STORE = $null
+    $env:DOTNET_STARTUP_HOOKS = $null
+
+    # OpenTelemetry
+    Get-ChildItem env: | Where-Object { $_.Name -like "OTEL_DOTNET_*" } | ForEach-Object { Set-Item "env:$($_.Name)" $null }
 }
 
 <#
     .SYNOPSIS
     Removes IIS environment variables to disable automatic instrumentation.
+    Performs IIS reset after removal.
 #>
 function Unregister-OpenTelemetryForIIS() {
     Unregister-OpenTelemetryForWindowsService -WindowsServiceName "W3SVC"
     Unregister-OpenTelemetryForWindowsService -WindowsServiceName "WAS"
+    Reset-IIS
 }
 
 <#
     .SYNOPSIS
     Removes specific Windows service environment variables to disable automatic instrumentation.
+    Performs service restart after removal.
     .PARAMETER WindowsServiceName
     Actual Windows service Name in registry.
 #>
@@ -322,6 +363,7 @@ function Unregister-OpenTelemetryForWindowsService() {
     )  
 
     Remove-Windows-Service -WindowsServiceName $WindowsServiceName
+    Restart-Service -Name $WindowsServiceName -Force
 }
 
 <#
@@ -345,4 +387,5 @@ Export-ModuleMember -Function Register-OpenTelemetryForCurrentSession
 Export-ModuleMember -Function Uninstall-OpenTelemetryCore
 Export-ModuleMember -Function Unregister-OpenTelemetryForIIS
 Export-ModuleMember -Function Unregister-OpenTelemetryForWindowsService
+Export-ModuleMember -Function Unregister-OpenTelemetryForCurrentSession
 Export-ModuleMember -Function Get-OpenTelemetryInstallDirectory
