@@ -175,6 +175,12 @@ Register-OpenTelemetryForIIS
 # Setup your Windows Service instrumentation
 Register-OpenTelemetryForWindowsService -WindowsServiceName "MyServiceName" -OTelServiceName "MyServiceDisplayName"
 
+# Setup environment to start instrumentation from the current PowerShell session
+Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
+
+# Get current installation location
+Get-OpenTelemetryInstallDirectory
+
 # List all available commands
 Get-Command -Module install
 
@@ -182,7 +188,7 @@ Get-Command -Module install
 Get-Help Install-OpenTelemetryCore -Detailed
 ```
 
-⚠️ You have to reboot the machine
+⚠️ You have to restart the IIS / Windows service
 after setting up the instrumentation.
 
 ## Instrument a Windows Service running a .NET application
