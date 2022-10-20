@@ -15,7 +15,6 @@
 // </copyright>
 
 using System.Threading.Tasks;
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
