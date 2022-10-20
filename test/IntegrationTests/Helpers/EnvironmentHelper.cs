@@ -88,60 +88,6 @@ public class EnvironmentHelper
         return RuntimeFrameworkDescription.Contains("core") || Environment.Version.Major >= 5;
     }
 
-    public static void ClearProfilerEnvironmentVariables()
-    {
-        var environmentVariables = new[]
-        {
-            // .NET Core
-            "CORECLR_ENABLE_PROFILING",
-            "CORECLR_PROFILER",
-            "CORECLR_PROFILER_PATH",
-            "CORECLR_PROFILER_PATH_32",
-            "CORECLR_PROFILER_PATH_64",
-            "DOTNET_STARTUP_HOOKS",
-            "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES",
-
-            // .NET Framework
-            "COR_ENABLE_PROFILING",
-            "COR_PROFILER",
-            "COR_PROFILER_PATH",
-
-            // OpenTelemetry
-            "OTEL_TRACES_EXPORTER",
-            "OTEL_METRICS_EXPORTER",
-            "OTEL_LOGS_EXPORTER",
-            "OTEL_EXPORTER_ZIPKIN_ENDPOINT",
-            "OTEL_EXPORTER_OTLP_ENDPOINT",
-            "OTEL_PROPAGATORS",
-            "OTEL_SERVICE_NAME",
-            "OTEL_METRIC_EXPORT_INTERVAL",
-
-            // OpenTelemetry Auto Instrumentation
-            "OTEL_DOTNET_AUTO_INCLUDE_PROCESSES",
-            "OTEL_DOTNET_AUTO_HOME",
-            "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE",
-            "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES",
-            "OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES",
-            "OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE",
-            "OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES",
-            "OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP",
-            "OTEL_DOTNET_AUTO_PLUGINS",
-            "OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS",
-            "OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS",
-            "OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS",
-            "OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS",
-
-            // Test helpers
-            "LONG_RUNNING",
-            "DISABLE_DistributedContextPropagator"
-        };
-
-        foreach (string variable in environmentVariables)
-        {
-            Environment.SetEnvironmentVariable(variable, null);
-        }
-    }
-
     public static string GetNukeBuildOutput()
     {
         string nukeOutputPath = Path.Combine(
