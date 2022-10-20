@@ -3,6 +3,7 @@
 1. Update the version in the following files:
 
    - [`download.sh`](../download.sh)
+   - [`OpenTelemetry.Dotnet.Auto.psm1`](../OpenTelemetry.Dotnet.Auto.psm1)
    - [`docs/README.md`](./README.md)
    - [`nuget/OpenTelemetry.AutoInstrumentation.nuspec`](../nuget/OpenTelemetry.AutoInstrumentation.nuspec)
    - [`src/OpenTelemetry.AutoInstrumentation/Constants.cs`](../src/OpenTelemetry.AutoInstrumentation/Constants.cs)
