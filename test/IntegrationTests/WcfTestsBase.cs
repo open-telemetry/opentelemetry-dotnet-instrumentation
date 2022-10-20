@@ -18,10 +18,10 @@ using System;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using FluentAssertions;
-using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
+using static OpenTelemetry.Proto.Trace.V1.Span.Types;
 
 namespace IntegrationTests;
 public abstract class WcfTestsBase : TestHelper, IDisposable
@@ -38,25 +38,22 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
     [Trait("Category", "EndToEnd")]
     public async Task SubmitsTraces()
     {
-        using var agent = await LegacyMockZipkinCollector.Start(Output);
+        EnvironmentTools.IsWindowsAdministrator().Should().BeTrue(); // WCF Server needs admin
+
+        using var collector = await MockSpansCollector.Start(Output);
+        // the test app makes 2 calls (therefore we exepct 4 spans)
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 1");
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 1");
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 2");
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 2");
 
         var serverHelper = new WcfServerTestHelper(Output);
-        _serverProcess = serverHelper.RunWcfServer(agent.Port);
+        _serverProcess = serverHelper.RunWcfServer(collector.Port);
         await WaitForServer();
 
-        RunTestApplication(agent.Port);
+        RunTestApplication(otlpTraceCollectorPort: collector.Port);
 
-        // wait so the spans from server are delivered
-        await Task.Delay(2000);
-        var spans = await agent.WaitForSpansAsync(4);
-
-        using var scope = new AssertionScope();
-        spans.Count.Should().Be(4);
-
-        foreach (var span in spans)
-        {
-            span.Tags["otel.library.name"].Should().Be("OpenTelemetry.Instrumentation.Wcf");
-        }
+        collector.AssertExpectations();
     }
 
     public void Dispose()
