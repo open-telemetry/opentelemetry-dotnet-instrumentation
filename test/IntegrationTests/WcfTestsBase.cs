@@ -17,6 +17,7 @@
 using System;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -37,6 +38,8 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
     [Trait("Category", "EndToEnd")]
     public async Task SubmitsTraces()
     {
+        EnvironmentTools.IsWindowsAdministrator().Should().BeTrue(); // WCF Server needs admin
+
         using var collector = await MockSpansCollector.Start(Output);
         // the test app makes 2 calls (therefore we exepct 4 spans)
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 1");
