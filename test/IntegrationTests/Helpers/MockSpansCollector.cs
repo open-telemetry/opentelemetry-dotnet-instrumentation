@@ -71,6 +71,7 @@ public class MockSpansCollector : IDisposable
     public void Dispose()
     {
         WriteOutput("Shutting down.");
+        ResourceExpector.Dispose();
         _spans.Dispose();
         _listener.Dispose();
     }
