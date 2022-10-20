@@ -15,7 +15,6 @@
 // </copyright>
 
 using System.Threading.Tasks;
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -33,13 +32,13 @@ public class PluginsTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task SubmitsTraces()
     {
+        using var collector = await MockSpansCollector.Start(Output);
+        collector.Expect("MyCompany.MyProduct.MyLibrary");
+
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+        RunTestApplication(otlpTraceCollectorPort: collector.Port);
 
-        using var collector = await LegacyMockZipkinCollector.Start(Output);
-        RunTestApplication(collector.Port);
-        var spans = await collector.WaitForSpansAsync(1);
-
-        spans.Should().Contain(x => x.Name == "SayHello");
+        collector.AssertExpectations();
     }
 
     [Fact]

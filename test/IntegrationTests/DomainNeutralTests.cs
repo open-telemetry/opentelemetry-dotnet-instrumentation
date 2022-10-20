@@ -15,12 +15,9 @@
 // </copyright>
 
 #if NETFRAMEWORK
-using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
-using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -40,6 +37,9 @@ public class DomainNeutralTests : TestHelper
     {
         EnvironmentTools.IsWindowsAdministrator().Should().BeTrue();
 
+        using var collector = await MockSpansCollector.Start(Output);
+        collector.Expect("TestApplication.StrongNamedValidation");
+
         // Add the necessary assembly to the GAC so it can be loaded as domain-neutral.
         var instrumentationAssembly = Path.Combine(
             EnvironmentTools.GetSolutionDirectory(),
@@ -55,22 +55,10 @@ public class DomainNeutralTests : TestHelper
         var assemblyPath = GetTestAssemblyPath();
         var integrationsFile = Path.Combine(assemblyPath, "StrongNamedTestsIntegrations.json");
         File.Exists(integrationsFile).Should().BeTrue();
-
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE", integrationsFile);
+        RunTestApplication(otlpTraceCollectorPort: collector.Port);
 
-        using var agent = await LegacyMockZipkinCollector.Start(Output);
-
-        RunTestApplication(agent.Port);
-
-        const int expectedSpansCount = 1;
-        var spans = await agent.WaitForSpansAsync(expectedSpansCount);
-
-        using (new AssertionScope())
-        {
-            spans.Count.Should().Be(expectedSpansCount);
-
-            spans.Count(s => s.Tags["validation"] == "StrongNamedValidation").Should().Be(1);
-        }
+        collector.AssertExpectations();
     }
 }
 #endif

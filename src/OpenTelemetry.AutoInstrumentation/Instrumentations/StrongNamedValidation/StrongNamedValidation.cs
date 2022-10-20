@@ -47,10 +47,7 @@ public class StrongNamedValidation
     internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance)
     {
         using var activity = ValidationActivitySource.StartActivity(nameof(StrongNamedValidation));
-        activity.AddTag("validation", nameof(StrongNamedValidation));
-
         Console.WriteLine($"Validation: {nameof(StrongNamedValidation)}");
-
         return CallTargetState.GetDefault();
     }
 }

@@ -14,12 +14,9 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
-using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -36,24 +33,15 @@ public class StrongNamedTests : TestHelper
     [Fact]
     public async Task SubmitsTraces()
     {
+        using var collector = await MockSpansCollector.Start(Output);
+        collector.Expect("TestApplication.StrongNamedValidation");
+
         var assemblyPath = GetTestAssemblyPath();
         var integrationsFile = Path.Combine(assemblyPath, "StrongNamedTestsIntegrations.json");
         File.Exists(integrationsFile).Should().BeTrue();
-
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE", integrationsFile);
+        RunTestApplication(otlpTraceCollectorPort: collector.Port);
 
-        using var agent = await LegacyMockZipkinCollector.Start(Output);
-
-        RunTestApplication(agent.Port);
-
-        const int expectedSpansCount = 1;
-        var spans = await agent.WaitForSpansAsync(expectedSpansCount);
-
-        using (new AssertionScope())
-        {
-            spans.Count.Should().Be(expectedSpansCount);
-
-            spans.Count(s => s.Tags["validation"] == "StrongNamedValidation").Should().Be(1);
-        }
+        collector.AssertExpectations();
     }
 }

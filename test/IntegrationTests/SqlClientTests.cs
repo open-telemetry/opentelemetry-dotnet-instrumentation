@@ -14,11 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -28,14 +24,12 @@ namespace IntegrationTests;
 [Collection(SqlServerCollection.Name)]
 public class SqlClientTests : TestHelper
 {
-    private const string ServiceName = "TestApplication.SqlClient";
     private readonly SqlServerFixture _sqlServerFixture;
 
     public SqlClientTests(ITestOutputHelper output, SqlServerFixture sqlServerFixture)
         : base("SqlClient", output)
     {
         _sqlServerFixture = sqlServerFixture;
-        SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
     }
 
     [Fact]
@@ -43,21 +37,11 @@ public class SqlClientTests : TestHelper
     [Trait("Containers", "Linux")]
     public async Task SubmitTraces()
     {
-        using var agent = await LegacyMockZipkinCollector.Start(Output);
+        using var collector = await MockSpansCollector.Start(Output);
+        collector.Expect("OpenTelemetry.SqlClient");
 
-        const int expectedSpanCount = 8;
+        RunTestApplication(otlpTraceCollectorPort: collector.Port, arguments: $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}", enableClrProfiler: !IsCoreClr());
 
-        RunTestApplication(agent.Port, arguments: $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}", enableClrProfiler: !IsCoreClr());
-        var spans = await agent.WaitForSpansAsync(expectedSpanCount);
-
-        using (new AssertionScope())
-        {
-            spans.Count.Should().Be(expectedSpanCount);
-
-            foreach (var span in spans)
-            {
-                span.Tags.Should().Contain(new KeyValuePair<string, string>("otel.library.name", "OpenTelemetry.SqlClient"));
-            }
-        }
+        collector.AssertExpectations();
     }
 }
