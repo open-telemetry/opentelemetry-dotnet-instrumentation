@@ -47,75 +47,75 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void SubmitsTraces()
+    public async Task SubmitsTraces()
     {
-        VerifyTestApplicationInstrumented();
+        await VerifyTestApplicationInstrumented();
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void WhenStartupHookIsNotEnabled()
+    public async Task WhenStartupHookIsNotEnabled()
     {
 #if NETFRAMEWORK
-        VerifyTestApplicationInstrumented(enableStartupHook: false);
+        await VerifyTestApplicationInstrumented(enableStartupHook: false);
 #else
         // on .NET Core it is required to set DOTNET_STARTUP_HOOKS
-        VerifyTestApplicationNotInstrumented(enableStartupHook: false);
+        await VerifyTestApplicationNotInstrumented(enableStartupHook: false);
 #endif
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void WhenClrProfilerIsNotEnabled()
+    public async Task WhenClrProfilerIsNotEnabled()
     {
 #if NETFRAMEWORK
         // on .NET Framework it is required to set the CLR .NET Profiler
-        VerifyTestApplicationNotInstrumented(enableClrProfiler: false);
+        await VerifyTestApplicationNotInstrumented(enableClrProfiler: false);
 #else
-        VerifyTestApplicationInstrumented(enableClrProfiler: false);
+        await VerifyTestApplicationInstrumented(enableClrProfiler: false);
 #endif
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ApplicationIsNotExcluded()
+    public async Task ApplicationIsNotExcluded()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", "dotnet,dotnet.exe");
 
-        VerifyTestApplicationInstrumented();
+        await VerifyTestApplicationInstrumented();
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ApplicationIsExcluded()
+    public async Task ApplicationIsExcluded()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
 
-        VerifyTestApplicationNotInstrumented();
+        await VerifyTestApplicationNotInstrumented();
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ApplicationIsNotIncluded()
+    public async Task ApplicationIsNotIncluded()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES", "dotnet,dotnet.exe");
 
 #if NETFRAMEWORK
-        VerifyTestApplicationNotInstrumented();
+        await VerifyTestApplicationNotInstrumented();
 #else
         // FIXME: OTEL_DOTNET_AUTO_INCLUDE_PROCESSES does not work on .NET Core.
         // https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/895
-        VerifyTestApplicationInstrumented();
+        await VerifyTestApplicationInstrumented();
 #endif
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ApplicationIsIncluded()
+    public async Task ApplicationIsIncluded()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES", $"{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
 
-        VerifyTestApplicationInstrumented();
+        await VerifyTestApplicationInstrumented();
     }
 
     [Fact]
@@ -274,7 +274,7 @@ public class SmokeTests : TestHelper
     }
 #endif
 
-    private async void VerifyTestApplicationInstrumented(bool enableStartupHook = true, bool enableClrProfiler = true)
+    private async Task VerifyTestApplicationInstrumented(bool enableStartupHook = true, bool enableClrProfiler = true)
     {
         using var collector = await MockSpansCollector.Start(Output);
         collector.Expect("MyCompany.MyProduct.MyLibrary");
@@ -290,7 +290,7 @@ public class SmokeTests : TestHelper
         collector.AssertExpectations();
     }
 
-    private async void VerifyTestApplicationNotInstrumented(bool enableStartupHook = true, bool enableClrProfiler = true)
+    private async Task VerifyTestApplicationNotInstrumented(bool enableStartupHook = true, bool enableClrProfiler = true)
     {
         using var collector = await MockSpansCollector.Start(Output);
 
