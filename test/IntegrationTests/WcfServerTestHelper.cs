@@ -102,6 +102,24 @@ internal class WcfServerTestHelper : TestHelper
             environmentVariables["OTEL_EXPORTER_ZIPKIN_ENDPOINT"] = $"http://localhost:{testSettings.TracesSettings.Port}/api/v2/spans";
         }
 
+        if (testSettings.OtlpTracesSettings != null)
+        {
+            environmentVariables["OTEL_TRACES_EXPORTER"] = testSettings.OtlpTracesSettings.Exporter;
+            environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = $"http://localhost:{testSettings.OtlpTracesSettings.Port}";
+        }
+
+        if (testSettings.MetricsSettings != null)
+        {
+            environmentVariables["OTEL_METRICS_EXPORTER"] = testSettings.MetricsSettings.Exporter;
+            environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = $"http://localhost:{testSettings.MetricsSettings.Port}";
+        }
+
+        if (testSettings.LogSettings != null)
+        {
+            environmentVariables["OTEL_LOGS_EXPORTER"] = testSettings.LogSettings.Exporter;
+            environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = $"http://localhost:{testSettings.LogSettings.Port}";
+        }
+
         environmentVariables["OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES"] = "TestApplication.*";
 
         foreach (var key in EnvironmentHelper.CustomEnvironmentVariables.Keys)
