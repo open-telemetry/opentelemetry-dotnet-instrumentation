@@ -33,7 +33,9 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData;
     IntegrationName = "MySqlData")]
 public class MySqlConnectionStringBuilderIntegration
 {
+#if !NETFRAMEWORK
     private static readonly object TrueAsObject = true;
+#endif
 
     /// <summary>
     /// OnMethodEnd callback

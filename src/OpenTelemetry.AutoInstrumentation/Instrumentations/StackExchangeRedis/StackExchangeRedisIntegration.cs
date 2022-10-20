@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-#if NETCOREAPP3_1_OR_GREATER
-
 using System;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 
@@ -73,9 +71,10 @@ public class StackExchangeRedisIntegration
     /// <returns>A response value, in an async scenario will be T of Task of T</returns>
     internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TReturn returnValue, Exception exception, CallTargetState state)
     {
+#if NETCOREAPP3_1_OR_GREATER
         StackExchangeRedisInitializer.Initialize(returnValue);
+#endif
 
         return new CallTargetReturn<TReturn>(returnValue);
     }
 }
-#endif
