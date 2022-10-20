@@ -109,7 +109,7 @@ function Get-Environment-Variables-Table([string]$InstallDir, [string]$OTelServi
 
 function Setup-Windows-Service([string]$InstallDir, [string]$WindowsServiceName, [string]$OTelServiceName) {  
     $varsTable = Get-Environment-Variables-Table -InstallDir $InstallDir -OTelServiceName $OTelServiceName
-    $varsList = ($varsTable.Keys | foreach-object { "$_=$($varsTable[$_])"})
+    $varsList = ($varsTable.Keys | foreach-object { "$_=$($varsTable[$_])" })
     $regPath = "HKLM:SYSTEM\CurrentControlSet\Services\"
     $regKey = Join-Path $regPath $WindowsServiceName
    
@@ -331,7 +331,7 @@ function Unregister-OpenTelemetryForWindowsService() {
 function Get-OpenTelemetryInstallDirectory() {
     $installDir = Get-Current-InstallDir
 
-    if($installDir) {
+    if ($installDir) {
         return $installDir
     }
 
