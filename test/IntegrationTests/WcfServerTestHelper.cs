@@ -46,7 +46,7 @@ internal class WcfServerTestHelper : TestHelper
 
         var testSettings = new TestSettings
         {
-            TracesSettings = new TracesSettings { Port = traceAgentPort }
+            OtlpTracesSettings = new OtlpTracesSettings { Port = traceAgentPort }
         };
 
         // clear all relevant environment variables to start with a clean slate
