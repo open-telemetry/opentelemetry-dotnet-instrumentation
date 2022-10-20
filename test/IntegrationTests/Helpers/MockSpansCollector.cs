@@ -145,6 +145,15 @@ public class MockSpansCollector : IDisposable
         }
     }
 
+    public void AssertEmpty(TimeSpan? timeout = null)
+    {
+        timeout ??= DefaultWaitTimeout;
+        if (_spans.TryTake(out var resourceSpan, timeout.Value))
+        {
+            Assert.Fail($"Expected nothing, but got: {resourceSpan}");
+        }
+    }
+
     private static void FailExpectations(
         List<Expectation> missingExpectations,
         List<Collected> expectationsMet,
