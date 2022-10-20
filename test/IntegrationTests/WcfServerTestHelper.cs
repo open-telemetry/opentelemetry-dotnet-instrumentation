@@ -49,9 +49,6 @@ internal class WcfServerTestHelper : TestHelper
             OtlpTracesSettings = new OtlpTracesSettings { Port = traceAgentPort }
         };
 
-        // clear all relevant environment variables to start with a clean slate
-        EnvironmentHelper.ClearProfilerEnvironmentVariables();
-
         var startInfo = new ProcessStartInfo(testApplicationPath, null);
 
         SetEnvironmentVariables(testSettings, startInfo.EnvironmentVariables, testApplicationPath);
