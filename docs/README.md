@@ -188,7 +188,7 @@ Get-Command -Module install
 Get-Help Install-OpenTelemetryCore -Detailed
 ```
 
-⚠️ Registering for the IIS or a Windows service will perform a service restart!
+⚠️ Registering for IIS and Windows Service will perform a service restart.
 
 ## Instrument a Windows Service running a .NET application
 
