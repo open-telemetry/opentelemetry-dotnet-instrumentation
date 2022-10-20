@@ -22,6 +22,9 @@ internal class Integration
     [JsonPropertyName("name")]
     public string Name { get; set; }
 
+    [JsonPropertyName("type")]
+    public string Type { get; set; }
+
     [JsonPropertyName("method_replacements")]
     public IList<MethodReplacement> MethodReplacements { get; set; }
 }

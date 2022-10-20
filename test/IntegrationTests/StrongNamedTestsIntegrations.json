@@ -1,6 +1,7 @@
 [
   {
     "name": "StrongNamedValidation",
+    "type": "Trace",
     "method_replacements": [
       {
         "caller": {},
