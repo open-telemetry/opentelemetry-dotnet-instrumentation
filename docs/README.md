@@ -161,8 +161,8 @@ Example usage:
 
 ```powershell
 # Download and import the module
-$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.3.1-beta.1/install.psm1"
-$download_path = Join-Path $env:temp "install.psm1"
+$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.3.1-beta.1/OpenTelemetry.Dotnet.Auto.psm1"
+$download_path = Join-Path $env:temp "OpenTelemetry.Dotnet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path
 Import-Module $download_path
 

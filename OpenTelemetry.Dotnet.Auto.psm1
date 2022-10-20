@@ -16,7 +16,11 @@
 
 #Requires -RunAsAdministrator
 
-function Get-Install-Directory([string]$InstallDir) {
+function Get-Current-InstallDir() {
+    return [System.Environment]::GetEnvironmentVariable("OTEL_DOTNET_AUTO_INSTALL_DIR", [System.EnvironmentVariableTarget]::Machine)
+}
+
+function Get-CLIInstallDir-From-InstallDir([string]$InstallDir) {
     $dir = "OpenTelemetry .NET AutoInstrumentation"
     
     if ($InstallDir -eq "<auto>" -or $installDir -eq "AppData") {
@@ -33,7 +37,13 @@ function Get-Install-Directory([string]$InstallDir) {
 }
 
 function Get-Temp-Directory() {
-    return $env:temp
+    $temp = $env:TEMP
+
+    if (-not (Test-Path $temp)) {
+        New-Item -ItemType Directory -Force -Path $temp | Out-Null
+    }
+
+    return $temp
 }
 
 function Prepare-Install-Directory([string]$InstallDir) {
@@ -55,53 +65,56 @@ function Download-OpenTelemetry([string]$Version, [string]$Path) {
     return $dlPath
 }
 
-function Extract-OpenTelemetry([string]$DlPath, [string] $InstallPath) {
-    Expand-Archive $DlPath $InstallPath -Force
-}
+function Get-Environment-Variables-Table([string]$InstallDir, [string]$OTelServiceName) {
+    $COR_PROFILER_PATH_32 = Join-Path $InstallDir "/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll"
+    $COR_PROFILER_PATH_64 = Join-Path $InstallDir "/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll"
+    $CORECLR_PROFILER_PATH_32 = Join-Path $InstallDir "/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll"
+    $CORECLR_PROFILER_PATH_64 = Join-Path $InstallDir "/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll"
 
-function Setup-OpenTelemetry-Environment([string] $InstallPath) {
-    $target = [System.EnvironmentVariableTarget]::Machine
+    $DOTNET_ADDITIONAL_DEPS = Join-Path $InstallDir "AdditionalDeps"
+    $DOTNET_SHARED_STORE = Join-Path $InstallDir "store"
+    $DOTNET_STARTUP_HOOKS = Join-Path $InstallDir "netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
 
-    # .NET Framework
-    [System.Environment]::SetEnvironmentVariable('COR_PROFILER', '{918728DD-259F-4A6A-AC2B-B85E1B658318}', $target)
-    [System.Environment]::SetEnvironmentVariable('COR_PROFILER_PATH_32', (Join-Path $InstallPath "/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll"), $target)
-    [System.Environment]::SetEnvironmentVariable('COR_PROFILER_PATH_64', (Join-Path $InstallPath "/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll"), $target)
-
-    # .NET Core
-    [System.Environment]::SetEnvironmentVariable('CORECLR_PROFILER', '{918728DD-259F-4A6A-AC2B-B85E1B658318}', $target)
-    [System.Environment]::SetEnvironmentVariable('CORECLR_PROFILER_PATH_32', (Join-Path $InstallPath "/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll"), $target)
-    [System.Environment]::SetEnvironmentVariable('CORECLR_PROFILER_PATH_64', (Join-Path $InstallPath "/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll"), $target)
-
-    # OpenTelemetry
-    [System.Environment]::SetEnvironmentVariable('OTEL_DOTNET_AUTO_HOME', $InstallPath, $target)
-    [System.Environment]::SetEnvironmentVariable('OTEL_DOTNET_AUTO_INTEGRATIONS_FILE', (Join-Path $InstallPath "integrations.json"), $target)
-}
-
-function Setup-Windows-Service([string]$HomeDir, [string]$WindowsServiceName, [string]$OTelServiceName) {
-    $DOTNET_ADDITIONAL_DEPS = Join-Path $HomeDir "AdditionalDeps"
-    $DOTNET_SHARED_STORE = Join-Path $HomeDir "store"
-    $DOTNET_STARTUP_HOOKS = Join-Path $HomeDir "netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
+    $OTEL_DOTNET_AUTO_HOME = $InstallDir
+    $OTEL_DOTNET_AUTO_INTEGRATIONS_FILE = Join-Path $InstallDir "integrations.json"
     
-    [string[]] $vars = @(
-        "COR_ENABLE_PROFILING=1",
-        "CORECLR_ENABLE_PROFILING=1",
+    $vars = @{
+        # .NET Framework
+        "COR_ENABLE_PROFILING"                = "1";
+        "COR_PROFILER"                        = "{918728DD-259F-4A6A-AC2B-B85E1B658318}";
+        "COR_PROFILER_PATH_32"                = $COR_PROFILER_PATH_32;
+        "COR_PROFILER_PATH_64"                = $COR_PROFILER_PATH_64;
+        # .NET Core
+        "CORECLR_ENABLE_PROFILING"            = "1";
+        "CORECLR_PROFILER"                    = "{918728DD-259F-4A6A-AC2B-B85E1B658318}";
+        "CORECLR_PROFILER_PATH_32"            = $CORECLR_PROFILER_PATH_32;
+        "CORECLR_PROFILER_PATH_64"            = $CORECLR_PROFILER_PATH_64;
         # ASP.NET Core
-        "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES=OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper",
+        "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES" = "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper";
         # .NET Common
-        "DOTNET_ADDITIONAL_DEPS=$DOTNET_ADDITIONAL_DEPS",
-        "DOTNET_SHARED_STORE=$DOTNET_SHARED_STORE",
-        "DOTNET_STARTUP_HOOKS=$DOTNET_STARTUP_HOOKS"
-    )
-
-    if (-not [string]::IsNullOrWhiteSpace($OTelServiceName)) {
-        $vars += "OTEL_SERVICE_NAME=$OTelServiceName"
+        "DOTNET_ADDITIONAL_DEPS"              = $DOTNET_ADDITIONAL_DEPS;
+        "DOTNET_SHARED_STORE"                 = $DOTNET_SHARED_STORE;
+        "DOTNET_STARTUP_HOOKS"                = $DOTNET_STARTUP_HOOKS;
+        # OpenTelemetry
+        "OTEL_DOTNET_AUTO_HOME"               = $OTEL_DOTNET_AUTO_HOME;
+        "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE"  = $OTEL_DOTNET_AUTO_INTEGRATIONS_FILE
     }
 
+    if (-not [string]::IsNullOrWhiteSpace($OTelServiceName)) {
+        $vars.Add("OTEL_SERVICE_NAME", $OTelServiceName)
+    }
+
+    return $vars
+}
+
+function Setup-Windows-Service([string]$InstallDir, [string]$WindowsServiceName, [string]$OTelServiceName) {  
+    $varsTable = Get-Environment-Variables-Table -InstallDir $InstallDir -OTelServiceName $OTelServiceName
+    $varsList = ($varsTable.Keys | foreach-object { "$_=$($varsTable[$_])"})
     $regPath = "HKLM:SYSTEM\CurrentControlSet\Services\"
     $regKey = Join-Path $regPath $WindowsServiceName
    
     if (Test-Path $regKey) {
-        Set-ItemProperty $regKey -Name Environment -Value $vars
+        Set-ItemProperty $regKey -Name Environment -Value $varsList
     }
     else {
         throw "Invalid service '$WindowsServiceName'. Service does not exist."
@@ -110,8 +123,16 @@ function Setup-Windows-Service([string]$HomeDir, [string]$WindowsServiceName, [s
 
 function Remove-Windows-Service([string]$WindowsServiceName) {
     [string[]] $filters = @(
+        # .NET Framework
         "COR_ENABLE_PROFILING",
+        "COR_PROFILER",
+        "COR_PROFILER_PATH_32",
+        "COR_PROFILER_PATH_64",
+        # .NET Core
         "CORECLR_ENABLE_PROFILING",
+        "CORECLR_PROFILER",
+        "CORECLR_PROFILER_PATH_32",
+        "CORECLR_PROFILER_PATH_64",
         # ASP.NET Core
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES",
         # .NET Common
@@ -119,7 +140,7 @@ function Remove-Windows-Service([string]$WindowsServiceName) {
         "DOTNET_SHARED_STORE",
         "DOTNET_STARTUP_HOOKS",
         # OpenTelemetry
-        "OTEL_SERVICE_NAME"
+        "OTEL_DOTNET_"
     )
 
     $regPath = "HKLM:SYSTEM\CurrentControlSet\Services\"
@@ -143,7 +164,7 @@ function Filter-Env-List([string[]]$EnvValues, [string[]]$Filters) {
         $match = $false
 
         foreach ($filter in $Filters) {
-            if ($value -clike "$($filter)=*") {
+            if ($value -clike "$($filter)*") {
                 $match = $true
                 break
             }
@@ -170,26 +191,29 @@ function Install-OpenTelemetryCore() {
         [string]$InstallDir = "<auto>"
     )
 
-    $Version = "v0.3.1-beta.1"
-    $SetupPath = Get-Install-Directory $InstallDir
-    $TempDir = Get-Temp-Directory
-    $DlPath = $null
+    $version = "v0.3.1-beta.1"
+    $installDir = Get-CLIInstallDir-From-InstallDir $InstallDir
+    $tempDir = Get-Temp-Directory
+    $dlPath = $null
 
     try {
-        $DlPath = Download-OpenTelemetry $Version $TempDir
-        Prepare-Install-Directory $SetupPath
+        $dlPath = Download-OpenTelemetry $version $tempDir
+        Prepare-Install-Directory $installDir
 
-        Extract-OpenTelemetry $DlPath $SetupPath
-        Setup-OpenTelemetry-Environment $SetupPath
+        # Extract files from zip
+        Expand-Archive $dlPath $installDir -Force
+
+        # OpenTelemetry service locator
+        [System.Environment]::SetEnvironmentVariable('OTEL_DOTNET_AUTO_INSTALL_DIR', $InstallPath, [System.EnvironmentVariableTarget]::Machine)
     } 
     catch {
         $message = $_
         Write-Error "Could not setup OpenTelemetry .NET Automatic Instrumentation! $message"
     } 
     finally {
-        if ($DlPath -ne $null) {
+        if ($dlPath) {
             # Cleanup
-            Remove-Item $DlPath
+            Remove-Item $dlPath
         }
     }
 }
@@ -199,29 +223,41 @@ function Install-OpenTelemetryCore() {
     Uninstalls OpenTelemetry .NET Automatic Instrumentation.
 #>
 function Uninstall-OpenTelemetryCore() {
-    $homeDir = [System.Environment]::GetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", "Machine")
+    $installDir = Get-Current-InstallDir
 
-    if (-not $homeDir) {
+    if (-not $installDir) {
         throw "OpenTelemetry Core is already removed."
     }
 
-    Remove-Item -LiteralPath $homeDir -Force -Recurse
+    Remove-Item -LiteralPath $installDir -Force -Recurse
 
-    $target = [System.EnvironmentVariableTarget]::Machine
+    # Remove OTel service locator variable
+    [System.Environment]::SetEnvironmentVariable('OTEL_DOTNET_AUTO_INSTALL_DIR', $null, [System.EnvironmentVariableTarget]::Machine)
+}
 
-    # .NET Framework
-    [System.Environment]::SetEnvironmentVariable('COR_PROFILER', $null, $target)
-    [System.Environment]::SetEnvironmentVariable('COR_PROFILER_PATH_32', $null, $target)
-    [System.Environment]::SetEnvironmentVariable('COR_PROFILER_PATH_64', $null, $target)
+<#
+    .SYNOPSIS
+    Setups IIS environment variables to enable automatic instrumentation.
+    .PARAMETER OTelServiceName
+    Specifies OpenTelemetry service name to identify your service.
+#>
+function Register-OpenTelemetryForCurrentSession() {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$OTelServiceName
+    )
 
-    # .NET Core
-    [System.Environment]::SetEnvironmentVariable('CORECLR_PROFILER', $null, $target)
-    [System.Environment]::SetEnvironmentVariable('CORECLR_PROFILER_PATH_32', $null, $target)
-    [System.Environment]::SetEnvironmentVariable('CORECLR_PROFILER_PATH_64', $null, $target)
+    $installDir = Get-Current-InstallDir
 
-    # OpenTelemetry
-    [System.Environment]::SetEnvironmentVariable('OTEL_DOTNET_AUTO_HOME', $null, $target)
-    [System.Environment]::SetEnvironmentVariable('OTEL_DOTNET_AUTO_INTEGRATIONS_FILE', $null, $target)
+    if (-not $installDir) {
+        throw "OpenTelemetry Core must be setup first. Run 'Install-OpenTelemetryCore' to setup Opentelemetry Core."
+    }
+
+    $varsTable = Get-Environment-Variables-Table -InstallDir $installDir -OTelServiceName $OTelServiceName
+
+    foreach ($var in $varsTable.Keys) {
+        Set-Item "env:$var" $varsTable[$var]
+    }
 }
 
 <#
@@ -229,14 +265,14 @@ function Uninstall-OpenTelemetryCore() {
     Setups IIS environment variables to enable automatic instrumentation.
 #>
 function Register-OpenTelemetryForIIS() {
-    $homeDir = [System.Environment]::GetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", "Machine")
+    $installDir = Get-Current-InstallDir
 
-    if (-not $homeDir) {
+    if (-not $installDir) {
         throw "OpenTelemetry Core must be setup first. Run 'Install-OpenTelemetryCore' to setup Opentelemetry Core."
     }
 
-    Setup-Windows-Service -HomeDir $homeDir -WindowsServiceName "W3SVC"
-    Setup-Windows-Service -HomeDir $homeDir -WindowsServiceName "WAS"
+    Setup-Windows-Service -InstallDir $installDir -WindowsServiceName "W3SVC"
+    Setup-Windows-Service -InstallDir $installDir -WindowsServiceName "WAS"
 }
 
 <#
@@ -254,13 +290,14 @@ function Register-OpenTelemetryForWindowsService() {
         [Parameter(Mandatory = $true)]
         [string]$OTelServiceName
     )
-    $homeDir = [System.Environment]::GetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", "Machine")
 
-    if (-not $homeDir) {
+    $installDir = Get-Current-InstallDir
+
+    if (-not $installDir) {
         throw "OpenTelemetry Core must be setup first. Run 'Install-OpenTelemetryCore' to setup Opentelemetry Core."
     }
 
-    Setup-Windows-Service -HomeDir $homeDir -WindowsServiceName $WindowsServiceName -OTelServiceName $OTelServiceName
+    Setup-Windows-Service -InstallDir $installDir -WindowsServiceName $WindowsServiceName -OTelServiceName $OTelServiceName
 }
 
 <#
@@ -287,9 +324,25 @@ function Unregister-OpenTelemetryForWindowsService() {
     Remove-Windows-Service -WindowsServiceName $WindowsServiceName
 }
 
+<#
+    .SYNOPSIS
+    Locates OpenTelemetry .NET Automatic Instrumentation's install path. 
+#>
+function Get-OpenTelemetryInstallDirectory() {
+    $installDir = Get-Current-InstallDir
+
+    if($installDir) {
+        return $installDir
+    }
+
+    Write-Warning "OpenTelemetry .NET Automatic Instrumentation is not installed."
+}
+
 Export-ModuleMember -Function Install-OpenTelemetryCore
 Export-ModuleMember -Function Register-OpenTelemetryForIIS
 Export-ModuleMember -Function Register-OpenTelemetryForWindowsService
+Export-ModuleMember -Function Register-OpenTelemetryForCurrentSession
 Export-ModuleMember -Function Uninstall-OpenTelemetryCore
 Export-ModuleMember -Function Unregister-OpenTelemetryForIIS
 Export-ModuleMember -Function Unregister-OpenTelemetryForWindowsService
+Export-ModuleMember -Function Get-OpenTelemetryInstallDirectory
