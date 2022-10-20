@@ -14,10 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Linq;
 using System.Threading.Tasks;
-using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -27,14 +24,12 @@ namespace IntegrationTests;
 [Collection(PostgresCollection.Name)]
 public class NpqsqlTests : TestHelper
 {
-    private const string ServiceName = "TestApplication.Npgsql";
     private readonly PostgresFixture _postgres;
 
     public NpqsqlTests(ITestOutputHelper output, PostgresFixture postgres)
         : base("Npgsql", output)
     {
         _postgres = postgres;
-        SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
     }
 
     [Fact]
@@ -42,12 +37,11 @@ public class NpqsqlTests : TestHelper
     [Trait("Containers", "Linux")]
     public async Task SubmitsTraces()
     {
-        using var agent = await LegacyMockZipkinCollector.Start(Output);
+        using var collector = await MockSpansCollector.Start(Output);
+        collector.Expect("Npgsql");
 
-        RunTestApplication(agent.Port, arguments: $"--postgres {_postgres.Port}", enableClrProfiler: !IsCoreClr());
-        var spans = await agent.WaitForSpansAsync(1);
+        RunTestApplication(otlpTraceCollectorPort: collector.Port, arguments: $"--postgres {_postgres.Port}", enableClrProfiler: !IsCoreClr());
 
-        spans.Count.Should().Be(1);
-        spans.First().Tags["db.statement"].Should().Be("SELECT 123;");
+        collector.AssertExpectations();
     }
 }

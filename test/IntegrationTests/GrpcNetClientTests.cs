@@ -14,11 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Linq;
 using System.Threading.Tasks;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -36,22 +32,14 @@ public class GrpcNetClientTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task SubmitsTraces()
     {
-        using var agent = await LegacyMockZipkinCollector.Start(Output);
+        using var collector = await MockSpansCollector.Start(Output);
+        collector.Expect("OpenTelemetry.Instrumentation.GrpcNetClient");
 
         // Grpc.Net.Client is using various version of http communication under the hood.
-        // Disabling HttpClient instrumentation to have consistent set of spans.
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS", "HttpClient");
+        // Enabling only GrpcNetClient instrumentation to have consistent set of spans.
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "GrpcNetClient");
+        RunTestApplication(otlpTraceCollectorPort: collector.Port, enableClrProfiler: !IsCoreClr());
 
-        RunTestApplication(agent.Port, enableClrProfiler: !IsCoreClr());
-
-        const int expectedSpansCount = 1;
-        var spans = await agent.WaitForSpansAsync(expectedSpansCount);
-
-        using (new AssertionScope())
-        {
-            spans.Count.Should().Be(expectedSpansCount);
-
-            spans.Count(s => s.Tags["otel.library.name"] == "OpenTelemetry.Instrumentation.GrpcNetClient").Should().Be(1);
-        }
+        collector.AssertExpectations();
     }
 }
