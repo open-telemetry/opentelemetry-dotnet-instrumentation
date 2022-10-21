@@ -63,9 +63,9 @@ for more details.
 
 ### Logs instrumentations
 
-| ID | Instrumented library                                                                                                            | Supported versions | Instrumentation type   |
-|----|---------------------------------------------------------------------------------------------------------------------------------|--------------------|------------------------|
-|    | [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging) **Not supported on .NET Framework** | ≥6.0.0             | bytecode or source [1] |
+| ID      | Instrumented library                                                                                                            | Supported versions | Instrumentation type   |
+|---------|---------------------------------------------------------------------------------------------------------------------------------|--------------------|------------------------|
+| ILogger | [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging) **Not supported on .NET Framework** | ≥6.0.0             | bytecode or source [1] |
 
 **[1]**: For ASP.NET Core applications, the `LoggingBuilder` instrumentation
 can be enabled without using the .NET CLR Profiler by setting

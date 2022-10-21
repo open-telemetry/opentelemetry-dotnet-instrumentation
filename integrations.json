@@ -52,7 +52,7 @@
     ]
   },
   {
-    "name": "LoggingBuilder",
+    "name": "ILogger",
     "type": "Log",
     "method_replacements": [
       {
