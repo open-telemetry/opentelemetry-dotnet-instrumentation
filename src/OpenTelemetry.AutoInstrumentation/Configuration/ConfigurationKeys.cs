@@ -174,6 +174,16 @@ internal static class ConfigurationKeys
         /// should be included on generated <see cref="LogRecord"/>s.
         /// </summary>
         public const string IncludeFormattedMessage = "OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE";
+
+        /// <summary>
+        /// Configuration key for comma separated list of enabled logs instrumentations.
+        /// </summary>
+        public const string Instrumentations = "OTEL_DOTNET_AUTO_LOGS_ENABLED_INSTRUMENTATIONS";
+
+        /// <summary>
+        /// Configuration key for comma separated list of disabled logs instrumentations.
+        /// </summary>
+        public const string DisabledInstrumentations = "OTEL_DOTNET_AUTO_LOGS_DISABLED_INSTRUMENTATIONS";
     }
 
     /// <summary>
