@@ -161,8 +161,8 @@ Example usage:
 
 ```powershell
 # Download and import the module
-$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.3.1-beta.1/install.psm1"
-$download_path = Join-Path $env:temp "install.psm1"
+$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.3.1-beta.1/OpenTelemetry.Dotnet.Auto.psm1"
+$download_path = Join-Path $env:temp "OpenTelemetry.Dotnet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path
 Import-Module $download_path
 
@@ -175,6 +175,12 @@ Register-OpenTelemetryForIIS
 # Setup your Windows Service instrumentation
 Register-OpenTelemetryForWindowsService -WindowsServiceName "MyServiceName" -OTelServiceName "MyServiceDisplayName"
 
+# Setup environment to start instrumentation from the current PowerShell session
+Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
+
+# Get current installation location
+Get-OpenTelemetryInstallDirectory
+
 # List all available commands
 Get-Command -Module install
 
@@ -182,8 +188,7 @@ Get-Command -Module install
 Get-Help Install-OpenTelemetryCore -Detailed
 ```
 
-⚠️ You have to reboot the machine
-after setting up the instrumentation.
+⚠️ Registering for IIS and Windows Service will perform a service restart.
 
 ## Instrument a Windows Service running a .NET application
 
