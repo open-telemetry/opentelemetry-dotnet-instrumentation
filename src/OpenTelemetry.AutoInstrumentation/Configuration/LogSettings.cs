@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
@@ -35,6 +36,11 @@ internal class LogSettings : Settings
         LogExporter = ParseLogExporter(source);
         ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.Logs.ConsoleExporterEnabled) ?? false;
         IncludeFormattedMessage = source.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
+
+        EnabledInstrumentations = source.ParseEnabledEnumList<LogInstrumentation>(
+            enabledConfiguration: ConfigurationKeys.Logs.Instrumentations,
+            disabledConfiguration: ConfigurationKeys.Logs.DisabledInstrumentations,
+            error: "The \"{0}\" is not recognized as supported logs instrumentation and cannot be enabled or disabled.");
     }
 
     /// <summary>
@@ -51,6 +57,11 @@ internal class LogSettings : Settings
     /// Gets a value indicating whether the console exporter is enabled.
     /// </summary>
     public bool ConsoleExporterEnabled { get; }
+
+    /// <summary>
+    /// Gets the list of enabled instrumentations.
+    /// </summary>
+    public IList<LogInstrumentation> EnabledInstrumentations { get; }
 
     internal static LogSettings FromDefaultSources()
     {

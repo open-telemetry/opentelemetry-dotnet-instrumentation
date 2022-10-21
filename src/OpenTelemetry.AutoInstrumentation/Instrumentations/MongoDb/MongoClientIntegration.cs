@@ -36,7 +36,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
     ParameterTypeNames = new[] { "MongoDB.Driver.MongoClientSettings" },
     MinimumVersion = "2.13.3",
     MaximumVersion = "2.65535.65535",
-    IntegrationName = "MongoDB")]
+    IntegrationName = "MongoDB",
+    Type = InstrumentationType.Trace)]
 public class MongoClientIntegration
 {
 #if NETCOREAPP3_1_OR_GREATER

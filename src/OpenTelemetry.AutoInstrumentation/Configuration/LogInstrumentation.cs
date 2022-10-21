@@ -1,4 +1,4 @@
-// <copyright file="GraphQLExecuteAsyncAttribute.cs" company="OpenTelemetry Authors">
+// <copyright file="LogInstrumentation.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,16 +14,15 @@
 // limitations under the License.
 // </copyright>
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
+namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
-internal class GraphQLExecuteAsyncAttribute : InstrumentMethodAttribute
+/// <summary>
+/// Enum representing supported meter instrumentations.
+/// </summary>
+internal enum LogInstrumentation
 {
-    public GraphQLExecuteAsyncAttribute()
-    {
-        IntegrationName = GraphQLCommon.IntegrationName;
-        MethodName = "ExecuteAsync";
-        ReturnTypeName = "System.Threading.Tasks.Task`1[GraphQL.ExecutionResult]";
-        ParameterTypeNames = new[] { "GraphQL.Execution.ExecutionContext" };
-        Type = InstrumentationType.Trace;
-    }
+    /// <summary>
+    /// ILogger instrumentation.
+    /// </summary>
+    ILogger
 }

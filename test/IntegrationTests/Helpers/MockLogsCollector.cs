@@ -139,6 +139,15 @@ public class MockLogsCollector : IDisposable
         }
     }
 
+    public void AssertEmpty(TimeSpan? timeout = null)
+    {
+        timeout ??= DefaultWaitTimeout;
+        if (_logs.TryTake(out var logRecord, timeout.Value))
+        {
+            Assert.Fail($"Expected nothing, but got: {logRecord}");
+        }
+    }
+
     private static void FailExpectations(
         List<Expectation> missingExpectations,
         List<global::OpenTelemetry.Proto.Logs.V1.LogRecord> expectationsMet,

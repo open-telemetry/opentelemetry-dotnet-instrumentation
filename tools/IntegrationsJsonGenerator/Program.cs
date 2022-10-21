@@ -50,6 +50,7 @@ foreach (var typeInfo in autoInstrumentationLib.GetTypes())
                 new Integration
                 {
                     Name = integration.IntegrationName,
+                    Type = integration.IntegartionType,
                     MethodReplacements = new List<MethodReplacement> { integration.MethodReplacement }
                 });
         }
@@ -88,9 +89,10 @@ bool InheritsFrom(Type type, string baseType)
     }
 }
 
-(string IntegrationName, MethodReplacement MethodReplacement) ConvertToIntegration(string wrapperTypeName, Attribute attribute)
+(string IntegartionType, string IntegrationName, MethodReplacement MethodReplacement) ConvertToIntegration(string wrapperTypeName, Attribute attribute)
 {
     var integrationName = GetPropertyValue<string>("IntegrationName", attribute);
+    var integrationType = GetPropertyValue<object>("Type", attribute).ToString();
 
     var methodReplacement = new MethodReplacement
     {
@@ -133,7 +135,7 @@ bool InheritsFrom(Type type, string baseType)
         methodReplacement.Target.MaximumPath = int.Parse(maxVersion[2]);
     }
 
-    return (integrationName, methodReplacement);
+    return (integrationType, integrationName, methodReplacement);
 }
 
 T GetPropertyValue<T>(string propertyName, Attribute attribute)

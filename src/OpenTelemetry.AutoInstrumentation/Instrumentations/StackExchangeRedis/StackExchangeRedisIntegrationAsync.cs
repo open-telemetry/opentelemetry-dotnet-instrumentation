@@ -30,7 +30,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
     ParameterTypeNames = new[] { ClrNames.Object, StackExchangeRedisConstants.TextWriterTypeName },
     MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
     MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
-    IntegrationName = StackExchangeRedisConstants.IntegrationName)]
+    IntegrationName = StackExchangeRedisConstants.IntegrationName,
+    Type = InstrumentationType.Trace)]
 [InstrumentMethod(// releases 2.1.50 - 2.5.43
     AssemblyName = StackExchangeRedisConstants.AssemblyName,
     TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
@@ -39,7 +40,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
     ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName },
     MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
     MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
-    IntegrationName = StackExchangeRedisConstants.IntegrationName)]
+    IntegrationName = StackExchangeRedisConstants.IntegrationName,
+    Type = InstrumentationType.Trace)]
 [InstrumentMethod(// releases 2.5.61+
     AssemblyName = StackExchangeRedisConstants.AssemblyName,
     TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
@@ -48,7 +50,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
     ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName, StackExchangeRedisConstants.NullableServerTypeTypeName },
     MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
     MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
-    IntegrationName = StackExchangeRedisConstants.IntegrationName)]
+    IntegrationName = StackExchangeRedisConstants.IntegrationName,
+    Type = InstrumentationType.Trace)]
 public class StackExchangeRedisIntegrationAsync
 {
     /// <summary>

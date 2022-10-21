@@ -28,14 +28,14 @@ namespace OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper;
 /// </summary>
 internal class BootstrapperHostingStartup : IHostingStartup
 {
-    private readonly LogSettings settings;
+    private readonly LogSettings _settings;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BootstrapperHostingStartup"/> class.
     /// </summary>
     public BootstrapperHostingStartup()
     {
-        settings = LogSettings.FromDefaultSources();
+        _settings = LogSettings.FromDefaultSources();
     }
 
     /// <summary>
@@ -44,6 +44,12 @@ internal class BootstrapperHostingStartup : IHostingStartup
     /// <param name="builder">The <see cref="IWebHostBuilder"/>.</param>
     public void Configure(IWebHostBuilder builder)
     {
+        if (!_settings.EnabledInstrumentations.Contains(LogInstrumentation.ILogger))
+        {
+            BootstrapperEventSource.Log.Trace($"BootstrapperHostingStartup loaded, but {nameof(LogInstrumentation.ILogger)} instrumentation is disabled. Skipping.");
+            return;
+        }
+
         try
         {
             builder.ConfigureLogging(logging => logging.AddOpenTelemetryLogs());

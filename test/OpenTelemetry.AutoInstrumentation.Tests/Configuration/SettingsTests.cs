@@ -98,6 +98,7 @@ public class SettingsTests : IDisposable
             settings.LogExporter.Should().Be(LogExporter.Otlp);
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.ConsoleExporterEnabled.Should().BeFalse();
+            settings.EnabledInstrumentations.Should().NotBeEmpty();
             settings.Plugins.Should().BeEmpty();
             settings.IncludeFormattedMessage.Should().BeFalse();
             settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
@@ -232,6 +233,27 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
+    [InlineData(nameof(LogInstrumentation.ILogger), LogInstrumentation.ILogger)]
+    internal void LogSettings_Instrumentations_SupportedValues(string logInstrumentation, LogInstrumentation expectedLogInstrumentation)
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, logInstrumentation);
+
+        var settings = LogSettings.FromDefaultSources();
+
+        settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<LogInstrumentation> { expectedLogInstrumentation });
+    }
+
+    [Fact]
+    internal void LogSettings_DisabledInstrumentations()
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.DisabledInstrumentations, nameof(LogInstrumentation.ILogger));
+
+        var settings = LogSettings.FromDefaultSources();
+
+        settings.EnabledInstrumentations.Should().BeEmpty();
+    }
+
+    [Theory]
     [InlineData("true", true)]
     [InlineData("false", false)]
     internal void IncludeFormattedMessage_DependsOnCorrespondingEnvVariable(string includeFormattedMessage, bool expectedValue)
@@ -297,6 +319,8 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.IncludeFormattedMessage, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Instrumentations, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.DisabledInstrumentations, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.DisabledInstrumentations, null);

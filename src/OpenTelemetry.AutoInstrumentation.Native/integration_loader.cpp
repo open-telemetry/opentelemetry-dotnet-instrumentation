@@ -1,7 +1,6 @@
 #include "integration_loader.h"
 
 #include <exception>
-#include <stdexcept>
 
 #include "environment_variables.h"
 #include "logger.h"
@@ -14,20 +13,25 @@ using json = nlohmann::json;
 
 void LoadIntegrationsFromEnvironment(
     std::vector<IntegrationMethod>& integrationMethods,
-    const std::vector<WSTRING>& enabledIntegrationNames,
-    const std::vector<WSTRING>& disabledIntegrationNames) {
+    const std::vector<WSTRING>& enabledTraceIntegrationNames,
+    const std::vector<WSTRING>& disabledTraceIntegrationNames,
+    const std::vector<WSTRING>& enabledLogIntegrationNames,
+    const std::vector<WSTRING>& disabledLogIntegrationNames) {
     for (const WSTRING& filePath : GetEnvironmentValues(environment::integrations_path, ENV_VAR_PATH_SEPARATOR))
     {
         Logger::Debug("Loading integrations from file: ", filePath);
-        LoadIntegrationsFromFile(filePath, integrationMethods, enabledIntegrationNames, disabledIntegrationNames);
+      LoadIntegrationsFromFile(
+          filePath, integrationMethods, enabledTraceIntegrationNames, disabledTraceIntegrationNames, enabledLogIntegrationNames, disabledLogIntegrationNames);
     }
 }
 
 void LoadIntegrationsFromFile(
     const WSTRING& file_path,
     std::vector<IntegrationMethod>& integrationMethods,
-    const std::vector<WSTRING>& enabledIntegrationNames,
-    const std::vector<WSTRING>& disabledIntegrationNames) {
+    const std::vector<WSTRING>& enabledTraceIntegrationNames,
+    const std::vector<WSTRING>& disabledTraceIntegrationNames,
+    const std::vector<WSTRING>& enabledLogIntegrationNames,
+    const std::vector<WSTRING>& disabledLogIntegrationNames) {
     try
     {
         std::ifstream stream(ToString(file_path));
@@ -36,8 +40,10 @@ void LoadIntegrationsFromFile(
         {
             LoadIntegrationsFromStream(stream,
                                      integrationMethods,
-                                     enabledIntegrationNames,
-                                     disabledIntegrationNames);
+                                     enabledTraceIntegrationNames,
+                                     disabledTraceIntegrationNames,
+                                     enabledLogIntegrationNames,
+                                     disabledLogIntegrationNames);
         }
         else
         {
@@ -66,8 +72,10 @@ void LoadIntegrationsFromFile(
 void LoadIntegrationsFromStream(
     std::istream& stream,
     std::vector<IntegrationMethod>& integrationMethods,
-    const std::vector<WSTRING>& enabledIntegrationNames,
-    const std::vector<WSTRING>& disabledIntegrationNames) {
+    const std::vector<WSTRING>& enabledTraceIntegrationNames,
+    const std::vector<WSTRING>& disabledTraceIntegrationNames,
+    const std::vector<WSTRING>& enabledLogIntegrationNames,
+    const std::vector<WSTRING>& disabledLogIntegrationNames) {
     try
     {
         json j;
@@ -78,7 +86,12 @@ void LoadIntegrationsFromStream(
 
         for (const auto& el : j)
         {
-            IntegrationFromJson(el, integrationMethods, enabledIntegrationNames, disabledIntegrationNames);
+          IntegrationFromJson(el,
+                              integrationMethods,
+                              enabledTraceIntegrationNames,
+                              disabledTraceIntegrationNames,
+                              enabledLogIntegrationNames,
+                            disabledLogIntegrationNames);
         }
 
     }
@@ -114,15 +127,6 @@ namespace
         const std::vector<WSTRING>& enabledIntegrationNames,
         const std::vector<WSTRING>& disabledIntegrationNames)
     {
-        // LoggingBuilder has to be always enabled.
-        // Technically it is not an instrumentation but
-        // it is using the same functionality.
-        // See https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1310.
-        if (name == WStr("LoggingBuilder"))
-        {
-            return true;
-        }
-
         // check if the integration is disabled
         for (const WSTRING& disabledName : disabledIntegrationNames)
         {
@@ -150,8 +154,10 @@ namespace
 
     void IntegrationFromJson(const json::value_type& src,
                          std::vector<IntegrationMethod>& integrationMethods,
-                         const std::vector<WSTRING>& enabledIntegrationNames,
-                         const std::vector<WSTRING>& disabledIntegrationNames)
+                         const std::vector<WSTRING>& enabledTraceIntegrationNames,
+                         const std::vector<WSTRING>& disabledTraceIntegrationNames,
+                         const std::vector<WSTRING>& enabledLogIntegrationNames,
+                         const std::vector<WSTRING>& disabledLogIntegrationNames)
     {
         if (!src.is_object())
         {
@@ -166,8 +172,29 @@ namespace
             return;
         }
 
-        if (!InstrumentationEnabled(name, enabledIntegrationNames, disabledIntegrationNames))
+        const WSTRING type = ToWSTRING(src.value("type", ""));
+        if (name.empty())
         {
+            Logger::Warn("Integration type is missing for integration: ", src.dump());
+            return;
+        }
+
+        if (type == WStr("Trace"))
+        {
+            if (!InstrumentationEnabled(name, enabledTraceIntegrationNames, disabledTraceIntegrationNames)) 
+            {
+                return;
+            }
+        }
+        else if (type == WStr("Log"))
+        {
+            if (!InstrumentationEnabled(name, enabledLogIntegrationNames, disabledLogIntegrationNames)) {
+                return;
+            }
+        }
+        else
+        {
+            Logger::Warn("Unsupported type for integration: ", src.dump());
             return;
         }
 

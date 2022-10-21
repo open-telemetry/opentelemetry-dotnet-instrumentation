@@ -25,10 +25,12 @@ for more details.
 | Environment variable                                 | Description                                                                                                                                                                                                                                                     | Default value                  |
 |------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|
 | `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE`                 | List of bytecode instrumentations JSON configuration filepaths, delimited by the platform-specific path separator (`;` on Windows, `:` on Linux and macOS). For example: `%ProfilerDirectory%/integrations.json`. It is required for bytecode instrumentations. |                                |
-| `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS`   | Comma-separated list of traces source instrumentations you want to enable. Set `none` to disable all trace instrumentations.                                                                                                                                    | all available instrumentations |
+| `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS`   | Comma-separated list of traces source instrumentations you want to enable. Set to `none` to disable all trace instrumentations.                                                                                                                                 | all available instrumentations |
 | `OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS`  | Comma-separated list of traces source and bytecode instrumentations you want to disable.                                                                                                                                                                        |                                |
-| `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS`  | Comma-separated list of metrics source instrumentations you want to enable. Set `none` to disable all metric instrumentations.                                                                                                                                  | all available instrumentations |
+| `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS`  | Comma-separated list of metrics source instrumentations you want to enable. Set to `none` to disable all metric instrumentations.                                                                                                                               | all available instrumentations |
 | `OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS` | Comma-separated list of metrics source instrumentations you want to disable.                                                                                                                                                                                    |                                |
+| `OTEL_DOTNET_AUTO_LOGS_ENABLED_INSTRUMENTATIONS`     | Comma-separated list of logs source instrumentations you want to enable. Set to `none` to disable all metric instrumentations.                                                                                                                                  | all available instrumentations |
+| `OTEL_DOTNET_AUTO_LOGS_DISABLED_INSTRUMENTATIONS`    | Comma-separated list of logs source instrumentations you want to disable.                                                                                                                                                                                       |                                |
 
 ### Traces instrumentations
 
@@ -61,9 +63,9 @@ for more details.
 
 ### Logs instrumentations
 
-| ID | Instrumented library                                                                                                            | Supported versions | Instrumentation type   |
-|----|---------------------------------------------------------------------------------------------------------------------------------|--------------------|------------------------|
-|    | [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging) **Not supported on .NET Framework** | ≥6.0.0             | bytecode or source [1] |
+| ID      | Instrumented library                                                                                                            | Supported versions | Instrumentation type   |
+|---------|---------------------------------------------------------------------------------------------------------------------------------|--------------------|------------------------|
+| ILogger | [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging) **Not supported on .NET Framework** | ≥6.0.0             | bytecode or source [1] |
 
 **[1]**: For ASP.NET Core applications, the `LoggingBuilder` instrumentation
 can be enabled without using the .NET CLR Profiler by setting

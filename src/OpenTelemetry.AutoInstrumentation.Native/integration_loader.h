@@ -19,29 +19,37 @@ using json = nlohmann::json;
 // in the OTEL_DOTNET_AUTO_INTEGRATIONS_FILE environment variable
 void LoadIntegrationsFromEnvironment(
     std::vector<IntegrationMethod>& integrationMethods,
-    const std::vector<WSTRING>& enabledIntegrationNames,
-    const std::vector<WSTRING>& disabledIntegrationNames);
+    const std::vector<WSTRING>& enabledTraceIntegrationNames,
+    const std::vector<WSTRING>& disabledTraceIntegrationNames,
+    const std::vector<WSTRING>& enabledLogIntegrationNames,
+    const std::vector<WSTRING>& disabledLogIntegrationNames);
 
 // LoadIntegrationsFromFile loads the integrations from a file
 void LoadIntegrationsFromFile(
     const WSTRING& file_path,
     std::vector<IntegrationMethod>& integrationMethods,
-    const std::vector<WSTRING>& enabledIntegrationNames,
-    const std::vector<WSTRING>& disabledIntegrationNames);
+    const std::vector<WSTRING>& enabledTraceIntegrationNames,
+    const std::vector<WSTRING>& disabledTraceIntegrationNames,
+    const std::vector<WSTRING>& enabledLogIntegrationNames,
+    const std::vector<WSTRING>& disabledLogIntegrationNames);
 
 // LoadIntegrationsFromFile loads the integrations from a stream
 void LoadIntegrationsFromStream(
     std::istream& stream,
     std::vector<IntegrationMethod>& integrationMethods,
-    const std::vector<WSTRING>& enabledIntegrationNames,
-    const std::vector<WSTRING>& disabledIntegrationNames);
+    const std::vector<WSTRING>& enabledTraceIntegrationNames,
+    const std::vector<WSTRING>& disabledTraceIntegrationNames,
+    const std::vector<WSTRING>& enabledLogIntegrationNames,
+    const std::vector<WSTRING>& disabledLogIntegrationNames);
 
 namespace
 {
     void IntegrationFromJson(const json::value_type& src,
                          std::vector<IntegrationMethod>& integrationMethods,
-                         const std::vector<WSTRING>& enabledIntegrationNames,
-                         const std::vector<WSTRING>& disabledIntegrationNames);
+                         const std::vector<WSTRING>& enabledTraceIntegrationNames,
+                         const std::vector<WSTRING>& disabledTraceIntegrationNames,
+                         const std::vector<WSTRING>& enabledLogIntegrationNames,
+                         const std::vector<WSTRING>& disabledLogIntegrationNames);
 
     void MethodReplacementFromJson(const json::value_type& src, const WSTRING& integrationName,
                                    std::vector<IntegrationMethod>& integrationMethods);
