@@ -16,13 +16,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using IntegrationTests.Helpers;
-using IntegrationTests.Helpers.Models;
+using OpenTelemetry.Proto.Trace.V1;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -30,41 +31,6 @@ namespace IntegrationTests;
 
 public class GraphQLTests : TestHelper
 {
-    private const string ServiceName = "TestApplication.GraphQL";
-    private const string ServiceVersion = OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version;
-    private const string Library = "OpenTelemetry.AutoInstrumentation.GraphQL";
-
-    private static readonly List<RequestInfo> _requests;
-    private static readonly List<SpanExpectation> _expectationsAll; // Full expectations
-    private static readonly List<SpanExpectation> _expectationsSafe; // PII protected expectations
-    private static int _expectedGraphQLExecuteSpanCount;
-
-    static GraphQLTests()
-    {
-        _requests = new List<RequestInfo>(0);
-        _expectationsAll = new List<SpanExpectation>();
-        _expectationsSafe = new List<SpanExpectation>();
-        _expectedGraphQLExecuteSpanCount = 0;
-
-        // SUCCESS: query using GET
-        CreateGraphQLRequestsAndExpectations(url: "/graphql?query=" + WebUtility.UrlEncode("query{hero{name appearsIn}}"), httpMethod: "GET", operationName: "query", graphQLRequestBody: null, graphQLOperationType: "query", graphQLOperationName: null, graphQLDocument: "query{hero{name appearsIn} }");
-
-        // SUCCESS: query using POST (default)
-        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", operationName: "query HeroQuery", graphQLRequestBody: @"{""query"":""query HeroQuery{hero {name appearsIn}}"",""operationName"": ""HeroQuery""}", graphQLOperationType: "query", graphQLOperationName: "HeroQuery", graphQLDocument: "query HeroQuery{hero{name appearsIn}}");
-
-        // SUCCESS: mutation
-        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", operationName: "mutation AddBobaFett", graphQLRequestBody: @"{""query"":""mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}"",""variables"":{""human"":{""name"": ""Boba Fett""}}}", graphQLOperationType: "mutation", graphQLOperationName: "AddBobaFett", graphQLDocument: "mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}");
-
-        // SUCCESS: subscription
-        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", operationName: "subscription HumanAddedSub", graphQLRequestBody: @"{ ""query"":""subscription HumanAddedSub{humanAdded{name}}""}", graphQLOperationType: "subscription", graphQLOperationName: "HumanAddedSub", graphQLDocument: "subscription HumanAddedSub{humanAdded{name}}");
-
-        // FAILURE: query fails 'validate' step
-        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", operationName: "query HumanError", graphQLRequestBody: @"{""query"":""query HumanError{human(id:1){name apearsIn}}""}", graphQLOperationType: "query", graphQLOperationName: null, failsValidation: true, graphQLDocument: "query HumanError{human(id:1){name apearsIn}}");
-
-        // FAILURE: query fails 'execute' step
-        CreateGraphQLRequestsAndExpectations(url: "/graphql", httpMethod: "POST", operationName: "subscription NotImplementedSub", graphQLRequestBody: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", failsExecution: true);
-    }
-
     public GraphQLTests(ITestOutputHelper output)
         : base("GraphQL", output)
     {
@@ -76,51 +42,118 @@ public class GraphQLTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task SubmitsTraces(bool setDocument)
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED", "true");
-        SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
+        var requests = new List<RequestInfo>();
+        using var collector = await MockSpansCollector.Start(Output);
 
+        // SUCCESS: query using GET
+        Request(requests, method: "GET", url: "/graphql?query=" + WebUtility.UrlEncode("query{hero{name appearsIn}}"));
+        Expect(collector, spanName: "query", graphQLOperationType: "query", graphQLOperationName: null, graphQLDocument: "query{hero{name appearsIn}}", setDocument: setDocument);
+
+        // SUCCESS: query using POST (default)
+        Request(requests, body: @"{""query"":""query HeroQuery{hero{name appearsIn}}"",""operationName"": ""HeroQuery""}");
+        Expect(collector, spanName: "query HeroQuery", graphQLOperationType: "query", graphQLOperationName: "HeroQuery", graphQLDocument: "query HeroQuery{hero{name appearsIn}}", setDocument: setDocument);
+
+        // SUCCESS: mutation
+        Request(requests, body: @"{""query"":""mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}"",""variables"":{""human"":{""name"": ""Boba Fett""}}}");
+        Expect(collector, spanName: "mutation AddBobaFett", graphQLOperationType: "mutation", graphQLOperationName: "AddBobaFett", graphQLDocument: "mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}", setDocument: setDocument);
+
+        // SUCCESS: subscription
+        Request(requests, body: @"{ ""query"":""subscription HumanAddedSub{humanAdded{name}}""}");
+        Expect(collector, spanName: "subscription HumanAddedSub", graphQLOperationType: "subscription", graphQLOperationName: "HumanAddedSub", graphQLDocument: "subscription HumanAddedSub{humanAdded{name}}", setDocument: setDocument);
+
+        // FAILURE: query fails 'execute' step
+        Request(requests, body: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}");
+        Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, failsExecution: true);
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
-        using var agent = await LegacyMockZipkinCollector.Start(Output);
-        using var process = StartTestApplication(agent.Port, aspNetCorePort: aspNetCorePort);
-        if (process.HasExited)
+        using var process = StartTestApplication(otlpTraceCollectorPort: collector.Port, aspNetCorePort: aspNetCorePort);
+        using var helper = new ProcessHelper(process);
+        try
         {
-            throw new InvalidOperationException($"Test application has exited with code: {process.ExitCode}");
+            await WaitForServer(aspNetCorePort);
+
+            await SubmitRequestsAsync(aspNetCorePort, requests);
+
+            collector.AssertExpectations();
+        }
+        finally
+        {
+            if (!process.HasExited)
+            {
+                process.Kill();
+                process.WaitForExit();
+            }
+
+            Output.WriteLine("Exit Code: " + process.ExitCode);
+            Output.WriteResult(helper);
+        }
+    }
+
+    private static void Request(List<RequestInfo> requests, string method = "POST", string url = "/graphql", string body = null)
+    {
+        requests.Add(new RequestInfo
+        {
+            Url = url,
+            HttpMethod = method,
+            RequestBody = body
+        });
+    }
+
+    private static void Expect(
+        MockSpansCollector collector,
+        string spanName,
+        string graphQLOperationType,
+        string graphQLOperationName,
+        string graphQLDocument,
+        bool setDocument,
+        bool failsExecution = false)
+    {
+        bool Predicate(Span span)
+        {
+            if (span.Kind != Span.Types.SpanKind.Server)
+            {
+                return false;
+            }
+
+            if (span.Name != spanName)
+            {
+                return false;
+            }
+
+            if (failsExecution && !span.Attributes.Any(attr => attr.Key == "error.msg"))
+            {
+                return false;
+            }
+
+            if (!span.Attributes.Any(attr => attr.Key == "graphql.operation.type" && attr.Value?.StringValue == graphQLOperationType))
+            {
+                return false;
+            }
+
+            if (graphQLOperationName != null && !span.Attributes.Any(attr => attr.Key == "graphql.operation.name" && attr.Value?.StringValue == graphQLOperationName))
+            {
+                return false;
+            }
+
+            if (setDocument && !span.Attributes.Any(attr => attr.Key == "graphql.document" && attr.Value?.StringValue == graphQLDocument))
+            {
+                return false;
+            }
+
+            return true;
         }
 
-        var wh = new EventWaitHandle(false, EventResetMode.AutoReset);
+        collector.Expect("OpenTelemetry.AutoInstrumentation.GraphQL", Predicate, spanName);
+    }
 
-        process.OutputDataReceived += (sender, args) =>
-        {
-            if (args.Data != null)
-            {
-                if (args.Data.Contains("Now listening on:") || args.Data.Contains("Unable to start Kestrel"))
-                {
-                    wh.Set();
-                }
-
-                Output.WriteLine($"[webserver][stdout] {args.Data}");
-            }
-        };
-        process.BeginOutputReadLine();
-
-        process.ErrorDataReceived += (sender, args) =>
-        {
-            if (args.Data != null)
-            {
-                Output.WriteLine($"[webserver][stderr] {args.Data}");
-            }
-        };
-        process.BeginErrorReadLine();
-
-        wh.WaitOne(5000);
-
+    private async Task WaitForServer(int aspNetCorePort)
+    {
+        var client = new HttpClient();
         var maxMillisecondsToWait = 15_000;
         var intervalMilliseconds = 500;
         var intervals = maxMillisecondsToWait / intervalMilliseconds;
         var serverReady = false;
-        var client = new HttpClient();
-
         // wait for server to be ready to receive requests
         while (intervals-- > 0)
         {
@@ -149,72 +182,12 @@ public class GraphQLTests : TestHelper
         {
             throw new Exception("Couldn't verify the application is ready to receive requests.");
         }
-
-        var testStart = DateTime.Now;
-
-        await SubmitRequestsAsync(client, aspNetCorePort);
-
-        var spans = await agent.WaitForSpansAsync(_expectedGraphQLExecuteSpanCount, instrumentationLibrary: Library);
-
-        if (!process.HasExited)
-        {
-            process.Kill();
-        }
-
-        if (setDocument)
-        {
-            SpanTestHelpers.AssertExpectationsMet(_expectationsAll, spans);
-        }
-        else
-        {
-            SpanTestHelpers.AssertExpectationsMet(_expectationsSafe, spans);
-        }
     }
 
-    private static void CreateGraphQLRequestsAndExpectations(
-        string url,
-        string httpMethod,
-        string operationName,
-        string graphQLRequestBody,
-        string graphQLOperationType,
-        string graphQLOperationName,
-        string graphQLDocument,
-        bool failsValidation = false,
-        bool failsExecution = false)
+    private async Task SubmitRequestsAsync(int aspNetCorePort, IEnumerable<RequestInfo> requests)
     {
-        _requests.Add(new RequestInfo
-        {
-            Url = url,
-            HttpMethod = httpMethod,
-            RequestBody = graphQLRequestBody,
-        });
-
-        if (failsValidation) { return; }
-
-        _expectationsAll.Add(new GraphQLSpanExpectation(ServiceName, ServiceVersion, operationName)
-        {
-            GraphQLRequestBody = graphQLRequestBody,
-            GraphQLOperationType = graphQLOperationType,
-            GraphQLOperationName = graphQLOperationName,
-            GraphQLDocument = graphQLDocument,
-            IsGraphQLError = failsExecution
-        });
-
-        _expectationsSafe.Add(new GraphQLSpanExpectation(ServiceName, ServiceVersion, operationName)
-        {
-            GraphQLRequestBody = graphQLRequestBody,
-            GraphQLOperationType = graphQLOperationType,
-            GraphQLOperationName = graphQLOperationName,
-            GraphQLDocument = null,
-            IsGraphQLError = failsExecution
-        });
-
-        _expectedGraphQLExecuteSpanCount++;
-    }
-
-    private async Task SubmitRequestsAsync(HttpClient client, int aspNetCorePort)
-    {
-        foreach (RequestInfo requestInfo in _requests)
+        var client = new HttpClient();
+        foreach (RequestInfo requestInfo in requests)
         {
             await SubmitRequestAsync(client, aspNetCorePort, requestInfo);
         }
