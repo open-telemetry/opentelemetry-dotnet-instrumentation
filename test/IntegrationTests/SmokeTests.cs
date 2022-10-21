@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System.Collections.Immutable;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
@@ -271,6 +270,18 @@ public class SmokeTests : TestHelper
         RunTestApplication(logsAgentPort: collector.Port, enableClrProfiler: true);
 
         collector.AssertExpectations();
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public async Task LogsNoneInstrumentations()
+    {
+        using var collector = await MockLogsCollector.Start(Output);
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLED_INSTRUMENTATIONS", "none");
+        RunTestApplication(logsAgentPort: collector.Port, enableClrProfiler: true);
+
+        collector.AssertEmpty(5.Seconds());
     }
 #endif
 
