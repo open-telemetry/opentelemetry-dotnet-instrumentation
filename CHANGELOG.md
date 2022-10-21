@@ -14,6 +14,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Support ASP.NET Core OpenTelemetry Log exporter related environment variables:
   - `OTEL_LOGS_EXPORTER`,
   - `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED`,
+  - `OTEL_DOTNET_AUTO_LOGS_ENABLED_INSTRUMENTATIONS`,
+  - `OTEL_DOTNET_AUTO_LOGS_DISABLED_INSTRUMENTATIONS`,
   - `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE`.
 - Support `OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT` (default value: `false`)
   environment variable which controls whether `graphql.document` attribute
