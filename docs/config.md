@@ -63,6 +63,7 @@ for more details.
 
 \[1\]: The ASP.NET metrics are generated only if the `AspNet` trace instrumentation
  is also enabled.
+
 \[2\]: This instrumentation automatically enables the
  `Microsoft.AspNetCore.Hosting.HttpRequestIn` spans.
 
