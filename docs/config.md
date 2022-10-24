@@ -55,11 +55,17 @@ for more details.
 
 | ID           | Instrumented library                                                                                                                                                                            | Supported versions | Instrumentation type |
 |--------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------|----------------------|
-| `AspNet`     | ASP.NET Framework                                                                                                                                                                               | *                  | source               |
-| `AspNet`     | ASP.NET Core                                                                                                                                                                                    | *                  | source               |
+| `AspNet`     | ASP.NET Framework \[1\]                                                                                                                                                                                    | *                  | source               |
+| `AspNet`     | ASP.NET Core \[2\]                                                                                                                                                                                    | *                  | source               |
 | `HttpClient` | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | *                  | source               |
 | `NetRuntime` | [OpenTelemetry.Instrumentation.Runtime](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.Runtime)                                                                                   | *                  | source               |
 | `Process`    | [OpenTelemetry.Instrumentation.Process](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.Process)                                                                                   | *                  | source               |
+
+\[1\]: The ASP.NET metrics are generated only if the `AspNet` trace instrumentation
+ is also enabled.
+
+\[2\]: This instrumentation automatically enables the
+ `Microsoft.AspNetCore.Hosting.HttpRequestIn` spans.
 
 ### Logs instrumentations
 
