@@ -17,7 +17,7 @@
 using System;
 using Xunit.Abstractions;
 
-namespace IntegrationTests.Helpers.Models;
+namespace IntegrationTests.Helpers;
 
 public class FirewallPort : IDisposable
 {

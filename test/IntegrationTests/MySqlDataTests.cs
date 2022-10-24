@@ -15,11 +15,7 @@
 // </copyright>
 
 #if NETCOREAPP3_1_OR_GREATER
-using System;
-using System.Linq;
 using System.Threading.Tasks;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -29,14 +25,12 @@ namespace IntegrationTests;
 [Collection(MySqlCollection.Name)]
 public class MySqlDataTests : TestHelper
 {
-    private const string ServiceName = "TestApplication.MySqlData";
     private readonly MySqlFixture _mySql;
 
     public MySqlDataTests(ITestOutputHelper output, MySqlFixture mySql)
         : base("MySqlData", output)
     {
         _mySql = mySql;
-        SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
     }
 
     [Fact]
@@ -44,17 +38,12 @@ public class MySqlDataTests : TestHelper
     [Trait("Containers", "Linux")]
     public async Task SubmitsTraces()
     {
-        using var agent = await LegacyMockZipkinCollector.Start(Output);
+        using var collector = await MockSpansCollector.Start(Output);
+        collector.Expect("OpenTelemetry.Instrumentation.MySqlData");
 
-        RunTestApplication(agent.Port, arguments: $"--mysql {_mySql.Port}");
+        RunTestApplication(otlpTraceCollectorPort: collector.Port, arguments: $"--mysql {_mySql.Port}");
 
-        var spans = await agent.WaitForSpansAsync(1);
-
-        using (new AssertionScope())
-        {
-            spans.Should().NotBeNullOrEmpty();
-            spans.First().Tags["db.system"].Should().Be("mysql");
-        }
+        collector.AssertExpectations();
     }
 }
 #endif

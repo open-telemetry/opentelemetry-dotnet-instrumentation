@@ -16,10 +16,7 @@
 
 #if NETCOREAPP3_1_OR_GREATER
 
-using System;
 using System.Threading.Tasks;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -29,14 +26,12 @@ namespace IntegrationTests;
 [Collection(RedisCollection.Name)]
 public class StackExchangeRedisTests : TestHelper
 {
-    private const string ServiceName = "TestApplication.StackExchangeRedis";
     private readonly RedisFixture _redis;
 
     public StackExchangeRedisTests(ITestOutputHelper output, RedisFixture redis)
         : base("StackExchangeRedis", output)
     {
         _redis = redis;
-        SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
     }
 
     [Fact]
@@ -44,23 +39,16 @@ public class StackExchangeRedisTests : TestHelper
     [Trait("Containers", "Linux")]
     public async Task SubmitsTraces()
     {
-        using var agent = await LegacyMockZipkinCollector.Start(Output);
-
-        RunTestApplication(agent.Port, arguments: $"--redis {_redis.Port}");
-
-        const int expectedSpansCount = 8;
-
-        var spans = await agent.WaitForSpansAsync(expectedSpansCount);
-
-        using (new AssertionScope())
+        using var collector = await MockSpansCollector.Start(Output);
+        const int spanCount = 8;
+        for (int i = 0; i < spanCount; i++)
         {
-            spans.Count.Should().Be(expectedSpansCount);
-
-            foreach (var span in spans)
-            {
-                span.Tags["db.system"].Should().Be("redis");
-            }
+            collector.Expect("OpenTelemetry.Instrumentation.StackExchangeRedis");
         }
+
+        RunTestApplication(otlpTraceCollectorPort: collector.Port, arguments: $"--redis {_redis.Port}");
+
+        collector.AssertExpectations();
     }
 }
 #endif

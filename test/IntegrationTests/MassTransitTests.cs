@@ -16,11 +16,10 @@
 
 #if !NETFRAMEWORK
 using System.Threading.Tasks;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
+using static OpenTelemetry.Proto.Trace.V1.Span.Types;
 
 namespace IntegrationTests;
 
@@ -29,28 +28,19 @@ public class MassTransitTests : TestHelper
     public MassTransitTests(ITestOutputHelper output)
         : base("MassTransit", output)
     {
-        SetEnvironmentVariable("OTEL_SERVICE_NAME", "TestApplication.MassTransit");
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
     public async Task SubmitsTraces()
     {
-        using var agent = await LegacyMockZipkinCollector.Start(Output);
-        RunTestApplication(agent.Port);
+        using var collector = await MockSpansCollector.Start(Output);
+        collector.Expect("MassTransit", span => span.Kind == SpanKind.Producer, "Producer");
+        collector.Expect("MassTransit", span => span.Kind == SpanKind.Consumer, "Consumer");
 
-        const int expectedSpans = 3;
-        var spans = await agent.WaitForSpansAsync(expectedSpans);
+        RunTestApplication(otlpTraceCollectorPort: collector.Port);
 
-        using (new AssertionScope())
-        {
-            spans.Count.Should().BeGreaterOrEqualTo(expectedSpans);
-
-            foreach (var span in spans)
-            {
-                span.Library.Should().Be("MassTransit");
-            }
-        }
+        collector.AssertExpectations();
     }
 }
 #endif
