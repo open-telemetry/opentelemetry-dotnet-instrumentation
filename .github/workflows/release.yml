@@ -21,7 +21,7 @@ jobs:
             6.0.x
       - run: ./build.cmd
       - name: Upload binaries
-        uses: actions/upload-artifact@v3.1.0
+        uses: actions/upload-artifact@v3.1.1
         if: always()
         with:
           name: bin-${{ matrix.machine }}
@@ -50,7 +50,7 @@ jobs:
           otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
           ./build.sh
     - name: Upload ${{ matrix.base-image }} binaries
-      uses: actions/upload-artifact@v3.1.0
+      uses: actions/upload-artifact@v3.1.1
       if: always()
       with:
         name: bin-${{ matrix.base-image }}
