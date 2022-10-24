@@ -15,8 +15,6 @@
 // </copyright>
 
 #if !NETFRAMEWORK
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using IntegrationTests.Helpers;
 using Xunit;
@@ -33,8 +31,6 @@ public class MongoDBTests : TestHelper
         : base("MongoDB", output)
     {
         _mongoDB = mongoDB;
-
-        SetEnvironmentVariable("OTEL_SERVICE_NAME", "TestApplication.MongoDB");
     }
 
     [Fact]
@@ -42,42 +38,16 @@ public class MongoDBTests : TestHelper
     [Trait("Containers", "Linux")]
     public async Task SubmitsTraces()
     {
-        using var agent = await LegacyMockZipkinCollector.Start(Output);
-        RunTestApplication(agent.Port, arguments: $"--mongo-db {_mongoDB.Port}");
-        var spans = await agent.WaitForSpansAsync(3);
-        Assert.True(spans.Count >= 3, $"Expecting at least 3 spans, only received {spans.Count}");
-
-        var rootSpan = spans.Single(s => s.ParentId == null);
-
-        // Check for manual trace
-        Assert.Equal("Main()", rootSpan.Name);
-
-        var spansWithStatement = 0;
-
-        foreach (var span in spans)
+        using var collector = await MockSpansCollector.Start(Output);
+        const int spanCount = 3;
+        for (int i = 0; i < spanCount; i++)
         {
-            Assert.Equal("TestApplication.MongoDB", span.Service);
-
-            if (Regex.IsMatch(span.Name, "employees\\.*"))
-            {
-                Assert.Equal("mongodb", span.Tags["db.system"]);
-                Assert.Equal("test-db", span.Tags["db.name"]);
-                Assert.True("1.0.0.0" == span.Tags["otel.library.version"], span.ToString());
-
-                if (span.Tags?.ContainsKey("db.statement") ?? false)
-                {
-                    spansWithStatement++;
-                    Assert.True(span.Tags?.ContainsKey("db.statement"), $"No db.statement found on span {span}");
-                }
-            }
-            else
-            {
-                // These are manual (DiagnosticSource) traces
-                Assert.True("1.0.0" == span.Tags["otel.library.version"], span.ToString());
-            }
+            collector.Expect("MongoDB.Driver.Core.Extensions.DiagnosticSources");
         }
 
-        Assert.False(spansWithStatement == 0, "Extraction of the command failed on all spans");
+        RunTestApplication(otlpTraceCollectorPort: collector.Port, arguments: $"--mongo-db {_mongoDB.Port}");
+
+        collector.AssertExpectations();
     }
 }
 #endif
