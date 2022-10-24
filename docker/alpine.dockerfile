@@ -12,6 +12,7 @@ RUN apk update \
         protobuf-dev \
         grpc
 
+ENV IsAlpine=true
 ENV PROTOBUF_PROTOC=/usr/bin/protoc
 ENV gRPC_PluginFullPath=/usr/bin/grpc_csharp_plugin
 
