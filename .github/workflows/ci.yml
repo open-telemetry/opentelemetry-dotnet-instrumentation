@@ -64,8 +64,6 @@ jobs:
       continue-on-error: true
 
   powershell-script:
-    strategy:
-      fail-fast: false
     runs-on: windows-2022
     steps:
       - uses: actions/setup-dotnet@v3.0.2
