@@ -569,8 +569,18 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
     // store module info for later lookup
     module_id_to_info_map_[module_id] = module_metadata;
 
-    // We call the function to analyze the module and request the ReJIT of integrations defined in this module.
-    CallTarget_RequestRejitForModule(module_id, module_metadata, integration_methods_);
+    if (module_info.assembly.name == managed_profiler_name)
+    {
+        // If we want to rewrite metadata tokens on the instrumentation assembly it will be
+        // necessary to ReJIT it. However, since that is not done at this moment it is not
+        // necessary to scan for targets to be instrumented on it.
+        managed_profiler_module_id_ = module_id;
+    }
+    else
+    {
+        // We call the function to analyze the module and request the ReJIT of integrations defined in this module.
+        CallTarget_RequestRejitForModule(module_id, module_metadata, integration_methods_);
+    }
 
     Logger::Debug("ModuleLoadFinished stored metadata for ", module_id, " ", module_info.assembly.name, " AppDomain ",
                   module_info.assembly.app_domain_id, " [", module_info.assembly.app_domain_name, "]");
@@ -586,7 +596,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
 
     return S_OK;
 }
-
 
 HRESULT STDMETHODCALLTYPE CorProfiler::ModuleUnloadStarted(ModuleID module_id)
 {
@@ -2453,13 +2462,59 @@ HRESULT CorProfiler::CallTarget_RewriterCallback(RejitHandlerModule* moduleHandl
 {
     auto _ = trace::Stats::Instance()->CallTargetRewriterCallbackMeasure();
 
+    FunctionInfo* caller = methodHandler->GetFunctionInfo();
+
+    // Ensure that the replacement is actually available and found.
+    if (!managed_profiler_module_id_)
+    {
+        Logger::Error("*** CallTarget_RewriterCallback() Error instrumenting: ", caller->type.name, ".", caller->name, "() ",
+                      "managed profiler module was not loaded yet.");
+        return S_FALSE;
+    }
+
+    HRESULT hr = S_OK;
+    MethodReplacement* method_replacement = methodHandler->GetMethodReplacement();
+    {
+        // keep this lock until we are done using the module,
+        // to prevent it from unloading while in use
+        std::lock_guard<std::mutex> guard(module_id_to_info_map_lock_);
+
+        ModuleMetadata* instrumentation_module_metadata = nullptr;
+        auto findRes = module_id_to_info_map_.find(managed_profiler_module_id_);
+        if (findRes == module_id_to_info_map_.end())
+        {
+            instrumentation_module_metadata = findRes->second;
+        }
+
+        if (instrumentation_module_metadata == nullptr)
+        {
+            Logger::Error("*** CallTarget_RewriterCallback() Error instrumenting: ", caller->type.name, ".", caller->name, "() ",
+                          "managed profiler module metadata was not found.");
+            return S_FALSE;
+        }
+
+        auto wrapper = method_replacement->wrapper_method;
+        mdTypeDef wrapper_type_def = mdTypeDefNil;
+        hr = instrumentation_module_metadata->metadata_import->FindTypeDefByName(
+            wrapper.type_name.c_str(),
+            NULL, // The wrapper type can't be a nested type.
+            &wrapper_type_def);
+        if (FAILED(hr) || wrapper_type_def == mdTypeDefNil)
+        {
+            Logger::Warn("*** CallTarget_RewriterCallback() Failed for: ", caller->type.name, ".", caller->name, "()",
+                        " integration type not found on the managed profiler module HRESULT=", HResultStr(hr),
+                        " IntegrationType=", wrapper.type_name);
+            return S_FALSE;
+        }
+
+        // TODO: Use the method signature to validate also the type. See 
+    }
+
     ModuleID module_id = moduleHandler->GetModuleId();
     ModuleMetadata* module_metadata = moduleHandler->GetModuleMetadata();
-    FunctionInfo* caller = methodHandler->GetFunctionInfo();
     CallTargetTokens* callTargetTokens = module_metadata->GetCallTargetTokens();
     mdToken function_token = caller->id;
     FunctionMethodArgument retFuncArg = caller->method_signature.GetRet();
-    MethodReplacement* method_replacement = methodHandler->GetMethodReplacement();
     unsigned int retFuncElementType;
     int retTypeFlags = retFuncArg.GetTypeFlags(retFuncElementType);
     bool isVoid = (retTypeFlags & TypeFlagVoid) > 0;
@@ -2494,7 +2549,7 @@ HRESULT CorProfiler::CallTarget_RewriterCallback(RejitHandlerModule* moduleHandl
     // *** Create rewriter
     ILRewriter rewriter(this->info_, methodHandler->GetFunctionControl(), module_id, function_token);
     bool modified = false;
-    auto hr = rewriter.Import();
+    hr = rewriter.Import();
     if (FAILED(hr))
     {
         Logger::Warn("*** CallTarget_RewriterCallback(): Call to ILRewriter.Import() failed for ", module_id, " ",

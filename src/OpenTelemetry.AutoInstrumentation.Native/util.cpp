@@ -174,4 +174,16 @@ WSTRING TokenStr(const mdToken* token)
     return s;
 }
 
+WSTRING HResultStr(const HRESULT hr)
+{
+    std::wstringstream ss;
+    ss << "0x"
+       << std::setfill(L'0')
+       << std::setw(2*sizeof(HRESULT))
+       << std::hex
+       << hr;
+
+    return ss.str();
+}
+
 } // namespace trace
