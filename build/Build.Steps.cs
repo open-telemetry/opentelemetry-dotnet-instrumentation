@@ -397,25 +397,28 @@ partial class Build
                     .ForEach(file =>
                     {
                         var depsJsonContent = File.ReadAllText(file);
-                        CopyNativeDependenciesToStore(file, depsJsonContent);
+                        using var jsonDocument = JsonDocument.Parse(depsJsonContent);
+
+                        var folderRuntimeName = GetFolderRuntimeName(jsonDocument);
+
+                        var architectureStores = new List<string>
+                        {
+                            Path.Combine(StoreDirectory, "x64", folderRuntimeName),
+                            Path.Combine(StoreDirectory, "x86", folderRuntimeName),
+                        }.AsReadOnly();
+
+                        CopyNativeDependenciesToStore(file, jsonDocument, architectureStores);
+
+                        RemoveDuplicatedLibraries(depsJsonContent, architectureStores);
 
                         RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsFile(depsJsonContent, file);
                     });
                 RemoveFilesFromAdditionalDepsDirectory();
 
-                void CopyNativeDependenciesToStore(AbsolutePath file, string depsJsonContent)
+
+                void CopyNativeDependenciesToStore(AbsolutePath file, JsonDocument jsonDocument, IReadOnlyList<string> architectureStores)
                 {
                     var depsDirectory = file.Parent;
-                    using var jsonDocument = JsonDocument.Parse(depsJsonContent);
-
-                    var runtimeName = jsonDocument.RootElement.GetProperty("runtimeTarget").GetProperty("name").GetString();
-                    var folderRuntimeName = runtimeName switch
-                    {
-                        ".NETCoreApp,Version=v3.1" => "netcoreapp3.1",
-                        ".NETCoreApp,Version=v6.0" => "net6.0",
-                        _ => throw new ArgumentOutOfRangeException(nameof(runtimeName), runtimeName,
-                            "This value is not supported. You have probably introduced new .NET version to AutoInstrumentation")
-                    };
 
                     foreach (var targetProperty in jsonDocument.RootElement.GetProperty("targets").EnumerateObject())
                     {
@@ -432,20 +435,40 @@ partial class Build
                             {
                                 var sourceFileName = Path.Combine(depsDirectory, runtimeDependency.Name);
 
-                                var targetFileNameX64 = Path.Combine(StoreDirectory, "x64", folderRuntimeName,
-                                    packages.Name.ToLowerInvariant(), runtimeDependency.Name);
-                                var targetFileNameX86 = Path.Combine(StoreDirectory, "x86", folderRuntimeName,
-                                    packages.Name.ToLowerInvariant(), runtimeDependency.Name);
-
-                                var targetDirectoryX64 = Path.GetDirectoryName(targetFileNameX64);
-                                var targetDirectoryX86 = Path.GetDirectoryName(targetFileNameX86);
-
-                                Directory.CreateDirectory(targetDirectoryX64);
-                                Directory.CreateDirectory(targetDirectoryX86);
-
-                                File.Copy(sourceFileName, targetFileNameX64);
-                                File.Copy(sourceFileName, targetFileNameX86);
+                                foreach (var architectureStore in architectureStores)
+                                {
+                                    var targetFileName = Path.Combine(architectureStore, packages.Name.ToLowerInvariant(), runtimeDependency.Name);
+                                    var targetDirectory = Path.GetDirectoryName(targetFileName);
+                                    Directory.CreateDirectory(targetDirectory);
+                                    File.Copy(sourceFileName, targetFileName);
+                                }
                             }
+                        }
+                    }
+                }
+
+                void RemoveDuplicatedLibraries(string depsJsonContent, IReadOnlyList<string> architectureStores)
+                {
+                    var duplicatedLibraries = new List<(string Name, string Version)> { (Name: "Microsoft.Extensions.Logging.Abstractions", Version: "6.0.0") };
+
+                    foreach (var duplicatedLibrary in duplicatedLibraries)
+                    {
+                        if (depsJsonContent.Contains(duplicatedLibrary.Name.ToLower() + "/" + duplicatedLibrary.Version))
+                        {
+                            throw new NotSupportedException($"Cannot remove {duplicatedLibrary.Name.ToLower()}/{duplicatedLibrary.Version} folder. It is referenced in json file");
+                        }
+
+                        foreach (var architectureStore in architectureStores)
+                        {
+                            var directoryToBeRemoved = Path.Combine(architectureStore, duplicatedLibrary.Name.ToLower(), duplicatedLibrary.Version);
+                            Console.WriteLine(directoryToBeRemoved);
+
+                            if (!Directory.Exists(directoryToBeRemoved))
+                            {
+                                throw new NotSupportedException($"Directory {directoryToBeRemoved} does not exists. Verify it.");
+                            }
+
+                            Directory.Delete(directoryToBeRemoved, true);
                         }
                     }
                 }
@@ -468,6 +491,19 @@ partial class Build
                     AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(DeleteDirectory);
                 }
             });
+
+        string GetFolderRuntimeName(JsonDocument jsonDocument)
+        {
+            var runtimeName = jsonDocument.RootElement.GetProperty("runtimeTarget").GetProperty("name").GetString();
+            var folderRuntimeName = runtimeName switch
+            {
+                ".NETCoreApp,Version=v3.1" => "netcoreapp3.1",
+                ".NETCoreApp,Version=v6.0" => "net6.0",
+                _ => throw new ArgumentOutOfRangeException(nameof(runtimeName), runtimeName,
+                    "This value is not supported. You have probably introduced new .NET version to AutoInstrumentation")
+            };
+            return folderRuntimeName;
+        }
     };
 
     Target InstallDocumentationTools => _ => _
