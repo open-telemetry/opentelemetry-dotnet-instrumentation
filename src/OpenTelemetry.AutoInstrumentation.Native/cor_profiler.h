@@ -57,6 +57,7 @@ private:
     //
     std::mutex module_id_to_info_map_lock_;
     std::unordered_map<ModuleID, ModuleMetadata*> module_id_to_info_map_;
+    ModuleID managed_profiler_module_id_ = 0;
 
     //
     // Helper methods
