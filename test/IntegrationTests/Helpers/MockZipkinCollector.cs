@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
@@ -31,7 +30,12 @@ using Xunit;
 using Xunit.Abstractions;
 
 #if NETFRAMEWORK
+using System.Net;
 using IntegrationTests.Helpers.Compatibility;
+#endif
+
+#if NETCOREAPP3_1_OR_GREATER
+using Microsoft.AspNetCore.Http;
 #endif
 
 namespace IntegrationTests.Helpers;
@@ -41,7 +45,7 @@ public class MockZipkinCollector : IDisposable
     private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromMinutes(1);
 
     private readonly ITestOutputHelper _output;
-    private readonly TestHttpListener _listener;
+    private readonly TestHttpServer _listener;
 
     private readonly BlockingCollection<ZSpanMock> _spans = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
@@ -49,7 +53,11 @@ public class MockZipkinCollector : IDisposable
     private MockZipkinCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
-        _listener = new TestHttpListener(output, HandleHttpRequests, host, "/api/v2/spans/");
+#if NETFRAMEWORK
+        _listener = new TestHttpServer(output, HandleHttpRequests, host, "/api/v2/spans/");
+#else
+        _listener = new TestHttpServer(output, HandleHttpRequests, "/api/v2/spans");
+#endif
     }
 
     /// <summary>
@@ -57,6 +65,7 @@ public class MockZipkinCollector : IDisposable
     /// </summary>
     public int Port { get => _listener.Port; }
 
+#if NETFRAMEWORK
     public static async Task<MockZipkinCollector> Start(ITestOutputHelper output, string host = "localhost")
     {
         var collector = new MockZipkinCollector(output, host);
@@ -71,6 +80,16 @@ public class MockZipkinCollector : IDisposable
 
         return collector;
     }
+#endif
+
+#if NETCOREAPP3_1_OR_GREATER
+    public static Task<MockZipkinCollector> Start(ITestOutputHelper output)
+    {
+        var collector = new MockZipkinCollector(output);
+
+        return Task.FromResult(collector);
+    }
+#endif
 
     public void Dispose()
     {
@@ -173,22 +192,33 @@ public class MockZipkinCollector : IDisposable
         Assert.Fail(message.ToString());
     }
 
+#if NETFRAMEWORK
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        using var reader = new StreamReader(ctx.Request.InputStream);
+        HandleJsonStream(ctx.Request.InputStream);
+
+        ctx.GenerateEmptyJsonResponse();
+    }
+#endif
+
+#if NETCOREAPP3_1_OR_GREATER
+    private async Task HandleHttpRequests(HttpContext ctx)
+    {
+        using var bodyStream = await ctx.ReadBodyToMemoryAsync();
+        HandleJsonStream(bodyStream);
+
+        await ctx.GenerateEmptyJsonResponseAsync();
+    }
+#endif
+
+    private void HandleJsonStream(Stream bodyStream)
+    {
+        using var reader = new StreamReader(bodyStream);
         var zspans = JsonConvert.DeserializeObject<List<ZSpanMock>>(reader.ReadToEnd());
         foreach (var span in zspans ?? Enumerable.Empty<ZSpanMock>())
         {
             _spans.Add(span);
         }
-
-        // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
-        // (Setting content-length avoids that)
-        ctx.Response.ContentType = "application/json";
-        var buffer = Encoding.UTF8.GetBytes("{}");
-        ctx.Response.ContentLength64 = buffer.LongLength;
-        ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
-        ctx.Response.Close();
     }
 
     private void WriteOutput(string msg)
