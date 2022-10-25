@@ -14,7 +14,6 @@ using Nuke.Common.Tools.MSBuild;
 using Nuke.Common.Tools.Npm;
 using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Utilities.Collections;
-using Serilog;
 using static DotNetMSBuildTasks;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
@@ -461,7 +460,6 @@ partial class Build
                         foreach (var architectureStore in architectureStores)
                         {
                             var directoryToBeRemoved = Path.Combine(architectureStore, duplicatedLibrary.Name.ToLower(), duplicatedLibrary.Version);
-                            Console.WriteLine(directoryToBeRemoved);
 
                             if (!Directory.Exists(directoryToBeRemoved))
                             {
