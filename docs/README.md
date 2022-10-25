@@ -182,7 +182,7 @@ Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
 Get-OpenTelemetryInstallDirectory
 
 # List all available commands
-Get-Command -Module install
+Get-Command -Module OpenTelemetry.DotNet.Auto
 
 # Get command's usage information
 Get-Help Install-OpenTelemetryCore -Detailed
