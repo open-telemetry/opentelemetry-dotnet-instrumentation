@@ -71,7 +71,7 @@ jobs:
       - uses: actions/setup-dotnet@v3.0.2
         with:
           dotnet-version: 6.0.x
-      - name: Test the Shell scripts from README.md
+      - name: Test the PowerShell module instructions from README.md
         shell: powershell
         run: |
           $module_url = "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/OpenTelemetry.DotNet.Auto.psm1"
