@@ -208,7 +208,7 @@ function Install-OpenTelemetryCore() {
         Expand-Archive $dlPath $installDir -Force
 
         # OpenTelemetry service locator
-        [System.Environment]::SetEnvironmentVariable('OTEL_DOTNET_AUTO_INSTALL_DIR', $InstallPath, [System.EnvironmentVariableTarget]::Machine)
+        [System.Environment]::SetEnvironmentVariable('OTEL_DOTNET_AUTO_INSTALL_DIR', $installDir, [System.EnvironmentVariableTarget]::Machine)
     } 
     catch {
         $message = $_
