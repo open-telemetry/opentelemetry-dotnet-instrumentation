@@ -2481,15 +2481,15 @@ HRESULT CorProfiler::CallTarget_RewriterCallback(RejitHandlerModule* moduleHandl
 
         ModuleMetadata* instrumentation_module_metadata = nullptr;
         auto findRes = module_id_to_info_map_.find(managed_profiler_module_id_);
-        if (findRes == module_id_to_info_map_.end())
+        if (findRes != module_id_to_info_map_.end())
         {
             instrumentation_module_metadata = findRes->second;
         }
 
         if (instrumentation_module_metadata == nullptr)
         {
-            Logger::Error("*** CallTarget_RewriterCallback() Error instrumenting: ", caller->type.name, ".", caller->name, "() ",
-                          "managed profiler module metadata was not found.");
+            Logger::Error("*** CallTarget_RewriterCallback() Error instrumenting: ", caller->type.name, ".", caller->name,
+                          "() managed profiler module metadata was not found.");
             return S_FALSE;
         }
 
@@ -2501,13 +2501,14 @@ HRESULT CorProfiler::CallTarget_RewriterCallback(RejitHandlerModule* moduleHandl
             &wrapper_type_def);
         if (FAILED(hr) || wrapper_type_def == mdTypeDefNil)
         {
-            Logger::Warn("*** CallTarget_RewriterCallback() Failed for: ", caller->type.name, ".", caller->name, "()",
-                        " integration type not found on the managed profiler module HRESULT=", HResultStr(hr),
+            Logger::Warn("*** CallTarget_RewriterCallback() Failed for: ", caller->type.name, ".", caller->name,
+                        "() integration type not found on the managed profiler module HRESULT=", HResultStr(hr),
                         " IntegrationType=", wrapper.type_name);
             return S_FALSE;
         }
 
-        // TODO: Use the method signature to validate also the type. See 
+        // TODO: Use the method signature to validate also the method, tracking via
+        // https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issue/1499 
     }
 
     ModuleID module_id = moduleHandler->GetModuleId();
