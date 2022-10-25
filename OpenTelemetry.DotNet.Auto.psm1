@@ -254,7 +254,7 @@ function Register-OpenTelemetryForCurrentSession() {
     $installDir = Get-Current-InstallDir
 
     if (-not $installDir) {
-        throw "OpenTelemetry Core must be setup first. Run 'Install-OpenTelemetryCore' to setup Opentelemetry Core."
+        throw "OpenTelemetry Core must be setup first. Run 'Install-OpenTelemetryCore' to setup OpenTelemetry Core."
     }
 
     $varsTable = Get-Environment-Variables-Table -InstallDir $installDir -OTelServiceName $OTelServiceName
@@ -273,7 +273,7 @@ function Register-OpenTelemetryForIIS() {
     $installDir = Get-Current-InstallDir
 
     if (-not $installDir) {
-        throw "OpenTelemetry Core must be setup first. Run 'Install-OpenTelemetryCore' to setup Opentelemetry Core."
+        throw "OpenTelemetry Core must be setup first. Run 'Install-OpenTelemetryCore' to setup OpenTelemetry Core."
     }
 
     Setup-Windows-Service -InstallDir $installDir -WindowsServiceName "W3SVC"
@@ -302,7 +302,7 @@ function Register-OpenTelemetryForWindowsService() {
     $installDir = Get-Current-InstallDir
 
     if (-not $installDir) {
-        throw "OpenTelemetry Core must be setup first. Run 'Install-OpenTelemetryCore' to setup Opentelemetry Core."
+        throw "OpenTelemetry Core must be setup first. Run 'Install-OpenTelemetryCore' to setup OpenTelemetry Core."
     }
 
     Setup-Windows-Service -InstallDir $installDir -WindowsServiceName $WindowsServiceName -OTelServiceName $OTelServiceName
