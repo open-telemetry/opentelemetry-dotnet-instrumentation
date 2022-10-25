@@ -63,6 +63,26 @@ jobs:
       if: (${{ job.status }} != 'cancelled')
       continue-on-error: true
 
+  powershell-script:
+    strategy:
+      fail-fast: false
+    runs-on: windows-2022
+    steps:
+      - uses: actions/setup-dotnet@v3.0.2
+        with:
+          dotnet-version: 6.0.x
+      - name: Test the Shell scripts from README.md
+        shell: powershell
+        run: |
+          $module_url = "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/OpenTelemetry.DotNet.Auto.psm1"
+          $dl_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
+          Invoke-WebRequest -Uri $module_url -OutFile $download_path
+          Import-Module $download_path
+          Install-OpenTelemetryCore
+          Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
+          dotnet help
+          Test-Path "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\dotnet-tracer-*"
+
   shell-scripts:
     strategy:
       fail-fast: false
