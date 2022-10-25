@@ -76,12 +76,13 @@ jobs:
         run: |
           $module_url = "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/OpenTelemetry.DotNet.Auto.psm1"
           $dl_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
+          $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\dotnet-tracer-managed-dotnet-*"
           Invoke-WebRequest -Uri $module_url -OutFile $dl_path
           Import-Module $dl_path
           Install-OpenTelemetryCore
           Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
           dotnet help
-          Test-Path "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\dotnet-tracer-managed-dotnet-*"
+          If (-not (Test-Path $log_path)) { throw "Log file does not exist. Instrumentation test failed." }
 
   shell-scripts:
     strategy:
