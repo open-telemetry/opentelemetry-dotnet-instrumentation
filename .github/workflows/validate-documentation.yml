@@ -13,6 +13,11 @@ on:
     - '**.md'
     - 'package-lock.json'
     - 'package.json'
+  workflow_dispatch:
+    paths:
+    - '**.md'
+    - 'package-lock.json'
+    - 'package.json'
 
 jobs:
   build:
