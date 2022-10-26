@@ -16,11 +16,6 @@ on:
     - 'package.json'
     - '.lycheeignore'
   workflow_dispatch:
-    paths:
-    - '**.md'
-    - 'package-lock.json'
-    - 'package.json'
-    - '.lycheeignore'
 
 jobs:
   build:
