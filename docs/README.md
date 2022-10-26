@@ -128,13 +128,14 @@ and instrument your .NET application using the provided Shell scripts.
 Example usage:
 
 ```sh
-curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.3.1-beta.1/download.sh -O
-sh ./download.sh
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.3.1-beta.1/otel-dotnet-auto-install.sh -O
+sh ./otel-dotnet-auto-install.sh
 . $HOME/.otel-dotnet-auto/instrument.sh
 OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 dotnet run
 ```
 
-[download.sh](../download.sh) script uses environment variables as parameters:
+[otel-dotnet-auto-install.sh](../otel-dotnet-auto-install.sh) script
+uses environment variables as parameters:
 
 | Parameter               | Description                                                      | Required | Default value             |
 |-------------------------|------------------------------------------------------------------|----------|---------------------------|
@@ -143,7 +144,8 @@ OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,
 | `TMPDIR`                | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`            |
 | `VERSION`               | Version to download                                              | No       | `v0.3.1-beta.1`           |
 
-[instrument.sh](../instrument.sh) script uses environment variables as parameters:
+[instrument.sh](../instrument.sh) script
+uses environment variables as parameters:
 
 | Parameter               | Description                                                            | Required | Default value             |
 |-------------------------|------------------------------------------------------------------------|----------|---------------------------|
@@ -188,7 +190,7 @@ Get-Command -Module OpenTelemetry.DotNet.Auto
 Get-Help Install-OpenTelemetryCore -Detailed
 ```
 
-⚠️ Registering for IIS and Windows Service will perform a service restart.
+⚠️ Register for IIS and Windows Service performs a service restart.
 
 ## Instrument a Windows Service running a .NET application
 
