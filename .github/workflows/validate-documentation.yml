@@ -20,6 +20,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3.1.0
+    - uses: lycheeverse/lychee-action@v1.5.1
+      with:
+        fail: true
 
     - run: npm install
 
