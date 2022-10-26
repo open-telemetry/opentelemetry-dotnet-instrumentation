@@ -2497,7 +2497,7 @@ HRESULT CorProfiler::CallTarget_RewriterCallback(RejitHandlerModule* moduleHandl
         mdTypeDef wrapper_type_def = mdTypeDefNil;
         hr = instrumentation_module_metadata->metadata_import->FindTypeDefByName(
             wrapper.type_name.c_str(),
-            NULL, // The wrapper type can't be a nested type.
+            mdTokenNil, // The wrapper type can't be a nested type.
             &wrapper_type_def);
         if (FAILED(hr) || wrapper_type_def == mdTypeDefNil)
         {
