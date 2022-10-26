@@ -79,7 +79,7 @@ CI tests run against the following operating systems:
 - [macOS Big Sur 11](https://github.com/actions/runner-images/blob/main/images/macos/macos-11-Readme.md)
 - [Microsoft Windows Server 2022](https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md)
 - [Ubuntu 20.04 LTS](https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2004-Readme.md)
-- [Alpine](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/build/nuke/docker/alpine.dockerfile)
+- [Alpine](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/alpine.dockerfile)
 
 ### Instrumented libraries and frameworks
 

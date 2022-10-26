@@ -2,7 +2,7 @@
 
 1. Update the version in the following files:
 
-   - [`OpenTelemetry.DotNet.Auto.psm1`](../OpenTelemetry.Dotnet.Auto.psm1)
+   - [`OpenTelemetry.DotNet.Auto.psm1`](../OpenTelemetry.DotNet.Auto.psm1)
    - [`otel-dotnet-auto-install.sh`](../otel-dotnet-auto-install.sh)
    - [`docs/README.md`](./README.md)
    - [`nuget/OpenTelemetry.AutoInstrumentation.nuspec`](../nuget/OpenTelemetry.AutoInstrumentation.nuspec)
