@@ -200,7 +200,7 @@ the [verify-test.yml](../.github/workflows/verify-test.yml) GitHub workflow.
   ./build.sh clr+libs
   ```
 
-- [Using `corerun`](https://github.com/dotnet/runtime/blob/main/docs/workflow/testing/using-corerun.md)
+- [Using `corerun`](https://github.com/dotnet/runtime/blob/main/docs/workflow/testing/using-corerun-and-coreroot.md)
 
   ```bash
   PATH="$PATH:$PWD/artifacts/bin/coreclr/Linux.x64.Debug/corerun"
@@ -208,7 +208,7 @@ the [verify-test.yml](../.github/workflows/verify-test.yml) GitHub workflow.
   corerun ~/repos/opentelemetry-dotnet-instrumentation/examples/ConsoleApp/bin/Debug/net6.0/Examples.ConsoleApp.dll
   ```
 
-- [Debugging](https://github.com/dotnet/runtime/blob/main/docs/workflow/debugging/coreclr/debugging.md)
+- [Debugging](https://github.com/dotnet/runtime/blob/main/docs/workflow/debugging/coreclr/debugging-runtime.md)
 
   The following example shows how you can debug if the profiler is attached:
 

@@ -7,17 +7,20 @@ on:
     - '**.md'
     - 'package-lock.json'
     - 'package.json'
+    - '.lycheeignore'
   pull_request:
     branches: [ main ]
     paths:
     - '**.md'
     - 'package-lock.json'
     - 'package.json'
+    - '.lycheeignore'
   workflow_dispatch:
     paths:
     - '**.md'
     - 'package-lock.json'
     - 'package.json'
+    - '.lycheeignore'
 
 jobs:
   build:
