@@ -1,10 +1,13 @@
-#include "util.h"
+#include "util.h" // Keep first to avoid PCH warning.
 
-#include "pal.h"
 #include <cwctype>
+#include <iomanip>
 #include <iterator>
 #include <string>
 #include <vector>
+
+#include "pal.h"
+#include "string.h"
 
 #ifdef MACOS
 extern char** environ;
@@ -176,14 +179,14 @@ WSTRING TokenStr(const mdToken* token)
 
 WSTRING HResultStr(const HRESULT hr)
 {
-    std::wstringstream ss;
+    std::stringstream ss;
     ss << "0x"
-       << std::setfill(L'0')
+       << std::setfill('0')
        << std::setw(2*sizeof(HRESULT))
        << std::hex
        << hr;
 
-    return ss.str();
+    return ToWSTRING(ss.str());
 }
 
 } // namespace trace
