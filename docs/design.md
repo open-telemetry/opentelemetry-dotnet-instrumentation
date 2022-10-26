@@ -142,7 +142,7 @@ versions of the assemblies targeted for instrumentation and reduce the number
 of shipped files.
 
 When operating with parameters and return values of the targeted methods,
-the instrumentation methods must use [DuckTyping](../src/OpenTelemetry.AutoInstrumentation.Managed/DuckTyping/README.md)
+the instrumentation methods must use [DuckTyping](../src/OpenTelemetry.AutoInstrumentation/DuckTyping/README.md)
 or [reflection](https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/reflection)
 to access objects from the APIs being instrumented.
 

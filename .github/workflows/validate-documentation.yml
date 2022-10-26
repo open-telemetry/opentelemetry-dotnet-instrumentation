@@ -7,12 +7,15 @@ on:
     - '**.md'
     - 'package-lock.json'
     - 'package.json'
+    - '.lycheeignore'
   pull_request:
     branches: [ main ]
     paths:
     - '**.md'
     - 'package-lock.json'
     - 'package.json'
+    - '.lycheeignore'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -20,6 +23,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3.1.0
+    - uses: lycheeverse/lychee-action@v1.5.1
+      with:
+        fail: true
 
     - run: npm install
 
