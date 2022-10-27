@@ -51,7 +51,10 @@ public class ModuleTests : TestHelper
         {
             await Task.Delay(2000);
 
-            ProcessModuleCollection currentModules = process.Modules;
+            // refresh the process current info
+            process.Refresh();
+
+            var currentModules = process.Modules;
 
             if (currentModules.Count > 0)
             {
