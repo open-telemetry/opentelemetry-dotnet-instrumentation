@@ -53,6 +53,11 @@ trap finish EXIT
 # Start the Docker containers
 docker-compose -f ./dev/docker-compose.yaml -f ./examples/docker-compose.yaml up -d
 
+# disable console exporters to avoid noise
+export OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED=false
+export OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED=false
+export OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED=false
+
 # instrument and run HTTP server app in background
 export OTEL_DOTNET_AUTO_PLUGINS="Examples.AspNetCoreMvc.OtelSdkPlugin, Examples.AspNetCoreMvc, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null:Examples.Vendor.Distro.Plugin, Examples.Vendor.Distro, Version=0.0.1.0, Culture=neutral, PublicKeyToken=null"
 ENABLE_PROFILING=${enableProfiling} OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES="MyCompany.MyProduct.MyLibrary" OTEL_SERVICE_NAME="aspnet-server" OTEL_TRACES_EXPORTER=${tracesExporter} OTEL_METRICS_EXPORTER=${metricsExporter} OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES=none ./dev/instrument.sh ASPNETCORE_URLS="http://127.0.0.1:8080/" dotnet ./examples/AspNetCoreMvc/bin/${configuration}/${aspNetAppTargetFramework}/Examples.AspNetCoreMvc.dll &
@@ -65,7 +70,7 @@ ENABLE_PROFILING=${enableProfiling} OTEL_SERVICE_NAME=${exampleApp} OTEL_TRACES_
 # verify if it works
 {
   echo "Check traces at http://localhost:16686/search"
-  echo "Check metrics at http://localhost:9090"
+  echo "Check metrics at http://localhost:8889/metrics"
   echo "Press enter to close containers and stop example apps"
   read
 } 2> /dev/null
