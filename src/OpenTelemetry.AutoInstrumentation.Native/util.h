@@ -41,6 +41,9 @@ WSTRING HexStr(const void* data, int len);
 // Convert Token to string
 WSTRING TokenStr(const mdToken* token);
 
+// Convert HRESULT to a friendly string, e.g.: "0x80000002"
+WSTRING HResultStr(const HRESULT hr);
+
 template <class Container>
 bool Contains(const Container& items, const typename Container::value_type& value)
 {
