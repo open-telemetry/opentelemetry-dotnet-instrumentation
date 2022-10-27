@@ -29,6 +29,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Add `OpenTelemetry.AutoInstrumentation` Nuget package.
 - Support for Process metrics collection using
   the `OpenTelemetry.Instrumentation.Process` package.
+- Add Shell scripts for downloading and installing OpenTelemetry .NET Automatic Instrumentation
+  and instrumenting .NET applications.
+- Add PowerShell script module for downloading and installing
+  OpenTelemetry .NET Automatic Instrumentation
+  and instrumenting .NET applications.
 
 ### Changed
 
