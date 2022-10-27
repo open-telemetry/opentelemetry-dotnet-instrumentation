@@ -4,6 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
+    - '.github/workflows/validate-documentation.yml'
     - '**.md'
     - 'package-lock.json'
     - 'package.json'
@@ -11,6 +12,7 @@ on:
   pull_request:
     branches: [ main ]
     paths:
+    - '.github/workflows/validate-documentation.yml'
     - '**.md'
     - 'package-lock.json'
     - 'package.json'
@@ -26,6 +28,7 @@ jobs:
     - uses: lycheeverse/lychee-action@v1.5.1
       with:
         fail: true
+        args: "--threads 1 --max-concurrency 1 --verbose --no-progress './**/*.md' './**/*.html'"
 
     - run: npm install
 
