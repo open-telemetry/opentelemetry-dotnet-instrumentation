@@ -113,7 +113,7 @@ function Get-Environment-Variables-Table([string]$InstallDir, [string]$OTelServi
 
 function Setup-Windows-Service([string]$InstallDir, [string]$WindowsServiceName, [string]$OTelServiceName) {  
     $varsTable = Get-Environment-Variables-Table -InstallDir $InstallDir -OTelServiceName $OTelServiceName
-    $varsList = ($varsTable.Keys | foreach-object { "$_=$($varsTable[$_])" })
+    [string []] $varsList = ($varsTable.Keys | foreach-object { "$_=$($varsTable[$_])" }) # [string []] definition is required for WS2016
     $regPath = "HKLM:SYSTEM\CurrentControlSet\Services\"
     $regKey = Join-Path $regPath $WindowsServiceName
    
@@ -344,8 +344,8 @@ function Unregister-OpenTelemetryForCurrentSession() {
     Performs IIS reset after removal.
 #>
 function Unregister-OpenTelemetryForIIS() {
-    Unregister-OpenTelemetryForWindowsService -WindowsServiceName "W3SVC"
-    Unregister-OpenTelemetryForWindowsService -WindowsServiceName "WAS"
+    Remove-Windows-Service -WindowsServiceName "W3SVC"
+    Remove-Windows-Service -WindowsServiceName "WAS"
     Reset-IIS
 }
 
