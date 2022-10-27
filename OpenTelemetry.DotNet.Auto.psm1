@@ -344,8 +344,8 @@ function Unregister-OpenTelemetryForCurrentSession() {
     Performs IIS reset after removal.
 #>
 function Unregister-OpenTelemetryForIIS() {
-    Unregister-OpenTelemetryForWindowsService -WindowsServiceName "W3SVC"
-    Unregister-OpenTelemetryForWindowsService -WindowsServiceName "WAS"
+    Remove-Windows-Service -WindowsServiceName "W3SVC"
+    Remove-Windows-Service -WindowsServiceName "WAS"
     Reset-IIS
 }
 
