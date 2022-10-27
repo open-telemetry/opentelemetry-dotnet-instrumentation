@@ -9,8 +9,8 @@ to .NET applications without having to modify their source code.
 
 ⚠️ The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
-([0.3.1-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
-can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.3.1-beta.1/docs/README.md).
+([0.4.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
+can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.4.0-beta.1/docs/README.md).
 
 ---
 
@@ -79,7 +79,7 @@ CI tests run against the following operating systems:
 - [macOS Big Sur 11](https://github.com/actions/runner-images/blob/main/images/macos/macos-11-Readme.md)
 - [Microsoft Windows Server 2022](https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md)
 - [Ubuntu 20.04 LTS](https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2004-Readme.md)
-- [Alpine](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/build/nuke/docker/alpine.dockerfile)
+- [Alpine](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/alpine.dockerfile)
 
 ### Instrumented libraries and frameworks
 
@@ -128,22 +128,24 @@ and instrument your .NET application using the provided Shell scripts.
 Example usage:
 
 ```sh
-curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.3.1-beta.1/download.sh -O
-sh ./download.sh
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.4.0-beta.1/otel-dotnet-auto-install.sh -O
+sh ./otel-dotnet-auto-install.sh
 . $HOME/.otel-dotnet-auto/instrument.sh
 OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 dotnet run
 ```
 
-[download.sh](../download.sh) script uses environment variables as parameters:
+[otel-dotnet-auto-install.sh](../otel-dotnet-auto-install.sh) script
+uses environment variables as parameters:
 
 | Parameter               | Description                                                      | Required | Default value             |
 |-------------------------|------------------------------------------------------------------|----------|---------------------------|
 | `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                      | No       | `$HOME/.otel-dotnet-auto` |
 | `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | No       | *Calculated*              |
 | `TMPDIR`                | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`            |
-| `VERSION`               | Version to download                                              | No       | `v0.3.1-beta.1`           |
+| `VERSION`               | Version to download                                              | No       | `v0.4.0-beta.1`           |
 
-[instrument.sh](../instrument.sh) script uses environment variables as parameters:
+[instrument.sh](../instrument.sh) script
+uses environment variables as parameters:
 
 | Parameter               | Description                                                            | Required | Default value             |
 |-------------------------|------------------------------------------------------------------------|----------|---------------------------|
@@ -161,7 +163,7 @@ Example usage:
 
 ```powershell
 # Download and import the module
-$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.3.1-beta.1/OpenTelemetry.DotNet.Auto.psm1"
+$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.4.0-beta.1/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path
 Import-Module $download_path
@@ -188,7 +190,7 @@ Get-Command -Module OpenTelemetry.DotNet.Auto
 Get-Help Install-OpenTelemetryCore -Detailed
 ```
 
-⚠️ Registering for IIS and Windows Service will perform a service restart.
+⚠️ Register for IIS and Windows Service performs a service restart.
 
 ## Instrument a Windows Service running a .NET application
 

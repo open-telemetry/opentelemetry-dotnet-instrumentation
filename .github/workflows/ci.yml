@@ -74,13 +74,20 @@ jobs:
         run: |
           $module_url = "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/OpenTelemetry.DotNet.Auto.psm1"
           $dl_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
-          $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\dotnet-tracer-managed-dotnet-*"
+          $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\*"
           Invoke-WebRequest -Uri $module_url -OutFile $dl_path
           Import-Module $dl_path
           Install-OpenTelemetryCore
+          $install_dir = Get-OpenTelemetryInstallDirectory
           Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
           dotnet help
           If (-not (Test-Path $log_path)) { throw "Log file does not exist. Instrumentation test failed." }
+          Remove-Item $log_path
+          Unregister-OpenTelemetryForCurrentSession
+          dotnet help
+          If (Test-Path $log_path) { throw "Log file exists. Instrumentation unregister failed." }
+          Uninstall-OpenTelemetryCore
+          If (Test-Path $install_dir) { throw "Core files exist. Core uninstall failed." }
 
   shell-scripts:
     strategy:
@@ -107,8 +114,8 @@ jobs:
         shell: bash
         run: |
           set -e
-          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh -O
-          sh ./download.sh
+          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/otel-dotnet-auto-install.sh -O
+          sh ./otel-dotnet-auto-install.sh
             test "$(ls -A "$HOME/.otel-dotnet-auto")"
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
           . ./instrument.sh
@@ -129,8 +136,8 @@ jobs:
         docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
         docker run --rm mybuildimage /bin/sh -c '
           set -e
-          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/download.sh -O
-          sh ./download.sh
+          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/otel-dotnet-auto-install.sh -O
+          sh ./otel-dotnet-auto-install.sh
             test "$(ls -A "$HOME/.otel-dotnet-auto")"
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
           . ./instrument.sh
