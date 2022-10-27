@@ -74,7 +74,7 @@ jobs:
         run: |
           $module_url = "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/OpenTelemetry.DotNet.Auto.psm1"
           $dl_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
-          $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\dotnet-tracer-managed-dotnet-*"
+          $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\otel-dotnet-auto-*"
           Invoke-WebRequest -Uri $module_url -OutFile $dl_path
           Import-Module $dl_path
           Install-OpenTelemetryCore
