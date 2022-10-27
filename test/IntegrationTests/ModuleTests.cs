@@ -14,7 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP3_1_OR_GREATER && _WINDOWS
 
 using System;
 using System.Diagnostics;
