@@ -7,6 +7,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.4.0-beta.1...HEAD)
 
+### Removed
+
+- Remove support for `OTEL_DOTNET_AUTO_ENABLED`.
+  Use `CORECLR_ENABLE_PROFILING` or `COR_ENABLE_PROFILING`.
+
 ### Fixed
 
 - Fix the IIS registration in the PowerShell script module for Windows Server 2016.
