@@ -60,7 +60,7 @@ internal class TracerSettings : Settings
             }
         }
 
-        LoadTracerAtStartup = source.GetBool(ConfigurationKeys.Traces.LoadTracerAtStartup) ?? true;
+        TracesEnabled = source.GetBool(ConfigurationKeys.Traces.TracesEnabled) ?? true;
 
         InstrumentationOptions = new InstrumentationOptions(source);
     }
@@ -68,7 +68,7 @@ internal class TracerSettings : Settings
     /// <summary>
     /// Gets a value indicating whether the tracer should be loaded by the profiler. Default is true.
     /// </summary>
-    public bool LoadTracerAtStartup { get; }
+    public bool TracesEnabled { get; }
 
     /// <summary>
     /// Gets the traces exporter.
