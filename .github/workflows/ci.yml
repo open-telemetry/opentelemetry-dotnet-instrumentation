@@ -21,7 +21,7 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.1.0
-      - uses: actions/setup-dotnet@v3.0.2
+      - uses: actions/setup-dotnet@v3.0.3
         with:
           dotnet-version: | 
             3.1.x
@@ -66,7 +66,7 @@ jobs:
   powershell-script:
     runs-on: windows-2022
     steps:
-      - uses: actions/setup-dotnet@v3.0.2
+      - uses: actions/setup-dotnet@v3.0.3
         with:
           dotnet-version: 6.0.x
       - name: Test the PowerShell module instructions from README.md
@@ -102,7 +102,7 @@ jobs:
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/setup-dotnet@v3.0.2
+      - uses: actions/setup-dotnet@v3.0.3
         with:
           dotnet-version: 6.0.x
       - run: brew install coreutils

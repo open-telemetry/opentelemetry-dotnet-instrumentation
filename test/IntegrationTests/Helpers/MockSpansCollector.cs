@@ -18,15 +18,21 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Google.Protobuf;
 using OpenTelemetry.Proto.Collector.Trace.V1;
 using OpenTelemetry.Proto.Trace.V1;
 using Xunit;
 using Xunit.Abstractions;
+
+#if NETFRAMEWORK
+using System.Net;
+#endif
+
+#if NETCOREAPP3_1_OR_GREATER
+using Microsoft.AspNetCore.Http;
+#endif
 
 namespace IntegrationTests.Helpers;
 
@@ -35,7 +41,7 @@ public class MockSpansCollector : IDisposable
     private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromMinutes(1);
 
     private readonly ITestOutputHelper _output;
-    private readonly TestHttpListener _listener;
+    private readonly TestHttpServer _listener;
 
     private readonly BlockingCollection<Collected> _spans = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
@@ -43,7 +49,12 @@ public class MockSpansCollector : IDisposable
     private MockSpansCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
-        _listener = new TestHttpListener(output, HandleHttpRequests, host, "/v1/traces/");
+
+#if NETFRAMEWORK
+        _listener = new TestHttpServer(output, HandleHttpRequests, host, "/v1/traces/");
+#else
+        _listener = new TestHttpServer(output, HandleHttpRequests, "/v1/traces");
+#endif
     }
 
     /// <summary>
@@ -53,6 +64,7 @@ public class MockSpansCollector : IDisposable
 
     public OtlpResourceExpector ResourceExpector { get; } = new();
 
+#if NETFRAMEWORK
     public static async Task<MockSpansCollector> Start(ITestOutputHelper output, string host = "localhost")
     {
         var collector = new MockSpansCollector(output, host);
@@ -67,6 +79,16 @@ public class MockSpansCollector : IDisposable
 
         return collector;
     }
+#endif
+
+#if NETCOREAPP3_1_OR_GREATER
+    public static Task<MockSpansCollector> Start(ITestOutputHelper output)
+    {
+        var collector = new MockSpansCollector(output);
+
+        return Task.FromResult(collector);
+    }
+#endif
 
     public void Dispose()
     {
@@ -184,10 +206,30 @@ public class MockSpansCollector : IDisposable
         Assert.Fail(message.ToString());
     }
 
+#if NETFRAMEWORK
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
-        var message = ExportTraceServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
-        foreach (var resourceSpan in message.ResourceSpans ?? Enumerable.Empty<ResourceSpans>())
+        var traceMessage = ExportTraceServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
+        HandleTraceMessage(traceMessage);
+
+        ctx.GenerateEmptyProtobufResponse<ExportTraceServiceResponse>();
+    }
+#endif
+
+#if NETCOREAPP3_1_OR_GREATER
+    private async Task HandleHttpRequests(HttpContext ctx)
+    {
+        using var bodyStream = await ctx.ReadBodyToMemoryAsync();
+        var traceMessage = ExportTraceServiceRequest.Parser.ParseFrom(bodyStream);
+        HandleTraceMessage(traceMessage);
+
+        await ctx.GenerateEmptyProtobufResponseAsync<ExportTraceServiceResponse>();
+    }
+#endif
+
+    private void HandleTraceMessage(ExportTraceServiceRequest traceMessage)
+    {
+        foreach (var resourceSpan in traceMessage.ResourceSpans ?? Enumerable.Empty<ResourceSpans>())
         {
             ResourceExpector.Collect(resourceSpan.Resource);
             foreach (var scopeSpans in resourceSpan.ScopeSpans ?? Enumerable.Empty<ScopeSpans>())
@@ -202,15 +244,6 @@ public class MockSpansCollector : IDisposable
                 }
             }
         }
-
-        // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
-        // (Setting content-length avoids that)
-        ctx.Response.ContentType = "application/x-protobuf";
-        ctx.Response.StatusCode = (int)HttpStatusCode.OK;
-        var responseMessage = new ExportTraceServiceResponse();
-        ctx.Response.ContentLength64 = responseMessage.CalculateSize();
-        responseMessage.WriteTo(ctx.Response.OutputStream);
-        ctx.Response.Close();
     }
 
     private void WriteOutput(string msg)

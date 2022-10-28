@@ -18,15 +18,21 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Google.Protobuf;
 using OpenTelemetry.Proto.Collector.Logs.V1;
 using OpenTelemetry.Proto.Logs.V1;
 using Xunit;
 using Xunit.Abstractions;
+
+#if NETFRAMEWORK
+using System.Net;
+#endif
+
+#if NETCOREAPP3_1_OR_GREATER
+using Microsoft.AspNetCore.Http;
+#endif
 
 namespace IntegrationTests.Helpers;
 
@@ -35,14 +41,19 @@ public class MockLogsCollector : IDisposable
     private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromMinutes(1);
 
     private readonly ITestOutputHelper _output;
-    private readonly TestHttpListener _listener;
+    private readonly TestHttpServer _listener;
     private readonly BlockingCollection<LogRecord> _logs = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
 
     private MockLogsCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
+
+#if NETFRAMEWORK
         _listener = new(output, HandleHttpRequests, host, "/v1/logs/");
+#else
+        _listener = new(output, HandleHttpRequests, "/v1/logs");
+#endif
     }
 
     /// <summary>
@@ -52,6 +63,7 @@ public class MockLogsCollector : IDisposable
 
     public OtlpResourceExpector ResourceExpector { get; } = new();
 
+#if NETFRAMEWORK
     public static async Task<MockLogsCollector> Start(ITestOutputHelper output, string host = "localhost")
     {
         var collector = new MockLogsCollector(output, host);
@@ -66,6 +78,16 @@ public class MockLogsCollector : IDisposable
 
         return collector;
     }
+#endif
+
+#if NETCOREAPP3_1_OR_GREATER
+    public static Task<MockLogsCollector> Start(ITestOutputHelper output)
+    {
+        var collector = new MockLogsCollector(output);
+
+        return Task.FromResult(collector);
+    }
+#endif
 
     public void Dispose()
     {
@@ -75,7 +97,7 @@ public class MockLogsCollector : IDisposable
         _listener.Dispose();
     }
 
-    public void Expect(Func<global::OpenTelemetry.Proto.Logs.V1.LogRecord, bool> predicate, string description = null)
+    public void Expect(Func<LogRecord, bool> predicate, string description = null)
     {
         description ??= "<no description>";
 
@@ -90,8 +112,8 @@ public class MockLogsCollector : IDisposable
         }
 
         var missingExpectations = new List<Expectation>(_expectations);
-        var expectationsMet = new List<global::OpenTelemetry.Proto.Logs.V1.LogRecord>();
-        var additionalEntries = new List<global::OpenTelemetry.Proto.Logs.V1.LogRecord>();
+        var expectationsMet = new List<LogRecord>();
+        var additionalEntries = new List<LogRecord>();
 
         timeout ??= DefaultWaitTimeout;
         var cts = new CancellationTokenSource();
@@ -150,8 +172,8 @@ public class MockLogsCollector : IDisposable
 
     private static void FailExpectations(
         List<Expectation> missingExpectations,
-        List<global::OpenTelemetry.Proto.Logs.V1.LogRecord> expectationsMet,
-        List<global::OpenTelemetry.Proto.Logs.V1.LogRecord> additionalEntries)
+        List<LogRecord> expectationsMet,
+        List<LogRecord> additionalEntries)
     {
         var message = new StringBuilder();
         message.AppendLine();
@@ -177,9 +199,29 @@ public class MockLogsCollector : IDisposable
         Assert.Fail(message.ToString());
     }
 
+#if NETFRAMEWORK
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
         var logsMessage = ExportLogsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
+        HandleLogsMessage(logsMessage);
+
+        ctx.GenerateEmptyProtobufResponse<ExportLogsServiceResponse>();
+    }
+#endif
+
+#if NETCOREAPP3_1_OR_GREATER
+    private async Task HandleHttpRequests(HttpContext ctx)
+    {
+        using var bodyStream = await ctx.ReadBodyToMemoryAsync();
+        var metricsMessage = ExportLogsServiceRequest.Parser.ParseFrom(bodyStream);
+        HandleLogsMessage(metricsMessage);
+
+        await ctx.GenerateEmptyProtobufResponseAsync<ExportLogsServiceResponse>();
+    }
+#endif
+
+    private void HandleLogsMessage(ExportLogsServiceRequest logsMessage)
+    {
         foreach (var resourceLogs in logsMessage.ResourceLogs ?? Enumerable.Empty<ResourceLogs>())
         {
             ResourceExpector.Collect(resourceLogs.Resource);
@@ -191,15 +233,6 @@ public class MockLogsCollector : IDisposable
                 }
             }
         }
-
-        // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
-        // (Setting content-length avoids that)
-        ctx.Response.ContentType = "application/x-protobuf";
-        ctx.Response.StatusCode = (int)HttpStatusCode.OK;
-        var responseMessage = new ExportLogsServiceResponse();
-        ctx.Response.ContentLength64 = responseMessage.CalculateSize();
-        responseMessage.WriteTo(ctx.Response.OutputStream);
-        ctx.Response.Close();
     }
 
     private void WriteOutput(string msg)

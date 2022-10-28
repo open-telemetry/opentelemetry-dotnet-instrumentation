@@ -47,13 +47,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     CorProfilerBase::Initialize(cor_profiler_info_unknown);
 
-    // check if tracing is completely disabled
-    if (IsTracingDisabled())
-    {
-        Logger::Info("OpenTelemetry Automatic Instrumentation - CLR Profiler disabled via ", environment::clr_profiler_enabled);
-        return E_FAIL;
-    }
-
 #if defined(ARM64) || defined(ARM)
     //
     // In ARM64 and ARM, complete ReJIT support is only available from .NET 5.0
