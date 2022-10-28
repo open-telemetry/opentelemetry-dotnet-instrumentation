@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.21.8" />
+    <PackageReference Include="Google.Protobuf" Version="3.21.9" />
     <PackageReference Include="Grpc.Tools" Version="2.50.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
@@ -21,7 +21,7 @@
     <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
-    <PackageReference Include="Testcontainers" Version="2.1.0" />
+    <PackageReference Include="Testcontainers" Version="2.2.0" />
     <PackageReference Include="Verify.Xunit" Version="18.0.0" />
     <PackageReference Include="xunit.abstractions" Version="2.0.3" />
   </ItemGroup>

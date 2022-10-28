@@ -7,6 +7,12 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.4.0-beta.1...HEAD)
 
+### Fixed
+
+- Fix the IIS registration in the PowerShell script module for Windows Server 2016.
+- Get rid of unnecessary service restarts during the IIS unregistration,
+  in the PowerShell script module.
+
 ## [0.4.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.4.0-beta.1)
 
 ### Added
@@ -29,6 +35,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Add `OpenTelemetry.AutoInstrumentation` Nuget package.
 - Support for Process metrics collection using
   the `OpenTelemetry.Instrumentation.Process` package.
+- Add Shell scripts for downloading and installing OpenTelemetry .NET Automatic Instrumentation
+  and instrumenting .NET applications.
+- Add PowerShell script module for downloading and installing
+  OpenTelemetry .NET Automatic Instrumentation
+  and instrumenting .NET applications.
 
 ### Changed
 
@@ -53,6 +64,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
  for the first few executions of the method to not be instrumented. See
  issue [#1242](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1242).
 - Span kind for GraphQL instrumentation is set as span property instead of attribute.
+- Application crash if "wrapper type" from bytecode instrumentation is missing
+ [#1469](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1469).
 
 ## [0.3.1-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.3.1-beta.1)
 
