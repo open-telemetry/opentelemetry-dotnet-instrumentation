@@ -58,10 +58,6 @@ bool IsDumpILRewriteEnabled() {
   CheckIfTrue(GetEnvironmentValue(environment::dump_il_rewrite_enabled));
 }
 
-bool IsTracingDisabled() {
-  CheckIfFalse(GetEnvironmentValue(environment::clr_profiler_enabled));
-}
-
 bool IsAzureAppServices() {
   CheckIfTrue(GetEnvironmentValue(environment::azure_app_services));
 }
