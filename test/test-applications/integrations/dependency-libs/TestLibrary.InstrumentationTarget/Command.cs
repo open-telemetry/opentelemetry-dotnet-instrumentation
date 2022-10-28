@@ -29,4 +29,9 @@ public class Command
     {
         Thread.Sleep(0); // Just to have some call to outside code.
     }
+
+    public void InstrumentationTargetMissingBytecodeInstrumentationMethod()
+    {
+        Thread.Yield(); // Just to have some call to outside code.
+    }
 }

@@ -25,5 +25,6 @@ public static class Program
         var command = new Command();
         command.Execute();
         command.InstrumentationTargetMissingBytecodeInstrumentationType();
+        command.InstrumentationTargetMissingBytecodeInstrumentationMethod();
     }
 }

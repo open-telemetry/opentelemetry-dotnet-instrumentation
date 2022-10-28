@@ -2501,14 +2501,47 @@ HRESULT CorProfiler::CallTarget_RewriterCallback(RejitHandlerModule* moduleHandl
             &wrapper_type_def);
         if (FAILED(hr) || wrapper_type_def == mdTypeDefNil)
         {
-            Logger::Warn("*** CallTarget_RewriterCallback() Failed for: ", caller->type.name, ".", caller->name,
+            Logger::Error("*** CallTarget_RewriterCallback() Failed for: ", caller->type.name, ".", caller->name,
                         "() integration type not found on the managed profiler module HRESULT=", HResultStr(hr),
                         " IntegrationType=", wrapper.type_name);
             return S_FALSE;
         }
 
-        // TODO: Use the method signature to validate also the method, tracking via
-        // https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issue/1499 
+        // CallTarget instrumentation doesn't inject calls to the instrumentation methods via IL rewrite.
+        // It injects the OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker, written in managed code,
+        // that uses reflection to find the expected instrumentation methods on the instrumentation wrapper type.
+        // If the wrapper type doesn't have any of the expected instrumentation methods "nothing happens", but,
+        // the JIT code of the targeted method is modified anyway. To avoid injecting instrumentation that does
+        // nothing and give a clear error message the code below ensures that at least one of the expected methods is
+        // implemented on the wrapper type.
+        static const LPCWSTR expected_wrapper_methods[] = { WStr("OnMethodBegin"), WStr("OnMethodEnd"), WStr("OnAsyncMethodEnd") };
+        bool found_wrapper_method = false;
+        for (auto i = 0; i < sizeof(expected_wrapper_methods) / sizeof(LPCWSTR); i++)
+        {
+            mdMethodDef wrapper_method_def[1];
+            HCORENUM phEnum = NULL;
+            ULONG cTokens,
+            hr = instrumentation_module_metadata->metadata_import->EnumMethodsWithName(
+                &phEnum,
+                wrapper_type_def,
+                expected_wrapper_methods[i],
+                wrapper_method_def,
+                1,
+                &cTokens);
+            if (hr == S_OK && cTokens > 0)
+            {
+                found_wrapper_method = true;
+                break;
+            }
+        }
+
+        if (!found_wrapper_method)
+        {
+            Logger::Error("*** CallTarget_RewriterCallback() Failed for: ", caller->type.name, ".", caller->name,
+                "() integration type found but none of the wrapper methods expected by CallTargetInvoker was found ",
+                "IntegrationType=", wrapper.type_name);
+            return S_FALSE;
+        }
     }
 
     ModuleID module_id = moduleHandler->GetModuleId();
