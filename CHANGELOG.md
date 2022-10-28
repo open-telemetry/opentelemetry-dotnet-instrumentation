@@ -18,6 +18,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Get rid of unnecessary service restarts during the IIS unregistration,
   in the PowerShell script module.
 
+### Added
+
+- Error message on the native log if bytecode instrumentation type is missing all
+  instrumentation methods [#1499](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1499).
+
 ## [0.4.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.4.0-beta.1)
 
 ### Added
