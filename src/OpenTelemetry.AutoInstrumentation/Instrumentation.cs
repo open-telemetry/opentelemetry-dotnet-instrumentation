@@ -95,7 +95,7 @@ internal static class Instrumentation
 
         try
         {
-            if (TracerSettings.LoadTracerAtStartup || MetricSettings.LoadMetricsAtStartup)
+            if (TracerSettings.TracesEnabled || MetricSettings.MetricsEnabled)
             {
                 // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
                 _sdkEventListener = new(EventLevel.Warning, Logger);
@@ -112,7 +112,7 @@ internal static class Instrumentation
                 EnvironmentConfigurationSdkHelper.UseEnvironmentVariables(SdkSettings);
             }
 
-            if (TracerSettings.LoadTracerAtStartup)
+            if (TracerSettings.TracesEnabled)
             {
                 // Setup the instrumentations that have additional setup occurring during AssemblyLoad
                 // -> this should be refactored in a separate PR
@@ -141,7 +141,7 @@ internal static class Instrumentation
                 Logger.Information("OpenTelemetry tracer initialized.");
             }
 
-            if (MetricSettings.LoadMetricsAtStartup)
+            if (MetricSettings.MetricsEnabled)
             {
 #if NETCOREAPP3_1_OR_GREATER
 

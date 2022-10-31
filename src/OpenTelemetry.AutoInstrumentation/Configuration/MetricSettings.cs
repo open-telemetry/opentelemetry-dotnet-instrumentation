@@ -51,13 +51,13 @@ internal class MetricSettings : Settings
         }
 
         MetricExportInterval = source.GetInt32(ConfigurationKeys.Metrics.ExportInterval);
-        LoadMetricsAtStartup = source.GetBool(ConfigurationKeys.Metrics.LoadMeterAtStartup) ?? true;
+        MetricsEnabled = source.GetBool(ConfigurationKeys.Metrics.MetricsEnabled) ?? true;
     }
 
     /// <summary>
     /// Gets a value indicating whether the metrics should be loaded by the profiler. Default is true.
     /// </summary>
-    public bool LoadMetricsAtStartup { get; }
+    public bool MetricsEnabled { get; }
 
     /// <summary>
     /// Gets the metrics exporter.
