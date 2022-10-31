@@ -2509,7 +2509,7 @@ HRESULT CorProfiler::CallTarget_RewriterCallback(RejitHandlerModule* moduleHandl
         // implemented on the wrapper type.
         static const LPCWSTR expected_wrapper_methods[] = { WStr("OnMethodBegin"), WStr("OnMethodEnd"), WStr("OnAsyncMethodEnd") };
         bool found_wrapper_method = false;
-        for (auto i = 0; i < sizeof(expected_wrapper_methods) / sizeof(LPCWSTR); i++)
+        for (LPCWSTR expected_wrapper_method : expected_wrapper_methods)
         {
             mdMethodDef wrapper_method_def[1];
             HCORENUM phEnum = NULL;
@@ -2517,7 +2517,7 @@ HRESULT CorProfiler::CallTarget_RewriterCallback(RejitHandlerModule* moduleHandl
             hr = instrumentation_module_metadata->metadata_import->EnumMethodsWithName(
                 &phEnum,
                 wrapper_type_def,
-                expected_wrapper_methods[i],
+                expected_wrapper_method,
                 wrapper_method_def,
                 1,
                 &cTokens);
