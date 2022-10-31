@@ -46,7 +46,6 @@ public class BuildTests
 
         return Verifier.Verify(relativesPaths)
             .UseTextForParameters(systemName)
-            .UseDirectory("./snapshots")
             .DisableDiff();
     }
 

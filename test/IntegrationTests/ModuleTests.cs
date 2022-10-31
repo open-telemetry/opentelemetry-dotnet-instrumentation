@@ -91,7 +91,6 @@ public class ModuleTests : TestHelper
         }
 
         await Verifier.Verify(modules)
-            .UseDirectory("./snapshots")
             .DisableDiff();
     }
 }
