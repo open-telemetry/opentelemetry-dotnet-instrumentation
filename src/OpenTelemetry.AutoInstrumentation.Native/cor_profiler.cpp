@@ -47,13 +47,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     CorProfilerBase::Initialize(cor_profiler_info_unknown);
 
-    // check if tracing is completely disabled
-    if (IsTracingDisabled())
-    {
-        Logger::Info("OpenTelemetry Automatic Instrumentation - CLR Profiler disabled via ", environment::clr_profiler_enabled);
-        return E_FAIL;
-    }
-
 #if defined(ARM64) || defined(ARM)
     //
     // In ARM64 and ARM, complete ReJIT support is only available from .NET 5.0
@@ -2167,7 +2160,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ReJITCompilationFinished(FunctionID funct
 {
     if (is_attached_)
     {
-        Logger::Debug("ReJITCompilationFinished: [functionId: ", functionId, ", rejitId: ", rejitId, ", hrStatus: ", hrStatus,
+        Logger::Debug("ReJITCompilationFinished: [functionId: ", functionId, ", rejitId: ", rejitId, ", hrStatus: ", HResultStr(hrStatus),
                     ", safeToBlock: ", fIsSafeToBlock, "]");
     }
 
@@ -2180,7 +2173,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ReJITError(ModuleID moduleId, mdMethodDef
     if (is_attached_)
     {
         Logger::Warn("ReJITError: [functionId: ", functionId, ", moduleId: ", moduleId, ", methodId: ", methodId,
-                    ", hrStatus: ", hrStatus, "]");
+                    ", hrStatus: ", HResultStr(hrStatus), "]");
     }
 
     return S_OK;

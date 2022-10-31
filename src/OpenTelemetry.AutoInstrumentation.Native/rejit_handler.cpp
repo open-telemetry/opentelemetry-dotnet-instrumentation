@@ -119,15 +119,15 @@ void RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
         else if (hr == E_INVALIDARG)
         {
             Logger::Info("NGEN:: Error Invalid arguments in [ModuleId=", currentModuleId,
-                         ",MethodDef=", currentMethodDef, ", HR=", hr, "]");
+                         ",MethodDef=", currentMethodDef, ", HR=E_INVALIDARG]");
         }
         else if (hr == CORPROF_E_DATAINCOMPLETE)
         {
-            Logger::Info("NGEN:: Error Incomplete data in [ModuleId=", currentModuleId, ",MethodDef=", currentMethodDef, ", HR=", hr, "]");
+            Logger::Info("NGEN:: Error Incomplete data in [ModuleId=", currentModuleId, ",MethodDef=", currentMethodDef, ", HR=CORPROF_E_DATAINCOMPLETE]");
         }
         else
         {
-            Logger::Info("NGEN:: Error in [ModuleId=", currentModuleId, ",MethodDef=", currentMethodDef, ", HR=", hr, "]");
+            Logger::Info("NGEN:: Error in [ModuleId=", currentModuleId, ",MethodDef=", currentMethodDef, ", HR=", HResultStr(hr), "]");
         }
     }
 }

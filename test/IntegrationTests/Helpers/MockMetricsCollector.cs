@@ -18,15 +18,21 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Google.Protobuf;
 using OpenTelemetry.Proto.Collector.Metrics.V1;
 using OpenTelemetry.Proto.Metrics.V1;
 using Xunit;
 using Xunit.Abstractions;
+
+#if NETFRAMEWORK
+using System.Net;
+#endif
+
+#if NETCOREAPP3_1_OR_GREATER
+using Microsoft.AspNetCore.Http;
+#endif
 
 namespace IntegrationTests.Helpers;
 
@@ -35,7 +41,7 @@ public class MockMetricsCollector : IDisposable
     private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromMinutes(1);
 
     private readonly ITestOutputHelper _output;
-    private readonly TestHttpListener _listener;
+    private readonly TestHttpServer _listener;
 
     private readonly List<Expectation> _expectations = new();
     private readonly BlockingCollection<List<Collected>> _metricsSnapshots = new(10); // bounded to avoid memory leak; contains protobuf type
@@ -43,7 +49,11 @@ public class MockMetricsCollector : IDisposable
     private MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
+#if NETFRAMEWORK
         _listener = new(output, HandleHttpRequests, host, "/v1/metrics/");
+#else
+        _listener = new(output, HandleHttpRequests, "/v1/metrics");
+#endif
     }
 
     /// <summary>
@@ -53,6 +63,7 @@ public class MockMetricsCollector : IDisposable
 
     public OtlpResourceExpector ResourceExpector { get; } = new();
 
+#if NETFRAMEWORK
     public static async Task<MockMetricsCollector> Start(ITestOutputHelper output, string host = "localhost")
     {
         var collector = new MockMetricsCollector(output, host);
@@ -67,6 +78,16 @@ public class MockMetricsCollector : IDisposable
 
         return collector;
     }
+#endif
+
+#if NETCOREAPP3_1_OR_GREATER
+    public static Task<MockMetricsCollector> Start(ITestOutputHelper output)
+    {
+        var collector = new MockMetricsCollector(output);
+
+        return Task.FromResult(collector);
+    }
+#endif
 
     public void Dispose()
     {
@@ -181,9 +202,29 @@ public class MockMetricsCollector : IDisposable
         Assert.Fail(message.ToString());
     }
 
+#if NETFRAMEWORK
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
         var metricsMessage = ExportMetricsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
+        HandleMetricsMessage(metricsMessage);
+
+        ctx.GenerateEmptyProtobufResponse<ExportMetricsServiceResponse>();
+    }
+#endif
+
+#if NETCOREAPP3_1_OR_GREATER
+    private async Task HandleHttpRequests(HttpContext ctx)
+    {
+        using var bodyStream = await ctx.ReadBodyToMemoryAsync();
+        var metricsMessage = ExportMetricsServiceRequest.Parser.ParseFrom(bodyStream);
+        HandleMetricsMessage(metricsMessage);
+
+        await ctx.GenerateEmptyProtobufResponseAsync<ExportMetricsServiceResponse>();
+    }
+#endif
+
+    private void HandleMetricsMessage(ExportMetricsServiceRequest metricsMessage)
+    {
         foreach (var resourceMetric in metricsMessage.ResourceMetrics ?? Enumerable.Empty<ResourceMetrics>())
         {
             ResourceExpector.Collect(resourceMetric.Resource);
@@ -204,15 +245,6 @@ public class MockMetricsCollector : IDisposable
 
             _metricsSnapshots.Add(metricsSnapshot);
         }
-
-        // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
-        // (Setting content-length avoids that)
-        ctx.Response.ContentType = "application/x-protobuf";
-        ctx.Response.StatusCode = (int)HttpStatusCode.OK;
-        var responseMessage = new ExportMetricsServiceResponse();
-        ctx.Response.ContentLength64 = responseMessage.CalculateSize();
-        responseMessage.WriteTo(ctx.Response.OutputStream);
-        ctx.Response.Close();
     }
 
     private void WriteOutput(string msg)

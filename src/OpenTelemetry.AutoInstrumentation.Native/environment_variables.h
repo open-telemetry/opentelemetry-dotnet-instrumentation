@@ -6,10 +6,6 @@
 namespace trace {
 namespace environment {
 
-// Sets whether the automatic instrumentation, via the CLR profiler, is enabled.
-// Default is true. Setting this to false disables the CLR profiler.
-const WSTRING clr_profiler_enabled = WStr("OTEL_DOTNET_AUTO_ENABLED");
-
 // Sets whether debug mode is enabled. Default is false.
 const WSTRING debug_enabled = WStr("OTEL_DOTNET_AUTO_DEBUG");
 
