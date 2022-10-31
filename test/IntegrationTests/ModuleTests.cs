@@ -37,22 +37,27 @@ public class ModuleTests : TestHelper
     {
         var tempPath = Path.GetTempFileName();
 
-        RunTestApplication(arguments: $"--temp-path {tempPath}");
-
-        if (!File.Exists(tempPath))
+        try
         {
-            Assert.Fail("Could not find modules report file.");
+            RunTestApplication(arguments: $"--temp-path {tempPath}");
+
+            if (!File.Exists(tempPath))
+            {
+                Assert.Fail("Could not find modules report file.");
+            }
+
+            var json = File.ReadAllText(tempPath);
+            var modules = JsonConvert.DeserializeObject<string[]>(json);
+
+            await Verifier.Verify(modules)
+                 .UniqueForOSPlatform()
+                 .UniqueForRuntime()
+                 .DisableDiff();
         }
-
-        var json = File.ReadAllText(tempPath);
-        var modules = JsonConvert.DeserializeObject<string[]>(json);
-
-        // Cleanup
-        File.Delete(tempPath);
-
-        await Verifier.Verify(modules)
-           .UniqueForOSPlatform()
-           .UniqueForRuntime()
-           .DisableDiff();
+        finally
+        {
+            // Cleanup
+            File.Delete(tempPath);
+        }
     }
 }

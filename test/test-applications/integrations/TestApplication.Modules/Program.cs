@@ -24,8 +24,6 @@ namespace TestApplication.Smoke;
 
 public class Program
 {
-    public const string SourceName = "MyCompany.MyProduct.MyLibrary";
-
     public static void Main(string[] args)
     {
         ConsoleHelper.WriteSplashScreen(args);
