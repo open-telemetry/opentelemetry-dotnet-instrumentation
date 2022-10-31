@@ -1,0 +1,20 @@
+﻿[
+  OpenTelemetry,
+  OpenTelemetry.Api,
+  OpenTelemetry.AutoInstrumentation,
+  OpenTelemetry.AutoInstrumentation.Loader,
+  OpenTelemetry.Exporter.Console,
+  OpenTelemetry.Exporter.Jaeger,
+  OpenTelemetry.Exporter.OpenTelemetryProtocol,
+  OpenTelemetry.Exporter.Prometheus,
+  OpenTelemetry.Exporter.Zipkin,
+  OpenTelemetry.Instrumentation.AspNet,
+  OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule,
+  OpenTelemetry.Instrumentation.GrpcNetClient,
+  OpenTelemetry.Instrumentation.Http,
+  OpenTelemetry.Instrumentation.Process,
+  OpenTelemetry.Instrumentation.Runtime,
+  OpenTelemetry.Instrumentation.SqlClient,
+  OpenTelemetry.Instrumentation.Wcf,
+  OpenTelemetry.Shims.OpenTracing
+]
