@@ -37,7 +37,7 @@ HRESULT STDMETHODCALLTYPE CorProfilerBase::AppDomainCreationStarted(AppDomainID 
 
 HRESULT STDMETHODCALLTYPE CorProfilerBase::AppDomainCreationFinished(AppDomainID appDomainId, HRESULT hrStatus)
 {
-    Logger::Debug("AppDomainCreationFinished: ", appDomainId, " hrStatus=", hrStatus);
+    Logger::Debug("AppDomainCreationFinished: ", appDomainId, " hrStatus=", HResultStr(hrStatus));
     return S_OK;
 }
 
@@ -49,7 +49,7 @@ HRESULT STDMETHODCALLTYPE CorProfilerBase::AppDomainShutdownStarted(AppDomainID 
 
 HRESULT STDMETHODCALLTYPE CorProfilerBase::AppDomainShutdownFinished(AppDomainID appDomainId, HRESULT hrStatus)
 {
-    Logger::Debug("AppDomainShutdownFinished: ", appDomainId, " ", hrStatus);
+    Logger::Debug("AppDomainShutdownFinished: ", appDomainId, " hrStatus=", HResultStr(hrStatus));
     return S_OK;
 }
 
@@ -61,7 +61,7 @@ HRESULT STDMETHODCALLTYPE CorProfilerBase::AssemblyLoadStarted(AssemblyID assemb
 
 HRESULT STDMETHODCALLTYPE CorProfilerBase::AssemblyLoadFinished(AssemblyID assemblyId, HRESULT hrStatus)
 {
-    Logger::Debug("AssemblyLoadFinished: ", assemblyId, " ", hrStatus);
+    Logger::Debug("AssemblyLoadFinished: ", assemblyId, " hrStatus=", HResultStr(hrStatus));
     return S_OK;
 }
 
@@ -73,7 +73,7 @@ HRESULT STDMETHODCALLTYPE CorProfilerBase::AssemblyUnloadStarted(AssemblyID asse
 
 HRESULT STDMETHODCALLTYPE CorProfilerBase::AssemblyUnloadFinished(AssemblyID assemblyId, HRESULT hrStatus)
 {
-    Logger::Debug("AssemblyUnloadFinished: ", assemblyId, " ", hrStatus);
+    Logger::Debug("AssemblyUnloadFinished: ", assemblyId, " hrStatus=", HResultStr(hrStatus));
     return S_OK;
 }
 
@@ -85,7 +85,7 @@ HRESULT STDMETHODCALLTYPE CorProfilerBase::ModuleLoadStarted(ModuleID moduleId)
 
 HRESULT STDMETHODCALLTYPE CorProfilerBase::ModuleLoadFinished(ModuleID moduleId, HRESULT hrStatus)
 {
-    Logger::Debug("ModuleLoadFinished: ", moduleId, " ", hrStatus);
+    Logger::Debug("ModuleLoadFinished: ", moduleId, " hrStatus=", HResultStr(hrStatus));
     return S_OK;
 }
 
@@ -96,7 +96,7 @@ HRESULT STDMETHODCALLTYPE CorProfilerBase::ModuleUnloadStarted(ModuleID moduleId
 
 HRESULT STDMETHODCALLTYPE CorProfilerBase::ModuleUnloadFinished(ModuleID moduleId, HRESULT hrStatus)
 {
-    Logger::Debug("ModuleUnloadFinished: ", moduleId, " ", hrStatus);
+    Logger::Debug("ModuleUnloadFinished: ", moduleId, " hrStatus=", HResultStr(hrStatus));
     return S_OK;
 }
 
