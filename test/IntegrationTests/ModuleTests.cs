@@ -14,13 +14,10 @@
 // limitations under the License.
 // </copyright>
 
-#if NETCOREAPP3_1_OR_GREATER && _WINDOWS
-
-using System;
-using System.Diagnostics;
-using System.Linq;
+using System.IO;
 using System.Threading.Tasks;
 using IntegrationTests.Helpers;
+using Newtonsoft.Json;
 using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
@@ -31,67 +28,31 @@ namespace IntegrationTests;
 public class ModuleTests : TestHelper
 {
     public ModuleTests(ITestOutputHelper output)
-        : base("Smoke", output)
+        : base("Modules", output)
     {
     }
 
     [Fact]
     public async Task RunApplication()
     {
-        SetEnvironmentVariable("LONG_RUNNING", "true");
+        var tempPath = Path.GetTempFileName();
 
-        var process = StartTestApplication();
+        RunTestApplication(arguments: $"--temp-path {tempPath}");
 
-        ProcessModuleCollection collection = null;
-        var hasMatchedOnce = false;
-        var stabilizations = 0;
-
-        // Process info stabilizer
-        while (true)
+        if (!File.Exists(tempPath))
         {
-            await Task.Delay(2000);
-
-            // refresh the process current info
-            process.Refresh();
-
-            var currentModules = process.Modules;
-
-            if (currentModules.Count > 0)
-            {
-                if (collection != null && collection.Count == currentModules.Count && !hasMatchedOnce)
-                {
-                    hasMatchedOnce = true;
-                }
-
-                if (collection != null && hasMatchedOnce)
-                {
-                    break;
-                }
-
-                collection = currentModules;
-            }
-
-            // fail if stabilization is longer than 40s
-            if (stabilizations++ > 20)
-            {
-                throw new TimeoutException("Could not stabilize process");
-            }
+            Assert.Fail("Could not find modules report file.");
         }
 
-        var modules = process.Modules
-            .OfType<ProcessModule>()
-            .Select(x => x.ModuleName)
-            .Where(name => name.StartsWith("OpenTelemetry"))
-            .OrderBy(name => name)
-            .ToList();
+        var json = File.ReadAllText(tempPath);
+        var modules = JsonConvert.DeserializeObject<string[]>(json);
 
-        if (!process.HasExited)
-        {
-            process.Kill();
-        }
+        // Cleanup
+        File.Delete(tempPath);
 
         await Verifier.Verify(modules)
-            .DisableDiff();
+           .UniqueForOSPlatform()
+           .UniqueForRuntime()
+           .DisableDiff();
     }
 }
-#endif
