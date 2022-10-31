@@ -65,7 +65,7 @@ internal static class ConfigurationKeys
         /// <summary>
         /// Configuration key for whether the tracer should be initialized by the profiler or not.
         /// </summary>
-        public const string LoadTracerAtStartup = "OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP";
+        public const string TracesEnabled = "OTEL_DOTNET_AUTO_TRACES_ENABLED";
 
         /// <summary>
         /// Configuration key for the traces exporter to be used.
@@ -119,7 +119,7 @@ internal static class ConfigurationKeys
         /// <summary>
         /// Configuration key for whether the meter should be initialized by the profiler or not.
         /// </summary>
-        public const string LoadMeterAtStartup = "OTEL_DOTNET_AUTO_LOAD_METER_AT_STARTUP";
+        public const string MetricsEnabled = "OTEL_DOTNET_AUTO_METRICS_ENABLED";
 
         /// <summary>
         /// Configuration key for the metrics exporter to be used.

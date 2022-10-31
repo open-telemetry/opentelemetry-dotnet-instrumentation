@@ -35,7 +35,7 @@ public class InstrumentationTests
     [FactRequiringEnvVar]
     public void Initialize_WithDisabledFlag_DoesNotCreateTracerProvider()
     {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP", "false");
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED", "false");
 
         Instrumentation.Initialize();
         var otelActivity = _otelActivitySource.StartActivity("OtelActivity");
@@ -61,7 +61,7 @@ public class InstrumentationTests
     [FactRequiringEnvVar]
     public void Initialize_WithEnabledFlag_CreatesTracerProvider()
     {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP", "true");
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED", "true");
 
         Instrumentation.Initialize();
         var otelActivity = _otelActivitySource.StartActivity("OtelActivity");
@@ -74,7 +74,7 @@ public class InstrumentationTests
     [FactRequiringEnvVar]
     public void Initialize_WithPreviouslyCreatedTracerProvider_WorksCorrectly()
     {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP", "false");
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED", "false");
         var tracer = Sdk
             .CreateTracerProviderBuilder()
             .AddSource("Custom")

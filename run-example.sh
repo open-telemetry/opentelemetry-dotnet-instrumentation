@@ -65,7 +65,7 @@ unset OTEL_DOTNET_AUTO_PLUGINS
 ./dev/wait-local-port.sh 8080
 
 # instrument and run HTTP client app
-ENABLE_PROFILING=${enableProfiling} OTEL_SERVICE_NAME=${exampleApp} OTEL_TRACES_EXPORTER=${tracesExporter} OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP=${exampleAppInjectSDK} OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES=none ./dev/instrument.sh $exampleAppDotnetCli ./examples/${exampleApp}/bin/$configuration/${exampleAppTargetFramework}/Examples.${exampleApp}.${exampleAppExt}
+ENABLE_PROFILING=${enableProfiling} OTEL_SERVICE_NAME=${exampleApp} OTEL_TRACES_EXPORTER=${tracesExporter} OTEL_DOTNET_AUTO_TRACES_ENABLED=${exampleAppInjectSDK} OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES=none ./dev/instrument.sh $exampleAppDotnetCli ./examples/${exampleApp}/bin/$configuration/${exampleAppTargetFramework}/Examples.${exampleApp}.${exampleAppExt}
 
 # verify if it works
 {

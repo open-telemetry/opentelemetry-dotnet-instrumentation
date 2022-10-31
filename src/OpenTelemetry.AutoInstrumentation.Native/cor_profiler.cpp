@@ -2160,7 +2160,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ReJITCompilationFinished(FunctionID funct
 {
     if (is_attached_)
     {
-        Logger::Debug("ReJITCompilationFinished: [functionId: ", functionId, ", rejitId: ", rejitId, ", hrStatus: ", hrStatus,
+        Logger::Debug("ReJITCompilationFinished: [functionId: ", functionId, ", rejitId: ", rejitId, ", hrStatus: ", HResultStr(hrStatus),
                     ", safeToBlock: ", fIsSafeToBlock, "]");
     }
 
@@ -2173,7 +2173,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ReJITError(ModuleID moduleId, mdMethodDef
     if (is_attached_)
     {
         Logger::Warn("ReJITError: [functionId: ", functionId, ", moduleId: ", moduleId, ", methodId: ", methodId,
-                    ", hrStatus: ", hrStatus, "]");
+                    ", hrStatus: ", HResultStr(hrStatus), "]");
     }
 
     return S_OK;

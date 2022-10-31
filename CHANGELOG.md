@@ -7,6 +7,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.4.0-beta.1...HEAD)
 
+### Changed
+
+- Replace `OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP` by `OTEL_DOTNET_AUTO_TRACES_ENABLED`
+  and `OTEL_DOTNET_AUTO_LOAD_METER_AT_STARTUP` by `OTEL_DOTNET_AUTO_METRICS_ENABLED`.
+
 ### Removed
 
 - Remove support for `OTEL_DOTNET_AUTO_ENABLED`.
