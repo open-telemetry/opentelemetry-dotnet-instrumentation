@@ -51,9 +51,9 @@ public class ModuleTests : TestHelper
 
             await Verifier.Verify(modules)
 #if NETFRAMEWORK
-                .UseFileName("ModuleTests.RunApplication.NetFx")
+                .UseFileName($"{nameof(ModuleTests)}.{nameof(RunApplication)}.NetFx")
 #else
-                .UseFileName("ModuleTests.RunApplication.NetCore")
+                .UseFileName($"{nameof(ModuleTests)}.{nameof(RunApplication)}.NetCore")
 #endif
                 .DisableDiff();
         }
