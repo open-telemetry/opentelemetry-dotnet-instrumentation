@@ -50,9 +50,12 @@ public class ModuleTests : TestHelper
             var modules = JsonConvert.DeserializeObject<string[]>(json);
 
             await Verifier.Verify(modules)
-                 .UniqueForOSPlatform()
-                 .UniqueForRuntime()
-                 .DisableDiff();
+#if NETFRAMEWORK
+                .UseFileName("ModuleTests.RunApplication.NetFx")
+#else
+                .UseFileName("ModuleTests.RunApplication.NetCore")
+#endif
+                .DisableDiff();
         }
         finally
         {
