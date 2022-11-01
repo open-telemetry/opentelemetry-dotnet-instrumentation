@@ -18,6 +18,8 @@ using System.IO;
 using System.Threading.Tasks;
 using IntegrationTests.Helpers;
 using Newtonsoft.Json;
+using OpenTelemetry.AutoInstrumentation;
+using OpenTelemetry.AutoInstrumentation.Configuration;
 using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
@@ -33,7 +35,36 @@ public class ModuleTests : TestHelper
     }
 
     [Fact]
-    public async Task RunApplication()
+    public async Task Default()
+    {
+        string verifyTestName =
+#if NETFRAMEWORK
+        $"{nameof(ModuleTests)}.{nameof(Default)}.NetFx";
+#else
+        $"{nameof(ModuleTests)}.{nameof(Default)}.NetCore";
+#endif
+
+        await RunTests(verifyTestName);
+    }
+
+    [Fact]
+    public async Task Minimal()
+    {
+        SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, Constants.ConfigurationValues.None);
+        SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, Constants.ConfigurationValues.None);
+        SetEnvironmentVariable(ConfigurationKeys.Traces.ConsoleExporterEnabled, bool.FalseString);
+
+        string verifyTestName =
+#if NETFRAMEWORK
+        $"{nameof(ModuleTests)}.{nameof(Minimal)}.NetFx";
+#else
+        $"{nameof(ModuleTests)}.{nameof(Minimal)}.NetCore";
+#endif
+
+        await RunTests(verifyTestName);
+    }
+
+    private async Task RunTests(string verifyName)
     {
         var tempPath = Path.GetTempFileName();
 
@@ -50,11 +81,7 @@ public class ModuleTests : TestHelper
             var modules = JsonConvert.DeserializeObject<string[]>(json);
 
             await Verifier.Verify(modules)
-#if NETFRAMEWORK
-                .UseFileName($"{nameof(ModuleTests)}.{nameof(RunApplication)}.NetFx")
-#else
-                .UseFileName($"{nameof(ModuleTests)}.{nameof(RunApplication)}.NetCore")
-#endif
+                .UseFileName(verifyName)
                 .DisableDiff();
         }
         finally
