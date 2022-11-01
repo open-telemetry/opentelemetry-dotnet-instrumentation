@@ -15,43 +15,36 @@
 // </copyright>
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using OpenTelemetry.Instrumentation.Wcf;
+using System.Runtime.CompilerServices;
 using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 internal static class EnvironmentConfigurationTracerHelper
 {
-    private static readonly Dictionary<TracerInstrumentation, Action<TracerProviderBuilder>> AddInstrumentation = new()
-    {
-        [TracerInstrumentation.Wcf] = builder => builder.AddWcfInstrumentation(),
-        [TracerInstrumentation.HttpClient] = builder => builder.AddHttpClientInstrumentation(),
-        [TracerInstrumentation.AspNet] = builder => builder.AddSdkAspNetInstrumentation(),
-        [TracerInstrumentation.SqlClient] = builder => builder.AddSqlClientInstrumentation(),
-#if NETCOREAPP3_1_OR_GREATER
-        [TracerInstrumentation.MongoDB] = builder => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources"),
-        [TracerInstrumentation.MySqlData] = builder => builder.AddSource("OpenTelemetry.Instrumentation.MySqlData"),
-        [TracerInstrumentation.StackExchangeRedis] = builder => builder.AddSource("OpenTelemetry.Instrumentation.StackExchangeRedis"),
-#endif
-        [TracerInstrumentation.Npgsql] = builder => builder.AddSource("Npgsql"),
-        [TracerInstrumentation.GrpcNetClient] = builder => builder.AddGrpcClientInstrumentation(options => options.SuppressDownstreamInstrumentation = !Instrumentation.TracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.HttpClient)),
-#if NETCOREAPP3_1_OR_GREATER
-        [TracerInstrumentation.MassTransit] = builder => builder.AddSource("MassTransit")
-#endif
-    };
-
     public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, TracerSettings settings)
     {
         builder.SetExporter(settings);
 
         foreach (var enabledInstrumentation in settings.EnabledInstrumentations)
         {
-            if (AddInstrumentation.TryGetValue(enabledInstrumentation, out var addInstrumentation))
+            _ = enabledInstrumentation switch
             {
-                addInstrumentation(builder);
-            }
+                TracerInstrumentation.AspNet => Wrappers.AddSdkAspNetInstrumentation(builder),
+                TracerInstrumentation.GrpcNetClient => Wrappers.AddGrpcClientInstrumentation(builder),
+                TracerInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder),
+                TracerInstrumentation.Npgsql => builder.AddSource("Npgsql"),
+                TracerInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder),
+                TracerInstrumentation.Wcf => Wrappers.AddWcfInstrumentation(builder),
+#if NETCOREAPP3_1_OR_GREATER
+                TracerInstrumentation.MassTransit => builder.AddSource("MassTransit"),
+                TracerInstrumentation.MongoDB => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources"),
+                TracerInstrumentation.MySqlData => builder.AddSource("OpenTelemetry.Instrumentation.MySqlData"),
+                TracerInstrumentation.StackExchangeRedis => builder.AddSource("OpenTelemetry.Instrumentation.StackExchangeRedis"),
+#endif
+                _ => null
+            };
         }
 
         builder.AddSource(settings.ActivitySources.ToArray());
@@ -63,57 +56,107 @@ internal static class EnvironmentConfigurationTracerHelper
         return builder;
     }
 
-    public static TracerProviderBuilder AddSdkAspNetInstrumentation(this TracerProviderBuilder builder)
-    {
-#if NET462
-        builder.AddAspNetInstrumentation();
-#elif NETCOREAPP3_1_OR_GREATER
-        builder.AddSource("OpenTelemetry.Instrumentation.AspNetCore");
-        builder.AddLegacySource("Microsoft.AspNetCore.Hosting.HttpRequestIn");
-#endif
-
-        return builder;
-    }
-
     private static TracerProviderBuilder SetExporter(this TracerProviderBuilder builder, TracerSettings settings)
     {
         if (settings.ConsoleExporterEnabled)
         {
-            builder.AddConsoleExporter();
+            Wrappers.AddConsoleExporter(builder);
         }
 
-        switch (settings.TracesExporter)
+        return settings.TracesExporter switch
         {
-            case TracesExporter.Zipkin:
-                builder.AddZipkinExporter();
-                break;
-            case TracesExporter.Jaeger:
-                builder.AddJaegerExporter();
-                break;
-            case TracesExporter.Otlp:
-#if NETCOREAPP3_1
-                if (settings.Http2UnencryptedSupportEnabled)
-                {
-                    // Adding the OtlpExporter creates a GrpcChannel.
-                    // This switch must be set before creating a GrpcChannel/HttpClient when calling an insecure gRPC service.
-                    // See: https://docs.microsoft.com/aspnet/core/grpc/troubleshoot#call-insecure-grpc-services-with-net-core-client
-                    AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-                }
-#endif
-                builder.AddOtlpExporter(options =>
-                {
-                    if (settings.OtlpExportProtocol.HasValue)
-                    {
-                        options.Protocol = settings.OtlpExportProtocol.Value;
-                    }
-                });
-                break;
-            case TracesExporter.None:
-                break;
-            default:
-                throw new ArgumentOutOfRangeException($"Traces exporter '{settings.TracesExporter}' is incorrect");
+            TracesExporter.Zipkin => Wrappers.AddZipkinExporter(builder),
+            TracesExporter.Jaeger => Wrappers.AddJaegerExporter(builder),
+            TracesExporter.Otlp => Wrappers.AddOtlpExporter(builder, settings),
+            TracesExporter.None => builder,
+            _ => throw new ArgumentOutOfRangeException($"Traces exporter '{settings.TracesExporter}' is incorrect")
+        };
+    }
+
+    /// <summary>
+    /// This class wraps external extensions methods to ensure the dlls are not loaded, if not necessary.
+    /// </summary>
+    private static class Wrappers
+    {
+        // Invstrumentations
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddWcfInstrumentation(TracerProviderBuilder builder)
+        {
+            return builder.AddWcfInstrumentation();
         }
 
-        return builder;
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddHttpClientInstrumentation(TracerProviderBuilder builder)
+        {
+            return builder.AddHttpClientInstrumentation();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddSdkAspNetInstrumentation(TracerProviderBuilder builder)
+        {
+#if NET462
+            builder.AddAspNetInstrumentation();
+#elif NETCOREAPP3_1_OR_GREATER
+            builder.AddSource("OpenTelemetry.Instrumentation.AspNetCore");
+            builder.AddLegacySource("Microsoft.AspNetCore.Hosting.HttpRequestIn");
+#endif
+
+            return builder;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddSqlClientInstrumentation(TracerProviderBuilder builder)
+        {
+            return builder.AddSqlClientInstrumentation();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddGrpcClientInstrumentation(TracerProviderBuilder builder)
+        {
+            return builder.AddGrpcClientInstrumentation(options =>
+                    options.SuppressDownstreamInstrumentation = !Instrumentation.TracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.HttpClient));
+        }
+
+        // Exporters
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddConsoleExporter(TracerProviderBuilder builder)
+        {
+            return builder.AddConsoleExporter();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddZipkinExporter(TracerProviderBuilder builder)
+        {
+            return builder.AddZipkinExporter();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddJaegerExporter(TracerProviderBuilder builder)
+        {
+            return builder.AddJaegerExporter();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddOtlpExporter(TracerProviderBuilder builder, TracerSettings settings)
+        {
+#if NETCOREAPP3_1
+            if (settings.Http2UnencryptedSupportEnabled)
+            {
+                // Adding the OtlpExporter creates a GrpcChannel.
+                // This switch must be set before creating a GrpcChannel/HttpClient when calling an insecure gRPC service.
+                // See: https://docs.microsoft.com/aspnet/core/grpc/troubleshoot#call-insecure-grpc-services-with-net-core-client
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            }
+#endif
+            return builder.AddOtlpExporter(options =>
+            {
+                if (settings.OtlpExportProtocol.HasValue)
+                {
+                    options.Protocol = settings.OtlpExportProtocol.Value;
+                }
+            });
+        }
     }
 }
