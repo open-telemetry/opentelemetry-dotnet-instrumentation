@@ -74,11 +74,12 @@ internal static class EnvironmentConfigurationTracerHelper
     }
 
     /// <summary>
-    /// This class wraps external extensions methods to ensure the dlls are not loaded, if not necessary.
+    /// This class wraps external extension methods to ensure the dlls are not loaded, if not necessary.
+    /// .NET Framework is aggressively inlining these wrappers. Inlining must be disabled to ensure the wrapping effect.
     /// </summary>
     private static class Wrappers
     {
-        // Invstrumentations
+        // Instrumentations
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddWcfInstrumentation(TracerProviderBuilder builder)
