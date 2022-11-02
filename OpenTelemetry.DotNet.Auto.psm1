@@ -23,12 +23,9 @@ function Get-Current-InstallDir() {
 function Get-CLIInstallDir-From-InstallDir([string]$InstallDir) {
     $dir = "OpenTelemetry .NET AutoInstrumentation"
     
-    if ($InstallDir -eq "<auto>" -or $installDir -eq "AppData") {
-        return (Join-Path $env:LOCALAPPDATA "Programs" | Join-Path -ChildPath $dir)
-    }
-    elseif ($InstallDir -eq "ProgramFiles") {
+    if ($InstallDir -eq "<auto>") {
         return (Join-Path $Env:ProgramFiles $dir)
-    } 
+    }
     elseif (Test-Path $InstallDir -IsValid) {
         return $InstallDir
     }
@@ -186,9 +183,9 @@ function Filter-Env-List([string[]]$EnvValues, [string[]]$Filters) {
     .SYNOPSIS
     Installs OpenTelemetry .NET Automatic Instrumentation.
     .PARAMETER InstallDir
-    Default: <auto> - the default value is AppData
+    Default: <auto> - the default path is Program Files dir.
     Install path of the OpenTelemetry .NET Automatic Instrumentation
-    Possible values: <auto>, ProgramFiles, AppData, (Custom path)
+    Possible values: <auto>, (Custom path)
 #>
 function Install-OpenTelemetryCore() {
     param(
@@ -274,6 +271,10 @@ function Register-OpenTelemetryForIIS() {
 
     if (-not $installDir) {
         throw "OpenTelemetry Core must be setup first. Run 'Install-OpenTelemetryCore' to setup OpenTelemetry Core."
+    }
+
+    if ($installDir -notlike "$env:ProgramFiles\*") {
+        Write-Warning "OpenTelemetry is installed to custom path. Make sure that IIS user has access to the path."
     }
 
     Setup-Windows-Service -InstallDir $installDir -WindowsServiceName "W3SVC"
