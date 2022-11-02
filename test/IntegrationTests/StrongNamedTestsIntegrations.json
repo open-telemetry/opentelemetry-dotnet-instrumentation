@@ -46,6 +46,28 @@
           "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.Validations.MissingInstrumentationType",
           "action": "CallTargetModification"
         }
+      },
+      {
+        "caller": {},
+        "target": {
+          "assembly": "TestLibrary.InstrumentationTarget",
+          "type": "TestLibrary.InstrumentationTarget.Command",
+          "method": "InstrumentationTargetMissingBytecodeInstrumentationMethod",
+          "signature_types": [
+            "System.Void"
+          ],
+          "minimum_major": 1,
+          "minimum_minor": 0,
+          "minimum_patch": 0,
+          "maximum_major": 1,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation",
+          "type": "OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute",
+          "action": "CallTargetModification"
+        }
       }
     ]
   }

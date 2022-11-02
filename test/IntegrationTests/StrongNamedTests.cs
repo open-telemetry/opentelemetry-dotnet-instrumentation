@@ -42,6 +42,10 @@ public class StrongNamedTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE", integrationsFile);
         RunTestApplication(otlpTraceCollectorPort: collector.Port);
 
+        // TODO: When native logs are moved to an EventSource implementation check for the log
+        // TODO: entries reporting the missing instrumentation type and missing instrumentation methods.
+        // TODO: See https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/960
+
         collector.AssertExpectations();
     }
 }

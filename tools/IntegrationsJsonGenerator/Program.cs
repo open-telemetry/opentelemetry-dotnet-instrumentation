@@ -65,7 +65,7 @@ foreach (var typeInfo in autoInstrumentationLib.GetTypes())
 var productionIntegrations = integrations.Where(x => x.Key != "StrongNamedValidation").Select(x => x.Value)
     .OrderBy(x => x.Name).ToArray();
 
-var testIntegrations = integrations.Where(x => x.Key == "StrongNamedValidation").Select(x => x.Value)
+var testIntegrations = integrations.Where(x => x.Key == "StrongNamedValidation").Select(x => AppendMockIntegrations(x.Value))
     .OrderBy(x => x.Name).ToArray();
 
 UpdateIntegrationFile(Path.Combine(solutionFolder, "integrations.json"), productionIntegrations);
@@ -164,3 +164,48 @@ void UpdateIntegrationFile(string filePath, Integration[] productionIntegrations
 
 static string GetSourceFilePathName([CallerFilePath] string callerFilePath = null)
     => callerFilePath ?? string.Empty;
+
+static Integration AppendMockIntegrations(Integration testIntegration)
+{
+    // Add some special cases used by the integration tests. This way the integrations
+    // file used in the integrations test doesn't change on each run of the tool.
+    var targetAssembly = testIntegration.MethodReplacements[0].Target.Assembly;
+    var targetType = testIntegration.MethodReplacements[0].Target.Type;
+    var targetSignatureTypes = testIntegration.MethodReplacements[0].Target.SignatureTypes;
+
+    testIntegration.MethodReplacements.Add(new MethodReplacement
+    {
+        Target = new Target
+        {
+            Assembly = testIntegration.MethodReplacements[0].Target.Assembly,
+            Type = targetType,
+            Method = "InstrumentationTargetMissingBytecodeInstrumentationType",
+            SignatureTypes = targetSignatureTypes,
+            MaximumMajor = 1,
+            MinimumMajor = 1,
+        },
+        Wrapper = new Wrapper
+        {
+            Type = "OpenTelemetry.AutoInstrumentation.Instrumentations.Validations.MissingInstrumentationType",
+        },
+    });
+
+    testIntegration.MethodReplacements.Add(new MethodReplacement
+    {
+        Target = new Target
+        {
+            Assembly = testIntegration.MethodReplacements[0].Target.Assembly,
+            Type = targetType,
+            Method = "InstrumentationTargetMissingBytecodeInstrumentationMethod",
+            SignatureTypes = targetSignatureTypes,
+            MaximumMajor = 1,
+            MinimumMajor = 1,
+        },
+        Wrapper = new Wrapper
+        {
+            Type = "OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute",
+        },
+    });
+
+    return testIntegration;
+}
