@@ -51,8 +51,11 @@ public class ModuleTests : TestHelper
     public async Task Minimal()
     {
         SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, Constants.ConfigurationValues.None);
+        SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, Constants.ConfigurationValues.None);
         SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, Constants.ConfigurationValues.None);
+        SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, Constants.ConfigurationValues.None);
         SetEnvironmentVariable(ConfigurationKeys.Traces.ConsoleExporterEnabled, bool.FalseString);
+        SetEnvironmentVariable(ConfigurationKeys.Metrics.ConsoleExporterEnabled, bool.FalseString);
 
         string verifyTestName =
 #if NETFRAMEWORK
