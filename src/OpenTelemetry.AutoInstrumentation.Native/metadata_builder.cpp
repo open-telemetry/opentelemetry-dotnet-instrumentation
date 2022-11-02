@@ -129,7 +129,7 @@ HRESULT MetadataBuilder::StoreWrapperMethodRef(const MethodReplacement& method_r
 
     // If the signature data size is greater than zero means we need to load the methodRef
     // for CallSite instrumentation.
-    // In case of the signature data size is zero we asume we are in a calltarget scenario
+    // In case of the signature data size is zero we assume we are in a CallTarget scenario
     // where we use the TypeRef but not a MemberRef.
 
     if (signature_data.size() > 0)
