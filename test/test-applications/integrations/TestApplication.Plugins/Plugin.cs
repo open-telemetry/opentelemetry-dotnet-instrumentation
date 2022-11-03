@@ -44,4 +44,19 @@ public class Plugin
 
         return options;
     }
+
+#if NETFRAMEWORK
+    public HttpWebRequestInstrumentationOptions ConfigureOptions(HttpWebRequestInstrumentationOptions options)
+    {
+        options.Enrich = (activity, eventName, rawObject) =>
+        {
+            if (eventName.Equals("OnStartActivity"))
+            {
+                activity.SetTag("example.plugin", "MyExamplePlugin");
+            }
+        };
+
+        return options;
+    }
+#endif
 }
