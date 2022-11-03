@@ -11,6 +11,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Replace `OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP` by `OTEL_DOTNET_AUTO_TRACES_ENABLED`
   and `OTEL_DOTNET_AUTO_LOAD_METER_AT_STARTUP` by `OTEL_DOTNET_AUTO_METRICS_ENABLED`.
+- Disable OpenTracing by default. OpenTracing can be re-enabled via `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`.
 
 ### Removed
 

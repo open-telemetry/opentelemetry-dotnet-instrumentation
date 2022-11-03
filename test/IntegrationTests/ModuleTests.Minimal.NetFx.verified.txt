@@ -3,6 +3,5 @@
   OpenTelemetry.Api,
   OpenTelemetry.AutoInstrumentation,
   OpenTelemetry.AutoInstrumentation.Loader,
-  OpenTelemetry.Exporter.OpenTelemetryProtocol,
-  OpenTelemetry.Shims.OpenTracing
+  OpenTelemetry.Exporter.OpenTelemetryProtocol
 ]

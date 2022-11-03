@@ -61,6 +61,7 @@ internal class TracerSettings : Settings
         }
 
         TracesEnabled = source.GetBool(ConfigurationKeys.Traces.TracesEnabled) ?? true;
+        OpenTracingEnabled = source.GetBool(ConfigurationKeys.Traces.OpenTracingEnabled) ?? false;
 
         InstrumentationOptions = new InstrumentationOptions(source);
     }
@@ -69,6 +70,11 @@ internal class TracerSettings : Settings
     /// Gets a value indicating whether the tracer should be loaded by the profiler. Default is true.
     /// </summary>
     public bool TracesEnabled { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the OpenTracing tracer is enabled. Default is false.
+    /// </summary>
+    public bool OpenTracingEnabled { get; }
 
     /// <summary>
     /// Gets the traces exporter.

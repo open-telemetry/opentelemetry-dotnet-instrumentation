@@ -15,7 +15,6 @@
 // </copyright>
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Configuration;
@@ -26,7 +25,6 @@ using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
 using OpenTelemetry.Shims.OpenTracing;
 using OpenTelemetry.Trace;
 using OpenTracing.Util;
@@ -167,30 +165,9 @@ internal static class Instrumentation
             throw;
         }
 
-        try
+        if (TracerSettings.OpenTracingEnabled)
         {
-            if (_tracerProvider is not null)
-            {
-                // Instantiate the OpenTracing shim. The underlying OpenTelemetry tracer will create
-                // spans using the "OpenTelemetry.AutoInstrumentation.OpenTracingShim" source.
-                var openTracingShim = new TracerShim(
-                    _tracerProvider.GetTracer("OpenTelemetry.AutoInstrumentation.OpenTracingShim"),
-                    Propagators.DefaultTextMapPropagator);
-
-                // This registration must occur prior to any reference to the OpenTracing tracer:
-                // otherwise the no-op tracer is going to be used by OpenTracing instead.
-                GlobalTracer.RegisterIfAbsent(openTracingShim);
-                Logger.Information("OpenTracingShim loaded.");
-            }
-            else
-            {
-                Logger.Information("OpenTracingShim was not loaded as the provider is not initialized.");
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "OpenTracingShim exception.");
-            throw;
+            EnableOpenTracing();
         }
     }
 
@@ -248,6 +225,35 @@ internal static class Instrumentation
                 // If we encounter an error while logging there is nothing else we can do
                 // with the exception.
             }
+        }
+    }
+
+    private static void EnableOpenTracing()
+    {
+        try
+        {
+            if (_tracerProvider is not null)
+            {
+                // Instantiate the OpenTracing shim. The underlying OpenTelemetry tracer will create
+                // spans using the "OpenTelemetry.AutoInstrumentation.OpenTracingShim" source.
+                var openTracingShim = new TracerShim(
+                    _tracerProvider.GetTracer("OpenTelemetry.AutoInstrumentation.OpenTracingShim"),
+                    Propagators.DefaultTextMapPropagator);
+
+                // This registration must occur prior to any reference to the OpenTracing tracer:
+                // otherwise the no-op tracer is going to be used by OpenTracing instead.
+                GlobalTracer.RegisterIfAbsent(openTracingShim);
+                Logger.Information("OpenTracingShim loaded.");
+            }
+            else
+            {
+                Logger.Information("OpenTracingShim was not loaded as the provider is not initialized.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "OpenTracingShim exception.");
+            throw;
         }
     }
 }

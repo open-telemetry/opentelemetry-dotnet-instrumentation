@@ -56,6 +56,7 @@ public class ModuleTests : TestHelper
         SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, Constants.ConfigurationValues.None);
         SetEnvironmentVariable(ConfigurationKeys.Traces.ConsoleExporterEnabled, bool.FalseString);
         SetEnvironmentVariable(ConfigurationKeys.Metrics.ConsoleExporterEnabled, bool.FalseString);
+        SetEnvironmentVariable(ConfigurationKeys.Traces.OpenTracingEnabled, bool.FalseString);
 
         string verifyTestName =
 #if NETFRAMEWORK

@@ -68,6 +68,11 @@ internal static class ConfigurationKeys
         public const string TracesEnabled = "OTEL_DOTNET_AUTO_TRACES_ENABLED";
 
         /// <summary>
+        /// Configuration key for whether the OpenTracing tracer should be enabled.
+        /// </summary>
+        public const string OpenTracingEnabled = "OTEL_DOTNET_AUTO_OPENTRACING_ENABLED";
+
+        /// <summary>
         /// Configuration key for the traces exporter to be used.
         /// Default is <c>"otlp"</c>.
         /// </summary>
