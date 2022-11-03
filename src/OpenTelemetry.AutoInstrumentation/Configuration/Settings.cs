@@ -15,7 +15,7 @@
 // </copyright>
 
 using System;
-using System.Linq.Expressions;
+using System.Reflection;
 using OpenTelemetry.Exporter;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
@@ -67,9 +67,17 @@ internal abstract class Settings
 #endif
         };
 
-        return (T)typeof(T)
-            .GetConstructor(new[] { typeof(IConfigurationSource) })
-            .Invoke(new object[] { configurationSource });
+        try
+        {
+            return (T)typeof(T)
+                .GetConstructor(new[] { typeof(IConfigurationSource) })
+                .Invoke(new object[] { configurationSource });
+        }
+        catch (TargetInvocationException ex)
+        {
+            // Unwrap the more informative internal exception
+            throw ex.InnerException;
+        }
     }
 
     private static OtlpExportProtocol? GetExporterOtlpProtocol(IConfigurationSource source)
