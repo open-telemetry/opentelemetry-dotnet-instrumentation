@@ -18,6 +18,7 @@ using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Metrics;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
@@ -26,10 +27,10 @@ internal static class EnvironmentConfigurationMetricHelper
 {
     private static readonly ILogger Logger = OtelLogging.GetLogger();
 
-    public static MeterProviderBuilder UseEnvironmentVariables(this MeterProviderBuilder builder, MetricSettings settings)
+    public static MeterProviderBuilder UseEnvironmentVariables(this MeterProviderBuilder builder, MetricSettings settings, PluginManager pluginManager)
     {
         builder
-            .SetExporter(settings)
+            .SetExporter(settings, pluginManager)
             .AddMeter(settings.Meters.ToArray());
 
         foreach (var enabledMeter in settings.EnabledInstrumentations)
@@ -38,8 +39,8 @@ internal static class EnvironmentConfigurationMetricHelper
             {
                 MetricInstrumentation.AspNet => Wrappers.AddSdkAspNetInstrumentation(builder),
                 MetricInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder),
-                MetricInstrumentation.NetRuntime => Wrappers.AddRuntimeInstrumentation(builder),
-                MetricInstrumentation.Process => Wrappers.AddProcessInstrumentation(builder),
+                MetricInstrumentation.NetRuntime => Wrappers.AddRuntimeInstrumentation(builder, pluginManager),
+                MetricInstrumentation.Process => Wrappers.AddProcessInstrumentation(builder, pluginManager),
                 _ => null,
             };
         }
@@ -47,17 +48,17 @@ internal static class EnvironmentConfigurationMetricHelper
         return builder;
     }
 
-    private static MeterProviderBuilder SetExporter(this MeterProviderBuilder builder, MetricSettings settings)
+    private static MeterProviderBuilder SetExporter(this MeterProviderBuilder builder, MetricSettings settings, PluginManager pluginManager)
     {
         if (settings.ConsoleExporterEnabled)
         {
-            Wrappers.AddConsoleExporter(builder, settings);
+            Wrappers.AddConsoleExporter(builder, settings, pluginManager);
         }
 
         return settings.MetricExporter switch
         {
-            MetricsExporter.Prometheus => Wrappers.AddPrometheusExporter(builder),
-            MetricsExporter.Otlp => Wrappers.AddOtlpExporter(builder, settings),
+            MetricsExporter.Prometheus => Wrappers.AddPrometheusExporter(builder, pluginManager),
+            MetricsExporter.Otlp => Wrappers.AddOtlpExporter(builder, settings, pluginManager),
             MetricsExporter.None => builder,
             _ => throw new ArgumentOutOfRangeException($"Metrics exporter '{settings.MetricExporter}' is incorrect")
         };
@@ -90,33 +91,36 @@ internal static class EnvironmentConfigurationMetricHelper
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddRuntimeInstrumentation(MeterProviderBuilder builder)
+        public static MeterProviderBuilder AddRuntimeInstrumentation(MeterProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddRuntimeInstrumentation();
+            return builder.AddRuntimeInstrumentation(pluginManager.ConfigureOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddProcessInstrumentation(MeterProviderBuilder builder)
+        public static MeterProviderBuilder AddProcessInstrumentation(MeterProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddProcessInstrumentation();
+            return builder.AddProcessInstrumentation(pluginManager.ConfigureOptions);
         }
 
         // Exporters
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddConsoleExporter(MeterProviderBuilder builder, MetricSettings settings)
+        public static MeterProviderBuilder AddConsoleExporter(MeterProviderBuilder builder, MetricSettings settings, PluginManager pluginManager)
         {
-            return builder.AddConsoleExporter((_, metricReaderOptions) =>
+            return builder.AddConsoleExporter((consoleExporterOptions, metricReaderOptions) =>
             {
                 if (settings.MetricExportInterval != null)
                 {
                     metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = settings.MetricExportInterval;
                 }
+
+                pluginManager.ConfigureOptions(consoleExporterOptions);
+                pluginManager.ConfigureOptions(metricReaderOptions);
             });
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddPrometheusExporter(MeterProviderBuilder builder)
+        public static MeterProviderBuilder AddPrometheusExporter(MeterProviderBuilder builder, PluginManager pluginManager)
         {
             Logger.Warning("Prometheus exporter is configured. It is intended for the inner dev loop. Do NOT use in production");
 
@@ -124,11 +128,13 @@ internal static class EnvironmentConfigurationMetricHelper
             {
                 options.StartHttpListener = true;
                 options.ScrapeResponseCacheDurationMilliseconds = 300;
+
+                pluginManager.ConfigureOptions(options);
             });
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddOtlpExporter(MeterProviderBuilder builder, MetricSettings settings)
+        public static MeterProviderBuilder AddOtlpExporter(MeterProviderBuilder builder, MetricSettings settings, PluginManager pluginManager)
         {
 #if NETCOREAPP3_1
             if (settings.Http2UnencryptedSupportEnabled)
@@ -151,6 +157,9 @@ internal static class EnvironmentConfigurationMetricHelper
                 {
                     metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = settings.MetricExportInterval;
                 }
+
+                pluginManager.ConfigureOptions(options);
+                pluginManager.ConfigureOptions(metricReaderOptions);
             });
         }
     }
