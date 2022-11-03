@@ -31,7 +31,7 @@ internal class TracerSettings : Settings
     /// using the specified <see cref="IConfigurationSource"/> to initialize values.
     /// </summary>
     /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
-    private TracerSettings(IConfigurationSource source)
+    public TracerSettings(IConfigurationSource source)
         : base(source)
     {
         TracesExporter = ParseTracesExporter(source);
@@ -105,21 +105,6 @@ internal class TracerSettings : Settings
     /// Gets the instrumentation options.
     /// </summary>
     public InstrumentationOptions InstrumentationOptions { get; private set; }
-
-    internal static TracerSettings FromDefaultSources()
-    {
-        var configurationSource = new CompositeConfigurationSource
-        {
-            new EnvironmentConfigurationSource(),
-
-#if NETFRAMEWORK
-            // on .NET Framework only, also read from app.config/web.config
-            new NameValueConfigurationSource(System.Configuration.ConfigurationManager.AppSettings)
-#endif
-        };
-
-        return new TracerSettings(configurationSource);
-    }
 
     private static TracesExporter ParseTracesExporter(IConfigurationSource source)
     {

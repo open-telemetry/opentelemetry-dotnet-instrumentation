@@ -15,11 +15,14 @@
 // </copyright>
 
 using System;
+using System.Collections.Specialized;
 using System.IO;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.Extensions.Logging;
+using Moq;
 using OpenTelemetry.AutoInstrumentation.Configuration;
+using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -32,42 +35,26 @@ public class PluginsConfigurationHelperTests
     [Fact]
     public void MissingAssembly()
     {
-        var tracerAction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { "Missing.Assembly.PluginType, Missing.Assembly" });
-        var meterAction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(new[] { "Missing.Assembly.PluginType, Missing.Assembly" });
-        var logsAction = () => LoggerFactory.Create(builder =>
-        {
-            builder.AddOpenTelemetry(options =>
-            {
-                options.InvokePlugins(new[] { "Missing.Assembly.PluginType, Missing.Assembly" });
-            });
-        });
+        var pluginAssemblyQualifiedName = "Missing.Assembly.PluginType, Missing.Assembly";
+        var settings = GetSettings(pluginAssemblyQualifiedName);
+        var createAction = () => new PluginManager(settings);
 
         using (new AssertionScope())
         {
-            tracerAction.Should().Throw<FileNotFoundException>();
-            meterAction.Should().Throw<FileNotFoundException>();
-            logsAction.Should().Throw<FileNotFoundException>();
+            createAction.Should().Throw<FileNotFoundException>();
         }
     }
 
     [Fact]
     public void MissingPluginTypeFromAssembly()
     {
-        var tracerAction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { "Missing.PluginType" });
-        var meterAction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(new[] { "Missing.PluginType" });
-        var logsAction = () => LoggerFactory.Create(builder =>
-        {
-            builder.AddOpenTelemetry(options =>
-            {
-                options.InvokePlugins(new[] { "Missing.PluginType" });
-            });
-        });
+        var pluginAssemblyQualifiedName = "Missing.PluginType";
+        var settings = GetSettings(pluginAssemblyQualifiedName);
+        var createAction = () => new PluginManager(settings);
 
         using (new AssertionScope())
         {
-            tracerAction.Should().Throw<TypeLoadException>();
-            meterAction.Should().Throw<TypeLoadException>();
-            logsAction.Should().Throw<TypeLoadException>();
+            createAction.Should().Throw<TypeLoadException>();
         }
     }
 
@@ -75,21 +62,16 @@ public class PluginsConfigurationHelperTests
     public void PluginTypeMissingMethodDoesNotThrow()
     {
         var pluginAssemblyQualifiedName = GetType().AssemblyQualifiedName;
-        var tracerAction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
-        var meterAction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
-        var logsAction = () => LoggerFactory.Create(builder =>
-        {
-            builder.AddOpenTelemetry(options =>
-            {
-                options.InvokePlugins(new[] { pluginAssemblyQualifiedName });
-            });
-        });
+        var settings = GetSettings(pluginAssemblyQualifiedName);
+        var pluginManager = new PluginManager(settings);
+
+        var tracerAction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(pluginManager);
+        var meterAction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(pluginManager);
 
         using (new AssertionScope())
         {
             tracerAction.Should().NotThrow();
             meterAction.Should().NotThrow();
-            logsAction.Should().NotThrow();
         }
     }
 
@@ -97,60 +79,96 @@ public class PluginsConfigurationHelperTests
     public void PluginTypeMissingDefaultConstructor()
     {
         var pluginAssemblyQualifiedName = typeof(MockPluginMissingDefaultConstructor).AssemblyQualifiedName;
-        var tracerAction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
-        var meterAction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
-        var logsAction = () => LoggerFactory.Create(builder =>
-        {
-            builder.AddOpenTelemetry(options =>
-            {
-                options.InvokePlugins(new[] { pluginAssemblyQualifiedName });
-            });
-        });
+        var settings = GetSettings(pluginAssemblyQualifiedName);
+        var createAction = () => new PluginManager(settings);
 
         using (new AssertionScope())
         {
-            tracerAction.Should().Throw<MissingMethodException>();
-            meterAction.Should().Throw<MissingMethodException>();
-            logsAction.Should().Throw<MissingMethodException>();
+            createAction.Should().Throw<MissingMethodException>();
         }
     }
 
     [Fact]
-    public void InvokePluginSuccess()
+    public void InvokeProviderPluginSuccess()
     {
         var pluginAssemblyQualifiedName = typeof(MockPlugin).AssemblyQualifiedName;
-        var tracerAction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
-        var meterAction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(new[] { pluginAssemblyQualifiedName });
-        var logsAction = () => LoggerFactory.Create(builder =>
-        {
-            builder.AddOpenTelemetry(options =>
-            {
-                options.InvokePlugins(new[] { pluginAssemblyQualifiedName });
-            });
-        });
+        var settings = GetSettings(pluginAssemblyQualifiedName);
+        var pluginManager = new PluginManager(settings);
+
+        var traceProviderBuilderMock = new Mock<TracerProviderBuilder>();
+        traceProviderBuilderMock.Setup(x => x.AddSource(It.Is<string>(x => x == "My.Custom.Source"))).Verifiable();
+
+        var meterProviderBuilderMock = new Mock<MeterProviderBuilder>();
+        meterProviderBuilderMock.Setup(x => x.AddMeter(It.Is<string>(x => x == "My.Custom.Meter"))).Verifiable();
+
+        var tracerAction = () => traceProviderBuilderMock.Object.InvokePlugins(pluginManager);
+        var meterAction = () => meterProviderBuilderMock.Object.InvokePlugins(pluginManager);
 
         using (new AssertionScope())
         {
             tracerAction.Should().NotThrow();
             meterAction.Should().NotThrow();
+
+            traceProviderBuilderMock.Verify();
+        }
+    }
+
+    [Fact]
+    public void ConfigureOptionsSuccess()
+    {
+        var pluginAssemblyQualifiedName = typeof(MockPlugin).AssemblyQualifiedName;
+        var settings = GetSettings(pluginAssemblyQualifiedName);
+        var pluginManager = new PluginManager(settings);
+
+        var logsAction = () => LoggerFactory.Create(builder =>
+        {
+            builder.AddOpenTelemetry(options =>
+            {
+                options.IncludeFormattedMessage = false;
+                pluginManager.ConfigureOptions(options);
+
+                // Verify that plugin changes the state
+                options.IncludeFormattedMessage.Should().BeTrue();
+            });
+        });
+
+        using (new AssertionScope())
+        {
             logsAction.Should().NotThrow();
         }
+    }
+
+    private static GeneralSettings GetSettings(string assemblyQualifiedName)
+    {
+        var config = new NameValueConfigurationSource(new NameValueCollection()
+        {
+            { ConfigurationKeys.ProviderPlugins, assemblyQualifiedName }
+        });
+
+        return new GeneralSettings(config);
     }
 
     public class MockPlugin
     {
         public TracerProviderBuilder ConfigureTracerProvider(TracerProviderBuilder builder)
         {
+            builder.AddSource("My.Custom.Source");
+
             return builder;
         }
 
         public MeterProviderBuilder ConfigureMeterProvider(MeterProviderBuilder builder)
         {
+            builder.AddMeter("My.Custom.Meter");
+
             return builder;
         }
 
-        public OpenTelemetryLoggerOptions ConfigureLoggerOptions(OpenTelemetryLoggerOptions options)
+        public OpenTelemetryLoggerOptions ConfigureOptions(OpenTelemetryLoggerOptions options)
         {
+            // Dummy overwritten setting
+            options.IncludeFormattedMessage = true;
+
             return options;
         }
     }

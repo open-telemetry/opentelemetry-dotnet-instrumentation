@@ -43,21 +43,20 @@ internal static class LogBuilderExtensions
                 return builder;
             }
 
-            var settings = LogSettings.FromDefaultSources();
+            var settings = Instrumentation.LogSettings;
+            var pluginManager = Instrumentation.PluginManager;
+
             builder.AddOpenTelemetry(options =>
             {
                 options.SetResourceBuilder(ResourceFactory.Create());
 
                 options.IncludeFormattedMessage = settings.IncludeFormattedMessage;
 
-                if (settings.Plugins.Count > 0)
-                {
-                    options.InvokePlugins(settings.Plugins);
-                }
+                pluginManager.ConfigureOptions(options);
 
                 if (settings.ConsoleExporterEnabled)
                 {
-                    options.AddConsoleExporter();
+                    options.AddConsoleExporter(consoleOptions => pluginManager.ConfigureOptions(consoleOptions));
                 }
 
                 switch (settings.LogExporter)
@@ -72,11 +71,13 @@ internal static class LogBuilderExtensions
                             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
                         }
 #endif
-                        options.AddOtlpExporter(options =>
+                        options.AddOtlpExporter(otlpOptions =>
                         {
+                            pluginManager.ConfigureOptions(otlpOptions);
+
                             if (settings.OtlpExportProtocol.HasValue)
                             {
-                                options.Protocol = settings.OtlpExportProtocol.Value;
+                                otlpOptions.Protocol = settings.OtlpExportProtocol.Value;
                             }
                         });
                         break;

@@ -15,7 +15,7 @@
 // </copyright>
 
 using System;
-using System.Collections.Generic;
+using System.Linq.Expressions;
 using OpenTelemetry.Exporter;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
@@ -39,16 +39,6 @@ internal abstract class Settings
 
         OtlpExportProtocol = GetExporterOtlpProtocol(source);
         Http2UnencryptedSupportEnabled = source.GetBool(ConfigurationKeys.Http2UnencryptedSupportEnabled) ?? false;
-        FlushOnUnhandledException = source.GetBool(ConfigurationKeys.FlushOnUnhandledException) ?? false;
-
-        var providerPlugins = source.GetString(ConfigurationKeys.ProviderPlugins);
-        if (providerPlugins != null)
-        {
-            foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(Constants.ConfigurationValues.DotNetQualifiedNameSeparator))
-            {
-                Plugins.Add(pluginAssemblyQualifiedName);
-            }
-        }
     }
 
     /// <summary>
@@ -64,17 +54,23 @@ internal abstract class Settings
     /// </summary>
     public bool Http2UnencryptedSupportEnabled { get; }
 
-    /// <summary>
-    /// Gets a value indicating whether the <see cref="AppDomain.UnhandledException"/> event should trigger
-    /// the flushing of telemetry data.
-    /// Default is <c>false</c>.
-    /// </summary>
-    public bool FlushOnUnhandledException { get; }
+    public static T FromDefaultSources<T>()
+        where T : Settings
+    {
+        var configurationSource = new CompositeConfigurationSource
+        {
+            new EnvironmentConfigurationSource(),
 
-    /// <summary>
-    /// Gets the list of plugins represented by <see cref="Type.AssemblyQualifiedName"/>.
-    /// </summary>
-    public IList<string> Plugins { get; } = new List<string>();
+#if NETFRAMEWORK
+            // on .NET Framework only, also read from app.config/web.config
+            new NameValueConfigurationSource(System.Configuration.ConfigurationManager.AppSettings)
+#endif
+        };
+
+        return (T)typeof(T)
+            .GetConstructor(new[] { typeof(IConfigurationSource) })
+            .Invoke(new object[] { configurationSource });
+    }
 
     private static OtlpExportProtocol? GetExporterOtlpProtocol(IConfigurationSource source)
     {

@@ -17,22 +17,25 @@
 #if NETCOREAPP3_1_OR_GREATER
 
 using System;
+using OpenTelemetry.AutoInstrumentation.Plugins;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading;
 
 internal class MySqlDataInitializer : InstrumentationInitializer
 {
-    public MySqlDataInitializer()
+    private readonly PluginManager _pluginManager;
+
+    public MySqlDataInitializer(PluginManager pluginManager)
         : base("MySql.Data")
     {
+        _pluginManager = pluginManager;
     }
 
     public override void Initialize(ILifespanManager lifespanManager)
     {
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentation, OpenTelemetry.Instrumentation.MySqlData");
-        var optionsInstrumentationType = Type.GetType("OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentationOptions, OpenTelemetry.Instrumentation.MySqlData");
 
-        var options = Activator.CreateInstance(optionsInstrumentationType);
+        var options = _pluginManager.ConfigureOptions(new OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentationOptions());
         var instrumentation = Activator.CreateInstance(instrumentationType, options);
 
         lifespanManager.Track(instrumentation);

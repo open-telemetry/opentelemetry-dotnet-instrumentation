@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using OpenTelemetry.Instrumentation.Http;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
@@ -29,5 +30,18 @@ public class Plugin
     public MeterProviderBuilder ConfigureMeterProvider(MeterProviderBuilder builder)
     {
         return builder.AddMeter(TestApplication.Smoke.Program.SourceName);
+    }
+
+    public HttpClientInstrumentationOptions ConfigureOptions(HttpClientInstrumentationOptions options)
+    {
+        options.Enrich = (activity, eventName, rawObject) =>
+        {
+            if (eventName.Equals("OnStartActivity"))
+            {
+                activity.SetTag("example.plugin", "MyExamplePlugin");
+            }
+        };
+
+        return options;
     }
 }
