@@ -56,7 +56,7 @@ internal static class LogBuilderExtensions
 
                 if (settings.ConsoleExporterEnabled)
                 {
-                    options.AddConsoleExporter(consoleOptions => pluginManager.ConfigureOptions(consoleOptions));
+                    options.AddConsoleExporter(pluginManager.ConfigureOptions);
                 }
 
                 switch (settings.LogExporter)

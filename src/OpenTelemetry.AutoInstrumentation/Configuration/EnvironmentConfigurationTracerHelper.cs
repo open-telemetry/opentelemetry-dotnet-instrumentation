@@ -85,20 +85,20 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddWcfInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddWcfInstrumentation(options => pluginManager.ConfigureOptions(options));
+            return builder.AddWcfInstrumentation(pluginManager.ConfigureOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddHttpClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddHttpClientInstrumentation(options => pluginManager.ConfigureOptions(options));
+            return builder.AddHttpClientInstrumentation(pluginManager.ConfigureOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddSdkAspNetInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager)
         {
 #if NET462
-            builder.AddAspNetInstrumentation(options => pluginManager.ConfigureOptions(options));
+            builder.AddAspNetInstrumentation(pluginManager.ConfigureOptions);
 #elif NETCOREAPP3_1_OR_GREATER
             builder.AddSource("OpenTelemetry.Instrumentation.AspNetCore");
             builder.AddLegacySource("Microsoft.AspNetCore.Hosting.HttpRequestIn");
@@ -110,7 +110,7 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddSqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddSqlClientInstrumentation(options => pluginManager.ConfigureOptions(options));
+            return builder.AddSqlClientInstrumentation(pluginManager.ConfigureOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -128,19 +128,19 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddConsoleExporter(TracerProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddConsoleExporter(options => pluginManager.ConfigureOptions(options));
+            return builder.AddConsoleExporter(pluginManager.ConfigureOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddZipkinExporter(TracerProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddZipkinExporter(options => pluginManager.ConfigureOptions(options));
+            return builder.AddZipkinExporter(pluginManager.ConfigureOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddJaegerExporter(TracerProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddJaegerExporter(options => pluginManager.ConfigureOptions(options));
+            return builder.AddJaegerExporter(pluginManager.ConfigureOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
