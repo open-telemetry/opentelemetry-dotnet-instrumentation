@@ -73,12 +73,12 @@ internal static class LogBuilderExtensions
 #endif
                         options.AddOtlpExporter(otlpOptions =>
                         {
-                            pluginManager.ConfigureOptions(otlpOptions);
-
                             if (settings.OtlpExportProtocol.HasValue)
                             {
                                 otlpOptions.Protocol = settings.OtlpExportProtocol.Value;
                             }
+
+                            pluginManager.ConfigureOptions(otlpOptions);
                         });
                         break;
                     case LogExporter.None:

@@ -110,6 +110,7 @@ public class PluginsConfigurationHelperTests
             meterAction.Should().NotThrow();
 
             traceProviderBuilderMock.Verify();
+            meterProviderBuilderMock.Verify();
         }
     }
 
