@@ -51,18 +51,16 @@ internal class PluginManager
         return ConfigureBuilder(builder, "ConfigureMeterProvider");
     }
 
-    public T ConfigureOptions<T>(T options)
+    public void ConfigureOptions<T>(T options)
     {
         foreach (var plugin in _plugins)
         {
             var mi = plugin.Type.GetMethod("ConfigureOptions", new Type[] { typeof(T) });
             if (mi is not null)
             {
-                options = (T)mi.Invoke(plugin.Instance, new object[] { options });
+                mi.Invoke(plugin.Instance, new object[] { options });
             }
         }
-
-        return options;
     }
 
     private T ConfigureBuilder<T>(T builder, string methodName)

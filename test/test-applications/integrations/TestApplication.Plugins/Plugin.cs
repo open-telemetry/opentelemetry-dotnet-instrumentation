@@ -32,7 +32,7 @@ public class Plugin
         return builder.AddMeter(TestApplication.Smoke.Program.SourceName);
     }
 
-    public HttpClientInstrumentationOptions ConfigureOptions(HttpClientInstrumentationOptions options)
+    public void ConfigureOptions(HttpClientInstrumentationOptions options)
     {
         options.Enrich = (activity, eventName, rawObject) =>
         {
@@ -41,12 +41,10 @@ public class Plugin
                 activity.SetTag("example.plugin", "MyExamplePlugin");
             }
         };
-
-        return options;
     }
 
 #if NETFRAMEWORK
-    public HttpWebRequestInstrumentationOptions ConfigureOptions(HttpWebRequestInstrumentationOptions options)
+    public void ConfigureOptions(HttpWebRequestInstrumentationOptions options)
     {
         options.Enrich = (activity, eventName, rawObject) =>
         {
@@ -55,8 +53,6 @@ public class Plugin
                 activity.SetTag("example.plugin", "MyExamplePlugin");
             }
         };
-
-        return options;
     }
 #endif
 }
