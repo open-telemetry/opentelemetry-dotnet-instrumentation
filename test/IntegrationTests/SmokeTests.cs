@@ -55,11 +55,12 @@ public class SmokeTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task WhenStartupHookIsNotEnabled()
     {
+        SetEnvironmentVariable("DOTNET_STARTUP_HOOKS", null);
 #if NETFRAMEWORK
-        await VerifyTestApplicationInstrumented(enableStartupHook: false);
+        await VerifyTestApplicationInstrumented();
 #else
         // on .NET Core it is required to set DOTNET_STARTUP_HOOKS
-        await VerifyTestApplicationNotInstrumented(enableStartupHook: false);
+        await VerifyTestApplicationNotInstrumented();
 #endif
     }
 
@@ -67,11 +68,13 @@ public class SmokeTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task WhenClrProfilerIsNotEnabled()
     {
+        SetEnvironmentVariable("CLR_ENABLE_PROFILING", "0");
+        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "0");
 #if NETFRAMEWORK
         // on .NET Framework it is required to set the CLR .NET Profiler
-        await VerifyTestApplicationNotInstrumented(enableClrProfiler: false);
+        await VerifyTestApplicationNotInstrumented();
 #else
-        await VerifyTestApplicationInstrumented(enableClrProfiler: false);
+        await VerifyTestApplicationInstrumented();
 #endif
     }
 
@@ -122,10 +125,11 @@ public class SmokeTests : TestHelper
     public async Task SubmitMetrics()
     {
         using var collector = await MockMetricsCollector.Start(Output);
+        SetExporter(collector);
         collector.Expect("MyCompany.MyProduct.MyLibrary", metric => metric.Name == "MyFruitCounter");
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
-        RunTestApplication(metricsAgentPort: collector.Port);
+        RunTestApplication();
 
         collector.AssertExpectations();
     }
@@ -135,6 +139,7 @@ public class SmokeTests : TestHelper
     public async Task TracesResource()
     {
         using var collector = await MockSpansCollector.Start(Output);
+        SetExporter(collector);
         collector.ResourceExpector.Expect("service.name", ServiceName);
         collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
         collector.ResourceExpector.Expect("telemetry.sdk.language", "dotnet");
@@ -142,7 +147,7 @@ public class SmokeTests : TestHelper
         collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
-        RunTestApplication(otlpTraceCollectorPort: collector.Port);
+        RunTestApplication();
 
         collector.ResourceExpector.AssertExpectations();
     }
@@ -152,6 +157,7 @@ public class SmokeTests : TestHelper
     public async Task MetricsResource()
     {
         using var collector = await MockMetricsCollector.Start(Output);
+        SetExporter(collector);
         collector.ResourceExpector.Expect("service.name", ServiceName);
         collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
         collector.ResourceExpector.Expect("telemetry.sdk.language", "dotnet");
@@ -159,7 +165,7 @@ public class SmokeTests : TestHelper
         collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
-        RunTestApplication(metricsAgentPort: collector.Port);
+        RunTestApplication();
 
         collector.ResourceExpector.AssertExpectations();
     }
@@ -170,13 +176,14 @@ public class SmokeTests : TestHelper
     public async Task LogsResource()
     {
         using var collector = await MockLogsCollector.Start(Output);
+        SetExporter(collector);
         collector.ResourceExpector.Expect("service.name", ServiceName);
         collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
         collector.ResourceExpector.Expect("telemetry.sdk.language", "dotnet");
         collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
         collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
 
-        RunTestApplication(logsAgentPort: collector.Port);
+        RunTestApplication();
 
         collector.ResourceExpector.AssertExpectations();
     }
@@ -187,10 +194,11 @@ public class SmokeTests : TestHelper
     public async Task OtlpTracesExporter()
     {
         using var collector = await MockSpansCollector.Start(Output);
+        SetExporter(collector);
         collector.Expect("MyCompany.MyProduct.MyLibrary", span => span.Name == "SayHello");
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
-        RunTestApplication(otlpTraceCollectorPort: collector.Port);
+        RunTestApplication();
 
         collector.AssertExpectations();
     }
@@ -264,10 +272,12 @@ public class SmokeTests : TestHelper
     public async Task SubmitLogs()
     {
         using var collector = await MockLogsCollector.Start(Output);
+        SetExporter(collector);
         collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Example log message\" }");
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
-        RunTestApplication(logsAgentPort: collector.Port, enableClrProfiler: true);
+        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1"); // uses bytecode instrumentation
+        RunTestApplication();
 
         collector.AssertExpectations();
     }
@@ -277,17 +287,20 @@ public class SmokeTests : TestHelper
     public async Task LogsNoneInstrumentations()
     {
         using var collector = await MockLogsCollector.Start(Output);
+        SetExporter(collector);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLED_INSTRUMENTATIONS", "none");
-        RunTestApplication(logsAgentPort: collector.Port, enableClrProfiler: true);
+        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1"); // uses bytecode instrumentation
+        RunTestApplication();
 
         collector.AssertEmpty(5.Seconds());
     }
 #endif
 
-    private async Task VerifyTestApplicationInstrumented(bool enableStartupHook = true, bool enableClrProfiler = true)
+    private async Task VerifyTestApplicationInstrumented()
     {
         using var collector = await MockSpansCollector.Start(Output);
+        SetExporter(collector);
         collector.Expect("MyCompany.MyProduct.MyLibrary");
 #if NETFRAMEWORK
         collector.Expect("OpenTelemetry.HttpWebRequest");
@@ -296,17 +309,18 @@ public class SmokeTests : TestHelper
 #endif
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
-        RunTestApplication(otlpTraceCollectorPort: collector.Port, enableStartupHook: enableStartupHook, enableClrProfiler: enableClrProfiler);
+        RunTestApplication();
 
         collector.AssertExpectations();
     }
 
-    private async Task VerifyTestApplicationNotInstrumented(bool enableStartupHook = true, bool enableClrProfiler = true)
+    private async Task VerifyTestApplicationNotInstrumented()
     {
         using var collector = await MockSpansCollector.Start(Output);
+        SetExporter(collector);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
-        RunTestApplication(otlpTraceCollectorPort: collector.Port, enableStartupHook: enableStartupHook, enableClrProfiler: enableClrProfiler);
+        RunTestApplication();
 
         collector.AssertEmpty(5.Seconds());
     }

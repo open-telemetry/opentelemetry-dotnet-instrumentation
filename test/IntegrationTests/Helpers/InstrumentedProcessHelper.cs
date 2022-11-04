@@ -24,8 +24,7 @@ public class InstrumentedProcessHelper
     public static Process StartInstrumentedProcess(
         string executable,
         EnvironmentHelper environmentHelper,
-        string arguments,
-        TestSettings testSettings)
+        string arguments)
     {
         if (environmentHelper == null)
         {
@@ -34,7 +33,7 @@ public class InstrumentedProcessHelper
 
         var startInfo = new ProcessStartInfo(executable, arguments ?? string.Empty);
 
-        environmentHelper.SetEnvironmentVariables(testSettings, startInfo.EnvironmentVariables, executable);
+        environmentHelper.SetEnvironmentVariables(startInfo.EnvironmentVariables, executable);
 
         startInfo.UseShellExecute = false;
         startInfo.CreateNoWindow = true;

@@ -40,6 +40,7 @@ public class HttpTests : TestHelper
     public async Task SubmitTraces(string propagators)
     {
         using var collector = await MockSpansCollector.Start(Output);
+        SetExporter(collector);
         Span clientSpan = null;
         collector.Expect("OpenTelemetry.Instrumentation.Http", span =>
         {
@@ -61,7 +62,7 @@ public class HttpTests : TestHelper
 
         SetEnvironmentVariable("OTEL_PROPAGATORS", propagators);
         SetEnvironmentVariable("DISABLE_DistributedContextPropagator", "true");
-        RunTestApplication(otlpTraceCollectorPort: collector.Port, enableClrProfiler: !IsCoreClr());
+        RunTestApplication();
 
         collector.AssertExpectations();
         using (new AssertionScope())
@@ -78,10 +79,11 @@ public class HttpTests : TestHelper
     public async Task SubmitMetrics()
     {
         using var collector = await MockMetricsCollector.Start(Output);
+        SetExporter(collector);
         collector.Expect("OpenTelemetry.Instrumentation.Http");
         collector.Expect("OpenTelemetry.Instrumentation.AspNetCore");
 
-        RunTestApplication(metricsAgentPort: collector.Port, enableClrProfiler: !IsCoreClr());
+        RunTestApplication();
 
         collector.AssertExpectations();
     }

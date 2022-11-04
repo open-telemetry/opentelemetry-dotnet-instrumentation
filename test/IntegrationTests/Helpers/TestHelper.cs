@@ -61,97 +61,36 @@ public abstract class TestHelper
 #endif
     }
 
-    /// <summary>
-    /// StartTestApplication starts the test application
-    /// and returns the Process instance for further interaction.
-    /// </summary>
-    /// <returns>Test application process</returns>
-    public Process StartTestApplication(int traceAgentPort = 0, int otlpTraceCollectorPort = 0, int metricsAgentPort = 0, int logsAgentPort = 0, string arguments = null, string packageVersion = "", int aspNetCorePort = 0, string framework = "", bool enableStartupHook = true, bool enableClrProfiler = true)
+    public void SetEnvironmentVariable(string key, string value)
     {
-        var testSettings = new TestSettings
-        {
-            Arguments = arguments,
-            PackageVersion = packageVersion,
-            AspNetCorePort = aspNetCorePort,
-            Framework = framework,
-            EnableStartupHook = enableStartupHook,
-            EnableClrProfiler = enableClrProfiler
-        };
+        EnvironmentHelper.CustomEnvironmentVariables[key] = value;
+    }
 
-        if (traceAgentPort != 0)
-        {
-            testSettings.TracesSettings = new() { Port = traceAgentPort };
-        }
+    public void SetExporter(MockSpansCollector collector)
+    {
+        SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "otlp");
+        SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{collector.Port}");
+    }
 
-        if (otlpTraceCollectorPort != 0)
-        {
-            testSettings.OtlpTracesSettings = new() { Port = otlpTraceCollectorPort };
-        }
+    public void SetExporter(MockMetricsCollector collector)
+    {
+        SetEnvironmentVariable("OTEL_METRICS_EXPORTER", "otlp");
+        SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{collector.Port}");
+    }
 
-        if (metricsAgentPort != 0)
-        {
-            testSettings.MetricsSettings = new() { Port = metricsAgentPort };
-        }
-
-        if (logsAgentPort != 0)
-        {
-            testSettings.LogSettings = new() { Port = logsAgentPort };
-        }
-
-        return StartTestApplication(testSettings);
+    public void SetExporter(MockLogsCollector collector)
+    {
+        SetEnvironmentVariable("OTEL_LOGS_EXPORTER", "otlp");
+        SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{collector.Port}");
     }
 
     /// <summary>
     /// RunTestApplication starts the test application, wait up to DefaultProcessTimeout.
     /// Assertion exceptions are thrown if it timed out or the exit code is non-zero.
     /// </summary>
-    public void RunTestApplication(int traceAgentPort = 0, int otlpTraceCollectorPort = 0, int metricsAgentPort = 0, int logsAgentPort = 0, string arguments = null, string packageVersion = "", string framework = "", int aspNetCorePort = 5000, bool enableStartupHook = true, bool enableClrProfiler = true)
+    public void RunTestApplication(TestSettings testSettings = null)
     {
-        var testSettings = new TestSettings
-        {
-            Arguments = arguments,
-            PackageVersion = packageVersion,
-            AspNetCorePort = aspNetCorePort,
-            Framework = framework,
-            EnableStartupHook = enableStartupHook,
-            EnableClrProfiler = enableClrProfiler
-        };
-
-        if (traceAgentPort != 0)
-        {
-            testSettings.TracesSettings = new() { Port = traceAgentPort };
-        }
-
-        if (otlpTraceCollectorPort != 0)
-        {
-            testSettings.OtlpTracesSettings = new() { Port = otlpTraceCollectorPort };
-        }
-
-        if (metricsAgentPort != 0)
-        {
-            testSettings.MetricsSettings = new() { Port = metricsAgentPort };
-        }
-
-        if (logsAgentPort != 0)
-        {
-            testSettings.LogSettings = new() { Port = logsAgentPort };
-        }
-
-        RunTestApplication(testSettings);
-    }
-
-    protected bool IsCoreClr()
-    {
-        return EnvironmentHelper.IsCoreClr();
-    }
-
-    protected void SetEnvironmentVariable(string key, string value)
-    {
-        EnvironmentHelper.CustomEnvironmentVariables.Add(key, value);
-    }
-
-    private void RunTestApplication(TestSettings testSettings)
-    {
+        testSettings ??= new();
         using var process = StartTestApplication(testSettings);
         Output.WriteLine($"ProcessName: " + process.ProcessName);
         using var helper = new ProcessHelper(process);
@@ -170,8 +109,14 @@ public abstract class TestHelper
         process.ExitCode.Should().Be(0, "Test application exited with non-zero exit code");
     }
 
-    private Process StartTestApplication(TestSettings testSettings)
+    /// <summary>
+    /// StartTestApplication starts the test application
+    /// and returns the Process instance for further interaction.
+    /// </summary>
+    /// <returns>Test application process</returns>
+    public Process StartTestApplication(TestSettings testSettings = null)
     {
+        testSettings ??= new();
         // get path to test application that the profiler will attach to
         string testApplicationPath = EnvironmentHelper.GetTestApplicationPath(testSettings.PackageVersion, testSettings.Framework);
         if (!File.Exists(testApplicationPath))
@@ -186,7 +131,6 @@ public abstract class TestHelper
         return InstrumentedProcessHelper.StartInstrumentedProcess(
             executable,
             EnvironmentHelper,
-            args,
-            testSettings);
+            args);
     }
 }

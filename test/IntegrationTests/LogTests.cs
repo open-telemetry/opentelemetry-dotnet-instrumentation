@@ -40,6 +40,7 @@ public class LogTests : TestHelper
     public async Task SubmitLogs(bool enableClrProfiler, bool includeFormattedMessage)
     {
         using var collector = await MockLogsCollector.Start(Output);
+        SetExporter(collector);
         if (includeFormattedMessage)
         {
             collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Information from Test App.\" }");
@@ -52,13 +53,17 @@ public class LogTests : TestHelper
             collector.Expect(logRecord => Convert.ToString(logRecord).Contains("TestApplication.Logs.Controllers.TestController"));
         }
 
-        if (!enableClrProfiler)
+        if (enableClrProfiler)
+        {
+            SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1");
+        }
+        else
         {
             SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
         }
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", includeFormattedMessage.ToString());
-        RunTestApplication(logsAgentPort: collector.Port, enableClrProfiler: enableClrProfiler);
+        RunTestApplication();
 
         collector.AssertExpectations();
     }
@@ -67,11 +72,13 @@ public class LogTests : TestHelper
     public async Task EnableLogsWithCLRAndHostingStartup()
     {
         using var collector = await MockLogsCollector.Start(Output);
+        SetExporter(collector);
         collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Information from Test App.\" }");
 
+        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1");
         SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
-        RunTestApplication(logsAgentPort: collector.Port, enableClrProfiler: true);
+        RunTestApplication();
 
         collector.AssertExpectations();
     }

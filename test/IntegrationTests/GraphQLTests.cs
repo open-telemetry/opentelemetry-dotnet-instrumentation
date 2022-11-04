@@ -44,6 +44,7 @@ public class GraphQLTests : TestHelper
     {
         var requests = new List<RequestInfo>();
         using var collector = await MockSpansCollector.Start(Output);
+        SetExporter(collector);
 
         // SUCCESS: query using GET
         Request(requests, method: "GET", url: "/graphql?query=" + WebUtility.UrlEncode("query{hero{name appearsIn}}"));
@@ -67,7 +68,9 @@ public class GraphQLTests : TestHelper
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
-        using var process = StartTestApplication(otlpTraceCollectorPort: collector.Port, aspNetCorePort: aspNetCorePort);
+        SetEnvironmentVariable("ASPNETCORE_URLS", $"http://127.0.0.1:{aspNetCorePort}/");
+        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1"); // uses bytecode instrumentation
+        using var process = StartTestApplication();
         using var helper = new ProcessHelper(process);
         try
         {

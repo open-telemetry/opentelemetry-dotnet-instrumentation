@@ -94,7 +94,6 @@ partial class Build
         }));
 
     Target CompileManagedSrc => _ => _
-        .Unlisted()
         .Description("Compiles the managed code in the src directory")
         .After(CreateRequiredDirectories)
         .After(Restore)
@@ -111,7 +110,6 @@ partial class Build
         });
 
     Target CompileManagedTests => _ => _
-        .Unlisted()
         .Description("Compiles the managed code in the test directory")
         .After(CompileManagedSrc)
         .Executes(() =>
@@ -141,14 +139,12 @@ partial class Build
         });
 
     Target CompileNativeSrc => _ => _
-        .Unlisted()
         .Description("Compiles the native loader")
         .DependsOn(CompileNativeSrcWindows)
         .DependsOn(CompileNativeSrcLinux)
         .DependsOn(CompileNativeSrcMacOs);
 
     Target CompileExamples => _ => _
-        .Unlisted()
         .Description("Compiles all the example projects")
         .Executes(() =>
         {
@@ -161,7 +157,6 @@ partial class Build
         });
 
     Target CompileNativeTests => _ => _
-        .Unlisted()
         .Description("Compiles the native loader unit tests")
         .DependsOn(CompileNativeTestsWindows)
         .DependsOn(CompileNativeTestsLinux);

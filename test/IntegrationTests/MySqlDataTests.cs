@@ -39,9 +39,14 @@ public class MySqlDataTests : TestHelper
     public async Task SubmitsTraces()
     {
         using var collector = await MockSpansCollector.Start(Output);
+        SetExporter(collector);
         collector.Expect("OpenTelemetry.Instrumentation.MySqlData");
 
-        RunTestApplication(otlpTraceCollectorPort: collector.Port, arguments: $"--mysql {_mySql.Port}");
+        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1"); // uses bytecode instrumentation
+        RunTestApplication(new()
+        {
+            Arguments = $"--mysql {_mySql.Port}"
+        });
 
         collector.AssertExpectations();
     }
