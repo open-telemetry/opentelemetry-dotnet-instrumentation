@@ -68,7 +68,7 @@ public class SmokeTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public async Task WhenClrProfilerIsNotEnabled()
     {
-        SetEnvironmentVariable("CLR_ENABLE_PROFILING", "0");
+        SetEnvironmentVariable("COR_ENABLE_PROFILING", "0");
         SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "0");
 #if NETFRAMEWORK
         // on .NET Framework it is required to set the CLR .NET Profiler
