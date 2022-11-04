@@ -43,7 +43,7 @@ internal class WcfServerTestHelper : TestHelper
         }
 
         SetExporter(collector);
-        var process = InstrumentedProcessHelper.StartInstrumentedProcess(testApplicationPath, EnvironmentHelper, null);
+        var process = InstrumentedProcessHelper.Start(testApplicationPath, null, EnvironmentHelper);
         return new ProcessHelper(process);
     }
 }

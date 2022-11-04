@@ -117,6 +117,7 @@ public abstract class TestHelper
     public Process StartTestApplication(TestSettings testSettings = null)
     {
         testSettings ??= new();
+
         // get path to test application that the profiler will attach to
         string testApplicationPath = EnvironmentHelper.GetTestApplicationPath(testSettings.PackageVersion, testSettings.Framework);
         if (!File.Exists(testApplicationPath))
@@ -127,10 +128,6 @@ public abstract class TestHelper
         Output.WriteLine($"Starting Application: {testApplicationPath}");
         var executable = EnvironmentHelper.IsCoreClr() ? EnvironmentHelper.GetTestApplicationExecutionSource() : testApplicationPath;
         var args = EnvironmentHelper.IsCoreClr() ? $"{testApplicationPath} {testSettings.Arguments ?? string.Empty}" : testSettings.Arguments;
-
-        return InstrumentedProcessHelper.StartInstrumentedProcess(
-            executable,
-            EnvironmentHelper,
-            args);
+        return InstrumentedProcessHelper.Start(executable, args, EnvironmentHelper);
     }
 }
