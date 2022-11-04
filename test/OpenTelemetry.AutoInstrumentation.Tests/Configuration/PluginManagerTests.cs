@@ -30,7 +30,7 @@ using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configuration;
 
-public class PluginsConfigurationHelperTests
+public class PluginManagerTests
 {
     [Fact]
     public void MissingAssembly()
