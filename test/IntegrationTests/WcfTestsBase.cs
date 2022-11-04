@@ -79,6 +79,7 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         using var tcpClient = new TcpClient();
         var retries = 0;
 
+        Output.WriteLine("Waiting for WCF Server to open ports.");
         while (retries < 60)
         {
             try
@@ -90,8 +91,6 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
             catch (Exception)
             {
                 retries++;
-
-                Output.WriteLine("Waiting for WCF Server to open ports.");
                 await Task.Delay(500);
             }
         }

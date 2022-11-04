@@ -299,23 +299,19 @@ public class EnvironmentHelper
     private void SetDefaultEnvironmentVariables()
     {
         string profilerPath = GetProfilerPath();
-        if (IsCoreClr())
-        {
-            CustomEnvironmentVariables["DOTNET_STARTUP_HOOKS"] = GetStartupHookOutputPath();
-            CustomEnvironmentVariables["DOTNET_SHARED_STORE"] = GetSharedStorePath();
-            CustomEnvironmentVariables["DOTNET_ADDITIONAL_DEPS"] = GetAdditionalDepsPath();
 
-            // when bytecode instrumentation is needed
-            // CoreCLR Profiler must be expliclitly enabled in test in needed by setting CORECLR_ENABLE_PROFILING=1
-            CustomEnvironmentVariables["CORECLR_PROFILER"] = EnvironmentTools.ProfilerClsId;
-            CustomEnvironmentVariables["CORECLR_PROFILER_PATH"] = profilerPath;
-        }
-        else
-        {
-            CustomEnvironmentVariables["COR_ENABLE_PROFILING"] = "1";
-            CustomEnvironmentVariables["COR_PROFILER"] = EnvironmentTools.ProfilerClsId;
-            CustomEnvironmentVariables["COR_PROFILER_PATH"] = profilerPath;
-        }
+        CustomEnvironmentVariables["DOTNET_STARTUP_HOOKS"] = GetStartupHookOutputPath();
+        CustomEnvironmentVariables["DOTNET_SHARED_STORE"] = GetSharedStorePath();
+        CustomEnvironmentVariables["DOTNET_ADDITIONAL_DEPS"] = GetAdditionalDepsPath();
+
+        // when bytecode instrumentation is needed
+        // CoreCLR Profiler must be expliclitly enabled in test in needed by setting CORECLR_ENABLE_PROFILING=1
+        CustomEnvironmentVariables["CORECLR_PROFILER"] = EnvironmentTools.ProfilerClsId;
+        CustomEnvironmentVariables["CORECLR_PROFILER_PATH"] = profilerPath;
+
+        CustomEnvironmentVariables["COR_ENABLE_PROFILING"] = "1";
+        CustomEnvironmentVariables["COR_PROFILER"] = EnvironmentTools.ProfilerClsId;
+        CustomEnvironmentVariables["COR_PROFILER_PATH"] = profilerPath;
 
         CustomEnvironmentVariables["OTEL_DOTNET_AUTO_DEBUG"] = "1";
         CustomEnvironmentVariables["OTEL_DOTNET_AUTO_LOG_DIRECTORY"] = Path.Combine(EnvironmentTools.GetSolutionDirectory(), "build_data", "profiler-logs");

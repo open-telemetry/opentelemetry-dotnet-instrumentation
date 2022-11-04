@@ -15,8 +15,6 @@
 // </copyright>
 
 using System;
-using System.Collections.Specialized;
-using System.Diagnostics;
 using System.IO;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
