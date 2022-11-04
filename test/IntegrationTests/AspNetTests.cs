@@ -16,6 +16,7 @@
 
 #if NETFRAMEWORK
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -28,12 +29,18 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-public class AspNetTests : TestHelper
+public class AspNetTests
 {
+    private const string TestApplicationName = "AspNet";
+
+    private readonly Dictionary<string, string> _environmentVariables = new();
+
     public AspNetTests(ITestOutputHelper output)
-        : base("AspNet", output)
     {
+        Output = output;
     }
+
+    private ITestOutputHelper Output { get; }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
@@ -51,8 +58,8 @@ public class AspNetTests : TestHelper
         collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry");
 
         string collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
-        SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "otlp");
-        SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", collectorUrl);
+        _environmentVariables["OTEL_TRACES_EXPORTER"] = "otlp";
+        _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
         var webPort = TcpPortProvider.GetOpenPort();
         await using var container = await StartContainerAsync(webPort);
         await CallTestApplicationEndpoint(webPort);
@@ -76,10 +83,10 @@ public class AspNetTests : TestHelper
         collector.Expect("OpenTelemetry.Instrumentation.AspNet");
 
         string collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
-        SetEnvironmentVariable("OTEL_METRICS_EXPORTER", "otlp");
-        SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", collectorUrl);
-        SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "1000");
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "AspNet"); // Helps to reduce noise by enabling only AspNet metrics.
+        _environmentVariables["OTEL_METRICS_EXPORTER"] = "otlp";
+        _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
+        _environmentVariables["OTEL_METRIC_EXPORT_INTERVAL"] = "1000";
+        _environmentVariables["OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS"] = "AspNet"; // Helps to reduce noise by enabling only AspNet metrics.
         var webPort = TcpPortProvider.GetOpenPort();
         await using var container = await StartContainerAsync(webPort);
         await CallTestApplicationEndpoint(webPort);
@@ -90,7 +97,7 @@ public class AspNetTests : TestHelper
     private async Task<TestcontainersContainer> StartContainerAsync(int webPort)
     {
         // get path to test application that the profiler will attach to
-        string testApplicationName = $"testapplication-{EnvironmentHelper.TestApplicationName.ToLowerInvariant()}";
+        string testApplicationName = $"testapplication-{TestApplicationName.ToLowerInvariant()}";
 
         string networkName = DockerNetworkHelper.IntegrationTestsNetworkName;
         string networkId = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
@@ -111,7 +118,7 @@ public class AspNetTests : TestHelper
             .WithBindMount(logPath, "c:/inetpub/wwwroot/logs")
             .WithBindMount(EnvironmentHelper.GetNukeBuildOutput(), "c:/opentelemetry");
 
-        foreach (var env in EnvironmentHelper.CustomEnvironmentVariables)
+        foreach (var env in _environmentVariables)
         {
             builder = builder.WithEnvironment(env.Key, env.Value);
         }
