@@ -304,8 +304,8 @@ public class EnvironmentHelper
         CustomEnvironmentVariables["DOTNET_SHARED_STORE"] = GetSharedStorePath();
         CustomEnvironmentVariables["DOTNET_ADDITIONAL_DEPS"] = GetAdditionalDepsPath();
 
-        // when bytecode instrumentation is needed
-        // CoreCLR Profiler must be expliclitly enabled in test in needed by setting CORECLR_ENABLE_PROFILING=1
+        // call TestHelper.EnableBytecodeInstrumentation() to enable CoreCLR Profiler when bytecode instrumentation is needed
+        // it is not enabled by default to make sure that the instrumentations that do not require CoreCLR Profiler are working without it
         CustomEnvironmentVariables["CORECLR_PROFILER"] = EnvironmentTools.ProfilerClsId;
         CustomEnvironmentVariables["CORECLR_PROFILER_PATH"] = profilerPath;
 

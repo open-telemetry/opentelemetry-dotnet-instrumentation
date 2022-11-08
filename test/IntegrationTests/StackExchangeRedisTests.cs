@@ -47,7 +47,7 @@ public class StackExchangeRedisTests : TestHelper
             collector.Expect("OpenTelemetry.Instrumentation.StackExchangeRedis");
         }
 
-        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1"); // uses bytecode instrumentation
+        EnableBytecodeInstrumentation();
         RunTestApplication(new()
         {
             Arguments = $"--redis {_redis.Port}"

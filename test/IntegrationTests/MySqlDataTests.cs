@@ -42,7 +42,7 @@ public class MySqlDataTests : TestHelper
         SetExporter(collector);
         collector.Expect("OpenTelemetry.Instrumentation.MySqlData");
 
-        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1"); // uses bytecode instrumentation
+        EnableBytecodeInstrumentation();
         RunTestApplication(new()
         {
             Arguments = $"--mysql {_mySql.Port}"

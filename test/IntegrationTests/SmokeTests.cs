@@ -183,7 +183,7 @@ public class SmokeTests : TestHelper
         collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
         collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
 
-        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1"); // uses bytecode instrumentation
+        EnableBytecodeInstrumentation();
         RunTestApplication();
 
         collector.ResourceExpector.AssertExpectations();
@@ -277,7 +277,7 @@ public class SmokeTests : TestHelper
         collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Example log message\" }");
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
-        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1"); // uses bytecode instrumentation
+        EnableBytecodeInstrumentation();
         RunTestApplication();
 
         collector.AssertExpectations();
@@ -291,7 +291,7 @@ public class SmokeTests : TestHelper
         SetExporter(collector);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLED_INSTRUMENTATIONS", "none");
-        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1"); // uses bytecode instrumentation
+        EnableBytecodeInstrumentation();
         RunTestApplication();
 
         collector.AssertEmpty(5.Seconds());
