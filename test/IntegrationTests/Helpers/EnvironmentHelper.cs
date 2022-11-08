@@ -73,6 +73,8 @@ public class EnvironmentHelper
         _appNamePrepend = prependTestApplicationToAppName
             ? "TestApplication."
             : string.Empty;
+
+        SetDefaultEnvironmentVariables();
     }
 
     public bool DebugModeEnabled { get; set; } = true;
@@ -114,84 +116,12 @@ public class EnvironmentHelper
         return !string.IsNullOrEmpty(env);
     }
 
-    public void SetEnvironmentVariables(
-        TestSettings testSettings,
-        StringDictionary environmentVariables,
-        string processToProfile)
+    public void SetEnvironmentVariables(StringDictionary environmentVariables, string processToProfile)
     {
-        string profilerPath = GetProfilerPath();
-
-        if (IsCoreClr())
-        {
-            // enableStartupHook should be true by default, and the parameter should only be set
-            // to false when testing the case that instrumentation should not be available.
-            if (testSettings.EnableStartupHook)
-            {
-                environmentVariables["DOTNET_STARTUP_HOOKS"] = GetStartupHookOutputPath();
-                environmentVariables["DOTNET_SHARED_STORE"] = GetSharedStorePath();
-                environmentVariables["DOTNET_ADDITIONAL_DEPS"] = GetAdditionalDepsPath();
-            }
-
-            if (testSettings.EnableClrProfiler)
-            {
-                environmentVariables["CORECLR_ENABLE_PROFILING"] = "1";
-                environmentVariables["CORECLR_PROFILER"] = EnvironmentTools.ProfilerClsId;
-                environmentVariables["CORECLR_PROFILER_PATH"] = profilerPath;
-            }
-        }
-        else
-        {
-            if (testSettings.EnableClrProfiler)
-            {
-                environmentVariables["COR_ENABLE_PROFILING"] = "1";
-                environmentVariables["COR_PROFILER"] = EnvironmentTools.ProfilerClsId;
-                environmentVariables["COR_PROFILER_PATH"] = profilerPath;
-            }
-        }
-
-        if (DebugModeEnabled)
-        {
-            environmentVariables["OTEL_DOTNET_AUTO_DEBUG"] = "1";
-            environmentVariables["OTEL_DOTNET_AUTO_LOG_DIRECTORY"] = Path.Combine(EnvironmentTools.GetSolutionDirectory(), "build_data", "profiler-logs");
-        }
-
         if (!string.IsNullOrEmpty(processToProfile))
         {
             environmentVariables["OTEL_DOTNET_AUTO_INCLUDE_PROCESSES"] = Path.GetFileName(processToProfile);
         }
-
-        environmentVariables["OTEL_DOTNET_AUTO_HOME"] = GetNukeBuildOutput();
-
-        environmentVariables["OTEL_DOTNET_AUTO_INTEGRATIONS_FILE"] = Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE") ?? GetIntegrationsPath();
-
-        if (testSettings.TracesSettings != null)
-        {
-            environmentVariables["OTEL_TRACES_EXPORTER"] = testSettings.TracesSettings.Exporter;
-            environmentVariables["OTEL_EXPORTER_ZIPKIN_ENDPOINT"] = $"http://localhost:{testSettings.TracesSettings.Port}/api/v2/spans";
-        }
-
-        if (testSettings.OtlpTracesSettings != null)
-        {
-            environmentVariables["OTEL_TRACES_EXPORTER"] = testSettings.OtlpTracesSettings.Exporter;
-            environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = $"http://localhost:{testSettings.OtlpTracesSettings.Port}";
-        }
-
-        if (testSettings.MetricsSettings != null)
-        {
-            environmentVariables["OTEL_METRICS_EXPORTER"] = testSettings.MetricsSettings.Exporter;
-            environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = $"http://localhost:{testSettings.MetricsSettings.Port}";
-        }
-
-        if (testSettings.LogSettings != null)
-        {
-            environmentVariables["OTEL_LOGS_EXPORTER"] = testSettings.LogSettings.Exporter;
-            environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = $"http://localhost:{testSettings.LogSettings.Port}";
-        }
-
-        // for ASP.NET Core test applications, set the server's port
-        environmentVariables["ASPNETCORE_URLS"] = $"http://127.0.0.1:{testSettings.AspNetCorePort}/";
-
-        environmentVariables["OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES"] = "TestApplication.*";
 
         foreach (var key in CustomEnvironmentVariables.Keys)
         {
@@ -364,5 +294,29 @@ public class EnvironmentHelper
             "AdditionalDeps");
 
         return additionalDeps;
+    }
+
+    private void SetDefaultEnvironmentVariables()
+    {
+        string profilerPath = GetProfilerPath();
+
+        CustomEnvironmentVariables["DOTNET_STARTUP_HOOKS"] = GetStartupHookOutputPath();
+        CustomEnvironmentVariables["DOTNET_SHARED_STORE"] = GetSharedStorePath();
+        CustomEnvironmentVariables["DOTNET_ADDITIONAL_DEPS"] = GetAdditionalDepsPath();
+
+        // when bytecode instrumentation is needed
+        // CoreCLR Profiler must be expliclitly enabled in test in needed by setting CORECLR_ENABLE_PROFILING=1
+        CustomEnvironmentVariables["CORECLR_PROFILER"] = EnvironmentTools.ProfilerClsId;
+        CustomEnvironmentVariables["CORECLR_PROFILER_PATH"] = profilerPath;
+
+        CustomEnvironmentVariables["COR_ENABLE_PROFILING"] = "1";
+        CustomEnvironmentVariables["COR_PROFILER"] = EnvironmentTools.ProfilerClsId;
+        CustomEnvironmentVariables["COR_PROFILER_PATH"] = profilerPath;
+
+        CustomEnvironmentVariables["OTEL_DOTNET_AUTO_DEBUG"] = "1";
+        CustomEnvironmentVariables["OTEL_DOTNET_AUTO_LOG_DIRECTORY"] = Path.Combine(EnvironmentTools.GetSolutionDirectory(), "build_data", "profiler-logs");
+        CustomEnvironmentVariables["OTEL_DOTNET_AUTO_HOME"] = GetNukeBuildOutput();
+        CustomEnvironmentVariables["OTEL_DOTNET_AUTO_INTEGRATIONS_FILE"] = Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE") ?? GetIntegrationsPath();
+        CustomEnvironmentVariables["OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES"] = "TestApplication.*";
     }
 }

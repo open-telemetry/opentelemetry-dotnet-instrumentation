@@ -21,11 +21,7 @@ namespace IntegrationTests.Helpers;
 
 public class InstrumentedProcessHelper
 {
-    public static Process StartInstrumentedProcess(
-        string executable,
-        EnvironmentHelper environmentHelper,
-        string arguments,
-        TestSettings testSettings)
+    public static Process Start(string executable, string arguments, EnvironmentHelper environmentHelper)
     {
         if (environmentHelper == null)
         {
@@ -34,7 +30,7 @@ public class InstrumentedProcessHelper
 
         var startInfo = new ProcessStartInfo(executable, arguments ?? string.Empty);
 
-        environmentHelper.SetEnvironmentVariables(testSettings, startInfo.EnvironmentVariables, executable);
+        environmentHelper.SetEnvironmentVariables(startInfo.EnvironmentVariables, executable);
 
         startInfo.UseShellExecute = false;
         startInfo.CreateNoWindow = true;

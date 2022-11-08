@@ -35,10 +35,11 @@ public class MassTransitTests : TestHelper
     public async Task SubmitsTraces()
     {
         using var collector = await MockSpansCollector.Start(Output);
+        SetExporter(collector);
         collector.Expect("MassTransit", span => span.Kind == SpanKind.Producer, "Producer");
         collector.Expect("MassTransit", span => span.Kind == SpanKind.Consumer, "Consumer");
 
-        RunTestApplication(otlpTraceCollectorPort: collector.Port);
+        RunTestApplication();
 
         collector.AssertExpectations();
     }

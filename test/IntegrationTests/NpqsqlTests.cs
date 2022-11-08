@@ -38,9 +38,13 @@ public class NpqsqlTests : TestHelper
     public async Task SubmitsTraces()
     {
         using var collector = await MockSpansCollector.Start(Output);
+        SetExporter(collector);
         collector.Expect("Npgsql");
 
-        RunTestApplication(otlpTraceCollectorPort: collector.Port, arguments: $"--postgres {_postgres.Port}", enableClrProfiler: !IsCoreClr());
+        RunTestApplication(new()
+        {
+            Arguments = $"--postgres {_postgres.Port}"
+        });
 
         collector.AssertExpectations();
     }

@@ -74,7 +74,10 @@ public class ModuleTests : TestHelper
 
         try
         {
-            RunTestApplication(arguments: $"--temp-path {tempPath}");
+            RunTestApplication(new()
+            {
+                Arguments = $"--temp-path {tempPath}"
+            });
 
             if (!File.Exists(tempPath))
             {

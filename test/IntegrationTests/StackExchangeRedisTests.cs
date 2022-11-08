@@ -40,13 +40,18 @@ public class StackExchangeRedisTests : TestHelper
     public async Task SubmitsTraces()
     {
         using var collector = await MockSpansCollector.Start(Output);
+        SetExporter(collector);
         const int spanCount = 8;
         for (int i = 0; i < spanCount; i++)
         {
             collector.Expect("OpenTelemetry.Instrumentation.StackExchangeRedis");
         }
 
-        RunTestApplication(otlpTraceCollectorPort: collector.Port, arguments: $"--redis {_redis.Port}");
+        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1"); // uses bytecode instrumentation
+        RunTestApplication(new()
+        {
+            Arguments = $"--redis {_redis.Port}"
+        });
 
         collector.AssertExpectations();
     }
