@@ -46,7 +46,7 @@ public class MongoDBTests : TestHelper
             collector.Expect("MongoDB.Driver.Core.Extensions.DiagnosticSources");
         }
 
-        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1"); // uses bytecode instrumentation
+        EnableBytecodeInstrumentation();
         RunTestApplication(new()
         {
             Arguments = $"--mongo-db {_mongoDB.Port}"

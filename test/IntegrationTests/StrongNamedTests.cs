@@ -41,7 +41,7 @@ public class StrongNamedTests : TestHelper
         var integrationsFile = Path.Combine(assemblyPath, "StrongNamedTestsIntegrations.json");
         File.Exists(integrationsFile).Should().BeTrue();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE", integrationsFile);
-        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1"); // uses bytecode instrumentation
+        EnableBytecodeInstrumentation();
         RunTestApplication();
 
         // TODO: When native logs are moved to an EventSource implementation check for the log

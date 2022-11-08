@@ -69,7 +69,7 @@ public class GraphQLTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
         SetEnvironmentVariable("ASPNETCORE_URLS", $"http://127.0.0.1:{aspNetCorePort}/");
-        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1"); // uses bytecode instrumentation
+        EnableBytecodeInstrumentation();
         using var process = StartTestApplication();
         using var helper = new ProcessHelper(process);
         try
