@@ -74,6 +74,7 @@ public class TestHttpServer : IDisposable
             }
             catch (HttpListenerException) when (retries > 0)
             {
+                _listener.Close(); // a new listener is created in the beginnning of the loop
                 retries--;
             }
 
