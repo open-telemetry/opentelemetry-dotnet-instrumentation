@@ -6,10 +6,8 @@ on:
     inputs:
       testProject:
         description: String that partially matches test projects to run. Defaults to all test projects.
-        required: false
       testName:
         description: 'String that partially matches the tests to run'
-        required: true
       count:
         description: 'Test execution count'
         default: '20'
