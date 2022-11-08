@@ -34,13 +34,15 @@ public class StrongNamedTests : TestHelper
     public async Task SubmitsTraces()
     {
         using var collector = await MockSpansCollector.Start(Output);
+        SetExporter(collector);
         collector.Expect("TestApplication.StrongNamedValidation");
 
         var assemblyPath = GetTestAssemblyPath();
         var integrationsFile = Path.Combine(assemblyPath, "StrongNamedTestsIntegrations.json");
         File.Exists(integrationsFile).Should().BeTrue();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE", integrationsFile);
-        RunTestApplication(otlpTraceCollectorPort: collector.Port);
+        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1"); // uses bytecode instrumentation
+        RunTestApplication();
 
         // TODO: When native logs are moved to an EventSource implementation check for the log
         // TODO: entries reporting the missing instrumentation type and missing instrumentation methods.

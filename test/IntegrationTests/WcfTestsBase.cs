@@ -41,6 +41,7 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         EnvironmentTools.IsWindowsAdministrator().Should().BeTrue(); // WCF Server needs admin
 
         using var collector = await MockSpansCollector.Start(Output);
+        SetExporter(collector);
         // the test app makes 2 calls (therefore we exepct 4 spans)
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 1");
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 1");
@@ -48,10 +49,10 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 2");
 
         var serverHelper = new WcfServerTestHelper(Output);
-        _serverProcess = serverHelper.RunWcfServer(collector.Port);
+        _serverProcess = serverHelper.RunWcfServer(collector);
         await WaitForServer();
 
-        RunTestApplication(otlpTraceCollectorPort: collector.Port);
+        RunTestApplication();
 
         collector.AssertExpectations();
     }
@@ -78,6 +79,7 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         using var tcpClient = new TcpClient();
         var retries = 0;
 
+        Output.WriteLine("Waiting for WCF Server to open ports.");
         while (retries < 60)
         {
             try
@@ -89,8 +91,6 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
             catch (Exception)
             {
                 retries++;
-
-                Output.WriteLine("Waiting for WCF Server to open ports.");
                 await Task.Delay(500);
             }
         }

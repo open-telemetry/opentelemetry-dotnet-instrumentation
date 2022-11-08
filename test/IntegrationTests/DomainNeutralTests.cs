@@ -38,6 +38,7 @@ public class DomainNeutralTests : TestHelper
         EnvironmentTools.IsWindowsAdministrator().Should().BeTrue();
 
         using var collector = await MockSpansCollector.Start(Output);
+        SetExporter(collector);
         collector.Expect("TestApplication.StrongNamedValidation");
 
         // Add the necessary assembly to the GAC so it can be loaded as domain-neutral.
@@ -56,7 +57,7 @@ public class DomainNeutralTests : TestHelper
         var integrationsFile = Path.Combine(assemblyPath, "StrongNamedTestsIntegrations.json");
         File.Exists(integrationsFile).Should().BeTrue();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE", integrationsFile);
-        RunTestApplication(otlpTraceCollectorPort: collector.Port);
+        RunTestApplication();
 
         collector.AssertExpectations();
     }

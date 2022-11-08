@@ -39,13 +39,18 @@ public class MongoDBTests : TestHelper
     public async Task SubmitsTraces()
     {
         using var collector = await MockSpansCollector.Start(Output);
+        SetExporter(collector);
         const int spanCount = 3;
         for (int i = 0; i < spanCount; i++)
         {
             collector.Expect("MongoDB.Driver.Core.Extensions.DiagnosticSources");
         }
 
-        RunTestApplication(otlpTraceCollectorPort: collector.Port, arguments: $"--mongo-db {_mongoDB.Port}");
+        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1"); // uses bytecode instrumentation
+        RunTestApplication(new()
+        {
+            Arguments = $"--mongo-db {_mongoDB.Port}"
+        });
 
         collector.AssertExpectations();
     }

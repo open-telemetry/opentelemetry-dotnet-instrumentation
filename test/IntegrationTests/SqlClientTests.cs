@@ -38,9 +38,13 @@ public class SqlClientTests : TestHelper
     public async Task SubmitTraces()
     {
         using var collector = await MockSpansCollector.Start(Output);
+        SetExporter(collector);
         collector.Expect("OpenTelemetry.SqlClient");
 
-        RunTestApplication(otlpTraceCollectorPort: collector.Port, arguments: $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}", enableClrProfiler: !IsCoreClr());
+        RunTestApplication(new()
+        {
+            Arguments = $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}"
+        });
 
         collector.AssertExpectations();
     }

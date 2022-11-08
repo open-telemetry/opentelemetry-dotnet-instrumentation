@@ -33,12 +33,13 @@ public class GrpcNetClientTests : TestHelper
     public async Task SubmitsTraces()
     {
         using var collector = await MockSpansCollector.Start(Output);
+        SetExporter(collector);
         collector.Expect("OpenTelemetry.Instrumentation.GrpcNetClient");
 
         // Grpc.Net.Client is using various version of http communication under the hood.
         // Enabling only GrpcNetClient instrumentation to have consistent set of spans.
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "GrpcNetClient");
-        RunTestApplication(otlpTraceCollectorPort: collector.Port, enableClrProfiler: !IsCoreClr());
+        RunTestApplication();
 
         collector.AssertExpectations();
     }

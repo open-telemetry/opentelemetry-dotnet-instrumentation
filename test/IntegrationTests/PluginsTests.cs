@@ -34,6 +34,7 @@ public class PluginsTests : TestHelper
     public async Task SubmitsTraces()
     {
         using var collector = await MockSpansCollector.Start(Output);
+        SetExporter(collector);
         collector.Expect("MyCompany.MyProduct.MyLibrary");
 #if NETFRAMEWORK
         collector.Expect("OpenTelemetry.HttpWebRequest", span => span.Attributes.Any(att => att.Key == "example.plugin"));
@@ -42,7 +43,7 @@ public class PluginsTests : TestHelper
 #endif
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
-        RunTestApplication(otlpTraceCollectorPort: collector.Port);
+        RunTestApplication();
 
         collector.AssertExpectations();
     }
@@ -52,10 +53,11 @@ public class PluginsTests : TestHelper
     public async Task SubmitMetrics()
     {
         using var collector = await MockMetricsCollector.Start(Output);
+        SetExporter(collector);
         collector.Expect("MyCompany.MyProduct.MyLibrary");
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
-        RunTestApplication(metricsAgentPort: collector.Port);
+        RunTestApplication();
 
         collector.AssertExpectations();
     }
