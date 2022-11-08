@@ -45,7 +45,7 @@ public class MyPlugin
 
 ### Tracing
 
-| Options type                                                                 | Nuget package                                | Nuget version |
+| Options type                                                                 | NuGet package                                | NuGet version |
 |------------------------------------------------------------------------------|----------------------------------------------|---------------|
 | OpenTelemetry.Exporter.ConsoleExporterOptions                                | OpenTelemetry.Exporter.Console               | 1.3.1         |
 | OpenTelemetry.Exporter.ZipkinExporterOptions                                 | OpenTelemetry.Exporter.Zipkin                | 1.3.1         |
@@ -62,7 +62,7 @@ public class MyPlugin
 
 ### Metrics
 
-| Options type                                                        | Nuget package                                | Nuget version |
+| Options type                                                        | NuGet package                                | NuGet version |
 |---------------------------------------------------------------------|----------------------------------------------|---------------|
 | OpenTelemetry.Metrics.MetricReaderOptions                           | OpenTelemetry                                | 1.3.1         |
 | OpenTelemetry.Exporter.ConsoleExporterOptions                       | OpenTelemetry.Exporter.Console               | 1.3.1         |
@@ -74,7 +74,7 @@ public class MyPlugin
 
 ### Logs
 
-| Options type                                  | Nuget package                                | Nuget version |
+| Options type                                  | NuGet package                                | NuGet version |
 |-----------------------------------------------|----------------------------------------------|---------------|
 | OpenTelemetry.Logs.OpenTelemetryLoggerOptions | OpenTelemetry                                | 1.3.1         |
 | OpenTelemetry.Exporter.ConsoleExporterOptions | OpenTelemetry.Exporter.Console               | 1.3.1         |
