@@ -22,9 +22,10 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// <summary>
 /// Propagator Settings
 /// </summary>
-internal class SdkSettings
+internal class SdkSettings : Settings
 {
-    private SdkSettings(CompositeConfigurationSource source)
+    public SdkSettings(IConfigurationSource source)
+        : base(source)
     {
         var propagators = source.GetString(ConfigurationKeys.Sdk.Propagators);
 
@@ -41,21 +42,6 @@ internal class SdkSettings
     /// Gets the list of propagators to be used.
     /// </summary>
     public IList<Propagator> Propagators { get; } = new List<Propagator>();
-
-    internal static SdkSettings FromDefaultSources()
-    {
-        var configurationSource = new CompositeConfigurationSource
-        {
-            new EnvironmentConfigurationSource(),
-
-#if NETFRAMEWORK
-            // on .NET Framework only, also read from app.config/web.config
-            new NameValueConfigurationSource(System.Configuration.ConfigurationManager.AppSettings)
-#endif
-        };
-
-        return new SdkSettings(configurationSource);
-    }
 
     private static Propagator ParsePropagator(string propagator)
     {

@@ -33,12 +33,12 @@ public class SettingsTests : IDisposable
 
     public static IEnumerable<object[]> ExporterEnvVarAndLoadSettingsAction()
     {
-        yield return new object[] { ConfigurationKeys.Traces.Exporter, new Action(() => TracerSettings.FromDefaultSources()) };
-        yield return new object[] { ConfigurationKeys.Traces.Instrumentations, new Action(() => TracerSettings.FromDefaultSources()) };
-        yield return new object[] { ConfigurationKeys.Metrics.Exporter, new Action(() => MetricSettings.FromDefaultSources()) };
-        yield return new object[] { ConfigurationKeys.Metrics.Instrumentations, new Action(() => MetricSettings.FromDefaultSources()) };
-        yield return new object[] { ConfigurationKeys.Logs.Exporter, new Action(() => LogSettings.FromDefaultSources()) };
-        yield return new object[] { ConfigurationKeys.Sdk.Propagators, new Action(() => SdkSettings.FromDefaultSources()) };
+        yield return new object[] { ConfigurationKeys.Traces.Exporter, new Action(() => Settings.FromDefaultSources<TracerSettings>()) };
+        yield return new object[] { ConfigurationKeys.Traces.Instrumentations, new Action(() => Settings.FromDefaultSources<TracerSettings>()) };
+        yield return new object[] { ConfigurationKeys.Metrics.Exporter, new Action(() => Settings.FromDefaultSources<MetricSettings>()) };
+        yield return new object[] { ConfigurationKeys.Metrics.Instrumentations, new Action(() => Settings.FromDefaultSources<MetricSettings>()) };
+        yield return new object[] { ConfigurationKeys.Logs.Exporter, new Action(() => Settings.FromDefaultSources<LogSettings>()) };
+        yield return new object[] { ConfigurationKeys.Sdk.Propagators, new Action(() => Settings.FromDefaultSources<SdkSettings>()) };
     }
 
     public void Dispose()
@@ -47,9 +47,23 @@ public class SettingsTests : IDisposable
     }
 
     [Fact]
+    internal void GeneralSettings_DefaultValues()
+    {
+        var settings = Settings.FromDefaultSources<GeneralSettings>();
+
+        using (new AssertionScope())
+        {
+            settings.Plugins.Should().BeEmpty();
+            settings.FlushOnUnhandledException.Should().BeFalse();
+            settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
+            settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
+        }
+    }
+
+    [Fact]
     internal void TracerSettings_DefaultValues()
     {
-        var settings = TracerSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<TracerSettings>();
 
         using (new AssertionScope())
         {
@@ -58,11 +72,9 @@ public class SettingsTests : IDisposable
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.EnabledInstrumentations.Should().NotBeEmpty();
-            settings.Plugins.Should().BeEmpty();
             settings.ActivitySources.Should().BeEquivalentTo(new List<string> { "OpenTelemetry.AutoInstrumentation.*" });
             settings.LegacySources.Should().BeEmpty();
             settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
-            settings.FlushOnUnhandledException.Should().BeFalse();
 
             // Instrumentation options tests
             settings.InstrumentationOptions.GraphQLSetDocument.Should().BeFalse();
@@ -72,7 +84,7 @@ public class SettingsTests : IDisposable
     [Fact]
     internal void MeterSettings_DefaultValues()
     {
-        var settings = MetricSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<MetricSettings>();
 
         using (new AssertionScope())
         {
@@ -81,17 +93,15 @@ public class SettingsTests : IDisposable
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.EnabledInstrumentations.Should().NotBeEmpty();
-            settings.Plugins.Should().BeEmpty();
             settings.Meters.Should().BeEmpty();
             settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
-            settings.FlushOnUnhandledException.Should().BeFalse();
         }
     }
 
     [Fact]
     internal void LogSettings_DefaultValues()
     {
-        var settings = LogSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<LogSettings>();
 
         using (new AssertionScope())
         {
@@ -99,17 +109,15 @@ public class SettingsTests : IDisposable
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.EnabledInstrumentations.Should().NotBeEmpty();
-            settings.Plugins.Should().BeEmpty();
             settings.IncludeFormattedMessage.Should().BeFalse();
             settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
-            settings.FlushOnUnhandledException.Should().BeFalse();
         }
     }
 
     [Fact]
     internal void SdkSettings_DefaultValues()
     {
-        var settings = SdkSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<SdkSettings>();
 
         using (new AssertionScope())
         {
@@ -126,7 +134,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, tracesExporter);
 
-        var settings = TracerSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<TracerSettings>();
 
         settings.TracesExporter.Should().Be(expectedTracesExporter);
     }
@@ -139,7 +147,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, metricExporter);
 
-        var settings = MetricSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<MetricSettings>();
 
         settings.MetricExporter.Should().Be(expectedMetricsExporter);
     }
@@ -151,7 +159,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, logExporter);
 
-        var settings = LogSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<LogSettings>();
 
         settings.LogExporter.Should().Be(expectedLogExporter);
     }
@@ -167,7 +175,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, propagators);
 
-        var settings = SdkSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<SdkSettings>();
 
         settings.Propagators.Should().BeEquivalentTo(expectedPropagators);
     }
@@ -191,7 +199,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, tracerInstrumentation);
 
-        var settings = TracerSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<TracerSettings>();
 
         settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<TracerInstrumentation> { expectedTracerInstrumentation });
     }
@@ -202,7 +210,7 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, $"{nameof(TracerInstrumentation.AspNet)},{nameof(TracerInstrumentation.GraphQL)}");
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.DisabledInstrumentations, nameof(TracerInstrumentation.GraphQL));
 
-        var settings = TracerSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<TracerSettings>();
 
         settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<TracerInstrumentation> { TracerInstrumentation.AspNet });
     }
@@ -216,7 +224,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, meterInstrumentation);
 
-        var settings = MetricSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<MetricSettings>();
 
         settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<MetricInstrumentation> { expectedMetricInstrumentation });
     }
@@ -227,7 +235,7 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, $"{nameof(MetricInstrumentation.NetRuntime)},{nameof(MetricInstrumentation.AspNet)}");
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.DisabledInstrumentations, nameof(MetricInstrumentation.AspNet));
 
-        var settings = MetricSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<MetricSettings>();
 
         settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<MetricInstrumentation> { MetricInstrumentation.NetRuntime });
     }
@@ -238,7 +246,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, logInstrumentation);
 
-        var settings = LogSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<LogSettings>();
 
         settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<LogInstrumentation> { expectedLogInstrumentation });
     }
@@ -248,7 +256,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.DisabledInstrumentations, nameof(LogInstrumentation.ILogger));
 
-        var settings = LogSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<LogSettings>();
 
         settings.EnabledInstrumentations.Should().BeEmpty();
     }
@@ -260,7 +268,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.IncludeFormattedMessage, includeFormattedMessage);
 
-        var settings = LogSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<LogSettings>();
 
         settings.IncludeFormattedMessage.Should().Be(expectedValue);
     }
@@ -283,7 +291,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, otlpProtocol);
 
-        var settings = TracerSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<TracerSettings>();
 
         // null values for expected data will be handled by OTel .NET SDK
         settings.OtlpExportProtocol.Should().Be(expectedOtlpExportProtocol);
@@ -297,7 +305,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Http2UnencryptedSupportEnabled, http2UnencryptedSupportEnabled);
 
-        var settings = TracerSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<TracerSettings>();
 
         settings.Http2UnencryptedSupportEnabled.Should().Be(expectedValue);
     }
@@ -310,7 +318,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, flushOnUnhandledException);
 
-        var settings = TracerSettings.FromDefaultSources();
+        var settings = Settings.FromDefaultSources<GeneralSettings>();
 
         settings.FlushOnUnhandledException.Should().Be(expectedValue);
     }

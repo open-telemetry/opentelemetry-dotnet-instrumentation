@@ -35,7 +35,7 @@ internal class BootstrapperHostingStartup : IHostingStartup
     /// </summary>
     public BootstrapperHostingStartup()
     {
-        _settings = LogSettings.FromDefaultSources();
+        _settings = Instrumentation.LogSettings;
     }
 
     /// <summary>

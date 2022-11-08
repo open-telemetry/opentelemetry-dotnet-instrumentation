@@ -16,14 +16,18 @@
 
 #if NETCOREAPP3_1_OR_GREATER
 using System;
+using OpenTelemetry.AutoInstrumentation.Plugins;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading;
 
 internal class AspNetCoreInitializer : InstrumentationInitializer
 {
-    public AspNetCoreInitializer()
+    private readonly PluginManager _pluginManager;
+
+    public AspNetCoreInitializer(PluginManager pluginManager)
         : base("Microsoft.AspNetCore.Http")
     {
+        _pluginManager = pluginManager;
     }
 
     public override void Initialize(ILifespanManager lifespanManager)
@@ -31,7 +35,10 @@ internal class AspNetCoreInitializer : InstrumentationInitializer
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentation, OpenTelemetry.Instrumentation.AspNetCore");
         var httpInListenerType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.Implementation.HttpInListener, OpenTelemetry.Instrumentation.AspNetCore");
 
-        var httpInListener = Activator.CreateInstance(httpInListenerType, args: new OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentationOptions());
+        var options = new OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentationOptions();
+        _pluginManager.ConfigureOptions(options);
+
+        var httpInListener = Activator.CreateInstance(httpInListenerType, args: options);
         var instrumentation = Activator.CreateInstance(instrumentationType, args: httpInListener);
 
         lifespanManager.Track(instrumentation);

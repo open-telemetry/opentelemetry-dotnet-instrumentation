@@ -28,6 +28,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Error message on the native log if bytecode instrumentation type is missing all
   instrumentation methods [#1499](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1499).
+- Plugins can overwrite OpenTelemetry dotnet SDK instrumentation and exporter options.
+  See more at [plugins.md](docs/plugins.md).
 
 ## [0.4.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.4.0-beta.1)
 

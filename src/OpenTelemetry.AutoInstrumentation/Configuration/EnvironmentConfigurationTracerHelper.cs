@@ -17,26 +17,27 @@
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 internal static class EnvironmentConfigurationTracerHelper
 {
-    public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, TracerSettings settings)
+    public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, TracerSettings settings, PluginManager pluginManager)
     {
-        builder.SetExporter(settings);
+        builder.SetExporter(settings, pluginManager);
 
         foreach (var enabledInstrumentation in settings.EnabledInstrumentations)
         {
             _ = enabledInstrumentation switch
             {
-                TracerInstrumentation.AspNet => Wrappers.AddSdkAspNetInstrumentation(builder),
-                TracerInstrumentation.GrpcNetClient => Wrappers.AddGrpcClientInstrumentation(builder),
-                TracerInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder),
+                TracerInstrumentation.AspNet => Wrappers.AddSdkAspNetInstrumentation(builder, pluginManager),
+                TracerInstrumentation.GrpcNetClient => Wrappers.AddGrpcClientInstrumentation(builder, pluginManager),
+                TracerInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, pluginManager),
                 TracerInstrumentation.Npgsql => builder.AddSource("Npgsql"),
-                TracerInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder),
-                TracerInstrumentation.Wcf => Wrappers.AddWcfInstrumentation(builder),
+                TracerInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, pluginManager),
+                TracerInstrumentation.Wcf => Wrappers.AddWcfInstrumentation(builder, pluginManager),
 #if NETCOREAPP3_1_OR_GREATER
                 TracerInstrumentation.MassTransit => builder.AddSource("MassTransit"),
                 TracerInstrumentation.MongoDB => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources"),
@@ -56,18 +57,18 @@ internal static class EnvironmentConfigurationTracerHelper
         return builder;
     }
 
-    private static TracerProviderBuilder SetExporter(this TracerProviderBuilder builder, TracerSettings settings)
+    private static TracerProviderBuilder SetExporter(this TracerProviderBuilder builder, TracerSettings settings, PluginManager pluginManager)
     {
         if (settings.ConsoleExporterEnabled)
         {
-            Wrappers.AddConsoleExporter(builder);
+            Wrappers.AddConsoleExporter(builder, pluginManager);
         }
 
         return settings.TracesExporter switch
         {
-            TracesExporter.Zipkin => Wrappers.AddZipkinExporter(builder),
-            TracesExporter.Jaeger => Wrappers.AddJaegerExporter(builder),
-            TracesExporter.Otlp => Wrappers.AddOtlpExporter(builder, settings),
+            TracesExporter.Zipkin => Wrappers.AddZipkinExporter(builder, pluginManager),
+            TracesExporter.Jaeger => Wrappers.AddJaegerExporter(builder, pluginManager),
+            TracesExporter.Otlp => Wrappers.AddOtlpExporter(builder, settings, pluginManager),
             TracesExporter.None => builder,
             _ => throw new ArgumentOutOfRangeException($"Traces exporter '{settings.TracesExporter}' is incorrect")
         };
@@ -82,22 +83,22 @@ internal static class EnvironmentConfigurationTracerHelper
         // Instrumentations
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddWcfInstrumentation(TracerProviderBuilder builder)
+        public static TracerProviderBuilder AddWcfInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddWcfInstrumentation();
+            return builder.AddWcfInstrumentation(pluginManager.ConfigureOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddHttpClientInstrumentation(TracerProviderBuilder builder)
+        public static TracerProviderBuilder AddHttpClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddHttpClientInstrumentation();
+            return builder.AddHttpClientInstrumentation(pluginManager.ConfigureOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddSdkAspNetInstrumentation(TracerProviderBuilder builder)
+        public static TracerProviderBuilder AddSdkAspNetInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager)
         {
 #if NET462
-            builder.AddAspNetInstrumentation();
+            builder.AddAspNetInstrumentation(pluginManager.ConfigureOptions);
 #elif NETCOREAPP3_1_OR_GREATER
             builder.AddSource("OpenTelemetry.Instrumentation.AspNetCore");
             builder.AddLegacySource("Microsoft.AspNetCore.Hosting.HttpRequestIn");
@@ -107,40 +108,43 @@ internal static class EnvironmentConfigurationTracerHelper
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddSqlClientInstrumentation(TracerProviderBuilder builder)
+        public static TracerProviderBuilder AddSqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddSqlClientInstrumentation();
+            return builder.AddSqlClientInstrumentation(pluginManager.ConfigureOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddGrpcClientInstrumentation(TracerProviderBuilder builder)
+        public static TracerProviderBuilder AddGrpcClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager)
         {
             return builder.AddGrpcClientInstrumentation(options =>
-                    options.SuppressDownstreamInstrumentation = !Instrumentation.TracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.HttpClient));
+            {
+                options.SuppressDownstreamInstrumentation = !Instrumentation.TracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.HttpClient);
+                pluginManager.ConfigureOptions(options);
+            });
         }
 
         // Exporters
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddConsoleExporter(TracerProviderBuilder builder)
+        public static TracerProviderBuilder AddConsoleExporter(TracerProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddConsoleExporter();
+            return builder.AddConsoleExporter(pluginManager.ConfigureOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddZipkinExporter(TracerProviderBuilder builder)
+        public static TracerProviderBuilder AddZipkinExporter(TracerProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddZipkinExporter();
+            return builder.AddZipkinExporter(pluginManager.ConfigureOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddJaegerExporter(TracerProviderBuilder builder)
+        public static TracerProviderBuilder AddJaegerExporter(TracerProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddJaegerExporter();
+            return builder.AddJaegerExporter(pluginManager.ConfigureOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddOtlpExporter(TracerProviderBuilder builder, TracerSettings settings)
+        public static TracerProviderBuilder AddOtlpExporter(TracerProviderBuilder builder, TracerSettings settings, PluginManager pluginManager)
         {
 #if NETCOREAPP3_1
             if (settings.Http2UnencryptedSupportEnabled)
@@ -156,6 +160,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 if (settings.OtlpExportProtocol.HasValue)
                 {
                     options.Protocol = settings.OtlpExportProtocol.Value;
+                    pluginManager.ConfigureOptions(options);
                 }
             });
         }

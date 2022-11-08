@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using OpenTelemetry.Instrumentation.Http;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
@@ -30,4 +31,28 @@ public class Plugin
     {
         return builder.AddMeter(TestApplication.Smoke.Program.SourceName);
     }
+
+    public void ConfigureOptions(HttpClientInstrumentationOptions options)
+    {
+        options.Enrich = (activity, eventName, rawObject) =>
+        {
+            if (eventName.Equals("OnStartActivity"))
+            {
+                activity.SetTag("example.plugin", "MyExamplePlugin");
+            }
+        };
+    }
+
+#if NETFRAMEWORK
+    public void ConfigureOptions(HttpWebRequestInstrumentationOptions options)
+    {
+        options.Enrich = (activity, eventName, rawObject) =>
+        {
+            if (eventName.Equals("OnStartActivity"))
+            {
+                activity.SetTag("example.plugin", "MyExamplePlugin");
+            }
+        };
+    }
+#endif
 }
