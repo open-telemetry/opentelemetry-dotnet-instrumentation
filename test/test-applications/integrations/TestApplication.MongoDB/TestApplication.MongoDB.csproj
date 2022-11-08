@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="$(ApiVersion)" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.0" />
     <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v.3.1.0 is minimal version supported by auto instrumentation.
     MongoDB.Driver 2.18+ references older version. It prevents to load required version from Additional Dependencies store-->
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.0" Condition="'$(ApiVersion)'>='2.18.0'" />
