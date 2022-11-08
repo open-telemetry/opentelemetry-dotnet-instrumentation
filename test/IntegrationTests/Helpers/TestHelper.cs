@@ -84,6 +84,11 @@ public abstract class TestHelper
         SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{collector.Port}");
     }
 
+    public void EnableBytecodeInstrumentation()
+    {
+        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1");
+    }
+
     /// <summary>
     /// RunTestApplication starts the test application, wait up to DefaultProcessTimeout.
     /// Assertion exceptions are thrown if it timed out or the exit code is non-zero.

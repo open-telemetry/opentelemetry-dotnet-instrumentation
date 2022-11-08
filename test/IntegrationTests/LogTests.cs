@@ -75,9 +75,9 @@ public class LogTests : TestHelper
         SetExporter(collector);
         collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Information from Test App.\" }");
 
-        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1");
         SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
+        EnableBytecodeInstrumentation();
         RunTestApplication();
 
         collector.AssertExpectations();
