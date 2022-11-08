@@ -53,7 +53,7 @@ public class AspNetTests
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
-        using var collector = await MockSpansCollector.Start(Output, host: "*");
+        using var collector = new MockSpansCollector(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
         collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry");
 
@@ -78,7 +78,7 @@ public class AspNetTests
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
-        using var collector = await MockMetricsCollector.Start(Output, host: "*");
+        using var collector = new MockMetricsCollector(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
         collector.Expect("OpenTelemetry.Instrumentation.AspNet");
 

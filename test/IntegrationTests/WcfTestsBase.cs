@@ -40,7 +40,7 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
     {
         EnvironmentTools.IsWindowsAdministrator().Should().BeTrue(); // WCF Server needs admin
 
-        using var collector = await MockSpansCollector.Start(Output);
+        using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         // the test app makes 2 calls (therefore we exepct 4 spans)
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 1");

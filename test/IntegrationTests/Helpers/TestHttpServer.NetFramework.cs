@@ -61,18 +61,25 @@ public class TestHttpServer : IDisposable
                 _listenerThread.Start();
                 WriteOutput($"Listening on '{_prefix}'");
 
+                // call healthz (wait until HttpListener is operational)
+                var healhtzEndpoint = $"{_prefix.Replace("*", "localhost")}/healthz";
+                var healthz = HealthzHelper.TestHealtzAsync(healhtzEndpoint, nameof(TestHttpServer), _output);
+                if (!healthz.Result)
+                {
+                    _listener.Close(); // always close listener if exception is thrown, whether it was caught or not
+                    throw new InvalidOperationException("Listener shut down. Could not find reach healthz endpoint.");
+                }
+
                 return;
             }
             catch (HttpListenerException) when (retries > 0)
             {
+                _listener.Close(); // a new listener is created in the beginnning of the loop
                 retries--;
             }
 
-            // always close listener if exception is thrown,
-            // whether it was caught or not
-            _listener.Close();
-
-            WriteOutput("Listener shut down. Could not find available port.");
+            _listener.Close(); // always close listener if exception is thrown, whether it was caught or not
+            throw new InvalidOperationException("Listener shut down. Could not find available port.");
         }
     }
 
@@ -81,17 +88,10 @@ public class TestHttpServer : IDisposable
     /// </summary>
     public int Port { get; }
 
-    public Task<bool> VerifyHealthzAsync()
-    {
-        var healhtzEndpoint = $"{_prefix.Replace("*", "localhost")}/healthz";
-
-        return HealthzHelper.TestHealtzAsync(healhtzEndpoint, nameof(MockLogsCollector), _output);
-    }
-
     public void Dispose()
     {
         WriteOutput($"Listener is shutting down.");
-        _listener.Stop();
+        _listener.Close();
     }
 
     private void HandleHttpRequests()

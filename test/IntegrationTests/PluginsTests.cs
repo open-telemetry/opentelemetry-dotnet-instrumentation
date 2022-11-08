@@ -31,9 +31,9 @@ public class PluginsTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task SubmitsTraces()
+    public void SubmitsTraces()
     {
-        using var collector = await MockSpansCollector.Start(Output);
+        using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         collector.Expect("MyCompany.MyProduct.MyLibrary");
 #if NETFRAMEWORK
@@ -50,9 +50,9 @@ public class PluginsTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task SubmitMetrics()
+    public void SubmitMetrics()
     {
-        using var collector = await MockMetricsCollector.Start(Output);
+        using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
         collector.Expect("MyCompany.MyProduct.MyLibrary");
 

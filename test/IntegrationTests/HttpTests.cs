@@ -37,9 +37,9 @@ public class HttpTests : TestHelper
     [InlineData("b3multi")]
     [InlineData("b3")]
     [Trait("Category", "EndToEnd")]
-    public async Task SubmitTraces(string propagators)
+    public void SubmitTraces(string propagators)
     {
-        using var collector = await MockSpansCollector.Start(Output);
+        using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         Span clientSpan = null;
         collector.Expect("OpenTelemetry.Instrumentation.Http", span =>
@@ -76,9 +76,9 @@ public class HttpTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task SubmitMetrics()
+    public void SubmitMetrics()
     {
-        using var collector = await MockMetricsCollector.Start(Output);
+        using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
         collector.Expect("OpenTelemetry.Instrumentation.Http");
         collector.Expect("OpenTelemetry.Instrumentation.AspNetCore");

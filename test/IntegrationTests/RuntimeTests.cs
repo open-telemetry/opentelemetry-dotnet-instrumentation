@@ -32,9 +32,9 @@ public class RuntimeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task SubmitMetrics()
+    public void SubmitMetrics()
     {
-        using var collector = await MockMetricsCollector.Start(Output);
+        using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
         collector.Expect("OpenTelemetry.Instrumentation.Runtime");
 
