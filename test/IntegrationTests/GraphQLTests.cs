@@ -20,7 +20,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Trace.V1;
@@ -74,8 +73,7 @@ public class GraphQLTests : TestHelper
         using var helper = new ProcessHelper(process);
         try
         {
-            await WaitForServer(aspNetCorePort);
-
+            await HealthzHelper.TestAsync($"http://localhost:{aspNetCorePort}/alive-check", Output);
             await SubmitRequestsAsync(aspNetCorePort, requests);
 
             collector.AssertExpectations();
@@ -148,43 +146,6 @@ public class GraphQLTests : TestHelper
         }
 
         collector.Expect("OpenTelemetry.AutoInstrumentation.GraphQL", Predicate, spanName);
-    }
-
-    private async Task WaitForServer(int aspNetCorePort)
-    {
-        var client = new HttpClient();
-        var maxMillisecondsToWait = 15_000;
-        var intervalMilliseconds = 500;
-        var intervals = maxMillisecondsToWait / intervalMilliseconds;
-        var serverReady = false;
-        // wait for server to be ready to receive requests
-        while (intervals-- > 0)
-        {
-            var aliveCheckRequest = new RequestInfo { HttpMethod = "GET", Url = "/alive-check" };
-            try
-            {
-                var responseCode = await SubmitRequestAsync(client, aspNetCorePort, aliveCheckRequest, false);
-
-                serverReady = responseCode == HttpStatusCode.OK;
-            }
-            catch
-            {
-                // ignore
-            }
-
-            if (serverReady)
-            {
-                Output.WriteLine("The server is ready.");
-                break;
-            }
-
-            Thread.Sleep(intervalMilliseconds);
-        }
-
-        if (!serverReady)
-        {
-            throw new Exception("Couldn't verify the application is ready to receive requests.");
-        }
     }
 
     private async Task SubmitRequestsAsync(int aspNetCorePort, IEnumerable<RequestInfo> requests)
