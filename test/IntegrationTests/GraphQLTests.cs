@@ -43,7 +43,7 @@ public class GraphQLTests : TestHelper
     public async Task SubmitsTraces(bool setDocument)
     {
         var requests = new List<RequestInfo>();
-        using var collector = await MockSpansCollector.Start(Output);
+        using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
         // SUCCESS: query using GET

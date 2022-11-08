@@ -28,9 +28,7 @@ using Xunit.Abstractions;
 
 #if NETFRAMEWORK
 using System.Net;
-#endif
-
-#if NETCOREAPP3_1_OR_GREATER
+#else
 using Microsoft.AspNetCore.Http;
 #endif
 
@@ -46,7 +44,7 @@ public class MockMetricsCollector : IDisposable
     private readonly List<Expectation> _expectations = new();
     private readonly BlockingCollection<List<Collected>> _metricsSnapshots = new(10); // bounded to avoid memory leak; contains protobuf type
 
-    private MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
+    public MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
 #if NETFRAMEWORK
@@ -62,32 +60,6 @@ public class MockMetricsCollector : IDisposable
     public int Port { get => _listener.Port; }
 
     public OtlpResourceExpector ResourceExpector { get; } = new();
-
-#if NETFRAMEWORK
-    public static async Task<MockMetricsCollector> Start(ITestOutputHelper output, string host = "localhost")
-    {
-        var collector = new MockMetricsCollector(output, host);
-
-        var healthzResult = await collector._listener.VerifyHealthzAsync();
-
-        if (!healthzResult)
-        {
-            collector.Dispose();
-            throw new InvalidOperationException($"Cannot start {nameof(MockMetricsCollector)}!");
-        }
-
-        return collector;
-    }
-#endif
-
-#if NETCOREAPP3_1_OR_GREATER
-    public static Task<MockMetricsCollector> Start(ITestOutputHelper output)
-    {
-        var collector = new MockMetricsCollector(output);
-
-        return Task.FromResult(collector);
-    }
-#endif
 
     public void Dispose()
     {
@@ -210,9 +182,7 @@ public class MockMetricsCollector : IDisposable
 
         ctx.GenerateEmptyProtobufResponse<ExportMetricsServiceResponse>();
     }
-#endif
-
-#if NETCOREAPP3_1_OR_GREATER
+#else
     private async Task HandleHttpRequests(HttpContext ctx)
     {
         using var bodyStream = await ctx.ReadBodyToMemoryAsync();

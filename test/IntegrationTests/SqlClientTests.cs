@@ -35,9 +35,9 @@ public class SqlClientTests : TestHelper
     [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    public async Task SubmitTraces()
+    public void SubmitTraces()
     {
-        using var collector = await MockSpansCollector.Start(Output);
+        using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         collector.Expect("OpenTelemetry.SqlClient");
 

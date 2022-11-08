@@ -32,9 +32,7 @@ using Xunit.Abstractions;
 #if NETFRAMEWORK
 using System.Net;
 using IntegrationTests.Helpers.Compatibility;
-#endif
-
-#if NETCOREAPP3_1_OR_GREATER
+#else
 using Microsoft.AspNetCore.Http;
 #endif
 
@@ -50,7 +48,7 @@ public class MockZipkinCollector : IDisposable
     private readonly BlockingCollection<ZSpanMock> _spans = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
 
-    private MockZipkinCollector(ITestOutputHelper output, string host = "localhost")
+    public MockZipkinCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
 #if NETFRAMEWORK
@@ -64,32 +62,6 @@ public class MockZipkinCollector : IDisposable
     /// Gets the TCP port that this collector is listening on.
     /// </summary>
     public int Port { get => _listener.Port; }
-
-#if NETFRAMEWORK
-    public static async Task<MockZipkinCollector> Start(ITestOutputHelper output, string host = "localhost")
-    {
-        var collector = new MockZipkinCollector(output, host);
-
-        var healthzResult = await collector._listener.VerifyHealthzAsync();
-
-        if (!healthzResult)
-        {
-            collector.Dispose();
-            throw new InvalidOperationException($"Cannot start {nameof(MockZipkinCollector)}!");
-        }
-
-        return collector;
-    }
-#endif
-
-#if NETCOREAPP3_1_OR_GREATER
-    public static Task<MockZipkinCollector> Start(ITestOutputHelper output)
-    {
-        var collector = new MockZipkinCollector(output);
-
-        return Task.FromResult(collector);
-    }
-#endif
 
     public void Dispose()
     {
@@ -199,9 +171,7 @@ public class MockZipkinCollector : IDisposable
 
         ctx.GenerateEmptyJsonResponse();
     }
-#endif
-
-#if NETCOREAPP3_1_OR_GREATER
+#else
     private async Task HandleHttpRequests(HttpContext ctx)
     {
         using var bodyStream = await ctx.ReadBodyToMemoryAsync();

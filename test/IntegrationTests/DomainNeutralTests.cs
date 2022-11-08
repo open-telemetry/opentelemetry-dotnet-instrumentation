@@ -33,11 +33,11 @@ public class DomainNeutralTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task SubmitsTraces()
+    public void SubmitsTraces()
     {
         EnvironmentTools.IsWindowsAdministrator().Should().BeTrue();
 
-        using var collector = await MockSpansCollector.Start(Output);
+        using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         collector.Expect("TestApplication.StrongNamedValidation");
 

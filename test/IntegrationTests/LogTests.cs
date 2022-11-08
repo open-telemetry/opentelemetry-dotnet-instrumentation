@@ -37,9 +37,9 @@ public class LogTests : TestHelper
     [InlineData(false, true)]
     [InlineData(false, false)]
     [Trait("Category", "EndToEnd")]
-    public async Task SubmitLogs(bool enableClrProfiler, bool includeFormattedMessage)
+    public void SubmitLogs(bool enableClrProfiler, bool includeFormattedMessage)
     {
-        using var collector = await MockLogsCollector.Start(Output);
+        using var collector = new MockLogsCollector(Output);
         SetExporter(collector);
         if (includeFormattedMessage)
         {
@@ -69,9 +69,9 @@ public class LogTests : TestHelper
     }
 
     [Fact]
-    public async Task EnableLogsWithCLRAndHostingStartup()
+    public void EnableLogsWithCLRAndHostingStartup()
     {
-        using var collector = await MockLogsCollector.Start(Output);
+        using var collector = new MockLogsCollector(Output);
         SetExporter(collector);
         collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Information from Test App.\" }");
 

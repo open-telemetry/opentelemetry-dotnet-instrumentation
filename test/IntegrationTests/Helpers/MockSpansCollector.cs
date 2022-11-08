@@ -28,9 +28,7 @@ using Xunit.Abstractions;
 
 #if NETFRAMEWORK
 using System.Net;
-#endif
-
-#if NETCOREAPP3_1_OR_GREATER
+#else
 using Microsoft.AspNetCore.Http;
 #endif
 
@@ -46,7 +44,7 @@ public class MockSpansCollector : IDisposable
     private readonly BlockingCollection<Collected> _spans = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
 
-    private MockSpansCollector(ITestOutputHelper output, string host = "localhost")
+    public MockSpansCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
 
@@ -63,32 +61,6 @@ public class MockSpansCollector : IDisposable
     public int Port { get => _listener.Port; }
 
     public OtlpResourceExpector ResourceExpector { get; } = new();
-
-#if NETFRAMEWORK
-    public static async Task<MockSpansCollector> Start(ITestOutputHelper output, string host = "localhost")
-    {
-        var collector = new MockSpansCollector(output, host);
-
-        var healthzResult = await collector._listener.VerifyHealthzAsync();
-
-        if (!healthzResult)
-        {
-            collector.Dispose();
-            throw new InvalidOperationException($"Cannot start {nameof(MockSpansCollector)}!");
-        }
-
-        return collector;
-    }
-#endif
-
-#if NETCOREAPP3_1_OR_GREATER
-    public static Task<MockSpansCollector> Start(ITestOutputHelper output)
-    {
-        var collector = new MockSpansCollector(output);
-
-        return Task.FromResult(collector);
-    }
-#endif
 
     public void Dispose()
     {
@@ -214,9 +186,7 @@ public class MockSpansCollector : IDisposable
 
         ctx.GenerateEmptyProtobufResponse<ExportTraceServiceResponse>();
     }
-#endif
-
-#if NETCOREAPP3_1_OR_GREATER
+#else
     private async Task HandleHttpRequests(HttpContext ctx)
     {
         using var bodyStream = await ctx.ReadBodyToMemoryAsync();

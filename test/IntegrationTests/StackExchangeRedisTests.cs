@@ -37,9 +37,9 @@ public class StackExchangeRedisTests : TestHelper
     [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    public async Task SubmitsTraces()
+    public void SubmitsTraces()
     {
-        using var collector = await MockSpansCollector.Start(Output);
+        using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         const int spanCount = 8;
         for (int i = 0; i < spanCount; i++)

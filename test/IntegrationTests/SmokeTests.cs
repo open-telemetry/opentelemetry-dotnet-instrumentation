@@ -46,85 +46,85 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task SubmitsTraces()
+    public void SubmitsTraces()
     {
-        await VerifyTestApplicationInstrumented();
+        VerifyTestApplicationInstrumented();
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task WhenStartupHookIsNotEnabled()
+    public void WhenStartupHookIsNotEnabled()
     {
         SetEnvironmentVariable("DOTNET_STARTUP_HOOKS", null);
 #if NETFRAMEWORK
-        await VerifyTestApplicationInstrumented();
+        VerifyTestApplicationInstrumented();
 #else
         // on .NET Core it is required to set DOTNET_STARTUP_HOOKS
-        await VerifyTestApplicationNotInstrumented();
+        VerifyTestApplicationNotInstrumented();
 #endif
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task WhenClrProfilerIsNotEnabled()
+    public void WhenClrProfilerIsNotEnabled()
     {
         SetEnvironmentVariable("COR_ENABLE_PROFILING", "0");
         SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "0");
 #if NETFRAMEWORK
         // on .NET Framework it is required to set the CLR .NET Profiler
-        await VerifyTestApplicationNotInstrumented();
+        VerifyTestApplicationNotInstrumented();
 #else
-        await VerifyTestApplicationInstrumented();
+        VerifyTestApplicationInstrumented();
 #endif
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task ApplicationIsNotExcluded()
+    public void ApplicationIsNotExcluded()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", "dotnet,dotnet.exe");
 
-        await VerifyTestApplicationInstrumented();
+        VerifyTestApplicationInstrumented();
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task ApplicationIsExcluded()
+    public void ApplicationIsExcluded()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
 
-        await VerifyTestApplicationNotInstrumented();
+        VerifyTestApplicationNotInstrumented();
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task ApplicationIsNotIncluded()
+    public void ApplicationIsNotIncluded()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES", "dotnet,dotnet.exe");
 
 #if NETFRAMEWORK
-        await VerifyTestApplicationNotInstrumented();
+        VerifyTestApplicationNotInstrumented();
 #else
         // FIXME: OTEL_DOTNET_AUTO_INCLUDE_PROCESSES does not work on .NET Core.
         // https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/895
-        await VerifyTestApplicationInstrumented();
+        VerifyTestApplicationInstrumented();
 #endif
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task ApplicationIsIncluded()
+    public void ApplicationIsIncluded()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES", $"{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
 
-        await VerifyTestApplicationInstrumented();
+        VerifyTestApplicationInstrumented();
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task SubmitMetrics()
+    public void SubmitMetrics()
     {
-        using var collector = await MockMetricsCollector.Start(Output);
+        using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
         collector.Expect("MyCompany.MyProduct.MyLibrary", metric => metric.Name == "MyFruitCounter");
 
@@ -136,9 +136,9 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task TracesResource()
+    public void TracesResource()
     {
-        using var collector = await MockSpansCollector.Start(Output);
+        using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         collector.ResourceExpector.Expect("service.name", ServiceName);
         collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
@@ -154,9 +154,9 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task MetricsResource()
+    public void MetricsResource()
     {
-        using var collector = await MockMetricsCollector.Start(Output);
+        using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
         collector.ResourceExpector.Expect("service.name", ServiceName);
         collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
@@ -173,9 +173,9 @@ public class SmokeTests : TestHelper
 #if !NETFRAMEWORK // The feature is not supported on .NET Framework
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task LogsResource()
+    public void LogsResource()
     {
-        using var collector = await MockLogsCollector.Start(Output);
+        using var collector = new MockLogsCollector(Output);
         SetExporter(collector);
         collector.ResourceExpector.Expect("service.name", ServiceName);
         collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
@@ -192,9 +192,9 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task OtlpTracesExporter()
+    public void OtlpTracesExporter()
     {
-        using var collector = await MockSpansCollector.Start(Output);
+        using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         collector.Expect("MyCompany.MyProduct.MyLibrary", span => span.Name == "SayHello");
 
@@ -206,9 +206,9 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task ZipkinExporter()
+    public void ZipkinExporter()
     {
-        using var collector = await MockZipkinCollector.Start(Output);
+        using var collector = new MockZipkinCollector(Output);
         collector.Expect(span => span.Name == "SayHello" && span.Tags.GetValueOrDefault("otel.library.name") == "MyCompany.MyProduct.MyLibrary");
 
         SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "zipkin");
@@ -222,7 +222,7 @@ public class SmokeTests : TestHelper
 #if NETFRAMEWORK // The test is flaky on Linux and macOS, becasue of https://github.com/dotnet/runtime/issues/28658#issuecomment-462062760
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task PrometheusExporter()
+    public void PrometheusExporter()
     {
         SetEnvironmentVariable("LONG_RUNNING", "true");
         SetEnvironmentVariable("OTEL_METRICS_EXPORTER", "prometheus");
@@ -248,7 +248,7 @@ public class SmokeTests : TestHelper
                 Output.WriteLine(content);
                 content.Should().Contain("TYPE ", "should export any metric");
             };
-            await assert.Should().NotThrowAfterAsync(
+            assert.Should().NotThrowAfterAsync(
                 waitTime: 1.Minutes(),
                 pollInterval: 1.Seconds());
         }
@@ -270,9 +270,9 @@ public class SmokeTests : TestHelper
 #if !NETFRAMEWORK // The feature is not supported on .NET Framework
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task SubmitLogs()
+    public void SubmitLogs()
     {
-        using var collector = await MockLogsCollector.Start(Output);
+        using var collector = new MockLogsCollector(Output);
         SetExporter(collector);
         collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Example log message\" }");
 
@@ -285,9 +285,9 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public async Task LogsNoneInstrumentations()
+    public void LogsNoneInstrumentations()
     {
-        using var collector = await MockLogsCollector.Start(Output);
+        using var collector = new MockLogsCollector(Output);
         SetExporter(collector);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLED_INSTRUMENTATIONS", "none");
@@ -298,9 +298,9 @@ public class SmokeTests : TestHelper
     }
 #endif
 
-    private async Task VerifyTestApplicationInstrumented()
+    private void VerifyTestApplicationInstrumented()
     {
-        using var collector = await MockSpansCollector.Start(Output);
+        using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         collector.Expect("MyCompany.MyProduct.MyLibrary");
 #if NETFRAMEWORK
@@ -315,9 +315,9 @@ public class SmokeTests : TestHelper
         collector.AssertExpectations();
     }
 
-    private async Task VerifyTestApplicationNotInstrumented()
+    private void VerifyTestApplicationNotInstrumented()
     {
-        using var collector = await MockSpansCollector.Start(Output);
+        using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
