@@ -30,7 +30,7 @@ internal class LogSettings : Settings
     /// using the specified <see cref="IConfigurationSource"/> to initialize values.
     /// </summary>
     /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
-    private LogSettings(IConfigurationSource source)
+    public LogSettings(IConfigurationSource source)
         : base(source)
     {
         LogExporter = ParseLogExporter(source);
@@ -62,21 +62,6 @@ internal class LogSettings : Settings
     /// Gets the list of enabled instrumentations.
     /// </summary>
     public IList<LogInstrumentation> EnabledInstrumentations { get; }
-
-    internal static LogSettings FromDefaultSources()
-    {
-        var configurationSource = new CompositeConfigurationSource
-        {
-            new EnvironmentConfigurationSource(),
-
-#if NETFRAMEWORK
-            // on .NET Framework only, also read from app.config/web.config
-            new NameValueConfigurationSource(System.Configuration.ConfigurationManager.AppSettings)
-#endif
-        };
-
-        return new LogSettings(configurationSource);
-    }
 
     private static LogExporter ParseLogExporter(IConfigurationSource source)
     {

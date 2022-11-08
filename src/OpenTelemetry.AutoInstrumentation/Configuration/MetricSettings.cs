@@ -30,7 +30,7 @@ internal class MetricSettings : Settings
     /// using the specified <see cref="IConfigurationSource"/> to initialize values.
     /// </summary>
     /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
-    private MetricSettings(IConfigurationSource source)
+    public MetricSettings(IConfigurationSource source)
         : base(source)
     {
         MetricExporter = ParseMetricExporter(source);
@@ -83,21 +83,6 @@ internal class MetricSettings : Settings
     /// Gets the list of meters to be added to the MeterProvider at the startup.
     /// </summary>
     public IList<string> Meters { get; } = new List<string>();
-
-    internal static MetricSettings FromDefaultSources()
-    {
-        var configurationSource = new CompositeConfigurationSource
-        {
-            new EnvironmentConfigurationSource(),
-
-#if NETFRAMEWORK
-            // on .NET Framework only, also read from app.config/web.config
-            new NameValueConfigurationSource(System.Configuration.ConfigurationManager.AppSettings)
-#endif
-        };
-
-        return new MetricSettings(configurationSource);
-    }
 
     private static MetricsExporter ParseMetricExporter(IConfigurationSource source)
     {

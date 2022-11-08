@@ -14,10 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-using OpenTelemetry.AutoInstrumentation.Logging;
-using OpenTelemetry.Logs;
+using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
@@ -25,92 +22,13 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 internal static class PluginsConfigurationHelper
 {
-    private static readonly ILogger Logger = OtelLogging.GetLogger();
-
-    public static TracerProviderBuilder InvokePlugins(this TracerProviderBuilder builder, IEnumerable<string> pluginsAssemblyQualifiedNames)
+    public static TracerProviderBuilder InvokePlugins(this TracerProviderBuilder builder, PluginManager pluginManager)
     {
-        foreach (var assemblyQualifiedName in pluginsAssemblyQualifiedNames)
-        {
-            builder = builder.InvokePlugin(assemblyQualifiedName);
-        }
-
-        return builder;
+        return pluginManager.ConfigureTracerProviderBuilder(builder);
     }
 
-    public static MeterProviderBuilder InvokePlugins(this MeterProviderBuilder builder, IEnumerable<string> pluginsAssemblyQualifiedNames)
+    public static MeterProviderBuilder InvokePlugins(this MeterProviderBuilder builder, PluginManager pluginManager)
     {
-        foreach (var assemblyQualifiedName in pluginsAssemblyQualifiedNames)
-        {
-            builder = builder.InvokePlugin(assemblyQualifiedName);
-        }
-
-        return builder;
-    }
-
-    public static OpenTelemetryLoggerOptions InvokePlugins(this OpenTelemetryLoggerOptions options, IEnumerable<string> pluginsAssemblyQualifiedNames)
-    {
-        foreach (var assemblyQualifiedName in pluginsAssemblyQualifiedNames)
-        {
-            options = options.InvokePlugin(assemblyQualifiedName);
-        }
-
-        return options;
-    }
-
-    private static TracerProviderBuilder InvokePlugin(this TracerProviderBuilder builder, string pluginAssemblyQualifiedName)
-    {
-        const string configureTracerProviderMethodName = "ConfigureTracerProvider";
-
-        // get the type and method
-        var t = Type.GetType(pluginAssemblyQualifiedName, throwOnError: true);
-        var mi = t.GetMethod(configureTracerProviderMethodName, new Type[] { typeof(TracerProviderBuilder) });
-        if (mi is null)
-        {
-            Logger.Information(new MissingMethodException(t.Name, configureTracerProviderMethodName), $"{configureTracerProviderMethodName} is missing in {pluginAssemblyQualifiedName}");
-            return builder;
-        }
-
-        // execute
-        var obj = Activator.CreateInstance(t);
-        var result = mi.Invoke(obj, new object[] { builder });
-        return (TracerProviderBuilder)result;
-    }
-
-    private static MeterProviderBuilder InvokePlugin(this MeterProviderBuilder builder, string pluginAssemblyQualifiedName)
-    {
-        const string configureMeterProviderMethodName = "ConfigureMeterProvider";
-
-        // get the type and method
-        var t = Type.GetType(pluginAssemblyQualifiedName, throwOnError: true);
-        var mi = t.GetMethod(configureMeterProviderMethodName, new Type[] { typeof(MeterProviderBuilder) });
-        if (mi is null)
-        {
-            Logger.Information(new MissingMethodException(t.Name, configureMeterProviderMethodName), $"{configureMeterProviderMethodName} is missing in {pluginAssemblyQualifiedName}");
-            return builder;
-        }
-
-        // execute
-        var obj = Activator.CreateInstance(t);
-        var result = mi.Invoke(obj, new object[] { builder });
-        return (MeterProviderBuilder)result;
-    }
-
-    private static OpenTelemetryLoggerOptions InvokePlugin(this OpenTelemetryLoggerOptions options, string pluginAssemblyQualifiedName)
-    {
-        const string configureLoggerOptionsMethodName = "ConfigureLoggerOptions";
-
-        // get the type and method
-        var t = Type.GetType(pluginAssemblyQualifiedName, throwOnError: true);
-        var mi = t.GetMethod(configureLoggerOptionsMethodName, new Type[] { typeof(OpenTelemetryLoggerOptions) });
-        if (mi is null)
-        {
-            Logger.Information(new MissingMethodException(t.Name, configureLoggerOptionsMethodName), $"{configureLoggerOptionsMethodName} is missing in {pluginAssemblyQualifiedName}");
-            return options;
-        }
-
-        // execute
-        var obj = Activator.CreateInstance(t);
-        var result = mi.Invoke(obj, new object[] { options });
-        return (OpenTelemetryLoggerOptions)result;
+        return pluginManager.ConfigureMeterProviderBuilder(builder);
     }
 }
