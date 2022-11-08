@@ -63,8 +63,9 @@ public class GraphQLTests : TestHelper
         Expect(collector, spanName: "subscription HumanAddedSub", graphQLOperationType: "subscription", graphQLOperationName: "HumanAddedSub", graphQLDocument: "subscription HumanAddedSub{humanAdded{name}}", setDocument: setDocument);
 
         // FAILURE: query fails 'execute' step
-        Request(requests, body: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}");
-        Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, failsExecution: true);
+        // TODO: Should be transfered to GraphQL server tests.
+        // Request(requests, body: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}");
+        // Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, failsExecution: true);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
         int aspNetCorePort = TcpPortProvider.GetOpenPort();

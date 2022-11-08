@@ -63,7 +63,7 @@ public class Startup
 
     public void Configure(
         IApplicationBuilder app,
-#if NETCOREAPP2_1 || NET462
+#if NET462
         IHostingEnvironment env,
 #else
         IWebHostEnvironment env,

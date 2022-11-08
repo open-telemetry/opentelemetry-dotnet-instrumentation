@@ -76,10 +76,6 @@ public class ExecuteAsyncIntegration
             {
                 activity?.SetException(exception);
             }
-            else if (state.State is IExecutionContext context)
-            {
-                GraphQLCommon.RecordExecutionErrorsIfPresent(activity, ErrorType, context.Errors);
-            }
         }
         finally
         {
