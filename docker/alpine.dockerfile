@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine3.16
+FROM mcr.microsoft.com/dotnet/sdk:7.0.100-alpine3.16
 
 RUN apk update \
     && apk upgrade \
