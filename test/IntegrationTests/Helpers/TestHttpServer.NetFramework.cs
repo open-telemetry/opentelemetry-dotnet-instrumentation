@@ -18,9 +18,7 @@
 
 using System;
 using System.Net;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;
@@ -60,16 +58,6 @@ public class TestHttpServer : IDisposable
                 _listenerThread = new Thread(HandleHttpRequests);
                 _listenerThread.Start();
                 WriteOutput($"Listening on '{_prefix}'");
-
-                // call healthz (wait until HttpListener is operational)
-                var healhtzEndpoint = $"{_prefix.Replace("*", "localhost")}/healthz";
-                var healthz = HealthzHelper.TestHealtzAsync(healhtzEndpoint, nameof(TestHttpServer), _output);
-                if (!healthz.Result)
-                {
-                    _listener.Close(); // always close listener if exception is thrown, whether it was caught or not
-                    throw new InvalidOperationException("Listener shut down. Could not find reach healthz endpoint.");
-                }
-
                 return;
             }
             catch (HttpListenerException) when (retries > 0)
@@ -101,13 +89,6 @@ public class TestHttpServer : IDisposable
             try
             {
                 var ctx = _listener.GetContext();
-
-                if (ctx.Request.RawUrl.EndsWith("/healthz", StringComparison.OrdinalIgnoreCase))
-                {
-                    CreateHealthResponse(ctx);
-                    continue;
-                }
-
                 _requestHandler(ctx);
             }
             catch (HttpListenerException)
@@ -135,16 +116,6 @@ public class TestHttpServer : IDisposable
                 WriteOutput(ex.ToString());
             }
         }
-    }
-
-    private void CreateHealthResponse(HttpListenerContext ctx)
-    {
-        ctx.Response.ContentType = "text/plain";
-        var buffer = Encoding.UTF8.GetBytes("OK");
-        ctx.Response.ContentLength64 = buffer.LongLength;
-        ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
-        ctx.Response.StatusCode = (int)HttpStatusCode.OK;
-        ctx.Response.Close();
     }
 
     private void WriteOutput(string msg)
