@@ -89,6 +89,7 @@ OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionContext.Err
 OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionContext.Operation.get -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IOperation
 OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError
 OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError.Code.get -> string
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError.InnerException.get -> System.Exception
 OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError.Locations.get -> System.Collections.Generic.IEnumerable<object>
 OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError.Message.get -> string
 OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError.Path.get -> System.Collections.Generic.IEnumerable<string>

@@ -16,13 +16,9 @@
 
 using System;
 using System.Diagnostics;
-using System.Text;
 using OpenTelemetry.AutoInstrumentation.Configuration;
-using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Logging;
-using OpenTelemetry.AutoInstrumentation.Tagging;
 using OpenTelemetry.AutoInstrumentation.Util;
-using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
 
@@ -72,86 +68,22 @@ internal class GraphQLCommon
         return activity;
     }
 
-    internal static void RecordExecutionErrorsIfPresent(Activity activity, string errorType, IExecutionErrors executionErrors)
+    internal static void RecordExecutionErrorsIfPresent(Activity activity, IExecutionErrors executionErrors)
     {
         var errorCount = executionErrors?.Count ?? 0;
 
         if (errorCount > 0)
         {
-            activity.SetTag(Tags.Status, Status.Error);
-            activity.SetTag(Tags.ErrorMsg, $"{errorCount} error(s)");
-            activity.SetTag(Tags.ErrorType, errorType);
-            activity.SetTag(Tags.ErrorStack, ConstructErrorMessage(executionErrors));
-        }
-    }
-
-    private static string ConstructErrorMessage(IExecutionErrors executionErrors)
-    {
-        if (executionErrors == null)
-        {
-            return string.Empty;
-        }
-
-        var builder = new StringBuilder();
-
-        try
-        {
-            const string tab = "    ";
-            builder.AppendLine("errors: [");
-
-            for (int i = 0; i < executionErrors.Count; i++)
+            for (int i = 0; i < errorCount; i++)
             {
-                var executionError = executionErrors[i];
+                Exception ex = executionErrors[i].InnerException;
 
-                builder.AppendLine($"{tab}{{");
-
-                var message = executionError.Message;
-                if (message != null)
+                if (ex != null)
                 {
-                    builder.AppendLine($"{tab + tab}\"message\": \"{message.Replace("\r", "\\r").Replace("\n", "\\n")}\",");
+                    activity.SetException(ex);
                 }
-
-                var path = executionError.Path;
-                if (path != null)
-                {
-                    builder.AppendLine($"{tab + tab}\"path\": \"{string.Join(".", path)}\",");
-                }
-
-                var code = executionError.Code;
-                if (code != null)
-                {
-                    builder.AppendLine($"{tab + tab}\"code\": \"{code}\",");
-                }
-
-                builder.AppendLine($"{tab + tab}\"locations\": [");
-                var locations = executionError.Locations;
-                if (locations != null)
-                {
-                    foreach (var location in locations)
-                    {
-                        if (location.TryDuckCast<ErrorLocationStruct>(out var locationProxy))
-                        {
-                            builder.AppendLine($"{tab + tab + tab}{{");
-                            builder.AppendLine($"{tab + tab + tab + tab}\"line\": {locationProxy.Line},");
-                            builder.AppendLine($"{tab + tab + tab + tab}\"column\": {locationProxy.Column}");
-                            builder.AppendLine($"{tab + tab + tab}}},");
-                        }
-                    }
-                }
-
-                builder.AppendLine($"{tab + tab}]");
-                builder.AppendLine($"{tab}}},");
             }
-
-            builder.AppendLine("]");
         }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Error creating GraphQL error message.");
-            return "errors: []";
-        }
-
-        return builder.ToString();
     }
 
     private static string GetOperation(string operationName, string operationType)

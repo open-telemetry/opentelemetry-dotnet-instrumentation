@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System;
 using System.Collections.Generic;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
@@ -42,4 +43,9 @@ public interface IExecutionError
     /// Gets the path in the document where the error applies
     /// </summary>
     IEnumerable<string> Path { get; }
+
+    /// <summary>
+    /// Gets the original thrown exception.
+    /// </summary>
+    Exception InnerException { get; }
 }

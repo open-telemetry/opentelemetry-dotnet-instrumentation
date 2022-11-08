@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System.Diagnostics;
-
 namespace OpenTelemetry.AutoInstrumentation.Tagging;
 
 /// <summary>
@@ -23,26 +21,6 @@ namespace OpenTelemetry.AutoInstrumentation.Tagging;
 /// </summary>
 internal static class Tags
 {
-    /// <summary>
-    /// The error message of an exception
-    /// </summary>
-    public const string ErrorMsg = "error.msg";
-
-    /// <summary>
-    /// The type of an exception
-    /// </summary>
-    public const string ErrorType = "error.type";
-
-    /// <summary>
-    /// The stack trace of an exception
-    /// </summary>
-    public const string ErrorStack = "error.stack";
-
-    /// <summary>
-    /// The status of a span
-    /// </summary>
-    public const string Status = "status";
-
     /// <summary>
     /// The hostname of a outgoing server connection.
     /// </summary>

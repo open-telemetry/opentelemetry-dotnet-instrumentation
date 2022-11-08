@@ -63,7 +63,7 @@ public class GraphQLTests : TestHelper
 
         // FAILURE: query fails 'execute' step
         Request(requests, body: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}");
-        Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, failsExecution: true);
+        Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, verifyFailure: VerifyNotImplementedException);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
@@ -101,6 +101,21 @@ public class GraphQLTests : TestHelper
         });
     }
 
+    private static bool VerifyNotImplementedException(Span span)
+    {
+        var exceptionEvent = span.Events.SingleOrDefault();
+
+        if (exceptionEvent == null)
+        {
+            return false;
+        }
+
+        return
+            exceptionEvent.Attributes.Any(x => x.Key == "exception.type" && x.Value?.StringValue == "System.NotImplementedException") &&
+            exceptionEvent.Attributes.Any(x => x.Key == "exception.message") &&
+            exceptionEvent.Attributes.Any(x => x.Key == "exception.stacktrace");
+    }
+
     private static void Expect(
         MockSpansCollector collector,
         string spanName,
@@ -108,7 +123,7 @@ public class GraphQLTests : TestHelper
         string graphQLOperationName,
         string graphQLDocument,
         bool setDocument,
-        bool failsExecution = false)
+        Predicate<Span> verifyFailure = null)
     {
         bool Predicate(Span span)
         {
@@ -122,9 +137,9 @@ public class GraphQLTests : TestHelper
                 return false;
             }
 
-            if (failsExecution && !span.Attributes.Any(attr => attr.Key == "error.msg"))
+            if (verifyFailure != null)
             {
-                return false;
+                return verifyFailure(span);
             }
 
             if (!span.Attributes.Any(attr => attr.Key == "graphql.operation.type" && attr.Value?.StringValue == graphQLOperationType))
