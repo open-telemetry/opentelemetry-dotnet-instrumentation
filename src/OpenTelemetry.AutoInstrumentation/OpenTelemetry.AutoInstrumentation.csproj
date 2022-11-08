@@ -21,7 +21,7 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Process" Version="0.1.0-alpha.1" />
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.0.0-rc9.4" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.7" />
-    <PackageReference Include="OpenTelemetry.Shims.OpenTracing" Version="1.0.0-rc9.4" />
+    <PackageReference Include="OpenTelemetry.Shims.OpenTracing" Version="1.0.0-rc9.9" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
