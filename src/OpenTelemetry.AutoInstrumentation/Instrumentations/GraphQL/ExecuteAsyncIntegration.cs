@@ -36,8 +36,6 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
     MaximumVersion = GraphQLCommon.Major2)]
 public class ExecuteAsyncIntegration
 {
-    private const string ErrorType = "GraphQL.ExecutionError";
-
     /// <summary>
     /// OnMethodBegin callback
     /// </summary>
@@ -78,7 +76,7 @@ public class ExecuteAsyncIntegration
             }
             else if (state.State is IExecutionContext context)
             {
-                GraphQLCommon.RecordExecutionErrorsIfPresent(activity, ErrorType, context.Errors);
+                GraphQLCommon.RecordExecutionErrorsIfPresent(activity, context.Errors);
             }
         }
         finally
