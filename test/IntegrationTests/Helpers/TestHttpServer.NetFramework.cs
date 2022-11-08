@@ -63,7 +63,7 @@ public class TestHttpServer : IDisposable
 
                 // call healthz (wait until HttpListener is operational)
                 var healhtzEndpoint = $"{_prefix.Replace("*", "localhost")}/healthz";
-                var healthz = HealthzHelper.TestHealtzAsync(healhtzEndpoint, nameof(MockLogsCollector), _output);
+                var healthz = HealthzHelper.TestHealtzAsync(healhtzEndpoint, nameof(TestHttpServer), _output);
                 if (!healthz.Result)
                 {
                     _listener.Close(); // always close listener if exception is thrown, whether it was caught or not
