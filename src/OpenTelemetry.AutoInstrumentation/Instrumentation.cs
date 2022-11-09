@@ -19,7 +19,7 @@ using System.Diagnostics.Tracing;
 using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
 using OpenTelemetry.AutoInstrumentation.Loading;
 #endif
 using OpenTelemetry.AutoInstrumentation.Logging;
@@ -38,7 +38,7 @@ namespace OpenTelemetry.AutoInstrumentation;
 internal static class Instrumentation
 {
     private static readonly ILogger Logger = OtelLogging.GetLogger();
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
     private static readonly LazyInstrumentationLoader LazyInstrumentationLoader = new();
 #endif
 
@@ -73,7 +73,7 @@ internal static class Instrumentation
 
     internal static PluginManager PluginManager => _pluginManager;
 
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
     internal static ILifespanManager LifespanManager => LazyInstrumentationLoader.LifespanManager;
 #endif
 
@@ -126,7 +126,7 @@ internal static class Instrumentation
                 // -> this should be refactored in a separate PR
                 // e.g. we could have a static method that returns a collection of initializers
                 //      and TracerSettings.EnabledInstrumentations would be passed as input
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
 
                 if (TracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.AspNet))
                 {
@@ -151,7 +151,7 @@ internal static class Instrumentation
 
             if (MetricSettings.MetricsEnabled)
             {
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
 
                 if (MetricSettings.EnabledInstrumentations.Contains(MetricInstrumentation.AspNet))
                 {
@@ -191,7 +191,7 @@ internal static class Instrumentation
 
         try
         {
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
             LazyInstrumentationLoader?.Dispose();
 #endif
             _tracerProvider?.Dispose();

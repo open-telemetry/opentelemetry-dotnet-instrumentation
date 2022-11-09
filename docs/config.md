@@ -149,12 +149,6 @@ Important environment variables include:
   `.csproj` file.
 - On .NET Framework, the `grpc` OTLP exporter protocol is not supported.
 
-The OpenTelemetry .NET Automatic Instrumentation also supports the following
-environment variables for the OTLP exporter:
-| Environment variable                               | Description                                                                                                                                                                                                                                                                                                                                                                  | Default value |
-|----------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| `OTEL_DOTNET_AUTO_HTTP2UNENCRYPTEDSUPPORT_ENABLED` | Enables `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`. Required when instrumenting .NET Core 3.x applications while using a non-TLS endpoint for gRPC OTLP. See the [official Microsoft documentation](https://docs.microsoft.com/en-us/aspnet/core/grpc/troubleshoot?view=aspnetcore-6.0#call-insecure-grpc-services-with-net-core-client) for more details. | `false`       |
-
 ### Prometheus
 
 > ⚠️ **Do NOT use in production.**
