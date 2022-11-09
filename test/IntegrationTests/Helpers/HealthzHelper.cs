@@ -17,7 +17,6 @@
 using System;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 
@@ -37,7 +36,7 @@ internal static class HealthzHelper
         {
             try
             {
-                var response = await client.GetAsync(healthzUrl);
+                var response = await client.GetAsync(healthzUrl).ConfigureAwait(false);
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     return;
@@ -50,7 +49,7 @@ internal static class HealthzHelper
                 output.WriteLine($"Healthz endpoint call failed: {ex.Message}");
             }
 
-            Thread.Sleep(intervalMilliseconds);
+            await Task.Delay(intervalMilliseconds).ConfigureAwait(false);
         }
 
         throw new InvalidOperationException($"Healthz endpoint never returned OK: {healthzUrl}");
