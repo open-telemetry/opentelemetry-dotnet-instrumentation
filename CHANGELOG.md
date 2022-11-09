@@ -16,6 +16,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Removed
 
+- Remove support for .NET Core 3.1.
 - Remove support for `OTEL_DOTNET_AUTO_ENABLED`.
   Use `CORECLR_ENABLE_PROFILING` or `COR_ENABLE_PROFILING` instead.
 
