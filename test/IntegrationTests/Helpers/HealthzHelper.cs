@@ -36,7 +36,7 @@ internal static class HealthzHelper
         {
             try
             {
-                var response = await client.GetAsync(healthzUrl).ConfigureAwait(false);
+                var response = await client.GetAsync(healthzUrl);
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     return;
@@ -49,7 +49,7 @@ internal static class HealthzHelper
                 output.WriteLine($"Healthz endpoint call failed: {ex.Message}");
             }
 
-            await Task.Delay(intervalMilliseconds).ConfigureAwait(false);
+            await Task.Delay(intervalMilliseconds);
         }
 
         throw new InvalidOperationException($"Healthz endpoint never returned OK: {healthzUrl}");
