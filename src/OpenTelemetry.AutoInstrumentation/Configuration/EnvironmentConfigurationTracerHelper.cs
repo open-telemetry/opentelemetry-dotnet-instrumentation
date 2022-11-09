@@ -37,7 +37,7 @@ internal static class EnvironmentConfigurationTracerHelper
         {
             _ = enabledInstrumentation switch
             {
-                TracerInstrumentation.AspNet => Wrappers.AddSdkAspNetInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
+                TracerInstrumentation.AspNet => Wrappers.AddAspNetInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.GrpcNetClient => Wrappers.AddGrpcClientInstrumentation(builder, pluginManager),
                 TracerInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, pluginManager),
                 TracerInstrumentation.Npgsql => builder.AddSource("Npgsql"),
@@ -102,10 +102,12 @@ internal static class EnvironmentConfigurationTracerHelper
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddSdkAspNetInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
+        public static TracerProviderBuilder AddAspNetInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
 #if NET462
-            builder.AddAspNetInstrumentation(pluginManager.ConfigureOptions);
+            new AspNetInitializer(lazyInstrumentationLoader, pluginManager);
+
+            builder.AddSource(OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule.AspNetSourceName);
 #elif NET6_0_OR_GREATER
             lazyInstrumentationLoader.Add(new AspNetCoreInitializer(pluginManager));
 
