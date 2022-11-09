@@ -69,10 +69,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
 
 OpenTelemetry .NET Automatic Instrumentation attempts to work with all officially
 supported operating systems and versions of
-[.NET (Core)](https://dotnet.microsoft.com/download/dotnet),
+[.NET](https://dotnet.microsoft.com/download/dotnet),
 and [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework).
 
 > Versions lower than `.NET Framework 4.6.2` are not supported.
+> .NET Core 3.1 is not supported. December 13, 2022, it will reach end of support.
 
 CI tests run against the following operating systems:
 
