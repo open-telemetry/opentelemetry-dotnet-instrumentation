@@ -72,7 +72,7 @@ else()
     message(STATUS "CLANG++ was found")
 endif()
 
-if (NOT EXISTS ${CMAKE_SOURCE_DIR}/../bin/ProfilerResources/netcoreapp3.1)
+if (NOT EXISTS ${CMAKE_SOURCE_DIR}/../bin/ProfilerResources/net6.0)
     message(FATAL_ERROR "OpenTelemetry.AutoInstrumentation.Loader must be built first.")
 else()
     message(STATUS "OpenTelemetry.AutoInstrumentation.Loader was found")
@@ -124,7 +124,7 @@ if (NOT EXISTS ${OUTPUT_DEPS_DIR}/fmt)
 endif()
 
 # Set Managed Loader folder
-SET(MANAGED_LOADER_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin/ProfilerResources/netcoreapp3.1)
+SET(MANAGED_LOADER_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin/ProfilerResources/net6.0)
 
 # Set specific custom commands to embed the loader
 if (ISMACOS)

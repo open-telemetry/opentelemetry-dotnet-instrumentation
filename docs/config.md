@@ -244,7 +244,7 @@ environment variable are used to mitigate assembly version conflicts in .NET (Co
 
 | Environment variable     | Required value                                                                 |
 |--------------------------|--------------------------------------------------------------------------------|
-| `DOTNET_STARTUP_HOOKS`   | `$INSTALL_DIR/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
+| `DOTNET_STARTUP_HOOKS`   | `$INSTALL_DIR/net6.0/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
 | `DOTNET_ADDITIONAL_DEPS` | `$INSTALL_DIR/AdditionalDeps`                                                  |
 | `DOTNET_SHARED_STORE`    | `$INSTALL_DIR/store`                                                           |
 

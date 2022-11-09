@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <!-- only run .NET Framework tests on Windows -->
-    <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net462</TargetFrameworks>
 
     <!-- Hide warnings for EOL .NET Core targets (e.g. netcoreapp3.0) -->

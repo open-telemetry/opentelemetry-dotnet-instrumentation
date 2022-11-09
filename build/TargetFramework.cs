@@ -10,7 +10,6 @@ using Nuke.Common.Tooling;
 public class TargetFramework : Enumeration
 {
     public static readonly TargetFramework NET462 = new() { Value = "net462" };
-    public static readonly TargetFramework NETCOREAPP3_1 = new() { Value = "netcoreapp3.1" };
     public static readonly TargetFramework NET6_0 = new() { Value = "net6.0" };
 
     public static readonly TargetFramework[] NetFramework = {

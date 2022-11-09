@@ -11,9 +11,9 @@ keepContainers=${keepContainers:-false}
 
 # Defaults for selected dotnet CLI commands.
 configuration=${configuration:-Release}
-aspNetAppTargetFramework=${aspNetAppTargetFramework:-netcoreapp3.1}
+aspNetAppTargetFramework=${aspNetAppTargetFramework:-net6.0}
 vendorPluginTargetFramework=${aspNetAppTargetFramework}
-exampleAppTargetFramework=${exampleAppTargetFramework:-netcoreapp3.1}
+exampleAppTargetFramework=${exampleAppTargetFramework:-net6.0}
 exampleApp=${exampleApp:-ConsoleApp}
 
 

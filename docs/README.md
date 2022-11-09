@@ -115,7 +115,7 @@ When running your application, make sure to:
 | `CORECLR_PROFILER_PATH_64`           | .NET (Core) on Windows | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll`            |
 | `DOTNET_ADDITIONAL_DEPS`             | .NET (Core)            | `$INSTALL_DIR/AdditionalDeps`                                                  |
 | `DOTNET_SHARED_STORE`                | .NET (Core)            | `$INSTALL_DIR/store`                                                           |
-| `DOTNET_STARTUP_HOOKS`               | .NET (Core)            | `$INSTALL_DIR/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
+| `DOTNET_STARTUP_HOOKS`               | .NET (Core)            | `$INSTALL_DIR/net6.0/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
 | `OTEL_DOTNET_AUTO_HOME`              | All versions           | `$INSTALL_DIR`                                                                 |
 | `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | All versions           | `$INSTALL_DIR/integrations.json`                                               |
 
