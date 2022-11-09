@@ -17,7 +17,6 @@
 using System;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 
@@ -50,7 +49,7 @@ internal static class HealthzHelper
                 output.WriteLine($"Healthz endpoint call failed: {ex.Message}");
             }
 
-            Thread.Sleep(intervalMilliseconds);
+            await Task.Delay(intervalMilliseconds);
         }
 
         throw new InvalidOperationException($"Healthz endpoint never returned OK: {healthzUrl}");

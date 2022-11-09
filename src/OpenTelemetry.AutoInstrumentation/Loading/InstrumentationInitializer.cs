@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-#if NETCOREAPP3_1_OR_GREATER
 namespace OpenTelemetry.AutoInstrumentation.Loading;
 
 /// <summary>
@@ -32,5 +31,3 @@ internal abstract class InstrumentationInitializer
 
     public abstract void Initialize(ILifespanManager lifespanManager);
 }
-
-#endif
