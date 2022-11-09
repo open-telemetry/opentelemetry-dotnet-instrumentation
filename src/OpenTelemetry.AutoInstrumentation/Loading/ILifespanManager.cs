@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-#if NETCOREAPP3_1_OR_GREATER
 using System;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading;
@@ -29,4 +28,3 @@ internal interface ILifespanManager : IDisposable
     /// <param name="instance">Trackable object</param>
     void Track(object instance);
 }
-#endif

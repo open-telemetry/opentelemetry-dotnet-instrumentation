@@ -10,6 +10,5 @@
   OpenTelemetry.Instrumentation.Http,
   OpenTelemetry.Instrumentation.Process,
   OpenTelemetry.Instrumentation.Runtime,
-  OpenTelemetry.Instrumentation.SqlClient,
-  OpenTelemetry.Instrumentation.Wcf
+  OpenTelemetry.Instrumentation.SqlClient
 ]

@@ -17,6 +17,7 @@
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Trace;
 
@@ -24,7 +25,11 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 internal static class EnvironmentConfigurationTracerHelper
 {
-    public static TracerProviderBuilder UseEnvironmentVariables(this TracerProviderBuilder builder, TracerSettings settings, PluginManager pluginManager)
+    public static TracerProviderBuilder UseEnvironmentVariables(
+        this TracerProviderBuilder builder,
+        LazyInstrumentationLoader lazyInstrumentationLoader,
+        TracerSettings settings,
+        PluginManager pluginManager)
     {
         builder.SetExporter(settings, pluginManager);
 
@@ -32,16 +37,16 @@ internal static class EnvironmentConfigurationTracerHelper
         {
             _ = enabledInstrumentation switch
             {
-                TracerInstrumentation.AspNet => Wrappers.AddSdkAspNetInstrumentation(builder, pluginManager),
+                TracerInstrumentation.AspNet => Wrappers.AddSdkAspNetInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.GrpcNetClient => Wrappers.AddGrpcClientInstrumentation(builder, pluginManager),
                 TracerInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, pluginManager),
                 TracerInstrumentation.Npgsql => builder.AddSource("Npgsql"),
                 TracerInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, pluginManager),
-                TracerInstrumentation.Wcf => Wrappers.AddWcfInstrumentation(builder, pluginManager),
+                TracerInstrumentation.Wcf => Wrappers.AddWcfInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
 #if NETCOREAPP3_1_OR_GREATER
                 TracerInstrumentation.MassTransit => builder.AddSource("MassTransit"),
                 TracerInstrumentation.MongoDB => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources"),
-                TracerInstrumentation.MySqlData => builder.AddSource("OpenTelemetry.Instrumentation.MySqlData"),
+                TracerInstrumentation.MySqlData => Wrappers.AddMySqlClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.StackExchangeRedis => builder.AddSource("OpenTelemetry.Instrumentation.StackExchangeRedis"),
 #endif
                 _ => null
@@ -83,9 +88,11 @@ internal static class EnvironmentConfigurationTracerHelper
         // Instrumentations
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddWcfInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager)
+        public static TracerProviderBuilder AddWcfInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-            return builder.AddWcfInstrumentation(pluginManager.ConfigureOptions);
+            lazyInstrumentationLoader.Add(new WcfInitializer(pluginManager));
+
+            return builder.AddSource("OpenTelemetry.Instrumentation.Wcf");
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -95,17 +102,28 @@ internal static class EnvironmentConfigurationTracerHelper
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddSdkAspNetInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager)
+        public static TracerProviderBuilder AddSdkAspNetInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
 #if NET462
             builder.AddAspNetInstrumentation(pluginManager.ConfigureOptions);
 #elif NETCOREAPP3_1_OR_GREATER
+            lazyInstrumentationLoader.Add(new AspNetCoreInitializer(pluginManager));
+
             builder.AddSource("OpenTelemetry.Instrumentation.AspNetCore");
             builder.AddLegacySource("Microsoft.AspNetCore.Hosting.HttpRequestIn");
 #endif
 
             return builder;
         }
+
+#if NETCOREAPP3_1_OR_GREATER
+        public static TracerProviderBuilder AddMySqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
+        {
+            lazyInstrumentationLoader.Add(new MySqlDataInitializer(pluginManager));
+
+            return builder.AddSource("OpenTelemetry.Instrumentation.MySqlData");
+        }
+#endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddSqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager)
