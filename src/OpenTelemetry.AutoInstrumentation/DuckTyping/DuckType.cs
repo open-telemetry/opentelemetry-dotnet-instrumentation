@@ -30,7 +30,7 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// <typeparam name="T">Type of struct</typeparam>
 /// <param name="instance">Object instance</param>
 /// <returns>Proxy instance</returns>
-public delegate T CreateProxyInstance<T>(object instance);
+internal delegate T CreateProxyInstance<T>(object instance);
 
 /// <summary>
 /// Duck Type

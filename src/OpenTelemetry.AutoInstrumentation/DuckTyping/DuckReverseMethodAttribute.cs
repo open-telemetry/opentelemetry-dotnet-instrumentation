@@ -22,7 +22,7 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// Duck reverse method attribute
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
-public class DuckReverseMethodAttribute : Attribute
+internal class DuckReverseMethodAttribute : Attribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="DuckReverseMethodAttribute"/> class.
