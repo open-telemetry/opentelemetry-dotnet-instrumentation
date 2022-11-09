@@ -22,6 +22,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Fixed
 
 - Fix the IIS registration in the PowerShell script module for Windows Server 2016.
+- Fix the IIS unregistration in the PowerShell script module.
 - Get rid of unnecessary service restarts during the IIS unregistration,
   in the PowerShell script module.
 
