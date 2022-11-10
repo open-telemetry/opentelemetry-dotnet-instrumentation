@@ -52,7 +52,10 @@ partial class Build
         TargetFramework.NET6_0
     };
 
-    private static readonly IEnumerable<TargetFramework> TestFrameworks = TargetFrameworks;
+    private static readonly IEnumerable<TargetFramework> TestFrameworks = TargetFrameworks
+        .Concat(new[] {
+            TargetFramework.NET7_0
+        });
 
     Target CreateRequiredDirectories => _ => _
         .Unlisted()
@@ -488,6 +491,7 @@ partial class Build
             var folderRuntimeName = runtimeName switch
             {
                 ".NETCoreApp,Version=v6.0" => "net6.0",
+                ".NETCoreApp,Version=v7.0" => "net7.0",
                 _ => throw new ArgumentOutOfRangeException(nameof(runtimeName), runtimeName,
                     "This value is not supported. You have probably introduced new .NET version to AutoInstrumentation")
             };
