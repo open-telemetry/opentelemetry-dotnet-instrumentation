@@ -29,21 +29,9 @@ namespace TestApplication.Wcf.Server.NetFramework;
     Name = "StatusService")]
 public class StatusService : IStatusServiceContract
 {
-    private static readonly object Lock = new();
-
-    public static int TimesHit { get; set; }
-
     public Task<StatusResponse> PingAsync(StatusRequest request)
     {
-        lock (Lock)
-        {
-            TimesHit += 1;
-        }
-
         return Task.FromResult(
-            new StatusResponse
-            {
-                ServerTime = DateTimeOffset.UtcNow,
-            });
+            new StatusResponse { ServerTime = DateTimeOffset.UtcNow });
     }
 }

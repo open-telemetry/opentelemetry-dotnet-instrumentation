@@ -26,29 +26,19 @@ internal static class Program
     {
         try
         {
-            try
-            {
-                ServiceHost serviceHost = new ServiceHost(typeof(StatusService));
-                serviceHost.Open();
+            var serviceHost = new ServiceHost(typeof(StatusService));
+            serviceHost.Open();
 
-                while (StatusService.TimesHit != 2)
-                {
-                    Console.WriteLine("Server waiting for calls");
-                    Thread.Sleep(1000);
-                }
+            Console.WriteLine($"[{DateTimeOffset.UtcNow:o}] Server waiting for calls");
 
-                serviceHost.Close();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"ServerException: nested try-catch {e}");
-            }
+            var manualResetEvent = new ManualResetEvent(false);
+            manualResetEvent.WaitOne();
         }
         catch (Exception e)
         {
-            Console.WriteLine($"ServerException: top-level try-catch {e}");
+            Console.WriteLine($"ServerException: {e}");
         }
 
-        Console.WriteLine("WCFServer: exiting main()");
+        Console.WriteLine($"[{DateTimeOffset.UtcNow:o}] WCFServer: exiting main()");
     }
 }
