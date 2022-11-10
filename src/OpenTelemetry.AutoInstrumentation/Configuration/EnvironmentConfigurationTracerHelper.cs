@@ -116,7 +116,7 @@ internal static class EnvironmentConfigurationTracerHelper
             return builder;
         }
 
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
         public static TracerProviderBuilder AddMySqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
             lazyInstrumentationLoader.Add(new MySqlDataInitializer(pluginManager));
