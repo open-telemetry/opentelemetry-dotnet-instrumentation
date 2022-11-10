@@ -15,6 +15,9 @@
 // </copyright>
 
 using System;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading;
@@ -47,34 +50,67 @@ internal class LazyInstrumentationLoader : IDisposable
         private readonly ILifespanManager _lifespanManager;
         private readonly string _requiredAssemblyName;
 
+#if NETFRAMEWORK
+        private int _firstInitialization = 1;
+#endif
+
         public OnAssemblyLoadInitializer(ILifespanManager lifespanManager, InstrumentationInitializer instrumentationInitializer)
         {
             _instrumentationInitializer = instrumentationInitializer;
             _lifespanManager = lifespanManager;
             _requiredAssemblyName = instrumentationInitializer.RequiredAssemblyName;
+
             AppDomain.CurrentDomain.AssemblyLoad += CurrentDomain_AssemblyLoad;
+
+#if NETFRAMEWORK
+            var isRequiredAssemblyLoaded = AppDomain.CurrentDomain
+                .GetAssemblies()
+                .Any(x => GetAssemblyName(x) == _requiredAssemblyName);
+            if (isRequiredAssemblyLoaded)
+            {
+                OnRequiredAssemblyDetected();
+            }
+#endif
         }
 
         private void CurrentDomain_AssemblyLoad(object sender, AssemblyLoadEventArgs args)
         {
-            var assemblyName = args.LoadedAssembly.FullName.Split(new[] { ',' }, count: 2)[0];
+            var assemblyName = GetAssemblyName(args.LoadedAssembly);
 
             if (_requiredAssemblyName == assemblyName)
             {
-                var initializerName = _instrumentationInitializer.GetType().Name;
-                Logger.Debug("'{0}' started", initializerName);
-
-                try
-                {
-                    _instrumentationInitializer.Initialize(_lifespanManager);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error(ex, "'{0}' failed", initializerName);
-                }
-
-                AppDomain.CurrentDomain.AssemblyLoad -= CurrentDomain_AssemblyLoad;
+                OnRequiredAssemblyDetected();
             }
+        }
+
+        private void OnRequiredAssemblyDetected()
+        {
+#if NETFRAMEWORK
+            if (Interlocked.Exchange(ref _firstInitialization, value: 0) != 1)
+            {
+                // InitializeOnFirstCall() was already called before
+                return;
+            }
+#endif
+
+            AppDomain.CurrentDomain.AssemblyLoad -= CurrentDomain_AssemblyLoad;
+
+            var initializerName = _instrumentationInitializer.GetType().Name;
+            Logger.Debug("'{0}' started", initializerName);
+
+            try
+            {
+                _instrumentationInitializer.Initialize(_lifespanManager);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "'{0}' failed", initializerName);
+            }
+        }
+
+        private string GetAssemblyName(Assembly assembly)
+        {
+            return assembly.FullName.Split(new[] { ',' }, count: 2)[0];
         }
     }
 }
