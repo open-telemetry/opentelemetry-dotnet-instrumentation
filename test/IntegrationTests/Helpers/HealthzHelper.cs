@@ -24,33 +24,34 @@ namespace IntegrationTests.Helpers;
 
 internal static class HealthzHelper
 {
-    public static async Task<bool> TestHealtzAsync(string healthzUrl, string logPrefix, ITestOutputHelper output)
+    public static async Task TestAsync(string healthzUrl, ITestOutputHelper output)
     {
-        output.WriteLine($"{logPrefix} healthz endpoint: {healthzUrl}");
+        output.WriteLine($"Testing healthz endpoint: {healthzUrl}");
         HttpClient client = new();
 
-        for (int retry = 0; retry < 5; retry++)
+        var intervalMilliseconds = 500;
+        var maxMillisecondsToWait = 15_000;
+        var maxRetries = maxMillisecondsToWait / intervalMilliseconds;
+        for (int retry = 0; retry < maxRetries; retry++)
         {
-            HttpResponseMessage response;
-
             try
             {
-                response = await client.GetAsync(healthzUrl);
+                var response = await client.GetAsync(healthzUrl);
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    return;
+                }
+
+                output.WriteLine($"Healthz endpoint retured HTTP status code: {response.StatusCode}");
             }
-            catch (TaskCanceledException)
+            catch (Exception ex)
             {
-                response = null;
+                output.WriteLine($"Healthz endpoint call failed: {ex.Message}");
             }
 
-            if (response?.StatusCode == HttpStatusCode.OK)
-            {
-                return true;
-            }
-
-            output.WriteLine($"{logPrefix} healthz failed {retry + 1}/5");
-            await Task.Delay(TimeSpan.FromSeconds(4));
+            await Task.Delay(intervalMilliseconds);
         }
 
-        return false;
+        throw new InvalidOperationException($"Healthz endpoint never returned OK: {healthzUrl}");
     }
 }

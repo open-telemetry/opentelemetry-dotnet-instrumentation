@@ -56,7 +56,6 @@ public class SettingsTests : IDisposable
             settings.Plugins.Should().BeEmpty();
             settings.FlushOnUnhandledException.Should().BeFalse();
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
-            settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
         }
     }
 
@@ -74,7 +73,6 @@ public class SettingsTests : IDisposable
             settings.EnabledInstrumentations.Should().NotBeEmpty();
             settings.ActivitySources.Should().BeEquivalentTo(new List<string> { "OpenTelemetry.AutoInstrumentation.*" });
             settings.LegacySources.Should().BeEmpty();
-            settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
 
             // Instrumentation options tests
             settings.InstrumentationOptions.GraphQLSetDocument.Should().BeFalse();
@@ -94,7 +92,6 @@ public class SettingsTests : IDisposable
             settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.EnabledInstrumentations.Should().NotBeEmpty();
             settings.Meters.Should().BeEmpty();
-            settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
         }
     }
 
@@ -110,7 +107,6 @@ public class SettingsTests : IDisposable
             settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.EnabledInstrumentations.Should().NotBeEmpty();
             settings.IncludeFormattedMessage.Should().BeFalse();
-            settings.Http2UnencryptedSupportEnabled.Should().BeFalse();
         }
     }
 
@@ -184,7 +180,7 @@ public class SettingsTests : IDisposable
     [InlineData(nameof(TracerInstrumentation.AspNet), TracerInstrumentation.AspNet)]
     [InlineData(nameof(TracerInstrumentation.GraphQL), TracerInstrumentation.GraphQL)]
     [InlineData(nameof(TracerInstrumentation.HttpClient), TracerInstrumentation.HttpClient)]
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
     [InlineData(nameof(TracerInstrumentation.MongoDB), TracerInstrumentation.MongoDB)]
     [InlineData(nameof(TracerInstrumentation.MySqlData), TracerInstrumentation.MySqlData)]
     [InlineData(nameof(TracerInstrumentation.StackExchangeRedis), TracerInstrumentation.StackExchangeRedis)]
@@ -192,7 +188,7 @@ public class SettingsTests : IDisposable
     [InlineData(nameof(TracerInstrumentation.Npgsql), TracerInstrumentation.Npgsql)]
     [InlineData(nameof(TracerInstrumentation.SqlClient), TracerInstrumentation.SqlClient)]
     [InlineData(nameof(TracerInstrumentation.GrpcNetClient), TracerInstrumentation.GrpcNetClient)]
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
     [InlineData(nameof(TracerInstrumentation.MassTransit), TracerInstrumentation.MassTransit)]
 #endif
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
@@ -301,19 +297,6 @@ public class SettingsTests : IDisposable
     [InlineData("true", true)]
     [InlineData("false", false)]
     [InlineData(null, false)]
-    internal void Http2UnencryptedSupportEnabled_DependsOnCorrespondingEnvVariable(string http2UnencryptedSupportEnabled, bool expectedValue)
-    {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Http2UnencryptedSupportEnabled, http2UnencryptedSupportEnabled);
-
-        var settings = Settings.FromDefaultSources<TracerSettings>();
-
-        settings.Http2UnencryptedSupportEnabled.Should().Be(expectedValue);
-    }
-
-    [Theory]
-    [InlineData("true", true)]
-    [InlineData("false", false)]
-    [InlineData(null, false)]
     internal void FlushOnUnhandledException_DependsOnCorrespondingEnvVariable(string flushOnUnhandledException, bool expectedValue)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, flushOnUnhandledException);
@@ -337,7 +320,6 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.DisabledInstrumentations, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.GraphQLSetDocument, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Http2UnencryptedSupportEnabled, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, null);
     }

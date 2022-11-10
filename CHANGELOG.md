@@ -12,15 +12,19 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Replace `OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP` by `OTEL_DOTNET_AUTO_TRACES_ENABLED`
   and `OTEL_DOTNET_AUTO_LOAD_METER_AT_STARTUP` by `OTEL_DOTNET_AUTO_METRICS_ENABLED`.
 - Disable OpenTracing by default. OpenTracing can be re-enabled via `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`.
+- GraphQL exceptions are recorded as OTel events.
 
 ### Removed
 
+- Remove support for .NET Core 3.1.
+- Remove support for `OTEL_DOTNET_AUTO_HTTP2UNENCRYPTEDSUPPORT_ENABLED`.
 - Remove support for `OTEL_DOTNET_AUTO_ENABLED`.
   Use `CORECLR_ENABLE_PROFILING` or `COR_ENABLE_PROFILING` instead.
 
 ### Fixed
 
 - Fix the IIS registration in the PowerShell script module for Windows Server 2016.
+- Fix the IIS unregistration in the PowerShell script module.
 - Get rid of unnecessary service restarts during the IIS unregistration,
   in the PowerShell script module.
 

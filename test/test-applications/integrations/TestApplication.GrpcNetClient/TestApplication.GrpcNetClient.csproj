@@ -14,7 +14,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.0" />
     <!-- Workaround! System.Diagnostics.DiagnosticSource v.6.0.0 is minimal version supported by auto instrumentation.
     Grpc.Net.Client references older version. It prevents to use older version during runtime.-->
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0"  Condition="'$(TargetFramework)' == 'net462'" />
   </ItemGroup>
 
   <ItemGroup>

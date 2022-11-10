@@ -257,12 +257,7 @@ public class EnvironmentHelper
     {
         if (_isCoreClr)
         {
-            if (_major >= 5)
-            {
-                return $"net{_major}.{_minor}";
-            }
-
-            return $"netcoreapp{_major}.{_minor}";
+            return $"net{_major}.{_minor}";
         }
 
         return $"net{_major}{_minor}{_patch ?? string.Empty}";
@@ -272,7 +267,7 @@ public class EnvironmentHelper
     {
         string startupHookOutputPath = Path.Combine(
             GetNukeBuildOutput(),
-            "netcoreapp3.1",
+            "net6.0",
             "OpenTelemetry.AutoInstrumentation.StartupHook.dll");
 
         return startupHookOutputPath;

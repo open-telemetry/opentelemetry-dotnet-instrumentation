@@ -130,9 +130,7 @@ public class AspNetTests
             wasStarted.Should().BeTrue($"Container based on {testApplicationName} has to be operational for the test.");
             Output.WriteLine($"Container was started successfully.");
 
-            var webAppHealthzUrl = $"http://localhost:{webPort}/healthz";
-            var webAppHealthzResult = await HealthzHelper.TestHealtzAsync(webAppHealthzUrl, "IIS WebApp", Output);
-            webAppHealthzResult.Should().BeTrue("IIS WebApp health check never returned OK.");
+            await HealthzHelper.TestAsync($"http://localhost:{webPort}/healthz", Output);
             Output.WriteLine($"IIS WebApp was started successfully.");
         }
         catch

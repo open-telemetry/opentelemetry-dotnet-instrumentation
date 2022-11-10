@@ -14,7 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
 using System;
 using System.Linq;
 using System.Linq.Expressions;
@@ -40,7 +40,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
     Type = InstrumentationType.Trace)]
 public class MongoClientIntegration
 {
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
     private static Delegate _setActivityListener;
 #endif
 
@@ -57,7 +57,7 @@ public class MongoClientIntegration
         // Additional deps doesn't support .NET FX
         // TODO: Find another way how to ship & load "MongoDB.Driver.Core.Extensions.DiagnosticSources"
 
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
         var setListenerDelegate = _setActivityListener ??= GetClusterConfiguratorExpression().Compile();
 
         var clusterConfiguratorProperty = settings
@@ -71,7 +71,7 @@ public class MongoClientIntegration
         return CallTargetState.GetDefault();
     }
 
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
     private static object GetInstrumentationOptions()
     {
         Type optionsType = Type.GetType("MongoDB.Driver.Core.Extensions.DiagnosticSources.InstrumentationOptions, MongoDB.Driver.Core.Extensions.DiagnosticSources");

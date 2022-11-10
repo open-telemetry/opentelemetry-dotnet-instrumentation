@@ -12,7 +12,7 @@
     <tags>Observability OpenTelemetry Monitoring Telemetry Tracing Auto Automatic Instrumentation</tags>
     <repository type="git" url="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation" />
     <dependencies>
-      <group targetFramework="netcoreapp3.1">
+      <group targetFramework="net6.0">
         <dependency id="OpenTelemetry" version="1.3.1" />
         <dependency id="OpenTelemetry.Api" version="1.3.1" />
         <dependency id="OpenTelemetry.Exporter.Console" version="1.3.1" />
@@ -56,7 +56,7 @@
   </metadata>
   <files>
     <file src="bin-linux-glibc/AdditionalDeps/**/*.*" target="AdditionalDeps" />
-    <file src="bin-linux-glibc/netcoreapp3.1/**/*.*" target="netcoreapp3.1" />
+    <file src="bin-linux-glibc/net6.0/**/*.*" target="net6.0" />
     <file src="bin-linux-glibc/store/**/*.*" target="store" />
     <file src="bin-linux-glibc/integrations.json" target="integrations.json" />
     <file src="bin-linux-glibc/OpenTelemetry.AutoInstrumentation.Native.so" target="OpenTelemetry.AutoInstrumentation.Native.so" />

@@ -20,7 +20,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Trace.V1;
@@ -64,7 +63,7 @@ public class GraphQLTests : TestHelper
 
         // FAILURE: query fails 'execute' step
         Request(requests, body: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}");
-        Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, failsExecution: true);
+        Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, verifyFailure: VerifyNotImplementedException);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
@@ -74,8 +73,7 @@ public class GraphQLTests : TestHelper
         using var helper = new ProcessHelper(process);
         try
         {
-            await WaitForServer(aspNetCorePort);
-
+            await HealthzHelper.TestAsync($"http://localhost:{aspNetCorePort}/alive-check", Output);
             await SubmitRequestsAsync(aspNetCorePort, requests);
 
             collector.AssertExpectations();
@@ -103,6 +101,21 @@ public class GraphQLTests : TestHelper
         });
     }
 
+    private static bool VerifyNotImplementedException(Span span)
+    {
+        var exceptionEvent = span.Events.SingleOrDefault();
+
+        if (exceptionEvent == null)
+        {
+            return false;
+        }
+
+        return
+            exceptionEvent.Attributes.Any(x => x.Key == "exception.type" && x.Value?.StringValue == "System.NotImplementedException") &&
+            exceptionEvent.Attributes.Any(x => x.Key == "exception.message") &&
+            exceptionEvent.Attributes.Any(x => x.Key == "exception.stacktrace");
+    }
+
     private static void Expect(
         MockSpansCollector collector,
         string spanName,
@@ -110,7 +123,7 @@ public class GraphQLTests : TestHelper
         string graphQLOperationName,
         string graphQLDocument,
         bool setDocument,
-        bool failsExecution = false)
+        Predicate<Span> verifyFailure = null)
     {
         bool Predicate(Span span)
         {
@@ -124,9 +137,9 @@ public class GraphQLTests : TestHelper
                 return false;
             }
 
-            if (failsExecution && !span.Attributes.Any(attr => attr.Key == "error.msg"))
+            if (verifyFailure != null)
             {
-                return false;
+                return verifyFailure(span);
             }
 
             if (!span.Attributes.Any(attr => attr.Key == "graphql.operation.type" && attr.Value?.StringValue == graphQLOperationType))
@@ -148,43 +161,6 @@ public class GraphQLTests : TestHelper
         }
 
         collector.Expect("OpenTelemetry.AutoInstrumentation.GraphQL", Predicate, spanName);
-    }
-
-    private async Task WaitForServer(int aspNetCorePort)
-    {
-        var client = new HttpClient();
-        var maxMillisecondsToWait = 15_000;
-        var intervalMilliseconds = 500;
-        var intervals = maxMillisecondsToWait / intervalMilliseconds;
-        var serverReady = false;
-        // wait for server to be ready to receive requests
-        while (intervals-- > 0)
-        {
-            var aliveCheckRequest = new RequestInfo { HttpMethod = "GET", Url = "/alive-check" };
-            try
-            {
-                var responseCode = await SubmitRequestAsync(client, aspNetCorePort, aliveCheckRequest, false);
-
-                serverReady = responseCode == HttpStatusCode.OK;
-            }
-            catch
-            {
-                // ignore
-            }
-
-            if (serverReady)
-            {
-                Output.WriteLine("The server is ready.");
-                break;
-            }
-
-            Thread.Sleep(intervalMilliseconds);
-        }
-
-        if (!serverReady)
-        {
-            throw new Exception("Couldn't verify the application is ready to receive requests.");
-        }
     }
 
     private async Task SubmitRequestsAsync(int aspNetCorePort, IEnumerable<RequestInfo> requests)
