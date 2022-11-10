@@ -27,30 +27,23 @@ internal static class Program
     {
         try
         {
-            try
+            var serviceHost = new ServiceHost(typeof(StatusService));
+            serviceHost.Open();
+
+            while (StatusService.TimesHit != 2)
             {
-                var serviceHost = new ServiceHost(typeof(StatusService));
-                serviceHost.Open();
-
-                while (StatusService.TimesHit != 2)
-                {
-                    Console.WriteLine($"[{DateTimeOffset.UtcNow:yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'}] Server waiting for calls");
-                    Thread.Sleep(1000);
-                }
-
-                // Wait for the last request to be fully handled
-                await Task.Delay(2000);
-
-                serviceHost.Close();
+                Console.WriteLine($"[{DateTimeOffset.UtcNow:yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'}] Server waiting for calls");
+                Thread.Sleep(1000);
             }
-            catch (Exception e)
-            {
-                Console.WriteLine($"ServerException: nested try-catch {e}");
-            }
+
+            // Wait for the last request to be fully handled
+            await Task.Delay(2000);
+
+            serviceHost.Close();
         }
         catch (Exception e)
         {
-            Console.WriteLine($"ServerException: top-level try-catch {e}");
+            Console.WriteLine($"ServerException: {e}");
         }
 
         Console.WriteLine($"[{DateTimeOffset.UtcNow:yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'}] WCFServer: exiting main()");
