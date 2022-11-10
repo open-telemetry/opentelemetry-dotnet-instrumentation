@@ -49,13 +49,10 @@ partial class Build
     private static readonly IEnumerable<TargetFramework> TargetFrameworks = new[]
     {
         TargetFramework.NET462,
-        TargetFramework.NETCOREAPP3_1
+        TargetFramework.NET6_0
     };
 
-    private static readonly IEnumerable<TargetFramework> TestFrameworks = TargetFrameworks
-        .Concat(new[] {
-            TargetFramework.NET6_0
-        });
+    private static readonly IEnumerable<TargetFramework> TestFrameworks = TargetFrameworks;
 
     Target CreateRequiredDirectories => _ => _
         .Unlisted()
@@ -182,25 +179,25 @@ partial class Build
                     .SetOutput(TracerHomeDirectory / framework)));
 
             // StartupHook is supported starting .Net Core 3.1.
-            // We need to emit AutoInstrumentationStartupHook and AutoInstrumentationLoader assemblies only for .NET Core 3.1 target framework.
+            // We need to emit AutoInstrumentationStartupHook and AutoInstrumentationLoader assemblies only for .NET 6.0 target framework.
             DotNetPublish(s => s
                 .SetProject(Solution.GetProject(Projects.AutoInstrumentationStartupHook))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
                 .EnableNoRestore()
-                .SetFramework(TargetFramework.NETCOREAPP3_1)
-                .SetOutput(TracerHomeDirectory / TargetFramework.NETCOREAPP3_1));
+                .SetFramework(TargetFramework.NET6_0)
+                .SetOutput(TracerHomeDirectory / TargetFramework.NET6_0));
 
-            // AutoInstrumentationLoader publish is needed only for .Net Core 3.1 to support load from AutoInstrumentationStartupHook.
+            // AutoInstrumentationLoader publish is needed only for .NET 6.0 to support load from AutoInstrumentationStartupHook.
             DotNetPublish(s => s
                 .SetProject(Solution.GetProject(Projects.AutoInstrumentationLoader))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
                 .EnableNoRestore()
-                .SetFramework(TargetFramework.NETCOREAPP3_1)
-                .SetOutput(TracerHomeDirectory / TargetFramework.NETCOREAPP3_1));
+                .SetFramework(TargetFramework.NET6_0)
+                .SetOutput(TracerHomeDirectory / TargetFramework.NET6_0));
 
             DotNetPublish(s => s
                 .SetProject(Solution.GetProject(Projects.AutoInstrumentationAspNetCoreBootstrapper))
@@ -208,8 +205,8 @@ partial class Build
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
                 .EnableNoRestore()
-                .SetFramework(TargetFramework.NETCOREAPP3_1)
-                .SetOutput(TracerHomeDirectory / TargetFramework.NETCOREAPP3_1));
+                .SetFramework(TargetFramework.NET6_0)
+                .SetOutput(TracerHomeDirectory / TargetFramework.NET6_0));
         });
 
     Target PublishNativeProfiler => _ => _
@@ -490,7 +487,6 @@ partial class Build
             var runtimeName = jsonDocument.RootElement.GetProperty("runtimeTarget").GetProperty("name").GetString();
             var folderRuntimeName = runtimeName switch
             {
-                ".NETCoreApp,Version=v3.1" => "netcoreapp3.1",
                 ".NETCoreApp,Version=v6.0" => "net6.0",
                 _ => throw new ArgumentOutOfRangeException(nameof(runtimeName), runtimeName,
                     "This value is not supported. You have probably introduced new .NET version to AutoInstrumentation")

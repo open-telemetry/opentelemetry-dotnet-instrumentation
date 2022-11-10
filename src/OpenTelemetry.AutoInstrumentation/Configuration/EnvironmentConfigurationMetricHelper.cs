@@ -77,7 +77,7 @@ internal static class EnvironmentConfigurationMetricHelper
         {
 #if NET462
             builder.AddAspNetInstrumentation();
-#elif NETCOREAPP3_1_OR_GREATER
+#elif NET6_0_OR_GREATER
             builder.AddMeter("OpenTelemetry.Instrumentation.AspNetCore");
 #endif
 
@@ -136,16 +136,6 @@ internal static class EnvironmentConfigurationMetricHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static MeterProviderBuilder AddOtlpExporter(MeterProviderBuilder builder, MetricSettings settings, PluginManager pluginManager)
         {
-#if NETCOREAPP3_1
-            if (settings.Http2UnencryptedSupportEnabled)
-            {
-                // Adding the OtlpExporter creates a GrpcChannel.
-                // This switch must be set before creating a GrpcChannel/HttpClient when calling an insecure gRPC service.
-                // See: https://docs.microsoft.com/aspnet/core/grpc/troubleshoot#call-insecure-grpc-services-with-net-core-client
-                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            }
-#endif
-
             return builder.AddOtlpExporter((options, metricReaderOptions) =>
             {
                 if (settings.OtlpExportProtocol.HasValue)

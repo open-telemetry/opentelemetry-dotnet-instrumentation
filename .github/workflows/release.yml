@@ -17,7 +17,6 @@ jobs:
       - uses: actions/setup-dotnet@v3.0.3
         with:
           dotnet-version: | 
-            3.1.x
             6.0.x
       - run: ./build.cmd
       - name: Upload binaries

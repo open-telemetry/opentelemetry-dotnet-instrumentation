@@ -164,7 +164,7 @@ Two issues might arise from incorrect versioning:
 
 #### Configuration resolution
 
-.NET Core [Framework-dependent deployment](https://docs.microsoft.com/en-us/dotnet/core/deploying/deploy-with-cli#framework-dependent-deployment)
+.NET [Framework-dependent deployment](https://docs.microsoft.com/en-us/dotnet/core/deploying/deploy-with-cli#framework-dependent-deployment)
 applications might use [DOTNET_ADDITIONAL_DEPS](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md)
 and [DOTNET_SHARED_STORE](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
 from OpenTelemetry .NET Automatic Instrumentation installation location

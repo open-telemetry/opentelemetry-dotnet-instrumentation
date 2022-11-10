@@ -18,7 +18,7 @@ using System;
 using System.Threading.Tasks;
 
 namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations;
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
 internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn> : ContinuationGenerator<TTarget, TReturn>
 {
     private static readonly Func<TTarget, object, Exception, CallTargetState, object> _continuation;

@@ -33,13 +33,6 @@ internal static class ConfigurationKeys
     public const string ExporterOtlpProtocol = "OTEL_EXPORTER_OTLP_PROTOCOL";
 
     /// <summary>
-    /// Configuration key for enabling `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`.
-    /// It is required by OTLP gRPC exporter on .NET Core 3.x.
-    /// Default is <c>false</c>.
-    /// </summary>
-    public const string Http2UnencryptedSupportEnabled = "OTEL_DOTNET_AUTO_HTTP2UNENCRYPTEDSUPPORT_ENABLED";
-
-    /// <summary>
     /// Configuration key for setting the directory for the profiler's log files.
     /// If not set, default is
     /// "%ProgramData%"\OpenTelemetry .NET AutoInstrumentation\logs\" on Windows or

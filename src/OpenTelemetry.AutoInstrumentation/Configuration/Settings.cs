@@ -38,21 +38,12 @@ internal abstract class Settings
         }
 
         OtlpExportProtocol = GetExporterOtlpProtocol(source);
-        Http2UnencryptedSupportEnabled = source.GetBool(ConfigurationKeys.Http2UnencryptedSupportEnabled) ?? false;
     }
 
     /// <summary>
     /// Gets the the OTLP transport protocol. Supported values: Grpc and HttpProtobuf.
     /// </summary>
     public OtlpExportProtocol? OtlpExportProtocol { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the `System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport`
-    /// should be enabled.
-    /// It is required by OTLP gRPC exporter on .NET Core 3.x.
-    /// Default is <c>false</c>.
-    /// </summary>
-    public bool Http2UnencryptedSupportEnabled { get; }
 
     public static T FromDefaultSources<T>()
         where T : Settings

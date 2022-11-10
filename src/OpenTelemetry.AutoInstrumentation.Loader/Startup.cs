@@ -65,7 +65,7 @@ internal partial class Startup
                 throw new TypeLoadException("The type OpenTelemetry.AutoInstrumentation.Instrumentation could not be loaded");
             }
 
-            var method = type.GetRuntimeMethod("Initialize", new Type[0]);
+            var method = type.GetRuntimeMethod("Initialize", Type.EmptyTypes);
             if (method == null)
             {
                 throw new MissingMethodException("The method OpenTelemetry.AutoInstrumentation.Instrumentation.Initialize could not be loaded");

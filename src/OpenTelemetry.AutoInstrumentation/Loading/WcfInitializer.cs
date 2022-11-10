@@ -1,4 +1,4 @@
-// <copyright file="MySqlDataInitializer.cs" company="OpenTelemetry Authors">
+// <copyright file="WcfInitializer.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,33 +14,30 @@
 // limitations under the License.
 // </copyright>
 
-#if NET6_0_OR_GREATER
-
 using System;
 using OpenTelemetry.AutoInstrumentation.Plugins;
+using OpenTelemetry.Instrumentation.Wcf;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading;
 
-internal class MySqlDataInitializer : InstrumentationInitializer
+internal class WcfInitializer : InstrumentationInitializer
 {
     private readonly PluginManager _pluginManager;
 
-    public MySqlDataInitializer(PluginManager pluginManager)
-        : base("MySql.Data")
+    public WcfInitializer(PluginManager pluginManager)
+        : base("System.ServiceModel.Primitives")
     {
         _pluginManager = pluginManager;
     }
 
     public override void Initialize(ILifespanManager lifespanManager)
     {
-        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentation, OpenTelemetry.Instrumentation.MySqlData");
+        var options = new WcfInstrumentationOptions();
 
-        var options = new OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentationOptions();
         _pluginManager.ConfigureOptions(options);
 
-        var instrumentation = Activator.CreateInstance(instrumentationType, options);
+        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationActivitySource, OpenTelemetry.Instrumentation.Wcf");
 
-        lifespanManager.Track(instrumentation);
+        instrumentationType.GetProperty("Options")?.SetValue(null, options);
     }
 }
-#endif

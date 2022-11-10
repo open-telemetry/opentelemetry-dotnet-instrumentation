@@ -15,7 +15,7 @@
 // </copyright>
 
 // This test won't work outside of windows as it need the server side which is .NET Framework only.
-#if NETCOREAPP3_1_OR_GREATER && _WINDOWS
+#if NET6_0_OR_GREATER && _WINDOWS
 
 using Xunit.Abstractions;
 

@@ -6,7 +6,6 @@ On all platforms, the minimum requirements are:
 
 - Git client and command line tools
 - [.NET 6.0 SDK](https://dotnet.microsoft.com/download/dotnet/6.0)
-- [.NET Core 3.1 Runtime](https://dotnet.microsoft.com/download/dotnet-core/3.1)
 
 ### Windows
 
@@ -140,7 +139,7 @@ with automatic instrumentation in your shell, such as bash, zsh, or git bash.
 For example:
 
 ```sh
-./dev/instrument.sh OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS=HttpClient dotnet run -f netcoreapp3.1 --project ./examples/ConsoleApp/Examples.ConsoleApp.csproj
+./dev/instrument.sh OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS=HttpClient dotnet run -f net6.0 --project ./examples/ConsoleApp/Examples.ConsoleApp.csproj
 ```
 
 You can use [`dev/envvars.sh`](../dev/envvars.sh) to export profiler
@@ -151,7 +150,7 @@ You must run `dev/envvars.sh` from the root of this repository. For example:
 ```sh
 source ./dev/envvars.sh
 export OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS=HttpClient
- ./examples/ConsoleApp/bin/Release/netcoreapp3.1/Examples.ConsoleApp
+ ./examples/ConsoleApp/bin/Release/net6.0/Examples.ConsoleApp
 ```
 
 ### Running the examples

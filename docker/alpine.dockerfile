@@ -17,9 +17,10 @@ ENV PROTOBUF_PROTOC=/usr/bin/protoc
 ENV gRPC_PluginFullPath=/usr/bin/grpc_csharp_plugin
 
 # Install older .NET SDKs using the install script
-RUN curl -sSL https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
-    && chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -c 3.1 --install-dir /usr/share/dotnet --no-path \
-    && rm dotnet-install.sh
+# will be needed when we switch to 7.0
+# RUN curl -sSL https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
+#    && chmod +x ./dotnet-install.sh \
+#    && ./dotnet-install.sh -c 3.1 --install-dir /usr/share/dotnet --no-path \
+#    && rm dotnet-install.sh
 
 WORKDIR /project
