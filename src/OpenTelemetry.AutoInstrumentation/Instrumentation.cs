@@ -128,7 +128,7 @@ internal static class Instrumentation
 
             if (MetricSettings.MetricsEnabled)
             {
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
 
                 if (MetricSettings.EnabledInstrumentations.Contains(MetricInstrumentation.AspNet))
                 {
@@ -168,7 +168,7 @@ internal static class Instrumentation
 
         try
         {
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
             LazyInstrumentationLoader?.Dispose();
 #endif
             _tracerProvider?.Dispose();

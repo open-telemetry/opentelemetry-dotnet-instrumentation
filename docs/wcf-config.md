@@ -46,7 +46,7 @@ Example project available in
 [test/test-applications/integrations/TestApplication.Wcf.Client.NetFramework](../test/test-applications/integrations/TestApplication.Wcf.Client.NetFramework/)
 folder.
 
-## WCF Client Configuration (.NET Core)
+## WCF Client Configuration (.NET)
 
 Add `OpenTelemetry.Instrumentation.Wcf` and `System.Diagnostics.DiagnosticSource`
 package to the project. The version of `OpenTelemetry.Instrumentation.Wcf`

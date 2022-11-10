@@ -69,10 +69,14 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
 
 OpenTelemetry .NET Automatic Instrumentation attempts to work with all officially
 supported operating systems and versions of
-[.NET (Core)](https://dotnet.microsoft.com/download/dotnet),
+[.NET](https://dotnet.microsoft.com/download/dotnet),
 and [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework).
 
 > Versions lower than `.NET Framework 4.6.2` are not supported.
+>  
+> `.NET Core 3.1` is not supported.
+> [0.4.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.4.0-beta.1)
+> is the latest version supporting it.
 
 CI tests run against the following operating systems:
 
@@ -101,25 +105,25 @@ When running your application, make sure to:
 1. Set the [resources](config.md#resources).
 1. Set the environment variables from the table below.
 
-| Environment variable                 | .NET version           | Value                                                                          |
-|--------------------------------------|------------------------|--------------------------------------------------------------------------------|
-| `COR_ENABLE_PROFILING`               | .NET Framework         | `1`                                                                            |
-| `COR_PROFILER`                       | .NET Framework         | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                                       |
-| `COR_PROFILER_PATH_32`               | .NET Framework         | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll`            |
-| `COR_PROFILER_PATH_64`               | .NET Framework         | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll`            |
-| `CORECLR_ENABLE_PROFILING`           | .NET (Core)            | `1`                                                                            |
-| `CORECLR_PROFILER`                   | .NET (Core)            | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                                       |
-| `CORECLR_PROFILER_PATH`              | .NET (Core) on Linux   | `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.so`                     |
-| `CORECLR_PROFILER_PATH`              | .NET (Core) on macOS   | `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.dylib`                  |
-| `CORECLR_PROFILER_PATH_32`           | .NET (Core) on Windows | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll`            |
-| `CORECLR_PROFILER_PATH_64`           | .NET (Core) on Windows | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll`            |
-| `DOTNET_ADDITIONAL_DEPS`             | .NET (Core)            | `$INSTALL_DIR/AdditionalDeps`                                                  |
-| `DOTNET_SHARED_STORE`                | .NET (Core)            | `$INSTALL_DIR/store`                                                           |
-| `DOTNET_STARTUP_HOOKS`               | .NET (Core)            | `$INSTALL_DIR/netcoreapp3.1/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
-| `OTEL_DOTNET_AUTO_HOME`              | All versions           | `$INSTALL_DIR`                                                                 |
-| `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | All versions           | `$INSTALL_DIR/integrations.json`                                               |
+| Environment variable                 | .NET version    | Value                                                                   |
+|--------------------------------------|-----------------|-------------------------------------------------------------------------|
+| `COR_ENABLE_PROFILING`               | .NET Framework  | `1`                                                                     |
+| `COR_PROFILER`                       | .NET Framework  | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                                |
+| `COR_PROFILER_PATH_32`               | .NET Framework  | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll`     |
+| `COR_PROFILER_PATH_64`               | .NET Framework  | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll`     |
+| `CORECLR_ENABLE_PROFILING`           | .NET            | `1`                                                                     |
+| `CORECLR_PROFILER`                   | .NET            | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                                |
+| `CORECLR_PROFILER_PATH`              | .NET on Linux   | `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.so`              |
+| `CORECLR_PROFILER_PATH`              | .NET on macOS   | `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.dylib`           |
+| `CORECLR_PROFILER_PATH_32`           | .NET on Windows | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll`     |
+| `CORECLR_PROFILER_PATH_64`           | .NET on Windows | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll`     |
+| `DOTNET_ADDITIONAL_DEPS`             | .NET            | `$INSTALL_DIR/AdditionalDeps`                                           |
+| `DOTNET_SHARED_STORE`                | .NET            | `$INSTALL_DIR/store`                                                    |
+| `DOTNET_STARTUP_HOOKS`               | .NET            | `$INSTALL_DIR/net6.0/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
+| `OTEL_DOTNET_AUTO_HOME`              | All versions    | `$INSTALL_DIR`                                                          |
+| `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | All versions    | `$INSTALL_DIR/integrations.json`                                        |
 
-> Some settings can be omitted on .NET (Core). For more information, see [config.md](config.md#net-clr-profiler).
+> Some settings can be omitted on .NET. For more information, see [config.md](config.md#net-clr-profiler).
 
 ### Shell scripts
 

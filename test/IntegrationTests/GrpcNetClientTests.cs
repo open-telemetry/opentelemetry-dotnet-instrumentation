@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System.Threading.Tasks;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;

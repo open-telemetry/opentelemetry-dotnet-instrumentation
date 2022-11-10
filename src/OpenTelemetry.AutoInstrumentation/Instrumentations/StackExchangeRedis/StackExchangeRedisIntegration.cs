@@ -75,7 +75,7 @@ public class StackExchangeRedisIntegration
     /// <returns>A response value, in an async scenario will be T of Task of T</returns>
     internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TReturn returnValue, Exception exception, CallTargetState state)
     {
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
         StackExchangeRedisInitializer.Initialize(returnValue);
 #endif
 

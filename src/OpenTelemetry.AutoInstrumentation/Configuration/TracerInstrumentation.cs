@@ -41,7 +41,7 @@ internal enum TracerInstrumentation
     /// </summary>
     GraphQL = 3,
 
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
     /// <summary>
     /// MongoDB instrumentation.
     /// </summary>
@@ -53,7 +53,7 @@ internal enum TracerInstrumentation
     /// </summary>
     Npgsql = 5,
 
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
     /// <summary>
     /// MySqlData instrumentation.
     /// </summary>
@@ -75,7 +75,7 @@ internal enum TracerInstrumentation
     /// </summary>
     Wcf = 9,
 
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
     /// <summary>
     /// MassTransit instrumentation.
     /// </summary>

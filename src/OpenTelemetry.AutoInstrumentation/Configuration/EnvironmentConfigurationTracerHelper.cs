@@ -43,7 +43,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.Npgsql => builder.AddSource("Npgsql"),
                 TracerInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, pluginManager),
                 TracerInstrumentation.Wcf => Wrappers.AddWcfInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
                 TracerInstrumentation.MassTransit => builder.AddSource("MassTransit"),
                 TracerInstrumentation.MongoDB => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources"),
                 TracerInstrumentation.MySqlData => Wrappers.AddMySqlClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
@@ -106,7 +106,7 @@ internal static class EnvironmentConfigurationTracerHelper
         {
 #if NET462
             builder.AddAspNetInstrumentation(pluginManager.ConfigureOptions);
-#elif NETCOREAPP3_1_OR_GREATER
+#elif NET6_0_OR_GREATER
             lazyInstrumentationLoader.Add(new AspNetCoreInitializer(pluginManager));
 
             builder.AddSource("OpenTelemetry.Instrumentation.AspNetCore");
@@ -116,7 +116,7 @@ internal static class EnvironmentConfigurationTracerHelper
             return builder;
         }
 
-#if NETCOREAPP3_1_OR_GREATER
+#if NET6_0_OR_GREATER
         public static TracerProviderBuilder AddMySqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
             lazyInstrumentationLoader.Add(new MySqlDataInitializer(pluginManager));
@@ -164,15 +164,6 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddOtlpExporter(TracerProviderBuilder builder, TracerSettings settings, PluginManager pluginManager)
         {
-#if NETCOREAPP3_1
-            if (settings.Http2UnencryptedSupportEnabled)
-            {
-                // Adding the OtlpExporter creates a GrpcChannel.
-                // This switch must be set before creating a GrpcChannel/HttpClient when calling an insecure gRPC service.
-                // See: https://docs.microsoft.com/aspnet/core/grpc/troubleshoot#call-insecure-grpc-services-with-net-core-client
-                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            }
-#endif
             return builder.AddOtlpExporter(options =>
             {
                 if (settings.OtlpExportProtocol.HasValue)
