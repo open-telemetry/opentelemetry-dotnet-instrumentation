@@ -80,13 +80,15 @@ jobs:
           $install_dir = Get-OpenTelemetryInstallDirectory
           Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
           dotnet help
-          If (-not (Test-Path $log_path)) { throw "Log file does not exist. Instrumentation test failed." }
+          if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
+          if (-not (Test-Path $log_path)) { throw "Log file does not exist. Instrumentation test failed." }
           Remove-Item $log_path
           Unregister-OpenTelemetryForCurrentSession
           dotnet help
-          If (Test-Path $log_path) { throw "Log file exists. Instrumentation unregister failed." }
+          if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
+          if (Test-Path $log_path) { throw "Log file exists. Instrumentation unregister failed." }
           Uninstall-OpenTelemetryCore
-          If (Test-Path $install_dir) { throw "Core files exist. Core uninstall failed." }
+          if (Test-Path $install_dir) { throw "Core files exist. Core uninstall failed." }
 
   shell-scripts:
     strategy:
