@@ -17,25 +17,29 @@
 using System;
 using System.ServiceModel;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace TestApplication.Wcf.Server.NetFramework;
 
 internal static class Program
 {
-    public static void Main()
+    public static async Task Main()
     {
         try
         {
             try
             {
-                ServiceHost serviceHost = new ServiceHost(typeof(StatusService));
+                var serviceHost = new ServiceHost(typeof(StatusService));
                 serviceHost.Open();
 
                 while (StatusService.TimesHit != 2)
                 {
-                    Console.WriteLine("Server waiting for calls");
+                    Console.WriteLine($"[{DateTimeOffset.UtcNow:yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'}] Server waiting for calls");
                     Thread.Sleep(1000);
                 }
+
+                // Wait for the last request to be fully handled
+                await Task.Delay(2000);
 
                 serviceHost.Close();
             }
@@ -49,6 +53,6 @@ internal static class Program
             Console.WriteLine($"ServerException: top-level try-catch {e}");
         }
 
-        Console.WriteLine("WCFServer: exiting main()");
+        Console.WriteLine($"[{DateTimeOffset.UtcNow:yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'}] WCFServer: exiting main()");
     }
 }

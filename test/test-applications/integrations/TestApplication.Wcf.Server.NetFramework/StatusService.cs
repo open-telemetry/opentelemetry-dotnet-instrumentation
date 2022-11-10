@@ -35,15 +35,20 @@ public class StatusService : IStatusServiceContract
 
     public Task<StatusResponse> PingAsync(StatusRequest request)
     {
-        lock (Lock)
-        {
-            TimesHit += 1;
-        }
+        var time = DateTimeOffset.UtcNow;
 
-        return Task.FromResult(
-            new StatusResponse
+        try
+        {
+            return Task.FromResult(
+                new StatusResponse { ServerTime = time, });
+        }
+        finally
+        {
+            lock (Lock)
             {
-                ServerTime = DateTimeOffset.UtcNow,
-            });
+                TimesHit += 1;
+                Console.WriteLine($"[{time:yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'}] Client request accepted. Status: {request.Status}");
+            }
+        }
     }
 }

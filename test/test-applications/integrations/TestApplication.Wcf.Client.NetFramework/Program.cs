@@ -34,18 +34,21 @@ internal static class Program
         // Note: Best practice is to re-use your client/channel instances.
         // This code is not meant to illustrate best practices, only the
         // instrumentation.
-        StatusServiceClient client = new StatusServiceClient(name);
+        var client = new StatusServiceClient(name);
         try
         {
             await client.OpenAsync().ConfigureAwait(false);
 
-            var response = await client.PingAsync(
-                new StatusRequest
-                {
-                    Status = Guid.NewGuid().ToString("N"),
-                }).ConfigureAwait(false);
+            var statusRequest = new StatusRequest
+            {
+                Status = Guid.NewGuid().ToString("N"),
+            };
 
-            Console.WriteLine($"Server returned: {response?.ServerTime}");
+            var time = DateTimeOffset.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+            var response = await client.PingAsync(
+                statusRequest).ConfigureAwait(false);
+
+            Console.WriteLine($"[{time}] Sending request with status {statusRequest.Status}. Server returned: {response?.ServerTime:yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'}");
         }
         finally
         {
