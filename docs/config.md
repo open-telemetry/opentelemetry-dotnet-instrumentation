@@ -33,24 +33,24 @@ for more details.
 
 ### Traces instrumentations
 
-| ID                   | Instrumented library                                                                                                                                                                              | Supported versions | Instrumentation type    |
-|----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------|-------------------------|
-| `AspNet`             | ASP.NET Framework                                                                                                                                                                                 | *                  | source                  |
-| `AspNet`             | ASP.NET Core                                                                                                                                                                                      | *                  | source                  |
-| `GraphQL`            | [GraphQL](https://www.nuget.org/packages/GraphQL/)                                                                                                                                                | ≥2.3.0 & < 3.0.0   | bytecode                |
-| `GrpcNetClient`      | [Grpc.Net.Client](https://www.nuget.org/packages/Grpc.Net.Client)                                                                                                                                 | ≥2.43.0 & < 3.0.0  | source                  |
-| `HttpClient`         | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest)   | *                  | source                  |
-| `MassTransit`        | [MassTransit](https://www.nuget.org/packages/MassTransit) **Not supported on .NET Framework**                                                                                                     | ≥8.0.0             | source                  |
-| `MongoDB`            | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core) **Not supported on .NET Framework**                                                                                     | ≥2.13.3 & < 3.0.0  | source & bytecode       |
-| `MySqlData`          | [MySql.Data](https://www.nuget.org/packages/MySql.Data) **Not supported on .NET Framework**                                                                                                       | ≥6.10.7            | source & bytecode \[1\] |
-| `Npgsql`             | [Npgsql](https://www.nuget.org/packages/Npgsql)                                                                                                                                                   | ≥6.0.0             | source                  |
-| `SqlClient`          | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient)                             | *                  | source                  |
-| `StackExchangeRedis` | [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis) **Not supported on .NET Framework**                                                                                     | ≥2.0.405 < 3.0.0   | source & bytecode       |
-| `Wcf`                | [System.ServiceModel](https://www.nuget.org/packages/System.ServiceModel) **No support for server side on .NET (Core)**. For configuration see [WCF Instrumentation Configuration](wcf-config.md) | * \[2\]            | source                  |
+| ID                   | Instrumented library                                                                                                                                                                            | Supported versions | Instrumentation type    |
+|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------|-------------------------|
+| `AspNet`             | ASP.NET Framework                                                                                                                                                                               | *                  | source                  |
+| `AspNet`             | ASP.NET Core                                                                                                                                                                                    | *                  | source                  |
+| `GraphQL`            | [GraphQL](https://www.nuget.org/packages/GraphQL/)                                                                                                                                              | ≥2.3.0 & < 3.0.0   | bytecode                |
+| `GrpcNetClient`      | [Grpc.Net.Client](https://www.nuget.org/packages/Grpc.Net.Client)                                                                                                                               | ≥2.43.0 & < 3.0.0  | source                  |
+| `HttpClient`         | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | *                  | source                  |
+| `MassTransit`        | [MassTransit](https://www.nuget.org/packages/MassTransit) **Not supported on .NET Framework**                                                                                                   | ≥8.0.0             | source                  |
+| `MongoDB`            | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core) **Not supported on .NET Framework**                                                                                   | ≥2.13.3 & < 3.0.0  | source & bytecode       |
+| `MySqlData`          | [MySql.Data](https://www.nuget.org/packages/MySql.Data) **Not supported on .NET Framework**                                                                                                     | ≥6.10.7            | source & bytecode \[1\] |
+| `Npgsql`             | [Npgsql](https://www.nuget.org/packages/Npgsql)                                                                                                                                                 | ≥6.0.0             | source                  |
+| `SqlClient`          | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient)                           | *                  | source                  |
+| `StackExchangeRedis` | [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis) **Not supported on .NET Framework**                                                                                   | ≥2.0.405 < 3.0.0   | source & bytecode       |
+| `Wcf`                | [System.ServiceModel](https://www.nuget.org/packages/System.ServiceModel) **No support for server side on .NET**. For configuration see [WCF Instrumentation Configuration](wcf-config.md)      | * \[2\]            | source                  |
 
 \[1\]: MySql.Data 8.0.31 and higher requires bytecode instrumentation.
 
-\[2\]: On .NET (Core) it supports [System.ServiceModel.Primitives](https://www.nuget.org/packages/System.ServiceModel.Primitives)
+\[2\]: On .NET it supports [System.ServiceModel.Primitives](https://www.nuget.org/packages/System.ServiceModel.Primitives)
 ≥ 4.7.0.
 
 ### Metrics instrumentations
@@ -198,18 +198,18 @@ environment variables to set up the profiler. See
 [.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/profiling/Profiler%20Loading.md)
 for more information.
 
-| .NET Framework environment variable | .NET (Core) environment variable | Description                                                                             | Required value                                                                                                                                                                                                         |
-|-------------------------------------|----------------------------------|-----------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `COR_ENABLE_PROFILING`              | `CORECLR_ENABLE_PROFILING`       | Enables the profiler.                                                                   | `1`                                                                                                                                                                                                                    |
-| `COR_PROFILER`                      | `CORECLR_PROFILER`               | CLSID of the profiler.                                                                  | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                                                                                                                                                                               |
-| `COR_PROFILER_PATH`                 | `CORECLR_PROFILER_PATH`          | Path to the profiler.                                                                   | `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows, `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.so` for Linux, `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.dylib` for macOS |
-| `COR_PROFILER_PATH_32`              | `CORECLR_PROFILER_PATH_32`       | Path to the 32-bit profiler. Bitness-specific paths take precedence over generic paths. | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows                                                                                                                                        |
-| `COR_PROFILER_PATH_64`              | `CORECLR_PROFILER_PATH_64`       | Path to the 64-bit profiler. Bitness-specific paths take precedence over generic paths. | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows                                                                                                                                        |
+| .NET Framework environment variable | .NET environment variable  | Description                                                                             | Required value                                                                                                                                                                                                         |
+|-------------------------------------|----------------------------|-----------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `COR_ENABLE_PROFILING`              | `CORECLR_ENABLE_PROFILING` | Enables the profiler.                                                                   | `1`                                                                                                                                                                                                                    |
+| `COR_PROFILER`                      | `CORECLR_PROFILER`         | CLSID of the profiler.                                                                  | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                                                                                                                                                                               |
+| `COR_PROFILER_PATH`                 | `CORECLR_PROFILER_PATH`    | Path to the profiler.                                                                   | `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows, `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.so` for Linux, `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.dylib` for macOS |
+| `COR_PROFILER_PATH_32`              | `CORECLR_PROFILER_PATH_32` | Path to the 32-bit profiler. Bitness-specific paths take precedence over generic paths. | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows                                                                                                                                        |
+| `COR_PROFILER_PATH_64`              | `CORECLR_PROFILER_PATH_64` | Path to the 64-bit profiler. Bitness-specific paths take precedence over generic paths. | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows                                                                                                                                        |
 
 Setting OpenTelemetry .NET Automatic Instrumentation as a .NET CLR Profiler
 is required for .NET Framework.
 
-On .NET (Core), the .NET CLR Profiler is used only for [bytecode instrumentation](#instrumentations).
+On .NET, the .NET CLR Profiler is used only for [bytecode instrumentation](#instrumentations).
 If having just [source instrumentation](#instrumentations) is acceptable,
 you can unset or remove the following environment variables:
 
@@ -228,13 +228,13 @@ OTEL_DOTNET_AUTO_INTEGRATIONS_FILE
 
 ## .NET Runtime
 
-On .NET (Core) it is required to set the
+On .NET it is required to set the
 [`DOTNET_STARTUP_HOOKS`](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)
 environment variable.
 
 The [`DOTNET_ADDITIONAL_DEPS`](https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md)
 and [`DOTNET_SHARED_STORE`](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
-environment variable are used to mitigate assembly version conflicts in .NET (Core).
+environment variable are used to mitigate assembly version conflicts in .NET.
 
 | Environment variable     | Required value                                                                 |
 |--------------------------|--------------------------------------------------------------------------------|
