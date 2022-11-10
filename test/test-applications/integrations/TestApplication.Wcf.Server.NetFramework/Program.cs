@@ -17,29 +17,22 @@
 using System;
 using System.ServiceModel;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace TestApplication.Wcf.Server.NetFramework;
 
 internal static class Program
 {
-    public static async Task Main()
+    public static void Main()
     {
         try
         {
             var serviceHost = new ServiceHost(typeof(StatusService));
             serviceHost.Open();
 
-            while (StatusService.TimesHit != 2)
-            {
-                Console.WriteLine($"[{DateTimeOffset.UtcNow:yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'}] Server waiting for calls");
-                Thread.Sleep(1000);
-            }
+            Console.WriteLine($"[{DateTimeOffset.UtcNow:yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'}] Server waiting for calls");
 
-            // Wait for the last request to be fully handled
-            await Task.Delay(2000);
-
-            serviceHost.Close();
+            var manualResetEvent = new ManualResetEvent(false);
+            manualResetEvent.WaitOne();
         }
         catch (Exception e)
         {
