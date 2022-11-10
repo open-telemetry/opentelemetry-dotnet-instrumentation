@@ -318,5 +318,10 @@ public class EnvironmentHelper
         CustomEnvironmentVariables["OTEL_DOTNET_AUTO_HOME"] = GetNukeBuildOutput();
         CustomEnvironmentVariables["OTEL_DOTNET_AUTO_INTEGRATIONS_FILE"] = Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE") ?? GetIntegrationsPath();
         CustomEnvironmentVariables["OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES"] = "TestApplication.*";
+
+        // exporters are disabled by default in order not to have errors in the logs
+        CustomEnvironmentVariables["OTEL_TRACES_EXPORTER"] = "none";
+        CustomEnvironmentVariables["OTEL_METRICS_EXPORTER"] = "none";
+        CustomEnvironmentVariables["OTEL_LOGS_EXPORTER"] = "none";
     }
 }
