@@ -51,11 +51,11 @@ internal static class Program
                 Status = Guid.NewGuid().ToString("N"),
             };
 
-            var time = DateTimeOffset.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+            var time = DateTimeOffset.UtcNow.ToString("o");
             var response = await client.PingAsync(
                 statusRequest).ConfigureAwait(false);
 
-            Console.WriteLine($"[{time}] Sending request with status {statusRequest.Status}. Server returned: {response?.ServerTime:yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'}");
+            Console.WriteLine($"[{time}] Sending request with status {statusRequest.Status}. Server returned: {response?.ServerTime:o}");
         }
         finally
         {

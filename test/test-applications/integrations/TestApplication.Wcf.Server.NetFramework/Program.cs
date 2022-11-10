@@ -29,7 +29,7 @@ internal static class Program
             var serviceHost = new ServiceHost(typeof(StatusService));
             serviceHost.Open();
 
-            Console.WriteLine($"[{DateTimeOffset.UtcNow:yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'}] Server waiting for calls");
+            Console.WriteLine($"[{DateTimeOffset.UtcNow:o}] Server waiting for calls");
 
             var manualResetEvent = new ManualResetEvent(false);
             manualResetEvent.WaitOne();
@@ -39,6 +39,6 @@ internal static class Program
             Console.WriteLine($"ServerException: {e}");
         }
 
-        Console.WriteLine($"[{DateTimeOffset.UtcNow:yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'}] WCFServer: exiting main()");
+        Console.WriteLine($"[{DateTimeOffset.UtcNow:o}] WCFServer: exiting main()");
     }
 }
