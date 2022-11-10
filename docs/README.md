@@ -73,7 +73,9 @@ supported operating systems and versions of
 and [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework).
 
 > Versions lower than `.NET Framework 4.6.2` are not supported.
-> .NET Core 3.1 is not supported. December 13, 2022, it will reach end of support.
+
+> `.NET Core 3.1` is not supported. Latest version supporting
+> it is [0.4.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.4.0-beta.1).
 
 CI tests run against the following operating systems:
 
