@@ -37,7 +37,7 @@ internal class AspNetInitializer
 
     private void InitializeOnFirstCall(ILifespanManager lifespanManager)
     {
-        if (Interlocked.Exchange(ref _initialized, value: 1) != 0)
+        if (Interlocked.Exchange(ref _initialized, value: 1) != default)
         {
             // InitializeOnFirstCall() was already called before
             return;

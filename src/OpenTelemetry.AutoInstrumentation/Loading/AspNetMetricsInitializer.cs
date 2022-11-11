@@ -23,7 +23,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loading;
 
 internal class AspNetMetricsInitializer
 {
-    private int _firstInitialization = 1;
+    private int _initialized;
 
     public AspNetMetricsInitializer(LazyInstrumentationLoader lazyInstrumentationLoader)
     {
@@ -33,7 +33,7 @@ internal class AspNetMetricsInitializer
 
     private void InitializeOnFirstCall(ILifespanManager lifespanManager)
     {
-        if (Interlocked.Exchange(ref _firstInitialization, value: 0) != 1)
+        if (Interlocked.Exchange(ref _initialized, value: 1) != default)
         {
             // InitializeOnFirstCall() was already called before
             return;

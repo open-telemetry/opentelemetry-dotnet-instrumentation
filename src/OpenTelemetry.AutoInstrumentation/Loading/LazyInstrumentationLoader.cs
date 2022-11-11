@@ -51,7 +51,7 @@ internal class LazyInstrumentationLoader : IDisposable
         private readonly string _requiredAssemblyName;
 
 #if NETFRAMEWORK
-        private int _firstInitialization = 1;
+        private int _initialized;
 #endif
 
         public OnAssemblyLoadInitializer(ILifespanManager lifespanManager, InstrumentationInitializer instrumentationInitializer)
@@ -63,6 +63,14 @@ internal class LazyInstrumentationLoader : IDisposable
             AppDomain.CurrentDomain.AssemblyLoad += CurrentDomain_AssemblyLoad;
 
 #if NETFRAMEWORK
+
+            // 1. NetFramework doesn't have startuphook that executes before the main content.
+            //    So, we must check at the startup, if the required assembly is already loaded.
+            // 2. There are multiple race conditions here between assembly loaded event and checking
+            //    if the required assembly is already loaded.
+            // 3. To eliminate risks that initializer doesn't invoke, we ensure that both strategies
+            //    are active at the same time, whichever executes first, determines the loading moment.
+
             var isRequiredAssemblyLoaded = AppDomain.CurrentDomain
                 .GetAssemblies()
                 .Any(x => GetAssemblyName(x) == _requiredAssemblyName);
@@ -86,9 +94,9 @@ internal class LazyInstrumentationLoader : IDisposable
         private void OnRequiredAssemblyDetected()
         {
 #if NETFRAMEWORK
-            if (Interlocked.Exchange(ref _firstInitialization, value: 0) != 1)
+            if (Interlocked.Exchange(ref _initialized, value: 1) != default)
             {
-                // InitializeOnFirstCall() was already called before
+                // OnRequiredAssemblyDetected() was already called before
                 return;
             }
 #endif
