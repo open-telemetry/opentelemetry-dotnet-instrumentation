@@ -26,7 +26,7 @@ internal class AspNetInitializer
 {
     private readonly PluginManager _pluginManager;
 
-    private int _firstInitialization = 1;
+    private int _initialized;
 
     public AspNetInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
     {
@@ -37,7 +37,7 @@ internal class AspNetInitializer
 
     private void InitializeOnFirstCall(ILifespanManager lifespanManager)
     {
-        if (Interlocked.Exchange(ref _firstInitialization, value: 0) != 1)
+        if (Interlocked.Exchange(ref _initialized, value: 1) != 0)
         {
             // InitializeOnFirstCall() was already called before
             return;
