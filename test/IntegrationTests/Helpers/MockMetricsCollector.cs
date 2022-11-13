@@ -145,6 +145,13 @@ public class MockMetricsCollector : IDisposable
         }
     }
 
+    internal void AssertEpmty()
+    {
+        List<Collected> items;
+        _metricsSnapshots.TryTake(out items, 1);
+        Assert.True(items is null, "metricsSnapshots has items");
+    }
+
     private static void FailMetrics(
         List<Expectation> missingExpectations,
         List<Collected> expectationsMet,

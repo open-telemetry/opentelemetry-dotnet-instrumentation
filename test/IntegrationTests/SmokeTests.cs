@@ -295,6 +295,38 @@ public class SmokeTests : TestHelper
 
         collector.AssertEmpty(5.Seconds());
     }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void TracesNoneInstrumentations()
+    {
+        using var collector = new MockSpansCollector(Output);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "none");
+        RunTestApplication();
+        collector.AssertEmpty(5.Seconds());
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void MetricsNoneInstrumentations()
+    {
+        using var collector = new MockMetricsCollector(Output);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "none");
+        RunTestApplication();
+        collector.AssertEpmty();
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void  AutoLogsDisabledInstrumentationsForILogger()
+    {
+        using var collector = new MockLogsCollector(Output);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_DISABLED_INSTRUMENTATIONS", "ILogger");
+        EnableBytecodeInstrumentation();
+        RunTestApplication();
+        collector.AssertEmpty(TimeSpan.FromSeconds(5));
+    }
+
 #endif
 
     private void VerifyTestApplicationInstrumented()
