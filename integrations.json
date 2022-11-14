@@ -68,7 +68,7 @@
           "minimum_major": 3,
           "minimum_minor": 1,
           "minimum_patch": 0,
-          "maximum_major": 6,
+          "maximum_major": 7,
           "maximum_minor": 65535,
           "maximum_patch": 65535
         },
