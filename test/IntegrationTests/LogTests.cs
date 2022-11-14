@@ -17,7 +17,6 @@
 #if !NETFRAMEWORK
 
 using System;
-using System.Threading.Tasks;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -55,7 +54,7 @@ public class LogTests : TestHelper
 
         if (enableClrProfiler)
         {
-            SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1");
+            EnableBytecodeInstrumentation();
         }
         else
         {
