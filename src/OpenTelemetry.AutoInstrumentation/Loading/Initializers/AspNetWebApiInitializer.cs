@@ -1,4 +1,4 @@
-// <copyright file="AspNetCoreMetricsInitializer.cs" company="OpenTelemetry Authors">
+// <copyright file="AspNetWebApiInitializer.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,26 +14,26 @@
 // limitations under the License.
 // </copyright>
 
-#if NET6_0_OR_GREATER
+#if NETFRAMEWORK
 
 using System;
 
-namespace OpenTelemetry.AutoInstrumentation.Loading;
+namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
-internal class AspNetCoreMetricsInitializer : InstrumentationInitializer
+internal class AspNetWebApiInitializer : InstrumentationInitializer
 {
-    public AspNetCoreMetricsInitializer()
-        : base("Microsoft.AspNetCore.Http")
+    private readonly Action<ILifespanManager> _initialize;
+
+    public AspNetWebApiInitializer(Action<ILifespanManager> initialize)
+        : base("System.Web.Http")
     {
+        _initialize = initialize;
     }
 
     public override void Initialize(ILifespanManager lifespanManager)
     {
-        var metricsType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreMetrics, OpenTelemetry.Instrumentation.AspNetCore");
-
-        var aspNetCoreMetrics = Activator.CreateInstance(metricsType);
-
-        lifespanManager.Track(aspNetCoreMetrics);
+        _initialize(lifespanManager);
     }
 }
+
 #endif

@@ -18,7 +18,7 @@ using System;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Instrumentation.Wcf;
 
-namespace OpenTelemetry.AutoInstrumentation.Loading;
+namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
 internal class WcfInitializer : InstrumentationInitializer
 {

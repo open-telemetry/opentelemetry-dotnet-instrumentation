@@ -4,7 +4,6 @@
   OpenTelemetry.AutoInstrumentation,
   OpenTelemetry.AutoInstrumentation.Loader,
   OpenTelemetry.Exporter.OpenTelemetryProtocol,
-  OpenTelemetry.Instrumentation.GrpcNetClient,
   OpenTelemetry.Instrumentation.Http,
   OpenTelemetry.Instrumentation.Process,
   OpenTelemetry.Instrumentation.Runtime,

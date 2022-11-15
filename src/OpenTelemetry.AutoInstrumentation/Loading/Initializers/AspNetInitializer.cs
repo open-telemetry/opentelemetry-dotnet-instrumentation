@@ -1,4 +1,4 @@
-// <copyright file="AspNetMetricsInitializer.cs" company="OpenTelemetry Authors">
+// <copyright file="AspNetInitializer.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,15 +18,19 @@
 
 using System;
 using System.Threading;
+using OpenTelemetry.AutoInstrumentation.Plugins;
 
-namespace OpenTelemetry.AutoInstrumentation.Loading;
+namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
-internal class AspNetMetricsInitializer
+internal class AspNetInitializer
 {
+    private readonly PluginManager _pluginManager;
+
     private int _initialized;
 
-    public AspNetMetricsInitializer(LazyInstrumentationLoader lazyInstrumentationLoader)
+    public AspNetInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
     {
+        _pluginManager = pluginManager;
         lazyInstrumentationLoader.Add(new AspNetMvcInitializer(InitializeOnFirstCall));
         lazyInstrumentationLoader.Add(new AspNetWebApiInitializer(InitializeOnFirstCall));
     }
@@ -39,11 +43,14 @@ internal class AspNetMetricsInitializer
             return;
         }
 
-        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.AspNet.AspNetMetrics, OpenTelemetry.Instrumentation.AspNet");
-        var instrumentation = Activator.CreateInstance(instrumentationType);
+        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.AspNet.AspNetInstrumentation, OpenTelemetry.Instrumentation.AspNet");
+
+        var options = new OpenTelemetry.Instrumentation.AspNet.AspNetInstrumentationOptions();
+        _pluginManager.ConfigureOptions(options);
+
+        var instrumentation = Activator.CreateInstance(instrumentationType, args: options);
 
         lifespanManager.Track(instrumentation);
     }
 }
-
 #endif

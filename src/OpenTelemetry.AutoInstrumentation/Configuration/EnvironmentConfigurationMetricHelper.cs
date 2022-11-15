@@ -18,6 +18,7 @@ using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation.Loading;
+using OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Metrics;
