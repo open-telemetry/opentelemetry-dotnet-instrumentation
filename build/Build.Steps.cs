@@ -347,9 +347,8 @@ partial class Build
                     .EnableTrxLogOutput(GetResultsDirectory(project))
                     .SetTargetPath(project)
                     .DisableRestore()
-                    .SetTargets("VSTest")
-                    .SetProperty("VSTestNoBuild", true)
-                    );
+                    .RunTests()
+                );
             }
         });
 

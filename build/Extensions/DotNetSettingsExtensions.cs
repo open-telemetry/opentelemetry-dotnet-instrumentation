@@ -48,11 +48,19 @@ internal static class DotNetSettingsExtensions
             .SetProperty("VSTestLogger", "trx")
             .SetProperty("VSTestResultsDirectory", resultsDirectory);
     }
+
     public static DotNetMSBuildSettings SetBlameHangTimeout(this DotNetMSBuildSettings settings, string timeout)
     {
         return settings
             .SetProperty("VSTestBlameHang", true)
             .SetProperty("VSTestBlameHangTimeout", timeout);
+    }
+
+    public static DotNetMSBuildSettings RunTests(this DotNetMSBuildSettings settings)
+    {
+        return settings
+            .SetTargets("VSTest")
+            .SetProperty("VSTestNoBuild", true);
     }
 
     public static DotNetMSBuildSettings SetFilter(this DotNetMSBuildSettings settings, string filter)
