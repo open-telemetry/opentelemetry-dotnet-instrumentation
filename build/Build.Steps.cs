@@ -14,7 +14,6 @@ using Nuke.Common.Tools.MSBuild;
 using Nuke.Common.Tools.Npm;
 using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Utilities.Collections;
-using static DotNetMSBuildTasks;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
@@ -132,7 +131,7 @@ partial class Build
 
             DotNetMSBuild(x => x
                 .SetTargetPath(MsBuildProject)
-                .SetTargetPlatform(Platform)
+                .SetPlatform(Platform)
                 .SetConfiguration(BuildConfiguration)
                 .DisableRestore()
                 .SetTargets("BuildCsharpTest"));
@@ -336,22 +335,21 @@ partial class Build
                 return;
             }
 
-            IEnumerable<TargetFramework> frameworks = IsWin ? TestFrameworks : TestFrameworks.ExceptNetFramework();
+            var frameworks = IsWin ? TestFrameworks : TestFrameworks.ExceptNetFramework();
 
             for (int i = 0; i < TestCount; i++)
             {
-                DotNetTest(config => config
+                DotNetMSBuild(config => config
                     .SetConfiguration(BuildConfiguration)
-                    .SetTargetPlatform(Platform)
+                    .SetPlatform(Platform)
                     .SetFilter(AndFilter(TestNameFilter(), ContainersFilter()))
                     .SetBlameHangTimeout("5m")
                     .EnableTrxLogOutput(GetResultsDirectory(project))
-                    .SetProjectFile(project)
-                    .EnableNoRestore()
-                    .EnableNoBuild()
-                    .CombineWith(frameworks, (s, fx) => s
-                        .SetFramework(fx)
-                    ));
+                    .SetTargetPath(project)
+                    .DisableRestore()
+                    .SetTargets("VSTest")
+                    .SetProperty("VSTestNoBuild", true)
+                    );
             }
         });
 
