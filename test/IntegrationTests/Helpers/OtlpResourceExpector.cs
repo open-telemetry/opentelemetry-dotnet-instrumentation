@@ -80,6 +80,25 @@ public class OtlpResourceExpector : IDisposable
         }
     }
 
+    internal bool CheckForAnyResourceAttributes(TimeSpan? timeout = null)
+    {
+        timeout ??= DefaultWaitTimeout;
+
+        try
+        {
+            if (!_resourceAttributesEvent.WaitOne(timeout.Value))
+            {
+                return false;
+            }
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            throw;
+        }
+
+        return true;
+    }
+
     private static void AssertResourceMetrics(List<ResourceExpectation> resourceExpectations, RepeatedField<KeyValue> actualResourceAttributes)
     {
         var missingExpectations = new List<ResourceExpectation>(resourceExpectations);

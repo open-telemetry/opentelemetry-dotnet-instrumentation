@@ -17,9 +17,11 @@
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using IntegrationTests.Helpers;
+using OpenTelemetry.AutoInstrumentation.Configuration;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -296,6 +298,8 @@ public class SmokeTests : TestHelper
         collector.AssertEmpty(5.Seconds());
     }
 
+#endif
+
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void TracesNoneInstrumentations()
@@ -303,7 +307,7 @@ public class SmokeTests : TestHelper
         using var collector = new MockSpansCollector(Output);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "none");
         RunTestApplication();
-        collector.AssertEmpty(5.Seconds());
+        collector.AssertEmpty(1.Seconds());
     }
 
     [Fact]
@@ -313,21 +317,63 @@ public class SmokeTests : TestHelper
         using var collector = new MockMetricsCollector(Output);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "none");
         RunTestApplication();
-        collector.AssertEpmty();
+        collector.AssertEpmty(1.Seconds());
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void  AutoLogsDisabledInstrumentationsForILogger()
+    public void LogsDisabledInstrumentation()
     {
         using var collector = new MockLogsCollector(Output);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_DISABLED_INSTRUMENTATIONS", "ILogger");
         EnableBytecodeInstrumentation();
         RunTestApplication();
-        collector.AssertEmpty(TimeSpan.FromSeconds(5));
+        collector.AssertEmpty(1.Seconds());
     }
 
-#endif
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void MetricsDisabledInstrumentation()
+    {
+        using var collector = new MockMetricsCollector(Output);
+        SetExporter(collector);
+
+        StringBuilder sbToDisableMetrics = new StringBuilder();
+        sbToDisableMetrics.Append(MetricInstrumentation.NetRuntime.ToString())
+        .Append(",").Append(MetricInstrumentation.HttpClient.ToString());
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS", sbToDisableMetrics.ToString());
+        EnableBytecodeInstrumentation();
+        RunTestApplication();
+        Assert.False(
+            collector.CheckInstrumentationScopeIsAbsent(
+            new List<string>() { "OpenTelemetry.Instrumentation.Process" },
+            1.Seconds()),
+            "Didn't find metrics instrumentation while it should be present.");
+        Assert.True(
+            collector.CheckInstrumentationScopeIsAbsent(
+            new List<string>() { "OpenTelemetry.Instrumentation.NetRuntime", "OpenTelemetry.Instrumentation.HttpClient" },
+            1.Seconds()),
+            "Found Metrics instrumentation while it should be disabled.");
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void TracesDisabledInstrumentation()
+    {
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+
+        StringBuilder sbToDisableMetrics = new StringBuilder();
+        sbToDisableMetrics.Append(TracerInstrumentation.HttpClient.ToString())
+        .Append(",").Append(TracerInstrumentation.AspNet.ToString());
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS", sbToDisableMetrics.ToString());
+        RunTestApplication();
+        Assert.False(
+            collector.ResourceExpector.CheckForAnyResourceAttributes(1.Seconds()),
+            "There shouldn't be any tracing.");
+    }
 
     private void VerifyTestApplicationInstrumented()
     {

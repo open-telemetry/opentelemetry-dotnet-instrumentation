@@ -145,11 +145,39 @@ public class MockMetricsCollector : IDisposable
         }
     }
 
-    internal void AssertEpmty()
+    internal bool CheckInstrumentationScopeIsAbsent(List<string> instrumentationScopes, TimeSpan? timeout = null)
     {
-        List<Collected> items;
-        _metricsSnapshots.TryTake(out items, 1);
-        Assert.True(items is null, "metricsSnapshots has items");
+        timeout ??= DefaultWaitTimeout;
+        var cts = new CancellationTokenSource();
+        try
+        {
+            cts.CancelAfter(timeout.Value);
+            foreach (var collectedMetricsSnapshot in _metricsSnapshots.GetConsumingEnumerable(cts.Token))
+            {
+                foreach (var collected in collectedMetricsSnapshot)
+                {
+                    if (instrumentationScopes.Contains(collected.InstrumentationScopeName))
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // NO-OP
+        }
+
+        return true;
+    }
+
+    internal void AssertEpmty(TimeSpan? timeout = null)
+    {
+        timeout ??= DefaultWaitTimeout;
+        if (_metricsSnapshots.TryTake(out var metricsResource, timeout.Value))
+        {
+            Assert.Fail($"Expected nothing, but got: {metricsResource}");
+        }
     }
 
     private static void FailMetrics(
