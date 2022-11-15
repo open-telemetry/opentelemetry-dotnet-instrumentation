@@ -1,4 +1,4 @@
-// <copyright file="AspNetWebApiInitializer.cs" company="OpenTelemetry Authors">
+// <copyright file="AspNetMvcInitializer.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,14 +18,14 @@
 
 using System;
 
-namespace OpenTelemetry.AutoInstrumentation.Loading;
+namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
-internal class AspNetWebApiInitializer : InstrumentationInitializer
+internal class AspNetMvcInitializer : InstrumentationInitializer
 {
     private readonly Action<ILifespanManager> _initialize;
 
-    public AspNetWebApiInitializer(Action<ILifespanManager> initialize)
-        : base("System.Web.Http")
+    public AspNetMvcInitializer(Action<ILifespanManager> initialize)
+        : base("System.Web.Mvc")
     {
         _initialize = initialize;
     }
