@@ -18,12 +18,6 @@ const WSTRING integrations_path = WStr("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE");
 // "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\" or "/opt/opentelemetry/"
 const WSTRING profiler_home_path = WStr("OTEL_DOTNET_AUTO_HOME");
 
-// Sets the filename of executables the profiler can attach to.
-// If not defined (default), the profiler will attach to any process.
-// Supports multiple values separated with comma, for example:
-// "MyApp.exe,dotnet.exe"
-const WSTRING include_process_names = WStr("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES");
-
 // Sets the filename of executables the profiler cannot attach to.
 // If not defined (default), the profiler will attach to any process.
 // Supports multiple values separated with comma, for example:

@@ -116,13 +116,8 @@ public class EnvironmentHelper
         return !string.IsNullOrEmpty(env);
     }
 
-    public void SetEnvironmentVariables(StringDictionary environmentVariables, string processToProfile)
+    public void SetEnvironmentVariables(StringDictionary environmentVariables)
     {
-        if (!string.IsNullOrEmpty(processToProfile))
-        {
-            environmentVariables["OTEL_DOTNET_AUTO_INCLUDE_PROCESSES"] = Path.GetFileName(processToProfile);
-        }
-
         foreach (var key in CustomEnvironmentVariables.Keys)
         {
             environmentVariables[key] = CustomEnvironmentVariables[key];
