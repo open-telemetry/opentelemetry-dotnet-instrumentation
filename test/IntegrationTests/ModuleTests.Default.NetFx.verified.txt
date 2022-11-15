@@ -4,8 +4,6 @@
   OpenTelemetry.AutoInstrumentation,
   OpenTelemetry.AutoInstrumentation.Loader,
   OpenTelemetry.Exporter.OpenTelemetryProtocol,
-  OpenTelemetry.Instrumentation.AspNet,
-  OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule,
   OpenTelemetry.Instrumentation.GrpcNetClient,
   OpenTelemetry.Instrumentation.Http,
   OpenTelemetry.Instrumentation.Process,
