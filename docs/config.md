@@ -2,11 +2,10 @@
 
 ## Global settings
 
-| Environment variable                 | Description                                                                                                                                                                                                                                                                                    | Default value |
-|--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| `OTEL_DOTNET_AUTO_HOME`              | Installation location.                                                                                                                                                                                                                                                                         |               |
-| `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES` | Names of the executable files that the profiler can instrument. Supports multiple comma-separated values, for example: `MyApp.exe,dotnet.exe`. If unset, the profiler attaches to all processes by default.                                                                                    |               |
-| `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` | Names of the executable files that the profiler cannot instrument. Supports multiple comma-separated values, for example: `ReservedProcess.exe,powershell.exe`. The list is processed after `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`. If unset, the profiler attaches to all processes by default. |               |
+| Environment variable                 | Description                                                                                                                                                                                                                  | Default value |
+|--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| `OTEL_DOTNET_AUTO_HOME`              | Installation location.                                                                                                                                                                                                       |               |
+| `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` | Names of the executable files that the profiler cannot instrument. Supports multiple comma-separated values, for example: `ReservedProcess.exe,powershell.exe`. If unset, the profiler attaches to all processes by default. |               |
 
 ## Resources
 
@@ -236,11 +235,11 @@ The [`DOTNET_ADDITIONAL_DEPS`](https://github.com/dotnet/runtime/blob/main/docs/
 and [`DOTNET_SHARED_STORE`](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
 environment variable are used to mitigate assembly version conflicts in .NET.
 
-| Environment variable     | Required value                                                                 |
-|--------------------------|--------------------------------------------------------------------------------|
+| Environment variable     | Required value                                                          |
+|--------------------------|-------------------------------------------------------------------------|
 | `DOTNET_STARTUP_HOOKS`   | `$INSTALL_DIR/net6.0/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
-| `DOTNET_ADDITIONAL_DEPS` | `$INSTALL_DIR/AdditionalDeps`                                                  |
-| `DOTNET_SHARED_STORE`    | `$INSTALL_DIR/store`                                                           |
+| `DOTNET_ADDITIONAL_DEPS` | `$INSTALL_DIR/AdditionalDeps`                                           |
+| `DOTNET_SHARED_STORE`    | `$INSTALL_DIR/store`                                                    |
 
 ## Internal logs
 

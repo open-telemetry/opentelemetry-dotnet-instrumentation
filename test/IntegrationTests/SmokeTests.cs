@@ -97,30 +97,6 @@ public class SmokeTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void ApplicationIsNotIncluded()
-    {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES", "dotnet,dotnet.exe");
-
-#if NETFRAMEWORK
-        VerifyTestApplicationNotInstrumented();
-#else
-        // FIXME: OTEL_DOTNET_AUTO_INCLUDE_PROCESSES does not work on .NET Core.
-        // https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/895
-        VerifyTestApplicationInstrumented();
-#endif
-    }
-
-    [Fact]
-    [Trait("Category", "EndToEnd")]
-    public void ApplicationIsIncluded()
-    {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_INCLUDE_PROCESSES", $"{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
-
-        VerifyTestApplicationInstrumented();
-    }
-
-    [Fact]
-    [Trait("Category", "EndToEnd")]
     public void SubmitMetrics()
     {
         using var collector = new MockMetricsCollector(Output);
