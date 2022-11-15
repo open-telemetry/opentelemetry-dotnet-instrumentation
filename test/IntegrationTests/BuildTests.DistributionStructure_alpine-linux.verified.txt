@@ -1,5 +1,4 @@
-﻿Received: BuildTests.DistributionStructure_alpine-linux.DotNet6_0.received.txt
-[
+﻿[
   /AdditionalDeps/shared/Microsoft.NETCore.App/6.0.0/OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
   /AdditionalDeps/shared/Microsoft.NETCore.App/7.0.0/OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
   /OpenTelemetry.AutoInstrumentation.Native.so,
