@@ -30,6 +30,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Add support for .NET 7.
 - Error message on the native log if bytecode instrumentation type is missing all
   instrumentation methods [#1499](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1499).
 - Plugins can overwrite OpenTelemetry dotnet SDK instrumentation and exporter options.

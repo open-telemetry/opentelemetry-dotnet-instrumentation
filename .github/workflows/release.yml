@@ -18,6 +18,7 @@ jobs:
         with:
           dotnet-version: | 
             6.0.x
+            7.0.x
       - run: ./build.cmd
       - name: Upload binaries
         uses: actions/upload-artifact@v3.1.1
