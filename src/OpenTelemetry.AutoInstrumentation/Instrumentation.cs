@@ -139,7 +139,7 @@ internal static class Instrumentation
                 var builder = Sdk
                     .CreateMeterProviderBuilder()
                     .SetResourceBuilder(ResourceFactory.Create())
-                    .UseEnvironmentVariables(MetricSettings, _pluginManager)
+                    .UseEnvironmentVariables(LazyInstrumentationLoader, MetricSettings, _pluginManager)
                     .InvokePlugins(_pluginManager);
 
                 _meterProvider = builder.Build();
