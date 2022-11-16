@@ -1,4 +1,4 @@
-// <copyright file="SqlClientTests.cs" company="OpenTelemetry Authors">
+// <copyright file="SqlClientSystemTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#if NETFRAMEWORK
+
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -21,12 +23,12 @@ using Xunit.Abstractions;
 namespace IntegrationTests;
 
 [Collection(SqlServerCollection.Name)]
-public class SqlClientTests : TestHelper
+public class SqlClientSystemTests : TestHelper
 {
     private readonly SqlServerFixture _sqlServerFixture;
 
-    public SqlClientTests(ITestOutputHelper output, SqlServerFixture sqlServerFixture)
-        : base("SqlClient", output)
+    public SqlClientSystemTests(ITestOutputHelper output, SqlServerFixture sqlServerFixture)
+        : base("SqlClient.NetFramework", output)
     {
         _sqlServerFixture = sqlServerFixture;
     }
@@ -48,3 +50,5 @@ public class SqlClientTests : TestHelper
         collector.AssertExpectations();
     }
 }
+
+#endif
