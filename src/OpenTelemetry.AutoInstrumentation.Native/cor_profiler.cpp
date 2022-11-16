@@ -59,7 +59,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     }
     else
     {
-        Logger::Warn("OpenTelemetry TRACER DIAGNOSTICS - Profiler disabled: .NET 5.0 runtime or greater is required on this "
+        Logger::Warn("OpenTelemetry .NET Automatic Instrumentation Diagnostics - Profiler disabled: .NET 5.0 runtime or greater is required on this "
                      "architecture.");
         return E_FAIL;
     }
@@ -71,7 +71,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     // attach profiler only if this process's name is NOT on the list
     if (!exclude_process_names.empty() && Contains(exclude_process_names, process_name))
     {
-        Logger::Info("OpenTelemetry TRACER DIAGNOSTICS - Profiler disabled: ", process_name, " found in ",
+        Logger::Info("OpenTelemetry .NET Automatic Instrumentation Diagnostics - Profiler disabled: ", process_name, " found in ",
                      environment::exclude_process_names, ".");
         return E_FAIL;
     }
@@ -80,7 +80,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     HRESULT hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo7), (void**) &this->info_);
     if (FAILED(hr))
     {
-        Logger::Warn("OpenTelemetry TRACER DIAGNOSTICS - Failed to attach profiler: interface ICorProfilerInfo7 not found.");
+        Logger::Warn("OpenTelemetry .NET Automatic Instrumentation Diagnostics - Failed to attach profiler: interface ICorProfilerInfo7 not found.");
         return E_FAIL;
     }
 
@@ -137,7 +137,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
         if (app_pool_id_value.size() > 1 && app_pool_id_value.at(0) == '~')
         {
-            Logger::Info("OpenTelemetry TRACER DIAGNOSTICS - Profiler disabled: ", environment::azure_app_services_app_pool_id, " ",
+            Logger::Info("OpenTelemetry .NET Automatic Instrumentation Diagnostics - Profiler disabled: ", environment::azure_app_services_app_pool_id, " ",
                          app_pool_id_value, " is recognized as an Azure App Services infrastructure process.");
             return E_FAIL;
         }
@@ -147,7 +147,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
         if (cli_telemetry_profile_value == WStr("AzureKudu"))
         {
-            Logger::Info("OpenTelemetry TRACER DIAGNOSTICS - Profiler disabled: ", app_pool_id_value,
+            Logger::Info("OpenTelemetry .NET Automatic Instrumentation Diagnostics - Profiler disabled: ", app_pool_id_value,
                          " is recognized as Kudu, an Azure App Services reserved process.");
             return E_FAIL;
         }
@@ -207,7 +207,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     hr = this->info_->SetEventMask2(event_mask, COR_PRF_HIGH_ADD_ASSEMBLY_REFERENCES);
     if (FAILED(hr))
     {
-        Logger::Warn("OpenTelemetry TRACER DIAGNOSTICS - Failed to attach profiler: unable to set event mask.");
+        Logger::Warn("OpenTelemetry .NET Automatic Instrumentation Diagnostics - Failed to attach profiler: unable to set event mask.");
         return E_FAIL;
     }
 
