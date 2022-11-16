@@ -7,6 +7,5 @@
   OpenTelemetry.Exporter.OpenTelemetryProtocol,
   OpenTelemetry.Instrumentation.Http,
   OpenTelemetry.Instrumentation.Process,
-  OpenTelemetry.Instrumentation.Runtime,
-  OpenTelemetry.Instrumentation.SqlClient
+  OpenTelemetry.Instrumentation.Runtime
 ]
