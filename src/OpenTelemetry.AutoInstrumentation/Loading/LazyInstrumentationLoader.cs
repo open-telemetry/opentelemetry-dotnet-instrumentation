@@ -15,6 +15,9 @@
 // </copyright>
 
 using System;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading;
@@ -47,34 +50,75 @@ internal class LazyInstrumentationLoader : IDisposable
         private readonly ILifespanManager _lifespanManager;
         private readonly string _requiredAssemblyName;
 
+#if NETFRAMEWORK
+        private int _initialized;
+#endif
+
         public OnAssemblyLoadInitializer(ILifespanManager lifespanManager, InstrumentationInitializer instrumentationInitializer)
         {
             _instrumentationInitializer = instrumentationInitializer;
             _lifespanManager = lifespanManager;
             _requiredAssemblyName = instrumentationInitializer.RequiredAssemblyName;
+
             AppDomain.CurrentDomain.AssemblyLoad += CurrentDomain_AssemblyLoad;
+
+#if NETFRAMEWORK
+
+            // 1. NetFramework doesn't have startuphook that executes before the main content.
+            //    So, we must check at the startup, if the required assembly is already loaded.
+            // 2. There are multiple race conditions here between assembly loaded event and checking
+            //    if the required assembly is already loaded.
+            // 3. To eliminate risks that initializer doesn't invoke, we ensure that both strategies
+            //    are active at the same time, whichever executes first, determines the loading moment.
+
+            var isRequiredAssemblyLoaded = AppDomain.CurrentDomain
+                .GetAssemblies()
+                .Any(x => GetAssemblyName(x) == _requiredAssemblyName);
+            if (isRequiredAssemblyLoaded)
+            {
+                OnRequiredAssemblyDetected();
+            }
+#endif
         }
 
         private void CurrentDomain_AssemblyLoad(object sender, AssemblyLoadEventArgs args)
         {
-            var assemblyName = args.LoadedAssembly.FullName.Split(new[] { ',' }, count: 2)[0];
+            var assemblyName = GetAssemblyName(args.LoadedAssembly);
 
             if (_requiredAssemblyName == assemblyName)
             {
-                var initializerName = _instrumentationInitializer.GetType().Name;
-                Logger.Debug("'{0}' started", initializerName);
-
-                try
-                {
-                    _instrumentationInitializer.Initialize(_lifespanManager);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error(ex, "'{0}' failed", initializerName);
-                }
-
-                AppDomain.CurrentDomain.AssemblyLoad -= CurrentDomain_AssemblyLoad;
+                OnRequiredAssemblyDetected();
             }
+        }
+
+        private void OnRequiredAssemblyDetected()
+        {
+#if NETFRAMEWORK
+            if (Interlocked.Exchange(ref _initialized, value: 1) != default)
+            {
+                // OnRequiredAssemblyDetected() was already called before
+                return;
+            }
+#endif
+
+            AppDomain.CurrentDomain.AssemblyLoad -= CurrentDomain_AssemblyLoad;
+
+            var initializerName = _instrumentationInitializer.GetType().Name;
+            Logger.Debug("'{0}' started", initializerName);
+
+            try
+            {
+                _instrumentationInitializer.Initialize(_lifespanManager);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "'{0}' failed", initializerName);
+            }
+        }
+
+        private string GetAssemblyName(Assembly assembly)
+        {
+            return assembly.FullName.Split(new[] { ',' }, count: 2)[0];
         }
     }
 }

@@ -18,6 +18,7 @@ using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation.Loading;
+using OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Trace;
 
@@ -37,8 +38,8 @@ internal static class EnvironmentConfigurationTracerHelper
         {
             _ = enabledInstrumentation switch
             {
-                TracerInstrumentation.AspNet => Wrappers.AddSdkAspNetInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
-                TracerInstrumentation.GrpcNetClient => Wrappers.AddGrpcClientInstrumentation(builder, pluginManager),
+                TracerInstrumentation.AspNet => Wrappers.AddAspNetInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
+                TracerInstrumentation.GrpcNetClient => Wrappers.AddGrpcClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, pluginManager),
                 TracerInstrumentation.Npgsql => builder.AddSource("Npgsql"),
                 TracerInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, pluginManager),
@@ -102,10 +103,12 @@ internal static class EnvironmentConfigurationTracerHelper
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddSdkAspNetInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
+        public static TracerProviderBuilder AddAspNetInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
 #if NET462
-            builder.AddAspNetInstrumentation(pluginManager.ConfigureOptions);
+            new AspNetInitializer(lazyInstrumentationLoader, pluginManager);
+
+            builder.AddSource(OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule.AspNetSourceName);
 #elif NET6_0_OR_GREATER
             lazyInstrumentationLoader.Add(new AspNetCoreInitializer(pluginManager));
 
@@ -132,13 +135,14 @@ internal static class EnvironmentConfigurationTracerHelper
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddGrpcClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager)
+        public static TracerProviderBuilder AddGrpcClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-            return builder.AddGrpcClientInstrumentation(options =>
-            {
-                options.SuppressDownstreamInstrumentation = !Instrumentation.TracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.HttpClient);
-                pluginManager.ConfigureOptions(options);
-            });
+            lazyInstrumentationLoader.Add(new GrpcClientInitializer(pluginManager));
+
+            builder.AddSource("OpenTelemetry.Instrumentation.GrpcNetClient");
+            builder.AddLegacySource("Grpc.Net.Client.GrpcOut");
+
+            return builder;
         }
 
         // Exporters

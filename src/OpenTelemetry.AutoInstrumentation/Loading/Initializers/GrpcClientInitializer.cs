@@ -1,4 +1,4 @@
-// <copyright file="AspNetCoreInitializer.cs" company="OpenTelemetry Authors">
+// <copyright file="GrpcClientInitializer.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,34 +14,33 @@
 // limitations under the License.
 // </copyright>
 
-#if NET6_0_OR_GREATER
 using System;
+using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 
-namespace OpenTelemetry.AutoInstrumentation.Loading;
+namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
-internal class AspNetCoreInitializer : InstrumentationInitializer
+internal class GrpcClientInitializer : InstrumentationInitializer
 {
     private readonly PluginManager _pluginManager;
 
-    public AspNetCoreInitializer(PluginManager pluginManager)
-        : base("Microsoft.AspNetCore.Http")
+    public GrpcClientInitializer(PluginManager pluginManager)
+        : base("Grpc.Net.Client")
     {
         _pluginManager = pluginManager;
     }
 
     public override void Initialize(ILifespanManager lifespanManager)
     {
-        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentation, OpenTelemetry.Instrumentation.AspNetCore");
-        var httpInListenerType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.Implementation.HttpInListener, OpenTelemetry.Instrumentation.AspNetCore");
+        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientInstrumentation, OpenTelemetry.Instrumentation.GrpcNetClient");
 
-        var options = new OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentationOptions();
+        var options = new OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientInstrumentationOptions();
+        options.SuppressDownstreamInstrumentation = !Instrumentation.TracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.HttpClient);
+
         _pluginManager.ConfigureOptions(options);
 
-        var httpInListener = Activator.CreateInstance(httpInListenerType, args: options);
-        var instrumentation = Activator.CreateInstance(instrumentationType, args: httpInListener);
+        var instrumentation = Activator.CreateInstance(instrumentationType, options);
 
         lifespanManager.Track(instrumentation);
     }
 }
-#endif

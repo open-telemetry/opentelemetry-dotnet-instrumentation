@@ -49,8 +49,7 @@ Make sure that you have not enabled the automatic instrumentation globally
 by setting the environment variables at system or user scope.
 
 If the system or user scope is intended, use the `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`
-and `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES` environment variables to include or exclude
-applications from the automatic instrumentation.
+environment variables to exclude applications from the automatic instrumentation.
 
 ## Collect debug logs
 

@@ -19,7 +19,7 @@
 using System;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 
-namespace OpenTelemetry.AutoInstrumentation.Loading;
+namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
 internal class MySqlDataInitializer : InstrumentationInitializer
 {
