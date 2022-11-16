@@ -17,11 +17,9 @@
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
-using System.Text;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using IntegrationTests.Helpers;
-using OpenTelemetry.AutoInstrumentation.Configuration;
 using Xunit;
 using Xunit.Abstractions;
 
