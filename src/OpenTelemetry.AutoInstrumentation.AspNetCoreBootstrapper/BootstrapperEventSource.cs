@@ -25,7 +25,7 @@ namespace OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper;
 internal class BootstrapperEventSource : EventSource
 {
 #pragma warning disable SA1401 // Fields should be private
-    public static BootstrapperEventSource Log = new BootstrapperEventSource();
+    public static readonly BootstrapperEventSource Log = new BootstrapperEventSource();
 #pragma warning restore SA1401 // Fields should be private
 
     /// <summary>Logs as Trace level message.</summary>
