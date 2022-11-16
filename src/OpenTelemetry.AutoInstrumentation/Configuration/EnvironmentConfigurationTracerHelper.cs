@@ -42,7 +42,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.GrpcNetClient => Wrappers.AddGrpcClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, pluginManager),
                 TracerInstrumentation.Npgsql => builder.AddSource("Npgsql"),
-                TracerInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, pluginManager),
+                TracerInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.Wcf => Wrappers.AddWcfInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
 #if NET6_0_OR_GREATER
                 TracerInstrumentation.MassTransit => builder.AddSource("MassTransit"),
@@ -129,9 +129,11 @@ internal static class EnvironmentConfigurationTracerHelper
 #endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddSqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager)
+        public static TracerProviderBuilder AddSqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-            return builder.AddSqlClientInstrumentation(pluginManager.ConfigureOptions);
+            lazyInstrumentationLoader.Add(new SqlClientInitializer(pluginManager));
+
+            return builder.AddSource("OpenTelemetry.SqlClient");
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

@@ -36,7 +36,7 @@ submit an issue to request its inclusion.
 | [Entity Framework Core](https://docs.microsoft.com/ef/core/) | | | | Needs investigation. It might be implicitly supported based on the configured [database provider](https://docs.microsoft.com/ef/core/providers/). |
 | [Dapper](https://github.com/DapperLib/Dapper) | | | | Needs investigation. It might be implicitly supported based on the configured [database provider](https://github.com/DapperLib/Dapper#will-dapper-work-with-my-db-provider). |
 | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) | Yes | | [MS SQL Server](https://www.microsoft.com/sql-server/sql-server-2019) | |
-| [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) | Yes | | | |
+| [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient) | | | | |
 | [MySql.Data](https://dev.mysql.com/doc/connector-net/en/connector-net-introduction.html) | Partial[^not_on_framework] | | | This is the official [MySQL](https://dev.mysql.com/) library. |
 | [MySqlConnector](https://mysqlconnector.net/) | | | | Seems to be the [recommended library for MariaDB](https://mariadb.com/kb/en/mysqlconnector-for-adonet/). |
 | [Npgsql](https://www.npgsql.org/) | Yes | | [PostgreSQL](https://www.postgresql.org/) | |
