@@ -30,7 +30,7 @@ public class InstrumentedProcessHelper
 
         var startInfo = new ProcessStartInfo(executable, arguments ?? string.Empty);
 
-        environmentHelper.SetEnvironmentVariables(startInfo.EnvironmentVariables, executable);
+        environmentHelper.SetEnvironmentVariables(startInfo.EnvironmentVariables);
 
         startInfo.UseShellExecute = false;
         startInfo.CreateNoWindow = true;

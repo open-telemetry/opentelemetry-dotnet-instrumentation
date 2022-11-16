@@ -66,17 +66,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 #endif
 
     const auto process_name = GetCurrentProcessName();
-    const auto include_process_names = GetEnvironmentValues(environment::include_process_names);
-
-    // if there is a process inclusion list, attach profiler only if this
-    // process's name is on the list
-    if (!include_process_names.empty() && !Contains(include_process_names, process_name))
-    {
-        Logger::Info("OpenTelemetry TRACER DIAGNOSTICS - Profiler disabled: ", process_name, " not found in ",
-                     environment::include_process_names, ".");
-        return E_FAIL;
-    }
-
     const auto exclude_process_names = GetEnvironmentValues(environment::exclude_process_names);
 
     // attach profiler only if this process's name is NOT on the list

@@ -20,6 +20,7 @@ using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Loading;
+using OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Context.Propagation;
@@ -139,7 +140,7 @@ internal static class Instrumentation
                 var builder = Sdk
                     .CreateMeterProviderBuilder()
                     .SetResourceBuilder(ResourceFactory.Create())
-                    .UseEnvironmentVariables(MetricSettings, _pluginManager)
+                    .UseEnvironmentVariables(LazyInstrumentationLoader, MetricSettings, _pluginManager)
                     .InvokePlugins(_pluginManager);
 
                 _meterProvider = builder.Build();

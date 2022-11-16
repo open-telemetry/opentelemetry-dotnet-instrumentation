@@ -17,6 +17,8 @@
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using OpenTelemetry.AutoInstrumentation.Loading;
+using OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Metrics;
@@ -27,7 +29,11 @@ internal static class EnvironmentConfigurationMetricHelper
 {
     private static readonly ILogger Logger = OtelLogging.GetLogger();
 
-    public static MeterProviderBuilder UseEnvironmentVariables(this MeterProviderBuilder builder, MetricSettings settings, PluginManager pluginManager)
+    public static MeterProviderBuilder UseEnvironmentVariables(
+        this MeterProviderBuilder builder,
+        LazyInstrumentationLoader lazyInstrumentationLoader,
+        MetricSettings settings,
+        PluginManager pluginManager)
     {
         builder
             .SetExporter(settings, pluginManager)
@@ -37,7 +43,7 @@ internal static class EnvironmentConfigurationMetricHelper
         {
             _ = enabledMeter switch
             {
-                MetricInstrumentation.AspNet => Wrappers.AddSdkAspNetInstrumentation(builder),
+                MetricInstrumentation.AspNet => Wrappers.AddAspNetInstrumentation(builder, lazyInstrumentationLoader),
                 MetricInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder),
                 MetricInstrumentation.NetRuntime => Wrappers.AddRuntimeInstrumentation(builder, pluginManager),
                 MetricInstrumentation.Process => Wrappers.AddProcessInstrumentation(builder, pluginManager),
@@ -73,10 +79,12 @@ internal static class EnvironmentConfigurationMetricHelper
         // Meters
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddSdkAspNetInstrumentation(MeterProviderBuilder builder)
+        public static MeterProviderBuilder AddAspNetInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
 #if NET462
-            builder.AddAspNetInstrumentation();
+            new AspNetMetricsInitializer(lazyInstrumentationLoader);
+
+            builder.AddMeter("OpenTelemetry.Instrumentation.AspNet");
 #elif NET6_0_OR_GREATER
             builder.AddMeter("OpenTelemetry.Instrumentation.AspNetCore");
 #endif
