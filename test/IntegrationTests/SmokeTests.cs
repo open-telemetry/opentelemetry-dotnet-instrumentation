@@ -336,25 +336,11 @@ public class SmokeTests : TestHelper
     public void MetricsDisabledInstrumentation()
     {
         using var collector = new MockMetricsCollector(Output);
-        SetExporter(collector);
-
-        StringBuilder sbToDisableMetrics = new StringBuilder();
-        sbToDisableMetrics.Append(MetricInstrumentation.NetRuntime.ToString())
-        .Append(",").Append(MetricInstrumentation.HttpClient.ToString());
-
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS", sbToDisableMetrics.ToString());
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "HttpClient");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS", "HttpClient");
         EnableBytecodeInstrumentation();
         RunTestApplication();
-        Assert.False(
-            collector.CheckInstrumentationScopeIsAbsent(
-            new List<string>() { "OpenTelemetry.Instrumentation.Process" },
-            1.Seconds()),
-            "Didn't find metrics instrumentation while it should be present.");
-        Assert.True(
-            collector.CheckInstrumentationScopeIsAbsent(
-            new List<string>() { "OpenTelemetry.Instrumentation.NetRuntime", "OpenTelemetry.Instrumentation.HttpClient" },
-            1.Seconds()),
-            "Found Metrics instrumentation while it should be disabled.");
+        collector.AssertEpmty(1.Seconds());
     }
 
     [Fact]
@@ -363,16 +349,9 @@ public class SmokeTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-
-        StringBuilder sbToDisableMetrics = new StringBuilder();
-        sbToDisableMetrics.Append(TracerInstrumentation.HttpClient.ToString())
-        .Append(",").Append(TracerInstrumentation.AspNet.ToString());
-
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS", sbToDisableMetrics.ToString());
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS", "AspNet,HttpClient");
         RunTestApplication();
-        Assert.False(
-            collector.ResourceExpector.CheckForAnyResourceAttributes(1.Seconds()),
-            "There shouldn't be any tracing.");
+        collector.AssertEmpty(1.Seconds());
     }
 
     private void VerifyTestApplicationInstrumented()

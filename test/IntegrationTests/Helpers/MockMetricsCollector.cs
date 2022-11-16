@@ -145,32 +145,6 @@ public class MockMetricsCollector : IDisposable
         }
     }
 
-    internal bool CheckInstrumentationScopeIsAbsent(List<string> instrumentationScopes, TimeSpan? timeout = null)
-    {
-        timeout ??= DefaultWaitTimeout;
-        var cts = new CancellationTokenSource();
-        try
-        {
-            cts.CancelAfter(timeout.Value);
-            foreach (var collectedMetricsSnapshot in _metricsSnapshots.GetConsumingEnumerable(cts.Token))
-            {
-                foreach (var collected in collectedMetricsSnapshot)
-                {
-                    if (instrumentationScopes.Contains(collected.InstrumentationScopeName))
-                    {
-                        return false;
-                    }
-                }
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // NO-OP
-        }
-
-        return true;
-    }
-
     internal void AssertEpmty(TimeSpan? timeout = null)
     {
         timeout ??= DefaultWaitTimeout;
