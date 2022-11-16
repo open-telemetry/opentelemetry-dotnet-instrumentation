@@ -145,6 +145,15 @@ public class MockMetricsCollector : IDisposable
         }
     }
 
+    internal void AssertEpmty(TimeSpan? timeout = null)
+    {
+        timeout ??= DefaultWaitTimeout;
+        if (_metricsSnapshots.TryTake(out var metricsResource, timeout.Value))
+        {
+            Assert.Fail($"Expected nothing, but got: {metricsResource}");
+        }
+    }
+
     private static void FailMetrics(
         List<Expectation> missingExpectations,
         List<Collected> expectationsMet,
