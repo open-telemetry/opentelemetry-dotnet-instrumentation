@@ -25,9 +25,6 @@ namespace IntegrationTests.Helpers;
 
 public abstract class TestHelper
 {
-    // Warning: Long timeouts can cause integer overflow!
-    private static readonly TimeSpan DefaultProcessTimeout = TimeSpan.FromMinutes(5);
-
     protected TestHelper(string testApplicationName, ITestOutputHelper output)
     {
         Output = output;
@@ -100,7 +97,7 @@ public abstract class TestHelper
         Output.WriteLine($"ProcessName: " + process.ProcessName);
         using var helper = new ProcessHelper(process);
 
-        bool processTimeout = !process.WaitForExit((int)DefaultProcessTimeout.TotalMilliseconds);
+        bool processTimeout = !process.WaitForExit((int)Timeout.ProcessExit.TotalMilliseconds);
         if (processTimeout)
         {
             process.Kill();

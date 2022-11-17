@@ -36,8 +36,6 @@ namespace IntegrationTests.Helpers;
 
 public class MockSpansCollector : IDisposable
 {
-    private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromMinutes(1);
-
     private readonly ITestOutputHelper _output;
     private readonly TestHttpServer _listener;
 
@@ -89,7 +87,7 @@ public class MockSpansCollector : IDisposable
         var expectationsMet = new List<Collected>();
         var additionalEntries = new List<Collected>();
 
-        timeout ??= DefaultWaitTimeout;
+        timeout ??= Timeout.Expectation;
         var cts = new CancellationTokenSource();
 
         try
@@ -142,7 +140,7 @@ public class MockSpansCollector : IDisposable
 
     public void AssertEmpty(TimeSpan? timeout = null)
     {
-        timeout ??= DefaultWaitTimeout;
+        timeout ??= Timeout.NoExpectation;
         if (_spans.TryTake(out var resourceSpan, timeout.Value))
         {
             Assert.Fail($"Expected nothing, but got: {resourceSpan}");

@@ -40,8 +40,6 @@ namespace IntegrationTests.Helpers;
 
 public class MockZipkinCollector : IDisposable
 {
-    private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromMinutes(1);
-
     private readonly ITestOutputHelper _output;
     private readonly TestHttpServer _listener;
 
@@ -89,7 +87,7 @@ public class MockZipkinCollector : IDisposable
         var expectationsMet = new List<ZSpanMock>();
         var additionalEntries = new List<ZSpanMock>();
 
-        timeout ??= DefaultWaitTimeout;
+        timeout ??= Timeout.Expectation;
         var cts = new CancellationTokenSource();
 
         try
