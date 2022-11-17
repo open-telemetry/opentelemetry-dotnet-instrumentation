@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System.Net;
-using System.Net.Http;
 using System.Reflection;
 using FluentAssertions;
 using FluentAssertions.Extensions;
@@ -24,6 +22,8 @@ using Xunit;
 using Xunit.Abstractions;
 
 #if NETFRAMEWORK
+using System.Net;
+using System.Net.Http;
 using IntegrationTests.Helpers.Compatibility;
 #else
 using System;
@@ -269,7 +269,7 @@ public class SmokeTests : TestHelper
         EnableBytecodeInstrumentation();
         RunTestApplication();
 
-        collector.AssertEmpty(5.Seconds());
+        collector.AssertEmpty();
     }
 
 #endif
@@ -281,7 +281,7 @@ public class SmokeTests : TestHelper
         using var collector = new MockSpansCollector(Output);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "none");
         RunTestApplication();
-        collector.AssertEmpty(1.Seconds());
+        collector.AssertEmpty();
     }
 
     [Fact]
@@ -291,7 +291,7 @@ public class SmokeTests : TestHelper
         using var collector = new MockMetricsCollector(Output);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "none");
         RunTestApplication();
-        collector.AssertEpmty(1.Seconds());
+        collector.AssertEmpty();
     }
 
     [Fact]
@@ -302,7 +302,7 @@ public class SmokeTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_DISABLED_INSTRUMENTATIONS", "ILogger");
         EnableBytecodeInstrumentation();
         RunTestApplication();
-        collector.AssertEmpty(1.Seconds());
+        collector.AssertEmpty();
     }
 
     [Fact]
@@ -314,7 +314,7 @@ public class SmokeTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS", "HttpClient");
         EnableBytecodeInstrumentation();
         RunTestApplication();
-        collector.AssertEpmty(1.Seconds());
+        collector.AssertEmpty();
     }
 
     [Fact]
@@ -325,7 +325,7 @@ public class SmokeTests : TestHelper
         SetExporter(collector);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS", "AspNet,HttpClient");
         RunTestApplication();
-        collector.AssertEmpty(1.Seconds());
+        collector.AssertEmpty();
     }
 
     private void VerifyTestApplicationInstrumented()
@@ -353,6 +353,6 @@ public class SmokeTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
         RunTestApplication();
 
-        collector.AssertEmpty(5.Seconds());
+        collector.AssertEmpty();
     }
 }
