@@ -175,7 +175,7 @@ Important environment variables include:
 
 | Environment variable            | Description | Default value                        |
 |---------------------------------|-------------|--------------------------------------|
-| `OTEL_EXPORTER_ZIPKIN_ENDPOINT` | Zipkin URL. | `http://localhost:9411/api/v2/spans` |
+| `OTEL_EXPORTER_ZIPKIN_ENDPOINT` | Zipkin URL  | `http://localhost:9411/api/v2/spans` |
 
 ## Additional settings
 
