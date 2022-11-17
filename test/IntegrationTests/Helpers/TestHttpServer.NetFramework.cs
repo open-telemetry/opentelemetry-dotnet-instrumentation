@@ -64,6 +64,7 @@ public class TestHttpServer : IDisposable
             {
                 _listener.Close(); // a new listener is created in the beginnning of the loop
                 retries--;
+                continue;
             }
 
             _listener.Close(); // always close listener if exception is thrown, whether it was caught or not
@@ -80,6 +81,7 @@ public class TestHttpServer : IDisposable
     {
         WriteOutput($"Listener is shutting down.");
         _listener.Close();
+        _listenerThread.Join();
     }
 
     private void HandleHttpRequests()
