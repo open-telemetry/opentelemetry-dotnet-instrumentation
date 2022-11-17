@@ -173,9 +173,9 @@ To customize the Zipkin exporter using environment variables,
 see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.3.0/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
 Important environment variables include:
 
-| Environment variable            | Description | Default value           |
-|---------------------------------|-------------|-------------------------|
-| `OTEL_EXPORTER_ZIPKIN_ENDPOINT` | Zipkin URL. | `http://localhost:8126` |
+| Environment variable            | Description | Default value                        |
+|---------------------------------|-------------|--------------------------------------|
+| `OTEL_EXPORTER_ZIPKIN_ENDPOINT` | Zipkin URL. | `http://localhost:9411/api/v2/spans` |
 
 ## Additional settings
 
