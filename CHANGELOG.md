@@ -30,11 +30,12 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Fix the IIS unregistration in the PowerShell script module.
 - Get rid of unnecessary service restarts during the IIS unregistration,
   in the PowerShell script module.
+- `OTEL_DOTNET_AUTO_TRACES_ENABLED` is also respected by bytecode instrumentations
 
 ### Added
 
 - Add support for .NET 7.
-- Add support for `OTEL_DOTNET_AUTO_TRACES_ENABLED`.
+- Add support for `OTEL_DOTNET_AUTO_LOGS_ENABLED`.
 - Error message on the native log if bytecode instrumentation type is missing all
   instrumentation methods [#1499](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1499).
 - Plugins can overwrite OpenTelemetry dotnet SDK instrumentation and exporter options.
