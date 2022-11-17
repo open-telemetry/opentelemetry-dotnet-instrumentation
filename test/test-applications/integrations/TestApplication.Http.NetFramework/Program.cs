@@ -25,7 +25,7 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        using var listener = new TestServer("localhost", "/test/");
+        using var listener = new TestServer("/test/");
         var address = $"http://localhost:{listener.Port}";
 
         var request = (HttpWebRequest)WebRequest.Create($"{address}/test");

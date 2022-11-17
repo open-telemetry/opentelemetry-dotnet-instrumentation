@@ -32,7 +32,7 @@ public class TestServer : IDisposable
     private readonly Thread _listenerThread;
     private readonly string _prefix;
 
-    public TestServer(string host, string sufix = "/")
+    public TestServer(string sufix)
     {
         // try up to 5 consecutive ports before giving up
         int retries = 4;
@@ -46,10 +46,8 @@ public class TestServer : IDisposable
             {
                 _listener.Start();
 
-                // See https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistenerprefixcollection.add?redirectedfrom=MSDN&view=net-6.0#remarks
-                // for info about the host value.
                 Port = TcpPortProvider.GetOpenPort();
-                _prefix = new UriBuilder("http", host, Port, sufix).ToString();
+                _prefix = new UriBuilder("http", "localhost", Port, sufix).ToString();
                 _listener.Prefixes.Add(_prefix);
 
                 // successfully listening
@@ -78,6 +76,7 @@ public class TestServer : IDisposable
     {
         Console.WriteLine($"[LISTENER] shutting down.");
         _listener.Close();
+        _listenerThread.Join();
     }
 
     private void HandleHttpRequests()
