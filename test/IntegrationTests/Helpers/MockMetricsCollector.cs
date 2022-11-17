@@ -36,8 +36,6 @@ namespace IntegrationTests.Helpers;
 
 public class MockMetricsCollector : IDisposable
 {
-    private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromMinutes(1);
-
     private readonly ITestOutputHelper _output;
     private readonly TestHttpServer _listener;
 
@@ -88,7 +86,7 @@ public class MockMetricsCollector : IDisposable
         var expectationsMet = new List<Collected>();
         var additionalEntries = new List<Collected>();
 
-        timeout ??= DefaultWaitTimeout;
+        timeout ??= Timeout.Expectation;
         var cts = new CancellationTokenSource();
 
         try
@@ -145,9 +143,9 @@ public class MockMetricsCollector : IDisposable
         }
     }
 
-    internal void AssertEpmty(TimeSpan? timeout = null)
+    internal void AssertEmpty(TimeSpan? timeout = null)
     {
-        timeout ??= DefaultWaitTimeout;
+        timeout ??= Timeout.NoExpectation;
         if (_metricsSnapshots.TryTake(out var metricsResource, timeout.Value))
         {
             Assert.Fail($"Expected nothing, but got: {metricsResource}");

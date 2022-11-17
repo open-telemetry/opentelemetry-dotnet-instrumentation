@@ -27,8 +27,6 @@ namespace IntegrationTests.Helpers;
 
 public class OtlpResourceExpector : IDisposable
 {
-    private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromMinutes(1);
-
     private readonly List<ResourceExpectation> _resourceExpectations = new();
 
     private readonly ManualResetEvent _resourceAttributesEvent = new(false); // synchronizes access to _resourceAttributes
@@ -61,7 +59,7 @@ public class OtlpResourceExpector : IDisposable
             throw new InvalidOperationException("Expectations were not set");
         }
 
-        timeout ??= DefaultWaitTimeout;
+        timeout ??= Timeout.Expectation;
 
         try
         {

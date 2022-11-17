@@ -36,8 +36,6 @@ namespace IntegrationTests.Helpers;
 
 public class MockLogsCollector : IDisposable
 {
-    private static readonly TimeSpan DefaultWaitTimeout = TimeSpan.FromMinutes(1);
-
     private readonly ITestOutputHelper _output;
     private readonly TestHttpServer _listener;
     private readonly BlockingCollection<LogRecord> _logs = new(100); // bounded to avoid memory leak
@@ -87,7 +85,7 @@ public class MockLogsCollector : IDisposable
         var expectationsMet = new List<LogRecord>();
         var additionalEntries = new List<LogRecord>();
 
-        timeout ??= DefaultWaitTimeout;
+        timeout ??= Timeout.Expectation;
         var cts = new CancellationTokenSource();
 
         try
@@ -135,7 +133,7 @@ public class MockLogsCollector : IDisposable
 
     public void AssertEmpty(TimeSpan? timeout = null)
     {
-        timeout ??= DefaultWaitTimeout;
+        timeout ??= Timeout.NoExpectation;
         if (_logs.TryTake(out var logRecord, timeout.Value))
         {
             Assert.Fail($"Expected nothing, but got: {logRecord}");
