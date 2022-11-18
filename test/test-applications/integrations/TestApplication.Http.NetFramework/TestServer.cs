@@ -34,37 +34,16 @@ public class TestServer : IDisposable
 
     public TestServer(string sufix)
     {
-        // try up to 5 consecutive ports before giving up
-        int retries = 4;
-        while (true)
-        {
-            // seems like we can't reuse a listener if it fails to start,
-            // so create a new listener each time we retry
-            _listener = new HttpListener();
+        Port = TcpPortProvider.GetOpenPort();
 
-            try
-            {
-                _listener.Start();
+        _listener = new HttpListener();
+        _listener.Start();
+        var prefix = new UriBuilder("http", "localhost", Port, sufix).ToString();
+        _listener.Prefixes.Add(prefix);
+        Console.WriteLine($"[LISTENER] Listening on '{_prefix}'");
 
-                Port = TcpPortProvider.GetOpenPort();
-                _prefix = new UriBuilder("http", "localhost", Port, sufix).ToString();
-                _listener.Prefixes.Add(_prefix);
-
-                // successfully listening
-                _listenerThread = new Thread(HandleHttpRequests);
-                _listenerThread.Start();
-                Console.WriteLine($"[LISTENER] Listening on '{_prefix}'");
-                return;
-            }
-            catch (HttpListenerException) when (retries > 0)
-            {
-                _listener.Close(); // a new listener is created in the beginnning of the loop
-                retries--;
-            }
-
-            _listener.Close(); // always close listener if exception is thrown, whether it was caught or not
-            throw new InvalidOperationException("Listener shut down. Could not find available port.");
-        }
+        _listenerThread = new Thread(HandleHttpRequests);
+        _listenerThread.Start();
     }
 
     /// <summary>

@@ -45,7 +45,7 @@ public class TestHttpServer : IDisposable
 
         _listenerThread = new Thread(HandleHttpRequests);
         _listenerThread.Start();
-}
+    }
 
     /// <summary>
     /// Gets the TCP port that this listener is listening on.
