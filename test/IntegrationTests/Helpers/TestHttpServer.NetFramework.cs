@@ -29,48 +29,23 @@ public class TestHttpServer : IDisposable
     private readonly Action<HttpListenerContext> _requestHandler;
     private readonly HttpListener _listener;
     private readonly Thread _listenerThread;
-    private readonly string _prefix;
 
     public TestHttpServer(ITestOutputHelper output, Action<HttpListenerContext> requestHandler, string host, string sufix = "/")
     {
         _output = output;
         _requestHandler = requestHandler;
 
-        // try up to 5 consecutive ports before giving up
-        int retries = 4;
-        while (true)
-        {
-            // seems like we can't reuse a listener if it fails to start,
-            // so create a new listener each time we retry
-            _listener = new HttpListener();
+        Port = TcpPortProvider.GetOpenPort();
 
-            try
-            {
-                _listener.Start();
+        _listener = new HttpListener();
+        _listener.Start();
+        var prefix = new UriBuilder("http", host, Port, sufix).ToString(); // See https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistenerprefixcollection.add?redirectedfrom=MSDN&view=net-6.0#remarks for info about the host value.
+        _listener.Prefixes.Add(prefix);
+        WriteOutput($"Listening on '{prefix}'");
 
-                // See https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistenerprefixcollection.add?redirectedfrom=MSDN&view=net-6.0#remarks
-                // for info about the host value.
-                Port = TcpPortProvider.GetOpenPort();
-                _prefix = new UriBuilder("http", host, Port, sufix).ToString();
-                _listener.Prefixes.Add(_prefix);
-
-                // successfully listening
-                _listenerThread = new Thread(HandleHttpRequests);
-                _listenerThread.Start();
-                WriteOutput($"Listening on '{_prefix}'");
-                return;
-            }
-            catch (HttpListenerException) when (retries > 0)
-            {
-                _listener.Close(); // a new listener is created in the beginnning of the loop
-                retries--;
-                continue;
-            }
-
-            _listener.Close(); // always close listener if exception is thrown, whether it was caught or not
-            throw new InvalidOperationException("Listener shut down. Could not find available port.");
-        }
-    }
+        _listenerThread = new Thread(HandleHttpRequests);
+        _listenerThread.Start();
+}
 
     /// <summary>
     /// Gets the TCP port that this listener is listening on.
@@ -79,7 +54,7 @@ public class TestHttpServer : IDisposable
 
     public void Dispose()
     {
-        WriteOutput($"Listener is shutting down.");
+        WriteOutput($"Shutting down");
         _listener.Close();
         _listenerThread.Join();
     }
