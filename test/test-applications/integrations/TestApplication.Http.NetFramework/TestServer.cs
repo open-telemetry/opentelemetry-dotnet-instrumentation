@@ -1,4 +1,4 @@
-// <copyright file="TestHttpServer.NetFramework.cs" company="OpenTelemetry Authors">
+// <copyright file="TestServer.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,34 +14,32 @@
 // limitations under the License.
 // </copyright>
 
-#if NETFRAMEWORK
-
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Net;
+using System.Text;
 using System.Threading;
-using Xunit.Abstractions;
+using TestApplication.Http.NetFramework.Helpers;
 
-namespace IntegrationTests.Helpers;
+namespace TestApplication.Http.NetFramework;
 
-public class TestHttpServer : IDisposable
+public class TestServer : IDisposable
 {
-    private readonly ITestOutputHelper _output;
-    private readonly Action<HttpListenerContext> _requestHandler;
+    private static readonly ActivitySource MyActivitySource = new ActivitySource("TestApplication.Http.NetFramework", "1.0.0");
+
     private readonly HttpListener _listener;
     private readonly Thread _listenerThread;
 
-    public TestHttpServer(ITestOutputHelper output, Action<HttpListenerContext> requestHandler, string host, string sufix = "/")
+    public TestServer(string sufix)
     {
-        _output = output;
-        _requestHandler = requestHandler;
-
         Port = TcpPortProvider.GetOpenPort();
 
         _listener = new HttpListener();
         _listener.Start();
-        var prefix = new UriBuilder("http", host, Port, sufix).ToString(); // See https://docs.microsoft.com/en-us/dotnet/api/system.net.httplistenerprefixcollection.add?redirectedfrom=MSDN&view=net-6.0#remarks for info about the host value.
+        var prefix = new UriBuilder("http", "localhost", Port, sufix).ToString();
         _listener.Prefixes.Add(prefix);
-        WriteOutput($"Listening on '{prefix}'");
+        Console.WriteLine($"[LISTENER] Listening on '{prefix}'");
 
         _listenerThread = new Thread(HandleHttpRequests);
         _listenerThread.Start();
@@ -54,7 +52,7 @@ public class TestHttpServer : IDisposable
 
     public void Dispose()
     {
-        WriteOutput($"Shutting down");
+        Console.WriteLine($"[LISTENER] shutting down.");
         _listener.Close();
         _listenerThread.Join();
     }
@@ -66,7 +64,24 @@ public class TestHttpServer : IDisposable
             try
             {
                 var ctx = _listener.GetContext();
-                _requestHandler(ctx);
+
+                using var reader = new StreamReader(ctx.Request.InputStream);
+                var request = reader.ReadToEnd();
+
+                Console.WriteLine("[SERVER] Received: {0}", request);
+
+                using (var activity = MyActivitySource.StartActivity("manual span"))
+                {
+                    activity?.SetTag("test_tag", "test_value");
+                }
+
+                // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
+                // (Setting content-length avoids that)
+                ctx.Response.ContentType = "text/plain";
+                var buffer = Encoding.UTF8.GetBytes("Pong");
+                ctx.Response.ContentLength64 = buffer.LongLength;
+                ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                ctx.Response.Close();
             }
             catch (HttpListenerException)
             {
@@ -90,15 +105,9 @@ public class TestHttpServer : IDisposable
             {
                 // somethig unexpected happened
                 // log instead of crashing the thread
-                WriteOutput(ex.ToString());
+                Console.WriteLine("[EXCEPTION]: {0}", ex.Message);
+                Console.WriteLine(ex);
             }
         }
     }
-
-    private void WriteOutput(string msg)
-    {
-        const string name = nameof(TestHttpServer);
-        _output.WriteLine($"[{name}]: {msg}");
-    }
 }
-#endif
