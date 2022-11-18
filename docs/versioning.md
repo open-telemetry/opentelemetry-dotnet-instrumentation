@@ -59,7 +59,8 @@ Most changes result in a minor version bump.
 
 Changs related to the instrumentation libraries:
 
-* Change (can be breaking) in a supported instrumentation library's functionality or configuration.
+* Change (can be breaking) in a supported instrumentation library's
+  functionality or configuration.
 * Removal or deprecation of an instrumentation library.
 
 Changes related to the experimental features:
