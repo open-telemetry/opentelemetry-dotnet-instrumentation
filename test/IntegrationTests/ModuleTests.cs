@@ -64,7 +64,7 @@ public class ModuleTests : TestHelper
 #if NETFRAMEWORK
         $"{nameof(ModuleTests)}.{nameof(DefaultNoExporters)}.NetFx";
 #else
-$"{nameof(ModuleTests)}.{nameof(DefaultNoExporters)}.NetCore";
+        $"{nameof(ModuleTests)}.{nameof(DefaultNoExporters)}.NetCore";
 #endif
 
         await RunTests(verifyTestName);
