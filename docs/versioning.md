@@ -42,8 +42,8 @@ There are a few cases when a major bump may occur.
 * Breaking change of a stable functionality or configuration.
 * Removal of a stable functionality or configuration.
 
-**Exception:** Changes connected with instrumentation libraries are handled differently.
-There are handled the same way as experimental functionality and configuration.
+**Exception:** Changes related to instrumentation libraries are handled
+the same way as experimental features.
 
 Major versions bumps are avoided.
 
