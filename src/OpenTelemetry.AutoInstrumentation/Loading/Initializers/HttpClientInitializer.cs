@@ -15,6 +15,7 @@
 // </copyright>
 
 using System;
+using System.Reflection;
 using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 
@@ -51,7 +52,7 @@ internal class HttpClientInitializer
 
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.Http.Implementation.HttpWebRequestActivitySource, OpenTelemetry.Instrumentation.Http");
 
-        instrumentationType.GetProperty("Options")?.SetValue(null, options);
+        instrumentationType.GetField("Options", BindingFlags.NonPublic | BindingFlags.Static)?.SetValue(null, options);
 #else
         var options = new OpenTelemetry.Instrumentation.Http.HttpClientInstrumentationOptions();
         _pluginManager.ConfigureOptions(options);

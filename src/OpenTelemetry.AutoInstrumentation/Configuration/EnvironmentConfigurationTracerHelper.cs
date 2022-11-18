@@ -104,9 +104,9 @@ internal static class EnvironmentConfigurationTracerHelper
             new HttpClientInitializer(lazyInstrumentationLoader, pluginManager);
 
 #if NETFRAMEWORK
-            builder.AddSource("OpenTelemetry.Instrumentation.Http.HttpWebRequest");
+            builder.AddSource("OpenTelemetry.HttpWebRequest");
 #else
-            builder.AddSource("OpenTelemetry.Instrumentation.Http.HttpClient");
+            builder.AddSource("OpenTelemetry.Instrumentation.Http");
             builder.AddSource("System.Net.Http"); // This works only System.Net.Http >= 7.0.0
             builder.AddLegacySource("System.Net.Http.HttpRequestOut");
 #endif
