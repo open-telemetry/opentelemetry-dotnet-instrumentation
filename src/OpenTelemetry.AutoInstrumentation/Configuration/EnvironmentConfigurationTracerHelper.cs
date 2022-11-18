@@ -40,7 +40,7 @@ internal static class EnvironmentConfigurationTracerHelper
             {
                 TracerInstrumentation.AspNet => Wrappers.AddAspNetInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.GrpcNetClient => Wrappers.AddGrpcClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
-                TracerInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, pluginManager),
+                TracerInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.Npgsql => builder.AddSource("Npgsql"),
                 TracerInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.Wcf => Wrappers.AddWcfInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
@@ -97,8 +97,18 @@ internal static class EnvironmentConfigurationTracerHelper
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddHttpClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager)
+        public static TracerProviderBuilder AddHttpClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
+            new HttpClientInitializer(lazyInstrumentationLoader, pluginManager);
+
+#if NETFRAMEWORK
+            builder.AddSource("OpenTelemetry.Instrumentation.Http.HttpWebRequest");
+#else
+            builder.AddSource("OpenTelemetry.Instrumentation.Http.HttpClient");
+            builder.AddSource("System.Net.Http"); // This works only System.Net.Http >= 7.0.0
+            builder.AddLegacySource("System.Net.Http.HttpRequestOut");
+#endif
+
             return builder.AddHttpClientInstrumentation(pluginManager.ConfigureOptions);
         }
 
