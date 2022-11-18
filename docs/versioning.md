@@ -37,32 +37,44 @@ See [here](https://github.com/open-telemetry/opentelemetry-specification/blob/ma
 
 ## Major version bump
 
-Major version bumps occurs when there is a breaking change to a stable interface
-or some functionality has been removed.
+There are a few cases when a major bump may occur.
 
-* A stable configuration has been renamed.
-* A stable functionality has been removed.
+* Breaking change of a stable functionality or configuration.
+* Removal of a stable functionality or configuration.
+
+**Exception:** Changes connected with instrumentation libraries are handled differently.
+There are handled the same way as experimental functionality and configuration.
+
+Major versions bumps are avoided.
 
 ## Minor version bump
 
 Most changes result in a minor version bump.
 
-* New backward-compatible functionality added.
-* Experimental functionality become stable.
-* Breaking changes to experimental functionalities.
-* New experimental functionality is added.
+* Addition of new functionality or configuration.
+* Backwards compatible change in a stable functionality or configuration.
 * Deprecation of a stable functionality.
-* Dependencies bump.
+* Dependency bump which may affect the user.
+
+Most changes related to the instrumentation libraries result in a minor version bump.
+
+* Addition of an instrumentation library.
+* Change (can be breaking) in a supported instrumentation library's functionality or configuration.
+* Removal or deprecation of an instrumentation library.
+
+Most changes related to the experimental functionalities and configurations result in a minor version bump.
+
+* Making experimental functionality or configuration stable.
+* Change (can be breaking) in an experimental functionality or configuration.
+* Removal of an experimental functionality or configuration.
 
 ### Patch version bump
 
-Most changes result in a patch version bump.
-
-Patch versions make no changes which would require recompilation
+Patch versions make no changes that would require recompilation
 or potentially break application code.
 The following are examples of patch fixes.
 
-* Bug fixes which do not require minor version bump per rules above.
+* Bug fixes that do not require minor version bumps per rules above.
 * Security fixes.
 
 ## Version numbers before 1.0.0
