@@ -102,6 +102,7 @@ public class SettingsTests : IDisposable
 
         using (new AssertionScope())
         {
+            settings.LogsEnabled.Should().BeTrue();
             settings.LogExporter.Should().Be(LogExporter.Otlp);
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
             settings.ConsoleExporterEnabled.Should().BeFalse();

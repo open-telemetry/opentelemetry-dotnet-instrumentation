@@ -160,13 +160,17 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     rejit_handler = new RejitHandler(this->info_, callback);
 
+    
+
     // load all integrations from JSON files
-    LoadIntegrationsFromEnvironment(
-        integration_methods_,
+    const LoadIntegrationConfiguration configuration(
+        AreTracesEnabled(), 
         GetEnvironmentValues(environment::enabled_traces_integrations),
-        GetEnvironmentValues(environment::disabled_traces_integrations),
+        GetEnvironmentValues(environment::disabled_traces_integrations), 
+        AreLogsEnabled(),
         GetEnvironmentValues(environment::enabled_logs_integrations),
         GetEnvironmentValues(environment::disabled_logs_integrations));
+    LoadIntegrationsFromEnvironment(integration_methods_, configuration);
 
     Logger::Debug("Number of Integrations loaded: ", integration_methods_.size());
 

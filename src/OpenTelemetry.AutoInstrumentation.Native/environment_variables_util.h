@@ -62,6 +62,14 @@ bool IsAzureAppServices() {
   CheckIfTrue(GetEnvironmentValue(environment::azure_app_services));
 }
 
+bool AreTracesEnabled() {
+  ToBooleanWithDefault(GetEnvironmentValue(environment::traces_enabled), true);
+}
+
+bool AreLogsEnabled() {
+  ToBooleanWithDefault(GetEnvironmentValue(environment::logs_enabled), true);
+}
+
 }  // namespace trace
 
 #endif  // OTEL_CLR_PROFILER_ENVIRONMENT_VARIABLES_UTIL_H_

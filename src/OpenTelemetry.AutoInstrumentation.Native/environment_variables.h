@@ -24,6 +24,10 @@ const WSTRING profiler_home_path = WStr("OTEL_DOTNET_AUTO_HOME");
 // "MyApp.exe,dotnet.exe"
 const WSTRING exclude_process_names = WStr("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES");
 
+// Whether traces are enabled or not. If not set (default), traces are enabled.
+const WSTRING traces_enabled =
+    WStr("OTEL_DOTNET_AUTO_TRACES_ENABLED");
+
 // Sets a list of integrations to enable. If not set (default), all integrations are enabled.
 // Supports multiple values separated with comma, for example:
 // "ElasticsearchNet,AspNetWebApi2"
@@ -37,6 +41,10 @@ const WSTRING enabled_traces_integrations =
 // "ElasticsearchNet,AspNetWebApi2"
 const WSTRING disabled_traces_integrations =
     WStr("OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS");
+
+// Whether logs are enabled or not. If not set (default), logs are enabled.
+const WSTRING logs_enabled =
+    WStr("OTEL_DOTNET_AUTO_LOGS_ENABLED");
 
 // Sets a list of integrations to enable. If not set (default), all integrations
 // are enabled. Supports multiple values separated with comma, for example:

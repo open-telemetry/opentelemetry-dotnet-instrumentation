@@ -13,37 +13,25 @@ using json = nlohmann::json;
 
 void LoadIntegrationsFromEnvironment(
     std::vector<IntegrationMethod>& integrationMethods,
-    const std::vector<WSTRING>& enabledTraceIntegrationNames,
-    const std::vector<WSTRING>& disabledTraceIntegrationNames,
-    const std::vector<WSTRING>& enabledLogIntegrationNames,
-    const std::vector<WSTRING>& disabledLogIntegrationNames) {
+    const LoadIntegrationConfiguration& configuration) {
     for (const WSTRING& filePath : GetEnvironmentValues(environment::integrations_path, ENV_VAR_PATH_SEPARATOR))
     {
         Logger::Debug("Loading integrations from file: ", filePath);
-      LoadIntegrationsFromFile(
-          filePath, integrationMethods, enabledTraceIntegrationNames, disabledTraceIntegrationNames, enabledLogIntegrationNames, disabledLogIntegrationNames);
+      LoadIntegrationsFromFile(filePath, integrationMethods, configuration);
     }
 }
 
 void LoadIntegrationsFromFile(
     const WSTRING& file_path,
     std::vector<IntegrationMethod>& integrationMethods,
-    const std::vector<WSTRING>& enabledTraceIntegrationNames,
-    const std::vector<WSTRING>& disabledTraceIntegrationNames,
-    const std::vector<WSTRING>& enabledLogIntegrationNames,
-    const std::vector<WSTRING>& disabledLogIntegrationNames) {
+    const LoadIntegrationConfiguration& configuration) {
     try
     {
         std::ifstream stream(ToString(file_path));
 
         if (static_cast<bool>(stream))
         {
-            LoadIntegrationsFromStream(stream,
-                                     integrationMethods,
-                                     enabledTraceIntegrationNames,
-                                     disabledTraceIntegrationNames,
-                                     enabledLogIntegrationNames,
-                                     disabledLogIntegrationNames);
+            LoadIntegrationsFromStream(stream, integrationMethods, configuration);
         }
         else
         {
@@ -72,10 +60,7 @@ void LoadIntegrationsFromFile(
 void LoadIntegrationsFromStream(
     std::istream& stream,
     std::vector<IntegrationMethod>& integrationMethods,
-    const std::vector<WSTRING>& enabledTraceIntegrationNames,
-    const std::vector<WSTRING>& disabledTraceIntegrationNames,
-    const std::vector<WSTRING>& enabledLogIntegrationNames,
-    const std::vector<WSTRING>& disabledLogIntegrationNames) {
+    const LoadIntegrationConfiguration& configuration) {
     try
     {
         json j;
@@ -86,12 +71,7 @@ void LoadIntegrationsFromStream(
 
         for (const auto& el : j)
         {
-          IntegrationFromJson(el,
-                              integrationMethods,
-                              enabledTraceIntegrationNames,
-                              disabledTraceIntegrationNames,
-                              enabledLogIntegrationNames,
-                            disabledLogIntegrationNames);
+          IntegrationFromJson(el, integrationMethods, configuration);
         }
 
     }
@@ -154,10 +134,7 @@ namespace
 
     void IntegrationFromJson(const json::value_type& src,
                          std::vector<IntegrationMethod>& integrationMethods,
-                         const std::vector<WSTRING>& enabledTraceIntegrationNames,
-                         const std::vector<WSTRING>& disabledTraceIntegrationNames,
-                         const std::vector<WSTRING>& enabledLogIntegrationNames,
-                         const std::vector<WSTRING>& disabledLogIntegrationNames)
+                         const LoadIntegrationConfiguration& configuration)
     {
         if (!src.is_object())
         {
@@ -181,14 +158,24 @@ namespace
 
         if (type == WStr("Trace"))
         {
-            if (!InstrumentationEnabled(name, enabledTraceIntegrationNames, disabledTraceIntegrationNames)) 
+            if (!configuration.traces_enabled)
+            {
+                  return;
+            }
+
+            if (!InstrumentationEnabled(name, configuration.enabledTraceIntegrationNames, configuration.disabledTraceIntegrationNames)) 
             {
                 return;
             }
         }
         else if (type == WStr("Log"))
         {
-            if (!InstrumentationEnabled(name, enabledLogIntegrationNames, disabledLogIntegrationNames)) {
+            if (!configuration.logs_enabled)
+            {
+                return;
+            }
+            if (!configuration.logs_enabled || !InstrumentationEnabled(name, configuration.enabledLogIntegrationNames, configuration.disabledLogIntegrationNames))
+            {
                 return;
             }
         }
