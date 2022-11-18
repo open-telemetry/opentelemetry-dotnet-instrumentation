@@ -51,20 +51,19 @@ Major versions bumps are avoided.
 
 Most changes result in a minor version bump.
 
-* Addition of new functionality or configuration.
+* Addition of new functionality, configuration, or instrumentation library.
+* Making experimental functionality or configuration stable.
 * Backwards compatible change in a stable functionality or configuration.
 * Deprecation of a stable functionality.
 * Dependency bump which may affect the user.
 
-Most changes related to the instrumentation libraries result in a minor version bump.
+Changs related to the instrumentation libraries:
 
-* Addition of an instrumentation library.
 * Change (can be breaking) in a supported instrumentation library's functionality or configuration.
 * Removal or deprecation of an instrumentation library.
 
-Most changes related to the experimental functionalities and configurations result in a minor version bump.
+Changes related to the experimental features:
 
-* Making experimental functionality or configuration stable.
 * Change (can be breaking) in an experimental functionality or configuration.
 * Removal of an experimental functionality or configuration.
 
