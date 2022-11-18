@@ -30,7 +30,6 @@ public class TestServer : IDisposable
 
     private readonly HttpListener _listener;
     private readonly Thread _listenerThread;
-    private readonly string _prefix;
 
     public TestServer(string sufix)
     {
@@ -40,7 +39,7 @@ public class TestServer : IDisposable
         _listener.Start();
         var prefix = new UriBuilder("http", "localhost", Port, sufix).ToString();
         _listener.Prefixes.Add(prefix);
-        Console.WriteLine($"[LISTENER] Listening on '{_prefix}'");
+        Console.WriteLine($"[LISTENER] Listening on '{prefix}'");
 
         _listenerThread = new Thread(HandleHttpRequests);
         _listenerThread.Start();
