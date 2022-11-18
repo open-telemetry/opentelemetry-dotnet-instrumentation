@@ -1,0 +1,9 @@
+﻿[
+  OpenTelemetry,
+  OpenTelemetry.Api,
+  OpenTelemetry.AutoInstrumentation,
+  OpenTelemetry.AutoInstrumentation.Loader,
+  OpenTelemetry.Exporter.OpenTelemetryProtocol,
+  OpenTelemetry.Instrumentation.Process,
+  OpenTelemetry.Instrumentation.Runtime
+]

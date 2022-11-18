@@ -32,8 +32,6 @@ internal static class EnvironmentConfigurationTracerHelper
         TracerSettings settings,
         PluginManager pluginManager)
     {
-        builder.SetExporter(settings, pluginManager);
-
         foreach (var enabledInstrumentation in settings.EnabledInstrumentations)
         {
             _ = enabledInstrumentation switch
@@ -53,6 +51,10 @@ internal static class EnvironmentConfigurationTracerHelper
                 _ => null
             };
         }
+
+        // Exporters can cause dependency loads.
+        // Should be called later if dependency listeners are already setup.
+        builder.SetExporter(settings, pluginManager);
 
         builder.AddSource(settings.ActivitySources.ToArray());
         foreach (var legacySource in settings.LegacySources)
@@ -102,14 +104,14 @@ internal static class EnvironmentConfigurationTracerHelper
             new HttpClientInitializer(lazyInstrumentationLoader, pluginManager);
 
 #if NETFRAMEWORK
-            builder.AddSource("OpenTelemetry.Instrumentation.Http.HttpWebRequest");
+            builder.AddSource("OpenTelemetry.HttpWebRequest");
 #else
-            builder.AddSource("OpenTelemetry.Instrumentation.Http.HttpClient");
+            builder.AddSource("OpenTelemetry.Instrumentation.Http");
             builder.AddSource("System.Net.Http"); // This works only System.Net.Http >= 7.0.0
             builder.AddLegacySource("System.Net.Http.HttpRequestOut");
 #endif
 
-            return builder.AddHttpClientInstrumentation(pluginManager.ConfigureOptions);
+            return builder;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

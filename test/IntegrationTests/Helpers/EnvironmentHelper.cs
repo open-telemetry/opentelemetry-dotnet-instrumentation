@@ -27,7 +27,6 @@ namespace IntegrationTests.Helpers;
 
 public class EnvironmentHelper
 {
-    private static readonly Assembly ExecutingAssembly = Assembly.GetExecutingAssembly();
     private static readonly string RuntimeFrameworkDescription = RuntimeInformation.FrameworkDescription.ToLower();
     private static string _nukeOutputLocation;
 

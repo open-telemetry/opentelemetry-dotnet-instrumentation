@@ -1,4 +1,4 @@
-// <copyright file="HttpClientInitializer.cs" company="OpenTelemetry Authors">
+// <copyright file="HttpClientMetricsInitializer.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,22 +15,16 @@
 // </copyright>
 
 using System;
-using System.Reflection;
 using System.Threading;
-using OpenTelemetry.AutoInstrumentation.Plugins;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
-internal class HttpClientInitializer
+internal class HttpClientMetricsInitializer
 {
-    private readonly PluginManager _pluginManager;
-
     private int _initialized;
 
-    public HttpClientInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
+    public HttpClientMetricsInitializer(LazyInstrumentationLoader lazyInstrumentationLoader)
     {
-        _pluginManager = pluginManager;
-
         lazyInstrumentationLoader.Add(new GenericInitializer("System.Net.Http", InitializeOnFirstCall));
 
 #if NETFRAMEWORK
@@ -46,21 +40,9 @@ internal class HttpClientInitializer
             return;
         }
 
-#if NETFRAMEWORK
-        var options = new OpenTelemetry.Instrumentation.Http.HttpWebRequestInstrumentationOptions();
-        _pluginManager.ConfigureOptions(options);
-
-        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.Http.Implementation.HttpWebRequestActivitySource, OpenTelemetry.Instrumentation.Http");
-
-        instrumentationType.GetField("Options", BindingFlags.NonPublic | BindingFlags.Static)?.SetValue(null, options);
-#else
-        var options = new OpenTelemetry.Instrumentation.Http.HttpClientInstrumentationOptions();
-        _pluginManager.ConfigureOptions(options);
-
-        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.Http.HttpClientInstrumentation, OpenTelemetry.Instrumentation.Http");
-        var instrumentation = Activator.CreateInstance(instrumentationType, options);
+        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.Http.HttpClientMetrics, OpenTelemetry.Instrumentation.Http");
+        var instrumentation = Activator.CreateInstance(instrumentationType);
 
         lifespanManager.Track(instrumentation);
-#endif
     }
 }
