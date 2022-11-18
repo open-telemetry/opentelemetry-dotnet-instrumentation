@@ -63,6 +63,11 @@ public abstract class TestHelper
         EnvironmentHelper.CustomEnvironmentVariables[key] = value;
     }
 
+    public void RemoveEnvironmentVariable(string key)
+    {
+        EnvironmentHelper.CustomEnvironmentVariables.Remove(key);
+    }
+
     public void SetExporter(MockSpansCollector collector)
     {
         SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "otlp");
@@ -84,6 +89,13 @@ public abstract class TestHelper
     public void EnableBytecodeInstrumentation()
     {
         SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1");
+    }
+
+    public void EnableDefaultExporters()
+    {
+        RemoveEnvironmentVariable("OTEL_TRACES_EXPORTER");
+        RemoveEnvironmentVariable("OTEL_METRICS_EXPORTER");
+        RemoveEnvironmentVariable("OTEL_LOGS_EXPORTER");
     }
 
     /// <summary>

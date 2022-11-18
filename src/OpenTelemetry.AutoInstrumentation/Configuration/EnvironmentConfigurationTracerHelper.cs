@@ -32,8 +32,6 @@ internal static class EnvironmentConfigurationTracerHelper
         TracerSettings settings,
         PluginManager pluginManager)
     {
-        builder.SetExporter(settings, pluginManager);
-
         foreach (var enabledInstrumentation in settings.EnabledInstrumentations)
         {
             _ = enabledInstrumentation switch
@@ -53,6 +51,10 @@ internal static class EnvironmentConfigurationTracerHelper
                 _ => null
             };
         }
+
+        // Exporters can cause dependency loads.
+        // Should be called later if dependency listeners are already setup.
+        builder.SetExporter(settings, pluginManager);
 
         builder.AddSource(settings.ActivitySources.ToArray());
         foreach (var legacySource in settings.LegacySources)
@@ -109,7 +111,7 @@ internal static class EnvironmentConfigurationTracerHelper
             builder.AddLegacySource("System.Net.Http.HttpRequestOut");
 #endif
 
-            return builder.AddHttpClientInstrumentation(pluginManager.ConfigureOptions);
+            return builder;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
