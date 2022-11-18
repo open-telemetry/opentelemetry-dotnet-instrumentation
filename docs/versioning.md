@@ -57,7 +57,7 @@ Most changes result in a minor version bump.
 * Deprecation of a stable functionality.
 * Dependency bump which may affect the user.
 
-Changs related to the instrumentation libraries:
+Changes related to the instrumentation libraries:
 
 * Change (can be breaking) in a supported instrumentation library's
   functionality or configuration.
