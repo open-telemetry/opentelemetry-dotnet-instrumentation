@@ -54,6 +54,7 @@ public class TestHttpServer : IDisposable
                 .Addresses
                 .First();
         Port = int.Parse(address.Split(':').Last());
+        WriteOutput($"Listening on '{address}/{path}'");
     }
 
     /// <summary>
@@ -63,7 +64,7 @@ public class TestHttpServer : IDisposable
 
     public void Dispose()
     {
-        WriteOutput($"Listener is shutting down.");
+        WriteOutput($"Shutting down");
         _listener.Dispose();
     }
 
