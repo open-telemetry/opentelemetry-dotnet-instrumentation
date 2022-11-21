@@ -50,7 +50,6 @@ internal class MetricSettings : Settings
             }
         }
 
-        MetricExportInterval = source.GetInt32(ConfigurationKeys.Metrics.ExportInterval);
         MetricsEnabled = source.GetBool(ConfigurationKeys.Metrics.MetricsEnabled) ?? true;
     }
 
@@ -63,11 +62,6 @@ internal class MetricSettings : Settings
     /// Gets the metrics exporter.
     /// </summary>
     public MetricsExporter MetricExporter { get; }
-
-    /// <summary>
-    /// Gets the metrics export interval.
-    /// </summary>
-    public int? MetricExportInterval { get; }
 
     /// <summary>
     /// Gets a value indicating whether the console exporter is enabled.
