@@ -145,7 +145,7 @@ internal static class EnvironmentConfigurationTracerHelper
         {
             lazyInstrumentationLoader.Add(new SqlClientInitializer(pluginManager));
 
-            return builder.AddSource("OpenTelemetry.SqlClient");
+            return builder.AddSource("OpenTelemetry.Instrumentation.SqlClient");
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

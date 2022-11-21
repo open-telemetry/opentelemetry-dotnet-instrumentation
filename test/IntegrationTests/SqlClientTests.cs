@@ -38,7 +38,7 @@ public class SqlClientTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.Expect("OpenTelemetry.SqlClient");
+        collector.Expect("OpenTelemetry.Instrumentation.SqlClient");
 
         RunTestApplication(new()
         {
