@@ -335,6 +335,8 @@ public class SmokeTests : TestHelper
         collector.Expect("MyCompany.MyProduct.MyLibrary");
 #if NETFRAMEWORK
         collector.Expect("OpenTelemetry.Instrumentation.Http.HttpWebRequest");
+#elif NET7_0_OR_GREATER
+        collector.Expect("System.Net.Http");
 #else
         collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient");
 #endif
