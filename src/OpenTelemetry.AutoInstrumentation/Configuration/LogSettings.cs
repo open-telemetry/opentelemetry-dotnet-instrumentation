@@ -33,6 +33,7 @@ internal class LogSettings : Settings
     public LogSettings(IConfigurationSource source)
         : base(source)
     {
+        LogsEnabled = source.GetBool(ConfigurationKeys.Logs.LogsEnabled) ?? true;
         LogExporter = ParseLogExporter(source);
         ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.Logs.ConsoleExporterEnabled) ?? false;
         IncludeFormattedMessage = source.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
@@ -42,6 +43,11 @@ internal class LogSettings : Settings
             disabledConfiguration: ConfigurationKeys.Logs.DisabledInstrumentations,
             error: "The \"{0}\" is not recognized as supported logs instrumentation and cannot be enabled or disabled.");
     }
+
+    /// <summary>
+    /// Gets a value indicating whether the logs should be loaded by the profiler. Default is true.
+    /// </summary>
+    public bool LogsEnabled { get; }
 
     /// <summary>
     /// Gets the logs exporter.

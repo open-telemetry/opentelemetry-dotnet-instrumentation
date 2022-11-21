@@ -35,21 +35,23 @@ internal static class EnvironmentConfigurationMetricHelper
         MetricSettings settings,
         PluginManager pluginManager)
     {
-        builder
-            .SetExporter(settings, pluginManager)
-            .AddMeter(settings.Meters.ToArray());
-
         foreach (var enabledMeter in settings.EnabledInstrumentations)
         {
             _ = enabledMeter switch
             {
                 MetricInstrumentation.AspNet => Wrappers.AddAspNetInstrumentation(builder, lazyInstrumentationLoader),
-                MetricInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder),
+                MetricInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, lazyInstrumentationLoader),
                 MetricInstrumentation.NetRuntime => Wrappers.AddRuntimeInstrumentation(builder, pluginManager),
                 MetricInstrumentation.Process => Wrappers.AddProcessInstrumentation(builder, pluginManager),
                 _ => null,
             };
         }
+
+        // Exporters can cause dependency loads.
+        // Should be called later if dependency listeners are already setup.
+        builder
+            .SetExporter(settings, pluginManager)
+            .AddMeter(settings.Meters.ToArray());
 
         return builder;
     }
@@ -86,6 +88,8 @@ internal static class EnvironmentConfigurationMetricHelper
 
             builder.AddMeter("OpenTelemetry.Instrumentation.AspNet");
 #elif NET6_0_OR_GREATER
+            lazyInstrumentationLoader.Add(new AspNetCoreMetricsInitializer());
+
             builder.AddMeter("OpenTelemetry.Instrumentation.AspNetCore");
 #endif
 
@@ -93,9 +97,11 @@ internal static class EnvironmentConfigurationMetricHelper
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddHttpClientInstrumentation(MeterProviderBuilder builder)
+        public static MeterProviderBuilder AddHttpClientInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-            return builder.AddHttpClientInstrumentation();
+            new HttpClientMetricsInitializer(lazyInstrumentationLoader);
+
+            return builder.AddMeter("OpenTelemetry.Instrumentation.Http");
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

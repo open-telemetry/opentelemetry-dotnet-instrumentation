@@ -44,6 +44,12 @@ internal class BootstrapperHostingStartup : IHostingStartup
     /// <param name="builder">The <see cref="IWebHostBuilder"/>.</param>
     public void Configure(IWebHostBuilder builder)
     {
+        if (!_settings.LogsEnabled)
+        {
+            BootstrapperEventSource.Log.Trace($"BootstrapperHostingStartup loaded, but OpenTelemetry Logs disabled. Skipping.");
+            return;
+        }
+
         if (!_settings.EnabledInstrumentations.Contains(LogInstrumentation.ILogger))
         {
             BootstrapperEventSource.Log.Trace($"BootstrapperHostingStartup loaded, but {nameof(LogInstrumentation.ILogger)} instrumentation is disabled. Skipping.");

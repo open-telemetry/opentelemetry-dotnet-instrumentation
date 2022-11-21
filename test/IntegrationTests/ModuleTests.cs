@@ -37,11 +37,34 @@ public class ModuleTests : TestHelper
     [Fact]
     public async Task Default()
     {
+        EnableDefaultExporters();
+        EnableBytecodeInstrumentation();
+
         string verifyTestName =
 #if NETFRAMEWORK
         $"{nameof(ModuleTests)}.{nameof(Default)}.NetFx";
 #else
         $"{nameof(ModuleTests)}.{nameof(Default)}.NetCore";
+#endif
+
+        await RunTests(verifyTestName);
+    }
+
+    [Fact]
+    public async Task DefaultNoExporters()
+    {
+        // Exporters using RPC can cause dependency loads, which can cause next instrumentation loads.
+        // This test ensures correct instrumentation loading.
+
+        SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, Constants.ConfigurationValues.None);
+        SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, Constants.ConfigurationValues.None);
+        SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, Constants.ConfigurationValues.None);
+
+        string verifyTestName =
+#if NETFRAMEWORK
+        $"{nameof(ModuleTests)}.{nameof(DefaultNoExporters)}.NetFx";
+#else
+        $"{nameof(ModuleTests)}.{nameof(DefaultNoExporters)}.NetCore";
 #endif
 
         await RunTests(verifyTestName);
@@ -54,6 +77,7 @@ public class ModuleTests : TestHelper
         SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, Constants.ConfigurationValues.None);
         SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, Constants.ConfigurationValues.None);
         SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, Constants.ConfigurationValues.None);
+        SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, Constants.ConfigurationValues.None);
         SetEnvironmentVariable(ConfigurationKeys.Traces.ConsoleExporterEnabled, bool.FalseString);
         SetEnvironmentVariable(ConfigurationKeys.Metrics.ConsoleExporterEnabled, bool.FalseString);
         SetEnvironmentVariable(ConfigurationKeys.Traces.OpenTracingEnabled, bool.FalseString);

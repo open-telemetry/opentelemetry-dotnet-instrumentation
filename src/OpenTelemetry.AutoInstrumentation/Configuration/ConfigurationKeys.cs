@@ -157,6 +157,11 @@ internal static class ConfigurationKeys
     public static class Logs
     {
         /// <summary>
+        /// Configuration key for whether the logger should be initialized by the profiler or not.
+        /// </summary>
+        public const string LogsEnabled = "OTEL_DOTNET_AUTO_LOGS_ENABLED";
+
+        /// <summary>
         /// Configuration key for the logs exporter to be used.
         /// Default is <c>"otlp"</c>.
         /// </summary>
