@@ -36,9 +36,9 @@ public class PluginsTests : TestHelper
         SetExporter(collector);
         collector.Expect("MyCompany.MyProduct.MyLibrary");
 #if NETFRAMEWORK
-        collector.Expect("OpenTelemetry.HttpWebRequest", span => span.Attributes.Any(att => att.Key == "example.plugin"));
+        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpWebRequest", span => span.Attributes.Any(att => att.Key == "example.plugin"));
 #else
-        collector.Expect("OpenTelemetry.Instrumentation.Http", span => span.Attributes.Any(att => att.Key == "example.plugin"));
+        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient", span => span.Attributes.Any(att => att.Key == "example.plugin"));
 #endif
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");

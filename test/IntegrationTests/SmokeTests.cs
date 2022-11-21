@@ -334,9 +334,9 @@ public class SmokeTests : TestHelper
         SetExporter(collector);
         collector.Expect("MyCompany.MyProduct.MyLibrary");
 #if NETFRAMEWORK
-        collector.Expect("OpenTelemetry.HttpWebRequest");
+        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpWebRequest");
 #else
-        collector.Expect("OpenTelemetry.Instrumentation.Http");
+        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient");
 #endif
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
