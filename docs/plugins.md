@@ -55,7 +55,6 @@ public class MyPlugin
 | OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentationOptions    | OpenTelemetry.Instrumentation.AspNetCore     | 1.0.0-rc9.4   |
 | OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientInstrumentationOptions | OpenTelemetry.Instrumentation.GrpcNetClient  | 1.0.0-rc9.4   |
 | OpenTelemetry.Instrumentation.Http.HttpClientInstrumentationOptions          | OpenTelemetry.Instrumentation.Http           | 1.0.0-rc9.4   |
-| OpenTelemetry.Instrumentation.Http.HttpWebRequestInstrumentationOptions      | OpenTelemetry.Instrumentation.Http           | 1.0.0-rc9.4   |
 | OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentationOptions      | OpenTelemetry.Instrumentation.SqlClient      | 1.0.0-rc9.4   |
 | OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentationOptions      | OpenTelemetry.Instrumentation.MySqlData      | 1.0.0-beta.4  |
 | OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationOptions                  | OpenTelemetry.Instrumentation.Wcf            | 1.0.0-rc7     |
