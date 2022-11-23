@@ -22,30 +22,22 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-[Collection(SqlServerCollection.Name)]
 public class SqlClientSystemDataTests : TestHelper
 {
-    private readonly SqlServerFixture _sqlServerFixture;
-
-    public SqlClientSystemDataTests(ITestOutputHelper output, SqlServerFixture sqlServerFixture)
+    public SqlClientSystemDataTests(ITestOutputHelper output)
         : base("SqlClient.NetFramework", output)
     {
-        _sqlServerFixture = sqlServerFixture;
     }
 
     [IgnoreRunningOnNet481Fact]
     [Trait("Category", "EndToEnd")]
-    [Trait("Containers", "Linux")]
     public void SubmitTraces()
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         collector.Expect("OpenTelemetry.SqlClient");
 
-        RunTestApplication(new()
-        {
-            Arguments = $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}"
-        });
+        RunTestApplication();
 
         collector.AssertExpectations();
     }

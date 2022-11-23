@@ -15,7 +15,6 @@
 // </copyright>
 
 using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 using TestApplication.Shared;
@@ -33,8 +32,7 @@ public class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
-        (string databasePassword, string databasePort) = ParseArgs(args);
-        var connectionString = GetConnectionString(databasePassword, databasePort);
+        const string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;TrustServerCertificate=True;";
 
         using (var connection = new SqlConnection(connectionString))
         {
@@ -131,20 +129,5 @@ public class Program
     private static async Task ExecuteDropAsync(SqlConnection connection)
     {
         await ExecuteCommandAsync(DropCommand, connection);
-    }
-
-    private static string GetConnectionString(string databasePassword, string databasePort)
-    {
-        return $"Server=127.0.0.1,{databasePort};User=sa;Password={databasePassword};TrustServerCertificate=True;";
-    }
-
-    private static (string DatabasePassword, string Port) ParseArgs(IReadOnlyList<string> args)
-    {
-        if (args?.Count != 2)
-        {
-            throw new ArgumentException($"{nameof(TestApplication.SqlClient)}: requires two command-line arguments: <dbPassword> <dbPort>");
-        }
-
-        return (DatabasePassword: args[0], Port: args[1]);
     }
 }
