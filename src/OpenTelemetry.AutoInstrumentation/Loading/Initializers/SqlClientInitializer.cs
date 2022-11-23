@@ -29,10 +29,10 @@ internal class SqlClientInitializer
     public SqlClientInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
     {
         _pluginManager = pluginManager;
-        lazyInstrumentationLoader.Add(new Initializer("Microsoft.Data.SqlClient", InitializeOnFirstCall));
+        lazyInstrumentationLoader.Add(new GenericInitializer("Microsoft.Data.SqlClient", InitializeOnFirstCall));
 
 #if NETFRAMEWORK
-        lazyInstrumentationLoader.Add(new Initializer("System.Data", InitializeOnFirstCall));
+        lazyInstrumentationLoader.Add(new GenericInitializer("System.Data", InitializeOnFirstCall));
 #endif
     }
 
@@ -52,21 +52,5 @@ internal class SqlClientInitializer
         var instrumentation = Activator.CreateInstance(instrumentationType, options);
 
         lifespanManager.Track(instrumentation);
-    }
-
-    private class Initializer : InstrumentationInitializer
-    {
-        private readonly Action<ILifespanManager> _initialize;
-
-        public Initializer(string assemblyName, Action<ILifespanManager> initialize)
-            : base(assemblyName)
-        {
-            _initialize = initialize;
-        }
-
-        public override void Initialize(ILifespanManager lifespanManager)
-        {
-            _initialize(lifespanManager);
-        }
     }
 }

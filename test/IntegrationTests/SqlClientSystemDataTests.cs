@@ -1,4 +1,4 @@
-// <copyright file="SqlClientSystemTests.cs" company="OpenTelemetry Authors">
+// <copyright file="SqlClientSystemDataTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,17 +23,17 @@ using Xunit.Abstractions;
 namespace IntegrationTests;
 
 [Collection(SqlServerCollection.Name)]
-public class SqlClientSystemTests : TestHelper
+public class SqlClientSystemDataTests : TestHelper
 {
     private readonly SqlServerFixture _sqlServerFixture;
 
-    public SqlClientSystemTests(ITestOutputHelper output, SqlServerFixture sqlServerFixture)
+    public SqlClientSystemDataTests(ITestOutputHelper output, SqlServerFixture sqlServerFixture)
         : base("SqlClient.NetFramework", output)
     {
         _sqlServerFixture = sqlServerFixture;
     }
 
-    [Fact]
+    [IgnoreRunningOnNet481Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     public void SubmitTraces()
@@ -48,6 +48,19 @@ public class SqlClientSystemTests : TestHelper
         });
 
         collector.AssertExpectations();
+    }
+}
+
+public sealed class IgnoreRunningOnNet481Fact : FactAttribute
+{
+    public IgnoreRunningOnNet481Fact()
+    {
+        var netVersion = RuntimeHelper.GetRuntimeVersion();
+        if (netVersion == "4.8.1+")
+        {
+            // https://github.com/open-telemetry/opentelemetry-dotnet/issues/3901
+            Skip = "NET Framework 4.8.1 is skipped due bug.";
+        }
     }
 }
 
