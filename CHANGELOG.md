@@ -31,8 +31,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Remove support for `OTEL_DOTNET_AUTO_ENABLED`.
   Use `CORECLR_ENABLE_PROFILING` or `COR_ENABLE_PROFILING` instead.
 - Remove support for `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`.
-- Remove traces instrumentation for [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient)
-  as it is not working.
 
 ### Fixed
 
