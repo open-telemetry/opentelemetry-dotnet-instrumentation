@@ -40,7 +40,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Fix the IIS unregistration in the PowerShell script module.
 - Get rid of unnecessary service restarts during the IIS unregistration,
   in the PowerShell script module.
-- `OTEL_DOTNET_AUTO_TRACES_ENABLED` is also respected by bytecode instrumentations
+- `OTEL_DOTNET_AUTO_TRACES_ENABLED` is also respected by bytecode instrumentations.
 
 ## [0.4.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.4.0-beta.1)
 
