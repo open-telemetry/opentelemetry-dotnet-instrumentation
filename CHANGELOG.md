@@ -5,12 +5,22 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.4.0-beta.1...HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.5.0-beta.1...HEAD)
+
+## [0.5.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.5.0-beta.1)
+
+### Added
+
+- Add support for .NET 7.
+- Add support for `OTEL_DOTNET_AUTO_LOGS_ENABLED`.
+- Add error log if bytecode instrumentation type
+  is missing all instrumentation methods.
+- Plugins can overwrite OpenTelemetry .NET SDK exporters' and instrumentations' options.
 
 ### Changed
 
-- Replace `OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP` by `OTEL_DOTNET_AUTO_TRACES_ENABLED`
-  and `OTEL_DOTNET_AUTO_LOAD_METER_AT_STARTUP` by `OTEL_DOTNET_AUTO_METRICS_ENABLED`.
+- Replace `OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP` with `OTEL_DOTNET_AUTO_TRACES_ENABLED`
+  and `OTEL_DOTNET_AUTO_LOAD_METER_AT_STARTUP` with `OTEL_DOTNET_AUTO_METRICS_ENABLED`.
 - Disable OpenTracing by default. OpenTracing can be re-enabled via `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`.
 - GraphQL exceptions are recorded as OTel events.
 
@@ -31,15 +41,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Get rid of unnecessary service restarts during the IIS unregistration,
   in the PowerShell script module.
 - `OTEL_DOTNET_AUTO_TRACES_ENABLED` is also respected by bytecode instrumentations
-
-### Added
-
-- Add support for .NET 7.
-- Add support for `OTEL_DOTNET_AUTO_LOGS_ENABLED`.
-- Error message on the native log if bytecode instrumentation type is missing all
-  instrumentation methods [#1499](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1499).
-- Plugins can overwrite OpenTelemetry dotnet SDK instrumentation and exporter options.
-  See more at [plugins.md](docs/plugins.md).
 
 ## [0.4.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.4.0-beta.1)
 
