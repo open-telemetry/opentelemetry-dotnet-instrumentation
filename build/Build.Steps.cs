@@ -181,15 +181,16 @@ partial class Build
                     .SetOutput(TracerHomeDirectory / MapToFolderOutput(framework))));
 
             // StartupHook is supported starting .Net Core 3.1.
-            // We need to emit AutoInstrumentationStartupHook and AutoInstrumentationLoader assemblies only for .NET 6.0 target framework.
+            // We need to emit AutoInstrumentationStartupHook for .Net Core 3.1 target framework
+            // to avoid application crash with .Net Core 3.1 and .NET 5.0 apps.
             DotNetPublish(s => s
                 .SetProject(Solution.GetProject(Projects.AutoInstrumentationStartupHook))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
                 .EnableNoRestore()
-                .SetFramework(TargetFramework.NET6_0)
-                .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET6_0)));
+                .SetFramework(TargetFramework.NETCore3_1)
+                .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NETCore3_1)));
 
             // AutoInstrumentationLoader publish is needed only for .NET 6.0 to support load from AutoInstrumentationStartupHook.
             DotNetPublish(s => s
