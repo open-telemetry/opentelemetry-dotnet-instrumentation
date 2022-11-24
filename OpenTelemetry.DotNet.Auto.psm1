@@ -74,7 +74,7 @@ function Get-Environment-Variables-Table([string]$InstallDir, [string]$OTelServi
 
     $DOTNET_ADDITIONAL_DEPS = Join-Path $InstallDir "AdditionalDeps"
     $DOTNET_SHARED_STORE = Join-Path $InstallDir "store"
-    $DOTNET_STARTUP_HOOKS = Join-Path $InstallDir "net6.0/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
+    $DOTNET_STARTUP_HOOKS = Join-Path $InstallDir "net/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
 
     $OTEL_DOTNET_AUTO_HOME = $InstallDir
     $OTEL_DOTNET_AUTO_INTEGRATIONS_FILE = Join-Path $InstallDir "integrations.json"

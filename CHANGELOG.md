@@ -23,6 +23,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   and `OTEL_DOTNET_AUTO_LOAD_METER_AT_STARTUP` with `OTEL_DOTNET_AUTO_METRICS_ENABLED`.
 - Disable OpenTracing by default. OpenTracing can be re-enabled via `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`.
 - GraphQL exceptions are recorded as OTel events.
+- `DOTNET_STARTUP_HOOKS` required value changed to `$INSTALL_DIR/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll`.
 
 ### Removed
 
