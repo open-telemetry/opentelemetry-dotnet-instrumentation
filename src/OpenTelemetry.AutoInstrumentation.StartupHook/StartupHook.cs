@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Versioning;
 using OpenTelemetry.AutoInstrumentation;
 using OpenTelemetry.AutoInstrumentation.StartupHook;
 
@@ -32,6 +33,22 @@ internal class StartupHook
     /// </summary>
     public static void Initialize()
     {
+        var minSupportedFramework = new FrameworkName(".NETCoreApp,Version=v6.0");
+        var appTargetFramework = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
+        // This is the best way to identify application's target framework.
+        // If entry assembly framework is null, StartupHook should continue its execution.
+        if (appTargetFramework != null)
+        {
+            var appTargetFrameworkName = new FrameworkName(appTargetFramework);
+            var appTargetFrameworkVersion = appTargetFrameworkName.Version;
+
+            if (appTargetFrameworkVersion < minSupportedFramework.Version)
+            {
+                StartupHookEventSource.Log.Trace($"Error in StartupHook initialization: {appTargetFramework} is not supported");
+                return;
+            }
+        }
+
         var applicationName = GetApplicationName();
         StartupHookEventSource.Log.Trace($"StartupHook loaded for application with name {applicationName}.");
 

@@ -30,6 +30,7 @@ jobs:
         fail: true
       env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
 
     - run: npm install
 
