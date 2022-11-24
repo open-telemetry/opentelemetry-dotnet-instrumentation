@@ -4,6 +4,9 @@
 
 We'd love your help!
 
+[The project board](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/projects/1)
+shows the current work in progress.
+
 Please join our weekly [SIG meeting](https://github.com/open-telemetry/community#special-interest-groups).
 Meeting notes are available as a public [Google
 doc](https://docs.google.com/document/d/1XedN2D8_PH4YLej-maT8sp4RKogfuhFpccRi3QpUcoI/edit?usp=sharing).
