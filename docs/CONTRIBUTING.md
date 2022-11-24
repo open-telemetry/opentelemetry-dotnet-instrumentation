@@ -16,8 +16,7 @@ If you are new, you can create a CNCF Slack account [here](http://slack.cncf.io/
 
 ## Give feedback
 
-We are in early phase of development
-and we are looking for your feedback.
+We are always looking for your feedback.
 
 You can do this by [submitting a GitHub issue](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/new).
 
