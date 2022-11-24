@@ -50,17 +50,6 @@ See [design.md](design.md) for an architectural overview.
 The versioning information and stability guarantees
 can be found in the [versioning documentation](versioning.md).
 
-⚠️ **We need you!** ⚠️
-
-Please, give us your **feedback** (in whatever form you like).
-
-You can do this by [submitting a GitHub issue](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/new).
-
-You may also prefer writing on [Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
-If you are new, you can create a CNCF Slack account [here](http://slack.cncf.io/).
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
-
 ## Compatibility
 
 OpenTelemetry .NET Automatic Instrumentation attempts to work with all officially
@@ -211,6 +200,10 @@ See [manual-instrumentation.md](manual-instrumentation.md).
 ## Troubleshooting
 
 See [troubleshooting.md](troubleshooting.md).
+
+## Contact
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Contributing
 
