@@ -178,7 +178,7 @@ partial class Build
                 .EnableNoRestore()
                 .CombineWith(targetFrameworks, (p, framework) => p
                     .SetFramework(framework)
-                    .SetOutput(TracerHomeDirectory / framework)));
+                    .SetOutput(TracerHomeDirectory / MapToFolderOutput(framework))));
 
             // StartupHook is supported starting .Net Core 3.1.
             // We need to emit AutoInstrumentationStartupHook for .Net Core 3.1 target framework
@@ -190,7 +190,7 @@ partial class Build
                 .EnableNoBuild()
                 .EnableNoRestore()
                 .SetFramework(TargetFramework.NETCore3_1)
-                .SetOutput(TracerHomeDirectory / TargetFramework.NET6_0));
+                .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NETCore3_1)));
 
             // AutoInstrumentationLoader publish is needed only for .NET 6.0 to support load from AutoInstrumentationStartupHook.
             DotNetPublish(s => s
@@ -200,7 +200,7 @@ partial class Build
                 .EnableNoBuild()
                 .EnableNoRestore()
                 .SetFramework(TargetFramework.NET6_0)
-                .SetOutput(TracerHomeDirectory / TargetFramework.NET6_0));
+                .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET6_0)));
 
             DotNetPublish(s => s
                 .SetProject(Solution.GetProject(Projects.AutoInstrumentationAspNetCoreBootstrapper))
@@ -209,7 +209,12 @@ partial class Build
                 .EnableNoBuild()
                 .EnableNoRestore()
                 .SetFramework(TargetFramework.NET6_0)
-                .SetOutput(TracerHomeDirectory / TargetFramework.NET6_0));
+                .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET6_0)));
+
+            string MapToFolderOutput(TargetFramework targetFramework)
+            {
+                return targetFramework.ToString().StartsWith("net4") ? "netfx" : "net";
+            }
         });
 
     Target PublishNativeProfiler => _ => _

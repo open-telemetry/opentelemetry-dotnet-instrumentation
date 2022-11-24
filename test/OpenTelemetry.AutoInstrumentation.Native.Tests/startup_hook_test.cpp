@@ -9,7 +9,7 @@ using namespace trace;
 const auto base_path = std::filesystem::path(__FILE__).parent_path();
 const auto home_path = std::filesystem::absolute(base_path / ".." / ".." / "bin" / "tracer-home").wstring();
 const auto otel_startup_hook_path =
-    (std::filesystem::path(home_path) / "net6.0" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll").wstring();
+    (std::filesystem::path(home_path) / "net" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll").wstring();
 
 TEST(StartupHookTest, StartupHookIsValid) {
   const auto startup_hooks = std::vector<WSTRING>{otel_startup_hook_path};
@@ -37,7 +37,7 @@ TEST(StartupHookTest, StartupHookIsInvalidWhenNoStartupHooksDefined) {
 
 TEST(StartupHookTest, StartupHookIsInvalidWhenStartupHookDoesNotContainOpenTelemetryHook) {
   const auto startup_hooks = std::vector<WSTRING>{
-      (std::filesystem::path(home_path) / "net6.0" / "StartupHook.dll").wstring()
+      (std::filesystem::path(home_path) / "net" / "StartupHook.dll").wstring()
   };
 
   const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
@@ -47,7 +47,7 @@ TEST(StartupHookTest, StartupHookIsInvalidWhenStartupHookDoesNotContainOpenTelem
 
 TEST(StartupHookTest, StartupHookIsInvalidWhenNotInTheCorrectLocation) {
   const auto startup_hooks = std::vector<WSTRING>{
-      (base_path / "other_folder" / "net6.0" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll")
+      (base_path / "other_folder" / "net" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll")
           .wstring()
   };
 

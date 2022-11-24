@@ -46,7 +46,7 @@ public class DomainNeutralTests : TestHelper
             EnvironmentTools.GetSolutionDirectory(),
             "bin",
             "tracer-home",
-            "net462",
+            "netfx",
             "OpenTelemetry.AutoInstrumentation.dll");
         File.Exists(instrumentationAssembly).Should().BeTrue();
         using var gacEntry = new GacEntry(instrumentationAssembly);
