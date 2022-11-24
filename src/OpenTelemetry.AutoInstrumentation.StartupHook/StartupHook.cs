@@ -35,13 +35,18 @@ internal class StartupHook
     {
         var minSupportedFramework = new FrameworkName(".NETCoreApp,Version=v6.0");
         var appTargetFramework = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
-        var appTargetFrameworkName = new FrameworkName(appTargetFramework);
-        var appTargetFrameworkVersion = appTargetFrameworkName.Version;
-
-        if (appTargetFrameworkVersion < minSupportedFramework.Version)
+        // This is the best way to identify application's target framework.
+        // If entry assembly framework is null, StartupHook should continue its execution.
+        if (appTargetFramework != null)
         {
-            StartupHookEventSource.Log.Trace($"Error in StartupHook initialization: {appTargetFramework} is not supported");
-            return;
+            var appTargetFrameworkName = new FrameworkName(appTargetFramework);
+            var appTargetFrameworkVersion = appTargetFrameworkName.Version;
+
+            if (appTargetFrameworkVersion < minSupportedFramework.Version)
+            {
+                StartupHookEventSource.Log.Trace($"Error in StartupHook initialization: {appTargetFramework} is not supported");
+                return;
+            }
         }
 
         var applicationName = GetApplicationName();
