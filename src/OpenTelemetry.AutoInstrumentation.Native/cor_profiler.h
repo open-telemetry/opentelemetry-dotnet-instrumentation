@@ -29,7 +29,6 @@ private:
 
     // Startup helper variables
     bool first_jit_compilation_completed = false;
-    bool use_dotnet_startuphook_bootstrapper = false;
 
     bool corlib_module_loaded = false;
     AppDomainID corlib_app_domain_id = 0;
