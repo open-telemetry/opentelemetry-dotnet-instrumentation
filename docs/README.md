@@ -9,8 +9,8 @@ to .NET applications without having to modify their source code.
 
 ⚠️ The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
-([0.4.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
-can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.4.0-beta.1/docs/README.md).
+([0.5.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
+can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.5.0/docs/README.md).
 
 ---
 
@@ -47,23 +47,8 @@ See [design.md](design.md) for an architectural overview.
 
 ## Status
 
-This project is in the early stages of development.
-[The project board](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/projects/1)
-shows the current work in progress.
-
-Project versioning information and stability guarantees
+The versioning information and stability guarantees
 can be found in the [versioning documentation](versioning.md).
-
-⚠️ **We need you!** ⚠️
-
-Please, give us your **feedback** (in whatever form you like).
-
-You can do this by [submitting a GitHub issue](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/new).
-
-You may also prefer writing on [Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
-If you are new, you can create a CNCF Slack account [here](http://slack.cncf.io/).
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
 
 ## Compatibility
 
@@ -215,6 +200,10 @@ See [manual-instrumentation.md](manual-instrumentation.md).
 ## Troubleshooting
 
 See [troubleshooting.md](troubleshooting.md).
+
+## Contact
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Contributing
 
