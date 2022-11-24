@@ -72,12 +72,15 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     {
         if (runtime_information_.is_desktop())
         {
-            Logger::Debug(".NET Runtime: .NET Framework ", runtime_information_.major_version, ".", runtime_information_.minor_version);
+            // on .NET Framework it is the CLR version therfore major_version == 4 and minor_version == 0
+            Logger::Debug(".NET Runtime: .NET Framework");
         }
-        else if (runtime_information_.major_version < 4)
+        else if (runtime_information_.major_version < 5)
         {
-            Logger::Debug(".NET Runtime: .NET Core ", runtime_information_.major_version, ".", runtime_information_.minor_version);
-        } else {
+            // on .NET Core the major_version == 4 and minor_version == 0 (sic!) 
+            Logger::Debug(".NET Runtime: .NET Core");
+        }
+        else {
             Logger::Debug(".NET Runtime: .NET ", runtime_information_.major_version, ".", runtime_information_.minor_version);
         }
     }
