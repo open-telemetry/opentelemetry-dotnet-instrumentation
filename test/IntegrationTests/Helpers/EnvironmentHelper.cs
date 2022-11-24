@@ -261,7 +261,7 @@ public class EnvironmentHelper
     {
         string startupHookOutputPath = Path.Combine(
             GetNukeBuildOutput(),
-            "net6.0",
+            "net",
             "OpenTelemetry.AutoInstrumentation.StartupHook.dll");
 
         return startupHookOutputPath;

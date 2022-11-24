@@ -27,7 +27,21 @@ public class StartupTests
     public void Ctor_LoadsManagedAssembly()
     {
         var directory = Directory.GetCurrentDirectory();
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", Path.Combine(directory, "..", "Profiler"));
+        var profilerDirectory = Path.Combine(directory, "..", "Profiler");
+
+#if NETFRAMEWORK
+        if (Directory.Exists(Path.Combine(profilerDirectory, "net462")))
+        {
+            Directory.Move(Path.Combine(profilerDirectory, "net462"), Path.Combine(profilerDirectory, "netfx"));
+        }
+#else
+        if (Directory.Exists(Path.Combine(profilerDirectory, "net6.0")))
+        {
+            Directory.Move(Path.Combine(profilerDirectory, "net6.0"), Path.Combine(profilerDirectory, "net"));
+        }
+#endif
+
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", profilerDirectory);
 
         var exception = Record.Exception(() => new AutoInstrumentation.Loader.Startup());
 

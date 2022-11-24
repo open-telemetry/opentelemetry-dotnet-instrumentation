@@ -47,23 +47,49 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     CorProfilerBase::Initialize(cor_profiler_info_unknown);
 
-#if defined(ARM64) || defined(ARM)
-    //
-    // In ARM64 and ARM, complete ReJIT support is only available from .NET 5.0
-    //
-    ICorProfilerInfo12* info12;
-    HRESULT hrInfo12 = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo12), (void**) &info12);
-    if (SUCCEEDED(hrInfo12))
+    if (IsDebugEnabled())
     {
-        Logger::Info(".NET 5.0 runtime or greater was detected.");
+        const auto env_variables = GetEnvironmentVariables(env_vars_prefixes_to_display);
+        Logger::Debug("Environment variables:");
+
+        for (const auto& env_variable : env_variables)
+        {
+            Logger::Debug("  ", env_variable);
+        }
     }
-    else
+
+    // get ICorProfilerInfo7 interface for .NET Framework >= 4.6.1 and any .NET (Core) 
+    HRESULT hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo7), (void**) &this->info_);
+    if (FAILED(hr))
     {
-        Logger::Warn("OpenTelemetry .NET Automatic Instrumentation Diagnostics - Profiler disabled: .NET 5.0 runtime or greater is required on this "
-                     "architecture.");
+        Logger::Warn("Failed to attach profiler: Not supported .NET Framework version (lower than 4.6.1).");
         return E_FAIL;
     }
-#endif
+
+    // code is ready to get runtime information
+    runtime_information_ = GetRuntimeInformation(this->info_);
+    if (IsDebugEnabled())
+    {
+        if (runtime_information_.is_desktop())
+        {
+            // on .NET Framework it is the CLR version therfore major_version == 4 and minor_version == 0
+            Logger::Debug(".NET Runtime: .NET Framework");
+        }
+        else if (runtime_information_.major_version < 5)
+        {
+            // on .NET Core the major_version == 4 and minor_version == 0 (sic!) 
+            Logger::Debug(".NET Runtime: .NET Core");
+        }
+        else {
+            Logger::Debug(".NET Runtime: .NET ", runtime_information_.major_version, ".", runtime_information_.minor_version);
+        }
+    }
+
+    if (runtime_information_.is_core() && runtime_information_.major_version < 6)
+    {
+        Logger::Warn("Failed to attach profiler: Not supported .NET version (lower than 6.0).");
+        return E_FAIL;
+    }
 
     const auto process_name = GetCurrentProcessName();
     const auto exclude_process_names = GetEnvironmentValues(environment::exclude_process_names);
@@ -71,53 +97,17 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     // attach profiler only if this process's name is NOT on the list
     if (!exclude_process_names.empty() && Contains(exclude_process_names, process_name))
     {
-        Logger::Info("OpenTelemetry .NET Automatic Instrumentation Diagnostics - Profiler disabled: ", process_name, " found in ",
+        Logger::Info("Profiler disabled: ", process_name, " found in ",
                      environment::exclude_process_names, ".");
         return E_FAIL;
     }
 
-    // get ICorProfilerInfo7 interface for .NET Framework >= 4.6.1 and any .NET (Core) 
-    HRESULT hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo7), (void**) &this->info_);
-    if (FAILED(hr))
+    if (runtime_information_.is_core())
     {
-        Logger::Warn("OpenTelemetry .NET Automatic Instrumentation Diagnostics - Failed to attach profiler: interface ICorProfilerInfo7 not found.");
-        return E_FAIL;
-    }
-
-    // code is ready to get runtime information
-    runtime_information_ = GetRuntimeInformation(this->info_);
-    if (process_name == WStr("w3wp.exe") || process_name == WStr("iisexpress.exe"))
-    {
-        is_desktop_iis = runtime_information_.is_desktop();
-    }
-
-    // get ICorProfilerInfo10 for >= .NET Core 3.0
-    ICorProfilerInfo10* info10 = nullptr;
-    hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo10), (void**) &info10);
-
-    if (SUCCEEDED(hr))
-    {
-        Logger::Debug("Interface ICorProfilerInfo10 found.");
         // .NET Core applications should use the dotnet startup hook to bootstrap OpenTelemetry so that the
         // necessary dependencies will be available. Bootstrapping with the profiling APIs occurs too early
         // and the necessary dependencies are not available yet.
-        use_dotnet_startuphook_bootstrapper = true;
-    }
-    info10 = nullptr;
 
-    if (IsDebugEnabled())
-    {
-        const auto env_variables = GetEnvironmentVariables(env_vars_prefixes_to_display);
-        Logger::Info("Environment variables:");
-
-        for (const auto& env_variable : env_variables)
-        {
-            Logger::Info("  ", env_variable);
-        }
-    }
-
-    if (use_dotnet_startuphook_bootstrapper)
-    {
         // Ensure that OTel StartupHook is listed.
         const auto home_path = GetEnvironmentValue(environment::profiler_home_path);
         const auto startup_hooks = GetEnvironmentValues(environment::dotnet_startup_hooks, ENV_VAR_PATH_SEPARATOR);
@@ -128,6 +118,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         }
     }
 
+    is_desktop_iis = runtime_information_.is_desktop() && (process_name == WStr("w3wp.exe") || process_name == WStr("iisexpress.exe"));
+
     if (IsAzureAppServices())
     {
         Logger::Info("Profiler is operating within Azure App Services context.");
@@ -137,7 +129,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
         if (app_pool_id_value.size() > 1 && app_pool_id_value.at(0) == '~')
         {
-            Logger::Info("OpenTelemetry .NET Automatic Instrumentation Diagnostics - Profiler disabled: ", environment::azure_app_services_app_pool_id, " ",
+            Logger::Info("Profiler disabled: ", environment::azure_app_services_app_pool_id, " ",
                          app_pool_id_value, " is recognized as an Azure App Services infrastructure process.");
             return E_FAIL;
         }
@@ -147,7 +139,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
         if (cli_telemetry_profile_value == WStr("AzureKudu"))
         {
-            Logger::Info("OpenTelemetry .NET Automatic Instrumentation Diagnostics - Profiler disabled: ", app_pool_id_value,
+            Logger::Info("Profiler disabled: ", app_pool_id_value,
                          " is recognized as Kudu, an Azure App Services reserved process.");
             return E_FAIL;
         }
@@ -211,7 +203,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     hr = this->info_->SetEventMask2(event_mask, COR_PRF_HIGH_ADD_ASSEMBLY_REFERENCES);
     if (FAILED(hr))
     {
-        Logger::Warn("OpenTelemetry .NET Automatic Instrumentation Diagnostics - Failed to attach profiler: unable to set event mask.");
+        Logger::Warn("Failed to attach profiler: unable to set event mask.");
         return E_FAIL;
     }
 
@@ -690,7 +682,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(FunctionID function
 {
     auto _ = trace::Stats::Instance()->JITCompilationStartedMeasure();
 
-    if (!is_attached_ || !is_safe_to_block || use_dotnet_startuphook_bootstrapper)
+    if (!is_attached_ || !is_safe_to_block || runtime_information_.is_core())
     {
         return S_OK;
     }
@@ -887,7 +879,7 @@ WSTRING CorProfiler::GetBytecodeInstrumentationAssembly() const
     {
         Logger::Error("GetBytecodeInstrumentationAssembly: called before runtime_information was initialized.");
     }
-    else if (!runtime_information_.is_core())
+    else if (runtime_information_.is_desktop())
     {
         // When on .NET Framework use the signature with the public key so strong name works.
         bytecodeInstrumentationAssembly = managed_profiler_full_assembly_version_strong_name;
@@ -2050,13 +2042,13 @@ void CorProfiler::GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray, int* assembl
 
     if (runtime_information_.is_desktop())
     {
-        dllLpName = MAKEINTRESOURCE(NET462_MANAGED_ENTRYPOINT_DLL);
-        symbolsLpName = MAKEINTRESOURCE(NET462_MANAGED_ENTRYPOINT_SYMBOLS);
+        dllLpName = MAKEINTRESOURCE(NETFRAMEWORK_MANAGED_ENTRYPOINT_DLL);
+        symbolsLpName = MAKEINTRESOURCE(NETFRAMEWORK_MANAGED_ENTRYPOINT_SYMBOLS);
     }
     else
     {
-        dllLpName = MAKEINTRESOURCE(NETCOREAPP31_MANAGED_ENTRYPOINT_DLL);
-        symbolsLpName = MAKEINTRESOURCE(NETCOREAPP31_MANAGED_ENTRYPOINT_SYMBOLS);
+        dllLpName = MAKEINTRESOURCE(NET_MANAGED_ENTRYPOINT_DLL);
+        symbolsLpName = MAKEINTRESOURCE(NET_MANAGED_ENTRYPOINT_SYMBOLS);
     }
 
     HRSRC hResAssemblyInfo = FindResource(hInstance, dllLpName, L"ASSEMBLY");

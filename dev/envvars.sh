@@ -58,7 +58,7 @@ fi
 # Configure .NET Core runtime
 export DOTNET_ADDITIONAL_DEPS="${CURDIR}/bin/tracer-home/AdditionalDeps"
 export DOTNET_SHARED_STORE="${CURDIR}/bin/tracer-home/store"
-export DOTNET_STARTUP_HOOKS="${CURDIR}/bin/tracer-home/net6.0/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
+export DOTNET_STARTUP_HOOKS="${CURDIR}/bin/tracer-home/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
 
 # Configure OpenTelemetry .NET Auto-Instrumentation
 export OTEL_DOTNET_AUTO_HOME="${CURDIR}/bin/tracer-home"
