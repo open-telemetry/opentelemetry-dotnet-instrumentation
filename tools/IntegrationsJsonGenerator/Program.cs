@@ -28,7 +28,7 @@ const string instrumentMethodAttributeName = "OpenTelemetry.AutoInstrumentation.
 var thisFilePath = GetSourceFilePathName();
 var solutionFolder = Path.Combine(thisFilePath, "..", "..", "..");
 
-var autoInstrumentationLibPath = Path.Combine(solutionFolder, "bin", "tracer-home", "net6.0", "OpenTelemetry.AutoInstrumentation.dll");
+var autoInstrumentationLibPath = Path.Combine(solutionFolder, "bin", "tracer-home", "net", "OpenTelemetry.AutoInstrumentation.dll");
 
 var autoInstrumentationLib = Assembly.LoadFrom(autoInstrumentationLibPath);
 

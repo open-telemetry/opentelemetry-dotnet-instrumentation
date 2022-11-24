@@ -236,11 +236,11 @@ The [`DOTNET_ADDITIONAL_DEPS`](https://github.com/dotnet/runtime/blob/main/docs/
 and [`DOTNET_SHARED_STORE`](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
 environment variable are used to mitigate assembly version conflicts in .NET.
 
-| Environment variable     | Required value                                                          |
-|--------------------------|-------------------------------------------------------------------------|
-| `DOTNET_STARTUP_HOOKS`   | `$INSTALL_DIR/net6.0/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
-| `DOTNET_ADDITIONAL_DEPS` | `$INSTALL_DIR/AdditionalDeps`                                           |
-| `DOTNET_SHARED_STORE`    | `$INSTALL_DIR/store`                                                    |
+| Environment variable     | Required value                                                       |
+|--------------------------|----------------------------------------------------------------------|
+| `DOTNET_STARTUP_HOOKS`   | `$INSTALL_DIR/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
+| `DOTNET_ADDITIONAL_DEPS` | `$INSTALL_DIR/AdditionalDeps`                                        |
+| `DOTNET_SHARED_STORE`    | `$INSTALL_DIR/store`                                                 |
 
 ## Internal logs
 

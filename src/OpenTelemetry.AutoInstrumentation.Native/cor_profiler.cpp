@@ -2050,13 +2050,13 @@ void CorProfiler::GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray, int* assembl
 
     if (runtime_information_.is_desktop())
     {
-        dllLpName = MAKEINTRESOURCE(NET462_MANAGED_ENTRYPOINT_DLL);
-        symbolsLpName = MAKEINTRESOURCE(NET462_MANAGED_ENTRYPOINT_SYMBOLS);
+        dllLpName = MAKEINTRESOURCE(NETFRAMEWORK_MANAGED_ENTRYPOINT_DLL);
+        symbolsLpName = MAKEINTRESOURCE(NETFRAMEWORK_MANAGED_ENTRYPOINT_SYMBOLS);
     }
     else
     {
-        dllLpName = MAKEINTRESOURCE(NETCOREAPP31_MANAGED_ENTRYPOINT_DLL);
-        symbolsLpName = MAKEINTRESOURCE(NETCOREAPP31_MANAGED_ENTRYPOINT_SYMBOLS);
+        dllLpName = MAKEINTRESOURCE(NET_MANAGED_ENTRYPOINT_DLL);
+        symbolsLpName = MAKEINTRESOURCE(NET_MANAGED_ENTRYPOINT_SYMBOLS);
     }
 
     HRSRC hResAssemblyInfo = FindResource(hInstance, dllLpName, L"ASSEMBLY");

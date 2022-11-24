@@ -30,7 +30,7 @@ internal partial class Startup
     private static string ResolveManagedProfilerDirectory()
     {
         var tracerHomeDirectory = ReadEnvironmentVariable("OTEL_DOTNET_AUTO_HOME") ?? string.Empty;
-        var tracerFrameworkDirectory = "net462";
+        var tracerFrameworkDirectory = "netfx";
         return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
     }
 
