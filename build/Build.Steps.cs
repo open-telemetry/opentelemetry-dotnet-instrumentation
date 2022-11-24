@@ -440,7 +440,6 @@ partial class Build
 
                 void RemoveDuplicatedLibraries(string depsJsonContent, IReadOnlyList<string> architectureStores)
                 {
-                    // TODO: Consider to remove this method
                     var duplicatedLibraries = new List<(string Name, string Version)> { };
 
                     foreach (var duplicatedLibrary in duplicatedLibraries)
