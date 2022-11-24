@@ -9,7 +9,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [0.5.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.5.0)
 
-The is the first, production-ready (non-beta), release.
+The is the first production-ready (non-beta) release.
 It is not stable yet.
 
 ### Added
