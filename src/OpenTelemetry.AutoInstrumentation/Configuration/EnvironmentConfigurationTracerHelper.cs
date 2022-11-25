@@ -104,9 +104,9 @@ internal static class EnvironmentConfigurationTracerHelper
             new HttpClientInitializer(lazyInstrumentationLoader, pluginManager);
 
 #if NETFRAMEWORK
-            builder.AddSource("OpenTelemetry.HttpWebRequest");
+            builder.AddSource("OpenTelemetry.Instrumentation.Http.HttpWebRequest");
 #else
-            builder.AddSource("OpenTelemetry.Instrumentation.Http");
+            builder.AddSource("OpenTelemetry.Instrumentation.Http.HttpClient");
             builder.AddSource("System.Net.Http"); // This works only System.Net.Http >= 7.0.0
             builder.AddLegacySource("System.Net.Http.HttpRequestOut");
 #endif
@@ -145,7 +145,7 @@ internal static class EnvironmentConfigurationTracerHelper
         {
             new SqlClientInitializer(lazyInstrumentationLoader, pluginManager);
 
-            return builder.AddSource("OpenTelemetry.SqlClient");
+            return builder.AddSource("OpenTelemetry.Instrumentation.SqlClient");
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

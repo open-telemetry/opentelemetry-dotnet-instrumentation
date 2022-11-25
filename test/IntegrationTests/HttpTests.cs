@@ -42,7 +42,11 @@ public class HttpTests : TestHelper
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         Span clientSpan = null;
-        collector.Expect("OpenTelemetry.Instrumentation.Http", span =>
+#if NET7_0_OR_GREATER
+        collector.Expect("System.Net.Http", span =>
+#else
+        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient", span =>
+#endif
         {
             clientSpan = span;
             return true;

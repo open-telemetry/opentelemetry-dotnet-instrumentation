@@ -65,7 +65,7 @@ internal static class EnvironmentConfigurationMetricHelper
 
         return settings.MetricExporter switch
         {
-            MetricsExporter.Prometheus => Wrappers.AddPrometheusExporter(builder, pluginManager),
+            MetricsExporter.Prometheus => Wrappers.AddPrometheusHttpListener(builder, pluginManager),
             MetricsExporter.Otlp => Wrappers.AddOtlpExporter(builder, settings, pluginManager),
             MetricsExporter.None => builder,
             _ => throw new ArgumentOutOfRangeException($"Metrics exporter '{settings.MetricExporter}' is incorrect")
@@ -134,15 +134,12 @@ internal static class EnvironmentConfigurationMetricHelper
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static MeterProviderBuilder AddPrometheusExporter(MeterProviderBuilder builder, PluginManager pluginManager)
+        public static MeterProviderBuilder AddPrometheusHttpListener(MeterProviderBuilder builder, PluginManager pluginManager)
         {
             Logger.Warning("Prometheus exporter is configured. It is intended for the inner dev loop. Do NOT use in production");
 
-            return builder.AddPrometheusExporter(options =>
+            return builder.AddPrometheusHttpListener(options =>
             {
-                options.StartHttpListener = true;
-                options.ScrapeResponseCacheDurationMilliseconds = 300;
-
                 pluginManager.ConfigureOptions(options);
             });
         }

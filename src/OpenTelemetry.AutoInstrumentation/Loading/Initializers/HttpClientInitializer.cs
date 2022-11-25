@@ -46,17 +46,14 @@ internal class HttpClientInitializer
             return;
         }
 
-#if NETFRAMEWORK
-        var options = new OpenTelemetry.Instrumentation.Http.HttpWebRequestInstrumentationOptions();
+        var options = new OpenTelemetry.Instrumentation.Http.HttpClientInstrumentationOptions();
         _pluginManager.ConfigureOptions(options);
 
+#if NETFRAMEWORK
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.Http.Implementation.HttpWebRequestActivitySource, OpenTelemetry.Instrumentation.Http");
 
         instrumentationType.GetField("Options", BindingFlags.NonPublic | BindingFlags.Static)?.SetValue(null, options);
 #else
-        var options = new OpenTelemetry.Instrumentation.Http.HttpClientInstrumentationOptions();
-        _pluginManager.ConfigureOptions(options);
-
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.Http.HttpClientInstrumentation, OpenTelemetry.Instrumentation.Http");
         var instrumentation = Activator.CreateInstance(instrumentationType, options);
 

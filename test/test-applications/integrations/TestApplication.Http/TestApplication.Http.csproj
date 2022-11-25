@@ -4,8 +4,4 @@
     <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
   </PropertyGroup>
   
-  <ItemGroup>
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
-  </ItemGroup>
-  
 </Project>

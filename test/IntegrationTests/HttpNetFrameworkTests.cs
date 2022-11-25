@@ -35,7 +35,7 @@ public class HttpNetFrameworkTests : TestHelper
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
-        collector.Expect("OpenTelemetry.HttpWebRequest");
+        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpWebRequest");
         collector.Expect("TestApplication.Http.NetFramework");
 
         RunTestApplication();
