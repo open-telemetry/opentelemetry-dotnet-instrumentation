@@ -21,7 +21,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 internal static class ResourceConfigurator
 {
-    public static void ConfigureAutoInstrumentationResources(ResourceBuilder resourceBuilder)
+    public static void Configure(ResourceBuilder resourceBuilder)
     {
         resourceBuilder
             .AddTelemetrySdk()
