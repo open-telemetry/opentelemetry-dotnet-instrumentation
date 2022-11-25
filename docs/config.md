@@ -135,12 +135,12 @@ To customize the Jaeger exporter using environment variables, see the
 [Jaeger exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.3.0/src/OpenTelemetry.Exporter.Jaeger#environment-variables).
 Important environment variables include:
 
-| Environment variable              | Description                                                                                          | Default value            |
-|-----------------------------------|------------------------------------------------------------------------------------------------------|--------------------------|
-| `OTEL_EXPORTER_JAEGER_AGENT_HOST` | Host name for the Jaeger agent. Used for the `udp/thrift.compact` protocol.                          | `localhost`              |
-| `OTEL_EXPORTER_JAEGER_AGENT_PORT` | Port for the Jaeger agent. Used for the `udp/thrift.compact` protocol.                               | `6831`                   |
-| `OTEL_EXPORTER_JAEGER_ENDPOINT`   | Jaeger Collector HTTP endpoint. Used for the `http/thrift.binary` protocol.                          | `http://localhost:14268` |
-| `OTEL_EXPORTER_JAEGER_PROTOCOL`   | Protocol to use for Jaeger exporter. Supported values are `udp/thrift.compact`, `http/thrift.binary` | `udp/thrift.compact`     |
+| Environment variable              | Description                                                                                          | Default value                       |
+|-----------------------------------|------------------------------------------------------------------------------------------------------|-------------------------------------|
+| `OTEL_EXPORTER_JAEGER_AGENT_HOST` | Host name for the Jaeger agent. Used for the `udp/thrift.compact` protocol.                          | `localhost`                         |
+| `OTEL_EXPORTER_JAEGER_AGENT_PORT` | Port for the Jaeger agent. Used for the `udp/thrift.compact` protocol.                               | `6831`                              |
+| `OTEL_EXPORTER_JAEGER_ENDPOINT`   | Jaeger Collector HTTP endpoint. Used for the `http/thrift.binary` protocol.                          | `http://localhost:14268/api/traces` |
+| `OTEL_EXPORTER_JAEGER_PROTOCOL`   | Protocol to use for Jaeger exporter. Supported values are `udp/thrift.compact`, `http/thrift.binary` | `udp/thrift.compact`                |
 
 ### OTLP
 
