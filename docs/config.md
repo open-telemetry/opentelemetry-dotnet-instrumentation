@@ -98,14 +98,33 @@ for more details.
 
 Exporters output the telemetry.
 
-| Environment variable                              | Description                                                                                            | Default value                                           |
-|---------------------------------------------------|--------------------------------------------------------------------------------------------------------|---------------------------------------------------------|
-| `OTEL_TRACES_EXPORTER`                            | Traces exporter to be used. The value can be one of the following: `zipkin`, `jaeger`, `otlp`, `none`. | `otlp`                                                  |
-| `OTEL_METRICS_EXPORTER`                           | Metrics exporter to be used. The value can be one of the following: `otlp`, `prometheus`, `none`.      | `otlp`                                                  |
-| `OTEL_METRIC_EXPORT_INTERVAL`                     | The time interval (in milliseconds) between the start of two export attempts.                          | `60000` for OTLP exporter, `10000` for console exporter |
-| `OTEL_METRIC_EXPORT_TIMEOUT`                      | Maximum allowed time (in milliseconds) to export data.                                                 | `30000` for OTLP exporter, none for console exporter    |
-| `OTEL_LOGS_EXPORTER`                              | Logs exporter to be used. The value can be one of the following: `otlp`, `none`.                       | `otlp`                                                  |
-| `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE` | Whether the formatted log message should be set or not.                                                | `false`                                                 |
+| Environment variable    | Description                                                                                            | Default value |
+|-------------------------|--------------------------------------------------------------------------------------------------------|---------------|
+| `OTEL_TRACES_EXPORTER`  | Traces exporter to be used. The value can be one of the following: `zipkin`, `jaeger`, `otlp`, `none`. | `otlp`        |
+| `OTEL_METRICS_EXPORTER` | Metrics exporter to be used. The value can be one of the following: `otlp`, `prometheus`, `none`.      | `otlp`        |
+| `OTEL_LOGS_EXPORTER`    | Logs exporter to be used. The value can be one of the following: `otlp`, `none`.                       | `otlp`        |
+
+### Traces exporter
+
+| Environment variable             | Description                                                                  | Default value |
+|----------------------------------|------------------------------------------------------------------------------|---------------|
+| `OTEL_BSP_SCHEDULE_DELAY`        | Delay interval (in milliseconds) between two consecutive exports.            | `5000`        |
+| `OTEL_BSP_EXPORT_TIMEOUT`        | Maximum allowed time (in milliseconds) to export data                        | `30000`       |
+| `OTEL_BSP_MAX_QUEUE_SIZE`        | Maximum queue size.                                                          | `2048`        |
+| `OTEL_BSP_MAX_EXPORT_BATCH_SIZE` | Maximum batch size. Must be less than or equal to `OTEL_BSP_MAX_QUEUE_SIZE`. | `512`         |
+
+### Metrics exporter
+
+| Environment variable          | Description                                                                   | Default value                                           |
+|-------------------------------|-------------------------------------------------------------------------------|---------------------------------------------------------|
+| `OTEL_METRIC_EXPORT_INTERVAL` | The time interval (in milliseconds) between the start of two export attempts. | `60000` for OTLP exporter, `10000` for console exporter |
+| `OTEL_METRIC_EXPORT_TIMEOUT`  | Maximum allowed time (in milliseconds) to export data.                        | `30000` for OTLP exporter, none for console exporter    |
+
+### Logs exporter
+
+| Environment variable                              | Description                                             | Default value |
+|---------------------------------------------------|---------------------------------------------------------|---------------|
+| `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE` | Whether the formatted log message should be set or not. | `false`       |
 
 ### Jaeger
 

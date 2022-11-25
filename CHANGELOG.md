@@ -15,6 +15,8 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 
 ### Added
 
+- Add support for `OTEL_BSP_SCHEDULE_DELAY`, `OTEL_BSP_EXPORT_TIMEOUT`,
+  `OTEL_BSP_MAX_QUEUE_SIZE`, `OTEL_BSP_MAX_EXPORT_BATCH_SIZE`.
 - Add support for `OTEL_METRIC_EXPORT_TIMEOUT`.
 
 ### Changed
