@@ -192,6 +192,10 @@ variable to `prometheus`.
 The exporter exposes the metrics HTTP endpoint on `http://localhost:9464/metrics`
 and it caches the responses for 300 milliseconds.
 
+See the
+[Prometheus Exporter HttpListener documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-beta.3/src/OpenTelemetry.Exporter.Prometheus.HttpListener).
+to learn more.
+
 ### Zipkin
 
 To enable the Zipkin exporter, set the `OTEL_TRACES_EXPORTER` environment
