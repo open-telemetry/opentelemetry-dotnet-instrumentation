@@ -15,6 +15,7 @@
 // </copyright>
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Configuration;
@@ -24,6 +25,7 @@ using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Shims.OpenTracing;
 using OpenTelemetry.Trace;
 using OpenTracing.Util;
@@ -118,7 +120,7 @@ internal static class Instrumentation
             {
                 var builder = Sdk
                     .CreateTracerProviderBuilder()
-                    .SetResourceBuilder(ResourceFactory.Create())
+                    .ConfigureResource(ResourceConfigurator.ConfigureAutoInstrumentationResources)
                     .UseEnvironmentVariables(LazyInstrumentationLoader, TracerSettings, _pluginManager)
                     .InvokePlugins(_pluginManager);
 
@@ -130,7 +132,7 @@ internal static class Instrumentation
             {
                 var builder = Sdk
                     .CreateMeterProviderBuilder()
-                    .SetResourceBuilder(ResourceFactory.Create())
+                    .ConfigureResource(ResourceConfigurator.ConfigureAutoInstrumentationResources)
                     .UseEnvironmentVariables(LazyInstrumentationLoader, MetricSettings, _pluginManager)
                     .InvokePlugins(_pluginManager);
 

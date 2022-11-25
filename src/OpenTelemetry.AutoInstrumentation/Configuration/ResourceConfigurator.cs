@@ -1,4 +1,4 @@
-// <copyright file="ResourceFactory.cs" company="OpenTelemetry Authors">
+// <copyright file="ResourceConfigurator.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,11 +19,11 @@ using OpenTelemetry.Resources;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
-internal static class ResourceFactory
+internal static class ResourceConfigurator
 {
-    public static ResourceBuilder Create()
+    public static void ConfigureAutoInstrumentationResources(ResourceBuilder resourceBuilder)
     {
-        return ResourceBuilder.CreateDefault()
+        resourceBuilder
             .AddTelemetrySdk()
             .AddAttributes(new KeyValuePair<string, object>[] { new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version) });
     }
