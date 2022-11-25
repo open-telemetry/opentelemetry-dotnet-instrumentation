@@ -16,7 +16,7 @@ inline bool IsStartupHookValid(const std::vector<WSTRING>& startup_hooks, const 
 
     const auto expected_startuphook_path =
         std::filesystem::path(home_path)
-        / "net6.0" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll";
+        / "net" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll";
     if (!std::filesystem::exists(expected_startuphook_path))
     {
         return false;

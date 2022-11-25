@@ -43,7 +43,7 @@ for more details.
 | `MongoDB`            | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core) **Not supported on .NET Framework**                                                                                   | ≥2.13.3 & < 3.0.0  | source & bytecode       |
 | `MySqlData`          | [MySql.Data](https://www.nuget.org/packages/MySql.Data) **Not supported on .NET Framework**                                                                                                     | ≥6.10.7            | source & bytecode \[1\] |
 | `Npgsql`             | [Npgsql](https://www.nuget.org/packages/Npgsql)                                                                                                                                                 | ≥6.0.0             | source                  |
-| `SqlClient`          | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient)                                                                                                             | *                  | source                  |
+| `SqlClient`          | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient)                           | *                  | source                  |
 | `StackExchangeRedis` | [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis) **Not supported on .NET Framework**                                                                                   | ≥2.0.405 < 3.0.0   | source & bytecode       |
 | `Wcf`                | [System.ServiceModel](https://www.nuget.org/packages/System.ServiceModel) **No support for server side on .NET**. For configuration see [WCF Instrumentation Configuration](wcf-config.md)      | * \[2\]            | source                  |
 
@@ -235,11 +235,11 @@ The [`DOTNET_ADDITIONAL_DEPS`](https://github.com/dotnet/runtime/blob/main/docs/
 and [`DOTNET_SHARED_STORE`](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store)
 environment variable are used to mitigate assembly version conflicts in .NET.
 
-| Environment variable     | Required value                                                          |
-|--------------------------|-------------------------------------------------------------------------|
-| `DOTNET_STARTUP_HOOKS`   | `$INSTALL_DIR/net6.0/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
-| `DOTNET_ADDITIONAL_DEPS` | `$INSTALL_DIR/AdditionalDeps`                                           |
-| `DOTNET_SHARED_STORE`    | `$INSTALL_DIR/store`                                                    |
+| Environment variable     | Required value                                                       |
+|--------------------------|----------------------------------------------------------------------|
+| `DOTNET_STARTUP_HOOKS`   | `$INSTALL_DIR/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
+| `DOTNET_ADDITIONAL_DEPS` | `$INSTALL_DIR/AdditionalDeps`                                        |
+| `DOTNET_SHARED_STORE`    | `$INSTALL_DIR/store`                                                 |
 
 ## Internal logs
 

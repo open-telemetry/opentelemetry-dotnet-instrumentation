@@ -1,4 +1,4 @@
-// <copyright file="HttpNetFrameworkTests.cs" company="OpenTelemetry Authors">
+// <copyright file="SqlClientSystemDataTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,32 +15,45 @@
 // </copyright>
 
 #if NETFRAMEWORK
+
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-public class HttpNetFrameworkTests : TestHelper
+public class SqlClientSystemDataTests : TestHelper
 {
-    public HttpNetFrameworkTests(ITestOutputHelper output)
-        : base("Http.NetFramework", output)
+    public SqlClientSystemDataTests(ITestOutputHelper output)
+        : base("SqlClient.NetFramework", output)
     {
     }
 
-    [Fact]
+    [IgnoreRunningOnNet481Fact]
     [Trait("Category", "EndToEnd")]
     public void SubmitTraces()
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-
-        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpWebRequest");
-        collector.Expect("TestApplication.Http.NetFramework");
+        collector.Expect("OpenTelemetry.SqlClient");
 
         RunTestApplication();
 
         collector.AssertExpectations();
     }
 }
+
+public sealed class IgnoreRunningOnNet481Fact : FactAttribute
+{
+    public IgnoreRunningOnNet481Fact()
+    {
+        var netVersion = RuntimeHelper.GetRuntimeVersion();
+        if (netVersion == "4.8.1+")
+        {
+            // https://github.com/open-telemetry/opentelemetry-dotnet/issues/3901
+            Skip = "NET Framework 4.8.1 is skipped due bug.";
+        }
+    }
+}
+
 #endif

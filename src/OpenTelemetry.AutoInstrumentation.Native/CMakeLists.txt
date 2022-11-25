@@ -5,7 +5,7 @@ cmake_policy(SET CMP0015 NEW)
 # Project definition
 # ******************************************************
 
-project("OpenTelemetry.AutoInstrumentation.Native" VERSION 0.4.0)
+project("OpenTelemetry.AutoInstrumentation.Native" VERSION 0.5.0)
 
 # ******************************************************
 # Environment detection
@@ -102,7 +102,7 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 if (NOT EXISTS ${OUTPUT_DEPS_DIR}/json)
     add_custom_command(
         OUTPUT ${OUTPUT_DEPS_DIR}/json
-        COMMAND git clone --quiet --depth 1 --branch v3.11.1 https://github.com/nlohmann/json.git
+        COMMAND git clone --quiet --depth 1 --branch v3.11.2 https://github.com/nlohmann/json.git
         WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
     )
 endif()

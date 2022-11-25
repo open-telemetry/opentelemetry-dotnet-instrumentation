@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>OpenTelemetry.AutoInstrumentation</id>
-    <version>0.4.0-beta.1</version>
+    <version>0.5.0</version>
     <description>OpenTelemetry Auto-Instrumentation</description>
     <authors>OpenTelemetry Authors</authors>
     <owners>OpenTelemetry Authors</owners>
@@ -56,11 +56,11 @@
   </metadata>
   <files>
     <file src="bin-linux-glibc/AdditionalDeps/**/*.*" target="AdditionalDeps" />
-    <file src="bin-linux-glibc/net6.0/**/*.*" target="net6.0" />
+    <file src="bin-linux-glibc/net/**/*.*" target="net" />
     <file src="bin-linux-glibc/store/**/*.*" target="store" />
     <file src="bin-linux-glibc/integrations.json" target="integrations.json" />
     <file src="bin-linux-glibc/OpenTelemetry.AutoInstrumentation.Native.so" target="OpenTelemetry.AutoInstrumentation.Native.so" />
-    <file src="bin-windows/net462/**/*.*" target="net462" />
+    <file src="bin-windows/netfx/**/*.*" target="netfx" />
     <file src="bin-windows/win-x64/**/*.*" target="win-x64" />
     <file src="bin-windows/win-x86/**/*.*" target="win-x86" />
     <file src="bin-macos/OpenTelemetry.AutoInstrumentation.Native.dylib" target="OpenTelemetry.AutoInstrumentation.Native.dylib" />

@@ -15,22 +15,35 @@
 // </copyright>
 
 using System;
+using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
-internal class SqlClientInitializer : InstrumentationInitializer
+internal class SqlClientInitializer
 {
     private readonly PluginManager _pluginManager;
 
-    public SqlClientInitializer(PluginManager pluginManager)
-        : base("Microsoft.Data.SqlClient")
+    private int _initialized;
+
+    public SqlClientInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
     {
         _pluginManager = pluginManager;
+        lazyInstrumentationLoader.Add(new GenericInitializer("Microsoft.Data.SqlClient", InitializeOnFirstCall));
+
+#if NETFRAMEWORK
+        lazyInstrumentationLoader.Add(new GenericInitializer("System.Data", InitializeOnFirstCall));
+#endif
     }
 
-    public override void Initialize(ILifespanManager lifespanManager)
+    private void InitializeOnFirstCall(ILifespanManager lifespanManager)
     {
+        if (Interlocked.Exchange(ref _initialized, value: 1) != default)
+        {
+            // InitializeOnFirstCall() was already called before
+            return;
+        }
+
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentation, OpenTelemetry.Instrumentation.SqlClient");
 
         var options = new OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentationOptions();

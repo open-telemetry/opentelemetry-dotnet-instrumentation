@@ -47,38 +47,37 @@ public class MyPlugin
 
 | Options type                                                                 | NuGet package                                | NuGet version |
 |------------------------------------------------------------------------------|----------------------------------------------|---------------|
-| OpenTelemetry.Exporter.ConsoleExporterOptions                                | OpenTelemetry.Exporter.Console               | 1.3.1         |
-| OpenTelemetry.Exporter.ZipkinExporterOptions                                 | OpenTelemetry.Exporter.Zipkin                | 1.3.1         |
-| OpenTelemetry.Exporter.JaegerExporterOptions                                 | OpenTelemetry.Exporter.Jaeger                | 1.3.1         |
-| OpenTelemetry.Exporter.OtlpExporterOptions                                   | OpenTelemetry.Exporter.OpenTelemetryProtocol | 1.3.1         |
+| OpenTelemetry.Exporter.ConsoleExporterOptions                                | OpenTelemetry.Exporter.Console               | 1.4.0-beta.3  |
+| OpenTelemetry.Exporter.ZipkinExporterOptions                                 | OpenTelemetry.Exporter.Zipkin                | 1.4.0-beta.3  |
+| OpenTelemetry.Exporter.JaegerExporterOptions                                 | OpenTelemetry.Exporter.Jaeger                | 1.4.0-beta.3  |
+| OpenTelemetry.Exporter.OtlpExporterOptions                                   | OpenTelemetry.Exporter.OpenTelemetryProtocol | 1.4.0-beta.3  |
 | OpenTelemetry.Instrumentation.AspNet.AspNetInstrumentationOptions            | OpenTelemetry.Instrumentation.AspNet         | 1.0.0-rc9.6   |
-| OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentationOptions    | OpenTelemetry.Instrumentation.AspNetCore     | 1.0.0-rc9.4   |
-| OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientInstrumentationOptions | OpenTelemetry.Instrumentation.GrpcNetClient  | 1.0.0-rc9.4   |
-| OpenTelemetry.Instrumentation.Http.HttpClientInstrumentationOptions          | OpenTelemetry.Instrumentation.Http           | 1.0.0-rc9.4   |
-| OpenTelemetry.Instrumentation.Http.HttpWebRequestInstrumentationOptions      | OpenTelemetry.Instrumentation.Http           | 1.0.0-rc9.4   |
-| OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentationOptions      | OpenTelemetry.Instrumentation.SqlClient      | 1.0.0-rc9.4   |
+| OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentationOptions    | OpenTelemetry.Instrumentation.AspNetCore     | 1.0.0-rc9.9   |
+| OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientInstrumentationOptions | OpenTelemetry.Instrumentation.GrpcNetClient  | 1.0.0-rc9.9   |
+| OpenTelemetry.Instrumentation.Http.HttpClientInstrumentationOptions          | OpenTelemetry.Instrumentation.Http           | 1.0.0-rc9.9   |
+| OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentationOptions      | OpenTelemetry.Instrumentation.SqlClient      | 1.0.0-rc9.9   |
 | OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentationOptions      | OpenTelemetry.Instrumentation.MySqlData      | 1.0.0-beta.4  |
 | OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationOptions                  | OpenTelemetry.Instrumentation.Wcf            | 1.0.0-rc7     |
 
 ### Metrics
 
-| Options type                                                        | NuGet package                                | NuGet version |
-|---------------------------------------------------------------------|----------------------------------------------|---------------|
-| OpenTelemetry.Metrics.MetricReaderOptions                           | OpenTelemetry                                | 1.3.1         |
-| OpenTelemetry.Exporter.ConsoleExporterOptions                       | OpenTelemetry.Exporter.Console               | 1.3.1         |
-| OpenTelemetry.Exporter.PrometheusExporterOptions                    | OpenTelemetry.Exporter.Prometheus            | 1.3.0-rc.2    |
-| OpenTelemetry.Exporter.OtlpExporterOptions                          | OpenTelemetry.Exporter.OpenTelemetryProtocol | 1.3.1         |
-| OpenTelemetry.Exporter.OtlpExporterOptions                          | OpenTelemetry.Exporter.OpenTelemetryProtocol | 1.3.1         |
-| OpenTelemetry.Instrumentation.Runtime.RuntimeInstrumentationOptions | OpenTelemetry.Instrumentation.Runtime        | 1.0.0         |
-| OpenTelemetry.Instrumentation.Process.ProcessInstrumentationOptions | OpenTelemetry.Instrumentation.Process        | 0.1.0-alpha.1 |
+| Options type                                                        | NuGet package                                  | NuGet version |
+|---------------------------------------------------------------------|------------------------------------------------|---------------|
+| OpenTelemetry.Metrics.MetricReaderOptions                           | OpenTelemetry                                  | 1.4.0-beta.3  |
+| OpenTelemetry.Exporter.ConsoleExporterOptions                       | OpenTelemetry.Exporter.Console                 | 1.3.1         |
+| OpenTelemetry.Exporter.PrometheusExporterOptions                    | OpenTelemetry.Exporter.Prometheus.HttpListener | 1.4.0-beta.3  |
+| OpenTelemetry.Exporter.OtlpExporterOptions                          | OpenTelemetry.Exporter.OpenTelemetryProtocol   | 1.4.0-beta.3  |
+| OpenTelemetry.Exporter.OtlpExporterOptions                          | OpenTelemetry.Exporter.OpenTelemetryProtocol   | 1.4.0-beta.3  |
+| OpenTelemetry.Instrumentation.Runtime.RuntimeInstrumentationOptions | OpenTelemetry.Instrumentation.Runtime          | 1.1.0-beta.1  |
+| OpenTelemetry.Instrumentation.Process.ProcessInstrumentationOptions | OpenTelemetry.Instrumentation.Process          | 1.0.0-alpha.2 |
 
 ### Logs
 
 | Options type                                  | NuGet package                                | NuGet version |
 |-----------------------------------------------|----------------------------------------------|---------------|
-| OpenTelemetry.Logs.OpenTelemetryLoggerOptions | OpenTelemetry                                | 1.3.1         |
-| OpenTelemetry.Exporter.ConsoleExporterOptions | OpenTelemetry.Exporter.Console               | 1.3.1         |
-| OpenTelemetry.Exporter.OtlpExporterOptions    | OpenTelemetry.Exporter.OpenTelemetryProtocol | 1.3.1         |
+| OpenTelemetry.Logs.OpenTelemetryLoggerOptions | OpenTelemetry                                | 1.4.0-beta.3  |
+| OpenTelemetry.Exporter.ConsoleExporterOptions | OpenTelemetry.Exporter.Console               | 1.4.0-beta.3  |
+| OpenTelemetry.Exporter.OtlpExporterOptions    | OpenTelemetry.Exporter.OpenTelemetryProtocol | 1.4.0-beta.3  |
 
 ## Requirements
 

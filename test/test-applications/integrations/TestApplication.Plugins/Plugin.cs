@@ -34,25 +34,13 @@ public class Plugin
 
     public void ConfigureOptions(HttpClientInstrumentationOptions options)
     {
-        options.Enrich = (activity, eventName, rawObject) =>
-        {
-            if (eventName.Equals("OnStartActivity"))
-            {
-                activity.SetTag("example.plugin", "MyExamplePlugin");
-            }
-        };
-    }
-
 #if NETFRAMEWORK
-    public void ConfigureOptions(HttpWebRequestInstrumentationOptions options)
-    {
-        options.Enrich = (activity, eventName, rawObject) =>
+        options.EnrichWithHttpWebRequest = (activity, message) =>
+#else
+        options.EnrichWithHttpRequestMessage = (activity, message) =>
+#endif
         {
-            if (eventName.Equals("OnStartActivity"))
-            {
-                activity.SetTag("example.plugin", "MyExamplePlugin");
-            }
+            activity.SetTag("example.plugin", "MyExamplePlugin");
         };
     }
-#endif
 }

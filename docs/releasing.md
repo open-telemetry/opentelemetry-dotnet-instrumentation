@@ -18,9 +18,8 @@
 
 1. Stable release only! Update `PublicAPI.Shipped.txt` based on corresponding `PublicAPI.Unshipped.txt`.
 
-1. Create a pull request on GitHub with the changes described in the changelog.
-   - `*scripts*` and `validate-documentation` jobs will fail
-     because the release is not published yet.
+1. Create a pull request with `release PR` label on GitHub
+   with the changes described in the changelog.
 
 1. Run the integration tests with Linux containers on Windows and macOS
    (not covered by CI):

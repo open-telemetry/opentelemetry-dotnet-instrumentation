@@ -26,6 +26,11 @@ jobs:
           dotnet-version: | 
             6.0.x
             7.0.x
+      - name: Install SQL Server (localdb)
+        uses: potatoqualitee/mssqlsuite@v1.7
+        if: ${{ runner.os == 'Windows' }}
+        with: 
+          install: localdb
       - run: ./build.cmd Workflow --containers ${{ matrix.containers }}
       - name: Upload logs
         uses: actions/upload-artifact@v3.1.1
@@ -64,6 +69,7 @@ jobs:
       continue-on-error: true
 
   powershell-script:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
     runs-on: windows-2022
     steps:
       - uses: actions/setup-dotnet@v3.0.3
@@ -92,6 +98,7 @@ jobs:
           if (Test-Path $install_dir) { throw "Core files exist. Core uninstall failed." }
 
   shell-scripts:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
     strategy:
       fail-fast: false
       matrix:
@@ -125,6 +132,7 @@ jobs:
             test "$(ls -A '${{ matrix.log-dir }}' )"
 
   shell-scripts-container:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
     strategy:
       fail-fast: false
       matrix:

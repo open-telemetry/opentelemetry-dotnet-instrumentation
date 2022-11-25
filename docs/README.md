@@ -9,8 +9,8 @@ to .NET applications without having to modify their source code.
 
 ⚠️ The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
-([0.4.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
-can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.4.0-beta.1/docs/README.md).
+([0.5.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
+can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.5.0/docs/README.md).
 
 ---
 
@@ -18,8 +18,8 @@ OpenTelemetry .NET Automatic Instrumentation is built on top of
 [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-[`1.3.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.3.1)
-- `System.Diagnostics.DiagnosticSource`: [`6.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/6.0.0)
+[`1.4.0-beta.3`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-beta.3)
+- `System.Diagnostics.DiagnosticSource`: [`7.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/7.0.0)
   referencing `System.Runtime.CompilerServices.Unsafe`: [`6.0.0`](https://www.nuget.org/packages/System.Runtime.CompilerServices.Unsafe/6.0.0)
 
 You can find all references in
@@ -47,23 +47,8 @@ See [design.md](design.md) for an architectural overview.
 
 ## Status
 
-This project is in the early stages of development.
-[The project board](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/projects/1)
-shows the current work in progress.
-
-Project versioning information and stability guarantees
+The versioning information and stability guarantees
 can be found in the [versioning documentation](versioning.md).
-
-⚠️ **We need you!** ⚠️
-
-Please, give us your **feedback** (in whatever form you like).
-
-You can do this by [submitting a GitHub issue](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/new).
-
-You may also prefer writing on [Slack](https://cloud-native.slack.com/archives/C01NR1YLSE7).
-If you are new, you can create a CNCF Slack account [here](http://slack.cncf.io/).
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
 
 ## Compatibility
 
@@ -105,23 +90,23 @@ When running your application, make sure to:
 1. Set the [resources](config.md#resources).
 1. Set the environment variables from the table below.
 
-| Environment variable                 | .NET version    | Value                                                                   |
-|--------------------------------------|-----------------|-------------------------------------------------------------------------|
-| `COR_ENABLE_PROFILING`               | .NET Framework  | `1`                                                                     |
-| `COR_PROFILER`                       | .NET Framework  | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                                |
-| `COR_PROFILER_PATH_32`               | .NET Framework  | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll`     |
-| `COR_PROFILER_PATH_64`               | .NET Framework  | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll`     |
-| `CORECLR_ENABLE_PROFILING`           | .NET            | `1`                                                                     |
-| `CORECLR_PROFILER`                   | .NET            | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                                |
-| `CORECLR_PROFILER_PATH`              | .NET on Linux   | `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.so`              |
-| `CORECLR_PROFILER_PATH`              | .NET on macOS   | `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.dylib`           |
-| `CORECLR_PROFILER_PATH_32`           | .NET on Windows | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll`     |
-| `CORECLR_PROFILER_PATH_64`           | .NET on Windows | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll`     |
-| `DOTNET_ADDITIONAL_DEPS`             | .NET            | `$INSTALL_DIR/AdditionalDeps`                                           |
-| `DOTNET_SHARED_STORE`                | .NET            | `$INSTALL_DIR/store`                                                    |
-| `DOTNET_STARTUP_HOOKS`               | .NET            | `$INSTALL_DIR/net6.0/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
-| `OTEL_DOTNET_AUTO_HOME`              | All versions    | `$INSTALL_DIR`                                                          |
-| `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | All versions    | `$INSTALL_DIR/integrations.json`                                        |
+| Environment variable                 | .NET version    | Value                                                                |
+|--------------------------------------|-----------------|----------------------------------------------------------------------|
+| `COR_ENABLE_PROFILING`               | .NET Framework  | `1`                                                                  |
+| `COR_PROFILER`                       | .NET Framework  | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                             |
+| `COR_PROFILER_PATH_32`               | .NET Framework  | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll`  |
+| `COR_PROFILER_PATH_64`               | .NET Framework  | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll`  |
+| `CORECLR_ENABLE_PROFILING`           | .NET            | `1`                                                                  |
+| `CORECLR_PROFILER`                   | .NET            | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                             |
+| `CORECLR_PROFILER_PATH`              | .NET on Linux   | `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.so`           |
+| `CORECLR_PROFILER_PATH`              | .NET on macOS   | `$INSTALL_DIR/OpenTelemetry.AutoInstrumentation.Native.dylib`        |
+| `CORECLR_PROFILER_PATH_32`           | .NET on Windows | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll`  |
+| `CORECLR_PROFILER_PATH_64`           | .NET on Windows | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll`  |
+| `DOTNET_ADDITIONAL_DEPS`             | .NET            | `$INSTALL_DIR/AdditionalDeps`                                        |
+| `DOTNET_SHARED_STORE`                | .NET            | `$INSTALL_DIR/store`                                                 |
+| `DOTNET_STARTUP_HOOKS`               | .NET            | `$INSTALL_DIR/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll` |
+| `OTEL_DOTNET_AUTO_HOME`              | All versions    | `$INSTALL_DIR`                                                       |
+| `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | All versions    | `$INSTALL_DIR/integrations.json`                                     |
 
 > Some settings can be omitted on .NET. For more information, see [config.md](config.md#net-clr-profiler).
 
@@ -132,7 +117,7 @@ and instrument your .NET application using the provided Shell scripts.
 Example usage:
 
 ```sh
-curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.4.0-beta.1/otel-dotnet-auto-install.sh -O
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.5.0/otel-dotnet-auto-install.sh -O
 sh ./otel-dotnet-auto-install.sh
 . $HOME/.otel-dotnet-auto/instrument.sh
 OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 dotnet run
@@ -146,7 +131,7 @@ uses environment variables as parameters:
 | `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                      | No       | `$HOME/.otel-dotnet-auto` |
 | `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | No       | *Calculated*              |
 | `TMPDIR`                | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`            |
-| `VERSION`               | Version to download                                              | No       | `v0.4.0-beta.1`           |
+| `VERSION`               | Version to download                                              | No       | `v0.5.0`           |
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
@@ -167,7 +152,7 @@ Example usage:
 
 ```powershell
 # Download and import the module
-$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.4.0-beta.1/OpenTelemetry.DotNet.Auto.psm1"
+$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.5.0/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path
 Import-Module $download_path
@@ -215,6 +200,10 @@ See [manual-instrumentation.md](manual-instrumentation.md).
 ## Troubleshooting
 
 See [troubleshooting.md](troubleshooting.md).
+
+## Contact
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Contributing
 

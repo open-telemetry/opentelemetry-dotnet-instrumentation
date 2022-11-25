@@ -36,7 +36,7 @@ if [[ $skipAppBuild != "true" && $skipAppBuild != "1" ]]; then
   dotnet publish -f $aspNetAppTargetFramework -c $configuration ./examples/AspNetCoreMvc/Examples.AspNetCoreMvc.csproj
 
   # build plugin for HTTP server app
-  dotnet publish -f $vendorPluginTargetFramework -c $configuration ./examples/Vendor.Distro/Examples.Vendor.Distro.csproj -o bin/tracer-home/$vendorPluginTargetFramework
+  dotnet publish -f $vendorPluginTargetFramework -c $configuration ./examples/Vendor.Distro/Examples.Vendor.Distro.csproj -o bin/tracer-home/net
 
   # build the client app
   dotnet publish -f $exampleAppTargetFramework -c $configuration ./examples/${exampleApp}/Examples.${exampleApp}.csproj

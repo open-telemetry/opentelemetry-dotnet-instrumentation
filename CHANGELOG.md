@@ -5,14 +5,45 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.4.0-beta.1...HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.5.0...HEAD)
+
+This release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
+
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.4.0-beta.3`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-beta.3)
+- `System.Diagnostics.DiagnosticSource`: [`7.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/7.0.0)
+
+### Added
 
 ### Changed
 
-- Replace `OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP` by `OTEL_DOTNET_AUTO_TRACES_ENABLED`
-  and `OTEL_DOTNET_AUTO_LOAD_METER_AT_STARTUP` by `OTEL_DOTNET_AUTO_METRICS_ENABLED`.
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.4.0-beta.3`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-beta.3)
+
+### Removed
+
+### Fixed
+
+## [0.5.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.5.0)
+
+The is the first production-ready (non-beta) release.
+It is not stable yet.
+
+### Added
+
+- Add support for .NET 7.
+- Add support for `OTEL_DOTNET_AUTO_LOGS_ENABLED`.
+- Add error log if bytecode instrumentation type
+  is missing all instrumentation methods.
+- Plugins can overwrite OpenTelemetry .NET SDK exporters' and instrumentations' options.
+
+### Changed
+
+- Replace `OTEL_DOTNET_AUTO_LOAD_TRACER_AT_STARTUP` with `OTEL_DOTNET_AUTO_TRACES_ENABLED`
+  and `OTEL_DOTNET_AUTO_LOAD_METER_AT_STARTUP` with `OTEL_DOTNET_AUTO_METRICS_ENABLED`.
 - Disable OpenTracing by default. OpenTracing can be re-enabled via `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`.
 - GraphQL exceptions are recorded as OTel events.
+- `DOTNET_STARTUP_HOOKS` required value changed to `$INSTALL_DIR/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll`.
 
 ### Removed
 
@@ -21,8 +52,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Remove support for `OTEL_DOTNET_AUTO_ENABLED`.
   Use `CORECLR_ENABLE_PROFILING` or `COR_ENABLE_PROFILING` instead.
 - Remove support for `OTEL_DOTNET_AUTO_INCLUDE_PROCESSES`.
-- Remove traces instrumentation for [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient)
-  as it is not working.
 
 ### Fixed
 
@@ -30,16 +59,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Fix the IIS unregistration in the PowerShell script module.
 - Get rid of unnecessary service restarts during the IIS unregistration,
   in the PowerShell script module.
-- `OTEL_DOTNET_AUTO_TRACES_ENABLED` is also respected by bytecode instrumentations
-
-### Added
-
-- Add support for .NET 7.
-- Add support for `OTEL_DOTNET_AUTO_LOGS_ENABLED`.
-- Error message on the native log if bytecode instrumentation type is missing all
-  instrumentation methods [#1499](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1499).
-- Plugins can overwrite OpenTelemetry dotnet SDK instrumentation and exporter options.
-  See more at [plugins.md](docs/plugins.md).
+- `OTEL_DOTNET_AUTO_TRACES_ENABLED` is also respected by bytecode instrumentations.
 
 ## [0.4.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.4.0-beta.1)
 
