@@ -15,6 +15,8 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 
 ### Added
 
+- Add support for `OTEL_METRIC_EXPORT_TIMEOUT`.
+
 ### Changed
 
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
