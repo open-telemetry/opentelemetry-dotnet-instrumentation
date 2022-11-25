@@ -123,11 +123,6 @@ internal static class EnvironmentConfigurationMetricHelper
         {
             return builder.AddConsoleExporter((consoleExporterOptions, metricReaderOptions) =>
             {
-                if (settings.MetricExportInterval != null)
-                {
-                    metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = settings.MetricExportInterval;
-                }
-
                 pluginManager.ConfigureOptions(consoleExporterOptions);
                 pluginManager.ConfigureOptions(metricReaderOptions);
             });
@@ -152,11 +147,6 @@ internal static class EnvironmentConfigurationMetricHelper
                 if (settings.OtlpExportProtocol.HasValue)
                 {
                     options.Protocol = settings.OtlpExportProtocol.Value;
-                }
-
-                if (settings.MetricExportInterval != null)
-                {
-                    metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = settings.MetricExportInterval;
                 }
 
                 pluginManager.ConfigureOptions(options);
