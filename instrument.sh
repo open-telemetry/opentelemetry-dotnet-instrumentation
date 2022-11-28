@@ -142,3 +142,5 @@ if [ "$ENABLE_PROFILING" = "true" ]; then
   # Configure the bytecode instrumentation configuration file
   export OTEL_DOTNET_AUTO_INTEGRATIONS_FILE="$OTEL_DOTNET_AUTO_HOME/integrations.json"
 fi
+
+eval "$@"
