@@ -29,8 +29,8 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
   [`1.4.0-beta.3`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-beta.3)
 - Updated plugins method signature to overwrite OpenTelemetry .NET SDK exporters'
- and instrumentations' options. `ConfigureOptions` changed to `ConfigureTracesOptions`,
- `ConfigureMetricsOptions` or `ConfigureLogsOptions`.
+  and instrumentations' options. `ConfigureOptions` changed to `ConfigureTracesOptions`,
+  `ConfigureMetricsOptions` or `ConfigureLogsOptions`.
 
 ### Removed
 
