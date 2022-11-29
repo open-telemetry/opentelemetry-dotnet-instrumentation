@@ -32,7 +32,7 @@ and its initialization can also be delegated to the application code.
 
 - **Applications using Ahead-of-Time (AOT) compilation**:
 The current implementation relies on the [host startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)
-or the [CLR Profiler APIs](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling)
+or the [CLR Profiler API](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling)
 and neither is supported when publishing AOT compiled applications.
 - **Side-by-side usage with other CLR Profiler based tools**: Various tools for .NET
 are also implemented using a CLR Profiler. However, only a single CLR Profiler
