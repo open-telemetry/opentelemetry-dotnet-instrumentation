@@ -95,8 +95,8 @@ can inject them at runtime. Some examples include:
   - [Logger](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/Logger/)
   - [MongoDb](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/MongoDb/)
 
-For both kind of instrumentations the instrumentations are enabled only when the
-targeted modules are loaded into the targeted application.
+Both kinds of instrumentation are enabled only when the targeted modules are loaded 
+into the targeted application.
 
 ## Architecture
 
