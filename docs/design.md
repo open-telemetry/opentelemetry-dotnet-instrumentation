@@ -71,8 +71,6 @@ For .NET Framework applications the OpenTelemetry .NET SDK is injected using the
 [CLR Profiler APIs](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
 which allow modifying application code during their execution.
 
-
-
 ### Adding and enabling instrumentations
 
 There are two broad instrumentations types injected into the applications:
