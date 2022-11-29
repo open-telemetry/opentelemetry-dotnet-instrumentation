@@ -104,7 +104,7 @@ The main components of the project are:
 
 - [**Loader**](../src/OpenTelemetry.AutoInstrumentation.Loader):
 Managed library that bootstraps the **Managed Profiler** code into the
-targeted application extending the
+targeted application, extending the
 load paths to include the folders with the OpenTelemetry .NET SDK
 and the instrumentations to be injected into the application.
 
