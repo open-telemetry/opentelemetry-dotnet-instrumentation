@@ -164,19 +164,19 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddConsoleExporter(TracerProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddConsoleExporter(pluginManager.ConfigureOptions);
+            return builder.AddConsoleExporter(pluginManager.ConfigureTracesOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddZipkinExporter(TracerProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddZipkinExporter(pluginManager.ConfigureOptions);
+            return builder.AddZipkinExporter(pluginManager.ConfigureTracesOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddJaegerExporter(TracerProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddJaegerExporter(pluginManager.ConfigureOptions);
+            return builder.AddJaegerExporter(pluginManager.ConfigureTracesOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -187,8 +187,9 @@ internal static class EnvironmentConfigurationTracerHelper
                 if (settings.OtlpExportProtocol.HasValue)
                 {
                     options.Protocol = settings.OtlpExportProtocol.Value;
-                    pluginManager.ConfigureOptions(options);
                 }
+
+                pluginManager.ConfigureTracesOptions(options);
             });
         }
     }

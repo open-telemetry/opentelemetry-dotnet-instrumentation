@@ -47,7 +47,7 @@ internal class HttpClientInitializer
         }
 
         var options = new OpenTelemetry.Instrumentation.Http.HttpClientInstrumentationOptions();
-        _pluginManager.ConfigureOptions(options);
+        _pluginManager.ConfigureTracesOptions(options);
 
 #if NETFRAMEWORK
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.Http.Implementation.HttpWebRequestActivitySource, OpenTelemetry.Instrumentation.Http");

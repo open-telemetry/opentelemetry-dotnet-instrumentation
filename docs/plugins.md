@@ -17,6 +17,13 @@ public class MyPlugin
 
         return builder;
     }
+        
+    // To configure any traces options used by OpenTelemetry .NET Automatic Instrumentation
+    public void ConfigureTracesOptions(OpenTelemetry.NameSpace.OptionType options)
+    {
+        // My custom logic here
+        // Find supported options below
+    }
 
     // To configure metrics SDK
     public OpenTelemetry.Metrics.MeterProviderBuilder ConfigureMeterProvider(OpenTelemetry.Metrics.MeterProviderBuilder builder)
@@ -25,15 +32,22 @@ public class MyPlugin
 
         return builder;
     }
+    
+    // To configure any metrics options used by OpenTelemetry .NET Automatic Instrumentation
+    public void ConfigureMetricsOptions(OpenTelemetry.NameSpace.OptionType options)
+    {
+        // My custom logic here
+        // Find supported options below
+    }
 
-    // To configure logs SDK
-    public void ConfigureOptions(OpenTelemetry.Logs.OpenTelemetryLoggerOptions options)
+    // To configure logs SDK (the method name is the same as for other logs options)
+    public void ConfigureLogsOptions(OpenTelemetry.Logs.OpenTelemetryLoggerOptions options)
     {
         // My custom logic here
     }
 
-    // To configure any options used by OpenTelemetry .NET Automatic Instrumentation
-    public void ConfigureOptions(OpenTelemetry.NameSpace.OptionType options)
+    // To configure any logs options used by OpenTelemetry .NET Automatic Instrumentation
+    public void ConfigureLogsOptions(OpenTelemetry.NameSpace.OptionType options)
     {
         // My custom logic here
         // Find supported options below
@@ -64,9 +78,8 @@ public class MyPlugin
 | Options type                                                        | NuGet package                                  | NuGet version |
 |---------------------------------------------------------------------|------------------------------------------------|---------------|
 | OpenTelemetry.Metrics.MetricReaderOptions                           | OpenTelemetry                                  | 1.4.0-beta.3  |
-| OpenTelemetry.Exporter.ConsoleExporterOptions                       | OpenTelemetry.Exporter.Console                 | 1.3.1         |
+| OpenTelemetry.Exporter.ConsoleExporterOptions                       | OpenTelemetry.Exporter.Console                 | 1.4.0-beta.3  |
 | OpenTelemetry.Exporter.PrometheusExporterOptions                    | OpenTelemetry.Exporter.Prometheus.HttpListener | 1.4.0-beta.3  |
-| OpenTelemetry.Exporter.OtlpExporterOptions                          | OpenTelemetry.Exporter.OpenTelemetryProtocol   | 1.4.0-beta.3  |
 | OpenTelemetry.Exporter.OtlpExporterOptions                          | OpenTelemetry.Exporter.OpenTelemetryProtocol   | 1.4.0-beta.3  |
 | OpenTelemetry.Instrumentation.Runtime.RuntimeInstrumentationOptions | OpenTelemetry.Instrumentation.Runtime          | 1.1.0-beta.1  |
 | OpenTelemetry.Instrumentation.Process.ProcessInstrumentationOptions | OpenTelemetry.Instrumentation.Process          | 1.0.0-alpha.2 |

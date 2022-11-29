@@ -36,7 +36,7 @@ internal class MySqlDataInitializer : InstrumentationInitializer
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentation, OpenTelemetry.Instrumentation.MySqlData");
 
         var options = new OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentationOptions();
-        _pluginManager.ConfigureOptions(options);
+        _pluginManager.ConfigureTracesOptions(options);
 
         var instrumentation = Activator.CreateInstance(instrumentationType, options);
 
