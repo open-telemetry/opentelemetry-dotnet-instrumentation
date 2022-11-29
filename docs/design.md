@@ -57,13 +57,12 @@ To instrument a .NET application without source code changes, do the following:
 
 ### Injecting the OpenTelemetry .NET SDK
 
-For **.NET** applications the [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet#readme)
-is injected using the [host startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md).
-This allows the OpenTelemetry .NET SDK to be setup before any application code
-is executed.
-Although the OpenTelemetry .NET SDK is injected into a .NET application
-without using a CLR Profiler, the later is still required to enable
-bytecode instrumentations (see next section).
+#### **.NET** applications 
+
+The [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet#readme)
+is injected using the [host startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md). This allows the OpenTelemetry .NET SDK to be configured before any application code
+runs. Although the OpenTelemetry .NET SDK is injected into a .NET application without using a CLR Profiler, 
+the latter is still required to enable bytecode instrumentations. See the next section for more information.
 
 The **.NET Framework** doesn't support the host startup hook.
 For .NET Framework applications the OpenTelemetry .NET SDK is injected using the
