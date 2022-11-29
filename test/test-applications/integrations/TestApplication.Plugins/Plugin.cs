@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+using System;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.Http;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -32,7 +34,7 @@ public class Plugin
         return builder.AddMeter(TestApplication.Smoke.Program.SourceName);
     }
 
-    public void ConfigureOptions(HttpClientInstrumentationOptions options)
+    public void ConfigureTracesOptions(HttpClientInstrumentationOptions options)
     {
 #if NETFRAMEWORK
         options.EnrichWithHttpWebRequest = (activity, message) =>
@@ -42,5 +44,15 @@ public class Plugin
         {
             activity.SetTag("example.plugin", "MyExamplePlugin");
         };
+    }
+
+    public void ConfigureTracesOptions(OtlpExporterOptions options)
+    {
+        Console.WriteLine($"{nameof(Plugin)}.{nameof(ConfigureTracesOptions)}({nameof(OtlpExporterOptions)} {nameof(options)}) invoked.");
+    }
+
+    public void ConfigureMetricsOptions(OtlpExporterOptions options)
+    {
+        Console.WriteLine($"{nameof(Plugin)}.{nameof(ConfigureMetricsOptions)}({nameof(OtlpExporterOptions)} {nameof(options)}) invoked.");
     }
 }

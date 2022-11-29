@@ -47,7 +47,7 @@ internal class SqlClientInitializer
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentation, OpenTelemetry.Instrumentation.SqlClient");
 
         var options = new OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentationOptions();
-        _pluginManager.ConfigureOptions(options);
+        _pluginManager.ConfigureTracesOptions(options);
 
         var instrumentation = Activator.CreateInstance(instrumentationType, options);
 

@@ -34,7 +34,7 @@ internal class WcfInitializer : InstrumentationInitializer
     {
         var options = new WcfInstrumentationOptions();
 
-        _pluginManager.ConfigureOptions(options);
+        _pluginManager.ConfigureTracesOptions(options);
 
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationActivitySource, OpenTelemetry.Instrumentation.Wcf");
 

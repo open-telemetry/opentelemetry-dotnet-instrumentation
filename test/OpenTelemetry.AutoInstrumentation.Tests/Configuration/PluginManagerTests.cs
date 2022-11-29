@@ -23,6 +23,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.AutoInstrumentation.Plugins;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -115,7 +116,7 @@ public class PluginManagerTests
     }
 
     [Fact]
-    public void ConfigureOptionsSuccess()
+    public void ConfigureLogsOptionsSuccess()
     {
         var pluginAssemblyQualifiedName = typeof(MockPlugin).AssemblyQualifiedName;
         var settings = GetSettings(pluginAssemblyQualifiedName);
@@ -126,7 +127,7 @@ public class PluginManagerTests
             builder.AddOpenTelemetry(options =>
             {
                 options.IncludeFormattedMessage = false;
-                pluginManager.ConfigureOptions(options);
+                pluginManager.ConfigureLogsOptions(options);
 
                 // Verify that plugin changes the state
                 options.IncludeFormattedMessage.Should().BeTrue();
@@ -165,12 +166,10 @@ public class PluginManagerTests
             return builder;
         }
 
-        public OpenTelemetryLoggerOptions ConfigureOptions(OpenTelemetryLoggerOptions options)
+        public void ConfigureLoggingOptions(OpenTelemetryLoggerOptions options)
         {
             // Dummy overwritten setting
             options.IncludeFormattedMessage = true;
-
-            return options;
         }
     }
 

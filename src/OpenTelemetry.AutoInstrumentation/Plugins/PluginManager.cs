@@ -51,11 +51,26 @@ internal class PluginManager
         return ConfigureBuilder(builder, "ConfigureMeterProvider");
     }
 
-    public void ConfigureOptions<T>(T options)
+    public void ConfigureMetricsOptions<T>(T options)
+    {
+        ConfigureOptions(options, "ConfigureMetricsOptions");
+    }
+
+    public void ConfigureTracesOptions<T>(T options)
+    {
+        ConfigureOptions(options, "ConfigureTracesOptions");
+    }
+
+    public void ConfigureLogsOptions<T>(T options)
+    {
+        ConfigureOptions(options, "ConfigureLogsOptions");
+    }
+
+    private void ConfigureOptions<T>(T options, string methodName)
     {
         foreach (var plugin in _plugins)
         {
-            var mi = plugin.Type.GetMethod("ConfigureOptions", new Type[] { typeof(T) });
+            var mi = plugin.Type.GetMethod(methodName, new[] { typeof(T) });
             if (mi is not null)
             {
                 mi.Invoke(plugin.Instance, new object[] { options });
@@ -67,7 +82,7 @@ internal class PluginManager
     {
         foreach (var plugin in _plugins)
         {
-            var mi = plugin.Type.GetMethod(methodName, new Type[] { typeof(T) });
+            var mi = plugin.Type.GetMethod(methodName, new[] { typeof(T) });
             if (mi is not null)
             {
                 builder = (T)mi.Invoke(plugin.Instance, new object[] { builder });
