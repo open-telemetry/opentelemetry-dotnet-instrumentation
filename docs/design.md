@@ -48,8 +48,7 @@ Errors occurring at application runtime are logged and should never crash the ap
 
 ## Zero-touch source code instrumentation workflow
 
-Instrumenting a .NET application, without requiring source code changes,
-is done in two distinct phases:
+To instrument a .NET application without source code changes, do the following:
 
  1. Injecting the [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet#readme)
  into the application.
