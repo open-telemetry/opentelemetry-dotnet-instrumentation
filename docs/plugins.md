@@ -40,7 +40,7 @@ public class MyPlugin
         // Find supported options below
     }
 
-    // To configure logs SDK (the method names is the same as for other logs options)
+    // To configure logs SDK (the method name is the same as for other logs options)
     public void ConfigureLogsOptions(OpenTelemetry.Logs.OpenTelemetryLoggerOptions options)
     {
         // My custom logic here
