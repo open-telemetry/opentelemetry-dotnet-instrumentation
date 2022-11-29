@@ -98,45 +98,57 @@ for more details.
 
 Exporters output the telemetry.
 
-| Environment variable                              | Description                                                                                            | Default value                                           |
-|---------------------------------------------------|--------------------------------------------------------------------------------------------------------|---------------------------------------------------------|
-| `OTEL_TRACES_EXPORTER`                            | Traces exporter to be used. The value can be one of the following: `zipkin`, `jaeger`, `otlp`, `none`. | `otlp`                                                  |
-| `OTEL_METRICS_EXPORTER`                           | Metrics exporter to be used. The value can be one of the following: `otlp`, `prometheus`, `none`.      | `otlp`                                                  |
-| `OTEL_METRIC_EXPORT_INTERVAL`                     | The time interval (in milliseconds) between the start of two export attempts.                          | `60000` for OTLP exporter, `10000` for console exporter |
-| `OTEL_LOGS_EXPORTER`                              | Logs exporter to be used. The value can be one of the following: `otlp`, `none`.                       | `otlp`                                                  |
-| `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE` | Whether the formatted log message should be set or not.                                                | `false`                                                 |
+| Environment variable    | Description                                                                                            | Default value |
+|-------------------------|--------------------------------------------------------------------------------------------------------|---------------|
+| `OTEL_TRACES_EXPORTER`  | Traces exporter to be used. The value can be one of the following: `zipkin`, `jaeger`, `otlp`, `none`. | `otlp`        |
+| `OTEL_METRICS_EXPORTER` | Metrics exporter to be used. The value can be one of the following: `otlp`, `prometheus`, `none`.      | `otlp`        |
+| `OTEL_LOGS_EXPORTER`    | Logs exporter to be used. The value can be one of the following: `otlp`, `none`.                       | `otlp`        |
 
-### Jaeger
+### Traces exporter
 
-To enable the Jaeger exporter, set the `OTEL_TRACES_EXPORTER` environment variable
-to `jaeger`.
+| Environment variable             | Description                                                                  | Default value |
+|----------------------------------|------------------------------------------------------------------------------|---------------|
+| `OTEL_BSP_SCHEDULE_DELAY`        | Delay interval (in milliseconds) between two consecutive exports.            | `5000`        |
+| `OTEL_BSP_EXPORT_TIMEOUT`        | Maximum allowed time (in milliseconds) to export data                        | `30000`       |
+| `OTEL_BSP_MAX_QUEUE_SIZE`        | Maximum queue size.                                                          | `2048`        |
+| `OTEL_BSP_MAX_EXPORT_BATCH_SIZE` | Maximum batch size. Must be less than or equal to `OTEL_BSP_MAX_QUEUE_SIZE`. | `512`         |
 
-To customize the Jaeger exporter using environment variables, see the
-[Jaeger exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.3.0/src/OpenTelemetry.Exporter.Jaeger#environment-variables).
-Important environment variables include:
+### Metrics exporter
 
-| Environment variable              | Description                                                                                          | Default value            |
-|-----------------------------------|------------------------------------------------------------------------------------------------------|--------------------------|
-| `OTEL_EXPORTER_JAEGER_AGENT_HOST` | Host name for the Jaeger agent. Used for the `udp/thrift.compact` protocol.                          | `localhost`              |
-| `OTEL_EXPORTER_JAEGER_AGENT_PORT` | Port for the Jaeger agent. Used for the `udp/thrift.compact` protocol.                               | `6831`                   |
-| `OTEL_EXPORTER_JAEGER_ENDPOINT`   | Jaeger Collector HTTP endpoint. Used for the `http/thrift.binary` protocol.                          | `http://localhost:14268` |
-| `OTEL_EXPORTER_JAEGER_PROTOCOL`   | Protocol to use for Jaeger exporter. Supported values are `udp/thrift.compact`, `http/thrift.binary` | `udp/thrift.compact`     |
+| Environment variable          | Description                                                                   | Default value                                           |
+|-------------------------------|-------------------------------------------------------------------------------|---------------------------------------------------------|
+| `OTEL_METRIC_EXPORT_INTERVAL` | The time interval (in milliseconds) between the start of two export attempts. | `60000` for OTLP exporter, `10000` for console exporter |
+| `OTEL_METRIC_EXPORT_TIMEOUT`  | Maximum allowed time (in milliseconds) to export data.                        | `30000` for OTLP exporter, none for console exporter    |
+
+### Logs exporter
+
+| Environment variable                              | Description                                             | Default value |
+|---------------------------------------------------|---------------------------------------------------------|---------------|
+| `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE` | Whether the formatted log message should be set or not. | `false`       |
 
 ### OTLP
 
-To enable the OTLP exporter, set the `OTEL_TRACES_EXPORTER`/`OTEL_METRICS_EXPORTER`
+To enable the OTLP exporter, set the `OTEL_TRACES_EXPORTER`/`OTEL_METRICS_EXPORTER`/`OTEL_LOGS_EXPORTER`
 environment variable to `otlp`.
 
 To customize the OTLP exporter using environment variables, see the
-[OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.3.0/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables).
+[OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-beta.3/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables).
 Important environment variables include:
 
-| Environment variable          | Description                                                                                                                                                                                                | Default value                                                                                             |
-|-------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | Target endpoint for the OTLP exporter. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md) for more details. | `http://localhost:4318` for the `http/protobuf` protocol, `http://localhost:4317` for the `grpc` protocol |
-| `OTEL_EXPORTER_OTLP_PROTOCOL` | OTLP exporter transport protocol. Supported values are `grpc`, `http/protobuf`. [1]                                                                                                                        | `http/protobuf`                                                                                           |
-| `OTEL_EXPORTER_OTLP_TIMEOUT`  | The max waiting time (in milliseconds) for the backend to process each batch.                                                                                                                              | `10000`                                                                                                   |
-| `OTEL_EXPORTER_OTLP_HEADERS`  | Comma-separated list of additional HTTP headers sent with each export, for example: `Authorization=secret,X-Key=Value`.                                                                                    |                                                                                                           |
+| Environment variable                     | Description                                                                                                                                                                                                | Default value                                                                                             |
+|------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| `OTEL_EXPORTER_OTLP_ENDPOINT`            | Target endpoint for the OTLP exporter. See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md) for more details. | `http://localhost:4318` for the `http/protobuf` protocol, `http://localhost:4317` for the `grpc` protocol |
+| `OTEL_EXPORTER_OTLP_PROTOCOL`            | OTLP exporter transport protocol. Supported values are `grpc`, `http/protobuf`. [1]                                                                                                                        | `http/protobuf`                                                                                           |
+| `OTEL_EXPORTER_OTLP_TIMEOUT`             | The max waiting time (in milliseconds) for the backend to process each batch.                                                                                                                              | `10000`                                                                                                   |
+| `OTEL_EXPORTER_OTLP_HEADERS`             | Comma-separated list of additional HTTP headers sent with each export, for example: `Authorization=secret,X-Key=Value`.                                                                                    |                                                                                                           |
+| `OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT`      | Maximum allowed attribute value size.                                                                                                                                                                      | none                                                                                                      |
+| `OTEL_ATTRIBUTE_COUNT_LIMIT`             | Maximum allowed span attribute count.                                                                                                                                                                      | `128`                                                                                                     |
+| `OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT` | Maximum allowed attribute value size.                                                                                                                                                                       | none                                                                                                      |
+| `OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT`        | Maximum allowed span attribute count.                                                                                                                                                                       | `128`                                                                                                     |
+| `OTEL_SPAN_EVENT_COUNT_LIMIT`            | Maximum allowed span event count.                                                                                                                                                                           | `128`                                                                                                     |
+| `OTEL_SPAN_LINK_COUNT_LIMIT`             | Maximum allowed span link count.                                                                                                                                                                            | `128`                                                                                                     |
+| `OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT`       | Maximum allowed attribute per span event count.                                                                                                                                                             | `128`                                                                                                     |
+| `OTEL_LINK_ATTRIBUTE_COUNT_LIMIT`        | Maximum allowed attribute per span link count.                                                                                                                                                              | `128`                                                                                                     |
 
 **[1]**: Considerations on the `OTEL_EXPORTER_OTLP_PROTOCOL`:
 
@@ -144,9 +156,25 @@ Important environment variables include:
   which differs from the OpenTelemetry .NET SDK default value of `grpc`.
 - On .NET 6 and higher, the application must reference [`Grpc.Net.Client`](https://www.nuget.org/packages/Grpc.Net.Client/)
   to use the `grpc` OTLP exporter protocol. For example, by adding
-  `<PackageReference Include="Grpc.Net.Client" Version="2.32.0" />` to the
+  `<PackageReference Include="Grpc.Net.Client" Version="2.43.0" />` to the
   `.csproj` file.
 - On .NET Framework, the `grpc` OTLP exporter protocol is not supported.
+
+### Jaeger
+
+To enable the Jaeger exporter, set the `OTEL_TRACES_EXPORTER` environment variable
+to `jaeger`.
+
+To customize the Jaeger exporter using environment variables, see the
+[Jaeger exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-beta.3/src/OpenTelemetry.Exporter.Jaeger#environment-variables).
+Important environment variables include:
+
+| Environment variable              | Description                                                                                          | Default value                       |
+|-----------------------------------|------------------------------------------------------------------------------------------------------|-------------------------------------|
+| `OTEL_EXPORTER_JAEGER_AGENT_HOST` | Host name for the Jaeger agent. Used for the `udp/thrift.compact` protocol.                          | `localhost`                         |
+| `OTEL_EXPORTER_JAEGER_AGENT_PORT` | Port for the Jaeger agent. Used for the `udp/thrift.compact` protocol.                               | `6831`                              |
+| `OTEL_EXPORTER_JAEGER_ENDPOINT`   | Jaeger Collector HTTP endpoint. Used for the `http/thrift.binary` protocol.                          | `http://localhost:14268/api/traces` |
+| `OTEL_EXPORTER_JAEGER_PROTOCOL`   | Protocol to use for Jaeger exporter. Supported values are `udp/thrift.compact`, `http/thrift.binary` | `udp/thrift.compact`                |
 
 ### Prometheus
 
@@ -164,13 +192,17 @@ variable to `prometheus`.
 The exporter exposes the metrics HTTP endpoint on `http://localhost:9464/metrics`
 and it caches the responses for 300 milliseconds.
 
+See the
+[Prometheus Exporter HttpListener documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-beta.3/src/OpenTelemetry.Exporter.Prometheus.HttpListener).
+to learn more.
+
 ### Zipkin
 
 To enable the Zipkin exporter, set the `OTEL_TRACES_EXPORTER` environment
 variable to `zipkin`.
 
 To customize the Zipkin exporter using environment variables,
-see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.3.0/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
+see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-beta.3/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
 Important environment variables include:
 
 | Environment variable            | Description | Default value                        |
