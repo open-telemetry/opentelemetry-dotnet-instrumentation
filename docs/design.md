@@ -88,7 +88,7 @@ library or framework that they instrument. Some examples include:
 or frameworks that lack proper hooks or callbacks to allow the collection
 of observability data. These instrumentations are enabled by modifying
 the application [IL code](https://en.wikipedia.org/wiki/Common_Intermediate_Language)
-during runtime using the [CLR Profiler APIs](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/).
+during runtime using the [CLR Profiler API](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/).
 Bytecode instrumentations must be implemented following
 the proper attribute annotation so that the native CLR Profiler implementation
 can inject them at runtime. Some examples include:
