@@ -166,7 +166,7 @@ public class PluginManagerTests
             return builder;
         }
 
-        public void ConfigureLoggingOptions(OpenTelemetryLoggerOptions options)
+        public void ConfigureLogsOptions(OpenTelemetryLoggerOptions options)
         {
             // Dummy overwritten setting
             options.IncludeFormattedMessage = true;
