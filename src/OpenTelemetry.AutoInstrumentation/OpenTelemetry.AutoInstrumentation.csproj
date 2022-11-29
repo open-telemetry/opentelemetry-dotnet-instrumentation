@@ -28,7 +28,7 @@
     <Reference Include="System.ServiceModel" ExcludeAssets="all" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNet" Version="1.0.0-rc9.6" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNet" Version="1.0.0-rc9.7" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
