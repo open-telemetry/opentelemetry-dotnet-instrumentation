@@ -123,12 +123,11 @@ the **Loader** (see above) during the application startup.
 
 ### Bootstrapping
 
-While the initial mechanism for bootstrapping the OpenTelemetry .NET SDK differs
-between .NET and .NET Framework applications, giving that the [host startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)
-is not available on the .NET Framework,
-in both cases the initialization is done by creating one instance of the
-`OpenTelemetry.AutoInstrumentation.Loader.Startup` class from the Loader assembly.
-When creating this instance the static constructor of the type performs
+The initial mechanism for bootstrapping the OpenTelemetry .NET SDK differs
+between .NET and .NET Framework. As the [host startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)
+is not available for .NET Framework, the initialization is done in both cases by creating one 
+instance of the `OpenTelemetry.AutoInstrumentation.Loader.Startup` class from the Loader 
+assembly. When creating the instance, the static constructor of the type performs
 the following actions:
 
 - Adds a handler to the
