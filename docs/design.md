@@ -165,7 +165,7 @@ the profiler injects the IL calling the Loader `Startup` constructor.
   `AppDomain.CurrentDomain.SetData("OpenTelemetry_IISPreInitStart", true)`,
   so that automatic instrumentations can correctly handle IIS startup scenarios.
 
-### Enabling and injecting instrumentations
+### Injecting instrumentations
 
 #### Source instrumentation
 
