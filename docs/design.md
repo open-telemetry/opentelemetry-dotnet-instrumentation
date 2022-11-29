@@ -115,10 +115,9 @@ as well as support code to run and implement bytecode instrumentations.
 - [**CLR Profiler DLL**](../src/OpenTelemetry.AutoInstrumentation.Native):
 Native component that implements a CLR Profiler. The CLR Profiler is used to
 modify the application [intermediate language](https://en.wikipedia.org/wiki/Common_Intermediate_Language)
-(IL), including the IL of packages used by the application, to add and collect
-observability data.
-On the .NET Framework the CLR Profiler DLL is also responsible for injecting
-the **Loader** (see above) during the application start up.
+(IL), including the IL of packages used by the application to add and collect
+observability data. On the .NET Framework the CLR Profiler DLL also injects 
+the **Loader** (see above) during the application startup.
 
 ![Overview](./images/architecture-overview.png)
 
