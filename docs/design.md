@@ -50,9 +50,9 @@ Errors occurring at application runtime are logged and should never crash the ap
 
 To instrument a .NET application without source code changes, do the following:
 
- 1. Injecting the [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet#readme)
+ 1. Inject the [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet#readme)
  into the application.
- 2. Adding and enabling instrumentations as the targeted libraries are loaded
+ 2. Add and enable instrumentations as the targeted libraries are loaded
  into the application.
 
 ### Injecting the OpenTelemetry .NET SDK
