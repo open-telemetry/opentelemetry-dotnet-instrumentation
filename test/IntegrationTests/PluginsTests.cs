@@ -15,6 +15,7 @@
 // </copyright>
 
 using System.Linq;
+using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -44,9 +45,10 @@ public class PluginsTests : TestHelper
 #endif
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
-        RunTestApplication();
+        var (standardOutput, _) = RunTestApplication();
 
         collector.AssertExpectations();
+        standardOutput.Should().Contain("Plugin.ConfigureTracesOptions(OtlpExporterOptions options) invoked.");
     }
 
     [Fact]
@@ -58,8 +60,10 @@ public class PluginsTests : TestHelper
         collector.Expect("MyCompany.MyProduct.MyLibrary");
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
-        RunTestApplication();
+
+        var (standardOutput, _) = RunTestApplication();
 
         collector.AssertExpectations();
+        standardOutput.Should().Contain("Plugin.ConfigureMetricsOptions(OtlpExporterOptions options) invoked.");
     }
 }

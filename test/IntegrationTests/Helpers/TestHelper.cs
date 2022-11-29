@@ -102,7 +102,7 @@ public abstract class TestHelper
     /// RunTestApplication starts the test application, wait up to DefaultProcessTimeout.
     /// Assertion exceptions are thrown if it timed out or the exit code is non-zero.
     /// </summary>
-    public void RunTestApplication(TestSettings testSettings = null)
+    public (string StandardOutput, string ErrorOutput) RunTestApplication(TestSettings testSettings = null)
     {
         testSettings ??= new();
         using var process = StartTestApplication(testSettings);
@@ -121,6 +121,8 @@ public abstract class TestHelper
 
         processTimeout.Should().BeFalse("Test application timed out");
         process.ExitCode.Should().Be(0, "Test application exited with non-zero exit code");
+
+        return (helper.StandardOutput, helper.ErrorOutput);
     }
 
     /// <summary>
