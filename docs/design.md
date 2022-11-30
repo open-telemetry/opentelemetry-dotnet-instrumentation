@@ -175,7 +175,7 @@ initialization code.
 
 #### Bytecode instrumentation
 
-Bytecode instrumentations, also defined as "call target" in this repo, rely on
+Bytecode instrumentations rely on
 the JIT recompilation capability of the CLR to rewrite the IL for instrumented
 methods. This adds logic at the beginning and end of the instrumented methods
 to invoke instrumentation included in this project, and wraps the calls with
