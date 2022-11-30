@@ -261,6 +261,7 @@ public class SmokeTests : TestHelper
     [Theory]
     [InlineData("OTEL_DOTNET_AUTO_LOGS_ENABLED_INSTRUMENTATIONS", "none")]
     [InlineData("OTEL_DOTNET_AUTO_LOGS_ENABLED", "false")]
+    [InlineData("OTEL_LOGS_EXPORTER", "none")]
     [Trait("Category", "EndToEnd")]
     public void LogsNoneInstrumentations(string envVarName, string envVarVal)
     {
@@ -279,6 +280,7 @@ public class SmokeTests : TestHelper
     [Theory]
     [InlineData("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "none")]
     [InlineData("OTEL_DOTNET_AUTO_TRACES_ENABLED", "false")]
+    [InlineData("OTEL_TRACES_EXPORTER", "none")]
     [Trait("Category", "EndToEnd")]
     public void TracesNoneInstrumentations(string envVarName, string envVarVal)
     {
@@ -292,6 +294,7 @@ public class SmokeTests : TestHelper
     [Theory]
     [InlineData("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "none")]
     [InlineData("OTEL_DOTNET_AUTO_METRICS_ENABLED", "false")]
+    [InlineData("OTEL_METRICS_EXPORTER", "none")]
     [Trait("Category", "EndToEnd")]
     public void MetricsNoneInstrumentations(string envVarName, string envVarVal)
     {
