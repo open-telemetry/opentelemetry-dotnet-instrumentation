@@ -67,10 +67,11 @@ without using a CLR Profiler,
 the latter is still required to enable bytecode instrumentations. See the next
 section for more information.
 
-The **.NET Framework** doesn't support the host startup hook.
-For .NET Framework applications the OpenTelemetry .NET SDK is injected using the
-[CLR Profiler API](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
-which allows modifying application code during their execution.
+#### **.NET Framework** applications
+
+.NET Framework doesn't support the host startup hook. The OpenTelemetry .NET SDK
+is injected using the [CLR Profiler APIs](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/),
+which allow modifying application code during execution.
 
 ### Library instrumentations
 
