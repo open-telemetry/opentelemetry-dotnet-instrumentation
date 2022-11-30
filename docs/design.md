@@ -167,7 +167,7 @@ the profiler injects the IL calling the Loader `Startup` constructor.
 
 Source instrumentations are injected into the target process by adding
 handlers to the [`AssemblyLoad` event](https://learn.microsoft.com/en-us/dotnet/api/system.appdomain.assemblyload?view=net-7.0)
-and when the targeted assembly is loaded triggering the source instrumentation
+and when the targeted assembly loads and triggers the source instrumentation
 initialization code.
 
 #### Bytecode instrumentation
