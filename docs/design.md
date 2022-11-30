@@ -57,12 +57,15 @@ To instrument a .NET application without source code changes, do the following:
 
 ### Injecting the OpenTelemetry .NET SDK
 
-#### **.NET** applications 
+#### **.NET** applications
 
 The [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet#readme)
-is injected using the [host startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md). This allows the OpenTelemetry .NET SDK to be configured before any application code
-runs. Although the OpenTelemetry .NET SDK is injected into a .NET application without using a CLR Profiler, 
-the latter is still required to enable bytecode instrumentations. See the next section for more information.
+is injected using the [host startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md).
+This allows the OpenTelemetry .NET SDK to be configured before any application code
+runs. Although the OpenTelemetry .NET SDK is injected into a .NET application
+without using a CLR Profiler,
+the latter is still required to enable bytecode instrumentations. See the next
+section for more information.
 
 The **.NET Framework** doesn't support the host startup hook.
 For .NET Framework applications the OpenTelemetry .NET SDK is injected using the
@@ -95,7 +98,7 @@ can inject them at runtime. Some examples include:
   - [Logger](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/Logger/)
   - [MongoDb](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/MongoDb/)
 
-Both kinds of instrumentation are enabled only when the targeted modules are loaded 
+Both kinds of instrumentation are enabled only when the targeted modules are loaded
 into the targeted application.
 
 ## Architecture
@@ -116,7 +119,7 @@ as well as support code to run and implement bytecode instrumentations.
 Native component that implements a CLR Profiler. The CLR Profiler is used to
 modify the application [intermediate language](https://en.wikipedia.org/wiki/Common_Intermediate_Language)
 (IL), including the IL of packages used by the application to add and collect
-observability data. On the .NET Framework the CLR Profiler DLL also injects 
+observability data. On the .NET Framework the CLR Profiler DLL also injects
 the **Loader** (see above) during the application startup.
 
 ![Overview](./images/architecture-overview.png)
@@ -125,12 +128,12 @@ the **Loader** (see above) during the application startup.
 
 The initial mechanism for bootstrapping the OpenTelemetry .NET SDK differs
 between .NET and .NET Framework. As the [host startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)
-is not available for .NET Framework, the initialization is done in both cases by creating one 
-instance of the `OpenTelemetry.AutoInstrumentation.Loader.Startup` class from the Loader 
-assembly. When creating the instance, the static constructor of the type performs
-the following actions:
+is not available for .NET Framework, the initialization is done in both cases by
+creating one instance of the `OpenTelemetry.AutoInstrumentation.Loader.Startup`
+class from the Loader assembly. When creating the instance, the static constructor
+of the type performs the following actions:
 
-1.  Adds a handler to the [`AssemblyResolve` event](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.assemblyresolve?view=net-5.0),
+1. Adds a handler to the [`AssemblyResolve` event](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.assemblyresolve?view=net-5.0),
 so that it can add any assembly needed by the SDK itself or by any instrumentation.
 2. Runs, through reflection, the `Initialization` method from
   the `OpenTelemetry.AutoInstrumentation.Instrumentation` type
@@ -154,8 +157,8 @@ callback. When that callback happens the CLR Profiler DLL takes
 the following actions:
 
 1. If the module is the first user module in the current AppDomain,
-the profiler injects the IL to call the Loader `Startup` constructor.
-- If the first method observed by `JITCompilationStarted` is IIS startup code,
+  the profiler injects the IL to call the Loader `Startup` constructor.
+2. If the first method observed by `JITCompilationStarted` is IIS startup code,
   the profiler invokes
   `AppDomain.CurrentDomain.SetData("OpenTelemetry_IISPreInitStart", true)`,
   so that automatic instrumentations can correctly handle IIS startup scenarios.
