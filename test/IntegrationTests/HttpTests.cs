@@ -15,7 +15,6 @@
 // </copyright>
 
 #if !NETFRAMEWORK
-using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
