@@ -146,9 +146,12 @@ public class MockMetricsCollector : IDisposable
     internal void AssertEmpty(TimeSpan? timeout = null)
     {
         timeout ??= Timeout.NoExpectation;
-        if (_metricsSnapshots.TryTake(out var metricsResource, timeout.Value))
+        while (_metricsSnapshots.TryTake(out var metricsResource, timeout.Value))
         {
-            Assert.Fail($"Expected nothing, but got: {metricsResource}");
+            if (metricsResource.Count > 0)
+            {
+                Assert.Fail($"Expected nothing, but got: {metricsResource}");
+            }
         }
     }
 
