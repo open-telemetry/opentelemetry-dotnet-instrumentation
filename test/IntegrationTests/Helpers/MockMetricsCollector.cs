@@ -146,7 +146,7 @@ public class MockMetricsCollector : IDisposable
     internal void AssertEmpty(TimeSpan? timeout = null)
     {
         timeout ??= Timeout.NoExpectation;
-        if (_metricsSnapshots.TryTake(out var metricsResource, timeout.Value))
+        while (_metricsSnapshots.TryTake(out var metricsResource, timeout.Value))
         {
             if (metricsResource.Count > 0)
             {
