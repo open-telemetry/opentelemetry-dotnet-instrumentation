@@ -145,8 +145,8 @@ so that it can add any assembly needed by the SDK itself or by any instrumentati
 .NET applications rely on the [host startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)
 being configured to use the `StartupHook.Initialize()` method from
 the `OpenTelemetry.AutoInstrumentation.StartupHook` assembly.
-The `Initialize` method will load the `OpenTelemetry.AutoInstrumentation.Loader`
-assembly and will create the `OpenTelemetry.AutoInstrumentation.Loader.Startup` instance.
+The `Initialize` method loads the `OpenTelemetry.AutoInstrumentation.Loader`
+assembly and creates the `OpenTelemetry.AutoInstrumentation.Loader.Startup` instance.
 
 #### .NET Framework bootstrapping
 
