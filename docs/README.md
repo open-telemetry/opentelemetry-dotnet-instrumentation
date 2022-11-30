@@ -9,8 +9,8 @@ to .NET applications without having to modify their source code.
 
 ⚠️ The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
-([0.5.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
-can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.5.0/docs/README.md).
+([0.5.1-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
+can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.5.1-beta.1/docs/README.md).
 
 ---
 
@@ -117,7 +117,7 @@ and instrument your .NET application using the provided Shell scripts.
 Example usage:
 
 ```sh
-curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.5.0/otel-dotnet-auto-install.sh -O
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.5.1-beta.1/otel-dotnet-auto-install.sh -O
 sh ./otel-dotnet-auto-install.sh
 . $HOME/.otel-dotnet-auto/instrument.sh
 OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 dotnet run
@@ -131,7 +131,7 @@ uses environment variables as parameters:
 | `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                      | No       | `$HOME/.otel-dotnet-auto` |
 | `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | No       | *Calculated*              |
 | `TMPDIR`                | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`            |
-| `VERSION`               | Version to download                                              | No       | `v0.5.0`           |
+| `VERSION`               | Version to download                                              | No       | `v0.5.1-beta.1`           |
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
@@ -152,7 +152,7 @@ Example usage:
 
 ```powershell
 # Download and import the module
-$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.5.0/OpenTelemetry.DotNet.Auto.psm1"
+$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.5.1-beta.1/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path
 Import-Module $download_path

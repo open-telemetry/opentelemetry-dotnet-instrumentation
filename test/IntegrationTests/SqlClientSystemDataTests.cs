@@ -15,7 +15,6 @@
 // </copyright>
 
 #if NETFRAMEWORK
-
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -55,5 +54,4 @@ public sealed class IgnoreRunningOnNet481Fact : FactAttribute
         }
     }
 }
-
 #endif
