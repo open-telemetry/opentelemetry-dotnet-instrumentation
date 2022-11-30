@@ -52,11 +52,11 @@ internal static class LogBuilderExtensions
 
                 options.IncludeFormattedMessage = settings.IncludeFormattedMessage;
 
-                pluginManager.ConfigureOptions(options);
+                pluginManager.ConfigureLogsOptions(options);
 
                 if (settings.ConsoleExporterEnabled)
                 {
-                    options.AddConsoleExporter(pluginManager.ConfigureOptions);
+                    options.AddConsoleExporter(pluginManager.ConfigureLogsOptions);
                 }
 
                 switch (settings.LogExporter)
@@ -69,7 +69,7 @@ internal static class LogBuilderExtensions
                                 otlpOptions.Protocol = settings.OtlpExportProtocol.Value;
                             }
 
-                            pluginManager.ConfigureOptions(otlpOptions);
+                            pluginManager.ConfigureLogsOptions(otlpOptions);
                         });
                         break;
                     case LogExporter.None:

@@ -15,7 +15,6 @@
 // </copyright>
 
 #if NETFRAMEWORK
-
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -35,7 +34,7 @@ public class SqlClientSystemDataTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.Expect("OpenTelemetry.SqlClient");
+        collector.Expect("OpenTelemetry.Instrumentation.SqlClient");
 
         RunTestApplication();
 
@@ -55,5 +54,4 @@ public sealed class IgnoreRunningOnNet481Fact : FactAttribute
         }
     }
 }
-
 #endif

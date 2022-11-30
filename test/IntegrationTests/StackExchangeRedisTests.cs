@@ -15,8 +15,6 @@
 // </copyright>
 
 #if NET6_0_OR_GREATER
-
-using System.Threading.Tasks;
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;

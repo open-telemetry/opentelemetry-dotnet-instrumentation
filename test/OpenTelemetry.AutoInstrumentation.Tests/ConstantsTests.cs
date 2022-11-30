@@ -24,6 +24,6 @@ public class ConstantsTests
     [Fact]
     public void VersionTag()
     {
-        Constants.Tracer.Version.Should().Be(typeof(Constants).Assembly.GetName().Version?.ToString(fieldCount: 3));
+        Constants.Tracer.Version.Should().Contain(typeof(Constants).Assembly.GetName().Version?.ToString(fieldCount: 3));
     }
 }

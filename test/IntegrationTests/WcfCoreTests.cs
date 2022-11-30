@@ -16,7 +16,6 @@
 
 // This test won't work outside of windows as it need the server side which is .NET Framework only.
 #if NET6_0_OR_GREATER && _WINDOWS
-
 using Xunit.Abstractions;
 
 namespace IntegrationTests;

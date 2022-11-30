@@ -37,7 +37,7 @@ internal class GrpcClientInitializer : InstrumentationInitializer
         var options = new OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientInstrumentationOptions();
         options.SuppressDownstreamInstrumentation = !Instrumentation.TracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.HttpClient);
 
-        _pluginManager.ConfigureOptions(options);
+        _pluginManager.ConfigureTracesOptions(options);
 
         var instrumentation = Activator.CreateInstance(instrumentationType, options);
 

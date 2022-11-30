@@ -107,13 +107,13 @@ internal static class EnvironmentConfigurationMetricHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static MeterProviderBuilder AddRuntimeInstrumentation(MeterProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddRuntimeInstrumentation(pluginManager.ConfigureOptions);
+            return builder.AddRuntimeInstrumentation(pluginManager.ConfigureMetricsOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static MeterProviderBuilder AddProcessInstrumentation(MeterProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddProcessInstrumentation(pluginManager.ConfigureOptions);
+            return builder.AddProcessInstrumentation(pluginManager.ConfigureMetricsOptions);
         }
 
         // Exporters
@@ -123,8 +123,8 @@ internal static class EnvironmentConfigurationMetricHelper
         {
             return builder.AddConsoleExporter((consoleExporterOptions, metricReaderOptions) =>
             {
-                pluginManager.ConfigureOptions(consoleExporterOptions);
-                pluginManager.ConfigureOptions(metricReaderOptions);
+                pluginManager.ConfigureMetricsOptions(consoleExporterOptions);
+                pluginManager.ConfigureMetricsOptions(metricReaderOptions);
             });
         }
 
@@ -133,10 +133,7 @@ internal static class EnvironmentConfigurationMetricHelper
         {
             Logger.Warning("Prometheus exporter is configured. It is intended for the inner dev loop. Do NOT use in production");
 
-            return builder.AddPrometheusHttpListener(options =>
-            {
-                pluginManager.ConfigureOptions(options);
-            });
+            return builder.AddPrometheusHttpListener(pluginManager.ConfigureMetricsOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -149,8 +146,8 @@ internal static class EnvironmentConfigurationMetricHelper
                     options.Protocol = settings.OtlpExportProtocol.Value;
                 }
 
-                pluginManager.ConfigureOptions(options);
-                pluginManager.ConfigureOptions(metricReaderOptions);
+                pluginManager.ConfigureMetricsOptions(options);
+                pluginManager.ConfigureMetricsOptions(metricReaderOptions);
             });
         }
     }

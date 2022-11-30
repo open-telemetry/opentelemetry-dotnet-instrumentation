@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-#if NET6_0_OR_GREATER
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -77,4 +76,3 @@ public class LazyInstrumentationLoaderTests
         }
     }
 }
-#endif
