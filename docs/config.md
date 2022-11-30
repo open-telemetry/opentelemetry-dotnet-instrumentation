@@ -96,7 +96,8 @@ for more details.
 
 ## Samplers
 
-Samplers allows to control the noise and overhead introduced by OpenTelemetry.
+Samplers let you control potential noise and overhead introduced by OpenTelemetry 
+instrumentation by selecting which traces you want to collect and export.
 See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.15.0/specification/sdk-environment-variables.md?plain=1#L45-L80)
 for more details.
 
@@ -112,8 +113,7 @@ for more details.
 - `traceidratio`,
 - `parentbased_always_on`,
 - `parentbased_always_off`,
-- `parentbased_traceidratio`,
-- `parentbased_jaeger_remote`.
+- `parentbased_traceidratio`.
 
 \[2\]: For `traceidratio` and `parentbased_traceidratio` samplers:
  Sampling probability, a number in the [0..1] range, e.g. "0.25".
