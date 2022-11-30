@@ -130,13 +130,12 @@ instance of the `OpenTelemetry.AutoInstrumentation.Loader.Startup` class from th
 assembly. When creating the instance, the static constructor of the type performs
 the following actions:
 
-- Adds a handler to the
-[`AssemblyResolve` event](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.assemblyresolve?view=net-5.0),
+1.  Adds a handler to the [`AssemblyResolve` event](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.assemblyresolve?view=net-5.0),
 so that it can add any assembly needed by the SDK itself or by any instrumentation.
-- Runs, through reflection, the `Initialization` method from
+2. Runs, through reflection, the `Initialization` method from
   the `OpenTelemetry.AutoInstrumentation.Instrumentation` type
   from the Managed Profiler assembly.
-  - The `Initialization` code bootstraps the OpenTelemetry .NET SDK,
+  a. The `Initialization` code bootstraps the OpenTelemetry .NET SDK,
     adding configured processors, exporters, and so on,
     and setting the mechanisms to enable any configured source instrumentations.
 
