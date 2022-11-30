@@ -154,9 +154,9 @@ assembly and will create the `OpenTelemetry.AutoInstrumentation.Loader.Startup` 
 callback. When that callback happens the CLR Profiler DLL takes
 the following actions:
 
-- If this the first user module in the current AppDomain,
-the profiler injects the IL calling the Loader `Startup` constructor.
-- If the first method observed by JITCompilationStarted is IIS startup code,
+1. If the module is the first user module in the current AppDomain,
+the profiler injects the IL to call the Loader `Startup` constructor.
+- If the first method observed by `JITCompilationStarted` is IIS startup code,
   the profiler invokes
   `AppDomain.CurrentDomain.SetData("OpenTelemetry_IISPreInitStart", true)`,
   so that automatic instrumentations can correctly handle IIS startup scenarios.
