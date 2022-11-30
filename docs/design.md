@@ -172,12 +172,12 @@ initialization code.
 
 #### Bytecode instrumentation
 
-The bytecode instrumentations, called "call target" in this repo, relies on
+Bytecode instrumentations, also defined as "call target" in this repo, rely on
 the JIT recompilation capability of the CLR to rewrite the IL for instrumented
 methods. This adds logic at the beginning and end of the instrumented methods
-to invoke instrumentation written in this repo, and wraps the calls with
+to invoke instrumentation included in this project, and wraps the calls with
 try-catch blocks to prevent instrumentation errors from affecting the normal operation
-of the application. This IL rewrite happens in the following steps:
+of the application. This IL code rewrite happens in the following steps:
 
 1. On the [CorProfiler::ModuleLoadFinished](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/icorprofilercallback-moduleloadfinished-method)
 callback, the CLR Profiler DLL takes the following actions:
