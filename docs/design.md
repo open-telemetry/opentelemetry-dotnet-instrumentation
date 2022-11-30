@@ -21,8 +21,8 @@ thanks to a good selection of default settings.
 
 ### Supported scenarios
 
-- **Zero-touch source code instrumentation**: Users can instrument applications
-without changing the source. Build changes may be required through the addition
+- **Automatic instrumentation**: Users can instrument applications
+without changing the source code. Build changes may be required through the addition
 of specific NuGet packages.
 - **Custom SDK support**: The instrumentation can initialize
 the OpenTelemetry .NET SDK, though what OpenTelemetry SDK implementation is used
@@ -31,11 +31,13 @@ and its initialization can also be delegated to the application code.
 ### Unsupported scenarios
 
 - **Applications using Ahead-of-Time (AOT) compilation**:
-The current implementation relies on the [CLR Profiler APIs](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
-and doesn't support AOT.
+The current implementation relies on the [host startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)
+or the [CLR Profiler API](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling)
+and neither is supported when publishing AOT compiled applications.
 - **Side-by-side usage with other CLR Profiler based tools**: Various tools for .NET
 are also implemented using a CLR Profiler. However, only a single CLR Profiler
-can be used when running the application.
+can be used when running the application. The CLR Profiler component is required
+on the **.NET Framework** and optional for **.NET** applications, more info below.
 
 ## Error handling
 
@@ -44,34 +46,38 @@ are logged and crash the application.
 
 Errors occurring at application runtime are logged and should never crash the application.
 
-## Architecture
+## Automatic instrumentation workflow
 
-To instrument a .NET application without requiring source code changes,
-the OpenTelemetry .NET Instrumentation uses the [CLR Profiler APIs](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/)
-to bootstrap the [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet#readme)
-and inject the selected instrumentations into the targeted application.
+To instrument a .NET application without source code changes, do the following:
 
-The main components of the project are:
+ 1. Inject the [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet#readme)
+ into the application.
+ 2. Add and enable instrumentations as the targeted libraries are loaded
+ into the application.
 
-- [**CLR Profiler DLL**](../src/OpenTelemetry.AutoInstrumentation.Native):
-Native component that implements a CLR Profiler. The CLR Profiler is used to
-modify the application [intermediate language](https://en.wikipedia.org/wiki/Common_Intermediate_Language)
- (IL), including the IL of packages used by the application, to add and collect
- observability data.
+### Injecting the OpenTelemetry .NET SDK
 
-- [**Loader**](../src/OpenTelemetry.AutoInstrumentation.Loader):
-Managed library shipped as a resource of the native CLR Profiler.
-It loads the bootstrap code into the targeted application and extends the assembly
-load paths to include the folders with the OpenTelemetry .NET SDK
-and the instrumentations to be injected into the application.
+#### **.NET** applications
 
-- [**Managed Profiler**](../src/OpenTelemetry.AutoInstrumentation):
-Contains the code to set up the OpenTelemetry .NET SDK and configured instrumentations,
-as well as support code to run and implement bytecode instrumentations. Set the
-`OTEL_DOTNET_AUTO_TRACES_ENABLED` environment variable to `false` when the
-application initializes the OpenTelemetry .NET SDK Tracer on its own.
+The [OpenTelemetry .NET SDK](https://github.com/open-telemetry/opentelemetry-dotnet#readme)
+is injected using the [host startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md).
+This allows the OpenTelemetry .NET SDK to be configured before any application code
+runs. Although the OpenTelemetry .NET SDK is injected into a .NET application
+without using a CLR Profiler,
+the latter is still required to enable bytecode instrumentations. See the next
+section for more information.
 
-- **Source Instrumentations**: Instrumentations created on top of API hooks
+#### **.NET Framework** applications
+
+.NET Framework doesn't support the host startup hook. The OpenTelemetry .NET SDK
+is injected using the [CLR Profiler APIs](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/),
+which allow modifying application code during execution.
+
+### Library instrumentations
+
+There are two broad instrumentations types injected into the applications:
+
+- **Source instrumentations**: instrumentations created on top of API hooks
 or callbacks provided directly by the library or framework being instrumented.
 This type of instrumentation depends on the OpenTelemetry API and the specific
 library or framework that they instrument. Some examples include:
@@ -80,61 +86,114 @@ library or framework that they instrument. Some examples include:
   - [gRPC Client Instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.GrpcNetClient)
   - [HttpClient and HttpWebRequest Instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.Http)
 
-- **Bytecode Instrumentations**: Instrumentations created for libraries
+- **Bytecode instrumentations**: instrumentations created for libraries
 or frameworks that lack proper hooks or callbacks to allow the collection
-of observability data. These instrumentations must be implemented following
+of observability data. These instrumentations are enabled by modifying
+the application [IL code](https://en.wikipedia.org/wiki/Common_Intermediate_Language)
+during runtime using the [CLR Profiler API](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/).
+Bytecode instrumentations must be implemented following
 the proper attribute annotation so that the native CLR Profiler implementation
 can inject them at runtime. Some examples include:
 
   - [GraphQL](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/GraphQL)
+  - [Logger](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/Logger/)
+  - [MongoDb](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/MongoDb/)
+
+Both kinds of instrumentation are enabled only when the targeted modules are loaded
+into the targeted application.
+
+## Architecture
+
+The main components of the project are:
+
+- [**Loader**](../src/OpenTelemetry.AutoInstrumentation.Loader):
+Managed library that bootstraps the **Managed Profiler** code into the
+targeted application, extending the
+load paths to include the folders with the OpenTelemetry .NET SDK
+and the instrumentations to be injected into the application.
+
+- [**Managed Profiler**](../src/OpenTelemetry.AutoInstrumentation):
+Contains the code to set up the OpenTelemetry .NET SDK and configured instrumentations,
+as well as support code to run and implement bytecode instrumentations.
+
+- [**CLR Profiler DLL**](../src/OpenTelemetry.AutoInstrumentation.Native):
+Native component that implements a CLR Profiler. The CLR Profiler is used to
+modify the application [intermediate language](https://en.wikipedia.org/wiki/Common_Intermediate_Language)
+(IL), including the IL of packages used by the application to add and collect
+observability data. On the .NET Framework the CLR Profiler DLL also injects
+the **Loader** (see above) during the application startup.
 
 ![Overview](./images/architecture-overview.png)
 
-### Injecting the OpenTelemetry .NET SDK and instrumentations
+### Bootstrapping
 
-The OpenTelemetry .NET SDK and selected source instrumentations are injected
-into the target process through a series of steps started by the CLR Profiler DLL:
+The initial mechanism for bootstrapping the OpenTelemetry .NET SDK differs
+between .NET and .NET Framework. As the [host startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)
+is not available for .NET Framework, the initialization is done in both cases by
+creating one instance of the `OpenTelemetry.AutoInstrumentation.Loader.Startup`
+class from the Loader assembly. When creating the instance, the static constructor
+of the type performs the following actions:
+
+1. Adds a handler to the [`AssemblyResolve` event](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.assemblyresolve?view=net-5.0),
+so that it can add any assembly needed by the SDK itself or by any instrumentation.
+2. Runs, through reflection, the `Initialization` method from
+  the `OpenTelemetry.AutoInstrumentation.Instrumentation` type
+  from the Managed Profiler assembly.
+  a. The `Initialization` code bootstraps the OpenTelemetry .NET SDK,
+    adding configured processors, exporters, and so on,
+    and setting the mechanisms to enable any configured source instrumentations.
+
+#### .NET bootstrapping
+
+.NET applications rely on the [host startup hook](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md)
+being configured to use the `StartupHook.Initialize()` method from
+the `OpenTelemetry.AutoInstrumentation.StartupHook` assembly.
+The `Initialize` method loads the `OpenTelemetry.AutoInstrumentation.Loader`
+assembly and creates the `OpenTelemetry.AutoInstrumentation.Loader.Startup` instance.
+
+#### .NET Framework bootstrapping
+
+.NET Framework bootstrapping is performed on the [CorProfiler::JITCompilationStarted](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/icorprofilercallback-jitcompilationstarted-method)
+callback. When that callback happens the CLR Profiler DLL takes
+the following actions:
+
+1. If the module is the first user module in the current AppDomain,
+  the profiler injects the IL to call the Loader `Startup` constructor.
+2. If the first method observed by `JITCompilationStarted` is IIS startup code,
+  the profiler invokes
+  `AppDomain.CurrentDomain.SetData("OpenTelemetry_IISPreInitStart", true)`,
+  so that automatic instrumentations can correctly handle IIS startup scenarios.
+
+### Injecting instrumentations
+
+#### Source instrumentation
+
+Source instrumentations are injected into the target process by adding
+handlers to the [`AssemblyLoad` event](https://learn.microsoft.com/en-us/dotnet/api/system.appdomain.assemblyload?view=net-7.0)
+and when the targeted assembly loads and triggers the source instrumentation
+initialization code.
+
+#### Bytecode instrumentation
+
+Bytecode instrumentations rely on
+the JIT recompilation capability of the CLR to rewrite the IL for instrumented
+methods. This adds logic at the beginning and end of the instrumented methods
+to invoke instrumentation included in this project, and wraps the calls with
+try-catch blocks to prevent instrumentation errors from affecting the normal operation
+of the application. This IL code rewrite happens in the following steps:
 
 1. On the [CorProfiler::ModuleLoadFinished](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/icorprofilercallback-moduleloadfinished-method)
 callback, the CLR Profiler DLL takes the following actions:
 
    - If the loaded module is in the set of modules for which there is bytecode instrumentation,
-   or if it's the first non-corelib module or not in one of the special cases,
    the profiler adds the module to a map of modules to be instrumented.
-   - If there is bytecode instrumentation for the module, the profiler requests
-   a JIT recompilation using
+   - The profiler then requests
+   a Re-JIT recompilation using
    [ICorProfilerInfo::RequestReJIT](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/icorprofilerinfo4-requestrejit-method)
    for the methods targeted by the bytecode instrumentation.
 
-2. On the [CorProfiler::JITCompilationStarted](https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/profiling/icorprofilercallback-jitcompilationstarted-method)
-callback, the CLR Profiler DLL takes the following actions:
-
-   - If instrumenting he first module in the current AppDomain,
-   the profiler injects the IL calling the Loader `Startup` type constructor.
-   This type of constructor:
-
-      - Adds an event handler to the
-      [`AssemblyResolve`](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.assemblyresolve?view=net-5.0),
-      so that it can add any assembly needed by the SDK itself or by any instrumentation.
-      - Runs, through reflection, the `Initialization` method from
-        the Managed Profiler assembly.
-        - The `Initialization` code bootstraps the OpenTelemetry .NET SDK,
-          adding configured processors, exporters, and so on,
-          and initializes any configured source instrumentations.
-   - If the first method observed by JITCompilationStarted is IIS startup code,
-     the profiler invokes
-     `AppDomain.CurrentDomain.SetData("OpenTelemetry_IISPreInitStart", true)`,
-     so that automatic instrumentation
-    correctly handles IIS startup scenarios.
-
-### Bytecode instrumentations
-
-The bytecode instrumentation, called "call target" in this repo, relies on
-the JIT recompilation capability of the CLR to rewrite the IL for instrumented
-methods. This adds logic at the beginning and end of the instrumented methods
-to invoke instrumentation written in this repo, and wraps the calls with
-try-catch blocks to prevent instrumentation errors from affecting the normal operation
-of the application.
+2. On the ReJIT callback the CLR Profiler DLL finds the corresponding
+instrumentation code and wraps it around the target code.
 
 Bytecode instrumentation methods should not have direct dependencies with
 the libraries that they instrument. This way, they can work with multiple
