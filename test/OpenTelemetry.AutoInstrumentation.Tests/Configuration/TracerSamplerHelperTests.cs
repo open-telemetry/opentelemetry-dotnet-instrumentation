@@ -34,19 +34,20 @@ public class TracerSamplerHelperTests
     [InlineData("parentbased_always_off", null, "ParentBased{AlwaysOffSampler}")]
     [InlineData("parentbased_traceidratio", null, "ParentBased{TraceIdRatioBasedSampler{1.000000}}")]
     [InlineData("parentbased_traceidratio", "0.25", "ParentBased{TraceIdRatioBasedSampler{0.250000}}")]
-    [InlineData("non-supported-value", null, null)]
-    [InlineData(null, null, null)]
-    public void GetSampler(string tracesSampler, string tracerSamplerArguments, string expectedDescription)
+    public void GetSamplerSupportedValues(string tracesSampler, string tracerSamplerArguments, string expectedDescription)
     {
         var sampler = TracerSamplerHelper.GetSampler(tracesSampler, tracerSamplerArguments);
 
-        if (expectedDescription == null)
-        {
-            sampler.Should().BeNull();
-        }
-        else
-        {
-            sampler.Description.Should().Be(expectedDescription);
-        }
+        sampler.Description.Should().Be(expectedDescription);
+    }
+
+    [Theory]
+    [InlineData("non-supported-value", null)]
+    [InlineData(null, null)]
+    public void GetSamplerNonSupportedValues(string tracesSampler, string tracerSamplerArguments)
+    {
+        var sampler = TracerSamplerHelper.GetSampler(tracesSampler, tracerSamplerArguments);
+
+        sampler.Should().BeNull();
     }
 }
