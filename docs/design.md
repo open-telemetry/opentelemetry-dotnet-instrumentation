@@ -21,7 +21,7 @@ thanks to a good selection of default settings.
 
 ### Supported scenarios
 
-- **Zero-touch source code instrumentation**: Users can instrument applications
+- **Automatic instrumentation**: Users can instrument applications
 without changing the source code. Build changes may be required through the addition
 of specific NuGet packages.
 - **Custom SDK support**: The instrumentation can initialize
@@ -46,7 +46,7 @@ are logged and crash the application.
 
 Errors occurring at application runtime are logged and should never crash the application.
 
-## Zero-touch source code instrumentation workflow
+## Automatic instrumentation workflow
 
 To instrument a .NET application without source code changes, do the following:
 
