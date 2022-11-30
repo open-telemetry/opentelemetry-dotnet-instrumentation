@@ -258,14 +258,17 @@ public class SmokeTests : TestHelper
         collector.AssertExpectations();
     }
 
-    [Fact]
+    [Theory]
+    [InlineData("OTEL_DOTNET_AUTO_LOGS_ENABLED_INSTRUMENTATIONS", "none")]
+    [InlineData("OTEL_DOTNET_AUTO_LOGS_ENABLED", "false")]
+    [InlineData("OTEL_LOGS_EXPORTER", "none")]
     [Trait("Category", "EndToEnd")]
-    public void LogsNoneInstrumentations()
+    public void LogsNoneInstrumentations(string envVarName, string envVarVal)
     {
         using var collector = new MockLogsCollector(Output);
         SetExporter(collector);
 
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_ENABLED_INSTRUMENTATIONS", "none");
+        SetEnvironmentVariable(envVarName, envVarVal);
         EnableBytecodeInstrumentation();
         RunTestApplication();
 
@@ -274,22 +277,30 @@ public class SmokeTests : TestHelper
 
 #endif
 
-    [Fact]
+    [Theory]
+    [InlineData("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "none")]
+    [InlineData("OTEL_DOTNET_AUTO_TRACES_ENABLED", "false")]
+    [InlineData("OTEL_TRACES_EXPORTER", "none")]
     [Trait("Category", "EndToEnd")]
-    public void TracesNoneInstrumentations()
+    public void TracesNoneInstrumentations(string envVarName, string envVarVal)
     {
         using var collector = new MockSpansCollector(Output);
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "none");
+        SetExporter(collector);
+        SetEnvironmentVariable(envVarName, envVarVal);
         RunTestApplication();
         collector.AssertEmpty();
     }
 
-    [Fact]
+    [Theory]
+    [InlineData("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "none")]
+    [InlineData("OTEL_DOTNET_AUTO_METRICS_ENABLED", "false")]
+    [InlineData("OTEL_METRICS_EXPORTER", "none")]
     [Trait("Category", "EndToEnd")]
-    public void MetricsNoneInstrumentations()
+    public void MetricsNoneInstrumentations(string envVarName, string envVarVal)
     {
         using var collector = new MockMetricsCollector(Output);
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS", "none");
+        SetExporter(collector);
+        SetEnvironmentVariable(envVarName, envVarVal);
         RunTestApplication();
         collector.AssertEmpty();
     }
