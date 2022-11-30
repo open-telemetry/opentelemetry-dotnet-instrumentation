@@ -73,7 +73,7 @@ which allows modifying application code during their execution.
 
 There are two broad instrumentations types injected into the applications:
 
-- **Source Instrumentations**: Instrumentations created on top of API hooks
+- **Source instrumentations**: instrumentations created on top of API hooks
 or callbacks provided directly by the library or framework being instrumented.
 This type of instrumentation depends on the OpenTelemetry API and the specific
 library or framework that they instrument. Some examples include:
@@ -82,7 +82,7 @@ library or framework that they instrument. Some examples include:
   - [gRPC Client Instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.GrpcNetClient)
   - [HttpClient and HttpWebRequest Instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/src/OpenTelemetry.Instrumentation.Http)
 
-- **Bytecode Instrumentations**: Instrumentations created for libraries
+- **Bytecode instrumentations**: instrumentations created for libraries
 or frameworks that lack proper hooks or callbacks to allow the collection
 of observability data. These instrumentations are enabled by modifying
 the application [IL code](https://en.wikipedia.org/wiki/Common_Intermediate_Language)
