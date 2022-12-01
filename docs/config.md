@@ -102,8 +102,8 @@ to collect and export.
 See [the OpenTelemetry specification](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.15.0/specification/sdk-environment-variables.md?plain=1#L45-L80)
 for more details.
 
-| Environment variable      | Description                                     | Default value           |
-|---------------------------|-------------------------------------------------|-------------------------|
+| Environment variable      | Description                                           | Default value           |
+|---------------------------|-------------------------------------------------------|-------------------------|
 | `OTEL_TRACES_SAMPLER`     | Sampler to be used for traces \[1\]                   | `parentbased_always_on` |
 | `OTEL_TRACES_SAMPLER_ARG` | String value to be used as the sampler argument \[2\] |                         |
 
