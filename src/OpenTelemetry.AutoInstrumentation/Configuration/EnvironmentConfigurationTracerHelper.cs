@@ -73,7 +73,7 @@ internal static class EnvironmentConfigurationTracerHelper
 
         if (sampler != null)
         {
-            builder.SetSampler(sampler);
+            return builder.SetSampler(sampler);
         }
 
         return builder;
