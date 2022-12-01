@@ -5,3 +5,5 @@ OTLP
 tracecontext
 triager
 Zipkin
+parentbased
+traceidratio

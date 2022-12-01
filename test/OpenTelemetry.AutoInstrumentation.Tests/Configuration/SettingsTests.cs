@@ -73,6 +73,8 @@ public class SettingsTests : IDisposable
             settings.EnabledInstrumentations.Should().NotBeEmpty();
             settings.ActivitySources.Should().BeEquivalentTo(new List<string> { "OpenTelemetry.AutoInstrumentation.*" });
             settings.LegacySources.Should().BeEmpty();
+            settings.TracesSampler.Should().BeNull();
+            settings.TracesSamplerArguments.Should().BeNull();
 
             // Instrumentation options tests
             settings.InstrumentationOptions.GraphQLSetDocument.Should().BeFalse();
@@ -212,6 +214,21 @@ public class SettingsTests : IDisposable
         settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<TracerInstrumentation> { TracerInstrumentation.AspNet });
     }
 
+    [Fact]
+    internal void TracerSettings_TracerSampler()
+    {
+        const string expectedTracesSampler = nameof(expectedTracesSampler);
+        const string expectedTracesSamplerArguments = nameof(expectedTracesSamplerArguments);
+
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesSampler, expectedTracesSampler);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesSamplerArguments, expectedTracesSamplerArguments);
+
+        var settings = Settings.FromDefaultSources<TracerSettings>();
+
+        settings.TracesSampler.Should().Be(expectedTracesSampler);
+        settings.TracesSamplerArguments.Should().Be(expectedTracesSamplerArguments);
+    }
+
     [Theory]
     [InlineData(nameof(MetricInstrumentation.NetRuntime), MetricInstrumentation.NetRuntime)]
     [InlineData(nameof(MetricInstrumentation.AspNet), MetricInstrumentation.AspNet)]
@@ -319,6 +336,8 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.DisabledInstrumentations, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesSampler, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesSamplerArguments, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.GraphQLSetDocument, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, null);
