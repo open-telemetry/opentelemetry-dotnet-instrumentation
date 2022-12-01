@@ -71,12 +71,12 @@ internal static class EnvironmentConfigurationTracerHelper
     {
         var sampler = TracerSamplerHelper.GetSampler(settings.TracesSampler, settings.TracesSamplerArguments);
 
-        if (sampler != null)
+        if (sampler == null)
         {
-            return builder.SetSampler(sampler);
+            return builder;
         }
 
-        return builder;
+        return builder.SetSampler(sampler);
     }
 
     private static TracerProviderBuilder SetExporter(this TracerProviderBuilder builder, TracerSettings settings, PluginManager pluginManager)
