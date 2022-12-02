@@ -24,6 +24,11 @@ namespace TestApplication.Plugins;
 
 public class Plugin
 {
+    public void Initializing()
+    {
+        Console.WriteLine($"{nameof(Plugin)}.{nameof(Initializing)}() invoked.");
+    }
+
     public TracerProviderBuilder ConfigureTracerProvider(TracerProviderBuilder builder)
     {
         return builder.AddSource(TestApplication.Smoke.Program.SourceName);
