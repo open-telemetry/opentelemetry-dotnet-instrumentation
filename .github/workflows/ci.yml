@@ -43,9 +43,6 @@ jobs:
           path: build_data/
       - run: brew install coreutils
         if: ${{ runner.os == 'macOS' }}
-      - name: Create test directory
-        run: sudo mkdir -p ${{ matrix.log-dir }} && sudo chmod a+rwx ${{ matrix.log-dir }}  # workaround before next release
-        if: ${{ runner.os != 'Windows' }}
       - name: Test the Shell scripts from README.md
         shell: bash
         run: |
