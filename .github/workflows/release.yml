@@ -67,13 +67,13 @@ jobs:
         shell: bash
         run: |
           set -e
-          dotnet build -c Release ./test/test-applications/integrations/TestApplication.Smoke/TestApplication.Smoke.csproj
+          dotnet publish -f net7.0 -c Release ./test/test-applications/integrations/TestApplication.Smoke
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/otel-dotnet-auto-install.sh -O
           sh ./otel-dotnet-auto-install.sh
             test "$(ls -A "$HOME/.otel-dotnet-auto")"
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
           . ./instrument.sh
-          dotnet ./test/test-applications/integrations/TestApplication.Smoke/bin/Release/net7.0/TestApplication.Smoke.dll
+          ./test/test-applications/integrations/TestApplication.Smoke/bin/Release/net7.0/publish/TestApplication.Smoke
             test "$(ls -A '${{ matrix.log-dir }}' )"
 
   shell-scripts-container:
@@ -92,13 +92,13 @@ jobs:
         docker run --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project --rm mybuildimage /bin/sh -c '
           set -e
           cd project
-          dotnet build -c Release ./test/test-applications/integrations/TestApplication.Smoke/TestApplication.Smoke.csproj
+          dotnet publish -f net7.0 -c Release ./test/test-applications/integrations/TestApplication.Smoke
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/otel-dotnet-auto-install.sh -O
           sh ./otel-dotnet-auto-install.sh
             test "$(ls -A "$HOME/.otel-dotnet-auto")"
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
           . ./instrument.sh
-          dotnet ./test/test-applications/integrations/TestApplication.Smoke/bin/Release/net7.0/TestApplication.Smoke.dll
+          ./test/test-applications/integrations/TestApplication.Smoke/bin/Release/net7.0/publish/TestApplication.Smoke
             test "$(ls -A /var/log/opentelemetry/dotnet )"
         '
 
