@@ -99,7 +99,6 @@ jobs:
         docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
         docker run --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project --rm mybuildimage /bin/sh -c '
           set -e
-          cd project
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/otel-dotnet-auto-install.sh -O
           sh ./otel-dotnet-auto-install.sh
             test "$(ls -A "$HOME/.otel-dotnet-auto")"
