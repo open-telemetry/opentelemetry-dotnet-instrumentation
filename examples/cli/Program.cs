@@ -1,4 +1,4 @@
-﻿// Example usage:
+// Example usage:
 //     dotnet run http://localhost:5200
 if (args.Length != 1)
 {

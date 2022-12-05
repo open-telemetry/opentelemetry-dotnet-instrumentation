@@ -1,6 +1,6 @@
-using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using Microsoft.Data.SqlClient;
 
 // .NET Diagnostics: create the span factory
 using var activitySource = new ActivitySource("MyCompany.MyWebService");
