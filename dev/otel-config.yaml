@@ -8,6 +8,11 @@ receivers:
     protocols:
       grpc:
       http:
+  jaeger:
+    protocols:
+      thrift_compact:
+      thrift_http:
+  zipkin:
 
 processors:
   batch:
