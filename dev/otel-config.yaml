@@ -20,6 +20,12 @@ processors:
 exporters:
   logging:
     # logLevel: debug
+  file/traces:
+    path: /log/otel/traces.log
+  file/metrics:
+    path: /log/otel/metrics.log
+  file/logs:
+    path: /log/otel/logs.log
   otlp:
     endpoint: "${JAEGER_ENDPOINT}"
     tls:
@@ -27,18 +33,35 @@ exporters:
   prometheus:
     endpoint: "0.0.0.0:8889"
 
+
 service:
   pipelines:
     traces:
-      receivers: [otlp]
+      receivers:
+        - otlp
+        - jaeger
+        - zipkin
       processors: [batch]
-      exporters: [otlp, logging]
+      exporters:
+        - logging 
+        - file/traces
+        - otlp
     metrics:
-      receivers: [otlp]
+      receivers:
+        - otlp
       processors: [batch]
-      exporters: [prometheus, logging]
+      exporters:
+        - logging 
+        - file/metrics
+        - prometheus
     logs:
-      receivers: [otlp]
+      receivers:
+        - otlp
       processors: [batch]
-      exporters: [logging]
-  extensions: [health_check, zpages]
+      exporters:
+        - logging 
+        - file/logs
+        - otlp
+  extensions:
+    - health_check
+    - zpages
