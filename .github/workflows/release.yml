@@ -61,7 +61,7 @@ jobs:
       - run: brew install coreutils
         if: ${{ runner.os == 'macOS' }}
       - name: Create test directory
-        run: sudo mkdir -p ${{ matrix.log-dir }} && sudo chmod a+rwx ${{ matrix.log-dir }}  # workaround before next release
+        run: sudo mkdir -p ${{ matrix.log-dir }} && sudo chmod a+rwx ${{ matrix.log-dir }}  # the instrumented process has no permissions to create log dir
         if: ${{ runner.os != 'Windows' }}
       - name: Test the Shell scripts from README.md
         shell: bash
