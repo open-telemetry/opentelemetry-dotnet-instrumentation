@@ -1,6 +1,7 @@
 .PHONY: run
 run:
 	mkdir -p log
+    chmod 777 log
 	docker-compose build
 	docker-compose up -d srv
 	sleep 10 # wait for bootstrap
