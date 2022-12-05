@@ -1,8 +1,11 @@
 .PHONY: run
 run:
+	mkdir -p log
 	docker-compose build
 	docker-compose up -d srv
+	sleep 10 # wait for bootstrap
 	docker-compose run cli
+	sleep 10 # wait for telemetry export
 
 .PHONY: clean
 clean:
@@ -15,9 +18,5 @@ test:
 	test -f "./log/metrics.log" || (echo "metrics not exported"; exit 1)
 	test -f "./log/logs.log" || (echo "logs not exported"; exit 1)
 
-.PHONY: wait
-wait:
-	sleep 10
-
 .PHONY: all
-all: run wait test clean
+all: run test clean
