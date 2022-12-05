@@ -22,5 +22,5 @@ namespace TestApplication.Wcf.Shared;
 public class StatusRequest
 {
     [DataMember]
-    public string Status { get; set; }
+    public string? Status { get; set; }
 }

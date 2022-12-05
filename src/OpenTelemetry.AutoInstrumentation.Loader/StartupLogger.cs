@@ -25,8 +25,8 @@ internal static class StartupLogger
     private const string NixDefaultDirectory = "/var/log/opentelemetry/dotnet";
 
     private static readonly bool DebugEnabled = IsDebugEnabled();
-    private static readonly string LogDirectory = GetLogDirectory();
-    private static readonly string StartupLogFilePath = SetStartupLogFilePath();
+    private static readonly string? LogDirectory = GetLogDirectory();
+    private static readonly string? StartupLogFilePath = SetStartupLogFilePath();
 
     public static void Log(string message, params object[] args)
     {
@@ -71,9 +71,9 @@ internal static class StartupLogger
         }
     }
 
-    private static string GetLogDirectory()
+    private static string? GetLogDirectory()
     {
-        string logDirectory = null;
+        string? logDirectory = null;
 
         try
         {
@@ -110,7 +110,7 @@ internal static class StartupLogger
         return logDirectory;
     }
 
-    private static string CreateDirectoryIfMissing(string pathToCreate)
+    private static string? CreateDirectoryIfMissing(string pathToCreate)
     {
         try
         {
@@ -125,7 +125,7 @@ internal static class StartupLogger
         }
     }
 
-    private static string SetStartupLogFilePath()
+    private static string? SetStartupLogFilePath()
     {
         if (LogDirectory == null)
         {
