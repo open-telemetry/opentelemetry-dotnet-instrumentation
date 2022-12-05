@@ -1,0 +1,66 @@
+extensions:
+  health_check:
+  zpages:
+    endpoint: :55679
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+  jaeger:
+    protocols:
+      thrift_compact:
+      thrift_http:
+  zipkin:
+
+processors:
+  batch:
+
+exporters:
+  logging:
+    # logLevel: debug
+  file/traces:
+    path: /log/otel/traces.log
+  file/metrics:
+    path: /log/otel/metrics.log
+  file/logs:
+    path: /log/otel/logs.log
+  otlp:
+    endpoint: "${JAEGER_ENDPOINT}"
+    tls:
+      insecure: true
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+
+service:
+  pipelines:
+    traces:
+      receivers:
+        - otlp
+        - jaeger
+        - zipkin
+      processors: [batch]
+      exporters:
+        - logging 
+        - file/traces
+        - otlp
+    metrics:
+      receivers:
+        - otlp
+      processors: [batch]
+      exporters:
+        - logging 
+        - file/metrics
+        - prometheus
+    logs:
+      receivers:
+        - otlp
+      processors: [batch]
+      exporters:
+        - logging 
+        - file/logs
+        - otlp
+  extensions:
+    - health_check
+    - zpages
