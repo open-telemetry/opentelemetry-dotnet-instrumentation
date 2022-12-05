@@ -129,7 +129,7 @@ The following Web UI endpoints are exposed:
 - <http://localhost:8889/metrics>: Collected metrics
 - <http://localhost:13133>: Collector health status
 
-You can also find the exported telemetry in [`dev/log`](../dev/log) directory.
+You can also find the exported telemetry in `dev/log` directory.
 
 ### Instrument an application
 
