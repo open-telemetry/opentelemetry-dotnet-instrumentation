@@ -23,14 +23,14 @@ internal static class TcpPortProvider
 {
     public static int GetOpenPort()
     {
-        TcpListener tcpListener = null;
+        TcpListener? tcpListener = null;
 
         try
         {
             tcpListener = new TcpListener(IPAddress.Loopback, 0);
             tcpListener.Start();
 
-            int port = ((IPEndPoint)tcpListener.LocalEndpoint).Port;
+            var port = ((IPEndPoint)tcpListener.LocalEndpoint).Port;
 
             return port;
         }
