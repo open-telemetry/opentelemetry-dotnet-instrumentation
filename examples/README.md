@@ -7,10 +7,10 @@ It consists of following services:
 
 1. [`cli`](cli) - console application that makes a HTTP GET request
 2. [`srv`](srv) - simple HTTP server using SQL Server
-3. `sqlserver` - [Microsft SQL Server](https://hub.docker.com/_/microsoft-mssql-server)
+3. `sqlserver` - [Microsoft SQL Server](https://hub.docker.com/_/microsoft-mssql-server)
    used by `srv`
 4. `otel-collector` - [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)
-   which collects the telemtry send by `cli` and `srv`
+   which collects the telemetry send by `cli` and `srv`
 5. `jaeger` - [Jaeger](https://www.jaegertracing.io/) as traces backend
 6. `prometheus` - [Prometheus](https://prometheus.io/) as metrics backend
 
