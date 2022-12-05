@@ -57,6 +57,7 @@ services:
       - "55679:55679" # ZPages extension
     depends_on:
       - jaeger
+      - prometheus
 
   jaeger:
     image: jaegertracing/all-in-one:1.38.1
@@ -64,3 +65,10 @@ services:
       COLLECTOR_OTLP_ENABLED: "true"
     ports:
       - "16686:16686" # Jaeger Web UI
+
+  prometheus:
+    image: prom/prometheus:v2.40.5
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"

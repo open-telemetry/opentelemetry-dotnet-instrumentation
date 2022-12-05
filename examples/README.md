@@ -12,6 +12,7 @@ It consists of following services:
 4. `otel-collector` - [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)
    which collects the telemtry send by `cli` and `srv`
 5. `jaeger` - [Jaeger](https://www.jaegertracing.io/) as traces backend
+6. `prometheus` - [Prometheus](https://prometheus.io/) as metrics backend
 
 ## Usage
 
@@ -26,9 +27,11 @@ docker-compose run cli
 The following Web UI endpoints are exposed:
 
 - <http://localhost:16686/search> - traces
-- <http://localhost:8889/metrics> - metrics
+- <http://localhost:9090/graph> - metrics
 
 You can also find the exported telemetry in the `log` directory.
+
+You can also see the metrics at <http://localhost:8889/metrics>.
 
 ## Cleanup
 
