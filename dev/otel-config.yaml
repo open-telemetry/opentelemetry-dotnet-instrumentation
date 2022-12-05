@@ -33,7 +33,6 @@ exporters:
   prometheus:
     endpoint: "0.0.0.0:8889"
 
-
 service:
   pipelines:
     traces:
