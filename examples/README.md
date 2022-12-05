@@ -16,13 +16,19 @@ It consists of following services:
 
 ## Usage
 
+Windows:
+
 ```sh
 docker-compose build
 docker-compose up -d srv
 docker-compose run cli
 ```
 
-> Alternative: `make`
+macOS and Linux:
+
+```sh
+make
+```
 
 The following Web UI endpoints are exposed:
 
@@ -35,9 +41,15 @@ You can also see the metrics at <http://localhost:8889/metrics>.
 
 ## Cleanup
 
+Windows (Git Bash):
+
 ```sh
 docker-compose down --remove-orphans
 rm -rf log
 ```
 
-> Alternative: `make clean`
+macOS and Linux:
+
+```sh
+make clean
+```
