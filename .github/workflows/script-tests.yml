@@ -6,7 +6,6 @@ on:
 
 jobs:
   powershell-script:
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v3.1.0
@@ -39,7 +38,6 @@ jobs:
           if (Test-Path $install_dir) { throw "Core files exist. Core uninstall failed." }
 
   shell-scripts:
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
     strategy:
       fail-fast: false
       matrix:
@@ -76,7 +74,6 @@ jobs:
             test "$(ls -A '${{ matrix.log-dir }}' )"
 
   shell-scripts-container:
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
     strategy:
       fail-fast: false
       matrix:
