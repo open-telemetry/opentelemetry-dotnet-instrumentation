@@ -11,10 +11,13 @@ clean:
 
 .PHONY: test
 test:
-	sleep 1 # give a chance to create the files
 	test -f "./log/traces.log" || (echo "traces not exported"; exit 1)
 	test -f "./log/metrics.log" || (echo "metrics not exported"; exit 1)
 	test -f "./log/logs.log" || (echo "logs not exported"; exit 1)
 
+.PHONY: wait
+wait:
+	sleep 10
+
 .PHONY: all
-all: run test clean
+all: run wait test clean
