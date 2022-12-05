@@ -4,6 +4,7 @@
 
   <PropertyGroup>
     <Version>0.5.1</Version>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
