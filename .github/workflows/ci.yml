@@ -99,12 +99,10 @@ jobs:
         docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
         docker run --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project --rm mybuildimage /bin/sh -c '
           set -e
-          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/otel-dotnet-auto-install.sh -O
-          sh ./otel-dotnet-auto-install.sh
-            test "$(ls -A "$HOME/.otel-dotnet-auto")"
-          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
+          dotnet publish -f net7.0 -c Release ./test/test-applications/integrations/TestApplication.Smoke
+          export OTEL_DOTNET_AUTO_HOME="${PWD}/bin/tracer-home"
           . ./instrument.sh
-          dotnet ./test/test-applications/integrations/TestApplication.Smoke/bin/x64/Release/net7.0/TestApplication.Smoke.dll
+          ./test/test-applications/integrations/TestApplication.Smoke/bin/Release/net7.0/publish/TestApplication.Smoke
             test "$(ls -A /var/log/opentelemetry/dotnet )"
         '
     - name: Publish Linux build
