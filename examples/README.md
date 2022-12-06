@@ -6,16 +6,16 @@ This example uses Docker Compose.
 It consists of following services:
 
 1. [`client`](Client) - console application that makes a HTTP GET request
-   instrumented with OpenTelemetry .NET Automatic Instrumentation. 
-3. [`service`](Service) - simple HTTP server using SQL Server.
+   instrumented with OpenTelemetry .NET Automatic Instrumentation.
+1. [`service`](Service) - simple HTTP server using SQL Server.
    The application additionally has manual instrumentation (traces, metrics, logs)
    on top of the automatic instrumentation.
-4. `sqlserver` - [Microsoft SQL Server](https://hub.docker.com/_/microsoft-mssql-server)
+1. `sqlserver` - [Microsoft SQL Server](https://hub.docker.com/_/microsoft-mssql-server)
    used by `srv`
-4. `otel-collector` - [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)
+1. `otel-collector` - [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)
    which collects the telemetry send by `cli` and `srv`
-5. `jaeger` - [Jaeger](https://www.jaegertracing.io/) as traces backend
-6. `prometheus` - [Prometheus](https://prometheus.io/) as metrics backend
+1. `jaeger` - [Jaeger](https://www.jaegertracing.io/) as traces backend
+1. `prometheus` - [Prometheus](https://prometheus.io/) as metrics backend
 
 ## Usage
 
