@@ -2,7 +2,7 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\Common.props" />
 
   <Import Project="$(MSBuildThisFileDirectory)Integrations.props" />
-
+  
   <!-- StyleCop -->
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" Link="GlobalSuppressions.integrations.cs" />

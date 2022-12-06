@@ -71,10 +71,10 @@ public class Startup
         ILoggerFactory loggerFactory)
     {
         // Get StarWarsSchema Singleton
-        var starWarsSchema = (StarWarsSchema)app.ApplicationServices.GetService(typeof(ISchema));
+        var starWarsSchema = (StarWarsSchema)app.ApplicationServices.GetService(typeof(ISchema))!;
 
         // Get StarWarsSubscription Singleton
-        var starWarsSubscription = (StarWarsExtensions.StarWarsSubscription)app.ApplicationServices.GetService(typeof(StarWarsExtensions.StarWarsSubscription));
+        var starWarsSubscription = (StarWarsExtensions.StarWarsSubscription)app.ApplicationServices.GetService(typeof(StarWarsExtensions.StarWarsSubscription))!;
 
         // Set the subscription
         // We do this roundabout mechanism to keep using the GraphQL.StarWars NuGet package

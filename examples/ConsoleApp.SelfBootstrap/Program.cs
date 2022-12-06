@@ -26,7 +26,7 @@ namespace Examples.ConsoleApp.SelfBootstrap;
 internal class Program
 {
     private static readonly ActivitySource MyActivitySource = new ActivitySource("ConsoleApp.SelfBootstrap");
-    private static TracerProvider _tracerProvider;
+    private static TracerProvider? _tracerProvider;
 
     private static async Task<int> Main()
     {

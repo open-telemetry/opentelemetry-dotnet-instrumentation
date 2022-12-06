@@ -12,6 +12,8 @@ TEST_F(CLRHelperTest, EnumeratesTypeDefs) {
   std::vector<std::wstring> expected_types = {
       L"Microsoft.CodeAnalysis.EmbeddedAttribute",
       L"System.Runtime.CompilerServices.IsReadOnlyAttribute",
+      L"System.Runtime.CompilerServices.NullableAttribute",
+      L"System.Runtime.CompilerServices.NullableContextAttribute",
       L"TestApplication.ExampleLibrary.Class1",
       L"TestApplication.ExampleLibrary.GenericTests.ComprehensiveCaller`2",
       L"TestApplication.ExampleLibrary.GenericTests.GenericTarget`2",
@@ -68,6 +70,9 @@ TEST_F(CLRHelperTest, GetsTypeInfoFromTypeDefs) {
       L"Cookie",
       L"Microsoft.CodeAnalysis.EmbeddedAttribute",
       L"Raisin",
+      L"System.Runtime.CompilerServices.IsReadOnlyAttribute",
+      L"System.Runtime.CompilerServices.NullableAttribute",
+      L"System.Runtime.CompilerServices.NullableContextAttribute",
       L"TestApplication.ExampleLibrary.Class1",
       L"TestApplication.ExampleLibrary.FakeClient.Biscuit",
       L"TestApplication.ExampleLibrary.FakeClient.Biscuit`1",
@@ -78,8 +83,7 @@ TEST_F(CLRHelperTest, GetsTypeInfoFromTypeDefs) {
       L"TestApplication.ExampleLibrary.GenericTests.ComprehensiveCaller`2",
       L"TestApplication.ExampleLibrary.GenericTests.GenericTarget`2",
       L"TestApplication.ExampleLibrary.GenericTests.PointStruct",
-      L"TestApplication.ExampleLibrary.GenericTests.StructContainer`1",
-      L"System.Runtime.CompilerServices.IsReadOnlyAttribute"};
+      L"TestApplication.ExampleLibrary.GenericTests.StructContainer`1"};
   std::set<std::wstring> actual;
   for (auto& type_def : EnumTypeDefs(metadata_import_)) {
     auto type_info = GetTypeInfo(metadata_import_, type_def);
@@ -96,6 +100,9 @@ TEST_F(CLRHelperTest, GetsTypeInfoFromTypeRefs) {
       L"Enumerator",
       L"System.Array",
       L"System.Attribute",
+      L"System.AttributeTargets",
+      L"System.AttributeUsageAttribute",
+      L"System.Byte",
       L"System.Collections.DictionaryEntry",
       L"System.Collections.Generic.Dictionary`2",
       L"System.Collections.Generic.IList`1",
@@ -160,12 +167,14 @@ TEST_F(CLRHelperTest, GetsTypeInfoFromModuleRefs) {
 
 TEST_F(CLRHelperTest, GetsTypeInfoFromMethods) {
   std::set<std::wstring> expected = {
-      L"Microsoft.CodeAnalysis.EmbeddedAttribute",
-      L"System.Runtime.CompilerServices.IsReadOnlyAttribute",
       L"<>c",
       L"<StayAndLayDown>d__4`2",
       L"Cookie",
+      L"Microsoft.CodeAnalysis.EmbeddedAttribute",
       L"Raisin",
+      L"System.Runtime.CompilerServices.IsReadOnlyAttribute",
+      L"System.Runtime.CompilerServices.NullableAttribute",
+      L"System.Runtime.CompilerServices.NullableContextAttribute",
       L"TestApplication.ExampleLibrary.Class1",
       L"TestApplication.ExampleLibrary.FakeClient.Biscuit",
       L"TestApplication.ExampleLibrary.FakeClient.Biscuit`1",

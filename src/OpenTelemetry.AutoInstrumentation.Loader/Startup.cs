@@ -80,7 +80,7 @@ internal partial class Startup
         }
     }
 
-    private static string ReadEnvironmentVariable(string key)
+    private static string? ReadEnvironmentVariable(string key)
     {
         try
         {
