@@ -14,10 +14,13 @@ jobs:
         include:
           - machine: windows-2022
             containers: windows
+            log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
           - machine: ubuntu-20.04
             containers: linux
+            log-dir: "/var/log/opentelemetry/dotnet"
           - machine: macos-11
             containers: none
+            log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.1.0
@@ -38,6 +41,36 @@ jobs:
         with:
           name: logs-${{ matrix.machine }}
           path: build_data/
+      - run: brew install coreutils
+        if: ${{ runner.os == 'macOS' }}
+      - name: Create test directory
+        run: sudo mkdir -p ${{ matrix.log-dir }} && sudo chmod a+rwx ${{ matrix.log-dir }}  # the instrumented process has no permissions to create log dir
+        if: ${{ runner.os != 'Windows' }}
+      - name: Test the Shell scripts from README.md
+        shell: bash
+        run: |
+          set -e
+          dotnet publish -f net7.0 -c Release ./test/test-applications/integrations/TestApplication.Smoke
+          export OTEL_DOTNET_AUTO_HOME="${PWD}/bin/tracer-home"
+          . ./instrument.sh
+          ./test/test-applications/integrations/TestApplication.Smoke/bin/Release/net7.0/publish/TestApplication.Smoke
+            test "$(ls -A '${{ matrix.log-dir }}' )"
+      - name: Test the PowerShell module instructions from README.md
+        if: ${{ runner.os == 'Windows' }}
+        shell: powershell
+        run: |
+          $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\*"
+          Import-Module "${PWD}/OpenTelemetry.DotNet.Auto.psm1"
+          [System.Environment]::SetEnvironmentVariable("OTEL_DOTNET_AUTO_INSTALL_DIR", "${PWD}/bin/tracer-home", [System.EnvironmentVariableTarget]::Machine)
+          Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
+          ./test/test-applications/integrations/TestApplication.Smoke/bin/Release/net7.0/TestApplication.Smoke.exe
+          if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
+          if (-not (Test-Path $log_path)) { throw "Log file does not exist. Instrumentation test failed." }
+          Remove-Item $log_path
+          Unregister-OpenTelemetryForCurrentSession
+          ./test/test-applications/integrations/TestApplication.Smoke/bin/Release/net7.0/TestApplication.Smoke.exe
+          if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
+          if (Test-Path $log_path) { throw "Log file exists. Instrumentation unregister failed." }
       - name: Upload binaries
         uses: actions/upload-artifact@v3.1.1
         if: always()
@@ -60,6 +93,20 @@ jobs:
         docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
         docker run --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
           ./build.sh Workflow --containers none
+    - name: Test the Shell scripts from README.md in Docker container
+      run: |
+        set -e
+        docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
+        docker run --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project --rm mybuildimage /bin/sh -c '
+          set -e
+          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/otel-dotnet-auto-install.sh -O
+          sh ./otel-dotnet-auto-install.sh
+            test "$(ls -A "$HOME/.otel-dotnet-auto")"
+          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
+          . ./instrument.sh
+          dotnet ./test/test-applications/integrations/TestApplication.Smoke/bin/x64/Release/net7.0/TestApplication.Smoke.dll
+            test "$(ls -A /var/log/opentelemetry/dotnet )"
+        '
     - name: Publish Linux build
       uses: actions/upload-artifact@v3.1.1
       with:
@@ -67,93 +114,6 @@ jobs:
         path: bin/tracer-home
       if: (${{ job.status }} != 'cancelled')
       continue-on-error: true
-
-  powershell-script:
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
-    runs-on: windows-2022
-    steps:
-      - uses: actions/setup-dotnet@v3.0.3
-        with:
-          dotnet-version: 6.0.x
-      - name: Test the PowerShell module instructions from README.md
-        shell: powershell
-        run: |
-          $module_url = "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/OpenTelemetry.DotNet.Auto.psm1"
-          $dl_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
-          $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\*"
-          Invoke-WebRequest -Uri $module_url -OutFile $dl_path
-          Import-Module $dl_path
-          Install-OpenTelemetryCore
-          $install_dir = Get-OpenTelemetryInstallDirectory
-          Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
-          dotnet help
-          if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
-          if (-not (Test-Path $log_path)) { throw "Log file does not exist. Instrumentation test failed." }
-          Remove-Item $log_path
-          Unregister-OpenTelemetryForCurrentSession
-          dotnet help
-          if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
-          if (Test-Path $log_path) { throw "Log file exists. Instrumentation unregister failed." }
-          Uninstall-OpenTelemetryCore
-          if (Test-Path $install_dir) { throw "Core files exist. Core uninstall failed." }
-
-  shell-scripts:
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - machine: windows-2022
-            log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
-          - machine: ubuntu-20.04
-            log-dir: "/var/log/opentelemetry/dotnet"
-          - machine: macos-11
-            log-dir: "/var/log/opentelemetry/dotnet"
-    runs-on: ${{ matrix.machine }}
-    steps:
-      - uses: actions/setup-dotnet@v3.0.3
-        with:
-          dotnet-version: 6.0.x
-      - run: brew install coreutils
-        if: ${{ runner.os == 'macOS' }}
-      - name: Create test directory
-        run: sudo mkdir -p ${{ matrix.log-dir }} && sudo chmod a+rwx ${{ matrix.log-dir }}  # workaround before next release
-        if: ${{ runner.os != 'Windows' }}
-      - name: Test the Shell scripts from README.md
-        shell: bash
-        run: |
-          set -e
-          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/otel-dotnet-auto-install.sh -O
-          sh ./otel-dotnet-auto-install.sh
-            test "$(ls -A "$HOME/.otel-dotnet-auto")"
-          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
-          . ./instrument.sh
-          dotnet help
-            test "$(ls -A '${{ matrix.log-dir }}' )"
-
-  shell-scripts-container:
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'release PR') }}
-    strategy:
-      fail-fast: false
-      matrix:
-        base-image: [ alpine ]
-    runs-on: ubuntu-20.04
-    steps:
-    - uses: actions/checkout@v3.1.0
-    - name: Test the Shell scripts from README.md in Docker container
-      run: |
-        set -e
-        docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
-        docker run --rm mybuildimage /bin/sh -c '
-          set -e
-          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/otel-dotnet-auto-install.sh -O
-          sh ./otel-dotnet-auto-install.sh
-            test "$(ls -A "$HOME/.otel-dotnet-auto")"
-          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
-          . ./instrument.sh
-          dotnet help
-            test "$(ls -A /var/log/opentelemetry/dotnet )"
-        '
 
   pack:
     needs: build

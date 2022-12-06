@@ -43,7 +43,7 @@ internal static class LogBuilderExtensions
                 return builder;
             }
 
-            var settings = Instrumentation.LogSettings;
+            var settings = Instrumentation.LogSettings.Value;
             var pluginManager = Instrumentation.PluginManager;
 
             builder.AddOpenTelemetry(options =>
