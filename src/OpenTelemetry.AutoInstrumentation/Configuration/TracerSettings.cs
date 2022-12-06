@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
-// TODO Move settings to more suitable place?
 
 /// <summary>
 /// Tracer Settings
@@ -64,6 +63,9 @@ internal class TracerSettings : Settings
         OpenTracingEnabled = source.GetBool(ConfigurationKeys.Traces.OpenTracingEnabled) ?? false;
 
         InstrumentationOptions = new InstrumentationOptions(source);
+
+        TracesSampler = source.GetString(ConfigurationKeys.Traces.TracesSampler);
+        TracesSamplerArguments = source.GetString(ConfigurationKeys.Traces.TracesSamplerArguments);
     }
 
     /// <summary>
@@ -104,7 +106,17 @@ internal class TracerSettings : Settings
     /// <summary>
     /// Gets the instrumentation options.
     /// </summary>
-    public InstrumentationOptions InstrumentationOptions { get; private set; }
+    public InstrumentationOptions InstrumentationOptions { get; }
+
+    /// <summary>
+    /// Gets sampler to be used for traces.
+    /// </summary>
+    public string TracesSampler { get; }
+
+    /// <summary>
+    /// Gets a value to be used as the sampler argument.
+    /// </summary>
+    public string TracesSamplerArguments { get; }
 
     private static TracesExporter ParseTracesExporter(IConfigurationSource source)
     {

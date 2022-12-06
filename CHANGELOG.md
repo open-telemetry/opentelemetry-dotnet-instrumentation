@@ -5,9 +5,27 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.5.0...HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.5.1-beta.1...HEAD)
 
-This release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
+### Added
+
+- Add support for `OTEL_TRACES_SAMPLER` and `OTEL_TRACES_SAMPLER_ARG`.
+- Add `Initializing` plugin extension point
+  that is invoked before OpenTelemetry SDK configuration.
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.5.1-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.5.1-beta.1)
+
+This beta release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
   [`1.4.0-beta.3`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-beta.3)
@@ -31,10 +49,6 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 - Updated plugins method signature to overwrite OpenTelemetry .NET SDK exporters'
   and instrumentations' options. `ConfigureOptions` changed to `ConfigureTracesOptions`,
   `ConfigureMetricsOptions` or `ConfigureLogsOptions`.
-
-### Removed
-
-### Fixed
 
 ## [0.5.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.5.0)
 

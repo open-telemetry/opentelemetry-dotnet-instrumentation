@@ -38,9 +38,9 @@ public class Program
         using var host = CreateHostBuilder(args).Build();
         host.Start();
 
-        var server = (IServer)host.Services.GetService(typeof(IServer));
-        var addressFeature = server.Features.Get<IServerAddressesFeature>();
-        var address = addressFeature.Addresses.First();
+        var server = (IServer?)host.Services.GetService(typeof(IServer));
+        var addressFeature = server?.Features.Get<IServerAddressesFeature>();
+        var address = addressFeature?.Addresses.First();
         using var httpClient = new HttpClient();
         httpClient.GetAsync($"{address}/test").Wait();
     }

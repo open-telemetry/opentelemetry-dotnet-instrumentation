@@ -20,5 +20,5 @@ namespace TestApplication.GraphQL;
 
 public class GraphQLUserContext
 {
-    public ClaimsPrincipal User { get; set; }
+    public ClaimsPrincipal? User { get; set; }
 }

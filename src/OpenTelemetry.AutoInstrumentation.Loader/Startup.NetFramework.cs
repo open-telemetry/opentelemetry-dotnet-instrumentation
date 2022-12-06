@@ -34,7 +34,7 @@ internal partial class Startup
         return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
     }
 
-    private static Assembly AssemblyResolve_ManagedProfilerDependencies(object sender, ResolveEventArgs args)
+    private static Assembly? AssemblyResolve_ManagedProfilerDependencies(object sender, ResolveEventArgs args)
     {
         var assemblyName = new AssemblyName(args.Name).Name;
 

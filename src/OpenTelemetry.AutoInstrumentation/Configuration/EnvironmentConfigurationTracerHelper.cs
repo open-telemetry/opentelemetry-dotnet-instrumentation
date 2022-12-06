@@ -52,17 +52,31 @@ internal static class EnvironmentConfigurationTracerHelper
             };
         }
 
-        // Exporters can cause dependency loads.
-        // Should be called later if dependency listeners are already setup.
-        builder.SetExporter(settings, pluginManager);
+        builder
+            .SetSampler(settings)
+            // Exporters can cause dependency loads.
+            // Should be called later if dependency listeners are already setup.
+            .SetExporter(settings, pluginManager)
+            .AddSource(settings.ActivitySources.ToArray());
 
-        builder.AddSource(settings.ActivitySources.ToArray());
         foreach (var legacySource in settings.LegacySources)
         {
             builder.AddLegacySource(legacySource);
         }
 
         return builder;
+    }
+
+    private static TracerProviderBuilder SetSampler(this TracerProviderBuilder builder, TracerSettings settings)
+    {
+        var sampler = TracerSamplerHelper.GetSampler(settings.TracesSampler, settings.TracesSamplerArguments);
+
+        if (sampler == null)
+        {
+            return builder;
+        }
+
+        return builder.SetSampler(sampler);
     }
 
     private static TracerProviderBuilder SetExporter(this TracerProviderBuilder builder, TracerSettings settings, PluginManager pluginManager)

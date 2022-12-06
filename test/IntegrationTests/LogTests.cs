@@ -15,7 +15,6 @@
 // </copyright>
 
 #if !NETFRAMEWORK
-
 using System;
 using IntegrationTests.Helpers;
 using Xunit;

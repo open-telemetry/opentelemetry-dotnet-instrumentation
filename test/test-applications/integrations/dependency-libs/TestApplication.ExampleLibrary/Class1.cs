@@ -61,12 +61,12 @@ public class Class1
         return new Class1[4, 2, 3];
     }
 
-    public Class1[][] ToJaggedArray()
+    public Class1?[][] ToJaggedArray()
     {
-        return new Class1[][]
+        return new Class1?[][]
         {
-            new Class1[] { this },
-            new Class1[] { null, null }
+            new Class1?[] { this },
+            new Class1?[] { null, null }
         };
     }
 
