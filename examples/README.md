@@ -37,8 +37,6 @@ The following Web UI endpoints are exposed:
 
 You can also find the exported telemetry in the `log` directory.
 
-You can also see the metrics at <http://localhost:8889/metrics>.
-
 ## Cleanup
 
 Windows (Git Bash):
