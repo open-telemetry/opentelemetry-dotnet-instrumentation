@@ -10,6 +10,12 @@ in an example plugin class:
 
 public class MyPlugin 
 {
+    // To configure plugin, before OTel SDK configuration is called.
+    public void Initializing()
+    {
+        // My custom logic here
+    }
+
     // To configure tracing SDK
     public OpenTelemetry.Trace.TracerProviderBuilder ConfigureTracerProvider(OpenTelemetry.Trace.TracerProviderBuilder builder)
     {

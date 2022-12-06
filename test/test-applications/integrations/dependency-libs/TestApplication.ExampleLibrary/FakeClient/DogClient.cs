@@ -45,13 +45,13 @@ public class DogClient<T1, T2>
     public void Sit(
         string message,
         int howManyTimes,
-        byte[] whatEvenIs = null,
-        Guid[][] whatEvenIsThis = null,
-        T1[][][] whatEvenIsThisT = null,
-        List<byte[][]> evenMoreWhatIsThis = null,
-        List<DogTrick<T1>> previousTricks = null,
-        Tuple<int, T1, string, object, Tuple<Tuple<T2, long>, long>, Task, Guid> tuple = null,
-        Dictionary<int, IList<Task<DogTrick<T1>>>> whatAmIDoing = null)
+        byte[]? whatEvenIs = null,
+        Guid[][]? whatEvenIsThis = null,
+        T1[][][]? whatEvenIsThisT = null,
+        List<byte[][]>? evenMoreWhatIsThis = null,
+        List<DogTrick<T1>>? previousTricks = null,
+        Tuple<int, T1, string, object, Tuple<Tuple<T2, long>, long>, Task, Guid>? tuple = null,
+        Dictionary<int, IList<Task<DogTrick<T1>>>>? whatAmIDoing = null)
     {
         for (var i = 0; i < howManyTimes; i++)
         {

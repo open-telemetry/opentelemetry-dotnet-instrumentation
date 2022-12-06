@@ -36,7 +36,7 @@ public class Program
         var otelLibs = AppDomain.CurrentDomain
             .GetAssemblies()
             .Select(x => x.GetName().Name)
-            .Where(name => name.StartsWith("OpenTelemetry"))
+            .Where(name => name != null && name.StartsWith("OpenTelemetry"))
             .OrderBy(name => name)
             .ToList();
 

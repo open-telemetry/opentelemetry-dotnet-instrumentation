@@ -22,7 +22,7 @@ namespace Examples.AspNetCoreMvc.Controllers;
 [Route("api/redis")]
 public class RedisController : ControllerBase
 {
-    private static IConnectionMultiplexer _connectionMultiplexer = null;
+    private static IConnectionMultiplexer? _connectionMultiplexer = null;
 
     public static IConnectionMultiplexer Connection
     {

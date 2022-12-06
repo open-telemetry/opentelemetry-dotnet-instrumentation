@@ -41,6 +41,18 @@ internal class PluginManager
         _plugins = plugins;
     }
 
+    public void Initializing()
+    {
+        foreach (var plugin in _plugins)
+        {
+            var mi = plugin.Type.GetMethod("Initializing", Type.EmptyTypes);
+            if (mi is not null)
+            {
+                mi.Invoke(plugin.Instance, null);
+            }
+        }
+    }
+
     public TracerProviderBuilder ConfigureTracerProviderBuilder(TracerProviderBuilder builder)
     {
         return ConfigureBuilder(builder, "ConfigureTracerProvider");

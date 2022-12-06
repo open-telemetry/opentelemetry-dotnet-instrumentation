@@ -38,8 +38,8 @@ internal static class Instrumentation
     private static readonly ILogger Logger = OtelLogging.GetLogger();
     private static readonly LazyInstrumentationLoader LazyInstrumentationLoader = new();
 
-    private static int _firstInitialization = 1;
-    private static int _isExiting = 0;
+    private static int _initialized;
+    private static int _isExiting;
     private static SdkSelfDiagnosticsEventListener _sdkEventListener;
 
     private static TracerProvider _tracerProvider;
@@ -73,13 +73,13 @@ internal static class Instrumentation
 
     internal static GeneralSettings GeneralSettings { get; } = Settings.FromDefaultSources<GeneralSettings>();
 
-    internal static TracerSettings TracerSettings { get; } = Settings.FromDefaultSources<TracerSettings>();
+    internal static Lazy<TracerSettings> TracerSettings { get; } = new(Settings.FromDefaultSources<TracerSettings>);
 
-    internal static MetricSettings MetricSettings { get; } = Settings.FromDefaultSources<MetricSettings>();
+    internal static Lazy<MetricSettings> MetricSettings { get; } = new(Settings.FromDefaultSources<MetricSettings>);
 
-    internal static LogSettings LogSettings { get; } = Settings.FromDefaultSources<LogSettings>();
+    internal static Lazy<LogSettings> LogSettings { get; } = new(Settings.FromDefaultSources<LogSettings>);
 
-    internal static SdkSettings SdkSettings { get; } = Settings.FromDefaultSources<SdkSettings>();
+    internal static Lazy<SdkSettings> SdkSettings { get; } = new(Settings.FromDefaultSources<SdkSettings>);
 
     /// <summary>
     /// Initialize the OpenTelemetry SDK with a pre-defined set of exporters, shims, and
@@ -87,7 +87,7 @@ internal static class Instrumentation
     /// </summary>
     public static void Initialize()
     {
-        if (Interlocked.Exchange(ref _firstInitialization, value: 0) != 1)
+        if (Interlocked.Exchange(ref _initialized, value: 1) != 0)
         {
             // Initialize() was already called before
             return;
@@ -97,7 +97,9 @@ internal static class Instrumentation
         {
             _pluginManager = new PluginManager(GeneralSettings);
 
-            if (TracerSettings.TracesEnabled || MetricSettings.MetricsEnabled)
+            _pluginManager.Initializing();
+
+            if (TracerSettings.Value.TracesEnabled || MetricSettings.Value.MetricsEnabled)
             {
                 // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
                 _sdkEventListener = new(EventLevel.Warning, Logger);
@@ -111,27 +113,27 @@ internal static class Instrumentation
                     AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
                 }
 
-                EnvironmentConfigurationSdkHelper.UseEnvironmentVariables(SdkSettings);
+                EnvironmentConfigurationSdkHelper.UseEnvironmentVariables(SdkSettings.Value);
             }
 
-            if (TracerSettings.TracesEnabled)
+            if (TracerSettings.Value.TracesEnabled)
             {
                 var builder = Sdk
                     .CreateTracerProviderBuilder()
                     .ConfigureResource(ResourceConfigurator.Configure)
-                    .UseEnvironmentVariables(LazyInstrumentationLoader, TracerSettings, _pluginManager)
+                    .UseEnvironmentVariables(LazyInstrumentationLoader, TracerSettings.Value, _pluginManager)
                     .InvokePlugins(_pluginManager);
 
                 _tracerProvider = builder.Build();
                 Logger.Information("OpenTelemetry tracer initialized.");
             }
 
-            if (MetricSettings.MetricsEnabled)
+            if (MetricSettings.Value.MetricsEnabled)
             {
                 var builder = Sdk
                     .CreateMeterProviderBuilder()
                     .ConfigureResource(ResourceConfigurator.Configure)
-                    .UseEnvironmentVariables(LazyInstrumentationLoader, MetricSettings, _pluginManager)
+                    .UseEnvironmentVariables(LazyInstrumentationLoader, MetricSettings.Value, _pluginManager)
                     .InvokePlugins(_pluginManager);
 
                 _meterProvider = builder.Build();
@@ -144,7 +146,7 @@ internal static class Instrumentation
             throw;
         }
 
-        if (TracerSettings.OpenTracingEnabled)
+        if (TracerSettings.Value.OpenTracingEnabled)
         {
             EnableOpenTracing();
         }
