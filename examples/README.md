@@ -6,8 +6,11 @@ This example uses Docker Compose.
 It consists of following services:
 
 1. [`client`](Client) - console application that makes a HTTP GET request
-2. [`service`](Service) - simple HTTP server using SQL Server
-3. `sqlserver` - [Microsoft SQL Server](https://hub.docker.com/_/microsoft-mssql-server)
+   instrumented with OpenTelemetry .NET Automatic Instrumentation. 
+3. [`service`](Service) - simple HTTP server using SQL Server.
+   The application additionally has manual instrumentation (traces, metrics, logs)
+   on top of the automatic instrumentation.
+4. `sqlserver` - [Microsoft SQL Server](https://hub.docker.com/_/microsoft-mssql-server)
    used by `srv`
 4. `otel-collector` - [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)
    which collects the telemetry send by `cli` and `srv`
