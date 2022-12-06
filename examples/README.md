@@ -11,9 +11,9 @@ It consists of following services:
    The application additionally has manual instrumentation (traces, metrics, logs)
    on top of the automatic instrumentation.
 1. `sqlserver` - [Microsoft SQL Server](https://hub.docker.com/_/microsoft-mssql-server)
-   used by `srv`
+   used by `service`
 1. `otel-collector` - [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)
-   which collects the telemetry send by `cli` and `srv`
+   which collects the telemetry send by `client` and `service`
 1. `jaeger` - [Jaeger](https://www.jaegertracing.io/) as traces backend
 1. `prometheus` - [Prometheus](https://prometheus.io/) as metrics backend
 
