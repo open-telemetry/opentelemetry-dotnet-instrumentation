@@ -3,9 +3,9 @@ run:
 	mkdir -p log
 	chmod 777 log
 	docker-compose build
-	docker-compose up -d srv
+	docker-compose up -d service
 	sleep 10 # wait for bootstrap
-	docker-compose run cli
+	docker-compose run client
 	sleep 10 # wait for telemetry export
 
 .PHONY: clean

@@ -5,8 +5,8 @@
 This example uses Docker Compose.
 It consists of following services:
 
-1. [`cli`](cli) - console application that makes a HTTP GET request
-2. [`srv`](srv) - simple HTTP server using SQL Server
+1. [`client`](Client) - console application that makes a HTTP GET request
+2. [`service`](Service) - simple HTTP server using SQL Server
 3. `sqlserver` - [Microsoft SQL Server](https://hub.docker.com/_/microsoft-mssql-server)
    used by `srv`
 4. `otel-collector` - [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)
@@ -16,12 +16,12 @@ It consists of following services:
 
 ## Usage
 
-Windows:
+Windows (Git Bash):
 
 ```sh
 docker-compose build
-docker-compose up -d srv
-docker-compose run cli
+docker-compose up -d service
+docker-compose run client
 ```
 
 macOS and Linux:
