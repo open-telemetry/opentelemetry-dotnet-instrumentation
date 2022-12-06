@@ -15,9 +15,11 @@
 // </copyright>
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
-
 #pragma warning disable SA1649 // File name must match first type name
 #pragma warning disable SA1402 // File may only contain a single class
 
@@ -28,9 +30,28 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// </summary>
 internal class DuckTypeException : Exception
 {
-    internal DuckTypeException(string message)
+    protected DuckTypeException(string message)
         : base(message)
     {
+    }
+
+    protected DuckTypeException(string message, Exception innerException)
+        : base(message, innerException)
+    {
+    }
+
+    [DebuggerHidden]
+    [DoesNotReturn]
+    internal static void Throw(string message)
+    {
+        throw new DuckTypeException(message);
+    }
+
+    [DebuggerHidden]
+    [DoesNotReturn]
+    internal static void Throw(string message, Exception innerException)
+    {
+        throw new DuckTypeException(message, innerException);
     }
 }
 
@@ -45,6 +66,7 @@ internal class DuckTypeProxyTypeDefinitionIsNull : DuckTypeException
     }
 
     [DebuggerHidden]
+    [DoesNotReturn]
     internal static void Throw()
     {
         throw new DuckTypeProxyTypeDefinitionIsNull();
@@ -62,6 +84,7 @@ internal class DuckTypeTargetObjectInstanceIsNull : DuckTypeException
     }
 
     [DebuggerHidden]
+    [DoesNotReturn]
     internal static void Throw()
     {
         throw new DuckTypeTargetObjectInstanceIsNull();
@@ -79,6 +102,7 @@ internal class DuckTypeInvalidTypeConversionException : DuckTypeException
     }
 
     [DebuggerHidden]
+    [DoesNotReturn]
     internal static void Throw(Type actualType, Type expectedType)
     {
         throw new DuckTypeInvalidTypeConversionException(actualType, expectedType);
@@ -96,6 +120,7 @@ internal class DuckTypePropertyCantBeReadException : DuckTypeException
     }
 
     [DebuggerHidden]
+    [DoesNotReturn]
     internal static void Throw(PropertyInfo property)
     {
         throw new DuckTypePropertyCantBeReadException(property);
@@ -113,6 +138,7 @@ internal class DuckTypePropertyCantBeWrittenException : DuckTypeException
     }
 
     [DebuggerHidden]
+    [DoesNotReturn]
     internal static void Throw(PropertyInfo property)
     {
         throw new DuckTypePropertyCantBeWrittenException(property);
@@ -130,6 +156,7 @@ internal class DuckTypePropertyArgumentsLengthException : DuckTypeException
     }
 
     [DebuggerHidden]
+    [DoesNotReturn]
     internal static void Throw(PropertyInfo property)
     {
         throw new DuckTypePropertyArgumentsLengthException(property);
@@ -147,6 +174,7 @@ internal class DuckTypeFieldIsReadonlyException : DuckTypeException
     }
 
     [DebuggerHidden]
+    [DoesNotReturn]
     internal static void Throw(FieldInfo field)
     {
         throw new DuckTypeFieldIsReadonlyException(field);
@@ -158,32 +186,16 @@ internal class DuckTypeFieldIsReadonlyException : DuckTypeException
 /// </summary>
 internal class DuckTypePropertyOrFieldNotFoundException : DuckTypeException
 {
-    private DuckTypePropertyOrFieldNotFoundException(string name, string duckAttributeName)
-        : base($"The property or field '{duckAttributeName}' for the proxy property '{name}' was not found in the instance.")
+    private DuckTypePropertyOrFieldNotFoundException(string name, string duckAttributeName, string type)
+        : base($"The property or field '{duckAttributeName}' for the proxy property '{name}' was not found in the instance of type '{type}'.")
     {
     }
 
     [DebuggerHidden]
-    internal static void Throw(string name, string duckAttributeName)
+    [DoesNotReturn]
+    internal static void Throw(string name, string duckAttributeName, Type type)
     {
-        throw new DuckTypePropertyOrFieldNotFoundException(name, duckAttributeName);
-    }
-}
-
-/// <summary>
-/// DuckType type is not public exception
-/// </summary>
-internal class DuckTypeTypeIsNotPublicException : DuckTypeException
-{
-    private DuckTypeTypeIsNotPublicException(Type type, string argumentName)
-        : base($"The type '{type.FullName}' must be public, argument: '{argumentName}'")
-    {
-    }
-
-    [DebuggerHidden]
-    internal static void Throw(Type type, string argumentName)
-    {
-        throw new DuckTypeTypeIsNotPublicException(type, argumentName);
+        throw new DuckTypePropertyOrFieldNotFoundException(name, duckAttributeName, type?.FullName ?? type?.Name ?? "NULL");
     }
 }
 
@@ -198,6 +210,7 @@ internal class DuckTypeStructMembersCannotBeChangedException : DuckTypeException
     }
 
     [DebuggerHidden]
+    [DoesNotReturn]
     internal static void Throw(Type type)
     {
         throw new DuckTypeStructMembersCannotBeChangedException(type);
@@ -215,6 +228,7 @@ internal class DuckTypeTargetMethodNotFoundException : DuckTypeException
     }
 
     [DebuggerHidden]
+    [DoesNotReturn]
     internal static void Throw(MethodInfo method)
     {
         throw new DuckTypeTargetMethodNotFoundException(method);
@@ -232,6 +246,7 @@ internal class DuckTypeProxyMethodParameterIsMissingException : DuckTypeExceptio
     }
 
     [DebuggerHidden]
+    [DoesNotReturn]
     internal static void Throw(MethodInfo proxyMethod, ParameterInfo targetParameterInfo)
     {
         throw new DuckTypeProxyMethodParameterIsMissingException(proxyMethod, targetParameterInfo);
@@ -249,9 +264,28 @@ internal class DuckTypeProxyAndTargetMethodParameterSignatureMismatchException :
     }
 
     [DebuggerHidden]
+    [DoesNotReturn]
     internal static void Throw(MethodInfo proxyMethod, MethodInfo targetMethod)
     {
         throw new DuckTypeProxyAndTargetMethodParameterSignatureMismatchException(proxyMethod, targetMethod);
+    }
+}
+
+/// <summary>
+/// DuckType parameter signature mismatch between proxy and target method
+/// </summary>
+internal class DuckTypeProxyAndTargetMethodReturnTypeMismatchException : DuckTypeException
+{
+    private DuckTypeProxyAndTargetMethodReturnTypeMismatchException(MethodInfo proxyMethod, MethodInfo targetMethod)
+        : base($"Return type mismatch between proxy '{proxyMethod}' and target method '{targetMethod}'.")
+    {
+    }
+
+    [DebuggerHidden]
+    [DoesNotReturn]
+    internal static void Throw(MethodInfo proxyMethod, MethodInfo targetMethod)
+    {
+        throw new DuckTypeProxyAndTargetMethodReturnTypeMismatchException(proxyMethod, targetMethod);
     }
 }
 
@@ -266,6 +300,7 @@ internal class DuckTypeProxyMethodsWithGenericParametersNotSupportedInNonPublicI
     }
 
     [DebuggerHidden]
+    [DoesNotReturn]
     internal static void Throw(MethodInfo proxyMethod)
     {
         throw new DuckTypeProxyMethodsWithGenericParametersNotSupportedInNonPublicInstancesException(proxyMethod);
@@ -283,8 +318,172 @@ internal class DuckTypeTargetMethodAmbiguousMatchException : DuckTypeException
     }
 
     [DebuggerHidden]
+    [DoesNotReturn]
     internal static void Throw(MethodInfo proxyMethod, MethodInfo targetMethod, MethodInfo targetMethod2)
     {
         throw new DuckTypeTargetMethodAmbiguousMatchException(proxyMethod, targetMethod, targetMethod2);
+    }
+}
+
+/// <summary>
+/// DuckType reverse proxy type to derive from is a struct exception
+/// </summary>
+internal class DuckTypeReverseProxyBaseIsStructException : DuckTypeException
+{
+    private DuckTypeReverseProxyBaseIsStructException(Type type)
+        : base($"Cannot derive from struct type '{type.FullName}' for reverse proxy")
+    {
+    }
+
+    [DebuggerHidden]
+    [DoesNotReturn]
+    internal static void Throw(Type type)
+    {
+        throw new DuckTypeReverseProxyBaseIsStructException(type);
+    }
+}
+
+/// <summary>
+/// DuckType proxy method is abstract
+/// </summary>
+internal class DuckTypeReverseProxyImplementorIsAbstractOrInterfaceException : DuckTypeException
+{
+    private DuckTypeReverseProxyImplementorIsAbstractOrInterfaceException(Type type)
+        : base($"The implementation type '{type.FullName}' must not be an interface or abstract type for reverse proxy")
+    {
+    }
+
+    [DebuggerHidden]
+    [DoesNotReturn]
+    internal static void Throw(Type type)
+    {
+        throw new DuckTypeReverseProxyImplementorIsAbstractOrInterfaceException(type);
+    }
+}
+
+/// <summary>
+/// DuckType property can't be read
+/// </summary>
+internal class DuckTypeReverseProxyPropertyCannotBeAbstractException : DuckTypeException
+{
+    private DuckTypeReverseProxyPropertyCannotBeAbstractException(PropertyInfo property)
+        : base($"The property '{property.Name}' cannot be abstract for reverse proxy")
+    {
+    }
+
+    [DebuggerHidden]
+    [DoesNotReturn]
+    internal static void Throw(PropertyInfo property)
+    {
+        throw new DuckTypeReverseProxyPropertyCannotBeAbstractException(property);
+    }
+}
+
+/// <summary>
+/// DuckType method was [DuckReverseMethod] in non-reverse proxy
+/// </summary>
+internal class DuckTypeIncorrectReverseMethodUsageException : DuckTypeException
+{
+    private DuckTypeIncorrectReverseMethodUsageException(MethodInfo method)
+        : base($"The method '{method.Name}' was marked as a [DuckReverseMethod] but not doing reverse duck typing.")
+    {
+    }
+
+    [DebuggerHidden]
+    [DoesNotReturn]
+    internal static void Throw(MethodInfo method)
+    {
+        throw new DuckTypeIncorrectReverseMethodUsageException(method);
+    }
+}
+
+/// <summary>
+/// DuckType property was [DuckReverseMethod] in non-reverse proxy
+/// </summary>
+internal class DuckTypeIncorrectReversePropertyUsageException : DuckTypeException
+{
+    private DuckTypeIncorrectReversePropertyUsageException(PropertyInfo property)
+        : base($"The property '{property.Name}' was marked as a [DuckReverseMethod] but not doing reverse duck typing.")
+    {
+    }
+
+    [DebuggerHidden]
+    [DoesNotReturn]
+    internal static void Throw(PropertyInfo property)
+    {
+        throw new DuckTypeIncorrectReversePropertyUsageException(property);
+    }
+}
+
+/// <summary>
+/// DuckType proxy was missing an implementation
+/// </summary>
+internal class DuckTypeReverseProxyMissingPropertyImplementationException : DuckTypeException
+{
+    private DuckTypeReverseProxyMissingPropertyImplementationException(IEnumerable<PropertyInfo> properties)
+        : base($"The duck reverse proxy was missing implementations for properties: {string.Join(", ", properties.Select(x => x.Name))}")
+    {
+    }
+
+    [DebuggerHidden]
+    [DoesNotReturn]
+    internal static void Throw(IEnumerable<PropertyInfo> properties)
+    {
+        throw new DuckTypeReverseProxyMissingPropertyImplementationException(properties);
+    }
+}
+
+/// <summary>
+/// DuckType proxy was missing an implementation
+/// </summary>
+internal class DuckTypeReverseProxyMissingMethodImplementationException : DuckTypeException
+{
+    private DuckTypeReverseProxyMissingMethodImplementationException(IEnumerable<MethodInfo> methods)
+        : base($"The duck reverse proxy was missing implementations for methods: {string.Join(", ", methods.Select(x => x.Name))}")
+    {
+    }
+
+    [DebuggerHidden]
+    [DoesNotReturn]
+    internal static void Throw(IEnumerable<MethodInfo> methods)
+    {
+        throw new DuckTypeReverseProxyMissingMethodImplementationException(methods);
+    }
+}
+
+/// <summary>
+/// DuckType proxy tried to implement a generic method in a non-generic way
+/// </summary>
+internal class DuckTypeReverseAttributeParameterNamesMismatchException : DuckTypeException
+{
+    private DuckTypeReverseAttributeParameterNamesMismatchException(MethodInfo method)
+        : base($"The reverse duck attribute parameter names for method '{method.Name}' did not match the method's parameters ")
+    {
+    }
+
+    [DebuggerHidden]
+    [DoesNotReturn]
+    internal static void Throw(MethodInfo method)
+    {
+        throw new DuckTypeReverseAttributeParameterNamesMismatchException(method);
+    }
+}
+
+/// <summary>
+/// DuckType proxy tried to implement a generic method in a non-generic way
+/// </summary>
+internal class DuckTypeReverseProxyMustImplementGenericMethodAsGenericException : DuckTypeException
+{
+    private DuckTypeReverseProxyMustImplementGenericMethodAsGenericException(MethodInfo implementationMethod, MethodInfo targetMethod)
+        : base($"The duck reverse proxy implementation '{implementationMethod.Name}' for generic target method '{targetMethod.Name}' " +
+                $"must have same number of generic parameters - had {implementationMethod.GetGenericArguments().Length}, expected {targetMethod.GetGenericArguments().Length}")
+    {
+    }
+
+    [DebuggerHidden]
+    [DoesNotReturn]
+    internal static void Throw(MethodInfo implementationMethod, MethodInfo targetMethod)
+    {
+        throw new DuckTypeReverseProxyMustImplementGenericMethodAsGenericException(implementationMethod, targetMethod);
     }
 }

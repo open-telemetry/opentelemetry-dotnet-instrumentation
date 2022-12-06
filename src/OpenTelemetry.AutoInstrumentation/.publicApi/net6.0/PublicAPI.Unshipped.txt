@@ -18,11 +18,13 @@ OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateCache<T>
 OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult
 OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult.CanCreate() -> bool
 OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult.CreateInstance<T>(object instance) -> T
+OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult.CreateInstance<T, TOriginal>(TOriginal instance) -> T
 OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult.CreateTypeResult() -> void
 OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult.ProxyType.get -> System.Type
 OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.DelegateCache<TProxyDelegate>
 OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType
 OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.Instance.get -> object
+OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.ToString() -> string
 OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.Type.get -> System.Type
 OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ErrorLocationStruct
 OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ErrorLocationStruct.Column -> int
@@ -87,16 +89,20 @@ static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.GetDefau
 static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.GetDefault() -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
 static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CanCreate(System.Type proxyType, object instance) -> bool
 static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CanCreate<T>(object instance) -> bool
-static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.Create(System.Type proxyType, object instance) -> OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.Create(System.Type proxyType, object instance) -> object
 static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.Create<T>(object instance) -> T
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateReverse(System.Type typeToDeriveFrom, object delegationInstance) -> object
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.GetOrCreateReverseProxyType(System.Type typeToDeriveFrom, System.Type delegationType) -> OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult
 static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateCache<T>.CanCreate(object instance) -> bool
 static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateCache<T>.Create(object instance) -> T
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateCache<T>.CreateFrom<TOriginal>(TOriginal instance) -> T
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateCache<T>.CreateReverse(object instance) -> T
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateCache<T>.GetReverseProxy(System.Type targetType) -> OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult
 static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateCache<T>.GetProxy(System.Type targetType) -> OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult
 static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.DelegateCache<TProxyDelegate>.GetDelegate() -> TProxyDelegate
 static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.GetOrCreateProxyType(System.Type proxyType, System.Type targetType) -> OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateTypeResult
 static OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration.OnAsyncMethodEnd<TTarget, TExecutionResult>(TTarget instance, TExecutionResult executionResult, System.Exception exception, OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState state) -> TExecutionResult
 static OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration.OnMethodBegin<TTarget, TContext>(TTarget instance, TContext context) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
-static readonly OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateCache<T>.IsVisible -> bool
 static readonly OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.CreateCache<T>.Type -> System.Type
-static readonly OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.EnumToObjectMethodInfo -> System.Reflection.MethodInfo
-static readonly OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.GetTypeFromHandleMethodInfo -> System.Reflection.MethodInfo
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.EnumToObjectMethodInfo.get -> System.Reflection.MethodInfo
+static OpenTelemetry.AutoInstrumentation.DuckTyping.DuckType.GetTypeFromHandleMethodInfo.get -> System.Reflection.MethodInfo
