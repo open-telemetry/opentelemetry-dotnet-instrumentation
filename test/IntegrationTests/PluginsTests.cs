@@ -31,6 +31,17 @@ public class PluginsTests : TestHelper
 
     [Fact]
     [Trait("Category", "EndToEnd")]
+    public void InitPlugin()
+    {
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+
+        var (standardOutput, _) = RunTestApplication();
+
+        standardOutput.Should().Contain("Plugin.Initializing() invoked.");
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
     public void SubmitsTraces()
     {
         using var collector = new MockSpansCollector(Output);

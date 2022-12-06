@@ -23,6 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		build.ps1 = build.ps1
 		build.sh = build.sh
 		CHANGELOG.md = CHANGELOG.md
+		Common.props = Common.props
 		Directory.Build.props = Directory.Build.props
 		GlobalSuppressions.cs = GlobalSuppressions.cs
 		integrations.json = integrations.json

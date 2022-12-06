@@ -50,7 +50,7 @@ public class StartupTests
 
         var openTelemetryAutoInstrumentationAssembly = AppDomain.CurrentDomain.GetAssemblies()
             .Select(a => a.FullName)
-            .FirstOrDefault(n => n.StartsWith("OpenTelemetry.AutoInstrumentation,"));
+            .FirstOrDefault(n => n != null && n.StartsWith("OpenTelemetry.AutoInstrumentation,"));
 
         Assert.NotNull(openTelemetryAutoInstrumentationAssembly);
     }

@@ -97,6 +97,16 @@ internal static class ConfigurationKeys
         public const string LegacySources = "OTEL_DOTNET_AUTO_LEGACY_SOURCES";
 
         /// <summary>
+        /// Configuration key for sampler to be used for traces.
+        /// </summary>
+        public const string TracesSampler = "OTEL_TRACES_SAMPLER";
+
+        /// <summary>
+        /// Configuration key for string value to be used as the sampler argument.
+        /// </summary>
+        public const string TracesSamplerArguments = "OTEL_TRACES_SAMPLER_ARG";
+
+        /// <summary>
         /// Configuration keys for instrumentation options.
         /// </summary>
         public static class InstrumentationOptions
