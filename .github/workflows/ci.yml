@@ -102,7 +102,7 @@ jobs:
           dotnet publish -f net7.0 -c Release ./test/test-applications/integrations/TestApplication.Smoke
           export OTEL_DOTNET_AUTO_HOME="${PWD}/bin/tracer-home"
           . ./instrument.sh
-          ./test/test-applications/integrations/TestApplication.Smoke/bin/Release/net7.0/TestApplication.Smoke
+          ./test/test-applications/integrations/TestApplication.Smoke/bin/Release/net7.0/publish/TestApplication.Smoke
             test "$(ls -A /var/log/opentelemetry/dotnet )"
         '
     - name: Publish Linux build
