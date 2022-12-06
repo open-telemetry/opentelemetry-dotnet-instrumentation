@@ -22,7 +22,7 @@ to use the same versions.
 
 When a rebuild is not possible,
 for .NET Framework applications the workaround is to use binding redirects.
-The binding redirect makes the application dependent on a version
+You can redirect a range of assembly versions to a specific version
 that is not available at build time.
 
 ## No proper relationship between spans
