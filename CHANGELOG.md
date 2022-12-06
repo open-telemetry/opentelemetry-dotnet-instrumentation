@@ -10,6 +10,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Added
 
 - Add support for `OTEL_TRACES_SAMPLER` and `OTEL_TRACES_SAMPLER_ARG`.
+- Add `Initializing` plugin extension point
+  that is invoked before OpenTelemetry SDK configuration.
 
 ### Changed
 

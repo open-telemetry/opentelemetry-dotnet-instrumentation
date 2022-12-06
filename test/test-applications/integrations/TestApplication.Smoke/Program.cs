@@ -76,7 +76,7 @@ public class Program
         var myMeter = new Meter(SourceName, "1.0.0");
         var myFruitCounter = myMeter.CreateCounter<int>("MyFruitCounter");
 
-        myFruitCounter.Add(1, new KeyValuePair<string, object>("name", "apple"));
+        myFruitCounter.Add(1, new KeyValuePair<string, object?>("name", "apple"));
     }
 
     private static void EmitLogs()

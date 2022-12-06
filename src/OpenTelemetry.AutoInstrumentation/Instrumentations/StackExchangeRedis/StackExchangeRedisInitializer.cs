@@ -25,7 +25,7 @@ internal static class StackExchangeRedisInitializer
 {
     public static void Initialize(object connection)
     {
-        if (connection != null && Instrumentation.TracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.StackExchangeRedis))
+        if (connection != null && Instrumentation.TracerSettings.Value.EnabledInstrumentations.Contains(TracerInstrumentation.StackExchangeRedis))
         {
             var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisCallsInstrumentation, OpenTelemetry.Instrumentation.StackExchangeRedis");
             var optionsInstrumentationType = Type.GetType("OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisCallsInstrumentationOptions, OpenTelemetry.Instrumentation.StackExchangeRedis");

@@ -65,7 +65,7 @@ internal class StartupHook
         try
         {
             // Check Instrumentation is already initialized with native profiler.
-            Type profilerType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation");
+            var profilerType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation");
 
             if (profilerType == null)
             {
@@ -152,7 +152,7 @@ internal class StartupHook
         return excludedProcesses;
     }
 
-    private static string GetEnvironmentVariable(string variableName)
+    private static string? GetEnvironmentVariable(string variableName)
     {
         try
         {

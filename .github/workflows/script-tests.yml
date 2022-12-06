@@ -1,0 +1,107 @@
+name: script-tests
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  powershell-script:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - uses: actions/setup-dotnet@v3.0.3
+        with:
+          dotnet-version: | 
+            6.0.x
+            7.0.x
+      - name: Test the PowerShell module instructions from README.md
+        shell: powershell
+        run: |
+          mkdir testapp
+          cd testapp
+          dotnet new console
+          dotnet publish /p:TreatWarningsAsErrors=false -f net7.0 -c Release
+          $module_url = "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/OpenTelemetry.DotNet.Auto.psm1"
+          $dl_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
+          $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\*"
+          Invoke-WebRequest -Uri $module_url -OutFile $dl_path
+          Import-Module $dl_path
+          Install-OpenTelemetryCore
+          $install_dir = Get-OpenTelemetryInstallDirectory
+          Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
+          ./bin/Release/net7.0/publish/testapp
+          if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
+          if (-not (Test-Path $log_path)) { throw "Log file does not exist. Instrumentation test failed." }
+          Remove-Item $log_path
+          Unregister-OpenTelemetryForCurrentSession
+          ./bin/Release/net7.0/publish/testapp
+          if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
+          if (Test-Path $log_path) { throw "Log file exists. Instrumentation unregister failed." }
+          Uninstall-OpenTelemetryCore
+          if (Test-Path $install_dir) { throw "Core files exist. Core uninstall failed." }
+
+  shell-scripts:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - machine: windows-2022
+            log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
+          - machine: ubuntu-20.04
+            log-dir: "/var/log/opentelemetry/dotnet"
+          - machine: macos-11
+            log-dir: "/var/log/opentelemetry/dotnet"
+    runs-on: ${{ matrix.machine }}
+    steps:
+      - uses: actions/setup-dotnet@v3.0.3
+        with:
+          dotnet-version: | 
+            6.0.x
+            7.0.x
+      - run: brew install coreutils
+        if: ${{ runner.os == 'macOS' }}
+      - name: Create test directory
+        run: sudo mkdir -p ${{ matrix.log-dir }} && sudo chmod a+rwx ${{ matrix.log-dir }}  # the instrumented process has no permissions to create log dir
+        if: ${{ runner.os != 'Windows' }}
+      - name: Test the Shell scripts from README.md
+        shell: bash
+        run: |
+          set -e
+          mkdir testapp
+          cd testapp
+          dotnet new console
+          dotnet publish -f net7.0 -c Release
+          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/otel-dotnet-auto-install.sh -O
+          sh ./otel-dotnet-auto-install.sh
+            test "$(ls -A "$HOME/.otel-dotnet-auto")"
+          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
+          . ./instrument.sh
+          ./bin/Release/net7.0/publish/testapp
+            test "$(ls -A '${{ matrix.log-dir }}' )"
+
+  shell-scripts-container:
+    strategy:
+      fail-fast: false
+      matrix:
+        base-image: [ alpine ]
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - name: Test the Shell scripts from README.md in Docker container
+        run: |
+          set -e
+          docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
+          docker run --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project --rm mybuildimage /bin/sh -c '
+            set -e
+            mkdir testapp
+            cd testapp
+            dotnet new console
+            dotnet publish /p:TreatWarningsAsErrors=false -f net7.0 -c Release
+            curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/otel-dotnet-auto-install.sh -O
+            sh ./otel-dotnet-auto-install.sh
+              test "$(ls -A "$HOME/.otel-dotnet-auto")"
+            curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
+            . ./instrument.sh
+            ./bin/Release/net7.0/publish/testapp
+              test "$(ls -A /var/log/opentelemetry/dotnet )"
+          '

@@ -47,19 +47,19 @@ public class StarWarsSubscription : ObjectGraphType<object>
         {
             Name = "humanAdded",
             Type = typeof(HumanType),
-            Resolver = new FuncFieldResolver<Human>(ResolveMessage),
+            Resolver = new FuncFieldResolver<Human?>(ResolveMessage),
             Subscriber = new EventStreamResolver<Human>(Subscribe)
         });
         AddField(new EventStreamFieldType
         {
             Name = "throwNotImplementedException",
             Type = typeof(HumanType),
-            Resolver = new FuncFieldResolver<Human>(ResolveMessage),
+            Resolver = new FuncFieldResolver<Human?>(ResolveMessage),
             Subscriber = new EventStreamResolver<Human>(ThrowNotImplementedException)
         });
     }
 
-    private Human ResolveMessage(ResolveFieldContext context)
+    private Human? ResolveMessage(ResolveFieldContext context)
     {
         return context.Source as Human;
     }

@@ -18,5 +18,5 @@ namespace TestApplication.MassTransit.Contracts;
 
 public record TestMessage
 {
-    public string Value { get; set; }
+    public string? Value { get; set; }
 }

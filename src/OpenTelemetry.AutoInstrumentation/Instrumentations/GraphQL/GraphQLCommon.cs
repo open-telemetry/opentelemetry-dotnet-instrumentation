@@ -38,7 +38,7 @@ internal class GraphQLCommon
     internal static Activity CreateActivityFromExecuteAsync(IExecutionContext executionContext)
     {
         Activity activity = null;
-        InstrumentationOptions options = Instrumentation.TracerSettings.InstrumentationOptions;
+        InstrumentationOptions options = Instrumentation.TracerSettings.Value.InstrumentationOptions;
 
         try
         {
