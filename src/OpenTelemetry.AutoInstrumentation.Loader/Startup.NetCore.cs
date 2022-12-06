@@ -36,7 +36,7 @@ internal partial class Startup
         return Path.Combine(tracerHomeDirectory, tracerFrameworkDirectory);
     }
 
-    private static Assembly AssemblyResolve_ManagedProfilerDependencies(object sender, ResolveEventArgs args)
+    private static Assembly? AssemblyResolve_ManagedProfilerDependencies(object? sender, ResolveEventArgs args)
     {
         var assemblyName = new AssemblyName(args.Name);
 
@@ -61,7 +61,7 @@ internal partial class Startup
         // 2) The AssemblyVersion is lower than the version used by OpenTelemetry.AutoInstrumentation, the assembly will fail to load
         //    and invoke this resolve event. It must be loaded in a separate AssemblyLoadContext since the application will only
         //    load the originally referenced version
-        if (assemblyName.Name.StartsWith("OpenTelemetry.AutoInstrumentation", StringComparison.OrdinalIgnoreCase) && File.Exists(path))
+        if (assemblyName.Name != null && assemblyName.Name.StartsWith("OpenTelemetry.AutoInstrumentation", StringComparison.OrdinalIgnoreCase) && File.Exists(path))
         {
             StartupLogger.Debug("Loading {0} with Assembly.LoadFrom", path);
             return Assembly.LoadFrom(path);
