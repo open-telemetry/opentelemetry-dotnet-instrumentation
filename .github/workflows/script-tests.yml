@@ -20,7 +20,7 @@ jobs:
           mkdir testapp
           cd testapp
           dotnet new console
-          dotnet publish -f net7.0 -c Release
+          dotnet publish /p:TreatWarningsAsErrors=false -f net7.0 -c Release
           $module_url = "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/OpenTelemetry.DotNet.Auto.psm1"
           $dl_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
           $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\*"
@@ -96,7 +96,7 @@ jobs:
             mkdir testapp
             cd testapp
             dotnet new console
-            dotnet publish -f net7.0 -c Release
+            dotnet publish /p:TreatWarningsAsErrors=false -f net7.0 -c Release
             curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/otel-dotnet-auto-install.sh -O
             sh ./otel-dotnet-auto-install.sh
               test "$(ls -A "$HOME/.otel-dotnet-auto")"
