@@ -36,10 +36,20 @@ public class GraphQLTests : TestHelper
     }
 
     [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
+
+#if NETFRAMEWORK
+    // There is no parent spans from AspNetCore under .NET Fx. See https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1727
+    [InlineData(true, "AspNet,GraphQL", null, Span.Types.SpanKind.Server)]
+    [InlineData(false, "AspNet,GraphQL", null, Span.Types.SpanKind.Server)]
+#else
+    [InlineData(true, "AspNet,GraphQL", null,  Span.Types.SpanKind.Internal)]
+    [InlineData(false, "AspNet,GraphQL", null, Span.Types.SpanKind.Internal)]
+#endif
+    // AspNetCore always create Activities. If default sampler (parentbased_always_on) is used. All child spans are dropped.
+    [InlineData(false, "GraphQL", "always_on", Span.Types.SpanKind.Server)]
+    [InlineData(true, "GraphQL", "always_on", Span.Types.SpanKind.Server)]
     [Trait("Category", "EndToEnd")]
-    public async Task SubmitsTraces(bool setDocument)
+    public async Task SubmitsTraces(bool setDocument, string enabledInstrumentations, string sampler, Span.Types.SpanKind expectedGraphQlActivityKind)
     {
         var requests = new List<RequestInfo>();
         using var collector = new MockSpansCollector(Output);
@@ -47,25 +57,28 @@ public class GraphQLTests : TestHelper
 
         // SUCCESS: query using GET
         Request(requests, method: "GET", url: "/graphql?query=" + WebUtility.UrlEncode("query{hero{name appearsIn}}"));
-        Expect(collector, spanName: "query", graphQLOperationType: "query", graphQLOperationName: null, graphQLDocument: "query{hero{name appearsIn}}", setDocument: setDocument);
+        Expect(collector, spanName: "query", graphQLOperationType: "query", graphQLOperationName: null, graphQLDocument: "query{hero{name appearsIn}}", setDocument: setDocument, expectedSpanKind: expectedGraphQlActivityKind);
 
         // SUCCESS: query using POST (default)
         Request(requests, body: @"{""query"":""query HeroQuery{hero{name appearsIn}}"",""operationName"": ""HeroQuery""}");
-        Expect(collector, spanName: "query HeroQuery", graphQLOperationType: "query", graphQLOperationName: "HeroQuery", graphQLDocument: "query HeroQuery{hero{name appearsIn}}", setDocument: setDocument);
+        Expect(collector, spanName: "query HeroQuery", graphQLOperationType: "query", graphQLOperationName: "HeroQuery", graphQLDocument: "query HeroQuery{hero{name appearsIn}}", setDocument: setDocument, expectedSpanKind: expectedGraphQlActivityKind);
 
         // SUCCESS: mutation
         Request(requests, body: @"{""query"":""mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}"",""variables"":{""human"":{""name"": ""Boba Fett""}}}");
-        Expect(collector, spanName: "mutation AddBobaFett", graphQLOperationType: "mutation", graphQLOperationName: "AddBobaFett", graphQLDocument: "mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}", setDocument: setDocument);
+        Expect(collector, spanName: "mutation AddBobaFett", graphQLOperationType: "mutation", graphQLOperationName: "AddBobaFett", graphQLDocument: "mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}", setDocument: setDocument, expectedSpanKind: expectedGraphQlActivityKind);
 
         // SUCCESS: subscription
         Request(requests, body: @"{ ""query"":""subscription HumanAddedSub{humanAdded{name}}""}");
-        Expect(collector, spanName: "subscription HumanAddedSub", graphQLOperationType: "subscription", graphQLOperationName: "HumanAddedSub", graphQLDocument: "subscription HumanAddedSub{humanAdded{name}}", setDocument: setDocument);
+        Expect(collector, spanName: "subscription HumanAddedSub", graphQLOperationType: "subscription", graphQLOperationName: "HumanAddedSub", graphQLDocument: "subscription HumanAddedSub{humanAdded{name}}", setDocument: setDocument, expectedSpanKind: expectedGraphQlActivityKind);
 
         // FAILURE: query fails 'execute' step
         Request(requests, body: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}");
-        Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, verifyFailure: VerifyNotImplementedException);
+        Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, expectedSpanKind: expectedGraphQlActivityKind, verifyFailure: VerifyNotImplementedException);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", enabledInstrumentations);
+        SetEnvironmentVariable("OTEL_TRACES_SAMPLER", sampler);
+
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
         SetEnvironmentVariable("ASPNETCORE_URLS", $"http://127.0.0.1:{aspNetCorePort}/");
         EnableBytecodeInstrumentation();
@@ -123,11 +136,12 @@ public class GraphQLTests : TestHelper
         string graphQLOperationName,
         string graphQLDocument,
         bool setDocument,
+        Span.Types.SpanKind expectedSpanKind,
         Predicate<Span> verifyFailure = null)
     {
         bool Predicate(Span span)
         {
-            if (span.Kind != Span.Types.SpanKind.Server)
+            if (span.Kind != expectedSpanKind)
             {
                 return false;
             }
