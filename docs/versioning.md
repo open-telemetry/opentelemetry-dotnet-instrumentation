@@ -80,4 +80,7 @@ The following are examples of patch fixes.
 ## Version numbers before 1.0.0
 
 We simply convert the Semantic Versioning scheme from
-`MAJOR.MINOR.PATCH` to `0.MAJOR.MINOR-beta.PATCH`.
+`MAJOR.MINOR.PATCH` to `0.MAJOR.MINOR`.
+
+The changes that would bump the patch version
+are bumping the minor version instead.
