@@ -24,8 +24,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// </summary>
 internal class EnvironmentConfigurationSource : StringConfigurationSource
 {
-    /// <inheritdoc />
-    public override string GetString(string key)
+    protected override string GetStringInternal(string key)
     {
         try
         {
