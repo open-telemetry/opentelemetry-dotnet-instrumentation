@@ -15,6 +15,7 @@
 // </copyright>
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
@@ -22,7 +23,7 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// <summary>
 /// Duck type extensions
 /// </summary>
-public static class DuckTypeExtensions
+internal static class DuckTypeExtensions
 {
     /// <summary>
     /// Gets the duck type instance for the object implementing a base class or interface T
@@ -59,14 +60,11 @@ public static class DuckTypeExtensions
             DuckTypeTargetObjectInstanceIsNull.Throw();
         }
 
-        if (DuckType.CreateCache<T>.IsVisible)
+        DuckType.CreateTypeResult proxyResult = DuckType.CreateCache<T>.GetProxy(instance.GetType());
+        if (proxyResult.Success)
         {
-            DuckType.CreateTypeResult proxyResult = DuckType.CreateCache<T>.GetProxy(instance.GetType());
-            if (proxyResult.Success)
-            {
-                value = proxyResult.CreateInstance<T>(instance);
-                return true;
-            }
+            value = proxyResult.CreateInstance<T>(instance)!;
+            return true;
         }
 
         value = default;
@@ -88,7 +86,7 @@ public static class DuckTypeExtensions
             DuckTypeTargetObjectInstanceIsNull.Throw();
         }
 
-        if (targetType != null && (targetType.IsPublic || targetType.IsNestedPublic))
+        if (targetType != null)
         {
             DuckType.CreateTypeResult proxyResult = DuckType.GetOrCreateProxyType(targetType, instance.GetType());
             if (proxyResult.Success)
@@ -117,13 +115,10 @@ public static class DuckTypeExtensions
             DuckTypeTargetObjectInstanceIsNull.Throw();
         }
 
-        if (DuckType.CreateCache<T>.IsVisible)
+        DuckType.CreateTypeResult proxyResult = DuckType.CreateCache<T>.GetProxy(instance.GetType());
+        if (proxyResult.Success)
         {
-            DuckType.CreateTypeResult proxyResult = DuckType.CreateCache<T>.GetProxy(instance.GetType());
-            if (proxyResult.Success)
-            {
-                return proxyResult.CreateInstance<T>(instance);
-            }
+            return proxyResult.CreateInstance<T>(instance);
         }
 
         return null;
@@ -143,7 +138,7 @@ public static class DuckTypeExtensions
             DuckTypeTargetObjectInstanceIsNull.Throw();
         }
 
-        if (targetType != null && (targetType.IsPublic || targetType.IsNestedPublic))
+        if (targetType != null)
         {
             DuckType.CreateTypeResult proxyResult = DuckType.GetOrCreateProxyType(targetType, instance.GetType());
             if (proxyResult.Success)
@@ -169,12 +164,7 @@ public static class DuckTypeExtensions
             DuckTypeTargetObjectInstanceIsNull.Throw();
         }
 
-        if (DuckType.CreateCache<T>.IsVisible)
-        {
-            return DuckType.CanCreate<T>(instance);
-        }
-
-        return false;
+        return DuckType.CanCreate<T>(instance);
     }
 
     /// <summary>
@@ -191,11 +181,53 @@ public static class DuckTypeExtensions
             DuckTypeTargetObjectInstanceIsNull.Throw();
         }
 
-        if (targetType != null && (targetType.IsPublic || targetType.IsNestedPublic))
+        if (targetType != null)
         {
             return DuckType.CanCreate(targetType, instance);
         }
 
+        return false;
+    }
+
+    /// <summary>
+    /// Gets or creates a proxy that implements/derives from <paramref name="typeToDeriveFrom"/>,
+    /// and delegates implementations/overrides to <paramref name="instance"/>
+    /// </summary>
+    /// <param name="instance">The instance containing additional overrides/implementations</param>
+    /// <param name="typeToDeriveFrom">The type to derive from</param>
+    /// <returns>DuckType instance</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static object DuckImplement(this object instance, Type typeToDeriveFrom)
+        => DuckType.CreateReverse(typeToDeriveFrom, instance);
+
+    /// <summary>
+    /// Tries to create a proxy that implements/derives from <paramref name="typeToDeriveFrom"/>,
+    /// and delegates implementations/overrides to <paramref name="instance"/>
+    /// ducktype the object implementing a base class or interface T
+    /// </summary>
+    /// <param name="instance">The instance containing additional overrides/implementations</param>
+    /// <param name="typeToDeriveFrom">The type to derive from</param>
+    /// <param name="value">The Ducktype instance</param>
+    /// <returns>true if the object instance was ducktyped; otherwise, false.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool TryDuckImplement(this object instance, Type typeToDeriveFrom, out object value)
+    {
+        if (instance is null)
+        {
+            DuckTypeTargetObjectInstanceIsNull.Throw();
+        }
+
+        if (typeToDeriveFrom != null)
+        {
+            DuckType.CreateTypeResult proxyResult = DuckType.GetOrCreateReverseProxyType(typeToDeriveFrom, instance.GetType());
+            if (proxyResult.Success)
+            {
+                value = proxyResult.CreateInstance(instance);
+                return true;
+            }
+        }
+
+        value = default;
         return false;
     }
 }
