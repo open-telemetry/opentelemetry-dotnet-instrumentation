@@ -43,7 +43,7 @@ internal delegate T CreateProxyInstance<T>(object? instance);
 /// </summary>
 [Browsable(false)]
 [EditorBrowsable(EditorBrowsableState.Never)]
-public static partial class DuckType
+internal static partial class DuckType
 {
     /// <summary>
     /// Create duck type proxy using a base type
@@ -1157,7 +1157,7 @@ public static partial class DuckType
     /// Generics Create Cache FastPath
     /// </summary>
     /// <typeparam name="T">Type of proxy definition</typeparam>
-    public static class CreateCache<T>
+    internal static class CreateCache<T>
     {
         /// <summary>
         /// Gets the type of T

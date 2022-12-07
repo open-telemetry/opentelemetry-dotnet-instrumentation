@@ -30,7 +30,7 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// <summary>
 /// Duck Type
 /// </summary>
-public static partial class DuckType
+internal static partial class DuckType
 {
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private static readonly object Locker;
