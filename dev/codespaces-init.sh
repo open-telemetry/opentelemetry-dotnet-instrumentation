@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -ex
 
 # install Nuke globally
 dotnet tool install Nuke.GlobalTool --global
