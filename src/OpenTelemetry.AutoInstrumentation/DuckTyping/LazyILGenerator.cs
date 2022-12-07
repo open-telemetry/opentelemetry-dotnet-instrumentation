@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -24,11 +26,11 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 // ReSharper disable once InconsistentNaming
 internal class LazyILGenerator
 {
-    private readonly ILGenerator _generator;
+    private readonly ILGenerator? _generator;
     private readonly List<Action<ILGenerator>> _instructions;
     private int _offset;
 
-    public LazyILGenerator(ILGenerator generator)
+    public LazyILGenerator(ILGenerator? generator)
     {
         _generator = generator;
         _instructions = new List<Action<ILGenerator>>(16);
@@ -69,12 +71,12 @@ internal class LazyILGenerator
         _offset++;
     }
 
-    public LocalBuilder DeclareLocal(Type localType, bool pinned)
+    public LocalBuilder? DeclareLocal(Type localType, bool pinned)
     {
         return _generator?.DeclareLocal(localType, pinned);
     }
 
-    public LocalBuilder DeclareLocal(Type localType)
+    public LocalBuilder? DeclareLocal(Type localType)
     {
         return _generator?.DeclareLocal(localType);
     }

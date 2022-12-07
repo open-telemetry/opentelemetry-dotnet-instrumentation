@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -32,7 +34,8 @@ internal static class DuckTypeExtensions
     /// <typeparam name="T">Target type</typeparam>
     /// <returns>DuckType instance</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T DuckCast<T>(this object instance)
+    [return: NotNullIfNotNull("instance")]
+    public static T? DuckCast<T>(this object? instance)
         => DuckType.Create<T>(instance);
 
     /// <summary>
@@ -53,7 +56,7 @@ internal static class DuckTypeExtensions
     /// <param name="value">Ducktype instance</param>
     /// <returns>true if the object instance was ducktyped; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool TryDuckCast<T>(this object instance, out T value)
+    public static bool TryDuckCast<T>(this object? instance, [NotNullWhen(true)] out T? value)
     {
         if (instance is null)
         {
@@ -79,7 +82,7 @@ internal static class DuckTypeExtensions
     /// <param name="value">Ducktype instance</param>
     /// <returns>true if the object instance was ducktyped; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool TryDuckCast(this object instance, Type targetType, out object value)
+    public static bool TryDuckCast(this object? instance, Type? targetType, [NotNullWhen(true)] out object? value)
     {
         if (instance is null)
         {
@@ -107,7 +110,7 @@ internal static class DuckTypeExtensions
     /// <typeparam name="T">Target type</typeparam>
     /// <returns>DuckType instance</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T DuckAs<T>(this object instance)
+    public static T? DuckAs<T>(this object? instance)
         where T : class
     {
         if (instance is null)
@@ -131,7 +134,7 @@ internal static class DuckTypeExtensions
     /// <param name="targetType">Target type</param>
     /// <returns>DuckType instance</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static object DuckAs(this object instance, Type targetType)
+    public static object? DuckAs(this object? instance, Type? targetType)
     {
         if (instance is null)
         {
@@ -157,7 +160,7 @@ internal static class DuckTypeExtensions
     /// <typeparam name="T">Duck type</typeparam>
     /// <returns>true if the proxy can be created; otherwise, false</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool DuckIs<T>(this object instance)
+    public static bool DuckIs<T>(this object? instance)
     {
         if (instance is null)
         {
@@ -174,7 +177,7 @@ internal static class DuckTypeExtensions
     /// <param name="targetType">Duck type</param>
     /// <returns>true if the proxy can be created; otherwise, false</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool DuckIs(this object instance, Type targetType)
+    public static bool DuckIs(this object? instance, Type? targetType)
     {
         if (instance is null)
         {
@@ -210,7 +213,7 @@ internal static class DuckTypeExtensions
     /// <param name="value">The Ducktype instance</param>
     /// <returns>true if the object instance was ducktyped; otherwise, false.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool TryDuckImplement(this object instance, Type typeToDeriveFrom, out object value)
+    public static bool TryDuckImplement(this object? instance, Type? typeToDeriveFrom, [NotNullWhen(true)] out object? value)
     {
         if (instance is null)
         {

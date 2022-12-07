@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -28,7 +30,7 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// <summary>
 /// Duck Type
 /// </summary>
-public static partial class DuckType
+internal static partial class DuckType
 {
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private static readonly object Locker;
@@ -40,15 +42,15 @@ public static partial class DuckType
     private static readonly Dictionary<ModuleBuilder, HashSet<string>> IgnoresAccessChecksToAssembliesSetDictionary;
 
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    private static readonly MethodInfo _getTypeFromHandleMethodInfo;
+    private static readonly MethodInfo? _getTypeFromHandleMethodInfo;
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    private static readonly MethodInfo _enumToObjectMethodInfo;
+    private static readonly MethodInfo? _enumToObjectMethodInfo;
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    private static readonly PropertyInfo _duckTypeInstancePropertyInfo;
+    private static readonly PropertyInfo? _duckTypeInstancePropertyInfo;
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    private static readonly MethodInfo _methodBuilderGetToken;
+    private static readonly MethodInfo? _methodBuilderGetToken;
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    private static readonly ConstructorInfo _ignoresAccessChecksToAttributeCtor;
+    private static readonly ConstructorInfo? _ignoresAccessChecksToAttributeCtor;
 
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private static long _assemblyCount;
@@ -200,7 +202,7 @@ public static partial class DuckType
     public static class DelegateCache<TProxyDelegate>
         where TProxyDelegate : Delegate
     {
-        private static TProxyDelegate _delegate;
+        private static TProxyDelegate? _delegate;
 
         /// <summary>
         /// Get cached delegate from the DynamicMethod
