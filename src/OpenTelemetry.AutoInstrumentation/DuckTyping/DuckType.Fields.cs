@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -25,17 +27,17 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// </summary>
 public static partial class DuckType
 {
-    private static MethodBuilder GetFieldGetMethod(
-        TypeBuilder proxyTypeBuilder,
+    private static MethodBuilder? GetFieldGetMethod(
+        TypeBuilder? proxyTypeBuilder,
         Type targetType,
         MemberInfo proxyMember,
         FieldInfo targetField,
-        FieldInfo instanceField)
+        FieldInfo? instanceField)
     {
         string proxyMemberName = proxyMember.Name;
         Type proxyMemberReturnType = proxyMember is PropertyInfo pinfo ? pinfo.PropertyType : proxyMember is FieldInfo finfo ? finfo.FieldType : typeof(object);
 
-        MethodBuilder proxyMethod = proxyTypeBuilder?.DefineMethod(
+        MethodBuilder? proxyMethod = proxyTypeBuilder?.DefineMethod(
             "get_" + proxyMemberName,
             MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.Virtual,
             proxyMemberReturnType,
@@ -126,17 +128,17 @@ public static partial class DuckType
         return proxyMethod;
     }
 
-    private static MethodBuilder GetFieldSetMethod(
-        TypeBuilder proxyTypeBuilder,
+    private static MethodBuilder? GetFieldSetMethod(
+        TypeBuilder? proxyTypeBuilder,
         Type targetType,
         MemberInfo proxyMember,
         FieldInfo targetField,
-        FieldInfo instanceField)
+        FieldInfo? instanceField)
     {
         string proxyMemberName = proxyMember.Name;
         Type proxyMemberReturnType = proxyMember is PropertyInfo pinfo ? pinfo.PropertyType : proxyMember is FieldInfo finfo ? finfo.FieldType : typeof(object);
 
-        MethodBuilder method = proxyTypeBuilder?.DefineMethod(
+        MethodBuilder? method = proxyTypeBuilder?.DefineMethod(
             "set_" + proxyMemberName,
             MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.Virtual,
             typeof(void),

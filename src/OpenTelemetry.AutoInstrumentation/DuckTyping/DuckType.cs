@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -33,7 +35,8 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// <typeparam name="T">Type of struct</typeparam>
 /// <param name="instance">Object instance</param>
 /// <returns>Proxy instance</returns>
-internal delegate T CreateProxyInstance<T>(object instance);
+[return: NotNull]
+internal delegate T CreateProxyInstance<T>(object? instance);
 
 /// <summary>
 /// Duck Type
@@ -49,7 +52,8 @@ public static partial class DuckType
     /// <typeparam name="T">Duck type</typeparam>
     /// <returns>Duck type proxy</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T Create<T>(object instance)
+    [return: NotNullIfNotNull("instance")]
+    public static T? Create<T>(object? instance)
     {
         return CreateCache<T>.Create(instance);
     }
@@ -80,7 +84,7 @@ public static partial class DuckType
     /// <typeparam name="T">Duck type</typeparam>
     /// <returns>true if the proxy can be created; otherwise, false</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool CanCreate<T>(object instance)
+    public static bool CanCreate<T>(object? instance)
     {
         return CreateCache<T>.CanCreate(instance);
     }
@@ -190,9 +194,9 @@ public static partial class DuckType
         {
             try
             {
-                ModuleBuilder moduleBuilder = null;
-                TypeBuilder proxyTypeBuilder = null;
-                FieldInfo instanceField = null;
+                ModuleBuilder? moduleBuilder = null;
+                TypeBuilder? proxyTypeBuilder = null;
+                FieldInfo? instanceField = null;
 
                 if (!dryRun)
                 {
@@ -286,9 +290,9 @@ public static partial class DuckType
                     DuckTypeReverseProxyImplementorIsAbstractOrInterfaceException.Throw(typeToDeriveFrom);
                 }
 
-                ModuleBuilder moduleBuilder = null;
-                TypeBuilder proxyTypeBuilder = null;
-                FieldInfo instanceField = null;
+                ModuleBuilder? moduleBuilder = null;
+                TypeBuilder? proxyTypeBuilder = null;
+                FieldInfo? instanceField = null;
 
                 if (!dryRun)
                 {
@@ -308,7 +312,7 @@ public static partial class DuckType
                 }
 
                 // Create Type
-                Type proxyType = proxyTypeBuilder!.CreateTypeInfo()!.AsType();
+                Type? proxyType = proxyTypeBuilder!.CreateTypeInfo()!.AsType();
                 return new CreateTypeResult(typeToDeriveFrom, proxyType, typeToDelegateTo, GetCreateProxyInstanceDelegate(moduleBuilder, typeToDeriveFrom, proxyType, typeToDelegateTo), null);
             }
             catch (DuckTypeException ex)
@@ -556,7 +560,7 @@ public static partial class DuckType
     /// <param name="proxyDefinitionType">The type we're inheriting from/implementing</param>
     /// <param name="targetType">The original type of the instance we're duck typing</param>
     /// <param name="instanceField">The field for accessing the instance of the <paramref name="targetType"/></param>
-    private static void CreateProperties(TypeBuilder proxyTypeBuilder, Type proxyDefinitionType, Type targetType, FieldInfo instanceField)
+    private static void CreateProperties(TypeBuilder? proxyTypeBuilder, Type proxyDefinitionType, Type targetType, FieldInfo? instanceField)
     {
         // Gets all properties to be implemented
         List<PropertyInfo> proxyTypeProperties = GetProperties(proxyDefinitionType);
@@ -575,7 +579,7 @@ public static partial class DuckType
                 DuckTypeIncorrectReversePropertyUsageException.Throw(proxyProperty);
             }
 
-            PropertyBuilder propertyBuilder = null;
+            PropertyBuilder? propertyBuilder = null;
 
             DuckAttribute duckAttribute = proxyProperty.GetCustomAttribute<DuckAttribute>(true) ?? new DuckAttribute();
             duckAttribute.Name ??= proxyProperty.Name;
@@ -583,7 +587,7 @@ public static partial class DuckType
             switch (duckAttribute.Kind)
             {
                 case DuckKind.Property:
-                    PropertyInfo targetProperty = null;
+                    PropertyInfo? targetProperty = null;
                     try
                     {
                         targetProperty = targetType.GetProperty(duckAttribute.Name, duckAttribute.BindingFlags);
@@ -628,7 +632,7 @@ public static partial class DuckType
                             DuckTypePropertyCantBeReadException.Throw(targetProperty);
                         }
 
-                        MethodBuilder getMethodBuilder = GetPropertyGetMethod(
+                        MethodBuilder? getMethodBuilder = GetPropertyGetMethod(
                             proxyTypeBuilder,
                             targetType: targetType,
                             proxyMember: proxyProperty,
@@ -657,7 +661,7 @@ public static partial class DuckType
                             DuckTypeStructMembersCannotBeChangedException.Throw(targetProperty.DeclaringType);
                         }
 
-                        MethodBuilder setMethodBuilder = GetPropertySetMethod(
+                        MethodBuilder? setMethodBuilder = GetPropertySetMethod(
                             proxyTypeBuilder,
                             targetType: targetType,
                             proxyMember: proxyProperty,
@@ -675,7 +679,7 @@ public static partial class DuckType
                     break;
 
                 case DuckKind.Field:
-                    FieldInfo targetField = targetType.GetField(duckAttribute.Name, duckAttribute.BindingFlags);
+                    FieldInfo? targetField = targetType.GetField(duckAttribute.Name, duckAttribute.BindingFlags);
                     if (targetField is null)
                     {
                         DuckTypePropertyOrFieldNotFoundException.Throw(proxyProperty.Name, duckAttribute.Name, targetType);
@@ -686,7 +690,7 @@ public static partial class DuckType
 
                     if (proxyProperty.CanRead)
                     {
-                        MethodBuilder getMethodBuilder = GetFieldGetMethod(proxyTypeBuilder, targetType, proxyProperty, targetField, instanceField);
+                        MethodBuilder? getMethodBuilder = GetFieldGetMethod(proxyTypeBuilder, targetType, proxyProperty, targetField, instanceField);
                         if (getMethodBuilder is not null)
                         {
                             propertyBuilder?.SetGetMethod(getMethodBuilder);
@@ -707,7 +711,7 @@ public static partial class DuckType
                             DuckTypeStructMembersCannotBeChangedException.Throw(targetField.DeclaringType);
                         }
 
-                        MethodBuilder setMethodBuilder = GetFieldSetMethod(proxyTypeBuilder, targetType, proxyProperty, targetField, instanceField);
+                        MethodBuilder? setMethodBuilder = GetFieldSetMethod(proxyTypeBuilder, targetType, proxyProperty, targetField, instanceField);
                         if (setMethodBuilder is not null)
                         {
                             propertyBuilder?.SetSetMethod(setMethodBuilder);
@@ -726,7 +730,7 @@ public static partial class DuckType
     /// <param name="typeToDeriveFrom">The type we're inheriting from/implementing</param>
     /// <param name="typeToDelegateTo">The type we're delegating the implementation too</param>
     /// <param name="instanceField">The field for accessing the instance of the <paramref name="typeToDelegateTo"/></param>
-    private static void CreateReverseProxyProperties(TypeBuilder proxyTypeBuilder, Type typeToDeriveFrom, Type typeToDelegateTo, FieldInfo instanceField)
+    private static void CreateReverseProxyProperties(TypeBuilder? proxyTypeBuilder, Type typeToDeriveFrom, Type typeToDelegateTo, FieldInfo? instanceField)
     {
         var propertiesThatShouldBeImplemented = GetReverseProperties(typeToDeriveFrom);
 
@@ -742,7 +746,7 @@ public static partial class DuckType
                 continue;
             }
 
-            PropertyBuilder propertyBuilder = null;
+            PropertyBuilder? propertyBuilder = null;
 
             DuckReverseMethodAttribute duckAttribute = implementationProperty.GetCustomAttribute<DuckReverseMethodAttribute>(true) ?? new DuckReverseMethodAttribute();
             duckAttribute.Name ??= implementationProperty.Name;
@@ -754,7 +758,7 @@ public static partial class DuckType
                 DuckTypeReverseProxyPropertyCannotBeAbstractException.Throw(implementationProperty);
             }
 
-            PropertyInfo overriddenProperty = null;
+            PropertyInfo? overriddenProperty = null;
             try
             {
                 overriddenProperty = typeToDeriveFrom.GetProperty(duckAttribute.Name, duckAttribute.BindingFlags);
@@ -782,7 +786,7 @@ public static partial class DuckType
                     DuckTypePropertyCantBeReadException.Throw(overriddenProperty);
                 }
 
-                MethodBuilder getMethodBuilder = GetPropertyGetMethod(
+                MethodBuilder? getMethodBuilder = GetPropertyGetMethod(
                     proxyTypeBuilder,
                     targetType: typeToDeriveFrom,
                     proxyMember: overriddenProperty,
@@ -811,7 +815,7 @@ public static partial class DuckType
                     DuckTypeStructMembersCannotBeChangedException.Throw(overriddenProperty.DeclaringType);
                 }
 
-                MethodBuilder setMethodBuilder = GetPropertySetMethod(
+                MethodBuilder? setMethodBuilder = GetPropertySetMethod(
                     proxyTypeBuilder,
                     targetType: typeToDeriveFrom,
                     proxyMember: overriddenProperty,
@@ -842,7 +846,7 @@ public static partial class DuckType
     /// <param name="proxyDefinitionType">The custom type we defined</param>
     /// <param name="targetType">The original type we are proxying</param>
     /// <param name="instanceField">The field for accessing the instance of the <paramref name="targetType"/></param>
-    private static void CreatePropertiesFromStruct(TypeBuilder proxyTypeBuilder, Type proxyDefinitionType, Type targetType, FieldInfo instanceField)
+    private static void CreatePropertiesFromStruct(TypeBuilder? proxyTypeBuilder, Type proxyDefinitionType, Type targetType, FieldInfo? instanceField)
     {
         // Gets all fields to be copied
         foreach (FieldInfo proxyFieldInfo in proxyDefinitionType.GetFields())
@@ -859,8 +863,8 @@ public static partial class DuckType
                 continue;
             }
 
-            PropertyBuilder propertyBuilder = null;
-            MethodBuilder getMethodBuilder = null;
+            PropertyBuilder? propertyBuilder = null;
+            MethodBuilder? getMethodBuilder = null;
 
             DuckAttribute duckAttribute = proxyFieldInfo.GetCustomAttribute<DuckAttribute>(true) ?? new DuckAttribute();
             duckAttribute.Name ??= proxyFieldInfo.Name;
@@ -868,7 +872,7 @@ public static partial class DuckType
             switch (duckAttribute.Kind)
             {
                 case DuckKind.Property:
-                    PropertyInfo targetProperty = targetType.GetProperty(duckAttribute.Name, duckAttribute.BindingFlags);
+                    PropertyInfo? targetProperty = targetType.GetProperty(duckAttribute.Name, duckAttribute.BindingFlags);
                     if (targetProperty is null)
                     {
                         DuckTypePropertyOrFieldNotFoundException.Throw(proxyFieldInfo.Name, duckAttribute.Name, targetType);
@@ -900,7 +904,7 @@ public static partial class DuckType
                     break;
 
                 case DuckKind.Field:
-                    FieldInfo targetField = targetType.GetField(duckAttribute.Name, duckAttribute.BindingFlags);
+                    FieldInfo? targetField = targetType.GetField(duckAttribute.Name, duckAttribute.BindingFlags);
                     if (targetField is null)
                     {
                         DuckTypePropertyOrFieldNotFoundException.Throw(proxyFieldInfo.Name, duckAttribute.Name, targetType);
@@ -919,7 +923,7 @@ public static partial class DuckType
         }
     }
 
-    private static Delegate GetCreateProxyInstanceDelegate(ModuleBuilder moduleBuilder, Type proxyDefinitionType, Type proxyType, Type targetType)
+    private static Delegate GetCreateProxyInstanceDelegate(ModuleBuilder? moduleBuilder, Type proxyDefinitionType, Type proxyType, Type targetType)
     {
         ConstructorInfo ctor = proxyType.GetConstructors()[0];
 
@@ -955,7 +959,7 @@ public static partial class DuckType
         return createProxyMethod.CreateDelegate(delegateType);
     }
 
-    private static Delegate CreateStructCopyMethod(ModuleBuilder moduleBuilder, Type proxyDefinitionType, Type proxyType, Type targetType)
+    private static Delegate CreateStructCopyMethod(ModuleBuilder? moduleBuilder, Type proxyDefinitionType, Type proxyType, Type targetType)
     {
         ConstructorInfo ctor = proxyType.GetConstructors()[0];
 
@@ -1007,7 +1011,7 @@ public static partial class DuckType
                 continue;
             }
 
-            PropertyInfo prop = proxyType.GetProperty(finfo.Name);
+            PropertyInfo? prop = proxyType.GetProperty(finfo.Name);
             if (prop?.GetMethod is not null)
             {
                 il.Emit(OpCodes.Ldloca_S, structLocal.LocalIndex);
@@ -1038,11 +1042,11 @@ public static partial class DuckType
         /// <summary>
         /// Target type
         /// </summary>
-        public readonly Type TargetType;
+        public readonly Type? TargetType;
 
-        private readonly Type _proxyType;
-        private readonly Delegate _activator;
-        private readonly ExceptionDispatchInfo _exceptionInfo;
+        private readonly Type? _proxyType;
+        private readonly Delegate? _activator;
+        private readonly ExceptionDispatchInfo? _exceptionInfo;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateTypeResult"/> struct.
@@ -1052,7 +1056,7 @@ public static partial class DuckType
         /// <param name="targetType">Target type</param>
         /// <param name="activator">Proxy activator</param>
         /// <param name="exceptionInfo">Exception dispatch info instance</param>
-        internal CreateTypeResult(Type proxyTypeDefinition, Type proxyType, Type targetType, Delegate activator, ExceptionDispatchInfo exceptionInfo)
+        internal CreateTypeResult(Type proxyTypeDefinition, Type? proxyType, Type targetType, Delegate? activator, ExceptionDispatchInfo? exceptionInfo)
         {
             _activator = activator;
             _proxyType = proxyType;
@@ -1073,7 +1077,7 @@ public static partial class DuckType
         /// <summary>
         /// Gets the Proxy type
         /// </summary>
-        public Type ProxyType
+        public Type? ProxyType
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
@@ -1090,7 +1094,8 @@ public static partial class DuckType
         /// <param name="instance">Target instance value</param>
         /// <returns>Proxy instance</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T CreateInstance<T>(object instance)
+        [return: NotNull]
+        public T CreateInstance<T>(object? instance)
         {
             if (_activator is null)
             {
@@ -1108,6 +1113,7 @@ public static partial class DuckType
         /// <param name="instance">Target instance value</param>
         /// <returns>Proxy instance</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNull]
         public T CreateInstance<T, TOriginal>(TOriginal instance)
         {
             if (_activator is null)
@@ -1140,7 +1146,7 @@ public static partial class DuckType
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private T ThrowOnError<T>(object instance)
+        private T? ThrowOnError<T>(object? instance)
         {
             _exceptionInfo?.Throw();
             return default;
@@ -1192,7 +1198,8 @@ public static partial class DuckType
         /// <param name="instance">Object instance</param>
         /// <returns>Proxy instance</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Create(object instance)
+        [return: NotNullIfNotNull("instance")]
+        public static T? Create(object? instance)
         {
             if (instance is null)
             {
@@ -1209,7 +1216,8 @@ public static partial class DuckType
         /// <param name="instance">Object instance</param>
         /// <returns>Proxy instance</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T CreateFrom<TOriginal>(TOriginal instance)
+        [return: NotNullIfNotNull("instance")]
+        public static T? CreateFrom<TOriginal>(TOriginal instance)
         {
             if (instance is null)
             {
@@ -1225,7 +1233,7 @@ public static partial class DuckType
         /// <param name="instance">Object instance</param>
         /// <returns>true if a proxy can be created; otherwise, false.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool CanCreate(object instance)
+        public static bool CanCreate(object? instance)
         {
             if (instance is null)
             {
@@ -1241,7 +1249,8 @@ public static partial class DuckType
         /// <param name="instance">Object instance</param>
         /// <returns>Proxy instance</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T CreateReverse(object instance)
+        [return: NotNullIfNotNull("instance")]
+        public static T? CreateReverse(object? instance)
         {
             if (instance is null)
             {

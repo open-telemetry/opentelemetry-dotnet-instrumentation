@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,16 +29,16 @@ namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 /// </summary>
 public static partial class DuckType
 {
-    private static MethodBuilder GetPropertyGetMethod(
-        TypeBuilder proxyTypeBuilder,
+    private static MethodBuilder? GetPropertyGetMethod(
+        TypeBuilder? proxyTypeBuilder,
         Type targetType,
         MemberInfo proxyMember,
         PropertyInfo targetProperty,
-        FieldInfo instanceField,
+        FieldInfo? instanceField,
         Func<LazyILGenerator, Type, Type, Type> duckCastInnerToOuterFunc,
         Func<Type, Type, bool> needsDuckChaining)
     {
-        MethodInfo targetMethod = targetProperty.GetMethod;
+        MethodInfo? targetMethod = targetProperty.GetMethod;
         if (targetMethod is null)
         {
             return null;
@@ -66,7 +68,7 @@ public static partial class DuckType
             }
         }
 
-        MethodBuilder proxyMethod = proxyTypeBuilder?.DefineMethod(
+        MethodBuilder? proxyMethod = proxyTypeBuilder?.DefineMethod(
             "get_" + proxyMemberName,
             MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.Virtual,
             proxyMemberReturnType,
@@ -206,22 +208,22 @@ public static partial class DuckType
         return proxyMethod;
     }
 
-    private static MethodBuilder GetPropertySetMethod(
-        TypeBuilder proxyTypeBuilder,
+    private static MethodBuilder? GetPropertySetMethod(
+        TypeBuilder? proxyTypeBuilder,
         Type targetType,
         MemberInfo proxyMember,
         PropertyInfo targetProperty,
-        FieldInfo instanceField,
+        FieldInfo? instanceField,
         Func<LazyILGenerator, Type, Type, Type> duckCastOuterToInner,
         Func<Type, Type, bool> needsDuckChaining)
     {
-        MethodInfo targetMethod = targetProperty.SetMethod;
+        MethodInfo? targetMethod = targetProperty.SetMethod;
         if (targetMethod is null)
         {
             return null;
         }
 
-        string proxyMemberName = null;
+        string? proxyMemberName = null;
         Type[] proxyParameterTypes = Type.EmptyTypes;
         Type[] targetParametersTypes = GetPropertySetParametersTypes(proxyTypeBuilder, targetProperty, true).ToArray();
 
@@ -244,7 +246,7 @@ public static partial class DuckType
             }
         }
 
-        MethodBuilder proxyMethod = proxyTypeBuilder?.DefineMethod(
+        MethodBuilder? proxyMethod = proxyTypeBuilder?.DefineMethod(
             "set_" + proxyMemberName,
             MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.Virtual,
             typeof(void),
@@ -360,7 +362,7 @@ public static partial class DuckType
         return proxyMethod;
     }
 
-    private static IEnumerable<Type> GetPropertyGetParametersTypes(TypeBuilder typeBuilder, PropertyInfo property, bool originalTypes, bool isDynamicSignature = false)
+    private static IEnumerable<Type> GetPropertyGetParametersTypes(TypeBuilder? typeBuilder, PropertyInfo property, bool originalTypes, bool isDynamicSignature = false)
     {
         if (isDynamicSignature)
         {
@@ -381,7 +383,7 @@ public static partial class DuckType
         }
     }
 
-    private static IEnumerable<Type> GetPropertySetParametersTypes(TypeBuilder typeBuilder, PropertyInfo property, bool originalTypes, bool isDynamicSignature = false)
+    private static IEnumerable<Type> GetPropertySetParametersTypes(TypeBuilder? typeBuilder, PropertyInfo property, bool originalTypes, bool isDynamicSignature = false)
     {
         if (isDynamicSignature)
         {

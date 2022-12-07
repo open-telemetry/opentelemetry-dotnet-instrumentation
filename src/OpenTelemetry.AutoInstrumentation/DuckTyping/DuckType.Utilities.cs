@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -32,7 +33,7 @@ public static partial class DuckType
     /// <param name="proxyType">Duck type</param>
     /// <param name="instance">Instance value</param>
     /// <exception cref="ArgumentNullException">If the duck type or the instance value is null</exception>
-    private static void EnsureArguments(Type proxyType, object instance)
+    private static void EnsureArguments(Type? proxyType, object? instance)
     {
         if (proxyType is null)
         {
@@ -124,7 +125,7 @@ public static partial class DuckType
     /// <param name="builder">Module builder</param>
     /// <param name="targetType">Target type</param>
     /// <returns>true for direct method; otherwise, false.</returns>
-    private static bool UseDirectAccessTo(ModuleBuilder builder, Type targetType)
+    private static bool UseDirectAccessTo(ModuleBuilder? builder, Type targetType)
     {
         if (builder is null)
         {
@@ -141,7 +142,7 @@ public static partial class DuckType
     /// <param name="builder">Type builder</param>
     /// <param name="targetType">Target type</param>
     /// <returns>true for direct method; otherwise, false.</returns>
-    private static bool UseDirectAccessTo(TypeBuilder builder, Type targetType)
+    private static bool UseDirectAccessTo(TypeBuilder? builder, Type targetType)
     {
         if (builder is null)
         {

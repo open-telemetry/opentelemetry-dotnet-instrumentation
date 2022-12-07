@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Reflection;
 
@@ -28,7 +30,7 @@ internal abstract class DuckAttributeBase : Attribute
     /// <summary>
     /// Gets or sets the underlying type member name
     /// </summary>
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
     /// <summary>
     /// Gets or sets the binding flags
@@ -38,15 +40,15 @@ internal abstract class DuckAttributeBase : Attribute
     /// <summary>
     /// Gets or sets the generic parameter type names definition for a generic method call (required when calling generic methods and instance type is non public)
     /// </summary>
-    public string[] GenericParameterTypeNames { get; set; }
+    public string[]? GenericParameterTypeNames { get; set; }
 
     /// <summary>
     /// Gets or sets the parameter type names of the target method (optional / used to disambiguation)
     /// </summary>
-    public string[] ParameterTypeNames { get; set; }
+    public string[]? ParameterTypeNames { get; set; }
 
     /// <summary>
     /// Gets or sets the explicit interface type name
     /// </summary>
-    public string ExplicitInterfaceTypeName { get; set; }
+    public string? ExplicitInterfaceTypeName { get; set; }
 }
