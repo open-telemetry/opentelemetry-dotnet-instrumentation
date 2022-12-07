@@ -42,7 +42,7 @@ public class GraphQLTests : TestHelper
     [InlineData(true, "AspNet,GraphQL", null, Span.Types.SpanKind.Server)]
     [InlineData(false, "AspNet,GraphQL", null, Span.Types.SpanKind.Server)]
 #else
-    [InlineData(true, "AspNet,GraphQL", null,  Span.Types.SpanKind.Internal)]
+    [InlineData(true, "AspNet,GraphQL", null, Span.Types.SpanKind.Internal)]
     [InlineData(false, "AspNet,GraphQL", null, Span.Types.SpanKind.Internal)]
 #endif
     // AspNetCore always create Activities. If default sampler (parentbased_always_on) is used. All child spans are dropped.
