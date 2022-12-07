@@ -1,12 +1,74 @@
-version: "2"
+version: "3.8"
 services:
 
-  mongo:
-    image: mongo:4.4.6
-    ports:
-      - "27017:27017"
+  client:
+    build:
+      context: ./Client
+      dockerfile: ../Dockerfile # installs OpenTelemetry .NET Automatic Instrumentation
+    entrypoint: "./out/Client http://service:5000"
+    env_file:
+      - otel-dotnet.env # enables OpenTelemetry .NET Automatic Instrumentation
+    environment:
+      # OpenTelemetry environmental variables:
+      OTEL_SERVICE_NAME: "client"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4318"
+    depends_on:
+      - service
+      - otel-collector
 
-  redis:
-    image: redis:6.2.4
+  service:
+    build:
+      context: ./Service
+      dockerfile: ../Dockerfile # installs OpenTelemetry .NET Automatic Instrumentation
+    entrypoint: "./out/Service --urls http://*:5000"
+    env_file:
+      - otel-dotnet.env # enable OpenTelemetry .NET Automatic Instrumentation
+    environment:
+      DB_CONNECTION: "Server=sqlserver,1433;User=sa;Password=yourStrong(!)Password;TrustServerCertificate=True;"
+      # OpenTelemetry environmental variables:
+      OTEL_SERVICE_NAME: "service"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4318"
+      OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES: "MyCompany.Service"
+      OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES: "MyCompany.Service"
+    depends_on:
+      - sqlserver
+      - otel-collector
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-CU17-ubuntu-20.04
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=yourStrong(!)Password
     ports:
-      - "6379:6379"
+      - "1433:1433"
+
+  # OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.61.0
+    volumes:
+      - ./otel-config.yaml:/etc/otel/config.yaml
+      - ./log:/log/otel
+    command: --config /etc/otel/config.yaml
+    environment:
+      JAEGER_ENDPOINT: "jaeger:4317"
+    ports:
+      - "8889:8889"   # Prometheus metrics exporter (scrape endpoint)
+      - "13133:13133" # health_check extension
+      - "55679:55679" # ZPages extension
+    depends_on:
+      - jaeger
+      - prometheus
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.38.1
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686" # Jaeger Web UI
+
+  prometheus:
+    image: prom/prometheus:v2.40.5
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"

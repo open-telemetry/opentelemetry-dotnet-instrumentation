@@ -1,5 +1,25 @@
 version: "2"
 services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.61.0
+    volumes:
+      - ./otel-config.yaml:/etc/otel/config.yaml
+      - ./log:/log/otel
+    command: --config /etc/otel/config.yaml
+    environment:
+      - JAEGER_ENDPOINT=jaeger:4317
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP/protobuf receiver
+      - "6831:6831"   # Jaeger UDP/thrift-compact receiver
+      - "8888:8888"   # Prometheus metrics scrape endpoint with collector telemetry
+      - "8889:8889"   # Prometheus metrics exporter (scrape endpoint)
+      - "9411:9411"   # Zipkin receiver
+      - "13133:13133" # health_check extension
+      - "14268:14268" # Jaeger HTTP/thrift-binary receiver
+      - "55679:55679" # ZPages extension
+    depends_on:
+      - jaeger
 
   jaeger:
     image: jaegertracing/all-in-one:1.38.1
@@ -7,34 +27,3 @@ services:
       - COLLECTOR_OTLP_ENABLED=true
     ports:
       - "16686:16686"
-
-  prometheus:
-    container_name: prometheus
-    image: prom/prometheus:latest
-    volumes:
-      - ./prometheus.yaml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
-
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.61.0
-    volumes:
-      - ./otel-config.yaml:/etc/otel/config.yaml
-    command: --config /etc/otel/config.yaml
-    environment:
-      - JAEGER_ENDPOINT=jaeger:4317
-    ports:
-      - "4317:4317"   # OTLP gRPC receiver
-      - "4318:4318"   # OTLP http/protobuf receiver
-      - "6831:6831"   # Jaeger thrift compact receiver
-      - "6832:6832"   # Jaeger thrift binary receiver
-      - "8888:8888"   # Prometheus metrics scrape endpoint with collector telemetry
-      - "8889:8889"   # Prometheus metrics exporter (scrape endpoint)
-      - "9411:9411"   # Zipkin receiver
-      - "13133:13133" # health_check extension
-      - "14250:14250" # Jaeger grpc receiver
-      - "14268:14268" # Jaeger thrift http receiver
-      - "55679:55679" # ZPages extension
-    depends_on:
-      - jaeger
-      - prometheus
