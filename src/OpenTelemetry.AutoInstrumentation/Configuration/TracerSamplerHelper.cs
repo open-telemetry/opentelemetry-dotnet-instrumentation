@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System.Globalization;
 using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
@@ -47,7 +48,8 @@ internal static class TracerSamplerHelper
 
         var ratio = defaultRatio;
 
-        if (double.TryParse(arguments, out var parsedRatio) && parsedRatio >= 0.0 && parsedRatio <= 1.0)
+        if (double.TryParse(arguments, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsedRatio)
+            && parsedRatio >= 0.0 && parsedRatio <= 1.0)
         {
             ratio = parsedRatio;
         }
