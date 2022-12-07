@@ -23,7 +23,7 @@ Microsoft provides
 [evaluation developer VMs](https://developer.microsoft.com/en-us/windows/downloads/virtual-machines)
 with Windows and Visual Studio preinstalled.
 
-## macOS
+### macOS
 
 - Run: `xcode-select --install`
 - [Visual Studio 2022 for Mac (17.3)](https://visualstudio.microsoft.com/vs/mac/) or higher
