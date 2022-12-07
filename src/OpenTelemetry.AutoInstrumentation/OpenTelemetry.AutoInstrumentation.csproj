@@ -23,7 +23,6 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.0.0-rc9.9" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.7" />
     <PackageReference Include="OpenTelemetry.Shims.OpenTracing" Version="1.0.0-rc9.9" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.9" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
@@ -34,6 +33,7 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.9" />
     <PackageReference Include="OpenTelemetry.Instrumentation.MySqlData" Version="1.0.0-beta.4" />
     <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc9.7" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs" Version="1.4.0-beta.3" />
