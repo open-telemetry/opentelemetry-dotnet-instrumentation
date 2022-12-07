@@ -1,8 +1,8 @@
 #!/bin/bash
 set -ex
 
-# install Nuke globally
-dotnet tool install Nuke.GlobalTool --global
+# install .NET tools
+dotnet tool restore
 
 # install .NET 6.0 SDK
 curl -sSL https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh
