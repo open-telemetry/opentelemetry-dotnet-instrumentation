@@ -12,6 +12,7 @@ On all platforms, the minimum requirements are:
 ### Windows
 
 - [Visual Studio 2022 (17.4)](https://visualstudio.microsoft.com/downloads/)
+  or higher
   - Workloads with the following components:
     - ASP.NET and web development
     - .NET desktop development
@@ -27,6 +28,7 @@ with Windows and Visual Studio preinstalled.
 
 - Run: `xcode-select --install`
 - [Visual Studio 2022 for Mac (17.4)](https://visualstudio.microsoft.com/vs/mac/)
+  or higher
 
 ### Linux
 
