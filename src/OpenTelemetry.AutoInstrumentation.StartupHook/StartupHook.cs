@@ -209,7 +209,7 @@ internal class StartupHook
             }
         }
 
-        if (oTelPackageVersion == null)
+        if (oTelPackageVersion != null)
         {
             throw new NotSupportedException($"Application has direct or indirect reference to older version of OpenTelemetry package {oTelPackageVersion}.");
         }
