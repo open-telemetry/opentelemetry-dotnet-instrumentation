@@ -34,8 +34,7 @@ by setting the `OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES` environmental variab
 You can set the value to either `Examples.ManualInstrumentations.Registered`
 or to `Examples.ManualInstrumentations.*`, which registers the entire prefix.
 
-You can see a sample console application with automatic (`HttpClient`) and manual
-instrumentation [here](../examples/ManualInstrumentations).
+You can see a sample console application with manual instrumentation [here](../examples/Service/Program.cs).
 
 > Note that an `Activity` created for `NonRegistered.ManualInstrumentations`
 `ActivitySource` is not handled by the OpenTelemetry Automatic Instrumentation.
