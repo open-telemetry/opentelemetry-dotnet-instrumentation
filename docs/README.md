@@ -9,8 +9,8 @@ to .NET applications without having to modify their source code.
 
 ⚠️ The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
-([0.5.1-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
-can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.5.1-beta.1/docs/README.md).
+([0.5.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
+can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.5.0/docs/README.md).
 
 ---
 
@@ -39,9 +39,6 @@ to inject additional instrumentations of this project at runtime, using a techni
 known as [monkey-patching](https://en.wikipedia.org/wiki/Monkey_patch). When enabled,
 the OpenTelemetry .NET Automatic Instrumentation generates traces for libraries that
 don't already generate traces using the OpenTelemetry .NET SDK.
-
-See the [examples](../examples) for demonstrations of different instrumentation scenarios
-covered by the OpenTelemetry .NET Automatic Instrumentation.
 
 See [design.md](design.md) for an architectural overview.
 
@@ -180,6 +177,13 @@ Get-Help Install-OpenTelemetryCore -Detailed
 ```
 
 ⚠️ Register for IIS and Windows Service performs a service restart.
+
+## Instrument a container
+
+You can find an example using Docker Compose [here](../examples).
+
+You can also consider using
+the [Kubernetes Operator for OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-operator).
 
 ## Instrument a Windows Service running a .NET application
 

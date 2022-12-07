@@ -26,49 +26,13 @@ updates:
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
-    directory: /examples/AspNetCoreMvc
+    directory: /examples/Client
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
-    directory: /examples/BindingRedirect
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 20
-
-  - package-ecosystem: nuget
-    directory: /examples/ConsoleApp
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 20
-
-  - package-ecosystem: nuget
-    directory: /examples/ConsoleApp.SelfBootstrap
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 20
-
-  - package-ecosystem: nuget
-    directory: /examples/CoreAppOldReference
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 20
-
-  - package-ecosystem: nuget
-    directory: /examples/OldReference
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 20
-
-  - package-ecosystem: nuget
-    directory: /examples/OpenTracingLibrary
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 20
-
-  - package-ecosystem: nuget
-    directory: /examples/Vendor.Distro
+    directory: /examples/Service
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20

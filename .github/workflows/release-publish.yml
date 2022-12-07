@@ -1,4 +1,4 @@
-name: script-tests
+name: release-publish
 
 on:
   release:

@@ -1,0 +1,22 @@
+name: examples
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - 'examples/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+    - 'examples/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3.1.0
+    - name: Test examples
+      run: make all
+      working-directory: examples
