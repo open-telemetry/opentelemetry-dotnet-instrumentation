@@ -129,28 +129,20 @@ The following Web UI endpoints are exposed:
 - <http://localhost:8889/metrics>: Collected metrics
 - <http://localhost:13133>: Collector health status
 
+You can also find the exported telemetry in `dev/log` directory.
+
 ### Instrument an application
 
 > *Warning:* Make sure to build and prepare the test environment beforehand.
 
-[`dev/instrument.sh`](../dev/instrument.sh) helps to run a command
-with automatic instrumentation in your shell, such as bash, zsh, or git bash.
-
+You can use [`dev/envvars.sh`](../dev/envvars.sh) to export profiler
+environmental variables to your current shell session.
+You must run it from the root of this repository.
 For example:
 
 ```sh
-./dev/instrument.sh OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS=HttpClient dotnet run -f net6.0 --project ./examples/ConsoleApp/Examples.ConsoleApp.csproj
-```
-
-You can use [`dev/envvars.sh`](../dev/envvars.sh) to export profiler
-environmental variables to your current shell session.
-
-You must run `dev/envvars.sh` from the root of this repository. For example:
-
-```sh
-source ./dev/envvars.sh
-export OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS=HttpClient
- ./examples/ConsoleApp/bin/Release/net6.0/Examples.ConsoleApp
+. ./dev/envvars.sh
+./test/test-applications/integrations/TestApplication.Smoke/bin/x64/Release/net7.0/TestApplication.Smoke
 ```
 
 ### Running the examples
