@@ -28,7 +28,7 @@ partial class Build : NukeBuild
     [Parameter("Test projects filter. Optional, default matches all test projects. The project will be selected if the string is part of its name.")]
     readonly string TestProject = "";
 
-    [Parameter("Test name fitler. Optional")]
+    [Parameter("Test name filter. Optional")]
     readonly string TestName;
 
     [Parameter("Number of times each dotnet test is run. Default is '1'")]
@@ -88,6 +88,7 @@ partial class Build : NukeBuild
         .DependsOn(Restore)
         .DependsOn(CompileManagedSrc)
         .DependsOn(PublishManagedProfiler)
+        .DependsOn(GenerateNetFxAssemblyRedirectionSource)
         .DependsOn(CompileNativeSrc)
         .DependsOn(PublishNativeProfiler)
         .DependsOn(CopyIntegrationsJson)
@@ -158,5 +159,10 @@ partial class Build : NukeBuild
         }
 
         return result;
+    }
+
+    string MapToFolderOutput(TargetFramework targetFramework)
+    {
+        return targetFramework.ToString().StartsWith("net4") ? "netfx" : "net";
     }
 }

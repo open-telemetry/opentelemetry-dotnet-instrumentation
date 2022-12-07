@@ -486,6 +486,52 @@ struct FunctionInfo
     }
 };
 
+struct AssemblyVersionRedirection
+{
+    // This struct is used to check and track version against ASSEMBLYMETADATA structs
+    // so it uses the same naming conventions, keeping fields with the same names in both
+    // structs.
+    USHORT      usMajorVersion;         // Major Version.
+    USHORT      usMinorVersion;         // Minor Version.
+    USHORT      usBuildNumber;          // Build Number.
+    USHORT      usRevisionNumber;       // Revision Number.
+
+    // Redirection related fields
+    ULONG       ulRedirectionCount;     // Tracks the number of times that the redirection was applied.
+
+    AssemblyVersionRedirection() :
+        usMajorVersion(0), usMinorVersion(0), usBuildNumber(0), usRevisionNumber(0), ulRedirectionCount(0)
+    {
+    }
+
+    AssemblyVersionRedirection(USHORT major, USHORT minor, USHORT build, USHORT revision) : ulRedirectionCount(0)
+    {
+        usMajorVersion = major;
+        usMinorVersion = minor;
+        usBuildNumber = build;
+        usRevisionNumber = revision;
+    }
+
+    int CompareToAssemblyVersion(const ASSEMBLYMETADATA& assembly)
+    {
+        return
+            usMajorVersion != assembly.usMajorVersion
+            ? (usMajorVersion > assembly.usMajorVersion ? 1 : -1) :
+            usMinorVersion != assembly.usMinorVersion
+            ? (usMinorVersion > assembly.usMinorVersion ? 1 : -1) :
+            usBuildNumber != assembly.usBuildNumber
+            ? (usBuildNumber > assembly.usBuildNumber ? 1 : -1) :
+            usRevisionNumber != assembly.usRevisionNumber
+            ? (usRevisionNumber > assembly.usRevisionNumber ? 1 : -1) :
+            0;
+    }
+
+    WSTRING VersionStr()
+    {
+        return trace::VersionStr(usMajorVersion, usMinorVersion, usBuildNumber, usRevisionNumber);
+    }
+};
+
 RuntimeInformation GetRuntimeInformation(ICorProfilerInfo7* info);
 
 AssemblyInfo GetAssemblyInfo(ICorProfilerInfo7* info, const AssemblyID& assembly_id);

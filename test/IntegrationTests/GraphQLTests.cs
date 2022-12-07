@@ -68,6 +68,7 @@ public class GraphQLTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "GraphQL");
         SetEnvironmentVariable("OTEL_TRACES_SAMPLER", "always_on");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_NETFX_ASSEMBLY_REDIRECTION_ENABLED", "false");
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
         SetEnvironmentVariable("ASPNETCORE_URLS", $"http://127.0.0.1:{aspNetCorePort}/");

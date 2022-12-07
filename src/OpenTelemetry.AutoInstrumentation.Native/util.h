@@ -44,6 +44,10 @@ WSTRING TokenStr(const mdToken* token);
 // Convert HRESULT to a friendly string, e.g.: "0x80000002"
 WSTRING HResultStr(const HRESULT hr);
 
+WSTRING VersionStr(const USHORT major, const USHORT minor, const USHORT build, const USHORT revision);
+
+WSTRING AssemblyVersionStr(const ASSEMBLYMETADATA& assembly_metadata);
+
 template <class Container>
 bool Contains(const Container& items, const typename Container::value_type& value)
 {
