@@ -26,13 +26,13 @@ updates:
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
-    directory: /examples/cli
+    directory: /examples/Client
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
-    directory: /examples/srv
+    directory: /examples/Service
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20

@@ -51,5 +51,5 @@
 
 1. For a non-RC and non-beta release, update the version in:
 
-   - [`examples/Dockerfile](../examples/Dockerfile)
+   - [`examples/Dockerfile`](../examples/Dockerfile)
    - [OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator/blob/main/autoinstrumentation/dotnet/version.txt)
