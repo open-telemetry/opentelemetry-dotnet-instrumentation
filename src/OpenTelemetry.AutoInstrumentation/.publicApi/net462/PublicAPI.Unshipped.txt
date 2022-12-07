@@ -13,6 +13,13 @@ OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(Sys
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity activity, object state, System.DateTimeOffset? startTime) -> void
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.StartTime.get -> System.DateTimeOffset?
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.State.get -> object
+OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData.MySqlConnectionStringBuilderIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync
+OpenTelemetry.AutoInstrumentation.Instrumentations.Validations.StrongNamedValidation
 override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.ToString() -> string
 override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.ToString() -> string
 static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8>(TTarget instance, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, TArg5 arg5, TArg6 arg6, TArg7 arg7, TArg8 arg8) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
