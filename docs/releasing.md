@@ -25,10 +25,8 @@
    (not covered by CI):
 
    ```bash
-   nuke Workflow --containers linux
+   nuke Workflow
    ```
-
-1. Test the described [examples](../examples/README.md).
 
 1. Once the pull request has been merged, create a signed tag for the merged commit.
    You can do this using the following Bash snippet:
@@ -37,7 +35,7 @@
    TAG='v{new-version-here}'
    COMMIT='{commit-sha-here}'
    git tag -s -m $TAG $TAG $COMMIT
-   git push {remote-to-the-main-repo} $TAG
+   git push upstream $TAG
    ```
 
    After you've pushed the git tag, a `release` GitHub workflow starts.
@@ -47,4 +45,11 @@
    - Use the [CHANGELOG.md](../CHANGELOG.md) content in the description.
    - Add the artifacts from [the `release` GitHub workflow](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/actions/workflows/release.yml).
 
-1. Update version under [OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator/blob/main/autoinstrumentation/dotnet/version.txt).
+   After you've publish the release, a `release-publish` GitHub workflow starts.
+
+1. Check the status of [the `release-publish` GitHub workflow](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/actions/workflows/release-publish.yml).
+
+1. For a non-RC and non-beta release, update the version in:
+
+   - [`examples/Dockerfile`](../examples/Dockerfile)
+   - [OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator/blob/main/autoinstrumentation/dotnet/version.txt)

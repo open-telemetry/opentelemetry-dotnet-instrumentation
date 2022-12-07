@@ -25,6 +25,7 @@ proto
 protobuf
 protos
 Serilog
+sqlserver
 TMPDIR
 tracesexporter
 unencrypted

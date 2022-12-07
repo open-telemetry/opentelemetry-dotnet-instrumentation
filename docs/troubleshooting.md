@@ -22,11 +22,8 @@ to use the same versions.
 
 When a rebuild is not possible,
 for .NET Framework applications the workaround is to use binding redirects.
-The [examples/BindingRedirect](./../examples/BindingRedirect/) app shows how
-to use the `app.config` file to solve version conflicts.
-The example can only run successfully under the instrumentation, as the
-binding redirect makes the application dependent on a version of
-`System.Diagnostics.DiagnosticSource` that is not available at build time.
+You can redirect a range of assembly versions to a specific version
+that is not available at build time.
 
 ## No proper relationship between spans
 
@@ -40,8 +37,7 @@ in your application.
 This causes automatic binding redirection to solve the issue.
 
 If automatic binding redirection is [disabled](https://docs.microsoft.com/en-us/dotnet/framework/configure-apps/how-to-enable-and-disable-automatic-binding-redirection)
-you can also manually add binding redirection to the [`App.config`](../examples/BindingRedirect/App.config)
-file.
+you can also manually add binding redirection to the `App.config` file.
 
 ## High CPU usage
 

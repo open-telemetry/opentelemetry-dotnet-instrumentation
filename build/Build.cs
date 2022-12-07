@@ -78,7 +78,6 @@ partial class Build : NukeBuild
         .Description("GitHub workflow entry point")
         .DependsOn(Clean)
         .DependsOn(BuildTracer)
-        .DependsOn(BuildExamples)
         .DependsOn(NativeTests)
         .DependsOn(ManagedTests);
 
@@ -110,10 +109,6 @@ partial class Build : NukeBuild
         .DependsOn(PublishMocks)
         .DependsOn(PublishIisTestApplications)
         .DependsOn(RunManagedTests);
-
-    Target BuildExamples => _ => _
-        .Description("Build the Examples")
-        .DependsOn(CompileExamples);
 
     string ContainersFilter()
     {

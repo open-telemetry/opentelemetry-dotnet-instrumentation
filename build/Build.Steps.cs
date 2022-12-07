@@ -143,18 +143,6 @@ partial class Build
         .DependsOn(CompileNativeSrcLinux)
         .DependsOn(CompileNativeSrcMacOs);
 
-    Target CompileExamples => _ => _
-        .Description("Compiles all the example projects")
-        .Executes(() =>
-        {
-            foreach (var exampleProject in Solution.GetProjects("Examples.*"))
-            {
-                DotNetBuild(s => s
-                    .SetProjectFile(exampleProject)
-                    .SetConfiguration(BuildConfiguration));
-            }
-        });
-
     Target CompileNativeTests => _ => _
         .Description("Compiles the native loader unit tests")
         .DependsOn(CompileNativeTestsWindows)
