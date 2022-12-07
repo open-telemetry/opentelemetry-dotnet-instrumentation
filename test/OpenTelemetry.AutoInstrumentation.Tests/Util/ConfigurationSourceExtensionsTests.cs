@@ -17,6 +17,8 @@
 using System;
 using System.Collections.Specialized;
 using FluentAssertions;
+using FluentAssertions.Execution;
+using Moq;
 using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.AutoInstrumentation.Util;
 using Xunit;
@@ -125,5 +127,52 @@ public class ConfigurationSourceExtensionsTests
 
         act.Should().Throw<FormatException>()
             .WithMessage("Invalid enum value: invalid");
+    }
+
+    [Fact]
+    public void ParseEmptyAsNull_StringConfigurationSource()
+    {
+        var source = new DummyStringConfigurationSource();
+
+        using (new AssertionScope())
+        {
+            source.GetString("TEST_NULL_VALUE").Should().BeNull();
+            source.GetString("TEST_EMPTY_VALUE").Should().BeNull();
+        }
+    }
+
+    [Fact]
+    public void ParseEmptyAsNull_CompositeConfigurationSource()
+    {
+        var mockSource = new Mock<IConfigurationSource>();
+        var compositeSource = new CompositeConfigurationSource();
+
+        mockSource.Setup(x => x.GetString(It.Is<string>(x => x == "TEST_NULL_VALUE"))).Returns<string>(k => null);
+        mockSource.Setup(x => x.GetString(It.Is<string>(x => x == "TEST_EMPTY_VALUE"))).Returns<string>(k => string.Empty);
+
+        compositeSource.Add(mockSource.Object);
+
+        using (new AssertionScope())
+        {
+            compositeSource.GetString("TEST_NULL_VALUE").Should().BeNull();
+            compositeSource.GetString("TEST_EMPTY_VALUE").Should().BeNull();
+        }
+    }
+
+    private class DummyStringConfigurationSource : StringConfigurationSource
+    {
+        protected override string GetStringInternal(string key)
+        {
+            if (key == "TEST_NULL_VALUE")
+            {
+                return null;
+            }
+            else if (key == "TEST_EMPTY_VALUE")
+            {
+                return string.Empty;
+            }
+
+            throw new NotImplementedException($"Invalid key '{key}'");
+        }
     }
 }

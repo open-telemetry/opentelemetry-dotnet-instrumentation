@@ -61,7 +61,7 @@ internal class CompositeConfigurationSource : IConfigurationSource, IEnumerable<
     public string GetString(string key)
     {
         return _sources.Select(source => source.GetString(key))
-            .FirstOrDefault(value => value != null);
+             .FirstOrDefault(value => !string.IsNullOrEmpty(value));
     }
 
     /// <summary>
