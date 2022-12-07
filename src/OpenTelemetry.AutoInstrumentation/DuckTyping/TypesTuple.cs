@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 
 namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
@@ -61,7 +63,7 @@ internal readonly struct TypesTuple : IEquatable<TypesTuple>
     /// </summary>
     /// <param name="obj">Object to compare</param>
     /// <returns>True if both are equals; otherwise, false.</returns>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is TypesTuple vTuple &&
                ProxyDefinitionType == vTuple.ProxyDefinitionType &&
