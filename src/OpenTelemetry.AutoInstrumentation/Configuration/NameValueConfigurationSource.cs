@@ -36,8 +36,7 @@ internal class NameValueConfigurationSource : StringConfigurationSource
         _nameValueCollection = nameValueCollection;
     }
 
-    /// <inheritdoc />
-    public override string GetString(string key)
+    protected override string GetStringInternal(string key)
     {
         return _nameValueCollection[key];
     }
