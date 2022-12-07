@@ -177,7 +177,7 @@ internal class StartupHook
         }
 
         var index = Array.FindIndex(appReferenceAssemblies, assembly => assembly.Name == "OpenTelemetry");
-        bool throwException = false;
+        string? oTelPackageVersion = null;
 
         if (index != -1)
         {
@@ -198,7 +198,7 @@ internal class StartupHook
 
                     if (loadedOTelfileVersion < profilerOTelFileVersion)
                     {
-                        throwException = true;
+                        oTelPackageVersion = loadedOTelFileVersionInfo.FileVersion;
                     }
                 }
             }
@@ -209,9 +209,9 @@ internal class StartupHook
             }
         }
 
-        if (throwException)
+        if (oTelPackageVersion == null)
         {
-            throw new NotSupportedException("Application has direct or indirect reference to older version of OpenTelemetry package.");
+            throw new NotSupportedException($"Application has direct or indirect reference to older version of OpenTelemetry package {oTelPackageVersion}.");
         }
     }
 }
