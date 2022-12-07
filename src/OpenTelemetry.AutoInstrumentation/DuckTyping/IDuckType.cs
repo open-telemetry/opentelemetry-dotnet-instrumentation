@@ -15,12 +15,15 @@
 // </copyright>
 
 using System;
+using System.ComponentModel;
 
 namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 
 /// <summary>
 /// Duck type interface
 /// </summary>
+[Browsable(false)]
+[EditorBrowsable(EditorBrowsableState.Never)]
 public interface IDuckType
 {
     /// <summary>
@@ -32,4 +35,10 @@ public interface IDuckType
     /// Gets instance Type
     /// </summary>
     Type Type { get; }
+
+    /// <summary>
+    /// Calls ToString() on the instance
+    /// </summary>
+    /// <returns>ToString result</returns>
+    string ToString();
 }
