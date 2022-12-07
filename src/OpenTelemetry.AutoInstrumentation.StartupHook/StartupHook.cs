@@ -192,11 +192,11 @@ internal class StartupHook
                     var loadedOTelFileVersionInfo = FileVersionInfo.GetVersionInfo(loadedOTelAssembly?.Location);
                     var loadedOTelfileVersion = new Version(loadedOTelFileVersionInfo.FileVersion);
 
-                    var profilerOTelLocation = Path.Combine(loaderAssemblyLocation, "OpenTelemetry.dll");
-                    var profilerOTelFileVersionInfo = FileVersionInfo.GetVersionInfo(profilerOTelLocation);
-                    var profilerOTelFileVersion = new Version(profilerOTelFileVersionInfo.FileVersion);
+                    var autoInstrumentationOTelLocation = Path.Combine(loaderAssemblyLocation, "OpenTelemetry.dll");
+                    var autoInstrumentationOTelFileVersionInfo = FileVersionInfo.GetVersionInfo(autoInstrumentationOTelLocation);
+                    var autoInstrumentationOTelFileVersion = new Version(autoInstrumentationOTelFileVersionInfo.FileVersion);
 
-                    if (loadedOTelfileVersion < profilerOTelFileVersion)
+                    if (loadedOTelfileVersion < autoInstrumentationOTelFileVersion)
                     {
                         oTelPackageVersion = loadedOTelFileVersionInfo.FileVersion;
                     }
