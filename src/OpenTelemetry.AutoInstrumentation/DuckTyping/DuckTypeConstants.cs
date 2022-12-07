@@ -1,4 +1,4 @@
-// <copyright file="DuckIncludeAttribute.cs" company="OpenTelemetry Authors">
+// <copyright file="DuckTypeConstants.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +14,11 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-
 namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 
-/// <summary>
-/// Use to include a member that would normally be ignored
-/// </summary>
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-internal class DuckIncludeAttribute : Attribute
+internal static class DuckTypeConstants
 {
+    internal const string DuckTypeAssemblyPrefix = "DuckTypeAssembly.";
+    internal const string DuckTypeNotVisibleAssemblyPrefix = "DuckTypeNotVisibleAssembly.";
+    internal const string DuckTypeGenericTypeAssemblyPrefix = "DuckTypeGenericTypeAssembly.";
 }
