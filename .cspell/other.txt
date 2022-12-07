@@ -2,6 +2,7 @@ AWSSDK
 bitness
 bytecode
 cmake
+Codespaces
 coreutils
 Couchbase
 distro

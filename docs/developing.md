@@ -27,7 +27,7 @@ with Windows and Visual Studio preinstalled.
 
 - cmake, make, gcc, clang, clang++
 
-On macOS it should be enought to run:
+On macOS it should be enough to run:
 
 ```sh
 xcode-select --install
