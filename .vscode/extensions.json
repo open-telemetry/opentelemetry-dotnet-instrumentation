@@ -3,6 +3,7 @@
     "editorconfig.editorconfig",
     "davidanson.vscode-markdownlint",
     "ms-dotnettools.csharp",
+    "ms-vscode.cpptools-extension-pack",
     "streetsidesoftware.code-spell-checker",
   ]
 }
