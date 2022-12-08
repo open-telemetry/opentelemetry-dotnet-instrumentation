@@ -4,41 +4,41 @@
 
 On all platforms, the minimum requirements are:
 
-- Git client and command line tools
+- [Docker](https://docs.docker.com/engine/install/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
 - [.NET 6.0 SDK](https://dotnet.microsoft.com/download/dotnet/6.0)
+- [.NET 7.0 SDK](https://dotnet.microsoft.com/download/dotnet/7.0)
 
 ### Windows
 
-- [Visual Studio 2022 (17.1)](https://visualstudio.microsoft.com/downloads/) or higher
+- [Visual Studio 2022 (17.4)](https://visualstudio.microsoft.com/downloads/)
+  or higher
   - Workloads with the following components:
     - ASP.NET and web development
     - .NET desktop development
     - Desktop development with C++
   - Individual components:
     - MSVC v142 - Visual Studio 2019 C++ x64/x86 build tools (version 14.29)
-- [Docker for Windows](https://docs.docker.com/docker-for-windows/)
 
 Microsoft provides
 [evaluation developer VMs](https://developer.microsoft.com/en-us/windows/downloads/virtual-machines)
 with Windows and Visual Studio preinstalled.
 
-### Linux and macOS
+### macOS
 
-- cmake, make, gcc, clang, and clang++
-- [Docker](https://docs.docker.com/engine/install/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
+- Run: `xcode-select --install`
 
-When using [C# for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp),
-follow these steps to set `omnisharp.useGlobalMono` to `never`:
+### Linux
 
-1. Go to `File` -> `Preferences` -> `Settings` -> `Extensions` -> `C# Configuration`.
-2. Change `Omnisharp: Use Global Mono` to `never`.
-3. Restart OmniSharp by pressing `F1` and selecting `OmniSharp: Restart OmniSharp`.
+- cmake, make, gcc, clang, clang++
 
-If you get errors due to projects targeting .NET Framework, use
-`OmniSharp: Select Project` in Visual Studio Code to load a subset of projects
-which work without any issues. You can also try building the projects which throw
-errors.
+### GitHub Codespaces
+
+Run:
+
+```sh
+`./dev/codespaces-init.sh`
+```
 
 ## Build
 
