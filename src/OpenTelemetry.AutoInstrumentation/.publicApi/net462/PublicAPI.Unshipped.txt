@@ -13,46 +13,13 @@ OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(Sys
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity activity, object state, System.DateTimeOffset? startTime) -> void
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.StartTime.get -> System.DateTimeOffset?
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.State.get -> object
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ErrorLocationStruct
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ErrorLocationStruct.Column -> int
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ErrorLocationStruct.ErrorLocationStruct() -> void
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ErrorLocationStruct.Line -> int
 OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration.ExecuteAsyncIntegration() -> void
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IDocument
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IDocument.OriginalQuery.get -> string
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionContext
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionContext.Document.get -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IDocument
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionContext.Errors.get -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionErrors
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionContext.Operation.get -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IOperation
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError.Code.get -> string
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError.InnerException.get -> System.Exception
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError.Locations.get -> System.Collections.Generic.IEnumerable<object>
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError.Message.get -> string
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError.Path.get -> System.Collections.Generic.IEnumerable<string>
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionErrors
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionErrors.Count.get -> int
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionErrors.this[int index].get -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IExecutionError
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IOperation
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IOperation.Name.get -> string
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.IOperation.OperationType.get -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy.Mutation = 1 -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy.Query = 0 -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy.Subscription = 2 -> OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.OperationTypeProxy
 OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration.LoggingBuilderIntegration() -> void
 OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration.MongoClientIntegration() -> void
 OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData.MySqlConnectionStringBuilderIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData.MySqlConnectionStringBuilderIntegration.MySqlConnectionStringBuilderIntegration() -> void
 OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration.StackExchangeRedisIntegration() -> void
 OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync
-OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync.StackExchangeRedisIntegrationAsync() -> void
 OpenTelemetry.AutoInstrumentation.Instrumentations.Validations.StrongNamedValidation
-OpenTelemetry.AutoInstrumentation.Instrumentations.Validations.StrongNamedValidation.StrongNamedValidation() -> void
 override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.ToString() -> string
 override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.ToString() -> string
 static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8>(TTarget instance, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, TArg5 arg5, TArg6 arg6, TArg7 arg7, TArg8 arg8) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
@@ -72,5 +39,3 @@ static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.LogExcepti
 static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn.GetDefault() -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn
 static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.GetDefault() -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>
 static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.GetDefault() -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
-static OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration.OnAsyncMethodEnd<TTarget, TExecutionResult>(TTarget instance, TExecutionResult executionResult, System.Exception exception, OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState state) -> TExecutionResult
-static OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration.OnMethodBegin<TTarget, TContext>(TTarget instance, TContext context) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState

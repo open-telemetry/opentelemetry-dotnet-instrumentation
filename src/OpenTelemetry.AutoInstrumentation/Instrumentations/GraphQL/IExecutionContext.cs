@@ -19,7 +19,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
 /// <summary>
 /// GraphQL.Execution.ExecutionContext interface for ducktyping
 /// </summary>
-public interface IExecutionContext
+internal interface IExecutionContext
 {
     /// <summary>
     /// Gets the document associated with the execution context

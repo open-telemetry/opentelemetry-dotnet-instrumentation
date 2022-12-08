@@ -52,7 +52,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
     MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
     IntegrationName = StackExchangeRedisConstants.IntegrationName,
     Type = InstrumentationType.Trace)]
-public class StackExchangeRedisIntegrationAsync
+public static class StackExchangeRedisIntegrationAsync
 {
     /// <summary>
     /// OnAsyncMethodEnd callback
