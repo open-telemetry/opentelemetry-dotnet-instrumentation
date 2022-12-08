@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>OpenTelemetry.AutoInstrumentation</id>
-    <version>0.5.1-beta.1</version>
+    <version>0.5.1-beta.2</version>
     <description>OpenTelemetry Auto-Instrumentation</description>
     <authors>OpenTelemetry Authors</authors>
     <owners>OpenTelemetry Authors</owners>
