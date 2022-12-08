@@ -10,7 +10,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        machine: [ windows-2022, ubuntu-20.04, macos-11 ]
+        include:
+          - machine: windows-2022
+            artifact-name: windows
+          - machine: ubuntu-20.04
+            artifact-name: linux-glibc
+          - machine: macos-11
+            artifact-name: macos
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.1.0
@@ -24,7 +30,7 @@ jobs:
         uses: actions/upload-artifact@v3.1.1
         if: always()
         with:
-          name: bin-${{ matrix.machine }}
+          name: opentelemetry-dotnet-instrumentation-${{ matrix.artifact-name }}
           path: bin/tracer-home
 
   container-build:
@@ -53,5 +59,25 @@ jobs:
       uses: actions/upload-artifact@v3.1.1
       if: always()
       with:
-        name: bin-${{ matrix.base-image }}
+        name: opentelemetry-dotnet-instrumentation-linux-musl
         path: bin/tracer-home
+
+  create-release:
+    name: Create GH release
+    runs-on: ubuntu-20.04
+    needs: [ build, container-build ]
+    permissions:
+      contents: write
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - uses: actions/download-artifact@v3.0.1
+        with:
+          path: .
+      - name: Extract Version from Tag
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v}
+      - name: Create Release
+        run: gh release create v${{ steps.get_version.outputs.VERSION }} --draft opentelemetry-dotnet-instrumentation-linux-musl/** opentelemetry-dotnet-instrumentation-linux-glibc/** opentelemetry-dotnet-instrumentation-windows/** opentelemetry-dotnet-instrumentation-macos/** ./otel-dotnet-auto-install.sh ./OpenTelemetry.DotNet.Auto.psm1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
