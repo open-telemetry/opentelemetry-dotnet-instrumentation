@@ -32,7 +32,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Logger;
     MaximumVersion = "7.*.*",
     IntegrationName = "ILogger",
     Type = InstrumentationType.Log)]
-public class LoggingBuilderIntegration
+public static class LoggingBuilderIntegration
 {
     /// <summary>
     /// OnMethodEnd callback

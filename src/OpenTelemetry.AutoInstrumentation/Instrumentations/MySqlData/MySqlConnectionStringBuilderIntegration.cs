@@ -31,7 +31,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData;
     MinimumVersion = "8.0.31",
     MaximumVersion = "8.65535.65535",
     IntegrationName = "MySqlData")]
-public class MySqlConnectionStringBuilderIntegration
+public static class MySqlConnectionStringBuilderIntegration
 {
 #if !NETFRAMEWORK
     private static readonly object TrueAsObject = true;
