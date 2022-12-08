@@ -10,13 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - machine: windows-2022
-            artifact-name: windows
-          - machine: ubuntu-20.04
-            artifact-name: linux-glibc
-          - machine: macos-11
-            artifact-name: macos
+        machine: [ windows-2022, ubuntu-20.04, macos-11 ]
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.1.0
@@ -30,7 +24,7 @@ jobs:
         uses: actions/upload-artifact@v3.1.1
         if: always()
         with:
-          name: opentelemetry-dotnet-instrumentation-${{ matrix.artifact-name }}
+          name: bin-${{ matrix.machine }}
           path: bin/tracer-home
 
   container-build:
@@ -59,7 +53,7 @@ jobs:
       uses: actions/upload-artifact@v3.1.1
       if: always()
       with:
-        name: opentelemetry-dotnet-instrumentation-linux-musl
+        name: bin-${{ matrix.base-image }}
         path: bin/tracer-home
 
   create-release:
@@ -74,10 +68,16 @@ jobs:
       - uses: actions/download-artifact@v3.0.1
         with:
           path: .
+      - name: Install zip
+        uses: montudor/action-zip@v1
+      - run: cd bin-alpine ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-musl.zip . * ; cd ..
+      - run: cd bin-ubuntu-20.04 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc.zip . * ; cd ..
+      - run: cd bin-windows-2022 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-windows.zip . * ; cd ..
+      - run: cd bin-macos-11 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-macos.zip . * ; cd ..
       - name: Extract Version from Tag
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v}
       - name: Create Release
-        run: gh release create v${{ steps.get_version.outputs.VERSION }} --draft opentelemetry-dotnet-instrumentation-linux-musl/** opentelemetry-dotnet-instrumentation-linux-glibc/** opentelemetry-dotnet-instrumentation-windows/** opentelemetry-dotnet-instrumentation-macos/** ./otel-dotnet-auto-install.sh ./OpenTelemetry.DotNet.Auto.psm1
+        run: gh release create v${{ steps.get_version.outputs.VERSION }} --draft ./*.zip ./otel-dotnet-auto-install.sh ./OpenTelemetry.DotNet.Auto.psm1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
