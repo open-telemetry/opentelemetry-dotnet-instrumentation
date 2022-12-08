@@ -34,7 +34,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
     TypeName = "GraphQL.Execution.SubscriptionExecutionStrategy",
     MinimumVersion = GraphQLCommon.Major2Minor3,
     MaximumVersion = GraphQLCommon.Major2)]
-public class ExecuteAsyncIntegration
+public static class ExecuteAsyncIntegration
 {
     /// <summary>
     /// OnMethodBegin callback
@@ -44,7 +44,7 @@ public class ExecuteAsyncIntegration
     /// <param name="instance">Instance value, aka `this` of the instrumented method.</param>
     /// <param name="context">The execution context of the GraphQL operation.</param>
     /// <returns>CallTarget state value</returns>
-    public static CallTargetState OnMethodBegin<TTarget, TContext>(TTarget instance, TContext context)
+    internal static CallTargetState OnMethodBegin<TTarget, TContext>(TTarget instance, TContext context)
         where TContext : IExecutionContext
     {
         return new CallTargetState(activity: GraphQLCommon.CreateActivityFromExecuteAsync(context), state: context);
@@ -60,7 +60,7 @@ public class ExecuteAsyncIntegration
     /// <param name="exception">Exception instance in case the original code threw an exception.</param>
     /// <param name="state">Calltarget state value</param>
     /// <returns>A response value, in an async scenario will be T of Task of T</returns>
-    public static TExecutionResult OnAsyncMethodEnd<TTarget, TExecutionResult>(TTarget instance, TExecutionResult executionResult, Exception exception, CallTargetState state)
+    internal static TExecutionResult OnAsyncMethodEnd<TTarget, TExecutionResult>(TTarget instance, TExecutionResult executionResult, Exception exception, CallTargetState state)
     {
         Activity activity = state.Activity;
         if (activity is null)

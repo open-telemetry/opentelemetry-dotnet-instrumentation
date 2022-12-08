@@ -19,7 +19,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
 /// <summary>
 /// GraphQL.ExecutionErrors interface for ducktyping
 /// </summary>
-public interface IExecutionErrors
+internal interface IExecutionErrors
 {
     /// <summary>
     /// Gets the number of errors
