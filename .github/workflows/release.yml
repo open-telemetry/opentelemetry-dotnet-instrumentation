@@ -55,3 +55,29 @@ jobs:
       with:
         name: bin-${{ matrix.base-image }}
         path: bin/tracer-home
+
+  create-release:
+    name: Create GH release
+    runs-on: ubuntu-20.04
+    needs: [ build, container-build ]
+    permissions:
+      contents: write
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - uses: actions/download-artifact@v3.0.1
+        with:
+          path: .
+      - name: Install zip
+        uses: montudor/action-zip@v1
+      - run: cd bin-alpine ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-musl.zip . * ; cd ..
+      - run: cd bin-ubuntu-20.04 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc.zip . * ; cd ..
+      - run: cd bin-windows-2022 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-windows.zip . * ; cd ..
+      - run: cd bin-macos-11 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-macos.zip . * ; cd ..
+      - name: Extract Version from Tag
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v}
+      - name: Create Release
+        run: gh release create v${{ steps.get_version.outputs.VERSION }} --draft ./*.zip ./otel-dotnet-auto-install.sh ./OpenTelemetry.DotNet.Auto.psm1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
