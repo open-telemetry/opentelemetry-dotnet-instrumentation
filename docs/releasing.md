@@ -39,11 +39,12 @@
    ```
 
    After you've pushed the git tag, a `release` GitHub workflow starts.
+   This will create draft release with uploaded artifacts.
 
 1. Publish a release in GitHub:
 
+   - Use draft created by `release` GitHub workflow.
    - Use the [CHANGELOG.md](../CHANGELOG.md) content in the description.
-   - Add the artifacts from [the `release` GitHub workflow](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/actions/workflows/release.yml).
 
    After you've publish the release, a `release-publish` GitHub workflow starts.
 

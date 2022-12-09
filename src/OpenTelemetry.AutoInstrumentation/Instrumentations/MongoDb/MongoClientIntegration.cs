@@ -38,7 +38,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
     MaximumVersion = "2.65535.65535",
     IntegrationName = "MongoDB",
     Type = InstrumentationType.Trace)]
-public class MongoClientIntegration
+public static class MongoClientIntegration
 {
 #if NET6_0_OR_GREATER
     private static Delegate _setActivityListener;
