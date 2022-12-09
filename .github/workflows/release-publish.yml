@@ -8,7 +8,6 @@ jobs:
   powershell-script:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v3.1.0
       - uses: actions/setup-dotnet@v3.0.3
         with:
           dotnet-version: | 
@@ -20,7 +19,7 @@ jobs:
           mkdir testapp
           cd testapp
           dotnet new console
-          dotnet publish /p:TreatWarningsAsErrors=false -f net7.0 -c Release
+          dotnet publish -f net7.0 -c Release
           $module_url = "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/OpenTelemetry.DotNet.Auto.psm1"
           $dl_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
           $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\*"
