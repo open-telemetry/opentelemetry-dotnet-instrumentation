@@ -31,6 +31,9 @@ internal static class StackExchangeRedisInitializer
             var optionsInstrumentationType = Type.GetType("OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisCallsInstrumentationOptions, OpenTelemetry.Instrumentation.StackExchangeRedis");
 
             var options = Activator.CreateInstance(optionsInstrumentationType);
+
+            Instrumentation.PluginManager.ConfigureTracesOptions(options);
+
             var instrumentation = Activator.CreateInstance(instrumentationType, connection, options);
 
             Instrumentation.LifespanManager.Track(instrumentation);
