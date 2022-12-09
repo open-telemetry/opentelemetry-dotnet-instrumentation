@@ -9,6 +9,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Add plugin support for
+ `ConfigureTracesOptions(StackExchangeRedisCallsInstrumentationOptions options)`.
+
 ### Changed
 
 ### Deprecated
