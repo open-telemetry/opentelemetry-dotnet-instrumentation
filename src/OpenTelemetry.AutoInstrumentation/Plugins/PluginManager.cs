@@ -73,6 +73,11 @@ internal class PluginManager
         ConfigureOptions(options, "ConfigureTracesOptions");
     }
 
+    public void ConfigureTracesOptions(object options)
+    {
+        ConfigureOptions(options.GetType(), options, "ConfigureTracesOptions");
+    }
+
     public void ConfigureLogsOptions<T>(T options)
     {
         ConfigureOptions(options, "ConfigureLogsOptions");
@@ -80,9 +85,14 @@ internal class PluginManager
 
     private void ConfigureOptions<T>(T options, string methodName)
     {
+        ConfigureOptions(typeof(T), options, methodName);
+    }
+
+    private void ConfigureOptions(Type type, object options, string methodName)
+    {
         foreach (var plugin in _plugins)
         {
-            var mi = plugin.Type.GetMethod(methodName, new[] { typeof(T) });
+            var mi = plugin.Type.GetMethod(methodName, new[] { type });
             if (mi is not null)
             {
                 mi.Invoke(plugin.Instance, new object[] { options });
