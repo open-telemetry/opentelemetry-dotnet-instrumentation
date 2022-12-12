@@ -24,7 +24,7 @@
         <dependency id="OpenTelemetry.Instrumentation.GrpcNetClient" version="1.0.0-rc9.9" />
         <dependency id="OpenTelemetry.Instrumentation.Http" version="1.0.0-rc9.9" />
         <dependency id="OpenTelemetry.Instrumentation.Runtime" version="1.1.0-beta.1" />
-        <dependency id="OpenTelemetry.Instrumentation.Process" Version="1.0.0-alpha.2" />
+        <dependency id="OpenTelemetry.Instrumentation.Process" version="1.0.0-alpha.2" />
         <dependency id="OpenTelemetry.Instrumentation.SqlClient" version="1.0.0-rc9.9" />
         <dependency id="OpenTelemetry.Instrumentation.Wcf" version="1.0.0-rc.7" />
         <dependency id="OpenTelemetry.Shims.OpenTracing" version="1.0.0-rc9.9" />
@@ -43,7 +43,7 @@
         <dependency id="OpenTelemetry.Instrumentation.GrpcNetClient" version="1.0.0-rc9.9" />
         <dependency id="OpenTelemetry.Instrumentation.Http" version="1.0.0-rc9.9" />
         <dependency id="OpenTelemetry.Instrumentation.Runtime" version="1.1.0-beta.1" />
-        <dependency id="OpenTelemetry.Instrumentation.Process" Version="1.0.0-alpha.2" />
+        <dependency id="OpenTelemetry.Instrumentation.Process" version="1.0.0-alpha.2" />
         <dependency id="OpenTelemetry.Instrumentation.SqlClient" version="1.0.0-rc9.9" />
         <dependency id="OpenTelemetry.Instrumentation.Wcf" version="1.0.0-rc.7" />
         <dependency id="OpenTelemetry.Shims.OpenTracing" version="1.0.0-rc9.9" />
