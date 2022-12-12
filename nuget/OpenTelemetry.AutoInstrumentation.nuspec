@@ -57,14 +57,14 @@
     </frameworkAssemblies>
   </metadata>
   <files>
-    <file src="bin-linux-glibc\AdditionalDeps\**\*.*" target="AdditionalDeps" />
-    <file src="bin-linux-glibc\net\**\*.*" target="net" />
-    <file src="bin-linux-glibc\store\**\*.*" target="store" />
-    <file src="bin-linux-glibc\integrations.json" target="integrations.json" />
-    <file src="bin-linux-glibc\OpenTelemetry.AutoInstrumentation.Native.so" target="OpenTelemetry.AutoInstrumentation.Native.so" />
-    <file src="bin-windows\netfx\**\*.*" target="netfx" />
-    <file src="bin-windows\win-x64\**\*.*" target="win-x64" />
-    <file src="bin-windows\win-x86\**\*.*" target="win-x86" />
-    <file src="bin-macos\OpenTelemetry.AutoInstrumentation.Native.dylib" target="OpenTelemetry.AutoInstrumentation.Native.dylib" />
+    <file src="bin-linux-glibc/AdditionalDeps/**/*.*" target="AdditionalDeps" />
+    <file src="bin-linux-glibc/net/**/*.*" target="net" />
+    <file src="bin-linux-glibc/store/**/*.*" target="store" />
+    <file src="bin-linux-glibc/integrations.json" target="integrations.json" />
+    <file src="bin-linux-glibc/OpenTelemetry.AutoInstrumentation.Native.so" target="OpenTelemetry.AutoInstrumentation.Native.so" />
+    <file src="bin-windows/netfx/**/*.*" target="netfx" />
+    <file src="bin-windows/win-x64/**/*.*" target="win-x64" />
+    <file src="bin-windows/win-x86/**/*.*" target="win-x86" />
+    <file src="bin-macos/OpenTelemetry.AutoInstrumentation.Native.dylib" target="OpenTelemetry.AutoInstrumentation.Native.dylib" />
   </files>
 </package>
