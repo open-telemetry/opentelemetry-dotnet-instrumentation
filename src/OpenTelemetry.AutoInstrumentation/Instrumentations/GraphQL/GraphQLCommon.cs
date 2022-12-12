@@ -59,7 +59,7 @@ internal class GraphQLCommon
             }
 
             var activityCurrent = Activity.Current;
-            var activityKind = activityCurrent != null && activityCurrent.Recorded ? ActivityKind.Internal : ActivityKind.Server;
+            var activityKind = activityCurrent != null ? ActivityKind.Internal : ActivityKind.Server;
 
             activity = ActivitySource.StartActivityWithTags(operation, activityKind, tags);
         }
