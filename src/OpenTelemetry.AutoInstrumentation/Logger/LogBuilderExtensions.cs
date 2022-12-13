@@ -48,7 +48,7 @@ internal static class LogBuilderExtensions
 
             builder.AddOpenTelemetry(options =>
             {
-                options.ConfigureResource(ResourceConfigurator.Configure);
+                options.SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder());
 
                 options.IncludeFormattedMessage = settings.IncludeFormattedMessage;
 
