@@ -27,4 +27,11 @@ internal static class ResourceConfigurator
             .AddTelemetrySdk()
             .AddAttributes(new KeyValuePair<string, object>[] { new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version) });
     }
+
+    public static ResourceBuilder CreateResourceBuilder()
+    {
+        var resourceBuilder = ResourceBuilder.CreateDefault();
+        Configure(resourceBuilder);
+        return resourceBuilder;
+    }
 }
