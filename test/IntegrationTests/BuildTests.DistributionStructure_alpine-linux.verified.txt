@@ -33,6 +33,7 @@
   /net/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll,
   /net/OpenTelemetry.Exporter.Prometheus.HttpListener.dll,
   /net/OpenTelemetry.Exporter.Zipkin.dll,
+  /net/OpenTelemetry.Extensions.DependencyInjection.dll,
   /net/OpenTelemetry.Extensions.Propagators.dll,
   /net/OpenTelemetry.Instrumentation.AspNetCore.dll,
   /net/OpenTelemetry.Instrumentation.GrpcNetClient.dll,

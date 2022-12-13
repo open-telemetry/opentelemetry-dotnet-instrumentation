@@ -158,7 +158,7 @@ To enable the OTLP exporter, set the `OTEL_TRACES_EXPORTER`/`OTEL_METRICS_EXPORT
 environment variable to `otlp`.
 
 To customize the OTLP exporter using environment variables, see the
-[OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-beta.3/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables).
+[OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-rc.1/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables).
 Important environment variables include:
 
 | Environment variable                     | Description                                                                                                                                                                                                | Default value                                                                                             |
@@ -168,13 +168,13 @@ Important environment variables include:
 | `OTEL_EXPORTER_OTLP_TIMEOUT`             | The max waiting time (in milliseconds) for the backend to process each batch.                                                                                                                              | `10000`                                                                                                   |
 | `OTEL_EXPORTER_OTLP_HEADERS`             | Comma-separated list of additional HTTP headers sent with each export, for example: `Authorization=secret,X-Key=Value`.                                                                                    |                                                                                                           |
 | `OTEL_ATTRIBUTE_VALUE_LENGTH_LIMIT`      | Maximum allowed attribute value size.                                                                                                                                                                      | none                                                                                                      |
-| `OTEL_ATTRIBUTE_COUNT_LIMIT`             | Maximum allowed span attribute count.                                                                                                                                                                      | none                                                                                                      |
+| `OTEL_ATTRIBUTE_COUNT_LIMIT`             | Maximum allowed span attribute count.                                                                                                                                                                      | 128                                                                                                       |
 | `OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT` | Maximum allowed attribute value size. [Not applicable for metrics.](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.15.0/specification/metrics/sdk.md#attribute-limits).             | none                                                                                                      |
-| `OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT`        | Maximum allowed span attribute count. [Not applicable for metrics.](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.15.0/specification/metrics/sdk.md#attribute-limits).             | none                                                                                                      |
-| `OTEL_SPAN_EVENT_COUNT_LIMIT`            | Maximum allowed span event count.                                                                                                                                                                          | none                                                                                                      |
-| `OTEL_SPAN_LINK_COUNT_LIMIT`             | Maximum allowed span link count.                                                                                                                                                                           | none                                                                                                      |
-| `OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT`       | Maximum allowed attribute per span event count.                                                                                                                                                            | none                                                                                                      |
-| `OTEL_LINK_ATTRIBUTE_COUNT_LIMIT`        | Maximum allowed attribute per span link count.                                                                                                                                                             | none                                                                                                      |
+| `OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT`        | Maximum allowed span attribute count. [Not applicable for metrics.](https://github.com/open-telemetry/opentelemetry-specification/blob/v1.15.0/specification/metrics/sdk.md#attribute-limits).             | 128                                                                                                       |
+| `OTEL_SPAN_EVENT_COUNT_LIMIT`            | Maximum allowed span event count.                                                                                                                                                                          | 128                                                                                                       |
+| `OTEL_SPAN_LINK_COUNT_LIMIT`             | Maximum allowed span link count.                                                                                                                                                                           | 128                                                                                                       |
+| `OTEL_EVENT_ATTRIBUTE_COUNT_LIMIT`       | Maximum allowed attribute per span event count.                                                                                                                                                            | 128                                                                                                       |
+| `OTEL_LINK_ATTRIBUTE_COUNT_LIMIT`        | Maximum allowed attribute per span link count.                                                                                                                                                             | 128                                                                                                       |
 
 **[1]**: Considerations on the `OTEL_EXPORTER_OTLP_PROTOCOL`:
 
@@ -192,7 +192,7 @@ To enable the Jaeger exporter, set the `OTEL_TRACES_EXPORTER` environment variab
 to `jaeger`.
 
 To customize the Jaeger exporter using environment variables, see the
-[Jaeger exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-beta.3/src/OpenTelemetry.Exporter.Jaeger#environment-variables).
+[Jaeger exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-rc.1/src/OpenTelemetry.Exporter.Jaeger#environment-variables).
 Important environment variables include:
 
 | Environment variable              | Description                                                                                          | Default value                       |
@@ -219,7 +219,7 @@ The exporter exposes the metrics HTTP endpoint on `http://localhost:9464/metrics
 and it caches the responses for 300 milliseconds.
 
 See the
-[Prometheus Exporter HttpListener documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-beta.3/src/OpenTelemetry.Exporter.Prometheus.HttpListener).
+[Prometheus Exporter HttpListener documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-rc.1/src/OpenTelemetry.Exporter.Prometheus.HttpListener).
 to learn more.
 
 ### Zipkin
@@ -228,7 +228,7 @@ To enable the Zipkin exporter, set the `OTEL_TRACES_EXPORTER` environment
 variable to `zipkin`.
 
 To customize the Zipkin exporter using environment variables,
-see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-beta.3/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
+see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-rc.1/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
 Important environment variables include:
 
 | Environment variable            | Description | Default value                        |
