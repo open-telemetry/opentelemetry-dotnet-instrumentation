@@ -17,6 +17,8 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
 
 - Add plugin support for
  `ConfigureTracesOptions(StackExchangeRedisCallsInstrumentationOptions options)`.
+- Add plugin support for
+ `ConfigureMetricsOptions(AspNetCoreMetricsInstrumentationOptions options)`.
 
 ### Changed
 
