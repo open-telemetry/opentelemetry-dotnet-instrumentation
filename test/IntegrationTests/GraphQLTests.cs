@@ -36,8 +36,8 @@ public class GraphQLTests : TestHelper
     }
 
     [Theory]
-    [InlineData(true)]
     [InlineData(false)]
+    [InlineData(true)]
     [Trait("Category", "EndToEnd")]
     public async Task SubmitsTraces(bool setDocument)
     {
@@ -66,6 +66,9 @@ public class GraphQLTests : TestHelper
         Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, verifyFailure: VerifyNotImplementedException);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "GraphQL");
+        SetEnvironmentVariable("OTEL_TRACES_SAMPLER", "always_on");
+
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
         SetEnvironmentVariable("ASPNETCORE_URLS", $"http://127.0.0.1:{aspNetCorePort}/");
         EnableBytecodeInstrumentation();
@@ -127,7 +130,13 @@ public class GraphQLTests : TestHelper
     {
         bool Predicate(Span span)
         {
+#if NETFRAMEWORK
+            // There is no parent Span. There is no parent Activity on .NET Fx
             if (span.Kind != Span.Types.SpanKind.Server)
+#else
+            // AspNetCore instrumentation always creates parent Activity. The activity is not recorded if instrumentation is disabled.
+            if (span.Kind != Span.Types.SpanKind.Internal)
+#endif
             {
                 return false;
             }
