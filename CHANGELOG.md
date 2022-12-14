@@ -31,6 +31,8 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
 
 ### Fixed
 
+- Fix WCF instrumenation on .NET Framework.
+
 ### Security
 
 ## [0.5.1-beta.2](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.5.1-beta.2)

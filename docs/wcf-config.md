@@ -36,7 +36,7 @@ the clients you want to instrument:
       </netTcpBinding>
     </bindings>
     <client>
-      <endpoint address="http://localhost:9009/Telemetry" binding="basicHttpBinding" bindingConfiguration="basicHttpConfig" behaviorConfiguration="telemetry" contract="TestApplication.Wcf.Shared.IStatusServiceContract" name="StatusService_Http" />
+      <endpoint address="http://localhost:9009/Telemetry" binding="basicHttpBinding" bindingConfiguration="basicHttpConfig" behaviorConfiguration="telemetry" contract="TestApplication.Wcf.Client.NetFramework.IStatusServiceContract" name="StatusService_Http" />
     </client>
   </system.serviceModel>
 </configuration>
@@ -105,7 +105,7 @@ to instrument:
     </bindings>
     <services>
       <service>
-        <endpoint binding="netTcpBinding" bindingConfiguration="netTCPConfig" behaviorConfiguration="telemetry" contract="TestApplication.Wcf.Shared.IStatusServiceContract" />
+        <endpoint binding="netTcpBinding" bindingConfiguration="netTCPConfig" behaviorConfiguration="telemetry" contract="TestApplication.Wcf.Server.NetFramework.IStatusServiceContract" />
         <host>
           <baseAddresses>
             <add baseAddress="net.tcp://localhost:9090/Telemetry" />
@@ -152,7 +152,7 @@ instrument:
     </bindings>
     <services>
       <service name="TestApplication.Wcf.Server.NetFramework.StatusService" behaviorConfiguration="telemetry">
-        <endpoint binding="netTcpBinding" bindingConfiguration="netTCPConfig" contract="TestApplication.Wcf.Shared.IStatusServiceContract" />
+        <endpoint binding="netTcpBinding" bindingConfiguration="netTCPConfig" contract="TestApplication.Wcf.Server.NetFramework.IStatusServiceContract" />
         <host>
           <baseAddresses>
             <add baseAddress="net.tcp://localhost:9090/Telemetry" />

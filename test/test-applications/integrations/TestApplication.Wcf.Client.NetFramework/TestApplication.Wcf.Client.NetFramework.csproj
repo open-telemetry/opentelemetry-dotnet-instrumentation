@@ -5,10 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TestApplication.Wcf.Shared\TestApplication.Wcf.Shared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="System.ServiceModel" />
   </ItemGroup>
 
