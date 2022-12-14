@@ -25,7 +25,11 @@ internal class WcfInitializer : InstrumentationInitializer
     private readonly PluginManager _pluginManager;
 
     public WcfInitializer(PluginManager pluginManager)
+#if NETFRAMEWORK
         : base("System.ServiceModel")
+#else
+        : base("System.ServiceModel.Primitives")
+#endif
     {
         _pluginManager = pluginManager;
     }
