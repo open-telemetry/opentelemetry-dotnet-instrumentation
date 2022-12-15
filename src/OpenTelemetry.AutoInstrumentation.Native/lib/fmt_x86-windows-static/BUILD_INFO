@@ -1,2 +1,2 @@
-CRTLinkage: static
-LibraryLinkage: static
+CRTLinkage: dynamic
+LibraryLinkage: dynamic
