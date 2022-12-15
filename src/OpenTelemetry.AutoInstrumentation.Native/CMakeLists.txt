@@ -118,7 +118,7 @@ endif()
 if (NOT EXISTS ${OUTPUT_DEPS_DIR}/fmt)
     add_custom_command(
         OUTPUT ${OUTPUT_DEPS_DIR}/fmt
-        COMMAND git clone --quiet --depth 1 --branch 5.3.0 https://github.com/fmtlib/fmt.git && cd fmt && cmake -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE -DFMT_TEST=0 -DFMT_DOC=0 . && make
+        COMMAND git clone --quiet --depth 1 --branch 9.1.0 https://github.com/fmtlib/fmt.git && cd fmt && cmake -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE -DFMT_TEST=0 -DFMT_DOC=0 . && make
         WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
     )
 endif()
