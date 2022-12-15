@@ -7,22 +7,22 @@ namespace trace
 {
 void CorProfiler::InitNetFxAssemblyRedirectsMap()
 {
-    assembly_version_redirect_map_[WSTRING(L"Google.Protobuf")] = AssemblyVersionRedirection(3, 19, 4, 0);
+    assembly_version_redirect_map_[WSTRING(L"Google.Protobuf")] = AssemblyVersionRedirection(3, 21, 11, 0);
     assembly_version_redirect_map_[WSTRING(L"Grpc.Core")] = AssemblyVersionRedirection(2, 0, 0, 0);
     assembly_version_redirect_map_[WSTRING(L"Grpc.Core.Api")] = AssemblyVersionRedirection(2, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Bcl.AsyncInterfaces")] = AssemblyVersionRedirection(1, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Configuration")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Configuration.Abstractions")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Configuration.Binder")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Configuration.EnvironmentVariables")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.DependencyInjection")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.DependencyInjection.Abstractions")] = AssemblyVersionRedirection(5, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Logging")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Logging.Abstractions")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Logging.Configuration")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Options")] = AssemblyVersionRedirection(5, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Options.ConfigurationExtensions")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Primitives")] = AssemblyVersionRedirection(5, 0, 0, 0);
+    assembly_version_redirect_map_[WSTRING(L"Microsoft.Bcl.AsyncInterfaces")] = AssemblyVersionRedirection(7, 0, 0, 0);
+    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Configuration")] = AssemblyVersionRedirection(7, 0, 0, 0);
+    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Configuration.Abstractions")] = AssemblyVersionRedirection(7, 0, 0, 0);
+    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Configuration.Binder")] = AssemblyVersionRedirection(7, 0, 0, 1);
+    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Configuration.EnvironmentVariables")] = AssemblyVersionRedirection(7, 0, 0, 0);
+    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.DependencyInjection")] = AssemblyVersionRedirection(7, 0, 0, 0);
+    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.DependencyInjection.Abstractions")] = AssemblyVersionRedirection(7, 0, 0, 0);
+    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Logging")] = AssemblyVersionRedirection(7, 0, 0, 0);
+    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Logging.Abstractions")] = AssemblyVersionRedirection(7, 0, 0, 0);
+    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Logging.Configuration")] = AssemblyVersionRedirection(7, 0, 0, 0);
+    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Options")] = AssemblyVersionRedirection(7, 0, 0, 0);
+    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Options.ConfigurationExtensions")] = AssemblyVersionRedirection(7, 0, 0, 0);
+    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Primitives")] = AssemblyVersionRedirection(7, 0, 0, 0);
     assembly_version_redirect_map_[WSTRING(L"Microsoft.Win32.Primitives")] = AssemblyVersionRedirection(4, 0, 3, 0);
     assembly_version_redirect_map_[WSTRING(L"OpenTelemetry")] = AssemblyVersionRedirection(1, 0, 0, 0);
     assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Api")] = AssemblyVersionRedirection(1, 0, 0, 0);
@@ -128,8 +128,8 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
     assembly_version_redirect_map_[WSTRING(L"System.Security.SecureString")] = AssemblyVersionRedirection(4, 1, 0, 0);
     assembly_version_redirect_map_[WSTRING(L"System.Text.Encoding")] = AssemblyVersionRedirection(4, 0, 11, 0);
     assembly_version_redirect_map_[WSTRING(L"System.Text.Encoding.Extensions")] = AssemblyVersionRedirection(4, 0, 11, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Text.Encodings.Web")] = AssemblyVersionRedirection(4, 0, 5, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Text.Json")] = AssemblyVersionRedirection(4, 0, 1, 2);
+    assembly_version_redirect_map_[WSTRING(L"System.Text.Encodings.Web")] = AssemblyVersionRedirection(7, 0, 0, 0);
+    assembly_version_redirect_map_[WSTRING(L"System.Text.Json")] = AssemblyVersionRedirection(7, 0, 0, 1);
     assembly_version_redirect_map_[WSTRING(L"System.Text.RegularExpressions")] = AssemblyVersionRedirection(4, 1, 1, 0);
     assembly_version_redirect_map_[WSTRING(L"System.Threading")] = AssemblyVersionRedirection(4, 0, 11, 0);
     assembly_version_redirect_map_[WSTRING(L"System.Threading.Overlapped")] = AssemblyVersionRedirection(4, 1, 0, 0);
