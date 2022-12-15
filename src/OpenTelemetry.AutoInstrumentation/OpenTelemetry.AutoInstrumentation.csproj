@@ -32,31 +32,6 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNet" Version="1.0.0-rc9.7" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
-    <!-- Bump transitive dependencies to latest version in order to minimize risks when performing -->
-    <!-- automatic assembly version redirection on the .NET Framework. List of latest transitive   -->
-    <!-- dependencies generated using: dotnet outdated -t -td 1024                                 -->
-    <PackageReference Include="Google.Protobuf" Version="3.21.11" />
-    <PackageReference Include="Grpc" Version="2.46.5" />
-    <PackageReference Include="Grpc.Core" Version="2.46.5" />
-    <PackageReference Include="Grpc.Core.Api" Version="2.50.0" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Primitives" Version="7.0.0" />
-    <PackageReference Include="System.Text.Encodings.Web" Version="7.0.0" />
-    <PackageReference Include="System.Text.Json" Version="7.0.1" />
-  </ItemGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.10" />
     <PackageReference Include="OpenTelemetry.Instrumentation.MySqlData" Version="1.0.0-beta.4" />
