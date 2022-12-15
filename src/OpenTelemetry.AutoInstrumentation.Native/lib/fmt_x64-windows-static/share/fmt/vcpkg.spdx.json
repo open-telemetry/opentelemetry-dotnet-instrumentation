@@ -3,13 +3,13 @@
   "spdxVersion": "SPDX-2.2",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "documentNamespace": "https://spdx.org/spdxdocs/fmt-x64-windows-9.1.0#1-d2d56270-8eb1-4c9d-bf1f-d0a882155bde",
-  "name": "fmt:x64-windows@9.1.0#1 7a67a1deaee8c3c0cf63b69dbe1c3c7808767b6b22bf18766aff7ea0580fed1d",
+  "documentNamespace": "https://spdx.org/spdxdocs/fmt-x64-windows-static-9.1.0#1-949221a1-fc0e-4444-aa29-4be98dea2f2e",
+  "name": "fmt:x64-windows-static@9.1.0#1 501342b0f72bb8a0567e699cee9e02809d8a46f21a4afe08d395dee13245d336",
   "creationInfo": {
     "creators": [
       "Tool: vcpkg-5fdee72bc1fceca198fb1ab7589837206a8b81ba"
     ],
-    "created": "2022-12-15T12:19:25Z"
+    "created": "2022-12-15T14:00:40Z"
   },
   "relationships": [
     {
@@ -92,9 +92,9 @@
       "comment": "This is the port (recipe) consumed by vcpkg."
     },
     {
-      "name": "fmt:x64-windows",
+      "name": "fmt:x64-windows-static",
       "SPDXID": "SPDXRef-binary",
-      "versionInfo": "7a67a1deaee8c3c0cf63b69dbe1c3c7808767b6b22bf18766aff7ea0580fed1d",
+      "versionInfo": "501342b0f72bb8a0567e699cee9e02809d8a46f21a4afe08d395dee13245d336",
       "downloadLocation": "NONE",
       "licenseConcluded": "MIT",
       "licenseDeclared": "NOASSERTION",

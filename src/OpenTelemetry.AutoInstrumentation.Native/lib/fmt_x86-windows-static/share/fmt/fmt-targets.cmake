@@ -55,10 +55,9 @@ if(_IMPORT_PREFIX STREQUAL "/")
 endif()
 
 # Create imported target fmt::fmt
-add_library(fmt::fmt SHARED IMPORTED)
+add_library(fmt::fmt STATIC IMPORTED)
 
 set_target_properties(fmt::fmt PROPERTIES
-  INTERFACE_COMPILE_DEFINITIONS "FMT_SHARED"
   INTERFACE_COMPILE_FEATURES "cxx_variadic_templates"
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
 )
