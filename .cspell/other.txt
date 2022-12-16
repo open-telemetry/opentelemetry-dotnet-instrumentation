@@ -26,8 +26,10 @@ proto
 protobuf
 protos
 Serilog
+spdlog
 sqlserver
 TMPDIR
 tracesexporter
 unencrypted
 UNENCRYPTEDSUPPORT
+vcpkg

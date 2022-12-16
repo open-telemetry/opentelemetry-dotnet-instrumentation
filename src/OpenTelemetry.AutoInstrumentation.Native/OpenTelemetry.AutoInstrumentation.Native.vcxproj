@@ -218,12 +218,21 @@
     <ClCompile Include="il_rewriter_wrapper.cpp" />
     <ClCompile Include="integration.cpp" />
     <ClCompile Include="integration_loader.cpp" />
-    <ClCompile Include="lib\spdlog\src\spdlog.cpp" />
     <ClCompile Include="metadata_builder.cpp" />
     <ClCompile Include="miniutf.cpp" />
     <ClCompile Include="rejit_handler.cpp" />
     <ClCompile Include="string.cpp" />
     <ClCompile Include="util.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Update spdlog inclusions here after updating the library. -->
+    <ClCompile Include="lib\spdlog\src\async.cpp" />
+    <ClCompile Include="lib\spdlog\src\bundled_fmtlib_format.cpp" />
+    <ClCompile Include="lib\spdlog\src\cfg.cpp" />
+    <ClCompile Include="lib\spdlog\src\color_sinks.cpp" />
+    <ClCompile Include="lib\spdlog\src\file_sinks.cpp" />
+    <ClCompile Include="lib\spdlog\src\spdlog.cpp" />
+    <ClCompile Include="lib\spdlog\src\stdout_sinks.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
