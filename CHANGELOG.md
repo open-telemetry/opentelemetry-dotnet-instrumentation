@@ -19,8 +19,10 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
  `ConfigureTracesOptions(StackExchangeRedisCallsInstrumentationOptions options)`.
 - Add plugin support for
  `ConfigureMetricsOptions(AspNetCoreMetricsInstrumentationOptions options)`.
-- Add automatic assembly redirection for .NET Framework applications, see
- `OTEL_DOTNET_AUTO_NETFX_ASSEMBLY_REDIRECTION_ENABLED`.
+- Add automatic assembly redirection for .NET Framework applications. The redirection
+ can be enabled or disabled via the
+ `OTEL_DOTNET_AUTO_NETFX_ASSEMBLY_REDIRECTION_ENABLED` environment variable.
+ See the [additional settings](./docs/config.md#additional-settings) table for details.
 
 ### Changed
 
