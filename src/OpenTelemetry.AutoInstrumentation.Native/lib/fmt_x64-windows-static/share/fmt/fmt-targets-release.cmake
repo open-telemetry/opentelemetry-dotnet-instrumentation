@@ -12,8 +12,8 @@ set_target_properties(fmt::fmt PROPERTIES
   IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib/fmt.lib"
   )
 
-list(APPEND _IMPORT_CHECK_TARGETS fmt::fmt )
-list(APPEND _IMPORT_CHECK_FILES_FOR_fmt::fmt "${_IMPORT_PREFIX}/lib/fmt.lib" )
+list(APPEND _cmake_import_check_targets fmt::fmt )
+list(APPEND _cmake_import_check_files_for_fmt::fmt "${_IMPORT_PREFIX}/lib/fmt.lib" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

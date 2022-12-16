@@ -24,5 +24,8 @@ endmacro()
 
 ####################################################################################
 
-include(${CMAKE_CURRENT_LIST_DIR}/fmt-targets.cmake)
+if (NOT TARGET fmt::fmt)
+  include(${CMAKE_CURRENT_LIST_DIR}/fmt-targets.cmake)
+endif ()
+
 check_required_components(fmt)
