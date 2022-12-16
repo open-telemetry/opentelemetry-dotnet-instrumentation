@@ -560,4 +560,9 @@ partial class Build
             }
         }
     }
+
+    private string MapToFolderOutput(TargetFramework targetFramework)
+    {
+        return targetFramework.ToString().StartsWith("net4") ? "netfx" : "net";
+    }
 }

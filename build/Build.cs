@@ -160,9 +160,4 @@ partial class Build : NukeBuild
 
         return result;
     }
-
-    string MapToFolderOutput(TargetFramework targetFramework)
-    {
-        return targetFramework.ToString().StartsWith("net4") ? "netfx" : "net";
-    }
 }
