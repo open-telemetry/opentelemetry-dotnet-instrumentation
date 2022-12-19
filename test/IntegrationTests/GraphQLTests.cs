@@ -83,18 +83,18 @@ public class GraphQLTests : TestHelper
         }
         finally
         {
-            if (!process.HasExited)
+            if (process != null && !process.HasExited)
             {
                 process.Kill();
                 process.WaitForExit();
+                Output.WriteLine("Exit Code: " + process.ExitCode);
             }
 
-            Output.WriteLine("Exit Code: " + process.ExitCode);
             Output.WriteResult(helper);
         }
     }
 
-    private static void Request(List<RequestInfo> requests, string method = "POST", string url = "/graphql", string body = null)
+    private static void Request(List<RequestInfo> requests, string method = "POST", string url = "/graphql", string? body = null)
     {
         requests.Add(new RequestInfo
         {
@@ -123,10 +123,10 @@ public class GraphQLTests : TestHelper
         MockSpansCollector collector,
         string spanName,
         string graphQLOperationType,
-        string graphQLOperationName,
+        string? graphQLOperationName,
         string graphQLDocument,
         bool setDocument,
-        Predicate<Span> verifyFailure = null)
+        Predicate<Span>? verifyFailure = null)
     {
         bool Predicate(Span span)
         {
@@ -175,13 +175,13 @@ public class GraphQLTests : TestHelper
     private async Task SubmitRequestsAsync(int aspNetCorePort, IEnumerable<RequestInfo> requests)
     {
         var client = new HttpClient();
-        foreach (RequestInfo requestInfo in requests)
+        foreach (var requestInfo in requests)
         {
             await SubmitRequestAsync(client, aspNetCorePort, requestInfo);
         }
     }
 
-    private async Task<HttpStatusCode> SubmitRequestAsync(HttpClient client, int aspNetCorePort, RequestInfo requestInfo, bool printResponseText = true)
+    private async Task SubmitRequestAsync(HttpClient client, int aspNetCorePort, RequestInfo requestInfo, bool printResponseText = true)
     {
         try
         {
@@ -196,6 +196,11 @@ public class GraphQLTests : TestHelper
             }
             else if (method == "POST")
             {
+                if (requestInfo.RequestBody == null)
+                {
+                    throw new NotSupportedException("RequestBody cannot be null when you are using POST method");
+                }
+
                 response = await client.PostAsync(url, new StringContent(requestInfo.RequestBody, Encoding.UTF8, "application/json"));
             }
             else
@@ -206,31 +211,23 @@ public class GraphQLTests : TestHelper
 
             if (printResponseText)
             {
-                string content = await response.Content.ReadAsStringAsync();
+                var content = await response.Content.ReadAsStringAsync();
 
                 Output.WriteLine($"[http] {response.StatusCode} {content}");
             }
-
-            return response.StatusCode;
         }
         catch (HttpRequestException ex)
         {
             Output.WriteLine($"[http] exception: {ex}");
-
-#if NET6_0_OR_GREATER
-            return ex.StatusCode.Value;
-#else
-            return HttpStatusCode.BadRequest;
-#endif
         }
     }
 
     private class RequestInfo
     {
-        public string Url { get; set; }
+        public string? Url { get; set; }
 
-        public string HttpMethod { get; set; }
+        public string? HttpMethod { get; set; }
 
-        public string RequestBody { get; set; }
+        public string? RequestBody { get; set; }
     }
 }

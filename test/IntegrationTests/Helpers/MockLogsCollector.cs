@@ -67,11 +67,11 @@ public class MockLogsCollector : IDisposable
         _listener.Dispose();
     }
 
-    public void Expect(Func<LogRecord, bool> predicate, string description = null)
+    public void Expect(Func<LogRecord, bool> predicate, string? description = null)
     {
         description ??= "<no description>";
 
-        _expectations.Add(new Expectation { Predicate = predicate, Description = description });
+        _expectations.Add(new Expectation(predicate, description));
     }
 
     public void AssertExpectations(TimeSpan? timeout = null)
@@ -211,8 +211,14 @@ public class MockLogsCollector : IDisposable
 
     private class Expectation
     {
-        public Func<LogRecord, bool> Predicate { get; set; }
+        public Expectation(Func<LogRecord, bool> predicate, string? description)
+        {
+            Predicate = predicate;
+            Description = description;
+        }
 
-        public string Description { get; set; }
+        public Func<LogRecord, bool> Predicate { get; }
+
+        public string? Description { get; }
     }
 }

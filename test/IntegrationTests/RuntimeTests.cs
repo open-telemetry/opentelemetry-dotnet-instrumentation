@@ -44,7 +44,7 @@ public class RuntimeTests : TestHelper
         }
         finally
         {
-            process.Kill();
+            process?.Kill();
         }
     }
 }

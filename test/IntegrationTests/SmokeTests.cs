@@ -118,7 +118,7 @@ public class SmokeTests : TestHelper
         collector.ResourceExpector.Expect("service.name", ServiceName);
         collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
         collector.ResourceExpector.Expect("telemetry.sdk.language", "dotnet");
-        collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
+        collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version);
         collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
@@ -136,7 +136,7 @@ public class SmokeTests : TestHelper
         collector.ResourceExpector.Expect("service.name", ServiceName);
         collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
         collector.ResourceExpector.Expect("telemetry.sdk.language", "dotnet");
-        collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
+        collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version);
         collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
@@ -155,7 +155,7 @@ public class SmokeTests : TestHelper
         collector.ResourceExpector.Expect("service.name", ServiceName);
         collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
         collector.ResourceExpector.Expect("telemetry.sdk.language", "dotnet");
-        collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
+        collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version);
         collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
 
         EnableBytecodeInstrumentation();
@@ -184,7 +184,7 @@ public class SmokeTests : TestHelper
     public void ZipkinExporter()
     {
         using var collector = new MockZipkinCollector(Output);
-        collector.Expect(span => span.Name == "SayHello" && span.Tags.GetValueOrDefault("otel.library.name") == "MyCompany.MyProduct.MyLibrary");
+        collector.Expect(span => span.Name == "SayHello" && span.Tags?.GetValueOrDefault("otel.library.name") == "MyCompany.MyProduct.MyLibrary");
 
         SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "zipkin");
         SetEnvironmentVariable("OTEL_EXPORTER_ZIPKIN_ENDPOINT", $"http://localhost:{collector.Port}/api/v2/spans");
@@ -229,15 +229,15 @@ public class SmokeTests : TestHelper
         }
         finally
         {
-            if (!helper.Process.HasExited)
+            if (helper?.Process != null && !helper.Process.HasExited)
             {
                 helper.Process.Kill();
                 helper.Process.WaitForExit();
-            }
 
-            Output.WriteLine("ProcessId: " + helper.Process.Id);
-            Output.WriteLine("Exit Code: " + helper.Process.ExitCode);
-            Output.WriteResult(helper);
+                Output.WriteLine("ProcessId: " + helper.Process.Id);
+                Output.WriteLine("Exit Code: " + helper.Process.ExitCode);
+                Output.WriteResult(helper);
+            }
         }
     }
 #endif

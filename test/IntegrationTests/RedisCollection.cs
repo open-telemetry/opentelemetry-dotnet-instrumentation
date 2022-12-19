@@ -35,7 +35,7 @@ public class RedisFixture : IAsyncLifetime
     private const int RedisPort = 6379;
     private const string RedisImage = "redis:7.0.4";
 
-    private TestcontainersContainer _container;
+    private TestcontainersContainer? _container;
 
     public RedisFixture()
     {

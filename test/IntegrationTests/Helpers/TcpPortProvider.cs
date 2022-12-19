@@ -28,7 +28,7 @@ public static class TcpPortProvider
 {
     public static int GetOpenPort()
     {
-        TcpListener tcpListener = null;
+        TcpListener? tcpListener = null;
 
         try
         {

@@ -34,8 +34,13 @@ public class ProcessHelper : IDisposable
     private bool _isStdOutputDrained;
     private bool _isErrOutputDrained;
 
-    public ProcessHelper(Process process)
+    public ProcessHelper(Process? process)
     {
+        if (process == null)
+        {
+            return;
+        }
+
         Process = process;
         Process.OutputDataReceived += (_, e) => DrainOutput(e.Data, _outputBuffer, isErrorStream: false);
         Process.ErrorDataReceived += (_, e) => DrainOutput(e.Data, _errorBuffer, isErrorStream: true);
@@ -44,7 +49,7 @@ public class ProcessHelper : IDisposable
         Process.BeginErrorReadLine();
     }
 
-    public Process Process { get; }
+    public Process? Process { get; }
 
     public string StandardOutput => CompleteOutput(_outputBuffer);
 
@@ -65,7 +70,7 @@ public class ProcessHelper : IDisposable
         _outputMutex.Dispose();
     }
 
-    private void DrainOutput(string data, StringBuilder buffer, bool isErrorStream)
+    private void DrainOutput(string? data, StringBuilder buffer, bool isErrorStream)
     {
         if (data != null)
         {
@@ -93,7 +98,7 @@ public class ProcessHelper : IDisposable
 
     private string CompleteOutput(StringBuilder builder)
     {
-        if (Process.HasExited)
+        if (Process == null || Process.HasExited)
         {
             return builder.ToString();
         }
