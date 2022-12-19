@@ -13,7 +13,7 @@
     <!-- System.Security.Cryptography.ProtectedData is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="4.7.0" ExcludeAssets="all" />
     <!-- System.Drawing.Common is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
-    <PackageReference Include="System.Drawing.Common" Version="4.7.0" ExcludeAssets="all" />
+    <PackageReference Include="System.Drawing.Common" Version="7.0.0" ExcludeAssets="all" />
     <!-- System.Windows.Extensions is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
     <PackageReference Include="System.Windows.Extensions" Version="4.7.0" ExcludeAssets="all" />
     <!-- Microsoft.Win32.SystemEvents is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
