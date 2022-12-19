@@ -2607,7 +2607,7 @@ extern "C" {
     #define __readonly
     #define __notreadonly
     #define __maybereadonly
-    #define __valid
+    // #define __valid
     #define __notvalid
     #define __maybevalid
     #define __readableTo(extent)
