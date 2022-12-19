@@ -11,7 +11,7 @@
     <!-- System.Configuration.ConfigurationManager is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" ExcludeAssets="all" />
     <!-- System.Security.Cryptography.ProtectedData is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="4.7.0" ExcludeAssets="all" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="7.0.0" ExcludeAssets="all" />
     <!-- System.Drawing.Common is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
     <PackageReference Include="System.Drawing.Common" Version="4.7.0" ExcludeAssets="all" />
     <!-- System.Windows.Extensions is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
