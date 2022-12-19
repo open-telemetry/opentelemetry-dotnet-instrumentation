@@ -21,7 +21,7 @@ namespace IntegrationTests.Helpers;
 
 public class InstrumentedProcessHelper
 {
-    public static Process Start(string executable, string arguments, EnvironmentHelper environmentHelper)
+    public static Process? Start(string executable, string? arguments, EnvironmentHelper environmentHelper)
     {
         if (environmentHelper == null)
         {

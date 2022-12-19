@@ -34,7 +34,7 @@ public class MongoDBFixture : IAsyncLifetime
     private const int MongoDBPort = 27017;
     private const string MongoDBImage = "mongo:5.0.6";
 
-    private TestcontainersContainer _container;
+    private TestcontainersContainer? _container;
 
     public MongoDBFixture()
     {

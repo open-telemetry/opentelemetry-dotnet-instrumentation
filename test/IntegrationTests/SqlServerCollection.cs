@@ -36,7 +36,7 @@ public class SqlServerFixture : IAsyncLifetime
     private const int DatabasePort = 1433;
     private const string DatabaseImage = "mcr.microsoft.com/mssql/server:2019-CU17-ubuntu-20.04";
 
-    private TestcontainersContainer _container;
+    private TestcontainersContainer? _container;
 
     public SqlServerFixture()
     {

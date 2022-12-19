@@ -67,12 +67,12 @@ public class MockMetricsCollector : IDisposable
         _listener.Dispose();
     }
 
-    public void Expect(string instrumentationScopeName, Func<Metric, bool> predicate = null, string description = null)
+    public void Expect(string instrumentationScopeName, Func<Metric, bool>? predicate = null, string? description = null)
     {
         predicate ??= x => true;
         description ??= instrumentationScopeName;
 
-        _expectations.Add(new Expectation { InstrumentationScopeName = instrumentationScopeName, Predicate = predicate, Description = description });
+        _expectations.Add(new Expectation(instrumentationScopeName, predicate, description));
     }
 
     public void AssertExpectations(TimeSpan? timeout = null)
@@ -215,11 +215,7 @@ public class MockMetricsCollector : IDisposable
             {
                 foreach (var metric in scopeMetrics.Metrics ?? Enumerable.Empty<Metric>())
                 {
-                    metricsSnapshot.Add(new Collected
-                    {
-                        InstrumentationScopeName = scopeMetrics.Scope.Name,
-                        Metric = metric
-                    });
+                    metricsSnapshot.Add(new Collected(scopeMetrics.Scope.Name, metric));
                 }
             }
 
@@ -235,18 +231,31 @@ public class MockMetricsCollector : IDisposable
 
     private class Expectation
     {
-        public string InstrumentationScopeName { get; set; }
+        public Expectation(string instrumentationScopeName, Func<Metric, bool> predicate, string? description)
+        {
+            InstrumentationScopeName = instrumentationScopeName;
+            Predicate = predicate;
+            Description = description;
+        }
 
-        public Func<Metric, bool> Predicate { get; set; }
+        public string InstrumentationScopeName { get; }
 
-        public string Description { get; set; }
+        public Func<Metric, bool> Predicate { get; }
+
+        public string? Description { get; }
     }
 
     private class Collected
     {
-        public string InstrumentationScopeName { get; set; }
+        public Collected(string instrumentationScopeName, Metric metric)
+        {
+            InstrumentationScopeName = instrumentationScopeName;
+            Metric = metric;
+        }
 
-        public Metric Metric { get; set; } // protobuf type
+        public string InstrumentationScopeName { get; }
+
+        public Metric Metric { get; } // protobuf type
 
         public override string ToString()
         {

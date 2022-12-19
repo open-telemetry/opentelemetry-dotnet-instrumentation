@@ -28,12 +28,11 @@ namespace IntegrationTests.Helpers;
 public class EnvironmentHelper
 {
     private static readonly string RuntimeFrameworkDescription = RuntimeInformation.FrameworkDescription.ToLower();
-    private static string _nukeOutputLocation;
 
     private readonly ITestOutputHelper _output;
     private readonly int _major;
     private readonly int _minor;
-    private readonly string _patch = null;
+    private readonly string? _patch = null;
 
     private readonly string _appNamePrepend;
     private readonly string _runtime;
@@ -41,19 +40,19 @@ public class EnvironmentHelper
     private readonly string _testApplicationDirectory;
     private readonly TargetFrameworkAttribute _targetFramework;
 
-    private string _integrationsFileLocation;
-    private string _profilerFileLocation;
+    private string? _integrationsFileLocation;
+    private string? _profilerFileLocation;
 
     public EnvironmentHelper(
         string testApplicationName,
         Type anchorType,
         ITestOutputHelper output,
-        string testApplicationDirectory = null,
+        string? testApplicationDirectory = null,
         bool prependTestApplicationToAppName = true)
     {
         TestApplicationName = testApplicationName;
         _testApplicationDirectory = testApplicationDirectory ?? Path.Combine("test", "test-applications", "integrations");
-        _targetFramework = Assembly.GetAssembly(anchorType).GetCustomAttribute<TargetFrameworkAttribute>();
+        _targetFramework = Assembly.GetAssembly(anchorType)?.GetCustomAttribute<TargetFrameworkAttribute>()!;
         _output = output;
 
         var parts = _targetFramework.FrameworkName.Split(',');
@@ -78,7 +77,7 @@ public class EnvironmentHelper
 
     public bool DebugModeEnabled { get; set; } = true;
 
-    public Dictionary<string, string> CustomEnvironmentVariables { get; set; } = new Dictionary<string, string>();
+    public Dictionary<string, string?> CustomEnvironmentVariables { get; set; } = new();
 
     public string TestApplicationName { get; }
 
@@ -98,9 +97,7 @@ public class EnvironmentHelper
 
         if (Directory.Exists(nukeOutputPath))
         {
-            _nukeOutputLocation = nukeOutputPath;
-
-            return _nukeOutputLocation;
+            return nukeOutputPath;
         }
 
         throw new Exception($"Unable to find Nuke output at: {nukeOutputPath}. Ensure Nuke has run first.");
@@ -111,7 +108,7 @@ public class EnvironmentHelper
         // https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
         // Github sets CI environment variable
 
-        string env = Environment.GetEnvironmentVariable("CI");
+        var env = Environment.GetEnvironmentVariable("CI");
         return !string.IsNullOrEmpty(env);
     }
 

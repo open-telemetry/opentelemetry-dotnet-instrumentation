@@ -48,7 +48,11 @@ public class LogTests : TestHelper
             // When includeFormattedMessage is set to false
             // LogRecord is not parsed and body will not have data.
             // This is a default collector behavior.
-            collector.Expect(logRecord => Convert.ToString(logRecord).Contains("TestApplication.Logs.Controllers.TestController"));
+            collector.Expect(logRecord =>
+            {
+                var logsAsString = Convert.ToString(logRecord);
+                return logsAsString != null && logsAsString.Contains("TestApplication.Logs.Controllers.TestController");
+            });
         }
 
         if (enableClrProfiler)
