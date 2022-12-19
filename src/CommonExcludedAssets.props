@@ -5,7 +5,7 @@
     <!-- Pipelines.Sockets.Unofficial is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. ExcludeAssets="all" prevents copying it to the output -->
     <PackageReference Include="Pipelines.Sockets.Unofficial" Version="2.1.16" ExcludeAssets="all" />
     <!-- System.Diagnostics.PerformanceCounter is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. ExcludeAssets="all" prevents copying it to the output -->
-    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="4.7.0" ExcludeAssets="all" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="7.0.0" ExcludeAssets="all" />
     <!-- MySql.Data is required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
     <PackageReference Include="MySql.Data" Version="6.10.7" ExcludeAssets="all" />
     <!-- System.Configuration.ConfigurationManager is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
