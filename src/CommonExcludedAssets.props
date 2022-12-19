@@ -17,6 +17,6 @@
     <!-- System.Windows.Extensions is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
     <PackageReference Include="System.Windows.Extensions" Version="4.7.0" ExcludeAssets="all" />
     <!-- Microsoft.Win32.SystemEvents is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
-    <PackageReference Include="Microsoft.Win32.SystemEvents" Version="4.7.0" ExcludeAssets="all" />
+    <PackageReference Include="Microsoft.Win32.SystemEvents" Version="7.0.0" ExcludeAssets="all" />
   </ItemGroup>
 </Project>
