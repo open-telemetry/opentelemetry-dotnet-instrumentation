@@ -24,15 +24,15 @@ public static class PowershellHelper
     public static (string StandardOutput, string ErrorOutput) RunCommand(string psCommand, ITestOutputHelper outputHelper)
     {
         var startInfo = new ProcessStartInfo
-            {
-                FileName = @"powershell.exe",
-                Arguments = $"& {psCommand}",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                Verb = "runas"
-            };
+        {
+            FileName = @"powershell.exe",
+            Arguments = $"& {psCommand}",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            Verb = "runas"
+        };
 
         var process = Process.Start(startInfo);
         var helper = new ProcessHelper(process);
