@@ -20,7 +20,7 @@ updates:
 
  
   - package-ecosystem: nuget
-    directory: /nuke
+    directory: /build
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20
