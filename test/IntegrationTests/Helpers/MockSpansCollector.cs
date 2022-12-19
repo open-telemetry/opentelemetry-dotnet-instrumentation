@@ -68,12 +68,12 @@ public class MockSpansCollector : IDisposable
         _listener.Dispose();
     }
 
-    public void Expect(string instrumentationScopeName, Func<Span, bool> predicate = null, string description = null)
+    public void Expect(string instrumentationScopeName, Func<Span, bool>? predicate = null, string? description = null)
     {
         predicate ??= x => true;
         description ??= "<no description>";
 
-        _expectations.Add(new Expectation { InstrumentationScopeName = instrumentationScopeName, Predicate = predicate, Description = description });
+        _expectations.Add(new Expectation(instrumentationScopeName, predicate, description));
     }
 
     public void AssertExpectations(TimeSpan? timeout = null)
@@ -204,11 +204,7 @@ public class MockSpansCollector : IDisposable
             {
                 foreach (var span in scopeSpans.Spans ?? Enumerable.Empty<Span>())
                 {
-                    _spans.Add(new Collected
-                    {
-                        InstrumentationScopeName = scopeSpans.Scope.Name,
-                        Span = span
-                    });
+                    _spans.Add(new Collected(scopeSpans.Scope.Name, span));
                 }
             }
         }
@@ -222,18 +218,31 @@ public class MockSpansCollector : IDisposable
 
     private class Expectation
     {
-        public string InstrumentationScopeName { get; set; }
+        public Expectation(string instrumentationScopeName, Func<Span, bool> predicate, string? description)
+        {
+            InstrumentationScopeName = instrumentationScopeName;
+            Predicate = predicate;
+            Description = description;
+        }
 
-        public Func<Span, bool> Predicate { get; set; }
+        public string InstrumentationScopeName { get; }
 
-        public string Description { get; set; }
+        public Func<Span, bool> Predicate { get; }
+
+        public string? Description { get; }
     }
 
     private class Collected
     {
-        public string InstrumentationScopeName { get; set; }
+        public Collected(string instrumentationScopeName, Span span)
+        {
+            InstrumentationScopeName = instrumentationScopeName;
+            Span = span;
+        }
 
-        public Span Span { get; set; } // protobuf type
+        public string InstrumentationScopeName { get; }
+
+        public Span Span { get; } // protobuf type
 
         public override string ToString()
         {

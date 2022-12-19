@@ -68,12 +68,12 @@ public class MockZipkinCollector : IDisposable
         _listener.Dispose();
     }
 
-    public void Expect(Func<ZSpanMock, bool> predicate = null, string description = null)
+    public void Expect(Func<ZSpanMock, bool>? predicate = null, string? description = null)
     {
         predicate ??= x => true;
         description ??= "<no description>";
 
-        _expectations.Add(new Expectation { Predicate = predicate, Description = description });
+        _expectations.Add(new Expectation(predicate, description));
     }
 
     public void AssertExpectations(TimeSpan? timeout = null)
@@ -216,14 +216,14 @@ public class MockZipkinCollector : IDisposable
             get => Convert.ToUInt64(_zipkinData["id"].ToString(), 16);
         }
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
-        public string Service
+        public string? Service
         {
-            get => _zipkinData["localEndpoint"]["serviceName"].ToString();
+            get => _zipkinData["localEndpoint"]?["serviceName"]?.ToString();
         }
 
-        public string Library { get; set; }
+        public string? Library { get; set; }
 
         public ActivityKind Kind
         {
@@ -249,14 +249,14 @@ public class MockZipkinCollector : IDisposable
         {
             get
             {
-                _zipkinData.TryGetValue("parentId", out JToken parentId);
+                _zipkinData.TryGetValue("parentId", out var parentId);
                 return parentId == null ? null : Convert.ToUInt64(parentId.ToString(), 16);
             }
         }
 
         public byte Error { get; set; }
 
-        public Dictionary<string, string> Tags { get; set; }
+        public Dictionary<string, string>? Tags { get; set; }
 
         public Dictionary<DateTimeOffset, Dictionary<string, object>> Logs
         {
@@ -264,13 +264,17 @@ public class MockZipkinCollector : IDisposable
             {
                 var logs = new Dictionary<DateTimeOffset, Dictionary<string, object>>();
 
-                if (_zipkinData.TryGetValue("annotations", out JToken annotations))
+                if (_zipkinData.TryGetValue("annotations", out var annotations) && annotations != null)
                 {
-                    foreach (var item in annotations.ToObject<List<Dictionary<string, object>>>())
+                    var list = annotations.ToObject<List<Dictionary<string, object>>>();
+                    if (list != null)
                     {
-                        DateTimeOffset timestamp = ((long)item["timestamp"]).UnixMicrosecondsToDateTimeOffset();
-                        item.Remove("timestamp");
-                        logs[timestamp] = item;
+                        foreach (var item in list)
+                        {
+                            var timestamp = ((long)item["timestamp"]).UnixMicrosecondsToDateTimeOffset();
+                            item.Remove("timestamp");
+                            logs[timestamp] = item;
+                        }
                     }
                 }
 
@@ -278,7 +282,7 @@ public class MockZipkinCollector : IDisposable
             }
         }
 
-        public Dictionary<string, double> Metrics { get; set; }
+        public Dictionary<string, double>? Metrics { get; set; }
 
         public override string ToString()
         {
@@ -319,6 +323,11 @@ public class MockZipkinCollector : IDisposable
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)
         {
+            if (Tags == null)
+            {
+                return;
+            }
+
             Library = Tags.GetValueOrDefault("otel.library.name");
 
             var error = Tags.GetValueOrDefault("error") ?? "false";
@@ -334,8 +343,14 @@ public class MockZipkinCollector : IDisposable
 
     private class Expectation
     {
-        public Func<ZSpanMock, bool> Predicate { get; set; }
+        public Expectation(Func<ZSpanMock, bool> predicate, string? description)
+        {
+            Predicate = predicate;
+            Description = description;
+        }
 
-        public string Description { get; set; }
+        public Func<ZSpanMock, bool> Predicate { get; }
+
+        public string? Description { get; }
     }
 }

@@ -30,7 +30,7 @@ public class OtlpResourceExpector : IDisposable
     private readonly List<ResourceExpectation> _resourceExpectations = new();
 
     private readonly ManualResetEvent _resourceAttributesEvent = new(false); // synchronizes access to _resourceAttributes
-    private RepeatedField<KeyValue> _resourceAttributes; // protobuf type
+    private RepeatedField<KeyValue>? _resourceAttributes; // protobuf type
 
     public void Dispose()
     {
@@ -78,25 +78,28 @@ public class OtlpResourceExpector : IDisposable
         }
     }
 
-    private static void AssertResourceMetrics(List<ResourceExpectation> resourceExpectations, RepeatedField<KeyValue> actualResourceAttributes)
+    private static void AssertResourceMetrics(List<ResourceExpectation> resourceExpectations, RepeatedField<KeyValue>? actualResourceAttributes)
     {
         var missingExpectations = new List<ResourceExpectation>(resourceExpectations);
-        foreach (var resourceAttribute in actualResourceAttributes)
+        if (actualResourceAttributes != null)
         {
-            for (int i = missingExpectations.Count - 1; i >= 0; i--)
+            foreach (var resourceAttribute in actualResourceAttributes)
             {
-                if (resourceAttribute.Key != missingExpectations[i].Key)
+                for (var i = missingExpectations.Count - 1; i >= 0; i--)
                 {
-                    continue;
-                }
+                    if (resourceAttribute.Key != missingExpectations[i].Key)
+                    {
+                        continue;
+                    }
 
-                if (resourceAttribute.Value.StringValue != missingExpectations[i].Value)
-                {
-                    continue;
-                }
+                    if (resourceAttribute.Value.StringValue != missingExpectations[i].Value)
+                    {
+                        continue;
+                    }
 
-                missingExpectations.RemoveAt(i);
-                break;
+                    missingExpectations.RemoveAt(i);
+                    break;
+                }
             }
         }
 
@@ -106,7 +109,7 @@ public class OtlpResourceExpector : IDisposable
         }
     }
 
-    private static void FailResourceMetrics(List<ResourceExpectation> missingExpectations, RepeatedField<KeyValue> attributes)
+    private static void FailResourceMetrics(List<ResourceExpectation> missingExpectations, RepeatedField<KeyValue>? attributes)
     {
         attributes ??= new();
 
@@ -130,8 +133,8 @@ public class OtlpResourceExpector : IDisposable
 
     private class ResourceExpectation
     {
-        public string Key { get; set; }
+        public string? Key { get; set; }
 
-        public string Value { get; set; }
+        public string? Value { get; set; }
     }
 }

@@ -18,7 +18,7 @@ namespace IntegrationTests.Helpers;
 
 public class TestSettings
 {
-    public string Arguments { get; set; } = null;
+    public string? Arguments { get; set; } = null;
 
     public string PackageVersion { get; set; } = string.Empty;
 

@@ -24,7 +24,7 @@ namespace IntegrationTests.Helpers.Compatibility;
 
 public static class DictionaryExtensions
 {
-    public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
+    public static TValue? GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
     {
         if (dictionary == null)
         {
@@ -36,26 +36,26 @@ public static class DictionaryExtensions
                     : default;
     }
 
-    public static TValue GetValueOrDefault<TValue>(this IDictionary dictionary, object key)
+    public static TValue? GetValueOrDefault<TValue>(this IDictionary dictionary, object key)
     {
         if (dictionary == null)
         {
             throw new ArgumentNullException(nameof(dictionary));
         }
 
-        return dictionary.TryGetValue(key, out TValue value)
+        return dictionary.TryGetValue(key, out TValue? value)
                     ? value
                     : default;
     }
 
-    public static bool TryGetValue<TValue>(this IDictionary dictionary, object key, out TValue value)
+    public static bool TryGetValue<TValue>(this IDictionary dictionary, object key, out TValue? value)
     {
         if (dictionary == null)
         {
             throw new ArgumentNullException(nameof(dictionary));
         }
 
-        object valueObj;
+        object? valueObj;
 
         try
         {

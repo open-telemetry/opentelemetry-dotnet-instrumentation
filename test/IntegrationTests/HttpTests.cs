@@ -40,7 +40,7 @@ public class HttpTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        Span clientSpan = null;
+        Span? clientSpan = null;
 #if NET7_0_OR_GREATER
         collector.Expect("System.Net.Http", span =>
 #else
@@ -50,13 +50,13 @@ public class HttpTests : TestHelper
             clientSpan = span;
             return true;
         });
-        Span serverSpan = null;
+        Span? serverSpan = null;
         collector.Expect("OpenTelemetry.Instrumentation.AspNetCore", span =>
         {
             serverSpan = span;
             return true;
         });
-        Span manualSpan = null;
+        Span? manualSpan = null;
         collector.Expect("TestApplication.Http", span =>
         {
             manualSpan = span;
@@ -71,9 +71,9 @@ public class HttpTests : TestHelper
         using (new AssertionScope())
         {
             // testing context propagation via trace hierarchy
-            clientSpan.ParentSpanId.IsEmpty.Should().BeTrue();
-            serverSpan.ParentSpanId.Should().Equal(clientSpan.SpanId);
-            manualSpan.ParentSpanId.Should().Equal(serverSpan.SpanId);
+            clientSpan!.ParentSpanId.IsEmpty.Should().BeTrue();
+            serverSpan!.ParentSpanId.Should().Equal(clientSpan.SpanId);
+            manualSpan!.ParentSpanId.Should().Equal(serverSpan.SpanId);
         }
     }
 

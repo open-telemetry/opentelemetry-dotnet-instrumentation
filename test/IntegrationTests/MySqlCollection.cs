@@ -34,7 +34,7 @@ public class MySqlFixture : IAsyncLifetime
     private const int MySqlPort = 3306;
     private const string MySqlImage = "mysql:8.0.29";
 
-    private TestcontainersContainer _container;
+    private TestcontainersContainer? _container;
 
     public MySqlFixture()
     {

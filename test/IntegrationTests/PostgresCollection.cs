@@ -33,7 +33,7 @@ public class PostgresFixture : IAsyncLifetime
     private const int PostgresPort = 5432;
     private const string PostgresImage = "postgres:14.4";
 
-    private TestcontainersContainer _container;
+    private TestcontainersContainer? _container;
 
     public PostgresFixture()
     {

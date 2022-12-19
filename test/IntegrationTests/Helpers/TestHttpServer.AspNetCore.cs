@@ -49,8 +49,8 @@ public class TestHttpServer : IDisposable
 
         _listener.Start();
 
-        string address = _listener.ServerFeatures
-                .Get<IServerAddressesFeature>()
+        var address = _listener.ServerFeatures!
+                .Get<IServerAddressesFeature>()!
                 .Addresses
                 .First();
         Port = int.Parse(address.Split(':').Last());

@@ -44,7 +44,7 @@ public class ProcessTests : TestHelper
         }
         finally
         {
-            process.Kill();
+            process?.Kill();
         }
     }
 }

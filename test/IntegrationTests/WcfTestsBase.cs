@@ -26,7 +26,7 @@ using static OpenTelemetry.Proto.Trace.V1.Span.Types;
 namespace IntegrationTests;
 public abstract class WcfTestsBase : TestHelper, IDisposable
 {
-    private ProcessHelper _serverProcess;
+    private ProcessHelper? _serverProcess;
 
     protected WcfTestsBase(string testAppName, ITestOutputHelper output)
         : base(testAppName, output)
@@ -59,6 +59,11 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
 
     public void Dispose()
     {
+        if (_serverProcess?.Process == null)
+        {
+            return;
+        }
+
         if (_serverProcess.Process.HasExited)
         {
             Output.WriteLine($"WCF server process finished. Exit code: {_serverProcess.Process.ExitCode}.");

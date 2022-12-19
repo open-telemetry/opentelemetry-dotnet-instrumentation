@@ -54,11 +54,11 @@ public abstract class TestHelper
         var directory = Path.GetDirectoryName(codeBasePath);
         return Path.GetFullPath(directory);
 #else
-        return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
 #endif
     }
 
-    public void SetEnvironmentVariable(string key, string value)
+    public void SetEnvironmentVariable(string key, string? value)
     {
         EnvironmentHelper.CustomEnvironmentVariables[key] = value;
     }
@@ -102,14 +102,16 @@ public abstract class TestHelper
     /// RunTestApplication starts the test application, wait up to DefaultProcessTimeout.
     /// Assertion exceptions are thrown if it timed out or the exit code is non-zero.
     /// </summary>
-    public (string StandardOutput, string ErrorOutput) RunTestApplication(TestSettings testSettings = null)
+    public (string StandardOutput, string ErrorOutput) RunTestApplication(TestSettings? testSettings = null)
     {
         testSettings ??= new();
         using var process = StartTestApplication(testSettings);
-        Output.WriteLine($"ProcessName: " + process.ProcessName);
+        Output.WriteLine($"ProcessName: " + process?.ProcessName);
         using var helper = new ProcessHelper(process);
 
-        bool processTimeout = !process.WaitForExit((int)Timeout.ProcessExit.TotalMilliseconds);
+        process.Should().NotBeNull();
+
+        bool processTimeout = !process!.WaitForExit((int)Timeout.ProcessExit.TotalMilliseconds);
         if (processTimeout)
         {
             process.Kill();
@@ -130,12 +132,12 @@ public abstract class TestHelper
     /// and returns the Process instance for further interaction.
     /// </summary>
     /// <returns>Test application process</returns>
-    public Process StartTestApplication(TestSettings testSettings = null)
+    public Process? StartTestApplication(TestSettings? testSettings = null)
     {
         testSettings ??= new();
 
         // get path to test application that the profiler will attach to
-        string testApplicationPath = EnvironmentHelper.GetTestApplicationPath(testSettings.PackageVersion, testSettings.Framework);
+        var testApplicationPath = EnvironmentHelper.GetTestApplicationPath(testSettings.PackageVersion, testSettings.Framework);
         if (!File.Exists(testApplicationPath))
         {
             throw new Exception($"application not found: {testApplicationPath}");
