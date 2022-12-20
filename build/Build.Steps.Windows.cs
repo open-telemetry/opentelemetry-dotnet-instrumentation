@@ -96,8 +96,7 @@ partial class Build
     Target PublishIisTestApplications => _ => _
         .Unlisted()
         .After(CompileManagedTests)
-        .OnlyWhenStatic(() => IsWin)
-        .OnlyWhenStatic(() => Containers == ContainersWindows)
+        .OnlyWhenStatic(() => IsWin && Containers == ContainersWindows)
         .Executes(() =>
         {
             var aspNetProject = TestsDirectory / "test-applications" / "integrations" / "TestApplication.AspNet" / "TestApplication.AspNet.csproj";
