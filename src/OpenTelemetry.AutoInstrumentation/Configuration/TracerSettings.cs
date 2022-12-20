@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using OpenTelemetry.AutoInstrumentation.Util;
@@ -111,12 +113,12 @@ internal class TracerSettings : Settings
     /// <summary>
     /// Gets sampler to be used for traces.
     /// </summary>
-    public string TracesSampler { get; }
+    public string? TracesSampler { get; }
 
     /// <summary>
     /// Gets a value to be used as the sampler argument.
     /// </summary>
-    public string TracesSamplerArguments { get; }
+    public string? TracesSamplerArguments { get; }
 
     private static TracesExporter ParseTracesExporter(IConfigurationSource source)
     {

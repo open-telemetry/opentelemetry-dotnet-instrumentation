@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 /// <summary>
@@ -27,7 +29,7 @@ internal interface IConfigurationSource
     /// </summary>
     /// <param name="key">The key that identifies the setting.</param>
     /// <returns>The value of the setting, or <c>null</c> if not found.</returns>
-    string GetString(string key);
+    string? GetString(string key);
 
     /// <summary>
     /// Gets the <see cref="int"/> value of

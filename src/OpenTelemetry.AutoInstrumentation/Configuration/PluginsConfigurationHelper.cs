@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;

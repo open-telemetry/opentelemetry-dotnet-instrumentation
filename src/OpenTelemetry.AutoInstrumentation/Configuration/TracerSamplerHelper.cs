@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System.Globalization;
 using OpenTelemetry.Trace;
 
@@ -21,7 +23,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 internal static class TracerSamplerHelper
 {
-    public static Sampler GetSampler(string tracerSampler, string tracerSamplerArguments)
+    public static Sampler? GetSampler(string? tracerSampler, string? tracerSamplerArguments)
     {
         switch (tracerSampler)
         {
@@ -42,7 +44,7 @@ internal static class TracerSamplerHelper
         return null;
     }
 
-    private static TraceIdRatioBasedSampler CreateTraceIdRatioBasedSampler(string arguments)
+    private static TraceIdRatioBasedSampler CreateTraceIdRatioBasedSampler(string? arguments)
     {
         const double defaultRatio = 1.0;
 

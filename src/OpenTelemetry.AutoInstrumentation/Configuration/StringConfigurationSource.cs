@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System.Globalization;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
@@ -25,7 +27,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 internal abstract class StringConfigurationSource : IConfigurationSource
 {
     /// <inheritdoc />
-    public virtual string GetString(string key)
+    public virtual string? GetString(string key)
     {
         var value = GetStringInternal(key);
         if (string.IsNullOrEmpty(value))
@@ -39,9 +41,9 @@ internal abstract class StringConfigurationSource : IConfigurationSource
     /// <inheritdoc />
     public virtual int? GetInt32(string key)
     {
-        string value = GetString(key);
+        var value = GetString(key);
 
-        return int.TryParse(value, out int result)
+        return int.TryParse(value, out var result)
             ? result
             : (int?)null;
     }
@@ -49,9 +51,9 @@ internal abstract class StringConfigurationSource : IConfigurationSource
     /// <inheritdoc />
     public double? GetDouble(string key)
     {
-        string value = GetString(key);
+        var value = GetString(key);
 
-        return double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out double result)
+        return double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result)
             ? result
             : (double?)null;
     }
@@ -60,8 +62,8 @@ internal abstract class StringConfigurationSource : IConfigurationSource
     public virtual bool? GetBool(string key)
     {
         var value = GetString(key);
-        return bool.TryParse(value, out bool result) ? result : null;
+        return bool.TryParse(value, out var result) ? result : null;
     }
 
-    protected abstract string GetStringInternal(string key);
+    protected abstract string? GetStringInternal(string key);
 }

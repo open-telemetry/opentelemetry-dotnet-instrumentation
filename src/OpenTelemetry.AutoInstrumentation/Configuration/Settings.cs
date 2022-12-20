@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Reflection;
 using OpenTelemetry.Exporter;
@@ -60,14 +62,16 @@ internal abstract class Settings
 
         try
         {
-            return (T)typeof(T)
-                .GetConstructor(new[] { typeof(IConfigurationSource) })
+            var ttt = typeof(T);
+
+            return (T)typeof(T)!
+                .GetConstructor(new[] { typeof(IConfigurationSource) })!
                 .Invoke(new object[] { configurationSource });
         }
         catch (TargetInvocationException ex)
         {
             // Unwrap the more informative internal exception
-            throw ex.InnerException;
+            throw ex.InnerException ?? ex;
         }
     }
 

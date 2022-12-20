@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 
@@ -31,7 +33,7 @@ internal class SdkSettings : Settings
 
         if (!string.IsNullOrEmpty(propagators))
         {
-            foreach (var propagator in propagators.Split(Constants.ConfigurationValues.Separator))
+            foreach (var propagator in propagators!.Split(Constants.ConfigurationValues.Separator))
             {
                 Propagators.Add(ParsePropagator(propagator));
             }

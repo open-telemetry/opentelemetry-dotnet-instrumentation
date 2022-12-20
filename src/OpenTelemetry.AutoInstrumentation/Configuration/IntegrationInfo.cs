@@ -14,24 +14,21 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 internal readonly struct IntegrationInfo
 {
-    public readonly string Name;
+    public readonly string? Name;
 
     public readonly int Id;
 
-    public IntegrationInfo(string integrationName)
+    public IntegrationInfo(string? integrationName)
     {
-        if (integrationName == null)
-        {
-            throw new ArgumentNullException(nameof(integrationName));
-        }
-
-        Name = integrationName;
+        Name = integrationName ?? throw new ArgumentNullException(nameof(integrationName));
         Id = 0;
     }
 

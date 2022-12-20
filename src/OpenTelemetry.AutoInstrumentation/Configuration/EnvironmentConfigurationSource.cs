@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
@@ -24,7 +26,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// </summary>
 internal class EnvironmentConfigurationSource : StringConfigurationSource
 {
-    protected override string GetStringInternal(string key)
+    protected override string? GetStringInternal(string key)
     {
         try
         {

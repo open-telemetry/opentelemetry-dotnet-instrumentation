@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System.Collections.Specialized;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
@@ -36,7 +38,7 @@ internal class NameValueConfigurationSource : StringConfigurationSource
         _nameValueCollection = nameValueCollection;
     }
 
-    protected override string GetStringInternal(string key)
+    protected override string? GetStringInternal(string key)
     {
         return _nameValueCollection[key];
     }
