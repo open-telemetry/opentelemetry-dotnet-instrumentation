@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System.Collections.Generic;
 
 namespace OpenTelemetry.AutoInstrumentation.Tagging;
@@ -21,8 +23,4 @@ namespace OpenTelemetry.AutoInstrumentation.Tagging;
 internal interface ITags
 {
     List<KeyValuePair<string, string>> GetAllTags();
-
-    string GetTag(string key);
-
-    void SetTag(string key, string value);
 }

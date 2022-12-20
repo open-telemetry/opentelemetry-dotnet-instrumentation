@@ -14,17 +14,17 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 
 namespace OpenTelemetry.AutoInstrumentation.Tagging;
 
-internal interface IProperty<TResult>
+internal interface IProperty<out TResult>
 {
     bool IsReadOnly { get; }
 
     string Key { get; }
 
     Func<ITags, TResult> Getter { get; }
-
-    Action<ITags, TResult> Setter { get; }
 }

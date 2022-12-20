@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 namespace OpenTelemetry.AutoInstrumentation.Tagging;
 
 /// <summary>
@@ -25,11 +27,6 @@ internal static class Tags
     /// The hostname of a outgoing server connection.
     /// </summary>
     public const string OutHost = "out.host";
-
-    /// <summary>
-    /// The port of a outgoing server connection.
-    /// </summary>
-    public const string OutPort = "out.port";
 
     /// <summary>
     /// GraphQL specific tags

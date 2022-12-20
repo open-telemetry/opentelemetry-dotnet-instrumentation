@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 namespace OpenTelemetry.AutoInstrumentation.Tagging;
 
 internal abstract class InstrumentationTags : TagsList
