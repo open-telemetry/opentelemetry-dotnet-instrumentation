@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Linq;
 using System.Reflection;
@@ -81,7 +83,7 @@ internal class LazyInstrumentationLoader : IDisposable
 #endif
         }
 
-        private void CurrentDomain_AssemblyLoad(object sender, AssemblyLoadEventArgs args)
+        private void CurrentDomain_AssemblyLoad(object? sender, AssemblyLoadEventArgs args)
         {
             var assemblyName = GetAssemblyName(args.LoadedAssembly);
 
@@ -116,9 +118,9 @@ internal class LazyInstrumentationLoader : IDisposable
             }
         }
 
-        private string GetAssemblyName(Assembly assembly)
+        private string? GetAssemblyName(Assembly assembly)
         {
-            return assembly.FullName.Split(new[] { ',' }, count: 2)[0];
+            return assembly.FullName?.Split(new[] { ',' }, count: 2)[0];
         }
     }
 }
