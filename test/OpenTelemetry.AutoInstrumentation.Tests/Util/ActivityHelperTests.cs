@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -32,7 +34,7 @@ public class ActivityHelperTests
     [Fact]
     public void SetException_NotThrow_WhenActivityIsNull()
     {
-        const Activity activity = null;
+        const Activity? activity = null;
 
         var action = () => activity.SetException(new Exception());
 
@@ -72,9 +74,9 @@ public class ActivityHelperTests
     [Fact]
     public void StartActivityWithTags_ReturnsNull_WhenActivitySourceIsNull()
     {
-        const ActivitySource activitySource = null;
+        const ActivitySource? activitySource = null;
 
-        using var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, null);
+        using var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, Mock.Of<ITags>());
 
         activity.Should().BeNull();
     }
@@ -84,7 +86,7 @@ public class ActivityHelperTests
     {
         using var activitySource = new ActivitySource("test-source");
 
-        using var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, null);
+        using var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, Mock.Of<ITags>());
 
         using (new AssertionScope())
         {
@@ -105,13 +107,13 @@ public class ActivityHelperTests
 
         using var listener = CreateActivityListener(activitySource);
 
-        using var activity = activitySource.StartActivityWithTags("test-operation", kind, null);
+        using var activity = activitySource.StartActivityWithTags("test-operation", kind, Mock.Of<ITags>());
 
         using (new AssertionScope())
         {
             activitySource.HasListeners().Should().BeTrue();
             activity.Should().NotBeNull();
-            activity.Kind.Should().Be(kind);
+            activity?.Kind.Should().Be(kind);
         }
     }
 
@@ -139,7 +141,7 @@ public class ActivityHelperTests
         {
             activitySource.HasListeners().Should().BeTrue();
             activity.Should().NotBeNull();
-            activity.Tags.Should().BeEquivalentTo(tags);
+            activity?.Tags.Should().BeEquivalentTo(tags);
         }
     }
 

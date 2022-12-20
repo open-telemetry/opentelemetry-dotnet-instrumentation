@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +26,7 @@ namespace OpenTelemetry.AutoInstrumentation.Util;
 internal static class ConfigurationSourceExtensions
 {
     public static IList<TEnum> ParseEnabledEnumList<TEnum>(this IConfigurationSource source, string enabledConfiguration, string disabledConfiguration, string error)
-        where TEnum : struct, IConvertible
+        where TEnum : struct, Enum, IConvertible
     {
         var instrumentations = new Dictionary<string, TEnum>();
         var enabledInstrumentations = source.GetString(enabledConfiguration);
@@ -52,7 +54,7 @@ internal static class ConfigurationSourceExtensions
             instrumentations = Enum.GetValues(typeof(TEnum))
                 .Cast<TEnum>()
                 .ToDictionary(
-                    key => Enum.GetName(typeof(TEnum), key),
+                    key => Enum.GetName(typeof(TEnum), key)!,
                     val => val);
         }
 

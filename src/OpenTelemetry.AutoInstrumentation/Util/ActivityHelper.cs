@@ -22,6 +22,8 @@ using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Util;
 
+#nullable enable
+
 internal static class ActivityHelper
 {
     private static readonly ILogger Log = OtelLogging.GetLogger();
@@ -31,7 +33,7 @@ internal static class ActivityHelper
     /// </summary>
     /// <param name="activity">The activity to include exception info.</param>
     /// <param name="exception">The exception.</param>
-    public static void SetException(this Activity activity, Exception exception)
+    public static void SetException(this Activity? activity, Exception? exception)
     {
         if (activity == null)
         {
@@ -48,7 +50,7 @@ internal static class ActivityHelper
         activity.RecordException(exception);
     }
 
-    public static Activity StartActivityWithTags(this ActivitySource activitySource, string operationName, ActivityKind kind, ITags tags)
+    public static Activity? StartActivityWithTags(this ActivitySource? activitySource, string operationName, ActivityKind kind, ITags tags)
     {
         if (activitySource == null)
         {
@@ -58,7 +60,7 @@ internal static class ActivityHelper
 
         var activity = activitySource.StartActivity(operationName, kind);
 
-        if (activity == null || tags == null)
+        if (activity == null)
         {
             return activity;
         }
