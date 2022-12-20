@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Runtime.CompilerServices;
 
@@ -156,34 +158,34 @@ internal class CustomLogger : ILogger
     public void Error(Exception exception, string messageTemplate, object[] args, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
         => Write(LogLevel.Error, exception, messageTemplate, args, sourceLine, sourceFile);
 
-    private void Write<T>(LogLevel level, Exception exception, string messageTemplate, T property, int sourceLine, string sourceFile)
+    private void Write<T>(LogLevel level, Exception? exception, string messageTemplate, T property, int sourceLine, string sourceFile)
     {
         if (IsEnabled(level))
         {
             // Avoid boxing + array allocation if disabled
-            WriteImpl(level, exception, messageTemplate, new object[] { property }, sourceLine, sourceFile);
+            WriteImpl(level, exception, messageTemplate, new object?[] { property }, sourceLine, sourceFile);
         }
     }
 
-    private void Write<T0, T1>(LogLevel level, Exception exception, string messageTemplate, T0 property0, T1 property1, int sourceLine, string sourceFile)
+    private void Write<T0, T1>(LogLevel level, Exception? exception, string messageTemplate, T0 property0, T1 property1, int sourceLine, string sourceFile)
     {
         if (IsEnabled(level))
         {
             // Avoid boxing + array allocation if disabled
-            WriteImpl(level, exception, messageTemplate, new object[] { property0, property1 }, sourceLine, sourceFile);
+            WriteImpl(level, exception, messageTemplate, new object?[] { property0, property1 }, sourceLine, sourceFile);
         }
     }
 
-    private void Write<T0, T1, T2>(LogLevel level, Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2, int sourceLine, string sourceFile)
+    private void Write<T0, T1, T2>(LogLevel level, Exception? exception, string messageTemplate, T0 property0, T1 property1, T2 property2, int sourceLine, string sourceFile)
     {
         if (IsEnabled(level))
         {
             // Avoid boxing + array allocation if disabled
-            WriteImpl(level, exception, messageTemplate, new object[] { property0, property1, property2 }, sourceLine, sourceFile);
+            WriteImpl(level, exception, messageTemplate, new object?[] { property0, property1, property2 }, sourceLine, sourceFile);
         }
     }
 
-    private void Write(LogLevel level, Exception exception, string messageTemplate, object[] args, int sourceLine, string sourceFile)
+    private void Write(LogLevel level, Exception? exception, string messageTemplate, object[] args, int sourceLine, string sourceFile)
     {
         if (IsEnabled(level))
         {
@@ -192,7 +194,7 @@ internal class CustomLogger : ILogger
         }
     }
 
-    private void WriteImpl(LogLevel level, Exception exception, string messageTemplate, object[] args, int sourceLine, string sourceFile)
+    private void WriteImpl(LogLevel level, Exception? exception, string messageTemplate, object?[] args, int sourceLine, string sourceFile)
     {
         try
         {

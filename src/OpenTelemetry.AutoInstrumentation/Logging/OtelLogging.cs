@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -32,7 +34,7 @@ internal static class OtelLogging
 
     static OtelLogging()
     {
-        ISink sink = null;
+        ISink? sink = null;
         try
         {
             var logDirectory = GetLogDirectory();
@@ -74,9 +76,9 @@ internal static class OtelLogging
         }
     }
 
-    private static string GetLogDirectory()
+    private static string? GetLogDirectory()
     {
-        string logDirectory;
+        string? logDirectory;
 
         try
         {
@@ -113,7 +115,7 @@ internal static class OtelLogging
         return logDirectory;
     }
 
-    private static string CreateDirectoryIfMissing(string pathToCreate)
+    private static string? CreateDirectoryIfMissing(string pathToCreate)
     {
         try
         {

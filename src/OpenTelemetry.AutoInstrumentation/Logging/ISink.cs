@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 namespace OpenTelemetry.AutoInstrumentation.Logging;
 
 internal interface ISink
