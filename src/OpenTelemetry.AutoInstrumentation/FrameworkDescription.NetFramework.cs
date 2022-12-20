@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 #if NETFRAMEWORK
 using System;
 using System.Linq;
@@ -23,11 +25,26 @@ namespace OpenTelemetry.AutoInstrumentation;
 
 internal partial class FrameworkDescription
 {
-    private static FrameworkDescription _instance = null;
+    private static readonly Tuple<int, string>[] DotNetFrameworkVersionMapping =
+    {
+        // known min value for each framework version
+        Tuple.Create(528040, "4.8"),
+        Tuple.Create(461808, "4.7.2"),
+        Tuple.Create(461308, "4.7.1"),
+        Tuple.Create(460798, "4.7"),
+        Tuple.Create(394802, "4.6.2"),
+        Tuple.Create(394254, "4.6.1"),
+        Tuple.Create(393295, "4.6"),
+        Tuple.Create(379893, "4.5.2"),
+        Tuple.Create(378675, "4.5.1"),
+        Tuple.Create(378389, "4.5"),
+    };
+
+    private static FrameworkDescription? _instance;
 
     public static FrameworkDescription Instance
     {
-        get { return _instance ?? (_instance = Create()); }
+        get { return _instance ??= Create(); }
     }
 
     public static FrameworkDescription Create()
@@ -57,11 +74,11 @@ internal partial class FrameworkDescription
 
     private static string GetNetFrameworkVersion()
     {
-        string productVersion = null;
+        string? productVersion = null;
 
         try
         {
-            object registryValue;
+            object? registryValue;
 
             using (var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Default))
             using (var subKey = baseKey.OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\"))
