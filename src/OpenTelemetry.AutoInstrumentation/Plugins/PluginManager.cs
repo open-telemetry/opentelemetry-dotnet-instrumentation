@@ -24,16 +24,16 @@ namespace OpenTelemetry.AutoInstrumentation.Plugins;
 
 internal class PluginManager
 {
-    private readonly IReadOnlyList<(Type Type, object? Instance)> _plugins;
+    private readonly IReadOnlyList<(Type Type, object Instance)> _plugins;
 
     public PluginManager(GeneralSettings settings)
     {
-        var plugins = new List<(Type, object?)>();
+        var plugins = new List<(Type, object)>();
 
         foreach (var assemblyQualifiedName in settings.Plugins)
         {
             var type = Type.GetType(assemblyQualifiedName, throwOnError: true)!;
-            var instance = Activator.CreateInstance(type);
+            var instance = Activator.CreateInstance(type)!;
 
             plugins.Add((type, instance));
         }

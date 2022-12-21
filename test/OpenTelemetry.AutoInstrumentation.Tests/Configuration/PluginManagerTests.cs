@@ -59,6 +59,19 @@ public class PluginManagerTests
     }
 
     [Fact]
+    public void MissingDefaultConstructor()
+    {
+        var pluginAssemblyQualifiedName = typeof(PluginWithoutDefaultConstructor).AssemblyQualifiedName!;
+        var settings = GetSettings(pluginAssemblyQualifiedName);
+        var createAction = () => new PluginManager(settings);
+
+        using (new AssertionScope())
+        {
+            createAction.Should().Throw<MissingMethodException>();
+        }
+    }
+
+    [Fact]
     public void PluginTypeMissingMethodDoesNotThrow()
     {
         var pluginAssemblyQualifiedName = GetType().AssemblyQualifiedName!;
@@ -169,6 +182,23 @@ public class PluginManagerTests
         {
             // Dummy overwritten setting
             options.IncludeFormattedMessage = true;
+        }
+    }
+
+    public class PluginWithoutDefaultConstructor
+    {
+        private readonly string _dummyParameter;
+
+        public PluginWithoutDefaultConstructor(string dummyParameter)
+        {
+            _dummyParameter = dummyParameter;
+        }
+
+        public TracerProviderBuilder ConfigureTracerProvider(TracerProviderBuilder builder)
+        {
+            builder.AddSource(_dummyParameter);
+
+            return builder;
         }
     }
 
