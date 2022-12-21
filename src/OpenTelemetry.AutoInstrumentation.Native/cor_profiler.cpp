@@ -645,16 +645,32 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         return S_OK;
     }
 
-    ComPtr<IUnknown> metadata_interfaces;
-    ModuleMetadata* module_metadata = nullptr;
-
-    if (module_info.IsDynamic())
+    // It is not safe to skip assemblies if applying redirection on .NET Framework
+    if (!runtime_information_.is_desktop() || !IsNetFxAssemblyRedirectionEnabled())
     {
-        // For CallTarget we don't need to load metadata on dynamic modules.
-        Logger::Debug("ModuleLoadFinished skipping Dynamic module: ", module_id, " ", module_info.assembly.name);
-        return S_OK;
+        // Not .NET Framework or assembly redirection is disabled, check if the 
+        // assembly can be skipped.
+        for (auto&& skip_assembly : skip_assemblies)
+        {
+            if (module_info.assembly.name == skip_assembly)
+            {
+                Logger::Debug("ModuleLoadFinished skipping known module: ", module_id, " ", module_info.assembly.name);
+                return S_OK;
+            }
+        }
+
+        for (auto&& skip_assembly_pattern : skip_assembly_prefixes)
+        {
+            if (module_info.assembly.name.rfind(skip_assembly_pattern, 0) == 0)
+            {
+                Logger::Debug("ModuleLoadFinished skipping module by pattern: ", module_id, " ", module_info.assembly.name);
+                return S_OK;
+            }
+        }
     }
 
+    ComPtr<IUnknown> metadata_interfaces;
+    ModuleMetadata* module_metadata = nullptr;
     auto hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2, metadata_interfaces.GetAddressOf());
 
     if (FAILED(hr))
@@ -668,9 +684,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
     const auto assembly_import = metadata_interfaces.As<IMetaDataAssemblyImport>(IID_IMetaDataAssemblyImport);
     const auto assembly_emit = metadata_interfaces.As<IMetaDataAssemblyEmit>(IID_IMetaDataAssemblyEmit);
 
-    module_metadata = new ModuleMetadata(metadata_import, metadata_emit, assembly_import, assembly_emit,
-                                            module_info.assembly.name, app_domain_id, &corAssemblyProperty);
-
 #ifdef _WIN32
     if (runtime_information_.is_desktop() && IsNetFxAssemblyRedirectionEnabled())
     {
@@ -680,7 +693,16 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
     }
 #endif
 
+    if (module_info.IsDynamic())
+    {
+        // For CallTarget we don't need to load metadata on dynamic modules.
+        Logger::Debug("ModuleLoadFinished skipping Dynamic module: ", module_id, " ", module_info.assembly.name);
+        return S_OK;
+    }
+
     // store module info for later lookup
+    module_metadata = new ModuleMetadata(metadata_import, metadata_emit, assembly_import, assembly_emit,
+                                            module_info.assembly.name, app_domain_id, &corAssemblyProperty);
     module_id_to_info_map_[module_id] = module_metadata;
 
     if (module_info.assembly.name == managed_profiler_name)
