@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-#nullable enable
-
 #if !NETFRAMEWORK
 using System;
 using System.Runtime.InteropServices;

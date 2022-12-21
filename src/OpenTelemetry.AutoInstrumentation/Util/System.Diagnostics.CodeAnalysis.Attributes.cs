@@ -24,8 +24,6 @@
 // so we define them here for older .NET runtimes.
 // https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/nullable-analysis
 
-#nullable enable
-
 #pragma warning disable SA1649 // file name should match first type name
 #pragma warning disable SA1402 // file may only contain a single type
 

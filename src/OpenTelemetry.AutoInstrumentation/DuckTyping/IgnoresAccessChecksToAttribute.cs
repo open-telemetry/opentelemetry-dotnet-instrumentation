@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-#nullable enable
-
 // ReSharper disable once CheckNamespace
 namespace System.Runtime.CompilerServices;
 

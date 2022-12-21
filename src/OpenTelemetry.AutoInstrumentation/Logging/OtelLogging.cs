@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-#nullable enable
-
 using System;
 using System.Diagnostics;
 using System.IO;

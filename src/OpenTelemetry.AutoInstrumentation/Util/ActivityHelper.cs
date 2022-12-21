@@ -22,8 +22,6 @@ using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Util;
 
-#nullable enable
-
 internal static class ActivityHelper
 {
     private static readonly ILogger Log = OtelLogging.GetLogger();

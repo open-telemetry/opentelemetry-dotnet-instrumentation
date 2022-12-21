@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-#nullable enable
-
 namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations;
 
 internal readonly struct ContinuationGeneratorState<TTarget>

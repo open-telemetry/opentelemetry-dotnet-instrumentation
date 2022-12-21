@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-#nullable enable
-
 using System;
 using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Logging;
