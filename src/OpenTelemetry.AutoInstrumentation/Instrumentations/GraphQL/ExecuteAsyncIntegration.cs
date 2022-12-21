@@ -15,7 +15,6 @@
 // </copyright>
 
 using System;
-using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.Util;
 
@@ -25,15 +24,15 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
 /// GraphQL.Execution.ExecutionStrategy calltarget instrumentation
 /// </summary>
 [GraphQLExecuteAsync(
-    AssemblyName = GraphQLCommon.GraphQLAssembly,
-    TypeName = "GraphQL.Execution.ExecutionStrategy",
-    MinimumVersion = GraphQLCommon.Major2Minor3,
-    MaximumVersion = GraphQLCommon.Major2)]
+    assemblyName: GraphQLCommon.GraphQLAssembly,
+    typeName: "GraphQL.Execution.ExecutionStrategy",
+    minimumVersion: GraphQLCommon.Major2Minor3,
+    maximumVersion: GraphQLCommon.Major2)]
 [GraphQLExecuteAsync(
-    AssemblyName = GraphQLCommon.GraphQLAssembly,
-    TypeName = "GraphQL.Execution.SubscriptionExecutionStrategy",
-    MinimumVersion = GraphQLCommon.Major2Minor3,
-    MaximumVersion = GraphQLCommon.Major2)]
+    assemblyName: GraphQLCommon.GraphQLAssembly,
+    typeName: "GraphQL.Execution.SubscriptionExecutionStrategy",
+    minimumVersion: GraphQLCommon.Major2Minor3,
+    maximumVersion: GraphQLCommon.Major2)]
 public static class ExecuteAsyncIntegration
 {
     /// <summary>
@@ -60,9 +59,9 @@ public static class ExecuteAsyncIntegration
     /// <param name="exception">Exception instance in case the original code threw an exception.</param>
     /// <param name="state">Calltarget state value</param>
     /// <returns>A response value, in an async scenario will be T of Task of T</returns>
-    internal static TExecutionResult OnAsyncMethodEnd<TTarget, TExecutionResult>(TTarget instance, TExecutionResult executionResult, Exception exception, CallTargetState state)
+    internal static TExecutionResult OnAsyncMethodEnd<TTarget, TExecutionResult>(TTarget instance, TExecutionResult executionResult, Exception? exception, CallTargetState state)
     {
-        Activity activity = state.Activity;
+        var activity = state.Activity;
         if (activity is null)
         {
             return executionResult;
@@ -72,7 +71,7 @@ public static class ExecuteAsyncIntegration
         {
             if (exception != null)
             {
-                activity?.SetException(exception);
+                activity.SetException(exception);
             }
             else if (state.State is IExecutionContext context)
             {

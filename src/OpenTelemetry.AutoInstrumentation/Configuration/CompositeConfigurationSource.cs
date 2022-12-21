@@ -26,7 +26,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// </summary>
 internal class CompositeConfigurationSource : IConfigurationSource, IEnumerable<IConfigurationSource>
 {
-    private readonly List<IConfigurationSource> _sources = new List<IConfigurationSource>();
+    private readonly List<IConfigurationSource> _sources = new();
 
     /// <summary>
     /// Adds a new configuration source to this instance.
@@ -58,7 +58,7 @@ internal class CompositeConfigurationSource : IConfigurationSource, IEnumerable<
     /// </summary>
     /// <param name="key">The key that identifies the setting.</param>
     /// <returns>The value of the setting, or <c>null</c> if not found.</returns>
-    public string GetString(string key)
+    public string? GetString(string key)
     {
         return _sources.Select(source => source.GetString(key))
              .FirstOrDefault(value => !string.IsNullOrEmpty(value));

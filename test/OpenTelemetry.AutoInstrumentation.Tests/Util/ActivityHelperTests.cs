@@ -32,7 +32,7 @@ public class ActivityHelperTests
     [Fact]
     public void SetException_NotThrow_WhenActivityIsNull()
     {
-        const Activity activity = null;
+        const Activity? activity = null;
 
         var action = () => activity.SetException(new Exception());
 
@@ -72,9 +72,9 @@ public class ActivityHelperTests
     [Fact]
     public void StartActivityWithTags_ReturnsNull_WhenActivitySourceIsNull()
     {
-        const ActivitySource activitySource = null;
+        const ActivitySource? activitySource = null;
 
-        using var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, null);
+        using var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, Mock.Of<ITags>());
 
         activity.Should().BeNull();
     }
@@ -84,7 +84,7 @@ public class ActivityHelperTests
     {
         using var activitySource = new ActivitySource("test-source");
 
-        using var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, null);
+        using var activity = activitySource.StartActivityWithTags("test-operation", ActivityKind.Internal, Mock.Of<ITags>());
 
         using (new AssertionScope())
         {
@@ -101,17 +101,20 @@ public class ActivityHelperTests
     [InlineData(ActivityKind.Consumer)]
     public void StartActivityWithTags_ReturnsActivity_WhenThereIsActivityListener(ActivityKind kind)
     {
+        var tagsMock = new Mock<ITags>();
+        tagsMock.Setup(x => x.GetAllTags()).Returns(new List<KeyValuePair<string, string>>());
+
         using var activitySource = new ActivitySource("test-source");
 
         using var listener = CreateActivityListener(activitySource);
 
-        using var activity = activitySource.StartActivityWithTags("test-operation", kind, null);
+        using var activity = activitySource.StartActivityWithTags("test-operation", kind, tagsMock.Object);
 
         using (new AssertionScope())
         {
             activitySource.HasListeners().Should().BeTrue();
             activity.Should().NotBeNull();
-            activity.Kind.Should().Be(kind);
+            activity?.Kind.Should().Be(kind);
         }
     }
 
@@ -139,7 +142,7 @@ public class ActivityHelperTests
         {
             activitySource.HasListeners().Should().BeTrue();
             activity.Should().NotBeNull();
-            activity.Tags.Should().BeEquivalentTo(tags);
+            activity?.Tags.Should().BeEquivalentTo(tags);
         }
     }
 

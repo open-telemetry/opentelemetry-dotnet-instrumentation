@@ -23,7 +23,7 @@ namespace OpenTelemetry.AutoInstrumentation;
 
 internal partial class FrameworkDescription
 {
-    private static FrameworkDescription _instance = null;
+    private static FrameworkDescription? _instance;
 
     public static FrameworkDescription Instance
     {
@@ -85,7 +85,7 @@ internal partial class FrameworkDescription
 
     private static string GetNetCoreOrNetFrameworkVersion()
     {
-        string productVersion = null;
+        string? productVersion = null;
 
         if (Environment.Version.Major == 3 || Environment.Version.Major >= 5)
         {

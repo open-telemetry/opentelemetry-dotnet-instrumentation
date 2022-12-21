@@ -31,14 +31,13 @@ internal class AspNetCoreMetricsInitializer : InstrumentationInitializer
 
     public override void Initialize(ILifespanManager lifespanManager)
     {
-        var optionsType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreMetricsInstrumentationOptions, OpenTelemetry.Instrumentation.AspNetCore");
-        var metricsType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreMetrics, OpenTelemetry.Instrumentation.AspNetCore");
+        var metricsType = Type.GetType("OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreMetrics, OpenTelemetry.Instrumentation.AspNetCore")!;
 
         var aspNetCoreMetricsInstrumentationOptions = new AspNetCoreMetricsInstrumentationOptions();
 
-        Instrumentation.PluginManager.ConfigureMetricsOptions(aspNetCoreMetricsInstrumentationOptions);
+        Instrumentation.PluginManager?.ConfigureMetricsOptions(aspNetCoreMetricsInstrumentationOptions);
 
-        var constructor = metricsType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, new[] { typeof(AspNetCoreMetricsInstrumentationOptions) });
+        var constructor = metricsType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, new[] { typeof(AspNetCoreMetricsInstrumentationOptions) })!;
         var aspNetCoreMetrics = constructor.Invoke(new[] { aspNetCoreMetricsInstrumentationOptions });
 
         lifespanManager.Track(aspNetCoreMetrics);

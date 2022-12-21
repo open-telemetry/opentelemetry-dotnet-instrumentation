@@ -34,23 +34,26 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
     private readonly object lockObj = new();
     private readonly EventLevel logLevel;
     private readonly ILogger log;
-    private readonly List<EventSource> eventSourcesBeforeConstructor = new();
+    private readonly List<EventSource>? eventSourcesBeforeConstructor = new();
 
     public SdkSelfDiagnosticsEventListener(EventLevel eventLevel, ILogger logger)
     {
         log = logger;
         logLevel = eventLevel;
 
-        List<EventSource> eventSources;
+        List<EventSource>? eventSources;
         lock (lockObj)
         {
             eventSources = this.eventSourcesBeforeConstructor;
             eventSourcesBeforeConstructor = null;
         }
 
-        foreach (var eventSource in eventSources)
+        if (eventSources != null)
         {
-            EnableEvents(eventSource, logLevel, EventKeywords.All);
+            foreach (var eventSource in eventSources)
+            {
+                EnableEvents(eventSource, logLevel, EventKeywords.All);
+            }
         }
     }
 
@@ -88,24 +91,34 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
     /// <param name="eventData">Data of the EventSource event.</param>
     protected override void OnEventWritten(EventWrittenEventArgs eventData)
     {
-        var payloadArray = new object[eventData.Payload.Count];
-        eventData.Payload.CopyTo(payloadArray, 0);
+        object[] payloadArray;
+        if (eventData.Payload != null)
+        {
+            payloadArray = new object[eventData.Payload.Count];
+            eventData.Payload.CopyTo(payloadArray, 0);
+        }
+        else
+        {
+            payloadArray = Array.Empty<object>();
+        }
+
+        var message = eventData.Message != null ? string.Format(eventData.Message ?? string.Empty, payloadArray) : string.Empty;
 
         switch (eventData.Level)
         {
             case EventLevel.Critical:
             case EventLevel.Error:
-                log.Error("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message, payloadArray));
+                log.Error("EventSource={0}, Message={1}", eventData.EventSource.Name, message);
                 break;
             case EventLevel.Warning:
-                log.Warning("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message, payloadArray));
+                log.Warning("EventSource={0}, Message={1}", eventData.EventSource.Name, message);
                 break;
             case EventLevel.LogAlways:
             case EventLevel.Informational:
-                log.Information("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message, payloadArray));
+                log.Information("EventSource={0}, Message={1}", eventData.EventSource.Name, message);
                 break;
             case EventLevel.Verbose:
-                log.Debug("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message, payloadArray));
+                log.Debug("EventSource={0}, Message={1}", eventData.EventSource.Name, message);
                 break;
         }
     }

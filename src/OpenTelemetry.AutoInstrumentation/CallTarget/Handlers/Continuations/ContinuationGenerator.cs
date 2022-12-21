@@ -21,7 +21,7 @@ namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations;
 
 internal class ContinuationGenerator<TTarget, TReturn>
 {
-    public virtual TReturn SetContinuation(TTarget instance, TReturn returnValue, Exception exception, CallTargetState state)
+    public virtual TReturn? SetContinuation(TTarget instance, TReturn? returnValue, Exception? exception, CallTargetState state)
     {
         return returnValue;
     }
@@ -37,12 +37,12 @@ internal class ContinuationGenerator<TTarget, TReturn>
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected static TTo FromTReturn<TTo>(TReturn returnValue)
+    protected static TTo FromTReturn<TTo>(TReturn? returnValue)
     {
 #if NET6_0_OR_GREATER
-        return Unsafe.As<TReturn, TTo>(ref returnValue);
+        return Unsafe.As<TReturn?, TTo>(ref returnValue);
 #else
-        return ContinuationsHelper.Convert<TReturn, TTo>(returnValue);
+        return ContinuationsHelper.Convert<TReturn?, TTo>(returnValue);
 #endif
     }
 }

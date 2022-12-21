@@ -33,12 +33,12 @@ internal class MySqlDataInitializer : InstrumentationInitializer
 
     public override void Initialize(ILifespanManager lifespanManager)
     {
-        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentation, OpenTelemetry.Instrumentation.MySqlData");
+        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentation, OpenTelemetry.Instrumentation.MySqlData")!;
 
         var options = new OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentationOptions();
         _pluginManager.ConfigureTracesOptions(options);
 
-        var instrumentation = Activator.CreateInstance(instrumentationType, options);
+        var instrumentation = Activator.CreateInstance(instrumentationType, options)!;
 
         lifespanManager.Track(instrumentation);
     }

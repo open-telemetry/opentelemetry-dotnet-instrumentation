@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-#nullable enable
-
 namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 
 internal static class DuckTypeConstants

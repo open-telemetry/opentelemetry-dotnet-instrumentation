@@ -27,11 +27,6 @@ internal static class Tags
     public const string OutHost = "out.host";
 
     /// <summary>
-    /// The port of a outgoing server connection.
-    /// </summary>
-    public const string OutPort = "out.port";
-
-    /// <summary>
     /// GraphQL specific tags
     /// </summary>
     public static class GraphQL

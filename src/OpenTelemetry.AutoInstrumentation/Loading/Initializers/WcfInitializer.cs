@@ -42,6 +42,6 @@ internal class WcfInitializer : InstrumentationInitializer
 
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationActivitySource, OpenTelemetry.Instrumentation.Wcf");
 
-        instrumentationType.GetProperty("Options")?.SetValue(null, options);
+        instrumentationType?.GetProperty("Options")?.SetValue(null, options);
     }
 }

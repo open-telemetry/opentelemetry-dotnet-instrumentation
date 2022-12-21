@@ -35,9 +35,9 @@ internal class GraphQLCommon
 
     private static readonly ILogger Log = OtelLogging.GetLogger();
 
-    internal static Activity CreateActivityFromExecuteAsync(IExecutionContext executionContext)
+    internal static Activity? CreateActivityFromExecuteAsync(IExecutionContext executionContext)
     {
-        Activity activity = null;
+        Activity? activity = null;
         InstrumentationOptions options = Instrumentation.TracerSettings.Value.InstrumentationOptions;
 
         try
@@ -73,18 +73,15 @@ internal class GraphQLCommon
 
     internal static void RecordExecutionErrorsIfPresent(Activity activity, IExecutionErrors executionErrors)
     {
-        var errorCount = executionErrors?.Count ?? 0;
+        var errorCount = executionErrors.Count;
 
         if (errorCount > 0)
         {
             for (int i = 0; i < errorCount; i++)
             {
-                Exception ex = executionErrors[i].InnerException;
+                var ex = executionErrors[i].InnerException;
 
-                if (ex != null)
-                {
-                    activity.SetException(ex);
-                }
+                activity.SetException(ex);
             }
         }
     }

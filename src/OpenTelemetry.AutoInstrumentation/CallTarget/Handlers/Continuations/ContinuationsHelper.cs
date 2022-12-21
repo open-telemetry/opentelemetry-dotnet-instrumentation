@@ -25,7 +25,7 @@ internal static class ContinuationsHelper
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static Type GetResultType(Type parentType)
     {
-        Type currentType = parentType;
+        Type? currentType = parentType;
         while (currentType != null)
         {
             Type[] typeArguments = currentType.GenericTypeArguments ?? Type.EmptyTypes;

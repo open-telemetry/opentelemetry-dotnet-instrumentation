@@ -3,7 +3,6 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net7.0</TargetFrameworks>
-    <Nullable>disable</Nullable>
   </PropertyGroup>
 
 </Project>

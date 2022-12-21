@@ -23,7 +23,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.AutoInstrumentation.Plugins;
-using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -60,9 +59,22 @@ public class PluginManagerTests
     }
 
     [Fact]
+    public void MissingDefaultConstructor()
+    {
+        var pluginAssemblyQualifiedName = typeof(PluginWithoutDefaultConstructor).AssemblyQualifiedName!;
+        var settings = GetSettings(pluginAssemblyQualifiedName);
+        var createAction = () => new PluginManager(settings);
+
+        using (new AssertionScope())
+        {
+            createAction.Should().Throw<MissingMethodException>();
+        }
+    }
+
+    [Fact]
     public void PluginTypeMissingMethodDoesNotThrow()
     {
-        var pluginAssemblyQualifiedName = GetType().AssemblyQualifiedName;
+        var pluginAssemblyQualifiedName = GetType().AssemblyQualifiedName!;
         var settings = GetSettings(pluginAssemblyQualifiedName);
         var pluginManager = new PluginManager(settings);
 
@@ -79,7 +91,7 @@ public class PluginManagerTests
     [Fact]
     public void PluginTypeMissingDefaultConstructor()
     {
-        var pluginAssemblyQualifiedName = typeof(MockPluginMissingDefaultConstructor).AssemblyQualifiedName;
+        var pluginAssemblyQualifiedName = typeof(MockPluginMissingDefaultConstructor).AssemblyQualifiedName!;
         var settings = GetSettings(pluginAssemblyQualifiedName);
         var createAction = () => new PluginManager(settings);
 
@@ -92,7 +104,7 @@ public class PluginManagerTests
     [Fact]
     public void InvokeProviderPluginSuccess()
     {
-        var pluginAssemblyQualifiedName = typeof(MockPlugin).AssemblyQualifiedName;
+        var pluginAssemblyQualifiedName = typeof(MockPlugin).AssemblyQualifiedName!;
         var settings = GetSettings(pluginAssemblyQualifiedName);
         var pluginManager = new PluginManager(settings);
 
@@ -118,7 +130,7 @@ public class PluginManagerTests
     [Fact]
     public void ConfigureLogsOptionsSuccess()
     {
-        var pluginAssemblyQualifiedName = typeof(MockPlugin).AssemblyQualifiedName;
+        var pluginAssemblyQualifiedName = typeof(MockPlugin).AssemblyQualifiedName!;
         var settings = GetSettings(pluginAssemblyQualifiedName);
         var pluginManager = new PluginManager(settings);
 
@@ -170,6 +182,23 @@ public class PluginManagerTests
         {
             // Dummy overwritten setting
             options.IncludeFormattedMessage = true;
+        }
+    }
+
+    public class PluginWithoutDefaultConstructor
+    {
+        private readonly string _dummyParameter;
+
+        public PluginWithoutDefaultConstructor(string dummyParameter)
+        {
+            _dummyParameter = dummyParameter;
+        }
+
+        public TracerProviderBuilder ConfigureTracerProvider(TracerProviderBuilder builder)
+        {
+            builder.AddSource(_dummyParameter);
+
+            return builder;
         }
     }
 

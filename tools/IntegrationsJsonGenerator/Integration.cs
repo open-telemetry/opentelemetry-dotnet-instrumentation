@@ -20,11 +20,11 @@ using System.Text.Json.Serialization;
 internal class Integration
 {
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    required public string Name { get; init; }
 
     [JsonPropertyName("type")]
-    public string Type { get; set; }
+    required public string Type { get; init; }
 
     [JsonPropertyName("method_replacements")]
-    public IList<MethodReplacement> MethodReplacements { get; set; }
+    required public IList<MethodReplacement> MethodReplacements { get; init; }
 }

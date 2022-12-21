@@ -50,12 +50,12 @@ internal class HttpClientInitializer
         _pluginManager.ConfigureTracesOptions(options);
 
 #if NETFRAMEWORK
-        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.Http.Implementation.HttpWebRequestActivitySource, OpenTelemetry.Instrumentation.Http");
+        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.Http.Implementation.HttpWebRequestActivitySource, OpenTelemetry.Instrumentation.Http")!;
 
         instrumentationType.GetField("Options", BindingFlags.NonPublic | BindingFlags.Static)?.SetValue(null, options);
 #else
-        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.Http.HttpClientInstrumentation, OpenTelemetry.Instrumentation.Http");
-        var instrumentation = Activator.CreateInstance(instrumentationType, options);
+        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.Http.HttpClientInstrumentation, OpenTelemetry.Instrumentation.Http")!;
+        var instrumentation = Activator.CreateInstance(instrumentationType, options)!;
 
         lifespanManager.Track(instrumentation);
 #endif

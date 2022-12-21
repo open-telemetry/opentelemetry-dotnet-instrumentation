@@ -32,14 +32,16 @@ internal class GrpcClientInitializer : InstrumentationInitializer
 
     public override void Initialize(ILifespanManager lifespanManager)
     {
-        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientInstrumentation, OpenTelemetry.Instrumentation.GrpcNetClient");
+        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientInstrumentation, OpenTelemetry.Instrumentation.GrpcNetClient")!;
 
-        var options = new OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientInstrumentationOptions();
-        options.SuppressDownstreamInstrumentation = !Instrumentation.TracerSettings.Value.EnabledInstrumentations.Contains(TracerInstrumentation.HttpClient);
+        var options = new OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientInstrumentationOptions
+        {
+            SuppressDownstreamInstrumentation = !Instrumentation.TracerSettings.Value.EnabledInstrumentations.Contains(TracerInstrumentation.HttpClient)
+        };
 
         _pluginManager.ConfigureTracesOptions(options);
 
-        var instrumentation = Activator.CreateInstance(instrumentationType, options);
+        var instrumentation = Activator.CreateInstance(instrumentationType, options)!;
 
         lifespanManager.Track(instrumentation);
     }

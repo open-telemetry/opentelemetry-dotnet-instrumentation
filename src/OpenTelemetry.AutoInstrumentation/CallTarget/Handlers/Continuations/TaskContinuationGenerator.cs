@@ -22,7 +22,7 @@ namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations;
 
 internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn> : ContinuationGenerator<TTarget, TReturn>
 {
-    private static readonly Func<TTarget, object, Exception, CallTargetState, object> _continuation;
+    private static readonly Func<TTarget, object?, Exception?, CallTargetState, object>? _continuation;
     private static readonly bool _preserveContext;
 
     static TaskContinuationGenerator()
@@ -30,12 +30,12 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn> : Conti
         var result = IntegrationMapper.CreateAsyncEndMethodDelegate(typeof(TIntegration), typeof(TTarget), typeof(object));
         if (result.Method != null)
         {
-            _continuation = (Func<TTarget, object, Exception, CallTargetState, object>)result.Method.CreateDelegate(typeof(Func<TTarget, object, Exception, CallTargetState, object>));
+            _continuation = (Func<TTarget, object?, Exception?, CallTargetState, object>)result.Method.CreateDelegate(typeof(Func<TTarget, object?, Exception?, CallTargetState, object>));
             _preserveContext = result.PreserveContext;
         }
     }
 
-    public override TReturn SetContinuation(TTarget instance, TReturn returnValue, Exception exception, CallTargetState state)
+    public override TReturn? SetContinuation(TTarget instance, TReturn? returnValue, Exception? exception, CallTargetState state)
     {
         if (_continuation == null)
         {
@@ -65,11 +65,11 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn> : Conti
             await new NoThrowAwaiter(previousTask, _preserveContext);
         }
 
-        Exception exception = null;
+        Exception? exception = null;
 
         if (previousTask.Status == TaskStatus.Faulted)
         {
-            exception = previousTask.Exception.GetBaseException();
+            exception = previousTask.Exception!.GetBaseException();
         }
         else if (previousTask.Status == TaskStatus.Canceled)
         {
@@ -89,7 +89,7 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn> : Conti
             // *
             // Calls the CallTarget integration continuation, exceptions here should never bubble up to the application
             // *
-            _continuation(target, null, exception, state);
+            _continuation!(target, null, exception, state);
         }
         catch (Exception ex)
         {

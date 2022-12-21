@@ -40,11 +40,11 @@ internal static class Instrumentation
 
     private static int _initialized;
     private static int _isExiting;
-    private static SdkSelfDiagnosticsEventListener _sdkEventListener;
+    private static SdkSelfDiagnosticsEventListener? _sdkEventListener;
 
-    private static TracerProvider _tracerProvider;
-    private static MeterProvider _meterProvider;
-    private static PluginManager _pluginManager;
+    private static TracerProvider? _tracerProvider;
+    private static MeterProvider? _meterProvider;
+    private static PluginManager? _pluginManager;
 
     /// <summary>
     /// Gets a value indicating whether OpenTelemetry's profiler is attached to the current process.
@@ -67,7 +67,7 @@ internal static class Instrumentation
         }
     }
 
-    internal static PluginManager PluginManager => _pluginManager;
+    internal static PluginManager? PluginManager => _pluginManager;
 
     internal static ILifespanManager LifespanManager => LazyInstrumentationLoader.LifespanManager;
 
@@ -152,7 +152,7 @@ internal static class Instrumentation
         }
     }
 
-    private static void OnExit(object sender, EventArgs e)
+    private static void OnExit(object? sender, EventArgs e)
     {
         if (Interlocked.Exchange(ref _isExiting, value: 1) != 0)
         {
@@ -167,7 +167,7 @@ internal static class Instrumentation
 #endif
             _tracerProvider?.Dispose();
             _meterProvider?.Dispose();
-            _sdkEventListener.Dispose();
+            _sdkEventListener?.Dispose();
 
             Logger.Information("OpenTelemetry Automatic Instrumentation exit.");
         }

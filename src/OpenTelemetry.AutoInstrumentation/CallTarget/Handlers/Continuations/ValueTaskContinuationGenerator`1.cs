@@ -23,7 +23,7 @@ namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations;
 #if NET6_0_OR_GREATER
 internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn, TResult> : ContinuationGenerator<TTarget, TReturn>
 {
-    private static readonly Func<TTarget, TResult, Exception, CallTargetState, TResult> _continuation;
+    private static readonly Func<TTarget, TResult?, Exception?, CallTargetState, TResult>? _continuation;
     private static readonly bool _preserveContext;
 
     static ValueTaskContinuationGenerator()
@@ -31,12 +31,12 @@ internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn, TR
         var result = IntegrationMapper.CreateAsyncEndMethodDelegate(typeof(TIntegration), typeof(TTarget), typeof(TResult));
         if (result.Method != null)
         {
-            _continuation = (Func<TTarget, TResult, Exception, CallTargetState, TResult>)result.Method.CreateDelegate(typeof(Func<TTarget, TResult, Exception, CallTargetState, TResult>));
+            _continuation = (Func<TTarget, TResult?, Exception?, CallTargetState, TResult>)result.Method.CreateDelegate(typeof(Func<TTarget, TResult?, Exception?, CallTargetState, TResult>));
             _preserveContext = result.PreserveContext;
         }
     }
 
-    public override TReturn SetContinuation(TTarget instance, TReturn returnValue, Exception exception, CallTargetState state)
+    public override TReturn? SetContinuation(TTarget instance, TReturn? returnValue, Exception? exception, CallTargetState state)
     {
         if (_continuation is null)
         {
@@ -52,9 +52,9 @@ internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn, TR
         ValueTask<TResult> previousValueTask = FromTReturn<ValueTask<TResult>>(returnValue);
         return ToTReturn(InnerSetValueTaskContinuation(instance, previousValueTask, state));
 
-        static async ValueTask<TResult> InnerSetValueTaskContinuation(TTarget instance, ValueTask<TResult> previousValueTask, CallTargetState state)
+        static async ValueTask<TResult?> InnerSetValueTaskContinuation(TTarget instance, ValueTask<TResult> previousValueTask, CallTargetState state)
         {
-            TResult result = default;
+            TResult? result = default;
             try
             {
                 result = await previousValueTask.ConfigureAwait(_preserveContext);
@@ -66,7 +66,7 @@ internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn, TR
                     // *
                     // Calls the CallTarget integration continuation, exceptions here should never bubble up to the application
                     // *
-                    _continuation(instance, result, ex, state);
+                    _continuation!(instance, result, ex, state);
                 }
                 catch (Exception contEx)
                 {
@@ -81,7 +81,7 @@ internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn, TR
                 // *
                 // Calls the CallTarget integration continuation, exceptions here should never bubble up to the application
                 // *
-                return _continuation(instance, result, null, state);
+                return _continuation!(instance, result, null, state);
             }
             catch (Exception contEx)
             {

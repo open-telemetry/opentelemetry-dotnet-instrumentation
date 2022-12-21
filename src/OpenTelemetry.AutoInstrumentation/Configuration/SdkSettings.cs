@@ -31,7 +31,7 @@ internal class SdkSettings : Settings
 
         if (!string.IsNullOrEmpty(propagators))
         {
-            foreach (var propagator in propagators.Split(Constants.ConfigurationValues.Separator))
+            foreach (var propagator in propagators!.Split(Constants.ConfigurationValues.Separator))
             {
                 Propagators.Add(ParsePropagator(propagator));
             }

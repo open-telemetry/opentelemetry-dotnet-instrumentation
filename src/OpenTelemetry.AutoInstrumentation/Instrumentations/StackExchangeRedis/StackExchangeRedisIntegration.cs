@@ -16,6 +16,7 @@
 
 using System;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
+using OpenTelemetry.AutoInstrumentation.Configuration;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
 
@@ -23,45 +24,45 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
 /// StackExchange.Redis.ConnectionMultiplexer calltarget instrumentation
 /// </summary>
 [InstrumentMethod(// releases 2.0.495 - 2.1.39
-    AssemblyName = StackExchangeRedisConstants.AssemblyName,
-    TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
-    MethodName = StackExchangeRedisConstants.ConnectImplMethodName,
-    ReturnTypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
-    ParameterTypeNames = new[] { ClrNames.Object, StackExchangeRedisConstants.TextWriterTypeName },
-    MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
-    MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
-    IntegrationName = StackExchangeRedisConstants.IntegrationName,
-    Type = InstrumentationType.Trace)]
+    assemblyName: StackExchangeRedisConstants.AssemblyName,
+    typeName: StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    methodName: StackExchangeRedisConstants.ConnectImplMethodName,
+    returnTypeName: StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    parameterTypeNames: new[] { ClrNames.Object, StackExchangeRedisConstants.TextWriterTypeName },
+    minimumVersion: StackExchangeRedisConstants.MinimumVersion,
+    maximumVersion: StackExchangeRedisConstants.MaximumVersion,
+    integrationName: StackExchangeRedisConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
 [InstrumentMethod(// releases 2.1.50 - 2.5.43
-    AssemblyName = StackExchangeRedisConstants.AssemblyName,
-    TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
-    MethodName = StackExchangeRedisConstants.ConnectImplMethodName,
-    ReturnTypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
-    ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName },
-    MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
-    MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
-    IntegrationName = StackExchangeRedisConstants.IntegrationName,
-    Type = InstrumentationType.Trace)]
+    assemblyName: StackExchangeRedisConstants.AssemblyName,
+    typeName: StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    methodName: StackExchangeRedisConstants.ConnectImplMethodName,
+    returnTypeName: StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    parameterTypeNames: new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName },
+    minimumVersion: StackExchangeRedisConstants.MinimumVersion,
+    maximumVersion: StackExchangeRedisConstants.MaximumVersion,
+    integrationName: StackExchangeRedisConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
 [InstrumentMethod(// releases 2.5.61 - 2.6.48
-    AssemblyName = StackExchangeRedisConstants.AssemblyName,
-    TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
-    MethodName = StackExchangeRedisConstants.ConnectImplMethodName,
-    ReturnTypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
-    ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName, StackExchangeRedisConstants.NullableServerTypeTypeName },
-    MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
-    MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
-    IntegrationName = StackExchangeRedisConstants.IntegrationName,
-    Type = InstrumentationType.Trace)]
+    assemblyName: StackExchangeRedisConstants.AssemblyName,
+    typeName: StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    methodName: StackExchangeRedisConstants.ConnectImplMethodName,
+    returnTypeName: StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    parameterTypeNames: new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName, StackExchangeRedisConstants.NullableServerTypeTypeName },
+    minimumVersion: StackExchangeRedisConstants.MinimumVersion,
+    maximumVersion: StackExchangeRedisConstants.MaximumVersion,
+    integrationName: StackExchangeRedisConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
 [InstrumentMethod(// releases 2.6.66+
-    AssemblyName = StackExchangeRedisConstants.AssemblyName,
-    TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
-    MethodName = StackExchangeRedisConstants.ConnectImplMethodName,
-    ReturnTypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
-    ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName, StackExchangeRedisConstants.NullableServerTypeTypeName, StackExchangeRedisConstants.EndPointCollectionTypeName },
-    MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
-    MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
-    IntegrationName = StackExchangeRedisConstants.IntegrationName,
-    Type = InstrumentationType.Trace)]
+    assemblyName: StackExchangeRedisConstants.AssemblyName,
+    typeName: StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    methodName: StackExchangeRedisConstants.ConnectImplMethodName,
+    returnTypeName: StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    parameterTypeNames: new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName, StackExchangeRedisConstants.NullableServerTypeTypeName, StackExchangeRedisConstants.EndPointCollectionTypeName },
+    minimumVersion: StackExchangeRedisConstants.MinimumVersion,
+    maximumVersion: StackExchangeRedisConstants.MaximumVersion,
+    integrationName: StackExchangeRedisConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
 public static class StackExchangeRedisIntegration
 {
     /// <summary>
@@ -76,7 +77,10 @@ public static class StackExchangeRedisIntegration
     internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TReturn returnValue, Exception exception, CallTargetState state)
     {
 #if NET6_0_OR_GREATER
-        StackExchangeRedisInitializer.Initialize(returnValue);
+        if (returnValue != null && Instrumentation.TracerSettings.Value.EnabledInstrumentations.Contains(TracerInstrumentation.StackExchangeRedis))
+        {
+            StackExchangeRedisInitializer.Initialize(returnValue);
+        }
 #endif
 
         return new CallTargetReturn<TReturn>(returnValue);

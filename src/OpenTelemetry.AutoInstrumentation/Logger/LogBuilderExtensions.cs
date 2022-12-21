@@ -31,7 +31,7 @@ internal static class LogBuilderExtensions
     {
         try
         {
-            if (!(builder?.Services is ServiceCollection services))
+            if (!(builder.Services is ServiceCollection services))
             {
                 return builder;
             }
@@ -52,11 +52,14 @@ internal static class LogBuilderExtensions
 
                 options.IncludeFormattedMessage = settings.IncludeFormattedMessage;
 
-                pluginManager.ConfigureLogsOptions(options);
+                pluginManager?.ConfigureLogsOptions(options);
 
                 if (settings.ConsoleExporterEnabled)
                 {
-                    options.AddConsoleExporter(pluginManager.ConfigureLogsOptions);
+                    if (pluginManager != null)
+                    {
+                        options.AddConsoleExporter(pluginManager.ConfigureLogsOptions);
+                    }
                 }
 
                 switch (settings.LogExporter)
@@ -69,7 +72,7 @@ internal static class LogBuilderExtensions
                                 otlpOptions.Protocol = settings.OtlpExportProtocol.Value;
                             }
 
-                            pluginManager.ConfigureLogsOptions(otlpOptions);
+                            pluginManager?.ConfigureLogsOptions(otlpOptions);
                         });
                         break;
                     case LogExporter.None:

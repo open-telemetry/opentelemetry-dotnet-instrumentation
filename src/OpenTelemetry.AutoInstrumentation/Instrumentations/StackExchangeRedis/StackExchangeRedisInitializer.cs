@@ -25,19 +25,16 @@ internal static class StackExchangeRedisInitializer
 {
     public static void Initialize(object connection)
     {
-        if (connection != null && Instrumentation.TracerSettings.Value.EnabledInstrumentations.Contains(TracerInstrumentation.StackExchangeRedis))
-        {
-            var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisCallsInstrumentation, OpenTelemetry.Instrumentation.StackExchangeRedis");
-            var optionsInstrumentationType = Type.GetType("OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisCallsInstrumentationOptions, OpenTelemetry.Instrumentation.StackExchangeRedis");
+        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisCallsInstrumentation, OpenTelemetry.Instrumentation.StackExchangeRedis")!;
+        var optionsInstrumentationType = Type.GetType("OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisCallsInstrumentationOptions, OpenTelemetry.Instrumentation.StackExchangeRedis")!;
 
-            var options = Activator.CreateInstance(optionsInstrumentationType);
+        var options = Activator.CreateInstance(optionsInstrumentationType)!;
 
-            Instrumentation.PluginManager.ConfigureTracesOptions(options);
+        Instrumentation.PluginManager?.ConfigureTracesOptions(options);
 
-            var instrumentation = Activator.CreateInstance(instrumentationType, connection, options);
+        var instrumentation = Activator.CreateInstance(instrumentationType, connection, options)!;
 
-            Instrumentation.LifespanManager.Track(instrumentation);
-        }
+        Instrumentation.LifespanManager.Track(instrumentation);
     }
 }
 #endif

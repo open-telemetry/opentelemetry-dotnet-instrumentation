@@ -18,12 +18,17 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
 
 internal class GraphQLExecuteAsyncAttribute : InstrumentMethodAttribute
 {
-    public GraphQLExecuteAsyncAttribute()
+    public GraphQLExecuteAsyncAttribute(string assemblyName, string typeName, string minimumVersion, string maximumVersion)
+        : base(
+            assemblyName: assemblyName,
+            typeName: typeName,
+            methodName: "ExecuteAsync",
+            returnTypeName: "System.Threading.Tasks.Task`1[GraphQL.ExecutionResult]",
+            parameterTypeNames: new[] { "GraphQL.Execution.ExecutionContext" },
+            minimumVersion: minimumVersion,
+            maximumVersion: maximumVersion,
+            integrationName: GraphQLCommon.IntegrationName,
+            type: InstrumentationType.Trace)
     {
-        IntegrationName = GraphQLCommon.IntegrationName;
-        MethodName = "ExecuteAsync";
-        ReturnTypeName = "System.Threading.Tasks.Task`1[GraphQL.ExecutionResult]";
-        ParameterTypeNames = new[] { "GraphQL.Execution.ExecutionContext" };
-        Type = InstrumentationType.Trace;
     }
 }

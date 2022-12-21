@@ -22,7 +22,7 @@ internal class Wrapper
     public string Assembly { get; set; } = "OpenTelemetry.AutoInstrumentation";
 
     [JsonPropertyName("type")]
-    public string Type { get; set; }
+    public string? Type { get; set; }
 
     [JsonPropertyName("action")]
     public string Action { get; set; } = "CallTargetModification";

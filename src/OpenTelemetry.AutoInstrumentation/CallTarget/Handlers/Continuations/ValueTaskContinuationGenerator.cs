@@ -21,7 +21,7 @@ namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations;
 #if NET6_0_OR_GREATER
 internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn> : ContinuationGenerator<TTarget, TReturn>
 {
-    private static readonly Func<TTarget, object, Exception, CallTargetState, object> _continuation;
+    private static readonly Func<TTarget, object?, Exception?, CallTargetState, object>? _continuation;
     private static readonly bool _preserveContext;
 
     static ValueTaskContinuationGenerator()
@@ -29,12 +29,12 @@ internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn> : 
         var result = IntegrationMapper.CreateAsyncEndMethodDelegate(typeof(TIntegration), typeof(TTarget), typeof(object));
         if (result.Method != null)
         {
-            _continuation = (Func<TTarget, object, Exception, CallTargetState, object>)result.Method.CreateDelegate(typeof(Func<TTarget, object, Exception, CallTargetState, object>));
+            _continuation = (Func<TTarget, object?, Exception?, CallTargetState, object>)result.Method.CreateDelegate(typeof(Func<TTarget, object?, Exception?, CallTargetState, object>));
             _preserveContext = result.PreserveContext;
         }
     }
 
-    public override TReturn SetContinuation(TTarget instance, TReturn returnValue, Exception exception, CallTargetState state)
+    public override TReturn? SetContinuation(TTarget instance, TReturn? returnValue, Exception? exception, CallTargetState state)
     {
         if (_continuation is null)
         {
@@ -64,7 +64,7 @@ internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn> : 
                     // *
                     // Calls the CallTarget integration continuation, exceptions here should never bubble up to the application
                     // *
-                    _continuation(instance, default, ex, state);
+                    _continuation!(instance, default, ex, state);
                 }
                 catch (Exception contEx)
                 {
@@ -79,7 +79,7 @@ internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn> : 
                 // *
                 // Calls the CallTarget integration continuation, exceptions here should never bubble up to the application
                 // *
-                _continuation(instance, default, default, state);
+                _continuation!(instance, default, default, state);
             }
             catch (Exception contEx)
             {
