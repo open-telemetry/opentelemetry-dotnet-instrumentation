@@ -1,30 +1,22 @@
 # Info
 
-The files here were copied from <https://github.com/dotnet/runtime/tree/v5.0.5/src/coreclr/src>.
+The files here were copied from
+<https://github.com/dotnet/runtime/tree/v7.0.0/src/coreclr>.
 
 This is to allow using the runtime's Platform Adaptation Layer.
 
-Add back the definition of g_tkCorEncodeToken in cor.h l.2096:
-
-replace
-
-```cpp
-extern const mdToken g_tkCorEncodeToken[];
-```
-
-by
+Manual changes:
+in `\inc\corhlpr.cpp:L143`,
+assert surrounded by `_DEBUG` conditional compilation
 
 ```cpp
-const mdToken g_tkCorEncodeToken[4] = { mdtTypeDef, mdtTypeRef, mdtTypeSpec, mdtBaseType };
++#ifdef _DEBUG
+     assert(&origBuff[size] == outBuff);
++#endif
 ```
 
-Commented #define statements because there is naming conflicts when compiling
-with the stdlibc++ 8 (+ C++17)
-in `dotnet-runtime-coreclr\pal\inc\rt\sal.h`
-l.2612    // commented because it conflicts with stdlibc++ 8
-l.2613    //#define __valid
+in `pal\sal.h:2610` commented ouf `#define __valid`
 
-and
-
-l.2622    // commented because it conflicts with stdlibc++ 8
-l.2623    //#define __pre
+```cpp
+    // #define __valid
+```

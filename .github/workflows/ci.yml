@@ -77,6 +77,17 @@ jobs:
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
+      - name: Delete SQL Server MSI
+        if: ${{ runner.os == 'Windows' }}
+        shell: bash
+        run: |
+          rm SqlLocalDB.msi
+      - name: Generated files unchanged
+        shell: bash
+        run: |
+          git status
+          git diff
+          [[ -z "$(git status --porcelain)" ]]
 
   build-container:
     strategy:

@@ -18,21 +18,32 @@ using System;
 using System.IO;
 using System.Linq;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader.Tests;
 
 public class StartupTests
 {
+    private ITestOutputHelper _testOutput;
+
+    public StartupTests(ITestOutputHelper testOutput)
+    {
+        _testOutput = testOutput;
+    }
+
     [Fact]
     public void Ctor_LoadsManagedAssembly()
     {
         var directory = Directory.GetCurrentDirectory();
         var profilerDirectory = Path.Combine(directory, "..", "Profiler");
+        _testOutput.WriteLine($"profilerDirectory={profilerDirectory}");
 
 #if NETFRAMEWORK
-        if (Directory.Exists(Path.Combine(profilerDirectory, "net462")))
+        var srcDir = Path.Combine(profilerDirectory, "net462");
+        var dstDir = Path.Combine(profilerDirectory, "netfx");
+        if (Directory.Exists(srcDir) && !Directory.Exists(dstDir))
         {
-            Directory.Move(Path.Combine(profilerDirectory, "net462"), Path.Combine(profilerDirectory, "netfx"));
+            Directory.Move(srcDir, dstDir);
         }
 #else
         if (Directory.Exists(Path.Combine(profilerDirectory, "net6.0")))
@@ -41,6 +52,7 @@ public class StartupTests
         }
 #endif
 
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_DEBUG", "1");
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", profilerDirectory);
 
         var exception = Record.Exception(() => new AutoInstrumentation.Loader.Startup());

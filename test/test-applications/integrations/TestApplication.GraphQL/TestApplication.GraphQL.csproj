@@ -12,4 +12,10 @@
     <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
   </ItemGroup>
 
+  <!-- "Microsoft.AspNetCore" is incompatible with the .NET Fx automatic redirection.       -->
+  <!-- The element below injects the necesary dependencies during build time, for more info -->
+  <!-- https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1727   -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.0" />
+  </ItemGroup>
 </Project>

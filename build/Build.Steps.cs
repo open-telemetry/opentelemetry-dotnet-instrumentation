@@ -198,11 +198,6 @@ partial class Build
                 .EnableNoRestore()
                 .SetFramework(TargetFramework.NET6_0)
                 .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET6_0)));
-
-            string MapToFolderOutput(TargetFramework targetFramework)
-            {
-                return targetFramework.ToString().StartsWith("net4") ? "netfx" : "net";
-            }
         });
 
     Target PublishNativeProfiler => _ => _
@@ -564,5 +559,10 @@ partial class Build
                     .SetProcessEnvironmentVariable("BOOSTRAPPING_TESTS", "true"));
             }
         }
+    }
+
+    private string MapToFolderOutput(TargetFramework targetFramework)
+    {
+        return targetFramework.ToString().StartsWith("net4") ? "netfx" : "net";
     }
 }

@@ -36,7 +36,6 @@ public class HttpNetFrameworkTests : TestHelper
         SetExporter(collector);
 
         collector.Expect("OpenTelemetry.Instrumentation.Http.HttpWebRequest");
-        collector.Expect("TestApplication.Http.NetFramework");
 
         RunTestApplication();
 

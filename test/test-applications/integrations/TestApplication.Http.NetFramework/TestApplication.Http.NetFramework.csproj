@@ -2,12 +2,4 @@
   <PropertyGroup>
     <TargetFrameworks>net462</TargetFrameworks>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Content Remove="App.config" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>  
 </Project>

@@ -15,7 +15,6 @@
 // </copyright>
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -26,8 +25,6 @@ namespace TestApplication.Http.NetFramework;
 
 public class TestServer : IDisposable
 {
-    private static readonly ActivitySource MyActivitySource = new ActivitySource("TestApplication.Http.NetFramework", "1.0.0");
-
     private readonly HttpListener _listener;
     private readonly Thread _listenerThread;
 
@@ -69,11 +66,6 @@ public class TestServer : IDisposable
                 var request = reader.ReadToEnd();
 
                 Console.WriteLine("[SERVER] Received: {0}", request);
-
-                using (var activity = MyActivitySource.StartActivity("manual span"))
-                {
-                    activity?.SetTag("test_tag", "test_value");
-                }
 
                 // NOTE: HttpStreamRequest doesn't support Transfer-Encoding: Chunked
                 // (Setting content-length avoids that)

@@ -48,11 +48,20 @@ internal partial class Startup
             return null;
         }
 
+        StartupLogger.Debug("Requester [{0}] requested [{1}]", args?.RequestingAssembly?.FullName ?? "<null>", args?.Name ?? "<null>");
         var path = Path.Combine(ManagedProfilerDirectory, $"{assemblyName}.dll");
         if (File.Exists(path))
         {
-            StartupLogger.Debug("Loading {0}", path);
-            return Assembly.LoadFrom(path);
+            try
+            {
+                var loadedAssembly = Assembly.LoadFrom(path);
+                StartupLogger.Debug("Assembly.LoadFrom(\"{0}\") succeeded={1}", path, loadedAssembly != null);
+                return loadedAssembly;
+            }
+            catch (Exception ex)
+            {
+                StartupLogger.Debug("Assembly.LoadFrom(\"{0}\") Exception: {1}", path, ex);
+            }
         }
 
         return null;
