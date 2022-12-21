@@ -67,7 +67,10 @@ public static class StackExchangeRedisIntegrationAsync
     internal static TReturn OnAsyncMethodEnd<TTarget, TReturn>(TTarget instance, TReturn returnValue, Exception exception, CallTargetState state)
     {
 #if NET6_0_OR_GREATER
-        StackExchangeRedisInitializer.Initialize(returnValue);
+        if (returnValue != null)
+        {
+            StackExchangeRedisInitializer.Initialize(returnValue);
+        }
 #endif
 
         return returnValue;

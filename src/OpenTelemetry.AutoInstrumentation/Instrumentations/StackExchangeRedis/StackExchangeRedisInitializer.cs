@@ -23,9 +23,9 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
 
 internal static class StackExchangeRedisInitializer
 {
-    public static void Initialize(object? connection)
+    public static void Initialize(object connection)
     {
-        if (connection != null && Instrumentation.TracerSettings.Value.EnabledInstrumentations.Contains(TracerInstrumentation.StackExchangeRedis))
+        if (Instrumentation.TracerSettings.Value.EnabledInstrumentations.Contains(TracerInstrumentation.StackExchangeRedis))
         {
             var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisCallsInstrumentation, OpenTelemetry.Instrumentation.StackExchangeRedis")!;
             var optionsInstrumentationType = Type.GetType("OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisCallsInstrumentationOptions, OpenTelemetry.Instrumentation.StackExchangeRedis")!;
