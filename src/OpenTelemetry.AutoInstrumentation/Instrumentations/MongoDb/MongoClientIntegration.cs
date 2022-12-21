@@ -29,15 +29,15 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
 /// MongoDB.Driver.MongoClient calltarget instrumentation
 /// </summary>
 [InstrumentMethod(
-    "MongoDB.Driver",
-    "MongoDB.Driver.MongoClient",
-    ".ctor",
-    ClrNames.Void,
-    new[] { "MongoDB.Driver.MongoClientSettings" },
-    "2.13.3",
-    "2.65535.65535",
-    "MongoDB",
-    InstrumentationType.Trace)]
+    assemblyName: "MongoDB.Driver",
+    typeName: "MongoDB.Driver.MongoClient",
+    methodName: ".ctor",
+    returnTypeName: ClrNames.Void,
+    parameterTypeNames: new[] { "MongoDB.Driver.MongoClientSettings" },
+    minimumVersion: "2.13.3",
+    maximumVersion: "2.65535.65535",
+    integrationName: "MongoDB",
+    type: InstrumentationType.Trace)]
 public static class MongoClientIntegration
 {
 #if NET6_0_OR_GREATER

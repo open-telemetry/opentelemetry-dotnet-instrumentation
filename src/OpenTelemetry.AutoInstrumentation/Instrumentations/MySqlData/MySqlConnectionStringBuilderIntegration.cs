@@ -23,15 +23,15 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData;
 /// MySql.Data.MySqlClient.MySqlConnectionStringBuilder calltarget instrumentation
 /// </summary>
 [InstrumentMethod(
-    "MySql.Data",
-    "MySql.Data.MySqlClient.MySqlConnectionStringBuilder",
-    "get_Logging",
-    ClrNames.Bool,
-    new string[0],
-    "8.0.31",
-    "8.65535.65535",
-    "MySqlData",
-    InstrumentationType.Trace)]
+    assemblyName: "MySql.Data",
+    typeName: "MySql.Data.MySqlClient.MySqlConnectionStringBuilder",
+    methodName: "get_Logging",
+    returnTypeName: ClrNames.Bool,
+    parameterTypeNames: new string[0],
+    minimumVersion: "8.0.31",
+    maximumVersion: "8.65535.65535",
+    integrationName: "MySqlData",
+    type: InstrumentationType.Trace)]
 public static class MySqlConnectionStringBuilderIntegration
 {
 #if !NETFRAMEWORK

@@ -15,7 +15,6 @@
 // </copyright>
 
 using System;
-using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.Util;
 
@@ -25,15 +24,15 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
 /// GraphQL.Execution.ExecutionStrategy calltarget instrumentation
 /// </summary>
 [GraphQLExecuteAsync(
-    GraphQLCommon.GraphQLAssembly,
-    "GraphQL.Execution.ExecutionStrategy",
-    GraphQLCommon.Major2Minor3,
-    GraphQLCommon.Major2)]
+    assemblyName: GraphQLCommon.GraphQLAssembly,
+    typeName: "GraphQL.Execution.ExecutionStrategy",
+    minimumVersion: GraphQLCommon.Major2Minor3,
+    maximumVersion: GraphQLCommon.Major2)]
 [GraphQLExecuteAsync(
-    GraphQLCommon.GraphQLAssembly,
-    "GraphQL.Execution.SubscriptionExecutionStrategy",
-    GraphQLCommon.Major2Minor3,
-    GraphQLCommon.Major2)]
+    assemblyName: GraphQLCommon.GraphQLAssembly,
+    typeName: "GraphQL.Execution.SubscriptionExecutionStrategy",
+    minimumVersion: GraphQLCommon.Major2Minor3,
+    maximumVersion: GraphQLCommon.Major2)]
 public static class ExecuteAsyncIntegration
 {
     /// <summary>

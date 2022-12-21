@@ -20,15 +20,15 @@ internal class GraphQLExecuteAsyncAttribute : InstrumentMethodAttribute
 {
     public GraphQLExecuteAsyncAttribute(string assemblyName, string typeName, string minimumVersion, string maximumVersion)
         : base(
-            assemblyName,
-            typeName,
-            "ExecuteAsync",
-            "System.Threading.Tasks.Task`1[GraphQL.ExecutionResult]",
-            new[] { "GraphQL.Execution.ExecutionContext" },
-            minimumVersion,
-            maximumVersion,
-            GraphQLCommon.IntegrationName,
-            InstrumentationType.Trace)
+            assemblyName: assemblyName,
+            typeName: typeName,
+            methodName: "ExecuteAsync",
+            returnTypeName: "System.Threading.Tasks.Task`1[GraphQL.ExecutionResult]",
+            parameterTypeNames: new[] { "GraphQL.Execution.ExecutionContext" },
+            minimumVersion: minimumVersion,
+            maximumVersion: maximumVersion,
+            integrationName: GraphQLCommon.IntegrationName,
+            type: InstrumentationType.Trace)
     {
     }
 }
