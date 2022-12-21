@@ -103,21 +103,21 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
         }
 
         switch (eventData.Level)
-            {
-                case EventLevel.Critical:
-                case EventLevel.Error:
-                    log.Error("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message ?? string.Empty, payloadArray));
-                    break;
-                case EventLevel.Warning:
-                    log.Warning("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message ?? string.Empty, payloadArray));
-                    break;
-                case EventLevel.LogAlways:
-                case EventLevel.Informational:
-                    log.Information("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message ?? string.Empty, payloadArray));
-                    break;
-                case EventLevel.Verbose:
-                    log.Debug("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message ?? string.Empty, payloadArray));
-                    break;
-            }
+        {
+            case EventLevel.Critical:
+            case EventLevel.Error:
+                log.Error("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message ?? string.Empty, payloadArray));
+                break;
+            case EventLevel.Warning:
+                log.Warning("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message ?? string.Empty, payloadArray));
+                break;
+            case EventLevel.LogAlways:
+            case EventLevel.Informational:
+                log.Information("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message ?? string.Empty, payloadArray));
+                break;
+            case EventLevel.Verbose:
+                log.Debug("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message ?? string.Empty, payloadArray));
+                break;
+        }
     }
 }
