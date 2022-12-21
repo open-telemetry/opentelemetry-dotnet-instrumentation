@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -34,10 +36,10 @@ internal static class IntegrationOptions<TIntegration, TTarget>
     internal static void DisableIntegration() => _disableIntegration = true;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void LogException(Exception exception, string message = null)
+    internal static void LogException(Exception exception, string? message = null)
     {
         // ReSharper disable twice ExplicitCallerInfoArgument
-        Log.Error(exception, message ?? exception?.Message);
+        Log.Error(exception, message ?? exception.Message);
         if (exception is DuckTypeException)
         {
             Log.Warning($"DuckTypeException has been detected, the integration <{typeof(TIntegration)}, {typeof(TTarget)}> will be disabled.");
@@ -50,7 +52,7 @@ internal static class IntegrationOptions<TIntegration, TTarget>
         }
         else if (exception is FileLoadException fileLoadException)
         {
-            if (fileLoadException.FileName.StartsWith("System.Diagnostics.DiagnosticSource") || fileLoadException.FileName.StartsWith("System.Runtime.CompilerServices.Unsafe"))
+            if (fileLoadException.FileName != null && (fileLoadException.FileName.StartsWith("System.Diagnostics.DiagnosticSource") || fileLoadException.FileName.StartsWith("System.Runtime.CompilerServices.Unsafe")))
             {
                 Log.Warning($"FileLoadException for '{fileLoadException.FileName}' has been detected, the integration <{typeof(TIntegration)}, {typeof(TTarget)}> will be disabled.");
                 _disableIntegration = true;

@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,10 +34,10 @@ internal class IntegrationMapper
     private const string EndAsyncMethodName = "OnAsyncMethodEnd";
 
     private static readonly ILogger Log = OtelLogging.GetLogger();
-    private static readonly MethodInfo UnwrapReturnValueMethodInfo = typeof(IntegrationMapper).GetMethod(nameof(IntegrationMapper.UnwrapReturnValue), BindingFlags.NonPublic | BindingFlags.Static);
-    private static readonly MethodInfo ConvertTypeMethodInfo = typeof(IntegrationMapper).GetMethod(nameof(IntegrationMapper.ConvertType), BindingFlags.NonPublic | BindingFlags.Static);
+    private static readonly MethodInfo UnwrapReturnValueMethodInfo = typeof(IntegrationMapper).GetMethod(nameof(IntegrationMapper.UnwrapReturnValue), BindingFlags.NonPublic | BindingFlags.Static)!;
+    private static readonly MethodInfo ConvertTypeMethodInfo = typeof(IntegrationMapper).GetMethod(nameof(IntegrationMapper.ConvertType), BindingFlags.NonPublic | BindingFlags.Static)!;
 
-    internal static DynamicMethod CreateBeginMethodDelegate(Type integrationType, Type targetType, Type[] argumentsTypes)
+    internal static DynamicMethod? CreateBeginMethodDelegate(Type integrationType, Type targetType, Type[] argumentsTypes)
     {
         /*
          * OnMethodBegin signatures with 1 or more parameters with 1 or more generics:
@@ -51,7 +53,7 @@ internal class IntegrationMapper
          */
 
         Log.Debug($"Creating BeginMethod Dynamic Method for '{integrationType.FullName}' integration. [Target={targetType.FullName}]");
-        MethodInfo onMethodBeginMethodInfo = integrationType.GetMethod(BeginMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        MethodInfo? onMethodBeginMethodInfo = integrationType.GetMethod(BeginMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
         if (onMethodBeginMethodInfo is null)
         {
             return null;
@@ -86,13 +88,13 @@ internal class IntegrationMapper
 
         bool mustLoadInstance = onMethodBeginParameters.Length != argumentsTypes.Length;
         Type instanceGenericType = genericArgumentsTypes[0];
-        Type instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
-        Type instanceProxyType = null;
+        Type? instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
+        Type? instanceProxyType = null;
         if (instanceGenericConstraint != null)
         {
             var result = DuckType.GetOrCreateProxyType(instanceGenericConstraint, targetType);
             instanceProxyType = result.ProxyType;
-            callGenericTypes.Add(instanceProxyType);
+            callGenericTypes.Add(instanceProxyType!);
         }
         else
         {
@@ -100,7 +102,7 @@ internal class IntegrationMapper
         }
 
         DynamicMethod callMethod = new DynamicMethod(
-            $"{onMethodBeginMethodInfo.DeclaringType.Name}.{onMethodBeginMethodInfo.Name}",
+            $"{onMethodBeginMethodInfo.DeclaringType?.Name}.{onMethodBeginMethodInfo.Name}",
             typeof(CallTargetState),
             new Type[] { targetType }.Concat(argumentsTypes),
             onMethodBeginMethodInfo.Module,
@@ -115,7 +117,7 @@ internal class IntegrationMapper
 
             if (instanceGenericConstraint != null)
             {
-                WriteCreateNewProxyInstance(ilWriter, instanceProxyType, targetType);
+                WriteCreateNewProxyInstance(ilWriter, instanceProxyType!, targetType);
             }
         }
 
@@ -124,8 +126,8 @@ internal class IntegrationMapper
         {
             Type sourceParameterType = argumentsTypes[mustLoadInstance ? i - 1 : i];
             Type targetParameterType = onMethodBeginParameters[i].ParameterType;
-            Type targetParameterTypeConstraint = null;
-            Type parameterProxyType = null;
+            Type? targetParameterTypeConstraint = null;
+            Type? parameterProxyType = null;
 
             if (targetParameterType.IsGenericParameter)
             {
@@ -139,7 +141,7 @@ internal class IntegrationMapper
                 {
                     var result = DuckType.GetOrCreateProxyType(targetParameterTypeConstraint, sourceParameterType);
                     parameterProxyType = result.ProxyType;
-                    callGenericTypes.Add(parameterProxyType);
+                    callGenericTypes.Add(parameterProxyType!);
                 }
             }
             else if (!targetParameterType.IsAssignableFrom(sourceParameterType) && (!(sourceParameterType.IsEnum && targetParameterType.IsEnum)))
@@ -179,7 +181,7 @@ internal class IntegrationMapper
          */
 
         Log.Debug($"Creating SlowBeginMethod Dynamic Method for '{integrationType.FullName}' integration. [Target={targetType.FullName}]");
-        MethodInfo onMethodBeginMethodInfo = integrationType.GetMethod(BeginMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        MethodInfo? onMethodBeginMethodInfo = integrationType.GetMethod(BeginMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
         if (onMethodBeginMethodInfo is null)
         {
             throw new NullReferenceException($"Couldn't find the method: {BeginMethodName} in type: {integrationType.FullName}");
@@ -202,13 +204,13 @@ internal class IntegrationMapper
 
         bool mustLoadInstance = onMethodBeginParameters[0].ParameterType.IsGenericParameter && onMethodBeginParameters[0].ParameterType.GenericParameterPosition == 0;
         Type instanceGenericType = genericArgumentsTypes[0];
-        Type instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
-        Type instanceProxyType = null;
+        Type? instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
+        Type? instanceProxyType = null;
         if (instanceGenericConstraint != null)
         {
             var result = DuckType.GetOrCreateProxyType(instanceGenericConstraint, targetType);
             instanceProxyType = result.ProxyType;
-            callGenericTypes.Add(instanceProxyType);
+            callGenericTypes.Add(instanceProxyType!);
         }
         else
         {
@@ -216,7 +218,7 @@ internal class IntegrationMapper
         }
 
         DynamicMethod callMethod = new DynamicMethod(
-            $"{onMethodBeginMethodInfo.DeclaringType.Name}.{onMethodBeginMethodInfo.Name}",
+            $"{onMethodBeginMethodInfo.DeclaringType?.Name}.{onMethodBeginMethodInfo.Name}",
             typeof(CallTargetState),
             new Type[] { targetType, typeof(object[]) },
             onMethodBeginMethodInfo.Module,
@@ -231,7 +233,7 @@ internal class IntegrationMapper
 
             if (instanceGenericConstraint != null)
             {
-                WriteCreateNewProxyInstance(ilWriter, instanceProxyType, targetType);
+                WriteCreateNewProxyInstance(ilWriter, instanceProxyType!, targetType);
             }
         }
 
@@ -239,7 +241,7 @@ internal class IntegrationMapper
         for (var i = mustLoadInstance ? 1 : 0; i < onMethodBeginParameters.Length; i++)
         {
             Type targetParameterType = onMethodBeginParameters[i].ParameterType;
-            Type targetParameterTypeConstraint = null;
+            Type? targetParameterTypeConstraint = null;
 
             if (targetParameterType.IsGenericParameter)
             {
@@ -280,7 +282,7 @@ internal class IntegrationMapper
         return callMethod;
     }
 
-    internal static DynamicMethod CreateEndMethodDelegate(Type integrationType, Type targetType)
+    internal static DynamicMethod? CreateEndMethodDelegate(Type integrationType, Type targetType)
     {
         /*
          * OnMethodEnd signatures with 2 or 3 parameters with 1 generics:
@@ -290,7 +292,7 @@ internal class IntegrationMapper
          */
 
         Log.Debug($"Creating EndMethod Dynamic Method for '{integrationType.FullName}' integration. [Target={targetType.FullName}]");
-        MethodInfo onMethodEndMethodInfo = integrationType.GetMethod(EndMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        MethodInfo? onMethodEndMethodInfo = integrationType.GetMethod(EndMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
         if (onMethodEndMethodInfo is null)
         {
             return null;
@@ -331,13 +333,13 @@ internal class IntegrationMapper
 
         bool mustLoadInstance = onMethodEndParameters.Length == 3;
         Type instanceGenericType = genericArgumentsTypes[0];
-        Type instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
-        Type instanceProxyType = null;
+        Type? instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
+        Type? instanceProxyType = null;
         if (instanceGenericConstraint != null)
         {
             var result = DuckType.GetOrCreateProxyType(instanceGenericConstraint, targetType);
             instanceProxyType = result.ProxyType;
-            callGenericTypes.Add(instanceProxyType);
+            callGenericTypes.Add(instanceProxyType!);
         }
         else
         {
@@ -345,7 +347,7 @@ internal class IntegrationMapper
         }
 
         DynamicMethod callMethod = new DynamicMethod(
-            $"{onMethodEndMethodInfo.DeclaringType.Name}.{onMethodEndMethodInfo.Name}",
+            $"{onMethodEndMethodInfo.DeclaringType?.Name}.{onMethodEndMethodInfo.Name}",
             typeof(CallTargetReturn),
             new Type[] { targetType, typeof(Exception), typeof(CallTargetState) },
             onMethodEndMethodInfo.Module,
@@ -360,7 +362,7 @@ internal class IntegrationMapper
 
             if (instanceGenericConstraint != null)
             {
-                WriteCreateNewProxyInstance(ilWriter, instanceProxyType, targetType);
+                WriteCreateNewProxyInstance(ilWriter, instanceProxyType!, targetType);
             }
         }
 
@@ -380,7 +382,7 @@ internal class IntegrationMapper
         return callMethod;
     }
 
-    internal static DynamicMethod CreateEndMethodDelegate(Type integrationType, Type targetType, Type returnType)
+    internal static DynamicMethod? CreateEndMethodDelegate(Type integrationType, Type targetType, Type returnType)
     {
         /*
          * OnMethodEnd signatures with 3 or 4 parameters with 1 or 2 generics:
@@ -391,7 +393,7 @@ internal class IntegrationMapper
          */
 
         Log.Debug($"Creating EndMethod Dynamic Method for '{integrationType.FullName}' integration. [Target={targetType.FullName}, ReturnType={returnType.FullName}]");
-        MethodInfo onMethodEndMethodInfo = integrationType.GetMethod(EndMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        MethodInfo? onMethodEndMethodInfo = integrationType.GetMethod(EndMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
         if (onMethodEndMethodInfo is null)
         {
             return null;
@@ -432,13 +434,13 @@ internal class IntegrationMapper
 
         bool mustLoadInstance = onMethodEndParameters.Length == 4;
         Type instanceGenericType = genericArgumentsTypes[0];
-        Type instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
-        Type instanceProxyType = null;
+        Type? instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
+        Type? instanceProxyType = null;
         if (instanceGenericConstraint != null)
         {
             var result = DuckType.GetOrCreateProxyType(instanceGenericConstraint, targetType);
             instanceProxyType = result.ProxyType;
-            callGenericTypes.Add(instanceProxyType);
+            callGenericTypes.Add(instanceProxyType!);
         }
         else
         {
@@ -447,9 +449,9 @@ internal class IntegrationMapper
 
         int returnParameterIndex = onMethodEndParameters.Length == 4 ? 1 : 0;
         bool isAGenericReturnValue = onMethodEndParameters[returnParameterIndex].ParameterType.IsGenericParameter;
-        Type returnValueGenericType = null;
-        Type returnValueGenericConstraint = null;
-        Type returnValueProxyType = null;
+        Type? returnValueGenericType = null;
+        Type? returnValueGenericConstraint = null;
+        Type? returnValueProxyType = null;
         if (isAGenericReturnValue)
         {
             returnValueGenericType = genericArgumentsTypes[1];
@@ -458,7 +460,7 @@ internal class IntegrationMapper
             {
                 var result = DuckType.GetOrCreateProxyType(returnValueGenericConstraint, returnType);
                 returnValueProxyType = result.ProxyType;
-                callGenericTypes.Add(returnValueProxyType);
+                callGenericTypes.Add(returnValueProxyType!);
             }
             else
             {
@@ -471,7 +473,7 @@ internal class IntegrationMapper
         }
 
         DynamicMethod callMethod = new DynamicMethod(
-            $"{onMethodEndMethodInfo.DeclaringType.Name}.{onMethodEndMethodInfo.Name}.{targetType.Name}.{returnType.Name}",
+            $"{onMethodEndMethodInfo.DeclaringType?.Name}.{onMethodEndMethodInfo.Name}.{targetType.Name}.{returnType.Name}",
             typeof(CallTargetReturn<>).MakeGenericType(returnType),
             new Type[] { targetType, returnType, typeof(Exception), typeof(CallTargetState) },
             onMethodEndMethodInfo.Module,
@@ -486,7 +488,7 @@ internal class IntegrationMapper
 
             if (instanceGenericConstraint != null)
             {
-                WriteCreateNewProxyInstance(ilWriter, instanceProxyType, targetType);
+                WriteCreateNewProxyInstance(ilWriter, instanceProxyType!, targetType);
             }
         }
 
@@ -534,7 +536,7 @@ internal class IntegrationMapper
          */
 
         Log.Debug($"Creating AsyncEndMethod Dynamic Method for '{integrationType.FullName}' integration. [Target={targetType.FullName}, ReturnType={returnType.FullName}]");
-        MethodInfo onAsyncMethodEndMethodInfo = integrationType.GetMethod(EndAsyncMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        MethodInfo? onAsyncMethodEndMethodInfo = integrationType.GetMethod(EndAsyncMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
         if (onAsyncMethodEndMethodInfo is null)
         {
             Log.Warning($"Couldn't find the method: {EndAsyncMethodName} in type: {integrationType.FullName}");
@@ -578,13 +580,13 @@ internal class IntegrationMapper
 
         bool mustLoadInstance = onAsyncMethodEndParameters.Length == 4;
         Type instanceGenericType = genericArgumentsTypes[0];
-        Type instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
-        Type instanceProxyType = null;
+        Type? instanceGenericConstraint = instanceGenericType.GetGenericParameterConstraints().FirstOrDefault();
+        Type? instanceProxyType = null;
         if (instanceGenericConstraint != null)
         {
             var result = DuckType.GetOrCreateProxyType(instanceGenericConstraint, targetType);
             instanceProxyType = result.ProxyType;
-            callGenericTypes.Add(instanceProxyType);
+            callGenericTypes.Add(instanceProxyType!);
         }
         else
         {
@@ -593,9 +595,9 @@ internal class IntegrationMapper
 
         int returnParameterIndex = onAsyncMethodEndParameters.Length == 4 ? 1 : 0;
         bool isAGenericReturnValue = onAsyncMethodEndParameters[returnParameterIndex].ParameterType.IsGenericParameter;
-        Type returnValueGenericType = null;
-        Type returnValueGenericConstraint = null;
-        Type returnValueProxyType = null;
+        Type? returnValueGenericType = null;
+        Type? returnValueGenericConstraint = null;
+        Type? returnValueProxyType = null;
         if (isAGenericReturnValue)
         {
             returnValueGenericType = genericArgumentsTypes[1];
@@ -604,7 +606,7 @@ internal class IntegrationMapper
             {
                 var result = DuckType.GetOrCreateProxyType(returnValueGenericConstraint, returnType);
                 returnValueProxyType = result.ProxyType;
-                callGenericTypes.Add(returnValueProxyType);
+                callGenericTypes.Add(returnValueProxyType!);
             }
             else
             {
@@ -617,7 +619,7 @@ internal class IntegrationMapper
         }
 
         DynamicMethod callMethod = new DynamicMethod(
-            $"{onAsyncMethodEndMethodInfo.DeclaringType.Name}.{onAsyncMethodEndMethodInfo.Name}.{targetType.Name}.{returnType.Name}",
+            $"{onAsyncMethodEndMethodInfo.DeclaringType?.Name}.{onAsyncMethodEndMethodInfo.Name}.{targetType.Name}.{returnType.Name}",
             returnType,
             new Type[] { targetType, returnType, typeof(Exception), typeof(CallTargetState) },
             onAsyncMethodEndMethodInfo.Module,
@@ -632,7 +634,7 @@ internal class IntegrationMapper
 
             if (instanceGenericConstraint != null)
             {
-                WriteCreateNewProxyInstance(ilWriter, instanceProxyType, targetType);
+                WriteCreateNewProxyInstance(ilWriter, instanceProxyType!, targetType);
             }
         }
 
@@ -748,12 +750,12 @@ internal class IntegrationMapper
         }
     }
 
-    private static T ConvertType<T>(object value)
+    private static T? ConvertType<T>(object value)
     {
         var conversionType = typeof(T);
         if (value is null || conversionType == typeof(object))
         {
-            return (T)value;
+            return (T?)value;
         }
 
         Type valueType = value.GetType();

@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Diagnostics;
 using System.Reflection.Emit;
@@ -27,15 +29,15 @@ namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers;
 
 internal static class EndMethodHandler<TIntegration, TTarget, TReturn>
 {
-    private static readonly InvokeDelegate _invokeDelegate = null;
-    private static readonly ContinuationGenerator<TTarget, TReturn> _continuationGenerator = null;
+    private static readonly InvokeDelegate? _invokeDelegate;
+    private static readonly ContinuationGenerator<TTarget, TReturn>? _continuationGenerator;
 
     static EndMethodHandler()
     {
         Type returnType = typeof(TReturn);
         try
         {
-            DynamicMethod dynMethod = IntegrationMapper.CreateEndMethodDelegate(typeof(TIntegration), typeof(TTarget), returnType);
+            DynamicMethod? dynMethod = IntegrationMapper.CreateEndMethodDelegate(typeof(TIntegration), typeof(TTarget), returnType);
             if (dynMethod != null)
             {
                 _invokeDelegate = (InvokeDelegate)dynMethod.CreateDelegate(typeof(InvokeDelegate));
@@ -52,13 +54,13 @@ internal static class EndMethodHandler<TIntegration, TTarget, TReturn>
             if (typeof(Task).IsAssignableFrom(returnType))
             {
                 // The type is a Task<>
-                _continuationGenerator = (ContinuationGenerator<TTarget, TReturn>)Activator.CreateInstance(typeof(TaskContinuationGenerator<,,,>).MakeGenericType(typeof(TIntegration), typeof(TTarget), returnType, ContinuationsHelper.GetResultType(returnType)));
+                _continuationGenerator = (ContinuationGenerator<TTarget, TReturn>?)Activator.CreateInstance(typeof(TaskContinuationGenerator<,,,>).MakeGenericType(typeof(TIntegration), typeof(TTarget), returnType, ContinuationsHelper.GetResultType(returnType)));
             }
 #if NET6_0_OR_GREATER
             else if (genericReturnType == typeof(ValueTask<>))
             {
                 // The type is a ValueTask<>
-                _continuationGenerator = (ContinuationGenerator<TTarget, TReturn>)Activator.CreateInstance(typeof(ValueTaskContinuationGenerator<,,,>).MakeGenericType(typeof(TIntegration), typeof(TTarget), returnType, ContinuationsHelper.GetResultType(returnType)));
+                _continuationGenerator = (ContinuationGenerator<TTarget, TReturn>?)Activator.CreateInstance(typeof(ValueTaskContinuationGenerator<,,,>).MakeGenericType(typeof(TIntegration), typeof(TTarget), returnType, ContinuationsHelper.GetResultType(returnType)));
             }
 #endif
         }
@@ -79,10 +81,10 @@ internal static class EndMethodHandler<TIntegration, TTarget, TReturn>
         }
     }
 
-    internal delegate CallTargetReturn<TReturn> InvokeDelegate(TTarget instance, TReturn returnValue, Exception exception, CallTargetState state);
+    internal delegate CallTargetReturn<TReturn?> InvokeDelegate(TTarget instance, TReturn? returnValue, Exception exception, CallTargetState state);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static CallTargetReturn<TReturn> Invoke(TTarget instance, TReturn returnValue, Exception exception, CallTargetState state)
+    internal static CallTargetReturn<TReturn?> Invoke(TTarget instance, TReturn? returnValue, Exception exception, CallTargetState state)
     {
         if (_continuationGenerator != null)
         {
@@ -95,10 +97,10 @@ internal static class EndMethodHandler<TIntegration, TTarget, TReturn>
 
         if (_invokeDelegate != null)
         {
-            CallTargetReturn<TReturn> returnWrap = _invokeDelegate(instance, returnValue, exception, state);
+            CallTargetReturn<TReturn?> returnWrap = _invokeDelegate(instance, returnValue, exception, state);
             returnValue = returnWrap.GetReturnValue();
         }
 
-        return new CallTargetReturn<TReturn>(returnValue);
+        return new CallTargetReturn<TReturn?>(returnValue);
     }
 }

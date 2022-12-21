@@ -67,7 +67,7 @@ public readonly struct CallTargetState
         _state = state;
     }
 
-    internal CallTargetState(Activity previousActivity, CallTargetState state)
+    internal CallTargetState(Activity? previousActivity, CallTargetState state)
     {
         _previousActivity = previousActivity;
         _activity = state._activity;

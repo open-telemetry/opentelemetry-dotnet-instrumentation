@@ -315,14 +315,14 @@ public static class CallTargetInvoker
     /// <param name="state">CallTarget state</param>
     /// <returns>CallTarget return structure</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CallTargetReturn<TReturn> EndMethod<TIntegration, TTarget, TReturn>(TTarget instance, TReturn returnValue, Exception exception, CallTargetState state)
+    public static CallTargetReturn<TReturn?> EndMethod<TIntegration, TTarget, TReturn>(TTarget instance, TReturn returnValue, Exception exception, CallTargetState state)
     {
         if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
         {
             return EndMethodHandler<TIntegration, TTarget, TReturn>.Invoke(instance, returnValue, exception, state);
         }
 
-        return new CallTargetReturn<TReturn>(returnValue);
+        return new CallTargetReturn<TReturn?>(returnValue);
     }
 
     /// <summary>
