@@ -38,7 +38,8 @@ public class TracerSamplerHelperTests
     {
         var sampler = TracerSamplerHelper.GetSampler(tracesSampler, tracerSamplerArguments);
 
-        sampler.Description.Should().Be(expectedDescription);
+        sampler.Should().NotBeNull();
+        sampler!.Description.Should().Be(expectedDescription);
     }
 
     [Theory]

@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <AddTestStrongNameAssemblyKeyOnNetFramework>true</AddTestStrongNameAssemblyKeyOnNetFramework>
-    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

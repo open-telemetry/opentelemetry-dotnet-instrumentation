@@ -161,7 +161,7 @@ public class ConfigurationSourceExtensionsTests
 
     private class DummyStringConfigurationSource : StringConfigurationSource
     {
-        protected override string GetStringInternal(string key)
+        protected override string? GetStringInternal(string key)
         {
             if (key == "TEST_NULL_VALUE")
             {

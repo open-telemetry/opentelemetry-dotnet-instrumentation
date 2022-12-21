@@ -48,7 +48,7 @@ public class LazyInstrumentationLoaderTests
     {
         var assemblyName = new AssemblyName(DummyInitializer.DummyAssemblyName);
         var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-        assemblyBuilder.DefineDynamicModule(assemblyName.Name);
+        assemblyBuilder.DefineDynamicModule(assemblyName.Name!);
     }
 
     private class DummyInitializer : InstrumentationInitializer, IDisposable
