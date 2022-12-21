@@ -16,6 +16,7 @@
 
 using System;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
+using OpenTelemetry.AutoInstrumentation.Configuration;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
 
@@ -76,7 +77,7 @@ public static class StackExchangeRedisIntegration
     internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TReturn returnValue, Exception exception, CallTargetState state)
     {
 #if NET6_0_OR_GREATER
-        if (returnValue != null)
+        if (returnValue != null && Instrumentation.TracerSettings.Value.EnabledInstrumentations.Contains(TracerInstrumentation.StackExchangeRedis))
         {
             StackExchangeRedisInitializer.Initialize(returnValue);
         }
