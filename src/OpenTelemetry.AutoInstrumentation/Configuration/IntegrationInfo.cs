@@ -24,9 +24,9 @@ internal readonly struct IntegrationInfo
 
     public readonly int Id;
 
-    public IntegrationInfo(string? integrationName)
+    public IntegrationInfo(string integrationName)
     {
-        Name = integrationName ?? throw new ArgumentNullException(nameof(integrationName));
+        Name = integrationName;
         Id = 0;
     }
 

@@ -21,7 +21,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 internal static class TracerSamplerHelper
 {
-    public static Sampler? GetSampler(string? tracerSampler, string? tracerSamplerArguments)
+    public static Sampler? GetSampler(string tracerSampler, string? tracerSamplerArguments)
     {
         switch (tracerSampler)
         {

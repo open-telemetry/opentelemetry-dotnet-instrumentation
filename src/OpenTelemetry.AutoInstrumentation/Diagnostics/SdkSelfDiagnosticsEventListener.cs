@@ -102,21 +102,23 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
             payloadArray = Array.Empty<object>();
         }
 
+        var message = eventData.Message != null ? string.Format(eventData.Message ?? string.Empty, payloadArray) : string.Empty;
+
         switch (eventData.Level)
         {
             case EventLevel.Critical:
             case EventLevel.Error:
-                log.Error("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message ?? string.Empty, payloadArray));
+                log.Error("EventSource={0}, Message={1}", eventData.EventSource.Name, message);
                 break;
             case EventLevel.Warning:
-                log.Warning("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message ?? string.Empty, payloadArray));
+                log.Warning("EventSource={0}, Message={1}", eventData.EventSource.Name, message);
                 break;
             case EventLevel.LogAlways:
             case EventLevel.Informational:
-                log.Information("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message ?? string.Empty, payloadArray));
+                log.Information("EventSource={0}, Message={1}", eventData.EventSource.Name, message);
                 break;
             case EventLevel.Verbose:
-                log.Debug("EventSource={0}, Message={1}", eventData.EventSource.Name, string.Format(eventData.Message ?? string.Empty, payloadArray));
+                log.Debug("EventSource={0}, Message={1}", eventData.EventSource.Name, message);
                 break;
         }
     }

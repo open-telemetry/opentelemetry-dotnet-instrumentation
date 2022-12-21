@@ -60,8 +60,6 @@ internal abstract class Settings
 
         try
         {
-            var ttt = typeof(T);
-
             return (T)typeof(T)!
                 .GetConstructor(new[] { typeof(IConfigurationSource) })!
                 .Invoke(new object[] { configurationSource });
