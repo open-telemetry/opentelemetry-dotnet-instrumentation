@@ -25,76 +25,68 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Assembly, AllowMultiple = true, Inherited = false)]
 internal class InstrumentMethodAttribute : Attribute
 {
-    /// <summary>
-    /// Gets or sets the name of the assembly that contains the target method to be intercepted.
-    /// Required if <see cref="AssemblyNames"/> is not set.
-    /// </summary>
-    public string AssemblyName
+    public InstrumentMethodAttribute(string assemblyName, string typeName, string methodName, string returnTypeName, string[] parameterTypeNames, string minimumVersion, string maximumVersion, string integrationName, InstrumentationType type)
     {
-        get
+        AssemblyName = assemblyName;
+        TypeName = typeName;
+        MethodName = methodName;
+        ReturnTypeName = returnTypeName;
+        ParameterTypeNames = parameterTypeNames;
+        VersionRange = new IntegrationVersionRange
         {
-            switch (AssemblyNames?.Length ?? 0)
-            {
-                case 0:
-                    return null;
-                case 1:
-                    return AssemblyNames[0];
-                default:
-                    throw new NotSupportedException("Multiple assemblies are not supported using this property. Use AssemblyNames property instead.");
-            }
-        }
-        set => AssemblyNames = new[] { value };
+            MinimumVersion = minimumVersion,
+            MaximumVersion = maximumVersion
+        };
+        IntegrationName = integrationName;
+        Type = type;
     }
 
     /// <summary>
-    /// Gets or sets the name of the assemblies that contain the target method to be intercepted.
-    /// Required if <see cref="AssemblyName"/> is not set.
+    /// Gets the name of the assembly that contains the target method to be intercepted.
     /// </summary>
-    public string[] AssemblyNames { get; set; }
+    public string AssemblyName { get; }
 
     /// <summary>
-    /// Gets or sets the name of the type that contains the target method to be intercepted.
+    /// Gets the name of the type that contains the target method to be intercepted.
     /// Required.
     /// </summary>
-    public string TypeName { get; set; }
+    public string TypeName { get; }
 
     /// <summary>
-    /// Gets or sets the name of the target method to be intercepted.
+    /// Gets the name of the target method to be intercepted.
     /// If null, default to the name of the decorated method.
     /// </summary>
-    public string MethodName { get; set; }
+    public string MethodName { get; }
 
     /// <summary>
-    /// Gets or sets the return type name
+    /// Gets the return type name
     /// </summary>
-    public string ReturnTypeName { get; set; }
+    public string ReturnTypeName { get; }
 
     /// <summary>
-    /// Gets or sets the parameters type array for the target method to be intercepted.
+    /// Gets the parameters type array for the target method to be intercepted.
     /// </summary>
-    public string[] ParameterTypeNames { get; set; }
+    public string[] ParameterTypeNames { get; }
 
     /// <summary>
     /// Gets the target version range for <see cref="AssemblyName"/>.
     /// </summary>
-    public IntegrationVersionRange VersionRange { get; } = new();
+    public IntegrationVersionRange VersionRange { get; }
 
     /// <summary>
-    /// Gets or sets the target minimum version.
+    /// Gets the target minimum version.
     /// </summary>
     public string MinimumVersion
     {
         get => VersionRange.MinimumVersion;
-        set => VersionRange.MinimumVersion = value;
     }
 
     /// <summary>
-    /// Gets or sets the target maximum version.
+    /// Gets the target maximum version.
     /// </summary>
     public string MaximumVersion
     {
         get => VersionRange.MaximumVersion;
-        set => VersionRange.MaximumVersion = value;
     }
 
     /// <summary>

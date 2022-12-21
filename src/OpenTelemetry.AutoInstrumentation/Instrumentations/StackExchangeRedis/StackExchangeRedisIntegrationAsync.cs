@@ -23,35 +23,35 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
 /// StackExchange.Redis.ConnectionMultiplexer calltarget instrumentation
 /// </summary>
 [InstrumentMethod(// releases 2.0.495 - 2.1.39
-    AssemblyName = StackExchangeRedisConstants.AssemblyName,
-    TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
-    MethodName = StackExchangeRedisConstants.ConnectImplAsyncMethodName,
-    ReturnTypeName = StackExchangeRedisConstants.TaskConnectionMultiplexerTypeName,
-    ParameterTypeNames = new[] { ClrNames.Object, StackExchangeRedisConstants.TextWriterTypeName },
-    MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
-    MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
-    IntegrationName = StackExchangeRedisConstants.IntegrationName,
-    Type = InstrumentationType.Trace)]
+    StackExchangeRedisConstants.AssemblyName,
+    StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    StackExchangeRedisConstants.ConnectImplAsyncMethodName,
+    StackExchangeRedisConstants.TaskConnectionMultiplexerTypeName,
+    new[] { ClrNames.Object, StackExchangeRedisConstants.TextWriterTypeName },
+    StackExchangeRedisConstants.MinimumVersion,
+    StackExchangeRedisConstants.MaximumVersion,
+    StackExchangeRedisConstants.IntegrationName,
+    InstrumentationType.Trace)]
 [InstrumentMethod(// releases 2.1.50 - 2.5.43
-    AssemblyName = StackExchangeRedisConstants.AssemblyName,
-    TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
-    MethodName = StackExchangeRedisConstants.ConnectImplAsyncMethodName,
-    ReturnTypeName = StackExchangeRedisConstants.TaskConnectionMultiplexerTypeName,
-    ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName },
-    MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
-    MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
-    IntegrationName = StackExchangeRedisConstants.IntegrationName,
-    Type = InstrumentationType.Trace)]
+    StackExchangeRedisConstants.AssemblyName,
+    StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    StackExchangeRedisConstants.ConnectImplAsyncMethodName,
+    StackExchangeRedisConstants.TaskConnectionMultiplexerTypeName,
+    new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName },
+    StackExchangeRedisConstants.MinimumVersion,
+    StackExchangeRedisConstants.MaximumVersion,
+    StackExchangeRedisConstants.IntegrationName,
+    InstrumentationType.Trace)]
 [InstrumentMethod(// releases 2.5.61+
-    AssemblyName = StackExchangeRedisConstants.AssemblyName,
-    TypeName = StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
-    MethodName = StackExchangeRedisConstants.ConnectImplAsyncMethodName,
-    ReturnTypeName = StackExchangeRedisConstants.TaskConnectionMultiplexerTypeName,
-    ParameterTypeNames = new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName, StackExchangeRedisConstants.NullableServerTypeTypeName },
-    MinimumVersion = StackExchangeRedisConstants.MinimumVersion,
-    MaximumVersion = StackExchangeRedisConstants.MaximumVersion,
-    IntegrationName = StackExchangeRedisConstants.IntegrationName,
-    Type = InstrumentationType.Trace)]
+    StackExchangeRedisConstants.AssemblyName,
+    StackExchangeRedisConstants.ConnectionMultiplexerTypeName,
+    StackExchangeRedisConstants.ConnectImplAsyncMethodName,
+    StackExchangeRedisConstants.TaskConnectionMultiplexerTypeName,
+    new[] { StackExchangeRedisConstants.ConfigurationOptionsTypeName, StackExchangeRedisConstants.TextWriterTypeName, StackExchangeRedisConstants.NullableServerTypeTypeName },
+    StackExchangeRedisConstants.MinimumVersion,
+    StackExchangeRedisConstants.MaximumVersion,
+    StackExchangeRedisConstants.IntegrationName,
+    InstrumentationType.Trace)]
 public static class StackExchangeRedisIntegrationAsync
 {
     /// <summary>

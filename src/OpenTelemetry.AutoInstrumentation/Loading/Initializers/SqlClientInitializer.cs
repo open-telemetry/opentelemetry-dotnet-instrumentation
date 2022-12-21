@@ -44,12 +44,12 @@ internal class SqlClientInitializer
             return;
         }
 
-        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentation, OpenTelemetry.Instrumentation.SqlClient");
+        var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentation, OpenTelemetry.Instrumentation.SqlClient")!;
 
         var options = new OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentationOptions();
         _pluginManager.ConfigureTracesOptions(options);
 
-        var instrumentation = Activator.CreateInstance(instrumentationType, options);
+        var instrumentation = Activator.CreateInstance(instrumentationType, options)!;
 
         lifespanManager.Track(instrumentation);
     }

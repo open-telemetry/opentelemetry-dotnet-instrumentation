@@ -26,15 +26,15 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Validations;
 /// is added we can remove this instrumentation.
 /// </summary>
 [InstrumentMethod(
-    AssemblyName = "TestLibrary.InstrumentationTarget",
-    TypeName = "TestLibrary.InstrumentationTarget.Command",
-    MethodName = "Execute",
-    ReturnTypeName = ClrNames.Void,
-    ParameterTypeNames = new string[0],
-    MinimumVersion = "1.0.0",
-    MaximumVersion = "1.65535.65535",
-    IntegrationName = "StrongNamedValidation",
-    Type = InstrumentationType.Trace)]
+    "TestLibrary.InstrumentationTarget",
+    "TestLibrary.InstrumentationTarget.Command",
+    "Execute",
+    ClrNames.Void,
+    new string[0],
+    "1.0.0",
+    "1.65535.65535",
+    "StrongNamedValidation",
+    InstrumentationType.Trace)]
 public static class StrongNamedValidation
 {
     private static readonly ActivitySource ValidationActivitySource = new ActivitySource("TestApplication.StrongNamedValidation");

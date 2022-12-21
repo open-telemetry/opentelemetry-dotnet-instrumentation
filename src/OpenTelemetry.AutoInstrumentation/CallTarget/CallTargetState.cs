@@ -28,7 +28,7 @@ namespace OpenTelemetry.AutoInstrumentation.CallTarget;
 public readonly struct CallTargetState
 {
     private readonly Activity? _previousActivity;
-    private readonly Activity _activity;
+    private readonly Activity? _activity;
     private readonly object? _state;
 
     /// <summary>
@@ -47,7 +47,7 @@ public readonly struct CallTargetState
     /// </summary>
     /// <param name="activity">Activity instance</param>
     /// <param name="state">Object state instance</param>
-    public CallTargetState(Activity activity, object state)
+    public CallTargetState(Activity? activity, object state)
     {
         _previousActivity = null;
         _activity = activity;
@@ -77,7 +77,7 @@ public readonly struct CallTargetState
     /// <summary>
     /// Gets the CallTarget BeginMethod activity
     /// </summary>
-    public Activity Activity => _activity;
+    public Activity? Activity => _activity;
 
     /// <summary>
     /// Gets the CallTarget BeginMethod state

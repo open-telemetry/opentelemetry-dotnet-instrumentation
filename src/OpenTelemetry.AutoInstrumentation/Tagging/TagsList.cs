@@ -66,5 +66,5 @@ internal abstract class TagsList : ITags
         return sb.ToString();
     }
 
-    protected virtual IProperty<string>[] GetAdditionalTags() => Array.Empty<IProperty<string>>();
+    protected virtual IProperty<string?>[] GetAdditionalTags() => Array.Empty<IProperty<string?>>();
 }

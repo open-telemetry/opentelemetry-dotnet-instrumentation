@@ -24,15 +24,15 @@ namespace OpenTelemetry.AutoInstrumentation.Plugins;
 
 internal class PluginManager
 {
-    private readonly IReadOnlyList<(Type Type, object Instance)> _plugins;
+    private readonly IReadOnlyList<(Type Type, object? Instance)> _plugins;
 
     public PluginManager(GeneralSettings settings)
     {
-        var plugins = new List<(Type, object)>();
+        var plugins = new List<(Type, object?)>();
 
         foreach (var assemblyQualifiedName in settings.Plugins)
         {
-            var type = Type.GetType(assemblyQualifiedName, throwOnError: true);
+            var type = Type.GetType(assemblyQualifiedName, throwOnError: true)!;
             var instance = Activator.CreateInstance(type);
 
             plugins.Add((type, instance));
@@ -64,11 +64,13 @@ internal class PluginManager
     }
 
     public void ConfigureMetricsOptions<T>(T options)
+        where T : notnull
     {
         ConfigureOptions(options, "ConfigureMetricsOptions");
     }
 
     public void ConfigureTracesOptions<T>(T options)
+        where T : notnull
     {
         ConfigureOptions(options, "ConfigureTracesOptions");
     }
@@ -79,11 +81,13 @@ internal class PluginManager
     }
 
     public void ConfigureLogsOptions<T>(T options)
+        where T : notnull
     {
         ConfigureOptions(options, "ConfigureLogsOptions");
     }
 
     private void ConfigureOptions<T>(T options, string methodName)
+        where T : notnull
     {
         ConfigureOptions(typeof(T), options, methodName);
     }
@@ -95,19 +99,20 @@ internal class PluginManager
             var mi = plugin.Type.GetMethod(methodName, new[] { type });
             if (mi is not null)
             {
-                mi.Invoke(plugin.Instance, new object[] { options });
+                mi.Invoke(plugin.Instance, new[] { options });
             }
         }
     }
 
     private T ConfigureBuilder<T>(T builder, string methodName)
+        where T : notnull
     {
         foreach (var plugin in _plugins)
         {
             var mi = plugin.Type.GetMethod(methodName, new[] { typeof(T) });
             if (mi is not null)
             {
-                builder = (T)mi.Invoke(plugin.Instance, new object[] { builder });
+                mi.Invoke(plugin.Instance, new object[] { builder });
             }
         }
 

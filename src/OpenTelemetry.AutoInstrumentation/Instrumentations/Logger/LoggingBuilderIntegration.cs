@@ -23,15 +23,15 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Logger;
 /// Microsoft.Extensions.Logging.LoggingBuilder calltarget instrumentation
 /// </summary>
 [InstrumentMethod(
-    AssemblyName = "Microsoft.Extensions.Logging",
-    TypeName = "Microsoft.Extensions.Logging.LoggingBuilder",
-    MethodName = ".ctor",
-    ReturnTypeName = ClrNames.Void,
-    ParameterTypeNames = new[] { "Microsoft.Extensions.DependencyInjection.IServiceCollection" },
-    MinimumVersion = "3.1.0",
-    MaximumVersion = "7.*.*",
-    IntegrationName = "ILogger",
-    Type = InstrumentationType.Log)]
+    "Microsoft.Extensions.Logging",
+    "Microsoft.Extensions.Logging.LoggingBuilder",
+    ".ctor",
+    ClrNames.Void,
+    new[] { "Microsoft.Extensions.DependencyInjection.IServiceCollection" },
+    "3.1.0",
+    "7.*.*",
+    "ILogger",
+    InstrumentationType.Log)]
 public static class LoggingBuilderIntegration
 {
     /// <summary>
