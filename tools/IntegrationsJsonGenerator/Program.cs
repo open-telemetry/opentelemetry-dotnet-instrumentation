@@ -41,7 +41,7 @@ foreach (var typeInfo in autoInstrumentationLib.GetTypes())
     foreach (var attribute in typeInfo.GetCustomAttributes()
                  .Where(a => assemblyInstrumentMethodAttributes.Contains(a.GetType().FullName)))
     {
-        var integration = ConvertToIntegration(typeInfo.FullName, attribute);
+        var integration = ConvertToIntegration(typeInfo.FullName!, attribute);
 
         if (!integrations.ContainsKey(integration.IntegrationName))
         {
@@ -92,7 +92,7 @@ bool InheritsFrom(Type type, string baseType)
 (string IntegartionType, string IntegrationName, MethodReplacement MethodReplacement) ConvertToIntegration(string wrapperTypeName, Attribute attribute)
 {
     var integrationName = GetPropertyValue<string>("IntegrationName", attribute);
-    var integrationType = GetPropertyValue<object>("Type", attribute).ToString();
+    var integrationType = GetPropertyValue<object>("Type", attribute).ToString()!;
 
     var methodReplacement = new MethodReplacement
     {
@@ -141,14 +141,14 @@ bool InheritsFrom(Type type, string baseType)
 T GetPropertyValue<T>(string propertyName, Attribute attribute)
 {
     var type = attribute.GetType();
-    var getMethod = type.GetProperty(propertyName).GetGetMethod();
+    var getMethod = type.GetProperty(propertyName)!.GetGetMethod()!;
 
     if (!getMethod.ReturnType.IsAssignableTo(typeof(T)))
     {
         throw new ArgumentException($"Property {propertyName} is not assignable to {typeof(T)}");
     }
 
-    var value = getMethod.Invoke(attribute, Array.Empty<object>());
+    var value = getMethod.Invoke(attribute, Array.Empty<object>())!;
 
     return (T)value;
 }
@@ -162,7 +162,7 @@ void UpdateIntegrationFile(string filePath, Integration[] productionIntegrations
     JsonSerializer.Serialize(fileStream, productionIntegrations1, jsonSerializerOptions);
 }
 
-static string GetSourceFilePathName([CallerFilePath] string callerFilePath = null)
+static string GetSourceFilePathName([CallerFilePath] string? callerFilePath = null)
     => callerFilePath ?? string.Empty;
 
 static Integration AppendMockIntegrations(Integration testIntegration)

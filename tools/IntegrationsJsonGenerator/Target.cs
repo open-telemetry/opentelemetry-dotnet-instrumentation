@@ -19,16 +19,16 @@ using System.Text.Json.Serialization;
 internal class Target
 {
     [JsonPropertyName("assembly")]
-    public string Assembly { get; set; }
+    public string? Assembly { get; set; }
 
     [JsonPropertyName("type")]
-    public string Type { get; set; }
+    public string? Type { get; set; }
 
     [JsonPropertyName("method")]
-    public string Method { get; set; }
+    public string? Method { get; set; }
 
     [JsonPropertyName("signature_types")]
-    public string[] SignatureTypes { get; set; }
+    public string[]? SignatureTypes { get; set; }
 
     [JsonPropertyName("minimum_major")]
     public int MinimumMajor { get; set; }
