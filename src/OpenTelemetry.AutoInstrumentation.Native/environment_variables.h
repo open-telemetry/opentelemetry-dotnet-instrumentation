@@ -94,7 +94,7 @@ const WSTRING clr_enable_inlining = WStr("OTEL_DOTNET_AUTO_CLR_ENABLE_INLINING")
 const WSTRING clr_enable_ngen = WStr("OTEL_DOTNET_AUTO_CLR_ENABLE_NGEN");
 
 // Enable the assembly version redirection when running on the .NET Framework.
-const WSTRING netfx_assembly_redirection_enabled = WStr("OTEL_DOTNET_AUTO_NETFX_ASSEMBLY_REDIRECTION_ENABLED");
+const WSTRING netfx_assembly_redirection_enabled = WStr("OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED");
 
 // Additional dependencies that are to be lighted up at runtime.
 // See https://github.com/dotnet/runtime/blob/main/docs/design/features/additional-deps.md
