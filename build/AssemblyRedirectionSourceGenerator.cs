@@ -50,17 +50,17 @@ namespace trace
 {
 void CorProfiler::InitNetFxAssemblyRedirectsMap()
 {
+    assembly_version_redirect_map_.insert({
 ");
         foreach (var kvp in assemblies)
         {
             var v = kvp.Value.Version!;
-            sb.AppendLine($"    assembly_version_redirect_map_[WSTRING(L\"{kvp.Key}\")] = AssemblyVersionRedirection({v.Major}, {v.Minor}, {v.Build}, {v.Revision});");
+            sb.AppendLine($"        {{ L\"{kvp.Key}\", {{{v.Major}, {v.Minor}, {v.Build}, {v.Revision}}} }},");
         }
 
-        sb.Append(@"}
-
+        sb.Append(@"    });
 }
-
+}
 #endif
 ");
 

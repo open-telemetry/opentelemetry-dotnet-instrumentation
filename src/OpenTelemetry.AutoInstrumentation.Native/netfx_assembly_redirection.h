@@ -7,147 +7,147 @@ namespace trace
 {
 void CorProfiler::InitNetFxAssemblyRedirectsMap()
 {
-    assembly_version_redirect_map_[WSTRING(L"Google.Protobuf")] = AssemblyVersionRedirection(3, 19, 4, 0);
-    assembly_version_redirect_map_[WSTRING(L"Grpc.Core")] = AssemblyVersionRedirection(2, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Grpc.Core.Api")] = AssemblyVersionRedirection(2, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Bcl.AsyncInterfaces")] = AssemblyVersionRedirection(1, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Configuration")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Configuration.Abstractions")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Configuration.Binder")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Configuration.EnvironmentVariables")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.DependencyInjection")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.DependencyInjection.Abstractions")] = AssemblyVersionRedirection(5, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Logging")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Logging.Abstractions")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Logging.Configuration")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Options")] = AssemblyVersionRedirection(5, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Options.ConfigurationExtensions")] = AssemblyVersionRedirection(3, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Extensions.Primitives")] = AssemblyVersionRedirection(5, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"Microsoft.Win32.Primitives")] = AssemblyVersionRedirection(4, 0, 3, 0);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry")] = AssemblyVersionRedirection(1, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Api")] = AssemblyVersionRedirection(1, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.AutoInstrumentation")] = AssemblyVersionRedirection(0, 5, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Exporter.Console")] = AssemblyVersionRedirection(1, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Exporter.Jaeger")] = AssemblyVersionRedirection(1, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Exporter.OpenTelemetryProtocol")] = AssemblyVersionRedirection(1, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Exporter.Prometheus.HttpListener")] = AssemblyVersionRedirection(1, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Exporter.Zipkin")] = AssemblyVersionRedirection(1, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Extensions.DependencyInjection")] = AssemblyVersionRedirection(1, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Extensions.Propagators")] = AssemblyVersionRedirection(1, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Instrumentation.AspNet")] = AssemblyVersionRedirection(1, 0, 0, 7);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule")] = AssemblyVersionRedirection(1, 0, 0, 7);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Instrumentation.GrpcNetClient")] = AssemblyVersionRedirection(1, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Instrumentation.Http")] = AssemblyVersionRedirection(1, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Instrumentation.Process")] = AssemblyVersionRedirection(1, 0, 0, 3);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Instrumentation.Runtime")] = AssemblyVersionRedirection(1, 1, 0, 2);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Instrumentation.SqlClient")] = AssemblyVersionRedirection(1, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Instrumentation.Wcf")] = AssemblyVersionRedirection(1, 0, 0, 7);
-    assembly_version_redirect_map_[WSTRING(L"OpenTelemetry.Shims.OpenTracing")] = AssemblyVersionRedirection(1, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"OpenTracing")] = AssemblyVersionRedirection(0, 12, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.AppContext")] = AssemblyVersionRedirection(4, 1, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Buffers")] = AssemblyVersionRedirection(4, 0, 3, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Collections")] = AssemblyVersionRedirection(4, 0, 11, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Collections.Concurrent")] = AssemblyVersionRedirection(4, 0, 11, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Collections.NonGeneric")] = AssemblyVersionRedirection(4, 0, 3, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Collections.Specialized")] = AssemblyVersionRedirection(4, 0, 3, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.ComponentModel")] = AssemblyVersionRedirection(4, 0, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.ComponentModel.EventBasedAsync")] = AssemblyVersionRedirection(4, 0, 11, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.ComponentModel.Primitives")] = AssemblyVersionRedirection(4, 1, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.ComponentModel.TypeConverter")] = AssemblyVersionRedirection(4, 1, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Console")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Data.Common")] = AssemblyVersionRedirection(4, 2, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Diagnostics.Contracts")] = AssemblyVersionRedirection(4, 0, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Diagnostics.Debug")] = AssemblyVersionRedirection(4, 0, 11, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Diagnostics.DiagnosticSource")] = AssemblyVersionRedirection(7, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Diagnostics.FileVersionInfo")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Diagnostics.Process")] = AssemblyVersionRedirection(4, 1, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Diagnostics.StackTrace")] = AssemblyVersionRedirection(4, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Diagnostics.TextWriterTraceListener")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Diagnostics.Tools")] = AssemblyVersionRedirection(4, 0, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Diagnostics.TraceSource")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Diagnostics.Tracing")] = AssemblyVersionRedirection(4, 2, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Drawing.Primitives")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Dynamic.Runtime")] = AssemblyVersionRedirection(4, 0, 11, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Globalization")] = AssemblyVersionRedirection(4, 0, 11, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Globalization.Calendars")] = AssemblyVersionRedirection(4, 0, 3, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Globalization.Extensions")] = AssemblyVersionRedirection(4, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.IO")] = AssemblyVersionRedirection(4, 1, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.IO.Compression")] = AssemblyVersionRedirection(4, 2, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.IO.Compression.ZipFile")] = AssemblyVersionRedirection(4, 0, 3, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.IO.FileSystem")] = AssemblyVersionRedirection(4, 0, 3, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.IO.FileSystem.DriveInfo")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.IO.FileSystem.Primitives")] = AssemblyVersionRedirection(4, 0, 3, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.IO.FileSystem.Watcher")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.IO.IsolatedStorage")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.IO.MemoryMappedFiles")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.IO.Pipes")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.IO.UnmanagedMemoryStream")] = AssemblyVersionRedirection(4, 0, 3, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Linq")] = AssemblyVersionRedirection(4, 1, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Linq.Expressions")] = AssemblyVersionRedirection(4, 1, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Linq.Parallel")] = AssemblyVersionRedirection(4, 0, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Linq.Queryable")] = AssemblyVersionRedirection(4, 0, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Memory")] = AssemblyVersionRedirection(4, 0, 1, 2);
-    assembly_version_redirect_map_[WSTRING(L"System.Net.Http")] = AssemblyVersionRedirection(4, 2, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Net.NameResolution")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Net.NetworkInformation")] = AssemblyVersionRedirection(4, 1, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Net.Ping")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Net.Primitives")] = AssemblyVersionRedirection(4, 0, 11, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Net.Requests")] = AssemblyVersionRedirection(4, 0, 11, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Net.Security")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Net.Sockets")] = AssemblyVersionRedirection(4, 2, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Net.WebHeaderCollection")] = AssemblyVersionRedirection(4, 0, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Net.WebSockets")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Net.WebSockets.Client")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Numerics.Vectors")] = AssemblyVersionRedirection(4, 1, 4, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.ObjectModel")] = AssemblyVersionRedirection(4, 0, 11, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Reflection")] = AssemblyVersionRedirection(4, 1, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Reflection.Extensions")] = AssemblyVersionRedirection(4, 0, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Reflection.Primitives")] = AssemblyVersionRedirection(4, 0, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Resources.Reader")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Resources.ResourceManager")] = AssemblyVersionRedirection(4, 0, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Resources.Writer")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Runtime")] = AssemblyVersionRedirection(4, 1, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Runtime.CompilerServices.Unsafe")] = AssemblyVersionRedirection(6, 0, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Runtime.CompilerServices.VisualC")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Runtime.Extensions")] = AssemblyVersionRedirection(4, 1, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Runtime.Handles")] = AssemblyVersionRedirection(4, 0, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Runtime.InteropServices")] = AssemblyVersionRedirection(4, 1, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Runtime.InteropServices.RuntimeInformation")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Runtime.Numerics")] = AssemblyVersionRedirection(4, 0, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Runtime.Serialization.Formatters")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Runtime.Serialization.Json")] = AssemblyVersionRedirection(4, 0, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Runtime.Serialization.Primitives")] = AssemblyVersionRedirection(4, 2, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Runtime.Serialization.Xml")] = AssemblyVersionRedirection(4, 1, 3, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Security.Claims")] = AssemblyVersionRedirection(4, 0, 3, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Security.Cryptography.Algorithms")] = AssemblyVersionRedirection(4, 3, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Security.Cryptography.Csp")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Security.Cryptography.Encoding")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Security.Cryptography.Primitives")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Security.Cryptography.X509Certificates")] = AssemblyVersionRedirection(4, 1, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Security.Principal")] = AssemblyVersionRedirection(4, 0, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Security.SecureString")] = AssemblyVersionRedirection(4, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Text.Encoding")] = AssemblyVersionRedirection(4, 0, 11, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Text.Encoding.Extensions")] = AssemblyVersionRedirection(4, 0, 11, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Text.Encodings.Web")] = AssemblyVersionRedirection(4, 0, 5, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Text.Json")] = AssemblyVersionRedirection(4, 0, 1, 2);
-    assembly_version_redirect_map_[WSTRING(L"System.Text.RegularExpressions")] = AssemblyVersionRedirection(4, 1, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Threading")] = AssemblyVersionRedirection(4, 0, 11, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Threading.Overlapped")] = AssemblyVersionRedirection(4, 1, 0, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Threading.Tasks")] = AssemblyVersionRedirection(4, 0, 11, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Threading.Tasks.Extensions")] = AssemblyVersionRedirection(4, 2, 0, 1);
-    assembly_version_redirect_map_[WSTRING(L"System.Threading.Tasks.Parallel")] = AssemblyVersionRedirection(4, 0, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Threading.Thread")] = AssemblyVersionRedirection(4, 0, 2, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Threading.ThreadPool")] = AssemblyVersionRedirection(4, 0, 12, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Threading.Timer")] = AssemblyVersionRedirection(4, 0, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.ValueTuple")] = AssemblyVersionRedirection(4, 0, 3, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Xml.ReaderWriter")] = AssemblyVersionRedirection(4, 1, 1, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Xml.XDocument")] = AssemblyVersionRedirection(4, 0, 11, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Xml.XmlDocument")] = AssemblyVersionRedirection(4, 0, 3, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Xml.XmlSerializer")] = AssemblyVersionRedirection(4, 0, 11, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Xml.XPath")] = AssemblyVersionRedirection(4, 0, 3, 0);
-    assembly_version_redirect_map_[WSTRING(L"System.Xml.XPath.XDocument")] = AssemblyVersionRedirection(4, 1, 0, 0);
+    assembly_version_redirect_map_.insert({
+        { L"Google.Protobuf", {3, 19, 4, 0} },
+        { L"Grpc.Core", {2, 0, 0, 0} },
+        { L"Grpc.Core.Api", {2, 0, 0, 0} },
+        { L"Microsoft.Bcl.AsyncInterfaces", {1, 0, 0, 0} },
+        { L"Microsoft.Extensions.Configuration", {3, 1, 0, 0} },
+        { L"Microsoft.Extensions.Configuration.Abstractions", {3, 1, 0, 0} },
+        { L"Microsoft.Extensions.Configuration.Binder", {3, 1, 0, 0} },
+        { L"Microsoft.Extensions.Configuration.EnvironmentVariables", {3, 1, 0, 0} },
+        { L"Microsoft.Extensions.DependencyInjection", {3, 1, 0, 0} },
+        { L"Microsoft.Extensions.DependencyInjection.Abstractions", {5, 0, 0, 0} },
+        { L"Microsoft.Extensions.Logging", {3, 1, 0, 0} },
+        { L"Microsoft.Extensions.Logging.Abstractions", {3, 1, 0, 0} },
+        { L"Microsoft.Extensions.Logging.Configuration", {3, 1, 0, 0} },
+        { L"Microsoft.Extensions.Options", {5, 0, 0, 0} },
+        { L"Microsoft.Extensions.Options.ConfigurationExtensions", {3, 1, 0, 0} },
+        { L"Microsoft.Extensions.Primitives", {5, 0, 0, 0} },
+        { L"Microsoft.Win32.Primitives", {4, 0, 3, 0} },
+        { L"OpenTelemetry", {1, 0, 0, 0} },
+        { L"OpenTelemetry.Api", {1, 0, 0, 0} },
+        { L"OpenTelemetry.AutoInstrumentation", {0, 5, 1, 0} },
+        { L"OpenTelemetry.Exporter.Console", {1, 0, 0, 0} },
+        { L"OpenTelemetry.Exporter.Jaeger", {1, 0, 0, 0} },
+        { L"OpenTelemetry.Exporter.OpenTelemetryProtocol", {1, 0, 0, 0} },
+        { L"OpenTelemetry.Exporter.Prometheus.HttpListener", {1, 0, 0, 0} },
+        { L"OpenTelemetry.Exporter.Zipkin", {1, 0, 0, 0} },
+        { L"OpenTelemetry.Extensions.DependencyInjection", {1, 0, 0, 0} },
+        { L"OpenTelemetry.Extensions.Propagators", {1, 0, 0, 0} },
+        { L"OpenTelemetry.Instrumentation.AspNet", {1, 0, 0, 7} },
+        { L"OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule", {1, 0, 0, 7} },
+        { L"OpenTelemetry.Instrumentation.GrpcNetClient", {1, 0, 0, 0} },
+        { L"OpenTelemetry.Instrumentation.Http", {1, 0, 0, 0} },
+        { L"OpenTelemetry.Instrumentation.Process", {1, 0, 0, 3} },
+        { L"OpenTelemetry.Instrumentation.Runtime", {1, 1, 0, 2} },
+        { L"OpenTelemetry.Instrumentation.SqlClient", {1, 0, 0, 0} },
+        { L"OpenTelemetry.Instrumentation.Wcf", {1, 0, 0, 7} },
+        { L"OpenTelemetry.Shims.OpenTracing", {1, 0, 0, 0} },
+        { L"OpenTracing", {0, 12, 1, 0} },
+        { L"System.AppContext", {4, 1, 2, 0} },
+        { L"System.Buffers", {4, 0, 3, 0} },
+        { L"System.Collections", {4, 0, 11, 0} },
+        { L"System.Collections.Concurrent", {4, 0, 11, 0} },
+        { L"System.Collections.NonGeneric", {4, 0, 3, 0} },
+        { L"System.Collections.Specialized", {4, 0, 3, 0} },
+        { L"System.ComponentModel", {4, 0, 1, 0} },
+        { L"System.ComponentModel.EventBasedAsync", {4, 0, 11, 0} },
+        { L"System.ComponentModel.Primitives", {4, 1, 2, 0} },
+        { L"System.ComponentModel.TypeConverter", {4, 1, 2, 0} },
+        { L"System.Console", {4, 0, 2, 0} },
+        { L"System.Data.Common", {4, 2, 0, 0} },
+        { L"System.Diagnostics.Contracts", {4, 0, 1, 0} },
+        { L"System.Diagnostics.Debug", {4, 0, 11, 0} },
+        { L"System.Diagnostics.DiagnosticSource", {7, 0, 0, 0} },
+        { L"System.Diagnostics.FileVersionInfo", {4, 0, 2, 0} },
+        { L"System.Diagnostics.Process", {4, 1, 2, 0} },
+        { L"System.Diagnostics.StackTrace", {4, 1, 0, 0} },
+        { L"System.Diagnostics.TextWriterTraceListener", {4, 0, 2, 0} },
+        { L"System.Diagnostics.Tools", {4, 0, 1, 0} },
+        { L"System.Diagnostics.TraceSource", {4, 0, 2, 0} },
+        { L"System.Diagnostics.Tracing", {4, 2, 0, 0} },
+        { L"System.Drawing.Primitives", {4, 0, 2, 0} },
+        { L"System.Dynamic.Runtime", {4, 0, 11, 0} },
+        { L"System.Globalization", {4, 0, 11, 0} },
+        { L"System.Globalization.Calendars", {4, 0, 3, 0} },
+        { L"System.Globalization.Extensions", {4, 1, 0, 0} },
+        { L"System.IO", {4, 1, 2, 0} },
+        { L"System.IO.Compression", {4, 2, 0, 0} },
+        { L"System.IO.Compression.ZipFile", {4, 0, 3, 0} },
+        { L"System.IO.FileSystem", {4, 0, 3, 0} },
+        { L"System.IO.FileSystem.DriveInfo", {4, 0, 2, 0} },
+        { L"System.IO.FileSystem.Primitives", {4, 0, 3, 0} },
+        { L"System.IO.FileSystem.Watcher", {4, 0, 2, 0} },
+        { L"System.IO.IsolatedStorage", {4, 0, 2, 0} },
+        { L"System.IO.MemoryMappedFiles", {4, 0, 2, 0} },
+        { L"System.IO.Pipes", {4, 0, 2, 0} },
+        { L"System.IO.UnmanagedMemoryStream", {4, 0, 3, 0} },
+        { L"System.Linq", {4, 1, 2, 0} },
+        { L"System.Linq.Expressions", {4, 1, 2, 0} },
+        { L"System.Linq.Parallel", {4, 0, 1, 0} },
+        { L"System.Linq.Queryable", {4, 0, 1, 0} },
+        { L"System.Memory", {4, 0, 1, 2} },
+        { L"System.Net.Http", {4, 2, 0, 0} },
+        { L"System.Net.NameResolution", {4, 0, 2, 0} },
+        { L"System.Net.NetworkInformation", {4, 1, 2, 0} },
+        { L"System.Net.Ping", {4, 0, 2, 0} },
+        { L"System.Net.Primitives", {4, 0, 11, 0} },
+        { L"System.Net.Requests", {4, 0, 11, 0} },
+        { L"System.Net.Security", {4, 0, 2, 0} },
+        { L"System.Net.Sockets", {4, 2, 0, 0} },
+        { L"System.Net.WebHeaderCollection", {4, 0, 1, 0} },
+        { L"System.Net.WebSockets", {4, 0, 2, 0} },
+        { L"System.Net.WebSockets.Client", {4, 0, 2, 0} },
+        { L"System.Numerics.Vectors", {4, 1, 4, 0} },
+        { L"System.ObjectModel", {4, 0, 11, 0} },
+        { L"System.Reflection", {4, 1, 2, 0} },
+        { L"System.Reflection.Extensions", {4, 0, 1, 0} },
+        { L"System.Reflection.Primitives", {4, 0, 1, 0} },
+        { L"System.Resources.Reader", {4, 0, 2, 0} },
+        { L"System.Resources.ResourceManager", {4, 0, 1, 0} },
+        { L"System.Resources.Writer", {4, 0, 2, 0} },
+        { L"System.Runtime", {4, 1, 2, 0} },
+        { L"System.Runtime.CompilerServices.Unsafe", {6, 0, 0, 0} },
+        { L"System.Runtime.CompilerServices.VisualC", {4, 0, 2, 0} },
+        { L"System.Runtime.Extensions", {4, 1, 2, 0} },
+        { L"System.Runtime.Handles", {4, 0, 1, 0} },
+        { L"System.Runtime.InteropServices", {4, 1, 2, 0} },
+        { L"System.Runtime.InteropServices.RuntimeInformation", {4, 0, 2, 0} },
+        { L"System.Runtime.Numerics", {4, 0, 1, 0} },
+        { L"System.Runtime.Serialization.Formatters", {4, 0, 2, 0} },
+        { L"System.Runtime.Serialization.Json", {4, 0, 1, 0} },
+        { L"System.Runtime.Serialization.Primitives", {4, 2, 0, 0} },
+        { L"System.Runtime.Serialization.Xml", {4, 1, 3, 0} },
+        { L"System.Security.Claims", {4, 0, 3, 0} },
+        { L"System.Security.Cryptography.Algorithms", {4, 3, 0, 0} },
+        { L"System.Security.Cryptography.Csp", {4, 0, 2, 0} },
+        { L"System.Security.Cryptography.Encoding", {4, 0, 2, 0} },
+        { L"System.Security.Cryptography.Primitives", {4, 0, 2, 0} },
+        { L"System.Security.Cryptography.X509Certificates", {4, 1, 2, 0} },
+        { L"System.Security.Principal", {4, 0, 1, 0} },
+        { L"System.Security.SecureString", {4, 1, 0, 0} },
+        { L"System.Text.Encoding", {4, 0, 11, 0} },
+        { L"System.Text.Encoding.Extensions", {4, 0, 11, 0} },
+        { L"System.Text.Encodings.Web", {4, 0, 5, 0} },
+        { L"System.Text.Json", {4, 0, 1, 2} },
+        { L"System.Text.RegularExpressions", {4, 1, 1, 0} },
+        { L"System.Threading", {4, 0, 11, 0} },
+        { L"System.Threading.Overlapped", {4, 1, 0, 0} },
+        { L"System.Threading.Tasks", {4, 0, 11, 0} },
+        { L"System.Threading.Tasks.Extensions", {4, 2, 0, 1} },
+        { L"System.Threading.Tasks.Parallel", {4, 0, 1, 0} },
+        { L"System.Threading.Thread", {4, 0, 2, 0} },
+        { L"System.Threading.ThreadPool", {4, 0, 12, 0} },
+        { L"System.Threading.Timer", {4, 0, 1, 0} },
+        { L"System.ValueTuple", {4, 0, 3, 0} },
+        { L"System.Xml.ReaderWriter", {4, 1, 1, 0} },
+        { L"System.Xml.XDocument", {4, 0, 11, 0} },
+        { L"System.Xml.XmlDocument", {4, 0, 3, 0} },
+        { L"System.Xml.XmlSerializer", {4, 0, 11, 0} },
+        { L"System.Xml.XPath", {4, 0, 3, 0} },
+        { L"System.Xml.XPath.XDocument", {4, 1, 0, 0} },
+    });
 }
-
 }
-
 #endif
