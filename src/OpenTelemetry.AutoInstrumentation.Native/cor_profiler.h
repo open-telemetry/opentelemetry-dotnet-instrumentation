@@ -59,6 +59,17 @@ private:
     ModuleID managed_profiler_module_id_ = 0;
 
     //
+    // Assembly redirect private members
+    //
+#ifdef _WIN32
+    std::unordered_map<WSTRING, AssemblyVersionRedirection> assembly_version_redirect_map_;
+    void InitNetFxAssemblyRedirectsMap();
+    void RedirectAssemblyReferences(
+        const ComPtr<IMetaDataAssemblyImport>& assembly_import,
+        const ComPtr<IMetaDataAssemblyEmit>& assembly_emit);
+#endif
+
+    //
     // Helper methods
     //
     void RewritingPInvokeMaps(ComPtr<IUnknown> metadata_interfaces, ModuleMetadata* module_metadata, WSTRING nativemethods_type_name);

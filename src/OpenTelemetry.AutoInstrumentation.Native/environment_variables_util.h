@@ -70,6 +70,10 @@ bool AreLogsEnabled() {
   ToBooleanWithDefault(GetEnvironmentValue(environment::logs_enabled), true);
 }
 
+bool IsNetFxAssemblyRedirectionEnabled() {
+  ToBooleanWithDefault(GetEnvironmentValue(environment::netfx_assembly_redirection_enabled), true);
+}
+
 }  // namespace trace
 
 #endif  // OTEL_CLR_PROFILER_ENVIRONMENT_VARIABLES_UTIL_H_
