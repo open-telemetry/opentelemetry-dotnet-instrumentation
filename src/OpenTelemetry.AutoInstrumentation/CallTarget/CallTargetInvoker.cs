@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -341,5 +343,5 @@ public static class CallTargetInvoker
     /// <typeparam name="T">Type to get the default value</typeparam>
     /// <returns>Default value of T</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T GetDefaultValue<T>() => default;
+    public static T? GetDefaultValue<T>() => default;
 }
