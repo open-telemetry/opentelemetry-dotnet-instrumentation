@@ -8,8 +8,4 @@
     <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" Link="GlobalSuppressions.integrations.cs" />
   </ItemGroup>
 
-  <!-- .NET Framework apps do not have shared store to bump these libraries -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.0" />
-  </ItemGroup>
 </Project>

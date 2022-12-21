@@ -1,10 +1,8 @@
 using System.IO;
 using Nuke.Common;
 using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.Docker;
-using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.MSBuild;
 using Serilog;
 using static Nuke.Common.EnvironmentInfo;
@@ -17,6 +15,7 @@ partial class Build
     Target CompileNativeSrcWindows => _ => _
         .Unlisted()
         .After(CompileManagedSrc)
+        .After(GenerateNetFxAssemblyRedirectionSource)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
@@ -117,5 +116,17 @@ partial class Build
                 .SetTag(Path.GetFileNameWithoutExtension(aspNetProject).Replace(".", "-").ToLowerInvariant())
                 .SetProcessWorkingDirectory(aspNetProject.Parent)
             );
+        });
+
+    Target GenerateNetFxAssemblyRedirectionSource => _ => _
+        .Unlisted()
+        .After(PublishManagedProfiler)
+        .OnlyWhenStatic(() => IsWin)
+        .Executes(() =>
+        {
+            var netFxAssembliesFolder = TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET462);
+            var generatedSourceFile = SourceDirectory / Projects.AutoInstrumentationNative / "netfx_assembly_redirection.h";
+
+            AssemblyRedirectionSourceGenerator.Generate(netFxAssembliesFolder, generatedSourceFile);
         });
 }

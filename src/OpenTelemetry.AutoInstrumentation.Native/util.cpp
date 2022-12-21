@@ -189,4 +189,16 @@ WSTRING HResultStr(const HRESULT hr)
     return ToWSTRING(ss.str());
 }
 
+WSTRING VersionStr(const USHORT major, const USHORT minor, const USHORT build, const USHORT revision)
+{
+    std::stringstream ss;
+    ss << major << "." << minor << "." << build << "." << revision;
+    return ToWSTRING(ss.str());
+}
+
+WSTRING AssemblyVersionStr(const ASSEMBLYMETADATA& assembly_metadata)
+{
+    return VersionStr(assembly_metadata.usMajorVersion, assembly_metadata.usMinorVersion, assembly_metadata.usBuildNumber, assembly_metadata.usRevisionNumber);
+}
+
 } // namespace trace
