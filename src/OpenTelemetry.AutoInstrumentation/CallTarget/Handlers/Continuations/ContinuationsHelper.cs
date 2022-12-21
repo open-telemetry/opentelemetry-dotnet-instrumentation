@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#nullable enable
+
 using System;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
@@ -25,7 +27,7 @@ internal static class ContinuationsHelper
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static Type GetResultType(Type parentType)
     {
-        Type currentType = parentType;
+        Type? currentType = parentType;
         while (currentType != null)
         {
             Type[] typeArguments = currentType.GenericTypeArguments ?? Type.EmptyTypes;
