@@ -103,11 +103,14 @@ public class ActivityHelperTests
     [InlineData(ActivityKind.Consumer)]
     public void StartActivityWithTags_ReturnsActivity_WhenThereIsActivityListener(ActivityKind kind)
     {
+        var tagsMock = new Mock<ITags>();
+        tagsMock.Setup(x => x.GetAllTags()).Returns(new List<KeyValuePair<string, string>>());
+
         using var activitySource = new ActivitySource("test-source");
 
         using var listener = CreateActivityListener(activitySource);
 
-        using var activity = activitySource.StartActivityWithTags("test-operation", kind, Mock.Of<ITags>());
+        using var activity = activitySource.StartActivityWithTags("test-operation", kind, tagsMock.Object);
 
         using (new AssertionScope())
         {
