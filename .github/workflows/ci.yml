@@ -96,19 +96,20 @@ jobs:
     timeout-minutes: 60
     steps:
     - uses: actions/checkout@v3.2.0
-    - uses: uraimo/run-on-arch-action@v2.5.0
-        with:
-          arch: aarch64
-          distro: bullseye
-          run: |
-            apt-get update
-            apt-get upgrade
-            apt-get install wget -y
-            wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-            dpkg -i packages-microsoft-prod.deb
-            rm packages-microsoft-prod.deb
-            apt-get update && apt-get install -y dotnet-sdk-6.0 && apt-get install -y dotnet-sdk-7.0
-            ./build.sh Workflow --containers linux
+    - name: Build ARM64
+      uses: uraimo/run-on-arch-action@v2.5.0
+      with:
+        arch: aarch64
+        distro: bullseye
+        run: |
+          apt-get update
+          apt-get upgrade
+          apt-get install wget -y
+          wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+          dpkg -i packages-microsoft-prod.deb
+          rm packages-microsoft-prod.deb
+          apt-get update && apt-get install -y dotnet-sdk-6.0 && apt-get install -y dotnet-sdk-7.0
+          ./build.sh Workflow --containers linux
     - name: Publish ARM64 build
       uses: actions/upload-artifact@v3.1.1
       with:
