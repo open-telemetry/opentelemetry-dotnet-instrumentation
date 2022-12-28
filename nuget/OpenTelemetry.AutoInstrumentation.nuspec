@@ -26,7 +26,7 @@
         <dependency id="OpenTelemetry.Instrumentation.Runtime" version="1.1.0-beta.2" />
         <dependency id="OpenTelemetry.Instrumentation.Process" version="1.0.0-alpha.3" />
         <dependency id="OpenTelemetry.Instrumentation.SqlClient" version="1.0.0-rc9.10" />
-        <dependency id="OpenTelemetry.Instrumentation.Wcf" version="1.0.0-rc.7" />
+        <dependency id="OpenTelemetry.Instrumentation.Wcf" version="1.0.0-rc.8" />
         <dependency id="OpenTelemetry.Shims.OpenTracing" version="1.0.0-rc9.10" />
         <dependency id="OpenTelemetry.Instrumentation.AspNetCore" version="1.0.0-rc9.10" />
         <dependency id="OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs" version="1.4.0-rc.1" />
@@ -45,7 +45,7 @@
         <dependency id="OpenTelemetry.Instrumentation.Runtime" version="1.1.0-beta.2" />
         <dependency id="OpenTelemetry.Instrumentation.Process" version="1.0.0-alpha.3" />
         <dependency id="OpenTelemetry.Instrumentation.SqlClient" version="1.0.0-rc9.10" />
-        <dependency id="OpenTelemetry.Instrumentation.Wcf" version="1.0.0-rc.7" />
+        <dependency id="OpenTelemetry.Instrumentation.Wcf" version="1.0.0-rc.8" />
         <dependency id="OpenTelemetry.Shims.OpenTracing" version="1.0.0-rc9.10" />
         <dependency id="OpenTelemetry.Instrumentation.AspNet" version="1.0.0-rc9.7" />
       </group>
