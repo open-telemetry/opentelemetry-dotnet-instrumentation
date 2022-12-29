@@ -69,7 +69,7 @@ client.Endpoint.EndpointBehaviors.Add(new TelemetryEndpointBehavior());
 ```
 
 Example project available in
-[test/test-applications/integrations/TestApplication.Wcf.Client.Core](../test/test-applications/integrations/TestApplication.Wcf.Client.Core/)
+[test/test-applications/integrations/TestApplication.Wcf.Client.DotNet](../test/test-applications/integrations/TestApplication.Wcf.Client.DotNet/)
 folder.
 
 ## WCF Server Configuration (.NET Framework)

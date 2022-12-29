@@ -1,4 +1,4 @@
-// <copyright file="StatusRequest.cs" company="OpenTelemetry Authors">
+// <copyright file="WcfDotNetTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +14,18 @@
 // limitations under the License.
 // </copyright>
 
-using System.Runtime.Serialization;
+// This test won't work outside of windows as it need the server side which is .NET Framework only.
+#if NET6_0_OR_GREATER && _WINDOWS
+using Xunit.Abstractions;
 
-namespace TestApplication.Wcf.Client.Core;
+namespace IntegrationTests;
 
-[DataContract]
-public class StatusRequest
+public class WcfDotNetTests : WcfTestsBase
 {
-    [DataMember]
-    public string? Status { get; set; }
+    public WcfDotNetTests(ITestOutputHelper output)
+        : base("Wcf.Client.DotNet", output)
+    {
+    }
 }
+
+#endif

@@ -20,7 +20,7 @@ using System.ServiceModel.Channels;
 using System.Threading.Tasks;
 using OpenTelemetry.Instrumentation.Wcf;
 
-namespace TestApplication.Wcf.Client.Core;
+namespace TestApplication.Wcf.Client.DotNet;
 
 internal static class Program
 {
