@@ -1,6 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:7.0.101-bullseye-slim-arm64v8
 
-RUN echo "deb http://deb.debian.org/debian stretch-backports main" > /etc/apt/sources.list.d/backports.list
+RUN touch /etc/apt/sources.list.d/backports.list
+RUN echo "deb http://deb.debian.org/debian stretch-backports main" >> /etc/apt/sources.list.d/backports.list
 
 RUN apt-get update \
     && apt-get upgrade \
