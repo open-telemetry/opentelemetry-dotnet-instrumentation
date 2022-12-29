@@ -1,4 +1,4 @@
-// <copyright file="IStatusServiceContract.cs" company="OpenTelemetry Authors">
+// <copyright file="StatusResponse.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +14,14 @@
 // limitations under the License.
 // </copyright>
 
-using System.ServiceModel;
-using System.Threading.Tasks;
+using System;
+using System.Runtime.Serialization;
 
-namespace TestApplication.Wcf.Client.Core;
+namespace TestApplication.Wcf.Client.DotNet;
 
-[ServiceContract(Namespace = "http://opentelemetry.io/", Name = "StatusService", SessionMode = SessionMode.Allowed)]
-public interface IStatusServiceContract
+[DataContract]
+public class StatusResponse
 {
-    [OperationContract]
-    Task<StatusResponse> PingAsync(StatusRequest request);
+    [DataMember]
+    public DateTimeOffset ServerTime { get; set; }
 }
