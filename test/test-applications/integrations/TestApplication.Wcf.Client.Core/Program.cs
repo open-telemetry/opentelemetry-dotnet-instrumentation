@@ -19,7 +19,6 @@ using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Threading.Tasks;
 using OpenTelemetry.Instrumentation.Wcf;
-using TestApplication.Wcf.Shared;
 
 namespace TestApplication.Wcf.Client.Core;
 
