@@ -10,8 +10,4 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.8" ExcludeAssets="runtime" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\TestApplication.Wcf.Shared\TestApplication.Wcf.Shared.csproj" />
-  </ItemGroup>
-
 </Project>
