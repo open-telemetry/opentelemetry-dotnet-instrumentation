@@ -25,6 +25,7 @@ public class NServiceBusTests : TestHelper
     public NServiceBusTests(ITestOutputHelper output)
         : base("NServiceBus", output)
     {
+        EnableBytecodeInstrumentation();
     }
 
     [Fact]

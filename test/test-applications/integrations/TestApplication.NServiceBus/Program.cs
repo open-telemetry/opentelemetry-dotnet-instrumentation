@@ -24,7 +24,6 @@ using TestApplication.Shared;
 ConsoleHelper.WriteSplashScreen(args);
 
 var endpointConfiguration = new EndpointConfiguration("TestApplication.NServiceBus");
-endpointConfiguration.EnableOpenTelemetry();
 
 var transport = endpointConfiguration.UseTransport<LearningTransport>();
 transport.StorageDirectory(".");
