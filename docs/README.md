@@ -180,7 +180,8 @@ Get-Help Install-OpenTelemetryCore -Detailed
 
 ## Instrument a container
 
-You can find an example using Docker Compose [here](../examples).
+You can find our demonstarative example
+that uses Docker Compose [here](../examples/demo).
 
 You can also consider using
 the [Kubernetes Operator for OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-operator).
