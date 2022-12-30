@@ -38,6 +38,12 @@ updates:
     open-pull-requests-limit: 20
 
   - package-ecosystem: nuget
+    directory: /examples/playground/AspNetCoreMvc
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 20
+
+  - package-ecosystem: nuget
     directory: /src
     schedule:
       interval: "daily"
