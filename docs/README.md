@@ -180,7 +180,7 @@ Get-Help Install-OpenTelemetryCore -Detailed
 
 ## Instrument a container
 
-You can find our demonstarative example
+You can find our demonstrative example
 that uses Docker Compose [here](../examples/demo).
 
 You can also consider using
