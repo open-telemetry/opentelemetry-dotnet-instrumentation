@@ -76,7 +76,7 @@ jobs:
       - run: cd bin-macos-11 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-macos.zip . * ; cd ..
       - name: Extract Version from Tag
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v}
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\/v}" >> $GITHUB_OUTPUT
       - name: Create Release
         run: gh release create v${{ steps.get_version.outputs.VERSION }} --draft ./*.zip ./otel-dotnet-auto-install.sh ./OpenTelemetry.DotNet.Auto.psm1
         env:
