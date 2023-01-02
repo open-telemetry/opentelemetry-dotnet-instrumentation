@@ -1,4 +1,4 @@
-// <copyright file="IStatusServiceContract.cs" company="OpenTelemetry Authors">
+// <copyright file="WcfDotNetTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +14,18 @@
 // limitations under the License.
 // </copyright>
 
-using System.ServiceModel;
-using System.Threading.Tasks;
+// This test won't work outside of windows as it need the server side which is .NET Framework only.
+#if NET6_0_OR_GREATER && _WINDOWS
+using Xunit.Abstractions;
 
-namespace TestApplication.Wcf.Shared;
+namespace IntegrationTests;
 
-[ServiceContract(Namespace = "http://opentelemetry.io/", Name = "StatusService", SessionMode = SessionMode.Allowed)]
-public interface IStatusServiceContract
+public class WcfDotNetTests : WcfTestsBase
 {
-    [OperationContract]
-    Task<StatusResponse> PingAsync(StatusRequest request);
+    public WcfDotNetTests(ITestOutputHelper output)
+        : base("Wcf.Client.DotNet", output)
+    {
+    }
 }
+
+#endif

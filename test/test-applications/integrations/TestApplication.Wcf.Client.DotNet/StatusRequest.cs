@@ -16,7 +16,7 @@
 
 using System.Runtime.Serialization;
 
-namespace TestApplication.Wcf.Shared;
+namespace TestApplication.Wcf.Client.DotNet;
 
 [DataContract]
 public class StatusRequest

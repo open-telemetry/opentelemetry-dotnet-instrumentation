@@ -78,7 +78,7 @@ public class MyPlugin
 | OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentationOptions                        | OpenTelemetry.Instrumentation.SqlClient           | 1.0.0-rc9.10  |
 | OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisCallsInstrumentationOptions | OpenTelemetry.Instrumentation.StackExchangeRedis" | 1.0.0-rc9.7   |
 | OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentationOptions                        | OpenTelemetry.Instrumentation.MySqlData           | 1.0.0-beta.4  |
-| OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationOptions                                    | OpenTelemetry.Instrumentation.Wcf                 | 1.0.0-rc7     |
+| OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationOptions                                    | OpenTelemetry.Instrumentation.Wcf                 | 1.0.0-rc.8     |
 
 ### Metrics
 

@@ -56,7 +56,7 @@ issues.
 ```xml
   <ItemGroup>
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.7" ExcludeAssets="runtime" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.8" ExcludeAssets="runtime" />
   </ItemGroup>
 ```
 
@@ -69,7 +69,7 @@ client.Endpoint.EndpointBehaviors.Add(new TelemetryEndpointBehavior());
 ```
 
 Example project available in
-[test/test-applications/integrations/TestApplication.Wcf.Client.Core](../test/test-applications/integrations/TestApplication.Wcf.Client.Core/)
+[test/test-applications/integrations/TestApplication.Wcf.Client.DotNet](../test/test-applications/integrations/TestApplication.Wcf.Client.DotNet/)
 folder.
 
 ## WCF Server Configuration (.NET Framework)
@@ -167,4 +167,4 @@ instrument:
 ## References
 
 * [OpenTelemetry Project](https://opentelemetry.io/)
-* [OpenTelemetry Contrib WCF docs](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/Instrumentation.Wcf-1.0.0-rc.7/src/OpenTelemetry.Instrumentation.Wcf/README.md)
+* [OpenTelemetry Contrib WCF docs](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/Instrumentation.Wcf-1.0.0-rc.8/src/OpenTelemetry.Instrumentation.Wcf/README.md)

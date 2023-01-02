@@ -17,9 +17,8 @@
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Threading.Tasks;
-using TestApplication.Wcf.Shared;
 
-namespace TestApplication.Wcf.Client.Core;
+namespace TestApplication.Wcf.Client.DotNet;
 
 public class StatusServiceClient : ClientBase<IStatusServiceContract>, IStatusServiceContract
 {
