@@ -168,13 +168,24 @@ namespace
                 return;
             }
         }
+        else if (type == WStr("Metric"))
+        {
+            if (!configuration.metrics_enabled)
+            {
+                return;
+            }
+            if (!InstrumentationEnabled(name, configuration.enabledMetricIntegrationNames, configuration.disabledMetricIntegrationNames))
+            {
+                return;
+            }
+        }
         else if (type == WStr("Log"))
         {
             if (!configuration.logs_enabled)
             {
                 return;
             }
-            if (!configuration.logs_enabled || !InstrumentationEnabled(name, configuration.enabledLogIntegrationNames, configuration.disabledLogIntegrationNames))
+            if (!InstrumentationEnabled(name, configuration.enabledLogIntegrationNames, configuration.disabledLogIntegrationNames))
             {
                 return;
             }

@@ -32,6 +32,16 @@ minimumVersion: "8.0.0",
 maximumVersion: "8.65535.65535",
 integrationName: "NServiceBus",
 type: InstrumentationType.Trace)]
+[InstrumentMethod(
+assemblyName: "NServiceBus.Core",
+typeName: "NServiceBus.EndpointConfiguration",
+methodName: ".ctor",
+returnTypeName: ClrNames.Void,
+parameterTypeNames: new[] { ClrNames.String },
+minimumVersion: "8.0.0",
+maximumVersion: "8.65535.65535",
+integrationName: "NServiceBus",
+type: InstrumentationType.Metric)]
 public static class EndpointConfigurationIntegration
 {
     internal static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception exception, CallTargetState state)

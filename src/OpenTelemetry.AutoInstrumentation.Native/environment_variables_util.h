@@ -66,6 +66,10 @@ bool AreTracesEnabled() {
   ToBooleanWithDefault(GetEnvironmentValue(environment::traces_enabled), true);
 }
 
+bool AreMetricsEnabled() {
+  ToBooleanWithDefault(GetEnvironmentValue(environment::metrics_enabled), true);
+}
+
 bool AreLogsEnabled() {
   ToBooleanWithDefault(GetEnvironmentValue(environment::logs_enabled), true);
 }

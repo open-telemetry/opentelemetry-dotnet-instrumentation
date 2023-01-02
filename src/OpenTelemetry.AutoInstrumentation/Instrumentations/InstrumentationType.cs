@@ -19,6 +19,6 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations;
 internal enum InstrumentationType
 {
     Trace,
-    // Metric,
+    Metric,
     Log
 }

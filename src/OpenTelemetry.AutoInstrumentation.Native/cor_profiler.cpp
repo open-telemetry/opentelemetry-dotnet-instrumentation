@@ -169,7 +169,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     const LoadIntegrationConfiguration configuration(
         AreTracesEnabled(), 
         GetEnvironmentValues(environment::enabled_traces_integrations),
-        GetEnvironmentValues(environment::disabled_traces_integrations), 
+        GetEnvironmentValues(environment::disabled_traces_integrations),
+        AreMetricsEnabled(), 
+        GetEnvironmentValues(environment::enabled_metrics_integrations),
+        GetEnvironmentValues(environment::disabled_metrics_integrations),
         AreLogsEnabled(),
         GetEnvironmentValues(environment::enabled_logs_integrations),
         GetEnvironmentValues(environment::disabled_logs_integrations));
