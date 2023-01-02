@@ -34,8 +34,8 @@ macOS and Linux:
 make
 ```
 
-You can explore all the exported telemetry in
-[Grafana UI](http://localhost:3000/).
+You can [explore](https://grafana.com/docs/grafana/v9.3/explore/)
+the telemetry in [Grafana UI](http://localhost:3000/).
 
 You can also find the exported telemetry in the `log` directory.
 
