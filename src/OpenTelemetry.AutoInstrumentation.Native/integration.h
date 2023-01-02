@@ -283,7 +283,7 @@ struct MethodReference
     {
         return assembly == other.assembly && type_name == other.type_name && min_version == other.min_version &&
                max_version == other.max_version && method_name == other.method_name &&
-               method_signature == other.method_signature;
+               method_signature == other.method_signature && signature_types == other.signature_types;
     }
 };
 

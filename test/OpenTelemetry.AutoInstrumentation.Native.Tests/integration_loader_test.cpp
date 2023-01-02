@@ -379,7 +379,7 @@ TEST(IntegrationLoaderTest, SupportsEnabledAndDisabledIntegrations)
         ]
     )TEXT");
 
-    const std::vector<std::wstring> expected_names = {L"test-trace-integration-1", L"test-metric-integration-1", L"test-log-integration-1"};
+    const std::vector<std::wstring> expected_names = {L"test-trace-integration-1", L"test-log-integration-1", L"test-metric-integration-1"};
     std::vector<std::wstring> actual_names;
     const LoadIntegrationConfiguration configuration(
         true,
@@ -426,19 +426,17 @@ TEST(IntegrationLoaderTest, DuplicatedIntegrations) {
     std::vector<IntegrationMethod> integrations;
     std::stringstream str(R"TEXT(
         [
-            { "name": "test-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-            { "name": "test-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-            { "name": "test-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }
+            { "name": "test-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.Pipeline'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" } }] },
+            { "name": "test-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.PipelineForTrace'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" } }] },
+            { "name": "test-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.Pipeline'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" } }] },
+            { "name": "test-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.PipelineForMetric'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" } }] },
+            { "name": "test-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.Pipeline'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" } }] },
+            { "name": "test-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.PipelineForLog'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" } }] }
         ]
     )TEXT");
 
-    const std::vector<std::wstring> expected_names = {L"test-integration-1"};
-    std::vector<std::wstring> actual_names;
     const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {}, true, {}, {});
     LoadIntegrationsFromStream(str, integrations, configuration);
 
-    for (auto& integration : integrations) {
-        actual_names.push_back(integration.integration_name);
-    }
-    EXPECT_EQ(expected_names, actual_names);
+    EXPECT_EQ(4, integrations.size());
 }

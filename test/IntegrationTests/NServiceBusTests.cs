@@ -15,6 +15,7 @@
 // </copyright>
 
 using IntegrationTests.Helpers;
+using OpenTelemetry.AutoInstrumentation.Configuration;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -35,6 +36,7 @@ public class NServiceBusTests : TestHelper
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         collector.Expect("NServiceBus.Core");
+        SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsEnabled, bool.FalseString);
 
 #if NET462
         RunTestApplication(new TestSettings
@@ -58,6 +60,7 @@ public class NServiceBusTests : TestHelper
 
         SetEnvironmentVariable("LONG_RUNNING", "true");
         SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "100");
+        SetEnvironmentVariable(ConfigurationKeys.Traces.TracesEnabled, bool.FalseString);
 
 #if NET462
         using var process = StartTestApplication(new TestSettings

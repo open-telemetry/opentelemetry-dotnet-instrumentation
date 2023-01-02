@@ -1,10 +1,19 @@
 #include "integration_loader.h"
 
 #include <exception>
+#include <unordered_set>
 
 #include "environment_variables.h"
 #include "logger.h"
 #include "util.h"
+
+template <>
+struct std::hash<trace::IntegrationMethod> {
+  std::size_t operator()(const trace::IntegrationMethod& integration_method) const noexcept {
+    // skip replacement operations while calculating hash
+    return std::hash<trace::WSTRING>()(integration_method.integration_name);
+  }
+};
 
 namespace trace
 {
@@ -67,13 +76,18 @@ void LoadIntegrationsFromStream(
         // parse the stream
         stream >> j;
 
-        integrationMethods.reserve(j.size());
+        std::unordered_set<IntegrationMethod> set;
 
         for (const auto& el : j)
         {
-          IntegrationFromJson(el, integrationMethods, configuration);
+            IntegrationFromJson(el, set, configuration);
         }
 
+        integrationMethods.reserve(set.size());
+        for (auto &integration_method : set)
+        {
+            integrationMethods.push_back(integration_method);
+        }
     }
     catch (const json::parse_error& e)
     {
@@ -133,7 +147,7 @@ namespace
     }
 
     void IntegrationFromJson(const json::value_type& src,
-                         std::vector<IntegrationMethod>& integrationMethods,
+                         std::unordered_set<IntegrationMethod>& integrationMethods,
                          const LoadIntegrationConfiguration& configuration)
     {
         if (!src.is_object())
@@ -206,7 +220,7 @@ namespace
         }
     }
 
-    void MethodReplacementFromJson(const json::value_type& src, const WSTRING& integrationName, std::vector<IntegrationMethod>& integrationMethods)
+    void MethodReplacementFromJson(const json::value_type& src, const WSTRING& integrationName, std::unordered_set<IntegrationMethod>& integrationMethods)
     {
         if (src.is_object())
         {
@@ -219,7 +233,7 @@ namespace
             const MethodReference target =
                 MethodReferenceFromJson(src.value("target", json::object()), true, false);
 
-            integrationMethods.push_back({integrationName, {{}, target, wrapper}});
+            integrationMethods.insert({integrationName, {{}, target, wrapper}});
         }
     }
 

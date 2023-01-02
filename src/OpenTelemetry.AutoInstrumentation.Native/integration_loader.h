@@ -5,6 +5,7 @@
 #include <locale>
 #include <nlohmann/json.hpp>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "integration.h"
@@ -69,11 +70,11 @@ void LoadIntegrationsFromStream(
 namespace
 {
     void IntegrationFromJson(const json::value_type& src,
-                         std::vector<IntegrationMethod>& integrationMethods,
+                         std::unordered_set<IntegrationMethod>& integrationMethods,
                          const LoadIntegrationConfiguration& configuration);
 
     void MethodReplacementFromJson(const json::value_type& src, const WSTRING& integrationName,
-                                   std::vector<IntegrationMethod>& integrationMethods);
+                                   std::unordered_set<IntegrationMethod>& integrationMethods);
 
     MethodReference MethodReferenceFromJson(const json::value_type& src, const bool is_target_method,
                                             const bool is_wrapper_method);
