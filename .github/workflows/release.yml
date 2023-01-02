@@ -78,6 +78,6 @@ jobs:
         id: get_version
         run: echo "VERSION=${GITHUB_REF/refs\/tags\/v}" >> $GITHUB_OUTPUT
       - name: Create Release
-        run: gh release create v${{ steps.get_version.outputs.VERSION }} --draft ./*.zip ./otel-dotnet-auto-install.sh ./OpenTelemetry.DotNet.Auto.psm1
+        run: gh release create v${{ env.VERSION }} --draft ./*.zip ./otel-dotnet-auto-install.sh ./OpenTelemetry.DotNet.Auto.psm1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
