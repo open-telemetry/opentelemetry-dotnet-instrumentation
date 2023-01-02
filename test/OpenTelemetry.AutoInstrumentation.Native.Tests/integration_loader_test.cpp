@@ -421,3 +421,24 @@ TEST(IntegrationLoaderTest, SupportsDisableAllIntegrations) {
     }
     EXPECT_EQ(expected_names, actual_names);
 }
+
+TEST(IntegrationLoaderTest, DuplicatedIntegrations) {
+    std::vector<IntegrationMethod> integrations;
+    std::stringstream str(R"TEXT(
+        [
+            { "name": "test-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
+            { "name": "test-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
+            { "name": "test-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }
+        ]
+    )TEXT");
+
+    const std::vector<std::wstring> expected_names = {L"test-integration-1"};
+    std::vector<std::wstring> actual_names;
+    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {}, true, {}, {});
+    LoadIntegrationsFromStream(str, integrations, configuration);
+
+    for (auto& integration : integrations) {
+        actual_names.push_back(integration.integration_name);
+    }
+    EXPECT_EQ(expected_names, actual_names);
+}
