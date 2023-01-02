@@ -2392,7 +2392,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCachedFunctionSearchStarted(FunctionID
 /// </summary>
 /// <param name="module_id">Module id</param>
 /// <param name="module_metadata">Module metadata for the module</param>
-/// <param name="filtered_integrations">Filtered vector of integrations to be applied</param>
+/// <param name="integrations">Filtered vector of integrations to be applied</param>
 /// <returns>Number of ReJIT requests made</returns>
 size_t CorProfiler::CallTarget_RequestRejitForModule(ModuleID module_id, ModuleMetadata* module_metadata,
                                                      const std::vector<IntegrationMethod>& integrations)
