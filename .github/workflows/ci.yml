@@ -89,15 +89,44 @@ jobs:
           git diff
           [[ -z "$(git status --porcelain)" ]]
 
+  build-arm64:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-20.04
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v3.2.0
+    - name: Build ARM64
+      uses: uraimo/run-on-arch-action@v2.5.0
+      with:
+        arch: aarch64
+        distro: bullseye
+        run: |
+          touch /etc/apt/sources.list.d/backports.list
+          echo "deb http://deb.debian.org/debian stretch-backports main" >> /etc/apt/sources.list.d/backports.list
+          apt-get update
+          apt-get upgrade
+          apt-get install -y curl clang cmake make protobuf-compiler
+          apt-get install -y -t stretch-backports libgrpc++-dev libgrpc++1 libgrpc6 libgrpc-dev protobuf-compiler-grpc 
+          curl -sSL https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh
+          chmod +x ./dotnet-install.sh
+          ./dotnet-install.sh -c 6.0 --install-dir /usr/share/dotnet --no-path
+          ./dotnet-install.sh -c 7.0 --install-dir /usr/share/dotnet --no-path
+          rm dotnet-install.sh
+          ./build.sh Workflow --containers linux
+    - name: Publish ARM64 build
+      uses: actions/upload-artifact@v3.1.1
+      with:
+        name: bin-arm64
+        path: bin/tracer-home
+      if: (${{ job.status }} != 'cancelled')
+      continue-on-error: true
+
   build-container:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - base-image: alpine
-            platform: linux/amd64
-          - base-image: debian
-            platform: linux/arm64
+        base-image: [ alpine ]
     runs-on: ubuntu-20.04
     timeout-minutes: 60
     steps:
@@ -106,13 +135,13 @@ jobs:
       run: |
         set -e
         docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
-        docker run --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project --platform ${{ matrix.platform }} mybuildimage \
+        docker run --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
           ./build.sh Workflow --containers none
     - name: Test the Shell scripts from README.md in Docker container
       run: |
         set -e
         docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
-        docker run --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project --platform ${{ matrix.platform }} --rm mybuildimage /bin/sh -c '
+        docker run --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project --rm mybuildimage /bin/sh -c '
           set -e
           dotnet publish -f net7.0 -c Release ./test/test-applications/integrations/TestApplication.Smoke
           export OTEL_DOTNET_AUTO_HOME="${PWD}/bin/tracer-home"
