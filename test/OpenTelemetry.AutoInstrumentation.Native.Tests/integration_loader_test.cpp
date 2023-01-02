@@ -25,7 +25,7 @@ TEST(IntegrationLoaderTest, HandlesInvalidIntegrationNoName)
 {
     std::vector<IntegrationMethod> integrations;
     std::stringstream str("[{}]");
-    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {},                                                      true, {}, {});
+    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {}, true, {}, {});
     LoadIntegrationsFromStream(str, integrations, configuration);
     // 0 because name is required
     EXPECT_EQ(0, integrations.size());
