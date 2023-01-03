@@ -36,7 +36,7 @@ public class NServiceBusTests : TestHelper
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         collector.Expect("NServiceBus.Core");
-        SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsEnabled, bool.FalseString);
+        SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsEnabled, bool.FalseString); // make sure that metrics instrumentation is not needed
 
 #if NET462
         RunTestApplication(new TestSettings
@@ -60,7 +60,7 @@ public class NServiceBusTests : TestHelper
 
         SetEnvironmentVariable("LONG_RUNNING", "true");
         SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "100");
-        SetEnvironmentVariable(ConfigurationKeys.Traces.TracesEnabled, bool.FalseString);
+        SetEnvironmentVariable(ConfigurationKeys.Traces.TracesEnabled, bool.FalseString); // make sure that traces instrumentation is not needed
 
 #if NET462
         using var process = StartTestApplication(new TestSettings
