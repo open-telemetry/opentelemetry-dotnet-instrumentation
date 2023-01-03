@@ -145,11 +145,10 @@ For example:
 ./test/test-applications/integrations/TestApplication.Smoke/bin/x64/Release/net7.0/TestApplication.Smoke
 ```
 
-### Running the examples
+### Using playground application
 
-You can use the example applications to see the local changes in action. See
-[`examples/README.md`](../examples/README.md) for instructions on
-how to run the examples.
+You can use [the example playground application](../examples/playground)
+to test the local changes.
 
 ## Release process
 
