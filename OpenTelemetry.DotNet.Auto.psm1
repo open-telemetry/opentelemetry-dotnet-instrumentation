@@ -217,7 +217,7 @@ function Install-OpenTelemetryCore() {
         $publish = New-Object System.EnterpriseServices.Internal.Publish 
         $dlls = Get-ChildItem -Path $installDir\netfx\ -Filter *.dll -File
         foreach ($dll in $dlls) {
-            $publish.GacInstall($dll)
+            $publish.GacInstall($dll.FullName)
         }
     } 
     catch {
@@ -248,7 +248,7 @@ function Uninstall-OpenTelemetryCore() {
     $publish = New-Object System.EnterpriseServices.Internal.Publish 
     $dlls = Get-ChildItem -Path $installDir\netfx\ -Filter *.dll -File
     foreach ($dll in $dlls) {
-        $publish.GacRemove($dll)
+        $publish.GacRemove($dll.FullName)
     }
 
     Remove-Item -LiteralPath $installDir -Force -Recurse
