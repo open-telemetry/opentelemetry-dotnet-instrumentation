@@ -11,7 +11,7 @@ template <>
 struct std::hash<trace::IntegrationMethod> {
   // needed for creating unordered_set to load all integration methods
   std::size_t operator()(const trace::IntegrationMethod& integration_method) const noexcept {
-    // skip replacement operations while calculating hash
+    // it is enough to use integration_name to calculate hash
     return std::hash<trace::WSTRING>()(integration_method.integration_name);
   }
 };
