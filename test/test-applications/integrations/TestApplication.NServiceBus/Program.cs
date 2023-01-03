@@ -16,6 +16,7 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using NServiceBus;
 using TestApplication.NServiceBus;
@@ -25,7 +26,7 @@ ConsoleHelper.WriteSplashScreen(args);
 
 var endpointConfiguration = new EndpointConfiguration("TestApplication.NServiceBus");
 
-var learningTransport = new LearningTransport { StorageDirectory = "." };
+var learningTransport = new LearningTransport { StorageDirectory = Path.GetTempPath() };
 endpointConfiguration.UseTransport(learningTransport);
 
 using var cancellation = new CancellationTokenSource();
