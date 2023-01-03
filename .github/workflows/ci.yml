@@ -113,7 +113,7 @@ jobs:
           ./dotnet-install.sh --channel 6.0.1xx --install-dir /usr/share/dotnet
           ./dotnet-install.sh --channel 7.0.1xx --install-dir /usr/share/dotnet
           rm dotnet-install.sh
-          ./build.sh Workflow --containers linux
+          ./build.sh Workflow --containers none
     - name: Publish ARM64 build
       uses: actions/upload-artifact@v3.1.1
       with:
