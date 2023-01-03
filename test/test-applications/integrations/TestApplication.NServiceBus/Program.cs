@@ -25,8 +25,9 @@ ConsoleHelper.WriteSplashScreen(args);
 
 var endpointConfiguration = new EndpointConfiguration("TestApplication.NServiceBus");
 
-var transport = endpointConfiguration.UseTransport<LearningTransport>();
-transport.StorageDirectory(".");
+var learningTransport = new LearningTransport { StorageDirectory = "." };
+endpointConfiguration.UseTransport(learningTransport);
+
 using var cancellation = new CancellationTokenSource();
 var endpointInstance = await Endpoint.Start(endpointConfiguration, cancellation.Token);
 
