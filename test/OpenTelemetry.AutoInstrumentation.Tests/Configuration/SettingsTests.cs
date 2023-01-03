@@ -194,6 +194,7 @@ public class SettingsTests : IDisposable
 #if NET6_0_OR_GREATER
     [InlineData(nameof(TracerInstrumentation.MassTransit), TracerInstrumentation.MassTransit)]
 #endif
+    [InlineData(nameof(TracerInstrumentation.NServiceBus), TracerInstrumentation.NServiceBus)]
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, tracerInstrumentation);
@@ -234,6 +235,7 @@ public class SettingsTests : IDisposable
     [InlineData(nameof(MetricInstrumentation.AspNet), MetricInstrumentation.AspNet)]
     [InlineData(nameof(MetricInstrumentation.HttpClient), MetricInstrumentation.HttpClient)]
     [InlineData(nameof(MetricInstrumentation.Process), MetricInstrumentation.Process)]
+    [InlineData(nameof(MetricInstrumentation.NServiceBus), MetricInstrumentation.NServiceBus)]
     internal void MeterSettings_Instrumentations_SupportedValues(string meterInstrumentation, MetricInstrumentation expectedMetricInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, meterInstrumentation);

@@ -138,6 +138,64 @@
     ]
   },
   {
+    "name": "NServiceBus",
+    "type": "Trace",
+    "method_replacements": [
+      {
+        "caller": {},
+        "target": {
+          "assembly": "NServiceBus.Core",
+          "type": "NServiceBus.EndpointConfiguration",
+          "method": ".ctor",
+          "signature_types": [
+            "System.Void",
+            "System.String"
+          ],
+          "minimum_major": 8,
+          "minimum_minor": 0,
+          "minimum_patch": 0,
+          "maximum_major": 8,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation",
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration",
+          "action": "CallTargetModification"
+        }
+      }
+    ]
+  },
+  {
+    "name": "NServiceBus",
+    "type": "Metric",
+    "method_replacements": [
+      {
+        "caller": {},
+        "target": {
+          "assembly": "NServiceBus.Core",
+          "type": "NServiceBus.EndpointConfiguration",
+          "method": ".ctor",
+          "signature_types": [
+            "System.Void",
+            "System.String"
+          ],
+          "minimum_major": 8,
+          "minimum_minor": 0,
+          "minimum_patch": 0,
+          "maximum_major": 8,
+          "maximum_minor": 65535,
+          "maximum_patch": 65535
+        },
+        "wrapper": {
+          "assembly": "OpenTelemetry.AutoInstrumentation",
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration",
+          "action": "CallTargetModification"
+        }
+      }
+    ]
+  },
+  {
     "name": "StackExchangeRedis",
     "type": "Trace",
     "method_replacements": [

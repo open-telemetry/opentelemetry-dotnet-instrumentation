@@ -43,6 +43,7 @@ internal static class EnvironmentConfigurationMetricHelper
                 MetricInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, lazyInstrumentationLoader),
                 MetricInstrumentation.NetRuntime => Wrappers.AddRuntimeInstrumentation(builder, pluginManager),
                 MetricInstrumentation.Process => Wrappers.AddProcessInstrumentation(builder, pluginManager),
+                MetricInstrumentation.NServiceBus => builder.AddMeter("NServiceBus.Core"),
                 _ => null,
             };
         }
