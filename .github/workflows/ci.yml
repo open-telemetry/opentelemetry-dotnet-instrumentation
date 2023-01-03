@@ -183,12 +183,6 @@ jobs:
           name: bin-macos-11
           path: nuget/bin-macos
 
-      - name: Download ARM64 Artifacts from build job
-        uses: actions/download-artifact@v3.0.1
-        with:
-          name: bin-arm64
-          path: nuget/bin-arm64
-
       - name: Build NuGet package
         run: nuget pack OpenTelemetry.AutoInstrumentation.nuspec -Properties NoWarn=NU5100,NU5123,NU5128
         working-directory: nuget
