@@ -211,6 +211,14 @@ function Install-OpenTelemetryCore() {
 
         # OpenTelemetry service locator
         [System.Environment]::SetEnvironmentVariable('OTEL_DOTNET_AUTO_INSTALL_DIR', $installDir, [System.EnvironmentVariableTarget]::Machine)
+
+        # Register .NET Framweworks dlls in GAC
+        [System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")            
+        $publish = New-Object System.EnterpriseServices.Internal.Publish 
+        $dlls = Get-ChildItem -Path $installDir\netfx\ -Filter *.dll -File
+        foreach ($dll in $dlls) {
+            $publish.GacInstall($dll)
+        }
     } 
     catch {
         $message = $_
@@ -233,6 +241,14 @@ function Uninstall-OpenTelemetryCore() {
 
     if (-not $installDir) {
         throw "OpenTelemetry Core is already removed."
+    }
+
+    # Unregister .NET Framwework dlls from GAC
+    [System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")            
+    $publish = New-Object System.EnterpriseServices.Internal.Publish 
+    $dlls = Get-ChildItem -Path $installDir\netfx\ -Filter *.dll -File
+    foreach ($dll in $dlls) {
+        $publish.GacRemove($dll)
     }
 
     Remove-Item -LiteralPath $installDir -Force -Recurse
