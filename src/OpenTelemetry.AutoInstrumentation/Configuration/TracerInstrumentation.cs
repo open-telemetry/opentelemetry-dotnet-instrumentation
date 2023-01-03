@@ -79,6 +79,11 @@ internal enum TracerInstrumentation
     /// <summary>
     /// MassTransit instrumentation.
     /// </summary>
-    MassTransit = 10
+    MassTransit = 10,
 #endif
+
+    /// <summary>
+    /// NServiceBus instrumentation.
+    /// </summary>
+    NServiceBus = 11
 }

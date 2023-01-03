@@ -42,6 +42,24 @@ const WSTRING enabled_traces_integrations =
 const WSTRING disabled_traces_integrations =
     WStr("OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS");
 
+// Whether metrics are enabled or not. If not set (default), traces are enabled.
+const WSTRING metrics_enabled =
+    WStr("OTEL_DOTNET_AUTO_METRICS_ENABLED");
+
+// Sets a list of integrations to enable. If not set (default), all integrations are enabled.
+// Supports multiple values separated with comma, for example:
+// "ElasticsearchNet,AspNetWebApi2"
+const WSTRING enabled_metrics_integrations =
+    WStr("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS");
+
+// Sets a list of integrations to disable. Status of other integrations will remain
+// unchanged. Calculation order: OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS
+// then if instrumentation is not explicitly disabled OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS is checked.
+// Supports multiple values separated with comma, for example:
+// "ElasticsearchNet,AspNetWebApi2"
+const WSTRING disabled_metrics_integrations =
+    WStr("OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS");
+
 // Whether logs are enabled or not. If not set (default), logs are enabled.
 const WSTRING logs_enabled =
     WStr("OTEL_DOTNET_AUTO_LOGS_ENABLED");
