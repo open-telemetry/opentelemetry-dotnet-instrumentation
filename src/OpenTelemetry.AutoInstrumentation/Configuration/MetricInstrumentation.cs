@@ -39,5 +39,10 @@ internal enum MetricInstrumentation
     /// <summary>
     /// Process instrumentation.
     /// </summary>
-    Process
+    Process,
+
+    /// <summary>
+    /// NServiceBus instrumentation.
+    /// </summary>
+    NServiceBus
 }

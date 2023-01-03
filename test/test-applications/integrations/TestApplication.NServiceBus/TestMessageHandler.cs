@@ -1,4 +1,4 @@
-// <copyright file="InstrumentationType.cs" company="OpenTelemetry Authors">
+// <copyright file="TestMessageHandler.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +14,19 @@
 // limitations under the License.
 // </copyright>
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations;
+using System.Threading.Tasks;
+using NServiceBus;
+using NServiceBus.Logging;
 
-internal enum InstrumentationType
+namespace TestApplication.NServiceBus;
+
+public class TestMessageHandler : IHandleMessages<TestMessage>
 {
-    Trace,
-    Metric,
-    Log
+    private static readonly ILog Log = LogManager.GetLogger<TestMessageHandler>();
+
+    public Task Handle(TestMessage message, IMessageHandlerContext context)
+    {
+        Log.Info("TestMessage handled");
+        return Task.CompletedTask;
+    }
 }

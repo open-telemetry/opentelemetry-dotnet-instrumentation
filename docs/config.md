@@ -43,6 +43,7 @@ for more details.
 | `MongoDB`            | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core) **Not supported on .NET Framework**                                                                                   | ≥2.13.3 & < 3.0.0  | source & bytecode       |
 | `MySqlData`          | [MySql.Data](https://www.nuget.org/packages/MySql.Data) **Not supported on .NET Framework**                                                                                                     | ≥6.10.7            | source & bytecode \[1\] |
 | `Npgsql`             | [Npgsql](https://www.nuget.org/packages/Npgsql)                                                                                                                                                 | ≥6.0.0             | source                  |
+| `NServiceBus`        | [NServiceBus](https://www.nuget.org/packages/NServiceBus)                                                                                                                                       | ≥8.0.0             | source & bytecode       |
 | `SqlClient`          | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient)                           | *                  | source                  |
 | `StackExchangeRedis` | [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis) **Not supported on .NET Framework**                                                                                   | ≥2.0.405 < 3.0.0   | source & bytecode       |
 | `Wcf`                | [System.ServiceModel](https://www.nuget.org/packages/System.ServiceModel) **No support for server side on .NET**. For configuration see [WCF Instrumentation Configuration](wcf-config.md)      | * \[2\]            | source                  |
@@ -54,13 +55,14 @@ for more details.
 
 ### Metrics instrumentations
 
-| ID           | Instrumented library                                                                                                                                                                            | Supported versions | Instrumentation type |
-|--------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------|----------------------|
-| `AspNet`     | ASP.NET Framework \[1\]                                                                                                                                                                         | *                  | source               |
-| `AspNet`     | ASP.NET Core \[2\]                                                                                                                                                                              | *                  | source               |
-| `HttpClient` | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | *                  | source               |
-| `NetRuntime` | [OpenTelemetry.Instrumentation.Runtime](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.Runtime)                                                                                   | *                  | source               |
-| `Process`    | [OpenTelemetry.Instrumentation.Process](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.Process)                                                                                   | *                  | source               |
+| ID            | Instrumented library                                                                                                                                                                            | Supported versions | Instrumentation type |
+|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------|----------------------|
+| `AspNet`      | ASP.NET Framework \[1\]                                                                                                                                                                         | *                  | source               |
+| `AspNet`      | ASP.NET Core \[2\]                                                                                                                                                                              | *                  | source               |
+| `HttpClient`  | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | *                  | source               |
+| `NetRuntime`  | [OpenTelemetry.Instrumentation.Runtime](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.Runtime)                                                                                   | *                  | source               |
+| `Process`     | [OpenTelemetry.Instrumentation.Process](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.Process)                                                                                   | *                  | source               |
+| `NServiceBus` | [NServiceBus](https://www.nuget.org/packages/NServiceBus)                                                                                                                                       | ≥8.0.0             | source & bytecode    |
 
 \[1\]: The ASP.NET metrics are generated only if the `AspNet` trace instrumentation
  is also enabled.
