@@ -110,8 +110,8 @@ jobs:
           apt-get install -y -t stretch-backports libgrpc++-dev libgrpc++1 libgrpc6 libgrpc-dev protobuf-compiler-grpc 
           curl -sSL https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh
           chmod +x ./dotnet-install.sh
-          ./dotnet-install.sh -c 6.0 --install-dir /usr/share/dotnet --no-path
-          ./dotnet-install.sh -c 7.0 --install-dir /usr/share/dotnet --no-path
+          ./dotnet-install.sh --channel 6.0.1xx --install-dir /usr/share/dotnet
+          ./dotnet-install.sh --channel 7.0.1xx --install-dir /usr/share/dotnet
           rm dotnet-install.sh
           ./build.sh Workflow --containers linux
     - name: Publish ARM64 build
