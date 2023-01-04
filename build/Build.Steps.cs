@@ -81,21 +81,19 @@ partial class Build
                     .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
                         o.SetPackageDirectory(NugetPackageDirectory)));
 
-                // Restore legacy projects
-                NuGetTasks.NuGetRestore(s => s
-                    .SetTargetPath(Solution.GetProject("TestApplication.AspNet"))
-                    .SetSolutionDirectory(Solution.Directory)
-                    .SetVerbosity(NuGetVerbosity.Normal)
-                    .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                        o.SetPackagesDirectory(NugetPackageDirectory)));
+                var legacyRestoreProjects = Solution.GetNativeProjects()
+                    .Concat(new[] { Solution.GetProject("TestApplication.AspNet") });
 
-                // Restore native projects
-                NuGetTasks.NuGetRestore(s => s
-                    .SetTargetPath(Solution.GetProject("OpenTelemetry.AutoInstrumentation.Native"))
-                    .SetSolutionDirectory(Solution.Directory)
-                    .SetVerbosity(NuGetVerbosity.Normal)
-                    .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                        o.SetPackagesDirectory(NugetPackageDirectory)));
+                foreach (var project in legacyRestoreProjects)
+                {
+                    // Restore legacy projects
+                    NuGetTasks.NuGetRestore(s => s
+                        .SetTargetPath(project)
+                        .SetSolutionDirectory(Solution.Directory)
+                        .SetVerbosity(NuGetVerbosity.Normal)
+                        .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
+                            o.SetPackagesDirectory(NugetPackageDirectory)));
+                }
             }
             else
             {

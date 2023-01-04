@@ -82,4 +82,10 @@ public static class ProjectsHelper
             .Concat(solution.GetCrossPlatformTestApplications())
             .Concat(new[] { solution.GetTestMock() });
     }
+
+    public static IEnumerable<Project> GetNativeProjects(this Solution solution)
+    {
+        return solution.GetNativeSrcProjects()
+            .Concat(new[] { solution.GetNativeTestProject() });
+    }
 }
