@@ -17,6 +17,8 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
+namespace IntegrationsJsonGenerator;
+
 internal class Integration
 {
     [JsonPropertyName("name")]

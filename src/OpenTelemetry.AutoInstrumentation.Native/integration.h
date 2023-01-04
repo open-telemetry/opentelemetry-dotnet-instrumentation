@@ -242,7 +242,6 @@ struct MethodReference
     const AssemblyReference assembly;
     const WSTRING type_name;
     const WSTRING method_name;
-    const WSTRING action;
     const MethodSignature method_signature;
     const Version min_version;
     const Version max_version;
@@ -253,13 +252,12 @@ struct MethodReference
     {
     }
 
-    MethodReference(const WSTRING& assembly_name, WSTRING type_name, WSTRING method_name, WSTRING action,
+    MethodReference(const WSTRING& assembly_name, WSTRING type_name, WSTRING method_name,
                     Version min_version, Version max_version, const std::vector<BYTE>& method_signature,
                     const std::vector<WSTRING>& signature_types) :
         assembly(*AssemblyReference::GetFromCache(assembly_name)),
         type_name(type_name),
         method_name(method_name),
-        action(action),
         method_signature(method_signature),
         min_version(min_version),
         max_version(max_version),
