@@ -63,6 +63,13 @@ public static class ProjectsHelper
         return solution.GetProject(Projects.Mocks.AutoInstrumentationMock);
     }
 
+    public static IEnumerable<Project> GetWindowsOnlyTestApplications(this Solution solution)
+    {
+        return solution
+            .GetTestApplications()
+            .Where(x => x.Name.Contains("AspNet") || x.Name.EndsWith("NetFramework"));
+    }
+
     public static IEnumerable<Project> GetCrossPlatformTestApplications(this Solution solution)
     {
         return solution

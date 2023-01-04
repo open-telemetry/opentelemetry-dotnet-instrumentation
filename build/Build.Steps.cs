@@ -131,7 +131,13 @@ partial class Build
         .After(CompileManagedSrc)
         .Executes(() =>
         {
-            foreach (var app in Solution.GetCrossPlatformTestApplications())
+            var testApps = Solution.GetCrossPlatformTestApplications();
+            if (IsWin)
+            {
+                testApps = testApps.Concat(Solution.GetWindowsOnlyTestApplications());
+            }
+
+            foreach (var app in testApps)
             {
                 DotNetBuild(x => x
                     .SetProjectFile(app)
