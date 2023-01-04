@@ -85,9 +85,9 @@ TEST_F(MetadataBuilderTest, StoresWrapperMemberRef) {
 
   const auto min_ver = Version(0, 0, 0, 0);
   const auto max_ver = Version(USHRT_MAX, USHRT_MAX, USHRT_MAX, USHRT_MAX);
-  const MethodReference ref1(L"", L"", L"", L"", min_ver, max_ver, {}, empty_sig_type_);
-  const MethodReference ref2(L"TestApplication.ExampleLibrary", L"Class1", L"Add", L"", min_ver, max_ver, {}, empty_sig_type_);
-  const MethodReference ref3(L"TestApplication.ExampleLibrary", L"Class1", L"Add", L"ReplaceTargetMethod", min_ver, max_ver, {}, empty_sig_type_);
+  const MethodReference ref1(L"", L"", L"", min_ver, max_ver, {}, empty_sig_type_);
+  const MethodReference ref2(L"TestApplication.ExampleLibrary", L"Class1", L"Add", min_ver, max_ver, {}, empty_sig_type_);
+  const MethodReference ref3(L"TestApplication.ExampleLibrary", L"Class1", L"Add", min_ver, max_ver, {}, empty_sig_type_);
   const MethodReplacement mr1(ref1, ref2, ref3);
   auto hr = metadata_builder_->StoreWrapperMethodRef(mr1);
   ASSERT_EQ(S_OK, hr);
@@ -108,11 +108,10 @@ TEST_F(MetadataBuilderTest, StoresWrapperMemberRef) {
 TEST_F(MetadataBuilderTest, StoresWrapperMemberRefForSeparateAssembly) {
   const auto min_ver = Version(0, 0, 0, 0);
   const auto max_ver = Version(USHRT_MAX, USHRT_MAX, USHRT_MAX, USHRT_MAX);
-  const MethodReference ref1(L"", L"", L"", L"", min_ver, max_ver, {},
+  const MethodReference ref1(L"", L"", L"", min_ver, max_ver, {},
                              empty_sig_type_);
-  const MethodReference ref2(L"TestApplication.ExampleLibrary", L"Class1", L"Add", L"", min_ver, max_ver, {}, empty_sig_type_);
-  const MethodReference ref3(L"TestApplication.ExampleLibraryTracer", L"Class1", L"Add", L"ReplaceTargetMethod",
-                             min_ver, max_ver, {}, empty_sig_type_);
+  const MethodReference ref2(L"TestApplication.ExampleLibrary", L"Class1", L"Add", min_ver, max_ver, {}, empty_sig_type_);
+  const MethodReference ref3(L"TestApplication.ExampleLibraryTracer", L"Class1", L"Add", min_ver, max_ver, {}, empty_sig_type_);
   const MethodReplacement mr1(ref1, ref2, ref3);
   auto hr = metadata_builder_->StoreWrapperMethodRef(mr1);
   ASSERT_EQ(S_OK, hr);
@@ -127,11 +126,9 @@ TEST_F(MetadataBuilderTest, StoresWrapperMemberRefForSeparateAssembly) {
 TEST_F(MetadataBuilderTest, StoresWrapperMemberRefRecordsFailure) {
   const auto min_ver = Version(0, 0, 0, 0);
   const auto max_ver = Version(USHRT_MAX, USHRT_MAX, USHRT_MAX, USHRT_MAX);
-  const MethodReference ref1(L"", L"", L"", L"", min_ver, max_ver, {},
-                             empty_sig_type_);
-  const MethodReference ref2(L"TestApplication.ExampleLibrary", L"Class1", L"Add", L"", min_ver, max_ver, {}, empty_sig_type_);
-  const MethodReference ref3(L"TestApplication.ExampleLibraryTracer.AssemblyDoesNotExist", L"Class1", L"Add", L"ReplaceTargetMethod",
-                             min_ver, max_ver, {}, empty_sig_type_);
+  const MethodReference ref1(L"", L"", L"", min_ver, max_ver, {}, empty_sig_type_);
+  const MethodReference ref2(L"TestApplication.ExampleLibrary", L"Class1", L"Add", min_ver, max_ver, {}, empty_sig_type_);
+  const MethodReference ref3(L"TestApplication.ExampleLibraryTracer.AssemblyDoesNotExist", L"Class1", L"Add", min_ver, max_ver, {}, empty_sig_type_);
   const MethodReplacement mr1(ref1, ref2, ref3);
   auto hr = metadata_builder_->StoreWrapperMethodRef(mr1);
   ASSERT_NE(S_OK, hr);
