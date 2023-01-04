@@ -21,7 +21,6 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 partial class Build
 {
     [Solution("OpenTelemetry.AutoInstrumentation.sln")] readonly Solution Solution;
-    AbsolutePath MsBuildProject => RootDirectory / "OpenTelemetry.AutoInstrumentation.proj";
 
     AbsolutePath OutputDirectory => RootDirectory / "bin";
     AbsolutePath SourceDirectory => RootDirectory / "src";
@@ -82,13 +81,16 @@ partial class Build
             }
             else
             {
-                DotNetRestore(s => s
-                    .SetProjectFile(MsBuildProject)
-                    .SetVerbosity(DotNetVerbosity.Normal)
-                    // .SetTargetPlatform(Platform) // necessary to ensure we restore every project
-                    .SetProperty("configuration", BuildConfiguration.ToString())
-                    .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                        o.SetPackageDirectory(NugetPackageDirectory)));
+                foreach (var project in Solution.GetCrossPlatformManagedProjects())
+                {
+                    DotNetRestore(s => s
+                        .SetProjectFile(project)
+                        .SetVerbosity(DotNetVerbosity.Normal)
+                        // .SetTargetPlatform(Platform) // necessary to ensure we restore every project
+                        .SetProperty("configuration", BuildConfiguration.ToString())
+                        .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
+                            o.SetPackageDirectory(NugetPackageDirectory)));
+                }
             }
         }));
 
@@ -98,14 +100,14 @@ partial class Build
         .After(Restore)
         .Executes(() =>
         {
-            // Always AnyCPU
-            DotNetMSBuild(x => x
-                .SetTargetPath(MsBuildProject)
-                .SetTargetPlatformAnyCPU()
-                .SetConfiguration(BuildConfiguration)
-                .DisableRestore()
-                .SetTargets("BuildCsharp")
-            );
+            foreach (var project in Solution.GetManagedSrcProjects())
+            {
+                // Always AnyCPU
+                DotNetBuild(x => x
+                    .SetProjectFile(project)
+                    .SetConfiguration(BuildConfiguration)
+                    .EnableNoRestore());
+            }
         });
 
     Target CompileManagedTests => _ => _
@@ -113,28 +115,23 @@ partial class Build
         .After(CompileManagedSrc)
         .Executes(() =>
         {
-            // Always AnyCPU
-            DotNetBuild(x => x
-                .SetProjectFile(Solution.GetProject(Projects.Tests.AutoInstrumentationLoaderTests))
-                .SetConfiguration(BuildConfiguration)
-                .SetNoRestore(true));
+            foreach (var app in Solution.GetCrossPlatformTestApplications())
+            {
+                // Always AnyCPU
+                DotNetBuild(x => x
+                    .SetProjectFile(app)
+                    .SetConfiguration(BuildConfiguration)
+                    .SetNoRestore(true));
+            }
 
-            DotNetBuild(x => x
-                .SetProjectFile(Solution.GetProject(Projects.Tests.AutoInstrumentationBootstrappingTests))
-                .SetConfiguration(BuildConfiguration)
-                .SetNoRestore(true));
-
-            DotNetBuild(x => x
-                .SetProjectFile(Solution.GetProject(Projects.Tests.AutoInstrumentationTests))
-                .SetConfiguration(BuildConfiguration)
-                .SetNoRestore(true));
-
-            DotNetMSBuild(x => x
-                .SetTargetPath(MsBuildProject)
-                .SetPlatform(Platform)
-                .SetConfiguration(BuildConfiguration)
-                .DisableRestore()
-                .SetTargets("BuildCsharpTest"));
+            foreach (var project in Solution.GetManagedTestProjects())
+            {
+                // Always AnyCPU
+                DotNetBuild(x => x
+                    .SetProjectFile(project)
+                    .SetConfiguration(BuildConfiguration)
+                    .SetNoRestore(true));
+            }
         });
 
     Target CompileNativeSrc => _ => _

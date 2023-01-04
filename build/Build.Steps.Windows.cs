@@ -25,15 +25,17 @@ partial class Build
                 ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
                 : new[] { MSBuildTargetPlatform.x86 };
 
-            // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
-            MSBuild(s => s
-                .SetTargetPath(MsBuildProject)
-                .SetConfiguration(BuildConfiguration)
-                .SetTargets("BuildCpp")
-                .DisableRestore()
-                .SetMaxCpuCount(null)
-                .CombineWith(platforms, (m, platform) => m
-                    .SetTargetPlatform(platform)));
+            foreach (var project in Solution.GetNativeSrcProjects())
+            {
+                // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
+                MSBuild(s => s
+                    .SetTargetPath(project)
+                    .SetConfiguration(BuildConfiguration)
+                    .DisableRestore()
+                    .SetMaxCpuCount(null)
+                    .CombineWith(platforms, (m, platform) => m
+                        .SetTargetPlatform(platform)));
+            }
         });
 
     Target CompileNativeTestsWindows => _ => _
@@ -50,7 +52,7 @@ partial class Build
 
             // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
             MSBuild(s => s
-                .SetTargetPath(MsBuildProject)
+                .SetTargetPath(Solution.GetNativeTestProject())
                 .SetConfiguration(BuildConfiguration)
                 .SetTargets("BuildCppTests")
                 .DisableRestore()
