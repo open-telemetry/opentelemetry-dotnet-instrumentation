@@ -32,6 +32,10 @@ exporters:
       insecure: true
   prometheus:
     endpoint: "0.0.0.0:8889"
+  loki:
+    endpoint: "${LOKI_ENDPOINT}"
+    tls:
+      insecure: true
 
 service:
   pipelines:
@@ -60,7 +64,7 @@ service:
       exporters:
         - logging 
         - file/logs
-        - otlp
+        - loki
   extensions:
     - health_check
     - zpages

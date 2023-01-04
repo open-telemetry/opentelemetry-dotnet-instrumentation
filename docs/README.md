@@ -143,9 +143,9 @@ uses environment variables as parameters:
 
 ### PowerShell module (Windows)
 
-On Windows, you can install OpenTelemetry .NET Automatic Instrumentation
+On Windows, you should install OpenTelemetry .NET Automatic Instrumentation
 and instrument your .NET application using the provided PowerShell module.
-Example usage:
+Example usage (run as administrator):
 
 ```powershell
 # Download and import the module

@@ -226,11 +226,6 @@ namespace
         if (src.is_object())
         {
             const MethodReference wrapper = MethodReferenceFromJson(src.value("wrapper", json::object()), false, true);
-            if (wrapper.action != WStr("CallTargetModification"))
-            {
-                return;
-            }
-
             const MethodReference target =
                 MethodReferenceFromJson(src.value("target", json::object()), true, false);
 
@@ -259,7 +254,6 @@ namespace
         USHORT max_minor = USHRT_MAX;
         USHORT max_patch = USHRT_MAX;
         std::vector<WSTRING> signature_type_array;
-        WSTRING action = EmptyWStr;
 
         if (is_target_method)
         {
@@ -301,10 +295,6 @@ namespace
                     signature_type_array[i] = ToWSTRING(sig_types[i]);
                 }
             }
-        }
-        else if (is_wrapper_method)
-        {
-            action = ToWSTRING(src.value("action", ""));
         }
 
         std::vector<BYTE> signature;
@@ -352,7 +342,7 @@ namespace
                 prev = b;
             }
         }
-        return MethodReference(assembly, type, method, action, Version(min_major, min_minor, min_patch, 0),
+        return MethodReference(assembly, type, method, Version(min_major, min_minor, min_patch, 0),
                                Version(max_major, max_minor, max_patch, USHRT_MAX), signature, signature_type_array);
     }
 
