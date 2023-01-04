@@ -1,10 +1,20 @@
 #include "integration_loader.h"
 
 #include <exception>
+#include <unordered_set>
 
 #include "environment_variables.h"
 #include "logger.h"
 #include "util.h"
+
+template <>
+struct std::hash<trace::IntegrationMethod> {
+  // needed for creating unordered_set to load all integration methods
+  std::size_t operator()(const trace::IntegrationMethod& integration_method) const noexcept {
+    // it is enough to use integration_name to calculate hash
+    return std::hash<trace::WSTRING>()(integration_method.integration_name);
+  }
+};
 
 namespace trace
 {
@@ -67,13 +77,18 @@ void LoadIntegrationsFromStream(
         // parse the stream
         stream >> j;
 
-        integrationMethods.reserve(j.size());
+        std::unordered_set<IntegrationMethod> set;
 
         for (const auto& el : j)
         {
-          IntegrationFromJson(el, integrationMethods, configuration);
+            IntegrationFromJson(el, set, configuration);
         }
 
+        integrationMethods.reserve(set.size());
+        for (auto &integration_method : set)
+        {
+            integrationMethods.push_back(integration_method);
+        }
     }
     catch (const json::parse_error& e)
     {
@@ -133,7 +148,7 @@ namespace
     }
 
     void IntegrationFromJson(const json::value_type& src,
-                         std::vector<IntegrationMethod>& integrationMethods,
+                         std::unordered_set<IntegrationMethod>& integrationMethods,
                          const LoadIntegrationConfiguration& configuration)
     {
         if (!src.is_object())
@@ -168,13 +183,24 @@ namespace
                 return;
             }
         }
+        else if (type == WStr("Metric"))
+        {
+            if (!configuration.metrics_enabled)
+            {
+                return;
+            }
+            if (!InstrumentationEnabled(name, configuration.enabledMetricIntegrationNames, configuration.disabledMetricIntegrationNames))
+            {
+                return;
+            }
+        }
         else if (type == WStr("Log"))
         {
             if (!configuration.logs_enabled)
             {
                 return;
             }
-            if (!configuration.logs_enabled || !InstrumentationEnabled(name, configuration.enabledLogIntegrationNames, configuration.disabledLogIntegrationNames))
+            if (!InstrumentationEnabled(name, configuration.enabledLogIntegrationNames, configuration.disabledLogIntegrationNames))
             {
                 return;
             }
@@ -195,7 +221,7 @@ namespace
         }
     }
 
-    void MethodReplacementFromJson(const json::value_type& src, const WSTRING& integrationName, std::vector<IntegrationMethod>& integrationMethods)
+    void MethodReplacementFromJson(const json::value_type& src, const WSTRING& integrationName, std::unordered_set<IntegrationMethod>& integrationMethods)
     {
         if (src.is_object())
         {
@@ -208,7 +234,7 @@ namespace
             const MethodReference target =
                 MethodReferenceFromJson(src.value("target", json::object()), true, false);
 
-            integrationMethods.push_back({integrationName, {{}, target, wrapper}});
+            integrationMethods.insert({integrationName, {{}, target, wrapper}});
         }
     }
 

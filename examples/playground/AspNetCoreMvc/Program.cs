@@ -14,21 +14,22 @@
 // limitations under the License.
 // </copyright>
 
-// This file is used by Code Analysis to maintain SuppressMessage
-// attributes that are applied to this project.
-// Project-level suppressions either have no target or are given
-// a specific target and scoped to a namespace, type, member, etc.
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
-// Example usage:
-//     dotnet run http://localhost:5200
-if (args.Length != 1)
+namespace Examples.AspNetCoreMvc;
+
+public class Program
 {
-    Console.WriteLine(@"URL missing");
-    return 2;
-}
+    public static void Main(string[] args)
+    {
+        CreateHostBuilder(args).Build().Run();
+    }
 
-var uri = args[0];
-using var httpClient = new HttpClient();
-var content = await httpClient.GetStringAsync(uri);
-Console.WriteLine(content);
-return 0;
+    public static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>();
+            });
+}

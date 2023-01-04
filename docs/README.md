@@ -143,9 +143,9 @@ uses environment variables as parameters:
 
 ### PowerShell module (Windows)
 
-On Windows, you can install OpenTelemetry .NET Automatic Instrumentation
+On Windows, you should install OpenTelemetry .NET Automatic Instrumentation
 and instrument your .NET application using the provided PowerShell module.
-Example usage:
+Example usage (run as administrator):
 
 ```powershell
 # Download and import the module
@@ -180,7 +180,8 @@ Get-Help Install-OpenTelemetryCore -Detailed
 
 ## Instrument a container
 
-You can find an example using Docker Compose [here](../examples).
+You can find our demonstrative example
+that uses Docker Compose [here](../examples/demo).
 
 You can also consider using
 the [Kubernetes Operator for OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-operator).

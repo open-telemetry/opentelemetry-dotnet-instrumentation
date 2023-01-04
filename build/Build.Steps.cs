@@ -148,6 +148,18 @@ partial class Build
         .DependsOn(CompileNativeTestsWindows)
         .DependsOn(CompileNativeTestsLinux);
 
+    Target CompileExamples => _ => _
+        .Description("Compiles all the example projects")
+        .Executes(() =>
+        {
+            foreach (var exampleProject in Solution.GetProjects("Examples.*"))
+            {
+                DotNetBuild(s => s
+                    .SetProjectFile(exampleProject)
+                    .SetConfiguration(BuildConfiguration));
+            }
+        });
+
     Target PublishManagedProfiler => _ => _
         .Unlisted()
         .After(CompileManagedSrc)

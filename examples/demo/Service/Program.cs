@@ -24,10 +24,10 @@ using System.Diagnostics.Metrics;
 using Microsoft.Data.SqlClient;
 
 // .NET Diagnostics: create the span factory
-using var activitySource = new ActivitySource("MyCompany.Service");
+using var activitySource = new ActivitySource("Examples.Service");
 
 // .NET Diagnostics: create a metric
-using var meter = new Meter("MyCompany.Service", "1.0");
+using var meter = new Meter("Examples.Service", "1.0");
 var successCounter = meter.CreateCounter<long>("srv.successes.count", description: "Number of successful responses");
 
 var builder = WebApplication.CreateBuilder(args);

@@ -169,7 +169,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     const LoadIntegrationConfiguration configuration(
         AreTracesEnabled(), 
         GetEnvironmentValues(environment::enabled_traces_integrations),
-        GetEnvironmentValues(environment::disabled_traces_integrations), 
+        GetEnvironmentValues(environment::disabled_traces_integrations),
+        AreMetricsEnabled(), 
+        GetEnvironmentValues(environment::enabled_metrics_integrations),
+        GetEnvironmentValues(environment::disabled_metrics_integrations),
         AreLogsEnabled(),
         GetEnvironmentValues(environment::enabled_logs_integrations),
         GetEnvironmentValues(environment::disabled_logs_integrations));
@@ -2389,7 +2392,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCachedFunctionSearchStarted(FunctionID
 /// </summary>
 /// <param name="module_id">Module id</param>
 /// <param name="module_metadata">Module metadata for the module</param>
-/// <param name="filtered_integrations">Filtered vector of integrations to be applied</param>
+/// <param name="integrations">Filtered vector of integrations to be applied</param>
 /// <returns>Number of ReJIT requests made</returns>
 size_t CorProfiler::CallTarget_RequestRejitForModule(ModuleID module_id, ModuleMetadata* module_metadata,
                                                      const std::vector<IntegrationMethod>& integrations)
