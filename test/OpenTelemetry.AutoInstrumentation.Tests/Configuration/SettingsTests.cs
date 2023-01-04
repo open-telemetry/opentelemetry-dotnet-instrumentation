@@ -195,6 +195,7 @@ public class SettingsTests : IDisposable
     [InlineData(nameof(TracerInstrumentation.MassTransit), TracerInstrumentation.MassTransit)]
 #endif
     [InlineData(nameof(TracerInstrumentation.NServiceBus), TracerInstrumentation.NServiceBus)]
+    [InlineData(nameof(TracerInstrumentation.Elasticsearch), TracerInstrumentation.Elasticsearch)]
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, tracerInstrumentation);
