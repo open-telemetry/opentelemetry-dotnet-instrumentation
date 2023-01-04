@@ -85,5 +85,10 @@ internal enum TracerInstrumentation
     /// <summary>
     /// NServiceBus instrumentation.
     /// </summary>
-    NServiceBus = 11
+    NServiceBus = 11,
+
+    /// <summary>
+    /// Elasticsearch instrumentation.
+    /// </summary>
+    Elasticsearch = 12
 }

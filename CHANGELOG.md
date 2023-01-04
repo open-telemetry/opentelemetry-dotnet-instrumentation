@@ -16,6 +16,7 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
 ### Added
 
 - Add support for NServiceBus metrics and traces instrumentations.
+- Add support for Elasticsearch traces instrumentations.
 - Add plugin support for
  `ConfigureTracesOptions(StackExchangeRedisCallsInstrumentationOptions options)`.
 - Add plugin support for
