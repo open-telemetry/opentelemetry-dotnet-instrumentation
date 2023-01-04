@@ -96,7 +96,6 @@ internal static class EnvironmentConfigurationTracerHelper
         return settings.TracesExporter switch
         {
             TracesExporter.Zipkin => Wrappers.AddZipkinExporter(builder, pluginManager),
-            TracesExporter.Jaeger => Wrappers.AddJaegerExporter(builder, pluginManager),
             TracesExporter.Otlp => Wrappers.AddOtlpExporter(builder, settings, pluginManager),
             TracesExporter.None => builder,
             _ => throw new ArgumentOutOfRangeException($"Traces exporter '{settings.TracesExporter}' is incorrect")
@@ -192,12 +191,6 @@ internal static class EnvironmentConfigurationTracerHelper
         public static TracerProviderBuilder AddZipkinExporter(TracerProviderBuilder builder, PluginManager pluginManager)
         {
             return builder.AddZipkinExporter(pluginManager.ConfigureTracesOptions);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddJaegerExporter(TracerProviderBuilder builder, PluginManager pluginManager)
-        {
-            return builder.AddJaegerExporter(pluginManager.ConfigureTracesOptions);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

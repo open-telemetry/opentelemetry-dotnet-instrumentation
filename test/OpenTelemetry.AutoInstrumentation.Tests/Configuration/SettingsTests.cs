@@ -126,7 +126,6 @@ public class SettingsTests : IDisposable
 
     [Theory]
     [InlineData("none", TracesExporter.None)]
-    [InlineData("jaeger", TracesExporter.Jaeger)]
     [InlineData("otlp", TracesExporter.Otlp)]
     [InlineData("zipkin", TracesExporter.Zipkin)]
     internal void TracesExporter_SupportedValues(string tracesExporter, TracesExporter expectedTracesExporter)
