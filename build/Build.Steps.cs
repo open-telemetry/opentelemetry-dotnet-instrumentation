@@ -88,6 +88,14 @@ partial class Build
                     .SetVerbosity(NuGetVerbosity.Normal)
                     .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
                         o.SetPackagesDirectory(NugetPackageDirectory)));
+
+                // Restore native projects
+                NuGetTasks.NuGetRestore(s => s
+                    .SetTargetPath(Solution.GetProject("OpenTelemetry.AutoInstrumentation.Native"))
+                    .SetSolutionDirectory(Solution.Directory)
+                    .SetVerbosity(NuGetVerbosity.Normal)
+                    .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
+                        o.SetPackagesDirectory(NugetPackageDirectory)));
             }
             else
             {
