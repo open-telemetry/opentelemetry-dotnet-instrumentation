@@ -5,7 +5,21 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.5.1-beta.2...HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.5.1-beta.3...HEAD)
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.5.1-beta.3](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.5.1-beta.3)
 
 This beta release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
@@ -31,8 +45,6 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
   [`1.4.0-rc.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-rc.1)
 
-### Deprecated
-
 ### Removed
 
 - Remove support for Jaeger exporter.
@@ -40,8 +52,6 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
 ### Fixed
 
 - Fix WCF instrumentation on .NET Framework.
-
-### Security
 
 ## [0.5.1-beta.2](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.5.1-beta.2)
 
