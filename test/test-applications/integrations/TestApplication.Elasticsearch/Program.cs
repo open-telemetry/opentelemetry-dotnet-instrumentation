@@ -15,7 +15,6 @@
 // </copyright>
 
 using System;
-using System.Linq;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
 using TestApplication.Shared;
@@ -34,15 +33,5 @@ var settings = new ElasticsearchClientSettings(fakeUri)
 
 var client = new ElasticsearchClient(settings);
 
-var response = await client.SearchAsync<TestObject>(s =>
+await client.SearchAsync<TestObject>(s =>
     s.Index("test-index").From(0).Size(10).Query(q => q.Term(t => t.Id, 1)));
-
-if (response.IsValidResponse)
-{
-    var tweet = response.Documents.FirstOrDefault();
-    Console.WriteLine(tweet);
-}
-else
-{
-    Console.WriteLine("fail");
-}
