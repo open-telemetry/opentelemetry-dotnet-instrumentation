@@ -16,6 +16,8 @@
 
 using System.Text.Json.Serialization;
 
+namespace IntegrationsJsonGenerator;
+
 internal class Wrapper
 {
     [JsonPropertyName("assembly")]
