@@ -4,7 +4,7 @@
   <Import Project="$(MSBuildThisFileDirectory)Integrations.props" />
  
   <!-- StyleCop -->
-  <ItemGroup>   
+  <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" Link="GlobalSuppressions.integrations.cs" />
   </ItemGroup>
 
