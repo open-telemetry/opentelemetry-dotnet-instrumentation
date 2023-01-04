@@ -14,14 +14,8 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using IntegrationTests.Helpers;
-using VerifyXunit;
-using Xunit;
 
 namespace IntegrationTests;
 

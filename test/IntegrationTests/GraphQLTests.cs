@@ -14,16 +14,10 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text;
-using System.Threading.Tasks;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Trace.V1;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;

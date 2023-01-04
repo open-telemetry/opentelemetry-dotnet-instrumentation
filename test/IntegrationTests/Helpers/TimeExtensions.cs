@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-
 namespace IntegrationTests.Helpers;
 
 internal static class TimeExtensions

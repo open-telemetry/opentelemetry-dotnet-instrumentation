@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Runtime.CompilerServices;
 
 namespace OpenTelemetry.AutoInstrumentation.Logging;

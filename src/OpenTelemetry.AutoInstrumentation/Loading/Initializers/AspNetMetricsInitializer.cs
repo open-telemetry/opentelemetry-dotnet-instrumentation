@@ -16,9 +16,6 @@
 
 #if NETFRAMEWORK
 
-using System;
-using System.Threading;
-
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
 internal class AspNetMetricsInitializer

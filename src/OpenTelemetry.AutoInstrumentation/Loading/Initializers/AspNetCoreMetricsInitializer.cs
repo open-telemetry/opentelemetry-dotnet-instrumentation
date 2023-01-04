@@ -16,7 +16,6 @@
 
 #if NET6_0_OR_GREATER
 
-using System;
 using System.Reflection;
 using OpenTelemetry.Instrumentation.AspNetCore;
 

@@ -14,11 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Diagnostics;
-using System.IO;
-using System.Threading;
-using NServiceBus;
 using TestApplication.NServiceBus;
 using TestApplication.Shared;
 

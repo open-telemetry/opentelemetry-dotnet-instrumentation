@@ -16,8 +16,6 @@
 
 #if NETFRAMEWORK
 
-using System;
-using System.Threading;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;

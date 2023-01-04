@@ -18,16 +18,11 @@ using System.Reflection;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using IntegrationTests.Helpers;
-using Xunit;
 using Xunit.Abstractions;
 
 #if NETFRAMEWORK
 using System.Net;
-using System.Net.Http;
 using IntegrationTests.Helpers.Compatibility;
-#else
-using System;
-using System.Collections.Generic;
 #endif
 
 namespace IntegrationTests;

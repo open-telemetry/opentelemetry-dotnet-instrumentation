@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Runtime.Serialization;
 
 namespace TestApplication.Wcf.Client.NetFramework;

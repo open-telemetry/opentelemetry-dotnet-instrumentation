@@ -15,10 +15,8 @@
 // </copyright>
 
 #if NETFRAMEWORK
-using System;
 using System.Collections;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 
 namespace IntegrationTests.Helpers.Compatibility;
 

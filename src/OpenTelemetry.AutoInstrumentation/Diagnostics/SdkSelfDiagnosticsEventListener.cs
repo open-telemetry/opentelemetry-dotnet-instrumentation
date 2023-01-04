@@ -16,8 +16,6 @@
 
 // Source originated from https://github.com/open-telemetry/opentelemetry-dotnet/blob/23609730ddd73c860553de847e67c9b2226cff94/src/OpenTelemetry/Internal/SelfDiagnosticsEventListener.cs
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using OpenTelemetry.AutoInstrumentation.Logging;
 

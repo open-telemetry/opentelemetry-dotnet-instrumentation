@@ -14,9 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Threading.Tasks;
-
 namespace TestApplication.ExampleLibrary.GenericTests;
 
 public class ComprehensiveCaller<CallerT1, CallerT2>

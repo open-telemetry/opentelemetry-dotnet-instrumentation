@@ -14,9 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
 
 namespace TestApplication.ExampleLibrary;
 

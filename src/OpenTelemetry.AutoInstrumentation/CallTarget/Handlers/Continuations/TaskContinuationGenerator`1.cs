@@ -14,9 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Runtime.ExceptionServices;
-using System.Threading.Tasks;
 
 #pragma warning disable SA1649 // File name must match first type name
 
