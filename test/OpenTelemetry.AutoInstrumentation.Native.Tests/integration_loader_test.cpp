@@ -70,7 +70,7 @@ TEST(IntegrationLoaderTest, HandlesSingleIntegrationWithMethodReplacements)
             "method_replacements": [{
                 "caller": { },
                 "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "minimum_major": 0, "minimum_minor": 1, "maximum_major": 10, "maximum_minor": 0 },
-                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" }
+                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28] }
             }]
         }]
     )TEXT");
@@ -91,7 +91,7 @@ TEST(IntegrationLoaderTest, DoesNotCrashWithOutOfRangeVersion)
             "method_replacements": [{
                 "caller": { },
                 "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "minimum_major": 0, "minimum_minor": 1, "maximum_major": 75555, "maximum_minor": 0 },
-                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" }
+                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28] }
             }]
         }]
     )TEXT");
@@ -123,7 +123,7 @@ TEST(IntegrationLoaderTest, HandlesSingleIntegrationWithMissingCaller)
             "type": "Trace",
             "method_replacements": [{
                 "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "minimum_major": 1, "minimum_minor": 2, "maximum_major": 10, "maximum_minor": 99 },
-                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" }
+                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28] }
             }]
         }]
     )TEXT");
@@ -162,7 +162,7 @@ TEST(IntegrationLoaderTest, HandlesSingleIntegrationWithInvalidTarget)
             "type": "Trace",
             "method_replacements": [{
                 "target": 1234,
-                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "action": "CallTargetModification" }
+                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two" }
             }]
         }]
     )TEXT");
@@ -185,12 +185,12 @@ TEST(IntegrationLoaderTest, LoadsFromEnvironment)
     std::ofstream f;
     f.open(temp_name1);
     f << R"TEXT(
-        [{ "name": "test-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }]
+        [{ "name": "test-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }]
     )TEXT";
     f.close();
     f.open(temp_name2);
     f << R"TEXT(
-        [{ "name": "test-integration-2", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }]
+        [{ "name": "test-integration-2", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }]
     )TEXT";
     f.close();
 
@@ -223,7 +223,7 @@ TEST(IntegrationLoaderTest, DeserializesSignatureTypeArray)
             "method_replacements": [{
                 "caller": { },
                 "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.Pipeline'1<T>"] },
-                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.One", "signature": [0, 1, 1, 28], "action": "CallTargetModification" }
+                "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.One", "signature": [0, 1, 1, 28] }
             }]
         }]
     )TEXT");
@@ -240,8 +240,8 @@ TEST(IntegrationLoaderTest, SupportsEnabledTraceIntegrations) {
     std::vector<IntegrationMethod> integrations;
     std::stringstream str(R"TEXT(
         [
-            { "name": "test-trace-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-            { "name": "test-trace-integration-2", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }
+            { "name": "test-trace-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
+            { "name": "test-trace-integration-2", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }
         ]
     )TEXT");
 
@@ -260,8 +260,8 @@ TEST(IntegrationLoaderTest, SupportsEnabledMetricIntegrations) {
     std::vector<IntegrationMethod> integrations;
     std::stringstream str(R"TEXT(
           [
-              { "name": "test-metric-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-              { "name": "test-metric-integration-2", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }
+              { "name": "test-metric-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
+              { "name": "test-metric-integration-2", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }
           ]
       )TEXT");
 
@@ -282,8 +282,8 @@ TEST(IntegrationLoaderTest, SupportsEnabledLogIntegrations)
     std::vector<IntegrationMethod> integrations;
     std::stringstream str(R"TEXT(
           [
-              { "name": "test-log-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-              { "name": "test-log-integration-2", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }
+              { "name": "test-log-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
+              { "name": "test-log-integration-2", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }
           ]
       )TEXT");
   
@@ -303,8 +303,8 @@ TEST(IntegrationLoaderTest, SupportsDisabledTraceIntegrations)
     std::vector<IntegrationMethod> integrations;
     std::stringstream str(R"TEXT(
         [
-            { "name": "test-trace-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-            { "name": "test-trace-integration-2", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }
+            { "name": "test-trace-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
+            { "name": "test-trace-integration-2", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }
         ]
     )TEXT");
 
@@ -325,8 +325,8 @@ TEST(IntegrationLoaderTest, SupportsDisabledMetricIntegrations)
     std::vector<IntegrationMethod> integrations;
     std::stringstream str(R"TEXT(
           [
-              { "name": "test-metric-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-              { "name": "test-metric-integration-2", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }
+              { "name": "test-metric-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
+              { "name": "test-metric-integration-2", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }
           ]
       )TEXT");
   
@@ -346,8 +346,8 @@ TEST(IntegrationLoaderTest, SupportsDisabledLogIntegrations)
     std::vector<IntegrationMethod> integrations;
     std::stringstream str(R"TEXT(
           [
-              { "name": "test-log-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-              { "name": "test-log-integration-2", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }
+              { "name": "test-log-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
+              { "name": "test-log-integration-2", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }
           ]
       )TEXT");
   
@@ -367,15 +367,15 @@ TEST(IntegrationLoaderTest, SupportsEnabledAndDisabledIntegrations)
     std::vector<IntegrationMethod> integrations;
     std::stringstream str(R"TEXT(
         [
-            { "name": "test-trace-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-            { "name": "test-trace-integration-2", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-            { "name": "test-trace-integration-3", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-            { "name": "test-metric-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-            { "name": "test-metric-integration-2", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-            { "name": "test-metric-integration-3", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-            { "name": "test-log-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-            { "name": "test-log-integration-2", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-            { "name": "test-log-integration-3", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }
+            { "name": "test-trace-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
+            { "name": "test-trace-integration-2", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
+            { "name": "test-trace-integration-3", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
+            { "name": "test-metric-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
+            { "name": "test-metric-integration-2", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
+            { "name": "test-metric-integration-3", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
+            { "name": "test-log-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
+            { "name": "test-log-integration-2", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
+            { "name": "test-log-integration-3", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }
         ]
     )TEXT");
 
@@ -405,9 +405,9 @@ TEST(IntegrationLoaderTest, SupportsDisableAllIntegrations) {
     std::vector<IntegrationMethod> integrations;
     std::stringstream str(R"TEXT(
         [
-            { "name": "test-trace-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-            { "name": "test-metric-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] },
-            { "name": "test-log-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {"action": "CallTargetModification"} }] }
+            { "name": "test-trace-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
+            { "name": "test-metric-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
+            { "name": "test-log-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }
         ]
     )TEXT");
 
@@ -426,12 +426,12 @@ TEST(IntegrationLoaderTest, DuplicatedIntegrations) {
     std::vector<IntegrationMethod> integrations;
     std::stringstream str(R"TEXT(
         [
-            { "name": "test-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.Pipeline'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" } }] },
-            { "name": "test-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.PipelineForTrace'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" } }] },
-            { "name": "test-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.Pipeline'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" } }] },
-            { "name": "test-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.PipelineForMetric'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" } }] },
-            { "name": "test-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.Pipeline'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" } }] },
-            { "name": "test-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.PipelineForLog'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28], "action": "CallTargetModification" } }] }
+            { "name": "test-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.Pipeline'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28] } }] },
+            { "name": "test-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.PipelineForTrace'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28] } }] },
+            { "name": "test-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.Pipeline'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28] } }] },
+            { "name": "test-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.PipelineForMetric'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28] } }] },
+            { "name": "test-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.Pipeline'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28] } }] },
+            { "name": "test-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": { "assembly": "Assembly.One", "type": "Type.One", "method": "Method.One", "signature_types": ["System.Void", "_", "FakeClient.PipelineForLog'1<T>"] }, "wrapper": { "assembly": "Assembly.Two", "type": "Type.Two", "method": "Method.Two", "signature": [0, 1, 1, 28] } }] }
         ]
     )TEXT");
 

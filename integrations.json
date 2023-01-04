@@ -22,8 +22,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration",
-          "action": "CallTargetModification"
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration"
         }
       },
       {
@@ -45,8 +44,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration",
-          "action": "CallTargetModification"
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration"
         }
       }
     ]
@@ -74,8 +72,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration",
-          "action": "CallTargetModification"
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration"
         }
       }
     ]
@@ -103,8 +100,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration",
-          "action": "CallTargetModification"
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration"
         }
       }
     ]
@@ -131,8 +127,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData.MySqlConnectionStringBuilderIntegration",
-          "action": "CallTargetModification"
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData.MySqlConnectionStringBuilderIntegration"
         }
       }
     ]
@@ -160,8 +155,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration",
-          "action": "CallTargetModification"
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration"
         }
       }
     ]
@@ -189,8 +183,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration",
-          "action": "CallTargetModification"
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration"
         }
       }
     ]
@@ -219,8 +212,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration",
-          "action": "CallTargetModification"
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration"
         }
       },
       {
@@ -243,8 +235,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration",
-          "action": "CallTargetModification"
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration"
         }
       },
       {
@@ -268,8 +259,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration",
-          "action": "CallTargetModification"
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration"
         }
       },
       {
@@ -294,8 +284,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration",
-          "action": "CallTargetModification"
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration"
         }
       },
       {
@@ -318,8 +307,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync",
-          "action": "CallTargetModification"
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync"
         }
       },
       {
@@ -342,8 +330,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync",
-          "action": "CallTargetModification"
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync"
         }
       },
       {
@@ -367,8 +354,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync",
-          "action": "CallTargetModification"
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync"
         }
       }
     ]
