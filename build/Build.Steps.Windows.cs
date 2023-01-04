@@ -54,7 +54,6 @@ partial class Build
             MSBuild(s => s
                 .SetTargetPath(Solution.GetNativeTestProject())
                 .SetConfiguration(BuildConfiguration)
-                .SetTargets("BuildCppTests")
                 .DisableRestore()
                 .SetMaxCpuCount(null)
                 .CombineWith(platforms, (m, platform) => m
