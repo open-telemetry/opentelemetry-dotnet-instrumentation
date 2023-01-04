@@ -2414,12 +2414,6 @@ size_t CorProfiler::CallTarget_RequestRejitForModule(ModuleID module_id, ModuleM
             continue;
         }
 
-        // If the integration mode is not CallTarget we skip.
-        if (integration.replacement.wrapper_method.action != calltarget_modification_action)
-        {
-            continue;
-        }
-
         // Check min version
         if (integration.replacement.target_method.min_version > assembly_metadata.version)
         {

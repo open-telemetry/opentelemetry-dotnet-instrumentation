@@ -25,7 +25,4 @@ internal class Wrapper
 
     [JsonPropertyName("type")]
     public string? Type { get; set; }
-
-    [JsonPropertyName("action")]
-    public string Action { get; set; } = "CallTargetModification";
 }
