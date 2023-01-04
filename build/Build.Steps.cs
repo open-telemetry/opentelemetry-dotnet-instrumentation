@@ -117,10 +117,10 @@ partial class Build
         {
             foreach (var app in Solution.GetCrossPlatformTestApplications())
             {
-                // Always AnyCPU
                 DotNetBuild(x => x
                     .SetProjectFile(app)
                     .SetConfiguration(BuildConfiguration)
+                    .SetPlatform(Platform)
                     .SetNoRestore(true));
             }
 
