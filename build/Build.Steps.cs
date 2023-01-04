@@ -339,7 +339,6 @@ partial class Build
             {
                 DotNetMSBuild(config => config
                     .SetConfiguration(BuildConfiguration)
-                    .SetPlatform(Platform)
                     .SetFilter(AndFilter(TestNameFilter(), ContainersFilter()))
                     .SetBlameHangTimeout("5m")
                     .EnableTrxLogOutput(GetResultsDirectory(project))
