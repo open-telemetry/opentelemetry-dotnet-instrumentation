@@ -73,11 +73,13 @@ partial class Build
 
             if (IsWin)
             {
-                NuGetTasks.NuGetRestore(s => s
-                    .SetTargetPath(Solution)
-                    .SetVerbosity(NuGetVerbosity.Normal)
+                DotNetRestore(s => s
+                    .SetProjectFile(Solution)
+                    .SetVerbosity(DotNetVerbosity.Normal)
+                    // .SetTargetPlatform(Platform) // necessary to ensure we restore every project
+                    .SetProperty("configuration", BuildConfiguration.ToString())
                     .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                        o.SetPackagesDirectory(NugetPackageDirectory)));
+                        o.SetPackageDirectory(NugetPackageDirectory)));
             }
             else
             {
