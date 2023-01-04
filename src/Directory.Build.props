@@ -6,7 +6,6 @@
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net462</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <EnablePublicApi>true</EnablePublicApi>
-    <ImplicitUsings>enable</ImplicitUsings>
 
     <!-- NuGet packages -->
     <IsPackable>true</IsPackable>
