@@ -80,6 +80,13 @@ partial class Build
                     .SetProperty("configuration", BuildConfiguration.ToString())
                     .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
                         o.SetPackageDirectory(NugetPackageDirectory)));
+
+                // Restore legacy projects
+                NuGetTasks.NuGetRestore(s => s
+                    .SetTargetPath(Solution.GetProject("TestApplication.AspNet"))
+                    .SetVerbosity(NuGetVerbosity.Normal)
+                    .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
+                        o.SetPackagesDirectory(NugetPackageDirectory)));
             }
             else
             {
