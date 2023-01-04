@@ -17,15 +17,15 @@ It consists of following services:
    which collects the telemetry send by `client` and `service`
 5. `jaeger` - [Jaeger](https://www.jaegertracing.io/) as traces backend
 6. `prometheus` - [Prometheus](https://prometheus.io/) as metrics backend
+7. `loki` - [Grafana Loki](https://grafana.com/oss/loki/) as logs backend
+8. `grafana` - [Grafana](https://grafana.com/oss/grafana/) as telemetry UI
 
 ## Usage
 
 Windows (Git Bash):
 
 ```sh
-docker-compose build
-docker-compose up -d service
-docker-compose run client
+docker-compose up -d --build
 ```
 
 macOS and Linux:
@@ -34,10 +34,8 @@ macOS and Linux:
 make
 ```
 
-The following Web UI endpoints are exposed:
-
-- <http://localhost:16686/search> - traces (Jaeger)
-- <http://localhost:9090/graph> - metrics (Prometheus)
+You can [explore](https://grafana.com/docs/grafana/v9.3/explore/)
+the telemetry in [Grafana UI](http://localhost:3000/).
 
 You can also find the exported telemetry in the `log` directory.
 
