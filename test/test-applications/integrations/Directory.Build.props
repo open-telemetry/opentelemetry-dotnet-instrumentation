@@ -2,9 +2,13 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\Common.props" />
 
   <Import Project="$(MSBuildThisFileDirectory)Integrations.props" />
+
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
   
   <!-- StyleCop -->
-  <ItemGroup>
+  <ItemGroup>   
     <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" Link="GlobalSuppressions.integrations.cs" />
   </ItemGroup>
 
