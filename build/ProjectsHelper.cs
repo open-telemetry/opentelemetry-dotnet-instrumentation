@@ -58,6 +58,11 @@ public static class ProjectsHelper
         return testApplications.Concat(testLibraries);
     }
 
+    public static Project GetTestMock(this Solution solution)
+    {
+        return solution.GetProject(Projects.Mocks.AutoInstrumentationMock);
+    }
+
     public static IEnumerable<Project> GetCrossPlatformTestApplications(this Solution solution)
     {
         return solution
@@ -74,6 +79,7 @@ public static class ProjectsHelper
     {
         return solution.GetManagedSrcProjects()
             .Concat(solution.GetManagedTestProjects())
-            .Concat(solution.GetCrossPlatformTestApplications());
+            .Concat(solution.GetCrossPlatformTestApplications())
+            .Concat(new[] { solution.GetTestMock() });
     }
 }

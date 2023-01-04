@@ -264,7 +264,7 @@ partial class Build
                 : TargetFrameworks.ExceptNetFramework();
 
             DotNetPublish(s => s
-                .SetProject(Solution.GetProject(Projects.Mocks.AutoInstrumentationMock))
+                .SetProject(Solution.GetTestMock())
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
