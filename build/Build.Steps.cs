@@ -82,7 +82,7 @@ partial class Build
                         o.SetPackageDirectory(NugetPackageDirectory)));
 
                 var legacyRestoreProjects = Solution.GetNativeProjects()
-                    .Concat(new[] { Solution.GetProject("TestApplication.AspNet") });
+                    .Concat(new[] { Solution.GetProject(Projects.Tests.Applications.AspNet) });
 
                 foreach (var project in legacyRestoreProjects)
                 {
@@ -349,7 +349,7 @@ partial class Build
         .After(RunManagedUnitTests)
         .Executes(() =>
         {
-            var project = Solution.GetProject("IntegrationTests");
+            var project = Solution.GetManagedIntegrationTestProject();
             if (!string.IsNullOrWhiteSpace(TestProject) && !project.Name.Contains(TestProject, StringComparison.OrdinalIgnoreCase))
             {
                 return;
