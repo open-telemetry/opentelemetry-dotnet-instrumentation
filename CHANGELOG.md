@@ -35,6 +35,8 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
 
 ### Removed
 
+- Remove support for Jaeger exporter.
+
 ### Fixed
 
 - Fix WCF instrumentation on .NET Framework.

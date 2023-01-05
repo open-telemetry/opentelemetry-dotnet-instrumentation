@@ -131,8 +131,6 @@ internal class TracerSettings : Settings
                 return TracesExporter.Otlp;
             case Constants.ConfigurationValues.Exporters.Zipkin:
                 return TracesExporter.Zipkin;
-            case Constants.ConfigurationValues.Exporters.Jaeger:
-                return TracesExporter.Jaeger;
             case Constants.ConfigurationValues.None:
                 return TracesExporter.None;
             default:

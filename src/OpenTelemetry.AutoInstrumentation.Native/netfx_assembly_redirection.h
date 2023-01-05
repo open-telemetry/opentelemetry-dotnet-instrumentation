@@ -29,7 +29,6 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"OpenTelemetry.Api", {1, 0, 0, 0} },
         { L"OpenTelemetry.AutoInstrumentation", {0, 5, 1, 0} },
         { L"OpenTelemetry.Exporter.Console", {1, 0, 0, 0} },
-        { L"OpenTelemetry.Exporter.Jaeger", {1, 0, 0, 0} },
         { L"OpenTelemetry.Exporter.OpenTelemetryProtocol", {1, 0, 0, 0} },
         { L"OpenTelemetry.Exporter.Prometheus.HttpListener", {1, 0, 0, 0} },
         { L"OpenTelemetry.Exporter.Zipkin", {1, 0, 0, 0} },
