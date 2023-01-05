@@ -69,7 +69,6 @@ public class MyPlugin
 |------------------------------------------------------------------------------------------------|---------------------------------------------------|---------------|
 | OpenTelemetry.Exporter.ConsoleExporterOptions                                                  | OpenTelemetry.Exporter.Console                    | 1.4.0-rc.1    |
 | OpenTelemetry.Exporter.ZipkinExporterOptions                                                   | OpenTelemetry.Exporter.Zipkin                     | 1.4.0-rc.1    |
-| OpenTelemetry.Exporter.JaegerExporterOptions                                                   | OpenTelemetry.Exporter.Jaeger                     | 1.4.0-rc.1    |
 | OpenTelemetry.Exporter.OtlpExporterOptions                                                     | OpenTelemetry.Exporter.OpenTelemetryProtocol      | 1.4.0-rc.1    |
 | OpenTelemetry.Instrumentation.AspNet.AspNetInstrumentationOptions                              | OpenTelemetry.Instrumentation.AspNet              | 1.0.0-rc9.7   |
 | OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentationOptions                      | OpenTelemetry.Instrumentation.AspNetCore          | 1.0.0-rc9.10  |

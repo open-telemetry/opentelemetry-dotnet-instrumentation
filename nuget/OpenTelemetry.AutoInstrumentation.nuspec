@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>OpenTelemetry.AutoInstrumentation</id>
-    <version>0.5.1-beta.2</version>
+    <version>0.5.1-beta.3</version>
     <description>OpenTelemetry Auto-Instrumentation</description>
     <authors>OpenTelemetry Authors</authors>
     <owners>OpenTelemetry Authors</owners>
@@ -16,7 +16,6 @@
         <dependency id="OpenTelemetry" version="1.4.0-rc.1" />
         <dependency id="OpenTelemetry.Api" version="1.4.0-rc.1" />
         <dependency id="OpenTelemetry.Exporter.Console" version="1.4.0-rc.1" />
-        <dependency id="OpenTelemetry.Exporter.Jaeger" version="1.4.0-rc.1" />
         <dependency id="OpenTelemetry.Exporter.OpenTelemetryProtocol" version="1.4.0-rc.1" />
         <dependency id="OpenTelemetry.Exporter.Prometheus.HttpListener" version="1.4.0-rc.1" />
         <dependency id="OpenTelemetry.Exporter.Zipkin" version="1.4.0-rc.1" />
@@ -35,7 +34,6 @@
         <dependency id="OpenTelemetry" version="1.4.0-rc.1" />
         <dependency id="OpenTelemetry.Api" version="1.4.0-rc.1" />
         <dependency id="OpenTelemetry.Exporter.Console" version="1.4.0-rc.1" />
-        <dependency id="OpenTelemetry.Exporter.Jaeger" version="1.4.0-rc.1" />
         <dependency id="OpenTelemetry.Exporter.OpenTelemetryProtocol" version="1.4.0-rc.1" />
         <dependency id="OpenTelemetry.Exporter.Prometheus.HttpListener" version="1.4.0-rc.1" />
         <dependency id="OpenTelemetry.Exporter.Zipkin" version="1.4.0-rc.1" />

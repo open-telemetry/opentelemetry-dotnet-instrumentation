@@ -32,11 +32,6 @@ internal enum TracesExporter
     Otlp,
 
     /// <summary>
-    /// Jaeger exporter.
-    /// </summary>
-    Jaeger,
-
-    /// <summary>
     /// Zipkin exporter.
     /// </summary>
     Zipkin,
