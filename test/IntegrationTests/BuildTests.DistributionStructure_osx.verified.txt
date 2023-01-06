@@ -1,7 +1,7 @@
 ﻿[
   /AdditionalDeps/shared/Microsoft.NETCore.App/6.0.0/OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
   /AdditionalDeps/shared/Microsoft.NETCore.App/7.0.0/OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
-  /OpenTelemetry.AutoInstrumentation.Native.dylib,
+  /osx-64/OpenTelemetry.AutoInstrumentation.Native.dylib,
   /instrument.sh,
   /integrations.json,
   /net/Google.Protobuf.dll,
