@@ -3,13 +3,13 @@
 case "$(uname -s | tr '[:upper:]' '[:lower:]')" in
   linux*)
     if [ "$(ldd /bin/ls | grep -m1 'musl')" ]; then
-      CLRDIRNAME="linux-musl"
+      DOTNET_RUNTIME_ID="linux-musl"
     else
-      CLRDIRNAME="linux-x64"
+      DOTNET_RUNTIME_ID="linux-x64"
     fi
     ;;
   darwin*)
-    CLRDIRNAME="osx-x64"
+    DOTNET_RUNTIME_ID="osx-x64"
     ;;
 esac
 
@@ -60,7 +60,7 @@ fi
 # Enable .NET Core Profiling API
 export CORECLR_ENABLE_PROFILING="${ENABLE_PROFILING}"
 export CORECLR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
-export CORECLR_PROFILER_PATH="${CURDIR}/bin/tracer-home/$CLRDIRNAME/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
+export CORECLR_PROFILER_PATH="${CURDIR}/bin/tracer-home/$DOTNET_RUNTIME_ID/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
 if [ "$OS" == "windows" ]
 then
     # Set paths for both bitness on Windows, see https://docs.microsoft.com/en-us/dotnet/core/run-time-config/debugging-profiling#profiler-location
