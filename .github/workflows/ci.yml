@@ -101,14 +101,14 @@ jobs:
     - name: Build in Docker container
       run: |
         set -e
-        docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
+        docker build -t mybuildimage -e OS_TYPE=linux-musl -f "./docker/${{ matrix.base-image }}.dockerfile" .
         docker run --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
           ./build.sh Workflow --containers none
     - name: Test the Shell scripts from README.md in Docker container
       run: |
         set -e
         docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
-        docker run --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project --rm mybuildimage /bin/sh -c '
+        docker run -e OS_TYPE=linux-musl --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project --rm mybuildimage /bin/sh -c '
           set -e
           dotnet publish -f net7.0 -c Release ./test/test-applications/integrations/TestApplication.Smoke
           export OTEL_DOTNET_AUTO_HOME="${PWD}/bin/tracer-home"

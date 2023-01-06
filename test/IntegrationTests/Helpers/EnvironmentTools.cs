@@ -116,4 +116,30 @@ public static class EnvironmentTools
         return "Release";
 #endif
     }
+
+    public static string? GetClrProfilerDirectoryName()
+    {
+        string? clrProfilerDirectoryName = Environment.GetEnvironmentVariable("OS_TYPE") switch
+        {
+            "windows" => "win",
+            "linux-glibc" => "linux",
+            "linux-musl" => "linux-musl",
+            "macos" => "osx",
+            _ => null
+        };
+
+        // If OS_TYPE is null, then fallback to default value.
+        if (clrProfilerDirectoryName == null)
+        {
+            clrProfilerDirectoryName = EnvironmentTools.GetOS() switch
+            {
+                "win" => "win",
+                "linux" => "linux",
+                "osx" => "osx",
+                _ => null
+            };
+        }
+
+        return clrProfilerDirectoryName;
+    }
 }

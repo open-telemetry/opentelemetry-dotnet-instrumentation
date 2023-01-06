@@ -1,3 +1,4 @@
+using System;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Serilog;
@@ -38,10 +39,17 @@ partial class Build
         .Executes(() =>
         {
             // Copy Native file
-            CopyFileToDirectory(
-                NativeProfilerProject.Directory / "build" / "bin" / $"{NativeProfilerProject.Name}.so",
-                TracerHomeDirectory,
-                FileExistsPolicy.Overwrite);
+            var source = NativeProfilerProject.Directory / "build" / "bin" / $"{NativeProfilerProject.Name}.so";          
+            string clrProfilerDirectoryName = Environment.GetEnvironmentVariable("OS_TYPE") switch
+            {
+                "linux-musl" => "linux-musl-x64",
+                _ => "linux-x64"
+            };
+
+            var dest = TracerHomeDirectory / clrProfilerDirectoryName;
+            Log.Information($"Copying '{source}' to '{dest}'");
+
+            CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
         });
 
     Target RunNativeTestsLinux => _ => _
