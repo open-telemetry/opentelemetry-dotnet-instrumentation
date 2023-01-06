@@ -100,14 +100,14 @@ partial class Build
         .OnlyWhenStatic(() => IsWin && Containers == ContainersWindows)
         .Executes(() =>
         {
-            var aspNetProject = TestsDirectory / "test-applications" / "integrations" / "TestApplication.AspNet" / "TestApplication.AspNet.csproj";
+            var aspNetProject = Solution.GetProject(Projects.Tests.Applications.AspNet);
 
             MSBuild(x => x
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatform(Platform)
                 .SetProperty("DeployOnBuild", true)
                 .SetMaxCpuCount(null)
-                    .SetProperty("PublishProfile", aspNetProject.Parent / "Properties" / "PublishProfiles" / $"FolderProfile.{BuildConfiguration}.pubxml")
+                    .SetProperty("PublishProfile", aspNetProject.Directory / "Properties" / "PublishProfiles" / $"FolderProfile.{BuildConfiguration}.pubxml")
                     .SetTargetPath(aspNetProject));
 
             DockerBuild(x => x
@@ -115,7 +115,7 @@ partial class Build
                 .SetBuildArg($"configuration={BuildConfiguration}", $"windowscontainer_version={WindowsContainerVersion}")
                 .SetRm(true)
                 .SetTag(Path.GetFileNameWithoutExtension(aspNetProject).Replace(".", "-").ToLowerInvariant())
-                .SetProcessWorkingDirectory(aspNetProject.Parent)
+                .SetProcessWorkingDirectory(aspNetProject.Directory)
             );
         });
 
