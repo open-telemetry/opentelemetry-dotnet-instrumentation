@@ -13,7 +13,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   in `tracer-home` for Linux glibc, `OpenTelemetry.AutoInstrumentation.Native.so`
   to `linux-musl-x64` for Linux musl and
   `OpenTelemetry.AutoInstrumentation.Native.dylib`
-  to `osx-64` for MacOS.
+  to `osx-x64` for MacOS.
 
 ### Changed
 
