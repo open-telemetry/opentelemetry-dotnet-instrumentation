@@ -49,7 +49,7 @@
   /net/System.Security.Permissions.dll,
   /net/System.ServiceModel.Primitives.dll,
   /net/System.ServiceModel.dll,
-  /osx-64/OpenTelemetry.AutoInstrumentation.Native.dylib,
+  /osx-x64/OpenTelemetry.AutoInstrumentation.Native.dylib,
   /store/x64/net6.0/artifact.xml,
   /store/x64/net6.0/dnsclient/1.4.0/lib/netstandard2.1/DnsClient.dll,
   /store/x64/net6.0/microsoft.extensions.configuration.abstractions/7.0.0/lib/net6.0/Microsoft.Extensions.Configuration.Abstractions.dll,
