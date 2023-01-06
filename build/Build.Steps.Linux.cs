@@ -39,7 +39,7 @@ partial class Build
         .Executes(() =>
         {
             // Copy Native file
-            var source = NativeProfilerProject.Directory / "build" / "bin" / $"{NativeProfilerProject.Name}.so";          
+            var source = NativeProfilerProject.Directory / "build" / "bin" / $"{NativeProfilerProject.Name}.so";
             string clrProfilerDirectoryName = Environment.GetEnvironmentVariable("OS_TYPE") switch
             {
                 "linux-musl" => "linux-musl-x64",
