@@ -76,7 +76,6 @@ partial class Build
                 DotNetRestore(s => s
                     .SetProjectFile(Solution)
                     .SetVerbosity(DotNetVerbosity.Normal)
-                    // .SetTargetPlatform(Platform) // necessary to ensure we restore every project
                     .SetProperty("configuration", BuildConfiguration.ToString())
                     .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
                         o.SetPackageDirectory(NugetPackageDirectory)));
@@ -103,7 +102,6 @@ partial class Build
                     DotNetRestore(s => s
                         .SetProjectFile(project)
                         .SetVerbosity(DotNetVerbosity.Normal)
-                        // .SetTargetPlatform(Platform) // necessary to ensure we restore every project
                         .SetProperty("configuration", BuildConfiguration.ToString())
                         .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
                             o.SetPackageDirectory(NugetPackageDirectory)));
