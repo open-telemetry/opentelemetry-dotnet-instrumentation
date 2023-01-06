@@ -101,8 +101,8 @@ jobs:
     - name: Build in Docker container
       run: |
         set -e
-        docker build -t mybuildimage -e OS_TYPE=linux-musl -f "./docker/${{ matrix.base-image }}.dockerfile" .
-        docker run --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
+        docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
+        docker run -e OS_TYPE=linux-musl --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
           ./build.sh Workflow --containers none
     - name: Test the Shell scripts from README.md in Docker container
       run: |
