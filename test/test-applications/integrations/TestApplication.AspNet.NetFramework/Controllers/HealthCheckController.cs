@@ -1,4 +1,4 @@
-// <copyright file="HomeController.cs" company="OpenTelemetry Authors">
+// <copyright file="HealthCheckController.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,28 +14,14 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Web.Mvc;
-using TestApplication.AspNet.Helpers;
-using TestApplication.Shared;
 
-namespace TestApplication.AspNet.Controllers;
+namespace TestApplication.AspNet.NetFramework.Controllers;
 
-public class HomeController : Controller
+public class HealthCheckController : Controller
 {
     public ActionResult Index()
     {
-        var envVars = ProfilerHelper.GetEnvironmentConfiguration();
-
-        ViewBag.EnvVars = envVars;
-        ViewBag.HasEnvVars = envVars.Any();
-        ViewBag.TracerAssemblies = AssembliesHelper.GetLoadedTracesAssemblies();
-        ViewBag.AllAssemblies = AssembliesHelper.GetLoadedAssemblies();
-
-        return View();
+        return new HttpStatusCodeResult(200);
     }
 }
