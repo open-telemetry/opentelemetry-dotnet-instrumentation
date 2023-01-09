@@ -36,7 +36,7 @@ jobs:
           install: localdb
       - run: ./build.cmd Workflow --containers ${{ matrix.containers }}
       - name: Upload logs
-        uses: actions/upload-artifact@v3.1.1
+        uses: actions/upload-artifact@v3.1.2
         if: always()
         with:
           name: logs-${{ matrix.machine }}
@@ -72,7 +72,7 @@ jobs:
           if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
           if (Test-Path $log_path) { throw "Log file exists. Instrumentation unregister failed." }
       - name: Upload binaries
-        uses: actions/upload-artifact@v3.1.1
+        uses: actions/upload-artifact@v3.1.2
         if: always()
         with:
           name: bin-${{ matrix.machine }}
@@ -117,7 +117,7 @@ jobs:
             test "$(ls -A /var/log/opentelemetry/dotnet )"
         '
     - name: Publish Linux build
-      uses: actions/upload-artifact@v3.1.1
+      uses: actions/upload-artifact@v3.1.2
       with:
         name: bin-${{ matrix.base-image }}
         path: bin/tracer-home
@@ -155,7 +155,7 @@ jobs:
         working-directory: nuget
 
       - name: Upload Nuget
-        uses: actions/upload-artifact@v3.1.1
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: OpenTelemetry.AutoInstrumentation.Nuget
           path: nuget/*.nupkg
