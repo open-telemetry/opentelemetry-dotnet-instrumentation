@@ -1,9 +1,9 @@
 ﻿[
   /AdditionalDeps/shared/Microsoft.NETCore.App/6.0.0/OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
   /AdditionalDeps/shared/Microsoft.NETCore.App/7.0.0/OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
-  /OpenTelemetry.AutoInstrumentation.Native.so,
   /instrument.sh,
   /integrations.json,
+  /linux-x64/OpenTelemetry.AutoInstrumentation.Native.so,
   /net/Google.Protobuf.dll,
   /net/Grpc.Core.Api.dll,
   /net/Grpc.Net.Client.dll,

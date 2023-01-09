@@ -137,9 +137,7 @@ public class EnvironmentHelper
 
         string fileName = $"OpenTelemetry.AutoInstrumentation.Native.{extension}";
         string nukeOutput = GetNukeBuildOutput();
-        string profilerPath = EnvironmentTools.IsWindows()
-            ? Path.Combine(nukeOutput, $"win-{EnvironmentTools.GetPlatform().ToLower()}", fileName)
-            : Path.Combine(nukeOutput, fileName);
+        string profilerPath = Path.Combine(nukeOutput, $"{EnvironmentTools.GetClrProfilerDirectoryName()}-{EnvironmentTools.GetPlatform().ToLower()}", fileName);
 
         if (File.Exists(profilerPath))
         {

@@ -9,6 +9,12 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Move `OpenTelemetry.AutoInstrumentation.Native.so` to `linux-x64` directory
+  in `tracer-home` for Linux glibc, `OpenTelemetry.AutoInstrumentation.Native.so`
+  to `linux-musl-x64` for Linux musl and
+  `OpenTelemetry.AutoInstrumentation.Native.dylib`
+  to `osx-x64` for MacOS.
+
 ### Changed
 
 ### Deprecated

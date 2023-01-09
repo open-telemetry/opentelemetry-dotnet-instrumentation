@@ -21,7 +21,16 @@ fi
 
 # validate input
 case "$OS_TYPE" in
-  "linux-glibc"|"linux-musl"|"macos"|"windows")
+  "linux-glibc")
+    DOTNET_RUNTIME_ID="linux-x64"
+    ;;
+  "linux-musl")
+    DOTNET_RUNTIME_ID="linux-musl-x64"
+    ;;
+  "macos")
+    DOTNET_RUNTIME_ID="osx-x64"
+    ;;
+  "windows")
     ;;
   *)
     echo "Set the operating system type using the OS_TYPE environment variable. Supported values: linux-glibc, linux-musl, macos, windows." >&2
@@ -136,7 +145,7 @@ if [ "$ENABLE_PROFILING" = "true" ]; then
     export CORECLR_PROFILER_PATH_64="$OTEL_DOTNET_AUTO_HOME/win-x64/OpenTelemetry.AutoInstrumentation.Native.$SUFIX"
     export CORECLR_PROFILER_PATH_32="$OTEL_DOTNET_AUTO_HOME/win-x86/OpenTelemetry.AutoInstrumentation.Native.$SUFIX"
   else
-    export CORECLR_PROFILER_PATH="$OTEL_DOTNET_AUTO_HOME/OpenTelemetry.AutoInstrumentation.Native.$SUFIX"
+    export CORECLR_PROFILER_PATH="$OTEL_DOTNET_AUTO_HOME/$DOTNET_RUNTIME_ID/OpenTelemetry.AutoInstrumentation.Native.$SUFIX"
   fi
 
   # Configure the bytecode instrumentation configuration file
