@@ -70,7 +70,6 @@ partial class Build
         .Unlisted()
         .Executes(() => ControlFlow.ExecuteWithRetry(() =>
         {
-
             if (IsWin)
             {
                 DotNetRestore(s => s

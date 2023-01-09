@@ -78,14 +78,14 @@ public static class ProjectsHelper
     {
         return solution
             .GetTestApplications()
-            .Where(x => x.Name.Contains("AspNet") || x.Name.EndsWith(NetFrameworkMarker));
+            .Where(x => x.Name.EndsWith(NetFrameworkMarker));
     }
 
     public static IEnumerable<Project> GetCrossPlatformTestApplications(this Solution solution)
     {
         return solution
             .GetTestApplications()
-            .Where(x => !x.Name.Contains("AspNet") && !x.Name.EndsWith(NetFrameworkMarker));
+            .Where(x => !x.Name.EndsWith(NetFrameworkMarker));
     }
 
     public static Project GetNativeTestProject(this Solution solution)

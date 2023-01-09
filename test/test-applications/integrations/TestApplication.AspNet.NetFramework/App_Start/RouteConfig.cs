@@ -1,4 +1,4 @@
-// <copyright file="HealthCheckController.cs" company="OpenTelemetry Authors">
+// <copyright file="RouteConfig.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,24 @@
 // </copyright>
 
 using System.Web.Mvc;
+using System.Web.Routing;
 
-namespace TestApplication.AspNet.Controllers;
+namespace TestApplication.AspNet.NetFramework;
 
-public class HealthCheckController : Controller
+public class RouteConfig
 {
-    public ActionResult Index()
+    public static void RegisterRoutes(RouteCollection routes)
     {
-        return new HttpStatusCodeResult(200);
+        routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+
+        routes.MapRoute(
+            name: "HealthCheck",
+            url: "healthz",
+            defaults: new { controller = "HealthCheck", action = "Index" });
+
+        routes.MapRoute(
+            name: "Default",
+            url: "{controller}/{action}/{id}",
+            defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional });
     }
 }

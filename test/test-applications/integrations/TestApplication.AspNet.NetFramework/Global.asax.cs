@@ -16,7 +16,7 @@
 
 using System.Web.Routing;
 
-namespace TestApplication.AspNet;
+namespace TestApplication.AspNet.NetFramework;
 
 public class MvcApplication : System.Web.HttpApplication
 {

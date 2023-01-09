@@ -1,4 +1,4 @@
-// <copyright file="RouteConfig.cs" company="OpenTelemetry Authors">
+// <copyright file="HomeController.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,25 +14,24 @@
 // limitations under the License.
 // </copyright>
 
+using System.Linq;
 using System.Web.Mvc;
-using System.Web.Routing;
+using TestApplication.AspNet.NetFramework.Helpers;
+using TestApplication.Shared;
 
-namespace TestApplication.AspNet;
+namespace TestApplication.AspNet.NetFramework.Controllers;
 
-public class RouteConfig
+public class HomeController : Controller
 {
-    public static void RegisterRoutes(RouteCollection routes)
+    public ActionResult Index()
     {
-        routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+        var envVars = ProfilerHelper.GetEnvironmentConfiguration();
 
-        routes.MapRoute(
-            name: "HealthCheck",
-            url: "healthz",
-            defaults: new { controller = "HealthCheck", action = "Index" });
+        ViewBag.EnvVars = envVars;
+        ViewBag.HasEnvVars = envVars.Any();
+        ViewBag.TracerAssemblies = AssembliesHelper.GetLoadedTracesAssemblies();
+        ViewBag.AllAssemblies = AssembliesHelper.GetLoadedAssemblies();
 
-        routes.MapRoute(
-            name: "Default",
-            url: "{controller}/{action}/{id}",
-            defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional });
+        return View();
     }
 }

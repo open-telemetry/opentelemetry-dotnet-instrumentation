@@ -79,8 +79,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mocks", "mocks", "{E3ABDF7D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Mock", "test\test-applications\mocks\OpenTelemetry.AutoInstrumentation.Mock\OpenTelemetry.AutoInstrumentation.Mock.csproj", "{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.AspNet", "test\test-applications\integrations\TestApplication.AspNet\TestApplication.AspNet.csproj", "{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests", "test\OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests\OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests.csproj", "{35AB65D8-D76E-40C6-B10C-501A6D44C9E0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.StartupHook", "src\OpenTelemetry.AutoInstrumentation.StartupHook\OpenTelemetry.AutoInstrumentation.StartupHook.csproj", "{E04DA938-E153-4A0D-9CB0-EAC38210FAF2}"
@@ -145,7 +143,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples.AspNetCoreMvc", "e
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.NServiceBus", "test\test-applications\integrations\TestApplication.NServiceBus\TestApplication.NServiceBus.csproj", "{4DCB389E-0499-4104-9991-CCA021667D7A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Elasticsearch", "test\test-applications\integrations\TestApplication.Elasticsearch\TestApplication.Elasticsearch.csproj", "{E1E55FB4-FCFF-4231-9CE7-C6671A3F5421}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Elasticsearch", "test\test-applications\integrations\TestApplication.Elasticsearch\TestApplication.Elasticsearch.csproj", "{E1E55FB4-FCFF-4231-9CE7-C6671A3F5421}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.AspNet.NetFramework", "test\test-applications\integrations\TestApplication.AspNet.NetFramework\TestApplication.AspNet.NetFramework.csproj", "{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -295,18 +295,6 @@ Global
 		{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}.Release|x64.Build.0 = Release|Any CPU
 		{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}.Release|x86.ActiveCfg = Release|Any CPU
 		{CF5EFBA1-A852-4D11-968D-CE6A9A46B299}.Release|x86.Build.0 = Release|Any CPU
-		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Debug|Any CPU.Build.0 = Debug|x64
-		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Debug|x64.ActiveCfg = Debug|x64
-		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Debug|x64.Build.0 = Debug|x64
-		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Debug|x86.ActiveCfg = Debug|x86
-		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Debug|x86.Build.0 = Debug|x86
-		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Release|Any CPU.ActiveCfg = Release|x64
-		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Release|Any CPU.Build.0 = Release|x64
-		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Release|x64.ActiveCfg = Release|x64
-		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Release|x64.Build.0 = Release|x64
-		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Release|x86.ActiveCfg = Release|x86
-		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Release|x86.Build.0 = Release|x86
 		{35AB65D8-D76E-40C6-B10C-501A6D44C9E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{35AB65D8-D76E-40C6-B10C-501A6D44C9E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35AB65D8-D76E-40C6-B10C-501A6D44C9E0}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -691,6 +679,18 @@ Global
 		{E1E55FB4-FCFF-4231-9CE7-C6671A3F5421}.Release|x64.Build.0 = Release|x64
 		{E1E55FB4-FCFF-4231-9CE7-C6671A3F5421}.Release|x86.ActiveCfg = Release|x86
 		{E1E55FB4-FCFF-4231-9CE7-C6671A3F5421}.Release|x86.Build.0 = Release|x86
+		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Debug|x64.ActiveCfg = Debug|x64
+		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Debug|x64.Build.0 = Debug|x64
+		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Debug|x86.ActiveCfg = Debug|x86
+		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Debug|x86.Build.0 = Debug|x86
+		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Release|x64.ActiveCfg = Release|x64
+		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Release|x64.Build.0 = Release|x64
+		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Release|x86.ActiveCfg = Release|x86
+		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -712,7 +712,6 @@ Global
 		{735434B9-6555-4DEE-97FC-786C763CA1F1} = {5C915382-C886-457D-8641-9E766D8E5A17}
 		{E3ABDF7D-4592-4923-907C-D351DDF1CBE9} = {91A299AD-6C09-4B7F-BD8B-A705D9BFC672}
 		{CF5EFBA1-A852-4D11-968D-CE6A9A46B299} = {E3ABDF7D-4592-4923-907C-D351DDF1CBE9}
-		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{35AB65D8-D76E-40C6-B10C-501A6D44C9E0} = {5C915382-C886-457D-8641-9E766D8E5A17}
 		{E04DA938-E153-4A0D-9CB0-EAC38210FAF2} = {9E5F0022-0A50-40BF-AC6A-C3078585ECAB}
 		{FF665CC4-6643-4614-A1A0-FA182E3AF37C} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
@@ -745,6 +744,7 @@ Global
 		{ACEB118B-767E-459F-AFD3-A52ED4ED08C6} = {BAF8F246-3645-42AD-B1D0-0F7EAFBAB34A}
 		{4DCB389E-0499-4104-9991-CCA021667D7A} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{E1E55FB4-FCFF-4231-9CE7-C6671A3F5421} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
+		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}

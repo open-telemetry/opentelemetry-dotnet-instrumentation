@@ -17,7 +17,7 @@ public static class Projects
 
         public static class Applications
         {
-            public const string AspNet = "TestApplication.AspNet";
+            public const string AspNet = "TestApplication.AspNet.NetFramework";
         }
     }
 
