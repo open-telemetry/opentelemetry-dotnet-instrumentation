@@ -71,8 +71,6 @@ const WSTRING managed_profiler_full_assembly_version_strong_name =
 
 const WSTRING nonwindows_nativemethods_type = WStr("OpenTelemetry.AutoInstrumentation.NativeMethods+NonWindows");
 
-const WSTRING calltarget_modification_action = WStr("CallTargetModification");
-
 } // namespace trace
 
 #endif // OTEL_PROFILER_CONSTANTS_H

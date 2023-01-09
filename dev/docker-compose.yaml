@@ -11,12 +11,10 @@ services:
     ports:
       - "4317:4317"   # OTLP gRPC receiver
       - "4318:4318"   # OTLP HTTP/protobuf receiver
-      - "6831:6831"   # Jaeger UDP/thrift-compact receiver
       - "8888:8888"   # Prometheus metrics scrape endpoint with collector telemetry
       - "8889:8889"   # Prometheus metrics exporter (scrape endpoint)
       - "9411:9411"   # Zipkin receiver
       - "13133:13133" # health_check extension
-      - "14268:14268" # Jaeger HTTP/thrift-binary receiver
       - "55679:55679" # ZPages extension
     depends_on:
       - jaeger

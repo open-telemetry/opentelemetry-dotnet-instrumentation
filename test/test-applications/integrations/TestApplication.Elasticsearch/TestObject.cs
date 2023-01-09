@@ -1,4 +1,4 @@
-// <copyright file="TracesExporter.cs" company="OpenTelemetry Authors">
+// <copyright file="TestObject.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,25 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-namespace OpenTelemetry.AutoInstrumentation.Configuration;
-
-/// <summary>
-/// Enum representing supported trace exporters.
-/// </summary>
-internal enum TracesExporter
+public class TestObject
 {
-    /// <summary>
-    /// None exporter.
-    /// </summary>
-    None,
-
-    /// <summary>
-    /// OTLP exporter.
-    /// </summary>
-    Otlp,
-
-    /// <summary>
-    /// Zipkin exporter.
-    /// </summary>
-    Zipkin,
+    public int Id { get; set; }
 }

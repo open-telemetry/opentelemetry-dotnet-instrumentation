@@ -43,7 +43,7 @@ submit an issue to request its inclusion.
 | [Microsoft.Data.SqlLite](https://docs.microsoft.com/dotnet/standard/data/sqlite/?tabs=netcore-cli) | | | | |
 | [MongoDB.Driver](https://www.nuget.org/packages/mongodb.driver) | Partial[^not_on_framework] | | [MongoDB](https://www.mongodb.com/docs/) | |
 | [StackExchange.Redis](https://stackexchange.github.io/StackExchange.Redis/) | Partial[^not_on_framework] | | | |
-| [Elasticsearch-net](https://github.com/elastic/elasticsearch-net) | | | | We should be able to use [OpenTelemetry.Instrumentation.ElasticsearchClient](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/tree/main/src/OpenTelemetry.Instrumentation.ElasticsearchClient). |
+| [Elasticsearch-net](https://github.com/elastic/elasticsearch-net) | Yes | | | 8.0.0+ only. Older versions do not have native OpenTelemetry support. |
 | [Oracle.ManagedDataAccess.Core](https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core) | | | | |
 | [Oracle.ManagedDataAccess](https://www.nuget.org/packages/Oracle.ManagedDataAccess) | | | | |
 | [AWSSDK.DynamoDBv2](https://www.nuget.org/packages/AWSSDK.DynamoDBv2) | | | | |

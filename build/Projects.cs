@@ -13,6 +13,12 @@ public static class Projects
         public const string AutoInstrumentationLoaderTests = "OpenTelemetry.AutoInstrumentation.Loader.Tests";
         public const string AutoInstrumentationBootstrappingTests = "OpenTelemetry.AutoInstrumentation.Bootstrapping.Tests";
         public const string AutoInstrumentationTests = "OpenTelemetry.AutoInstrumentation.Tests";
+        public const string IntegrationTests = "IntegrationTests";
+
+        public static class Applications
+        {
+            public const string AspNet = "TestApplication.AspNet";
+        }
     }
 
     public static class Mocks

@@ -25,15 +25,17 @@ partial class Build
                 ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
                 : new[] { MSBuildTargetPlatform.x86 };
 
-            // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
-            MSBuild(s => s
-                .SetTargetPath(MsBuildProject)
-                .SetConfiguration(BuildConfiguration)
-                .SetTargets("BuildCpp")
-                .DisableRestore()
-                .SetMaxCpuCount(null)
-                .CombineWith(platforms, (m, platform) => m
-                    .SetTargetPlatform(platform)));
+            foreach (var project in Solution.GetNativeSrcProjects())
+            {
+                // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
+                MSBuild(s => s
+                    .SetTargetPath(project)
+                    .SetConfiguration(BuildConfiguration)
+                    .DisableRestore()
+                    .SetMaxCpuCount(null)
+                    .CombineWith(platforms, (m, platform) => m
+                        .SetTargetPlatform(platform)));
+            }
         });
 
     Target CompileNativeTestsWindows => _ => _
@@ -50,9 +52,8 @@ partial class Build
 
             // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
             MSBuild(s => s
-                .SetTargetPath(MsBuildProject)
+                .SetTargetPath(Solution.GetNativeTestProject())
                 .SetConfiguration(BuildConfiguration)
-                .SetTargets("BuildCppTests")
                 .DisableRestore()
                 .SetMaxCpuCount(null)
                 .CombineWith(platforms, (m, platform) => m
@@ -99,14 +100,14 @@ partial class Build
         .OnlyWhenStatic(() => IsWin && Containers == ContainersWindows)
         .Executes(() =>
         {
-            var aspNetProject = TestsDirectory / "test-applications" / "integrations" / "TestApplication.AspNet" / "TestApplication.AspNet.csproj";
+            var aspNetProject = Solution.GetProject(Projects.Tests.Applications.AspNet);
 
             MSBuild(x => x
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatform(Platform)
                 .SetProperty("DeployOnBuild", true)
                 .SetMaxCpuCount(null)
-                    .SetProperty("PublishProfile", aspNetProject.Parent / "Properties" / "PublishProfiles" / $"FolderProfile.{BuildConfiguration}.pubxml")
+                    .SetProperty("PublishProfile", aspNetProject.Directory / "Properties" / "PublishProfiles" / $"FolderProfile.{BuildConfiguration}.pubxml")
                     .SetTargetPath(aspNetProject));
 
             DockerBuild(x => x
@@ -114,7 +115,7 @@ partial class Build
                 .SetBuildArg($"configuration={BuildConfiguration}", $"windowscontainer_version={WindowsContainerVersion}")
                 .SetRm(true)
                 .SetTag(Path.GetFileNameWithoutExtension(aspNetProject).Replace(".", "-").ToLowerInvariant())
-                .SetProcessWorkingDirectory(aspNetProject.Parent)
+                .SetProcessWorkingDirectory(aspNetProject.Directory)
             );
         });
 

@@ -5,7 +5,27 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.5.1-beta.2...HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.5.1-beta.3...HEAD)
+
+### Added
+
+- Move `OpenTelemetry.AutoInstrumentation.Native.so` to `linux-x64` directory
+  in `tracer-home` for Linux glibc, `OpenTelemetry.AutoInstrumentation.Native.so`
+  to `linux-musl-x64` for Linux musl and
+  `OpenTelemetry.AutoInstrumentation.Native.dylib`
+  to `osx-x64` for MacOS.
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.5.1-beta.3](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.5.1-beta.3)
 
 This beta release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
@@ -16,6 +36,7 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
 ### Added
 
 - Add support for NServiceBus metrics and traces instrumentations.
+- Add support for Elasticsearch traces instrumentations.
 - Add plugin support for
  `ConfigureTracesOptions(StackExchangeRedisCallsInstrumentationOptions options)`.
 - Add plugin support for
@@ -30,15 +51,13 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
   [`1.4.0-rc.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-rc.1)
 
-### Deprecated
-
 ### Removed
+
+- Remove support for Jaeger exporter.
 
 ### Fixed
 
-- Fix WCF instrumenation on .NET Framework.
-
-### Security
+- Fix WCF instrumentation on .NET Framework.
 
 ## [0.5.1-beta.2](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.5.1-beta.2)
 

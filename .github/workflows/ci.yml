@@ -23,7 +23,7 @@ jobs:
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/checkout@v3.2.0
+      - uses: actions/checkout@v3.3.0
       - uses: actions/setup-dotnet@v3.0.3
         with:
           dotnet-version: | 
@@ -130,18 +130,18 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 60
     steps:
-    - uses: actions/checkout@v3.2.0
+    - uses: actions/checkout@v3.3.0
     - name: Build in Docker container
       run: |
         set -e
         docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
-        docker run --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
+        docker run -e OS_TYPE=linux-musl --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
           ./build.sh Workflow --containers none
     - name: Test the Shell scripts from README.md in Docker container
       run: |
         set -e
         docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
-        docker run --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project --rm mybuildimage /bin/sh -c '
+        docker run -e OS_TYPE=linux-musl --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project --rm mybuildimage /bin/sh -c '
           set -e
           dotnet publish -f net7.0 -c Release ./test/test-applications/integrations/TestApplication.Smoke
           export OTEL_DOTNET_AUTO_HOME="${PWD}/bin/tracer-home"
@@ -162,23 +162,23 @@ jobs:
 
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3.2.0
+      - uses: actions/checkout@v3.3.0
       - uses: nuget/setup-nuget@v1.1.1
 
       - name: Download Windows Artifacts from build job
-        uses: actions/download-artifact@v3.0.1
+        uses: actions/download-artifact@v3.0.2
         with:
           name: bin-windows-2022
           path: nuget/bin-windows
 
       - name: Download Ubuntu Artifacts from build job
-        uses: actions/download-artifact@v3.0.1
+        uses: actions/download-artifact@v3.0.2
         with:
           name: bin-ubuntu-20.04
           path: nuget/bin-linux-glibc 
 
       - name: Download Mac-OS Artifacts from build job
-        uses: actions/download-artifact@v3.0.1
+        uses: actions/download-artifact@v3.0.2
         with:
           name: bin-macos-11
           path: nuget/bin-macos

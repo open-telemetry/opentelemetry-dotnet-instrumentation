@@ -1,9 +1,9 @@
 ﻿[
   /AdditionalDeps/shared/Microsoft.NETCore.App/6.0.0/OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
   /AdditionalDeps/shared/Microsoft.NETCore.App/7.0.0/OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
-  /OpenTelemetry.AutoInstrumentation.Native.so,
   /instrument.sh,
   /integrations.json,
+  /linux-musl-x64/OpenTelemetry.AutoInstrumentation.Native.so,
   /net/Google.Protobuf.dll,
   /net/Grpc.Core.Api.dll,
   /net/Grpc.Net.Client.dll,
@@ -27,7 +27,6 @@
   /net/OpenTelemetry.AutoInstrumentation.pdb,
   /net/OpenTelemetry.AutoInstrumentation.xml,
   /net/OpenTelemetry.Exporter.Console.dll,
-  /net/OpenTelemetry.Exporter.Jaeger.dll,
   /net/OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs.dll,
   /net/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll,
   /net/OpenTelemetry.Exporter.Prometheus.HttpListener.dll,

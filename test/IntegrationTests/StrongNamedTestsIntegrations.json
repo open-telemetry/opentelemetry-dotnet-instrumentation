@@ -21,8 +21,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.Validations.StrongNamedValidation",
-          "action": "CallTargetModification"
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.Validations.StrongNamedValidation"
         }
       },
       {
@@ -43,8 +42,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.Validations.MissingInstrumentationType",
-          "action": "CallTargetModification"
+          "type": "OpenTelemetry.AutoInstrumentation.Instrumentations.Validations.MissingInstrumentationType"
         }
       },
       {
@@ -65,8 +63,7 @@
         },
         "wrapper": {
           "assembly": "OpenTelemetry.AutoInstrumentation",
-          "type": "OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute",
-          "action": "CallTargetModification"
+          "type": "OpenTelemetry.AutoInstrumentation.DuckTyping.DuckAttribute"
         }
       }
     ]

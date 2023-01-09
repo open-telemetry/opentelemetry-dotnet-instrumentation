@@ -2,7 +2,7 @@
 
 ## Description
 
-This is a demonstarative example that uses Docker Compose.
+This is a demonstrative example that uses Docker Compose.
 
 It consists of following services:
 
