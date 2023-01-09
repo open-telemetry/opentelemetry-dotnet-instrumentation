@@ -21,7 +21,6 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 partial class Build
 {
     [Solution("OpenTelemetry.AutoInstrumentation.sln")] readonly Solution Solution;
-    AbsolutePath MsBuildProject => RootDirectory / "OpenTelemetry.AutoInstrumentation.proj";
 
     AbsolutePath OutputDirectory => RootDirectory / "bin";
     AbsolutePath SourceDirectory => RootDirectory / "src";
@@ -74,21 +73,39 @@ partial class Build
 
             if (IsWin)
             {
-                NuGetTasks.NuGetRestore(s => s
-                    .SetTargetPath(Solution)
-                    .SetVerbosity(NuGetVerbosity.Normal)
-                    .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                        o.SetPackagesDirectory(NugetPackageDirectory)));
-            }
-            else
-            {
                 DotNetRestore(s => s
-                    .SetProjectFile(MsBuildProject)
+                    .SetProjectFile(Solution)
                     .SetVerbosity(DotNetVerbosity.Normal)
-                    // .SetTargetPlatform(Platform) // necessary to ensure we restore every project
                     .SetProperty("configuration", BuildConfiguration.ToString())
                     .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
                         o.SetPackageDirectory(NugetPackageDirectory)));
+
+                // Projects using `packages.config` can't be restored via "dotnet restore", use a NuGet Task to restore these projects.
+                var legacyRestoreProjects = Solution.GetNativeProjects()
+                    .Concat(new[] { Solution.GetProject(Projects.Tests.Applications.AspNet) });
+
+                foreach (var project in legacyRestoreProjects)
+                {
+                    // Restore legacy projects
+                    NuGetTasks.NuGetRestore(s => s
+                        .SetTargetPath(project)
+                        .SetSolutionDirectory(Solution.Directory)
+                        .SetVerbosity(NuGetVerbosity.Normal)
+                        .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
+                            o.SetPackagesDirectory(NugetPackageDirectory)));
+                }
+            }
+            else
+            {
+                foreach (var project in Solution.GetCrossPlatformManagedProjects())
+                {
+                    DotNetRestore(s => s
+                        .SetProjectFile(project)
+                        .SetVerbosity(DotNetVerbosity.Normal)
+                        .SetProperty("configuration", BuildConfiguration.ToString())
+                        .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
+                            o.SetPackageDirectory(NugetPackageDirectory)));
+                }
             }
         }));
 
@@ -98,14 +115,14 @@ partial class Build
         .After(Restore)
         .Executes(() =>
         {
-            // Always AnyCPU
-            DotNetMSBuild(x => x
-                .SetTargetPath(MsBuildProject)
-                .SetTargetPlatformAnyCPU()
-                .SetConfiguration(BuildConfiguration)
-                .DisableRestore()
-                .SetTargets("BuildCsharp")
-            );
+            foreach (var project in Solution.GetManagedSrcProjects())
+            {
+                // Always AnyCPU
+                DotNetBuild(x => x
+                    .SetProjectFile(project)
+                    .SetConfiguration(BuildConfiguration)
+                    .EnableNoRestore());
+            }
         });
 
     Target CompileManagedTests => _ => _
@@ -113,28 +130,29 @@ partial class Build
         .After(CompileManagedSrc)
         .Executes(() =>
         {
-            // Always AnyCPU
-            DotNetBuild(x => x
-                .SetProjectFile(Solution.GetProject(Projects.Tests.AutoInstrumentationLoaderTests))
-                .SetConfiguration(BuildConfiguration)
-                .SetNoRestore(true));
+            var testApps = Solution.GetCrossPlatformTestApplications();
+            if (IsWin)
+            {
+                testApps = testApps.Concat(Solution.GetWindowsOnlyTestApplications());
+            }
 
-            DotNetBuild(x => x
-                .SetProjectFile(Solution.GetProject(Projects.Tests.AutoInstrumentationBootstrappingTests))
-                .SetConfiguration(BuildConfiguration)
-                .SetNoRestore(true));
+            foreach (var app in testApps)
+            {
+                DotNetBuild(x => x
+                    .SetProjectFile(app)
+                    .SetConfiguration(BuildConfiguration)
+                    .SetPlatform(Platform)
+                    .SetNoRestore(true));
+            }
 
-            DotNetBuild(x => x
-                .SetProjectFile(Solution.GetProject(Projects.Tests.AutoInstrumentationTests))
-                .SetConfiguration(BuildConfiguration)
-                .SetNoRestore(true));
-
-            DotNetMSBuild(x => x
-                .SetTargetPath(MsBuildProject)
-                .SetPlatform(Platform)
-                .SetConfiguration(BuildConfiguration)
-                .DisableRestore()
-                .SetTargets("BuildCsharpTest"));
+            foreach (var project in Solution.GetManagedTestProjects())
+            {
+                // Always AnyCPU
+                DotNetBuild(x => x
+                    .SetProjectFile(project)
+                    .SetConfiguration(BuildConfiguration)
+                    .SetNoRestore(true));
+            }
         });
 
     Target CompileNativeSrc => _ => _
@@ -267,7 +285,7 @@ partial class Build
                 : TargetFrameworks.ExceptNetFramework();
 
             DotNetPublish(s => s
-                .SetProject(Solution.GetProject(Projects.Mocks.AutoInstrumentationMock))
+                .SetProject(Solution.GetTestMock())
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
@@ -330,7 +348,7 @@ partial class Build
         .After(RunManagedUnitTests)
         .Executes(() =>
         {
-            var project = Solution.GetProject("IntegrationTests");
+            var project = Solution.GetManagedIntegrationTestProject();
             if (!string.IsNullOrWhiteSpace(TestProject) && !project.Name.Contains(TestProject, StringComparison.OrdinalIgnoreCase))
             {
                 return;
@@ -342,7 +360,6 @@ partial class Build
             {
                 DotNetMSBuild(config => config
                     .SetConfiguration(BuildConfiguration)
-                    .SetPlatform(Platform)
                     .SetFilter(AndFilter(TestNameFilter(), ContainersFilter()))
                     .SetBlameHangTimeout("5m")
                     .EnableTrxLogOutput(GetResultsDirectory(project))
