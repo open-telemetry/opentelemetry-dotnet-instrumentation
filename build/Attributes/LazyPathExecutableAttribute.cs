@@ -1,4 +1,3 @@
-using System;
 using System.Reflection;
 using Nuke.Common.Tooling;
 using Nuke.Common.ValueInjection;
