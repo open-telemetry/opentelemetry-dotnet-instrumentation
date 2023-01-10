@@ -15,8 +15,6 @@
 // </copyright>
 
 #if NETCOREAPP
-using System;
-using System.IO;
 using System.Reflection;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;

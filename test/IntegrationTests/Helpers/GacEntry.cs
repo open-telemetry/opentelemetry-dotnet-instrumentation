@@ -15,7 +15,6 @@
 // </copyright>
 
 #if NETFRAMEWORK
-using System;
 using System.EnterpriseServices.Internal;
 
 namespace IntegrationTests.Helpers;

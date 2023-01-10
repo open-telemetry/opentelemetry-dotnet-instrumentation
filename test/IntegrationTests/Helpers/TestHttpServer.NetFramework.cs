@@ -16,9 +16,7 @@
 
 #if NETFRAMEWORK
 
-using System;
 using System.Net;
-using System.Threading;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;

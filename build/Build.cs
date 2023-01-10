@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-using System.Linq;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tools.MSBuild;

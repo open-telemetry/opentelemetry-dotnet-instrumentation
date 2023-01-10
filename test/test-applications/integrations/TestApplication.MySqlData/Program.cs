@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using TestApplication.Shared;
 

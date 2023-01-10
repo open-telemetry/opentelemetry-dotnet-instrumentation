@@ -14,10 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
 namespace TestApplication.ExampleLibrary.FakeClient;
 
 public class DogClient<T1, T2>

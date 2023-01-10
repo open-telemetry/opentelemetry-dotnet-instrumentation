@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-
 namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 
 internal readonly struct TypesTuple : IEquatable<TypesTuple>

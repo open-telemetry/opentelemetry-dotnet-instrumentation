@@ -14,10 +14,8 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
-using System.Threading.Tasks;
 using OpenTelemetry.Instrumentation.Wcf;
 
 namespace TestApplication.Wcf.Client.DotNet;

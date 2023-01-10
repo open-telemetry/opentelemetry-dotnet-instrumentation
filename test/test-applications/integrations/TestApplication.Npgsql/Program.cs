@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Threading.Tasks;
 using Npgsql;
 using TestApplication.Shared;
 

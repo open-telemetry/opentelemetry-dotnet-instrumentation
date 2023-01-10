@@ -14,15 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using TestApplication.Shared;
 
 namespace TestApplication.GraphQL;
 

@@ -14,9 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-
 namespace TestApplication.ExampleLibrary.FakeClient;
 
 public class Biscuit<T> : Biscuit

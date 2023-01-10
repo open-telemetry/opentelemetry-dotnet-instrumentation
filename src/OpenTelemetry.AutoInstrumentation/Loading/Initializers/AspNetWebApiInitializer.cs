@@ -16,8 +16,6 @@
 
 #if NETFRAMEWORK
 
-using System;
-
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
 internal class AspNetWebApiInitializer : InstrumentationInitializer

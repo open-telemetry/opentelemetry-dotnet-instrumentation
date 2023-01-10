@@ -14,11 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using MassTransit;
-using Microsoft.Extensions.Hosting;
 using TestApplication.MassTransit.Contracts;
 
 namespace TestApplication.MassTransit;

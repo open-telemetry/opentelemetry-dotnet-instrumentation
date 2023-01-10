@@ -14,10 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;

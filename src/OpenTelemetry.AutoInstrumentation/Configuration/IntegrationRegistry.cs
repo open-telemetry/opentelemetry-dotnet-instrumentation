@@ -14,10 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 internal static class IntegrationRegistry

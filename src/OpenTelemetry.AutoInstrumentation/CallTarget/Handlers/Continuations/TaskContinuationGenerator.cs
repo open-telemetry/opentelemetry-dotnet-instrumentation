@@ -14,9 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Runtime.ExceptionServices;
-using System.Threading.Tasks;
 
 namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations;
 

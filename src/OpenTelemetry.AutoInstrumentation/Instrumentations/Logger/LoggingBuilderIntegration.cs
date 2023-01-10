@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Logger;

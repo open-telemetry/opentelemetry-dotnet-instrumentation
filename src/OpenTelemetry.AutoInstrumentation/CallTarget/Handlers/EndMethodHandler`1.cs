@@ -14,11 +14,9 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Diagnostics;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations;
 
 #pragma warning disable SA1649 // File name must match first type name

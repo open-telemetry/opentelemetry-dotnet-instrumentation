@@ -14,9 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Data.SqlClient;
-using System.Threading.Tasks;
 using TestApplication.Shared;
 
 namespace TestApplication.SqlClient;

@@ -16,9 +16,6 @@
 
 #if NET6_0_OR_GREATER
 
-using System;
-using OpenTelemetry.AutoInstrumentation.Configuration;
-
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
 
 internal static class StackExchangeRedisInitializer

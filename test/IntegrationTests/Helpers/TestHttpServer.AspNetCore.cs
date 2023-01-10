@@ -16,8 +16,6 @@
 
 #if NET6_0_OR_GREATER
 
-using System;
-using System.Linq;
 using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

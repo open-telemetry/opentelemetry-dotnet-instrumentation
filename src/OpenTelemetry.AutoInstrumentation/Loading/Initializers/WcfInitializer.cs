@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Instrumentation.Wcf;
 

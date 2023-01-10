@@ -14,9 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Threading;
-
 namespace OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 
 internal class HttpClientMetricsInitializer
