@@ -16,6 +16,7 @@
 
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using System.Net.Http;
 using Microsoft.Extensions.Logging;
 using TestApplication.Shared;
 

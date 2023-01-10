@@ -12,9 +12,4 @@
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
   </PropertyGroup>
 
-  <!-- Reconfigure default usings template -->
-  <ItemGroup>
-    <Using Remove="System.Net.Http" />
-  </ItemGroup>
-
 </Project>

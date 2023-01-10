@@ -15,6 +15,7 @@
 // </copyright>
 
 using System.Diagnostics;
+using System.Net.Http;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 
