@@ -37,4 +37,8 @@
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs" Version="1.4.0-rc.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\OpenTelemetry.AutoInstrumentation.Logging\OpenTelemetry.AutoInstrumentation.Logging.csproj" />
+  </ItemGroup>
+
 </Project>
