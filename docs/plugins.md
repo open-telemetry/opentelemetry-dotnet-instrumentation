@@ -88,8 +88,8 @@ public class MyPlugin
 | OpenTelemetry.Exporter.PrometheusExporterOptions                                 | OpenTelemetry.Exporter.Prometheus.HttpListener | 1.4.0-rc.2    |
 | OpenTelemetry.Exporter.OtlpExporterOptions                                       | OpenTelemetry.Exporter.OpenTelemetryProtocol   | 1.4.0-rc.2    |
 | OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreMetricsInstrumentationOptions | OpenTelemetry.Instrumentation.AspNetCore       | 1.0.0-rc9.11  |
-| OpenTelemetry.Instrumentation.Runtime.RuntimeInstrumentationOptions              | OpenTelemetry.Instrumentation.Runtime          | 1.1.0-beta.2  |
-| OpenTelemetry.Instrumentation.Process.ProcessInstrumentationOptions              | OpenTelemetry.Instrumentation.Process          | 1.0.0-alpha.3 |
+| OpenTelemetry.Instrumentation.Runtime.RuntimeInstrumentationOptions              | OpenTelemetry.Instrumentation.Runtime          | 1.1.0-beta.3  |
+| OpenTelemetry.Instrumentation.Process.ProcessInstrumentationOptions              | OpenTelemetry.Instrumentation.Process          | 1.0.0-alpha.4 |
 
 ### Logs
 
