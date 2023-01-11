@@ -20,24 +20,28 @@ To handle dependency versions conflicts,
 update the instrumented application's project references
 to use the same versions.
 
-When a rebuild is not possible,
-for .NET Framework applications the workaround is to use binding redirects.
-You can redirect a range of assembly versions to a specific version
-that is not available at build time.
+For .NET Framework applications the assembly references are, by default, updated
+during runtime to the versions used by the automatic instrumentation.
+This behavior can be controlled via the [`OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/config.md#additional-settings)
+setting.
 
-## No proper relationship between spans
+For the automatic redirection above to work there are two specific scenarios that
+require the assemblies used to instrument .NET Framework
+applications, the ones under the `netfx` folder of the installation directory,
+to be also installed into the Global Assembly Cache (GAC):
 
-On .NET Framework, strong name signing can force the loading of multiple versions
-of the same assembly on the same process. This causes a separate hierarchy of
-Activity objects. If you are referencing packages in your application that use a
-version of the `System.Diagnostics.DiagnosticSource` different than the `OpenTelemetry.Api`
-version used by the OpenTelemetry .NET Automatic Instrumentation, reference
-the correct version of the `System.Diagnostics.DiagnosticSource` package
-in your application.
-This causes automatic binding redirection to solve the issue.
+1. [__Monkey patch instrumentation__](https://en.wikipedia.org/wiki/Monkey_patch#:~:text=Monkey%20patching%20is%20a%20technique,Python%2C%20Groovy%2C%20etc.)
+of assemblies loaded as domain-neutral.
+2. Assembly redirection for strong-named applications if the app also ships
+different versions of some assemblies also shipped in the `netfx` folder.
 
-If automatic binding redirection is [disabled](https://docs.microsoft.com/en-us/dotnet/framework/configure-apps/how-to-enable-and-disable-automatic-binding-redirection)
-you can also manually add binding redirection to the `App.config` file.
+If you are having problems in one of the scenarios above re-run the
+`Install-OpenTelemetryCore` command from the
+[PowerShell installation module](../OpenTelemetry.DotNet.Auto.psm1)
+to ensure that the required GAC installations are up-to-date.
+
+For more information about the GAC usage by the automatic instrumentation,
+see [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1906#issuecomment-1376292814).
 
 ## High CPU usage
 
