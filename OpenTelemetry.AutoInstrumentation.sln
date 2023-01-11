@@ -149,6 +149,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Elasticsear
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.AspNet.NetFramework", "test\test-applications\integrations\TestApplication.AspNet.NetFramework\TestApplication.AspNet.NetFramework.csproj", "{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.MultipleAppDomains.NetFramework", "test\test-applications\integrations\TestApplication.MultipleAppDomains.NetFramework\TestApplication.MultipleAppDomains.NetFramework.csproj", "{A0338846-2AF8-4D96-ADA7-EBD4F010D08F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -693,6 +695,18 @@ Global
 		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Release|x64.Build.0 = Release|x64
 		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Release|x86.ActiveCfg = Release|x86
 		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF}.Release|x86.Build.0 = Release|x86
+		{A0338846-2AF8-4D96-ADA7-EBD4F010D08F}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{A0338846-2AF8-4D96-ADA7-EBD4F010D08F}.Debug|Any CPU.Build.0 = Debug|x64
+		{A0338846-2AF8-4D96-ADA7-EBD4F010D08F}.Debug|x64.ActiveCfg = Debug|x64
+		{A0338846-2AF8-4D96-ADA7-EBD4F010D08F}.Debug|x64.Build.0 = Debug|x64
+		{A0338846-2AF8-4D96-ADA7-EBD4F010D08F}.Debug|x86.ActiveCfg = Debug|x86
+		{A0338846-2AF8-4D96-ADA7-EBD4F010D08F}.Debug|x86.Build.0 = Debug|x86
+		{A0338846-2AF8-4D96-ADA7-EBD4F010D08F}.Release|Any CPU.ActiveCfg = Release|x64
+		{A0338846-2AF8-4D96-ADA7-EBD4F010D08F}.Release|Any CPU.Build.0 = Release|x64
+		{A0338846-2AF8-4D96-ADA7-EBD4F010D08F}.Release|x64.ActiveCfg = Release|x64
+		{A0338846-2AF8-4D96-ADA7-EBD4F010D08F}.Release|x64.Build.0 = Release|x64
+		{A0338846-2AF8-4D96-ADA7-EBD4F010D08F}.Release|x86.ActiveCfg = Release|x86
+		{A0338846-2AF8-4D96-ADA7-EBD4F010D08F}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -747,6 +761,7 @@ Global
 		{4DCB389E-0499-4104-9991-CCA021667D7A} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{E1E55FB4-FCFF-4231-9CE7-C6671A3F5421} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
+		{A0338846-2AF8-4D96-ADA7-EBD4F010D08F} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}
