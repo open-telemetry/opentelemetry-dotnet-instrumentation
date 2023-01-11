@@ -23,6 +23,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Fix console error messages `Log: Exception creating FileSink`
+ [#1885](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1885)
+
 ### Security
 
 ## [0.5.1-beta.3](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.5.1-beta.3)
