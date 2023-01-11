@@ -17,6 +17,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.4.0-rc.2`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-rc.2)
+
 ### Deprecated
 
 ### Removed
