@@ -15,6 +15,7 @@
 // </copyright>
 
 using System.Diagnostics;
+using System.Text;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
 
@@ -25,25 +26,27 @@ internal static class StartupLogger
     private static readonly bool DebugEnabled = IsDebugEnabled();
     private static readonly string? LogDirectory = GetLogDirectory();
     private static readonly string? StartupLogFilePath = SetStartupLogFilePath();
+    private static readonly FileSink? LogFileSink = SetLogFileSink();
 
     public static void Log(string message, params object[] args)
     {
         try
         {
-            if (StartupLogFilePath != null)
+            if (LogFileSink != null)
             {
                 try
                 {
-                    using (var fileSink = new FileSink(StartupLogFilePath))
+                    // It is possible a race with multiple threads under the same app domain.
+                    lock (LogFileSink)
                     {
-                        fileSink.Info($"[{DateTime.UtcNow:O}] {message}{Environment.NewLine}", args);
+                        LogFileSink.Info($"[{DateTime.UtcNow:O}] [ThreadId: {Thread.CurrentThread.ManagedThreadId}] {message}{Environment.NewLine}", args);
                     }
 
                     return;
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine($"Log: Exception creating FileSink {ex}");
+                    Console.Error.WriteLine($"Log: Exception writing to FileSink {ex}");
                 }
             }
 
@@ -132,16 +135,57 @@ internal static class StartupLogger
 
         try
         {
+            // Pick up the parts used to build the log file name and minimize the chances
+            // of file name conflict with other processes.
             using var process = Process.GetCurrentProcess();
-            var appDomainName = AppDomain.CurrentDomain.FriendlyName;
-            // Do our best to not block other processes on write
-            return Path.Combine(LogDirectory, $"otel-dotnet-auto-loader-{appDomainName}-{process.Id}.log");
+
+            // AppDomain friendly name can contain characters that are invalid in file names,
+            // remove any of those. For the first assembly loaded by the process this is typically
+            // expected to be name of the file with the application entry point.
+            var appDomainFriendlyName = AppDomain.CurrentDomain.FriendlyName;
+            var invalidChars = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+            var sb = new StringBuilder(appDomainFriendlyName);
+            for (int i = 0; i < sb.Length; i++)
+            {
+                if (invalidChars.IndexOf(sb[i]) != -1)
+                {
+                    sb[i] = '_';
+                }
+            }
+
+            appDomainFriendlyName = sb.ToString();
+
+            // AppDomain friendly name may not be unique in the same process, use also the id.
+            // Per documentation the id is an integer that uniquely identifies the application
+            // domain within the process.
+            var appDomainId = AppDomain.CurrentDomain.Id;
+
+            return Path.Combine(LogDirectory, $"otel-dotnet-auto-loader-{appDomainFriendlyName}-{appDomainId}-{process?.Id}.log");
         }
         catch
         {
             // We can't get the process info
             return Path.Combine(LogDirectory, $"otel-dotnet-auto-loader-{Guid.NewGuid()}.log");
         }
+    }
+
+    private static FileSink? SetLogFileSink()
+    {
+        if (StartupLogFilePath == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            return new FileSink(StartupLogFilePath);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Log: Exception creating FileSink {ex}");
+        }
+
+        return null;
     }
 
     private static bool IsDebugEnabled()
