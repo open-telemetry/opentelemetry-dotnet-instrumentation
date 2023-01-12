@@ -46,13 +46,13 @@ internal class BootstrapperHostingStartup : IHostingStartup
     {
         if (!_logSettings.LogsEnabled)
         {
-            BootstrapperEventSource.Log.Trace("BootstrapperHostingStartup loaded, but OpenTelemetry Logs disabled. Skipping.");
+            Logger.LogTrace("BootstrapperHostingStartup loaded, but OpenTelemetry Logs disabled. Skipping.");
             return;
         }
 
         if (!_logSettings.EnabledInstrumentations.Contains(LogInstrumentation.ILogger))
         {
-            BootstrapperEventSource.Log.Trace($"BootstrapperHostingStartup loaded, but {nameof(LogInstrumentation.ILogger)} instrumentation is disabled. Skipping.");
+            Logger.LogTrace($"BootstrapperHostingStartup loaded, but {nameof(LogInstrumentation.ILogger)} instrumentation is disabled. Skipping.");
             return;
         }
 
@@ -61,11 +61,11 @@ internal class BootstrapperHostingStartup : IHostingStartup
             builder.ConfigureLogging(logging => logging.AddOpenTelemetryLogs());
 
             var applicationName = GetApplicationName();
-            BootstrapperEventSource.Log.Trace($"BootstrapperHostingStartup loaded for application with name {applicationName}.");
+            Logger.LogTrace($"BootstrapperHostingStartup loaded for application with name {applicationName}.");
         }
         catch (Exception ex)
         {
-            BootstrapperEventSource.Log.Error($"Error in BootstrapperHostingStartup: {ex}");
+            Logger.LogError($"Error in BootstrapperHostingStartup: {ex}");
             throw;
         }
     }
@@ -78,7 +78,7 @@ internal class BootstrapperHostingStartup : IHostingStartup
         }
         catch (Exception ex)
         {
-            BootstrapperEventSource.Log.Error($"Error getting AppDomain.CurrentDomain.FriendlyName: {ex}");
+            Logger.LogError($"Error getting AppDomain.CurrentDomain.FriendlyName: {ex}");
             return string.Empty;
         }
     }

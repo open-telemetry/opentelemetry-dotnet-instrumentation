@@ -11,4 +11,8 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs" Link="Constants.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\OpenTelemetry.AutoInstrumentation.Logging\OpenTelemetry.AutoInstrumentation.Logging.csproj" />
+  </ItemGroup>
+
 </Project>
