@@ -7,20 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpenTelemetry" Version="1.4.0-rc.1" />
-    <PackageReference Include="OpenTelemetry.Api" Version="1.4.0-rc.1" />
-    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.4.0-rc.1" />
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.4.0-rc.1" />
-    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.HttpListener" Version="1.4.0-rc.1" />
-    <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.4.0-rc.1" />
-    <PackageReference Include="OpenTelemetry.Extensions.Propagators" Version="1.4.0-rc.1" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.0.0-rc9.10" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9.10" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.1.0-beta.2" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Process" Version="1.0.0-alpha.3" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.0.0-rc9.10" />
+    <PackageReference Include="OpenTelemetry" Version="1.4.0-rc.2" />
+    <PackageReference Include="OpenTelemetry.Api" Version="1.4.0-rc.2" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.4.0-rc.2" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.4.0-rc.2" />
+    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.HttpListener" Version="1.4.0-rc.2" />
+    <PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.4.0-rc.2" />
+    <PackageReference Include="OpenTelemetry.Extensions.Propagators" Version="1.4.0-rc.2" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.0.0-rc9.11" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9.11" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.1.0-beta.3" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Process" Version="1.0.0-alpha.4" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.0.0-rc9.11" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.8" />
-    <PackageReference Include="OpenTelemetry.Shims.OpenTracing" Version="1.0.0-rc9.10" />
+    <PackageReference Include="OpenTelemetry.Shims.OpenTracing" Version="1.0.0-rc9.11" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
@@ -31,10 +31,10 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.10" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.11" />
     <PackageReference Include="OpenTelemetry.Instrumentation.MySqlData" Version="1.0.0-beta.4" />
     <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc9.7" />
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs" Version="1.4.0-rc.1" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs" Version="1.4.0-rc.2" />
   </ItemGroup>
   
 </Project>
