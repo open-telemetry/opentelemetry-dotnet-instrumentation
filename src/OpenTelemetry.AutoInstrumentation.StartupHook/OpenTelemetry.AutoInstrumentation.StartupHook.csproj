@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- To avoid application crash with .Net Core 3.1 and .NET 5.0 apps 
+    <!-- To avoid application crash with .Net Core 3.1 and .NET 5.0 apps
          this project should target netcoreapp3.1.
          Reference: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1644 -->
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
@@ -10,9 +10,4 @@
   <ItemGroup>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs" Link="Constants.cs" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\OpenTelemetry.AutoInstrumentation.Logging\OpenTelemetry.AutoInstrumentation.Logging.csproj" />
-  </ItemGroup>
-
 </Project>

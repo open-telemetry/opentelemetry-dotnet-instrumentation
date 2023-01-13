@@ -31,8 +31,6 @@ internal class StartupHook
     /// </summary>
     public static void Initialize()
     {
-        InitLogger();
-
         var minSupportedFramework = new FrameworkName(".NETCoreApp,Version=v6.0");
         var appTargetFramework = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
         // This is the best way to identify application's target framework.
@@ -88,17 +86,6 @@ internal class StartupHook
         {
             Logger.LogError($"Error in StartupHook initialization: LoaderFolderLocation: {loaderAssemblyLocation}, Error: {ex}");
             throw;
-        }
-    }
-
-    private static void InitLogger()
-    {
-        // Workaround to make startup hook load the logger assembly.
-        var executionPath = Assembly.GetExecutingAssembly().Location;
-        var dirname = Path.GetDirectoryName(executionPath);
-        if (!string.IsNullOrEmpty(dirname))
-        {
-            Assembly.LoadFrom(Path.Combine(dirname, "OpenTelemetry.AutoInstrumentation.Logging.dll"));
         }
     }
 

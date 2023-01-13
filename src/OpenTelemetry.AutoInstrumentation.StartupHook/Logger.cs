@@ -15,41 +15,18 @@
 // </copyright>
 
 using System.Reflection;
-using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.StartupHook;
 
 internal static class Logger
 {
-    private static readonly ILogger Log = OtelLogging.GetLogger();
-
     internal static void LogTrace(string message)
     {
         StartupHookEventSource.Log.Trace(message);
-
-        try
-        {
-            Log.Information(message);
-        }
-        catch (TargetInvocationException ex)
-        {
-            // Logging assembly was not loaded.
-            StartupHookEventSource.Log.Error($"Logging to file failed. {ex.Message}");
-        }
     }
 
     internal static void LogError(string message)
     {
         StartupHookEventSource.Log.Error(message);
-
-        try
-        {
-            Log.Error(message);
-        }
-        catch (TargetInvocationException ex)
-        {
-            // Logging assembly was not loaded.
-            StartupHookEventSource.Log.Error($"Logging to file failed. {ex.Message}");
-        }
     }
 }
