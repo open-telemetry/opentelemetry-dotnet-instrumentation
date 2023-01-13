@@ -221,6 +221,9 @@ Two issues might arise from incorrect versioning:
 2. Multiple versions of the assembly in the same process,
    as the runtime treats them independently.
 
+On the .NET Framework, by default, the CLR Profiler redirects any
+assembly references to the versions shipped with the Managed Profiler.
+
 #### Configuration resolution
 
 .NET [Framework-dependent deployment](https://docs.microsoft.com/en-us/dotnet/core/deploying/deploy-with-cli#framework-dependent-deployment)

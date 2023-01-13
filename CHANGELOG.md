@@ -57,6 +57,8 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
  can be enabled or disabled via the
  `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED` environment variable.
  See the [additional settings](./docs/config.md#additional-settings) table for details.
+- Add automatic Global Assembly Cache (GAC) registration, of the distributed
+ .NET Framework assemblies, to the PowerShell installation module.
 
 ### Changed
 
