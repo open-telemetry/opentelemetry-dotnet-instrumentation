@@ -16,7 +16,7 @@
 
 using System.Reflection;
 
-namespace TestApplication.DomainNeutral;
+namespace TestApplication.DomainNeutral.NetFramework;
 
 using TestLibrary.InstrumentationTarget;
 
