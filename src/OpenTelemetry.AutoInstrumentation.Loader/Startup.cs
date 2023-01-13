@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.IO;
 using System.Reflection;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;

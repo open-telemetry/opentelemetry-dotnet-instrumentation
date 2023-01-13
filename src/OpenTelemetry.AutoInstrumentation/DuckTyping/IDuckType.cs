@@ -14,9 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.ComponentModel;
-
 namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 
 /// <summary>

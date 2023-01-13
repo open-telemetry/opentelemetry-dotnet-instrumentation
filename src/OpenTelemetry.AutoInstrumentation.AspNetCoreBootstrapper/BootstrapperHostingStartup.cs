@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using Microsoft.AspNetCore.Hosting;
 using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.AutoInstrumentation.Logger;

@@ -14,19 +14,12 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Xunit;
 using Xunit.Abstractions;
 
 #if NETFRAMEWORK

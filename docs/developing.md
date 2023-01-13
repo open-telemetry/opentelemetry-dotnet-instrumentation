@@ -171,9 +171,9 @@ against its lowest supported, but not vulnerable, version.
 The pull requests created by @dependabot with `do NOT merge` label
 are used to test against higher library versions when they are released.
 
-> `TestApplication.AspNet` is an exception to this strategy
+> `TestApplication.AspNet.NetFramework` is an exception to this strategy
 > as it would not work well, because of multiple dependent packages.
-> `TestApplication.AspNet` references the latest versions
+> `TestApplication.AspNet.NetFramework` references the latest versions
 > of the ASP.NET packages.
 
 To verify that a test is not flaky,

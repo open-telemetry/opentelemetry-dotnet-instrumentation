@@ -14,9 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Collections.Specialized;
-using System.IO;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.Extensions.Logging;

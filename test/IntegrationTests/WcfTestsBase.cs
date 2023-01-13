@@ -14,12 +14,9 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 using FluentAssertions;
 using IntegrationTests.Helpers;
-using Xunit;
 using Xunit.Abstractions;
 using static OpenTelemetry.Proto.Trace.V1.Span.Types;
 

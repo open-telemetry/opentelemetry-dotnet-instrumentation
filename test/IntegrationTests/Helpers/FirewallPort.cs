@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;

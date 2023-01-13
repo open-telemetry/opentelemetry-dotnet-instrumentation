@@ -14,9 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 using System.ServiceModel;
-using System.Threading.Tasks;
 
 namespace TestApplication.Wcf.Server.NetFramework;
 

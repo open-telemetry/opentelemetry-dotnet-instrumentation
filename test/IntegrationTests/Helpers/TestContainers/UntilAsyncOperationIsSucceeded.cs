@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Threading.Tasks;
 using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
 using Microsoft.Extensions.Logging;

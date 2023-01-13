@@ -14,14 +14,10 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
 using System.Text;
-using System.Threading;
 using Google.Protobuf.Collections;
 using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Resource.V1;
-using Xunit;
 
 namespace IntegrationTests.Helpers;
 

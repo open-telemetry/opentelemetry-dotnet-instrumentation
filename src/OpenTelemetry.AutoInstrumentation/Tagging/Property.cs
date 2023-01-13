@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-
 namespace OpenTelemetry.AutoInstrumentation.Tagging;
 
 internal class Property<TTags, TResult> : IProperty<TResult>

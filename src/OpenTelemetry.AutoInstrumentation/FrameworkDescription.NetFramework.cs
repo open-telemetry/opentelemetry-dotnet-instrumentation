@@ -15,8 +15,6 @@
 // </copyright>
 
 #if NETFRAMEWORK
-using System;
-using System.Linq;
 using Microsoft.Win32;
 
 namespace OpenTelemetry.AutoInstrumentation;

@@ -15,24 +15,16 @@
 // </copyright>
 
 #if NETFRAMEWORK
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using FluentAssertions;
 using IntegrationTests.Helpers;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
 public class AspNetTests
 {
-    private const string TestApplicationName = "AspNet";
-
     private readonly Dictionary<string, string> _environmentVariables = new();
 
     public AspNetTests(ITestOutputHelper output)
@@ -97,7 +89,7 @@ public class AspNetTests
     private async Task<TestcontainersContainer> StartContainerAsync(int webPort)
     {
         // get path to test application that the profiler will attach to
-        string testApplicationName = $"testapplication-{TestApplicationName.ToLowerInvariant()}";
+        string imageName = $"testapplication-aspnet-netframework";
 
         string networkName = DockerNetworkHelper.IntegrationTestsNetworkName;
         string networkId = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
@@ -109,10 +101,10 @@ public class AspNetTests
         Output.WriteLine("Collecting docker logs to: " + logPath);
 
         var builder = new TestcontainersBuilder<TestcontainersContainer>()
-            .WithImage(testApplicationName)
+            .WithImage(imageName)
             .WithCleanUp(cleanUp: true)
             .WithOutputConsumer(Consume.RedirectStdoutAndStderrToConsole())
-            .WithName($"{testApplicationName}-{webPort}")
+            .WithName($"{imageName}-{webPort}")
             .WithNetwork(networkId, networkName)
             .WithPortBinding(webPort, 80)
             .WithBindMount(logPath, "c:/inetpub/wwwroot/logs")
@@ -127,7 +119,7 @@ public class AspNetTests
         try
         {
             var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
-            wasStarted.Should().BeTrue($"Container based on {testApplicationName} has to be operational for the test.");
+            wasStarted.Should().BeTrue($"Container based on {imageName} has to be operational for the test.");
             Output.WriteLine($"Container was started successfully.");
 
             await HealthzHelper.TestAsync($"http://localhost:{webPort}/healthz", Output);

@@ -14,14 +14,11 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
 using IntegrationTests.Helpers.TestContainers;
 using Microsoft.Data.SqlClient;
-using Xunit;
 
 namespace IntegrationTests;
 

@@ -18,7 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TestApplication.AspNet.Helpers;
+namespace TestApplication.AspNet.NetFramework.Helpers;
 
 public static class AssembliesHelper
 {

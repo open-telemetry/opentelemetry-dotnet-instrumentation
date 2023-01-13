@@ -14,11 +14,8 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.IO;
 using System.Net;
 using System.Text;
-using System.Threading;
 using TestApplication.Http.NetFramework.Helpers;
 
 namespace TestApplication.Http.NetFramework;

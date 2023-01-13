@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Loading.Initializers;

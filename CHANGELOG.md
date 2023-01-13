@@ -7,6 +7,12 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.5.1-beta.3...HEAD)
 
+This beta release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
+
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.4.0-rc.2`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-rc.2)
+- `System.Diagnostics.DiagnosticSource`: [`7.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/7.0.0)
+
 ### Added
 
 - Move `OpenTelemetry.AutoInstrumentation.Native.so` to `linux-x64` directory
@@ -17,11 +23,17 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.4.0-rc.2`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-rc.2)
+
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+
+- Fix console error messages `Log: Exception creating FileSink`
+ [#1885](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1885)
 
 ### Security
 

@@ -14,11 +14,9 @@
 // limitations under the License.
 // </copyright>
 
-using System;
 #if NETFRAMEWORK
 using System.Net.Http;
 #endif
-using System.Threading.Tasks;
 using Greet;
 using Grpc.Core;
 using Grpc.Net.Client;

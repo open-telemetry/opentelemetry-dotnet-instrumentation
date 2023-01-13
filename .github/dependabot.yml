@@ -140,7 +140,7 @@ updates:
       - "do NOT merge"
 
   - package-ecosystem: nuget
-    directory: /test/test-applications/integrations/TestApplication.AspNet
+    directory: /test/test-applications/integrations/TestApplication.AspNet.NetFramework
     schedule:
       interval: "daily"
     open-pull-requests-limit: 20

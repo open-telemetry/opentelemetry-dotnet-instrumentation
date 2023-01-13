@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System;
-
 namespace OpenTelemetry.AutoInstrumentation.Util;
 
 internal static class ArrayHelper

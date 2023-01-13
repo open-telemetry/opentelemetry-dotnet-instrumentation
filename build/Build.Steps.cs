@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Extensions;
@@ -70,7 +66,6 @@ partial class Build
         .Unlisted()
         .Executes(() => ControlFlow.ExecuteWithRetry(() =>
         {
-
             if (IsWin)
             {
                 DotNetRestore(s => s
