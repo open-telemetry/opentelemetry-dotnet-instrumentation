@@ -123,7 +123,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Logs", "tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestLibrary.InstrumentationTarget", "test\test-applications\integrations\dependency-libs\TestLibrary.InstrumentationTarget\TestLibrary.InstrumentationTarget.csproj", "{1DC12784-CD32-400D-AE13-A637BFA66B1B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.DomainNeutral", "test\test-applications\integrations\TestApplication.DomainNeutral\TestApplication.DomainNeutral.csproj", "{28879377-2043-4370-A8DB-B04464B6E552}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.DomainNeutral.NetFramework", "test\test-applications\integrations\TestApplication.DomainNeutral.NetFramework\TestApplication.DomainNeutral.NetFramework.csproj", "{28879377-2043-4370-A8DB-B04464B6E552}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.MassTransit", "test\test-applications\integrations\TestApplication.MassTransit\TestApplication.MassTransit.csproj", "{06664166-35D6-484D-9171-DCB99D1D310A}"
 EndProject

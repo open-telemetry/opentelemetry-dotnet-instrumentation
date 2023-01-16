@@ -27,7 +27,7 @@ namespace IntegrationTests;
 public class DomainNeutralTests : TestHelper
 {
     public DomainNeutralTests(ITestOutputHelper output)
-        : base("DomainNeutral", output)
+        : base("DomainNeutral.NetFramework", output)
     {
     }
 
