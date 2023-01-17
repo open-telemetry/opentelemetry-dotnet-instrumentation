@@ -44,21 +44,21 @@ internal class StartupHook
 
             if (appTargetFrameworkVersion < minSupportedFramework.Version)
             {
-                Logger.LogTrace($"Error in StartupHook initialization: {appTargetFramework} is not supported");
+                Logger.LogInformation($"Error in StartupHook initialization: {appTargetFramework} is not supported");
                 return;
             }
         }
 
         var applicationName = GetApplicationName();
-        Logger.LogTrace($"StartupHook loaded for application with name {applicationName}.");
+        Logger.LogInformation($"StartupHook loaded for application with name {applicationName}.");
 
         if (IsApplicationInExcludeList(applicationName))
         {
-            Logger.LogTrace("Application is in the exclusion list. Skipping initialization.");
+            Logger.LogInformation("Application is in the exclusion list. Skipping initialization.");
             return;
         }
 
-        Logger.LogTrace("Attempting initialization.");
+        Logger.LogInformation("Attempting initialization.");
 
         string loaderAssemblyLocation = GetLoaderAssemblyLocation();
 
@@ -77,11 +77,11 @@ internal class StartupHook
                 string loaderFilePath = Path.Combine(loaderAssemblyLocation, "OpenTelemetry.AutoInstrumentation.Loader.dll");
                 Assembly loaderAssembly = Assembly.LoadFrom(loaderFilePath);
                 loaderAssembly.CreateInstance("OpenTelemetry.AutoInstrumentation.Loader.Startup");
-                Logger.LogTrace("StartupHook initialized successfully!");
+                Logger.LogInformation("StartupHook initialized successfully!");
             }
             else
             {
-                Logger.LogTrace("OpenTelemetry.AutoInstrumentation.Instrumentation initialized before startup hook");
+                Logger.LogInformation("OpenTelemetry.AutoInstrumentation.Instrumentation initialized before startup hook");
             }
         }
         catch (Exception ex)
@@ -215,7 +215,7 @@ internal class StartupHook
             catch (Exception ex)
             {
                 // Exception in evaluation should not throw or crash the process.
-                Logger.LogTrace($"Couldn't evaluate reference to OpenTelemetry Sdk in an app. Exception: {ex}");
+                Logger.LogInformation($"Couldn't evaluate reference to OpenTelemetry Sdk in an app. Exception: {ex}");
             }
         }
 

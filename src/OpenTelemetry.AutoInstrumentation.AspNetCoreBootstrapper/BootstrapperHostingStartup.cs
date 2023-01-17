@@ -45,13 +45,13 @@ internal class BootstrapperHostingStartup : IHostingStartup
     {
         if (!_logSettings.LogsEnabled)
         {
-            Logger.LogTrace("BootstrapperHostingStartup loaded, but OpenTelemetry Logs disabled. Skipping.");
+            Logger.LogInformation("BootstrapperHostingStartup loaded, but OpenTelemetry Logs disabled. Skipping.");
             return;
         }
 
         if (!_logSettings.EnabledInstrumentations.Contains(LogInstrumentation.ILogger))
         {
-            Logger.LogTrace($"BootstrapperHostingStartup loaded, but {nameof(LogInstrumentation.ILogger)} instrumentation is disabled. Skipping.");
+            Logger.LogInformation($"BootstrapperHostingStartup loaded, but {nameof(LogInstrumentation.ILogger)} instrumentation is disabled. Skipping.");
             return;
         }
 
@@ -60,7 +60,7 @@ internal class BootstrapperHostingStartup : IHostingStartup
             builder.ConfigureLogging(logging => logging.AddOpenTelemetryLogs());
 
             var applicationName = GetApplicationName();
-            Logger.LogTrace($"BootstrapperHostingStartup loaded for application with name {applicationName}.");
+            Logger.LogInformation($"BootstrapperHostingStartup loaded for application with name {applicationName}.");
         }
         catch (Exception ex)
         {

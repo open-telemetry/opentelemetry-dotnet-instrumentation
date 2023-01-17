@@ -22,7 +22,7 @@ internal static class Logger
 {
     private static readonly ILogger Log = OtelLogging.GetLogger();
 
-    internal static void LogTrace(string message)
+    internal static void LogInformation(string message)
     {
         Log.Information(message);
         BootstrapperEventSource.Log.Trace(message);
