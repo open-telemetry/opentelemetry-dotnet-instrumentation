@@ -98,7 +98,14 @@ internal class StartupHook
         var dirname = Path.GetDirectoryName(executionPath);
         if (!string.IsNullOrEmpty(dirname))
         {
-            Assembly.LoadFrom(Path.Combine(dirname, "OpenTelemetry.AutoInstrumentation.Logging.dll"));
+            try
+            {
+                Assembly.LoadFrom(Path.Combine(dirname, "OpenTelemetry.AutoInstrumentation.Logging.dll"));
+            }
+            catch (Exception e)
+            {
+                StartupHookEventSource.Log.Error($"Error occured while loading Logging library. {e.Message}");
+            }
         }
     }
 
