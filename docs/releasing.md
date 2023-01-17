@@ -55,4 +55,4 @@
    - [`examples/demo/Dockerfile`](../examples/demo/Dockerfile)
    - [OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator/blob/main/autoinstrumentation):
      - [`README.md`](https://github.com/open-telemetry/opentelemetry-operator/blob/main/README.md)
-     - [`autoinstrumentation/dotnet/version.txt`](https://github.com/open-telemetry/opentelemetry-operator/blob/main/autoinstrumentation/dotnet/version.txt) 
+     - [`autoinstrumentation/dotnet/version.txt`](https://github.com/open-telemetry/opentelemetry-operator/blob/main/autoinstrumentation/dotnet/version.txt)
