@@ -26,6 +26,11 @@ internal static class StartupLogger
     private static readonly bool DebugEnabled = IsDebugEnabled();
     private static readonly string? LogDirectory = GetLogDirectory();
     private static readonly string? StartupLogFilePath = SetStartupLogFilePath();
+
+    // It is not necessary to dispose of FileSink explicitly: the OS closes the respective
+    // native handle when the process is closed. Moreover, this is a low-volume log and
+    // each write operation is followed by a flush so no risk of losing some data on
+    // intermediary buffers due to the lack of explicit dispose.
     private static readonly FileSink? LogFileSink = SetLogFileSink();
 
     public static void Log(string message, params object[] args)
