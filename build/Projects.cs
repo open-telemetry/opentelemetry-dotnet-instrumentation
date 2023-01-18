@@ -7,6 +7,11 @@ public static class Projects
     public const string AutoInstrumentationAdditionalDeps = "OpenTelemetry.AutoInstrumentation.AdditionalDeps";
     public const string AutoInstrumentationAspNetCoreBootstrapper = "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper";
 
+    public static class Mocks
+    {
+        public const string AutoInstrumentationMock = "OpenTelemetry.AutoInstrumentation.Mock";
+    }
+
     public static class Tests
     {
         public const string AutoInstrumentationNativeTests = "OpenTelemetry.AutoInstrumentation.Native.Tests";
@@ -21,8 +26,9 @@ public static class Projects
         }
     }
 
-    public static class Mocks
+    public static class Tools
     {
-        public const string AutoInstrumentationMock = "OpenTelemetry.AutoInstrumentation.Mock";
+        public const string IntegrationsJsonGenerator = "IntegrationsJsonGenerator";
+
     }
 }
