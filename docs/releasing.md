@@ -9,7 +9,7 @@
    - [`src/OpenTelemetry.AutoInstrumentation/Constants.cs`](../src/OpenTelemetry.AutoInstrumentation/Constants.cs)
    - [`src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj`](../src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj)
    - [`src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Loader.csproj`](../src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Loader.csproj)
-   - [`src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Logging.csproj`](../src/OpenTelemetry.AutoInstrumentation.Loader/OpenTelemetry.AutoInstrumentation.Logging.csproj)
+   - [`src/OpenTelemetry.AutoInstrumentation.Logging/OpenTelemetry.AutoInstrumentation.Logging.csproj`](../src/OpenTelemetry.AutoInstrumentation.Logging/OpenTelemetry.AutoInstrumentation.Logging.csproj)
    - [`src/OpenTelemetry.AutoInstrumentation.Native/CMakeLists.txt`](../src/OpenTelemetry.AutoInstrumentation.Native/CMakeLists.txt)
    - [`src/OpenTelemetry.AutoInstrumentation.Native/Resource.rc`](../src/OpenTelemetry.AutoInstrumentation.Native/Resource.rc)
    - [`src/OpenTelemetry.AutoInstrumentation.Native/otel_profiler_constants.h`](../src/OpenTelemetry.AutoInstrumentation.Native/otel_profiler_constants.h)
