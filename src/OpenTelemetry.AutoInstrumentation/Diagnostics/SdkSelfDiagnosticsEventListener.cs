@@ -31,10 +31,10 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
 
     private readonly object lockObj = new();
     private readonly EventLevel logLevel;
-    private readonly ILogger log;
+    private readonly IOtelLogger log;
     private readonly List<EventSource>? eventSourcesBeforeConstructor = new();
 
-    public SdkSelfDiagnosticsEventListener(EventLevel eventLevel, ILogger logger)
+    public SdkSelfDiagnosticsEventListener(EventLevel eventLevel, IOtelLogger logger)
     {
         log = logger;
         logLevel = eventLevel;

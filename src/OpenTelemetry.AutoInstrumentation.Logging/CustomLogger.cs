@@ -18,7 +18,7 @@ using System;
 
 namespace OpenTelemetry.AutoInstrumentation.Logging;
 
-internal class CustomLogger : ILogger
+internal class CustomLogger : IOtelLogger
 {
     private static readonly object[] NoPropertyValues = Array.Empty<object>();
 

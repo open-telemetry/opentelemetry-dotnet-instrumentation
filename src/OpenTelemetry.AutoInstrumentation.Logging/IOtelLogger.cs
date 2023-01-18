@@ -1,4 +1,4 @@
-// <copyright file="ILogger.cs" company="OpenTelemetry Authors">
+// <copyright file="IOtelLogger.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,7 @@ namespace OpenTelemetry.AutoInstrumentation.Logging;
 
 #pragma warning disable CS1591
 [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:Elements should be documented", Justification = "Not")]
-public interface ILogger
+public interface IOtelLogger
 {
     bool IsEnabled(LogLevel level);
 

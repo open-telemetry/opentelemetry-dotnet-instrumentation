@@ -27,7 +27,7 @@ public static class OtelLogging
     private const string OtelDotnetAutoLogDirectory = "OTEL_DOTNET_AUTO_LOG_DIRECTORY";
     private const string NixDefaultDirectory = "/var/log/opentelemetry/dotnet";
 
-    private static readonly ILogger Logger;
+    private static readonly IOtelLogger OtelLogger;
 
     static OtelLogging()
     {
@@ -52,14 +52,14 @@ public static class OtelLogging
             sink = new NoopSink();
         }
 
-        Logger = new CustomLogger(sink);
+        OtelLogger = new CustomLogger(sink);
     }
 
     /// <summary>
     /// Returns Logger implementation.
     /// </summary>
     /// <returns>Logger</returns>
-    public static ILogger GetLogger() => Logger;
+    public static IOtelLogger GetLogger() => OtelLogger;
 
     private static string GetLogFileName()
     {
