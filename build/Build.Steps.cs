@@ -231,10 +231,19 @@ partial class Build
         .DependsOn(PublishNativeProfilerLinux)
         .DependsOn(PublishNativeProfilerMacOs);
 
+    Target GenerateIntegrationsJson => _ => _
+        .After(PublishManagedProfiler)
+        .Executes(() =>
+        {
+            var generatorTool = Solution.GetProject(Projects.Tools.IntegrationsJsonGenerator);
+
+            DotNetRun(s => s
+                .SetProjectFile(generatorTool));
+        });
+
     Target CopyIntegrationsJson => _ => _
         .Unlisted()
-        .After(Clean)
-        .After(CreateRequiredDirectories)
+        .After(GenerateIntegrationsJson)
         .Executes(() =>
         {
             var source = RootDirectory / "integrations.json";
