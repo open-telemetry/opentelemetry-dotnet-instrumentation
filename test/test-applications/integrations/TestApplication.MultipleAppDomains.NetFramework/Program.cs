@@ -53,13 +53,7 @@ public static class Program
             // Use a name that contains characters that can't be used in file names.
             appDomains[i] = AppDomain.CreateDomain("|invalid:in:file:name|");
             var targetAppDomain = appDomains[i];
-            tasks.Add(Task.Run(async () =>
-            {
-                targetAppDomain.ExecuteAssembly(applicationCodeBase, new string[] { NoAppDomainsSwitch });
-
-                // Ensure concurrent non-completed tasks.
-                await Task.Delay(TimeSpan.FromSeconds(2.5));
-            }));
+            tasks.Add(Task.Run(() => targetAppDomain.ExecuteAssembly(applicationCodeBase, new string[] { NoAppDomainsSwitch })));
         }
 
         Task.WaitAll(tasks.ToArray());
