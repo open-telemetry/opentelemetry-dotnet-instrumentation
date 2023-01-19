@@ -22,7 +22,7 @@ namespace IntegrationTests;
 
 public class WcfNetFrameworkTests : WcfTestsBase
 {
-    private const string ServiceName = "Client.Server.NetFramework";
+    private const string ServiceName = "Wcf.Client.NetFramework";
 
     public WcfNetFrameworkTests(ITestOutputHelper output)
         : base(ServiceName, output)
