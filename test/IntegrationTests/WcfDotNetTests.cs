@@ -23,7 +23,7 @@ namespace IntegrationTests;
 public class WcfDotNetTests : WcfTestsBase
 {
     public WcfDotNetTests(ITestOutputHelper output)
-        : base("TestApplication.Wcf.Client.DotNet", output)
+        : base("Wcf.Client.DotNet", output)
     {
     }
 }
