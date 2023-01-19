@@ -26,30 +26,12 @@ internal static class Logger
     internal static void LogInformation(string message)
     {
         StartupHookEventSource.Log.Trace(message);
-
-        try
-        {
-            Log.Information(message);
-        }
-        catch (TargetInvocationException ex)
-        {
-            // Logging assembly was not loaded.
-            StartupHookEventSource.Log.Error($"Logging to file failed. {ex.Message}");
-        }
+        Log.Information(message);
     }
 
     internal static void LogError(string message)
     {
         StartupHookEventSource.Log.Error(message);
-
-        try
-        {
-            Log.Error(message);
-        }
-        catch (TargetInvocationException ex)
-        {
-            // Logging assembly was not loaded.
-            StartupHookEventSource.Log.Error($"Logging to file failed. {ex.Message}");
-        }
+        Log.Error(message);
     }
 }

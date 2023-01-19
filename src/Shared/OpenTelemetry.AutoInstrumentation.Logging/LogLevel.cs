@@ -19,7 +19,7 @@ namespace OpenTelemetry.AutoInstrumentation.Logging;
 /// <summary>
 /// Specifies the meaning and relative importance of a log event.
 /// </summary>
-public enum LogLevel
+internal enum LogLevel
 {
     /// <summary>
     /// Functionality is unavailable, invariants are broken
