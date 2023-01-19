@@ -15,6 +15,7 @@
 // </copyright>
 
 #if NET462
+using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
@@ -30,7 +31,7 @@ public class WcfNetFrameworkTests : WcfTestsBase
 
     [Fact]
     [Trait("Category", "EndToEnd")]
-    public void TracesResource()
+    public async Task TracesResource()
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -38,7 +39,7 @@ public class WcfNetFrameworkTests : WcfTestsBase
         // collector.ResourceExpector.Expect("deployment.environment", "test"); // this is set via App.config
 
         var serverHelper = new WcfServerTestHelper(Output);
-        _serverProcess = serverHelper.RunWcfServer(collector);
+        ServerProcess = serverHelper.RunWcfServer(collector);
         await WaitForServer();
 
         RunTestApplication();

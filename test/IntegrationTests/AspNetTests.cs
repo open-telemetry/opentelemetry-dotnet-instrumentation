@@ -62,7 +62,7 @@ public class AspNetTests
     [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
-    public async Task SubmitsTraces()
+    public async Task TracesResource()
     {
         Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
 
@@ -82,7 +82,7 @@ public class AspNetTests
         await using var container = await StartContainerAsync(webPort);
         await CallTestApplicationEndpoint(webPort);
 
-        collector.AssertExpectations();
+        collector.ResourceExpector.AssertExpectations();
     }
 
     [Fact]

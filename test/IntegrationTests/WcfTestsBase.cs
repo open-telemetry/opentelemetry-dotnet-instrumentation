@@ -23,13 +23,13 @@ using static OpenTelemetry.Proto.Trace.V1.Span.Types;
 namespace IntegrationTests;
 public abstract class WcfTestsBase : TestHelper, IDisposable
 {
-    private ProcessHelper? _serverProcess;
-
     protected WcfTestsBase(string testAppName, ITestOutputHelper output)
         : base(testAppName, output)
     {
         SetEnvironmentVariable("OTEL_SERVICE_NAME", testAppName);
     }
+
+    protected ProcessHelper? ServerProcess { get; set; }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
@@ -46,7 +46,7 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 2");
 
         var serverHelper = new WcfServerTestHelper(Output);
-        _serverProcess = serverHelper.RunWcfServer(collector);
+        ServerProcess = serverHelper.RunWcfServer(collector);
         await WaitForServer();
 
         RunTestApplication();
@@ -56,26 +56,26 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
 
     public void Dispose()
     {
-        if (_serverProcess?.Process == null)
+        if (ServerProcess?.Process == null)
         {
             return;
         }
 
-        if (_serverProcess.Process.HasExited)
+        if (ServerProcess.Process.HasExited)
         {
-            Output.WriteLine($"WCF server process finished. Exit code: {_serverProcess.Process.ExitCode}.");
+            Output.WriteLine($"WCF server process finished. Exit code: {ServerProcess.Process.ExitCode}.");
         }
         else
         {
-            _serverProcess.Process.Kill();
+            ServerProcess.Process.Kill();
         }
 
-        Output.WriteLine("ProcessId: " + _serverProcess.Process.Id);
-        Output.WriteLine("Exit Code: " + _serverProcess.Process.ExitCode);
-        Output.WriteResult(_serverProcess);
+        Output.WriteLine("ProcessId: " + ServerProcess.Process.Id);
+        Output.WriteLine("Exit Code: " + ServerProcess.Process.ExitCode);
+        Output.WriteResult(ServerProcess);
     }
 
-    private async Task WaitForServer()
+    protected async Task WaitForServer()
     {
         const int tcpPort = 9090;
         using var tcpClient = new TcpClient();
