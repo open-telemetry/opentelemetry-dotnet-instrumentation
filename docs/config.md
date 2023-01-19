@@ -49,7 +49,7 @@ for more details.
 | `StackExchangeRedis` | [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis) **Not supported on .NET Framework**                                                                                   | ≥2.0.405 < 3.0.0   | source & bytecode       |
 | `Wcf`                | [System.ServiceModel](https://www.nuget.org/packages/System.ServiceModel) **No support for server side on .NET**. For configuration see [WCF Instrumentation Configuration](wcf-config.md)      | * \[3\]            | source                  |
 
-\[1\]: Only integrated pipline mode is supported.
+\[1\]: Only integrated pipeline mode is supported.
 
 \[2\]: MySql.Data 8.0.31 and higher requires bytecode instrumentation.
 
