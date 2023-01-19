@@ -21,9 +21,29 @@ namespace IntegrationTests;
 
 public class WcfNetFrameworkTests : WcfTestsBase
 {
+    private const string ServiceName = "TestApplication.Client.Server.NetFramework";
+
     public WcfNetFrameworkTests(ITestOutputHelper output)
-        : base("Wcf.Client.NetFramework", output)
+        : base(ServiceName, output)
     {
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void TracesResource()
+    {
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+        collector.ResourceExpector.Expect("service.name", ServiceName); // this is set via env var and App.config, but env var has precedence
+        // collector.ResourceExpector.Expect("deployment.environment", "test"); // this is set via App.config
+
+        var serverHelper = new WcfServerTestHelper(Output);
+        _serverProcess = serverHelper.RunWcfServer(collector);
+        await WaitForServer();
+
+        RunTestApplication();
+
+        collector.ResourceExpector.AssertExpectations();
     }
 }
 
