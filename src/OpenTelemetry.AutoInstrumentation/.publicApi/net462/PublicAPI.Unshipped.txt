@@ -12,6 +12,10 @@ OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(Sys
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity! activity, object! state, System.DateTimeOffset? startTime) -> void
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity? activity, object! state) -> void
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.State.get -> object?
+OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType
+OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.Instance.get -> object!
+OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.ToString() -> string!
+OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.Type.get -> System.Type!
 OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration
