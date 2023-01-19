@@ -35,4 +35,17 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc9.7" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs" Version="1.4.0-rc.2" />
   </ItemGroup>
+
+  <!-- Versions from CommonExcludedAssets.props -->
+  <ItemGroup>
+    <PackageVersion Include="StackExchange.Redis" Version="2.1.58"/>
+    <PackageVersion Include="Pipelines.Sockets.Unofficial" Version="2.1.16"/>
+    <PackageVersion Include="System.Diagnostics.PerformanceCounter" Version="4.7.0"/>
+    <PackageVersion Include="MySql.Data" Version="6.10.7"/>
+    <PackageVersion Include="System.Configuration.ConfigurationManager" Version="4.7.0"/>
+    <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="4.7.0"/>
+    <PackageVersion Include="System.Drawing.Common" Version="4.7.0"/>
+    <PackageVersion Include="System.Windows.Extensions" Version="4.7.0"/>
+    <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="4.7.0"/>
+  </ItemGroup>
 </Project>
