@@ -1,3 +1,5 @@
 <Project>
-  <Import Project="$(MSBuildThisFileDirectory)Common.Packages.props" />
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
 </Project>
