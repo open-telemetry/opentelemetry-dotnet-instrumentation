@@ -1,7 +1,5 @@
 <Project>
-  <!-- This file prevents unintended imports of unrelated MSBuild files -->
-  <!-- Uncomment to include parent Directory.Build.props file -->
-  <!--<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Packages.props', '$(MSBuildThisFileDirectory)../'))" />-->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Packages.props', '$(MSBuildThisFileDirectory)../'))" />
 
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
