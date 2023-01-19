@@ -15,22 +15,22 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.21.12" />
-    <PackageReference Include="Grpc.Tools" Version="2.51.0" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-    <PackageReference Include="StrongNamer" Version="0.2.5" Condition="$(TargetFramework.StartsWith('net4'))" />
-    <PackageReference Include="System.Collections.Immutable" Version="7.0.0" />
-    <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
-    <PackageReference Include="Testcontainers" Version="2.3.0" />
-    <PackageReference Include="Verify.Xunit" Version="19.6.0" />
-    <PackageReference Include="xunit.abstractions" Version="2.0.3" />
+    <PackageReference Include="Google.Protobuf" />
+    <PackageReference Include="Grpc.Tools" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Data.SqlClient" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="StrongNamer" Condition="$(TargetFramework.StartsWith('net4'))" />
+    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Runtime.InteropServices" />
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" />
+    <PackageReference Include="Testcontainers" />
+    <PackageReference Include="Verify.Xunit" />
+    <PackageReference Include="xunit.abstractions" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' OR '$(TargetFramework)' == 'net6.0' ">
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" />
   </ItemGroup>
 
   <ItemGroup>

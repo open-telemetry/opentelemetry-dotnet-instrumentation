@@ -1,0 +1,13 @@
+<Project>
+  <!-- This file prevents unintended imports of unrelated MSBuild files -->
+  <!-- Uncomment to include parent Directory.Build.props file -->
+  <!--<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Packages.props', '$(MSBuildThisFileDirectory)../'))" />-->
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+  </ItemGroup>
+</Project>
