@@ -14,12 +14,16 @@
 // limitations under the License.
 // </copyright>
 
+using System.ComponentModel;
+
 namespace OpenTelemetry.AutoInstrumentation.DuckTyping;
 
 /// <summary>
 /// Duck type interface
 /// </summary>
-internal interface IDuckType
+[Browsable(false)]
+[EditorBrowsable(EditorBrowsableState.Never)]
+public interface IDuckType
 {
     /// <summary>
     /// Gets instance
