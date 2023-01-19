@@ -36,7 +36,7 @@ public class WcfNetFrameworkTests : WcfTestsBase
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         collector.ResourceExpector.Expect("service.name", ServiceName); // this is set via env var and App.config, but env var has precedence
-        // collector.ResourceExpector.Expect("deployment.environment", "test"); // this is set via App.config
+        collector.ResourceExpector.Expect("deployment.environment", "test"); // this is set via App.config
 
         var serverHelper = new WcfServerTestHelper(Output);
         ServerProcess = serverHelper.RunWcfServer(collector);
