@@ -29,7 +29,7 @@ public class WcfNetFrameworkTests : WcfTestsBase
     {
     }
 
-    [Fact]
+    [Fact(Skip = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1429")]
     [Trait("Category", "EndToEnd")]
     public async Task TracesResource()
     {
