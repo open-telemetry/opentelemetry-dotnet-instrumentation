@@ -2,7 +2,6 @@
   <Import Project="..\Directory.Packages.props" />
 
   <!-- TODO: I'm having second thought on whether it would be better to consolidate all packages in one ItemGroup and sort them alphabetically. -->
-  <!-- TODO: Take special care for the complicated logic in TestApplication.MongoDB.csproj -->
 
   <!-- Versions from Directory.Build.props in the same folder -->
   <ItemGroup>
@@ -76,19 +75,6 @@
   <ItemGroup>
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup> -->
-
-  <!-- TODO: complicated logic here. Is it better to not centralize the package version for MongoDB.csproj? -->
-  <!-- Versions from TestApplication.MongoDB.csproj -->
-  <PropertyGroup>
-    <MongoDBDriverApiVersion Condition="'$(MongoDBDriverApiVersion)' == ''">2.13.3</MongoDBDriverApiVersion>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageVersion Include="MongoDB.Driver" Version="$(MongoDBDriverApiVersion)" />
-    <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v.3.1.0 is minimal version supported by auto instrumentation.
-    MongoDB.Driver 2.18+ references older version. It prevents to load required version from Additional Dependencies store-->
-    <!-- <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.0" Condition="'$(MongoDBDriverApiVersion)'>='2.18.0'" /> -->
-  </ItemGroup>
 
   <!-- Versions from TestApplication.MySqlData.csproj -->
   <ItemGroup>
