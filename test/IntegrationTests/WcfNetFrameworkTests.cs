@@ -22,10 +22,10 @@ namespace IntegrationTests;
 
 public class WcfNetFrameworkTests : WcfTestsBase
 {
-    private const string ServiceName = "Wcf.Client.NetFramework";
+    private const string ServiceName = "TestApplication.Wcf.Client.NetFramework";
 
     public WcfNetFrameworkTests(ITestOutputHelper output)
-        : base(ServiceName, output)
+        : base("Wcf.Client.NetFramework", output)
     {
     }
 
@@ -33,6 +33,8 @@ public class WcfNetFrameworkTests : WcfTestsBase
     [Trait("Category", "EndToEnd")]
     public async Task TracesResource()
     {
+        SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
+
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         collector.ResourceExpector.Expect("service.name", ServiceName); // this is set via env var and App.config, but env var has precedence

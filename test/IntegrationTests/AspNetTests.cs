@@ -27,10 +27,7 @@ public class AspNetTests
 {
     private const string ServiceName = "TestApplication.AspNet.NetFramework";
 
-    private readonly Dictionary<string, string> _environmentVariables = new()
-    {
-        { "OTEL_SERVICE_NAME", ServiceName }
-    };
+    private readonly Dictionary<string, string> _environmentVariables = new();
 
     public AspNetTests(ITestOutputHelper output)
     {
@@ -70,6 +67,8 @@ public class AspNetTests
     public async Task TracesResource()
     {
         Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
+
+        _environmentVariables["OTEL_SERVICE_NAME"] = ServiceName;
 
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
         // accessible to the Windows docker container where the test application is executed by binding

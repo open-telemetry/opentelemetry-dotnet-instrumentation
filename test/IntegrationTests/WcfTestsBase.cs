@@ -26,7 +26,6 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
     protected WcfTestsBase(string testAppName, ITestOutputHelper output)
         : base(testAppName, output)
     {
-        SetEnvironmentVariable("OTEL_SERVICE_NAME", testAppName);
     }
 
     protected ProcessHelper? ServerProcess { get; set; }
