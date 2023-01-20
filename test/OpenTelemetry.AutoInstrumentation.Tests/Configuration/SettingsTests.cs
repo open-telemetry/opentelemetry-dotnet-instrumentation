@@ -193,6 +193,7 @@ public class SettingsTests : IDisposable
 #endif
     [InlineData(nameof(TracerInstrumentation.NServiceBus), TracerInstrumentation.NServiceBus)]
     [InlineData(nameof(TracerInstrumentation.Elasticsearch), TracerInstrumentation.Elasticsearch)]
+    [InlineData(nameof(TracerInstrumentation.Quartz), TracerInstrumentation.Quartz)]
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, tracerInstrumentation);
