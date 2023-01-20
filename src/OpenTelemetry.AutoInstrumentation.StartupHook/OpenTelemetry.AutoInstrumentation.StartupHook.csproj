@@ -9,29 +9,29 @@
 
   <ItemGroup>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs" Link="Constants.cs" />
-    <Compile Include="..\Shared\OpenTelemetry.AutoInstrumentation.Logging\CustomLogger.cs">
-      <Link>OpenTelemetry.AutoInstrumentation.Logging\CustomLogger.cs</Link>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\CustomLogger.cs">
+      <Link>Logging\CustomLogger.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\OpenTelemetry.AutoInstrumentation.Logging\FileSink.cs">
-      <Link>OpenTelemetry.AutoInstrumentation.Logging\FileSink.cs</Link>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\FileSink.cs">
+      <Link>Logging\FileSink.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\OpenTelemetry.AutoInstrumentation.Logging\IOtelLogger.cs">
-      <Link>OpenTelemetry.AutoInstrumentation.Logging\IOtelLogger.cs</Link>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\IOtelLogger.cs">
+      <Link>Logging\IOtelLogger.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\OpenTelemetry.AutoInstrumentation.Logging\ISink.cs">
-      <Link>OpenTelemetry.AutoInstrumentation.Logging\ISink.cs</Link>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\ISink.cs">
+      <Link>Logging\ISink.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\OpenTelemetry.AutoInstrumentation.Logging\LogLevel.cs">
-      <Link>OpenTelemetry.AutoInstrumentation.Logging\LogLevel.cs</Link>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\LogLevel.cs">
+      <Link>Logging\LogLevel.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\OpenTelemetry.AutoInstrumentation.Logging\NoopSink.cs">
-      <Link>OpenTelemetry.AutoInstrumentation.Logging\NoopSink.cs</Link>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\NoopSink.cs">
+      <Link>Logging\NoopSink.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\OpenTelemetry.AutoInstrumentation.Logging\OtelLogging.cs">
-      <Link>OpenTelemetry.AutoInstrumentation.Logging\OtelLogging.cs</Link>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\OtelLogging.cs">
+      <Link>Logging\OtelLogging.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\OpenTelemetry.AutoInstrumentation.Logging\WriteCountingStream.cs">
-      <Link>OpenTelemetry.AutoInstrumentation.Logging\WriteCountingStream.cs</Link>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\WriteCountingStream.cs">
+      <Link>Logging\WriteCountingStream.cs</Link>
     </Compile>
   </ItemGroup>
 
