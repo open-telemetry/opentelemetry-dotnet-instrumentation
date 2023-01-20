@@ -58,6 +58,13 @@ public class MyPlugin
         // My custom logic here
         // Find supported options below
     }
+
+	// To configure Resource
+	public OpenTelemetry.Resources.ResourceBuilder ConfigureResource(OpenTelemetry.Resources.ResourceBuilder builder)
+	{
+		// My custom logic here
+		return builder;
+	}
 }
 ```
 

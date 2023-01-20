@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System.Collections.Generic;
 using OpenTelemetry.Resources;
 
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
@@ -25,7 +24,8 @@ internal static class ResourceConfigurator
     {
         resourceBuilder
             .AddTelemetrySdk()
-            .AddAttributes(new KeyValuePair<string, object>[] { new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version) });
+            .AddAttributes(new KeyValuePair<string, object>[] { new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version) })
+            .InvokePlugins(Instrumentation.PluginManager);
     }
 
     public static ResourceBuilder CreateResourceBuilder()

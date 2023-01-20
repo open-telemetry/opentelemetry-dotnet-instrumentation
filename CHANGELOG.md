@@ -15,6 +15,8 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
 
 ### Added
 
+- Add plugin support for
+ `ResourceBuilder ConfigureResource(ResourceBuilder builder)`.
 - Move `OpenTelemetry.AutoInstrumentation.Native.so` to `linux-x64` directory
   in `tracer-home` for Linux glibc, `OpenTelemetry.AutoInstrumentation.Native.so`
   to `linux-musl-x64` for Linux musl and

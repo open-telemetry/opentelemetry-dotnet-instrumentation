@@ -23,6 +23,7 @@ using OpenTelemetry.AutoInstrumentation.Configuration;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Xunit;
 
@@ -150,6 +151,21 @@ public class PluginManagerTests
         }
     }
 
+    [Fact]
+    public void ConfigureResourceSuccess()
+    {
+        var pluginAssemblyQualifiedName = typeof(MockPlugin).AssemblyQualifiedName!;
+        var settings = GetSettings(pluginAssemblyQualifiedName);
+        var pluginManager = new PluginManager(settings);
+
+        var resourceAction = () => ResourceBuilder.CreateEmpty().InvokePlugins(pluginManager);
+
+        using (new AssertionScope())
+        {
+            resourceAction.Should().NotThrow();
+        }
+    }
+
     private static GeneralSettings GetSettings(string assemblyQualifiedName)
     {
         var config = new NameValueConfigurationSource(new NameValueCollection()
@@ -180,6 +196,17 @@ public class PluginManagerTests
         {
             // Dummy overwritten setting
             options.IncludeFormattedMessage = true;
+        }
+
+        public ResourceBuilder ConfigureResource(ResourceBuilder builder)
+        {
+            var attributes = new List<KeyValuePair<string, object>>
+            {
+                new KeyValuePair<string, object>("key", "val"),
+            };
+
+            builder.AddAttributes(attributes);
+            return builder;
         }
     }
 
