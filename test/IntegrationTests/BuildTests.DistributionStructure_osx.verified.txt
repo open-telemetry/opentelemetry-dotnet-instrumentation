@@ -37,6 +37,7 @@
   /net/OpenTelemetry.Instrumentation.Http.dll,
   /net/OpenTelemetry.Instrumentation.MySqlData.dll,
   /net/OpenTelemetry.Instrumentation.Process.dll,
+  /net/OpenTelemetry.Instrumentation.Quartz.dll,
   /net/OpenTelemetry.Instrumentation.Runtime.dll,
   /net/OpenTelemetry.Instrumentation.SqlClient.dll,
   /net/OpenTelemetry.Instrumentation.StackExchangeRedis.dll,
