@@ -15,18 +15,19 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
 
 ### Added
 
+- Add Quartz traces instrumentation.
 - Add plugin support for
- `ResourceBuilder ConfigureResource(ResourceBuilder builder)`.
-- Move `OpenTelemetry.AutoInstrumentation.Native.so` to `linux-x64` directory
-  in `tracer-home` for Linux glibc, `OpenTelemetry.AutoInstrumentation.Native.so`
-  to `linux-musl-x64` for Linux musl and
-  `OpenTelemetry.AutoInstrumentation.Native.dylib`
-  to `osx-x64` for MacOS.
+  `ResourceBuilder ConfigureResource(ResourceBuilder builder)`.
 
 ### Changed
 
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
   [`1.4.0-rc.2`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-rc.2)
+- Move `OpenTelemetry.AutoInstrumentation.Native.so` to `linux-x64` directory
+  in `tracer-home` for Linux glibc, `OpenTelemetry.AutoInstrumentation.Native.so`
+  to `linux-musl-x64` for Linux musl and
+  `OpenTelemetry.AutoInstrumentation.Native.dylib`
+  to `osx-x64` for MacOS.
 
 ### Deprecated
 
