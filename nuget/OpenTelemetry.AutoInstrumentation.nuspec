@@ -27,8 +27,10 @@
         <dependency id="OpenTelemetry.Instrumentation.SqlClient" version="1.0.0-rc9.11" />
         <dependency id="OpenTelemetry.Instrumentation.Wcf" version="1.0.0-rc.8" />
         <dependency id="OpenTelemetry.Shims.OpenTracing" version="1.0.0-rc9.11" />
-        <dependency id="OpenTelemetry.Instrumentation.AspNetCore" version="1.0.0-rc9.11" />
         <dependency id="OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs" version="1.4.0-rc.2" />
+        <dependency id="OpenTelemetry.Instrumentation.AspNetCore" version="1.0.0-rc9.11" />
+        <dependency id="OpenTelemetry.Instrumentation.MySqlData" version="1.0.0-beta.5" />
+        <dependency id="OpenTelemetry.Instrumentation.StackExchangeRedis" version="1.0.0-rc9.7" />
       </group>
       <group targetFramework=".NETFramework4.6.2">
         <dependency id="OpenTelemetry" version="1.4.0-rc.2" />
