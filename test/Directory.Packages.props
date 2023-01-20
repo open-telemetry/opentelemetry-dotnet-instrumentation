@@ -26,10 +26,6 @@
     <PackageVersion Include="NServiceBus" Version="8.0.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageVersion Include="Npgsql" Version="6.0.5" />
-    <PackageVersion Include="OpenTelemetry" Version="1.4.0-rc.2" />
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.4.0-rc.2" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9.11" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.8" />
     <PackageVersion Include="StackExchange.Redis" Version="2.1.58" />
     <PackageVersion Include="StrongNamer" Version="0.2.5" />
     <PackageVersion Include="System.Collections.Immutable" Version="7.0.0" />
