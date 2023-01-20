@@ -42,6 +42,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.Wcf => Wrappers.AddWcfInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.NServiceBus => builder.AddSource("NServiceBus.Core"),
                 TracerInstrumentation.Elasticsearch => builder.AddSource("Elastic.Clients.Elasticsearch.ElasticsearchClient"),
+                TracerInstrumentation.Quartz => Wrappers.AddQuartzInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
 #if NET6_0_OR_GREATER
                 TracerInstrumentation.MassTransit => builder.AddSource("MassTransit"),
                 TracerInstrumentation.MongoDB => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources"),
@@ -150,6 +151,7 @@ internal static class EnvironmentConfigurationTracerHelper
         }
 
 #if NET6_0_OR_GREATER
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddMySqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
             lazyInstrumentationLoader.Add(new MySqlDataInitializer(pluginManager));
@@ -175,6 +177,16 @@ internal static class EnvironmentConfigurationTracerHelper
             builder.AddLegacySource("Grpc.Net.Client.GrpcOut");
 
             return builder;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddQuartzInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
+        {
+            lazyInstrumentationLoader.Add(new QuartzInitializer(pluginManager));
+
+            return builder.AddSource("OpenTelemetry.Instrumentation.Quartz")
+                .AddLegacySource("Quartz.Job.Execute")
+                .AddLegacySource("Quartz.Job.Veto");
         }
 
         // Exporters
