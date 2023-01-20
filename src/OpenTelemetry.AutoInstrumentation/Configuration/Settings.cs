@@ -25,55 +25,41 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 internal abstract class Settings
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="Settings"/> class
-    /// using the specified <see cref="IConfigurationSource"/> to initialize values.
+    /// Gets the the OTLP transport protocol. Supported values: Grpc and HttpProtobuf.
     /// </summary>
-    /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
-    protected Settings(IConfigurationSource source)
-    {
-        if (source == null)
-        {
-            throw new ArgumentNullException(nameof(source));
-        }
+    public OtlpExportProtocol? OtlpExportProtocol { get; private set; }
 
-        OtlpExportProtocol = GetExporterOtlpProtocol(source);
+    public static T FromDefaultSources<T>()
+        where T : Settings, new()
+    {
+#if NETFRAMEWORK
+        // on .NET Framework only, also read from app.config/web.config
+        var configuration = new Configuration(new EnvironmentConfigurationSource(), new NameValueConfigurationSource(System.Configuration.ConfigurationManager.AppSettings));
+#else
+        var configuration = new Configuration(new EnvironmentConfigurationSource());
+#endif
+        var settings = new T();
+        settings.Load(configuration);
+        return settings;
+    }
+
+    public void Load(Configuration configuration)
+    {
+        OtlpExportProtocol = GetExporterOtlpProtocol(configuration);
+        OnLoad(configuration);
     }
 
     /// <summary>
-    /// Gets the the OTLP transport protocol. Supported values: Grpc and HttpProtobuf.
+    /// Initializes a new instance of the <see cref="Settings"/> class
+    /// using the specified <see cref="Configuration"/> to initialize values.
     /// </summary>
-    public OtlpExportProtocol? OtlpExportProtocol { get; }
+    /// <param name="configuration">The <see cref="Configuration"/> to use when retrieving configuration values.</param>
+    protected abstract void OnLoad(Configuration configuration);
 
-    public static T FromDefaultSources<T>()
-        where T : Settings
-    {
-        var configurationSource = new CompositeConfigurationSource
-        {
-            new EnvironmentConfigurationSource(),
-
-#if NETFRAMEWORK
-            // on .NET Framework only, also read from app.config/web.config
-            new NameValueConfigurationSource(System.Configuration.ConfigurationManager.AppSettings)
-#endif
-        };
-
-        try
-        {
-            return (T)typeof(T)!
-                .GetConstructor(new[] { typeof(IConfigurationSource) })!
-                .Invoke(new object[] { configurationSource });
-        }
-        catch (TargetInvocationException ex)
-        {
-            // Unwrap the more informative internal exception
-            throw ex.InnerException ?? ex;
-        }
-    }
-
-    private static OtlpExportProtocol? GetExporterOtlpProtocol(IConfigurationSource source)
+    private static OtlpExportProtocol? GetExporterOtlpProtocol(Configuration configuration)
     {
         // the default in SDK is grpc. http/protobuf should be default for our purposes
-        var exporterOtlpProtocol = source.GetString(ConfigurationKeys.ExporterOtlpProtocol);
+        var exporterOtlpProtocol = configuration.GetString(ConfigurationKeys.ExporterOtlpProtocol);
 
         if (string.IsNullOrEmpty(exporterOtlpProtocol))
         {

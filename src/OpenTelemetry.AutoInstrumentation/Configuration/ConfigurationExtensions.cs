@@ -1,4 +1,4 @@
-// <copyright file="ConfigurationSourceExtensions.cs" company="OpenTelemetry Authors">
+// <copyright file="ConfigurationExtensions.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +14,11 @@
 // limitations under the License.
 // </copyright>
 
-using OpenTelemetry.AutoInstrumentation.Configuration;
+namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
-namespace OpenTelemetry.AutoInstrumentation.Util;
-
-internal static class ConfigurationSourceExtensions
+internal static class ConfigurationExtensions
 {
-    public static IList<TEnum> ParseEnabledEnumList<TEnum>(this IConfigurationSource source, string enabledConfiguration, string disabledConfiguration, string error)
+    public static IList<TEnum> ParseEnabledEnumList<TEnum>(this Configuration source, string enabledConfiguration, string disabledConfiguration, string error)
         where TEnum : struct, Enum, IConvertible
     {
         var instrumentations = new Dictionary<string, TEnum>();

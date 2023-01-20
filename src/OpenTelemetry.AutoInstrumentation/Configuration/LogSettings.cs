@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using OpenTelemetry.AutoInstrumentation.Util;
-
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 /// <summary>
@@ -24,52 +22,46 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 internal class LogSettings : Settings
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="LogSettings"/> class
-    /// using the specified <see cref="IConfigurationSource"/> to initialize values.
+    /// Gets a value indicating whether the logs should be loaded by the profiler. Default is true.
     /// </summary>
-    /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
-    public LogSettings(IConfigurationSource source)
-        : base(source)
-    {
-        LogsEnabled = source.GetBool(ConfigurationKeys.Logs.LogsEnabled) ?? true;
-        LogExporter = ParseLogExporter(source);
-        ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.Logs.ConsoleExporterEnabled) ?? false;
-        IncludeFormattedMessage = source.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
+    public bool LogsEnabled { get; private set; }
 
-        EnabledInstrumentations = source.ParseEnabledEnumList<LogInstrumentation>(
+    /// <summary>
+    /// Gets the logs exporter.
+    /// </summary>
+    public LogExporter LogExporter { get; private set; }
+
+    /// <summary>
+    /// Gets a value indicating whether the IncludeFormattedMessage is enabled.
+    /// </summary>
+    public bool IncludeFormattedMessage { get; private set; }
+
+    /// <summary>
+    /// Gets a value indicating whether the console exporter is enabled.
+    /// </summary>
+    public bool ConsoleExporterEnabled { get; private set; }
+
+    /// <summary>
+    /// Gets the list of enabled instrumentations.
+    /// </summary>
+    public IList<LogInstrumentation> EnabledInstrumentations { get; private set; } = new List<LogInstrumentation>();
+
+    protected override void OnLoad(Configuration configuration)
+    {
+        LogsEnabled = configuration.GetBool(ConfigurationKeys.Logs.LogsEnabled) ?? true;
+        LogExporter = ParseLogExporter(configuration);
+        ConsoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Logs.ConsoleExporterEnabled) ?? false;
+        IncludeFormattedMessage = configuration.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
+
+        EnabledInstrumentations = configuration.ParseEnabledEnumList<LogInstrumentation>(
             enabledConfiguration: ConfigurationKeys.Logs.Instrumentations,
             disabledConfiguration: ConfigurationKeys.Logs.DisabledInstrumentations,
             error: "The \"{0}\" is not recognized as supported logs instrumentation and cannot be enabled or disabled.");
     }
 
-    /// <summary>
-    /// Gets a value indicating whether the logs should be loaded by the profiler. Default is true.
-    /// </summary>
-    public bool LogsEnabled { get; }
-
-    /// <summary>
-    /// Gets the logs exporter.
-    /// </summary>
-    public LogExporter LogExporter { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the IncludeFormattedMessage is enabled.
-    /// </summary>
-    public bool IncludeFormattedMessage { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the console exporter is enabled.
-    /// </summary>
-    public bool ConsoleExporterEnabled { get; }
-
-    /// <summary>
-    /// Gets the list of enabled instrumentations.
-    /// </summary>
-    public IList<LogInstrumentation> EnabledInstrumentations { get; }
-
-    private static LogExporter ParseLogExporter(IConfigurationSource source)
+    private static LogExporter ParseLogExporter(Configuration configuration)
     {
-        var logExporterEnvVar = source.GetString(ConfigurationKeys.Logs.Exporter)
+        var logExporterEnvVar = configuration.GetString(ConfigurationKeys.Logs.Exporter)
             ?? Constants.ConfigurationValues.Exporters.Otlp;
 
         switch (logExporterEnvVar)

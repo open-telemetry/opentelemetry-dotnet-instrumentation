@@ -21,9 +21,9 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// </summary>
 internal class InstrumentationOptions
 {
-    internal InstrumentationOptions(IConfigurationSource source)
+    internal InstrumentationOptions(Configuration configuration)
     {
-        GraphQLSetDocument = source.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.GraphQLSetDocument) ?? false;
+        GraphQLSetDocument = configuration.GetBool(ConfigurationKeys.Traces.InstrumentationOptions.GraphQLSetDocument) ?? false;
     }
 
     /// <summary>

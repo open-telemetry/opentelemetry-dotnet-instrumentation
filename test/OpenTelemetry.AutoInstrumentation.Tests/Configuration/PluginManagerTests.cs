@@ -28,6 +28,8 @@ using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configuration;
 
+using Configuration = OpenTelemetry.AutoInstrumentation.Configuration.Configuration;
+
 public class PluginManagerTests
 {
     [Fact]
@@ -152,12 +154,14 @@ public class PluginManagerTests
 
     private static GeneralSettings GetSettings(string assemblyQualifiedName)
     {
-        var config = new NameValueConfigurationSource(new NameValueCollection()
+        var config = new Configuration(new NameValueConfigurationSource(new NameValueCollection()
         {
             { ConfigurationKeys.ProviderPlugins, assemblyQualifiedName }
-        });
+        }));
 
-        return new GeneralSettings(config);
+        var settings = new GeneralSettings();
+        settings.Load(config);
+        return settings;
     }
 
     public class MockPlugin

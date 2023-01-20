@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using OpenTelemetry.AutoInstrumentation.Util;
-
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 /// <summary>
@@ -24,101 +22,95 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 internal class TracerSettings : Settings
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="TracerSettings"/> class
-    /// using the specified <see cref="IConfigurationSource"/> to initialize values.
-    /// </summary>
-    /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
-    public TracerSettings(IConfigurationSource source)
-        : base(source)
-    {
-        TracesExporter = ParseTracesExporter(source);
-        ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.Traces.ConsoleExporterEnabled) ?? false;
-
-        EnabledInstrumentations = source.ParseEnabledEnumList<TracerInstrumentation>(
-            enabledConfiguration: ConfigurationKeys.Traces.Instrumentations,
-            disabledConfiguration: ConfigurationKeys.Traces.DisabledInstrumentations,
-            error: "The \"{0}\" is not recognized as supported trace instrumentation and cannot be enabled or disabled.");
-
-        var additionalSources = source.GetString(ConfigurationKeys.Traces.AdditionalSources);
-        if (additionalSources != null)
-        {
-            foreach (var sourceName in additionalSources.Split(Constants.ConfigurationValues.Separator))
-            {
-                ActivitySources.Add(sourceName);
-            }
-        }
-
-        var legacySources = source.GetString(ConfigurationKeys.Traces.LegacySources);
-        if (legacySources != null)
-        {
-            foreach (var sourceName in legacySources.Split(Constants.ConfigurationValues.Separator))
-            {
-                LegacySources.Add(sourceName);
-            }
-        }
-
-        TracesEnabled = source.GetBool(ConfigurationKeys.Traces.TracesEnabled) ?? true;
-        OpenTracingEnabled = source.GetBool(ConfigurationKeys.Traces.OpenTracingEnabled) ?? false;
-
-        InstrumentationOptions = new InstrumentationOptions(source);
-
-        TracesSampler = source.GetString(ConfigurationKeys.Traces.TracesSampler);
-        TracesSamplerArguments = source.GetString(ConfigurationKeys.Traces.TracesSamplerArguments);
-    }
-
-    /// <summary>
     /// Gets a value indicating whether the tracer should be loaded by the profiler. Default is true.
     /// </summary>
-    public bool TracesEnabled { get; }
+    public bool TracesEnabled { get; private set; }
 
     /// <summary>
     /// Gets a value indicating whether the OpenTracing tracer is enabled. Default is false.
     /// </summary>
-    public bool OpenTracingEnabled { get; }
+    public bool OpenTracingEnabled { get; private set; }
 
     /// <summary>
     /// Gets the traces exporter.
     /// </summary>
-    public TracesExporter TracesExporter { get; }
+    public TracesExporter TracesExporter { get; private set; }
 
     /// <summary>
     /// Gets a value indicating whether the console exporter is enabled.
     /// </summary>
-    public bool ConsoleExporterEnabled { get; }
+    public bool ConsoleExporterEnabled { get; private set; }
 
     /// <summary>
     /// Gets the list of enabled instrumentations.
     /// </summary>
-    public IList<TracerInstrumentation> EnabledInstrumentations { get; }
+    public IList<TracerInstrumentation> EnabledInstrumentations { get; private set; } = new List<TracerInstrumentation>();
 
     /// <summary>
-    /// Gets the list of activity sources to be added to the tracer at the startup.
+    /// Gets the list of activity configurations to be added to the tracer at the startup.
     /// </summary>
     public IList<string> ActivitySources { get; } = new List<string> { "OpenTelemetry.AutoInstrumentation.*" };
 
     /// <summary>
-    /// Gets the list of legacy sources to be added to the tracer at the startup.
+    /// Gets the list of legacy configurations to be added to the tracer at the startup.
     /// </summary>
     public IList<string> LegacySources { get; } = new List<string>();
 
     /// <summary>
     /// Gets the instrumentation options.
     /// </summary>
-    public InstrumentationOptions InstrumentationOptions { get; }
+    public InstrumentationOptions InstrumentationOptions { get; private set; } = new(new Configuration());
 
     /// <summary>
     /// Gets sampler to be used for traces.
     /// </summary>
-    public string? TracesSampler { get; }
+    public string? TracesSampler { get; private set; }
 
     /// <summary>
     /// Gets a value to be used as the sampler argument.
     /// </summary>
-    public string? TracesSamplerArguments { get; }
+    public string? TracesSamplerArguments { get; private set; }
 
-    private static TracesExporter ParseTracesExporter(IConfigurationSource source)
+    protected override void OnLoad(Configuration configuration)
     {
-        var tracesExporterEnvVar = source.GetString(ConfigurationKeys.Traces.Exporter)
+        TracesExporter = ParseTracesExporter(configuration);
+        ConsoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Traces.ConsoleExporterEnabled) ?? false;
+
+        EnabledInstrumentations = configuration.ParseEnabledEnumList<TracerInstrumentation>(
+            enabledConfiguration: ConfigurationKeys.Traces.Instrumentations,
+            disabledConfiguration: ConfigurationKeys.Traces.DisabledInstrumentations,
+            error: "The \"{0}\" is not recognized as supported trace instrumentation and cannot be enabled or disabled.");
+
+        var additionalSources = configuration.GetString(ConfigurationKeys.Traces.AdditionalSources);
+        if (additionalSources != null)
+        {
+            foreach (var configurationName in additionalSources.Split(Constants.ConfigurationValues.Separator))
+            {
+                ActivitySources.Add(configurationName);
+            }
+        }
+
+        var legacySources = configuration.GetString(ConfigurationKeys.Traces.LegacySources);
+        if (legacySources != null)
+        {
+            foreach (var configurationName in legacySources.Split(Constants.ConfigurationValues.Separator))
+            {
+                LegacySources.Add(configurationName);
+            }
+        }
+
+        TracesEnabled = configuration.GetBool(ConfigurationKeys.Traces.TracesEnabled) ?? true;
+        OpenTracingEnabled = configuration.GetBool(ConfigurationKeys.Traces.OpenTracingEnabled) ?? false;
+
+        InstrumentationOptions = new InstrumentationOptions(configuration);
+
+        TracesSampler = configuration.GetString(ConfigurationKeys.Traces.TracesSampler);
+        TracesSamplerArguments = configuration.GetString(ConfigurationKeys.Traces.TracesSamplerArguments);
+    }
+
+    private static TracesExporter ParseTracesExporter(Configuration configuration)
+    {
+        var tracesExporterEnvVar = configuration.GetString(ConfigurationKeys.Traces.Exporter)
             ?? Constants.ConfigurationValues.Exporters.Otlp;
 
         switch (tracesExporterEnvVar)

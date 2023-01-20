@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using OpenTelemetry.AutoInstrumentation.Util;
-
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 /// <summary>
@@ -24,22 +22,41 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 internal class MetricSettings : Settings
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="MetricSettings"/> class
-    /// using the specified <see cref="IConfigurationSource"/> to initialize values.
+    /// Gets a value indicating whether the metrics should be loaded by the profiler. Default is true.
     /// </summary>
-    /// <param name="source">The <see cref="IConfigurationSource"/> to use when retrieving configuration values.</param>
-    public MetricSettings(IConfigurationSource source)
-        : base(source)
-    {
-        MetricExporter = ParseMetricExporter(source);
-        ConsoleExporterEnabled = source.GetBool(ConfigurationKeys.Metrics.ConsoleExporterEnabled) ?? false;
+    public bool MetricsEnabled { get; private set; }
 
-        EnabledInstrumentations = source.ParseEnabledEnumList<MetricInstrumentation>(
+    /// <summary>
+    /// Gets the metrics exporter.
+    /// </summary>
+    public MetricsExporter MetricExporter { get; private set; }
+
+    /// <summary>
+    /// Gets a value indicating whether the console exporter is enabled.
+    /// </summary>
+    public bool ConsoleExporterEnabled { get; private set; }
+
+    /// <summary>
+    /// Gets the list of enabled meters.
+    /// </summary>
+    public IList<MetricInstrumentation> EnabledInstrumentations { get; private set; } = new List<MetricInstrumentation>();
+
+    /// <summary>
+    /// Gets the list of meters to be added to the MeterProvider at the startup.
+    /// </summary>
+    public IList<string> Meters { get; } = new List<string>();
+
+    protected override void OnLoad(Configuration configuration)
+    {
+        MetricExporter = ParseMetricExporter(configuration);
+        ConsoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Metrics.ConsoleExporterEnabled) ?? false;
+
+        EnabledInstrumentations = configuration.ParseEnabledEnumList<MetricInstrumentation>(
             enabledConfiguration: ConfigurationKeys.Metrics.Instrumentations,
             disabledConfiguration: ConfigurationKeys.Metrics.DisabledInstrumentations,
             error: "The \"{0}\" is not recognized as supported metrics instrumentation and cannot be enabled or disabled.");
 
-        var additionalSources = source.GetString(ConfigurationKeys.Metrics.AdditionalSources);
+        var additionalSources = configuration.GetString(ConfigurationKeys.Metrics.AdditionalSources);
         if (additionalSources != null)
         {
             foreach (var sourceName in additionalSources.Split(Constants.ConfigurationValues.Separator))
@@ -48,37 +65,12 @@ internal class MetricSettings : Settings
             }
         }
 
-        MetricsEnabled = source.GetBool(ConfigurationKeys.Metrics.MetricsEnabled) ?? true;
+        MetricsEnabled = configuration.GetBool(ConfigurationKeys.Metrics.MetricsEnabled) ?? true;
     }
 
-    /// <summary>
-    /// Gets a value indicating whether the metrics should be loaded by the profiler. Default is true.
-    /// </summary>
-    public bool MetricsEnabled { get; }
-
-    /// <summary>
-    /// Gets the metrics exporter.
-    /// </summary>
-    public MetricsExporter MetricExporter { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the console exporter is enabled.
-    /// </summary>
-    public bool ConsoleExporterEnabled { get; }
-
-    /// <summary>
-    /// Gets the list of enabled meters.
-    /// </summary>
-    public IList<MetricInstrumentation> EnabledInstrumentations { get; }
-
-    /// <summary>
-    /// Gets the list of meters to be added to the MeterProvider at the startup.
-    /// </summary>
-    public IList<string> Meters { get; } = new List<string>();
-
-    private static MetricsExporter ParseMetricExporter(IConfigurationSource source)
+    private static MetricsExporter ParseMetricExporter(Configuration configuration)
     {
-        var metricsExporterEnvVar = source.GetString(ConfigurationKeys.Metrics.Exporter)
+        var metricsExporterEnvVar = configuration.GetString(ConfigurationKeys.Metrics.Exporter)
                                     ?? Constants.ConfigurationValues.Exporters.Otlp;
 
         switch (metricsExporterEnvVar)

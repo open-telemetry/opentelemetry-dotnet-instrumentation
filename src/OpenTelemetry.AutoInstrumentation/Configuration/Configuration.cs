@@ -1,4 +1,4 @@
-// <copyright file="CompositeConfigurationSource.cs" company="OpenTelemetry Authors">
+// <copyright file="Configuration.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,38 +14,18 @@
 // limitations under the License.
 // </copyright>
 
-using System.Collections;
-
 namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 /// <summary>
-/// Represents one or more configuration sources.
+/// Represents the configration taken from one or more configuration sources.
 /// </summary>
-internal class CompositeConfigurationSource : IConfigurationSource, IEnumerable<IConfigurationSource>
+internal class Configuration
 {
-    private readonly List<IConfigurationSource> _sources = new();
+    private readonly IConfigurationSource[] _sources;
 
-    /// <summary>
-    /// Adds a new configuration source to this instance.
-    /// </summary>
-    /// <param name="source">The configuration source to add.</param>
-    public void Add(IConfigurationSource source)
+    public Configuration(params IConfigurationSource[] sources)
     {
-        if (source == null) { throw new ArgumentNullException(nameof(source)); }
-
-        _sources.Add(source);
-    }
-
-    /// <summary>
-    /// Inserts an element into the <see cref="CompositeConfigurationSource"/> at the specified index.
-    /// </summary>
-    /// <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param>
-    /// <param name="item">The configuration source to insert.</param>
-    public void Insert(int index, IConfigurationSource item)
-    {
-        if (item == null) { throw new ArgumentNullException(nameof(item)); }
-
-        _sources.Insert(index, item);
+        _sources = sources;
     }
 
     /// <summary>
@@ -71,7 +51,7 @@ internal class CompositeConfigurationSource : IConfigurationSource, IEnumerable<
     public int? GetInt32(string key)
     {
         return _sources.Select(source => source.GetInt32(key))
-            .FirstOrDefault(value => value != null);
+            .FirstOrDefault(value => value.HasValue);
     }
 
     /// <summary>
@@ -84,7 +64,7 @@ internal class CompositeConfigurationSource : IConfigurationSource, IEnumerable<
     public double? GetDouble(string key)
     {
         return _sources.Select(source => source.GetDouble(key))
-            .FirstOrDefault(value => value != null);
+            .FirstOrDefault(value => value.HasValue);
     }
 
     /// <summary>
@@ -97,18 +77,6 @@ internal class CompositeConfigurationSource : IConfigurationSource, IEnumerable<
     public bool? GetBool(string key)
     {
         return _sources.Select(source => source.GetBool(key))
-            .FirstOrDefault(value => value != null);
-    }
-
-    /// <inheritdoc />
-    IEnumerator<IConfigurationSource> IEnumerable<IConfigurationSource>.GetEnumerator()
-    {
-        return _sources.GetEnumerator();
-    }
-
-    /// <inheritdoc />
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return _sources.GetEnumerator();
+            .FirstOrDefault(value => value.HasValue);
     }
 }

@@ -18,10 +18,21 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 internal class GeneralSettings : Settings
 {
-    public GeneralSettings(IConfigurationSource source)
-        : base(source)
+    /// <summary>
+    /// Gets the list of plugins represented by <see cref="Type.AssemblyQualifiedName"/>.
+    /// </summary>
+    public IList<string> Plugins { get; private set; } = new List<string>();
+
+    /// <summary>
+    /// Gets a value indicating whether the <see cref="AppDomain.UnhandledException"/> event should trigger
+    /// the flushing of telemetry data.
+    /// Default is <c>false</c>.
+    /// </summary>
+    public bool FlushOnUnhandledException { get; private set; }
+
+    protected override void OnLoad(Configuration configuration)
     {
-        var providerPlugins = source.GetString(ConfigurationKeys.ProviderPlugins);
+        var providerPlugins = configuration.GetString(ConfigurationKeys.ProviderPlugins);
         if (providerPlugins != null)
         {
             foreach (var pluginAssemblyQualifiedName in providerPlugins.Split(Constants.ConfigurationValues.DotNetQualifiedNameSeparator))
@@ -30,18 +41,6 @@ internal class GeneralSettings : Settings
             }
         }
 
-        FlushOnUnhandledException = source.GetBool(ConfigurationKeys.FlushOnUnhandledException) ?? false;
+        FlushOnUnhandledException = configuration.GetBool(ConfigurationKeys.FlushOnUnhandledException) ?? false;
     }
-
-    /// <summary>
-    /// Gets the list of plugins represented by <see cref="Type.AssemblyQualifiedName"/>.
-    /// </summary>
-    public IList<string> Plugins { get; } = new List<string>();
-
-    /// <summary>
-    /// Gets a value indicating whether the <see cref="AppDomain.UnhandledException"/> event should trigger
-    /// the flushing of telemetry data.
-    /// Default is <c>false</c>.
-    /// </summary>
-    public bool FlushOnUnhandledException { get; }
 }

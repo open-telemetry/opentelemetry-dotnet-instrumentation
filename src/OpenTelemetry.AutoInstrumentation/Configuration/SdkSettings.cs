@@ -21,10 +21,14 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 /// </summary>
 internal class SdkSettings : Settings
 {
-    public SdkSettings(IConfigurationSource source)
-        : base(source)
+    /// <summary>
+    /// Gets the list of propagators to be used.
+    /// </summary>
+    public IList<Propagator> Propagators { get; } = new List<Propagator>();
+
+    protected override void OnLoad(Configuration configuration)
     {
-        var propagators = source.GetString(ConfigurationKeys.Sdk.Propagators);
+        var propagators = configuration.GetString(ConfigurationKeys.Sdk.Propagators);
 
         if (!string.IsNullOrEmpty(propagators))
         {
@@ -34,11 +38,6 @@ internal class SdkSettings : Settings
             }
         }
     }
-
-    /// <summary>
-    /// Gets the list of propagators to be used.
-    /// </summary>
-    public IList<Propagator> Propagators { get; } = new List<Propagator>();
 
     private static Propagator ParsePropagator(string propagator)
     {
