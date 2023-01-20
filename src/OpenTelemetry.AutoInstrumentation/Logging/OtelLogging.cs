@@ -15,7 +15,6 @@
 // </copyright>
 
 using System.Diagnostics;
-using OpenTelemetry.AutoInstrumentation.Configuration;
 
 namespace OpenTelemetry.AutoInstrumentation.Logging;
 
@@ -24,9 +23,10 @@ namespace OpenTelemetry.AutoInstrumentation.Logging;
 /// </summary>
 internal static class OtelLogging
 {
+    private const string OtelDotnetAutoLogDirectory = "OTEL_DOTNET_AUTO_LOG_DIRECTORY";
     private const string NixDefaultDirectory = "/var/log/opentelemetry/dotnet";
 
-    private static readonly ILogger Logger;
+    private static readonly IOtelLogger OtelLogger;
 
     static OtelLogging()
     {
@@ -51,10 +51,14 @@ internal static class OtelLogging
             sink = new NoopSink();
         }
 
-        Logger = new CustomLogger(sink);
+        OtelLogger = new CustomLogger(sink);
     }
 
-    internal static ILogger GetLogger() => Logger;
+    /// <summary>
+    /// Returns Logger implementation.
+    /// </summary>
+    /// <returns>Logger</returns>
+    public static IOtelLogger GetLogger() => OtelLogger;
 
     private static string GetLogFileName()
     {
@@ -78,7 +82,7 @@ internal static class OtelLogging
 
         try
         {
-            logDirectory = Environment.GetEnvironmentVariable(ConfigurationKeys.LogDirectory);
+            logDirectory = Environment.GetEnvironmentVariable(OtelDotnetAutoLogDirectory);
 
             if (logDirectory == null)
             {

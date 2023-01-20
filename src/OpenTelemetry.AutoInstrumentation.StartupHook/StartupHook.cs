@@ -42,21 +42,21 @@ internal class StartupHook
 
             if (appTargetFrameworkVersion < minSupportedFramework.Version)
             {
-                StartupHookEventSource.Log.Trace($"Error in StartupHook initialization: {appTargetFramework} is not supported");
+                Logger.LogInformation($"Error in StartupHook initialization: {appTargetFramework} is not supported");
                 return;
             }
         }
 
         var applicationName = GetApplicationName();
-        StartupHookEventSource.Log.Trace($"StartupHook loaded for application with name {applicationName}.");
+        Logger.LogInformation($"StartupHook loaded for application with name {applicationName}.");
 
         if (IsApplicationInExcludeList(applicationName))
         {
-            StartupHookEventSource.Log.Trace("Application is in the exclusion list. Skipping initialization.");
+            Logger.LogInformation("Application is in the exclusion list. Skipping initialization.");
             return;
         }
 
-        StartupHookEventSource.Log.Trace("Attempting initialization.");
+        Logger.LogInformation("Attempting initialization.");
 
         string loaderAssemblyLocation = GetLoaderAssemblyLocation();
 
@@ -75,16 +75,16 @@ internal class StartupHook
                 string loaderFilePath = Path.Combine(loaderAssemblyLocation, "OpenTelemetry.AutoInstrumentation.Loader.dll");
                 Assembly loaderAssembly = Assembly.LoadFrom(loaderFilePath);
                 loaderAssembly.CreateInstance("OpenTelemetry.AutoInstrumentation.Loader.Startup");
-                StartupHookEventSource.Log.Trace("StartupHook initialized successfully!");
+                Logger.LogInformation("StartupHook initialized successfully!");
             }
             else
             {
-                StartupHookEventSource.Log.Trace("OpenTelemetry.AutoInstrumentation.Instrumentation initialized before startup hook");
+                Logger.LogInformation("OpenTelemetry.AutoInstrumentation.Instrumentation initialized before startup hook");
             }
         }
         catch (Exception ex)
         {
-            StartupHookEventSource.Log.Error($"Error in StartupHook initialization: LoaderFolderLocation: {loaderAssemblyLocation}, Error: {ex}");
+            Logger.LogError($"Error in StartupHook initialization: LoaderFolderLocation: {loaderAssemblyLocation}, Error: {ex}");
             throw;
         }
     }
@@ -107,7 +107,7 @@ internal class StartupHook
         }
         catch (Exception ex)
         {
-            StartupHookEventSource.Log.Error($"Error getting loader directory location: {ex}");
+            Logger.LogError($"Error getting loader directory location: {ex}");
             throw;
         }
     }
@@ -120,7 +120,7 @@ internal class StartupHook
         }
         catch (Exception ex)
         {
-            StartupHookEventSource.Log.Error($"Error getting AppDomain.CurrentDomain.FriendlyName: {ex}");
+            Logger.LogError($"Error getting AppDomain.CurrentDomain.FriendlyName: {ex}");
             return string.Empty;
         }
     }
@@ -160,7 +160,7 @@ internal class StartupHook
         }
         catch (Exception ex)
         {
-            StartupHookEventSource.Log.Error($"Error getting environment variable {variableName}: {ex}");
+            Logger.LogError($"Error getting environment variable {variableName}: {ex}");
             return null;
         }
     }
@@ -202,7 +202,7 @@ internal class StartupHook
             catch (Exception ex)
             {
                 // Exception in evaluation should not throw or crash the process.
-                StartupHookEventSource.Log.Trace($"Couldn't evaluate reference to OpenTelemetry Sdk in an app. Exception: {ex}");
+                Logger.LogInformation($"Couldn't evaluate reference to OpenTelemetry Sdk in an app. Exception: {ex}");
             }
         }
 

@@ -25,7 +25,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configuration;
 
 internal static class EnvironmentConfigurationMetricHelper
 {
-    private static readonly ILogger Logger = OtelLogging.GetLogger();
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
 
     public static MeterProviderBuilder UseEnvironmentVariables(
         this MeterProviderBuilder builder,

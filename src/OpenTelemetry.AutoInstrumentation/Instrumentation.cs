@@ -33,7 +33,7 @@ namespace OpenTelemetry.AutoInstrumentation;
 /// </summary>
 internal static class Instrumentation
 {
-    private static readonly ILogger Logger = OtelLogging.GetLogger();
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
     private static readonly LazyInstrumentationLoader LazyInstrumentationLoader = new();
 
     private static int _initialized;
