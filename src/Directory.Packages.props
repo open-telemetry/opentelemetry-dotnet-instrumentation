@@ -3,8 +3,8 @@
 
   <!-- Versions from Directory.Build.props in the same folder -->
   <ItemGroup>
-	<PackageVersion Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" />
-	<PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.4" />
+    <PackageVersion Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.4" />
   </ItemGroup>
 
   <!-- Versions from OpenTelemetry.AutoInstrumentation.csproj -->
