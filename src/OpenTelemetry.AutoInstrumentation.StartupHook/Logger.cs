@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.StartupHook;

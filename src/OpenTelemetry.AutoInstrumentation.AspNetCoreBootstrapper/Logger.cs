@@ -24,13 +24,13 @@ internal static class Logger
 
     internal static void LogInformation(string message)
     {
-        Log.Information(message);
         BootstrapperEventSource.Log.Trace(message);
+        Log.Information(message);
     }
 
     internal static void LogError(string message)
     {
-        Log.Error(message);
         BootstrapperEventSource.Log.Error(message);
+        Log.Error(message);
     }
 }
