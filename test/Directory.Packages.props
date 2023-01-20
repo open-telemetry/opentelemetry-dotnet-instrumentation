@@ -1,105 +1,45 @@
 <Project>
   <Import Project="..\Directory.Packages.props" />
 
-  <!-- TODO: I'm having second thought on whether it would be better to consolidate all packages in one ItemGroup and sort them alphabetically. -->
-
-  <!-- Versions from Directory.Build.props in the same folder -->
   <ItemGroup>
-	<PackageVersion Include="FluentAssertions" Version="6.9.0" />
+    <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.0.0" />
+    <PackageVersion Include="FluentAssertions" Version="6.9.0" />
+    <PackageVersion Include="Google.Protobuf" Version="3.21.12" />
+    <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="3.4.0" />
+    <PackageVersion Include="GraphQL.Server.Ui.Playground" Version="3.4.0" />
+    <PackageVersion Include="GraphQL.StarWars" Version="1.0.0" />
+    <PackageVersion Include="GraphQL" Version="2.3.0" />
+    <PackageVersion Include="Grpc.Tools" Version="2.51.0" />
+    <PackageVersion Include="MassTransit" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
+    <PackageVersion Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+    <PackageVersion Include="Microsoft.AspNetCore" Version="2.2.0" />
+    <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="7.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
     <PackageVersion Include="Moq" Version="4.18.4" />
-    <PackageVersion Include="xunit" Version="2.4.2" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />
-  </ItemGroup>
-
-  <!-- Versions from IntegrationTests.csproj -->
-  <ItemGroup>
-    <PackageVersion Include="Google.Protobuf" Version="3.21.12" />
-    <PackageVersion Include="Grpc.Tools" Version="2.51.0" />
-    <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.0.1" />
+    <PackageVersion Include="MySql.Data" Version="6.10.7" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageVersion Include="Npgsql" Version="6.0.5" />
+    <PackageVersion Include="NServiceBus" Version="8.0.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.4.0-rc.2" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9.11" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.8" />
+    <PackageVersion Include="OpenTelemetry" Version="1.4.0-rc.2" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.1.58" />
     <PackageVersion Include="StrongNamer" Version="0.2.5" />
     <PackageVersion Include="System.Collections.Immutable" Version="7.0.0" />
-    <PackageVersion Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageVersion Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+    <PackageVersion Include="System.Runtime.InteropServices" Version="4.3.0" />
+    <PackageVersion Include="System.ServiceModel.Http" Version="4.10.0" />
+    <PackageVersion Include="System.ServiceModel.NetTcp" Version="4.10.0" />
+    <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
     <PackageVersion Include="Testcontainers" Version="2.3.0" />
     <PackageVersion Include="Verify.Xunit" Version="19.7.0" />
     <PackageVersion Include="xunit.abstractions" Version="2.0.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageVersion Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-  </ItemGroup>
-
-  <!-- Versions from TestApplication.Shared.csproj -->
-  <ItemGroup>
-    <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
-  </ItemGroup>
-
-  <!-- Versions from TestApplication.Elasticsearch.csproj -->
-  <ItemGroup>
-    <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.0.0" />
-  </ItemGroup>
-  
-  <!-- Versions from TestApplication.GraphQL.csproj -->
-  <ItemGroup>
-    <PackageVersion Include="GraphQL" Version="2.3.0" />
-    <PackageVersion Include="GraphQL.StarWars" Version="1.0.0" />
-    <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="3.4.0" />
-    <PackageVersion Include="GraphQL.Server.Ui.Playground" Version="3.4.0" />
-    <PackageVersion Include="Microsoft.AspNetCore" Version="2.2.0" />
-  </ItemGroup>
-
-  <!-- Versions from TestApplication.MassTransit.csproj -->
-  <ItemGroup>
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
-    <PackageVersion Include="MassTransit" Version="8.0.0" />
-  </ItemGroup>
-
-  <!-- Duplicate -->
-  <!-- Versions from TestApplication.Modules.csproj
-  <ItemGroup>
-    <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
-  </ItemGroup> -->
-
-  <!-- Versions from TestApplication.MySqlData.csproj -->
-  <ItemGroup>
-    <PackageVersion Include="MySql.Data" Version="6.10.7" />
-  </ItemGroup>
-
-  <!-- Versions from TestApplication.Npgsql.csproj -->
-  <ItemGroup>
-    <PackageVersion Include="Npgsql" Version="6.0.5" />
-  </ItemGroup>
-
-  <!-- Versions from TestApplication.NServiceBus.csproj -->
-  <ItemGroup>
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
-    <PackageVersion Include="NServiceBus" Version="8.0.0" />
-  </ItemGroup>
-
-  <!-- Versions from TestApplication.Plugins.csproj -->
-  <ItemGroup>
-    <PackageVersion Include="OpenTelemetry" Version="1.4.0-rc.2" />
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.4.0-rc.2" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9.11" />
-  </ItemGroup>
-
-  <!-- Versions from TestApplication.Smoke.csproj -->
-  <ItemGroup>
-    <PackageVersion Include="Microsoft.Extensions.Logging" Version="7.0.0" />
-  </ItemGroup>
-
-  <!-- Versions from TestApplication.StackExchangeRedis.csproj -->
-  <ItemGroup>
-    <PackageVersion Include="StackExchange.Redis" Version="2.1.58" />
-  </ItemGroup>
-
-  <!-- Versions from TestApplication.Wcf.Client.DotNet.csproj -->
-  <ItemGroup>
-    <PackageVersion Include="System.ServiceModel.Http" Version="4.10.0" />
-    <PackageVersion Include="System.ServiceModel.NetTcp" Version="4.10.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.8" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />
+    <PackageVersion Include="xunit" Version="2.4.2" />
   </ItemGroup>
 </Project>
