@@ -90,5 +90,10 @@ internal enum TracerInstrumentation
     /// <summary>
     /// Elasticsearch instrumentation.
     /// </summary>
-    Elasticsearch = 12
+    Elasticsearch = 12,
+
+    /// <summary>
+    /// Quartz instrumentation.
+    /// </summary>
+    Quartz = 13
 }
