@@ -91,12 +91,6 @@
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="7.0.0" />
   </ItemGroup>
 
-  <!-- TODO: VersionOverride: reason unknown for why this csproj used a lower version. Need to verify if latest version works. -->
-  <!-- Versions from TestApplication.SqlClient.csproj 
-  <ItemGroup>
-    <PackageVersion Include="Microsoft.Data.SqlClient" Version="1.1.4" />
-  </ItemGroup> -->
-
   <!-- Versions from TestApplication.StackExchangeRedis.csproj -->
   <ItemGroup>
     <PackageVersion Include="StackExchange.Redis" Version="2.1.58" />
