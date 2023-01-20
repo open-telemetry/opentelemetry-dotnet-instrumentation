@@ -15,7 +15,6 @@
 // </copyright>
 
 #if NET462
-using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
