@@ -20,8 +20,5 @@ namespace OpenTelemetry.AutoInstrumentation.Loader.Benchmark;
 
 internal class Program
 {
-    private static void Main(string[] args)
-    {
-        BenchmarkRunner.Run<StartupLoggerBenchmarks>();
-    }
+    private static void Main(string[] args) => BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 }
