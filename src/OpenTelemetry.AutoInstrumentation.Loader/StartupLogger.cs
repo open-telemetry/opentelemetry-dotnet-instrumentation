@@ -26,6 +26,7 @@ internal static class StartupLogger
     private static readonly bool DebugEnabled = IsDebugEnabled();
     private static readonly string? LogDirectory = GetLogDirectory();
     private static readonly string? StartupLogFilePath = SetStartupLogFilePath();
+    private static readonly HashSet<char> InvalidChars = GetInvalidChars();
 
     // It is not necessary to dispose of FileSink explicitly: the OS closes the respective
     // native handle when the process is closed. Moreover, this is a low-volume log and
@@ -94,11 +95,10 @@ internal static class StartupLogger
             // remove any of those. For the first assembly loaded by the process this is typically
             // expected to be name of the file with the application entry point.
             var appDomainFriendlyName = AppDomain.CurrentDomain.FriendlyName;
-            var invalidChars = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
             var sb = new StringBuilder(appDomainFriendlyName);
             for (int i = 0; i < sb.Length; i++)
             {
-                if (invalidChars.IndexOf(sb[i]) != -1)
+                if (InvalidChars.Contains(sb[i]))
                 {
                     sb[i] = '_';
                 }
@@ -118,6 +118,17 @@ internal static class StartupLogger
             // We can't get the process info
             return Path.Combine(LogDirectory, $"otel-dotnet-auto-loader-{Guid.NewGuid()}.log");
         }
+    }
+
+    private static HashSet<char> GetInvalidChars()
+    {
+        var invalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
+        foreach (var c in Path.GetInvalidPathChars())
+        {
+            invalidChars.Add(c);
+        }
+
+        return invalidChars;
     }
 
     private static string? GetLogDirectory()
