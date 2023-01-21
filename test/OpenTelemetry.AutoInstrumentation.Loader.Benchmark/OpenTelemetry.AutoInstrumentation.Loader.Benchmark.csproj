@@ -10,4 +10,8 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.4" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\OpenTelemetry.AutoInstrumentation.Loader\OpenTelemetry.AutoInstrumentation.Loader.csproj" />
+  </ItemGroup>
 </Project>

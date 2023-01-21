@@ -24,9 +24,9 @@ Intel Core i9-10900K CPU 3.70GHz, 1 CPU, 20 logical and 10 physical cores
   DefaultJob : .NET 6.0.13 (6.0.1322.58009), X64 RyuJIT AVX2
 
 
-|                Method |      Mean |     Error |    StdDev |
-|---------------------- |----------:|----------:|----------:|
-| SetStartupLogFilePath | 0.0024 ns | 0.0024 ns | 0.0022 ns |
+|                Method |     Mean |     Error |    StdDev |
+|---------------------- |---------:|----------:|----------:|
+| SetStartupLogFilePath | 1.496 us | 0.0289 us | 0.0309 us |
  */
 
 namespace OpenTelemetry.AutoInstrumentation.Loader.Benchmark;
@@ -35,6 +35,6 @@ public class StartupLoggerBenchmarks
     [Benchmark]
     public void SetStartupLogFilePath()
     {
-        // var path = StartupLogger.SetStartupLogFilePath();
+        var path = StartupLogger.SetStartupLogFilePath();
     }
 }
