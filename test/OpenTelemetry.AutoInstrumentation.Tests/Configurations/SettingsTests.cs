@@ -194,6 +194,9 @@ public class SettingsTests : IDisposable
     [InlineData(nameof(TracerInstrumentation.NServiceBus), TracerInstrumentation.NServiceBus)]
     [InlineData(nameof(TracerInstrumentation.Elasticsearch), TracerInstrumentation.Elasticsearch)]
     [InlineData(nameof(TracerInstrumentation.Quartz), TracerInstrumentation.Quartz)]
+#if NET6_0_OR_GREATER
+    [InlineData(nameof(TracerInstrumentation.EntityFrameworkCore), TracerInstrumentation.EntityFrameworkCore)]
+#endif
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, tracerInstrumentation);

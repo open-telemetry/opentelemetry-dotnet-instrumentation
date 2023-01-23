@@ -48,6 +48,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.MongoDB => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources"),
                 TracerInstrumentation.MySqlData => Wrappers.AddMySqlClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.StackExchangeRedis => builder.AddSource("OpenTelemetry.Instrumentation.StackExchangeRedis"),
+                TracerInstrumentation.EntityFrameworkCore => Wrappers.AddEntityFrameworkCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
 #endif
                 _ => null
             };
@@ -188,6 +189,16 @@ internal static class EnvironmentConfigurationTracerHelper
                 .AddLegacySource("Quartz.Job.Execute")
                 .AddLegacySource("Quartz.Job.Veto");
         }
+
+#if NET6_0_OR_GREATER
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddEntityFrameworkCoreInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
+        {
+            lazyInstrumentationLoader.Add(new EntityFrameworkCoreInitializer(pluginManager));
+
+            return builder.AddSource("OpenTelemetry.EntityFrameworkCore");
+        }
+#endif
 
         // Exporters
 

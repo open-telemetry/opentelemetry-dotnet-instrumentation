@@ -95,5 +95,12 @@ internal enum TracerInstrumentation
     /// <summary>
     /// Quartz instrumentation.
     /// </summary>
-    Quartz = 13
+    Quartz = 13,
+
+#if NET6_0_OR_GREATER
+    /// <summary>
+    /// Entity Framework Core instrumentation.
+    /// </summary>
+    EntityFrameworkCore = 14
+#endif
 }

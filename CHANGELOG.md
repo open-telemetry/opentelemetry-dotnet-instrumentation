@@ -15,7 +15,8 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
 
 ### Added
 
-- Add Quartz traces instrumentation.
+- Add support for Quartz traces instrumentation.
+- Add support for EntityFrameworkCore traces instrumentations.
 
 ### Changed
 
