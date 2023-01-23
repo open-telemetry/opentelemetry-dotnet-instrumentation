@@ -25,7 +25,7 @@
     <PackageVersion Include="MySql.Data" Version="6.10.7" />
     <PackageVersion Include="NServiceBus" Version="8.0.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
-    <PackageVersion Include="Npgsql" Version="6.0.5" />
+    <PackageVersion Include="Npgsql" Version="7.0.1" />
     <PackageVersion Include="Quartz" Version="3.4.0" />
     <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.4.0" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.4.0" />
