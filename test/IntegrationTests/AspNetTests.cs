@@ -61,7 +61,7 @@ public class AspNetTests
         collector.AssertExpectations();
     }
 
-    [Fact(Skip = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1429")]
+    [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
     public async Task TracesResource()
