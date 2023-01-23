@@ -42,7 +42,7 @@ internal class LazyInstrumentationLoader : IDisposable
 
     private class OnAssemblyLoadInitializer
     {
-        private static readonly ILogger Logger = OtelLogging.GetLogger();
+        private static readonly IOtelLogger OtelLogger = OtelLogging.GetLogger();
         private readonly InstrumentationInitializer _instrumentationInitializer;
         private readonly ILifespanManager _lifespanManager;
         private readonly string _requiredAssemblyName;
@@ -101,7 +101,7 @@ internal class LazyInstrumentationLoader : IDisposable
             AppDomain.CurrentDomain.AssemblyLoad -= CurrentDomain_AssemblyLoad;
 
             var initializerName = _instrumentationInitializer.GetType().Name;
-            Logger.Debug("'{0}' started", initializerName);
+            OtelLogger.Debug("'{0}' started", initializerName);
 
             try
             {
@@ -109,7 +109,7 @@ internal class LazyInstrumentationLoader : IDisposable
             }
             catch (Exception ex)
             {
-                Logger.Error(ex, "'{0}' failed", initializerName);
+                OtelLogger.Error(ex, "'{0}' failed", initializerName);
             }
         }
 

@@ -1,4 +1,4 @@
-// <copyright file="ErrorLocationStruct.cs" company="OpenTelemetry Authors">
+// <copyright file="Logger.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,23 +14,23 @@
 // limitations under the License.
 // </copyright>
 
-using OpenTelemetry.AutoInstrumentation.DuckTyping;
+using OpenTelemetry.AutoInstrumentation.Logging;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
+namespace OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper;
 
-/// <summary>
-/// GraphQL.ErrorLocation interface for ducktyping
-/// </summary>
-[DuckCopy]
-internal struct ErrorLocationStruct
+internal static class Logger
 {
-    /// <summary>
-    /// Gets the line number of the document where the error occurred
-    /// </summary>
-    public int Line;
+    private static readonly IOtelLogger Log = OtelLogging.GetLogger();
 
-    /// <summary>
-    /// Gets the column number of the document where the error occurred
-    /// </summary>
-    public int Column;
+    internal static void LogInformation(string message)
+    {
+        BootstrapperEventSource.Log.Trace(message);
+        Log.Information(message);
+    }
+
+    internal static void LogError(string message)
+    {
+        BootstrapperEventSource.Log.Error(message);
+        Log.Error(message);
+    }
 }

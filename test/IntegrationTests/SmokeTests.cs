@@ -110,7 +110,11 @@ public class SmokeTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.ResourceExpector.Expect("service.name", ServiceName);
+        collector.ResourceExpector.Expect("service.name", ServiceName); // this is set via env var and App.config, but env var has precedence
+#if NETFRAMEWORK
+        // TODO: uncomment the line below as part of https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1429
+        // collector.ResourceExpector.Expect("deployment.environment", "test"); // this is set via App.config
+#endif
         collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
         collector.ResourceExpector.Expect("telemetry.sdk.language", "dotnet");
         collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version);

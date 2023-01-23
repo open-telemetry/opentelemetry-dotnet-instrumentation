@@ -14,11 +14,9 @@
 // limitations under the License.
 // </copyright>
 
-using System.Runtime.CompilerServices;
-
 namespace OpenTelemetry.AutoInstrumentation.Logging;
 
-internal class CustomLogger : ILogger
+internal class CustomLogger : IOtelLogger
 {
     private static readonly object[] NoPropertyValues = Array.Empty<object>();
 
@@ -35,163 +33,163 @@ internal class CustomLogger : ILogger
         return true;
     }
 
-    public void Debug(string messageTemplate, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Debug, exception: null, messageTemplate, NoPropertyValues, sourceLine, sourceFile);
+    public void Debug(string messageTemplate)
+        => Write(LogLevel.Debug, exception: null, messageTemplate, NoPropertyValues);
 
-    public void Debug<T>(string messageTemplate, T property, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Debug, exception: null, messageTemplate, property, sourceLine, sourceFile);
+    public void Debug<T>(string messageTemplate, T property)
+        => Write(LogLevel.Debug, exception: null, messageTemplate, property);
 
-    public void Debug<T0, T1>(string messageTemplate, T0 property0, T1 property1, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Debug, exception: null, messageTemplate, property0, property1, sourceLine, sourceFile);
+    public void Debug<T0, T1>(string messageTemplate, T0 property0, T1 property1)
+        => Write(LogLevel.Debug, exception: null, messageTemplate, property0, property1);
 
-    public void Debug<T0, T1, T2>(string messageTemplate, T0 property0, T1 property1, T2 property2, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Debug, exception: null, messageTemplate, property0, property1, property2, sourceLine, sourceFile);
+    public void Debug<T0, T1, T2>(string messageTemplate, T0 property0, T1 property1, T2 property2)
+        => Write(LogLevel.Debug, exception: null, messageTemplate, property0, property1, property2);
 
-    public void Debug(string messageTemplate, object[] args, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Debug, exception: null, messageTemplate, args, sourceLine, sourceFile);
+    public void Debug(string messageTemplate, object[] args)
+        => Write(LogLevel.Debug, exception: null, messageTemplate, args);
 
-    public void Debug(Exception exception, string messageTemplate, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Debug, exception, messageTemplate, NoPropertyValues, sourceLine, sourceFile);
+    public void Debug(Exception exception, string messageTemplate)
+        => Write(LogLevel.Debug, exception, messageTemplate, NoPropertyValues);
 
-    public void Debug<T>(Exception exception, string messageTemplate, T property, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Debug, exception, messageTemplate, property, sourceLine, sourceFile);
+    public void Debug<T>(Exception exception, string messageTemplate, T property)
+        => Write(LogLevel.Debug, exception, messageTemplate, property);
 
-    public void Debug<T0, T1>(Exception exception, string messageTemplate, T0 property0, T1 property1, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Debug, exception, messageTemplate, property0, property1, sourceLine, sourceFile);
+    public void Debug<T0, T1>(Exception exception, string messageTemplate, T0 property0, T1 property1)
+        => Write(LogLevel.Debug, exception, messageTemplate, property0, property1);
 
-    public void Debug<T0, T1, T2>(Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Debug, exception, messageTemplate, property0, property1, property2, sourceLine, sourceFile);
+    public void Debug<T0, T1, T2>(Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2)
+        => Write(LogLevel.Debug, exception, messageTemplate, property0, property1, property2);
 
-    public void Debug(Exception exception, string messageTemplate, object[] args, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Debug, exception, messageTemplate, args, sourceLine, sourceFile);
+    public void Debug(Exception exception, string messageTemplate, object[] args)
+        => Write(LogLevel.Debug, exception, messageTemplate, args);
 
-    public void Information(string messageTemplate, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Information, exception: null, messageTemplate, NoPropertyValues, sourceLine, sourceFile);
+    public void Information(string messageTemplate)
+        => Write(LogLevel.Information, exception: null, messageTemplate, NoPropertyValues);
 
-    public void Information<T>(string messageTemplate, T property, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Information, exception: null, messageTemplate, property, sourceLine, sourceFile);
+    public void Information<T>(string messageTemplate, T property)
+        => Write(LogLevel.Information, exception: null, messageTemplate, property);
 
-    public void Information<T0, T1>(string messageTemplate, T0 property0, T1 property1, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Information, exception: null, messageTemplate, property0, property1, sourceLine, sourceFile);
+    public void Information<T0, T1>(string messageTemplate, T0 property0, T1 property1)
+        => Write(LogLevel.Information, exception: null, messageTemplate, property0, property1);
 
-    public void Information<T0, T1, T2>(string messageTemplate, T0 property0, T1 property1, T2 property2, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Information, exception: null, messageTemplate, property0, property1, property2, sourceLine, sourceFile);
+    public void Information<T0, T1, T2>(string messageTemplate, T0 property0, T1 property1, T2 property2)
+        => Write(LogLevel.Information, exception: null, messageTemplate, property0, property1, property2);
 
-    public void Information(string messageTemplate, object[] args, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Information, exception: null, messageTemplate, args, sourceLine, sourceFile);
+    public void Information(string messageTemplate, object[] args)
+        => Write(LogLevel.Information, exception: null, messageTemplate, args);
 
-    public void Information(Exception exception, string messageTemplate, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Information, exception, messageTemplate, NoPropertyValues, sourceLine, sourceFile);
+    public void Information(Exception exception, string messageTemplate)
+        => Write(LogLevel.Information, exception, messageTemplate, NoPropertyValues);
 
-    public void Information<T>(Exception exception, string messageTemplate, T property, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Information, exception, messageTemplate, property, sourceLine, sourceFile);
+    public void Information<T>(Exception exception, string messageTemplate, T property)
+        => Write(LogLevel.Information, exception, messageTemplate, property);
 
-    public void Information<T0, T1>(Exception exception, string messageTemplate, T0 property0, T1 property1, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Information, exception, messageTemplate, property0, property1, sourceLine, sourceFile);
+    public void Information<T0, T1>(Exception exception, string messageTemplate, T0 property0, T1 property1)
+        => Write(LogLevel.Information, exception, messageTemplate, property0, property1);
 
-    public void Information<T0, T1, T2>(Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Information, exception, messageTemplate, property0, property1, property2, sourceLine, sourceFile);
+    public void Information<T0, T1, T2>(Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2)
+        => Write(LogLevel.Information, exception, messageTemplate, property0, property1, property2);
 
-    public void Information(Exception exception, string messageTemplate, object[] args, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Information, exception, messageTemplate, args, sourceLine, sourceFile);
+    public void Information(Exception exception, string messageTemplate, object[] args)
+        => Write(LogLevel.Information, exception, messageTemplate, args);
 
-    public void Warning(string messageTemplate, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Warning, exception: null, messageTemplate, NoPropertyValues, sourceLine, sourceFile);
+    public void Warning(string messageTemplate)
+        => Write(LogLevel.Warning, exception: null, messageTemplate, NoPropertyValues);
 
-    public void Warning<T>(string messageTemplate, T property, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Warning, exception: null, messageTemplate, property, sourceLine, sourceFile);
+    public void Warning<T>(string messageTemplate, T property)
+        => Write(LogLevel.Warning, exception: null, messageTemplate, property);
 
-    public void Warning<T0, T1>(string messageTemplate, T0 property0, T1 property1, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Warning, exception: null, messageTemplate, property0, property1, sourceLine, sourceFile);
+    public void Warning<T0, T1>(string messageTemplate, T0 property0, T1 property1)
+        => Write(LogLevel.Warning, exception: null, messageTemplate, property0, property1);
 
-    public void Warning<T0, T1, T2>(string messageTemplate, T0 property0, T1 property1, T2 property2, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Warning, exception: null, messageTemplate, property0, property1, property2, sourceLine, sourceFile);
+    public void Warning<T0, T1, T2>(string messageTemplate, T0 property0, T1 property1, T2 property2)
+        => Write(LogLevel.Warning, exception: null, messageTemplate, property0, property1, property2);
 
-    public void Warning(string messageTemplate, object[] args, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Warning, exception: null, messageTemplate, args, sourceLine, sourceFile);
+    public void Warning(string messageTemplate, object[] args)
+        => Write(LogLevel.Warning, exception: null, messageTemplate, args);
 
-    public void Warning(Exception exception, string messageTemplate, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Warning, exception, messageTemplate, NoPropertyValues, sourceLine, sourceFile);
+    public void Warning(Exception exception, string messageTemplate)
+        => Write(LogLevel.Warning, exception, messageTemplate, NoPropertyValues);
 
-    public void Warning<T>(Exception exception, string messageTemplate, T property, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Warning, exception, messageTemplate, property, sourceLine, sourceFile);
+    public void Warning<T>(Exception exception, string messageTemplate, T property)
+        => Write(LogLevel.Warning, exception, messageTemplate, property);
 
-    public void Warning<T0, T1>(Exception exception, string messageTemplate, T0 property0, T1 property1, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Warning, exception, messageTemplate, property0, property1, sourceLine, sourceFile);
+    public void Warning<T0, T1>(Exception exception, string messageTemplate, T0 property0, T1 property1)
+        => Write(LogLevel.Warning, exception, messageTemplate, property0, property1);
 
-    public void Warning<T0, T1, T2>(Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Warning, exception, messageTemplate, property0, property1, property2, sourceLine, sourceFile);
+    public void Warning<T0, T1, T2>(Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2)
+        => Write(LogLevel.Warning, exception, messageTemplate, property0, property1, property2);
 
-    public void Warning(Exception exception, string messageTemplate, object[] args, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Warning, exception, messageTemplate, args, sourceLine, sourceFile);
+    public void Warning(Exception exception, string messageTemplate, object[] args)
+        => Write(LogLevel.Warning, exception, messageTemplate, args);
 
-    public void Error(string messageTemplate, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Error, exception: null, messageTemplate, NoPropertyValues, sourceLine, sourceFile);
+    public void Error(string messageTemplate)
+        => Write(LogLevel.Error, exception: null, messageTemplate, NoPropertyValues);
 
-    public void Error<T>(string messageTemplate, T property, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Error, exception: null, messageTemplate, property, sourceLine, sourceFile);
+    public void Error<T>(string messageTemplate, T property)
+        => Write(LogLevel.Error, exception: null, messageTemplate, property);
 
-    public void Error<T0, T1>(string messageTemplate, T0 property0, T1 property1, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Error, exception: null, messageTemplate, property0, property1, sourceLine, sourceFile);
+    public void Error<T0, T1>(string messageTemplate, T0 property0, T1 property1)
+        => Write(LogLevel.Error, exception: null, messageTemplate, property0, property1);
 
-    public void Error<T0, T1, T2>(string messageTemplate, T0 property0, T1 property1, T2 property2, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Error, exception: null, messageTemplate, property0, property1, property2, sourceLine, sourceFile);
+    public void Error<T0, T1, T2>(string messageTemplate, T0 property0, T1 property1, T2 property2)
+        => Write(LogLevel.Error, exception: null, messageTemplate, property0, property1, property2);
 
-    public void Error(string messageTemplate, object[] args, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Error, exception: null, messageTemplate, args, sourceLine, sourceFile);
+    public void Error(string messageTemplate, object[] args)
+        => Write(LogLevel.Error, exception: null, messageTemplate, args);
 
-    public void Error(Exception exception, string messageTemplate, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Error, exception, messageTemplate, NoPropertyValues, sourceLine, sourceFile);
+    public void Error(Exception exception, string messageTemplate)
+        => Write(LogLevel.Error, exception, messageTemplate, NoPropertyValues);
 
-    public void Error<T>(Exception exception, string messageTemplate, T property, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Error, exception, messageTemplate, property, sourceLine, sourceFile);
+    public void Error<T>(Exception exception, string messageTemplate, T property)
+        => Write(LogLevel.Error, exception, messageTemplate, property);
 
-    public void Error<T0, T1>(Exception exception, string messageTemplate, T0 property0, T1 property1, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Error, exception, messageTemplate, property0, property1, sourceLine, sourceFile);
+    public void Error<T0, T1>(Exception exception, string messageTemplate, T0 property0, T1 property1)
+        => Write(LogLevel.Error, exception, messageTemplate, property0, property1);
 
-    public void Error<T0, T1, T2>(Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Error, exception, messageTemplate, property0, property1, property2, sourceLine, sourceFile);
+    public void Error<T0, T1, T2>(Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2)
+        => Write(LogLevel.Error, exception, messageTemplate, property0, property1, property2);
 
-    public void Error(Exception exception, string messageTemplate, object[] args, [CallerLineNumber] int sourceLine = 0, [CallerFilePath] string sourceFile = "")
-        => Write(LogLevel.Error, exception, messageTemplate, args, sourceLine, sourceFile);
+    public void Error(Exception exception, string messageTemplate, object[] args)
+        => Write(LogLevel.Error, exception, messageTemplate, args);
 
-    private void Write<T>(LogLevel level, Exception? exception, string messageTemplate, T property, int sourceLine, string sourceFile)
+    private void Write<T>(LogLevel level, Exception? exception, string messageTemplate, T property)
     {
         if (IsEnabled(level))
         {
             // Avoid boxing + array allocation if disabled
-            WriteImpl(level, exception, messageTemplate, new object?[] { property }, sourceLine, sourceFile);
+            WriteImpl(level, exception, messageTemplate, new object?[] { property });
         }
     }
 
-    private void Write<T0, T1>(LogLevel level, Exception? exception, string messageTemplate, T0 property0, T1 property1, int sourceLine, string sourceFile)
+    private void Write<T0, T1>(LogLevel level, Exception? exception, string messageTemplate, T0 property0, T1 property1)
     {
         if (IsEnabled(level))
         {
             // Avoid boxing + array allocation if disabled
-            WriteImpl(level, exception, messageTemplate, new object?[] { property0, property1 }, sourceLine, sourceFile);
+            WriteImpl(level, exception, messageTemplate, new object?[] { property0, property1 });
         }
     }
 
-    private void Write<T0, T1, T2>(LogLevel level, Exception? exception, string messageTemplate, T0 property0, T1 property1, T2 property2, int sourceLine, string sourceFile)
+    private void Write<T0, T1, T2>(LogLevel level, Exception? exception, string messageTemplate, T0 property0, T1 property1, T2 property2)
     {
         if (IsEnabled(level))
         {
             // Avoid boxing + array allocation if disabled
-            WriteImpl(level, exception, messageTemplate, new object?[] { property0, property1, property2 }, sourceLine, sourceFile);
+            WriteImpl(level, exception, messageTemplate, new object?[] { property0, property1, property2 });
         }
     }
 
-    private void Write(LogLevel level, Exception? exception, string messageTemplate, object[] args, int sourceLine, string sourceFile)
+    private void Write(LogLevel level, Exception? exception, string messageTemplate, object[] args)
     {
         if (IsEnabled(level))
         {
             // logging is not disabled
-            WriteImpl(level, exception, messageTemplate, args, sourceLine, sourceFile);
+            WriteImpl(level, exception, messageTemplate, args);
         }
     }
 
-    private void WriteImpl(LogLevel level, Exception? exception, string messageTemplate, object?[] args, int sourceLine, string sourceFile)
+    private void WriteImpl(LogLevel level, Exception? exception, string messageTemplate, object?[] args)
     {
         try
         {

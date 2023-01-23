@@ -169,6 +169,26 @@ updates:
       - "do NOT merge"
 
   - package-ecosystem: nuget
+    directory: /test/test-applications/integrations/TestApplication.Quartz
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - ".NET"
+      - "do NOT merge"
+      
+  - package-ecosystem: nuget
+    directory: /test/test-applications/integrations/TestApplication.MassTransit
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 20
+    labels:
+      - "dependencies"
+      - ".NET"
+      - "do NOT merge"
+
+  - package-ecosystem: nuget
     directory: /test/test-applications/integrations/TestApplication.MongoDB
     schedule:
       interval: "daily"
