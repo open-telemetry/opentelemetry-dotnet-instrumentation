@@ -15,7 +15,7 @@
 // </copyright>
 
 using System.Diagnostics.Tracing;
-using OpenTelemetry.AutoInstrumentation.Configuration;
+using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
