@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\CommonExcludedAssets.props" />
+
+  <PropertyGroup>
+    <Version>0.5.1</Version>
+    <SignAssembly>True</SignAssembly>
+    <TargetFrameworks>net462;netcoreapp3.1;net6.0</TargetFrameworks>
+  </PropertyGroup>
+
+</Project>

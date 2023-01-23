@@ -18,7 +18,9 @@ using System;
 
 namespace OpenTelemetry.AutoInstrumentation.Logging;
 
-internal interface IOtelLogger
+#pragma warning disable CS1591
+[System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:Elements should be documented", Justification = "Not")]
+public interface IOtelLogger
 {
     bool IsEnabled(LogLevel level);
 
@@ -102,3 +104,4 @@ internal interface IOtelLogger
 
     void Error(Exception exception, string messageTemplate, object[] args);
 }
+#pragma warning restore CS1591

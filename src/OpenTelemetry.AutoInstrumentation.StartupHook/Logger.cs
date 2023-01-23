@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.StartupHook;
@@ -25,12 +26,30 @@ internal static class Logger
     internal static void LogInformation(string message)
     {
         StartupHookEventSource.Log.Trace(message);
-        Log.Information(message);
+
+        try
+        {
+            Log.Information(message);
+        }
+        catch (TargetInvocationException ex)
+        {
+            // Logging assembly was not loaded.
+            StartupHookEventSource.Log.Error($"Logging to file failed. {ex.Message}");
+        }
     }
 
     internal static void LogError(string message)
     {
         StartupHookEventSource.Log.Error(message);
-        Log.Error(message);
+
+        try
+        {
+            Log.Error(message);
+        }
+        catch (TargetInvocationException ex)
+        {
+            // Logging assembly was not loaded.
+            StartupHookEventSource.Log.Error($"Logging to file failed. {ex.Message}");
+        }
     }
 }

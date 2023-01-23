@@ -3,6 +3,7 @@
   OpenTelemetry.Api,
   OpenTelemetry.AutoInstrumentation,
   OpenTelemetry.AutoInstrumentation.Loader,
+  OpenTelemetry.AutoInstrumentation.Logging,
   OpenTelemetry.AutoInstrumentation.StartupHook,
   OpenTelemetry.Exporter.OpenTelemetryProtocol,
   OpenTelemetry.Extensions.DependencyInjection

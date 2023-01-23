@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- To avoid application crash with .Net Core 3.1 and .NET 5.0 apps 
+    <!-- To avoid application crash with .Net Core 3.1 and .NET 5.0 apps
          this project should target netcoreapp3.1.
          Reference: https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1644 -->
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
@@ -9,30 +9,10 @@
 
   <ItemGroup>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs" Link="Constants.cs" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\CustomLogger.cs">
-      <Link>Logging\CustomLogger.cs</Link>
-    </Compile>
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\FileSink.cs">
-      <Link>Logging\FileSink.cs</Link>
-    </Compile>
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\IOtelLogger.cs">
-      <Link>Logging\IOtelLogger.cs</Link>
-    </Compile>
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\ISink.cs">
-      <Link>Logging\ISink.cs</Link>
-    </Compile>
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\LogLevel.cs">
-      <Link>Logging\LogLevel.cs</Link>
-    </Compile>
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\NoopSink.cs">
-      <Link>Logging\NoopSink.cs</Link>
-    </Compile>
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\OtelLogging.cs">
-      <Link>Logging\OtelLogging.cs</Link>
-    </Compile>
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\WriteCountingStream.cs">
-      <Link>Logging\WriteCountingStream.cs</Link>
-    </Compile>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\OpenTelemetry.AutoInstrumentation.Logging\OpenTelemetry.AutoInstrumentation.Logging.csproj" />
   </ItemGroup>
 
 </Project>

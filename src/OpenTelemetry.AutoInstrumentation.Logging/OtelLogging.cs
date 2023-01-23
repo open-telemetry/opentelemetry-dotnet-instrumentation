@@ -21,7 +21,7 @@ namespace OpenTelemetry.AutoInstrumentation.Logging;
 /// <summary>
 /// Configures shared logger used by instrumentations.
 /// </summary>
-internal static class OtelLogging
+public static class OtelLogging
 {
     private const string OtelDotnetAutoLogDirectory = "OTEL_DOTNET_AUTO_LOG_DIRECTORY";
     private const string NixDefaultDirectory = "/var/log/opentelemetry/dotnet";
