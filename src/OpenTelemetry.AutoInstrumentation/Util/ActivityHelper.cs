@@ -23,7 +23,7 @@ namespace OpenTelemetry.AutoInstrumentation.Util;
 
 internal static class ActivityHelper
 {
-    private static readonly ILogger Log = OtelLogging.GetLogger();
+    private static readonly IOtelLogger Log = OtelLogging.GetLogger();
 
     /// <summary>
     /// Add the StackTrace and other exception metadata to the span
