@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System.Reflection;
 using OpenTelemetry.Exporter;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
@@ -32,12 +31,7 @@ internal abstract class Settings
     public static T FromDefaultSources<T>()
         where T : Settings, new()
     {
-#if NETFRAMEWORK
-        // on .NET Framework only, also read from app.config/web.config
-        var configuration = new Configuration(new EnvironmentConfigurationSource(), new NameValueConfigurationSource(System.Configuration.ConfigurationManager.AppSettings));
-#else
         var configuration = new Configuration(new EnvironmentConfigurationSource());
-#endif
         var settings = new T();
         settings.Load(configuration);
         return settings;
