@@ -15,7 +15,7 @@
 // </copyright>
 
 using IntegrationTests.Helpers;
-using OpenTelemetry.AutoInstrumentation.Configuration;
+using OpenTelemetry.AutoInstrumentation.Configurations;
 using Xunit;
 using Xunit.Abstractions;
 
