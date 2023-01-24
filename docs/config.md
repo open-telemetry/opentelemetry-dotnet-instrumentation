@@ -1,5 +1,32 @@
 # Configuration
 
+## Configuration methods
+
+You can apply configuration settings in the following ways,
+with environment variables taking precedence over `App.config` or `Web.config` file:
+
+1. Environment variables
+
+    Environment variables are the main way to configure the settings.
+
+2. `App.config` or `Web.config` file
+
+    For an application running on .NET Framework, you can use a web configuration
+    file  (`web.config`) or an application configuration file (`app.config`) to
+    configure the `OTEL_*` settings.
+
+    Example with `OTEL_SERVICE_NAME` setting:
+
+    ```xml
+    <configuration>
+    <appSettings>
+        <add key="OTEL_SERVICE_NAME" value="my-service-name" />
+    </appSettings>
+    </configuration>
+    ```
+
+    > ⚠️ Only settings starting with `OTEL_` can be set using `App.config` or `Web.config`.
+
 ## Global settings
 
 | Environment variable                 | Description                                                                                                                                                                                                                  | Default value |
