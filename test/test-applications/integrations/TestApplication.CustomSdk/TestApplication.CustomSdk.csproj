@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="OpenTelemetry" />
@@ -9,9 +10,19 @@
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" />
     <PackageReference Include="StackExchange.Redis"/>
+    <PackageReference Include="NServiceBus" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\TestApplication.NServiceBus\TestMessage.cs">
+      <Link>TestMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\TestApplication.NServiceBus\TestMessageHandler.cs">
+      <Link>TestMessageHandler.cs</Link>
+    </Compile>
   </ItemGroup>
 </Project>
