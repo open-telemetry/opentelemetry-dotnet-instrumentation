@@ -235,6 +235,9 @@ internal static class Instrumentation
                 case TracerInstrumentation.MySqlData:
                     DelayedInitialization.Traces.AddMySqlClient(LazyInstrumentationLoader, pluginManager);
                     break;
+                case TracerInstrumentation.EntityFrameworkCore:
+                    DelayedInitialization.Traces.AddEntityFrameworkCore(LazyInstrumentationLoader, pluginManager);
+                    break;
                 case TracerInstrumentation.MongoDB:
                     break;
                 case TracerInstrumentation.StackExchangeRedis:

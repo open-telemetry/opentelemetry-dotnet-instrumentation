@@ -59,6 +59,12 @@ internal static class DelayedInitialization
         {
             lazyInstrumentationLoader.Add(new MySqlDataInitializer(pluginManager));
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void AddEntityFrameworkCore(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
+        {
+            lazyInstrumentationLoader.Add(new EntityFrameworkCoreInitializer(pluginManager));
+        }
 #endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]

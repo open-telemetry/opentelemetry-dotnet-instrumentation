@@ -190,7 +190,7 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddEntityFrameworkCoreInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-            lazyInstrumentationLoader.Add(new EntityFrameworkCoreInitializer(pluginManager));
+            DelayedInitialization.Traces.AddEntityFrameworkCore(lazyInstrumentationLoader, pluginManager);
 
             return builder.AddSource("OpenTelemetry.EntityFrameworkCore");
         }
