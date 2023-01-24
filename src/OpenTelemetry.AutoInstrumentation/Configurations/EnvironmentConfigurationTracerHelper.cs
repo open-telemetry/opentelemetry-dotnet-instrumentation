@@ -113,7 +113,7 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddWcfInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-            lazyInstrumentationLoader.Add(new WcfInitializer(pluginManager));
+            DelayedInitialization.Traces.AddWcf(lazyInstrumentationLoader, pluginManager);
 
             return builder.AddSource("OpenTelemetry.Instrumentation.Wcf");
         }
@@ -121,7 +121,7 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddHttpClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-            new HttpClientInitializer(lazyInstrumentationLoader, pluginManager);
+            DelayedInitialization.Traces.AddHttpClient(lazyInstrumentationLoader, pluginManager);
 
 #if NETFRAMEWORK
             builder.AddSource("OpenTelemetry.Instrumentation.Http.HttpWebRequest");
@@ -137,17 +137,13 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddAspNetInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
+            DelayedInitialization.Traces.AddAspNet(lazyInstrumentationLoader, pluginManager);
 #if NET462
-            new AspNetInitializer(lazyInstrumentationLoader, pluginManager);
-
             builder.AddSource(OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule.AspNetSourceName);
 #elif NET6_0_OR_GREATER
-            lazyInstrumentationLoader.Add(new AspNetCoreInitializer(pluginManager));
-
             builder.AddSource("OpenTelemetry.Instrumentation.AspNetCore");
             builder.AddLegacySource("Microsoft.AspNetCore.Hosting.HttpRequestIn");
 #endif
-
             return builder;
         }
 
@@ -155,7 +151,7 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddMySqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-            lazyInstrumentationLoader.Add(new MySqlDataInitializer(pluginManager));
+            DelayedInitialization.Traces.AddMySqlClient(lazyInstrumentationLoader, pluginManager);
 
             return builder.AddSource("OpenTelemetry.Instrumentation.MySqlData");
         }
@@ -164,7 +160,7 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddSqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-            new SqlClientInitializer(lazyInstrumentationLoader, pluginManager);
+            DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager);
 
             return builder.AddSource("OpenTelemetry.Instrumentation.SqlClient");
         }
@@ -172,7 +168,7 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddGrpcClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-            lazyInstrumentationLoader.Add(new GrpcClientInitializer(pluginManager));
+            DelayedInitialization.Traces.AddGrpcClient(lazyInstrumentationLoader, pluginManager);
 
             builder.AddSource("OpenTelemetry.Instrumentation.GrpcNetClient");
             builder.AddLegacySource("Grpc.Net.Client.GrpcOut");
@@ -183,7 +179,7 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddQuartzInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-            lazyInstrumentationLoader.Add(new QuartzInitializer(pluginManager));
+            DelayedInitialization.Traces.AddQuartz(lazyInstrumentationLoader, pluginManager);
 
             return builder.AddSource("OpenTelemetry.Instrumentation.Quartz")
                 .AddLegacySource("Quartz.Job.Execute")

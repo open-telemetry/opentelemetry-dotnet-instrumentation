@@ -33,6 +33,7 @@ with environment variables taking precedence over `App.config` or `Web.config` f
 |--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
 | `OTEL_DOTNET_AUTO_HOME`              | Installation location.                                                                                                                                                                                                       |               |
 | `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` | Names of the executable files that the profiler cannot instrument. Supports multiple comma-separated values, for example: `ReservedProcess.exe,powershell.exe`. If unset, the profiler attaches to all processes by default. |               |
+| `OTEL_DOTNET_AUTO_INJECT_SDK`        | Controls whether auto-instrumentation should inject OpenTelemetry .NET SDK at startup.                                                                                                                                       | `true`        |
 
 ## Resources
 

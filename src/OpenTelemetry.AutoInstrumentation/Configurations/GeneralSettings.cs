@@ -30,6 +30,11 @@ internal class GeneralSettings : Settings
     /// </summary>
     public bool FlushOnUnhandledException { get; private set; }
 
+    /// <summary>
+    /// Gets a value indicating whether sdk should be injected.
+    /// </summary>
+    public bool InjectSdk { get; private set; }
+
     protected override void OnLoad(Configuration configuration)
     {
         var providerPlugins = configuration.GetString(ConfigurationKeys.ProviderPlugins);
@@ -42,5 +47,6 @@ internal class GeneralSettings : Settings
         }
 
         FlushOnUnhandledException = configuration.GetBool(ConfigurationKeys.FlushOnUnhandledException) ?? false;
+        InjectSdk = configuration.GetBool(ConfigurationKeys.InjectSdk) ?? true;
     }
 }

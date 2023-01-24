@@ -51,6 +51,11 @@ internal static class ConfigurationKeys
     public const string ProviderPlugins = "OTEL_DOTNET_AUTO_PLUGINS";
 
     /// <summary>
+    /// Configuration key for injecting sdk.
+    /// </summary>
+    public const string InjectSdk = "OTEL_DOTNET_AUTO_INJECT_SDK";
+
+    /// <summary>
     /// Configuration keys for traces.
     /// </summary>
     public static class Traces

@@ -131,26 +131,43 @@ internal static class Instrumentation
 
             if (TracerSettings.Value.TracesEnabled)
             {
-                var builder = Sdk
-                    .CreateTracerProviderBuilder()
-                    .ConfigureResource(ResourceConfigurator.Configure)
-                    .UseEnvironmentVariables(LazyInstrumentationLoader, TracerSettings.Value, _pluginManager)
-                    .InvokePlugins(_pluginManager);
+                if (GeneralSettings.Value.InjectSdk)
+                {
+                    var builder = Sdk
+                        .CreateTracerProviderBuilder()
+                        .ConfigureResource(ResourceConfigurator.Configure)
+                        .UseEnvironmentVariables(LazyInstrumentationLoader, TracerSettings.Value, _pluginManager)
+                        .InvokePlugins(_pluginManager);
 
-                _tracerProvider = builder.Build();
-                Logger.Information("OpenTelemetry tracer initialized.");
+                    _tracerProvider = builder.Build();
+                    Logger.Information("OpenTelemetry tracer initialized.");
+                }
+                else
+                {
+                    AddLazilyLoadedTraceInstrumentations(LazyInstrumentationLoader, _pluginManager, TracerSettings.Value.EnabledInstrumentations);
+                    Logger.Information("Initialized lazily-loaded trace instrumentations without initializing sdk.");
+                }
             }
 
             if (MetricSettings.Value.MetricsEnabled)
             {
-                var builder = Sdk
-                    .CreateMeterProviderBuilder()
-                    .ConfigureResource(ResourceConfigurator.Configure)
-                    .UseEnvironmentVariables(LazyInstrumentationLoader, MetricSettings.Value, _pluginManager)
-                    .InvokePlugins(_pluginManager);
+                if (GeneralSettings.Value.InjectSdk)
+                {
+                    var builder = Sdk
+                        .CreateMeterProviderBuilder()
+                        .ConfigureResource(ResourceConfigurator.Configure)
+                        .UseEnvironmentVariables(LazyInstrumentationLoader, MetricSettings.Value, _pluginManager)
+                        .InvokePlugins(_pluginManager);
 
-                _meterProvider = builder.Build();
-                Logger.Information("OpenTelemetry meter initialized.");
+                    _meterProvider = builder.Build();
+                    Logger.Information("OpenTelemetry meter initialized.");
+                }
+                else
+                {
+                    AddLazilyLoadedMetricInstrumentations(LazyInstrumentationLoader, MetricSettings.Value.EnabledInstrumentations);
+
+                    Logger.Information("Initialized lazily-loaded metric instrumentations without initializing sdk.");
+                }
             }
         }
         catch (Exception ex)
@@ -162,6 +179,81 @@ internal static class Instrumentation
         if (TracerSettings.Value.OpenTracingEnabled)
         {
             EnableOpenTracing();
+        }
+    }
+
+    private static void AddLazilyLoadedMetricInstrumentations(LazyInstrumentationLoader lazyInstrumentationLoader, IList<MetricInstrumentation> enabledInstrumentations)
+    {
+        foreach (var instrumentation in enabledInstrumentations)
+        {
+            switch (instrumentation)
+            {
+                case MetricInstrumentation.AspNet:
+                    DelayedInitialization.Metrics.AddAspNet(lazyInstrumentationLoader);
+                    break;
+                case MetricInstrumentation.HttpClient:
+                    DelayedInitialization.Metrics.AddHttpClient(lazyInstrumentationLoader);
+                    break;
+                case MetricInstrumentation.NetRuntime:
+                    break;
+                case MetricInstrumentation.Process:
+                    break;
+                case MetricInstrumentation.NServiceBus:
+                    break;
+                default:
+                    Logger.Warning($"Configured metric intrumentation type is not supported: {instrumentation}");
+                    break;
+            }
+        }
+    }
+
+    private static void AddLazilyLoadedTraceInstrumentations(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, IList<TracerInstrumentation> enabledInstrumentations)
+    {
+        foreach (var instrumentation in enabledInstrumentations)
+        {
+            switch (instrumentation)
+            {
+                case TracerInstrumentation.AspNet:
+                    DelayedInitialization.Traces.AddAspNet(lazyInstrumentationLoader, pluginManager);
+                    break;
+                case TracerInstrumentation.HttpClient:
+                    DelayedInitialization.Traces.AddHttpClient(lazyInstrumentationLoader, pluginManager);
+                    break;
+                case TracerInstrumentation.GrpcNetClient:
+                    DelayedInitialization.Traces.AddGrpcClient(lazyInstrumentationLoader, pluginManager);
+                    break;
+                case TracerInstrumentation.SqlClient:
+                    DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager);
+                    break;
+                case TracerInstrumentation.Wcf:
+                    DelayedInitialization.Traces.AddWcf(lazyInstrumentationLoader, pluginManager);
+                    break;
+                case TracerInstrumentation.Quartz:
+                    DelayedInitialization.Traces.AddQuartz(lazyInstrumentationLoader, pluginManager);
+                    break;
+#if NET6_0_OR_GREATER
+                case TracerInstrumentation.MySqlData:
+                    DelayedInitialization.Traces.AddMySqlClient(LazyInstrumentationLoader, pluginManager);
+                    break;
+                case TracerInstrumentation.MongoDB:
+                    break;
+                case TracerInstrumentation.StackExchangeRedis:
+                    break;
+                case TracerInstrumentation.MassTransit:
+                    break;
+#endif
+                case TracerInstrumentation.GraphQL:
+                    break;
+                case TracerInstrumentation.Npgsql:
+                    break;
+                case TracerInstrumentation.NServiceBus:
+                    break;
+                case TracerInstrumentation.Elasticsearch:
+                    break;
+                default:
+                    Logger.Warning($"Configured trace intrumentation type is not supported: {instrumentation}");
+                    break;
+            }
         }
     }
 
