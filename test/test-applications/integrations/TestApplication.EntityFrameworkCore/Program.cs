@@ -47,8 +47,6 @@ await using (var context = new TestContext(contextOptions))
 static DbConnection CreateInMemoryDatabase()
 {
     var connection = new SqliteConnection("Filename=:memory:");
-
     connection.Open();
-
     return connection;
 }
