@@ -19,6 +19,7 @@
 #if NET7_0_OR_GREATER
 
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -28,9 +29,11 @@ namespace OpenTelemetry.AutoInstrumentation.Tests;
 
 public class TransientDependenciesTests
 {
-    [Fact]
+    [SkippableFact]
     public void DefinedTransientDeps_Are_MatchingGeneratedDeps()
     {
+        Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Supported only on Windows.");
+
         var currentTestLocation = Assembly.GetExecutingAssembly().Location;
         var testDir = GetParentDir(currentTestLocation, "test");
         var codeDir = Path.Combine(Directory.GetParent(testDir)!.FullName, "src", "OpenTelemetry.AutoInstrumentation");
