@@ -15,7 +15,7 @@
 // </copyright>
 
 using Microsoft.AspNetCore.Hosting;
-using OpenTelemetry.AutoInstrumentation.Configuration;
+using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Logger;
 
 [assembly: HostingStartup(typeof(OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper.BootstrapperHostingStartup))]

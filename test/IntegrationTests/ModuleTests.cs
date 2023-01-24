@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 using IntegrationTests.Helpers;
 using Newtonsoft.Json;
 using OpenTelemetry.AutoInstrumentation;
-using OpenTelemetry.AutoInstrumentation.Configuration;
+using OpenTelemetry.AutoInstrumentation.Configurations;
 using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
