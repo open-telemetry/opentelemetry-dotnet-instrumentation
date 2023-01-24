@@ -15,7 +15,7 @@
 // </copyright>
 
 using System.Diagnostics.Tracing;
-using OpenTelemetry.AutoInstrumentation.Configuration;
+using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
@@ -69,7 +69,7 @@ internal static class Instrumentation
 
     internal static ILifespanManager LifespanManager => LazyInstrumentationLoader.LifespanManager;
 
-    internal static GeneralSettings GeneralSettings { get; } = Settings.FromDefaultSources<GeneralSettings>();
+    internal static Lazy<GeneralSettings> GeneralSettings { get; } = new(Settings.FromDefaultSources<GeneralSettings>);
 
     internal static Lazy<TracerSettings> TracerSettings { get; } = new(Settings.FromDefaultSources<TracerSettings>);
 
@@ -91,10 +91,25 @@ internal static class Instrumentation
             return;
         }
 
+#if NETFRAMEWORK
         try
         {
-            _pluginManager = new PluginManager(GeneralSettings);
+            // On .NET Framework only, initialize env vars from app.config/web.config
+            // this does not override settings which where already set via env vars.
+            // We are doing so as the OTel .NET SDK only supports the env vars and we want to be
+            // be able to set them via app.config/web.config.
+            EnvironmentInitializer.Initialize(System.Configuration.ConfigurationManager.AppSettings);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Failed to initialize from AppSettings.");
+            throw;
+        }
+#endif
 
+        try
+        {
+            _pluginManager = new PluginManager(GeneralSettings.Value);
             _pluginManager.Initializing();
 
             if (TracerSettings.Value.TracesEnabled || MetricSettings.Value.MetricsEnabled)
@@ -106,7 +121,7 @@ internal static class Instrumentation
                 AppDomain.CurrentDomain.ProcessExit += OnExit;
                 AppDomain.CurrentDomain.DomainUnload += OnExit;
 
-                if (GeneralSettings.FlushOnUnhandledException)
+                if (GeneralSettings.Value.FlushOnUnhandledException)
                 {
                     AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
                 }
