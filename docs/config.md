@@ -15,6 +15,16 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     file  (`web.config`) or an application configuration file (`app.config`) to
     configure the `OTEL_*` settings.
 
+    ⚠️ Only settings starting with `OTEL_` can be set using `App.config` or `Web.config`.
+    Additionally, following settings are not supported:
+
+    - `OTEL_DOTNET_AUTO_HOME`
+    - `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`
+    - `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE`
+    - `OTEL_DOTNET_AUTO_[TRACES|METRICS|LOGS]_[ENABLED|DISABLED]_INSTRUMENTATIONS`
+    - `OTEL_DOTNET_AUTO_LOG_DIRECTORY`
+    - `OTEL_DOTNET_AUTO_DEBUG`
+
     Example with `OTEL_SERVICE_NAME` setting:
 
     ```xml
@@ -24,8 +34,6 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     </appSettings>
     </configuration>
     ```
-
-    > ⚠️ Only settings starting with `OTEL_` can be set using `App.config` or `Web.config`.
 
 ## Global settings
 
@@ -261,7 +269,6 @@ Important environment variables include:
 | `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`         | Enables OpenTracing tracer.                                                                                                                                                                                                                                                                                                                                                                        | `false`       |
 | `OTEL_DOTNET_AUTO_LOGS_ENABLED`                | Enables logs.                                                                                                                                                                                                                                                                                                                                                                                      | `true`        |
 | `OTEL_DOTNET_AUTO_METRICS_ENABLED`             | Enables metrics.                                                                                                                                                                                                                                                                                                                                                                                   | `true`        |
-| `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`      | Enables automatic redirection of the assemblies used by the automatic instrumentation on the .NET Framework.                                                                                                                                                                                                                                                                                       | `true`        |
 | `OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES`   | Comma-separated list of additional `System.Diagnostics.ActivitySource` names to be added to the tracer at the startup. Use it to capture manually instrumented spans.                                                                                                                                                                                                                              |               |
 | `OTEL_DOTNET_AUTO_LEGACY_SOURCES`              | Comma-separated list of additional legacy source names to be added to the tracer at the startup. Use it to capture `System.Diagnostics.Activity` objects created without using the `System.Diagnostics.ActivitySource` API.                                                                                                                                                                        |               |
 | `OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION` | Controls whether the telemetry data is flushed when an [AppDomain.UnhandledException](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.unhandledexception) event is raised. Set to `true` when you suspect that you are experiencing a problem with missing telemetry data and also experiencing unhandled exceptions.                                                                 | `false`       |

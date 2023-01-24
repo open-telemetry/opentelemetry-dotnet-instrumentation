@@ -2,6 +2,8 @@
 
 This document lists advanced configuration settings rarely changed by users.
 
+These configuration can be only set using environment variables.
+
 ## Environment
 
 | Environment variable                  | Description                                                                        | Default value |
@@ -13,6 +15,12 @@ This document lists advanced configuration settings rarely changed by users.
 | Environment variable                      | Description                                                              | Default value |
 |-------------------------------------------|--------------------------------------------------------------------------|---------------|
 | `OTEL_DOTNET_AUTO_DUMP_ILREWRITE_ENABLED` | Lets the profiler dump the IL original code and modification to the log. | `false`       |
+
+## Redirection
+
+| Environment variable                      | Description                                                                                                  | Default value |
+|-------------------------------------------|--------------------------------------------------------------------------------------------------------------|---------------|
+| `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED` | Enables automatic redirection of the assemblies used by the automatic instrumentation on the .NET Framework. | `true`        |
 
 ## CLR Optimizations
 
