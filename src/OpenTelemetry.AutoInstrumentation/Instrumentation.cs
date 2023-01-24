@@ -131,7 +131,7 @@ internal static class Instrumentation
 
             if (TracerSettings.Value.TracesEnabled)
             {
-                if (GeneralSettings.Value.InjectSdk)
+                if (GeneralSettings.Value.SetupSdk)
                 {
                     var builder = Sdk
                         .CreateTracerProviderBuilder()
@@ -151,7 +151,7 @@ internal static class Instrumentation
 
             if (MetricSettings.Value.MetricsEnabled)
             {
-                if (GeneralSettings.Value.InjectSdk)
+                if (GeneralSettings.Value.SetupSdk)
                 {
                     var builder = Sdk
                         .CreateMeterProviderBuilder()

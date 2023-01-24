@@ -53,7 +53,7 @@ public class CustomSdkTests : TestHelper
         collector.Expect("TestApplication.CustomSdk", span => IsTopLevel(span));
 
         EnableBytecodeInstrumentation();
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_INJECT_SDK", "false");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_SETUP_SDK", "false");
         SetEnvironmentVariable("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf");
 
         RunTestApplication(new()

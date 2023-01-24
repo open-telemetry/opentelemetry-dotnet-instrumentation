@@ -51,9 +51,9 @@ internal static class ConfigurationKeys
     public const string ProviderPlugins = "OTEL_DOTNET_AUTO_PLUGINS";
 
     /// <summary>
-    /// Configuration key for injecting sdk.
+    /// Configuration key for setting up OpenTelemetry .NET SDK.
     /// </summary>
-    public const string InjectSdk = "OTEL_DOTNET_AUTO_INJECT_SDK";
+    public const string SetupSdk = "OTEL_DOTNET_AUTO_SETUP_SDK";
 
     /// <summary>
     /// Configuration keys for traces.
