@@ -21,6 +21,7 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
+using DependencyListGenerator;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Xunit;
@@ -35,7 +36,7 @@ public class TransientDependenciesTests
         Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Supported only on Windows.");
 
         var currentTestLocation = Assembly.GetExecutingAssembly().Location;
-        var testDir = GetParentDir(currentTestLocation, "test");
+        var testDir = FindParentDir(currentTestLocation, "test");
         var codeDir = Path.Combine(Directory.GetParent(testDir)!.FullName, "src", "OpenTelemetry.AutoInstrumentation");
         var projectPath = Path.Combine(codeDir, "OpenTelemetry.AutoInstrumentation.csproj");
         var projectGenPath = Path.Combine(codeDir, "OpenTelemetry.AutoInstrumentation.g.csproj");
@@ -46,7 +47,7 @@ public class TransientDependenciesTests
 
         CleanTransientDeps(projectGenPath);
 
-        var generatedDeps = DependencyListGenerator.Generator
+        var generatedDeps = Generator
             .EnumerateDependencies(projectGenPath)
             .Select(x => x.Name)
             .ToList();
@@ -75,7 +76,6 @@ public class TransientDependenciesTests
     {
         var projXml = XElement.Load(projPath);
         var depsGroup = GetTransientDepsGroup(projXml);
-
         if (depsGroup != null)
         {
             depsGroup.Remove();
@@ -88,7 +88,6 @@ public class TransientDependenciesTests
     {
         var projXml = XElement.Load(projPath);
         var depsGroup = GetTransientDepsGroup(projXml);
-
         if (depsGroup == null)
         {
             return Array.Empty<string>();
@@ -101,7 +100,7 @@ public class TransientDependenciesTests
             .ToList();
     }
 
-    private static string GetParentDir(string location, string parentName)
+    private static string FindParentDir(string location, string parentName)
     {
         var parent = Directory.GetParent(location);
         if (parent == null)
@@ -114,7 +113,7 @@ public class TransientDependenciesTests
             return parent.FullName;
         }
 
-        return GetParentDir(parent.FullName, parentName);
+        return FindParentDir(parent.FullName, parentName);
     }
 }
 
