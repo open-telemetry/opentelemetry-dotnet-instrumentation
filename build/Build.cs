@@ -7,8 +7,7 @@ using static Nuke.Common.IO.FileSystemTasks;
 
 partial class Build : NukeBuild
 {
-    // public static int Main() => Execute<Build>(x => x.BuildTracer);
-    public static int Main() => Execute<Build>(x => x.GenerateNetFxTransientDependencies);
+    public static int Main() => Execute<Build>(x => x.BuildTracer);
 
     [Parameter("Configuration to build. Default is 'Release'")]
     readonly Configuration BuildConfiguration = Configuration.Release;
