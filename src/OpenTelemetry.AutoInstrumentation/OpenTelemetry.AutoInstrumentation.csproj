@@ -34,6 +34,7 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" />
     <PackageReference Include="OpenTelemetry.Instrumentation.MySqlData" />
     <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" />
   </ItemGroup>

@@ -33,6 +33,7 @@
   /net/OpenTelemetry.Extensions.DependencyInjection.dll,
   /net/OpenTelemetry.Extensions.Propagators.dll,
   /net/OpenTelemetry.Instrumentation.AspNetCore.dll,
+  /net/OpenTelemetry.Instrumentation.EntityFrameworkCore.dll,
   /net/OpenTelemetry.Instrumentation.GrpcNetClient.dll,
   /net/OpenTelemetry.Instrumentation.Http.dll,
   /net/OpenTelemetry.Instrumentation.MySqlData.dll,

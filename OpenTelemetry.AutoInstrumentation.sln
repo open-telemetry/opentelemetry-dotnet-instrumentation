@@ -151,7 +151,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.AspNet.NetF
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.MultipleAppDomains.NetFramework", "test\test-applications\integrations\TestApplication.MultipleAppDomains.NetFramework\TestApplication.MultipleAppDomains.NetFramework.csproj", "{A0338846-2AF8-4D96-ADA7-EBD4F010D08F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Quartz", "test\test-applications\integrations\TestApplication.Quartz\TestApplication.Quartz.csproj", "{B48780CE-8AAB-44D3-9CD1-8491584352B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Quartz", "test\test-applications\integrations\TestApplication.Quartz\TestApplication.Quartz.csproj", "{B48780CE-8AAB-44D3-9CD1-8491584352B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.EntityFrameworkCore", "test\test-applications\integrations\TestApplication.EntityFrameworkCore\TestApplication.EntityFrameworkCore.csproj", "{036A56A4-4EEF-42E3-9857-B9B00D302BF9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -721,6 +723,18 @@ Global
 		{B48780CE-8AAB-44D3-9CD1-8491584352B5}.Release|x64.Build.0 = Release|x64
 		{B48780CE-8AAB-44D3-9CD1-8491584352B5}.Release|x86.ActiveCfg = Release|x86
 		{B48780CE-8AAB-44D3-9CD1-8491584352B5}.Release|x86.Build.0 = Release|x86
+		{036A56A4-4EEF-42E3-9857-B9B00D302BF9}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{036A56A4-4EEF-42E3-9857-B9B00D302BF9}.Debug|Any CPU.Build.0 = Debug|x64
+		{036A56A4-4EEF-42E3-9857-B9B00D302BF9}.Debug|x64.ActiveCfg = Debug|x64
+		{036A56A4-4EEF-42E3-9857-B9B00D302BF9}.Debug|x64.Build.0 = Debug|x64
+		{036A56A4-4EEF-42E3-9857-B9B00D302BF9}.Debug|x86.ActiveCfg = Debug|x86
+		{036A56A4-4EEF-42E3-9857-B9B00D302BF9}.Debug|x86.Build.0 = Debug|x86
+		{036A56A4-4EEF-42E3-9857-B9B00D302BF9}.Release|Any CPU.ActiveCfg = Release|x64
+		{036A56A4-4EEF-42E3-9857-B9B00D302BF9}.Release|Any CPU.Build.0 = Release|x64
+		{036A56A4-4EEF-42E3-9857-B9B00D302BF9}.Release|x64.ActiveCfg = Release|x64
+		{036A56A4-4EEF-42E3-9857-B9B00D302BF9}.Release|x64.Build.0 = Release|x64
+		{036A56A4-4EEF-42E3-9857-B9B00D302BF9}.Release|x86.ActiveCfg = Release|x86
+		{036A56A4-4EEF-42E3-9857-B9B00D302BF9}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -777,6 +791,7 @@ Global
 		{5FDB5603-21D3-446A-8B50-36DACCF7C2FF} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{A0338846-2AF8-4D96-ADA7-EBD4F010D08F} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{B48780CE-8AAB-44D3-9CD1-8491584352B5} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
+		{036A56A4-4EEF-42E3-9857-B9B00D302BF9} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}
