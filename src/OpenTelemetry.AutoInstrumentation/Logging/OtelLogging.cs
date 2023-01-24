@@ -15,6 +15,7 @@
 // </copyright>
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -29,8 +30,7 @@ internal static class OtelLogging
     private const string OtelDotnetAutoLogDirectory = "OTEL_DOTNET_AUTO_LOG_DIRECTORY";
     private const string NixDefaultDirectory = "/var/log/opentelemetry/dotnet";
 
-    private static readonly IDictionary<string, IOtelLogger> OtelLoggers = new Dictionary<string, IOtelLogger>();
-    private static readonly object Lock = new();
+    private static readonly ConcurrentDictionary<string, IOtelLogger> OtelLoggers = new();
 
     /// <summary>
     /// Returns Logger implementation.
@@ -48,23 +48,10 @@ internal static class OtelLogging
     /// <returns>Logger</returns>
     public static IOtelLogger GetLogger(string suffix)
     {
-        if (OtelLoggers.ContainsKey(suffix))
-        {
-            return OtelLoggers[suffix];
-        }
-
-        lock (Lock)
-        {
-            if (!OtelLoggers.ContainsKey(suffix))
-            {
-                OtelLoggers[suffix] = CreateLogger(suffix);
-            }
-        }
-
-        return OtelLoggers[suffix];
+        return OtelLoggers.GetOrAdd(suffix, CreateLogger);
     }
 
-    private static IOtelLogger CreateLogger(string? suffix)
+    private static IOtelLogger CreateLogger(string suffix)
     {
         ISink? sink = null;
         try
@@ -87,7 +74,7 @@ internal static class OtelLogging
         return new CustomLogger(sink);
     }
 
-    private static string GetLogFileName(string? suffix)
+    private static string GetLogFileName(string suffix)
     {
         try
         {
