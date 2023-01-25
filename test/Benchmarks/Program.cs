@@ -16,7 +16,7 @@
 
 using BenchmarkDotNet.Running;
 
-namespace OpenTelemetry.AutoInstrumentation.Loader.Benchmark;
+namespace OpenTelemetry.AutoInstrumentation.Loader.Benchmarks;
 
 internal class Program
 {
