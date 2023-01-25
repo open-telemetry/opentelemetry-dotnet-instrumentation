@@ -101,7 +101,8 @@ public static class ProjectsHelper
         return solution.GetManagedSrcProjects()
             .Concat(solution.GetManagedTestProjects())
             .Concat(solution.GetCrossPlatformTestApplications())
-            .Concat(new[] { solution.GetTestMock() });
+            .Concat(new[] { solution.GetTestMock() })
+            .Concat(new[] { solution.GetBenchmarks() });
     }
 
     public static IEnumerable<Project> GetNativeProjects(this Solution solution)
