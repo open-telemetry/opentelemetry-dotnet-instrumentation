@@ -4,10 +4,10 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="OpenTelemetry" VersionOverride="1.4.0-rc.2" />
-    <PackageReference Include="OpenTelemetry.Api" VersionOverride="1.4.0-rc.2" />
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" VersionOverride="1.4.0-rc.2" />
-    <PackageReference Include="OpenTelemetry.Exporter.Console" VersionOverride="1.4.0-rc.2" />
+    <PackageReference Include="OpenTelemetry" />
+    <PackageReference Include="OpenTelemetry.Api" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" />
     <PackageReference Include="StackExchange.Redis"/>
   </ItemGroup>
 
