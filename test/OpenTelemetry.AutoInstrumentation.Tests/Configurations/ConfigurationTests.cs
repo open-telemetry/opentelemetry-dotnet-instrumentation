@@ -131,8 +131,8 @@ public class ConfigurationTests
     public void ParseEmptyAsNull_CompositeConfigurationSource()
     {
         var mockSource = new Mock<IConfigurationSource>();
-        mockSource.Setup(x => x.GetString(It.Is<string>(x => x == "TEST_NULL_VALUE"))).Returns<string>(k => null);
-        mockSource.Setup(x => x.GetString(It.Is<string>(x => x == "TEST_EMPTY_VALUE"))).Returns<string>(k => string.Empty);
+        mockSource.Setup(x => x.GetString(It.Is<string>(key => key == "TEST_NULL_VALUE"))).Returns<string>(_ => null);
+        mockSource.Setup(x => x.GetString(It.Is<string>(key => key == "TEST_EMPTY_VALUE"))).Returns<string>(_ => string.Empty);
         var compositeSource = new Configuration(mockSource.Object);
 
         using (new AssertionScope())
