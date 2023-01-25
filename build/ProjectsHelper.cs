@@ -72,6 +72,11 @@ public static class ProjectsHelper
         return solution.GetProject(Projects.Mocks.AutoInstrumentationMock);
     }
 
+    public static Project GetBenchmarks(this Solution solution)
+    {
+        return solution.GetProject(Projects.Benchmarks.AutoInstrumentationBenchmarks);
+    }
+
     public static IEnumerable<Project> GetWindowsOnlyTestApplications(this Solution solution)
     {
         return solution

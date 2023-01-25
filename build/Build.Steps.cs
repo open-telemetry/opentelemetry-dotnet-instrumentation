@@ -150,6 +150,17 @@ partial class Build
             }
         });
 
+    Target CompileBenchmarks => _ => _
+        .Description("Compiles the Benchmarks project in the test directory")
+        .After(CompileManagedSrc)
+        .Executes(() =>
+        {
+            DotNetBuild(x => x
+                .SetProjectFile(Solution.GetBenchmarks())
+                .SetConfiguration(BuildConfiguration)
+                .EnableNoRestore());
+        });
+
     Target CompileNativeSrc => _ => _
         .Description("Compiles the native loader")
         .DependsOn(CompileNativeSrcWindows)
