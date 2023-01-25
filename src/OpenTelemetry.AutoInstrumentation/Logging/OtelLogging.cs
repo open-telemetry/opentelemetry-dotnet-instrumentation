@@ -14,7 +14,11 @@
 // limitations under the License.
 // </copyright>
 
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 
 namespace OpenTelemetry.AutoInstrumentation.Logging;
 
@@ -26,9 +30,28 @@ internal static class OtelLogging
     private const string OtelDotnetAutoLogDirectory = "OTEL_DOTNET_AUTO_LOG_DIRECTORY";
     private const string NixDefaultDirectory = "/var/log/opentelemetry/dotnet";
 
-    private static readonly IOtelLogger OtelLogger;
+    private static readonly ConcurrentDictionary<string, IOtelLogger> OtelLoggers = new();
 
-    static OtelLogging()
+    /// <summary>
+    /// Returns Logger implementation.
+    /// </summary>
+    /// <returns>Logger</returns>
+    public static IOtelLogger GetLogger()
+    {
+        return GetLogger(string.Empty);
+    }
+
+    /// <summary>
+    /// Returns Logger implementation.
+    /// </summary>
+    /// <param name="suffix">Suffix of the log file.</param>
+    /// <returns>Logger</returns>
+    public static IOtelLogger GetLogger(string suffix)
+    {
+        return OtelLoggers.GetOrAdd(suffix, CreateLogger);
+    }
+
+    private static IOtelLogger CreateLogger(string suffix)
     {
         ISink? sink = null;
         try
@@ -36,7 +59,7 @@ internal static class OtelLogging
             var logDirectory = GetLogDirectory();
             if (logDirectory != null)
             {
-                var fileName = GetLogFileName();
+                var fileName = GetLogFileName(suffix);
                 var logPath = Path.Combine(logDirectory, fileName);
                 sink = new FileSink(logPath);
             }
@@ -46,33 +69,28 @@ internal static class OtelLogging
             // unable to configure logging to a file
         }
 
-        if (sink == null)
-        {
-            sink = new NoopSink();
-        }
+        sink ??= new NoopSink();
 
-        OtelLogger = new CustomLogger(sink);
+        return new CustomLogger(sink);
     }
 
-    /// <summary>
-    /// Returns Logger implementation.
-    /// </summary>
-    /// <returns>Logger</returns>
-    public static IOtelLogger GetLogger() => OtelLogger;
-
-    private static string GetLogFileName()
+    private static string GetLogFileName(string suffix)
     {
         try
         {
             using var process = Process.GetCurrentProcess();
             var appDomainName = AppDomain.CurrentDomain.FriendlyName;
 
-            return $"otel-dotnet-auto-{appDomainName}-{process.Id}.log";
+            return string.IsNullOrEmpty(suffix)
+                ? $"otel-dotnet-auto-{appDomainName}-{process.Id}.log"
+                : $"otel-dotnet-auto-{appDomainName}-{process.Id}-{suffix}.log";
         }
         catch
         {
             // We can't get the process info
-            return $"otel-dotnet-auto-{Guid.NewGuid()}.log";
+            return string.IsNullOrEmpty(suffix)
+                ? $"otel-dotnet-auto-{Guid.NewGuid()}.log"
+                : $"otel-dotnet-auto-{Guid.NewGuid()}-{suffix}.log";
         }
     }
 

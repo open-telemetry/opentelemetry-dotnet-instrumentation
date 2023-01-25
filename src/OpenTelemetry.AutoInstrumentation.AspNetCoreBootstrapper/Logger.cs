@@ -20,7 +20,7 @@ namespace OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper;
 
 internal static class Logger
 {
-    private static readonly IOtelLogger Log = OtelLogging.GetLogger();
+    private static readonly IOtelLogger Log = OtelLogging.GetLogger("AspNetCoreBootstrapper");
 
     internal static void LogInformation(string message)
     {
