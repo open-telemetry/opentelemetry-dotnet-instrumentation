@@ -177,6 +177,9 @@ Get-Command -Module OpenTelemetry.DotNet.Auto
 Get-Help Install-OpenTelemetryCore -Detailed
 ```
 
+⚠️ The PowerShell module works only on PowerShell 5.1 which
+is the one installed by default on Windows.
+
 ⚠️ Register for IIS and Windows Service performs a service restart.
 
 ## Instrument a container
