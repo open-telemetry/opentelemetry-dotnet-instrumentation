@@ -20,58 +20,6 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal static class ConfigurationExtensions
 {
-    public static IList<TEnum> ParseEnabledEnumList<TEnum>(this Configuration source, string enabledConfiguration, string disabledConfiguration, string error)
-        where TEnum : struct, Enum, IConvertible
-    {
-        var configurations = new Dictionary<string, TEnum>();
-        var enabledConfigurations = source.GetString(enabledConfiguration);
-        if (enabledConfigurations != null)
-        {
-            if (enabledConfigurations == Constants.ConfigurationValues.None)
-            {
-                return Array.Empty<TEnum>();
-            }
-
-            foreach (var configuration in enabledConfigurations.Split(Constants.ConfigurationValues.Separator))
-            {
-                if (Enum.TryParse(configuration, out TEnum parsedType))
-                {
-                    configurations[configuration] = parsedType;
-                }
-                else
-                {
-                    throw new FormatException(string.Format(error, configuration));
-                }
-            }
-        }
-        else
-        {
-            configurations = Enum.GetValues(typeof(TEnum))
-                .Cast<TEnum>()
-                .ToDictionary(
-                    key => Enum.GetName(typeof(TEnum), key)!,
-                    val => val);
-        }
-
-        var disabledConfigurations = source.GetString(disabledConfiguration);
-        if (disabledConfigurations != null)
-        {
-            foreach (var configuration in disabledConfigurations.Split(Constants.ConfigurationValues.Separator))
-            {
-                if (Enum.TryParse(configuration, out TEnum _))
-                {
-                    configurations.Remove(configuration);
-                }
-                else
-                {
-                    throw new FormatException(string.Format(error, configuration));
-                }
-            }
-        }
-
-        return configurations.Values.ToList();
-    }
-
     public static IList<TEnum> ParseEnabledEnumList<TEnum>(this Configuration source, bool enabledByDefault, string enabledConfigurationTemplate)
         where TEnum : struct, Enum, IConvertible
     {
