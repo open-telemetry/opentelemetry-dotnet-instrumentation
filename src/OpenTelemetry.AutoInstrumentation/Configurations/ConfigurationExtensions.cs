@@ -75,9 +75,10 @@ internal static class ConfigurationExtensions
     public static IList<TEnum> ParseEnabledEnumList<TEnum>(this Configuration source, bool enabledByDefault, string enabledConfigurationTemplate)
         where TEnum : struct, Enum, IConvertible
     {
-        var enabledConfigurations = new List<TEnum>();
+        var allConfigurations = Enum.GetValues(typeof(TEnum)).Cast<TEnum>().ToArray();
+        var enabledConfigurations = new List<TEnum>(allConfigurations.Length);
 
-        foreach (var configuration in Enum.GetValues(typeof(TEnum)).Cast<TEnum>())
+        foreach (var configuration in allConfigurations)
         {
             var configurationEnable = source.GetBool(string.Format(CultureInfo.InvariantCulture, enabledConfigurationTemplate, configuration)) ?? enabledByDefault;
 
