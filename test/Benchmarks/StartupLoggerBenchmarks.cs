@@ -26,7 +26,7 @@ Intel Core i9-10900K CPU 3.70GHz, 1 CPU, 20 logical and 10 physical cores
 
 |                Method |     Mean |     Error |    StdDev |   Gen0 | Allocated |
 |---------------------- |---------:|----------:|----------:|-------:|----------:|
-| SetStartupLogFilePath | 1.857 us | 0.0191 us | 0.0170 us | 0.2651 |   2.71 KB |
+| SetStartupLogFilePath | 1.458 us | 0.0133 us | 0.0111 us | 0.2136 |   2.19 KB |
  */
 
 namespace OpenTelemetry.AutoInstrumentation.Loader.Benchmarks;
