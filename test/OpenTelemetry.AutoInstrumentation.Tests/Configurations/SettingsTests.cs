@@ -33,7 +33,6 @@ public class SettingsTests : IDisposable
     {
         yield return new object[] { ConfigurationKeys.Traces.Exporter, new Action(() => Settings.FromDefaultSources<TracerSettings>()) };
         yield return new object[] { ConfigurationKeys.Metrics.Exporter, new Action(() => Settings.FromDefaultSources<MetricSettings>()) };
-        yield return new object[] { ConfigurationKeys.Metrics.Instrumentations, new Action(() => Settings.FromDefaultSources<MetricSettings>()) };
         yield return new object[] { ConfigurationKeys.Logs.Exporter, new Action(() => Settings.FromDefaultSources<LogSettings>()) };
         yield return new object[] { ConfigurationKeys.Sdk.Propagators, new Action(() => Settings.FromDefaultSources<SdkSettings>()) };
     }
@@ -229,22 +228,12 @@ public class SettingsTests : IDisposable
     [InlineData(nameof(MetricInstrumentation.NServiceBus), MetricInstrumentation.NServiceBus)]
     internal void MeterSettings_Instrumentations_SupportedValues(string meterInstrumentation, MetricInstrumentation expectedMetricInstrumentation)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, meterInstrumentation);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled, "false");
+        Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Metrics.EnabledMetricsInstrumentationTemplate, meterInstrumentation), "true");
 
         var settings = Settings.FromDefaultSources<MetricSettings>();
 
         settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<MetricInstrumentation> { expectedMetricInstrumentation });
-    }
-
-    [Fact]
-    internal void MeterSettings_DisabledInstrumentations()
-    {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, $"{nameof(MetricInstrumentation.NetRuntime)},{nameof(MetricInstrumentation.AspNet)}");
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.DisabledInstrumentations, nameof(MetricInstrumentation.AspNet));
-
-        var settings = Settings.FromDefaultSources<MetricSettings>();
-
-        settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<MetricInstrumentation> { MetricInstrumentation.NetRuntime });
     }
 
     [Theory]
@@ -321,8 +310,13 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.IncludeFormattedMessage, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Instrumentations, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.DisabledInstrumentations, null);
+
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled, null);
+        foreach (var metricInstrumentation in Enum.GetValues(typeof(MetricInstrumentation)).Cast<MetricInstrumentation>())
+        {
+            Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Metrics.EnabledMetricsInstrumentationTemplate, metricInstrumentation), null);
+        }
+
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.DisabledInstrumentations, null);

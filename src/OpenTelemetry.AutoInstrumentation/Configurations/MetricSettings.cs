@@ -51,10 +51,13 @@ internal class MetricSettings : Settings
         MetricExporter = ParseMetricExporter(configuration);
         ConsoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Metrics.ConsoleExporterEnabled) ?? false;
 
+        var instrumentationEnabledByDefault =
+            configuration.GetBool(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled) ??
+            configuration.GetBool(ConfigurationKeys.InstrumentationEnabled) ?? true;
+
         EnabledInstrumentations = configuration.ParseEnabledEnumList<MetricInstrumentation>(
-            enabledConfiguration: ConfigurationKeys.Metrics.Instrumentations,
-            disabledConfiguration: ConfigurationKeys.Metrics.DisabledInstrumentations,
-            error: "The \"{0}\" is not recognized as supported metrics instrumentation and cannot be enabled or disabled.");
+            enabledByDefault: instrumentationEnabledByDefault,
+            enabledConfigurationTemplate: ConfigurationKeys.Metrics.EnabledMetricsInstrumentationTemplate);
 
         var additionalSources = configuration.GetString(ConfigurationKeys.Metrics.AdditionalSources);
         if (additionalSources != null)
