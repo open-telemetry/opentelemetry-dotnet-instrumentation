@@ -16,7 +16,8 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
 ### Added
 
 - Support configuring `OTEL_*` settings using `App.config` and `Web.config`.
-- Add Quartz traces instrumentation.
+- Add support for Quartz traces instrumentation.
+- Add support for EntityFrameworkCore traces instrumentations.
 
 ### Changed
 
