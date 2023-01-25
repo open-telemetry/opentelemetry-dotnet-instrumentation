@@ -153,7 +153,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.MultipleApp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Quartz", "test\test-applications\integrations\TestApplication.Quartz\TestApplication.Quartz.csproj", "{B48780CE-8AAB-44D3-9CD1-8491584352B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.AutoInstrumentation.Loader.Benchmark", "test\OpenTelemetry.AutoInstrumentation.Loader.Benchmark\OpenTelemetry.AutoInstrumentation.Loader.Benchmark.csproj", "{B1E71654-E784-4A39-BE45-8671E027B6D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmarks", "test\Benchmarks\Benchmarks.csproj", "{B1E71654-E784-4A39-BE45-8671E027B6D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
