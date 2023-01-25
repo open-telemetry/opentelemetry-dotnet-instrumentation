@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+using System.Globalization;
+
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal static class ConfigurationExtensions
@@ -68,5 +70,23 @@ internal static class ConfigurationExtensions
         }
 
         return configurations.Values.ToList();
+    }
+
+    public static IList<TEnum> ParseEnabledEnumList<TEnum>(this Configuration source, bool enabledByDefault, string enabledConfigurationTemplate)
+        where TEnum : struct, Enum, IConvertible
+    {
+        var enabledConfigurations = new List<TEnum>();
+
+        foreach (var configuration in Enum.GetValues(typeof(TEnum)).Cast<TEnum>())
+        {
+            var configurationEnable = source.GetBool(string.Format(CultureInfo.InvariantCulture, enabledConfigurationTemplate, configuration)) ?? enabledByDefault;
+
+            if (configurationEnable)
+            {
+                enabledConfigurations.Add(configuration);
+            }
+        }
+
+        return enabledConfigurations;
     }
 }

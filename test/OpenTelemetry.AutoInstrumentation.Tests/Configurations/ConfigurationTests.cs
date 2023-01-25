@@ -128,6 +128,61 @@ public class ConfigurationTests
     }
 
     [Fact]
+    public void ParseEnabledEnumList_Default_Enabled()
+    {
+        var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection()));
+
+        var list = source.ParseEnabledEnumList<TestEnum>(
+            enabledByDefault: true,
+            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
+
+        list.Should().Equal(TestEnum.Test1, TestEnum.Test2, TestEnum.Test3);
+    }
+
+    [Fact]
+    public void ParseEnabledEnumList_Default_Disabled()
+    {
+        var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection()));
+
+        var list = source.ParseEnabledEnumList<TestEnum>(
+            enabledByDefault: false,
+            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
+
+        list.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void ParseEnabledEnumList_SelectivelyEnabled()
+    {
+        var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection
+        {
+            { "TEST_CONFIGURATION_Test1_ENABLED", "true" },
+            { "TEST_CONFIGURATION_Test3_ENABLED", "true" }
+        }));
+
+        var list = source.ParseEnabledEnumList<TestEnum>(
+            false,
+            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
+
+        list.Should().Equal(TestEnum.Test1, TestEnum.Test3);
+    }
+
+    [Fact]
+    public void ParseEnabledEnumList_SelectivelyDisabled()
+    {
+        var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection
+        {
+            { "TEST_CONFIGURATION_Test2_ENABLED", "false" },
+        }));
+
+        var list = source.ParseEnabledEnumList<TestEnum>(
+            true,
+            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
+
+        list.Should().Equal(TestEnum.Test1, TestEnum.Test3);
+    }
+
+    [Fact]
     public void ParseEmptyAsNull_CompositeConfigurationSource()
     {
         var mockSource = new Mock<IConfigurationSource>();
