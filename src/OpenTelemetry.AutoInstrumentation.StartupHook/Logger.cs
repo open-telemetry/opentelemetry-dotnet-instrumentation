@@ -20,7 +20,7 @@ namespace OpenTelemetry.AutoInstrumentation.StartupHook;
 
 internal static class Logger
 {
-    private static readonly IOtelLogger Log = OtelLogging.GetLogger();
+    private static readonly IOtelLogger Log = OtelLogging.GetLogger("StartupHook");
 
     internal static void LogInformation(string message)
     {
