@@ -240,21 +240,12 @@ public class SettingsTests : IDisposable
     [InlineData(nameof(LogInstrumentation.ILogger), LogInstrumentation.ILogger)]
     internal void LogSettings_Instrumentations_SupportedValues(string logInstrumentation, LogInstrumentation expectedLogInstrumentation)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, logInstrumentation);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.LogsInstrumentationEnabled, "false");
+        Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate, logInstrumentation), "true");
 
         var settings = Settings.FromDefaultSources<LogSettings>();
 
         settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<LogInstrumentation> { expectedLogInstrumentation });
-    }
-
-    [Fact]
-    internal void LogSettings_DisabledInstrumentations()
-    {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.DisabledInstrumentations, nameof(LogInstrumentation.ILogger));
-
-        var settings = Settings.FromDefaultSources<LogSettings>();
-
-        settings.EnabledInstrumentations.Should().BeEmpty();
     }
 
     [Theory]
@@ -308,6 +299,12 @@ public class SettingsTests : IDisposable
 
     private static void ClearEnvVars()
     {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.LogsInstrumentationEnabled, null);
+        foreach (var logInstrumentation in Enum.GetValues(typeof(LogInstrumentation)).Cast<LogInstrumentation>())
+        {
+            Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate, logInstrumentation), null);
+        }
+
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.IncludeFormattedMessage, null);
 
@@ -318,8 +315,12 @@ public class SettingsTests : IDisposable
         }
 
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.DisabledInstrumentations, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, null);
+        foreach (var tracerInstrumentation in Enum.GetValues(typeof(TracerInstrumentation)).Cast<TracerInstrumentation>())
+        {
+            Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, tracerInstrumentation), null);
+        }
+
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesSampler, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesSamplerArguments, null);

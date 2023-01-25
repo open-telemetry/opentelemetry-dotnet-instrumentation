@@ -194,14 +194,14 @@ internal static class ConfigurationKeys
         public const string IncludeFormattedMessage = "OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE";
 
         /// <summary>
-        /// Configuration key for comma separated list of enabled logs instrumentations.
+        /// Configuration key for enabling all log instrumentations.
         /// </summary>
-        public const string Instrumentations = "OTEL_DOTNET_AUTO_LOGS_ENABLED_INSTRUMENTATIONS";
+        public const string LogsInstrumentationEnabled = "OTEL_DOTNET_AUTO_LOGS_INSTRUMENTATION_ENABLED";
 
         /// <summary>
-        /// Configuration key for comma separated list of disabled logs instrumentations.
+        /// Configuration key template for enabled log instrumentations.
         /// </summary>
-        public const string DisabledInstrumentations = "OTEL_DOTNET_AUTO_LOGS_DISABLED_INSTRUMENTATIONS";
+        public const string EnabledLogsInstrumentationTemplate = "OTEL_DOTNET_AUTO_LOGS_{0}_INSTRUMENTATION_ENABLED";
     }
 
     /// <summary>
