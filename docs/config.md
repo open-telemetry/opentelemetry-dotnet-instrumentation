@@ -15,6 +15,17 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     file  (`web.config`) or an application configuration file (`app.config`) to
     configure the `OTEL_*` settings.
 
+    ⚠️ Only settings starting with `OTEL_` can be set using `App.config` or `Web.config`.
+    However, the following settings are not supported:
+
+    - `OTEL_DOTNET_AUTO_HOME`
+    - `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`
+    - `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE`
+    - `OTEL_DOTNET_AUTO_[TRACES|METRICS|LOGS]_[ENABLED|DISABLED]_INSTRUMENTATIONS`
+    - `OTEL_DOTNET_AUTO_LOG_DIRECTORY`
+    - `OTEL_DOTNET_AUTO_DEBUG`
+    - `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`
+
     Example with `OTEL_SERVICE_NAME` setting:
 
     ```xml
@@ -24,8 +35,6 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     </appSettings>
     </configuration>
     ```
-
-    > ⚠️ Only settings starting with `OTEL_` can be set using `App.config` or `Web.config`.
 
 ## Global settings
 
