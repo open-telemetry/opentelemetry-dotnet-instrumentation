@@ -2,6 +2,8 @@
 
 This document lists advanced configuration settings rarely changed by users.
 
+These configuration can be only set using environment variables.
+
 ## Environment
 
 | Environment variable                  | Description                                                                        | Default value |
