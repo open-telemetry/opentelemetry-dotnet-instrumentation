@@ -16,7 +16,7 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     configure the `OTEL_*` settings.
 
     ⚠️ Only settings starting with `OTEL_` can be set using `App.config` or `Web.config`.
-    Additionally, the following settings are not supported:
+    However, the following settings are not supported:
 
     - `OTEL_DOTNET_AUTO_HOME`
     - `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`
