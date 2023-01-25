@@ -16,5 +16,5 @@
 
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("OpenTelemetry.AutoInstrumentation.Loader.Benchmark")]
+[assembly: InternalsVisibleTo("Benchmarks")]
 [assembly: InternalsVisibleTo("OpenTelemetry.AutoInstrumentation.Loader.Tests")]
