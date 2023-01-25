@@ -26,7 +26,6 @@ internal static class StartupLogger
     private static readonly bool DebugEnabled = IsDebugEnabled();
     private static readonly string? LogDirectory = GetLogDirectory();
     private static readonly string? StartupLogFilePath = SetStartupLogFilePath();
-    private static readonly HashSet<char> InvalidChars = GetInvalidChars();
 
     // It is not necessary to dispose of FileSink explicitly: the OS closes the respective
     // native handle when the process is closed. Moreover, this is a low-volume log and
@@ -95,10 +94,11 @@ internal static class StartupLogger
             // remove any of those. For the first assembly loaded by the process this is typically
             // expected to be name of the file with the application entry point.
             var appDomainFriendlyName = AppDomain.CurrentDomain.FriendlyName;
+            HashSet<char> invalidChars = GetInvalidChars();
             var sb = new StringBuilder(appDomainFriendlyName);
             for (int i = 0; i < sb.Length; i++)
             {
-                if (InvalidChars.Contains(sb[i]))
+                if (invalidChars.Contains(sb[i]))
                 {
                     sb[i] = '_';
                 }
