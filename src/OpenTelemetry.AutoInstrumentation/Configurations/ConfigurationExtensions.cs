@@ -21,52 +21,52 @@ internal static class ConfigurationExtensions
     public static IList<TEnum> ParseEnabledEnumList<TEnum>(this Configuration source, string enabledConfiguration, string disabledConfiguration, string error)
         where TEnum : struct, Enum, IConvertible
     {
-        var instrumentations = new Dictionary<string, TEnum>();
-        var enabledInstrumentations = source.GetString(enabledConfiguration);
-        if (enabledInstrumentations != null)
+        var configurations = new Dictionary<string, TEnum>();
+        var enabledConfigurations = source.GetString(enabledConfiguration);
+        if (enabledConfigurations != null)
         {
-            if (enabledInstrumentations == Constants.ConfigurationValues.None)
+            if (enabledConfigurations == Constants.ConfigurationValues.None)
             {
                 return Array.Empty<TEnum>();
             }
 
-            foreach (var instrumentation in enabledInstrumentations.Split(Constants.ConfigurationValues.Separator))
+            foreach (var configuration in enabledConfigurations.Split(Constants.ConfigurationValues.Separator))
             {
-                if (Enum.TryParse(instrumentation, out TEnum parsedType))
+                if (Enum.TryParse(configuration, out TEnum parsedType))
                 {
-                    instrumentations[instrumentation] = parsedType;
+                    configurations[configuration] = parsedType;
                 }
                 else
                 {
-                    throw new FormatException(string.Format(error, instrumentation));
+                    throw new FormatException(string.Format(error, configuration));
                 }
             }
         }
         else
         {
-            instrumentations = Enum.GetValues(typeof(TEnum))
+            configurations = Enum.GetValues(typeof(TEnum))
                 .Cast<TEnum>()
                 .ToDictionary(
                     key => Enum.GetName(typeof(TEnum), key)!,
                     val => val);
         }
 
-        var disabledInstrumentations = source.GetString(disabledConfiguration);
-        if (disabledInstrumentations != null)
+        var disabledConfigurations = source.GetString(disabledConfiguration);
+        if (disabledConfigurations != null)
         {
-            foreach (var instrumentation in disabledInstrumentations.Split(Constants.ConfigurationValues.Separator))
+            foreach (var configuration in disabledConfigurations.Split(Constants.ConfigurationValues.Separator))
             {
-                if (Enum.TryParse(instrumentation, out TEnum _))
+                if (Enum.TryParse(configuration, out TEnum _))
                 {
-                    instrumentations.Remove(instrumentation);
+                    configurations.Remove(configuration);
                 }
                 else
                 {
-                    throw new FormatException(string.Format(error, instrumentation));
+                    throw new FormatException(string.Format(error, configuration));
                 }
             }
         }
 
-        return instrumentations.Values.ToList();
+        return configurations.Values.ToList();
     }
 }
