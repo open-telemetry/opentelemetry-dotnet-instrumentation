@@ -56,6 +56,11 @@ internal static class ConfigurationKeys
     public const string SetupSdk = "OTEL_DOTNET_AUTO_SETUP_SDK";
 
     /// <summary>
+    /// Configuration key for enabling all instrumentations.
+    /// </summary>
+    public const string InstrumentationEnabled = "OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED";
+
+    /// <summary>
     /// Configuration keys for traces.
     /// </summary>
     public static class Traces
@@ -82,14 +87,14 @@ internal static class ConfigurationKeys
         public const string ConsoleExporterEnabled = "OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED";
 
         /// <summary>
-        /// Configuration key for comma separated list of enabled trace instrumentations.
+        /// Configuration key for enabling all trace instrumentations.
         /// </summary>
-        public const string Instrumentations = "OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS";
+        public const string TracesInstrumentationEnabled = "OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED";
 
         /// <summary>
-        /// Configuration key for comma separated list of disabled trace instrumentations.
+        /// Configuration key template for enabled trace instrumentations.
         /// </summary>
-        public const string DisabledInstrumentations = "OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS";
+        public const string EnabledTracesInstrumentationTemplate = "OTEL_DOTNET_AUTO_TRACES_{0}_INSTRUMENTATION_ENABLED";
 
         /// <summary>
         /// Configuration key for additional <see cref="ActivitySource"/> names to be added to the tracer at the startup.
