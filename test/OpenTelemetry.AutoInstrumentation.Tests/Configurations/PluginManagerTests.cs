@@ -16,6 +16,7 @@
 
 using System.Collections.Specialized;
 using FluentAssertions;
+using FluentAssertions.Collections;
 using FluentAssertions.Execution;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -79,11 +80,13 @@ public class PluginManagerTests
 
         var tracerAction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(pluginManager);
         var meterAction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(pluginManager);
+        var resourceAction = () => ResourceBuilder.CreateEmpty().InvokePlugins(pluginManager);
 
         using (new AssertionScope())
         {
             tracerAction.Should().NotThrow();
             meterAction.Should().NotThrow();
+            resourceAction.Should().NotThrow();
         }
     }
 
@@ -158,11 +161,12 @@ public class PluginManagerTests
         var settings = GetSettings(pluginAssemblyQualifiedName);
         var pluginManager = new PluginManager(settings);
 
-        var resourceAction = () => ResourceBuilder.CreateEmpty().InvokePlugins(pluginManager);
+        var resource = ResourceBuilder.CreateEmpty().InvokePlugins(pluginManager).Build();
 
         using (new AssertionScope())
         {
-            resourceAction.Should().NotThrow();
+            resource.Attributes.First().Key.Should().Be("key");
+            resource.Attributes.First().Value.Should().Be("value");
         }
     }
 
@@ -204,7 +208,7 @@ public class PluginManagerTests
         {
             var attributes = new List<KeyValuePair<string, object>>
             {
-                new KeyValuePair<string, object>("key", "val"),
+                new KeyValuePair<string, object>("key", "value"),
             };
 
             builder.AddAttributes(attributes);

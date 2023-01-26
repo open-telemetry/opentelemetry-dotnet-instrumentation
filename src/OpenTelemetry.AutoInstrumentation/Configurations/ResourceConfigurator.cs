@@ -22,10 +22,16 @@ internal static class ResourceConfigurator
 {
     public static void Configure(ResourceBuilder resourceBuilder)
     {
+        var pluginManager = Instrumentation.PluginManager;
+
         resourceBuilder
             .AddTelemetrySdk()
-            .AddAttributes(new KeyValuePair<string, object>[] { new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version) })
-            .InvokePlugins(Instrumentation.PluginManager);
+            .AddAttributes(new KeyValuePair<string, object>[] { new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version) });
+
+        if (pluginManager != null)
+        {
+            resourceBuilder.InvokePlugins(pluginManager);
+        }
     }
 
     public static ResourceBuilder CreateResourceBuilder()

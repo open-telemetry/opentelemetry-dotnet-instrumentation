@@ -33,15 +33,8 @@ internal static class PluginsConfigurationHelper
         return pluginManager.ConfigureMeterProviderBuilder(builder);
     }
 
-    public static ResourceBuilder InvokePlugins(this ResourceBuilder builder, PluginManager? pluginManager)
+    public static ResourceBuilder InvokePlugins(this ResourceBuilder builder, PluginManager pluginManager)
     {
-        if (pluginManager == null)
-        {
-            return builder;
-        }
-        else
-        {
-            return pluginManager.ConfigureResourceBuilder(builder);
-        }
+        return pluginManager.ConfigureResourceBuilder(builder);
     }
 }
