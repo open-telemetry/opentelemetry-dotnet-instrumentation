@@ -60,8 +60,8 @@ and [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework).
 > [0.4.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.4.0-beta.1)
 > is the latest version supporting it.
 >
-> [Red Hat Enterprise Linux 7](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7)
-> is not supported. See [(#2083)](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2083).
+> `Red Hat Enterprise Linux` lower than `9` are not supported.
+> See [(#2083)](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2083).
 
 CI tests run against the following operating systems:
 
