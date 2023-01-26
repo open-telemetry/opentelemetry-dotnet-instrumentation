@@ -1,4 +1,4 @@
-// <copyright file="AssemblyInfo.cs" company="OpenTelemetry Authors">
+// <copyright file="Program.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,11 @@
 // limitations under the License.
 // </copyright>
 
-using System.Runtime.CompilerServices;
+using BenchmarkDotNet.Running;
 
-[assembly: InternalsVisibleTo("Benchmarks")]
-[assembly: InternalsVisibleTo("OpenTelemetry.AutoInstrumentation.Loader.Tests")]
+namespace OpenTelemetry.AutoInstrumentation.Loader.Benchmarks;
+
+internal class Program
+{
+    private static void Main(string[] args) => BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+}
