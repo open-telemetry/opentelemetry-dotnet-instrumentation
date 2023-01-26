@@ -37,7 +37,8 @@ public class GrpcNetClientTests : TestHelper
 
         // Grpc.Net.Client is using various version of http communication under the hood.
         // Enabling only GrpcNetClient instrumentation to have consistent set of spans.
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "GrpcNetClient");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED", "false");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_GrpcNetClient_INSTRUMENTATION_ENABLED", "true");
         RunTestApplication();
 
         collector.AssertExpectations();
