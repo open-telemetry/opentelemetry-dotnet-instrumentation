@@ -34,7 +34,7 @@ public class EntityFrameworkCoreTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.Expect("OpenTelemetry.EntityFrameworkCore");
+        collector.Expect("OpenTelemetry.Instrumentation.EntityFrameworkCore");
 
         RunTestApplication();
 
