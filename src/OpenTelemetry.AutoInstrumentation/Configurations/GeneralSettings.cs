@@ -30,6 +30,11 @@ internal class GeneralSettings : Settings
     /// </summary>
     public bool FlushOnUnhandledException { get; private set; }
 
+    /// <summary>
+    /// Gets a value indicating whether OpenTelemetry .NET SDK should be set up.
+    /// </summary>
+    public bool SetupSdk { get; private set; }
+
     protected override void OnLoad(Configuration configuration)
     {
         var providerPlugins = configuration.GetString(ConfigurationKeys.ProviderPlugins);
@@ -42,5 +47,6 @@ internal class GeneralSettings : Settings
         }
 
         FlushOnUnhandledException = configuration.GetBool(ConfigurationKeys.FlushOnUnhandledException) ?? false;
+        SetupSdk = configuration.GetBool(ConfigurationKeys.SetupSdk) ?? true;
     }
 }

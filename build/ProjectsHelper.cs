@@ -72,6 +72,11 @@ public static class ProjectsHelper
         return solution.GetProject(Projects.Mocks.AutoInstrumentationMock);
     }
 
+    public static Project GetBenchmarks(this Solution solution)
+    {
+        return solution.GetProject(Projects.Benchmarks.AutoInstrumentationBenchmarks);
+    }
+
     public static IEnumerable<Project> GetWindowsOnlyTestApplications(this Solution solution)
     {
         return solution
@@ -96,7 +101,8 @@ public static class ProjectsHelper
         return solution.GetManagedSrcProjects()
             .Concat(solution.GetManagedTestProjects())
             .Concat(solution.GetCrossPlatformTestApplications())
-            .Concat(new[] { solution.GetTestMock() });
+            .Concat(new[] { solution.GetTestMock() })
+            .Concat(new[] { solution.GetBenchmarks() });
     }
 
     public static IEnumerable<Project> GetNativeProjects(this Solution solution)

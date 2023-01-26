@@ -15,6 +15,17 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     file  (`web.config`) or an application configuration file (`app.config`) to
     configure the `OTEL_*` settings.
 
+    ⚠️ Only settings starting with `OTEL_` can be set using `App.config` or `Web.config`.
+    However, the following settings are not supported:
+
+    - `OTEL_DOTNET_AUTO_HOME`
+    - `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`
+    - `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE`
+    - `OTEL_DOTNET_AUTO_[TRACES|METRICS|LOGS]_[ENABLED|DISABLED]_INSTRUMENTATIONS`
+    - `OTEL_DOTNET_AUTO_LOG_DIRECTORY`
+    - `OTEL_DOTNET_AUTO_DEBUG`
+    - `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`
+
     Example with `OTEL_SERVICE_NAME` setting:
 
     ```xml
@@ -25,14 +36,13 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     </configuration>
     ```
 
-    > ⚠️ Only settings starting with `OTEL_` can be set using `App.config` or `Web.config`.
-
 ## Global settings
 
 | Environment variable                 | Description                                                                                                                                                                                                                  | Default value |
 |--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
 | `OTEL_DOTNET_AUTO_HOME`              | Installation location.                                                                                                                                                                                                       |               |
 | `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` | Names of the executable files that the profiler cannot instrument. Supports multiple comma-separated values, for example: `ReservedProcess.exe,powershell.exe`. If unset, the profiler attaches to all processes by default. |               |
+| `OTEL_DOTNET_AUTO_SETUP_SDK`         | Controls whether auto-instrumentation should set up OpenTelemetry .NET SDK at startup.                                                                                                                                       | `true`        |
 
 ## Resources
 
