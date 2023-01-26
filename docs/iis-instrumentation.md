@@ -66,4 +66,4 @@ to set it for all ASP.NET application running in Integrated Pipeline Mode:
 ## Enable ASP.NET instrumentation
 
 Make sure to enable the ASP.NET instrumentation by setting
-`OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS=AspNet`.
+`OTEL_DOTNET_AUTO_TRACES_AspNet_INSTRUMENTATION_ENABLED=true`.
