@@ -199,6 +199,7 @@
     <ClInclude Include="miniutf.hpp" />
     <ClInclude Include="miniutfdata.h" />
     <ClInclude Include="module_metadata.h" />
+    <ClInclude Include="netfx_assembly_redirection.h" />
     <ClInclude Include="otel_profiler_constants.h" />
     <ClInclude Include="pal.h" />
     <ClInclude Include="rejit_handler.h" />
