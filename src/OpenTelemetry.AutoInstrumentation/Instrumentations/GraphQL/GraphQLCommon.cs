@@ -15,7 +15,7 @@
 // </copyright>
 
 using System.Diagnostics;
-using OpenTelemetry.AutoInstrumentation.Configuration;
+using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Util;
 
@@ -32,7 +32,7 @@ internal class GraphQLCommon
     internal static readonly ActivitySource ActivitySource = new ActivitySource(
         "OpenTelemetry.AutoInstrumentation.GraphQL", Constants.Tracer.Version);
 
-    private static readonly ILogger Log = OtelLogging.GetLogger();
+    private static readonly IOtelLogger Log = OtelLogging.GetLogger();
 
     internal static Activity? CreateActivityFromExecuteAsync(IExecutionContext executionContext)
     {

@@ -59,6 +59,9 @@ and [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework).
 > `.NET Core 3.1` is not supported.
 > [0.4.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.4.0-beta.1)
 > is the latest version supporting it.
+>
+> [Red Hat Enterprise Linux 7](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7)
+> is not supported. See [(#2083)](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2083).
 
 CI tests run against the following operating systems:
 
@@ -177,6 +180,9 @@ Get-Command -Module OpenTelemetry.DotNet.Auto
 Get-Help Install-OpenTelemetryCore -Detailed
 ```
 
+⚠️ The PowerShell module works only on PowerShell 5.1
+which is the one installed by default on Windows.
+
 ⚠️ Register for IIS and Windows Service performs a service restart.
 
 ## Instrument a container
@@ -222,6 +228,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 - [Chris Ventura](https://github.com/nrcventura), New Relic
 - [Paulo Janotti](https://github.com/pjanotti), Splunk
+- [Piotr Kie&#x142;kowicz](https://github.com/Kielek), Splunk
 - [Rajkumar Rangaraj](https://github.com/rajkumar-rangaraj), Microsoft
 - [Robert Paj&#x105;k](https://github.com/pellared), Splunk
 - [Zach Montoya](https://github.com/zacharycmontoya), Datadog
@@ -229,7 +236,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 [Approvers](https://github.com/open-telemetry/community/blob/main/community-membership.md#approver)
 ([@open-telemetry/dotnet-instrumentation-approvers](https://github.com/orgs/open-telemetry/teams/dotnet-instrumentation-approvers)):
 
-- [Piotr Kie&#x142;kowicz](https://github.com/Kielek), Splunk
 - [Rasmus Kuusmann](https://github.com/RassK), Splunk
 
 [Emeritus

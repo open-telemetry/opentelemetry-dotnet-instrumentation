@@ -12,6 +12,11 @@ public static class Projects
         public const string AutoInstrumentationMock = "OpenTelemetry.AutoInstrumentation.Mock";
     }
 
+    public static class Benchmarks
+    {
+        public const string AutoInstrumentationBenchmarks = "Benchmarks";
+    }
+
     public static class Tests
     {
         public const string AutoInstrumentationNativeTests = "OpenTelemetry.AutoInstrumentation.Native.Tests";

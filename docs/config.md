@@ -1,11 +1,48 @@
 # Configuration
 
+## Configuration methods
+
+You can apply configuration settings in the following ways,
+with environment variables taking precedence over `App.config` or `Web.config` file:
+
+1. Environment variables
+
+    Environment variables are the main way to configure the settings.
+
+2. `App.config` or `Web.config` file
+
+    For an application running on .NET Framework, you can use a web configuration
+    file  (`web.config`) or an application configuration file (`app.config`) to
+    configure the `OTEL_*` settings.
+
+    ⚠️ Only settings starting with `OTEL_` can be set using `App.config` or `Web.config`.
+    However, the following settings are not supported:
+
+    - `OTEL_DOTNET_AUTO_HOME`
+    - `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`
+    - `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE`
+    - `OTEL_DOTNET_AUTO_[TRACES|METRICS|LOGS]_[ENABLED|DISABLED]_INSTRUMENTATIONS`
+    - `OTEL_DOTNET_AUTO_LOG_DIRECTORY`
+    - `OTEL_DOTNET_AUTO_DEBUG`
+    - `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`
+
+    Example with `OTEL_SERVICE_NAME` setting:
+
+    ```xml
+    <configuration>
+    <appSettings>
+        <add key="OTEL_SERVICE_NAME" value="my-service-name" />
+    </appSettings>
+    </configuration>
+    ```
+
 ## Global settings
 
 | Environment variable                 | Description                                                                                                                                                                                                                  | Default value |
 |--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
 | `OTEL_DOTNET_AUTO_HOME`              | Installation location.                                                                                                                                                                                                       |               |
 | `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` | Names of the executable files that the profiler cannot instrument. Supports multiple comma-separated values, for example: `ReservedProcess.exe,powershell.exe`. If unset, the profiler attaches to all processes by default. |               |
+| `OTEL_DOTNET_AUTO_SETUP_SDK`         | Controls whether auto-instrumentation should set up OpenTelemetry .NET SDK at startup.                                                                                                                                       | `true`        |
 
 ## Resources
 
@@ -32,23 +69,24 @@ for more details.
 
 ### Traces instrumentations
 
-| ID                   | Instrumented library                                                                                                                                                                            | Supported versions | Instrumentation type    |
-|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------|-------------------------|
-| `AspNet`             | ASP.NET (.NET Framework) MVC / WebApi \[1\]                                                                                                                                                     | *                  | source                  |
-| `AspNet`             | ASP.NET Core                                                                                                                                                                                    | *                  | source                  |
-| `Elasticsearch`      | [Elastic.Clients.Elasticsearch](https://www.nuget.org/packages/Elastic.Clients.Elasticsearch)                                                                                                   | ≥8.0.0             | source                  |
-| `GraphQL`            | [GraphQL](https://www.nuget.org/packages/GraphQL)                                                                                                                                               | ≥2.3.0 & < 3.0.0   | bytecode                |
-| `GrpcNetClient`      | [Grpc.Net.Client](https://www.nuget.org/packages/Grpc.Net.Client)                                                                                                                               | ≥2.43.0 & < 3.0.0  | source                  |
-| `HttpClient`         | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | *                  | source                  |
-| `Quartz`             | [Quartz](https://www.nuget.org/packages/Quartz) **Not supported on .NET Framework 4.7.1 and older**                                                                                             | ≥3.4.0             | source                  |
-| `MassTransit`        | [MassTransit](https://www.nuget.org/packages/MassTransit) **Not supported on .NET Framework**                                                                                                   | ≥8.0.0             | source                  |
-| `MongoDB`            | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core) **Not supported on .NET Framework**                                                                                   | ≥2.13.3 & < 3.0.0  | source & bytecode       |
-| `MySqlData`          | [MySql.Data](https://www.nuget.org/packages/MySql.Data) **Not supported on .NET Framework**                                                                                                     | ≥6.10.7            | source & bytecode \[2\] |
-| `Npgsql`             | [Npgsql](https://www.nuget.org/packages/Npgsql)                                                                                                                                                 | ≥6.0.0             | source                  |
-| `NServiceBus`        | [NServiceBus](https://www.nuget.org/packages/NServiceBus)                                                                                                                                       | ≥8.0.0             | source & bytecode       |
-| `SqlClient`          | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient)                           | *                  | source                  |
-| `StackExchangeRedis` | [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis) **Not supported on .NET Framework**                                                                                   | ≥2.0.405 < 3.0.0   | source & bytecode       |
-| `Wcf`                | [System.ServiceModel](https://www.nuget.org/packages/System.ServiceModel) **No support for server side on .NET**. For configuration see [WCF Instrumentation Configuration](wcf-config.md)      | * \[3\]            | source                  |
+| ID                    | Instrumented library                                                                                                                                                                            | Supported versions | Instrumentation type    |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------|-------------------------|
+| `AspNet`              | ASP.NET (.NET Framework) MVC / WebApi \[1\]                                                                                                                                                     | *                  | source                  |
+| `AspNet`              | ASP.NET Core                                                                                                                                                                                    | *                  | source                  |
+| `Elasticsearch`       | [Elastic.Clients.Elasticsearch](https://www.nuget.org/packages/Elastic.Clients.Elasticsearch)                                                                                                   | ≥8.0.0             | source                  |
+| `EntityFrameworkCore` | [Microsoft.EntityFrameworkCore](https://www.nuget.org/packages/) **Not supported on .NET Framework**                                                                                            | ≥6.0.12            | source                  |
+| `GraphQL`             | [GraphQL](https://www.nuget.org/packages/GraphQL)                                                                                                                                               | ≥2.3.0 & < 3.0.0   | bytecode                |
+| `GrpcNetClient`       | [Grpc.Net.Client](https://www.nuget.org/packages/Grpc.Net.Client)                                                                                                                               | ≥2.43.0 & < 3.0.0  | source                  |
+| `HttpClient`          | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | *                  | source                  |
+| `Quartz`              | [Quartz](https://www.nuget.org/packages/Quartz) **Not supported on .NET Framework 4.7.1 and older**                                                                                             | ≥3.4.0             | source                  |
+| `MassTransit`         | [MassTransit](https://www.nuget.org/packages/MassTransit) **Not supported on .NET Framework**                                                                                                   | ≥8.0.0             | source                  |
+| `MongoDB`             | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core) **Not supported on .NET Framework**                                                                                   | ≥2.13.3 & < 3.0.0  | source & bytecode       |
+| `MySqlData`           | [MySql.Data](https://www.nuget.org/packages/MySql.Data) **Not supported on .NET Framework**                                                                                                     | ≥6.10.7            | source & bytecode \[2\] |
+| `Npgsql`              | [Npgsql](https://www.nuget.org/packages/Npgsql)                                                                                                                                                 | ≥6.0.0             | source                  |
+| `NServiceBus`         | [NServiceBus](https://www.nuget.org/packages/NServiceBus)                                                                                                                                       | ≥8.0.0             | source & bytecode       |
+| `SqlClient`           | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient)                           | *                  | source                  |
+| `StackExchangeRedis`  | [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis) **Not supported on .NET Framework**                                                                                   | ≥2.0.405 < 3.0.0   | source & bytecode       |
+| `Wcf`                 | [System.ServiceModel](https://www.nuget.org/packages/System.ServiceModel) **No support for server side on .NET**. For configuration see [WCF Instrumentation Configuration](wcf-config.md)      | * \[3\]            | source                  |
 
 \[1\]: Only integrated pipeline mode is supported.
 

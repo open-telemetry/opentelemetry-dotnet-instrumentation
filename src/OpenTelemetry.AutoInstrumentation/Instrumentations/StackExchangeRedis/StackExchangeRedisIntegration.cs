@@ -15,7 +15,7 @@
 // </copyright>
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
-using OpenTelemetry.AutoInstrumentation.Configuration;
+using OpenTelemetry.AutoInstrumentation.Configurations;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
 
