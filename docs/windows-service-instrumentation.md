@@ -3,7 +3,7 @@
 ## Setup
 
 Use the `OpenTelemetry.DotNet.Auto.psm1"` PowerShell module
-to setup automatic instrumentation for a Windows Service:
+to set up automatic instrumentation for a Windows Service:
 
 ```powershell
 # Import the module
@@ -12,7 +12,7 @@ Import-Module "OpenTelemetry.DotNet.Auto.psm1"
 # Install core files
 Install-OpenTelemetryCore
 
-# Setup your Windows Service instrumentation
+# Set up your Windows Service instrumentation
 Register-OpenTelemetryForWindowsService -WindowsServiceName "WindowsServiceName" -OTelServiceName "MyServiceDisplayName"
 ```
 
@@ -24,7 +24,7 @@ Register-OpenTelemetryForWindowsService -WindowsServiceName "WindowsServiceName"
 > You can do it by executing
 > `Restart-Service -Name $WindowsServiceName -Force` in PowerShell.
 
-For .NET Framework application you can configure the most common `OTEL_` settings
+For .NET Framework applications you can configure the most common `OTEL_` settings
 (like `OTEL_RESOURCE_ATTRIBUTES`) via `appSettings` in `Web.config`.
 
 The alternative is to set environment variables for the Windows Service
@@ -36,7 +36,7 @@ The registry key of a given Windows Service (named `$svcName`) is located under:
 HKLM\SYSTEM\CurrentControlSet\Services\$svcName
 ```
 
-The environment variables can are defined
+The environment variables are defined
 in a `REG_MULTI_SZ` (multiline registry value) called `Environment`
 in the following format:
 

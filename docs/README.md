@@ -167,11 +167,11 @@ Import-Module $download_path
 # Install core files
 Install-OpenTelemetryCore
 
-# Setup the instrumentation for the current PowerShell session
+# Set up the instrumentation for the current PowerShell session
 Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
 
 # Run your application with instrumentation
-dotnet run
+.\MyNetApp.exe
 ```
 
 You can get usage information by calling:

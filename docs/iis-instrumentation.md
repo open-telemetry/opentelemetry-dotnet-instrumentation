@@ -3,7 +3,7 @@
 ## Setup
 
 Use the `OpenTelemetry.DotNet.Auto.psm1"` PowerShell module
-to setup automatic instrumentation for IIS:
+to set up automatic instrumentation for IIS:
 
 ```powershell
 # Import the module
@@ -83,7 +83,7 @@ to set environment variables for given application pools.
   set its environment variables
   and use it as the application pool user.
 
-You can consider setting common environment variables,
-for all application deployed to IIS
+Consider setting common environment variables,
+for all applications deployed to IIS
 by setting the environment variables for
 `W3SVC` and `WAS` Windows Services as described in [windows-service-instrumentation.md](windows-service-instrumentation.md).
