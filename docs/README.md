@@ -167,8 +167,9 @@ Invoke-WebRequest -Uri $module_url -OutFile $download_path
 # Import the module to use its functions
 Import-Module $download_path
 
-# Install core files
+# Install core files (online vs offline method)
 Install-OpenTelemetryCore
+Install-OpenTelemetryCore -LocalPath "C:\Path\To\OpenTelemetry.zip" 
 
 # Set up the instrumentation for the current PowerShell session
 Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
