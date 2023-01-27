@@ -35,8 +35,6 @@ public class SmokeTests : TestHelper
         : base("Smoke", output)
     {
         SetEnvironmentVariable("OTEL_SERVICE_NAME", ServiceName);
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED", "false");
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_HttpClient_INSTRUMENTATION_ENABLED", "true");
     }
 
     [Fact]
@@ -54,7 +52,7 @@ public class SmokeTests : TestHelper
 #if NETFRAMEWORK
         VerifyTestApplicationInstrumented();
 #else
-        // on .NET Core it is required to set DOTNET_STARTUP_HOOKS
+        // on .NET it is required to set DOTNET_STARTUP_HOOKS
         VerifyTestApplicationNotInstrumented();
 #endif
     }
@@ -120,6 +118,7 @@ public class SmokeTests : TestHelper
         collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version);
         collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
 
+        EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
         RunTestApplication();
 
@@ -138,6 +137,7 @@ public class SmokeTests : TestHelper
         collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version);
         collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
 
+        EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
         RunTestApplication();
 
@@ -157,6 +157,7 @@ public class SmokeTests : TestHelper
         collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version);
         collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
 
+        EnableOnlyHttpClientTraceInstrumentation();
         EnableBytecodeInstrumentation();
         RunTestApplication();
 
@@ -172,6 +173,7 @@ public class SmokeTests : TestHelper
         SetExporter(collector);
         collector.Expect("MyCompany.MyProduct.MyLibrary", span => span.Name == "SayHello");
 
+        EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
         RunTestApplication();
 
@@ -185,6 +187,7 @@ public class SmokeTests : TestHelper
         using var collector = new MockZipkinCollector(Output);
         collector.Expect(span => span.Name == "SayHello" && span.Tags?.GetValueOrDefault("otel.library.name") == "MyCompany.MyProduct.MyLibrary");
 
+        EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "zipkin");
         SetEnvironmentVariable("OTEL_EXPORTER_ZIPKIN_ENDPOINT", $"http://localhost:{collector.Port}/api/v2/spans");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
@@ -198,6 +201,7 @@ public class SmokeTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public void PrometheusExporter()
     {
+        EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("LONG_RUNNING", "true");
         SetEnvironmentVariable("OTEL_METRICS_EXPORTER", "prometheus");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
@@ -250,6 +254,7 @@ public class SmokeTests : TestHelper
         SetExporter(collector);
         collector.Expect(logRecord => Convert.ToString(logRecord.Body) == "{ \"stringValue\": \"Example log message\" }");
 
+        EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
         EnableBytecodeInstrumentation();
         RunTestApplication();
@@ -268,6 +273,7 @@ public class SmokeTests : TestHelper
         using var collector = new MockLogsCollector(Output);
         SetExporter(collector);
 
+        EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable(envVarName, envVarVal);
         EnableBytecodeInstrumentation();
         RunTestApplication();
@@ -301,6 +307,7 @@ public class SmokeTests : TestHelper
     {
         using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
+        EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable(envVarName, envVarVal);
         RunTestApplication();
         collector.AssertEmpty();
@@ -312,6 +319,7 @@ public class SmokeTests : TestHelper
     {
         using var collector = new MockLogsCollector(Output);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_DISABLED_INSTRUMENTATIONS", "ILogger");
+        EnableOnlyHttpClientTraceInstrumentation();
         EnableBytecodeInstrumentation();
         RunTestApplication();
         collector.AssertEmpty();
@@ -323,6 +331,7 @@ public class SmokeTests : TestHelper
     {
         using var collector = new MockMetricsCollector(Output);
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_HttpClient_INSTRUMENTATION_ENABLED", "false");
+        EnableOnlyHttpClientTraceInstrumentation();
         EnableBytecodeInstrumentation();
         RunTestApplication();
         collector.AssertEmpty();
@@ -353,6 +362,7 @@ public class SmokeTests : TestHelper
         collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient");
 #endif
 
+        EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
         RunTestApplication();
 
@@ -364,9 +374,16 @@ public class SmokeTests : TestHelper
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
+        EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
         RunTestApplication();
 
         collector.AssertEmpty();
+    }
+
+    private void EnableOnlyHttpClientTraceInstrumentation()
+    {
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED", "false");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_HttpClient_INSTRUMENTATION_ENABLED", "true");
     }
 }
