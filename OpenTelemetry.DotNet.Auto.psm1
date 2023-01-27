@@ -184,6 +184,19 @@ function Filter-Env-List([string[]]$EnvValues, [string[]]$Filters) {
     return $remaining
 }
 
+function Get-OpenTelemetry-Archive([string] $Version, [string] $LocalPath) {
+    if ($LocalPath) {
+        if (Test-Path $LocalPath) {
+            return $LocalPath
+        }
+
+        throw "Could not find archive '$LocalPath'"
+    }
+
+    $tempDir = Get-Temp-Directory
+    return Download-OpenTelemetry $Version $tempDir
+}
+
 <#
     .SYNOPSIS
     Installs OpenTelemetry .NET Automatic Instrumentation.
@@ -194,20 +207,29 @@ function Filter-Env-List([string[]]$EnvValues, [string[]]$Filters) {
 #>
 function Install-OpenTelemetryCore() {
     param(
-        [string]$InstallDir = "<auto>"
+        [Parameter(Mandatory = $false)]
+        [string]$InstallDir = "<auto>",
+        [Parameter(Mandatory = $false)]
+        [string]$LocalPath
     )
 
     $version = "v0.5.1-beta.3"
     $installDir = Get-CLIInstallDir-From-InstallDir $InstallDir
-    $tempDir = Get-Temp-Directory
-    $dlPath = $null
+    $archivePath = $null
+    $deleteArchive = $true
 
     try {
-        $dlPath = Download-OpenTelemetry $version $tempDir
+        if ($LocalPath) {
+            # Keep the archive if it's user downloaded
+            $deleteArchive = $false
+        }
+
+        $archivePath = Get-OpenTelemetry-Archive $version $LocalPath
+
         Prepare-Install-Directory $installDir
 
         # Extract files from zip
-        Expand-Archive $dlPath $installDir -Force
+        Expand-Archive $archivePath $installDir -Force
 
         # OpenTelemetry service locator
         [System.Environment]::SetEnvironmentVariable('OTEL_DOTNET_AUTO_INSTALL_DIR', $installDir, [System.EnvironmentVariableTarget]::Machine)
@@ -222,12 +244,12 @@ function Install-OpenTelemetryCore() {
     } 
     catch {
         $message = $_
-        Write-Error "Could not setup OpenTelemetry .NET Automatic Instrumentation! $message"
+        Write-Error "Could not setup OpenTelemetry .NET Automatic Instrumentation. $message"
     } 
     finally {
-        if ($dlPath) {
+        if ($archivePath -and $deleteArchive) {
             # Cleanup
-            Remove-Item $dlPath
+            Remove-Item $archivePath
         }
     }
 }

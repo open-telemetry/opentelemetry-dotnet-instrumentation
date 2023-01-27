@@ -36,7 +36,7 @@ public class CustomSdkTests : TestHelper
     [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    public void SubmitsTraces_CustomSdk()
+    public void SubmitsTraces()
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -51,6 +51,36 @@ public class CustomSdkTests : TestHelper
         collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient", span => !IsTopLevel(span));
 #endif
         collector.Expect("TestApplication.CustomSdk", span => IsTopLevel(span));
+
+        collector.Expect("NServiceBus.Core", span => IsTopLevel(span));
+
+        EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_SETUP_SDK", "false");
+        SetEnvironmentVariable("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf");
+
+        RunTestApplication(new()
+        {
+            Arguments = $"--redis {_redis.Port}"
+        });
+
+        collector.AssertExpectations();
+        collector.ResourceExpector.AssertExpectations();
+    }
+
+    [Fact(Skip = "Flaky, needs investigation.")]
+    [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Linux")]
+    public void SubmitsMetrics()
+    {
+        using var collector = new MockMetricsCollector(Output);
+        SetExporter(collector);
+
+        // ensure metrics are exported by custom sdk with custom resource
+        collector.ResourceExpector.Expect("test_attr", "added_manually");
+
+        collector.Expect("OpenTelemetry.Instrumentation.Http");
+        collector.Expect("NServiceBus.Core");
+        collector.Expect("TestApplication.CustomSdk");
 
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_SETUP_SDK", "false");

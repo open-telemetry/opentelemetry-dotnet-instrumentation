@@ -36,13 +36,18 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     </configuration>
     ```
 
+By default we recommend using environment variables for configuration.
+However, if given setting supports it, then:
+
+- use `Web.config` for configuring an ASP.NET application (.NET Framework),
+- use `App.config` for configuring a Windows Service (.NET Framework).
+
 ## Global settings
 
 | Environment variable                 | Description                                                                                                                                                                                                                  | Default value |
 |--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
 | `OTEL_DOTNET_AUTO_HOME`              | Installation location.                                                                                                                                                                                                       |               |
 | `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` | Names of the executable files that the profiler cannot instrument. Supports multiple comma-separated values, for example: `ReservedProcess.exe,powershell.exe`. If unset, the profiler attaches to all processes by default. |               |
-| `OTEL_DOTNET_AUTO_SETUP_SDK`         | Controls whether auto-instrumentation should set up OpenTelemetry .NET SDK at startup.                                                                                                                                       | `true`        |
 
 ## Resources
 
