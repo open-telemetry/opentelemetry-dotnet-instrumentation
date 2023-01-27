@@ -186,7 +186,6 @@ void UpdateNativeInstrumentationFile(string filePath, Dictionary<string, List<st
 namespace trace
 {
 ");
-    // inline std::unordered_map<WSTRING, WSTRING> traces({"StrongNamedValidation",    "StrongNamedValidationKey"});
     foreach (var bytecodeIntegration in bytecodeIntegrations)
     {
         writer.Write("inline std::unordered_map<WSTRING, WSTRING> ");
