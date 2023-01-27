@@ -15,11 +15,14 @@
 // </copyright>
 
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Net.Http;
 using OpenTelemetry;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using StackExchange.Redis;
+using TestApplication.NServiceBus;
 using TestApplication.Shared;
 
 namespace TestApplication.CustomSdk;
@@ -29,6 +32,9 @@ public static class Program
     private static readonly ActivitySource ActivitySource = new(
         "TestApplication.CustomSdk");
 
+    private static readonly Meter Meter = new("TestApplication.CustomSdk");
+    private static readonly Counter<long> Counter = Meter.CreateCounter<long>("RequestCounter");
+
     public static async Task Main(string[] args)
     {
         ConsoleHelper.WriteSplashScreen(args);
@@ -36,7 +42,36 @@ public static class Program
         // if auto-instrumentation is not injecting sdk
         // then it's client's code responsibility
         // to subscribe to all activity sources
-        using var tracerProvider = Sdk
+
+        var tracerProvider = BuildTracerProvider();
+        var meterProvider = BuildMeterProvider();
+
+        AppDomain.CurrentDomain.ProcessExit += (sender, eventArgs) =>
+        {
+            // autoinstrumentation disposes created instrumentations during AppDomain.CurrentDomain.ProcessExit
+            // redis instrumentation flushes inside Dispose() which creates activities
+            // delay providers disposal so that there are active listeners
+            // when redis instrumentation attempts to create new activities
+            tracerProvider?.Dispose();
+            meterProvider?.Dispose();
+        };
+
+        await SendNServiceBusMessage();
+
+        Counter.Add(1);
+
+        using (var activity = ActivitySource.StartActivity("Manual"))
+        {
+            await PingRedis(args);
+
+            using var client = new HttpClient();
+            await client.GetStringAsync("https://www.bing.com");
+        }
+    }
+
+    private static TracerProvider? BuildTracerProvider()
+    {
+        return Sdk
             .CreateTracerProviderBuilder()
             // bytecode instrumentation
             .AddSource("OpenTelemetry.Instrumentation.StackExchangeRedis")
@@ -46,30 +81,59 @@ public static class Program
             .AddLegacySource("System.Net.Http.HttpRequestOut")
             // custom activity source
             .AddSource("TestApplication.CustomSdk")
+            .AddSource("NServiceBus.Core")
             .ConfigureResource(builder =>
                 builder.AddAttributes(new[] { new KeyValuePair<string, object>("test_attr", "added_manually") }))
             .AddOtlpExporter()
-            .AddConsoleExporter()
             .Build();
+    }
 
+    private static MeterProvider? BuildMeterProvider()
+    {
+        return Sdk
+            .CreateMeterProviderBuilder()
+            // lazily-loaded metric instrumentation
+            .AddMeter("OpenTelemetry.Instrumentation.*")
+            // bytecode metric instrumentation
+            .AddMeter("NServiceBus.Core")
+            // custom metric
+            .AddMeter("TestApplication.CustomSdk")
+            .ConfigureResource(builder =>
+                builder.AddAttributes(new[] { new KeyValuePair<string, object>("test_attr", "added_manually") }))
+            .AddOtlpExporter()
+            .Build();
+    }
+
+    private static async Task PingRedis(string[] args)
+    {
         var redisPort = GetRedisPort(args);
 
         var connectionString = $@"127.0.0.1:{redisPort}";
 
-        using (var activity = ActivitySource.StartActivity("Manual"))
+        using var connection = await ConnectionMultiplexer.ConnectAsync(connectionString);
+        var db = connection.GetDatabase();
+
+        db.Ping();
+    }
+
+    private static async Task SendNServiceBusMessage()
+    {
+        var endpointConfiguration = new EndpointConfiguration("TestApplication.NServiceBus");
+
+        var learningTransport = new LearningTransport { StorageDirectory = Path.GetTempPath() };
+        endpointConfiguration.UseTransport(learningTransport);
+
+        using var cancellation = new CancellationTokenSource();
+        var endpointInstance = await Endpoint.Start(endpointConfiguration, cancellation.Token);
+
+        try
         {
-            using (var connection = await ConnectionMultiplexer.ConnectAsync(connectionString))
-            {
-                var db = connection.GetDatabase();
-
-                db.Ping();
-            }
-
-            using var client = new HttpClient();
-            await client.GetStringAsync("https://www.bing.com");
+            await endpointInstance.SendLocal(new TestMessage(), cancellation.Token);
         }
-
-        Thread.Sleep(TimeSpan.FromSeconds(10));
+        finally
+        {
+            await endpointInstance.Stop(cancellation.Token);
+        }
     }
 
     private static string GetRedisPort(string[] args)

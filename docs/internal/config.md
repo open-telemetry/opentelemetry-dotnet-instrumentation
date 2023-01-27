@@ -32,3 +32,9 @@ modify CLR optimizations.
 | `OTEL_DOTNET_AUTO_CLR_DISABLE_OPTIMIZATIONS` | Set to `true` to disable all JIT optimizations. | `false`       |
 | `OTEL_DOTNET_AUTO_CLR_ENABLE_INLINING`       | Set to `false` to disable JIT inlining.         | `true`        |
 | `OTEL_DOTNET_AUTO_CLR_ENABLE_NGEN`           | Set to `false` to disable NGEN images.          | `true`        |
+
+## Disable OpenTelemetry .NET SDK setup
+
+| Environment variable                   | Description                                                                            | Default value                                        |
+|----------------------------------------|----------------------------------------------------------------------------------------|------------------------------------------------------|
+| `OTEL_DOTNET_AUTO_SETUP_SDK`           | Controls whether auto-instrumentation should set up OpenTelemetry .NET SDK at startup. | `true`                                               |
