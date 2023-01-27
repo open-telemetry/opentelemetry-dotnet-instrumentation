@@ -36,6 +36,12 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     </configuration>
     ```
 
+By default we recommend using environment variables for configuration.
+However, if given setting supports it, then:
+
+- use `Web.config` for configuring an ASP.NET application (.NET Framework),
+- use `App.config` for configuring a Windows Service (.NET Framework).
+
 ## Global settings
 
 | Environment variable                 | Description                                                                                                                                                                                                                  | Default value |
