@@ -188,7 +188,7 @@ void UpdateNativeInstrumentationFile(string filePath, Dictionary<string, List<st
         writer.Write("inline std::unordered_map<WSTRING, WSTRING> ");
         writer.Write(bytecodeIntegration.Key.ToLowerInvariant());
         writer.Write("_integration_names = {");
-        writer.Write(string.Join(", ", bytecodeIntegration.Value.Select(name => $"{{WStr(\"{name}\"), WStr(\"OTEL_DOTNET_AUTO_{bytecodeIntegration.Key.ToUpperInvariant()}S_{name}_INSTRUMENTATION_ENABLED\")}}")));
+        writer.Write(string.Join(", ", bytecodeIntegration.Value.Select(name => $"{{WStr(\"{name}\"), WStr(\"OTEL_DOTNET_AUTO_{bytecodeIntegration.Key.ToUpperInvariant()}S_{name}_INSTRUMENTATION_DISABLED\")}}")));
         writer.Write("};\r\n");
     }
 

@@ -78,20 +78,20 @@ bool IsNetFxAssemblyRedirectionEnabled() {
   ToBooleanWithDefault(GetEnvironmentValue(environment::netfx_assembly_redirection_enabled), true);
 }
 
-bool AreInstrumentationsEnabledByDefault() {
-  ToBooleanWithDefault(GetEnvironmentValue(environment::instrumentation_enabled), true);
+bool AreInstrumentationsDisabledByDefault() {
+  ToBooleanWithDefault(GetEnvironmentValue(environment::instrumentation_disabled), false);
 }
 
-bool AreTracesInstrumentationsEnabledByDefault(const bool enabled_if_not_configured) {
-  ToBooleanWithDefault(GetEnvironmentValue(environment::traces_instrumentation_enabled), enabled_if_not_configured);
+bool AreTracesInstrumentationsDisabledByDefault(const bool disabled_if_not_configured) {
+  ToBooleanWithDefault(GetEnvironmentValue(environment::traces_instrumentation_disabled), disabled_if_not_configured);
 }
 
-bool AreMetricsInstrumentationsEnabledByDefault(const bool enabled_if_not_configured) {
-  ToBooleanWithDefault(GetEnvironmentValue(environment::metrics_instrumentation_enabled), enabled_if_not_configured);
+bool AreMetricsInstrumentationsDisabledByDefault(const bool disabled_if_not_configured) {
+  ToBooleanWithDefault(GetEnvironmentValue(environment::metrics_instrumentation_disabled), disabled_if_not_configured);
 }
 
-bool AreLogsInstrumentationsEnabledByDefault(const bool enabled_if_not_configured) {
-  ToBooleanWithDefault(GetEnvironmentValue(environment::logs_instrumentation_enabled), enabled_if_not_configured);
+bool AreLogsInstrumentationsDisabledByDefault(const bool disabled_if_not_configured) {
+  ToBooleanWithDefault(GetEnvironmentValue(environment::logs_instrumentation_disabled), disabled_if_not_configured);
 }
 
 }  // namespace trace

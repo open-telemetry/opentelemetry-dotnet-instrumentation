@@ -58,7 +58,7 @@ internal static class ConfigurationKeys
     /// <summary>
     /// Configuration key for enabling all instrumentations.
     /// </summary>
-    public const string InstrumentationEnabled = "OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED";
+    public const string InstrumentationDisabled = "OTEL_DOTNET_AUTO_INSTRUMENTATION_DISABLED";
 
     /// <summary>
     /// Configuration keys for traces.
@@ -87,14 +87,14 @@ internal static class ConfigurationKeys
         public const string ConsoleExporterEnabled = "OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED";
 
         /// <summary>
-        /// Configuration key for enabling all trace instrumentations.
+        /// Configuration key for disabling all trace instrumentations.
         /// </summary>
-        public const string TracesInstrumentationEnabled = "OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED";
+        public const string TracesInstrumentationDisabled = "OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_DISABLED";
 
         /// <summary>
-        /// Configuration key template for enabled trace instrumentations.
+        /// Configuration key template for disabled trace instrumentations.
         /// </summary>
-        public const string EnabledTracesInstrumentationTemplate = "OTEL_DOTNET_AUTO_TRACES_{0}_INSTRUMENTATION_ENABLED";
+        public const string DisabledTracesInstrumentationTemplate = "OTEL_DOTNET_AUTO_TRACES_{0}_INSTRUMENTATION_DISABLED";
 
         /// <summary>
         /// Configuration key for additional <see cref="ActivitySource"/> names to be added to the tracer at the startup.
@@ -151,14 +151,14 @@ internal static class ConfigurationKeys
         public const string ConsoleExporterEnabled = "OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED";
 
         /// <summary>
-        /// Configuration key for enabling all metrics instrumentations.
+        /// Configuration key for disabling all metrics instrumentations.
         /// </summary>
-        public const string MetricsInstrumentationEnabled = "OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED";
+        public const string MetricsInstrumentationDisabled = "OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_DISABLED";
 
         /// <summary>
         /// Configuration key template for enabled metric instrumentations.
         /// </summary>
-        public const string EnabledMetricsInstrumentationTemplate = "OTEL_DOTNET_AUTO_METRICS_{0}_INSTRUMENTATION_ENABLED";
+        public const string DisabledMetricsInstrumentationTemplate = "OTEL_DOTNET_AUTO_METRICS_{0}_INSTRUMENTATION_DISABLED";
 
         /// <summary>
         /// Configuration key for additional <see cref="Meter"/> names to be added to the meter at the startup.
@@ -196,12 +196,12 @@ internal static class ConfigurationKeys
         /// <summary>
         /// Configuration key for enabling all log instrumentations.
         /// </summary>
-        public const string LogsInstrumentationEnabled = "OTEL_DOTNET_AUTO_LOGS_INSTRUMENTATION_ENABLED";
+        public const string LogsInstrumentationDisabled = "OTEL_DOTNET_AUTO_LOGS_INSTRUMENTATION_DISABLED";
 
         /// <summary>
         /// Configuration key template for enabled log instrumentations.
         /// </summary>
-        public const string EnabledLogsInstrumentationTemplate = "OTEL_DOTNET_AUTO_LOGS_{0}_INSTRUMENTATION_ENABLED";
+        public const string DisabledLogsInstrumentationTemplate = "OTEL_DOTNET_AUTO_LOGS_{0}_INSTRUMENTATION_DISABLED";
     }
 
     /// <summary>

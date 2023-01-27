@@ -24,33 +24,33 @@ const WSTRING profiler_home_path = WStr("OTEL_DOTNET_AUTO_HOME");
 // "MyApp.exe,dotnet.exe"
 const WSTRING exclude_process_names = WStr("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES");
 
-// Whether instrumentations are enabled. If not set (default), all instrumentations are enabled.
-const WSTRING instrumentation_enabled =
-    WStr("OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED");
+// Whether instrumentations are disabled. If not set (default), all instrumentations are enabled.
+const WSTRING instrumentation_disabled =
+    WStr("OTEL_DOTNET_AUTO_INSTRUMENTATION_DISABLED");
 
 // Whether traces are enabled or not. If not set (default), traces are enabled.
 const WSTRING traces_enabled =
     WStr("OTEL_DOTNET_AUTO_TRACES_ENABLED");
 
-// Whether traces instrumentations are enabled. If not set (default), value from OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED is used.
-const WSTRING traces_instrumentation_enabled =
-    WStr("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED");
+// Whether traces instrumentations are enabled. If not set (default), value from OTEL_DOTNET_AUTO_INSTRUMENTATION_DISABLED is used.
+const WSTRING traces_instrumentation_disabled =
+    WStr("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_DISABLED");
 
 // Whether metrics are enabled or not. If not set (default), traces are enabled.
 const WSTRING metrics_enabled =
     WStr("OTEL_DOTNET_AUTO_METRICS_ENABLED");
 
-// Whether metrics instrumentations are enabled. If not set (default), value from OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED is used.
-const WSTRING metrics_instrumentation_enabled =
-    WStr("OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED");
+// Whether metrics instrumentations are enabled. If not set (default), value from OTEL_DOTNET_AUTO_INSTRUMENTATION_DISABLED is used.
+const WSTRING metrics_instrumentation_disabled =
+    WStr("OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_DISABLED");
 
 // Whether logs are enabled or not. If not set (default), logs are enabled.
 const WSTRING logs_enabled =
     WStr("OTEL_DOTNET_AUTO_LOGS_ENABLED");
 
-// Whether logs instrumentations are enabled. If not set (default), value from OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED is used.
-const WSTRING logs_instrumentation_enabled =
-    WStr("OTEL_DOTNET_AUTO_LOGS_INSTRUMENTATION_ENABLED");
+// Whether logs instrumentations are enabled. If not set (default), value from OTEL_DOTNET_AUTO_INSTRUMENTATION_DISABLED is used.
+const WSTRING logs_instrumentation_disabled =
+    WStr("OTEL_DOTNET_AUTO_LOGS_INSTRUMENTATION_DISABLED");
 
 // Sets the directory for the profiler's log file.
 // If not set, default is

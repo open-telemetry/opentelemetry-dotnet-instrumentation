@@ -164,16 +164,16 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     rejit_handler = new RejitHandler(this->info_, callback);
 
-    const bool instrumentation_enabled_by_default = AreInstrumentationsEnabledByDefault();
+    const bool instrumentation_disabled_by_default = AreInstrumentationsDisabledByDefault();
 
     // load all integrations from JSON files
     const LoadIntegrationConfiguration configuration(
         AreTracesEnabled(), 
-        GetEnabledEnvironmentValues(AreTracesInstrumentationsEnabledByDefault(instrumentation_enabled_by_default), trace_integration_names),
+        GetEnabledEnvironmentValues(AreTracesInstrumentationsDisabledByDefault(instrumentation_disabled_by_default), trace_integration_names),
         AreMetricsEnabled(), 
-        GetEnabledEnvironmentValues(AreMetricsInstrumentationsEnabledByDefault(instrumentation_enabled_by_default), metric_integration_names),
+        GetEnabledEnvironmentValues(AreMetricsInstrumentationsDisabledByDefault(instrumentation_disabled_by_default), metric_integration_names),
         AreLogsEnabled(),
-        GetEnabledEnvironmentValues(AreLogsInstrumentationsEnabledByDefault(instrumentation_enabled_by_default), log_integration_names));
+        GetEnabledEnvironmentValues(AreLogsInstrumentationsDisabledByDefault(instrumentation_disabled_by_default), log_integration_names));
     LoadIntegrationsFromEnvironment(integration_methods_, configuration);
 
     Logger::Debug("Number of Integrations loaded: ", integration_methods_.size());

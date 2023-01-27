@@ -6,8 +6,8 @@
 
 namespace trace
 {
-inline std::unordered_map<WSTRING, WSTRING> trace_integration_names = {{WStr("StrongNamedValidation"), WStr("OTEL_DOTNET_AUTO_TRACES_StrongNamedValidation_INSTRUMENTATION_ENABLED")}, {WStr("StackExchangeRedis"), WStr("OTEL_DOTNET_AUTO_TRACES_StackExchangeRedis_INSTRUMENTATION_ENABLED")}, {WStr("NServiceBus"), WStr("OTEL_DOTNET_AUTO_TRACES_NServiceBus_INSTRUMENTATION_ENABLED")}, {WStr("MySqlData"), WStr("OTEL_DOTNET_AUTO_TRACES_MySqlData_INSTRUMENTATION_ENABLED")}, {WStr("MongoDB"), WStr("OTEL_DOTNET_AUTO_TRACES_MongoDB_INSTRUMENTATION_ENABLED")}, {WStr("GraphQL"), WStr("OTEL_DOTNET_AUTO_TRACES_GraphQL_INSTRUMENTATION_ENABLED")}};
-inline std::unordered_map<WSTRING, WSTRING> metric_integration_names = {{WStr("NServiceBus"), WStr("OTEL_DOTNET_AUTO_METRICS_NServiceBus_INSTRUMENTATION_ENABLED")}};
-inline std::unordered_map<WSTRING, WSTRING> log_integration_names = {{WStr("ILogger"), WStr("OTEL_DOTNET_AUTO_LOGS_ILogger_INSTRUMENTATION_ENABLED")}};
+inline std::unordered_map<WSTRING, WSTRING> trace_integration_names = {{WStr("StrongNamedValidation"), WStr("OTEL_DOTNET_AUTO_TRACES_StrongNamedValidation_INSTRUMENTATION_DISABLED")}, {WStr("StackExchangeRedis"), WStr("OTEL_DOTNET_AUTO_TRACES_StackExchangeRedis_INSTRUMENTATION_DISABLED")}, {WStr("NServiceBus"), WStr("OTEL_DOTNET_AUTO_TRACES_NServiceBus_INSTRUMENTATION_DISABLED")}, {WStr("MySqlData"), WStr("OTEL_DOTNET_AUTO_TRACES_MySqlData_INSTRUMENTATION_DISABLED")}, {WStr("MongoDB"), WStr("OTEL_DOTNET_AUTO_TRACES_MongoDB_INSTRUMENTATION_DISABLED")}, {WStr("GraphQL"), WStr("OTEL_DOTNET_AUTO_TRACES_GraphQL_INSTRUMENTATION_DISABLED")}};
+inline std::unordered_map<WSTRING, WSTRING> metric_integration_names = {{WStr("NServiceBus"), WStr("OTEL_DOTNET_AUTO_METRICS_NServiceBus_INSTRUMENTATION_DISABLED")}};
+inline std::unordered_map<WSTRING, WSTRING> log_integration_names = {{WStr("ILogger"), WStr("OTEL_DOTNET_AUTO_LOGS_ILogger_INSTRUMENTATION_DISABLED")}};
 }
 #endif

@@ -38,10 +38,10 @@ public class ConfigurationTests
         var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection()));
 
         var list = source.ParseEnabledEnumList<TestEnum>(
-            enabledByDefault: true,
-            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
+            disabledByDefault: true,
+            disabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_DISABLED");
 
-        list.Should().Equal(TestEnum.Test1, TestEnum.Test2, TestEnum.Test3);
+        list.Should().BeEmpty();
     }
 
     [Fact]
@@ -50,10 +50,10 @@ public class ConfigurationTests
         var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection()));
 
         var list = source.ParseEnabledEnumList<TestEnum>(
-            enabledByDefault: false,
-            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
+            disabledByDefault: false,
+            disabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_DISABLED");
 
-        list.Should().BeEmpty();
+        list.Should().Equal(TestEnum.Test1, TestEnum.Test2, TestEnum.Test3);
     }
 
     [Fact]
@@ -61,13 +61,13 @@ public class ConfigurationTests
     {
         var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection
         {
-            { "TEST_CONFIGURATION_Test1_ENABLED", "true" },
-            { "TEST_CONFIGURATION_Test3_ENABLED", "true" }
+            { "TEST_CONFIGURATION_Test1_DISABLED", "false" },
+            { "TEST_CONFIGURATION_Test3_DISABLED", "false" }
         }));
 
         var list = source.ParseEnabledEnumList<TestEnum>(
-            false,
-            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
+            true,
+            disabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_DISABLED");
 
         list.Should().Equal(TestEnum.Test1, TestEnum.Test3);
     }
@@ -77,12 +77,12 @@ public class ConfigurationTests
     {
         var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection
         {
-            { "TEST_CONFIGURATION_Test2_ENABLED", "false" },
+            { "TEST_CONFIGURATION_Test2_DISABLED", "true" },
         }));
 
         var list = source.ParseEnabledEnumList<TestEnum>(
-            true,
-            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
+            disabledByDefault: false,
+            disabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_DISABLED");
 
         list.Should().Equal(TestEnum.Test1, TestEnum.Test3);
     }

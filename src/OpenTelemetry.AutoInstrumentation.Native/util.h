@@ -37,7 +37,7 @@ std::vector<WSTRING> GetEnvironmentValues(const WSTRING& name);
 std::vector<WSTRING> GetEnvironmentVariables(const std::vector<WSTRING> &prefixes);
 
 // GetEnabledEnvironmentValues returns collection of enabled elements from values_map
-std::vector<WSTRING> GetEnabledEnvironmentValues(const bool enabled_by_default, const std::unordered_map<WSTRING, WSTRING> values_map);
+std::vector<WSTRING> GetEnabledEnvironmentValues(const bool enabled_by_default, const std::unordered_map<WSTRING, WSTRING> &values_map);
 
 // Convert Hex to string
 WSTRING HexStr(const void* data, int len);
