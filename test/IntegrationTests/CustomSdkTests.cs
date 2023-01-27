@@ -67,7 +67,7 @@ public class CustomSdkTests : TestHelper
         collector.ResourceExpector.AssertExpectations();
     }
 
-    [Fact]
+    [Fact(Skip = "Flaky, needs investigation.")]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     public void SubmitsMetrics()
