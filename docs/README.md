@@ -118,9 +118,16 @@ and instrument your .NET application using the provided Shell scripts.
 Example usage:
 
 ```sh
+# Download the bash script
 curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.5.1-beta.3/otel-dotnet-auto-install.sh -O
+
+# Install core files
 sh ./otel-dotnet-auto-install.sh
+
+# Setup the instrumentation for the current shell session
 . $HOME/.otel-dotnet-auto/instrument.sh
+
+# Run your application with instrumentation
 OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 dotnet run
 ```
 
@@ -152,27 +159,27 @@ and instrument your .NET application using the provided PowerShell module.
 Example usage (run as administrator):
 
 ```powershell
-# Download and import the module
+# Download the module
 $module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.5.1-beta.3/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path
+
+# Import the module to use its functions
 Import-Module $download_path
 
 # Install core files
 Install-OpenTelemetryCore
 
-# Setup IIS instrumentation
-Register-OpenTelemetryForIIS
-
-# Setup your Windows Service instrumentation
-Register-OpenTelemetryForWindowsService -WindowsServiceName "MyServiceName" -OTelServiceName "MyServiceDisplayName"
-
-# Setup environment to start instrumentation from the current PowerShell session
+# Set up the instrumentation for the current PowerShell session
 Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
 
-# Get current installation location
-Get-OpenTelemetryInstallDirectory
+# Run your application with instrumentation
+.\MyNetApp.exe
+```
 
+You can get usage information by calling:
+
+```powershell
 # List all available commands
 Get-Command -Module OpenTelemetry.DotNet.Auto
 
@@ -182,8 +189,6 @@ Get-Help Install-OpenTelemetryCore -Detailed
 
 ⚠️ The PowerShell module works only on PowerShell 5.1
 which is the one installed by default on Windows.
-
-⚠️ Register for IIS and Windows Service performs a service restart.
 
 ## Instrument a container
 
