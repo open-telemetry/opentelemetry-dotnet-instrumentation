@@ -32,7 +32,7 @@ var autoInstrumentationLib = Assembly.LoadFrom(autoInstrumentationLibPath);
 var assemblyInstrumentMethodAttributes = autoInstrumentationLib.DefinedTypes
     .Where(type => InheritsFrom(type, instrumentMethodAttributeName)).Select(x => x.FullName);
 
-var integrations = new Dictionary<(string, string), Integration>();
+var integrations = new Dictionary<(string IntegrationType, string IntegrationName), Integration>();
 foreach (var typeInfo in autoInstrumentationLib.GetTypes())
 {
     foreach (var attribute in typeInfo.GetCustomAttributes()
@@ -40,29 +40,29 @@ foreach (var typeInfo in autoInstrumentationLib.GetTypes())
     {
         var integration = ConvertToIntegration(typeInfo.FullName!, attribute);
 
-        if (!integrations.ContainsKey((integration.IntegartionType, integration.IntegrationName)))
+        if (!integrations.ContainsKey((integration.IntegrationType, integration.IntegrationName)))
         {
             integrations.Add(
-                (integration.IntegartionType, integration.IntegrationName),
+                (integration.IntegrationType, integration.IntegrationName),
                 new Integration
                 {
                     Name = integration.IntegrationName,
-                    Type = integration.IntegartionType,
+                    Type = integration.IntegrationType,
                     MethodReplacements = new List<MethodReplacement> { integration.MethodReplacement }
                 });
         }
         else
         {
-            var integration2 = integrations[(integration.IntegartionType, integration.IntegrationName)];
+            var integration2 = integrations[(integration.IntegrationType, integration.IntegrationName)];
             integration2.MethodReplacements.Add(integration.MethodReplacement);
         }
     }
 }
 
-var productionIntegrations = integrations.Where(x => x.Key.Item2 != "StrongNamedValidation").Select(x => x.Value)
+var productionIntegrations = integrations.Where(x => x.Key.IntegrationName != "StrongNamedValidation").Select(x => x.Value)
     .OrderBy(x => x.Name).ToArray();
 
-var testIntegrations = integrations.Where(x => x.Key.Item2 == "StrongNamedValidation").Select(x => AppendMockIntegrations(x.Value))
+var testIntegrations = integrations.Where(x => x.Key.IntegrationName == "StrongNamedValidation").Select(x => AppendMockIntegrations(x.Value))
     .OrderBy(x => x.Name).ToArray();
 
 UpdateIntegrationFile(Path.Combine(solutionFolder, "integrations.json"), productionIntegrations);
@@ -86,7 +86,7 @@ bool InheritsFrom(Type type, string baseType)
     }
 }
 
-(string IntegartionType, string IntegrationName, MethodReplacement MethodReplacement) ConvertToIntegration(string wrapperTypeName, Attribute attribute)
+(string IntegrationType, string IntegrationName, MethodReplacement MethodReplacement) ConvertToIntegration(string wrapperTypeName, Attribute attribute)
 {
     var integrationName = GetPropertyValue<string>("IntegrationName", attribute);
     var integrationType = GetPropertyValue<object>("Type", attribute).ToString()!;
