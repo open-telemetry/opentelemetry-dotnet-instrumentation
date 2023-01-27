@@ -43,9 +43,18 @@ public static class Program
         // then it's client's code responsibility
         // to subscribe to all activity sources
 
-        using var tracerProvider = BuildTracerProvider();
+        var tracerProvider = BuildTracerProvider();
+        var meterProvider = BuildMeterProvider();
 
-        using var meterProvider = BuildMeterProvider();
+        AppDomain.CurrentDomain.ProcessExit += (sender, eventArgs) =>
+        {
+            // autoinstrumentation disposes created instrumentations during AppDomain.CurrentDomain.ProcessExit
+            // redis instrumentation flushes inside Dispose() which creates activities
+            // delay providers disposal so that there are active listeners
+            // when redis instrumentation attempts to create new activities
+            tracerProvider?.Dispose();
+            meterProvider?.Dispose();
+        };
 
         await SendNServiceBusMessage();
 
@@ -58,8 +67,6 @@ public static class Program
             using var client = new HttpClient();
             await client.GetStringAsync("https://www.bing.com");
         }
-
-        Thread.Sleep(TimeSpan.FromSeconds(10));
     }
 
     private static TracerProvider? BuildTracerProvider()
