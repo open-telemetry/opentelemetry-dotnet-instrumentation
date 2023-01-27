@@ -87,6 +87,7 @@ partial class Build : NukeBuild
         .DependsOn(Restore)
         .DependsOn(CompileManagedSrc)
         .DependsOn(PublishManagedProfiler)
+        .DependsOn(GenerateNetFxAssemblyRedirectionSource)
         .DependsOn(CompileNativeSrc)
         .DependsOn(PublishNativeProfiler)
         .DependsOn(GenerateIntegrationsJson)

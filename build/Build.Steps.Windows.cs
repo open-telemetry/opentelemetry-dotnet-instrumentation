@@ -15,8 +15,8 @@ partial class Build
 {
     Target CompileNativeSrcWindows => _ => _
         .Unlisted()
-        .DependsOn(GenerateNetFxAssemblyRedirectionSource)
         .After(CompileManagedSrc)
+        .After(GenerateNetFxAssemblyRedirectionSource)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
