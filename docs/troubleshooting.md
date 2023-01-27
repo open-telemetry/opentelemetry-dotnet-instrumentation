@@ -6,7 +6,7 @@ Instrumenting `dotnet` often results in a crash.
 See [(#1744)](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1744).
 
 Therefore, we advise executing `dotnet build` before instrumenting the terminal session
-or calling it in a seperate terminal session.
+or calling it in a separate terminal session.
 
 ## Assembly version conflicts
 
