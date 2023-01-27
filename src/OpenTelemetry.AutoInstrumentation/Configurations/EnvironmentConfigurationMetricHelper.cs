@@ -82,23 +82,19 @@ internal static class EnvironmentConfigurationMetricHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static MeterProviderBuilder AddAspNetInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
+            DelayedInitialization.Metrics.AddAspNet(lazyInstrumentationLoader);
 #if NET462
-            new AspNetMetricsInitializer(lazyInstrumentationLoader);
-
             builder.AddMeter("OpenTelemetry.Instrumentation.AspNet");
 #elif NET6_0_OR_GREATER
-            lazyInstrumentationLoader.Add(new AspNetCoreMetricsInitializer());
-
             builder.AddMeter("OpenTelemetry.Instrumentation.AspNetCore");
 #endif
-
             return builder;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static MeterProviderBuilder AddHttpClientInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-            new HttpClientMetricsInitializer(lazyInstrumentationLoader);
+            DelayedInitialization.Metrics.AddHttpClient(lazyInstrumentationLoader);
 
             return builder.AddMeter("OpenTelemetry.Instrumentation.Http");
         }

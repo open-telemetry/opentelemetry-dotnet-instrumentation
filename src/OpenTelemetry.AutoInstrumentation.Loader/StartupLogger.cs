@@ -77,6 +77,49 @@ internal static class StartupLogger
         }
     }
 
+    internal static string? SetStartupLogFilePath()
+    {
+        if (LogDirectory == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            // Pick up the parts used to build the log file name and minimize the chances
+            // of file name conflict with other processes.
+            using var process = Process.GetCurrentProcess();
+
+            // AppDomain friendly name can contain characters that are invalid in file names,
+            // remove any of those. For the first assembly loaded by the process this is typically
+            // expected to be name of the file with the application entry point.
+            var appDomainFriendlyName = AppDomain.CurrentDomain.FriendlyName;
+            var invalidChars = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+            var sb = new StringBuilder(appDomainFriendlyName);
+            for (int i = 0; i < sb.Length; i++)
+            {
+                if (invalidChars.IndexOf(sb[i]) != -1)
+                {
+                    sb[i] = '_';
+                }
+            }
+
+            appDomainFriendlyName = sb.ToString();
+
+            // AppDomain friendly name may not be unique in the same process, use also the id.
+            // Per documentation the id is an integer that uniquely identifies the application
+            // domain within the process.
+            var appDomainId = AppDomain.CurrentDomain.Id;
+
+            return Path.Combine(LogDirectory, $"otel-dotnet-auto-loader-{appDomainFriendlyName}-{appDomainId}-{process?.Id}.log");
+        }
+        catch
+        {
+            // We can't get the process info
+            return Path.Combine(LogDirectory, $"otel-dotnet-auto-loader-{Guid.NewGuid()}.log");
+        }
+    }
+
     private static string? GetLogDirectory()
     {
         string? logDirectory = null;
@@ -128,49 +171,6 @@ internal static class StartupLogger
             // Unable to create the directory meaning that the user will have to create it on their own.
             // It is unsafe to log here, so return null to defer deciding what the path is
             return null;
-        }
-    }
-
-    private static string? SetStartupLogFilePath()
-    {
-        if (LogDirectory == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            // Pick up the parts used to build the log file name and minimize the chances
-            // of file name conflict with other processes.
-            using var process = Process.GetCurrentProcess();
-
-            // AppDomain friendly name can contain characters that are invalid in file names,
-            // remove any of those. For the first assembly loaded by the process this is typically
-            // expected to be name of the file with the application entry point.
-            var appDomainFriendlyName = AppDomain.CurrentDomain.FriendlyName;
-            var invalidChars = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
-            var sb = new StringBuilder(appDomainFriendlyName);
-            for (int i = 0; i < sb.Length; i++)
-            {
-                if (invalidChars.IndexOf(sb[i]) != -1)
-                {
-                    sb[i] = '_';
-                }
-            }
-
-            appDomainFriendlyName = sb.ToString();
-
-            // AppDomain friendly name may not be unique in the same process, use also the id.
-            // Per documentation the id is an integer that uniquely identifies the application
-            // domain within the process.
-            var appDomainId = AppDomain.CurrentDomain.Id;
-
-            return Path.Combine(LogDirectory, $"otel-dotnet-auto-loader-{appDomainFriendlyName}-{appDomainId}-{process?.Id}.log");
-        }
-        catch
-        {
-            // We can't get the process info
-            return Path.Combine(LogDirectory, $"otel-dotnet-auto-loader-{Guid.NewGuid()}.log");
         }
     }
 

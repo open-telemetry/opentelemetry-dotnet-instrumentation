@@ -1,10 +1,9 @@
+using Nuke.Common;
+using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 
 public static class ProjectsHelper
 {
-    private const string SrcDirName = "src";
-    private const string TestDirName = "test";
-
     private const string NativeProjectMarker = "Native"; // Contains word Native
     private const string TestsProjectMarker = "Tests"; // Ends with word Tests
     private const string NetFrameworkMarker = ".NetFramework"; // Ends with word .NetFramework
@@ -13,13 +12,16 @@ public static class ProjectsHelper
     private const string TestApplicationSelector = "TestApplication.*";
     private const string TestLibrarySelector = "TestLibrary.*";
 
+    private readonly static AbsolutePath SrcDirectory = NukeBuild.RootDirectory / "src";
+    private readonly static AbsolutePath TestDirectory = NukeBuild.RootDirectory / "test";
+
     public static IEnumerable<Project> GetManagedSrcProjects(this Solution solution)
     {
         return solution
             .GetProjects(CoreProjectSelector)
             .Where(x =>
                 // Should contain in the src directory
-                x.Directory.ToString().Contains(SrcDirName) &&
+                SrcDirectory.Contains(x.Directory) &&
                 // Should not be native projects
                 !x.Name.Contains(NativeProjectMarker));
     }
@@ -30,7 +32,7 @@ public static class ProjectsHelper
             .GetProjects(CoreProjectSelector)
             .Where(x =>
                 // Should contain in the src directory
-                x.Directory.ToString().Contains(SrcDirName) &&
+                SrcDirectory.Contains(x.Directory) &&
                 // Should be native projects
                 x.Name.Contains(NativeProjectMarker));
     }
@@ -47,7 +49,7 @@ public static class ProjectsHelper
             .GetProjects(CoreProjectSelector)
             .Where(x =>
                 // Should contain in the test directory
-                x.Directory.ToString().Contains(TestDirName) &&
+                TestDirectory.Contains(x.Directory) &&
                 // Should not be native projects
                 !x.Name.Contains(NativeProjectMarker) &&
                 // Should be test projects
@@ -70,6 +72,11 @@ public static class ProjectsHelper
     public static Project GetTestMock(this Solution solution)
     {
         return solution.GetProject(Projects.Mocks.AutoInstrumentationMock);
+    }
+
+    public static Project GetBenchmarks(this Solution solution)
+    {
+        return solution.GetProject(Projects.Benchmarks.AutoInstrumentationBenchmarks);
     }
 
     public static IEnumerable<Project> GetWindowsOnlyTestApplications(this Solution solution)
@@ -96,7 +103,8 @@ public static class ProjectsHelper
         return solution.GetManagedSrcProjects()
             .Concat(solution.GetManagedTestProjects())
             .Concat(solution.GetCrossPlatformTestApplications())
-            .Concat(new[] { solution.GetTestMock() });
+            .Concat(new[] { solution.GetTestMock() })
+            .Concat(new[] { solution.GetBenchmarks() });
     }
 
     public static IEnumerable<Project> GetNativeProjects(this Solution solution)
