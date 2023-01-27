@@ -106,6 +106,7 @@ partial class Build
 
     Target CompileManagedSrc => _ => _
         .Description("Compiles the managed code in the src directory")
+        .After(GenerateNetFxTransientDependencies)
         .After(CreateRequiredDirectories)
         .After(Restore)
         .Executes(() =>
