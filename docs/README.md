@@ -155,8 +155,9 @@ $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path
 Import-Module $download_path
 
-# Install core files
+# Install core files (online vs offline method)
 Install-OpenTelemetryCore
+Install-OpenTelemetryCore -LocalPath "C:\Path\To\OpenTelemetry.zip" 
 
 # Setup IIS instrumentation
 Register-OpenTelemetryForIIS
