@@ -185,13 +185,15 @@ function Filter-Env-List([string[]]$EnvValues, [string[]]$Filters) {
 }
 
 function Get-OpenTelemetry-Archive([string] $Version, [string] $LocalPath) {
-    if($LocalPath) {
-        if(Test-Path $LocalPath) {
+    if ($LocalPath) {
+        if (Test-Path $LocalPath) {
             return $LocalPath
-        } else {
+        }
+        else {
             throw "Could not find archive '$LocalPath'"
         }
-    } else {
+    }
+    else {
         $tempDir = Get-Temp-Directory
 
         return Download-OpenTelemetry $Version $tempDir
@@ -208,9 +210,9 @@ function Get-OpenTelemetry-Archive([string] $Version, [string] $LocalPath) {
 #>
 function Install-OpenTelemetryCore() {
     param(
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$InstallDir = "<auto>",
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]$LocalPath
     )
 
@@ -220,7 +222,7 @@ function Install-OpenTelemetryCore() {
     $deleteArchive = $true
 
     try {
-        if($LocalPath) {
+        if ($LocalPath) {
             # Keep the archive if it's user downloaded
             $deleteArchive = $false
         }
