@@ -10,3 +10,4 @@ inline std::unordered_map<WSTRING, WSTRING> trace_integration_names = {{WStr("St
 inline std::unordered_map<WSTRING, WSTRING> metric_integration_names = {{WStr("NServiceBus"), WStr("OTEL_DOTNET_AUTO_METRICS_NServiceBus_INSTRUMENTATION_ENABLED")}};
 inline std::unordered_map<WSTRING, WSTRING> log_integration_names = {{WStr("ILogger"), WStr("OTEL_DOTNET_AUTO_LOGS_ILogger_INSTRUMENTATION_ENABLED")}};
 }
+#endif

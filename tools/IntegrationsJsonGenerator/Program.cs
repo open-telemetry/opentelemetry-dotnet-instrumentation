@@ -193,6 +193,7 @@ void UpdateNativeInstrumentationFile(string filePath, Dictionary<string, List<st
     }
 
     writer.Write("}\r\n");
+    writer.Write("#endif\r\n");
 }
 
 static string GetSourceFilePathName([CallerFilePath] string? callerFilePath = null)
