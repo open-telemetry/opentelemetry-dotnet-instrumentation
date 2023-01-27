@@ -29,7 +29,8 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
   to `linux-musl-x64` for Linux musl and
   `OpenTelemetry.AutoInstrumentation.Native.dylib`
   to `osx-x64` for MacOS.
-- Change the way to manage enabled instrumentations. The following environmental variables:
+- Change the way to manage enabled instrumentations. The following environmental
+  variables:
   - `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS`,
   - `OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS`z,
   - `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS`,
