@@ -4,6 +4,7 @@
 #include <corprof.h>
 #include <string>
 
+#include "bytecode_instrumentations.h"
 #include "clr_helpers.h"
 #include "dllmain.h"
 #include "environment_variables.h"
@@ -163,19 +164,16 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     rejit_handler = new RejitHandler(this->info_, callback);
 
-    
+    const bool instrumentation_enabled_by_default = AreInstrumentationsEnabledByDefault();
 
     // load all integrations from JSON files
     const LoadIntegrationConfiguration configuration(
         AreTracesEnabled(), 
-        GetEnvironmentValues(environment::enabled_traces_integrations),
-        GetEnvironmentValues(environment::disabled_traces_integrations),
+        GetEnabledEnvironmentValues(AreTracesInstrumentationsEnabledByDefault(instrumentation_enabled_by_default), trace_integration_names),
         AreMetricsEnabled(), 
-        GetEnvironmentValues(environment::enabled_metrics_integrations),
-        GetEnvironmentValues(environment::disabled_metrics_integrations),
+        GetEnabledEnvironmentValues(AreMetricsInstrumentationsEnabledByDefault(instrumentation_enabled_by_default), metric_integration_names),
         AreLogsEnabled(),
-        GetEnvironmentValues(environment::enabled_logs_integrations),
-        GetEnvironmentValues(environment::disabled_logs_integrations));
+        GetEnabledEnvironmentValues(AreLogsInstrumentationsEnabledByDefault(instrumentation_enabled_by_default), log_integration_names));
     LoadIntegrationsFromEnvironment(integration_methods_, configuration);
 
     Logger::Debug("Number of Integrations loaded: ", integration_methods_.size());

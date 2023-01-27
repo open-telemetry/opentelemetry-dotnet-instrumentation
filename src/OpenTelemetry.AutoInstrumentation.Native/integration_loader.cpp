@@ -119,23 +119,8 @@ namespace
 {
     bool InstrumentationEnabled(
         const WSTRING name,
-        const std::vector<WSTRING>& enabledIntegrationNames,
-        const std::vector<WSTRING>& disabledIntegrationNames)
+        const std::vector<WSTRING>& enabledIntegrationNames)
     {
-        // check if the integration is disabled
-        for (const WSTRING& disabledName : disabledIntegrationNames)
-        {
-            if (name == disabledName) 
-            {
-                return false;
-            }
-        }
-
-        if (enabledIntegrationNames.empty())
-        {
-            return true;
-        }
-
         // check if the integration is enabled
         for (const WSTRING& enabledName : enabledIntegrationNames)
         {
@@ -178,7 +163,7 @@ namespace
                   return;
             }
 
-            if (!InstrumentationEnabled(name, configuration.enabledTraceIntegrationNames, configuration.disabledTraceIntegrationNames)) 
+            if (!InstrumentationEnabled(name, configuration.enabledTraceIntegrationNames)) 
             {
                 return;
             }
@@ -189,7 +174,7 @@ namespace
             {
                 return;
             }
-            if (!InstrumentationEnabled(name, configuration.enabledMetricIntegrationNames, configuration.disabledMetricIntegrationNames))
+            if (!InstrumentationEnabled(name, configuration.enabledMetricIntegrationNames))
             {
                 return;
             }
@@ -200,7 +185,7 @@ namespace
             {
                 return;
             }
-            if (!InstrumentationEnabled(name, configuration.enabledLogIntegrationNames, configuration.disabledLogIntegrationNames))
+            if (!InstrumentationEnabled(name, configuration.enabledLogIntegrationNames))
             {
                 return;
             }
