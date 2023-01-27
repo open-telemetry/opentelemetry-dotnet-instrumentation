@@ -189,15 +189,12 @@ function Get-OpenTelemetry-Archive([string] $Version, [string] $LocalPath) {
         if (Test-Path $LocalPath) {
             return $LocalPath
         }
-        else {
-            throw "Could not find archive '$LocalPath'"
-        }
-    }
-    else {
-        $tempDir = Get-Temp-Directory
 
-        return Download-OpenTelemetry $Version $tempDir
-    } 
+        throw "Could not find archive '$LocalPath'"
+    }
+
+    $tempDir = Get-Temp-Directory
+    return Download-OpenTelemetry $Version $tempDir
 }
 
 <#
