@@ -122,6 +122,7 @@ partial class Build
 
     Target GenerateNetFxTransientDependencies => _ => _
         .Unlisted()
+        .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
             var project = Solution.GetProject(Projects.AutoInstrumentation).GetMSBuildProject();
