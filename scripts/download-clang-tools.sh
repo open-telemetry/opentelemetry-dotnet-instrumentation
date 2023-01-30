@@ -51,12 +51,6 @@ function DownloadClangTool {
     cd bin/artifacts
 
     curl --retry 5 -o "${FILENAME}" "$TOOLS_URL"
-
-    if [[ ! -x "$FILENAME" ]]; then
-        echo "Failed to download $FILENAME"
-        exit 1
-    fi
-
     chmod +x $FILENAME
 }
 
