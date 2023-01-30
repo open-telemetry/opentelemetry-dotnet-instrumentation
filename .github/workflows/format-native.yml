@@ -6,18 +6,20 @@ on:
     paths:
     - '**.cpp'
     - '**.h'
+    - 'scripts/**'
   pull_request:
     branches: [ main ]
     paths:
     - '**.cpp'
     - '**.h'
+    - 'scripts/**'
 
 jobs:
-  strategy:
+  check-native-format:
+    strategy:
       fail-fast: false
       matrix:
         base-image: [ windows-2022, ubuntu-20.04, macos-11 ]
-  check-native-format:
     runs-on: ${{ matrix.machine }}
 
     steps:
