@@ -67,7 +67,7 @@ public class CustomSdkTests : TestHelper
         collector.ResourceExpector.AssertExpectations();
     }
 
-    [Fact(Skip = "Flaky, needs investigation.")]
+    [Fact]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     public void SubmitsMetrics()
@@ -85,14 +85,23 @@ public class CustomSdkTests : TestHelper
         EnableBytecodeInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_SETUP_SDK", "false");
         SetEnvironmentVariable("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf");
+        SetEnvironmentVariable("LONG_RUNNING", "true");
+        SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "100");
 
-        RunTestApplication(new()
+        var process = StartTestApplication(new()
         {
             Arguments = $"--redis {_redis.Port}"
         });
 
-        collector.AssertExpectations();
-        collector.ResourceExpector.AssertExpectations();
+        try
+        {
+            collector.AssertExpectations();
+            collector.ResourceExpector.AssertExpectations();
+        }
+        finally
+        {
+            process?.Kill();
+        }
     }
 
     private static bool IsTopLevel(Span span)
