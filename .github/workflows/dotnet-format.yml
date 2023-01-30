@@ -11,6 +11,7 @@ on:
     paths:
     - '**.cs'
     - '.editorconfig'
+  workflow_dispatch:
 
 jobs:
   check-format:
