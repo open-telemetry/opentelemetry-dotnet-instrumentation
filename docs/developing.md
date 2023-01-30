@@ -95,7 +95,7 @@ nuke MarkdownLintFix
 
 All MarkdownLint tasks require [Node.js](https://nodejs.org/) installed locally.
 
-### Mananaged code formatting
+### Managed code formatting
 
 The .NET code formatting is based on the
 [OpenTelemetry .NET repository](https://github.com/open-telemetry/opentelemetry-dotnet).
@@ -112,7 +112,7 @@ Formatting (Bash):
 dotnet-format --folder
 ```
 
-### Natvie code formatting
+### Native code formatting
 
 The C++ code formatting is based on the
 [.NET Runtime repository](https://github.com/dotnet/runtime)
