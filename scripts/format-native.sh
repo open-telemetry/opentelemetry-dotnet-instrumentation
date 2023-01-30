@@ -37,6 +37,4 @@ NATIVE_FILES=$(find . -iname *.cpp -o -iname *.hpp -iname *.h -iname *.inc | gre
 echo "$NATIVE_FILES" | xargs "./bin/artifacts/clang-format$EXT" -style=file -i
 
 ## check if anything changed
-if [ -z "$(git status --porcelain)" ]; then
-    exit 1
-fi
+test -z "$(git status --porcelain)"
