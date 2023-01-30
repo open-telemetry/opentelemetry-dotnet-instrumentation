@@ -1,4 +1,5 @@
 ---
+# copied from: https://github.com/dotnet/runtime/blob/main/src/coreclr/jit/.clang-format
 Language:     Cpp
 AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
