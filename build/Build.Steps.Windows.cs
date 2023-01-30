@@ -122,7 +122,7 @@ partial class Build
 
     Target GenerateNetFxTransientDependencies => _ => _
         .Unlisted()
-        .After(Clean)
+        .After(Restore)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
