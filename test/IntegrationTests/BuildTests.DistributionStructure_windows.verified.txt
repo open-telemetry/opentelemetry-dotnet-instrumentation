@@ -1,6 +1,7 @@
 ﻿[
   \AdditionalDeps\shared\Microsoft.NETCore.App\6.0.0\OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
   \AdditionalDeps\shared\Microsoft.NETCore.App\7.0.0\OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
+  \LICENSE,
   \instrument.sh,
   \integrations.json,
   \net\Google.Protobuf.dll,
