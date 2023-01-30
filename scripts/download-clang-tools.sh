@@ -61,4 +61,4 @@ function DownloadClangTool {
 }
 
 DownloadClangTool "clang-format"
-DownloadClangTool "clang-tidy"
+# DownloadClangTool "clang-tidy" # unused
