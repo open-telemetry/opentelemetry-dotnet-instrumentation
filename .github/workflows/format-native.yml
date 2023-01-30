@@ -1,0 +1,28 @@
+name: format native
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - '**.cpp'
+    - '**.h'
+  pull_request:
+    branches: [ main ]
+    paths:
+    - '**.cpp'
+    - '**.h'
+
+jobs:
+  strategy:
+      fail-fast: false
+      matrix:
+        base-image: [ windows-2022, ubuntu-20.04, macos-11 ]
+  check-native-format:
+    runs-on: ${{ matrix.machine }}
+
+    steps:
+    - uses: actions/checkout@v3.3.0
+
+    - name: Install clang tools
+      shell: bash
+      run: ./scritps/download-clang-tools.sh
