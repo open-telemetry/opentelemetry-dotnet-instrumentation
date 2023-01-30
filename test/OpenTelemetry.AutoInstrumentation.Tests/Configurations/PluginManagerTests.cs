@@ -16,6 +16,7 @@
 
 using System.Collections.Specialized;
 using FluentAssertions;
+using FluentAssertions.Collections;
 using FluentAssertions.Execution;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -23,6 +24,7 @@ using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Xunit;
 
@@ -78,11 +80,13 @@ public class PluginManagerTests
 
         var tracerAction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(pluginManager);
         var meterAction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(pluginManager);
+        var resourceAction = () => ResourceBuilder.CreateEmpty().InvokePlugins(pluginManager);
 
         using (new AssertionScope())
         {
             tracerAction.Should().NotThrow();
             meterAction.Should().NotThrow();
+            resourceAction.Should().NotThrow();
         }
     }
 
@@ -150,6 +154,22 @@ public class PluginManagerTests
         }
     }
 
+    [Fact]
+    public void ConfigureResourceSuccess()
+    {
+        var pluginAssemblyQualifiedName = typeof(MockPlugin).AssemblyQualifiedName!;
+        var settings = GetSettings(pluginAssemblyQualifiedName);
+        var pluginManager = new PluginManager(settings);
+
+        var resource = ResourceBuilder.CreateEmpty().InvokePlugins(pluginManager).Build();
+
+        using (new AssertionScope())
+        {
+            resource.Attributes.First().Key.Should().Be("key");
+            resource.Attributes.First().Value.Should().Be("value");
+        }
+    }
+
     private static GeneralSettings GetSettings(string assemblyQualifiedName)
     {
         var config = new Configuration(new NameValueConfigurationSource(new NameValueCollection()
@@ -182,6 +202,17 @@ public class PluginManagerTests
         {
             // Dummy overwritten setting
             options.IncludeFormattedMessage = true;
+        }
+
+        public ResourceBuilder ConfigureResource(ResourceBuilder builder)
+        {
+            var attributes = new List<KeyValuePair<string, object>>
+            {
+                new KeyValuePair<string, object>("key", "value"),
+            };
+
+            builder.AddAttributes(attributes);
+            return builder;
         }
     }
 

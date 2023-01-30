@@ -16,6 +16,7 @@
 
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
@@ -30,5 +31,10 @@ internal static class PluginsConfigurationHelper
     public static MeterProviderBuilder InvokePlugins(this MeterProviderBuilder builder, PluginManager pluginManager)
     {
         return pluginManager.ConfigureMeterProviderBuilder(builder);
+    }
+
+    public static ResourceBuilder InvokePlugins(this ResourceBuilder builder, PluginManager pluginManager)
+    {
+        return pluginManager.ConfigureResourceBuilder(builder);
     }
 }

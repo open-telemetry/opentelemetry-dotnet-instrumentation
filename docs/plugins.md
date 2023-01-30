@@ -58,6 +58,17 @@ public class MyPlugin
         // My custom logic here
         // Find supported options below
     }
+
+    // To configure Resource
+    public OpenTelemetry.Resources.ResourceBuilder ConfigureResource(OpenTelemetry.Resources.ResourceBuilder builder)
+    {
+        // My custom logic here
+        // Please note this method is common to set the resource for trace, logs and metrics.
+        // This method could be overridden by ConfigureTracesOptions, ConfigureMeterProvider and ConfigureLogsOptions
+        // by calling SetResourceBuilder with new object.
+
+        return builder;
+    }
 }
 ```
 
