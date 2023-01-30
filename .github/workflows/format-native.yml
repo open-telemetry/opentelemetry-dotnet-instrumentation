@@ -19,8 +19,8 @@ jobs:
 
     - name: Install Clang tools
       shell: bash
-      run: ./scritps/download-clang-tools.sh
+      run: ./scripts/download-clang-tools.sh
 
     - name: Format native code
       shell: bash
-      run: ./scritps/format-native.sh
+      run: ./scripts/format-native.sh
