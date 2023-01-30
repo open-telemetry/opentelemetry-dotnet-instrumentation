@@ -274,6 +274,17 @@ partial class Build
             CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
         });
 
+    Target CopyLegalFiles => _ => _
+        .Unlisted()
+        .After(Clean)
+        .After(CreateRequiredDirectories)
+        .Executes(() =>
+        {
+            var source = RootDirectory / "LICENSE";
+            var dest = TracerHomeDirectory;
+            CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
+        });
+
     Target RunNativeTests => _ => _
         .Unlisted()
         .DependsOn(RunNativeTestsWindows)
