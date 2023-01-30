@@ -11,86 +11,90 @@ const auto home_path = std::filesystem::absolute(base_path / ".." / ".." / "bin"
 const auto otel_startup_hook_path =
     (std::filesystem::path(home_path) / "net" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll").wstring();
 
-TEST(StartupHookTest, StartupHookIsValid) {
-  const auto startup_hooks = std::vector<WSTRING>{otel_startup_hook_path};
+TEST(StartupHookTest, StartupHookIsValid)
+{
+    const auto startup_hooks = std::vector<WSTRING>{otel_startup_hook_path};
 
-  const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
+    const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
 
-  ASSERT_TRUE(is_valid);
+    ASSERT_TRUE(is_valid);
 }
 
-TEST(StartupHookTest, StartupHookIsNotValidWhenStartupHooksIsEmpty) {
-  const auto startup_hooks = std::vector<WSTRING>{WStr("")};
+TEST(StartupHookTest, StartupHookIsNotValidWhenStartupHooksIsEmpty)
+{
+    const auto startup_hooks = std::vector<WSTRING>{WStr("")};
 
-  const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
+    const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
 
-  ASSERT_FALSE(is_valid);
+    ASSERT_FALSE(is_valid);
 }
 
-TEST(StartupHookTest, StartupHookIsInvalidWhenNoStartupHooksDefined) {
-  const std::vector<WSTRING> startup_hooks;
+TEST(StartupHookTest, StartupHookIsInvalidWhenNoStartupHooksDefined)
+{
+    const std::vector<WSTRING> startup_hooks;
 
-  const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
+    const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
 
-  ASSERT_FALSE(is_valid);
+    ASSERT_FALSE(is_valid);
 }
 
-TEST(StartupHookTest, StartupHookIsInvalidWhenStartupHookDoesNotContainOpenTelemetryHook) {
-  const auto startup_hooks = std::vector<WSTRING>{
-      (std::filesystem::path(home_path) / "net" / "StartupHook.dll").wstring()
-  };
+TEST(StartupHookTest, StartupHookIsInvalidWhenStartupHookDoesNotContainOpenTelemetryHook)
+{
+    const auto startup_hooks =
+        std::vector<WSTRING>{(std::filesystem::path(home_path) / "net" / "StartupHook.dll").wstring()};
 
-  const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
+    const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
 
-  ASSERT_FALSE(is_valid);
+    ASSERT_FALSE(is_valid);
 }
 
-TEST(StartupHookTest, StartupHookIsInvalidWhenNotInTheCorrectLocation) {
-  const auto startup_hooks = std::vector<WSTRING>{
-      (base_path / "other_folder" / "net" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll")
-          .wstring()
-  };
+TEST(StartupHookTest, StartupHookIsInvalidWhenNotInTheCorrectLocation)
+{
+    const auto startup_hooks = std::vector<WSTRING>{
+        (base_path / "other_folder" / "net" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll").wstring()};
 
-  const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
+    const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
 
-  ASSERT_FALSE(is_valid);
+    ASSERT_FALSE(is_valid);
 }
 
-TEST(StartupHookTest, StartupHookIsValidWhenMultipleStartupHooksDefined) {
-  const auto startup_hooks = std::vector<WSTRING>{
-      (base_path / "folder1" / "StartupHook.dll").wstring(),
-      otel_startup_hook_path,
-      (base_path / "folder2" / "StartupHook.dll").wstring(),
-  };
+TEST(StartupHookTest, StartupHookIsValidWhenMultipleStartupHooksDefined)
+{
+    const auto startup_hooks = std::vector<WSTRING>{
+        (base_path / "folder1" / "StartupHook.dll").wstring(), otel_startup_hook_path,
+        (base_path / "folder2" / "StartupHook.dll").wstring(),
+    };
 
-  const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
+    const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
 
-  ASSERT_TRUE(is_valid);
+    ASSERT_TRUE(is_valid);
 }
 
 #ifdef _WIN32
 
 // Tests mixing Windows folder separators
 
-TEST(StartupHookTest, StartupHookIsValidAltSepOnHomePath) {
-  const auto startup_hooks = std::vector<WSTRING>{otel_startup_hook_path};
-  auto alt_home_path = home_path;
-  std::replace(alt_home_path.begin(), alt_home_path.end(), L'\\', L'/');
+TEST(StartupHookTest, StartupHookIsValidAltSepOnHomePath)
+{
+    const auto startup_hooks = std::vector<WSTRING>{otel_startup_hook_path};
+    auto       alt_home_path = home_path;
+    std::replace(alt_home_path.begin(), alt_home_path.end(), L'\\', L'/');
 
-  const auto is_valid = IsStartupHookValid(startup_hooks, alt_home_path);
+    const auto is_valid = IsStartupHookValid(startup_hooks, alt_home_path);
 
-  ASSERT_TRUE(is_valid);
+    ASSERT_TRUE(is_valid);
 }
 
-TEST(StartupHookTest, StartupHookIsValidAltSepOnStartupHooks) {
-  auto alt_startup_hook = otel_startup_hook_path;
-  std::replace(alt_startup_hook.begin(), alt_startup_hook.end(), L'\\', L'/');
+TEST(StartupHookTest, StartupHookIsValidAltSepOnStartupHooks)
+{
+    auto alt_startup_hook = otel_startup_hook_path;
+    std::replace(alt_startup_hook.begin(), alt_startup_hook.end(), L'\\', L'/');
 
-  const auto startup_hooks = std::vector<WSTRING>{alt_startup_hook};
+    const auto startup_hooks = std::vector<WSTRING>{alt_startup_hook};
 
-  const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
+    const auto is_valid = IsStartupHookValid(startup_hooks, home_path);
 
-  ASSERT_TRUE(is_valid);
+    ASSERT_TRUE(is_valid);
 }
 
 #endif
