@@ -27,6 +27,9 @@ public class DotNetRunner
 {
     public RunStatus Run(string workingDirectory, string[] arguments)
     {
+        Console.WriteLine("DotNetRunner - WorkingDirectory: {0}", workingDirectory);
+        Console.WriteLine("DotNetRunner - Arguments: {0}", string.Join(" ", arguments));
+
         var psi = new ProcessStartInfo(DotNetExe.FullPathOrDefault(), string.Join(" ", arguments))
         {
             WorkingDirectory = workingDirectory,
