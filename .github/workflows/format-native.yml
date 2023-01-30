@@ -3,16 +3,8 @@ name: format native
 on:
   push:
     branches: [ main ]
-    paths:
-    - '**.cpp'
-    - '**.h'
-    - 'scripts/**'
   pull_request:
-    branches: [ main ]
-    paths:
-    - '**.cpp'
-    - '**.h'
-    - 'scripts/**'
+  workflow_dispatch:
 
 jobs:
   check-native-format:
@@ -25,6 +17,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3.3.0
 
-    - name: Install clang tools
+    - name: Install Clang tools
       shell: bash
       run: ./scritps/download-clang-tools.sh
+
+    - name: Format native code
+      shell: bash
+      run: ./scritps/format-native.sh
