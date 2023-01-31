@@ -1,15 +1,41 @@
 #!/bin/bash
 
-case "$(uname -s | tr '[:upper:]' '[:lower:]')" in
-  linux*)
-    if [ "$(ldd /bin/ls | grep -m1 'musl')" ]; then
-      DOTNET_RUNTIME_ID="linux-musl"
-    else
-      DOTNET_RUNTIME_ID="linux-x64"
-    fi
+# guess OS_TYPE if not provided
+OS_TYPE=${OS_TYPE:-}
+if [ -z "$OS_TYPE" ]; then
+  case "$(uname -s | tr '[:upper:]' '[:lower:]')" in
+    cygwin_nt*|mingw*|msys_nt*)
+      OS_TYPE="windows"
+      ;;
+    linux*)
+      if [ "$(ldd /bin/ls | grep -m1 'musl')" ]; then
+        OS_TYPE="linux-musl"
+      else
+        OS_TYPE="linux-glibc"
+      fi
+      ;;
+    darwin*)
+      OS_TYPE="macos"
+      ;;
+  esac
+fi
+
+# validate input
+case "$OS_TYPE" in
+  "linux-glibc")
+    DOTNET_RUNTIME_ID="linux-x64"
     ;;
-  darwin*)
+  "linux-musl")
+    DOTNET_RUNTIME_ID="linux-musl-x64"
+    ;;
+  "macos")
     DOTNET_RUNTIME_ID="osx-x64"
+    ;;
+  "windows")
+    ;;
+  *)
+    echo "Set the operating system type using the OS_TYPE environment variable. Supported values: linux-glibc, linux-musl, macos, windows." >&2
+    return 2
     ;;
 esac
 
@@ -46,28 +72,6 @@ SUFIX=$(native_sufix)
 OS=$(uname_os)
 ENABLE_PROFILING=${ENABLE_PROFILING:-1}
 
-# Enable .NET Framework Profiling API
-if [ "$OS" == "windows" ]
-then
-    export COR_ENABLE_PROFILING="${ENABLE_PROFILING}"
-    export COR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
-    export COR_PROFILER_PATH="${CURDIR}/bin/tracer-home/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
-    # Set paths for both bitness on Windows, see https://docs.microsoft.com/en-us/dotnet/core/run-time-config/debugging-profiling#profiler-location
-    export COR_PROFILER_PATH_64="${CURDIR}/bin/tracer-home/win-x64/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
-    export COR_PROFILER_PATH_32="${CURDIR}/bin/tracer-home/win-x86/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
-fi
-
-# Enable .NET Core Profiling API
-export CORECLR_ENABLE_PROFILING="${ENABLE_PROFILING}"
-export CORECLR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
-export CORECLR_PROFILER_PATH="${CURDIR}/bin/tracer-home/$DOTNET_RUNTIME_ID/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
-if [ "$OS" == "windows" ]
-then
-    # Set paths for both bitness on Windows, see https://docs.microsoft.com/en-us/dotnet/core/run-time-config/debugging-profiling#profiler-location
-    export CORECLR_PROFILER_PATH_64="${CURDIR}/bin/tracer-home/win-x64/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
-    export CORECLR_PROFILER_PATH_32="${CURDIR}/bin/tracer-home/win-x86/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
-fi
-
 # Configure .NET Core runtime
 export DOTNET_ADDITIONAL_DEPS="${CURDIR}/bin/tracer-home/AdditionalDeps"
 export DOTNET_SHARED_STORE="${CURDIR}/bin/tracer-home/store"
@@ -87,3 +91,26 @@ export OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES=${OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES:-
 export OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED=${OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED:-true}
 export OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED=${OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED:-true}
 export OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED=${OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED:-true}
+
+# Enable .NET Framework Profiling API
+if [ "$OS" == "windows" ]
+then
+    export COR_ENABLE_PROFILING="${ENABLE_PROFILING}"
+    export COR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
+    export COR_PROFILER_PATH="${CURDIR}/bin/tracer-home/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
+    # Set paths for both bitness on Windows, see https://docs.microsoft.com/en-us/dotnet/core/run-time-config/debugging-profiling#profiler-location
+    export COR_PROFILER_PATH_64="${CURDIR}/bin/tracer-home/win-x64/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
+    export COR_PROFILER_PATH_32="${CURDIR}/bin/tracer-home/win-x86/OpenTelemetry.AutoInstrumentation.Native.${SUFIX}"
+fi
+
+# Enable .NET Core Profiling API
+export CORECLR_ENABLE_PROFILING="${ENABLE_PROFILING}"
+export CORECLR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
+  if [ "$OS_TYPE" == "windows" ]
+  then
+    # Set paths for both bitness on Windows, see https://docs.microsoft.com/en-us/dotnet/core/run-time-config/debugging-profiling#profiler-location
+    export CORECLR_PROFILER_PATH_64="$OTEL_DOTNET_AUTO_HOME/win-x64/OpenTelemetry.AutoInstrumentation.Native.$SUFIX"
+    export CORECLR_PROFILER_PATH_32="$OTEL_DOTNET_AUTO_HOME/win-x86/OpenTelemetry.AutoInstrumentation.Native.$SUFIX"
+  else
+    export CORECLR_PROFILER_PATH="$OTEL_DOTNET_AUTO_HOME/$DOTNET_RUNTIME_ID/OpenTelemetry.AutoInstrumentation.Native.$SUFIX"
+  fi
