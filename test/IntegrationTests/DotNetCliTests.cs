@@ -80,11 +80,12 @@ public sealed class DotNetCliTests : TestHelper, IDisposable
 
     private static void ChangeDefaultProgramToHttpClient()
     {
-        const string ProgramContent = """
-            using var httpClient = new HttpClient();
-            using var response = await httpClient.GetAsync("http://example.com");
-            Console.WriteLine(response.StatusCode);
-            """;
+        const string ProgramContent = @"
+using var httpClient = new HttpClient();
+using var response = await httpClient.GetAsync(""http://example.com"");
+Console.WriteLine(response.StatusCode);
+";
+
         File.WriteAllText("Program.cs", ProgramContent);
     }
 
