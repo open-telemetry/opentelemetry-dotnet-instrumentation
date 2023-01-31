@@ -44,10 +44,10 @@ However, if given setting supports it, then:
 
 ## Global settings
 
-| Environment variable                 | Description                                                                                                                                                                                                                  | Default value |
-|--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| `OTEL_DOTNET_AUTO_HOME`              | Installation location.                                                                                                                                                                                                       |               |
-| `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` | Names of the executable files that the profiler cannot instrument. Supports multiple comma-separated values, for example: `ReservedProcess.exe,powershell.exe`. If unset, the profiler attaches to all processes by default. |               |
+| Environment variable                 | Description                                                                                                                                                     | Default value                                  |
+|--------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------|
+| `OTEL_DOTNET_AUTO_HOME`              | Installation location.                                                                                                                                          |                                                |
+| `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` | Names of the executable files that the profiler cannot instrument. Supports multiple comma-separated values, for example: `ReservedProcess.exe,powershell.exe`. | dotnet,dotnet.exe,powershell.exe,pwsh,pwsh.exe |
 
 ## Resources
 

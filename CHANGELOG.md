@@ -48,6 +48,10 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
   - `OTEL_DOTNET_AUTO_METRICS_{0}_INSTRUMENTATION_ENABLED`,
   - `OTEL_DOTNET_AUTO_LOGS_INSTRUMENTATION_ENABLED`,
   - `OTEL_DOTNET_AUTO_LOGS_{0}_INSTRUMENTATION_ENABLED`.
+- Set the default of `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` to
+  `dotnet,dotnet.exe,powershell.exe,pwsh,pwsh.exe`.
+- Unset, in the StartupHook, the `DOTNET_ADDITIONAL_DEPS`, `DOTNET_SHARED_STORE`,
+  and `DOTNET_STARTUP_HOOKS` environment variables, for processes in `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`.
 
 ### Deprecated
 

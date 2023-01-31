@@ -53,6 +53,12 @@ internal class StartupHook
         if (IsApplicationInExcludeList(applicationName))
         {
             Logger.LogInformation("Application is in the exclusion list. Skipping initialization.");
+
+            // TODO: Non-destructive clean-up: remove only OTel .NET AutoInstrumentaion related paths.
+            Environment.SetEnvironmentVariable("DOTNET_ADDITIONAL_DEPS", null);
+            Environment.SetEnvironmentVariable("DOTNET_SHARED_STORE", null);
+            Environment.SetEnvironmentVariable("DOTNET_STARTUP_HOOKS", null);
+
             return;
         }
 
@@ -138,7 +144,10 @@ internal class StartupHook
 
         if (environmentValue == null)
         {
-            return excludedProcesses;
+            return new List<string>
+            {
+                "dotnet", "dotnet.exe", "powershell.exe", "pwsh", "pwsh.exe"
+            };
         }
 
         foreach (var processName in environmentValue.Split(Constants.ConfigurationValues.Separator))

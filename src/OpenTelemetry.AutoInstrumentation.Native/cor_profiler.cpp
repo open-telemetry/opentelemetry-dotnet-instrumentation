@@ -104,7 +104,14 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 #endif
 
     const auto process_name = GetCurrentProcessName();
-    const auto exclude_process_names = GetEnvironmentValues(environment::exclude_process_names);
+    auto exclude_process_names = GetEnvironmentValues(environment::exclude_process_names);
+    if (exclude_process_names.empty())
+    {
+        exclude_process_names = std::vector<WSTRING>
+        {
+            WStr("dotnet"), WStr("dotnet.exe"), WStr("powershell.exe"), WStr("pwsh"), WStr("pwsh.exe")
+        };
+    }
 
     // attach profiler only if this process's name is NOT on the list
     if (!exclude_process_names.empty() && Contains(exclude_process_names, process_name))
@@ -113,6 +120,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
                      environment::exclude_process_names, ".");
         return E_FAIL;
     }
+
+    Logger::Info("Profiler NOT disabled: ", process_name, " NOT found in ",
+                    environment::exclude_process_names, ".");
 
     if (runtime_information_.is_core())
     {
