@@ -251,7 +251,7 @@ are under the following copyright:
 Copyright The OpenTelemetry Authors under Apache License Version 2.0
 (https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/main/LICENSE).
 
-Library Google.Protobuf is under the following copyright:
+Library OpenTracing is under the following copyright:
 Copyright The OpenTracing Authors under Apache License Version 2.0
 (https://github.com/opentracing/opentracing-csharp/blob/master/LICENSE).
 
