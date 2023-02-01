@@ -79,7 +79,7 @@ bool IsNetFxAssemblyRedirectionEnabled() {
 }
 
 bool AreInstrumentationsEnabledByDefault() {
-  ToBooleanWithDefault(GetEnvironmentValue(environment::instrumentation_enabled), false);
+  ToBooleanWithDefault(GetEnvironmentValue(environment::instrumentation_enabled), true);
 }
 
 bool AreTracesInstrumentationsEnabledByDefault(const bool enabled_if_not_configured) {
