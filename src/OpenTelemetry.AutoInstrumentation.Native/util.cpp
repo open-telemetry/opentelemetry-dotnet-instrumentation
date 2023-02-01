@@ -103,23 +103,23 @@ std::vector<WSTRING> GetEnvironmentValues(const WSTRING& name)
     return GetEnvironmentValues(name, L',');
 }
 
-std::vector<WSTRING> GetEnabledEnvironmentValues(const bool disabled_by_default, const std::unordered_map<WSTRING, WSTRING>& values_map)
+std::vector<WSTRING> GetEnabledEnvironmentValues(const bool enabled_by_default, const std::unordered_map<WSTRING, WSTRING>& values_map)
 {
     std::vector<WSTRING> values;
  
     for (const auto& value : values_map)
     {
-        bool disabled = disabled_by_default;
+        bool enabled = enabled_by_default;
         const auto env_value = GetEnvironmentValue(value.second);
         if (env_value == WStr("true"))
         {
-            disabled = true;
+            enabled = true;
         }
         else if (env_value == WStr("false"))
         {
-            disabled = false;
+            enabled = false;
         }
-        if (!disabled)
+        if (enabled)
         {
             values.push_back(value.first);
         }

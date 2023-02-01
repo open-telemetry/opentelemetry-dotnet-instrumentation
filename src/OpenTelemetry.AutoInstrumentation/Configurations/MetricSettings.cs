@@ -51,13 +51,13 @@ internal class MetricSettings : Settings
         MetricExporter = ParseMetricExporter(configuration);
         ConsoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Metrics.ConsoleExporterEnabled) ?? false;
 
-        var instrumentationDisabledByDefault =
-            configuration.GetBool(ConfigurationKeys.Metrics.MetricsInstrumentationDisabled) ??
-            configuration.GetBool(ConfigurationKeys.InstrumentationDisabled) ?? false;
+        var instrumentationEnabledByDefault =
+            configuration.GetBool(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled) ??
+            configuration.GetBool(ConfigurationKeys.InstrumentationEnabled) ?? true;
 
         EnabledInstrumentations = configuration.ParseEnabledEnumList<MetricInstrumentation>(
-            disabledByDefault: instrumentationDisabledByDefault,
-            disabledConfigurationTemplate: ConfigurationKeys.Metrics.DisabledMetricsInstrumentationTemplate);
+            enabledByDefault: instrumentationEnabledByDefault,
+            enabledConfigurationTemplate: ConfigurationKeys.Metrics.EnabledMetricsInstrumentationTemplate);
 
         var additionalSources = configuration.GetString(ConfigurationKeys.Metrics.AdditionalSources);
         if (additionalSources != null)

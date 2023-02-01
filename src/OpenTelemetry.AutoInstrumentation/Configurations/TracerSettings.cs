@@ -76,13 +76,13 @@ internal class TracerSettings : Settings
         TracesExporter = ParseTracesExporter(configuration);
         ConsoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Traces.ConsoleExporterEnabled) ?? false;
 
-        var instrumentationDisabledByDefault =
-            configuration.GetBool(ConfigurationKeys.Traces.TracesInstrumentationDisabled) ??
-            configuration.GetBool(ConfigurationKeys.InstrumentationDisabled) ?? false;
+        var instrumentationEnabledByDefault =
+            configuration.GetBool(ConfigurationKeys.Traces.TracesInstrumentationEnabled) ??
+            configuration.GetBool(ConfigurationKeys.InstrumentationEnabled) ?? true;
 
         EnabledInstrumentations = configuration.ParseEnabledEnumList<TracerInstrumentation>(
-            disabledByDefault: instrumentationDisabledByDefault,
-            disabledConfigurationTemplate: ConfigurationKeys.Traces.DisabledTracesInstrumentationTemplate);
+            enabledByDefault: instrumentationEnabledByDefault,
+            enabledConfigurationTemplate: ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate);
 
         var additionalSources = configuration.GetString(ConfigurationKeys.Traces.AdditionalSources);
         if (additionalSources != null)

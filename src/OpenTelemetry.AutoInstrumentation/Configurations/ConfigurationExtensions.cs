@@ -20,7 +20,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal static class ConfigurationExtensions
 {
-    public static IList<TEnum> ParseEnabledEnumList<TEnum>(this Configuration source, bool disabledByDefault, string disabledConfigurationTemplate)
+    public static IList<TEnum> ParseEnabledEnumList<TEnum>(this Configuration source, bool enabledByDefault, string enabledConfigurationTemplate)
         where TEnum : struct, Enum, IConvertible
     {
         var allConfigurations = Enum.GetValues(typeof(TEnum)).Cast<TEnum>().ToArray();
@@ -28,9 +28,9 @@ internal static class ConfigurationExtensions
 
         foreach (var configuration in allConfigurations)
         {
-            var configurationDisabled = source.GetBool(string.Format(CultureInfo.InvariantCulture, disabledConfigurationTemplate, configuration)) ?? disabledByDefault;
+            var configurationEnabled = source.GetBool(string.Format(CultureInfo.InvariantCulture, enabledConfigurationTemplate, configuration)) ?? enabledByDefault;
 
-            if (!configurationDisabled)
+            if (configurationEnabled)
             {
                 enabledConfigurations.Add(configuration);
             }

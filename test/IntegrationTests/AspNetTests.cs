@@ -108,8 +108,8 @@ public class AspNetTests
         _environmentVariables["OTEL_METRICS_EXPORTER"] = "otlp";
         _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
         _environmentVariables["OTEL_METRIC_EXPORT_INTERVAL"] = "1000";
-        _environmentVariables["OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_DISABLED"] = "true"; // Helps to reduce noise by enabling only AspNet metrics.
-        _environmentVariables["OTEL_DOTNET_AUTO_METRICS_AspNet_INSTRUMENTATION_DISABLED"] = "false"; // Helps to reduce noise by enabling only AspNet metrics.
+        _environmentVariables["OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED"] = "false"; // Helps to reduce noise by enabling only AspNet metrics.
+        _environmentVariables["OTEL_DOTNET_AUTO_METRICS_AspNet_INSTRUMENTATION_ENABLED"] = "true"; // Helps to reduce noise by enabling only AspNet metrics.
         var webPort = TcpPortProvider.GetOpenPort();
         await using var container = await StartContainerAsync(webPort);
         await CallTestApplicationEndpoint(webPort);

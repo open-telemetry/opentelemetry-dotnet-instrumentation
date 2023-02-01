@@ -54,12 +54,12 @@ internal class LogSettings : Settings
         IncludeFormattedMessage = configuration.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
 
         var instrumentationEnabledByDefault =
-            configuration.GetBool(ConfigurationKeys.Logs.LogsInstrumentationDisabled) ??
-            configuration.GetBool(ConfigurationKeys.InstrumentationDisabled) ?? false;
+            configuration.GetBool(ConfigurationKeys.Logs.LogsInstrumentationEnabled) ??
+            configuration.GetBool(ConfigurationKeys.InstrumentationEnabled) ?? true;
 
         EnabledInstrumentations = configuration.ParseEnabledEnumList<LogInstrumentation>(
-            disabledByDefault: instrumentationEnabledByDefault,
-            disabledConfigurationTemplate: ConfigurationKeys.Logs.DisabledLogsInstrumentationTemplate);
+            enabledByDefault: instrumentationEnabledByDefault,
+            enabledConfigurationTemplate: ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate);
     }
 
     private static LogExporter ParseLogExporter(Configuration configuration)
