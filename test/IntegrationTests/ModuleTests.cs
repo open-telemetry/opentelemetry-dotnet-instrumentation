@@ -14,14 +14,10 @@
 // limitations under the License.
 // </copyright>
 
-using System.IO;
-using System.Threading.Tasks;
 using IntegrationTests.Helpers;
 using Newtonsoft.Json;
 using OpenTelemetry.AutoInstrumentation;
 using OpenTelemetry.AutoInstrumentation.Configurations;
-using VerifyXunit;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
@@ -73,8 +69,7 @@ public class ModuleTests : TestHelper
     [Fact]
     public async Task Minimal()
     {
-        SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, Constants.ConfigurationValues.None);
-        SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, Constants.ConfigurationValues.None);
+        SetEnvironmentVariable(ConfigurationKeys.InstrumentationEnabled, "false");
         SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, Constants.ConfigurationValues.None);
         SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, Constants.ConfigurationValues.None);
         SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, Constants.ConfigurationValues.None);

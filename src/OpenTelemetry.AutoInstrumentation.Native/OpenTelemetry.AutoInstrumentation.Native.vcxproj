@@ -180,6 +180,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="bytecode_instrumentations.h" />
     <ClInclude Include="calltarget_tokens.h" />
     <ClInclude Include="class_factory.h" />
     <ClInclude Include="com_ptr.h" />
@@ -199,6 +200,7 @@
     <ClInclude Include="miniutf.hpp" />
     <ClInclude Include="miniutfdata.h" />
     <ClInclude Include="module_metadata.h" />
+    <ClInclude Include="netfx_assembly_redirection.h" />
     <ClInclude Include="otel_profiler_constants.h" />
     <ClInclude Include="pal.h" />
     <ClInclude Include="rejit_handler.h" />
