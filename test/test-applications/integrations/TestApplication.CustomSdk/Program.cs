@@ -39,6 +39,10 @@ public static class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
+        // When export of NServiceBus metrics is tested, which are updated on receive side,
+        // test has to be marked as long running, in order to avoid random failures
+        var longRunning = Environment.GetEnvironmentVariable("LONG_RUNNING") == "true";
+
         // if auto-instrumentation is not injecting sdk
         // then it's client's code responsibility
         // to subscribe to all activity sources
@@ -46,26 +50,59 @@ public static class Program
         var tracerProvider = BuildTracerProvider();
         var meterProvider = BuildMeterProvider();
 
-        AppDomain.CurrentDomain.ProcessExit += (sender, eventArgs) =>
+        // When export of traces is tested, test is not marked as long running,
+        // to avoid unnecessary delay due to default Redis instrumentation flush interval;
+        // in this scenario it is required to add tracer/meter provider disposals on process exit
+        if (!longRunning)
         {
-            // autoinstrumentation disposes created instrumentations during AppDomain.CurrentDomain.ProcessExit
-            // redis instrumentation flushes inside Dispose() which creates activities
-            // delay providers disposal so that there are active listeners
-            // when redis instrumentation attempts to create new activities
-            tracerProvider?.Dispose();
-            meterProvider?.Dispose();
-        };
+            AppDomain.CurrentDomain.ProcessExit += (sender, eventArgs) =>
+            {
+                // autoinstrumentation disposes created instrumentations during AppDomain.CurrentDomain.ProcessExit
+                // redis instrumentation flushes inside Dispose() which creates activities
+                // delay providers disposal so that there are active listeners
+                // when redis instrumentation attempts to create new activities
+                tracerProvider?.Dispose();
+                meterProvider?.Dispose();
+            };
+        }
 
-        await SendNServiceBusMessage();
+        var endpointConfiguration = new EndpointConfiguration("TestApplication.NServiceBus");
 
-        Counter.Add(1);
+        var learningTransport = new LearningTransport { StorageDirectory = Path.GetTempPath() };
+        endpointConfiguration.UseTransport(learningTransport);
 
-        using (var activity = ActivitySource.StartActivity("Manual"))
+        using var cancellation = new CancellationTokenSource();
+        var endpointInstance = await Endpoint.Start(endpointConfiguration, cancellation.Token);
+
+        try
         {
-            await PingRedis(args);
+            await endpointInstance.SendLocal(new TestMessage(), cancellation.Token);
 
-            using var client = new HttpClient();
-            await client.GetStringAsync("https://www.bing.com");
+            Counter.Add(1);
+
+            using (var activity = ActivitySource.StartActivity("Manual"))
+            {
+                await PingRedis(args);
+
+                using var client = new HttpClient();
+                await client.GetStringAsync("https://www.bing.com", cancellation.Token);
+            }
+
+            // The "LONG_RUNNING" environment variable is used by tests that access/receive
+            // data that takes time to be produced.
+            if (longRunning)
+            {
+                // In this case it is necessary to ensure that the test has a chance to read the
+                // expected data, only by keeping the application alive for some time that can
+                // be ensured. Anyway, tests that set "LONG_RUNNING" env var to true are expected
+                // to kill the process directly.
+                Console.WriteLine("LONG_RUNNING is true, waiting for process to be killed...");
+                await Process.GetCurrentProcess().WaitForExitAsync(cancellation.Token);
+            }
+        }
+        finally
+        {
+            await endpointInstance.Stop(cancellation.Token);
         }
     }
 
@@ -114,26 +151,6 @@ public static class Program
         var db = connection.GetDatabase();
 
         db.Ping();
-    }
-
-    private static async Task SendNServiceBusMessage()
-    {
-        var endpointConfiguration = new EndpointConfiguration("TestApplication.NServiceBus");
-
-        var learningTransport = new LearningTransport { StorageDirectory = Path.GetTempPath() };
-        endpointConfiguration.UseTransport(learningTransport);
-
-        using var cancellation = new CancellationTokenSource();
-        var endpointInstance = await Endpoint.Start(endpointConfiguration, cancellation.Token);
-
-        try
-        {
-            await endpointInstance.SendLocal(new TestMessage(), cancellation.Token);
-        }
-        finally
-        {
-            await endpointInstance.Stop(cancellation.Token);
-        }
     }
 
     private static string GetRedisPort(string[] args)

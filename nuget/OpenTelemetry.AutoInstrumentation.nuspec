@@ -64,6 +64,7 @@
     <file src="bin-linux-glibc/net/**/*.*" target="net" />
     <file src="bin-linux-glibc/store/**/*.*" target="store" />
     <file src="bin-linux-glibc/integrations.json" target="integrations.json" />
+    <file src="bin-linux-glibc/LICENSE" target="LICENSE" />
     <file src="bin-linux-glibc/linux-x64/**/*.*" target="linux-x64" />
     <file src="bin-linux-musl/linux-musl-x64/**/*.*" target="linux-musl-x64" />
     <file src="bin-windows/netfx/**/*.*" target="netfx" />
