@@ -33,6 +33,9 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\WriteCountingStream.cs">
       <Link>Logging\WriteCountingStream.cs</Link>
     </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\AutoInstrumentationEventSource.cs">
+      <Link>AutoInstrumentationEventSource.cs</Link>
+    </Compile>
   </ItemGroup>
 
 </Project>

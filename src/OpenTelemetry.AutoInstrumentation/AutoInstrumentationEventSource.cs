@@ -24,16 +24,14 @@ namespace OpenTelemetry.AutoInstrumentation;
 [EventSource(Name = "OpenTelemetry-AutoInstrumentation")]
 internal class AutoInstrumentationEventSource : EventSource
 {
-#pragma warning disable SA1401 // Fields should be private
-    public static readonly AutoInstrumentationEventSource Log = new AutoInstrumentationEventSource();
-#pragma warning restore SA1401 // Fields should be private
+    public static AutoInstrumentationEventSource Log => new();
 
-    /// <summary>Logs as Trace level message.</summary>
+    /// <summary>Logs as Information level message.</summary>
     /// <param name="message">Message to log.</param>
     [Event(1, Message = "{0}", Level = EventLevel.Informational)]
-    public void Trace(string message)
+    public void Information(string message)
     {
-        this.WriteEvent(1, message);
+        WriteEvent(1, message);
     }
 
     /// <summary>Logs as Error level message.</summary>
@@ -41,6 +39,14 @@ internal class AutoInstrumentationEventSource : EventSource
     [Event(2, Message = "{0}", Level = EventLevel.Error)]
     public void Error(string message)
     {
-        this.WriteEvent(2, message);
+        WriteEvent(2, message);
+    }
+
+    /// <summary>Logs as Warning level message.</summary>
+    /// <param name="message">Message to log.</param>
+    [Event(1, Message = "{0}", Level = EventLevel.Warning)]
+    public void Warning(string message)
+    {
+        WriteEvent(3, message);
     }
 }

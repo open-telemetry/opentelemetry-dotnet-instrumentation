@@ -17,7 +17,7 @@
 #if NET6_0_OR_GREATER
 using Google.Protobuf;
 using IntegrationTests.Helpers;
-using OpenTelemetry.Proto.Trace.V1;
+using OpenTelemetry.Proto.Information.V1;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;

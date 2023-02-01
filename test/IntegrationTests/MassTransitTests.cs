@@ -18,7 +18,7 @@
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
-using static OpenTelemetry.Proto.Trace.V1.Span.Types;
+using static OpenTelemetry.Proto.Information.V1.Span.Types;
 
 namespace IntegrationTests;
 

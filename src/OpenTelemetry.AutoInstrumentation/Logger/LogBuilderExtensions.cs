@@ -80,7 +80,7 @@ internal static class LogBuilderExtensions
                 }
             });
 
-            AutoInstrumentationEventSource.Log.Trace($"Logs: Loaded AddOpenTelemetry from LoggingBuilder.");
+            AutoInstrumentationEventSource.Log.Information($"Logs: Loaded AddOpenTelemetry from LoggingBuilder.");
         }
         catch (Exception ex)
         {

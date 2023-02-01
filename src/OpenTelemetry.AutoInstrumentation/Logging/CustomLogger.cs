@@ -153,6 +153,25 @@ internal class CustomLogger : IOtelLogger
     public void Error(Exception exception, string messageTemplate, object[] args)
         => Write(LogLevel.Error, exception, messageTemplate, args);
 
+    private static void WriteEventSourceLog(LogLevel level, string message)
+    {
+        switch (level)
+        {
+            case LogLevel.Information:
+                AutoInstrumentationEventSource.Log.Information(message);
+                break;
+            case LogLevel.Debug:
+                AutoInstrumentationEventSource.Log.Information(message);
+                break;
+            case LogLevel.Warning:
+                AutoInstrumentationEventSource.Log.Warning(message);
+                break;
+            case LogLevel.Error:
+                AutoInstrumentationEventSource.Log.Error(message);
+                break;
+        }
+    }
+
     private void Write<T>(LogLevel level, Exception? exception, string messageTemplate, T property)
     {
         if (IsEnabled(level))
@@ -196,6 +215,7 @@ internal class CustomLogger : IOtelLogger
             var message =
                 $"[{DateTime.UtcNow:O}] [{level}] {string.Format(messageTemplate, args)} {Environment.NewLine}";
             _sink.Write(message);
+            WriteEventSourceLog(level, message);
 
             if (exception != null)
             {
