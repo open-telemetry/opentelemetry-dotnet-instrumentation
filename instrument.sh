@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # guess OS_TYPE if not provided
+OS_TYPE=${OS_TYPE:-}
 if [ -z "$OS_TYPE" ]; then
   case "$(uname -s | tr '[:upper:]' '[:lower:]')" in
     cygwin_nt*|mingw*|msys_nt*)
