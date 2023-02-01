@@ -238,7 +238,8 @@ partial class Build
 
             // Remove non-library files
             (TracerHomeDirectory / "net").GlobFiles("*.json", "*.xml").ForEach(DeleteFile);
-            if (IsWin) {
+            if (IsWin)
+            {
                 (TracerHomeDirectory / "netfx").GlobFiles("*.json", "*.xml").ForEach(DeleteFile);
             }
         });
