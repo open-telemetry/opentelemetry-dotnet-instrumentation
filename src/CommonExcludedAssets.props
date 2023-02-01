@@ -18,5 +18,7 @@
     <PackageReference Include="System.Windows.Extensions" ExcludeAssets="all" />
     <!-- Microsoft.Win32.SystemEvents is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
     <PackageReference Include="Microsoft.Win32.SystemEvents" ExcludeAssets="all" />
+    <!-- Microsoft.Bcl.AsyncInterfaces is required by StackExchange.Redis. ExcludeAssets="all" prevents copying it to the output -->
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" ExcludeAssets="all" />
   </ItemGroup>
 </Project>
