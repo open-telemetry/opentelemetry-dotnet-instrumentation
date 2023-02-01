@@ -237,10 +237,11 @@ partial class Build
                 .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET6_0)));
 
             // Remove non-library files
-            (TracerHomeDirectory / "net").GlobFiles("*.json", "*.xml").ForEach(DeleteFile);
+            TracerHomeDirectory.GlobFiles("**/*.xml").ForEach(DeleteFile);
+            (TracerHomeDirectory / "net").GlobFiles("*.json").ForEach(DeleteFile);
             if (IsWin)
             {
-                (TracerHomeDirectory / "netfx").GlobFiles("*.json", "*.xml").ForEach(DeleteFile);
+                (TracerHomeDirectory / "netfx").GlobFiles("*.json").ForEach(DeleteFile);
             }
         });
 
