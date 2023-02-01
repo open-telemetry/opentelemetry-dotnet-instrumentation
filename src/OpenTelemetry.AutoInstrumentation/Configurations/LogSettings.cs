@@ -53,10 +53,13 @@ internal class LogSettings : Settings
         ConsoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Logs.ConsoleExporterEnabled) ?? false;
         IncludeFormattedMessage = configuration.GetBool(ConfigurationKeys.Logs.IncludeFormattedMessage) ?? false;
 
+        var instrumentationEnabledByDefault =
+            configuration.GetBool(ConfigurationKeys.Logs.LogsInstrumentationEnabled) ??
+            configuration.GetBool(ConfigurationKeys.InstrumentationEnabled) ?? true;
+
         EnabledInstrumentations = configuration.ParseEnabledEnumList<LogInstrumentation>(
-            enabledConfiguration: ConfigurationKeys.Logs.Instrumentations,
-            disabledConfiguration: ConfigurationKeys.Logs.DisabledInstrumentations,
-            error: "The \"{0}\" is not recognized as supported logs instrumentation and cannot be enabled or disabled.");
+            enabledByDefault: instrumentationEnabledByDefault,
+            enabledConfigurationTemplate: ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate);
     }
 
     private static LogExporter ParseLogExporter(Configuration configuration)

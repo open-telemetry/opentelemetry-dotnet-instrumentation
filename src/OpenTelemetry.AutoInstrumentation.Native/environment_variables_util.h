@@ -78,6 +78,22 @@ bool IsNetFxAssemblyRedirectionEnabled() {
   ToBooleanWithDefault(GetEnvironmentValue(environment::netfx_assembly_redirection_enabled), true);
 }
 
+bool AreInstrumentationsEnabledByDefault() {
+  ToBooleanWithDefault(GetEnvironmentValue(environment::instrumentation_enabled), true);
+}
+
+bool AreTracesInstrumentationsEnabledByDefault(const bool enabled_if_not_configured) {
+  ToBooleanWithDefault(GetEnvironmentValue(environment::traces_instrumentation_enabled), enabled_if_not_configured);
+}
+
+bool AreMetricsInstrumentationsEnabledByDefault(const bool enabled_if_not_configured) {
+  ToBooleanWithDefault(GetEnvironmentValue(environment::metrics_instrumentation_enabled), enabled_if_not_configured);
+}
+
+bool AreLogsInstrumentationsEnabledByDefault(const bool enabled_if_not_configured) {
+  ToBooleanWithDefault(GetEnvironmentValue(environment::logs_instrumentation_enabled), enabled_if_not_configured);
+}
+
 }  // namespace trace
 
 #endif  // OTEL_CLR_PROFILER_ENVIRONMENT_VARIABLES_UTIL_H_
