@@ -82,7 +82,7 @@ void utf16_encode(char32_t pt, std::u16string& out)
 
 struct offset_pt
 {
-    int offset;
+    int      offset;
     char32_t pt;
 };
 
@@ -112,33 +112,42 @@ static offset_pt utf8_decode_check(const std::string& str, std::string::size_typ
     else if (b0 < 0xE0)
     {
         // 2-byte character
-        if (((b1 = str[i + 1]) & 0xC0) != 0x80) return invalid_pt;
+        if (((b1 = str[i + 1]) & 0xC0) != 0x80)
+            return invalid_pt;
 
         char32_t pt = (b0 & 0x1F) << 6 | (b1 & 0x3F);
-        if (pt < 0x80) return invalid_pt;
+        if (pt < 0x80)
+            return invalid_pt;
 
         return {2, pt};
     }
     else if (b0 < 0xF0)
     {
         // 3-byte character
-        if (((b1 = str[i + 1]) & 0xC0) != 0x80) return invalid_pt;
-        if (((b2 = str[i + 2]) & 0xC0) != 0x80) return invalid_pt;
+        if (((b1 = str[i + 1]) & 0xC0) != 0x80)
+            return invalid_pt;
+        if (((b2 = str[i + 2]) & 0xC0) != 0x80)
+            return invalid_pt;
 
         char32_t pt = (b0 & 0x0F) << 12 | (b1 & 0x3F) << 6 | (b2 & 0x3F);
-        if (pt < 0x800) return invalid_pt;
+        if (pt < 0x800)
+            return invalid_pt;
 
         return {3, pt};
     }
     else if (b0 < 0xF8)
     {
         // 4-byte character
-        if (((b1 = str[i + 1]) & 0xC0) != 0x80) return invalid_pt;
-        if (((b2 = str[i + 2]) & 0xC0) != 0x80) return invalid_pt;
-        if (((b3 = str[i + 3]) & 0xC0) != 0x80) return invalid_pt;
+        if (((b1 = str[i + 1]) & 0xC0) != 0x80)
+            return invalid_pt;
+        if (((b2 = str[i + 2]) & 0xC0) != 0x80)
+            return invalid_pt;
+        if (((b3 = str[i + 3]) & 0xC0) != 0x80)
+            return invalid_pt;
 
         char32_t pt = (b0 & 0x0F) << 18 | (b1 & 0x3F) << 12 | (b2 & 0x3F) << 6 | (b3 & 0x3F);
-        if (pt < 0x10000 || pt >= 0x110000) return invalid_pt;
+        if (pt < 0x10000 || pt >= 0x110000)
+            return invalid_pt;
 
         return {4, pt};
     }
@@ -205,7 +214,8 @@ char32_t utf8_decode(const std::string& str, std::string::size_type& i, bool* re
     offset_pt res = utf8_decode_check(str, i);
     if (res.offset < 0)
     {
-        if (replacement_flag) *replacement_flag = true;
+        if (replacement_flag)
+            *replacement_flag = true;
         i += 1;
         return 0xFFFD;
     }
@@ -221,7 +231,8 @@ char32_t utf16_decode(const std::u16string& str, std::u16string::size_type& i, b
     offset_pt res = utf16_decode_check(str, i);
     if (res.offset < 0)
     {
-        if (replacement_flag) *replacement_flag = true;
+        if (replacement_flag)
+            *replacement_flag = true;
         i += 1;
         return 0xFFFD;
     }
@@ -242,7 +253,8 @@ bool check_helper(const Tfunc& func, const Tstring& str)
     for (typename Tstring::size_type i = 0; i < str.length();)
     {
         offset_pt res = func(str, i);
-        if (res.offset < 0) return false;
+        if (res.offset < 0)
+            return false;
         i += res.offset;
     }
     return true;
@@ -269,7 +281,8 @@ std::u32string to_utf32(const std::string& str)
 {
     std::u32string out;
     out.reserve(str.length()); // likely overallocate
-    for (std::string::size_type i = 0; i < str.length();) out += utf8_decode(str, i);
+    for (std::string::size_type i = 0; i < str.length();)
+        out += utf8_decode(str, i);
     return out;
 }
 
@@ -277,7 +290,8 @@ std::u16string to_utf16(const std::string& str)
 {
     std::u16string out;
     out.reserve(str.length()); // likely overallocate
-    for (std::string::size_type i = 0; i < str.length();) utf16_encode(utf8_decode(str, i), out);
+    for (std::string::size_type i = 0; i < str.length();)
+        utf16_encode(utf8_decode(str, i), out);
     return out;
 }
 
@@ -285,7 +299,8 @@ std::string to_utf8(const std::u16string& str)
 {
     std::string out;
     out.reserve(str.length() * 3 / 2); // estimate
-    for (std::u16string::size_type i = 0; i < str.length();) utf8_encode(utf16_decode(str, i), out);
+    for (std::u16string::size_type i = 0; i < str.length();)
+        utf8_encode(utf16_decode(str, i), out);
     return out;
 }
 
@@ -293,7 +308,8 @@ std::string to_utf8(const std::u32string& str)
 {
     std::string out;
     out.reserve(str.length() * 3 / 2); // estimate
-    for (char32_t pt : str) utf8_encode(pt, out);
+    for (char32_t pt : str)
+        utf8_encode(pt, out);
     return out;
 }
 
@@ -327,7 +343,8 @@ static void unicode_decompose(char32_t pt, std::u32string& out)
     {
         out += 0x1100 + (pt - 0xAC00) / 588;
         out += 0x1161 + ((pt - 0xAC00) % 588) / 28;
-        if ((pt - 0xAC00) % 28) out += 0x11A7 + (pt - 0xAC00) % 28;
+        if ((pt - 0xAC00) % 28)
+            out += 0x11A7 + (pt - 0xAC00) % 28;
         return;
     }
 
@@ -357,15 +374,18 @@ static uint32_t unicode_compose(uint32_t L, uint32_t C)
     int comp_seq_idx;
 
     /* Algorithmic Hangul composition */
-    if (L >= 0x1100 && L < 0x1113 && C >= 0x1161 && C < 0x1176) return ((L - 0x1100) * 21 + C - 0x1161) * 28 + 0xAC00;
+    if (L >= 0x1100 && L < 0x1113 && C >= 0x1161 && C < 0x1176)
+        return ((L - 0x1100) * 21 + C - 0x1161) * 28 + 0xAC00;
 
-    if (L >= 0xAC00 && L < 0xD7A4 && !((L - 0xAC00) % 28) && C >= 0x11A8 && C < 0x11C3) return L + C - 0x11A7;
+    if (L >= 0xAC00 && L < 0xD7A4 && !((L - 0xAC00) % 28) && C >= 0x11A8 && C < 0x11C3)
+        return L + C - 0x11A7;
 
     /* Predefined composition mapping */
     comp_seq_idx = comp_idx(L);
     do
     {
-        if (xref[comp_seq[comp_seq_idx * 2] & ~0x8000] == C) return xref[comp_seq[comp_seq_idx * 2 + 1]];
+        if (xref[comp_seq[comp_seq_idx * 2] & ~0x8000] == C)
+            return xref[comp_seq[comp_seq_idx * 2 + 1]];
     } while (!(comp_seq[(comp_seq_idx++) * 2] & 0x8000));
 
     return 0;
@@ -373,7 +393,8 @@ static uint32_t unicode_compose(uint32_t L, uint32_t C)
 
 std::u32string normalize32(const std::string& str, bool compose, bool* replacement_flag)
 {
-    if (str.empty()) return {};
+    if (str.empty())
+        return {};
 
     // Decode and decompose
     std::u32string codepoints;
@@ -412,32 +433,32 @@ std::u32string normalize32(const std::string& str, bool compose, bool* replaceme
 
     if (compose)
     {
-        size_t i = 1;
-        int last_class = -1, starter_pos = 0, target_pos = 1;
+        size_t   i          = 1;
+        int      last_class = -1, starter_pos = 0, target_pos = 1;
         char32_t starter = codepoints[0];
 
         while (i < codepoints.length())
         {
-            char32_t ch = codepoints[i];
-            int ch_class = ccc(ch);
+            char32_t ch       = codepoints[i];
+            int      ch_class = ccc(ch);
 
             uint32_t composite = unicode_compose(starter, ch);
             if (composite && last_class < ch_class)
             {
                 codepoints[starter_pos] = composite;
-                starter = composite;
+                starter                 = composite;
             }
             else if (ch_class == 0)
             {
-                starter_pos = target_pos;
-                starter = ch;
-                last_class = -1;
+                starter_pos            = target_pos;
+                starter                = ch;
+                last_class             = -1;
                 codepoints[target_pos] = ch;
                 target_pos++;
             }
             else
             {
-                last_class = ch_class;
+                last_class             = ch_class;
                 codepoints[target_pos] = ch;
                 target_pos++;
             }

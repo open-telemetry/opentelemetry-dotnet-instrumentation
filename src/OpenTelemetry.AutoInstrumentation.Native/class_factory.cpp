@@ -56,26 +56,27 @@ HRESULT STDMETHODCALLTYPE ClassFactory::CreateInstance(IUnknown* pUnkOuter, REFI
     trace::Logger::Info("OpenTelemetry CLR Profiler ", PROFILER_VERSION, " on",
 
 #ifdef _WIN32
-                " Windows"
+                        " Windows"
 #elif MACOS
-                " macOS"
+                        " macOS"
 #else
-                " Linux"
+                        " Linux"
 #endif
 
 #ifdef AMD64
-                ,
-                " (amd64)"
+                        ,
+                        " (amd64)"
 #elif X86
-                ,
-                " (x86)"
+                        ,
+                        " (x86)"
 #elif ARM64
-                ,
-                " (arm64)"
+                        ,
+                        " (arm64)"
 #elif ARM
-                , " (arm)"
+                        ,
+                        " (arm)"
 #endif
-    );
+                        );
     trace::Logger::Debug("ClassFactory::CreateInstance");
 
     auto profiler = new trace::CorProfiler();
