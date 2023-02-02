@@ -144,7 +144,7 @@ public class SmokeTests : TestHelper
         collector.ResourceExpector.AssertExpectations();
     }
 
-#if !NETFRAMEWORK // The feature is not supported on .NET Framework
+#if NET6_0_OR_GREATER // The feature is not supported on .NET Framework
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void LogsResource()
@@ -196,7 +196,7 @@ public class SmokeTests : TestHelper
         collector.AssertExpectations();
     }
 
-#if NETFRAMEWORK // The test is flaky on Linux and macOS, becasue of https://github.com/dotnet/runtime/issues/28658#issuecomment-462062760
+#if NETFRAMEWORK // The test is flaky on Linux and macOS, because of https://github.com/dotnet/runtime/issues/28658#issuecomment-462062760
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void PrometheusExporter()
@@ -245,7 +245,7 @@ public class SmokeTests : TestHelper
     }
 #endif
 
-#if !NETFRAMEWORK // The feature is not supported on .NET Framework
+#if NET6_0_OR_GREATER // The feature is not supported on .NET Framework
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void SubmitLogs()
