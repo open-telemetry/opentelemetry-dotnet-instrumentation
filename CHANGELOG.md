@@ -49,6 +49,9 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
   - `OTEL_DOTNET_AUTO_LOGS_INSTRUMENTATION_ENABLED`,
   - `OTEL_DOTNET_AUTO_LOGS_{0}_INSTRUMENTATION_ENABLED`.
 
+- Change instrumentation id for ASP.NET Core traces and metrics instrumentation
+  from `AspNet` to `ASPNETCORE`.
+
 ### Deprecated
 
 ### Removed

@@ -343,7 +343,6 @@ public class SmokeTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ASPNET_INSTRUMENTATION_ENABLED", "false");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_HTTPCLIENT_INSTRUMENTATION_ENABLED", "false");
         RunTestApplication();
         collector.AssertEmpty();
