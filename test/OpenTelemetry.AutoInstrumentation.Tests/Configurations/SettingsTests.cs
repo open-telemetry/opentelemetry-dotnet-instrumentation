@@ -175,7 +175,9 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
+#if NETFRAMEWORK
     [InlineData("ASPNET", TracerInstrumentation.AspNet)]
+#endif
     [InlineData("GRAPHQL", TracerInstrumentation.GraphQL)]
     [InlineData("HTTPCLIENT", TracerInstrumentation.HttpClient)]
 #if NET6_0_OR_GREATER
@@ -194,6 +196,7 @@ public class SettingsTests : IDisposable
     [InlineData("QUARTZ", TracerInstrumentation.Quartz)]
 #if NET6_0_OR_GREATER
     [InlineData("ENTITYFRAMEWORKCORE", TracerInstrumentation.EntityFrameworkCore)]
+    [InlineData("ASPNETCORE", TracerInstrumentation.AspNetCore)]
 #endif
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
@@ -221,11 +224,16 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData("NETRUNTIME", MetricInstrumentation.NetRuntime)]
+#if NETFRAMEWORK
     [InlineData("ASPNET", MetricInstrumentation.AspNet)]
+#endif
+    [InlineData("NETRUNTIME", MetricInstrumentation.NetRuntime)]
     [InlineData("HTTPCLIENT", MetricInstrumentation.HttpClient)]
     [InlineData("PROCESS", MetricInstrumentation.Process)]
     [InlineData("NSERVICEBUS", MetricInstrumentation.NServiceBus)]
+#if NET6_0_OR_GREATER
+    [InlineData("ASPNETCORE", MetricInstrumentation.AspNetCore)]
+#endif
     internal void MeterSettings_Instrumentations_SupportedValues(string meterInstrumentation, MetricInstrumentation expectedMetricInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled, "false");

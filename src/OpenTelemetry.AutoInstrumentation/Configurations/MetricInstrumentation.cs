@@ -21,28 +21,37 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 /// </summary>
 internal enum MetricInstrumentation
 {
+#if NETFRAMEWORK
     /// <summary>
     /// ASP.NET instrumentation.
     /// </summary>
-    AspNet,
+    AspNet = 1,
+#endif
 
     /// <summary>
     /// HttpClient instrumentation.
     /// </summary>
-    HttpClient,
+    HttpClient = 2,
 
     /// <summary>
     /// .NET Runtime Metrics instrumentation.
     /// </summary>
-    NetRuntime,
+    NetRuntime = 3,
 
     /// <summary>
     /// Process instrumentation.
     /// </summary>
-    Process,
+    Process = 4,
 
     /// <summary>
     /// NServiceBus instrumentation.
     /// </summary>
-    NServiceBus
+    NServiceBus = 5,
+
+#if NET6_0_OR_GREATER
+    /// <summary>
+    /// ASP.NET Core instrumentation.
+    /// </summary>
+    AspNetCore = 6
+#endif
 }
