@@ -26,14 +26,6 @@ internal class AutoInstrumentationEventSource : EventSource
 {
     public static AutoInstrumentationEventSource Log => new();
 
-    /// <summary>Logs as Information level message.</summary>
-    /// <param name="message">Message to log.</param>
-    [Event(1, Message = "{0}", Level = EventLevel.Informational)]
-    public void Information(string message)
-    {
-        WriteEvent(1, message);
-    }
-
     /// <summary>Logs as Error level message.</summary>
     /// <param name="message">Error to log.</param>
     [Event(2, Message = "{0}", Level = EventLevel.Error)]
@@ -44,9 +36,25 @@ internal class AutoInstrumentationEventSource : EventSource
 
     /// <summary>Logs as Warning level message.</summary>
     /// <param name="message">Message to log.</param>
-    [Event(1, Message = "{0}", Level = EventLevel.Warning)]
+    [Event(3, Message = "{0}", Level = EventLevel.Warning)]
     public void Warning(string message)
     {
         WriteEvent(3, message);
+    }
+
+    /// <summary>Logs as Information level message.</summary>
+    /// <param name="message">Message to log.</param>
+    [Event(4, Message = "{0}", Level = EventLevel.Informational)]
+    public void Information(string message)
+    {
+        WriteEvent(4, message);
+    }
+
+    /// <summary>Logs as Warning level message.</summary>
+    /// <param name="message">Message to log.</param>
+    [Event(5, Message = "{0}", Level = EventLevel.Verbose)]
+    public void Verbose(string message)
+    {
+        WriteEvent(5, message);
     }
 }

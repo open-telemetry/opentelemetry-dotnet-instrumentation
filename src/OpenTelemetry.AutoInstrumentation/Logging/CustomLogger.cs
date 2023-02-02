@@ -161,7 +161,7 @@ internal class CustomLogger : IOtelLogger
                 AutoInstrumentationEventSource.Log.Information(message);
                 break;
             case LogLevel.Debug:
-                AutoInstrumentationEventSource.Log.Information(message);
+                AutoInstrumentationEventSource.Log.Verbose(message);
                 break;
             case LogLevel.Warning:
                 AutoInstrumentationEventSource.Log.Warning(message);
@@ -212,16 +212,14 @@ internal class CustomLogger : IOtelLogger
     {
         try
         {
-            var message =
-                $"[{DateTime.UtcNow:O}] [{level}] {string.Format(messageTemplate, args)} {Environment.NewLine}";
-            _sink.Write(message);
-            WriteEventSourceLog(level, message);
-
+            var rawMessage = string.Format(messageTemplate, args);
             if (exception != null)
             {
-                var exceptionMessage = $"Exception: {exception.Message}{Environment.NewLine}{exception}{Environment.NewLine}";
-                _sink.Write(exceptionMessage);
+                rawMessage += $"{Environment.NewLine}Exception: {exception.Message}{Environment.NewLine}{exception}";
             }
+
+            _sink.Write($"[{DateTime.UtcNow:O}] [{level}] {rawMessage} {Environment.NewLine}");
+            WriteEventSourceLog(level, rawMessage);
         }
         catch
         {
