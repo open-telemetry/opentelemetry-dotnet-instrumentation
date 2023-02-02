@@ -25,7 +25,7 @@ internal static class DelayedInitialization
 {
     internal static class Traces
     {
-#if NET462
+#if NETFRAMEWORK
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddAspNet(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
