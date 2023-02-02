@@ -28,7 +28,7 @@ internal static class ConfigurationExtensions
 
         foreach (var configuration in allConfigurations)
         {
-            var configurationEnabled = source.GetBool(string.Format(CultureInfo.InvariantCulture, enabledConfigurationTemplate, configuration)) ?? enabledByDefault;
+            var configurationEnabled = source.GetBool(string.Format(CultureInfo.InvariantCulture, enabledConfigurationTemplate, configuration.ToString().ToUpperInvariant())) ?? enabledByDefault;
 
             if (configurationEnabled)
             {

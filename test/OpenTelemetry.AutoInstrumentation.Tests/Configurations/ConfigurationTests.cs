@@ -61,8 +61,8 @@ public class ConfigurationTests
     {
         var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection
         {
-            { "TEST_CONFIGURATION_Test1_ENABLED", "true" },
-            { "TEST_CONFIGURATION_Test3_ENABLED", "true" }
+            { "TEST_CONFIGURATION_TEST1_ENABLED", "true" },
+            { "TEST_CONFIGURATION_TEST3_ENABLED", "true" }
         }));
 
         var list = source.ParseEnabledEnumList<TestEnum>(
@@ -77,7 +77,7 @@ public class ConfigurationTests
     {
         var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection
         {
-            { "TEST_CONFIGURATION_Test2_ENABLED", "false" },
+            { "TEST_CONFIGURATION_TEST2_ENABLED", "false" },
         }));
 
         var list = source.ParseEnabledEnumList<TestEnum>(
