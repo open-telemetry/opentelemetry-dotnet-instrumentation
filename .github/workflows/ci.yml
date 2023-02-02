@@ -157,7 +157,7 @@ jobs:
           path: nuget/bin-macos
 
       - name: Build NuGet package
-        run: nuget pack OpenTelemetry.AutoInstrumentation.nuspec -Properties NoWarn=NU5100,NU5123,NU5128,NU1608
+        run: nuget pack OpenTelemetry.AutoInstrumentation.nuspec -Properties NoWarn=NU5100,NU5123,NU5128
         working-directory: nuget
 
       - name: Upload Nuget
