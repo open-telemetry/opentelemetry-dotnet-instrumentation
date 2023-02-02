@@ -263,7 +263,6 @@ Libraries
 - Microsoft.Extensions.Configuration,
 - Microsoft.Extensions.Configuration.Abstractions,
 - Microsoft.Extensions.Configuration.Binder,
-- Microsoft.Extensions.Configuration.EnvironmentVariables,
 - Microsoft.Extensions.DependencyInjection,
 - Microsoft.Extensions.DependencyInjection.Abstractions,
 - Microsoft.Extensions.Logging,
