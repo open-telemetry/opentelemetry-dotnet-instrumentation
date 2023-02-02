@@ -14,11 +14,9 @@
 // limitations under the License.
 // </copyright>
 
-using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
-using Xunit;
 
 namespace IntegrationTests;
 
@@ -33,7 +31,7 @@ public class PostgresFixture : IAsyncLifetime
     private const int PostgresPort = 5432;
     private const string PostgresImage = "postgres:14.4";
 
-    private TestcontainersContainer? _container;
+    private IContainer? _container;
 
     public PostgresFixture()
     {
@@ -55,9 +53,9 @@ public class PostgresFixture : IAsyncLifetime
         }
     }
 
-    private async Task<TestcontainersContainer> LaunchPostgresContainerAsync(int port)
+    private async Task<IContainer> LaunchPostgresContainerAsync(int port)
     {
-        var containersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
+        var containersBuilder = new ContainerBuilder()
             .WithImage(PostgresImage)
             .WithName($"postgres-{port}")
             .WithPortBinding(port, PostgresPort)
@@ -70,9 +68,8 @@ public class PostgresFixture : IAsyncLifetime
         return container;
     }
 
-    private async Task ShutdownPostgresContainerAsync(TestcontainersContainer container)
+    private async Task ShutdownPostgresContainerAsync(IContainer container)
     {
-        await container.CleanUpAsync();
         await container.DisposeAsync();
     }
 }

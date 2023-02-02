@@ -117,7 +117,7 @@ public class AspNetTests
         collector.AssertExpectations();
     }
 
-    private async Task<TestcontainersContainer> StartContainerAsync(int webPort)
+    private async Task<IContainer> StartContainerAsync(int webPort)
     {
         // get path to test application that the profiler will attach to
         string imageName = $"testapplication-aspnet-netframework";
@@ -131,7 +131,7 @@ public class AspNetTests
         Directory.CreateDirectory(logPath);
         Output.WriteLine("Collecting docker logs to: " + logPath);
 
-        var builder = new TestcontainersBuilder<TestcontainersContainer>()
+        var builder = new ContainerBuilder()
             .WithImage(imageName)
             .WithCleanUp(cleanUp: true)
             .WithOutputConsumer(Consume.RedirectStdoutAndStderrToConsole())
