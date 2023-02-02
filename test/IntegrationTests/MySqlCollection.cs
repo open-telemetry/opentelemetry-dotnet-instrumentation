@@ -15,11 +15,9 @@
 // </copyright>
 
 #if NET6_0_OR_GREATER
-using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
-using Xunit;
 
 namespace IntegrationTests;
 
@@ -34,7 +32,7 @@ public class MySqlFixture : IAsyncLifetime
     private const int MySqlPort = 3306;
     private const string MySqlImage = "mysql:8.0.29";
 
-    private TestcontainersContainer? _container;
+    private IContainer? _container;
 
     public MySqlFixture()
     {
@@ -56,9 +54,9 @@ public class MySqlFixture : IAsyncLifetime
         }
     }
 
-    private async Task<TestcontainersContainer> LaunchMySqlContainerAsync(int port)
+    private async Task<IContainer> LaunchMySqlContainerAsync(int port)
     {
-        var containersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
+        var containersBuilder = new ContainerBuilder()
             .WithImage(MySqlImage)
             .WithName($"mysql-{port}")
             .WithPortBinding(port, MySqlPort)
@@ -71,9 +69,8 @@ public class MySqlFixture : IAsyncLifetime
         return container;
     }
 
-    private async Task ShutdownMySqlContainerAsync(TestcontainersContainer container)
+    private async Task ShutdownMySqlContainerAsync(IContainer container)
     {
-        await container.CleanUpAsync();
         await container.DisposeAsync();
     }
 }

@@ -16,11 +16,9 @@
 
 #if NET6_0_OR_GREATER
 
-using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
-using Xunit;
 
 namespace IntegrationTests;
 
@@ -35,7 +33,7 @@ public class RedisFixture : IAsyncLifetime
     private const int RedisPort = 6379;
     private const string RedisImage = "redis:7.0.4";
 
-    private TestcontainersContainer? _container;
+    private IContainer? _container;
 
     public RedisFixture()
     {
@@ -57,9 +55,9 @@ public class RedisFixture : IAsyncLifetime
         }
     }
 
-    private async Task<TestcontainersContainer> LaunchRedisContainerAsync(int port)
+    private async Task<IContainer> LaunchRedisContainerAsync(int port)
     {
-        var containersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
+        var containersBuilder = new ContainerBuilder()
             .WithImage(RedisImage)
             .WithName($"redis-{port}")
             .WithPortBinding(port, RedisPort)
@@ -71,9 +69,8 @@ public class RedisFixture : IAsyncLifetime
         return container;
     }
 
-    private async Task ShutdownRedisContainerAsync(TestcontainersContainer container)
+    private async Task ShutdownRedisContainerAsync(IContainer container)
     {
-        await container.CleanUpAsync();
         await container.DisposeAsync();
     }
 }

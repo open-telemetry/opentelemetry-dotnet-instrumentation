@@ -34,7 +34,7 @@ public class MongoDBFixture : IAsyncLifetime
     private const int MongoDBPort = 27017;
     private const string MongoDBImage = "mongo:5.0.6";
 
-    private TestcontainersContainer? _container;
+    private IContainer? _container;
 
     public MongoDBFixture()
     {
@@ -56,9 +56,9 @@ public class MongoDBFixture : IAsyncLifetime
         }
     }
 
-    private async Task<TestcontainersContainer> LaunchMongoContainerAsync(int port)
+    private async Task<IContainer> LaunchMongoContainerAsync(int port)
     {
-        var mongoContainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
+        var mongoContainersBuilder = new ContainerBuilder()
             .WithImage(MongoDBImage)
             .WithName($"mongo-db-{port}")
             .WithPortBinding(port, MongoDBPort)
@@ -70,9 +70,8 @@ public class MongoDBFixture : IAsyncLifetime
         return container;
     }
 
-    private async Task ShutdownMongoContainerAsync(TestcontainersContainer container)
+    private async Task ShutdownMongoContainerAsync(IContainer container)
     {
-        await container.CleanUpAsync();
         await container.DisposeAsync();
     }
 }
