@@ -39,7 +39,8 @@ public class BuildTests
         var systemName = GetSystemName();
 
         return Verifier.Verify(relativesPaths)
-            .UseTextForParameters(systemName);
+            .UseTextForParameters(systemName)
+            .DisableDiff();
     }
 
     private static string GetSystemName()
