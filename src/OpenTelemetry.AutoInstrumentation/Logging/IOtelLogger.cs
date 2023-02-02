@@ -22,83 +22,83 @@ internal interface IOtelLogger
 {
     bool IsEnabled(LogLevel level);
 
-    void Debug(string messageTemplate);
+    void Debug(string messageTemplate, bool writeToEventLog = true);
 
-    void Debug<T>(string messageTemplate, T property);
+    void Debug<T>(string messageTemplate, T property, bool writeToEventLog = true);
 
-    void Debug<T0, T1>(string messageTemplate, T0 property0, T1 property1);
+    void Debug<T0, T1>(string messageTemplate, T0 property0, T1 property1, bool writeToEventLog = true);
 
-    void Debug<T0, T1, T2>(string messageTemplate, T0 property0, T1 property1, T2 property2);
+    void Debug<T0, T1, T2>(string messageTemplate, T0 property0, T1 property1, T2 property2, bool writeToEventLog = true);
 
-    void Debug(string messageTemplate, object[] args);
+    void Debug(string messageTemplate, object[] args, bool writeToEventLog = true);
 
-    void Debug(Exception exception, string messageTemplate);
+    void Debug(Exception exception, string messageTemplate, bool writeToEventLog = true);
 
-    void Debug<T>(Exception exception, string messageTemplate, T property);
+    void Debug<T>(Exception exception, string messageTemplate, T property, bool writeToEventLog = true);
 
-    void Debug<T0, T1>(Exception exception, string messageTemplate, T0 property0, T1 property1);
+    void Debug<T0, T1>(Exception exception, string messageTemplate, T0 property0, T1 property1, bool writeToEventLog = true);
 
-    void Debug<T0, T1, T2>(Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2);
+    void Debug<T0, T1, T2>(Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2, bool writeToEventLog = true);
 
-    void Debug(Exception exception, string messageTemplate, object[] args);
+    void Debug(Exception exception, string messageTemplate, object[] args, bool writeToEventLog = true);
 
-    void Information(string messageTemplate);
+    void Information(string messageTemplate, bool writeToEventLog = true);
 
-    void Information<T>(string messageTemplate, T property);
+    void Information<T>(string messageTemplate, T property, bool writeToEventLog = true);
 
-    void Information<T0, T1>(string messageTemplate, T0 property0, T1 property1);
+    void Information<T0, T1>(string messageTemplate, T0 property0, T1 property1, bool writeToEventLog = true);
 
-    void Information<T0, T1, T2>(string messageTemplate, T0 property0, T1 property1, T2 property2);
+    void Information<T0, T1, T2>(string messageTemplate, T0 property0, T1 property1, T2 property2, bool writeToEventLog = true);
 
-    void Information(string messageTemplate, object[] args);
+    void Information(string messageTemplate, object[] args, bool writeToEventLog = true);
 
-    void Information(Exception exception, string messageTemplate);
+    void Information(Exception exception, string messageTemplate, bool writeToEventLog = true);
 
-    void Information<T>(Exception exception, string messageTemplate, T property);
+    void Information<T>(Exception exception, string messageTemplate, T property, bool writeToEventLog = true);
 
-    void Information<T0, T1>(Exception exception, string messageTemplate, T0 property0, T1 property1);
+    void Information<T0, T1>(Exception exception, string messageTemplate, T0 property0, T1 property1, bool writeToEventLog = true);
 
-    void Information<T0, T1, T2>(Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2);
+    void Information<T0, T1, T2>(Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2, bool writeToEventLog = true);
 
-    void Information(Exception exception, string messageTemplate, object[] args);
+    void Information(Exception exception, string messageTemplate, object[] args, bool writeToEventLog = true);
 
-    void Warning(string messageTemplate);
+    void Warning(string messageTemplate, bool writeToEventLog = true);
 
-    void Warning<T>(string messageTemplate, T property);
+    void Warning<T>(string messageTemplate, T property, bool writeToEventLog = true);
 
-    void Warning<T0, T1>(string messageTemplate, T0 property0, T1 property1);
+    void Warning<T0, T1>(string messageTemplate, T0 property0, T1 property1, bool writeToEventLog = true);
 
-    void Warning<T0, T1, T2>(string messageTemplate, T0 property0, T1 property1, T2 property2);
+    void Warning<T0, T1, T2>(string messageTemplate, T0 property0, T1 property1, T2 property2, bool writeToEventLog = true);
 
-    void Warning(string messageTemplate, object[] args);
+    void Warning(string messageTemplate, object[] args, bool writeToEventLog = true);
 
-    void Warning(Exception exception, string messageTemplate);
+    void Warning(Exception exception, string messageTemplate, bool writeToEventLog = true);
 
-    void Warning<T>(Exception exception, string messageTemplate, T property);
+    void Warning<T>(Exception exception, string messageTemplate, T property, bool writeToEventLog = true);
 
-    void Warning<T0, T1>(Exception exception, string messageTemplate, T0 property0, T1 property1);
+    void Warning<T0, T1>(Exception exception, string messageTemplate, T0 property0, T1 property1, bool writeToEventLog = true);
 
-    void Warning<T0, T1, T2>(Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2);
+    void Warning<T0, T1, T2>(Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2, bool writeToEventLog = true);
 
-    void Warning(Exception exception, string messageTemplate, object[] args);
+    void Warning(Exception exception, string messageTemplate, object[] args, bool writeToEventLog = true);
 
-    void Error(string messageTemplate);
+    void Error(string messageTemplate, bool writeToEventLog = true);
 
-    void Error<T>(string messageTemplate, T property);
+    void Error<T>(string messageTemplate, T property, bool writeToEventLog = true);
 
-    void Error<T0, T1>(string messageTemplate, T0 property0, T1 property1);
+    void Error<T0, T1>(string messageTemplate, T0 property0, T1 property1, bool writeToEventLog = true);
 
-    void Error<T0, T1, T2>(string messageTemplate, T0 property0, T1 property1, T2 property2);
+    void Error<T0, T1, T2>(string messageTemplate, T0 property0, T1 property1, T2 property2, bool writeToEventLog = true);
 
-    void Error(string messageTemplate, object[] args);
+    void Error(string messageTemplate, object[] args, bool writeToEventLog = true);
 
-    void Error(Exception exception, string messageTemplate);
+    void Error(Exception exception, string messageTemplate, bool writeToEventLog = true);
 
-    void Error<T>(Exception exception, string messageTemplate, T property);
+    void Error<T>(Exception exception, string messageTemplate, T property, bool writeToEventLog = true);
 
-    void Error<T0, T1>(Exception exception, string messageTemplate, T0 property0, T1 property1);
+    void Error<T0, T1>(Exception exception, string messageTemplate, T0 property0, T1 property1, bool writeToEventLog = true);
 
-    void Error<T0, T1, T2>(Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2);
+    void Error<T0, T1, T2>(Exception exception, string messageTemplate, T0 property0, T1 property1, T2 property2, bool writeToEventLog = true);
 
-    void Error(Exception exception, string messageTemplate, object[] args);
+    void Error(Exception exception, string messageTemplate, object[] args, bool writeToEventLog = true);
 }
