@@ -28,7 +28,7 @@ void Split(const WSTRING& s, wchar_t delim, Out result)
         if (s[i] == delim)
         {
             *(result++) = s.substr(lpos, (i - lpos));
-            lpos = i + 1;
+            lpos        = i + 1;
         }
     }
     *(result++) = s.substr(lpos);
@@ -69,8 +69,8 @@ WSTRING GetEnvironmentValue(const WSTRING& name)
 {
 #ifdef _WIN32
     const size_t max_buf_size = 4096;
-    WSTRING buf(max_buf_size, 0);
-    auto len = GetEnvironmentVariable(name.data(), buf.data(), (DWORD)(buf.size()));
+    WSTRING      buf(max_buf_size, 0);
+    auto         len = GetEnvironmentVariable(name.data(), buf.data(), (DWORD)(buf.size()));
     return Trim(buf.substr(0, len));
 #else
     auto cstr = std::getenv(ToString(name).c_str());
@@ -79,7 +79,7 @@ WSTRING GetEnvironmentValue(const WSTRING& name)
         return EmptyWStr;
     }
     std::string str(cstr);
-    auto wstr = ToWSTRING(str);
+    auto        wstr = ToWSTRING(str);
     return Trim(wstr);
 #endif
 }
@@ -103,13 +103,14 @@ std::vector<WSTRING> GetEnvironmentValues(const WSTRING& name)
     return GetEnvironmentValues(name, L',');
 }
 
-std::vector<WSTRING> GetEnabledEnvironmentValues(const bool enabled_by_default, const std::unordered_map<WSTRING, WSTRING>& values_map)
+std::vector<WSTRING> GetEnabledEnvironmentValues(const bool enabled_by_default,
+                                                 const std::unordered_map<WSTRING, WSTRING>& values_map)
 {
     std::vector<WSTRING> values;
- 
+
     for (const auto& value : values_map)
     {
-        bool enabled = enabled_by_default;
+        bool       enabled   = enabled_by_default;
         const auto env_value = GetEnvironmentValue(value.second);
         if (env_value == WStr("true"))
         {
@@ -128,15 +129,18 @@ std::vector<WSTRING> GetEnabledEnvironmentValues(const bool enabled_by_default, 
     return values;
 }
 
-std::vector<WSTRING> GetEnvironmentVariables(const std::vector<WSTRING> &prefixes)
+std::vector<WSTRING> GetEnvironmentVariables(const std::vector<WSTRING>& prefixes)
 {
     std::vector<WSTRING> env_strings;
 #ifdef _WIN32
-    // Documentation for GetEnvironmentStrings: https://learn.microsoft.com/en-us/windows/win32/api/processenv/nf-processenv-getenvironmentstrings#remarks
+    // Documentation for GetEnvironmentStrings:
+    // https://learn.microsoft.com/en-us/windows/win32/api/processenv/nf-processenv-getenvironmentstrings#remarks
     const auto env_variables = GetEnvironmentStrings();
-    int prev = 0;
-    for (int i = 0;; i++) {
-        if (env_variables[i] != '\0') {
+    int        prev          = 0;
+    for (int i = 0;; i++)
+    {
+        if (env_variables[i] != '\0')
+        {
             continue;
         }
 
@@ -179,11 +183,11 @@ constexpr char HexMap[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a'
 
 WSTRING HexStr(const void* dataPtr, int len)
 {
-    const unsigned char* data = (unsigned char*) dataPtr;
-    WSTRING s(len * 2, ' ');
+    const unsigned char* data = (unsigned char*)dataPtr;
+    WSTRING              s(len * 2, ' ');
     for (int i = 0; i < len; ++i)
     {
-        s[2 * i] = HexMap[(data[i] & 0xF0) >> 4];
+        s[2 * i]     = HexMap[(data[i] & 0xF0) >> 4];
         s[2 * i + 1] = HexMap[data[i] & 0x0F];
     }
     return s;
@@ -191,9 +195,9 @@ WSTRING HexStr(const void* dataPtr, int len)
 
 WSTRING TokenStr(const mdToken* token)
 {
-    const unsigned char* data = (unsigned char*) token;
-    int len = sizeof(mdToken);
-    WSTRING s(len * 2, ' ');
+    const unsigned char* data = (unsigned char*)token;
+    int                  len  = sizeof(mdToken);
+    WSTRING              s(len * 2, ' ');
     for (int i = 0; i < len; i++)
     {
         s[(2 * (len - i)) - 2] = HexMap[(data[i] & 0xF0) >> 4];
@@ -205,11 +209,7 @@ WSTRING TokenStr(const mdToken* token)
 WSTRING HResultStr(const HRESULT hr)
 {
     std::stringstream ss;
-    ss << "0x"
-       << std::setfill('0')
-       << std::setw(2*sizeof(HRESULT))
-       << std::hex
-       << hr;
+    ss << "0x" << std::setfill('0') << std::setw(2 * sizeof(HRESULT)) << std::hex << hr;
 
     return ToWSTRING(ss.str());
 }
@@ -223,7 +223,8 @@ WSTRING VersionStr(const USHORT major, const USHORT minor, const USHORT build, c
 
 WSTRING AssemblyVersionStr(const ASSEMBLYMETADATA& assembly_metadata)
 {
-    return VersionStr(assembly_metadata.usMajorVersion, assembly_metadata.usMinorVersion, assembly_metadata.usBuildNumber, assembly_metadata.usRevisionNumber);
+    return VersionStr(assembly_metadata.usMajorVersion, assembly_metadata.usMinorVersion,
+                      assembly_metadata.usBuildNumber, assembly_metadata.usRevisionNumber);
 }
 
 } // namespace trace

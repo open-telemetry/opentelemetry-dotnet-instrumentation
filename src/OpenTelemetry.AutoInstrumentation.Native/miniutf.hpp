@@ -35,10 +35,12 @@ void utf8_encode(char32_t pt, std::string& out);
 void utf16_encode(char32_t pt, std::u16string& out);
 
 /*
- * Character-at-a-time decoding. Decodes and returns the codepoint starting at str[pos],
+ * Character-at-a-time decoding. Decodes and returns the codepoint starting at
+ * str[pos],
  * and then advance pos by the appropriate amount.
  *
- * If an invalid codepoint is found, return U+FFFD, add 1 to pos, and (if replacement_flag is
+ * If an invalid codepoint is found, return U+FFFD, add 1 to pos, and (if
+ * replacement_flag is
  * non-null) set *replacement_flag to true.
  */
 char32_t utf8_decode(const std::string& str, std::string::size_type& pos, bool* replacement_flag = nullptr);
@@ -47,10 +49,12 @@ char32_t utf16_decode(const std::u16string& str, std::u16string::size_type& pos,
 /*
  * Return true if str is valid UTF-8, -16, or -32.
  *
- * - UTF-8 is valid if it contains no misplaced or missing continuation bytes, no overlong
+ * - UTF-8 is valid if it contains no misplaced or missing continuation bytes,
+ * no overlong
  *   encodings, and no codepoints above U+10FFFF.
  *
- * - UTF-16 is valid if it contains no unpaired surrogates. (There's no way to attempt
+ * - UTF-16 is valid if it contains no unpaired surrogates. (There's no way to
+ * attempt
  *   to represent codepoints above U+10FFFF in UTF-16.)
  *
  * - UTF-32 is valid if it contains no codepoints above U+10FFFF.
@@ -62,7 +66,8 @@ bool utf32_check(const std::string& str);
 /*
  * Convert back and forth between UTF-8 and UTF-16 or UTF-32.
  *
- * These functions replace invalid sections of input with U+FFFD. If this is not desired,
+ * These functions replace invalid sections of input with U+FFFD. If this is not
+ * desired,
  * use utf8_check (above) first to check that the input is valid.
  */
 std::u32string to_utf32(const std::string& str);
@@ -71,31 +76,37 @@ std::string to_utf8(const std::u16string& str);
 std::string to_utf8(const std::u32string& str);
 
 /*
- * Convert str to lowercase, per the built-in Unicode lowercasing map (codepoint-by-codepoint).
+ * Convert str to lowercase, per the built-in Unicode lowercasing map
+ * (codepoint-by-codepoint).
  */
 std::string lowercase(const std::string& str);
 
 /*
  * Decompose str. Then, if compose is set, recompose it.
  *
- * If replacement characters are used during decoding (i.e. str contains invalid UTF-8), and
+ * If replacement characters are used during decoding (i.e. str contains invalid
+ * UTF-8), and
  * replacement_flag is specified, it will be set to true.
  */
 std::string normalize8(const std::string& str, bool compose, bool* replacement_flag = nullptr);
 std::u32string normalize32(const std::string& str, bool compose, bool* replacement_flag = nullptr);
 
 /*
- * Convert str to Normalization Form C. Equivalent to normalize8(str, true, replacement_flag).
+ * Convert str to Normalization Form C. Equivalent to normalize8(str, true,
+ * replacement_flag).
  *
- * If replacement characters are used during decoding (i.e. str contains invalid UTF-8), and
+ * If replacement characters are used during decoding (i.e. str contains invalid
+ * UTF-8), and
  * replacement_flag is specified, *replacement_flag will be set to true.
  */
 std::string nfc(const std::string& str, bool* replacement_flag = nullptr);
 
 /*
- * Convert str to Normalization Form D. Equivalent to normalize8(in, false, replacement_flag).
+ * Convert str to Normalization Form D. Equivalent to normalize8(in, false,
+ * replacement_flag).
  *
- * If replacement characters are used during decoding (i.e. str contains invalid UTF-8), and
+ * If replacement characters are used during decoding (i.e. str contains invalid
+ * UTF-8), and
  * replacement_flag is specified, *replacement_flag will be set to true.
  */
 std::string nfd(const std::string& str, bool* replacement_flag = nullptr);

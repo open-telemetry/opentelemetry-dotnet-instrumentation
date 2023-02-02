@@ -1,0 +1,26 @@
+name: format native
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check-native-format:
+    strategy:
+      fail-fast: false
+      matrix:
+        machine: [ windows-2022, ubuntu-20.04, macos-11 ]
+    runs-on: ${{ matrix.machine }}
+
+    steps:
+    - uses: actions/checkout@v3.3.0
+
+    - name: Install Clang tools
+      shell: bash
+      run: ./scripts/download-clang-tools.sh
+
+    - name: Format native code
+      shell: bash
+      run: ./scripts/format-native.sh

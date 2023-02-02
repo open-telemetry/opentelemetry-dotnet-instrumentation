@@ -12,9 +12,9 @@ namespace trace
 HRESULT MetadataBuilder::EmitAssemblyRef(const trace::AssemblyReference& assembly_ref) const
 {
     ASSEMBLYMETADATA assembly_metadata{};
-    assembly_metadata.usMajorVersion = assembly_ref.version.major;
-    assembly_metadata.usMinorVersion = assembly_ref.version.minor;
-    assembly_metadata.usBuildNumber = assembly_ref.version.build;
+    assembly_metadata.usMajorVersion   = assembly_ref.version.major;
+    assembly_metadata.usMinorVersion   = assembly_ref.version.minor;
+    assembly_metadata.usBuildNumber    = assembly_ref.version.build;
     assembly_metadata.usRevisionNumber = assembly_ref.version.revision;
     if (assembly_ref.locale == WStr("neutral"))
     {
@@ -53,7 +53,7 @@ HRESULT MetadataBuilder::EmitAssemblyRef(const trace::AssemblyReference& assembl
 HRESULT MetadataBuilder::FindWrapperTypeRef(const MethodReplacement& method_replacement, mdTypeRef& type_ref_out) const
 {
     const auto& cache_key = method_replacement.wrapper_method.get_type_cache_key();
-    mdTypeRef type_ref = mdTypeRefNil;
+    mdTypeRef   type_ref  = mdTypeRefNil;
 
     if (metadata_.TryGetWrapperParentTypeRef(cache_key, type_ref))
     {
@@ -105,7 +105,7 @@ HRESULT MetadataBuilder::FindWrapperTypeRef(const MethodReplacement& method_repl
 
 HRESULT MetadataBuilder::StoreWrapperMethodRef(const MethodReplacement& method_replacement) const
 {
-    const auto& cache_key = method_replacement.wrapper_method.get_method_cache_key();
+    const auto& cache_key  = method_replacement.wrapper_method.get_method_cache_key();
     mdMemberRef member_ref = mdMemberRefNil;
 
     if (metadata_.TryGetWrapperMemberRef(cache_key, member_ref))
@@ -115,7 +115,7 @@ HRESULT MetadataBuilder::StoreWrapperMethodRef(const MethodReplacement& method_r
     }
 
     mdTypeRef type_ref = mdTypeRefNil;
-    HRESULT hr = FindWrapperTypeRef(method_replacement, type_ref);
+    HRESULT   hr       = FindWrapperTypeRef(method_replacement, type_ref);
     if (FAILED(hr))
     {
         // Record that this cache_key failed
@@ -127,9 +127,11 @@ HRESULT MetadataBuilder::StoreWrapperMethodRef(const MethodReplacement& method_r
 
     auto signature_data = method_replacement.wrapper_method.method_signature.data;
 
-    // If the signature data size is greater than zero means we need to load the methodRef
+    // If the signature data size is greater than zero means we need to load the
+    // methodRef
     // for CallSite instrumentation.
-    // In case of the signature data size is zero we assume we are in a CallTarget scenario
+    // In case of the signature data size is zero we assume we are in a CallTarget
+    // scenario
     // where we use the TypeRef but not a MemberRef.
 
     if (signature_data.size() > 0)
