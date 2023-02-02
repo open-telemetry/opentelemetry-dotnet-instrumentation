@@ -85,6 +85,7 @@ partial class Build : NukeBuild
         .After(Clean)
         .DependsOn(CreateRequiredDirectories)
         .DependsOn(Restore)
+        .DependsOn(GenerateNetFxTransientDependencies)
         .DependsOn(CompileManagedSrc)
         .DependsOn(PublishManagedProfiler)
         .DependsOn(GenerateNetFxAssemblyRedirectionSource)
