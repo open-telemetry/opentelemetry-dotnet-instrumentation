@@ -14,7 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-#if !NETFRAMEWORK
+#if NET6_0_OR_GREATER
 using IntegrationTests.Helpers;
 using Xunit;
 using Xunit.Abstractions;

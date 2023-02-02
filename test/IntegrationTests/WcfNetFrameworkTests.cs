@@ -14,7 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-#if NET462
+#if NETFRAMEWORK
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
