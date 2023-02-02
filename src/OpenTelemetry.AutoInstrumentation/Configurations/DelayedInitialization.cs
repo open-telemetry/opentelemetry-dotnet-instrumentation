@@ -25,15 +25,21 @@ internal static class DelayedInitialization
 {
     internal static class Traces
     {
+#if NETFRAMEWORK
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddAspNet(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
-#if NET462
             new AspNetInitializer(lazyInstrumentationLoader, pluginManager);
-#elif NET6_0_OR_GREATER
-            lazyInstrumentationLoader.Add(new AspNetCoreInitializer(pluginManager));
-#endif
         }
+#endif
+
+#if NET6_0_OR_GREATER
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void AddAspNetCore(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
+        {
+            lazyInstrumentationLoader.Add(new AspNetCoreInitializer(pluginManager));
+        }
+#endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddHttpClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
@@ -82,15 +88,21 @@ internal static class DelayedInitialization
 
     internal static class Metrics
     {
+#if NETFRAMEWORK
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddAspNet(LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-#if NET462
             new AspNetMetricsInitializer(lazyInstrumentationLoader);
-#elif NET6_0_OR_GREATER
-            lazyInstrumentationLoader.Add(new AspNetCoreMetricsInitializer());
-#endif
         }
+#endif
+
+#if NET6_0_OR_GREATER
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void AddAspNetCore(LazyInstrumentationLoader lazyInstrumentationLoader)
+        {
+            lazyInstrumentationLoader.Add(new AspNetCoreMetricsInitializer());
+        }
+#endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddHttpClient(LazyInstrumentationLoader lazyInstrumentationLoader)

@@ -3,6 +3,7 @@
 #include <cwctype>
 #include <iomanip>
 #include <iterator>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -100,6 +101,32 @@ std::vector<WSTRING> GetEnvironmentValues(const WSTRING& name, const wchar_t del
 std::vector<WSTRING> GetEnvironmentValues(const WSTRING& name)
 {
     return GetEnvironmentValues(name, L',');
+}
+
+std::vector<WSTRING> GetEnabledEnvironmentValues(const bool enabled_by_default,
+                                                 const std::unordered_map<WSTRING, WSTRING>& values_map)
+{
+    std::vector<WSTRING> values;
+
+    for (const auto& value : values_map)
+    {
+        bool       enabled   = enabled_by_default;
+        const auto env_value = GetEnvironmentValue(value.second);
+        if (env_value == WStr("true"))
+        {
+            enabled = true;
+        }
+        else if (env_value == WStr("false"))
+        {
+            enabled = false;
+        }
+        if (enabled)
+        {
+            values.push_back(value.first);
+        }
+    }
+
+    return values;
 }
 
 std::vector<WSTRING> GetEnvironmentVariables(const std::vector<WSTRING>& prefixes)

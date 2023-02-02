@@ -25,7 +25,7 @@ Register-OpenTelemetryForWindowsService -WindowsServiceName "WindowsServiceName"
 > `Restart-Service -Name $WindowsServiceName -Force` in PowerShell.
 
 For .NET Framework applications you can configure the most common `OTEL_` settings
-(like `OTEL_RESOURCE_ATTRIBUTES`) via `appSettings` in `Web.config`.
+(like `OTEL_RESOURCE_ATTRIBUTES`) via `appSettings` in `App.config`.
 
 The alternative is to set environment variables for the Windows Service
 in the Windows Registry.

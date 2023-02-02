@@ -33,106 +33,66 @@ public class ConfigurationTests
     }
 
     [Fact]
-    public void ParseEnabledEnumList_Default()
+    public void ParseEnabledEnumList_Default_Enabled()
     {
         var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection()));
 
         var list = source.ParseEnabledEnumList<TestEnum>(
-            enabledConfiguration: "TEST_ENABLED_VALUES",
-            disabledConfiguration: "TEST_DISABLED_VALUES",
-            error: "Invalid enum value: {0}");
+            enabledByDefault: true,
+            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
 
         list.Should().Equal(TestEnum.Test1, TestEnum.Test2, TestEnum.Test3);
     }
 
     [Fact]
-    public void ParseEnabledEnumList_Enabled()
+    public void ParseEnabledEnumList_Default_Disabled()
     {
-        var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection()
-        {
-            { "TEST_ENABLED_VALUES", "Test1,Test3" }
-        }));
+        var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection()));
 
         var list = source.ParseEnabledEnumList<TestEnum>(
-            enabledConfiguration: "TEST_ENABLED_VALUES",
-            disabledConfiguration: "TEST_DISABLED_VALUES",
-            error: "Invalid enum value: {0}");
-
-        list.Should().Equal(TestEnum.Test1, TestEnum.Test3);
-    }
-
-    [Fact]
-    public void ParseEnabledEnumList_Disabled()
-    {
-        var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection()
-        {
-            { "TEST_DISABLED_VALUES", "Test2" }
-        }));
-
-        var list = source.ParseEnabledEnumList<TestEnum>(
-            enabledConfiguration: "TEST_ENABLED_VALUES",
-            disabledConfiguration: "TEST_DISABLED_VALUES",
-            error: "Invalid enum value: {0}");
-
-        list.Should().Equal(TestEnum.Test1, TestEnum.Test3);
-    }
-
-    [Fact]
-    public void ParseEnabledEnumList_None()
-    {
-        var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection()
-        {
-            { "TEST_ENABLED_VALUES", "none" }
-        }));
-
-        var list = source.ParseEnabledEnumList<TestEnum>(
-            enabledConfiguration: "TEST_ENABLED_VALUES",
-            disabledConfiguration: "TEST_DISABLED_VALUES",
-            error: "Invalid enum value: {0}");
+            enabledByDefault: false,
+            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
 
         list.Should().BeEmpty();
     }
 
     [Fact]
-    public void ParseEnabledEnumList_Invalid()
+    public void ParseEnabledEnumList_SelectivelyEnabled()
     {
-        var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection()
+        var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection
         {
-            { "TEST_ENABLED_VALUES", "invalid" }
+            { "TEST_CONFIGURATION_TEST1_ENABLED", "true" },
+            { "TEST_CONFIGURATION_TEST3_ENABLED", "true" }
         }));
 
-        var act = () => source.ParseEnabledEnumList<TestEnum>(
-            enabledConfiguration: "TEST_ENABLED_VALUES",
-            disabledConfiguration: "TEST_DISABLED_VALUES",
-            error: "Invalid enum value: {0}");
+        var list = source.ParseEnabledEnumList<TestEnum>(
+            enabledByDefault: false,
+            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
 
-        act.Should().Throw<FormatException>()
-            .WithMessage("Invalid enum value: invalid");
+        list.Should().Equal(TestEnum.Test1, TestEnum.Test3);
     }
 
     [Fact]
-    public void ParseDisabledEnumList_Invalid()
+    public void ParseEnabledEnumList_SelectivelyDisabled()
     {
-        var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection()
+        var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection
         {
-            { "TEST_DISABLED_VALUES", "invalid" }
+            { "TEST_CONFIGURATION_TEST2_ENABLED", "false" },
         }));
 
-        var act = () => source.ParseEnabledEnumList<TestEnum>(
-            enabledConfiguration: "TEST_ENABLED_VALUES",
-            disabledConfiguration: "TEST_DISABLED_VALUES",
-            error: "Invalid enum value: {0}");
+        var list = source.ParseEnabledEnumList<TestEnum>(
+            enabledByDefault: true,
+            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
 
-        act.Should().Throw<FormatException>()
-            .WithMessage("Invalid enum value: invalid");
+        list.Should().Equal(TestEnum.Test1, TestEnum.Test3);
     }
 
     [Fact]
     public void ParseEmptyAsNull_CompositeConfigurationSource()
     {
         var mockSource = new Mock<IConfigurationSource>();
-        mockSource.Setup(x => x.GetString(It.Is<string>(x => x == "TEST_NULL_VALUE"))).Returns<string>(k => null);
-        mockSource.Setup(x => x.GetString(It.Is<string>(x => x == "TEST_EMPTY_VALUE"))).Returns<string>(k => string.Empty);
+        mockSource.Setup(x => x.GetString(It.Is<string>(key => key == "TEST_NULL_VALUE"))).Returns<string>(_ => null);
+        mockSource.Setup(x => x.GetString(It.Is<string>(key => key == "TEST_EMPTY_VALUE"))).Returns<string>(_ => string.Empty);
         var compositeSource = new Configuration(mockSource.Object);
 
         using (new AssertionScope())

@@ -33,7 +33,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData;
     type: InstrumentationType.Trace)]
 public static class MySqlConnectionStringBuilderIntegration
 {
-#if !NETFRAMEWORK
+#if NET6_0_OR_GREATER
     private static readonly object TrueAsObject = true;
 #endif
 
@@ -49,7 +49,7 @@ public static class MySqlConnectionStringBuilderIntegration
     internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TReturn returnValue, Exception exception, CallTargetState state)
         where TTarget : struct
     {
-#if !NETFRAMEWORK
+#if NET6_0_OR_GREATER
         var alwaysReturnTrue = (TReturn)TrueAsObject;
 
         return new CallTargetReturn<TReturn>(alwaysReturnTrue);

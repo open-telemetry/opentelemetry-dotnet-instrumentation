@@ -16,7 +16,7 @@ using namespace trace;
 TEST(IntegrationLoaderTest, HandlesMissingFile)
 {
     std::vector<IntegrationMethod>     integrations;
-    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {}, true, {}, {});
+    const LoadIntegrationConfiguration configuration(true, {}, true, {}, true, {});
     LoadIntegrationsFromFile(L"missing-file", integrations, configuration);
     EXPECT_EQ(0, integrations.size());
 }
@@ -25,7 +25,7 @@ TEST(IntegrationLoaderTest, HandlesInvalidIntegrationNoName)
 {
     std::vector<IntegrationMethod>     integrations;
     std::stringstream                  str("[{}]");
-    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {}, true, {}, {});
+    const LoadIntegrationConfiguration configuration(true, {}, true, {}, true, {});
     LoadIntegrationsFromStream(str, integrations, configuration);
     // 0 because name is required
     EXPECT_EQ(0, integrations.size());
@@ -35,7 +35,7 @@ TEST(IntegrationLoaderTest, HandlesInvalidIntegrationBadJson)
 {
     std::vector<IntegrationMethod>     integrations;
     std::stringstream                  str("[");
-    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {}, true, {}, {});
+    const LoadIntegrationConfiguration configuration(true, {}, true, {}, true, {});
     LoadIntegrationsFromStream(str, integrations, configuration);
     EXPECT_EQ(0, integrations.size());
 }
@@ -44,7 +44,7 @@ TEST(IntegrationLoaderTest, HandlesInvalidIntegrationNotAnObject)
 {
     std::vector<IntegrationMethod>     integrations;
     std::stringstream                  str("[1,2,3]");
-    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {}, true, {}, {});
+    const LoadIntegrationConfiguration configuration(true, {}, true, {}, true, {});
     LoadIntegrationsFromStream(str, integrations, configuration);
     EXPECT_EQ(0, integrations.size());
 }
@@ -55,7 +55,7 @@ TEST(IntegrationLoaderTest, HandlesInvalidIntegrationNotAnArray)
     std::stringstream                  str(R"TEXT(
         {"name": "test-integration"}
     )TEXT");
-    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {}, true, {}, {});
+    const LoadIntegrationConfiguration configuration(true, {L"test-integration"}, true, {}, true, {});
     LoadIntegrationsFromStream(str, integrations, configuration);
     EXPECT_EQ(0, integrations.size());
 }
@@ -75,7 +75,7 @@ TEST(IntegrationLoaderTest, HandlesSingleIntegrationWithMethodReplacements)
         }]
     )TEXT");
 
-    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {}, true, {}, {});
+    const LoadIntegrationConfiguration configuration(true, {L"test-integration"}, true, {}, true, {});
     LoadIntegrationsFromStream(str, integrations, configuration);
     EXPECT_EQ(1, integrations.size());
     EXPECT_STREQ(L"test-integration", integrations[0].integration_name.c_str());
@@ -96,7 +96,7 @@ TEST(IntegrationLoaderTest, DoesNotCrashWithOutOfRangeVersion)
         }]
     )TEXT");
 
-    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {}, true, {}, {});
+    const LoadIntegrationConfiguration configuration(true, {L"test-integration"}, true, {}, true, {});
     LoadIntegrationsFromStream(str, integrations, configuration);
     EXPECT_EQ(1, integrations.size());
     EXPECT_STREQ(L"test-integration", integrations[0].integration_name.c_str());
@@ -128,7 +128,7 @@ TEST(IntegrationLoaderTest, HandlesSingleIntegrationWithMissingCaller)
         }]
     )TEXT");
 
-    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {}, true, {}, {});
+    const LoadIntegrationConfiguration configuration(true, {L"test-integration"}, true, {}, true, {});
     LoadIntegrationsFromStream(str, integrations, configuration);
     EXPECT_EQ(1, integrations.size());
     EXPECT_STREQ(L"test-integration", integrations[0].integration_name.c_str());
@@ -167,7 +167,7 @@ TEST(IntegrationLoaderTest, HandlesSingleIntegrationWithInvalidTarget)
         }]
     )TEXT");
 
-    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {}, true, {}, {});
+    const LoadIntegrationConfiguration configuration(true, {L"test-integration"}, true, {}, true, {});
     LoadIntegrationsFromStream(str, integrations, configuration);
     EXPECT_EQ(1, integrations.size());
     EXPECT_STREQ(L"test-integration", integrations[0].integration_name.c_str());
@@ -201,7 +201,8 @@ TEST(IntegrationLoaderTest, LoadsFromEnvironment)
     const std::vector<std::wstring>    expected_names = {L"test-integration-1", L"test-integration-2"};
     std::vector<std::wstring>          actual_names;
     std::vector<IntegrationMethod>     integrations;
-    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {}, true, {}, {});
+    const LoadIntegrationConfiguration configuration(true, {L"test-integration-1", L"test-integration-2"}, true, {},
+                                                     true, {});
     LoadIntegrationsFromEnvironment(integrations, configuration);
     for (auto& integration : integrations)
     {
@@ -228,7 +229,7 @@ TEST(IntegrationLoaderTest, DeserializesSignatureTypeArray)
         }]
     )TEXT");
 
-    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {}, true, {}, {});
+    const LoadIntegrationConfiguration configuration(true, {L"test-integration"}, true, {}, true, {});
     LoadIntegrationsFromStream(str, integrations, configuration);
     const auto target = integrations[0].replacement.target_method;
     EXPECT_STREQ(L"System.Void", target.signature_types[0].c_str());
@@ -248,8 +249,7 @@ TEST(IntegrationLoaderTest, SupportsEnabledTraceIntegrations)
 
     const std::vector<std::wstring>    expected_names = {L"test-trace-integration-2"};
     std::vector<std::wstring>          actual_names;
-    const LoadIntegrationConfiguration configuration(true, {L"test-trace-integration-2"}, {}, true, {}, {}, true, {},
-                                                     {});
+    const LoadIntegrationConfiguration configuration(true, {L"test-trace-integration-2"}, true, {}, true, {});
     LoadIntegrationsFromStream(str, integrations, configuration);
     for (auto& integration : integrations)
     {
@@ -270,8 +270,7 @@ TEST(IntegrationLoaderTest, SupportsEnabledMetricIntegrations)
 
     const std::vector<std::wstring>    expected_names = {L"test-metric-integration-2"};
     std::vector<std::wstring>          actual_names;
-    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {L"test-metric-integration-2"}, {}, true, {},
-                                                     {});
+    const LoadIntegrationConfiguration configuration(true, {}, true, {L"test-metric-integration-2"}, true, {});
     LoadIntegrationsFromStream(str, integrations, configuration);
     for (auto& integration : integrations)
     {
@@ -292,109 +291,8 @@ TEST(IntegrationLoaderTest, SupportsEnabledLogIntegrations)
 
     const std::vector<std::wstring>    expected_names = {L"test-log-integration-2"};
     std::vector<std::wstring>          actual_names;
-    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {}, true, {L"test-log-integration-2"}, {});
+    const LoadIntegrationConfiguration configuration(true, {}, true, {}, true, {L"test-log-integration-2"});
     LoadIntegrationsFromStream(str, integrations, configuration);
-    for (auto& integration : integrations)
-    {
-        actual_names.push_back(integration.integration_name);
-    }
-    EXPECT_EQ(expected_names, actual_names);
-}
-
-TEST(IntegrationLoaderTest, SupportsDisabledTraceIntegrations)
-{
-    std::vector<IntegrationMethod> integrations;
-    std::stringstream              str(R"TEXT(
-        [
-            { "name": "test-trace-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
-            { "name": "test-trace-integration-2", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }
-        ]
-    )TEXT");
-
-    const std::vector<std::wstring>    expected_names = {L"test-trace-integration-1"};
-    std::vector<std::wstring>          actual_names;
-    const LoadIntegrationConfiguration configuration(true, {}, {L"test-trace-integration-2"}, true, {}, {}, true, {},
-                                                     {});
-    LoadIntegrationsFromStream(str, integrations, configuration);
-    for (auto& integration : integrations)
-    {
-        actual_names.push_back(integration.integration_name);
-    }
-    EXPECT_EQ(expected_names, actual_names);
-}
-
-TEST(IntegrationLoaderTest, SupportsDisabledMetricIntegrations)
-{
-    std::vector<IntegrationMethod> integrations;
-    std::stringstream              str(R"TEXT(
-          [
-              { "name": "test-metric-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
-              { "name": "test-metric-integration-2", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }
-          ]
-      )TEXT");
-
-    const std::vector<std::wstring>    expected_names = {L"test-metric-integration-1"};
-    std::vector<std::wstring>          actual_names;
-    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {L"test-metric-integration-2"}, true, {},
-                                                     {});
-    LoadIntegrationsFromStream(str, integrations, configuration);
-    for (auto& integration : integrations)
-    {
-        actual_names.push_back(integration.integration_name);
-    }
-    EXPECT_EQ(expected_names, actual_names);
-}
-
-TEST(IntegrationLoaderTest, SupportsDisabledLogIntegrations)
-{
-    std::vector<IntegrationMethod> integrations;
-    std::stringstream              str(R"TEXT(
-          [
-              { "name": "test-log-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
-              { "name": "test-log-integration-2", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }
-          ]
-      )TEXT");
-
-    const std::vector<std::wstring>    expected_names = {L"test-log-integration-1"};
-    std::vector<std::wstring>          actual_names;
-    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {}, true, {}, {L"test-log-integration-2"});
-    LoadIntegrationsFromStream(str, integrations, configuration);
-    for (auto& integration : integrations)
-    {
-        actual_names.push_back(integration.integration_name);
-    }
-    EXPECT_EQ(expected_names, actual_names);
-}
-
-TEST(IntegrationLoaderTest, SupportsEnabledAndDisabledIntegrations)
-{
-    std::vector<IntegrationMethod> integrations;
-    std::stringstream              str(R"TEXT(
-        [
-            { "name": "test-trace-integration-1", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
-            { "name": "test-trace-integration-2", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
-            { "name": "test-trace-integration-3", "type": "Trace", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
-            { "name": "test-metric-integration-1", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
-            { "name": "test-metric-integration-2", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
-            { "name": "test-metric-integration-3", "type": "Metric", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
-            { "name": "test-log-integration-1", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
-            { "name": "test-log-integration-2", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] },
-            { "name": "test-log-integration-3", "type": "Log", "method_replacements": [{ "caller": {}, "target": {}, "wrapper": {} }] }
-        ]
-    )TEXT");
-
-    const std::vector<std::wstring> expected_names = {L"test-trace-integration-1", L"test-log-integration-1",
-                                                      L"test-metric-integration-1"};
-    std::vector<std::wstring>          actual_names;
-    const LoadIntegrationConfiguration configuration(true, {L"test-trace-integration-1", L"test-trace-integration-2"},
-                                                     {L"test-trace-integration-2", L"test-trace-integration-3"}, true,
-                                                     {L"test-metric-integration-1", L"test-metric-integration-2"},
-                                                     {L"test-metric-integration-2", L"test-metric-integration-3"}, true,
-                                                     {L"test-log-integration-1", L"test-log-integration-2"},
-                                                     {L"test-log-integration-2", L"test-log-integration-3"});
-
-    LoadIntegrationsFromStream(str, integrations, configuration);
-
     for (auto& integration : integrations)
     {
         actual_names.push_back(integration.integration_name);
@@ -415,7 +313,7 @@ TEST(IntegrationLoaderTest, SupportsDisableAllIntegrations)
 
     const std::vector<std::wstring>    expected_names = {};
     std::vector<std::wstring>          actual_names;
-    const LoadIntegrationConfiguration configuration(false, {}, {}, false, {}, {}, false, {}, {});
+    const LoadIntegrationConfiguration configuration(false, {}, false, {}, false, {});
     LoadIntegrationsFromStream(str, integrations, configuration);
 
     for (auto& integration : integrations)
@@ -439,7 +337,8 @@ TEST(IntegrationLoaderTest, DuplicatedIntegrations)
         ]
     )TEXT");
 
-    const LoadIntegrationConfiguration configuration(true, {}, {}, true, {}, {}, true, {}, {});
+    const LoadIntegrationConfiguration configuration(true, {L"test-integration-1"}, true, {L"test-integration-1"}, true,
+                                                     {L"test-integration-1"});
     LoadIntegrationsFromStream(str, integrations, configuration);
 
     EXPECT_EQ(4, integrations.size());

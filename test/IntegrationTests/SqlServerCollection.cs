@@ -33,7 +33,7 @@ public class SqlServerFixture : IAsyncLifetime
     private const int DatabasePort = 1433;
     private const string DatabaseImage = "mcr.microsoft.com/mssql/server:2019-CU17-ubuntu-20.04";
 
-    private TestcontainersContainer? _container;
+    private IContainer? _container;
 
     public SqlServerFixture()
     {
@@ -57,15 +57,14 @@ public class SqlServerFixture : IAsyncLifetime
         }
     }
 
-    private static async Task ShutdownSqlServerContainerAsync(TestcontainersContainer container)
+    private static async Task ShutdownSqlServerContainerAsync(IContainer container)
     {
-        await container.CleanUpAsync();
         await container.DisposeAsync();
     }
 
-    private async Task<TestcontainersContainer> LaunchSqlServerContainerAsync()
+    private async Task<IContainer> LaunchSqlServerContainerAsync()
     {
-        var databaseContainersBuilder = new TestcontainersBuilder<TestcontainersContainer>()
+        var databaseContainersBuilder = new ContainerBuilder()
             .WithImage(DatabaseImage)
             .WithName($"sql-server-{Port}")
             .WithPortBinding(Port, DatabasePort)

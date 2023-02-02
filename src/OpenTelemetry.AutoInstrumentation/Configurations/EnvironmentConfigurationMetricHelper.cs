@@ -16,7 +16,6 @@
 
 using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation.Loading;
-using OpenTelemetry.AutoInstrumentation.Loading.Initializers;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Metrics;
@@ -37,11 +36,16 @@ internal static class EnvironmentConfigurationMetricHelper
         {
             _ = enabledMeter switch
             {
+#if NETFRAMEWORK
                 MetricInstrumentation.AspNet => Wrappers.AddAspNetInstrumentation(builder, lazyInstrumentationLoader),
+#endif
                 MetricInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, lazyInstrumentationLoader),
                 MetricInstrumentation.NetRuntime => Wrappers.AddRuntimeInstrumentation(builder, pluginManager),
                 MetricInstrumentation.Process => Wrappers.AddProcessInstrumentation(builder, pluginManager),
                 MetricInstrumentation.NServiceBus => builder.AddMeter("NServiceBus.Core"),
+#if NET6_0_OR_GREATER
+                MetricInstrumentation.AspNetCore => Wrappers.AddAspNetCoreInstrumentation(builder, lazyInstrumentationLoader),
+#endif
                 _ => null,
             };
         }
@@ -78,18 +82,23 @@ internal static class EnvironmentConfigurationMetricHelper
     private static class Wrappers
     {
         // Meters
-
+#if NETFRAMEWORK
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static MeterProviderBuilder AddAspNetInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
             DelayedInitialization.Metrics.AddAspNet(lazyInstrumentationLoader);
-#if NET462
-            builder.AddMeter("OpenTelemetry.Instrumentation.AspNet");
-#elif NET6_0_OR_GREATER
-            builder.AddMeter("OpenTelemetry.Instrumentation.AspNetCore");
-#endif
-            return builder;
+            return builder.AddMeter("OpenTelemetry.Instrumentation.AspNet");
         }
+#endif
+
+#if NET6_0_OR_GREATER
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static MeterProviderBuilder AddAspNetCoreInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
+        {
+            DelayedInitialization.Metrics.AddAspNetCore(lazyInstrumentationLoader);
+            return builder.AddMeter("OpenTelemetry.Instrumentation.AspNetCore");
+        }
+#endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static MeterProviderBuilder AddHttpClientInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)

@@ -188,9 +188,16 @@ internal static class Instrumentation
         {
             switch (instrumentation)
             {
+#if NETFRAMEWORK
                 case MetricInstrumentation.AspNet:
                     DelayedInitialization.Metrics.AddAspNet(lazyInstrumentationLoader);
                     break;
+#endif
+#if NET6_0_OR_GREATER
+                case MetricInstrumentation.AspNetCore:
+                    DelayedInitialization.Metrics.AddAspNetCore(lazyInstrumentationLoader);
+                    break;
+#endif
                 case MetricInstrumentation.HttpClient:
                     DelayedInitialization.Metrics.AddHttpClient(lazyInstrumentationLoader);
                     break;
@@ -201,7 +208,7 @@ internal static class Instrumentation
                 case MetricInstrumentation.NServiceBus:
                     break;
                 default:
-                    Logger.Warning($"Configured metric intrumentation type is not supported: {instrumentation}");
+                    Logger.Warning($"Configured metric instrumentation type is not supported: {instrumentation}");
                     break;
             }
         }
@@ -213,9 +220,11 @@ internal static class Instrumentation
         {
             switch (instrumentation)
             {
+#if NETFRAMEWORK
                 case TracerInstrumentation.AspNet:
                     DelayedInitialization.Traces.AddAspNet(lazyInstrumentationLoader, pluginManager);
                     break;
+#endif
                 case TracerInstrumentation.HttpClient:
                     DelayedInitialization.Traces.AddHttpClient(lazyInstrumentationLoader, pluginManager);
                     break;
@@ -232,6 +241,9 @@ internal static class Instrumentation
                     DelayedInitialization.Traces.AddQuartz(lazyInstrumentationLoader, pluginManager);
                     break;
 #if NET6_0_OR_GREATER
+                case TracerInstrumentation.AspNetCore:
+                    DelayedInitialization.Traces.AddAspNetCore(lazyInstrumentationLoader, pluginManager);
+                    break;
                 case TracerInstrumentation.MySqlData:
                     DelayedInitialization.Traces.AddMySqlClient(LazyInstrumentationLoader, pluginManager);
                     break;
@@ -254,7 +266,7 @@ internal static class Instrumentation
                 case TracerInstrumentation.Elasticsearch:
                     break;
                 default:
-                    Logger.Warning($"Configured trace intrumentation type is not supported: {instrumentation}");
+                    Logger.Warning($"Configured trace instrumentation type is not supported: {instrumentation}");
                     break;
             }
         }
