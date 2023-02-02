@@ -330,7 +330,7 @@ public class SmokeTests : TestHelper
     public void MetricsDisabledInstrumentation()
     {
         using var collector = new MockMetricsCollector(Output);
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_HttpClient_INSTRUMENTATION_ENABLED", "false");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_HTTPCLIENT_INSTRUMENTATION_ENABLED", "false");
         EnableOnlyHttpClientTraceInstrumentation();
         EnableBytecodeInstrumentation();
         RunTestApplication();
@@ -343,8 +343,8 @@ public class SmokeTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_AspNet_INSTRUMENTATION_ENABLED", "false");
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_HttpClient_INSTRUMENTATION_ENABLED", "false");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ASPNET_INSTRUMENTATION_ENABLED", "false");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_HTTPCLIENT_INSTRUMENTATION_ENABLED", "false");
         RunTestApplication();
         collector.AssertEmpty();
     }
@@ -384,6 +384,6 @@ public class SmokeTests : TestHelper
     private void EnableOnlyHttpClientTraceInstrumentation()
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED", "false");
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_HttpClient_INSTRUMENTATION_ENABLED", "true");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_HTTPCLIENT_INSTRUMENTATION_ENABLED", "true");
     }
 }

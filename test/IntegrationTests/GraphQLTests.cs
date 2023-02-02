@@ -61,7 +61,7 @@ public class GraphQLTests : TestHelper
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED", "false");
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_GraphQL_INSTRUMENTATION_ENABLED", "true");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_GRAPHQL_INSTRUMENTATION_ENABLED", "true");
         SetEnvironmentVariable("OTEL_TRACES_SAMPLER", "always_on");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED", "false");
 
