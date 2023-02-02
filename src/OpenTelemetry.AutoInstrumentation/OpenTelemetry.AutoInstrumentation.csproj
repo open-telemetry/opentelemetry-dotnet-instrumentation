@@ -4,6 +4,8 @@
 
   <PropertyGroup>
     <Version>0.5.1</Version>
+    <!-- Temporary suppress this warning for OpenTelemetry.Instrumentation.Runtime and OpenTelemetry.Instrumentation.Process because they require exact version. -->
+    <NoWarn>NU1608</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
