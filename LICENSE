@@ -209,7 +209,7 @@ separate copyright notices and license terms:
 
 Library Google.Protobuf is under the following copyright:
 Copyright 2008 Google Inc. All rights reserved under BSD-3-Clause license
-(https://github.com/protocolbuffers/protobuf/blob/main/LICENSE).
+(<https://github.com/protocolbuffers/protobuf/blob/main/LICENSE>).
 
 Libraries
 
@@ -218,7 +218,7 @@ Libraries
 - Grpc.Net.Common,
 are under the following copyright:
 Copyright 2019 The gRPC Authors under Apache License Version 2.0
-(https://github.com/grpc/grpc-dotnet/blob/master/LICENSE).
+(<https://github.com/grpc/grpc-dotnet/blob/master/LICENSE>).
 
 Libraries
 
@@ -239,7 +239,7 @@ Libraries
 - OpenTelemetry.Shims.OpenTracing,
 are under the following copyright:
 Copyright The OpenTelemetry Authors under Apache License Version 2.0
-(https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/LICENSE).
+(<https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/LICENSE>).
 
 Libraries
 
@@ -253,11 +253,11 @@ Libraries
 - OpenTelemetry.Instrumentation.Wcf
 are under the following copyright:
 Copyright The OpenTelemetry Authors under Apache License Version 2.0
-(https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/main/LICENSE).
+(<https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/main/LICENSE>).
 
 Library OpenTracing is under the following copyright:
 Copyright The OpenTracing Authors under Apache License Version 2.0
-(https://github.com/opentracing/opentracing-csharp/blob/master/LICENSE).
+(<https://github.com/opentracing/opentracing-csharp/blob/master/LICENSE>).
 
 Libraries
 
@@ -277,7 +277,7 @@ Libraries
 - System.Security.Permissions,
 are under the following copyright:
 Copyright (c) .NET Foundation and Contributors under the MIT License (MIT)
-(https://github.com/dotnet/runtime/blob/main/LICENSE.TXT).
+(<https://github.com/dotnet/runtime/blob/main/LICENSE.TXT>).
 
 Libraries
 
@@ -286,11 +286,11 @@ Libraries
 - System.ServiceModel
 are under the following copyright:
 Copyright (c) .NET Foundation and Contributors under the MIT License (MIT)
-(https://github.com/dotnet/wcf/blob/main/LICENSE.TXT).
+(<https://github.com/dotnet/wcf/blob/main/LICENSE.TXT>).
 
 Library DnsClient is under the following copyright:
 Copyright The DnsClient.NET Authors under Apache License Version 2.0
-(https://github.com/opentracing/opentracing-csharp/blob/master/LICENSE).
+(<https://github.com/opentracing/opentracing-csharp/blob/master/LICENSE>).
 
 Libraries
 
@@ -304,13 +304,13 @@ Libraries
 - snappy64,
 are under the following copyright:
 Copyright 2010-present MongoDB Inc. under Apache License Version 2.0
-(https://github.com/mongodb/mongo-csharp-driver/blob/master/License.txt).
+(<https://github.com/mongodb/mongo-csharp-driver/blob/master/License.txt>).
 
 Library MongoDB.Driver.Core.Extensions.DiagnosticSources is under the following copyright:
 Copyright MongoDB.Driver.Core.Extensions.DiagnosticSources Authors under Apache
 License Version 2.0
-(https://github.com/jbogard/MongoDB.Driver.Core.Extensions.DiagnosticSources/blob/master/LICENSE).
+(<https://github.com/jbogard/MongoDB.Driver.Core.Extensions.DiagnosticSources/blob/master/LICENSE>).
 
 Library SharpCompress is under the following copyright:
 Copyright (c) 2014  Adam Hathcock under the MIT License (MIT)
-(https://github.com/adamhathcock/sharpcompress/blob/master/LICENSE.txt).
+(<https://github.com/adamhathcock/sharpcompress/blob/master/LICENSE.txt>).
