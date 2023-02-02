@@ -175,25 +175,25 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData(nameof(TracerInstrumentation.AspNet), TracerInstrumentation.AspNet)]
-    [InlineData(nameof(TracerInstrumentation.GraphQL), TracerInstrumentation.GraphQL)]
-    [InlineData(nameof(TracerInstrumentation.HttpClient), TracerInstrumentation.HttpClient)]
+    [InlineData("ASPNET", TracerInstrumentation.AspNet)]
+    [InlineData("GRAPHQL", TracerInstrumentation.GraphQL)]
+    [InlineData("HTTPCLIENT", TracerInstrumentation.HttpClient)]
 #if NET6_0_OR_GREATER
-    [InlineData(nameof(TracerInstrumentation.MongoDB), TracerInstrumentation.MongoDB)]
-    [InlineData(nameof(TracerInstrumentation.MySqlData), TracerInstrumentation.MySqlData)]
-    [InlineData(nameof(TracerInstrumentation.StackExchangeRedis), TracerInstrumentation.StackExchangeRedis)]
+    [InlineData("MONGODB", TracerInstrumentation.MongoDB)]
+    [InlineData("MYSQLDATA", TracerInstrumentation.MySqlData)]
+    [InlineData("STACKEXCHANGEREDIS", TracerInstrumentation.StackExchangeRedis)]
 #endif
-    [InlineData(nameof(TracerInstrumentation.Npgsql), TracerInstrumentation.Npgsql)]
-    [InlineData(nameof(TracerInstrumentation.SqlClient), TracerInstrumentation.SqlClient)]
-    [InlineData(nameof(TracerInstrumentation.GrpcNetClient), TracerInstrumentation.GrpcNetClient)]
+    [InlineData("NPGSQL", TracerInstrumentation.Npgsql)]
+    [InlineData("SQLCLIENT", TracerInstrumentation.SqlClient)]
+    [InlineData("GRPCNETCLIENT", TracerInstrumentation.GrpcNetClient)]
 #if NET6_0_OR_GREATER
-    [InlineData(nameof(TracerInstrumentation.MassTransit), TracerInstrumentation.MassTransit)]
+    [InlineData("MASSTRANSIT", TracerInstrumentation.MassTransit)]
 #endif
-    [InlineData(nameof(TracerInstrumentation.NServiceBus), TracerInstrumentation.NServiceBus)]
-    [InlineData(nameof(TracerInstrumentation.Elasticsearch), TracerInstrumentation.Elasticsearch)]
-    [InlineData(nameof(TracerInstrumentation.Quartz), TracerInstrumentation.Quartz)]
+    [InlineData("NSERVICEBUS", TracerInstrumentation.NServiceBus)]
+    [InlineData("ELASTICSEARCH", TracerInstrumentation.Elasticsearch)]
+    [InlineData("QUARTZ", TracerInstrumentation.Quartz)]
 #if NET6_0_OR_GREATER
-    [InlineData(nameof(TracerInstrumentation.EntityFrameworkCore), TracerInstrumentation.EntityFrameworkCore)]
+    [InlineData("ENTITYFRAMEWORKCORE", TracerInstrumentation.EntityFrameworkCore)]
 #endif
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
@@ -221,11 +221,11 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData(nameof(MetricInstrumentation.NetRuntime), MetricInstrumentation.NetRuntime)]
-    [InlineData(nameof(MetricInstrumentation.AspNet), MetricInstrumentation.AspNet)]
-    [InlineData(nameof(MetricInstrumentation.HttpClient), MetricInstrumentation.HttpClient)]
-    [InlineData(nameof(MetricInstrumentation.Process), MetricInstrumentation.Process)]
-    [InlineData(nameof(MetricInstrumentation.NServiceBus), MetricInstrumentation.NServiceBus)]
+    [InlineData("NETRUNTIME", MetricInstrumentation.NetRuntime)]
+    [InlineData("ASPNET", MetricInstrumentation.AspNet)]
+    [InlineData("HTTPCLIENT", MetricInstrumentation.HttpClient)]
+    [InlineData("PROCESS", MetricInstrumentation.Process)]
+    [InlineData("NSERVICEBUS", MetricInstrumentation.NServiceBus)]
     internal void MeterSettings_Instrumentations_SupportedValues(string meterInstrumentation, MetricInstrumentation expectedMetricInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled, "false");
@@ -237,7 +237,7 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData(nameof(LogInstrumentation.ILogger), LogInstrumentation.ILogger)]
+    [InlineData("ILOGGER", LogInstrumentation.ILogger)]
     internal void LogSettings_Instrumentations_SupportedValues(string logInstrumentation, LogInstrumentation expectedLogInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.LogsInstrumentationEnabled, "false");
