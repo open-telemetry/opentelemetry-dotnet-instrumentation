@@ -238,8 +238,12 @@ function Install-OpenTelemetryCore() {
         [System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") | Out-Null
         $publish = New-Object System.EnterpriseServices.Internal.Publish 
         $dlls = Get-ChildItem -Path $installDir\netfx\ -Filter *.dll -File
-        foreach ($dll in $dlls) {
-            $publish.GacInstall($dll.FullName)
+        for ($i = 0; $i -le $dlls.Count; $i++) {
+            $percentageComplete = $i / $dlls.Count * 100
+            Write-Progress -Activity "Registering .NET Framweworks dlls in GAC" `
+                -Status "Module $($i+1) out of $($dlls.Count). Installing $($dlls[$i].Name):" `
+                -PercentComplete $percentageComplete
+            $publish.GacInstall($dlls[$i].FullName)
         }
     } 
     catch {
