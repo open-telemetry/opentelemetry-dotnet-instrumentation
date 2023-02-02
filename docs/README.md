@@ -76,6 +76,25 @@ See [config.md#instrumented-libraries-and-frameworks](config.md#instrumented-lib
 
 ## Get started
 
+### Considerations on scope
+
+Currently, instrumenting [`self-contained`](https://learn.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained)
+applications is not supported. Note that a `self-contained` applications is
+automatically generated in .NET 7.0 whenever the `dotnet publish` or `dotnet build`
+command is used with a Runtime Identifier (RID) parameter, for example when `-r`
+or `--runtime` is used when running the command. The `dotnet` CLI is
+a `self-contained` application and it's incompatible with automatic instrumentation.
+
+To build and launch an instrumented application, take the following into account:
+
+- Don't set the automatic instrumentation environment variables in the same session
+used to run the `dotnet` tool.
+- Don't launch the application to be instrumented using `dotnet run` or
+`dotnet <dll>`. Build the application in an isolated shell, without the
+automatic instrumentation environment variables set, and use a separate
+session with the automatic instrumentation variables to directly launch
+the executable.
+
 ### Install
 
 Download and extract the appropriate binaries from

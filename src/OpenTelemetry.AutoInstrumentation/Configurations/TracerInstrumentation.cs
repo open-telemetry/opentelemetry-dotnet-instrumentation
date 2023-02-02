@@ -26,10 +26,12 @@ internal enum TracerInstrumentation
     /// </summary>
     HttpClient = 0,
 
+#if NETFRAMEWORK
     /// <summary>
     /// ASP.NET instrumentation.
     /// </summary>
     AspNet = 1,
+#endif
 
     /// <summary>
     /// SqlClient instrumentation.
@@ -101,6 +103,11 @@ internal enum TracerInstrumentation
     /// <summary>
     /// Entity Framework Core instrumentation.
     /// </summary>
-    EntityFrameworkCore = 14
+    EntityFrameworkCore = 14,
+
+    /// <summary>
+    /// ASP.NET Core instrumentation.
+    /// </summary>
+    AspNetCore = 15
 #endif
 }

@@ -32,9 +32,7 @@ public class SettingsTests : IDisposable
     public static IEnumerable<object[]> ExporterEnvVarAndLoadSettingsAction()
     {
         yield return new object[] { ConfigurationKeys.Traces.Exporter, new Action(() => Settings.FromDefaultSources<TracerSettings>()) };
-        yield return new object[] { ConfigurationKeys.Traces.Instrumentations, new Action(() => Settings.FromDefaultSources<TracerSettings>()) };
         yield return new object[] { ConfigurationKeys.Metrics.Exporter, new Action(() => Settings.FromDefaultSources<MetricSettings>()) };
-        yield return new object[] { ConfigurationKeys.Metrics.Instrumentations, new Action(() => Settings.FromDefaultSources<MetricSettings>()) };
         yield return new object[] { ConfigurationKeys.Logs.Exporter, new Action(() => Settings.FromDefaultSources<LogSettings>()) };
         yield return new object[] { ConfigurationKeys.Sdk.Propagators, new Action(() => Settings.FromDefaultSources<SdkSettings>()) };
     }
@@ -177,44 +175,37 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData(nameof(TracerInstrumentation.AspNet), TracerInstrumentation.AspNet)]
-    [InlineData(nameof(TracerInstrumentation.GraphQL), TracerInstrumentation.GraphQL)]
-    [InlineData(nameof(TracerInstrumentation.HttpClient), TracerInstrumentation.HttpClient)]
-#if NET6_0_OR_GREATER
-    [InlineData(nameof(TracerInstrumentation.MongoDB), TracerInstrumentation.MongoDB)]
-    [InlineData(nameof(TracerInstrumentation.MySqlData), TracerInstrumentation.MySqlData)]
-    [InlineData(nameof(TracerInstrumentation.StackExchangeRedis), TracerInstrumentation.StackExchangeRedis)]
+#if NETFRAMEWORK
+    [InlineData("ASPNET", TracerInstrumentation.AspNet)]
 #endif
-    [InlineData(nameof(TracerInstrumentation.Npgsql), TracerInstrumentation.Npgsql)]
-    [InlineData(nameof(TracerInstrumentation.SqlClient), TracerInstrumentation.SqlClient)]
-    [InlineData(nameof(TracerInstrumentation.GrpcNetClient), TracerInstrumentation.GrpcNetClient)]
+    [InlineData("GRAPHQL", TracerInstrumentation.GraphQL)]
+    [InlineData("HTTPCLIENT", TracerInstrumentation.HttpClient)]
 #if NET6_0_OR_GREATER
-    [InlineData(nameof(TracerInstrumentation.MassTransit), TracerInstrumentation.MassTransit)]
+    [InlineData("MONGODB", TracerInstrumentation.MongoDB)]
+    [InlineData("MYSQLDATA", TracerInstrumentation.MySqlData)]
+    [InlineData("STACKEXCHANGEREDIS", TracerInstrumentation.StackExchangeRedis)]
 #endif
-    [InlineData(nameof(TracerInstrumentation.NServiceBus), TracerInstrumentation.NServiceBus)]
-    [InlineData(nameof(TracerInstrumentation.Elasticsearch), TracerInstrumentation.Elasticsearch)]
-    [InlineData(nameof(TracerInstrumentation.Quartz), TracerInstrumentation.Quartz)]
+    [InlineData("NPGSQL", TracerInstrumentation.Npgsql)]
+    [InlineData("SQLCLIENT", TracerInstrumentation.SqlClient)]
+    [InlineData("GRPCNETCLIENT", TracerInstrumentation.GrpcNetClient)]
 #if NET6_0_OR_GREATER
-    [InlineData(nameof(TracerInstrumentation.EntityFrameworkCore), TracerInstrumentation.EntityFrameworkCore)]
+    [InlineData("MASSTRANSIT", TracerInstrumentation.MassTransit)]
+#endif
+    [InlineData("NSERVICEBUS", TracerInstrumentation.NServiceBus)]
+    [InlineData("ELASTICSEARCH", TracerInstrumentation.Elasticsearch)]
+    [InlineData("QUARTZ", TracerInstrumentation.Quartz)]
+#if NET6_0_OR_GREATER
+    [InlineData("ENTITYFRAMEWORKCORE", TracerInstrumentation.EntityFrameworkCore)]
+    [InlineData("ASPNETCORE", TracerInstrumentation.AspNetCore)]
 #endif
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, tracerInstrumentation);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false");
+        Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, tracerInstrumentation), "true");
 
         var settings = Settings.FromDefaultSources<TracerSettings>();
 
         settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<TracerInstrumentation> { expectedTracerInstrumentation });
-    }
-
-    [Fact]
-    internal void TracerSettings_DisabledInstrumentations()
-    {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, $"{nameof(TracerInstrumentation.AspNet)},{nameof(TracerInstrumentation.GraphQL)}");
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.DisabledInstrumentations, nameof(TracerInstrumentation.GraphQL));
-
-        var settings = Settings.FromDefaultSources<TracerSettings>();
-
-        settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<TracerInstrumentation> { TracerInstrumentation.AspNet });
     }
 
     [Fact]
@@ -233,50 +224,36 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData(nameof(MetricInstrumentation.NetRuntime), MetricInstrumentation.NetRuntime)]
-    [InlineData(nameof(MetricInstrumentation.AspNet), MetricInstrumentation.AspNet)]
-    [InlineData(nameof(MetricInstrumentation.HttpClient), MetricInstrumentation.HttpClient)]
-    [InlineData(nameof(MetricInstrumentation.Process), MetricInstrumentation.Process)]
-    [InlineData(nameof(MetricInstrumentation.NServiceBus), MetricInstrumentation.NServiceBus)]
+#if NETFRAMEWORK
+    [InlineData("ASPNET", MetricInstrumentation.AspNet)]
+#endif
+    [InlineData("NETRUNTIME", MetricInstrumentation.NetRuntime)]
+    [InlineData("HTTPCLIENT", MetricInstrumentation.HttpClient)]
+    [InlineData("PROCESS", MetricInstrumentation.Process)]
+    [InlineData("NSERVICEBUS", MetricInstrumentation.NServiceBus)]
+#if NET6_0_OR_GREATER
+    [InlineData("ASPNETCORE", MetricInstrumentation.AspNetCore)]
+#endif
     internal void MeterSettings_Instrumentations_SupportedValues(string meterInstrumentation, MetricInstrumentation expectedMetricInstrumentation)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, meterInstrumentation);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled, "false");
+        Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Metrics.EnabledMetricsInstrumentationTemplate, meterInstrumentation), "true");
 
         var settings = Settings.FromDefaultSources<MetricSettings>();
 
         settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<MetricInstrumentation> { expectedMetricInstrumentation });
     }
 
-    [Fact]
-    internal void MeterSettings_DisabledInstrumentations()
-    {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, $"{nameof(MetricInstrumentation.NetRuntime)},{nameof(MetricInstrumentation.AspNet)}");
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.DisabledInstrumentations, nameof(MetricInstrumentation.AspNet));
-
-        var settings = Settings.FromDefaultSources<MetricSettings>();
-
-        settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<MetricInstrumentation> { MetricInstrumentation.NetRuntime });
-    }
-
     [Theory]
-    [InlineData(nameof(LogInstrumentation.ILogger), LogInstrumentation.ILogger)]
+    [InlineData("ILOGGER", LogInstrumentation.ILogger)]
     internal void LogSettings_Instrumentations_SupportedValues(string logInstrumentation, LogInstrumentation expectedLogInstrumentation)
     {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, logInstrumentation);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.LogsInstrumentationEnabled, "false");
+        Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate, logInstrumentation), "true");
 
         var settings = Settings.FromDefaultSources<LogSettings>();
 
         settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<LogInstrumentation> { expectedLogInstrumentation });
-    }
-
-    [Fact]
-    internal void LogSettings_DisabledInstrumentations()
-    {
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.DisabledInstrumentations, nameof(LogInstrumentation.ILogger));
-
-        var settings = Settings.FromDefaultSources<LogSettings>();
-
-        settings.EnabledInstrumentations.Should().BeEmpty();
     }
 
     [Theory]
@@ -330,16 +307,29 @@ public class SettingsTests : IDisposable
 
     private static void ClearEnvVars()
     {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.LogsInstrumentationEnabled, null);
+        foreach (var logInstrumentation in Enum.GetValues(typeof(LogInstrumentation)).Cast<LogInstrumentation>())
+        {
+            Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate, logInstrumentation.ToString().ToUpperInvariant()), null);
+        }
+
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.IncludeFormattedMessage, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Instrumentations, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.DisabledInstrumentations, null);
+
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled, null);
+        foreach (var metricInstrumentation in Enum.GetValues(typeof(MetricInstrumentation)).Cast<MetricInstrumentation>())
+        {
+            Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Metrics.EnabledMetricsInstrumentationTemplate, metricInstrumentation.ToString().ToUpperInvariant()), null);
+        }
+
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Instrumentations, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.DisabledInstrumentations, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, null);
+        foreach (var tracerInstrumentation in Enum.GetValues(typeof(TracerInstrumentation)).Cast<TracerInstrumentation>())
+        {
+            Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, tracerInstrumentation.ToString().ToUpperInvariant()), null);
+        }
+
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Instrumentations, null);
-        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.DisabledInstrumentations, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesSampler, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesSamplerArguments, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.GraphQLSetDocument, null);

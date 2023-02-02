@@ -24,60 +24,33 @@ const WSTRING profiler_home_path = WStr("OTEL_DOTNET_AUTO_HOME");
 // "MyApp.exe,dotnet.exe"
 const WSTRING exclude_process_names = WStr("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES");
 
+// Whether instrumentations are enabled. If not set (default), all instrumentations are enabled.
+const WSTRING instrumentation_enabled =
+    WStr("OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED");
+
 // Whether traces are enabled or not. If not set (default), traces are enabled.
 const WSTRING traces_enabled =
     WStr("OTEL_DOTNET_AUTO_TRACES_ENABLED");
 
-// Sets a list of integrations to enable. If not set (default), all integrations are enabled.
-// Supports multiple values separated with comma, for example:
-// "ElasticsearchNet,AspNetWebApi2"
-const WSTRING enabled_traces_integrations =
-    WStr("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS");
-
-// Sets a list of integrations to disable. Status of other integrations will remain
-// unchanged. Calculation order: OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS
-// then if instrumentation is not explicitly disabled OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS is checked.
-// Supports multiple values separated with comma, for example:
-// "ElasticsearchNet,AspNetWebApi2"
-const WSTRING disabled_traces_integrations =
-    WStr("OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS");
+// Whether traces instrumentations are enabled. If not set (default), value from OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED is used.
+const WSTRING traces_instrumentation_enabled =
+    WStr("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED");
 
 // Whether metrics are enabled or not. If not set (default), traces are enabled.
 const WSTRING metrics_enabled =
     WStr("OTEL_DOTNET_AUTO_METRICS_ENABLED");
 
-// Sets a list of integrations to enable. If not set (default), all integrations are enabled.
-// Supports multiple values separated with comma, for example:
-// "ElasticsearchNet,AspNetWebApi2"
-const WSTRING enabled_metrics_integrations =
-    WStr("OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS");
-
-// Sets a list of integrations to disable. Status of other integrations will remain
-// unchanged. Calculation order: OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS
-// then if instrumentation is not explicitly disabled OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS is checked.
-// Supports multiple values separated with comma, for example:
-// "ElasticsearchNet,AspNetWebApi2"
-const WSTRING disabled_metrics_integrations =
-    WStr("OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS");
+// Whether metrics instrumentations are enabled. If not set (default), value from OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED is used.
+const WSTRING metrics_instrumentation_enabled =
+    WStr("OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED");
 
 // Whether logs are enabled or not. If not set (default), logs are enabled.
 const WSTRING logs_enabled =
     WStr("OTEL_DOTNET_AUTO_LOGS_ENABLED");
 
-// Sets a list of integrations to enable. If not set (default), all integrations
-// are enabled. Supports multiple values separated with comma, for example:
-// "ElasticsearchNet,AspNetWebApi2"
-const WSTRING enabled_logs_integrations =
-    WStr("OTEL_DOTNET_AUTO_LOGS_ENABLED_INSTRUMENTATIONS");
-
-// Sets a list of integrations to disable. Status of other integrations will
-// remain unchanged. Calculation order:
-// OTEL_DOTNET_AUTO_LOGS_DISABLED_INSTRUMENTATIONS then if instrumentation is
-// not explicitly disabled OTEL_DOTNET_AUTO_LOGS_ENABLED_INSTRUMENTATIONS is
-// checked. Supports multiple values separated with comma, for example:
-// "ElasticsearchNet,AspNetWebApi2"
-const WSTRING disabled_logs_integrations =
-    WStr("OTEL_DOTNET_AUTO_LOGS_DISABLED_INSTRUMENTATIONS");
+// Whether logs instrumentations are enabled. If not set (default), value from OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED is used.
+const WSTRING logs_instrumentation_enabled =
+    WStr("OTEL_DOTNET_AUTO_LOGS_INSTRUMENTATION_ENABLED");
 
 // Sets the directory for the profiler's log file.
 // If not set, default is

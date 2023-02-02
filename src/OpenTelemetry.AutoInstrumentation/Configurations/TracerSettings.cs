@@ -76,10 +76,13 @@ internal class TracerSettings : Settings
         TracesExporter = ParseTracesExporter(configuration);
         ConsoleExporterEnabled = configuration.GetBool(ConfigurationKeys.Traces.ConsoleExporterEnabled) ?? false;
 
+        var instrumentationEnabledByDefault =
+            configuration.GetBool(ConfigurationKeys.Traces.TracesInstrumentationEnabled) ??
+            configuration.GetBool(ConfigurationKeys.InstrumentationEnabled) ?? true;
+
         EnabledInstrumentations = configuration.ParseEnabledEnumList<TracerInstrumentation>(
-            enabledConfiguration: ConfigurationKeys.Traces.Instrumentations,
-            disabledConfiguration: ConfigurationKeys.Traces.DisabledInstrumentations,
-            error: "The \"{0}\" is not recognized as supported trace instrumentation and cannot be enabled or disabled.");
+            enabledByDefault: instrumentationEnabledByDefault,
+            enabledConfigurationTemplate: ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate);
 
         var additionalSources = configuration.GetString(ConfigurationKeys.Traces.AdditionalSources);
         if (additionalSources != null)

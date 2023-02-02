@@ -14,59 +14,28 @@
 // limitations under the License.
 // </copyright>
 
+using System.Globalization;
+
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal static class ConfigurationExtensions
 {
-    public static IList<TEnum> ParseEnabledEnumList<TEnum>(this Configuration source, string enabledConfiguration, string disabledConfiguration, string error)
+    public static IList<TEnum> ParseEnabledEnumList<TEnum>(this Configuration source, bool enabledByDefault, string enabledConfigurationTemplate)
         where TEnum : struct, Enum, IConvertible
     {
-        var instrumentations = new Dictionary<string, TEnum>();
-        var enabledInstrumentations = source.GetString(enabledConfiguration);
-        if (enabledInstrumentations != null)
-        {
-            if (enabledInstrumentations == Constants.ConfigurationValues.None)
-            {
-                return Array.Empty<TEnum>();
-            }
+        var allConfigurations = Enum.GetValues(typeof(TEnum)).Cast<TEnum>().ToArray();
+        var enabledConfigurations = new List<TEnum>(allConfigurations.Length);
 
-            foreach (var instrumentation in enabledInstrumentations.Split(Constants.ConfigurationValues.Separator))
-            {
-                if (Enum.TryParse(instrumentation, out TEnum parsedType))
-                {
-                    instrumentations[instrumentation] = parsedType;
-                }
-                else
-                {
-                    throw new FormatException(string.Format(error, instrumentation));
-                }
-            }
-        }
-        else
+        foreach (var configuration in allConfigurations)
         {
-            instrumentations = Enum.GetValues(typeof(TEnum))
-                .Cast<TEnum>()
-                .ToDictionary(
-                    key => Enum.GetName(typeof(TEnum), key)!,
-                    val => val);
-        }
+            var configurationEnabled = source.GetBool(string.Format(CultureInfo.InvariantCulture, enabledConfigurationTemplate, configuration.ToString().ToUpperInvariant())) ?? enabledByDefault;
 
-        var disabledInstrumentations = source.GetString(disabledConfiguration);
-        if (disabledInstrumentations != null)
-        {
-            foreach (var instrumentation in disabledInstrumentations.Split(Constants.ConfigurationValues.Separator))
+            if (configurationEnabled)
             {
-                if (Enum.TryParse(instrumentation, out TEnum _))
-                {
-                    instrumentations.Remove(instrumentation);
-                }
-                else
-                {
-                    throw new FormatException(string.Format(error, instrumentation));
-                }
+                enabledConfigurations.Add(configuration);
             }
         }
 
-        return instrumentations.Values.ToList();
+        return enabledConfigurations;
     }
 }

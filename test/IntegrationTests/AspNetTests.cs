@@ -108,7 +108,8 @@ public class AspNetTests
         _environmentVariables["OTEL_METRICS_EXPORTER"] = "otlp";
         _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
         _environmentVariables["OTEL_METRIC_EXPORT_INTERVAL"] = "1000";
-        _environmentVariables["OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS"] = "AspNet"; // Helps to reduce noise by enabling only AspNet metrics.
+        _environmentVariables["OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED"] = "false"; // Helps to reduce noise by enabling only AspNet metrics.
+        _environmentVariables["OTEL_DOTNET_AUTO_METRICS_ASPNET_INSTRUMENTATION_ENABLED"] = "true"; // Helps to reduce noise by enabling only AspNet metrics.
         var webPort = TcpPortProvider.GetOpenPort();
         await using var container = await StartContainerAsync(webPort);
         await CallTestApplicationEndpoint(webPort);
@@ -116,7 +117,7 @@ public class AspNetTests
         collector.AssertExpectations();
     }
 
-    private async Task<TestcontainersContainer> StartContainerAsync(int webPort)
+    private async Task<IContainer> StartContainerAsync(int webPort)
     {
         // get path to test application that the profiler will attach to
         string imageName = $"testapplication-aspnet-netframework";
@@ -130,7 +131,7 @@ public class AspNetTests
         Directory.CreateDirectory(logPath);
         Output.WriteLine("Collecting docker logs to: " + logPath);
 
-        var builder = new TestcontainersBuilder<TestcontainersContainer>()
+        var builder = new ContainerBuilder()
             .WithImage(imageName)
             .WithCleanUp(cleanUp: true)
             .WithOutputConsumer(Consume.RedirectStdoutAndStderrToConsole())

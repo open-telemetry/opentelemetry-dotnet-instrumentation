@@ -20,33 +20,24 @@ class LoadIntegrationConfiguration {
 public:
   LoadIntegrationConfiguration(bool traces_enabled,
                                std::vector<WSTRING> enabled_trace_integration_names,
-                               std::vector<WSTRING> disabled_trace_integration_names,
                                bool metrics_enabled,
                                std::vector<WSTRING> enabled_metric_integration_names,
-                               std::vector<WSTRING> disabled_metric_integration_names,
                                bool logs_enabled,
-                               std::vector<WSTRING> enabled_log_integration_names,
-                               std::vector<WSTRING> disabled_log_integration_names)
+                               std::vector<WSTRING> enabled_log_integration_names)
     : traces_enabled(traces_enabled),
       enabledTraceIntegrationNames(std::move(enabled_trace_integration_names)),
-      disabledTraceIntegrationNames(std::move(disabled_trace_integration_names)),
       metrics_enabled(metrics_enabled),
       enabledMetricIntegrationNames(std::move(enabled_metric_integration_names)),
-      disabledMetricIntegrationNames(std::move(disabled_metric_integration_names)),
       logs_enabled(logs_enabled),
-      enabledLogIntegrationNames(std::move(enabled_log_integration_names)),
-      disabledLogIntegrationNames(std::move(disabled_log_integration_names)) {
+      enabledLogIntegrationNames(std::move(enabled_log_integration_names)) {
   }
 
   const bool traces_enabled;
   const std::vector<WSTRING> enabledTraceIntegrationNames;
-  const std::vector<WSTRING> disabledTraceIntegrationNames;
   const bool metrics_enabled;
   const std::vector<WSTRING> enabledMetricIntegrationNames;
-  const std::vector<WSTRING> disabledMetricIntegrationNames;
   const bool logs_enabled;
   const std::vector<WSTRING> enabledLogIntegrationNames;
-  const std::vector<WSTRING> disabledLogIntegrationNames;
 };
 
 // LoadIntegrationsFromEnvironment loads integrations from any files specified

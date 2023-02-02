@@ -34,7 +34,9 @@ internal static class EnvironmentConfigurationTracerHelper
         {
             _ = enabledInstrumentation switch
             {
+#if NETFRAMEWORK
                 TracerInstrumentation.AspNet => Wrappers.AddAspNetInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
+#endif
                 TracerInstrumentation.GrpcNetClient => Wrappers.AddGrpcClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.Npgsql => builder.AddSource("Npgsql"),
@@ -44,6 +46,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.Elasticsearch => builder.AddSource("Elastic.Clients.Elasticsearch.ElasticsearchClient"),
                 TracerInstrumentation.Quartz => Wrappers.AddQuartzInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
 #if NET6_0_OR_GREATER
+                TracerInstrumentation.AspNetCore => Wrappers.AddAspNetCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.MassTransit => builder.AddSource("MassTransit"),
                 TracerInstrumentation.MongoDB => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources"),
                 TracerInstrumentation.MySqlData => Wrappers.AddMySqlClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
@@ -134,20 +137,25 @@ internal static class EnvironmentConfigurationTracerHelper
             return builder;
         }
 
+#if NETFRAMEWORK
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddAspNetInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
             DelayedInitialization.Traces.AddAspNet(lazyInstrumentationLoader, pluginManager);
-#if NET462
-            builder.AddSource(OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule.AspNetSourceName);
-#elif NET6_0_OR_GREATER
-            builder.AddSource("OpenTelemetry.Instrumentation.AspNetCore");
-            builder.AddLegacySource("Microsoft.AspNetCore.Hosting.HttpRequestIn");
-#endif
-            return builder;
+            return builder.AddSource(OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule.AspNetSourceName);
         }
+#endif
 
 #if NET6_0_OR_GREATER
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddAspNetCoreInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
+        {
+            DelayedInitialization.Traces.AddAspNetCore(lazyInstrumentationLoader, pluginManager);
+            return builder
+                .AddSource("OpenTelemetry.Instrumentation.AspNetCore")
+                .AddLegacySource("Microsoft.AspNetCore.Hosting.HttpRequestIn");
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddMySqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {

@@ -235,6 +235,14 @@ partial class Build
                 .EnableNoRestore()
                 .SetFramework(TargetFramework.NET6_0)
                 .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET6_0)));
+
+            // Remove non-library files
+            TracerHomeDirectory.GlobFiles("**/*.xml").ForEach(DeleteFile);
+            (TracerHomeDirectory / "net").GlobFiles("*.json").ForEach(DeleteFile);
+            if (IsWin)
+            {
+                (TracerHomeDirectory / "netfx").GlobFiles("*.json").ForEach(DeleteFile);
+            }
         });
 
     Target PublishNativeProfiler => _ => _
