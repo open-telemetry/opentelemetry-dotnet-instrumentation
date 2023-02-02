@@ -109,7 +109,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     {
         exclude_process_names = std::vector<WSTRING>
         {
-            WStr("dotnet"), WStr("dotnet.exe"), WStr("powershell.exe"), WStr("pwsh"), WStr("pwsh.exe")
+            WStr("powershell.exe"), WStr("pwsh"), WStr("pwsh.exe")
         };
     }
 

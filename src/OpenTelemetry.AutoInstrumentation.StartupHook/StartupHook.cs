@@ -146,7 +146,7 @@ internal class StartupHook
         {
             return new List<string>
             {
-                "dotnet", "dotnet.exe", "powershell.exe", "pwsh", "pwsh.exe"
+                "powershell.exe", "pwsh", "pwsh.exe"
             };
         }
 
