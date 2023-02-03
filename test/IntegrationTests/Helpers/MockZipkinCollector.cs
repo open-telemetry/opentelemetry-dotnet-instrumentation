@@ -16,18 +16,12 @@
 
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Net;
 using System.Runtime.Serialization;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit.Abstractions;
-
-#if NETFRAMEWORK
-using System.Net;
-using IntegrationTests.Helpers.Compatibility;
-#else
-using Microsoft.AspNetCore.Http;
-#endif
 
 namespace IntegrationTests.Helpers;
 
@@ -42,11 +36,7 @@ public class MockZipkinCollector : IDisposable
     public MockZipkinCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
-#if NETFRAMEWORK
         _listener = new TestHttpServer(output, HandleHttpRequests, host, "/api/v2/spans/");
-#else
-        _listener = new TestHttpServer(output, HandleHttpRequests, "/api/v2/spans");
-#endif
     }
 
     /// <summary>
@@ -155,22 +145,12 @@ public class MockZipkinCollector : IDisposable
         Assert.Fail(message.ToString());
     }
 
-#if NETFRAMEWORK
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
         HandleJsonStream(ctx.Request.InputStream);
 
         ctx.GenerateEmptyJsonResponse();
     }
-#else
-    private async Task HandleHttpRequests(HttpContext ctx)
-    {
-        using var bodyStream = await ctx.ReadBodyToMemoryAsync();
-        HandleJsonStream(bodyStream);
-
-        await ctx.GenerateEmptyJsonResponseAsync();
-    }
-#endif
 
     private void HandleJsonStream(Stream bodyStream)
     {
@@ -217,19 +197,6 @@ public class MockZipkinCollector : IDisposable
         }
 
         public string? Library { get; set; }
-
-        public ActivityKind Kind
-        {
-            get
-            {
-                if (_zipkinData.TryGetValue("kind", out var value))
-                {
-                    return (ActivityKind)Enum.Parse(typeof(ActivityKind), value.ToString(), true);
-                }
-
-                return ActivityKind.Internal;
-            }
-        }
 
         public long Start
         {
@@ -286,7 +253,6 @@ public class MockZipkinCollector : IDisposable
             sb.AppendLine($"Service: {Service}");
             sb.AppendLine($"Name: {Name}");
             sb.AppendLine($"Library: {Library}");
-            sb.AppendLine($"Kind: {Kind}");
             sb.AppendLine($"Start: {Start}");
             sb.AppendLine($"Duration: {Duration}");
             sb.AppendLine($"Error: {Error}");
@@ -321,12 +287,12 @@ public class MockZipkinCollector : IDisposable
                 return;
             }
 
-            Library = Tags.GetValueOrDefault("otel.library.name");
+            Library = Tags.TryGetValue("otel.library.name", out var library) ? library : default;
 
-            var error = Tags.GetValueOrDefault("error") ?? "false";
+            var error = Tags.TryGetValue("error", out var errorValue) ? errorValue : "false";
             Error = (byte)(error.ToLowerInvariant().Equals("true") ? 1 : 0);
 
-            var spanKind = _zipkinData.GetValueOrDefault("kind")?.ToString();
+            var spanKind = _zipkinData.TryGetValue("kind", out var spanKindValue) ? spanKindValue.ToString() : default;
             if (spanKind != null)
             {
                 Tags["span.kind"] = spanKind.ToLowerInvariant();

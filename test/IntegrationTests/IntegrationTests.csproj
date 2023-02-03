@@ -15,6 +15,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\src\OpenTelemetry.AutoInstrumentation\Configurations\ConfigurationKeys.cs" />
+    <Compile Include="..\..\src\OpenTelemetry.AutoInstrumentation\Constants.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Google.Protobuf" />
     <PackageReference Include="Grpc.Tools" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Data.SqlClient" />
@@ -35,10 +40,6 @@
 
   <ItemGroup>
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.csproj" />
   </ItemGroup>
 
   <ItemGroup>

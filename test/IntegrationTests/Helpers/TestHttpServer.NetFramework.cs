@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-#if NETFRAMEWORK
-
 using System.Net;
 using Xunit.Abstractions;
 
@@ -99,4 +97,3 @@ public class TestHttpServer : IDisposable
         _output.WriteLine($"[{name}]: {msg}");
     }
 }
-#endif

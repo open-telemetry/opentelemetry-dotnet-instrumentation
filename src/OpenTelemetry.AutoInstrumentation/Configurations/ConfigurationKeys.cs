@@ -14,11 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
-using OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
-using OpenTelemetry.Logs;
-
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 /// <summary>
@@ -97,7 +92,7 @@ internal static class ConfigurationKeys
         public const string EnabledTracesInstrumentationTemplate = "OTEL_DOTNET_AUTO_TRACES_{0}_INSTRUMENTATION_ENABLED";
 
         /// <summary>
-        /// Configuration key for additional <see cref="ActivitySource"/> names to be added to the tracer at the startup.
+        /// Configuration key for additional ActivitySource names to be added to the tracer at the startup.
         /// </summary>
         public const string AdditionalSources = "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES";
 
@@ -123,7 +118,6 @@ internal static class ConfigurationKeys
         {
             /// <summary>
             /// Configuration key for GraphQL instrumentation to enable passing query as a document attribute.
-            /// See <see cref="GraphQLTags.Document"/>.
             /// </summary>
             public const string GraphQLSetDocument = "OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT";
         }
@@ -161,7 +155,7 @@ internal static class ConfigurationKeys
         public const string EnabledMetricsInstrumentationTemplate = "OTEL_DOTNET_AUTO_METRICS_{0}_INSTRUMENTATION_ENABLED";
 
         /// <summary>
-        /// Configuration key for additional <see cref="Meter"/> names to be added to the meter at the startup.
+        /// Configuration key for additional "Meter" names to be added to the meter at the startup.
         /// </summary>
         public const string AdditionalSources = "OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES";
     }
@@ -189,7 +183,7 @@ internal static class ConfigurationKeys
 
         /// <summary>
         /// Configuration key for whether or not formatted log message
-        /// should be included on generated <see cref="LogRecord"/>s.
+        /// should be included on generated.
         /// </summary>
         public const string IncludeFormattedMessage = "OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE";
 

@@ -15,16 +15,11 @@
 // </copyright>
 
 using System.Collections.Concurrent;
+using System.Net;
 using System.Text;
 using OpenTelemetry.Proto.Collector.Metrics.V1;
 using OpenTelemetry.Proto.Metrics.V1;
 using Xunit.Abstractions;
-
-#if NETFRAMEWORK
-using System.Net;
-#else
-using Microsoft.AspNetCore.Http;
-#endif
 
 namespace IntegrationTests.Helpers;
 
@@ -39,11 +34,7 @@ public class MockMetricsCollector : IDisposable
     public MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
-#if NETFRAMEWORK
         _listener = new(output, HandleHttpRequests, host, "/v1/metrics/");
-#else
-        _listener = new(output, HandleHttpRequests, "/v1/metrics");
-#endif
     }
 
     /// <summary>
@@ -178,7 +169,6 @@ public class MockMetricsCollector : IDisposable
         Assert.Fail(message.ToString());
     }
 
-#if NETFRAMEWORK
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
         var metricsMessage = ExportMetricsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
@@ -186,16 +176,6 @@ public class MockMetricsCollector : IDisposable
 
         ctx.GenerateEmptyProtobufResponse<ExportMetricsServiceResponse>();
     }
-#else
-    private async Task HandleHttpRequests(HttpContext ctx)
-    {
-        using var bodyStream = await ctx.ReadBodyToMemoryAsync();
-        var metricsMessage = ExportMetricsServiceRequest.Parser.ParseFrom(bodyStream);
-        HandleMetricsMessage(metricsMessage);
-
-        await ctx.GenerateEmptyProtobufResponseAsync<ExportMetricsServiceResponse>();
-    }
-#endif
 
     private void HandleMetricsMessage(ExportMetricsServiceRequest metricsMessage)
     {

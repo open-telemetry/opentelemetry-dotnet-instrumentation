@@ -15,16 +15,11 @@
 // </copyright>
 
 using System.Collections.Concurrent;
+using System.Net;
 using System.Text;
 using OpenTelemetry.Proto.Collector.Trace.V1;
 using OpenTelemetry.Proto.Trace.V1;
 using Xunit.Abstractions;
-
-#if NETFRAMEWORK
-using System.Net;
-#else
-using Microsoft.AspNetCore.Http;
-#endif
 
 namespace IntegrationTests.Helpers;
 
@@ -40,11 +35,7 @@ public class MockSpansCollector : IDisposable
     {
         _output = output;
 
-#if NETFRAMEWORK
         _listener = new TestHttpServer(output, HandleHttpRequests, host, "/v1/traces/");
-#else
-        _listener = new TestHttpServer(output, HandleHttpRequests, "/v1/traces");
-#endif
     }
 
     /// <summary>
@@ -170,7 +161,6 @@ public class MockSpansCollector : IDisposable
         Assert.Fail(message.ToString());
     }
 
-#if NETFRAMEWORK
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
         var traceMessage = ExportTraceServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
@@ -178,16 +168,6 @@ public class MockSpansCollector : IDisposable
 
         ctx.GenerateEmptyProtobufResponse<ExportTraceServiceResponse>();
     }
-#else
-    private async Task HandleHttpRequests(HttpContext ctx)
-    {
-        using var bodyStream = await ctx.ReadBodyToMemoryAsync();
-        var traceMessage = ExportTraceServiceRequest.Parser.ParseFrom(bodyStream);
-        HandleTraceMessage(traceMessage);
-
-        await ctx.GenerateEmptyProtobufResponseAsync<ExportTraceServiceResponse>();
-    }
-#endif
 
     private void HandleTraceMessage(ExportTraceServiceRequest traceMessage)
     {

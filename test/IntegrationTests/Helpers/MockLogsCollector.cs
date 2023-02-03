@@ -15,16 +15,11 @@
 // </copyright>
 
 using System.Collections.Concurrent;
+using System.Net;
 using System.Text;
 using OpenTelemetry.Proto.Collector.Logs.V1;
 using OpenTelemetry.Proto.Logs.V1;
 using Xunit.Abstractions;
-
-#if NETFRAMEWORK
-using System.Net;
-#else
-using Microsoft.AspNetCore.Http;
-#endif
 
 namespace IntegrationTests.Helpers;
 
@@ -39,11 +34,7 @@ public class MockLogsCollector : IDisposable
     {
         _output = output;
 
-#if NETFRAMEWORK
         _listener = new(output, HandleHttpRequests, host, "/v1/logs/");
-#else
-        _listener = new(output, HandleHttpRequests, "/v1/logs");
-#endif
     }
 
     /// <summary>
@@ -163,7 +154,6 @@ public class MockLogsCollector : IDisposable
         Assert.Fail(message.ToString());
     }
 
-#if NETFRAMEWORK
     private void HandleHttpRequests(HttpListenerContext ctx)
     {
         var logsMessage = ExportLogsServiceRequest.Parser.ParseFrom(ctx.Request.InputStream);
@@ -171,16 +161,6 @@ public class MockLogsCollector : IDisposable
 
         ctx.GenerateEmptyProtobufResponse<ExportLogsServiceResponse>();
     }
-#else
-    private async Task HandleHttpRequests(HttpContext ctx)
-    {
-        using var bodyStream = await ctx.ReadBodyToMemoryAsync();
-        var metricsMessage = ExportLogsServiceRequest.Parser.ParseFrom(bodyStream);
-        HandleLogsMessage(metricsMessage);
-
-        await ctx.GenerateEmptyProtobufResponseAsync<ExportLogsServiceResponse>();
-    }
-#endif
 
     private void HandleLogsMessage(ExportLogsServiceRequest logsMessage)
     {

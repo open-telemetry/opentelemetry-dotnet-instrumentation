@@ -28,7 +28,6 @@ namespace IntegrationTests.Helpers;
 
 internal static class CollectorResponseHelper
 {
-#if NETFRAMEWORK
     public static void GenerateEmptyProtobufResponse<T>(this HttpListenerContext ctx)
         where T : IMessage, new()
     {
@@ -52,28 +51,4 @@ internal static class CollectorResponseHelper
         ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
         ctx.Response.Close();
     }
-#endif
-
-#if NET6_0_OR_GREATER
-    public static async Task GenerateEmptyProtobufResponseAsync<T>(this HttpContext ctx)
-        where T : IMessage, new()
-    {
-        ctx.Response.ContentType = "application/x-protobuf";
-        ctx.Response.StatusCode = (int)HttpStatusCode.OK;
-        var responseMessage = new T();
-        ctx.Response.ContentLength = responseMessage.CalculateSize();
-
-        using var outMemory = new MemoryStream();
-        responseMessage.WriteTo(outMemory);
-
-        await ctx.Response.Body.WriteAsync(outMemory.GetBuffer(), 0, (int)outMemory.Length);
-        await ctx.Response.CompleteAsync();
-    }
-
-    public static async Task GenerateEmptyJsonResponseAsync(this HttpContext ctx)
-    {
-        ctx.Response.ContentType = "application/json";
-        await ctx.Response.WriteAsync("{}");
-    }
-#endif
 }
