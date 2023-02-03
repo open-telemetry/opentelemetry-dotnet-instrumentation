@@ -5,7 +5,21 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.5.1-beta.3...HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.6.0-beta.1...HEAD)
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.6.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.6.0-beta.1)
 
 This beta release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
@@ -52,16 +66,10 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
 - Change instrumentation id for ASP.NET Core traces and metrics instrumentation
   from `AspNet` to `ASPNETCORE`.
 
-### Deprecated
-
-### Removed
-
 ### Fixed
 
 - Fix console error messages `Log: Exception creating FileSink`
  [#1885](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1885)
-
-### Security
 
 ## [0.5.1-beta.3](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.5.1-beta.3)
 
