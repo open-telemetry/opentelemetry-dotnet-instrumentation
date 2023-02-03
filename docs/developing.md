@@ -155,14 +155,12 @@ You can also find the exported telemetry in `dev/log` directory.
 
 > *Warning:* Make sure to build and prepare the test environment beforehand.
 
-You can use [`dev/envvars.sh`](../dev/envvars.sh) to export profiler
-environmental variables to your current shell session.
-You must run it from the root of this repository.
-For example:
+You can reuse [`instrument.sh`](../instrument.sh) to export profiler
+environmental variables to your current Shell session:
 
 ```sh
-. ./dev/envvars.sh
-./test/test-applications/integrations/TestApplication.Smoke/bin/x64/Release/net7.0/TestApplication.Smoke
+export OTEL_DOTNET_AUTO_HOME="bin/tracer-home"
+. ./instrument.sh
 ```
 
 ### Using playground application
@@ -223,7 +221,8 @@ the [verify-test.yml](../.github/workflows/verify-test.yml) GitHub workflow.
   The following example shows how you can debug if the profiler is attached:
 
   ```bash
-  ~/repos/opentelemetry-dotnet-instrumentation$ source dev/envvars.sh 
+  ~/repos/opentelemetry-dotnet-instrumentation$ export OTEL_DOTNET_AUTO_HOME="bin/tracer-home"
+  ~/repos/opentelemetry-dotnet-instrumentation$ . ./instrument.sh 
   ~/repos/opentelemetry-dotnet-instrumentation$ cd ../runtime/
   ~/repos/runtime$ lldb -- ./artifacts/bin/coreclr/Linux.x64.Debug/corerun ~/repos/opentelemetry-dotnet-instrumentation/examples/ConsoleApp/bin/Debug/net6.0/Examples.ConsoleApp.dll
   (lldb) target create "./artifacts/bin/coreclr/Linux.x64.Debug/corerun"
