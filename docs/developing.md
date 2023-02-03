@@ -221,7 +221,8 @@ the [verify-test.yml](../.github/workflows/verify-test.yml) GitHub workflow.
   The following example shows how you can debug if the profiler is attached:
 
   ```bash
-  ~/repos/opentelemetry-dotnet-instrumentation$ source dev/envvars.sh 
+  ~/repos/opentelemetry-dotnet-instrumentation$ export OTEL_DOTNET_AUTO_HOME="bin/tracer-home"
+  ~/repos/opentelemetry-dotnet-instrumentation$ . ./instrument.sh 
   ~/repos/opentelemetry-dotnet-instrumentation$ cd ../runtime/
   ~/repos/runtime$ lldb -- ./artifacts/bin/coreclr/Linux.x64.Debug/corerun ~/repos/opentelemetry-dotnet-instrumentation/examples/ConsoleApp/bin/Debug/net6.0/Examples.ConsoleApp.dll
   (lldb) target create "./artifacts/bin/coreclr/Linux.x64.Debug/corerun"
