@@ -183,6 +183,7 @@ partial class Build
     Target InstallNetFxAssembliesGAC => _ => _
         .Unlisted()
         .Before(RunManagedTests)
+        .After(BuildTracer)
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
