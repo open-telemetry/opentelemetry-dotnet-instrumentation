@@ -87,7 +87,7 @@ internal static class DelayedInitialization
         {
 #if NET462
             new AspNetMetricsInitializer(lazyInstrumentationLoader);
-#elif NET6_0_OR_GREATER
+#elif NET6_0_OR_GREATER && _INCLUDE_ASP_NET_CORE_
             lazyInstrumentationLoader.Add(new AspNetCoreMetricsInitializer());
 #endif
         }

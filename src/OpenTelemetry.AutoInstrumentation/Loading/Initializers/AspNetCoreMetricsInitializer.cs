@@ -14,7 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER && _INCLUDE_ASP_NET_CORE_
 
 using System.Reflection;
 using OpenTelemetry.Instrumentation.AspNetCore;
