@@ -131,6 +131,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.MassTransit", "test\test-applications\integrations\TestApplication.MassTransit\TestApplication.MassTransit.csproj", "{06664166-35D6-484D-9171-DCB99D1D310A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{00F4C92D-6652-4BD8-A334-B35D3E711BE6}"
+	ProjectSection(SolutionItems) = preProject
+		tools\Directory.Build.targets = tools\Directory.Build.targets
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationsJsonGenerator", "tools\IntegrationsJsonGenerator\IntegrationsJsonGenerator.csproj", "{0A950D85-E813-4CA3-8927-334BB7787372}"
 EndProject
@@ -154,15 +157,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.AspNet.NetF
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.MultipleAppDomains.NetFramework", "test\test-applications\integrations\TestApplication.MultipleAppDomains.NetFramework\TestApplication.MultipleAppDomains.NetFramework.csproj", "{A0338846-2AF8-4D96-ADA7-EBD4F010D08F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.CustomSdk", "test\test-applications\integrations\TestApplication.CustomSdk\TestApplication.CustomSdk.csproj", "{7B363F47-1DB8-44CF-8388-A41F9366C9DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.CustomSdk", "test\test-applications\integrations\TestApplication.CustomSdk\TestApplication.CustomSdk.csproj", "{7B363F47-1DB8-44CF-8388-A41F9366C9DE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Quartz", "test\test-applications\integrations\TestApplication.Quartz\TestApplication.Quartz.csproj", "{B48780CE-8AAB-44D3-9CD1-8491584352B5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmarks", "test\Benchmarks\Benchmarks.csproj", "{B1E71654-E784-4A39-BE45-8671E027B6D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.EntityFrameworkCore", "test\test-applications\integrations\TestApplication.EntityFrameworkCore\TestApplication.EntityFrameworkCore.csproj", "{036A56A4-4EEF-42E3-9857-B9B00D302BF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.EntityFrameworkCore", "test\test-applications\integrations\TestApplication.EntityFrameworkCore\TestApplication.EntityFrameworkCore.csproj", "{036A56A4-4EEF-42E3-9857-B9B00D302BF9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DependencyListGenerator", "tools\DependencyListGenerator\DependencyListGenerator.csproj", "{D6181786-C7F1-400D-A678-8DC300485429}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GacInstallTool", "tools\GacInstallTool\GacInstallTool.csproj", "{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -780,6 +785,18 @@ Global
 		{D6181786-C7F1-400D-A678-8DC300485429}.Release|x64.Build.0 = Release|Any CPU
 		{D6181786-C7F1-400D-A678-8DC300485429}.Release|x86.ActiveCfg = Release|Any CPU
 		{D6181786-C7F1-400D-A678-8DC300485429}.Release|x86.Build.0 = Release|Any CPU
+		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD}.Debug|x64.Build.0 = Debug|Any CPU
+		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD}.Debug|x86.Build.0 = Debug|Any CPU
+		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD}.Release|x64.ActiveCfg = Release|Any CPU
+		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD}.Release|x64.Build.0 = Release|Any CPU
+		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD}.Release|x86.ActiveCfg = Release|Any CPU
+		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -840,6 +857,7 @@ Global
 		{B1E71654-E784-4A39-BE45-8671E027B6D7} = {5C915382-C886-457D-8641-9E766D8E5A17}
 		{036A56A4-4EEF-42E3-9857-B9B00D302BF9} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{D6181786-C7F1-400D-A678-8DC300485429} = {00F4C92D-6652-4BD8-A334-B35D3E711BE6}
+		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD} = {00F4C92D-6652-4BD8-A334-B35D3E711BE6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}

@@ -4,11 +4,13 @@ using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.Docker;
+using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.MSBuild;
 using Serilog;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.Docker.DockerTasks;
+using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.MSBuild.MSBuildTasks;
 
 partial class Build
@@ -176,5 +178,20 @@ partial class Build
             var generatedSourceFile = SourceDirectory / Projects.AutoInstrumentationNative / "netfx_assembly_redirection.h";
 
             AssemblyRedirectionSourceGenerator.Generate(netFxAssembliesFolder, generatedSourceFile);
+        });
+
+    Target InstallNetFxAssembliesGAC => _ => _
+        .Unlisted()
+        .Before(RunManagedTests)
+        .OnlyWhenStatic(() => IsWin)
+        .Executes(() =>
+        {
+            var netFxAssembliesFolder = TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET462);
+            var installTool = Solution.GetProject(Projects.Tools.GacInstallTool);
+
+            var output = DotNetRun(s => s
+                .SetProjectFile(installTool)
+                .SetConfiguration(BuildConfiguration)
+                .SetApplicationArguments(netFxAssembliesFolder));
         });
 }
