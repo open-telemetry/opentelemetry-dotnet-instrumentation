@@ -16,8 +16,10 @@
 
 #Requires -RunAsAdministrator
 
+$ServiceLocatorVariable = "OTEL_DOTNET_AUTO_INSTALL_DIR"
+
 function Get-Current-InstallDir() {
-    return [System.Environment]::GetEnvironmentVariable("OTEL_DOTNET_AUTO_INSTALL_DIR", [System.EnvironmentVariableTarget]::Machine)
+    return [System.Environment]::GetEnvironmentVariable($ServiceLocatorVariable, [System.EnvironmentVariableTarget]::Machine)
 }
 
 function Get-CLIInstallDir-From-InstallDir([string]$InstallDir) {
@@ -232,7 +234,7 @@ function Install-OpenTelemetryCore() {
         Expand-Archive $archivePath $installDir -Force
 
         # OpenTelemetry service locator
-        [System.Environment]::SetEnvironmentVariable('OTEL_DOTNET_AUTO_INSTALL_DIR', $installDir, [System.EnvironmentVariableTarget]::Machine)
+        [System.Environment]::SetEnvironmentVariable($ServiceLocatorVariable, $installDir, [System.EnvironmentVariableTarget]::Machine)
 
         # Register .NET Framweworks dlls in GAC
         [System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") | Out-Null
@@ -280,7 +282,7 @@ function Uninstall-OpenTelemetryCore() {
     Remove-Item -LiteralPath $installDir -Force -Recurse
 
     # Remove OTel service locator variable
-    [System.Environment]::SetEnvironmentVariable('OTEL_DOTNET_AUTO_INSTALL_DIR', $null, [System.EnvironmentVariableTarget]::Machine)
+    [System.Environment]::SetEnvironmentVariable($ServiceLocatorVariable, $null, [System.EnvironmentVariableTarget]::Machine)
 }
 
 <#
