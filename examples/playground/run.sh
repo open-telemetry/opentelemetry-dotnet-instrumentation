@@ -8,6 +8,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 cd $DIR/AspNetCoreMvc
 dotnet build -c $CONFIGURATION
 
+cd $DIR/../..
 export OTEL_DOTNET_AUTO_HOME="bin/tracer-home"
 . ./instrument.sh 
 
