@@ -34,6 +34,6 @@ internal class Program
             publisher.GacInstall(file);
         }
 
-        Console.WriteLine($"Success: Installed {files.Length} libraries.");
+        Console.WriteLine($"Success: Installed {files.Length} libraries in the GAC.");
     }
 }
