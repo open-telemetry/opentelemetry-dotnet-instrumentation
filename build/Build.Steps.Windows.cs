@@ -184,14 +184,26 @@ partial class Build
         .Unlisted()
         .After(BuildTracer)
         .OnlyWhenStatic(() => IsWin)
-        .Executes(() =>
-        {
-            var netFxAssembliesFolder = TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET462);
-            var installTool = Solution.GetProject(Projects.Tools.GacInstallTool);
+        .Executes(() => RunNetFxGacOperation(install: true));
 
-            var output = DotNetRun(s => s
-                .SetProjectFile(installTool)
-                .SetConfiguration(BuildConfiguration)
-                .SetApplicationArguments(netFxAssembliesFolder));
-        });
+    /// <remarks>
+    /// Warning: This target could cause potential harm to your system by removing a required library from GAC.
+    /// </remarks>
+    Target UninstallNetFxAssembliesGAC => _ => _
+        .Unlisted()
+        .After(BuildTracer)
+        .OnlyWhenStatic(() => IsWin)
+        .Executes(() => RunNetFxGacOperation(install: false));
+
+    private void RunNetFxGacOperation(bool install)
+    {
+        var netFxAssembliesFolder = TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET462);
+        var installTool = Solution.GetProject(Projects.Tools.GacInstallTool);
+        var flag = install ? "-i" : "-u";
+
+        DotNetRun(s => s
+            .SetProjectFile(installTool)
+            .SetConfiguration(BuildConfiguration)
+            .SetApplicationArguments($"{flag} {netFxAssembliesFolder}"));
+    }
 }

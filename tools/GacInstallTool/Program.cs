@@ -18,23 +18,50 @@ namespace GacInstallTool;
 
 internal class Program
 {
+    private const string InstallFlag = "-i";
+    private const string UninstallFlag = "-u";
+
     public static void Main(string[] args)
     {
-        if (args.Length == 0)
+        if (args.Length < 2)
         {
-            throw new ArgumentNullException(nameof(args));
+            throw new InvalidOperationException("Missing arguments. Provide -i path/to/dir to install and -u path/to/dir to uninstall.");
         }
 
-        var dir = args[0];
+        var flag = args[0];
+        var dir = args[1];
+
+        if (flag != InstallFlag && flag != UninstallFlag)
+        {
+            throw new InvalidOperationException($"Unknown flag: {flag}.");
+        }
+
+        if (!Directory.Exists(dir))
+        {
+            throw new DirectoryNotFoundException($"Directory does not exist: {dir}");
+        }
+
+        var install = flag == InstallFlag;
         var publisher = new System.EnterpriseServices.Internal.Publish();
         var files = Directory.GetFiles(dir, "*.dll");
 
         foreach (var file in files)
         {
-            // This API call can silently fail.
-            publisher.GacInstall(file);
+            // Publisher API call can silently fail.
+
+            if (install)
+            {
+                publisher.GacInstall(file);
+            }
+            else
+            {
+                publisher.GacRemove(file);
+            }
         }
 
-        Console.WriteLine($"Success: Installed {files.Length} libraries in the GAC.");
+        var resultText = install
+            ? $"Success: Installed {files.Length} libraries in the GAC."
+            : $"Success: Uninstalled {files.Length} libraries from the GAC.";
+        Console.WriteLine(resultText);
     }
 }
