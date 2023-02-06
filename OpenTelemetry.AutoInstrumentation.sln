@@ -133,6 +133,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{00F4C92D-6652-4BD8-A334-B35D3E711BE6}"
 	ProjectSection(SolutionItems) = preProject
 		tools\Directory.Build.targets = tools\Directory.Build.targets
+		tools\Directory.Packages.props = tools\Directory.Packages.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationsJsonGenerator", "tools\IntegrationsJsonGenerator\IntegrationsJsonGenerator.csproj", "{0A950D85-E813-4CA3-8927-334BB7787372}"
