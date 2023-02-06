@@ -31,6 +31,7 @@ internal class Program
 
         foreach (var file in files)
         {
+            // This API call can silently fail.
             publisher.GacInstall(file);
         }
 
