@@ -11,7 +11,8 @@ RUN yum update -y \
 
 RUN curl -sL https://cmake.org/files/v3.25/cmake-3.25.2-linux-x86_64.sh -o cmake_install.sh \
     && chmod +x cmake_install.sh \
-    && ./cmake_install.sh --prefix=/usr/local --exclude-subdir --skip-license
+    && ./cmake_install.sh --prefix=/usr/local --exclude-subdir --skip-license \
+    && rm cmake_install.sh
 
 # https://releases.llvm.org/12.0.0/docs/GettingStarted.html#getting-started-quickly-a-summary
 RUN git clone --depth 1 --branch release/12.x https://github.com/llvm/llvm-project.git \
