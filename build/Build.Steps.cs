@@ -380,6 +380,7 @@ partial class Build
 
     Target RunManagedIntegrationTests => _ => _
         .Unlisted()
+        .After(InstallNetFxAssembliesGAC)
         .After(RunManagedUnitTests)
         .Executes(() =>
         {
