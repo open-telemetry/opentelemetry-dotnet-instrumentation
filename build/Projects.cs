@@ -34,6 +34,6 @@ public static class Projects
     public static class Tools
     {
         public const string IntegrationsJsonGenerator = "IntegrationsJsonGenerator";
-
+        public const string GacInstallTool = "GacInstallTool";
     }
 }
