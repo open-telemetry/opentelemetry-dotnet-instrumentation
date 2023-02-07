@@ -52,6 +52,10 @@ public sealed class DotNetCliTests : TestHelper, IDisposable
         // Ensure to MS telemetry spans.
         SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", "1");
 
+        // Stop all build servers to ensure user like experience.
+        // Currently there is an issue trying to launch VBCSCompiler background server.
+        RunDotNetCli("build-server shutdown");
+
         var tfm = $"net{Environment.Version.Major}.0";
         RunDotNetCli($"new console --framework {tfm}");
 
