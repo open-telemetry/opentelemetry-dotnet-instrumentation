@@ -199,6 +199,15 @@ function Get-OpenTelemetry-Archive([string] $Version, [string] $LocalPath) {
     return Download-OpenTelemetry $Version $tempDir
 }
 
+function Test-AssemblyNotForGAC([string] $Name) {
+    switch ($Name) {
+        "netstandard.dll" { return $true }
+        "grpc_csharp_ext.x64.dll" { return $true }
+        "grpc_csharp_ext.x86.dll" { return $true }
+    }
+    return $false 
+}
+
 <#
     .SYNOPSIS
     Installs OpenTelemetry .NET Automatic Instrumentation.
@@ -246,13 +255,7 @@ function Install-OpenTelemetryCore() {
                 -Status "Module $($i+1) out of $($dlls.Count). Installing $($dlls[$i].Name):" `
                 -PercentComplete $percentageComplete
 
-            if ($dlls[$i].Name -eq "netstandard.dll") {
-                continue
-            }
-            if ($dlls[$i].Name -eq "grpc_csharp_ext.x86.dll") {
-                continue
-            }
-            if ($dlls[$i].Name -eq "grpc_csharp_ext.x64.dll") {
+            if (Test-AssemblyNotForGAC $dlls[$i].Name) {
                 continue
             }
 
@@ -293,13 +296,7 @@ function Uninstall-OpenTelemetryCore() {
             -Status "Module $($i+1) out of $($dlls.Count). Uninstalling $($dlls[$i].Name):" `
             -PercentComplete $percentageComplete
 
-        if ($dlls[$i].Name -eq "netstandard.dll") {
-            continue
-        }
-        if ($dlls[$i].Name -eq "grpc_csharp_ext.x86.dll") {
-            continue
-        }
-        if ($dlls[$i].Name -eq "grpc_csharp_ext.x64.dll") {
+        if (Test-AssemblyNotForGAC $dlls[$i].Name) {
             continue
         }
 
