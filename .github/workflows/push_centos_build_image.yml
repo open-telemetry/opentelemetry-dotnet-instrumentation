@@ -8,7 +8,7 @@ jobs:
   build-and-push-image:
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: centos7-build-image
+      IMAGE_NAME: ${{ github.repository }}-centos7-build-image
     runs-on: ubuntu-20.04
     permissions:
       contents: read
