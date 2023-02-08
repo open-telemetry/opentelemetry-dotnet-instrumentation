@@ -23,4 +23,6 @@ RUN git clone --depth 1 --branch release/12.x https://github.com/llvm/llvm-proje
     # use gcc_install_prefix to tell clang where gcc containing required libstdc++ is installed
     && scl enable devtoolset-9 -- cmake -DLLVM_ENABLE_PROJECTS=clang -DCMAKE_BUILD_TYPE=Release -DGCC_INSTALL_PREFIX=/opt/rh/devtoolset-9/root/usr/ -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=1 -G "Unix Makefiles" ../llvm \
     && make install \
+    && cd ../../ \
     && rm -rf llvm-project
+
