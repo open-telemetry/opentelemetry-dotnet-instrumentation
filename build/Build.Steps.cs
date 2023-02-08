@@ -457,6 +457,13 @@ partial class Build
                         RemoveDuplicatedLibraries(depsJsonContent, architectureStores);
 
                         RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsFile(depsJsonContent, file);
+                        
+                        // To allow roll forward for applications, like Roslyn, that target one tfm
+                        // but have a later runtime make additional copies under the original tfm folder.
+                        if (folderRuntimeName == TargetFramework.NET6_0)
+                        {
+                            AddFrameworkRollForwardCopy(TargetFramework.NET6_0, TargetFramework.NET7_0, architectureStores);
+                        }
                     });
                 RemoveFilesFromAdditionalDepsDirectory();
 
@@ -533,6 +540,32 @@ partial class Build
                 {
                     AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml", "**/*.dylib", "**/*.so").ForEach(DeleteFile);
                     AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(DeleteDirectory);
+                }
+
+                void AddFrameworkRollForwardCopy(string runtime, string rollForwardRuntine, IReadOnlyList<string> architectureStores)
+                {
+                    foreach (var architectureStore in architectureStores)
+                    {
+                        var assemblyDirectories = Directory.GetDirectories(architectureStore);
+                        foreach (var assemblyDirectory in assemblyDirectories)
+                        {
+                            var assemblyVersionDirectories = Directory.GetDirectories(assemblyDirectory);
+                            if (assemblyVersionDirectories.Length != 1)
+                            {
+                                throw new InvalidOperationException(
+                                    $"Expected exactly one directory under {assemblyDirectory} but found {assemblyVersionDirectories.Length} instead.");
+                            }
+
+                            var assemblyVersionDirectory = assemblyVersionDirectories[0];
+                            var sourceDir = Path.Combine(assemblyVersionDirectory, "lib", runtime);
+                            if (Directory.Exists(sourceDir))
+                            {
+                                var destDir = Path.Combine(assemblyVersionDirectory, "lib", rollForwardRuntine);
+                                // Directory.CreateDirectory(destDir);
+                                CopyDirectoryRecursively(sourceDir, destDir);
+                            }
+                        }
+                    }    
                 }
             });
 
