@@ -1,6 +1,5 @@
 ﻿#include "pch.h"
 
-
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/string.h"
 #include "../../src/OpenTelemetry.AutoInstrumentation.Native/environment_variables_parser.h"
 
@@ -23,7 +22,6 @@ TEST(TrueConditionTest, NonTrueValues)
     ASSERT_FALSE(TrueCondition(ToWSTRING("truee")));
     ASSERT_FALSE(TrueCondition(ToWSTRING("TRUEE")));
 }
-
 
 TEST(FalseConditionTest, FalseValues)
 {
