@@ -4,12 +4,11 @@ name: Build and push centos7 base image
 on:
   workflow_dispatch:
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}-centos7-build-image
-
 jobs:
   build-and-push-image:
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: centos7-build-image
     runs-on: ubuntu-20.04
     permissions:
       contents: read
@@ -35,7 +34,6 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v4.0.0
         with:
-          context: ./docker
           file: ./docker/centos.dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
