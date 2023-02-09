@@ -51,7 +51,7 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="3.1.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="3.1.0" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Configuration" Version="3.1.0" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="5.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.0" />
