@@ -432,11 +432,11 @@ partial class Build
                     .EnableNoBuild()
                     .EnableNoRestore()
                     .CombineWith(TestFrameworks.ExceptNetFramework(), (p, framework) => p
-                        .SetFramework(framework)
-                        // Additional-deps probes the directory using SemVer format.
-                        // Example: For netcoreapp3.1 framework, additional-deps uses 3.1.0 or 3.1.1 and so on.
-                        // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
-                        .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
+                    .SetFramework(framework)
+                    // Additional-deps probes the directory using SemVer format.
+                    // Example: For netcoreapp3.1 framework, additional-deps uses 3.1.0 or 3.1.1 and so on.
+                    // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
+                    .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
 
                 AdditionalDepsDirectory.GlobFiles("**/*deps.json")
                     .ForEach(file =>
@@ -457,6 +457,13 @@ partial class Build
                         RemoveDuplicatedLibraries(depsJsonContent, architectureStores);
 
                         RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsFile(depsJsonContent, file);
+
+                        // To allow roll forward for applications, like Roslyn, that target one tfm
+                        // but have a later runtime make additional copies under the original tfm folder.
+                        if (folderRuntimeName == TargetFramework.NET6_0)
+                        {
+                            AddFrameworkRollForwardCopy(TargetFramework.NET6_0, TargetFramework.NET7_0, architectureStores);
+                        }
                     });
                 RemoveFilesFromAdditionalDepsDirectory();
 
@@ -533,6 +540,32 @@ partial class Build
                 {
                     AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml", "**/*.dylib", "**/*.so").ForEach(DeleteFile);
                     AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(DeleteDirectory);
+                }
+
+                void AddFrameworkRollForwardCopy(string runtime, string rollForwardRuntime, IReadOnlyList<string> architectureStores)
+                {
+                    foreach (var architectureStore in architectureStores)
+                    {
+                        var assemblyDirectories = Directory.GetDirectories(architectureStore);
+                        foreach (var assemblyDirectory in assemblyDirectories)
+                        {
+                            var assemblyVersionDirectories = Directory.GetDirectories(assemblyDirectory);
+                            if (assemblyVersionDirectories.Length != 1)
+                            {
+                                throw new InvalidOperationException(
+                                    $"Expected exactly one directory under {assemblyDirectory} but found {assemblyVersionDirectories.Length} instead.");
+                            }
+
+                            var assemblyVersionDirectory = assemblyVersionDirectories[0];
+                            var sourceDir = Path.Combine(assemblyVersionDirectory, "lib", runtime);
+                            if (Directory.Exists(sourceDir))
+                            {
+                                var destDir = Path.Combine(assemblyVersionDirectory, "lib", rollForwardRuntime);
+                                // Directory.CreateDirectory(destDir);
+                                CopyDirectoryRecursively(sourceDir, destDir);
+                            }
+                        }
+                    }
                 }
             });
 
