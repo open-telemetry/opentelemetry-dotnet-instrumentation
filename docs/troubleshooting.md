@@ -2,11 +2,11 @@
 
 ## dotnet is crashing
 
-Currently, instrumenting self-contained applications and the `dotnet`
-CLI tool in particular is not supported.
-See [(#1744)](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1744).
+Until version `v0.6.0-beta.1` (inclusive) there were issues instrumenting
+the `dotnet` CLI tool.
 
-Therefore, we advise executing `dotnet build` before instrumenting the terminal session
+Therefore, if you are using one of these versions, we advise executing
+`dotnet build` before instrumenting the terminal session
 or calling it in a separate terminal session.
 
 See the [Get started](./README.md#get-started)
