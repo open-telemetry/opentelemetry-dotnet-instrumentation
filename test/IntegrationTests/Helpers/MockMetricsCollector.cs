@@ -80,7 +80,7 @@ public class MockMetricsCollector : IDisposable
         var expectationsMet = new List<Collected>();
         var additionalEntries = new List<Collected>();
 
-        timeout ??= Timeout.Expectation;
+        timeout ??= TestTimeout.Expectation;
         var cts = new CancellationTokenSource();
 
         try
@@ -139,7 +139,7 @@ public class MockMetricsCollector : IDisposable
 
     internal void AssertEmpty(TimeSpan? timeout = null)
     {
-        timeout ??= Timeout.NoExpectation;
+        timeout ??= TestTimeout.NoExpectation;
         while (_metricsSnapshots.TryTake(out var metricsResource, timeout.Value))
         {
             if (metricsResource.Count > 0)

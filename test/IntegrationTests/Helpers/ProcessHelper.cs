@@ -55,7 +55,7 @@ public class ProcessHelper : IDisposable
 
     public bool Drain()
     {
-        return Drain(Timeout.ProcessExit);
+        return Drain(TestTimeout.ProcessExit);
     }
 
     public bool Drain(TimeSpan timeout)

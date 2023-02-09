@@ -19,7 +19,6 @@
 using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
-using Timeouts = IntegrationTests.Helpers.Timeout;
 
 namespace IntegrationTests;
 
@@ -96,7 +95,7 @@ Console.WriteLine(response.StatusCode);
 
         process.Should().NotBeNull();
 
-        bool processTimeout = !process!.WaitForExit((int)Timeouts.ProcessExit.TotalMilliseconds);
+        bool processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
         if (processTimeout)
         {
             process.Kill();
