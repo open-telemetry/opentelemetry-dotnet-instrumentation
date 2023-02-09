@@ -64,7 +64,7 @@ internal static class EnvironmentConfigurationTracerHelper
             .SetExporter(settings, pluginManager)
             .AddSource(settings.ActivitySources.ToArray());
 
-        foreach (var legacySource in settings.LegacySources)
+        foreach (var legacySource in settings.AdditionalLegacySources)
         {
             builder.AddLegacySource(legacySource);
         }
