@@ -90,7 +90,7 @@ jobs:
         run: |
           set -e
           docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" .
-          docker run --rm mybuildimage /bin/sh -c '
+          docker run -e OS_TYPE=linux-musl --rm mybuildimage /bin/sh -c '
             set -e
             mkdir testapp
             cd testapp
