@@ -16,12 +16,10 @@
 
 #if !NETFRAMEWORK
 
-using System.Runtime.InteropServices;
 using FluentAssertions;
 using IntegrationTests.Helpers;
-using Org.BouncyCastle.Asn1.X509;
 using Xunit.Abstractions;
-using Timeout = IntegrationTests.Helpers.Timeout;
+using Timeouts = IntegrationTests.Helpers.Timeout;
 
 namespace IntegrationTests;
 
@@ -46,8 +44,14 @@ public sealed class DotNetCliTests : TestHelper, IDisposable
         Directory.SetCurrentDirectory(_tempWorkingDir.FullName);
     }
 
+    public void Dispose()
+    {
+        Directory.SetCurrentDirectory(_prevWorkingDir);
+        _tempWorkingDir.Delete(recursive: true);
+    }
+
     [Fact]
-    public void ExecuteDotNetCliWorkFlow()
+    public void WorkFlow()
     {
         // Ensure to MS telemetry spans.
         SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", "1");
@@ -72,12 +76,6 @@ public sealed class DotNetCliTests : TestHelper, IDisposable
         RunAppWithDotNetCliAndAssertHttpSpans("run -c Release");
     }
 
-    public void Dispose()
-    {
-        Directory.SetCurrentDirectory(_prevWorkingDir);
-        _tempWorkingDir.Delete(recursive: true);
-    }
-
     private static void ChangeDefaultProgramToHttpClient()
     {
         const string ProgramContent = @"
@@ -98,7 +96,7 @@ Console.WriteLine(response.StatusCode);
 
         process.Should().NotBeNull();
 
-        bool processTimeout = !process!.WaitForExit((int)Timeout.ProcessExit.TotalMilliseconds);
+        bool processTimeout = !process!.WaitForExit((int)Timeouts.ProcessExit.TotalMilliseconds);
         if (processTimeout)
         {
             process.Kill();
