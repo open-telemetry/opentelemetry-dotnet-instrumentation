@@ -11,6 +11,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+Replace `OTEL_DOTNET_AUTO_LEGACY_SOURCES` with `OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES`.
+
 ### Deprecated
 
 ### Removed

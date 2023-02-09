@@ -68,7 +68,7 @@ public class SettingsTests : IDisposable
             settings.ConsoleExporterEnabled.Should().BeFalse();
             settings.EnabledInstrumentations.Should().NotBeEmpty();
             settings.ActivitySources.Should().BeEquivalentTo(new List<string> { "OpenTelemetry.AutoInstrumentation.*" });
-            settings.LegacySources.Should().BeEmpty();
+            settings.AdditionalLegacySources.Should().BeEmpty();
             settings.TracesSampler.Should().BeNull();
             settings.TracesSamplerArguments.Should().BeNull();
 
