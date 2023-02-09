@@ -167,43 +167,33 @@ internal class StartupHook
 
     private static void ThrowIfReferenceIncorrectOpenTelemetryVersion(string loaderAssemblyLocation)
     {
-        var appReferenceAssemblies = Assembly.GetEntryAssembly()?.GetReferencedAssemblies();
-        if (appReferenceAssemblies == null)
-        {
-            return;
-        }
-
-        var index = Array.FindIndex(appReferenceAssemblies, assembly => assembly.Name == "OpenTelemetry");
         string? oTelPackageVersion = null;
 
-        if (index != -1)
+        try
         {
-            try
+            // Look up for type with an assembly name, will load the library.
+            // OpenTelemetry assembly load happens only if app has reference to the package.
+            var openTelemetryType = Type.GetType("OpenTelemetry.Sdk, OpenTelemetry");
+            if (openTelemetryType != null)
             {
-                // Look up for type with an assembly name, will load the library.
-                // OpenTelemetry assembly load happens only if app has reference to the package.
-                var openTelemetryType = Type.GetType("OpenTelemetry.Sdk, OpenTelemetry");
-                if (openTelemetryType != null)
+                var loadedOTelAssembly = Assembly.GetAssembly(openTelemetryType);
+                var loadedOTelFileVersionInfo = FileVersionInfo.GetVersionInfo(loadedOTelAssembly?.Location);
+                var loadedOTelFileVersion = new Version(loadedOTelFileVersionInfo.FileVersion);
+
+                var autoInstrumentationOTelLocation = Path.Combine(loaderAssemblyLocation, "OpenTelemetry.dll");
+                var autoInstrumentationOTelFileVersionInfo = FileVersionInfo.GetVersionInfo(autoInstrumentationOTelLocation);
+                var autoInstrumentationOTelFileVersion = new Version(autoInstrumentationOTelFileVersionInfo.FileVersion);
+
+                if (loadedOTelFileVersion < autoInstrumentationOTelFileVersion)
                 {
-                    var loadedOTelAssembly = Assembly.GetAssembly(openTelemetryType);
-                    var loadedOTelFileVersionInfo = FileVersionInfo.GetVersionInfo(loadedOTelAssembly?.Location);
-                    var loadedOTelfileVersion = new Version(loadedOTelFileVersionInfo.FileVersion);
-
-                    var autoInstrumentationOTelLocation = Path.Combine(loaderAssemblyLocation, "OpenTelemetry.dll");
-                    var autoInstrumentationOTelFileVersionInfo = FileVersionInfo.GetVersionInfo(autoInstrumentationOTelLocation);
-                    var autoInstrumentationOTelFileVersion = new Version(autoInstrumentationOTelFileVersionInfo.FileVersion);
-
-                    if (loadedOTelfileVersion < autoInstrumentationOTelFileVersion)
-                    {
-                        oTelPackageVersion = loadedOTelFileVersionInfo.FileVersion;
-                    }
+                    oTelPackageVersion = loadedOTelFileVersionInfo.FileVersion;
                 }
             }
-            catch (Exception ex)
-            {
-                // Exception in evaluation should not throw or crash the process.
-                Logger.LogInformation($"Couldn't evaluate reference to OpenTelemetry Sdk in an app. Exception: {ex}");
-            }
+        }
+        catch (Exception ex)
+        {
+            // Exception in evaluation should not throw or crash the process.
+            Logger.LogInformation($"Couldn't evaluate reference to OpenTelemetry Sdk in an app. Exception: {ex}");
         }
 
         if (oTelPackageVersion != null)
