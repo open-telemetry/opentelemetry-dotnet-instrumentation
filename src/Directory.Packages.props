@@ -54,7 +54,7 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Configuration" Version="3.1.0" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="5.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Primitives" Version="5.0.0" />
     <PackageVersion Include="System.Buffers" Version="4.5.1" />
     <PackageVersion Include="System.ComponentModel.Annotations" Version="4.7.0" />
