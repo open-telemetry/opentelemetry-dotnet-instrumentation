@@ -46,7 +46,7 @@ jobs:
     - name: Build in Docker container
       run: |
         docker run --rm \
-          --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project \
+          -e OS_TYPE=linux-musl --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project \
           otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
           ./build.sh
     - name: Upload ${{ matrix.base-image }} binaries

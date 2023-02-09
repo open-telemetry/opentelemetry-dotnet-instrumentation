@@ -17,6 +17,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Fix location of `OpenTelemetry.AutoInstrumentation.Native.so` for `linux-musl-x64`.
+
 ### Security
 
 ## [0.6.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.6.0-beta.1)
