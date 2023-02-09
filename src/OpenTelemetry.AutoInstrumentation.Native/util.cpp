@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "environment_variables_parser.h"
 #include "pal.h"
 #include "string.h"
 
@@ -112,11 +113,11 @@ std::vector<WSTRING> GetEnabledEnvironmentValues(const bool enabled_by_default,
     {
         bool       enabled   = enabled_by_default;
         const auto env_value = GetEnvironmentValue(value.second);
-        if (env_value == WStr("true"))
+        if (TrueCondition(env_value))
         {
             enabled = true;
         }
-        else if (env_value == WStr("false"))
+        else if (FalseCondition(env_value))
         {
             enabled = false;
         }
