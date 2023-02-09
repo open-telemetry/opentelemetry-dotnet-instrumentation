@@ -542,7 +542,7 @@ partial class Build
                     AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(DeleteDirectory);
                 }
 
-                void AddFrameworkRollForwardCopy(string runtime, string rollForwardRuntine, IReadOnlyList<string> architectureStores)
+                void AddFrameworkRollForwardCopy(string runtime, string rollForwardRuntime, IReadOnlyList<string> architectureStores)
                 {
                     foreach (var architectureStore in architectureStores)
                     {
@@ -560,7 +560,7 @@ partial class Build
                             var sourceDir = Path.Combine(assemblyVersionDirectory, "lib", runtime);
                             if (Directory.Exists(sourceDir))
                             {
-                                var destDir = Path.Combine(assemblyVersionDirectory, "lib", rollForwardRuntine);
+                                var destDir = Path.Combine(assemblyVersionDirectory, "lib", rollForwardRuntime);
                                 // Directory.CreateDirectory(destDir);
                                 CopyDirectoryRecursively(sourceDir, destDir);
                             }
