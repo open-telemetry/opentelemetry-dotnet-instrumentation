@@ -1,4 +1,7 @@
 CORECLR
+COREHOST
+corehost
+TRACEFILE
 netcoreapp
 NGEN
 CLSID
