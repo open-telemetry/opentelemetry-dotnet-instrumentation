@@ -102,9 +102,9 @@ internal static class ConfigurationKeys
         public const string AdditionalSources = "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES";
 
         /// <summary>
-        /// Configuration key for legacy source names to be added to the tracer at the startup.
+        /// Configuration key for additional legacy source names to be added to the tracer at the startup.
         /// </summary>
-        public const string LegacySources = "OTEL_DOTNET_AUTO_LEGACY_SOURCES";
+        public const string AdditionalLegacySources = "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES";
 
         /// <summary>
         /// Configuration key for sampler to be used for traces.

@@ -54,7 +54,7 @@ internal class TracerSettings : Settings
     /// <summary>
     /// Gets the list of legacy configurations to be added to the tracer at the startup.
     /// </summary>
-    public IList<string> LegacySources { get; } = new List<string>();
+    public IList<string> AdditionalLegacySources { get; } = new List<string>();
 
     /// <summary>
     /// Gets the instrumentation options.
@@ -93,12 +93,12 @@ internal class TracerSettings : Settings
             }
         }
 
-        var legacySources = configuration.GetString(ConfigurationKeys.Traces.LegacySources);
-        if (legacySources != null)
+        var additionalLegacySources = configuration.GetString(ConfigurationKeys.Traces.AdditionalLegacySources);
+        if (additionalLegacySources != null)
         {
-            foreach (var configurationName in legacySources.Split(Constants.ConfigurationValues.Separator))
+            foreach (var configurationName in additionalLegacySources.Split(Constants.ConfigurationValues.Separator))
             {
-                LegacySources.Add(configurationName);
+                AdditionalLegacySources.Add(configurationName);
             }
         }
 
