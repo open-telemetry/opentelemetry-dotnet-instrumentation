@@ -80,7 +80,7 @@ public class MockZipkinCollector : IDisposable
         var expectationsMet = new List<ZSpanMock>();
         var additionalEntries = new List<ZSpanMock>();
 
-        timeout ??= Timeout.Expectation;
+        timeout ??= TestTimeout.Expectation;
         var cts = new CancellationTokenSource();
 
         try

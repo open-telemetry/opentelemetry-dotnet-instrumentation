@@ -1,4 +1,4 @@
-// <copyright file="Timeout.cs" company="OpenTelemetry Authors">
+// <copyright file="TestTimeout.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,7 @@
 
 namespace IntegrationTests.Helpers;
 
-internal static class Timeout
+internal static class TestTimeout
 {
     public static readonly TimeSpan ProcessExit = TimeSpan.FromMinutes(5); // caution: long timeouts can cause integer overflow!
     public static readonly TimeSpan Expectation = TimeSpan.FromMinutes(1); // long to avoid flaky tests
