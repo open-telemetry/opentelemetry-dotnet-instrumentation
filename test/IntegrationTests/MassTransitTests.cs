@@ -16,7 +16,6 @@
 
 #if NET6_0_OR_GREATER
 using IntegrationTests.Helpers;
-using Xunit;
 using Xunit.Abstractions;
 using static OpenTelemetry.Proto.Trace.V1.Span.Types;
 

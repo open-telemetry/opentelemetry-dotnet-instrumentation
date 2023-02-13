@@ -16,7 +16,6 @@
 
 using IntegrationTests.Helpers;
 using OpenTelemetry.AutoInstrumentation.Configurations;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;

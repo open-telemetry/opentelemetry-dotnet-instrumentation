@@ -14,10 +14,10 @@
 // limitations under the License.
 // </copyright>
 
-using System.IO;
 using System.Net;
+#if NETFRAMEWORK
 using System.Text;
-using System.Threading.Tasks;
+#endif
 using Google.Protobuf;
 
 #if NET6_0_OR_GREATER
