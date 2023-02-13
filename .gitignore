@@ -296,6 +296,9 @@ src/OpenTelemetry.AutoInstrumentation.Native/Makefile
 src/OpenTelemetry.AutoInstrumentation.Native/CMakeCache.txt
 src/OpenTelemetry.AutoInstrumentation.Native/cmake_install.cmake
 
+# generated profiler files
+src/OpenTelemetry.AutoInstrumentation.Native/netfx_assembly_redirection.h
+
 # exception for native profiler dependencies
 !src/OpenTelemetry.AutoInstrumentation.Native/lib/**
 
