@@ -55,7 +55,7 @@ public class MockMetricsCollector : IDisposable
 
     public void Dispose()
     {
-        WriteOutput($"Shutting down.");
+        WriteOutput("Shutting down.");
         ResourceExpector.Dispose();
         _metricsSnapshots.Dispose();
         _listener.Dispose();
