@@ -15,13 +15,13 @@
 // </copyright>
 
 using System.Reflection;
-using FluentAssertions;
-using FluentAssertions.Extensions;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
 #if NETFRAMEWORK
 using System.Net;
+using FluentAssertions;
+using FluentAssertions.Extensions;
 using IntegrationTests.Helpers.Compatibility;
 #endif
 
