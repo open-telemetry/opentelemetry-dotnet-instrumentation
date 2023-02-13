@@ -15,9 +15,6 @@ jobs:
           - machine: windows-2022
             containers: windows
             log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
-          - machine: ubuntu-20.04
-            containers: linux
-            log-dir: "/var/log/opentelemetry/dotnet"
           - machine: macos-11
             containers: none
             log-dir: "/var/log/opentelemetry/dotnet"
@@ -142,10 +139,10 @@ jobs:
           name: bin-windows-2022
           path: nuget/bin-windows
 
-      - name: Download Ubuntu Artifacts from build job
+      - name: Download CentOS Artifacts from build job
         uses: actions/download-artifact@v3.0.2
         with:
-          name: bin-ubuntu-20.04
+          name: bin-centos
           path: nuget/bin-linux-glibc
 
       - name: Download Alpine Artifacts from build job
