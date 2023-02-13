@@ -19,7 +19,6 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Trace.V1;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;

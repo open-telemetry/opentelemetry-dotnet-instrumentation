@@ -14,10 +14,8 @@
 // limitations under the License.
 // </copyright>
 
-using System.Linq;
 using FluentAssertions;
 using IntegrationTests.Helpers;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;

@@ -15,7 +15,6 @@
 // </copyright>
 
 using IntegrationTests.Helpers;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
