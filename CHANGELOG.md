@@ -15,6 +15,8 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
 
 ### Added
 
+- Support for systems with glibc versions 2.17-2.29.
+
 ### Changed
 
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):

@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        machine: [ windows-2022, ubuntu-20.04, macos-11 ]
+        machine: [ windows-2022, macos-11 ]
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.3.0
@@ -32,7 +32,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        base-image: [ alpine ]
+        include:
+          - base-image: alpine
+            os-type: linux-musl
+          - base-image: centos
+            os-type: linux-glibc
     runs-on: ubuntu-20.04
     timeout-minutes: 60
     steps:
@@ -42,11 +46,11 @@ jobs:
         docker build \
           --tag otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
           --file "./docker/${{ matrix.base-image }}.dockerfile" \
-          ./build
+          ./docker
     - name: Build in Docker container
       run: |
         docker run --rm \
-          -e OS_TYPE=linux-musl --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project \
+          -e OS_TYPE=${{ matrix.os-type }} --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project \
           otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
           ./build.sh
     - name: Upload ${{ matrix.base-image }} binaries
@@ -71,7 +75,7 @@ jobs:
       - name: Install zip
         uses: montudor/action-zip@v1.0.0
       - run: cd bin-alpine ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-musl.zip . * ; cd ..
-      - run: cd bin-ubuntu-20.04 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc.zip . * ; cd ..
+      - run: cd bin-centos ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc.zip . * ; cd ..
       - run: cd bin-windows-2022 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-windows.zip . * ; cd ..
       - run: cd bin-macos-11 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-macos.zip . * ; cd ..
       - name: Create Release
