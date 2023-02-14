@@ -89,8 +89,6 @@ END
 // ASSEMBLY
 //
 
-NET_MANAGED_ENTRYPOINT_DLL ASSEMBLY "..\\bin\\ProfilerResources\\net6.0\\OpenTelemetry.AutoInstrumentation.Loader.dll"
-NET_MANAGED_ENTRYPOINT_SYMBOLS SYMBOLS "..\\bin\\ProfilerResources\\net6.0\\OpenTelemetry.AutoInstrumentation.Loader.pdb"
 NETFRAMEWORK_MANAGED_ENTRYPOINT_DLL ASSEMBLY "..\\bin\\ProfilerResources\\net462\\OpenTelemetry.AutoInstrumentation.Loader.dll"
 NETFRAMEWORK_MANAGED_ENTRYPOINT_SYMBOLS SYMBOLS "..\\bin\\ProfilerResources\\net462\\OpenTelemetry.AutoInstrumentation.Loader.pdb"
 

@@ -65,7 +65,13 @@ internal class StartupHook
             // Check Instrumentation is already initialized with native profiler.
             var profilerType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation");
 
-            if (profilerType == null)
+            if (profilerType != null)
+            {
+                Logger.LogError(
+                    $"OpenTelemetry.AutoInstrumentation assembly was already loaded from: {profilerType.Assembly?.Location}. " +
+                    "Check the DOTNET_STARTUP_HOOK environment variable.");
+            }
+            else
             {
                 ThrowIfReferenceIncorrectOpenTelemetryVersion(loaderAssemblyLocation);
 
@@ -74,12 +80,15 @@ internal class StartupHook
                 // will initialize Instrumentation through its static constructor.
                 string loaderFilePath = Path.Combine(loaderAssemblyLocation, "OpenTelemetry.AutoInstrumentation.Loader.dll");
                 Assembly loaderAssembly = Assembly.LoadFrom(loaderFilePath);
-                loaderAssembly.CreateInstance("OpenTelemetry.AutoInstrumentation.Loader.Startup");
-                Logger.LogInformation("StartupHook initialized successfully!");
-            }
-            else
-            {
-                Logger.LogInformation("OpenTelemetry.AutoInstrumentation.Instrumentation initialized before startup hook");
+                var loaderInstance = loaderAssembly.CreateInstance("OpenTelemetry.AutoInstrumentation.Loader.Loader");
+                if (loaderInstance is null)
+                {
+                    Logger.LogError("StartupHook failed to create an instance of the Loader");
+                }
+                else
+                {
+                    Logger.LogInformation("StartupHook initialized successfully!");
+                }
             }
         }
         catch (Exception ex)

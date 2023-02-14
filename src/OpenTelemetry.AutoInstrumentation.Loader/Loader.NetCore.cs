@@ -1,4 +1,4 @@
-// <copyright file="Startup.NetCore.cs" company="OpenTelemetry Authors">
+// <copyright file="Loader.NetCore.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// <summary>
 /// A class that attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
 /// </summary>
-internal partial class Startup
+internal partial class Loader
 {
     internal static System.Runtime.Loader.AssemblyLoadContext DependencyLoadContext { get; } = new ManagedProfilerAssemblyLoadContext();
 
@@ -61,12 +61,12 @@ internal partial class Startup
         //    load the originally referenced version
         if (assemblyName.Name != null && assemblyName.Name.StartsWith("OpenTelemetry.AutoInstrumentation", StringComparison.OrdinalIgnoreCase) && File.Exists(path))
         {
-            StartupLogger.Debug("Loading {0} with Assembly.LoadFrom", path);
+            LoaderLogger.Debug("Loading {0} with Assembly.LoadFrom", path);
             return Assembly.LoadFrom(path);
         }
         else if (File.Exists(path))
         {
-            StartupLogger.Debug("Loading {0} with DependencyLoadContext.LoadFromAssemblyPath", path);
+            LoaderLogger.Debug("Loading {0} with DependencyLoadContext.LoadFromAssemblyPath", path);
             return DependencyLoadContext.LoadFromAssemblyPath(path); // Load unresolved framework and third-party dependencies into a custom Assembly Load Context
         }
 

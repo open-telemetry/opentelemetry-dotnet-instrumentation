@@ -117,7 +117,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     if (runtime_information_.is_core())
     {
-        // .NET Core applications should use the dotnet startup hook to bootstrap OpenTelemetry so that the
+        // .NET Core applications should use the dotnet StartupHook to bootstrap OpenTelemetry so that the
         // necessary dependencies will be available. Bootstrapping with the profiling APIs occurs too early
         // and the necessary dependencies are not available yet.
 
@@ -126,7 +126,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         const auto startup_hooks = GetEnvironmentValues(environment::dotnet_startup_hooks, ENV_VAR_PATH_SEPARATOR);
         if (!IsStartupHookValid(startup_hooks, home_path))
         {
-            Logger::Error("The required startup hook was not configured correctly. No telemetry will be captured.");
+            Logger::Error("The required StartupHook was not configured correctly. No telemetry will be captured.");
             return E_FAIL;
         }
     }
@@ -183,11 +183,22 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     Logger::Debug("Number of Integrations loaded: ", integration_methods_.size());
 
-    DWORD event_mask = COR_PRF_MONITOR_JIT_COMPILATION | COR_PRF_DISABLE_TRANSPARENCY_CHECKS_UNDER_FULL_TRUST |
+    DWORD event_mask = COR_PRF_DISABLE_TRANSPARENCY_CHECKS_UNDER_FULL_TRUST |
                        COR_PRF_MONITOR_MODULE_LOADS | COR_PRF_MONITOR_ASSEMBLY_LOADS | COR_PRF_MONITOR_APPDOMAIN_LOADS;
 
     Logger::Info("CallTarget instrumentation is enabled.");
     event_mask |= COR_PRF_ENABLE_REJIT;
+
+    if (!runtime_information_.is_desktop())
+    {
+        Logger::Info("JIT Compilation callbacks disabled.");
+    }
+    else
+    {
+        // Only on .NET Framework callbacks for JIT compilation are needed.
+        Logger::Info("JIT Compilation callbacks enabled.");
+        event_mask |= COR_PRF_MONITOR_JIT_COMPILATION;
+    }
 
     if (!EnableInlining())
     {
@@ -617,10 +628,10 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         return S_OK;
     }
 
-    // In IIS, the startup hook will be inserted into a method in System.Web (which is domain-neutral)
-    // but the OpenTelemetry.AutoInstrumentation.Loader assembly that the startup hook loads from a
+    // In IIS, the OpenTelemetry.AutoInstrumentation will be inserted into a method in System.Web (which is domain-neutral)
+    // but the OpenTelemetry.AutoInstrumentation.Loader assembly that the CLR profiler loads from a
     // byte array will be loaded into a non-shared AppDomain.
-    // In this case, do not insert another startup hook into that non-shared AppDomain
+    // In this case, do not insert another Loader into that non-shared AppDomain
     if (module_info.assembly.name == opentelemetry_autoinstrumentation_loader_assemblyName)
     {
         Logger::Info("ModuleLoadFinished: OpenTelemetry.AutoInstrumentation.Loader loaded into AppDomain ",
@@ -843,126 +854,15 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(FunctionID function
 {
     auto _ = trace::Stats::Instance()->JITCompilationStartedMeasure();
 
-    if (!is_attached_ || !is_safe_to_block || runtime_information_.is_core())
+#ifdef _WIN32
+    if (runtime_information_.is_desktop() && is_attached_ && is_safe_to_block)
     {
-        return S_OK;
+        // The JIT compilation only needs to be tracked on the .NET Framework so the Loader
+        // can be injected. For .NET the DOTNET_STARTUP_HOOK takes care of injecting the
+        // instrumentation startup code.
+        return JITCompilationStartedOnNetFramework(function_id, is_safe_to_block);
     }
-
-    // keep this lock until we are done using the module,
-    // to prevent it from unloading while in use
-    std::lock_guard<std::mutex> guard(module_id_to_info_map_lock_);
-
-    // double check if is_attached_ has changed to avoid possible race condition with shutdown function
-    if (!is_attached_)
-    {
-        return S_OK;
-    }
-
-    ModuleID module_id;
-    mdToken  function_token = mdTokenNil;
-
-    HRESULT hr = this->info_->GetFunctionInfo(function_id, nullptr, &module_id, &function_token);
-
-    if (FAILED(hr))
-    {
-        Logger::Warn("JITCompilationStarted: Call to ICorProfilerInfo4.GetFunctionInfo() failed for ", function_id);
-        return S_OK;
-    }
-
-    // Verify that we have the metadata for this module
-    ModuleMetadata* module_metadata = nullptr;
-
-    auto findRes = module_id_to_info_map_.find(module_id);
-    if (findRes != module_id_to_info_map_.end())
-    {
-        module_metadata = findRes->second;
-    }
-
-    if (module_metadata == nullptr)
-    {
-        // we haven't stored a ModuleMetadata for this module,
-        // so we can't modify its IL
-        return S_OK;
-    }
-
-    // We check if we are in CallTarget mode and the loader was already injected.
-    const bool has_loader_injected_in_appdomain =
-        first_jit_compilation_app_domains.find(module_metadata->app_domain_id) !=
-        first_jit_compilation_app_domains.end();
-
-    if (has_loader_injected_in_appdomain)
-    {
-        // Loader was already injected in a calltarget scenario, we don't need to do anything else here
-        return S_OK;
-    }
-
-    // get function info
-    const auto& caller = GetFunctionInfo(module_metadata->metadata_import, function_token);
-    if (!caller.IsValid())
-    {
-        return S_OK;
-    }
-
-    if (Logger::IsDebugEnabled())
-    {
-        Logger::Debug("JITCompilationStarted: function_id=", function_id, " token=", function_token, " name=",
-                      caller.type.name, ".", caller.name, "()");
-    }
-
-    // IIS: Ensure that the startup hook is inserted into System.Web.Compilation.BuildManager.InvokePreStartInitMethods.
-    // This will be the first call-site considered for the startup hook injection,
-    // which correctly loads OpenTelemetry.AutoInstrumentation.Loader into the application's
-    // own AppDomain because at this point in the code path, the ApplicationImpersonationContext
-    // has been started.
-    //
-    // Note: This check must only run on desktop because it is possible (and the default) to host
-    // ASP.NET Core in-process, so a new .NET Core runtime is instantiated and run in the same w3wp.exe process
-    auto valid_startup_hook_callsite = true;
-    if (is_desktop_iis)
-    {
-        valid_startup_hook_callsite = module_metadata->assemblyName == WStr("System.Web") &&
-                                      caller.type.name == WStr("System.Web.Compilation.BuildManager") &&
-                                      caller.name == WStr("InvokePreStartInitMethods");
-    }
-    else if (module_metadata->assemblyName == WStr("System") ||
-             module_metadata->assemblyName == WStr("System.Net.Http"))
-    {
-        valid_startup_hook_callsite = false;
-    }
-
-    // The first time a method is JIT compiled in an AppDomain, insert our startup
-    // hook, which, at a minimum, must add an AssemblyResolve event so we can find
-    // OpenTelemetry.AutoInstrumentation.dll and its dependencies on disk.
-    if (valid_startup_hook_callsite && !has_loader_injected_in_appdomain)
-    {
-        bool domain_neutral_assembly = runtime_information_.is_desktop() && corlib_module_loaded &&
-                                       module_metadata->app_domain_id == corlib_app_domain_id;
-        Logger::Info("JITCompilationStarted: Startup hook registered in function_id=", function_id, " token=",
-                     function_token, " name=", caller.type.name, ".", caller.name, "(), assembly_name=",
-                     module_metadata->assemblyName, " app_domain_id=", module_metadata->app_domain_id,
-                     " domain_neutral=", domain_neutral_assembly);
-
-        first_jit_compilation_app_domains.insert(module_metadata->app_domain_id);
-
-        hr = RunILStartupHook(module_metadata->metadata_emit, module_id, function_token);
-        if (FAILED(hr))
-        {
-            Logger::Warn("JITCompilationStarted: Call to RunILStartupHook() failed for ", module_id, " ",
-                         function_token);
-            return S_OK;
-        }
-
-        if (is_desktop_iis)
-        {
-            hr = AddIISPreStartInitFlags(module_id, function_token);
-            if (FAILED(hr))
-            {
-                Logger::Warn("JITCompilationStarted: Call to AddIISPreStartInitFlags() failed for ", module_id, " ",
-                             function_token);
-                return S_OK;
-            }
-        }
-    }
+#endif
 
     return S_OK;
 }
@@ -1027,6 +927,130 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITInlining(FunctionID callerId, Function
 
     return S_OK;
 }
+
+#ifdef _WIN32
+HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(FunctionID function_id, BOOL is_safe_to_block)
+{
+    // keep this lock until we are done using the module,
+    // to prevent it from unloading while in use
+    std::lock_guard<std::mutex> guard(module_id_to_info_map_lock_);
+
+    // double check if is_attached_ has changed to avoid possible race condition with shutdown function
+    if (!is_attached_)
+    {
+        return S_OK;
+    }
+
+    ModuleID module_id;
+    mdToken  function_token = mdTokenNil;
+
+    HRESULT hr = this->info_->GetFunctionInfo(function_id, nullptr, &module_id, &function_token);
+
+    if (FAILED(hr))
+    {
+        Logger::Warn("JITCompilationStarted: Call to ICorProfilerInfo4.GetFunctionInfo() failed for ", function_id);
+        return S_OK;
+    }
+
+    // Verify that we have the metadata for this module
+    ModuleMetadata* module_metadata = nullptr;
+
+    auto findRes = module_id_to_info_map_.find(module_id);
+    if (findRes != module_id_to_info_map_.end())
+    {
+        module_metadata = findRes->second;
+    }
+
+    if (module_metadata == nullptr)
+    {
+        // we haven't stored a ModuleMetadata for this module,
+        // so we can't modify its IL
+        return S_OK;
+    }
+
+    // We check if we are in CallTarget mode and the loader was already injected.
+    const bool has_loader_injected_in_appdomain =
+        first_jit_compilation_app_domains.find(module_metadata->app_domain_id) !=
+        first_jit_compilation_app_domains.end();
+
+    if (has_loader_injected_in_appdomain)
+    {
+        // Loader was already injected in a calltarget scenario, we don't need to do anything else here
+        return S_OK;
+    }
+
+    // get function info
+    const auto& caller = GetFunctionInfo(module_metadata->metadata_import, function_token);
+    if (!caller.IsValid())
+    {
+        return S_OK;
+    }
+
+    if (Logger::IsDebugEnabled())
+    {
+        Logger::Debug("JITCompilationStarted: function_id=", function_id, " token=", function_token, " name=",
+                      caller.type.name, ".", caller.name, "()");
+    }
+
+    // IIS: Ensure that the OpenTelemetry.AutoInstrumentation assembly is inserted into
+    // System.Web.Compilation.BuildManager.InvokePreStartInitMethods.
+    // This will be the first call-site considered for the injection,
+    // which correctly loads OpenTelemetry.AutoInstrumentation.Loader into the application's
+    // own AppDomain because at this point in the code path, the ApplicationImpersonationContext
+    // has been started.
+    //
+    // Note: This check must only run on desktop because it is possible (and the default) to host
+    // ASP.NET Core in-process, so a new .NET Core runtime is instantiated and run in the same w3wp.exe process
+    auto valid_loader_callsite = true;
+    if (is_desktop_iis)
+    {
+        valid_loader_callsite = module_metadata->assemblyName == WStr("System.Web") &&
+                                      caller.type.name == WStr("System.Web.Compilation.BuildManager") &&
+                                      caller.name == WStr("InvokePreStartInitMethods");
+    }
+    else if (module_metadata->assemblyName == WStr("System") ||
+             module_metadata->assemblyName == WStr("System.Net.Http"))
+    {
+        valid_loader_callsite = false;
+    }
+
+    // The first time a method is JIT compiled in an AppDomain, insert our Loader,
+    // which, at a minimum, must add an AssemblyResolve event so we can find
+    // OpenTelemetry.AutoInstrumentation.dll and its dependencies on disk.
+    if (valid_loader_callsite && !has_loader_injected_in_appdomain)
+    {
+        bool domain_neutral_assembly = runtime_information_.is_desktop() && corlib_module_loaded &&
+                                       module_metadata->app_domain_id == corlib_app_domain_id;
+        Logger::Info("JITCompilationStarted: Loader registered in function_id=", function_id, " token=",
+                     function_token, " name=", caller.type.name, ".", caller.name, "(), assembly_name=",
+                     module_metadata->assemblyName, " app_domain_id=", module_metadata->app_domain_id,
+                     " domain_neutral=", domain_neutral_assembly);
+
+        first_jit_compilation_app_domains.insert(module_metadata->app_domain_id);
+
+        hr = RunAutoInstrumentationLoader(module_metadata->metadata_emit, module_id, function_token);
+        if (FAILED(hr))
+        {
+            Logger::Warn("JITCompilationStarted: Call to RunAutoInstrumentationLoader() failed for ", module_id, " ",
+                         function_token);
+            return S_OK;
+        }
+
+        if (is_desktop_iis)
+        {
+            hr = AddIISPreStartInitFlags(module_id, function_token);
+            if (FAILED(hr))
+            {
+                Logger::Warn("JITCompilationStarted: Call to AddIISPreStartInitFlags() failed for ", module_id, " ",
+                             function_token);
+                return S_OK;
+            }
+        }
+    }
+
+    return S_OK;
+}
+#endif
 
 bool CorProfiler::IsAttached() const
 {
@@ -1362,19 +1386,20 @@ std::string CorProfiler::GetILCodes(const std::string&  title,
     return orig_sstream.str();
 }
 
+#ifdef _WIN32
 //
-// Startup methods
+// Loader methods. These are only used on the .NET Framework.
 //
-HRESULT CorProfiler::RunILStartupHook(const ComPtr<IMetaDataEmit2>& metadata_emit,
+HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& metadata_emit,
                                       const ModuleID                module_id,
                                       const mdToken                 function_token)
 {
     mdMethodDef ret_method_token;
-    auto        hr = GenerateVoidILStartupMethod(module_id, &ret_method_token);
+    auto        hr = GenerateLoaderMethod(module_id, &ret_method_token);
 
     if (FAILED(hr))
     {
-        Logger::Warn("RunILStartupHook: Call to GenerateVoidILStartupMethod failed for ", module_id);
+        Logger::Warn("RunAutoInstrumentationLoader: Call to GenerateLoaderMethod failed for ", module_id);
         return hr;
     }
 
@@ -1383,7 +1408,7 @@ HRESULT CorProfiler::RunILStartupHook(const ComPtr<IMetaDataEmit2>& metadata_emi
 
     if (FAILED(hr))
     {
-        Logger::Warn("RunILStartupHook: Call to ILRewriter.Import() failed for ", module_id, " ", function_token);
+        Logger::Warn("RunAutoInstrumentationLoader: Call to ILRewriter.Import() failed for ", module_id, " ", function_token);
         return hr;
     }
 
@@ -1397,7 +1422,7 @@ HRESULT CorProfiler::RunILStartupHook(const ComPtr<IMetaDataEmit2>& metadata_emi
 
     if (FAILED(hr))
     {
-        Logger::Warn("RunILStartupHook: Call to ILRewriter.Export() failed for ModuleID=", module_id, " ",
+        Logger::Warn("RunAutoInstrumentationLoader: Call to ILRewriter.Export() failed for ModuleID=", module_id, " ",
                      function_token);
         return hr;
     }
@@ -1405,14 +1430,14 @@ HRESULT CorProfiler::RunILStartupHook(const ComPtr<IMetaDataEmit2>& metadata_emi
     return S_OK;
 }
 
-HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMethodDef* ret_method_token)
+HRESULT CorProfiler::GenerateLoaderMethod(const ModuleID module_id, mdMethodDef* ret_method_token)
 {
     ComPtr<IUnknown> metadata_interfaces;
     auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
                                              metadata_interfaces.GetAddressOf());
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: failed to get metadata interface for ", module_id);
+        Logger::Warn("GenerateLoaderMethod: failed to get metadata interface for ", module_id);
         return hr;
     }
 
@@ -1426,7 +1451,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
 
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: failed to define AssemblyRef to mscorlib");
+        Logger::Warn("GenerateLoaderMethod: failed to define AssemblyRef to mscorlib");
         return hr;
     }
 
@@ -1435,7 +1460,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
     hr = metadata_emit->DefineTypeRefByName(corlib_ref, WStr("System.Object"), &object_type_ref);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineTypeRefByName failed");
+        Logger::Warn("GenerateLoaderMethod: DefineTypeRefByName failed");
         return hr;
     }
 
@@ -1445,7 +1470,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
                                       &new_type_def);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineTypeDef failed");
+        Logger::Warn("GenerateLoaderMethod: DefineTypeDef failed");
         return hr;
     }
 
@@ -1460,7 +1485,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
                                      sizeof(initialize_signature), 0, 0, ret_method_token);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineMethod failed");
+        Logger::Warn("GenerateLoaderMethod: DefineMethod failed");
         return hr;
     }
 
@@ -1480,7 +1505,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
                                      &alreadyLoadedMethodToken);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineMethod IsAlreadyLoaded failed");
+        Logger::Warn("GenerateLoaderMethod: DefineMethod IsAlreadyLoaded failed");
         return hr;
     }
 
@@ -1491,7 +1516,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
                                     sizeof(field_signature), 0, nullptr, 0, &isAssemblyLoadedFieldToken);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineField _isAssemblyLoaded failed");
+        Logger::Warn("GenerateLoaderMethod: DefineField _isAssemblyLoaded failed");
         return hr;
     }
 
@@ -1500,7 +1525,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
     hr = metadata_emit->DefineTypeRefByName(corlib_ref, WStr("System.Threading.Interlocked"), &interlocked_type_ref);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineTypeRefByName interlocked_type_ref failed");
+        Logger::Warn("GenerateLoaderMethod: DefineTypeRefByName interlocked_type_ref failed");
         return hr;
     }
 
@@ -1520,7 +1545,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
                                        sizeof(interlocked_compare_exchange_signature), &interlocked_compare_member_ref);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineMemberRef CompareExchange failed");
+        Logger::Warn("GenerateLoaderMethod: DefineMemberRef CompareExchange failed");
         return hr;
     }
 
@@ -1579,7 +1604,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
     hr = rewriter_already_loaded.Export();
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: Call to ILRewriter.Export() failed for ModuleID=", module_id);
+        Logger::Warn("GenerateLoaderMethod: Call to ILRewriter.Export() failed for ModuleID=", module_id);
         return hr;
     }
 
@@ -1606,35 +1631,31 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
                                      sizeof(get_assembly_bytes_signature), 0, 0, &pinvoke_method_def);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineMethod failed");
+        Logger::Warn("GenerateLoaderMethod: DefineMethod failed");
         return hr;
     }
 
     metadata_emit->SetMethodImplFlags(pinvoke_method_def, miPreserveSig);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: SetMethodImplFlags failed");
+        Logger::Warn("GenerateLoaderMethod: SetMethodImplFlags failed");
         return hr;
     }
 
-#ifdef _WIN32
     WSTRING native_profiler_file = WStr("OpenTelemetry.AutoInstrumentation.Native.DLL");
-#else  // _WIN32
-    WSTRING  native_profiler_file    = GetCoreCLRProfilerPath();
-#endif // _WIN32
 
     mdModuleRef profiler_ref;
     hr = metadata_emit->DefineModuleRef(native_profiler_file.c_str(), &profiler_ref);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineModuleRef failed");
+        Logger::Warn("GenerateLoaderMethod: DefineModuleRef failed");
         return hr;
     }
 
     hr = metadata_emit->DefinePinvokeMap(pinvoke_method_def, 0, WStr("GetAssemblyAndSymbolsBytes"), profiler_ref);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefinePinvokeMap failed");
+        Logger::Warn("GenerateLoaderMethod: DefinePinvokeMap failed");
         return hr;
     }
 
@@ -1643,7 +1664,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
     hr = metadata_emit->DefineTypeRefByName(corlib_ref, WStr("System.Byte"), &byte_type_ref);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineTypeRefByName failed");
+        Logger::Warn("GenerateLoaderMethod: DefineTypeRefByName failed");
         return hr;
     }
 
@@ -1653,7 +1674,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
                                             &marshal_type_ref);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineTypeRefByName failed");
+        Logger::Warn("GenerateLoaderMethod: DefineTypeRefByName failed");
         return hr;
     }
 
@@ -1671,7 +1692,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
                                         sizeof(marshal_copy_signature), &marshal_copy_member_ref);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineMemberRef failed");
+        Logger::Warn("GenerateLoaderMethod: DefineMemberRef failed");
         return hr;
     }
 
@@ -1681,7 +1702,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
                                             &system_reflection_assembly_type_ref);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineTypeRefByName failed");
+        Logger::Warn("GenerateLoaderMethod: DefineTypeRefByName failed");
         return hr;
     }
 
@@ -1690,7 +1711,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
     hr = metadata_emit->DefineTypeRefByName(corlib_ref, WStr("System.Object"), &system_object_type_ref);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineTypeRefByName failed");
+        Logger::Warn("GenerateLoaderMethod: DefineTypeRefByName failed");
         return hr;
     }
 
@@ -1720,7 +1741,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
                                         appdomain_load_signature_length, &appdomain_load_member_ref);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineMemberRef failed");
+        Logger::Warn("GenerateLoaderMethod: DefineMemberRef failed");
         return hr;
     }
 
@@ -1735,27 +1756,19 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
                                         &assembly_create_instance_member_ref);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineMemberRef failed");
+        Logger::Warn("GenerateLoaderMethod: DefineMemberRef failed");
         return hr;
     }
 
-// Create a string representing "OpenTelemetry.AutoInstrumentation.Loader.Startup"
-// Create OS-specific implementations because on Windows, creating the string via
-// "OpenTelemetry.AutoInstrumentation.Loader.Startup"_W.c_str() does not create the
-// proper string for CreateInstance to successfully call
-#ifdef _WIN32
-    LPCWSTR load_helper_str      = L"OpenTelemetry.AutoInstrumentation.Loader.Startup";
+    // Create a string representing "OpenTelemetry.AutoInstrumentation.Loader.Loader"
+    LPCWSTR load_helper_str      = L"OpenTelemetry.AutoInstrumentation.Loader.Loader";
     auto    load_helper_str_size = wcslen(load_helper_str);
-#else
-    char16_t load_helper_str[]       = u"OpenTelemetry.AutoInstrumentation.Loader.Startup";
-    auto     load_helper_str_size    = std::char_traits<char16_t>::length(load_helper_str);
-#endif
 
     mdString load_helper_token;
     hr = metadata_emit->DefineUserString(load_helper_str, (ULONG)load_helper_str_size, &load_helper_token);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineUserString failed");
+        Logger::Warn("GenerateLoaderMethod: DefineUserString failed");
         return hr;
     }
 
@@ -1780,7 +1793,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
     hr = metadata_emit->GetTokenFromSig(locals_signature, sizeof(locals_signature), &locals_signature_token);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: Unable to generate locals signature. ModuleID=", module_id);
+        Logger::Warn("GenerateLoaderMethod: Unable to generate locals signature. ModuleID=", module_id);
         return hr;
     }
 
@@ -1971,7 +1984,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
     pNewInstr->m_Arg8   = 6;
     rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
 
-    // Step 4) Call instance method Assembly.CreateInstance("OpenTelemetry.AutoInstrumentation.Loader.Startup")
+    // Step 4) Call instance method Assembly.CreateInstance("OpenTelemetry.AutoInstrumentation.Loader.Loader")
 
     // ldloc.s 6 : Load the "loadedAssembly" variable (locals index 6) to call Assembly.CreateInstance
     pNewInstr           = rewriter_void.NewILInstr();
@@ -1979,7 +1992,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
     pNewInstr->m_Arg8   = 6;
     rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
 
-    // ldstr "OpenTelemetry.AutoInstrumentation.Loader.Startup"
+    // ldstr "OpenTelemetry.AutoInstrumentation.Loader.Loader"
     pNewInstr           = rewriter_void.NewILInstr();
     pNewInstr->m_opcode = CEE_LDSTR;
     pNewInstr->m_Arg32  = load_helper_token;
@@ -2004,7 +2017,7 @@ HRESULT CorProfiler::GenerateVoidILStartupMethod(const ModuleID module_id, mdMet
     hr = rewriter_void.Export();
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: Call to ILRewriter.Export() failed for ModuleID=", module_id);
+        Logger::Warn("GenerateLoaderMethod: Call to ILRewriter.Export() failed for ModuleID=", module_id);
         return hr;
     }
 
@@ -2018,7 +2031,7 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
                                              metadata_interfaces.GetAddressOf());
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: failed to get metadata interface for ", module_id);
+        Logger::Warn("GenerateLoaderMethod: failed to get metadata interface for ", module_id);
         return hr;
     }
 
@@ -2032,7 +2045,7 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
 
     if (FAILED(hr))
     {
-        Logger::Warn("RunILStartupHook: Call to ILRewriter.Import() failed for ", module_id, " ", function_token);
+        Logger::Warn("RunAutoInstrumentationLoader: Call to ILRewriter.Import() failed for ", module_id, " ", function_token);
         return hr;
     }
 
@@ -2089,26 +2102,15 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
     hr = metadata_emit->DefineMemberRef(system_appdomain_type_ref, WStr("SetData"), appdomain_set_data_signature,
                                         sizeof(appdomain_set_data_signature), &appdomain_set_data_member_ref);
 
-// Define "OpenTelemetry_IISPreInitStart" string
-// Create a string representing
-// "OpenTelemetry.AutoInstrumentation.Loader.Startup" Create OS-specific
-// implementations because on Windows, creating the string via
-// "OpenTelemetry.AutoInstrumentation.Loader.Startup"_W.c_str() does not
-// create the proper string for CreateInstance to successfully call
-#ifdef _WIN32
     LPCWSTR pre_init_start_str      = L"OpenTelemetry_IISPreInitStart";
     auto    pre_init_start_str_size = wcslen(pre_init_start_str);
-#else
-    char16_t pre_init_start_str[]    = u"OpenTelemetry_IISPreInitStart";
-    auto     pre_init_start_str_size = std::char_traits<char16_t>::length(pre_init_start_str);
-#endif
 
     mdString pre_init_start_string_token;
     hr = metadata_emit->DefineUserString(pre_init_start_str, (ULONG)pre_init_start_str_size,
                                          &pre_init_start_string_token);
     if (FAILED(hr))
     {
-        Logger::Warn("GenerateVoidILStartupMethod: DefineUserString failed");
+        Logger::Warn("GenerateLoaderMethod: DefineUserString failed");
         return hr;
     }
 
@@ -2175,7 +2177,7 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
 
     if (FAILED(hr))
     {
-        Logger::Warn("RunILStartupHook: Call to ILRewriter.Export() failed for ModuleID=", module_id, " ",
+        Logger::Warn("RunAutoInstrumentationLoader: Call to ILRewriter.Export() failed for ModuleID=", module_id, " ",
                      function_token);
         return hr;
     }
@@ -2183,34 +2185,20 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
     return S_OK;
 }
 
-#ifdef LINUX
-extern uint8_t dll_start[] asm("_binary_OpenTelemetry_AutoInstrumentation_Loader_dll_start");
-extern uint8_t dll_end[] asm("_binary_OpenTelemetry_AutoInstrumentation_Loader_dll_end");
-
-extern uint8_t pdb_start[] asm("_binary_OpenTelemetry_AutoInstrumentation_Loader_pdb_start");
-extern uint8_t pdb_end[] asm("_binary_OpenTelemetry_AutoInstrumentation_Loader_pdb_end");
-#endif
-
 void CorProfiler::GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray,
                                              int*   assemblySize,
                                              BYTE** pSymbolsArray,
                                              int*   symbolsSize) const
 {
-#ifdef _WIN32
-    HINSTANCE hInstance = DllHandle;
-    LPCWSTR   dllLpName;
-    LPCWSTR   symbolsLpName;
+    if (!runtime_information_.is_desktop())
+    {
+        // On .NET the StartupHook is in charge of injecting the main managed module.
+        return;
+    }
 
-    if (runtime_information_.is_desktop())
-    {
-        dllLpName     = MAKEINTRESOURCE(NETFRAMEWORK_MANAGED_ENTRYPOINT_DLL);
-        symbolsLpName = MAKEINTRESOURCE(NETFRAMEWORK_MANAGED_ENTRYPOINT_SYMBOLS);
-    }
-    else
-    {
-        dllLpName     = MAKEINTRESOURCE(NET_MANAGED_ENTRYPOINT_DLL);
-        symbolsLpName = MAKEINTRESOURCE(NET_MANAGED_ENTRYPOINT_SYMBOLS);
-    }
+    HINSTANCE hInstance     = DllHandle;
+    LPCWSTR   dllLpName     = MAKEINTRESOURCE(NETFRAMEWORK_MANAGED_ENTRYPOINT_DLL);
+    LPCWSTR   symbolsLpName = MAKEINTRESOURCE(NETFRAMEWORK_MANAGED_ENTRYPOINT_SYMBOLS);
 
     HRSRC   hResAssemblyInfo = FindResource(hInstance, dllLpName, L"ASSEMBLY");
     HGLOBAL hResAssembly     = LoadResource(hInstance, hResAssemblyInfo);
@@ -2221,37 +2209,8 @@ void CorProfiler::GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray,
     HGLOBAL hResSymbols     = LoadResource(hInstance, hResSymbolsInfo);
     *symbolsSize            = SizeofResource(hInstance, hResSymbolsInfo);
     *pSymbolsArray          = (LPBYTE)LockResource(hResSymbols);
-#elif LINUX
-    *assemblySize                    = dll_end - dll_start;
-    *pAssemblyArray                  = (BYTE*)dll_start;
-
-    *symbolsSize   = pdb_end - pdb_start;
-    *pSymbolsArray = (BYTE*)pdb_start;
-#else
-    const unsigned int imgCount = _dyld_image_count();
-
-    for (auto i = 0; i < imgCount; i++)
-    {
-        const std::string name = std::string(_dyld_get_image_name(i));
-
-        if (name.rfind("OpenTelemetry.AutoInstrumentation.Native.dylib") != std::string::npos)
-        {
-            const mach_header_64* header = (const struct mach_header_64*)_dyld_get_image_header(i);
-
-            unsigned long dllSize;
-            const auto    dllData = getsectiondata(header, "binary", "dll", &dllSize);
-            *assemblySize         = dllSize;
-            *pAssemblyArray       = (BYTE*)dllData;
-
-            unsigned long pdbSize;
-            const auto    pdbData = getsectiondata(header, "binary", "pdb", &pdbSize);
-            *symbolsSize          = pdbSize;
-            *pSymbolsArray        = (BYTE*)pdbData;
-            break;
-        }
-    }
-#endif
 }
+#endif
 
 // ***
 // * ReJIT Methods

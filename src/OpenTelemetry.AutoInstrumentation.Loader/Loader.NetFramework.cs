@@ -1,4 +1,4 @@
-// <copyright file="Startup.NetFramework.cs" company="OpenTelemetry Authors">
+// <copyright file="Loader.NetFramework.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,7 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// <summary>
 /// A class that attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
 /// </summary>
-internal partial class Startup
+internal partial class Loader
 {
     private static string ResolveManagedProfilerDirectory()
     {
@@ -46,19 +46,19 @@ internal partial class Startup
             return null;
         }
 
-        StartupLogger.Debug("Requester [{0}] requested [{1}]", args?.RequestingAssembly?.FullName ?? "<null>", args?.Name ?? "<null>");
+        LoaderLogger.Debug("Requester [{0}] requested [{1}]", args?.RequestingAssembly?.FullName ?? "<null>", args?.Name ?? "<null>");
         var path = Path.Combine(ManagedProfilerDirectory, $"{assemblyName}.dll");
         if (File.Exists(path))
         {
             try
             {
                 var loadedAssembly = Assembly.LoadFrom(path);
-                StartupLogger.Debug("Assembly.LoadFrom(\"{0}\") succeeded={1}", path, loadedAssembly != null);
+                LoaderLogger.Debug("Assembly.LoadFrom(\"{0}\") succeeded={1}", path, loadedAssembly != null);
                 return loadedAssembly;
             }
             catch (Exception ex)
             {
-                StartupLogger.Debug("Assembly.LoadFrom(\"{0}\") Exception: {1}", path, ex);
+                LoaderLogger.Debug("Assembly.LoadFrom(\"{0}\") Exception: {1}", path, ex);
             }
         }
 

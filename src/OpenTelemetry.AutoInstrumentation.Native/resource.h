@@ -1,8 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
 // Used by Resource.rc
-#define NET_MANAGED_ENTRYPOINT_DLL      401
-#define NET_MANAGED_ENTRYPOINT_SYMBOLS 402
 #define NETFRAMEWORK_MANAGED_ENTRYPOINT_DLL        403
 #define NETFRAMEWORK_MANAGED_ENTRYPOINT_SYMBOLS    404
 
