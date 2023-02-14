@@ -15,6 +15,9 @@ jobs:
           - machine: windows-2022
             containers: windows
             log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
+          - machine: ubuntu-20.04
+            containers: linux
+            log-dir: "/var/log/opentelemetry/dotnet"
           - machine: macos-11
             containers: none
             log-dir: "/var/log/opentelemetry/dotnet"
