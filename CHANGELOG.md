@@ -7,10 +7,18 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.6.0-beta.1...HEAD)
 
+This beta release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
+
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.4.0-rc.4`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-rc.4)
+- `System.Diagnostics.DiagnosticSource`: [`7.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/7.0.0)
+
 ### Added
 
 ### Changed
 
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.4.0-rc.4`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-rc.4).
 - Replace `OTEL_DOTNET_AUTO_LEGACY_SOURCES` with `OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES`.
 - Updated the shared store to correctly support
   [framework roll-forward](https://learn.microsoft.com/en-us/dotnet/core/versions/selection#framework-dependent-apps-roll-forward)
@@ -19,6 +27,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Deprecated
 
 ### Removed
+
+- Remove support for plugin method `ConfigureMetricsOptions(OpenTelemetry.Instrumentation.Process.ProcessInstrumentationOptions)`.
 
 ### Fixed
 
