@@ -117,7 +117,7 @@ internal static class EnvironmentConfigurationMetricHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static MeterProviderBuilder AddProcessInstrumentation(MeterProviderBuilder builder, PluginManager pluginManager)
         {
-            return builder.AddProcessInstrumentation(pluginManager.ConfigureMetricsOptions);
+            return builder.AddProcessInstrumentation();
         }
 
         // Exporters

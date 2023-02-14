@@ -13,43 +13,43 @@
     <repository type="git" url="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation" />
     <dependencies>
       <group targetFramework="net6.0">
-        <dependency id="OpenTelemetry" version="1.4.0-rc.3" />
-        <dependency id="OpenTelemetry.Api" version="1.4.0-rc.3" />
-        <dependency id="OpenTelemetry.Exporter.Console" version="1.4.0-rc.3" />
-        <dependency id="OpenTelemetry.Exporter.OpenTelemetryProtocol" version="1.4.0-rc.3" />
-        <dependency id="OpenTelemetry.Exporter.Prometheus.HttpListener" version="1.4.0-rc.3" />
-        <dependency id="OpenTelemetry.Exporter.Zipkin" version="1.4.0-rc.3" />
-        <dependency id="OpenTelemetry.Extensions.Propagators" version="1.4.0-rc.3" />
-        <dependency id="OpenTelemetry.Instrumentation.GrpcNetClient" version="1.0.0-rc9.12" />
-        <dependency id="OpenTelemetry.Instrumentation.Http" version="1.0.0-rc9.12" />
+        <dependency id="OpenTelemetry" version="1.4.0-rc.4" />
+        <dependency id="OpenTelemetry.Api" version="1.4.0-rc.4" />
+        <dependency id="OpenTelemetry.Exporter.Console" version="1.4.0-rc.4" />
+        <dependency id="OpenTelemetry.Exporter.OpenTelemetryProtocol" version="1.4.0-rc.4" />
+        <dependency id="OpenTelemetry.Exporter.Prometheus.HttpListener" version="1.4.0-rc.4" />
+        <dependency id="OpenTelemetry.Exporter.Zipkin" version="1.4.0-rc.4" />
+        <dependency id="OpenTelemetry.Extensions.Propagators" version="1.4.0-rc.4" />
+        <dependency id="OpenTelemetry.Instrumentation.GrpcNetClient" version="1.0.0-rc9.13" />
+        <dependency id="OpenTelemetry.Instrumentation.Http" version="1.0.0-rc9.13" />
         <dependency id="OpenTelemetry.Instrumentation.Quartz" version="1.0.0-alpha.1" />
-        <dependency id="OpenTelemetry.Instrumentation.Runtime" version="1.1.0-beta.4" />
-        <dependency id="OpenTelemetry.Instrumentation.Process" version="1.0.0-alpha.5" />
-        <dependency id="OpenTelemetry.Instrumentation.SqlClient" version="1.0.0-rc9.12" />
+        <dependency id="OpenTelemetry.Instrumentation.Runtime" version="1.1.0-rc.1" />
+        <dependency id="OpenTelemetry.Instrumentation.Process" version="1.0.0-alpha.6" />
+        <dependency id="OpenTelemetry.Instrumentation.SqlClient" version="1.0.0-rc9.13" />
         <dependency id="OpenTelemetry.Instrumentation.Wcf" version="1.0.0-rc.8" />
-        <dependency id="OpenTelemetry.Shims.OpenTracing" version="1.0.0-rc9.12" />
-        <dependency id="OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs" version="1.4.0-rc.3" />
-        <dependency id="OpenTelemetry.Instrumentation.AspNetCore" version="1.0.0-rc9.12" />
+        <dependency id="OpenTelemetry.Shims.OpenTracing" version="1.0.0-rc9.13" />
+        <dependency id="OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs" version="1.4.0-rc.4" />
+        <dependency id="OpenTelemetry.Instrumentation.AspNetCore" version="1.0.0-rc9.13" />
         <dependency id="OpenTelemetry.Instrumentation.EntityFrameworkCore" version="1.0.0-beta.4" />
         <dependency id="OpenTelemetry.Instrumentation.MySqlData" version="1.0.0-beta.5" />
         <dependency id="OpenTelemetry.Instrumentation.StackExchangeRedis" version="1.0.0-rc9.7" />
       </group>
       <group targetFramework=".NETFramework4.6.2">
-        <dependency id="OpenTelemetry" version="1.4.0-rc.3" />
-        <dependency id="OpenTelemetry.Api" version="1.4.0-rc.3" />
-        <dependency id="OpenTelemetry.Exporter.Console" version="1.4.0-rc.3" />
-        <dependency id="OpenTelemetry.Exporter.OpenTelemetryProtocol" version="1.4.0-rc.3" />
-        <dependency id="OpenTelemetry.Exporter.Prometheus.HttpListener" version="1.4.0-rc.3" />
-        <dependency id="OpenTelemetry.Exporter.Zipkin" version="1.4.0-rc.3" />
-        <dependency id="OpenTelemetry.Extensions.Propagators" version="1.4.0-rc.3" />
-        <dependency id="OpenTelemetry.Instrumentation.GrpcNetClient" version="1.0.0-rc9.12" />
-        <dependency id="OpenTelemetry.Instrumentation.Http" version="1.0.0-rc9.12" />
+        <dependency id="OpenTelemetry" version="1.4.0-rc.4" />
+        <dependency id="OpenTelemetry.Api" version="1.4.0-rc.4" />
+        <dependency id="OpenTelemetry.Exporter.Console" version="1.4.0-rc.4" />
+        <dependency id="OpenTelemetry.Exporter.OpenTelemetryProtocol" version="1.4.0-rc.4" />
+        <dependency id="OpenTelemetry.Exporter.Prometheus.HttpListener" version="1.4.0-rc.4" />
+        <dependency id="OpenTelemetry.Exporter.Zipkin" version="1.4.0-rc.4" />
+        <dependency id="OpenTelemetry.Extensions.Propagators" version="1.4.0-rc.4" />
+        <dependency id="OpenTelemetry.Instrumentation.GrpcNetClient" version="1.0.0-rc9.13" />
+        <dependency id="OpenTelemetry.Instrumentation.Http" version="1.0.0-rc9.13" />
         <dependency id="OpenTelemetry.Instrumentation.Quartz" version="1.0.0-alpha.1" />
-        <dependency id="OpenTelemetry.Instrumentation.Runtime" version="1.1.0-beta.4" />
-        <dependency id="OpenTelemetry.Instrumentation.Process" version="1.0.0-alpha.5" />
-        <dependency id="OpenTelemetry.Instrumentation.SqlClient" version="1.0.0-rc9.12" />
+        <dependency id="OpenTelemetry.Instrumentation.Runtime" version="1.1.0-rc.1" />
+        <dependency id="OpenTelemetry.Instrumentation.Process" version="1.0.0-alpha.6" />
+        <dependency id="OpenTelemetry.Instrumentation.SqlClient" version="1.0.0-rc9.13" />
         <dependency id="OpenTelemetry.Instrumentation.Wcf" version="1.0.0-rc.8" />
-        <dependency id="OpenTelemetry.Shims.OpenTracing" version="1.0.0-rc9.12" />
+        <dependency id="OpenTelemetry.Shims.OpenTracing" version="1.0.0-rc9.13" />
         <dependency id="OpenTelemetry.Instrumentation.AspNet" version="1.0.0-rc9.7" />
       </group>
     </dependencies>
