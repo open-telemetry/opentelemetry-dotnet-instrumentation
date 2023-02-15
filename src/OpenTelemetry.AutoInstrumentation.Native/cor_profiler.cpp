@@ -189,16 +189,13 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     Logger::Info("CallTarget instrumentation is enabled.");
     event_mask |= COR_PRF_ENABLE_REJIT;
 
-    if (!runtime_information_.is_desktop())
-    {
-        Logger::Info("JIT Compilation callbacks disabled.");
-    }
-    else
+#ifdef _WIN32
+    if (runtime_information_.is_desktop())
     {
         // Only on .NET Framework callbacks for JIT compilation are needed.
-        Logger::Info("JIT Compilation callbacks enabled.");
         event_mask |= COR_PRF_MONITOR_JIT_COMPILATION;
     }
+#endif
 
     if (!EnableInlining())
     {
@@ -850,22 +847,26 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ProfilerDetachSucceeded()
     return S_OK;
 }
 
+#ifdef _WIN32
+// JITCompilationStarted is only called for .NET Framework. It is used to inject the Loader
+// into the application.
 HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStarted(FunctionID function_id, BOOL is_safe_to_block)
 {
     auto _ = trace::Stats::Instance()->JITCompilationStartedMeasure();
 
-#ifdef _WIN32
-    if (runtime_information_.is_desktop() && is_attached_ && is_safe_to_block)
+    // The flag for this callback is only set if runtime_information_.is_desktop() is true.
+    // So there is no need to check it again here.
+    if (is_attached_ && is_safe_to_block)
     {
         // The JIT compilation only needs to be tracked on the .NET Framework so the Loader
         // can be injected. For .NET the DOTNET_STARTUP_HOOK takes care of injecting the
         // instrumentation startup code.
         return JITCompilationStartedOnNetFramework(function_id, is_safe_to_block);
     }
-#endif
 
     return S_OK;
 }
+#endif
 
 HRESULT STDMETHODCALLTYPE CorProfiler::AppDomainShutdownFinished(AppDomainID appDomainId, HRESULT hrStatus)
 {

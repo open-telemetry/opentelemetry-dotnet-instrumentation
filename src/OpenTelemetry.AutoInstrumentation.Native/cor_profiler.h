@@ -126,7 +126,10 @@ public:
 
     HRESULT STDMETHODCALLTYPE ModuleUnloadStarted(ModuleID module_id) override;
 
+#ifdef _WIN32
+    // JITCompilationStarted is only needed on .NET Framework, see JITCompilationStartedOnNetFramework.
     HRESULT STDMETHODCALLTYPE JITCompilationStarted(FunctionID function_id, BOOL is_safe_to_block) override;
+#endif
 
     HRESULT STDMETHODCALLTYPE AppDomainShutdownFinished(AppDomainID appDomainId, HRESULT hrStatus) override;
 
