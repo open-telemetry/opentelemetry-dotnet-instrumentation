@@ -183,8 +183,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     Logger::Debug("Number of Integrations loaded: ", integration_methods_.size());
 
-    DWORD event_mask = COR_PRF_DISABLE_TRANSPARENCY_CHECKS_UNDER_FULL_TRUST |
-                       COR_PRF_MONITOR_MODULE_LOADS | COR_PRF_MONITOR_ASSEMBLY_LOADS | COR_PRF_MONITOR_APPDOMAIN_LOADS;
+    DWORD event_mask = COR_PRF_DISABLE_TRANSPARENCY_CHECKS_UNDER_FULL_TRUST | COR_PRF_MONITOR_MODULE_LOADS |
+                       COR_PRF_MONITOR_ASSEMBLY_LOADS | COR_PRF_MONITOR_APPDOMAIN_LOADS;
 
     Logger::Info("CallTarget instrumentation is enabled.");
     event_mask |= COR_PRF_ENABLE_REJIT;
@@ -625,7 +625,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         return S_OK;
     }
 
-    // In IIS, the OpenTelemetry.AutoInstrumentation will be inserted into a method in System.Web (which is domain-neutral)
+    // In IIS, the OpenTelemetry.AutoInstrumentation will be inserted into a method in System.Web (which is
+    // domain-neutral)
     // but the OpenTelemetry.AutoInstrumentation.Loader assembly that the CLR profiler loads from a
     // byte array will be loaded into a non-shared AppDomain.
     // In this case, do not insert another Loader into that non-shared AppDomain
@@ -930,7 +931,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITInlining(FunctionID callerId, Function
 }
 
 #ifdef _WIN32
-HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(FunctionID function_id, BOOL is_safe_to_block)
+HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(FunctionID function_id,
+                                                                           BOOL       is_safe_to_block)
 {
     // keep this lock until we are done using the module,
     // to prevent it from unloading while in use
@@ -1006,8 +1008,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
     if (is_desktop_iis)
     {
         valid_loader_callsite = module_metadata->assemblyName == WStr("System.Web") &&
-                                      caller.type.name == WStr("System.Web.Compilation.BuildManager") &&
-                                      caller.name == WStr("InvokePreStartInitMethods");
+                                caller.type.name == WStr("System.Web.Compilation.BuildManager") &&
+                                caller.name == WStr("InvokePreStartInitMethods");
     }
     else if (module_metadata->assemblyName == WStr("System") ||
              module_metadata->assemblyName == WStr("System.Net.Http"))
@@ -1022,10 +1024,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
     {
         bool domain_neutral_assembly = runtime_information_.is_desktop() && corlib_module_loaded &&
                                        module_metadata->app_domain_id == corlib_app_domain_id;
-        Logger::Info("JITCompilationStarted: Loader registered in function_id=", function_id, " token=",
-                     function_token, " name=", caller.type.name, ".", caller.name, "(), assembly_name=",
-                     module_metadata->assemblyName, " app_domain_id=", module_metadata->app_domain_id,
-                     " domain_neutral=", domain_neutral_assembly);
+        Logger::Info("JITCompilationStarted: Loader registered in function_id=", function_id, " token=", function_token,
+                     " name=", caller.type.name, ".", caller.name, "(), assembly_name=", module_metadata->assemblyName,
+                     " app_domain_id=", module_metadata->app_domain_id, " domain_neutral=", domain_neutral_assembly);
 
         first_jit_compilation_app_domains.insert(module_metadata->app_domain_id);
 
@@ -1392,8 +1393,8 @@ std::string CorProfiler::GetILCodes(const std::string&  title,
 // Loader methods. These are only used on the .NET Framework.
 //
 HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& metadata_emit,
-                                      const ModuleID                module_id,
-                                      const mdToken                 function_token)
+                                                  const ModuleID                module_id,
+                                                  const mdToken                 function_token)
 {
     mdMethodDef ret_method_token;
     auto        hr = GenerateLoaderMethod(module_id, &ret_method_token);
@@ -1409,7 +1410,8 @@ HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& 
 
     if (FAILED(hr))
     {
-        Logger::Warn("RunAutoInstrumentationLoader: Call to ILRewriter.Import() failed for ", module_id, " ", function_token);
+        Logger::Warn("RunAutoInstrumentationLoader: Call to ILRewriter.Import() failed for ", module_id, " ",
+                     function_token);
         return hr;
     }
 
@@ -2046,7 +2048,8 @@ HRESULT CorProfiler::AddIISPreStartInitFlags(const ModuleID module_id, const mdT
 
     if (FAILED(hr))
     {
-        Logger::Warn("RunAutoInstrumentationLoader: Call to ILRewriter.Import() failed for ", module_id, " ", function_token);
+        Logger::Warn("RunAutoInstrumentationLoader: Call to ILRewriter.Import() failed for ", module_id, " ",
+                     function_token);
         return hr;
     }
 
