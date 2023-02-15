@@ -130,7 +130,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"System.Text.Encoding", {4, 0, 11, 0} },
         { L"System.Text.Encoding.Extensions", {4, 0, 11, 0} },
         { L"System.Text.Encodings.Web", {7, 0, 0, 0} },
-        { L"System.Text.Json", {7, 0, 0, 1} },
+        { L"System.Text.Json", {7, 0, 0, 2} },
         { L"System.Text.RegularExpressions", {4, 1, 1, 0} },
         { L"System.Threading", {4, 0, 11, 0} },
         { L"System.Threading.Overlapped", {4, 1, 0, 0} },
