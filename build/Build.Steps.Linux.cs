@@ -8,7 +8,7 @@ partial class Build
 {
     Target CompileNativeSrcLinux => _ => _
         .Unlisted()
-        .After(CompileManagedSrc)
+        .After(CreateRequiredDirectories)
         .OnlyWhenStatic(() => IsLinux)
         .Executes(() =>
         {

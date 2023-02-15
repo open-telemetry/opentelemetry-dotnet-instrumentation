@@ -75,22 +75,14 @@ else()
     message(STATUS "CLANG++ found: ${FOUND_CLANGPP}")
 endif()
 
-if (NOT EXISTS ${CMAKE_SOURCE_DIR}/../bin/ProfilerResources/net6.0)
-    message(FATAL_ERROR "OpenTelemetry.AutoInstrumentation.Loader must be built first.")
-else()
-    message(STATUS "OpenTelemetry.AutoInstrumentation.Loader was found")
-endif()
-
 # ******************************************************
 # Output folders
 # ******************************************************
 
 # Set output folders
 SET(OUTPUT_BIN_DIR ${CMAKE_BINARY_DIR}/bin)
-SET(OUTPUT_TMP_DIR ${CMAKE_BINARY_DIR}/tmp.${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_PROCESSOR})
 SET(OUTPUT_DEPS_DIR ${CMAKE_BINARY_DIR}/deps)
 FILE(MAKE_DIRECTORY ${OUTPUT_BIN_DIR})
-FILE(MAKE_DIRECTORY ${OUTPUT_TMP_DIR})
 FILE(MAKE_DIRECTORY ${OUTPUT_DEPS_DIR})
 
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
@@ -101,72 +93,26 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 # Dependencies
 # ******************************************************
 
-# Prepare dependencies
-if (NOT EXISTS ${OUTPUT_DEPS_DIR}/json)
-    add_custom_command(
-        OUTPUT ${OUTPUT_DEPS_DIR}/json
-        COMMAND git clone --quiet --depth 1 --branch v3.11.2 https://github.com/nlohmann/json.git
-        WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
-    )
-endif()
-
-if (NOT EXISTS ${OUTPUT_DEPS_DIR}/re2)
-    add_custom_command(
-        OUTPUT ${OUTPUT_DEPS_DIR}/re2
-        COMMAND git clone --quiet --depth 1 --branch 2022-12-01 https://github.com/google/re2.git && cd re2 && env ARFLAGS=\"-r -s -c\" CXXFLAGS=\"-std=c++11 -O3 -g -fPIC\" make
-        WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
-    )
-endif()
-
-if (NOT EXISTS ${OUTPUT_DEPS_DIR}/fmt)
-    add_custom_command(
-        OUTPUT ${OUTPUT_DEPS_DIR}/fmt
-        COMMAND git clone --quiet --depth 1 --branch 9.1.0 https://github.com/fmtlib/fmt.git && cd fmt && cmake -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE -DFMT_TEST=0 -DFMT_DOC=0 . && make
-        WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
-    )
-endif()
-
-# Set Managed Loader folder
-SET(MANAGED_LOADER_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin/ProfilerResources/net6.0)
-
-# Set specific custom commands to embed the loader
-if (ISMACOS)
-    add_custom_command(
-            OUTPUT ${OUTPUT_TMP_DIR}/OpenTelemetry.AutoInstrumentation.Loader.dll.o
-            COMMAND touch stub.c && gcc -o stub.o -c stub.c && cp ${MANAGED_LOADER_DIRECTORY}/OpenTelemetry.AutoInstrumentation.Loader.dll OpenTelemetry.AutoInstrumentation.Loader.dll && ld -r -o OpenTelemetry.AutoInstrumentation.Loader.dll.o -sectcreate binary dll OpenTelemetry.AutoInstrumentation.Loader.dll stub.o
-            DEPENDS ${MANAGED_LOADER_DIRECTORY}/OpenTelemetry.AutoInstrumentation.Loader.dll ${OUTPUT_DEPS_DIR}/json ${OUTPUT_DEPS_DIR}/re2 ${OUTPUT_DEPS_DIR}/fmt
-            WORKING_DIRECTORY ${OUTPUT_TMP_DIR}
-    )
-    add_custom_command(
-            OUTPUT ${OUTPUT_TMP_DIR}/OpenTelemetry.AutoInstrumentation.Loader.pdb.o
-            COMMAND touch stub.c && gcc -o stub.o -c stub.c && cp "${MANAGED_LOADER_DIRECTORY}/OpenTelemetry.AutoInstrumentation.Loader.pdb" OpenTelemetry.AutoInstrumentation.Loader.pdb && ld -r -o OpenTelemetry.AutoInstrumentation.Loader.pdb.o -sectcreate binary pdb OpenTelemetry.AutoInstrumentation.Loader.pdb stub.o
-            DEPENDS ${MANAGED_LOADER_DIRECTORY}/OpenTelemetry.AutoInstrumentation.Loader.pdb ${OUTPUT_DEPS_DIR}/json ${OUTPUT_DEPS_DIR}/re2 ${OUTPUT_DEPS_DIR}/fmt
-            WORKING_DIRECTORY ${OUTPUT_TMP_DIR}
-    )
-elseif(ISLINUX)
-    add_custom_command(
-            OUTPUT ${OUTPUT_TMP_DIR}/OpenTelemetry.AutoInstrumentation.Loader.dll.o
-            COMMAND cp "${MANAGED_LOADER_DIRECTORY}/OpenTelemetry.AutoInstrumentation.Loader.dll" OpenTelemetry.AutoInstrumentation.Loader.dll && ld -r -b binary -o OpenTelemetry.AutoInstrumentation.Loader.dll.o OpenTelemetry.AutoInstrumentation.Loader.dll
-            DEPENDS ${MANAGED_LOADER_DIRECTORY}/OpenTelemetry.AutoInstrumentation.Loader.dll ${OUTPUT_DEPS_DIR}/json ${OUTPUT_DEPS_DIR}/re2 ${OUTPUT_DEPS_DIR}/fmt
-            WORKING_DIRECTORY ${OUTPUT_TMP_DIR}
-    )
-    add_custom_command(
-            OUTPUT ${OUTPUT_TMP_DIR}/OpenTelemetry.AutoInstrumentation.Loader.pdb.o
-            COMMAND cp "${MANAGED_LOADER_DIRECTORY}/OpenTelemetry.AutoInstrumentation.Loader.pdb" OpenTelemetry.AutoInstrumentation.Loader.pdb && ld -r -b binary -o OpenTelemetry.AutoInstrumentation.Loader.pdb.o OpenTelemetry.AutoInstrumentation.Loader.pdb
-            DEPENDS ${MANAGED_LOADER_DIRECTORY}/OpenTelemetry.AutoInstrumentation.Loader.pdb ${OUTPUT_DEPS_DIR}/json ${OUTPUT_DEPS_DIR}/re2 ${OUTPUT_DEPS_DIR}/fmt
-            WORKING_DIRECTORY ${OUTPUT_TMP_DIR}
-    )
-endif()
-SET(GENERATED_OBJ_FILES
-        ${OUTPUT_TMP_DIR}/OpenTelemetry.AutoInstrumentation.Loader.dll.o
-        ${OUTPUT_TMP_DIR}/OpenTelemetry.AutoInstrumentation.Loader.pdb.o
+# Add custom commands to setup dependencies via git
+add_custom_command(
+    OUTPUT ${OUTPUT_DEPS_DIR}/json/include/nlohmann/json.hpp
+    COMMAND git clone --quiet --depth 1 --branch v3.11.2 https://github.com/nlohmann/json.git
+    WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
 )
-SET_SOURCE_FILES_PROPERTIES(
-        ${GENERATED_OBJ_FILES}
-        PROPERTIES
-        EXTERNAL_OBJECT true
-        GENERATED true
+
+add_custom_command(
+    OUTPUT ${OUTPUT_DEPS_DIR}/re2/obj/libre2.a
+    COMMAND git clone --quiet --depth 1 --branch 2022-12-01 https://github.com/google/re2.git && cd re2 && env ARFLAGS=\"-r -s -c\" CXXFLAGS=\"-std=c++11 -O3 -g -fPIC\" make
+    WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
 )
+
+add_custom_command(
+    OUTPUT ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
+    COMMAND git clone --quiet --depth 1 --branch 9.1.0 https://github.com/fmtlib/fmt.git && cd fmt && cmake -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE -DFMT_TEST=0 -DFMT_DOC=0 . && make
+    WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
+)
+
+
 
 # ******************************************************
 # Compiler options
@@ -233,7 +179,10 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         calltarget_tokens.cpp
         rejit_handler.cpp
         lib/coreclr/src/pal/prebuilt/idl/corprof_i.cpp
-        ${GENERATED_OBJ_FILES}
+        # Source dependencies retrievied via additional commands using git
+        ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
+        ${OUTPUT_DEPS_DIR}/json/include/nlohmann/json.hpp
+        ${OUTPUT_DEPS_DIR}/re2/obj/libre2.a
 )
 
 set_target_properties("OpenTelemetry.AutoInstrumentation.Native.static" PROPERTIES PREFIX "")
@@ -276,7 +225,6 @@ if (ISMACOS)
     add_library(${TARGET_NAME} SHARED
         dllmain.cpp
         interop.cpp
-        ${GENERATED_OBJ_FILES}
     )
 else()
     add_library(${TARGET_NAME} SHARED
