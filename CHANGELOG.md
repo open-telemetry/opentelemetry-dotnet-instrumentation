@@ -5,7 +5,21 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.6.0-beta.1...HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.6.0-beta.2...HEAD)
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.6.0-beta.2](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.6.0-beta.2)
 
 This beta release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
@@ -26,8 +40,6 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
   [framework roll-forward](https://learn.microsoft.com/en-us/dotnet/core/versions/selection#framework-dependent-apps-roll-forward)
   from `net6.0` to `net7.0`.
 
-### Deprecated
-
 ### Removed
 
 - Remove support for plugin method `ConfigureMetricsOptions(OpenTelemetry.Instrumentation.Process.ProcessInstrumentationOptions)`.
@@ -37,8 +49,6 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
 - Fix location of `OpenTelemetry.AutoInstrumentation.Native.so` for `linux-musl-x64`.
 - Fix issues when instrumenting `dotnet` CLI
   [#1477](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1744).
-
-### Security
 
 ## [0.6.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.6.0-beta.1)
 
