@@ -4,8 +4,4 @@
     <PackageReference Include="Elastic.Clients.Elasticsearch" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
-  </ItemGroup>
-
 </Project>

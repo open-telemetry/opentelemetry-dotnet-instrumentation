@@ -5,7 +5,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
+    <PackageReference Include="System.ValueTuple" Condition="'$(TargetFramework)' == 'net462'"/>
   </ItemGroup>
-
 </Project>

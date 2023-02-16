@@ -9,11 +9,8 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
   </ItemGroup>
 
-    <ItemGroup>
+  <ItemGroup>
     <Compile Include="..\TestApplication.Smoke\Program.cs" />
   </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
-    </ItemGroup>
 </Project>

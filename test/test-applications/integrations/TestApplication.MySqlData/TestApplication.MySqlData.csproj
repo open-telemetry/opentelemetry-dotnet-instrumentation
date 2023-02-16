@@ -8,8 +8,4 @@
     <PackageReference Include="MySql.Data" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
-  </ItemGroup>
-  
 </Project>

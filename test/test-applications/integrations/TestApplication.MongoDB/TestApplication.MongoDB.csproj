@@ -20,8 +20,4 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="3.1.0" Condition="'$(ApiVersion)'>='2.18.0'" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
-  </ItemGroup>
-
 </Project>

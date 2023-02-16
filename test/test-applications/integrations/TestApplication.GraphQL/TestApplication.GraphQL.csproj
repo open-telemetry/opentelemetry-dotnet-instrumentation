@@ -8,10 +8,6 @@
     <PackageReference Include="Microsoft.AspNetCore" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
-  </ItemGroup>
-
   <!-- Reconfigure default usings template -->
   <ItemGroup>
     <Using Remove="System.Net.Http.Json"/>

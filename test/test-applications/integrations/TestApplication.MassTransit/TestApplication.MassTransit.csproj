@@ -3,8 +3,4 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="MassTransit" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
-  </ItemGroup>
 </Project>

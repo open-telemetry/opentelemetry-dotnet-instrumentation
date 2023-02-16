@@ -12,8 +12,4 @@
     <PackageReference Include="Quartz.Extensions.Hosting" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
-  </ItemGroup>
-
 </Project>
