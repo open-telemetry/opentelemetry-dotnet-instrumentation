@@ -31,15 +31,16 @@ public class StackExchangeRedisTests : TestHelper
         _redis = redis;
     }
 
-    [Fact]
+    [Theory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    public void SubmitsTraces()
+    [MemberData(nameof(TestPackageVersions.StackExchangeRedis), MemberType = typeof(TestPackageVersions))]
+    public void SubmitsTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         const int spanCount = 8;
-        for (int i = 0; i < spanCount; i++)
+        for (var i = 0; i < spanCount; i++)
         {
             collector.Expect("OpenTelemetry.Instrumentation.StackExchangeRedis");
         }
@@ -47,7 +48,8 @@ public class StackExchangeRedisTests : TestHelper
         EnableBytecodeInstrumentation();
         RunTestApplication(new()
         {
-            Arguments = $"--redis {_redis.Port}"
+            Arguments = $"--redis {_redis.Port}",
+            PackageVersion = packageVersion
         });
 
         collector.AssertExpectations();

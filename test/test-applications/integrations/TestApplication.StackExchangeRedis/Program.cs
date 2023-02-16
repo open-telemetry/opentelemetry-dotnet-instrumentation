@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System.Threading.Tasks;
 using StackExchange.Redis;
 using TestApplication.Shared;
 

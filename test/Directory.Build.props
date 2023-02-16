@@ -2,6 +2,7 @@
   <Import Project="..\Directory.Build.props" />
 
   <PropertyGroup>
+    <DefineConstants Condition="'$(BuildingInsideVisualStudio)'=='true'">$(DefineConstants);DEFAULT_TEST_PACKAGE_VERSIONS</DefineConstants>
     <!-- only run .NET Framework tests on Windows -->
     <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net462</TargetFrameworks>

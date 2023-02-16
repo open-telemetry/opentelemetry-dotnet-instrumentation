@@ -15,10 +15,6 @@
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
 
-    <!--These should be consolidated in a file that can be shared for the tests and test applications directories -->
-    <DefineConstants Condition="'$(BuildingInsideVisualStudio)'=='true' or '$(TestAllPackageVersions)'!='true'">$(DefineConstants);DEFAULT_TEST_APPLICATIONS</DefineConstants>
-    <DefineConstants Condition="'$(PerformComprehensiveTesting)'=='true'">$(DefineConstants);COMPREHENSIVE_TESTS</DefineConstants>
-
     <!-- Hide warnings for EOL .NET Core targets (e.g. netcoreapp3.0) -->
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
   </PropertyGroup>
