@@ -49,8 +49,8 @@ internal sealed class ServiceNameDetector : IResourceDetector
         }
 #endif
         return Assembly.GetEntryAssembly()?.GetName().Name ?? GetCurrentProcessName();
-    }        
-    
+    }
+
     /// <summary>
     /// Wrapper around <see cref="Process.GetCurrentProcess"/> and <see cref="Process.ProcessName"/>
     ///

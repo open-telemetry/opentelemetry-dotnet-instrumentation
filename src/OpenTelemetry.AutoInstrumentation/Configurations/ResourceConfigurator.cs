@@ -28,7 +28,7 @@ internal static class ResourceConfigurator
             .AddTelemetrySdk()
             .AddDetector(new ServiceNameDetector())
             .AddAttributes(new KeyValuePair<string, object>[] { new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version) });
-        
+
         if (pluginManager != null)
         {
             resourceBuilder.InvokePlugins(pluginManager);
