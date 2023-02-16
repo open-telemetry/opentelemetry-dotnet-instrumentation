@@ -9,8 +9,8 @@
     <PlatformTarget>$(Platform)</PlatformTarget>
     <LangVersion>10.0</LangVersion>
 
-    <BaseIntermediateOutputPath Condition="'$(ApiVersion)'!=''">obj\$(ApiVersion)\</BaseIntermediateOutputPath>
-    <BaseOutputPath Condition="'$(ApiVersion)'!=''">bin\$(ApiVersion)\</BaseOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(TestedPackageVersion)'!=''">obj\$(TestedPackageVersion)\</BaseIntermediateOutputPath>
+    <BaseOutputPath Condition="'$(TestedPackageVersion)'!=''">bin\$(TestedPackageVersion)\</BaseOutputPath>
 
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
