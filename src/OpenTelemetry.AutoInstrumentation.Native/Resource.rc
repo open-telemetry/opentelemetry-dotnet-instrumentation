@@ -17,6 +17,7 @@
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -42,6 +43,7 @@ BEGIN
 END
 
 #endif    // APSTUDIO_INVOKED
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -81,18 +83,26 @@ BEGIN
     END
 END
 
-#endif    // English (United States) resources
-/////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // ASSEMBLY
 //
 
-NET_MANAGED_ENTRYPOINT_DLL ASSEMBLY "..\\bin\\ProfilerResources\\net6.0\\OpenTelemetry.AutoInstrumentation.Loader.dll"
-NET_MANAGED_ENTRYPOINT_SYMBOLS SYMBOLS "..\\bin\\ProfilerResources\\net6.0\\OpenTelemetry.AutoInstrumentation.Loader.pdb"
-NETFRAMEWORK_MANAGED_ENTRYPOINT_DLL ASSEMBLY "..\\bin\\ProfilerResources\\net462\\OpenTelemetry.AutoInstrumentation.Loader.dll"
-NETFRAMEWORK_MANAGED_ENTRYPOINT_SYMBOLS SYMBOLS "..\\bin\\ProfilerResources\\net462\\OpenTelemetry.AutoInstrumentation.Loader.pdb"
+NETFRAMEWORK_MANAGED_ENTRYPOINT_DLL ASSEMBLY                "..\\bin\\ProfilerResources\\net462\\OpenTelemetry.AutoInstrumentation.Loader.dll"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// SYMBOLS
+//
+
+NETFRAMEWORK_MANAGED_ENTRYPOINT_SYMBOLS SYMBOLS                 "..\\bin\\ProfilerResources\\net462\\OpenTelemetry.AutoInstrumentation.Loader.pdb"
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
 
 #ifndef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -100,5 +110,7 @@ NETFRAMEWORK_MANAGED_ENTRYPOINT_SYMBOLS SYMBOLS "..\\bin\\ProfilerResources\\net
 // Generated from the TEXTINCLUDE 3 resource.
 //
 
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
+

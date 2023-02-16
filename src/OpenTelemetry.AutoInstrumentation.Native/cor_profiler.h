@@ -59,14 +59,29 @@ private:
     ModuleID managed_profiler_module_id_ = 0;
 
     //
-    // Assembly redirect private members
+    // Methods only for .NET Framework
     //
 #ifdef _WIN32
+    //
+    // Special handler for JITCompilationStarted on .NET Framework.
+    //
+    HRESULT STDMETHODCALLTYPE JITCompilationStartedOnNetFramework(FunctionID function_id, BOOL is_safe_to_block);
+
+    //
+    // Assembly redirect private members.
+    //
     std::unordered_map<WSTRING, AssemblyVersionRedirection> assembly_version_redirect_map_;
     void InitNetFxAssemblyRedirectsMap();
     void RedirectAssemblyReferences(
         const ComPtr<IMetaDataAssemblyImport>& assembly_import,
         const ComPtr<IMetaDataAssemblyEmit>& assembly_emit);
+
+    //
+    // Loader methods. These are only used on the .NET Framework.
+    //
+    HRESULT RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>&, const ModuleID module_id, const mdToken function_token);
+    HRESULT GenerateLoaderMethod(const ModuleID module_id, mdMethodDef* ret_method_token);
+    HRESULT AddIISPreStartInitFlags(const ModuleID module_id, const mdToken function_token);
 #endif
 
     //
@@ -81,13 +96,6 @@ private:
     std::string GetILCodes(const std::string& title, ILRewriter* rewriter, const FunctionInfo& caller,
                            ModuleMetadata* module_metadata);
     //
-    // Startup methods
-    //
-    HRESULT RunILStartupHook(const ComPtr<IMetaDataEmit2>&, const ModuleID module_id, const mdToken function_token);
-    HRESULT GenerateVoidILStartupMethod(const ModuleID module_id, mdMethodDef* ret_method_token);
-    HRESULT AddIISPreStartInitFlags(const ModuleID module_id, const mdToken function_token);
-
-    //
     // CallTarget Methods
     //
     size_t CallTarget_RequestRejitForModule(ModuleID module_id, ModuleMetadata* module_metadata,
@@ -101,8 +109,11 @@ public:
 
     WSTRING GetBytecodeInstrumentationAssembly() const;
 
+#ifdef _WIN32
+    // GetAssemblyAndSymbolsBytes is used when injecting the Loader into a .NET Framework application.
     void GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray, int* assemblySize, BYTE** pSymbolsArray,
                                     int* symbolsSize) const;
+#endif
 
     //
     // ICorProfilerCallback methods
@@ -115,7 +126,10 @@ public:
 
     HRESULT STDMETHODCALLTYPE ModuleUnloadStarted(ModuleID module_id) override;
 
+#ifdef _WIN32
+    // JITCompilationStarted is only needed on .NET Framework, see JITCompilationStartedOnNetFramework.
     HRESULT STDMETHODCALLTYPE JITCompilationStarted(FunctionID function_id, BOOL is_safe_to_block) override;
+#endif
 
     HRESULT STDMETHODCALLTYPE AppDomainShutdownFinished(AppDomainID appDomainId, HRESULT hrStatus) override;
 

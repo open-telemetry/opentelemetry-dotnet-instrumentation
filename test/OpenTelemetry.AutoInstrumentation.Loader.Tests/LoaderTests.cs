@@ -1,4 +1,4 @@
-// <copyright file="StartupTests.cs" company="OpenTelemetry Authors">
+// <copyright file="LoaderTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,11 +19,11 @@ using Xunit.Abstractions;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader.Tests;
 
-public class StartupTests
+public class LoaderTests
 {
     private ITestOutputHelper _testOutput;
 
-    public StartupTests(ITestOutputHelper testOutput)
+    public LoaderTests(ITestOutputHelper testOutput)
     {
         _testOutput = testOutput;
     }
@@ -52,7 +52,7 @@ public class StartupTests
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_DEBUG", "1");
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", profilerDirectory);
 
-        var exception = Record.Exception(() => new AutoInstrumentation.Loader.Startup());
+        var exception = Record.Exception(() => new AutoInstrumentation.Loader.Loader());
 
         // That means the assembly was loaded successfully and Initialize method was called.
         Assert.Null(exception);

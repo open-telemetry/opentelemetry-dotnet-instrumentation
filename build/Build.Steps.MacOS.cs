@@ -8,7 +8,7 @@ partial class Build
 {
     Target CompileNativeSrcMacOs => _ => _
         .Unlisted()
-        .After(CompileManagedSrc)
+        .After(CreateRequiredDirectories)
         .OnlyWhenStatic(() => IsOsx)
         .Executes(() =>
         {
