@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <DefineConstants Condition="'$(TestedPackageVersion)'!='' and'$(TestedPackageVersion)'&lt;='2.1.50'">$(DefineConstants);REDIS_2_1_50_OR_LOWER</DefineConstants>
+
   </PropertyGroup>
 
   <ItemGroup>

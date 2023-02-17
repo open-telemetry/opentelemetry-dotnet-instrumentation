@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Extensions;
@@ -51,6 +52,8 @@ partial class Build
             TargetFramework.NET7_0
         });
 
+    private static readonly IEnumerable<string> StackExchangeRedisTestedPackageVersions = new[] { "2.0.495", "2.1.50", "2.5.61", "2.6.66", "2.6.90" };
+
     Target CreateRequiredDirectories => _ => _
         .Unlisted()
         .Executes(() =>
@@ -75,13 +78,30 @@ partial class Build
 
             foreach (var project in projectsToRestore)
             {
-                DotNetRestore(s => s
-                    .SetProjectFile(project)
-                    .SetVerbosity(DotNetVerbosity.Normal)
-                    .SetProperty("configuration", BuildConfiguration.ToString())
-                    .SetPlatform(Platform)
-                    .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                        o.SetPackageDirectory(NugetPackageDirectory)));
+                if (project.Name.Contains("StackExchangeRedis"))
+                {
+                    foreach (var testedPackageVersion in StackExchangeRedisTestedPackageVersions)
+                    {
+                        DotNetRestore(s => s
+                            .SetProjectFile(project)
+                            .SetVerbosity(DotNetVerbosity.Normal)
+                            .SetProperty("configuration", BuildConfiguration.ToString())
+                            .SetProperty("TestedPackageVersion", testedPackageVersion)
+                            .SetPlatform(Platform)
+                            .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
+                                o.SetPackageDirectory(NugetPackageDirectory)));
+                    }
+                }
+                else
+                {
+                    DotNetRestore(s => s
+                        .SetProjectFile(project)
+                        .SetVerbosity(DotNetVerbosity.Normal)
+                        .SetProperty("configuration", BuildConfiguration.ToString())
+                        .SetPlatform(Platform)
+                        .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
+                            o.SetPackageDirectory(NugetPackageDirectory)));
+                }
             }
 
             if (IsWin)
@@ -133,11 +153,26 @@ partial class Build
 
             foreach (var app in testApps)
             {
-                DotNetBuild(x => x
-                    .SetProjectFile(app)
-                    .SetConfiguration(BuildConfiguration)
-                    .SetPlatform(Platform)
-                    .SetNoRestore(true));
+                if (app.Name.Contains("StackExchangeRedis"))
+                {
+                    foreach (var testedPackageVersion in StackExchangeRedisTestedPackageVersions)
+                    {
+                        DotNetBuild(x => x
+                            .SetProjectFile(app)
+                            .SetConfiguration(BuildConfiguration)
+                            .SetProperty("TestedPackageVersion", testedPackageVersion)
+                            .SetPlatform(Platform)
+                            .SetNoRestore(true));
+                    }
+                }
+                else
+                {
+                    DotNetBuild(x => x
+                        .SetProjectFile(app)
+                        .SetConfiguration(BuildConfiguration)
+                        .SetPlatform(Platform)
+                        .SetNoRestore(true));
+                }
             }
 
             foreach (var project in Solution.GetManagedTestProjects())

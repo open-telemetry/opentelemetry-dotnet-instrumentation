@@ -56,8 +56,7 @@ public static class Program
 
             db.Ping();
         }
-
-        // SentinelConnect and SentinelConnectAsync introduced in 2.1.50
+#if !REDIS_2_1_50_OR_LOWER
         using (var connection = ConnectionMultiplexer.SentinelConnect(connectionString))
         {
             var db = connection.GetDatabase();
@@ -85,6 +84,7 @@ public static class Program
 
             db.Ping();
         }
+#endif
     }
 
     private static string GetRedisPort(string[] args)
