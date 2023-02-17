@@ -206,12 +206,13 @@ public class EnvironmentHelper
         return executor;
     }
 
-    public string GetTestApplicationProjectDirectory()
+    public string GetTestApplicationBaseBinDirectory()
     {
         var solutionDirectory = EnvironmentTools.GetSolutionDirectory();
         var projectDir = Path.Combine(
             solutionDirectory,
             _testApplicationDirectory,
+            "bin",
             $"{FullTestApplicationName}");
         return projectDir;
     }
@@ -219,20 +220,18 @@ public class EnvironmentHelper
     public string GetTestApplicationApplicationOutputDirectory(string packageVersion = "", string framework = "")
     {
         var targetFramework = string.IsNullOrEmpty(framework) ? GetTargetFramework() : framework;
-        var binDir = Path.Combine(
-            GetTestApplicationProjectDirectory(),
-            "bin");
+        var baseBinDirectory = GetTestApplicationBaseBinDirectory();
 
         if (_testApplicationDirectory.Contains("aspnet"))
         {
             return Path.Combine(
-                binDir,
+                baseBinDirectory,
                 EnvironmentTools.GetBuildConfiguration(),
                 "app.publish");
         }
 
         return Path.Combine(
-            binDir,
+            baseBinDirectory,
             packageVersion,
             EnvironmentTools.GetPlatform().ToLowerInvariant(),
             EnvironmentTools.GetBuildConfiguration(),
