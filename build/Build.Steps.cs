@@ -66,15 +66,26 @@ partial class Build
         .Unlisted()
         .Executes(() => ControlFlow.ExecuteWithRetry(() =>
         {
+            var projectsToRestore = Solution.GetCrossPlatformManagedProjects();
+
             if (IsWin)
             {
+                projectsToRestore = projectsToRestore.Concat(Solution.GetWindowsOnlyTestApplications());
+            }
+
+            foreach (var project in projectsToRestore)
+            {
                 DotNetRestore(s => s
-                    .SetProjectFile(Solution)
+                    .SetProjectFile(project)
                     .SetVerbosity(DotNetVerbosity.Normal)
                     .SetProperty("configuration", BuildConfiguration.ToString())
+                    .SetPlatform(Platform)
                     .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
                         o.SetPackageDirectory(NugetPackageDirectory)));
+            }
 
+            if (IsWin)
+            {
                 // Projects using `packages.config` can't be restored via "dotnet restore", use a NuGet Task to restore these projects.
                 var legacyRestoreProjects = Solution.GetNativeProjects()
                     .Concat(new[] { Solution.GetProject(Projects.Tests.Applications.AspNet) });
@@ -88,18 +99,6 @@ partial class Build
                         .SetVerbosity(NuGetVerbosity.Normal)
                         .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
                             o.SetPackagesDirectory(NugetPackageDirectory)));
-                }
-            }
-            else
-            {
-                foreach (var project in Solution.GetCrossPlatformManagedProjects())
-                {
-                    DotNetRestore(s => s
-                        .SetProjectFile(project)
-                        .SetVerbosity(DotNetVerbosity.Normal)
-                        .SetProperty("configuration", BuildConfiguration.ToString())
-                        .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                            o.SetPackageDirectory(NugetPackageDirectory)));
                 }
             }
         }));
