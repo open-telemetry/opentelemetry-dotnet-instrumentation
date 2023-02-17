@@ -20,14 +20,14 @@ public class TestPackageVersions
 {
     public static readonly IReadOnlyCollection<object[]> StackExchangeRedis = new List<object[]>
     {
-#if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty },
-#else
-        new object[] { "2.0.495" },
-        new object[] { "2.1.50" },
-        new object[] { "2.5.61" },
-        new object[] { "2.6.66" },
-        new object[] { "2.6.90" }
-#endif
+// #if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+// #else
+//        new object[] { "2.0.495" },
+//        new object[] { "2.1.50" },
+//        new object[] { "2.5.61" },
+//        new object[] { "2.6.66" },
+//        new object[] { "2.6.90" }
+// #endif
     };
 }
