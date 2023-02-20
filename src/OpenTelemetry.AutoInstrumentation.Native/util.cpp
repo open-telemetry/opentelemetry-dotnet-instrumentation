@@ -1,3 +1,6 @@
+// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
+
 #include "util.h" // Keep first to avoid PCH warning.
 
 #include <cwctype>

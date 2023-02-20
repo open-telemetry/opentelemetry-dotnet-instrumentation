@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef OTEL_CLR_PROFILER_LOGGER_IMPL_H_
 #define OTEL_CLR_PROFILER_LOGGER_IMPL_H_
 #include "util.h"

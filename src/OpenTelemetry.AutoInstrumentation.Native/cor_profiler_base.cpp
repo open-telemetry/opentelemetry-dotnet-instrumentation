@@ -1,4 +1,7 @@
-﻿#include "cor_profiler_base.h"
+// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
+
+#include "cor_profiler_base.h"
 #include "logger.h"
 
 namespace trace
