@@ -17,11 +17,11 @@ public static class TestPackageVersions
             "TestApplication.StackExchangeRedis",
             new List<string>
             {
-"2.0.495",
-"2.1.50",
-"2.5.61",
-"2.6.66",
-"*",
+                "2.0.495",
+                "2.1.50",
+                "2.5.61",
+                "2.6.66",
+                "2.6.90",
             }
         },
     };

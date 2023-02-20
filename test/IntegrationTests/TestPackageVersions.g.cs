@@ -11,7 +11,7 @@
 
 namespace IntegrationTests;
 
-public class TestPackageVersions
+public static class TestPackageVersions
 {
     public static readonly IReadOnlyCollection<object[]> StackExchangeRedis = new List<object[]>
     {
