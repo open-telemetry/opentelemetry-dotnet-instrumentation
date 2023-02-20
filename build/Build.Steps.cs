@@ -91,7 +91,7 @@ partial class Build
                 }
                 else
                 {
-                    DotNetRestore(s =>  s
+                    DotNetRestore(s => s
                             .SetProjectFile(project)
                             .SetVerbosity(DotNetVerbosity.Normal)
                             .SetProperty("configuration", BuildConfiguration.ToString())
@@ -291,7 +291,7 @@ partial class Build
             DotNetRun(s => s
                 .SetProjectFile(generatorTool));
         });
-        
+
     Target GenerateTestPackageVersionFiles => _ => _
         .After(PublishManagedProfiler)
         .Executes(() =>
