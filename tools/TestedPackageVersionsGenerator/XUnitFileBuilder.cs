@@ -31,7 +31,7 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
 
     public override CSharpFileBuilder AddVersion(string version)
     {
-        Builder.AppendLine($"        new object[] {{ \"{version}\" }}");
+        Builder.AppendLine($"        new object[] {{ \"{version}\" }},");
         return this;
     }
 
