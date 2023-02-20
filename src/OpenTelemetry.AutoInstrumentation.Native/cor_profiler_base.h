@@ -1,4 +1,9 @@
-﻿#ifndef OTEL_CLR_PROFILER_COR_PROFILER_BASE_H_
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#ifndef OTEL_CLR_PROFILER_COR_PROFILER_BASE_H_
 #define OTEL_CLR_PROFILER_COR_PROFILER_BASE_H_
 
 #include <atomic>
