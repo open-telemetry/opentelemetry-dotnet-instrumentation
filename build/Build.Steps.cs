@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Extensions;
@@ -52,8 +51,6 @@ partial class Build
             TargetFramework.NET7_0
         });
 
-    private static readonly IEnumerable<string> StackExchangeRedisTestedPackageVersions = new[] { "2.0.495", "2.1.50", "2.5.61", "2.6.66", "2.6.90" };
-
     Target CreateRequiredDirectories => _ => _
         .Unlisted()
         .Executes(() =>
@@ -78,9 +75,9 @@ partial class Build
 
             foreach (var project in projectsToRestore)
             {
-                if (project.Name.Contains("StackExchangeRedis"))
+                if (TestPackageVersions.Versions.TryGetValue(project.Name, out var testedPackageVersions))
                 {
-                    foreach (var testedPackageVersion in StackExchangeRedisTestedPackageVersions)
+                    foreach (var testedPackageVersion in testedPackageVersions)
                     {
                         DotNetRestore(s => s
                             .SetProjectFile(project)
@@ -94,13 +91,13 @@ partial class Build
                 }
                 else
                 {
-                    DotNetRestore(s => s
-                        .SetProjectFile(project)
-                        .SetVerbosity(DotNetVerbosity.Normal)
-                        .SetProperty("configuration", BuildConfiguration.ToString())
-                        .SetPlatform(Platform)
-                        .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                            o.SetPackageDirectory(NugetPackageDirectory)));
+                    DotNetRestore(s =>  s
+                            .SetProjectFile(project)
+                            .SetVerbosity(DotNetVerbosity.Normal)
+                            .SetProperty("configuration", BuildConfiguration.ToString())
+                            .SetPlatform(Platform)
+                            .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
+                                o.SetPackageDirectory(NugetPackageDirectory)));
                 }
             }
 
@@ -153,9 +150,9 @@ partial class Build
 
             foreach (var app in testApps)
             {
-                if (app.Name.Contains("StackExchangeRedis"))
+                if (TestPackageVersions.Versions.TryGetValue(app.Name, out var testedPackageVersions))
                 {
-                    foreach (var testedPackageVersion in StackExchangeRedisTestedPackageVersions)
+                    foreach (var testedPackageVersion in testedPackageVersions)
                     {
                         DotNetBuild(x => x
                             .SetProjectFile(app)

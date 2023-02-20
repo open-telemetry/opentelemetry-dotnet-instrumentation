@@ -1,4 +1,4 @@
-// <copyright file="TestPackageVersions.cs" company="OpenTelemetry Authors">
+// <copyright file="PackageVersionDefinition.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,20 +14,15 @@
 // limitations under the License.
 // </copyright>
 
-namespace IntegrationTests;
+namespace TestedPackageVersionsGenerator;
 
-public class TestPackageVersions
+internal record PackageVersionDefinition
 {
-    public static readonly IReadOnlyCollection<object[]> StackExchangeRedis = new List<object[]>
-    {
- #if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
- #else
-        new object[] { "2.0.495" },
-        new object[] { "2.1.50" },
-        new object[] { "2.5.61" },
-        new object[] { "2.6.66" },
-        new object[] { "2.6.90" }
- #endif
-    };
+    required public string IntegrationName { get; init; }
+
+    required public string NugetPackageName { get; init; }
+
+    required public string TestApplicationName { get; init; }
+
+    required public IReadOnlyCollection<string> Versions { get; init; }
 }
