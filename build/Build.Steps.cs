@@ -291,6 +291,16 @@ partial class Build
             DotNetRun(s => s
                 .SetProjectFile(generatorTool));
         });
+        
+    Target GenerateTestPackageVersionFiles => _ => _
+        .After(PublishManagedProfiler)
+        .Executes(() =>
+        {
+            var generatorTool = Solution.GetProject(Projects.Tools.TestedPackageVersionsGenerator);
+
+            DotNetRun(s => s
+                .SetProjectFile(generatorTool));
+        });
 
     Target CopyIntegrationsJson => _ => _
         .Unlisted()
