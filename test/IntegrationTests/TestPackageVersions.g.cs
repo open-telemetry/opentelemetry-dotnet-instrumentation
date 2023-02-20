@@ -13,6 +13,15 @@ namespace IntegrationTests;
 
 public static class TestPackageVersions
 {
+    public static readonly IReadOnlyCollection<object[]> MassTransit = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "8.0.0" },
+        new object[] { "8.0.13" },
+#endif
+    };
     public static readonly IReadOnlyCollection<object[]> StackExchangeRedis = new List<object[]>
     {
 #if DEFAULT_TEST_PACKAGE_VERSIONS

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="StackExchange.Redis" VersionOverride="$(TestedPackageVersion)"/>
+    <PackageReference Include="StackExchange.Redis" VersionOverride="$(TestedPackageVersion)" />
   </ItemGroup>
 
 </Project>

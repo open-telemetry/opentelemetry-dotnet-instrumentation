@@ -28,16 +28,17 @@ public class MassTransitTests : TestHelper
     {
     }
 
-    [Fact]
+    [Theory]
     [Trait("Category", "EndToEnd")]
-    public void SubmitsTraces()
+    [MemberData(nameof(TestPackageVersions.MassTransit), MemberType = typeof(TestPackageVersions))]
+    public void SubmitsTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         collector.Expect("MassTransit", span => span.Kind == SpanKind.Producer, "Producer");
         collector.Expect("MassTransit", span => span.Kind == SpanKind.Consumer, "Consumer");
 
-        RunTestApplication();
+        RunTestApplication(new TestSettings { PackageVersion = packageVersion });
 
         collector.AssertExpectations();
     }

@@ -14,6 +14,14 @@ public static class TestPackageVersions
     public static IReadOnlyDictionary<string, IReadOnlyCollection<string>> Versions = new Dictionary<string, IReadOnlyCollection<string>>
     {
         {
+            "TestApplication.MassTransit",
+            new List<string>
+            {
+                "8.0.0",
+                "8.0.13",
+            }
+        },
+        {
             "TestApplication.StackExchangeRedis",
             new List<string>
             {

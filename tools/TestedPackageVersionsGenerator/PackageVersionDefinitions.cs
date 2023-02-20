@@ -22,6 +22,17 @@ internal static class PackageVersionDefinitions
     {
         new()
         {
+            IntegrationName = "MassTransit",
+            NugetPackageName = "MassTransit",
+            TestApplicationName = "TestApplication.MassTransit",
+            Versions = new List<string>
+            {
+                "8.0.0",
+                "*"
+            }
+        },
+        new()
+        {
             IntegrationName = "StackExchangeRedis",
             NugetPackageName = "StackExchange.Redis",
             TestApplicationName = "TestApplication.StackExchangeRedis",
