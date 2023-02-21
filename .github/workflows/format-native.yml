@@ -24,3 +24,20 @@ jobs:
     - name: Format native code
       shell: bash
       run: ./scripts/format-native.sh
+
+  check-native-headers:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v3.3.0
+      - uses: actions/setup-go@v3.5.0
+        with:
+          go-version: '1.20.1'
+      - name: Verify all native files have license headers
+        shell: bash
+        run: |
+          go install github.com/google/addlicense@v1.1.1
+          addlicense -v -y "" -l "apache" -c "The OpenTelemetry Authors" -s=only -ignore **/lib/** src/OpenTelemetry.AutoInstrumentation.Native/
+          git status
+          git diff
+          test -z "$(git status --porcelain)"
