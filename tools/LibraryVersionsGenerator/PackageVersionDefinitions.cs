@@ -55,6 +55,17 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "Quartz",
+            NugetPackageName = "Quartz",
+            TestApplicationName = "TestApplication.Quartz",
+            Versions = new List<string>
+            {
+                "3.4.0",
+                "*"
+            }
+        },
+        new()
+        {
             IntegrationName = "StackExchangeRedis",
             NugetPackageName = "StackExchange.Redis",
             TestApplicationName = "TestApplication.StackExchangeRedis",

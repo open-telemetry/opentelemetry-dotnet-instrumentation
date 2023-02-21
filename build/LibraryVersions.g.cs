@@ -38,6 +38,14 @@ public static class LibraryVersion
             }
         },
         {
+            "TestApplication.Quartz",
+            new List<string>
+            {
+                "3.4.0",
+                "3.6.0",
+            }
+        },
+        {
             "TestApplication.StackExchangeRedis",
             new List<string>
             {

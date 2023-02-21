@@ -40,6 +40,15 @@ public static class LibraryVersion
         new object[] { "8.0.13" },
 #endif
     };
+    public static readonly IReadOnlyCollection<object[]> Quartz = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "3.4.0" },
+        new object[] { "3.6.0" },
+#endif
+    };
     public static readonly IReadOnlyCollection<object[]> StackExchangeRedis = new List<object[]>
     {
 #if DEFAULT_TEST_PACKAGE_VERSIONS
