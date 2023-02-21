@@ -454,19 +454,20 @@ partial class Build
 
                         CopyNativeDependenciesToStore(file, jsonDocument, architectureStores);
 
-                        RemoveDuplicatedLibraries(depsJsonContent, architectureStores);
+                        depsJsonContent = RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsContent(depsJsonContent);
 
-                        RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsFile(depsJsonContent, file);
-
-                        // To allow roll forward for applications, like Roslyn, that target one tfm
-                        // but have a later runtime make additional copies under the original tfm folder.
                         if (folderRuntimeName == TargetFramework.NET6_0)
                         {
-                            AddFrameworkRollForwardCopy(TargetFramework.NET6_0, TargetFramework.NET7_0, architectureStores);
+                            // To allow roll forward for applications, like Roslyn, that target one tfm
+                            // but have a later runtime move the libraries under the original tfm folder
+                            // to the latest one.
+                            depsJsonContent = RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET7_0, architectureStores, depsJsonContent);
                         }
+
+                        // Write the updated deps.json file.
+                        File.WriteAllText(file, depsJsonContent);
                     });
                 RemoveFilesFromAdditionalDepsDirectory();
-
 
                 void CopyNativeDependenciesToStore(AbsolutePath file, JsonDocument jsonDocument, IReadOnlyList<string> architectureStores)
                 {
@@ -499,41 +500,17 @@ partial class Build
                     }
                 }
 
-                void RemoveDuplicatedLibraries(string depsJsonContent, IReadOnlyList<string> architectureStores)
-                {
-                    var duplicatedLibraries = new List<(string Name, string Version)> { };
-
-                    foreach (var duplicatedLibrary in duplicatedLibraries)
-                    {
-                        if (depsJsonContent.Contains(duplicatedLibrary.Name.ToLower() + "/" + duplicatedLibrary.Version))
-                        {
-                            throw new NotSupportedException($"Cannot remove {duplicatedLibrary.Name.ToLower()}/{duplicatedLibrary.Version} folder. It is referenced in json file");
-                        }
-
-                        foreach (var architectureStore in architectureStores)
-                        {
-                            var directoryToBeRemoved = Path.Combine(architectureStore, duplicatedLibrary.Name.ToLower(), duplicatedLibrary.Version);
-
-                            if (!Directory.Exists(directoryToBeRemoved))
-                            {
-                                throw new NotSupportedException($"Directory {directoryToBeRemoved} does not exists. Verify it.");
-                            }
-
-                            Directory.Delete(directoryToBeRemoved, true);
-                        }
-                    }
-                }
-
-                void RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsFile(string depsJsonContent, AbsolutePath file)
+                string RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsContent(string depsJsonContent)
                 {
                     // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from target section.
-                    depsJsonContent = Regex.Replace(depsJsonContent,
+                    var updatedDepsJsonContent = Regex.Replace(depsJsonContent,
                         "\"OpenTelemetry(.+)AutoInstrumentation.AdditionalDeps.dll(.+?)}," + Environment.NewLine + "(.+?)\"", "\"",
                         RegexOptions.IgnoreCase | RegexOptions.Singleline);
                     // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from library section and write to file.
-                    depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+?)}," + Environment.NewLine + "(.+?)\"", "\"",
+                    updatedDepsJsonContent = Regex.Replace(updatedDepsJsonContent, "\"OpenTelemetry(.+?)}," + Environment.NewLine + "(.+?)\"", "\"",
                         RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                    File.WriteAllText(file, depsJsonContent);
+
+                    return updatedDepsJsonContent;
                 }
 
                 void RemoveFilesFromAdditionalDepsDirectory()
@@ -542,8 +519,14 @@ partial class Build
                     AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(DeleteDirectory);
                 }
 
-                void AddFrameworkRollForwardCopy(string runtime, string rollForwardRuntime, IReadOnlyList<string> architectureStores)
+                string RollFrameworkForward(string runtime, string rollForwardRuntime, IReadOnlyList<string> architectureStores, string depsJsonContent)
                 {
+                    // Update the contents of the json file.
+                    var updatedDepsJsonContent = Regex.Replace(depsJsonContent,
+                        $"\"lib/{runtime}/", $"\"lib/{rollForwardRuntime}/",
+                        RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
+                    // Roll forward each architecture by renaming the tfm folder holding the assemblies.
                     foreach (var architectureStore in architectureStores)
                     {
                         var assemblyDirectories = Directory.GetDirectories(architectureStore);
@@ -561,11 +544,17 @@ partial class Build
                             if (Directory.Exists(sourceDir))
                             {
                                 var destDir = Path.Combine(assemblyVersionDirectory, "lib", rollForwardRuntime);
-                                // Directory.CreateDirectory(destDir);
+
                                 CopyDirectoryRecursively(sourceDir, destDir);
+
+                                // Since the json was also rolled forward the original tfm folder can be deleted.
+                                DeleteDirectory(sourceDir);
                             }
                         }
                     }
+
+                    // Return the updated json contents.
+                    return updatedDepsJsonContent;
                 }
             });
 
