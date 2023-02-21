@@ -18,7 +18,7 @@ namespace TestedPackageVersionsGenerator;
 
 internal sealed class XUnitFileBuilder : CSharpFileBuilder
 {
-    public override CSharpFileBuilder BeginTestPackage(string testApplicationName, string integrationName, string nugetPackageName)
+    public override CSharpFileBuilder BeginTestPackage(string testApplicationName, string integrationName)
     {
         Builder.AppendLine(
             @$"    public static readonly IReadOnlyCollection<object[]> {integrationName} = new List<object[]>

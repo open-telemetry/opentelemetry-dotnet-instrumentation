@@ -36,7 +36,7 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
         return base.EndClass();
     }
 
-    public override CSharpFileBuilder BeginTestPackage(string testApplicationName, string integrationName, string nugetPackageName)
+    public override CSharpFileBuilder BeginTestPackage(string testApplicationName, string integrationName)
     {
         Builder.AppendLine(
             @$"        {{

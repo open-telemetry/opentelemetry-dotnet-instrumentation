@@ -59,7 +59,7 @@ internal abstract class CSharpFileBuilder
         return this;
     }
 
-    public abstract CSharpFileBuilder BeginTestPackage(string testApplicationName, string integrationName, string nugetPackageName);
+    public abstract CSharpFileBuilder BeginTestPackage(string testApplicationName, string integrationName);
 
     public abstract CSharpFileBuilder AddVersion(string version);
 
