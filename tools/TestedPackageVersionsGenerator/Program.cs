@@ -40,8 +40,8 @@ buildFileStringBuilder.BeginClass(classNamespace: string.Empty, className: "Test
 
 foreach (var packageVersionDefinition in PackageVersionDefinitions.Definitions)
 {
-    xUnitFileStringBuilder.BeginTestPackage(packageVersionDefinition.TestApplicationName, packageVersionDefinition.IntegrationName, packageVersionDefinition.NugetPackageName);
-    buildFileStringBuilder.BeginTestPackage(packageVersionDefinition.TestApplicationName, packageVersionDefinition.IntegrationName, packageVersionDefinition.NugetPackageName);
+    xUnitFileStringBuilder.BeginTestPackage(packageVersionDefinition.TestApplicationName, packageVersionDefinition.IntegrationName);
+    buildFileStringBuilder.BeginTestPackage(packageVersionDefinition.TestApplicationName, packageVersionDefinition.IntegrationName);
 
     foreach (var version in packageVersionDefinition.Versions)
     {
