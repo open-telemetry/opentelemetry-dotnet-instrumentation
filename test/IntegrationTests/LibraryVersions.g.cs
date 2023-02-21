@@ -61,6 +61,16 @@ public static class LibraryVersion
         new object[] { "5.1.0" },
 #endif
     };
+    public static readonly IReadOnlyCollection<object[]> MongoDB = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "2.13.3" },
+        new object[] { "2.15.0" },
+        new object[] { "2.19.0" },
+#endif
+    };
     public static readonly IReadOnlyCollection<object[]> MySqlData = new List<object[]>
     {
 #if DEFAULT_TEST_PACKAGE_VERSIONS

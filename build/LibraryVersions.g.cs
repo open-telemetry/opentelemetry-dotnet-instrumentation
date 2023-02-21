@@ -57,6 +57,15 @@ public static class LibraryVersion
             }
         },
         {
+            "TestApplication.MongoDB",
+            new List<string>
+            {
+                "2.13.3",
+                "2.15.0",
+                "2.19.0",
+            }
+        },
+        {
             "TestApplication.MySqlData",
             new List<string>
             {

@@ -80,6 +80,18 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "MongoDB",
+            NugetPackageName = "MongoDB.Driver",
+            TestApplicationName = "TestApplication.MongoDB",
+            Versions = new List<string>
+            {
+                "2.13.3",
+                "2.15.0",
+                "*"
+            }
+        },
+        new()
+        {
             IntegrationName = "MySqlData",
             NugetPackageName = "MySql.Data",
             TestApplicationName = "TestApplication.MySqlData",
