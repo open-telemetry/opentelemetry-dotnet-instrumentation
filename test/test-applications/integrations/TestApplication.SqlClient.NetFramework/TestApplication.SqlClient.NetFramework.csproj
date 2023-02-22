@@ -4,8 +4,4 @@
     <TargetFrameworks>net462</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
-  </ItemGroup>
-
 </Project>

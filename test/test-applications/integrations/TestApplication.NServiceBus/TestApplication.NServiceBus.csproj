@@ -10,8 +10,4 @@
     <PackageReference Include="NServiceBus" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
-  </ItemGroup>
-
 </Project>

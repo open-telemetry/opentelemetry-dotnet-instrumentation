@@ -66,15 +66,37 @@ partial class Build
         .Unlisted()
         .Executes(() => ControlFlow.ExecuteWithRetry(() =>
         {
+            var projectsToRestore = Solution.GetCrossPlatformManagedProjects();
+
             if (IsWin)
             {
-                DotNetRestore(s => s
-                    .SetProjectFile(Solution)
-                    .SetVerbosity(DotNetVerbosity.Normal)
-                    .SetProperty("configuration", BuildConfiguration.ToString())
-                    .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                        o.SetPackageDirectory(NugetPackageDirectory)));
+                projectsToRestore = projectsToRestore.Concat(Solution.GetWindowsOnlyTestApplications());
+            }
 
+            foreach (var project in projectsToRestore)
+            {
+                DotNetRestoreSettings Restore(DotNetRestoreSettings s) =>
+                    s.SetProjectFile(project)
+                        .SetVerbosity(DotNetVerbosity.Normal)
+                        .SetProperty("configuration", BuildConfiguration.ToString())
+                        .SetPlatform(Platform)
+                        .When(!string.IsNullOrEmpty(NugetPackageDirectory), o => o.SetPackageDirectory(NugetPackageDirectory));
+
+                if (LibraryVersion.Versions.TryGetValue(project.Name, out var libraryVersions))
+                {
+                    DotNetRestore(s =>
+                         Restore(s)
+                        .CombineWith(libraryVersions, (p, libraryVersion) =>
+                                p.SetProperty("LibraryVersion", libraryVersion)));
+                }
+                else
+                {
+                    DotNetRestore(Restore);
+                }
+            }
+
+            if (IsWin)
+            {
                 // Projects using `packages.config` can't be restored via "dotnet restore", use a NuGet Task to restore these projects.
                 var legacyRestoreProjects = Solution.GetNativeProjects()
                     .Concat(new[] { Solution.GetProject(Projects.Tests.Applications.AspNet) });
@@ -88,18 +110,6 @@ partial class Build
                         .SetVerbosity(NuGetVerbosity.Normal)
                         .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
                             o.SetPackagesDirectory(NugetPackageDirectory)));
-                }
-            }
-            else
-            {
-                foreach (var project in Solution.GetCrossPlatformManagedProjects())
-                {
-                    DotNetRestore(s => s
-                        .SetProjectFile(project)
-                        .SetVerbosity(DotNetVerbosity.Normal)
-                        .SetProperty("configuration", BuildConfiguration.ToString())
-                        .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                            o.SetPackageDirectory(NugetPackageDirectory)));
                 }
             }
         }));
@@ -134,11 +144,23 @@ partial class Build
 
             foreach (var app in testApps)
             {
-                DotNetBuild(x => x
-                    .SetProjectFile(app)
-                    .SetConfiguration(BuildConfiguration)
-                    .SetPlatform(Platform)
-                    .SetNoRestore(true));
+                DotNetBuildSettings BuildTestApplication(DotNetBuildSettings x) =>
+                    x.SetProjectFile(app)
+                        .SetConfiguration(BuildConfiguration)
+                        .SetPlatform(Platform)
+                        .SetNoRestore(true);
+
+                if (LibraryVersion.Versions.TryGetValue(app.Name, out var libraryVersions))
+                {
+                    DotNetBuild(x =>
+                         BuildTestApplication(x)
+                        .CombineWith(libraryVersions, (p, libraryVersion) =>
+                            p.SetProperty("LibraryVersion", libraryVersion)));
+                }
+                else
+                {
+                    DotNetBuild(BuildTestApplication);
+                }
             }
 
             foreach (var project in Solution.GetManagedTestProjects())
@@ -256,6 +278,16 @@ partial class Build
         .Executes(() =>
         {
             var generatorTool = Solution.GetProject(Projects.Tools.IntegrationsJsonGenerator);
+
+            DotNetRun(s => s
+                .SetProjectFile(generatorTool));
+        });
+
+    Target GenerateLibraryVersionFiles => _ => _
+        .After(PublishManagedProfiler)
+        .Executes(() =>
+        {
+            var generatorTool = Solution.GetProject(Projects.Tools.LibraryVersionsGenerator);
 
             DotNetRun(s => s
                 .SetProjectFile(generatorTool));

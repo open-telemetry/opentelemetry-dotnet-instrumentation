@@ -15,11 +15,8 @@
 // </copyright>
 
 #if NETFRAMEWORK
-using System.IO;
-using System.Threading.Tasks;
 using FluentAssertions;
 using IntegrationTests.Helpers;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
