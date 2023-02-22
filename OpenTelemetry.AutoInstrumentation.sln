@@ -170,6 +170,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DependencyListGenerator", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GacInstallTool", "tools\GacInstallTool\GacInstallTool.csproj", "{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryVersionsGenerator", "tools\LibraryVersionsGenerator\LibraryVersionsGenerator.csproj", "{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -798,6 +800,18 @@ Global
 		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD}.Release|x64.Build.0 = Release|Any CPU
 		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD}.Release|x86.ActiveCfg = Release|Any CPU
 		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD}.Release|x86.Build.0 = Release|Any CPU
+		{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8}.Debug|x64.Build.0 = Debug|Any CPU
+		{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8}.Debug|x86.Build.0 = Debug|Any CPU
+		{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8}.Release|x64.ActiveCfg = Release|Any CPU
+		{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8}.Release|x64.Build.0 = Release|Any CPU
+		{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8}.Release|x86.ActiveCfg = Release|Any CPU
+		{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -859,6 +873,7 @@ Global
 		{036A56A4-4EEF-42E3-9857-B9B00D302BF9} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{D6181786-C7F1-400D-A678-8DC300485429} = {00F4C92D-6652-4BD8-A334-B35D3E711BE6}
 		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD} = {00F4C92D-6652-4BD8-A334-B35D3E711BE6}
+		{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8} = {00F4C92D-6652-4BD8-A334-B35D3E711BE6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}
