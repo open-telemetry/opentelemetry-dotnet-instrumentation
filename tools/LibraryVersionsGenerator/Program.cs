@@ -15,10 +15,9 @@
 // </copyright>
 
 using System.Runtime.CompilerServices;
-using System.Text;
+using LibraryVersionsGenerator;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
-using LibraryVersionsGenerator;
 
 var thisFilePath = GetSourceFilePathName();
 var solutionFolder = Path.Combine(thisFilePath, "..", "..", "..");

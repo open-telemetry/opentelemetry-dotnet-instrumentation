@@ -46,4 +46,15 @@ internal static class PackageVersionDefinitions
             }
         }
     };
+
+    internal record PackageVersionDefinition
+    {
+        required public string IntegrationName { get; init; }
+
+        required public string NugetPackageName { get; init; }
+
+        required public string TestApplicationName { get; init; }
+
+        required public IReadOnlyCollection<string> Versions { get; init; }
+    }
 }
