@@ -10,7 +10,7 @@
     <LangVersion>10.0</LangVersion>
 
     <BaseIntermediateOutputPath Condition="'$(LibraryVersion)'!=''">..\obj\$(MSBuildProjectName)\$(LibraryVersion)\</BaseIntermediateOutputPath>
-    <BaseIntermediateOutputPath Condition="'$(LibraryVersion)'==''">..\obj\\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(LibraryVersion)'==''">..\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
     <BaseOutputPath Condition="'$(LibraryVersion)'!=''">..\bin\$(MSBuildProjectName)\$(LibraryVersion)\</BaseOutputPath>
     <BaseOutputPath Condition="'$(LibraryVersion)'==''">..\bin\$(MSBuildProjectName)\</BaseOutputPath>
 
