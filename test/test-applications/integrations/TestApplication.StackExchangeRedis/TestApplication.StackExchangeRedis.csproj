@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <DefineConstants Condition="'$(LibraryVersion)'!='' and'$(LibraryVersion)'&lt;='2.1.50'">$(DefineConstants);REDIS_2_1_50_OR_LOWER</DefineConstants>
+    <DefineConstants Condition="'$(LibraryVersion)'=='' or '$(LibraryVersion)'>='2.1.50'">$(DefineConstants);REDIS_2_1_50_OR_GREATER</DefineConstants>
 
   </PropertyGroup>
 

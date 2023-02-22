@@ -56,7 +56,7 @@ public static class Program
 
             db.Ping();
         }
-#if !REDIS_2_1_50_OR_LOWER
+#if REDIS_2_1_50_OR_GREATER
         using (var connection = ConnectionMultiplexer.SentinelConnect(connectionString))
         {
             var db = connection.GetDatabase();
