@@ -9,10 +9,10 @@
     <PlatformTarget>$(Platform)</PlatformTarget>
     <LangVersion>10.0</LangVersion>
 
-    <BaseIntermediateOutputPath Condition="'$(TestedPackageVersion)'!=''">..\obj\$(MSBuildProjectName)\$(TestedPackageVersion)\</BaseIntermediateOutputPath>
-    <BaseIntermediateOutputPath Condition="'$(TestedPackageVersion)'==''">..\obj\\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-    <BaseOutputPath Condition="'$(TestedPackageVersion)'!=''">..\bin\$(MSBuildProjectName)\$(TestedPackageVersion)\</BaseOutputPath>
-    <BaseOutputPath Condition="'$(TestedPackageVersion)'==''">..\bin\$(MSBuildProjectName)\</BaseOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(LibraryVersion)'!=''">..\obj\$(MSBuildProjectName)\$(LibraryVersion)\</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(LibraryVersion)'==''">..\obj\\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <BaseOutputPath Condition="'$(LibraryVersion)'!=''">..\bin\$(MSBuildProjectName)\$(LibraryVersion)\</BaseOutputPath>
+    <BaseOutputPath Condition="'$(LibraryVersion)'==''">..\bin\$(MSBuildProjectName)\</BaseOutputPath>
 
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>

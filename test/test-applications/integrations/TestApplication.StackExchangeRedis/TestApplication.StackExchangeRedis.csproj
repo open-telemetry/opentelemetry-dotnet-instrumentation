@@ -2,12 +2,12 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <DefineConstants Condition="'$(TestedPackageVersion)'!='' and'$(TestedPackageVersion)'&lt;='2.1.50'">$(DefineConstants);REDIS_2_1_50_OR_LOWER</DefineConstants>
+    <DefineConstants Condition="'$(LibraryVersion)'!='' and'$(LibraryVersion)'&lt;='2.1.50'">$(DefineConstants);REDIS_2_1_50_OR_LOWER</DefineConstants>
 
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="StackExchange.Redis" VersionOverride="$(TestedPackageVersion)" />
+    <PackageReference Include="StackExchange.Redis" VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
 
 </Project>

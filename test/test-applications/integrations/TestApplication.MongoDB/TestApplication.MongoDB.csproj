@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TestedPackageVersion Condition="'$(TestedPackageVersion)' == ''">2.13.3</TestedPackageVersion>
-    <DefineConstants Condition="'$(TestedPackageVersion)'>='2.15.0'">$(DefineConstants);MONGODB_2_15</DefineConstants>
+    <LibraryVersion Condition="'$(LibraryVersion)' == ''">2.13.3</LibraryVersion>
+    <DefineConstants Condition="'$(LibraryVersion)'>='2.15.0'">$(DefineConstants);MONGODB_2_15</DefineConstants>
 
     <!-- Required to build multiple projects with the same Configuration|Platform -->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -14,10 +14,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" VersionOverride="$(TestedPackageVersion)" />
+    <PackageReference Include="MongoDB.Driver" VersionOverride="$(LibraryVersion)" />
     <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v.3.1.0 is minimal version supported by auto instrumentation.
     MongoDB.Driver 2.18+ references older version. It prevents to load required version from Additional Dependencies store-->
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="3.1.0" Condition="'$(TestedPackageVersion)'>='2.18.0'" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" VersionOverride="3.1.0" Condition="'$(LibraryVersion)'>='2.18.0'" />
   </ItemGroup>
 
 </Project>

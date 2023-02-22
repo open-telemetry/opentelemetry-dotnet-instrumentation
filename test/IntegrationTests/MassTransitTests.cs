@@ -30,7 +30,7 @@ public class MassTransitTests : TestHelper
 
     [Theory]
     [Trait("Category", "EndToEnd")]
-    [MemberData(nameof(TestPackageVersions.MassTransit), MemberType = typeof(TestPackageVersions))]
+    [MemberData(nameof(LibraryVersion.MassTransit), MemberType = typeof(LibraryVersion))]
     public void SubmitsTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);

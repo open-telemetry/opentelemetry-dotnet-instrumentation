@@ -14,7 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-namespace TestedPackageVersionsGenerator;
+namespace LibraryVersionsGenerator;
 
 internal static class PackageVersionDefinitions
 {

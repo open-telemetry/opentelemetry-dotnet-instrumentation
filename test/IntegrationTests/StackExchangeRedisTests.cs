@@ -34,7 +34,7 @@ public class StackExchangeRedisTests : TestHelper
     [Theory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    [MemberData(nameof(TestPackageVersions.StackExchangeRedis), MemberType = typeof(TestPackageVersions))]
+    [MemberData(nameof(LibraryVersion.StackExchangeRedis), MemberType = typeof(LibraryVersion))]
     public void SubmitsTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);

@@ -75,15 +75,15 @@ partial class Build
 
             foreach (var project in projectsToRestore)
             {
-                if (TestPackageVersions.Versions.TryGetValue(project.Name, out var testedPackageVersions))
+                if (LibraryVersion.Versions.TryGetValue(project.Name, out var libraryVersions))
                 {
-                    foreach (var testedPackageVersion in testedPackageVersions)
+                    foreach (var libraryVersion in libraryVersions)
                     {
                         DotNetRestore(s => s
                             .SetProjectFile(project)
                             .SetVerbosity(DotNetVerbosity.Normal)
                             .SetProperty("configuration", BuildConfiguration.ToString())
-                            .SetProperty("TestedPackageVersion", testedPackageVersion)
+                            .SetProperty("LibraryVersion", libraryVersion)
                             .SetPlatform(Platform)
                             .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
                                 o.SetPackageDirectory(NugetPackageDirectory)));
@@ -150,14 +150,14 @@ partial class Build
 
             foreach (var app in testApps)
             {
-                if (TestPackageVersions.Versions.TryGetValue(app.Name, out var testedPackageVersions))
+                if (LibraryVersion.Versions.TryGetValue(app.Name, out var libraryVersions))
                 {
-                    foreach (var testedPackageVersion in testedPackageVersions)
+                    foreach (var libraryVersion in libraryVersions)
                     {
                         DotNetBuild(x => x
                             .SetProjectFile(app)
                             .SetConfiguration(BuildConfiguration)
-                            .SetProperty("TestedPackageVersion", testedPackageVersion)
+                            .SetProperty("LibraryVersion", libraryVersion)
                             .SetPlatform(Platform)
                             .SetNoRestore(true));
                     }
@@ -292,11 +292,11 @@ partial class Build
                 .SetProjectFile(generatorTool));
         });
 
-    Target GenerateTestPackageVersionFiles => _ => _
+    Target GenerateLibraryVersionFiles => _ => _
         .After(PublishManagedProfiler)
         .Executes(() =>
         {
-            var generatorTool = Solution.GetProject(Projects.Tools.TestedPackageVersionsGenerator);
+            var generatorTool = Solution.GetProject(Projects.Tools.LibraryVersionsGenerator);
 
             DotNetRun(s => s
                 .SetProjectFile(generatorTool));

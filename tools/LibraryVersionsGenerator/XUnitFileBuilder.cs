@@ -1,4 +1,4 @@
-// <copyright file="BuildFileBuilder.cs" company="OpenTelemetry Authors">
+// <copyright file="XUnitFileBuilder.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,49 +14,32 @@
 // limitations under the License.
 // </copyright>
 
-namespace TestedPackageVersionsGenerator;
+namespace LibraryVersionsGenerator;
 
-internal sealed class BuildFileBuilder : CSharpFileBuilder
+internal sealed class XUnitFileBuilder : CSharpFileBuilder
 {
-    public override CSharpFileBuilder BeginClass(string classNamespace, string className)
-    {
-        base.BeginClass(classNamespace, className);
-
-        Builder.AppendLine(
-            @"    public static IReadOnlyDictionary<string, IReadOnlyCollection<string>> Versions = new Dictionary<string, IReadOnlyCollection<string>>
-    {");
-
-        return this;
-    }
-
-    public override CSharpFileBuilder EndClass()
-    {
-        Builder.AppendLine("    };");
-
-        return base.EndClass();
-    }
-
     public override CSharpFileBuilder BeginTestPackage(string testApplicationName, string integrationName)
     {
         Builder.AppendLine(
-            @$"        {{
-            ""{testApplicationName}"",
-            new List<string>
-            {{");
-
+            @$"    public static readonly IReadOnlyCollection<object[]> {integrationName} = new List<object[]>
+    {{
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] {{ string.Empty }}
+#else");
         return this;
     }
 
     public override CSharpFileBuilder AddVersion(string version)
     {
-        Builder.AppendLine($"                \"{version}\",");
+        Builder.AppendLine($"        new object[] {{ \"{version}\" }},");
         return this;
     }
 
     public override CSharpFileBuilder EndTestPackage()
     {
-        Builder.AppendLine(@"            }
-        },");
+        Builder.AppendLine(@"#endif
+    };");
+
         return this;
     }
 }
