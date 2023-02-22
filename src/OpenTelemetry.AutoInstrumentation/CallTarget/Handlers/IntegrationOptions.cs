@@ -36,8 +36,8 @@ internal static class IntegrationOptions<TIntegration, TTarget>
     internal static void LogException(Exception exception, string? message = null)
     {
         // ReSharper disable twice ExplicitCallerInfoArgument
-        Log.Error(exception, message ?? exception.Message);
-        if (exception is DuckTypeException)
+        Log.Error(exception, message ?? exception?.Message);
+        if (exception is DuckTypeException or TargetInvocationException { InnerException: DuckTypeException })
         {
             Log.Warning($"DuckTypeException has been detected, the integration <{typeof(TIntegration)}, {typeof(TTarget)}> will be disabled.");
             _disableIntegration = true;
