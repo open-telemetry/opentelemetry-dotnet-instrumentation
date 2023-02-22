@@ -28,9 +28,11 @@ public:
     void LoadInt64(INT64 value) const;
     void LoadInt32(INT32 value) const;
     ILInstr* LoadArgument(UINT16 index) const;
+    ILInstr* LoadArgumentRef(UINT16 index) const;
     void Cast(mdTypeRef type_ref) const;
     void Box(mdTypeRef type_ref) const;
     void UnboxAny(mdTypeRef type_ref) const;
+    void UnboxAnyAfter(mdTypeRef type_ref) const;
     void CreateArray(mdTypeRef type_ref, INT32 size) const;
     ILInstr* CallMember(const mdMemberRef& member_ref, bool is_virtual) const;
     void Duplicate() const;

@@ -3,7 +3,9 @@
 
 #include "rejit_handler.h"
 
+#include "otel_profiler_constants.h"
 #include "logger.h"
+#include "stats.h"
 
 namespace trace
 {
@@ -12,13 +14,12 @@ namespace trace
 // RejitHandlerModuleMethod
 //
 
-RejitHandlerModuleMethod::RejitHandlerModuleMethod(mdMethodDef methodDef, RejitHandlerModule* module)
+RejitHandlerModuleMethod::RejitHandlerModuleMethod(mdMethodDef methodDef, RejitHandlerModule* module, const FunctionInfo& functionInfo)
 {
-    m_methodDef         = methodDef;
-    m_pFunctionControl  = nullptr;
-    m_module            = module;
-    m_functionInfo      = nullptr;
-    m_methodReplacement = nullptr;
+    m_methodDef = methodDef;
+    SetFunctionInfo(functionInfo);
+    m_pFunctionControl = nullptr;
+    m_module = module;
 }
 
 mdMethodDef RejitHandlerModuleMethod::GetMethodDef()
@@ -51,16 +52,6 @@ void RejitHandlerModuleMethod::SetFunctionInfo(const FunctionInfo& functionInfo)
     m_functionInfo = std::make_unique<FunctionInfo>(functionInfo);
 }
 
-MethodReplacement* RejitHandlerModuleMethod::GetMethodReplacement()
-{
-    return m_methodReplacement.get();
-}
-
-void RejitHandlerModuleMethod::SetMethodReplacement(const MethodReplacement& methodReplacement)
-{
-    m_methodReplacement = std::make_unique<MethodReplacement>(methodReplacement);
-}
-
 void RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId)
 {
     Logger::Debug("RejitHandlerModuleMethod::RequestRejitForInlinersInModule: ", moduleId);
@@ -77,7 +68,7 @@ void RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
     ModuleID           currentModuleId  = m_module->GetModuleId();
     mdMethodDef        currentMethodDef = m_methodDef;
     RejitHandler*      handler          = m_module->GetHandler();
-    ICorProfilerInfo7* pInfo            = handler->GetCorProfilerInfo7();
+    ICorProfilerInfo7* pInfo            = handler->GetCorProfilerInfo();
 
     if (pInfo != nullptr)
     {
@@ -87,6 +78,8 @@ void RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
 
         HRESULT hr = pInfo->EnumNgenModuleMethodsInliningThisMethod(moduleId, currentModuleId, currentMethodDef,
                                                                     &incompleteData, &methodEnum);
+        std::ostringstream hexValue;
+        hexValue << std::hex << hr;
         if (SUCCEEDED(hr))
         {
             COR_PRF_METHOD           method;
@@ -105,7 +98,7 @@ void RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
             methodEnum = nullptr;
             if (total > 0)
             {
-                handler->RequestRejit(modules, methods);
+                handler->EnqueueForRejit(modules, methods);
                 Logger::Info("NGEN:: Processed with ", total, " inliners [ModuleId=", currentModuleId, ",MethodDef=",
                              currentMethodDef, "]");
             }
@@ -121,20 +114,47 @@ void RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
         }
         else if (hr == E_INVALIDARG)
         {
-            Logger::Info("NGEN:: Error Invalid arguments in [ModuleId=", currentModuleId, ",MethodDef=",
-                         currentMethodDef, ", HR=E_INVALIDARG]");
+            Logger::Info("NGEN:: Error Invalid arguments in [ModuleId=", currentModuleId,
+                         ",MethodDef=", currentMethodDef, ", HR=", hexValue.str(), "]");
         }
         else if (hr == CORPROF_E_DATAINCOMPLETE)
         {
             Logger::Info("NGEN:: Error Incomplete data in [ModuleId=", currentModuleId, ",MethodDef=", currentMethodDef,
-                         ", HR=CORPROF_E_DATAINCOMPLETE]");
+                         ", HR=", hexValue.str(), "]");
+        }
+        else if (hr == CORPROF_E_UNSUPPORTED_CALL_SEQUENCE)
+        {
+            Logger::Info("NGEN:: Unsupported call sequence error in [ModuleId=", currentModuleId, ",MethodDef=", currentMethodDef,
+                         ", HR=", hexValue.str(), "]");
         }
         else
         {
-            Logger::Info("NGEN:: Error in [ModuleId=", currentModuleId, ",MethodDef=", currentMethodDef, ", HR=",
-                         HResultStr(hr), "]");
+            Logger::Info("NGEN:: Error in [ModuleId=", currentModuleId, ",MethodDef=", currentMethodDef,
+                         ", HR=", hexValue.str(), "]");
         }
     }
+}
+
+//
+// TracerRejitHandlerModuleMethod
+//
+
+TracerRejitHandlerModuleMethod::TracerRejitHandlerModuleMethod(
+    mdMethodDef methodDef, RejitHandlerModule* module, const FunctionInfo& functionInfo,
+    const IntegrationDefinition& integrationDefinition) :
+    RejitHandlerModuleMethod(methodDef, module, functionInfo),
+    m_integrationDefinition(std::make_unique<IntegrationDefinition>(integrationDefinition))
+{
+}
+
+IntegrationDefinition* TracerRejitHandlerModuleMethod::GetIntegrationDefinition()
+{
+    return m_integrationDefinition.get();
+}
+
+MethodRewriter* TracerRejitHandlerModuleMethod::GetMethodRewriter()
+{
+    return TracerMethodRewriter::Instance();
 }
 
 //
@@ -160,27 +180,27 @@ RejitHandler* RejitHandlerModule::GetHandler()
 
 ModuleMetadata* RejitHandlerModule::GetModuleMetadata()
 {
-    return m_metadata;
+    return m_metadata.get();
 }
 
 void RejitHandlerModule::SetModuleMetadata(ModuleMetadata* metadata)
 {
-    m_metadata = metadata;
+    m_metadata = std::unique_ptr<ModuleMetadata>(metadata);
 }
 
-RejitHandlerModuleMethod* RejitHandlerModule::GetOrAddMethod(mdMethodDef methodDef)
+bool RejitHandlerModule::CreateMethodIfNotExists(const mdMethodDef methodDef,
+                                                 RejitHandlerModuleMethodCreatorFunc creator)
 {
     std::lock_guard<std::mutex> guard(m_methods_lock);
 
     auto find_res = m_methods.find(methodDef);
     if (find_res != m_methods.end())
     {
-        return find_res->second.get();
+        return false; // already exist and was not created
     }
 
-    RejitHandlerModuleMethod* methodHandler = new RejitHandlerModuleMethod(methodDef, this);
-    m_methods[methodDef]                    = std::unique_ptr<RejitHandlerModuleMethod>(methodHandler);
-    return methodHandler;
+    m_methods[methodDef] = creator(methodDef, this);
+    return true;
 }
 
 bool RejitHandlerModule::TryGetMethod(mdMethodDef methodDef, RejitHandlerModuleMethod** methodHandler)
@@ -193,7 +213,7 @@ bool RejitHandlerModule::TryGetMethod(mdMethodDef methodDef, RejitHandlerModuleM
         *methodHandler = find_res->second.get();
         return true;
     }
-    *methodHandler = nullptr;
+
     return false;
 }
 
@@ -212,26 +232,103 @@ void RejitHandlerModule::RequestRejitForInlinersInModule(ModuleID moduleId)
     }
 }
 
+//
+// RejitHandler
+//
+
 void RejitHandler::RequestRejitForInlinersInModule(ModuleID moduleId)
 {
-    std::lock_guard<std::mutex> guard(m_modules_lock);
-    for (const auto& mod : m_modules)
+    ReadLock r_lock(m_shutdown_lock);
+    if (m_shutdown)
     {
-        mod.second->RequestRejitForInlinersInModule(moduleId);
+        return;
+    }
+
+    std::lock_guard<std::mutex> guard(m_modules_lock);
+    if (m_profilerInfo != nullptr)
+    {
+        for (const auto& mod : m_modules)
+        {
+            mod.second->RequestRejitForInlinersInModule(moduleId);
+        }
     }
 }
 
-RejitHandler::RejitHandler(ICorProfilerInfo7* pInfo,
-                           std::function<HRESULT(RejitHandlerModule*, RejitHandlerModuleMethod*)> rewriteCallback)
+void RejitHandler::RequestRejit(std::vector<ModuleID>& modulesVector,
+                                std::vector<mdMethodDef>& modulesMethodDef)
 {
-    m_profilerInfo7   = pInfo;
-    m_rewriteCallback = rewriteCallback;
+    ReadLock r_lock(m_shutdown_lock);
+    if (m_shutdown)
+    {
+        return;
+    }
+
+    // Request the ReJIT for all integrations found in the module.
+    HRESULT hr;
+
+    if (!modulesVector.empty())
+    {
+        // *************************************
+        // Request ReJIT
+        // *************************************
+
+        if (m_profilerInfo10 != nullptr)
+        {
+            // RequestReJITWithInliners is currently always failing with `Fatal error. Internal CLR error.
+            // (0x80131506)` more research is required, meanwhile we fallback to the normal RequestReJIT and
+            // manual track of inliners.
+
+            /*hr = m_profilerInfo10->RequestReJITWithInliners(COR_PRF_REJIT_BLOCK_INLINING, (ULONG) modulesVector.size(),
+            &modulesVector[0], &modulesMethodDef[0]); if (FAILED(hr))
+            {
+                Warn("Error requesting ReJITWithInliners for ", vtModules.size(),
+                     " methods, falling back to a normal RequestReJIT");
+                hr = m_profilerInfo10->RequestReJIT((ULONG) modulesVector.size(), &modulesVector[0], &modulesMethodDef[0]);
+            }*/
+
+            hr = m_profilerInfo10->RequestReJIT((ULONG) modulesVector.size(), &modulesVector[0], &modulesMethodDef[0]);
+        }
+        else
+        {
+            hr = m_profilerInfo->RequestReJIT((ULONG) modulesVector.size(), &modulesVector[0], &modulesMethodDef[0]);
+        }
+        if (SUCCEEDED(hr))
+        {
+            Logger::Info("Request ReJIT done for ", modulesVector.size(), " methods");
+        }
+        else
+        {
+            Logger::Warn("Error requesting ReJIT for ", modulesVector.size(), " methods");
+        }
+
+        // Request for NGen Inliners
+        RequestRejitForNGenInliners();
+    }
+}
+
+RejitHandler::RejitHandler(ICorProfilerInfo7* pInfo, std::shared_ptr<RejitWorkOffloader> work_offloader)
+{
+    m_profilerInfo = pInfo;
+    m_profilerInfo10 = nullptr;
+    m_work_offloader = work_offloader;
+}
+
+RejitHandler::RejitHandler(ICorProfilerInfo10* pInfo, std::shared_ptr<RejitWorkOffloader> work_offloader)
+{
+    m_profilerInfo = pInfo;
+    m_profilerInfo10 = pInfo;
+    m_work_offloader = work_offloader;
 }
 
 RejitHandlerModule* RejitHandler::GetOrAddModule(ModuleID moduleId)
 {
-    std::lock_guard<std::mutex> guard(m_modules_lock);
+    ReadLock r_lock(m_shutdown_lock);
+    if (m_shutdown)
+    {
+        return nullptr;
+    }
 
+    std::lock_guard<std::mutex> guard(m_modules_lock);
     auto find_res = m_modules.find(moduleId);
     if (find_res != m_modules.end())
     {
@@ -243,79 +340,115 @@ RejitHandlerModule* RejitHandler::GetOrAddModule(ModuleID moduleId)
     return moduleHandler;
 }
 
-bool RejitHandler::TryGetModule(ModuleID moduleId, RejitHandlerModule** moduleHandler)
+bool RejitHandler::HasModuleAndMethod(ModuleID moduleId, mdMethodDef methodDef)
 {
-    std::lock_guard<std::mutex> guard(m_modules_lock);
+    ReadLock r_lock(m_shutdown_lock);
+    if (m_shutdown)
+    {
+        return false;
+    }
 
+    std::lock_guard<std::mutex> guard(m_modules_lock);
     auto find_res = m_modules.find(moduleId);
     if (find_res != m_modules.end())
     {
-        *moduleHandler = find_res->second.get();
-        return true;
+        auto moduleHandler = find_res->second.get();
+        return moduleHandler->ContainsMethod(methodDef);
     }
-    *moduleHandler = nullptr;
+
     return false;
 }
 
 void RejitHandler::RemoveModule(ModuleID moduleId)
 {
+    ReadLock r_lock(m_shutdown_lock);
+    if (m_shutdown)
+    {
+        return;
+    }
+
     std::lock_guard<std::mutex> guard(m_modules_lock);
     m_modules.erase(moduleId);
 }
 
 void RejitHandler::AddNGenModule(ModuleID moduleId)
 {
+    ReadLock r_lock(m_shutdown_lock);
+    if (m_shutdown)
+    {
+        return;
+    }
+
     std::lock_guard<std::mutex> guard(m_ngenModules_lock);
     m_ngenModules.push_back(moduleId);
     RequestRejitForInlinersInModule(moduleId);
 }
 
-void RejitHandler::RequestRejit(std::vector<ModuleID>& modulesVector, std::vector<mdMethodDef>& modulesMethodDef)
+void RejitHandler::EnqueueForRejit(std::vector<ModuleID>& modulesVector, std::vector<mdMethodDef>& modulesMethodDef)
 {
-    const size_t length = modulesMethodDef.size();
-
-    // Create module and methods metadata.
-    for (size_t i = 0; i < length; i++)
+    if (IsShutdownRequested() || modulesVector.size() == 0 || modulesMethodDef.size() == 0)
     {
-        GetOrAddModule(modulesVector[i])->GetOrAddMethod(modulesMethodDef[i]);
+        return;
     }
 
-    // Even if ICorProfilerInfo10, or later, is available the code leverages the
-    // fact
-    // that this is a startup profiler so there is no need to handle an attach
-    // scenario.
-    // Instead of using RequestReJITWithInliners to handle inlined methods that
-    // are targeted
-    // for instrumentation the code uses the ICorProfilerCallback::JITInlining
-    // callback instead.
-    // On the callback the profiler blocks the inlining of any method targeted for
-    // instrumentation.
-    HRESULT hr = m_profilerInfo7->RequestReJIT((ULONG)length, modulesVector.data(), modulesMethodDef.data());
-    if (SUCCEEDED(hr))
-    {
-        Logger::Info("Request ReJIT done for ", length, " methods");
-    }
-    else
-    {
-        Logger::Warn("Error requesting ReJIT for ", length, " methods");
-    }
+    Logger::Debug("RejitHandler::EnqueueForRejit");
+
+    std::function<void()> action = [=, modules = std::move(modulesVector),
+                                    methods = std::move(modulesMethodDef)]() mutable {
+        // Request ReJIT
+        RequestRejit(modules, methods);
+    };
+
+    // Enqueue
+    m_work_offloader->Enqueue(std::make_unique<RejitWorkItem>(std::move(action)));
 }
 
 void RejitHandler::Shutdown()
 {
+    Logger::Debug("RejitHandler::Shutdown");
+
+    // Wait for exiting the thread
+    m_work_offloader->Enqueue(RejitWorkItem::CreateTerminatingWorkItem());
+    m_work_offloader->WaitForTermination();
+
+    std::lock_guard<std::mutex> moduleGuard(m_modules_lock);
+    std::lock_guard<std::mutex> ngenModuleGuard(m_ngenModules_lock);
+
+    WriteLock w_lock(m_shutdown_lock);
+    m_shutdown.store(true);
+
     m_modules.clear();
-    m_profilerInfo7   = nullptr;
-    m_rewriteCallback = nullptr;
+    m_profilerInfo = nullptr;
+    m_profilerInfo10 = nullptr;
 }
 
-HRESULT RejitHandler::NotifyReJITParameters(ModuleID                     moduleId,
-                                            mdMethodDef                  methodId,
-                                            ICorProfilerFunctionControl* pFunctionControl,
-                                            ModuleMetadata*              metadata)
+bool RejitHandler::IsShutdownRequested()
 {
+    ReadLock r_lock(m_shutdown_lock);
+    return m_shutdown;
+}
+
+HRESULT RejitHandler::NotifyReJITParameters(ModuleID moduleId, mdMethodDef methodId,
+                                            ICorProfilerFunctionControl* pFunctionControl)
+{
+    ReadLock r_lock(m_shutdown_lock);
+    if (m_shutdown)
+    {
+        return S_FALSE;
+    }
+
     auto moduleHandler = GetOrAddModule(moduleId);
-    moduleHandler->SetModuleMetadata(metadata);
-    auto methodHandler = moduleHandler->GetOrAddMethod(methodId);
+    if (moduleHandler == nullptr)
+    {
+        return S_FALSE;
+    }
+
+    RejitHandlerModuleMethod* methodHandler = nullptr;
+    if (!moduleHandler->TryGetMethod(methodId, &methodHandler))
+    {
+        return S_FALSE;
+    }
+
     methodHandler->SetFunctionControl(pFunctionControl);
 
     if (methodHandler->GetMethodDef() == mdMethodDefNil)
@@ -343,14 +476,6 @@ HRESULT RejitHandler::NotifyReJITParameters(ModuleID                     moduleI
         return S_FALSE;
     }
 
-    if (methodHandler->GetMethodReplacement() == nullptr)
-    {
-        Logger::Warn("NotifyReJITCompilationStarted: MethodReplacement is missing for "
-                     "MethodDef: ",
-                     methodId);
-        return S_FALSE;
-    }
-
     if (moduleHandler->GetModuleId() == 0)
     {
         Logger::Warn("NotifyReJITCompilationStarted: ModuleID is missing for "
@@ -367,7 +492,17 @@ HRESULT RejitHandler::NotifyReJITParameters(ModuleID                     moduleI
         return S_FALSE;
     }
 
-    return m_rewriteCallback(moduleHandler, methodHandler);
+    auto rewriter = methodHandler->GetMethodRewriter();
+
+    if (rewriter == nullptr)
+    {
+        Logger::Error("NotifyReJITCompilationStarted: The rewriter is missing for "
+                      "MethodDef: ",
+                      methodId, ", methodHandler type name = ", typeid(methodHandler).name());
+        return S_FALSE;
+    }
+
+    return rewriter->Rewrite(moduleHandler, methodHandler);
 }
 
 HRESULT RejitHandler::NotifyReJITCompilationStarted(FunctionID functionId, ReJITID rejitId)
@@ -375,21 +510,57 @@ HRESULT RejitHandler::NotifyReJITCompilationStarted(FunctionID functionId, ReJIT
     return S_OK;
 }
 
-ICorProfilerInfo7* RejitHandler::GetCorProfilerInfo7()
+ICorProfilerInfo7* RejitHandler::GetCorProfilerInfo()
 {
-    return m_profilerInfo7;
+    return m_profilerInfo;
+}
+
+void RejitHandler::SetCorAssemblyProfiler(AssemblyProperty* pCorAssemblyProfiler)
+{
+    m_pCorAssemblyProperty = pCorAssemblyProfiler;
+}
+
+AssemblyProperty* RejitHandler::GetCorAssemblyProperty()
+{
+    return m_pCorAssemblyProperty;
 }
 
 void RejitHandler::RequestRejitForNGenInliners()
 {
-    if (m_profilerInfo7 != nullptr)
+    ReadLock r_lock(m_shutdown_lock);
+    if (m_shutdown)
     {
-        std::lock_guard<std::mutex> guard(m_ngenModules_lock);
+        return;
+    }
+
+    std::lock_guard<std::mutex> guard(m_ngenModules_lock);
+    if (m_profilerInfo != nullptr)
+    {
         for (const auto& mod : m_ngenModules)
         {
             RequestRejitForInlinersInModule(mod);
         }
     }
+}
+
+void RejitHandler::SetEnableByRefInstrumentation(bool enableByRefInstrumentation)
+{
+    enable_by_ref_instrumentation = enableByRefInstrumentation;
+}
+
+void RejitHandler::SetEnableCallTargetStateByRef(bool enableCallTargetStateByRef)
+{
+    enable_calltarget_state_by_ref = enableCallTargetStateByRef;
+}
+
+bool RejitHandler::GetEnableCallTargetStateByRef()
+{
+    return enable_calltarget_state_by_ref;
+}
+
+bool RejitHandler::GetEnableByRefInstrumentation()
+{
+    return enable_by_ref_instrumentation;
 }
 
 } // namespace trace

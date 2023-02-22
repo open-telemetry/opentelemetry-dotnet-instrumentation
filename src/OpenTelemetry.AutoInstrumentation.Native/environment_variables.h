@@ -17,11 +17,6 @@ const WSTRING log_level = WStr("OTEL_LOG_LEVEL");
 // Sets max size of a single log file
 const WSTRING max_log_file_size = WStr("OTEL_DOTNET_AUTO_LOG_FILE_SIZE");
 
-// Sets the paths to integration definition JSON files.
-// Supports multiple values separated with comma, for example:
-// "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\integrations.json,D:\temp\test_integrations.json"
-const WSTRING integrations_path = WStr("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE");
-
 // Sets the path to the profiler's home directory, for example:
 // "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\" or "/opt/opentelemetry/"
 const WSTRING profiler_home_path = WStr("OTEL_DOTNET_AUTO_HOME");

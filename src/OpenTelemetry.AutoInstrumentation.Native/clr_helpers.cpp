@@ -46,6 +46,8 @@ AssemblyInfo GetAssemblyInfo(ICorProfilerInfo7* info, const AssemblyID& assembly
 
     if (FAILED(hr) || assembly_name_len == 0)
     {
+        Logger::Warn("Error loading the assembly info: ", assembly_id, " [", "AssemblyLength=", assembly_name_len,
+                     ", HRESULT=0x", std::setfill('0'), std::setw(8), std::hex, hr, "]");
         return {};
     }
 
@@ -56,6 +58,9 @@ AssemblyInfo GetAssemblyInfo(ICorProfilerInfo7* info, const AssemblyID& assembly
 
     if (FAILED(hr) || app_domain_name_len == 0)
     {
+        Logger::Warn("Error loading the appdomain for assembly: ", assembly_id,
+                     " [AssemblyName=", WSTRING(assembly_name), ", AssemblyLength=", assembly_name_len, ", HRESULT=0x",
+                     std::setfill('0'), std::setw(8), std::hex, hr, ", AppDomainId=", app_domain_id, "]");
         return {};
     }
 
@@ -265,7 +270,7 @@ TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdTo
                 const auto baseType = GetTypeInfo(metadata_import, type_token);
                 return {baseType.id,        baseType.name,        token,
                         token_type,         baseType.extend_from, baseType.valueType,
-                        baseType.isGeneric, baseType.parent_type};
+                        baseType.isGeneric, baseType.parent_type, baseType.scopeToken};
             }
         }
         break;
@@ -293,7 +298,7 @@ TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdTo
     }
 
     return {token,       type_name_string, mdTypeSpecNil,  token_type,
-            extendsInfo, type_valueType,   type_isGeneric, parentTypeInfo};
+            extendsInfo, type_valueType,   type_isGeneric, parentTypeInfo, parent_token};
 }
 
 mdAssemblyRef FindAssemblyRef(const ComPtr<IMetaDataAssemblyImport>& assembly_import, const WSTRING& assembly_name)
@@ -319,7 +324,7 @@ HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit,
         Logger::Debug("Using existing corlib reference: ", corAssemblyProperty.szName);
         return assembly_emit->DefineAssemblyRef(corAssemblyProperty.ppbPublicKey, corAssemblyProperty.pcbPublicKey,
                                                 corAssemblyProperty.szName.c_str(), &corAssemblyProperty.pMetaData,
-                                                NULL, 0, 0, corlib_ref);
+                                                NULL, 0, corAssemblyProperty.assemblyFlags, corlib_ref);
     }
     else
     {
@@ -330,8 +335,8 @@ HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit,
         metadata.usBuildNumber    = 0;
         metadata.usRevisionNumber = 0;
         BYTE public_key[]         = {0xB7, 0x7A, 0x5C, 0x56, 0x19, 0x34, 0xE0, 0x89};
-        return assembly_emit->DefineAssemblyRef(public_key, sizeof(public_key), WStr("mscorlib"), &metadata, NULL, 0, 0,
-                                                corlib_ref);
+        return assembly_emit->DefineAssemblyRef(public_key, sizeof(public_key), WStr("mscorlib"), &metadata, NULL, 0,
+                                                corAssemblyProperty.assemblyFlags, corlib_ref);
     }
 }
 
