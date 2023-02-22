@@ -97,8 +97,6 @@ partial class Build : NukeBuild
         .DependsOn(GenerateNetFxAssemblyRedirectionSource)
         .DependsOn(CompileNativeSrc)
         .DependsOn(PublishNativeProfiler)
-        .DependsOn(GenerateIntegrationsJson)
-        .DependsOn(CopyIntegrationsJson)
         .DependsOn(CopyInstrumentScripts)
         .DependsOn(CopyLegalFiles);
 

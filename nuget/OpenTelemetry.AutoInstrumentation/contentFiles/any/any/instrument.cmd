@@ -18,7 +18,6 @@ set DOTNET_STARTUP_HOOKS=%BASE_PATH%OpenTelemetry.AutoInstrumentation.StartupHoo
 
 :: Settings for OpenTelemetry
 set OTEL_DOTNET_AUTO_HOME=%BASE_PATH%
-set OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=%BASE_PATH%integrations.json
 
 @echo on
 %*

@@ -79,7 +79,6 @@ function Get-Environment-Variables-Table([string]$InstallDir, [string]$OTelServi
     $DOTNET_STARTUP_HOOKS = Join-Path $InstallDir "net/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
 
     $OTEL_DOTNET_AUTO_HOME = $InstallDir
-    $OTEL_DOTNET_AUTO_INTEGRATIONS_FILE = Join-Path $InstallDir "integrations.json"
     
     $vars = @{
         # .NET Framework
@@ -100,7 +99,6 @@ function Get-Environment-Variables-Table([string]$InstallDir, [string]$OTelServi
         "DOTNET_STARTUP_HOOKS"                = $DOTNET_STARTUP_HOOKS;
         # OpenTelemetry
         "OTEL_DOTNET_AUTO_HOME"               = $OTEL_DOTNET_AUTO_HOME;
-        "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE"  = $OTEL_DOTNET_AUTO_INTEGRATIONS_FILE
     }
 
     if (-not [string]::IsNullOrWhiteSpace($OTelServiceName)) {

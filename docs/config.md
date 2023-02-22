@@ -20,7 +20,6 @@ with environment variables taking precedence over `App.config` or `Web.config` f
 
     - `OTEL_DOTNET_AUTO_HOME`
     - `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`
-    - `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE`
     - `OTEL_DOTNET_AUTO_[TRACES|METRICS|LOGS]_[ENABLED|DISABLED]_INSTRUMENTATIONS`
     - `OTEL_DOTNET_AUTO_LOG_DIRECTORY`
     - `OTEL_LOG_LEVEL`
@@ -86,7 +85,6 @@ for example `TRACES`, and `{0}` is the case-sensitive name of the instrumentatio
 
 | Environment variable                                   | Description                                                                                                                                                                                                                                                     | Default value                                                                          | Status                                                                                                                            |
 |--------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE`                   | List of bytecode instrumentations JSON configuration filepaths, delimited by the platform-specific path separator (`;` on Windows, `:` on Linux and macOS). For example: `%ProfilerDirectory%/integrations.json`. It is required for bytecode instrumentations. |                                                                                        | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED`             | Disables all instrumentations.                                                                                                                                                                                                                                  | `true`                                                                                 | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED`      | Disables all trace instrumentations. Overrides `OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED`.                                                                                                                                                                      | Inherited from the current value of `OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED`         | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `OTEL_DOTNET_AUTO_TRACES_{0}_INSTRUMENTATION_ENABLED`  | Configuration pattern for enabling or disabling a specific trace instrumentation, where `{0}` is the uppercase id of the instrumentation you want to enable. Overrides `OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED`.                                       | Inherited from the current value of `OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED`  | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
@@ -357,7 +355,6 @@ CORECLR_PROFILER
 CORECLR_PROFILER_PATH
 CORECLR_PROFILER_PATH_32
 CORECLR_PROFILER_PATH_64
-OTEL_DOTNET_AUTO_INTEGRATIONS_FILE
 ```
 
 ## .NET Runtime

@@ -3,7 +3,6 @@
   /AdditionalDeps/shared/Microsoft.NETCore.App/7.0.0/OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
   /LICENSE,
   /instrument.sh,
-  /integrations.json,
   /linux-musl-x64/OpenTelemetry.AutoInstrumentation.Native.so,
   /net/Google.Protobuf.dll,
   /net/Grpc.Core.Api.dll,
