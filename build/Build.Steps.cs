@@ -75,29 +75,23 @@ partial class Build
 
             foreach (var project in projectsToRestore)
             {
+                DotNetRestoreSettings Restore(DotNetRestoreSettings s) =>
+                    s.SetProjectFile(project)
+                        .SetVerbosity(DotNetVerbosity.Normal)
+                        .SetProperty("configuration", BuildConfiguration.ToString())
+                        .SetPlatform(Platform)
+                        .When(!string.IsNullOrEmpty(NugetPackageDirectory), o => o.SetPackageDirectory(NugetPackageDirectory));
+
                 if (LibraryVersion.Versions.TryGetValue(project.Name, out var libraryVersions))
                 {
-                    foreach (var libraryVersion in libraryVersions)
-                    {
-                        DotNetRestore(s => s
-                            .SetProjectFile(project)
-                            .SetVerbosity(DotNetVerbosity.Normal)
-                            .SetProperty("configuration", BuildConfiguration.ToString())
-                            .SetProperty("LibraryVersion", libraryVersion)
-                            .SetPlatform(Platform)
-                            .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                                o.SetPackageDirectory(NugetPackageDirectory)));
-                    }
+                    DotNetRestore(s =>
+                         Restore(s)
+                        .CombineWith(libraryVersions, (p, libraryVersion) =>
+                                p.SetProperty("LibraryVersion", libraryVersion)));
                 }
                 else
                 {
-                    DotNetRestore(s => s
-                            .SetProjectFile(project)
-                            .SetVerbosity(DotNetVerbosity.Normal)
-                            .SetProperty("configuration", BuildConfiguration.ToString())
-                            .SetPlatform(Platform)
-                            .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                                o.SetPackageDirectory(NugetPackageDirectory)));
+                    DotNetRestore(Restore);
                 }
             }
 
@@ -150,25 +144,22 @@ partial class Build
 
             foreach (var app in testApps)
             {
+                DotNetBuildSettings BuildTestApplication(DotNetBuildSettings x) =>
+                    x.SetProjectFile(app)
+                        .SetConfiguration(BuildConfiguration)
+                        .SetPlatform(Platform)
+                        .SetNoRestore(true);
+
                 if (LibraryVersion.Versions.TryGetValue(app.Name, out var libraryVersions))
                 {
-                    foreach (var libraryVersion in libraryVersions)
-                    {
-                        DotNetBuild(x => x
-                            .SetProjectFile(app)
-                            .SetConfiguration(BuildConfiguration)
-                            .SetProperty("LibraryVersion", libraryVersion)
-                            .SetPlatform(Platform)
-                            .SetNoRestore(true));
-                    }
+                    DotNetBuild(x =>
+                         BuildTestApplication(x)
+                        .CombineWith(libraryVersions, (p, libraryVersion) =>
+                            p.SetProperty("LibraryVersion", libraryVersion)));
                 }
                 else
                 {
-                    DotNetBuild(x => x
-                        .SetProjectFile(app)
-                        .SetConfiguration(BuildConfiguration)
-                        .SetPlatform(Platform)
-                        .SetNoRestore(true));
+                    DotNetBuild(BuildTestApplication);
                 }
             }
 
