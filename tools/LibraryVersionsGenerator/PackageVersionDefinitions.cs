@@ -55,6 +55,20 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "SqlClient",
+            NugetPackageName = "Microsoft.Data.SqlClient",
+            TestApplicationName = "TestApplication.SqlClient",
+            Versions = new List<string>
+            {
+                "1.1.4",
+                "2.1.5",
+                "3.1.2",
+                "4.1.1",
+                "*"
+            }
+        },
+        new()
+        {
             IntegrationName = "MySqlData",
             NugetPackageName = "MySql.Data",
             TestApplicationName = "TestApplication.MySqlData",

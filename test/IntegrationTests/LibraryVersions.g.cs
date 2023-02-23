@@ -40,6 +40,18 @@ public static class LibraryVersion
         new object[] { "8.0.13" },
 #endif
     };
+    public static readonly IReadOnlyCollection<object[]> SqlClient = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "1.1.4" },
+        new object[] { "2.1.5" },
+        new object[] { "3.1.2" },
+        new object[] { "4.1.1" },
+        new object[] { "5.1.0" },
+#endif
+    };
     public static readonly IReadOnlyCollection<object[]> MySqlData = new List<object[]>
     {
 #if DEFAULT_TEST_PACKAGE_VERSIONS

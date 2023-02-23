@@ -38,6 +38,17 @@ public static class LibraryVersion
             }
         },
         {
+            "TestApplication.SqlClient",
+            new List<string>
+            {
+                "1.1.4",
+                "2.1.5",
+                "3.1.2",
+                "4.1.1",
+                "5.1.0",
+            }
+        },
+        {
             "TestApplication.MySqlData",
             new List<string>
             {
