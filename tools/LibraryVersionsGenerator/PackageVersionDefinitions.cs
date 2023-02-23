@@ -55,6 +55,17 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "MySqlData",
+            NugetPackageName = "MySql.Data",
+            TestApplicationName = "TestApplication.MySqlData",
+            Versions = new List<string>
+            {
+                "6.10.7",
+                "*"
+            }
+        },
+        new()
+        {
             IntegrationName = "Npgsql",
             NugetPackageName = "Npgsql",
             TestApplicationName = "TestApplication.Npgsql",

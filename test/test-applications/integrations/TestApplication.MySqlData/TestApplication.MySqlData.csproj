@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MySql.Data" />
+    <PackageReference Include="MySql.Data" VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
 
 </Project>

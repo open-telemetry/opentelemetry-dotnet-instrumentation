@@ -40,6 +40,15 @@ public static class LibraryVersion
         new object[] { "8.0.13" },
 #endif
     };
+    public static readonly IReadOnlyCollection<object[]> MySqlData = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "6.10.7" },
+        new object[] { "8.0.32" },
+#endif
+    };
     public static readonly IReadOnlyCollection<object[]> Npgsql = new List<object[]>
     {
 #if DEFAULT_TEST_PACKAGE_VERSIONS
