@@ -29,11 +29,15 @@ public class GraphQLTests : TestHelper
     {
     }
 
+    public static IEnumerable<object[]> GetData()
+        => from packageVersionArray in LibraryVersion.GraphQL
+           from setDocument in new[] { true, false }
+           select new[] { packageVersionArray[0], setDocument };
+
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
     [Trait("Category", "EndToEnd")]
-    public async Task SubmitsTraces(bool setDocument)
+    [MemberData(nameof(GetData))]
+    public async Task SubmitsTraces(string packageVersion, bool setDocument)
     {
         var requests = new List<RequestInfo>();
         using var collector = new MockSpansCollector(Output);
@@ -68,7 +72,7 @@ public class GraphQLTests : TestHelper
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
         SetEnvironmentVariable("ASPNETCORE_URLS", $"http://127.0.0.1:{aspNetCorePort}/");
         EnableBytecodeInstrumentation();
-        using var process = StartTestApplication();
+        using var process = StartTestApplication(new TestSettings { PackageVersion = packageVersion });
         using var helper = new ProcessHelper(process);
         try
         {

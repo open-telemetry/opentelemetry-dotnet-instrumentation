@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="Elastic.Clients.Elasticsearch" />
+    <PackageReference Include="Elastic.Clients.Elasticsearch" VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
 
 </Project>

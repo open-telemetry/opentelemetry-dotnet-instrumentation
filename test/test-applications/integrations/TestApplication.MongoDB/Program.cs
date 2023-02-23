@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-#if !MONGODB_2_15
-#endif
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Core.Clusters;
@@ -54,7 +52,7 @@ public static class Program
         Run(collection, newDocument);
         RunAsync(collection, newDocument).Wait();
 
-#if !MONGODB_2_15
+#if !MONGODB_2_15_OR_GREATER
         WireProtocolExecuteIntegrationTest(client);
 #endif
     }
@@ -78,7 +76,7 @@ public static class Program
         // https://stackoverflow.com/questions/49506857/how-do-i-run-an-explain-query-with-the-2-4-c-sharp-mongo-driver
         var options = new FindOptions
         {
-#if !MONGODB_2_15
+#if !MONGODB_2_15_OR_GREATER
 #pragma warning disable 0618 // 'FindOptionsBase.Modifiers' is obsolete: 'Use individual properties instead.'
             Modifiers = new BsonDocument("$explain", true)
 #pragma warning restore 0618
@@ -110,7 +108,7 @@ public static class Program
         Console.WriteLine(allDocuments.FirstOrDefault());
     }
 
-#if !MONGODB_2_15
+#if !MONGODB_2_15_OR_GREATER
     public static void WireProtocolExecuteIntegrationTest(MongoClient client)
     {
         var server = client.Cluster.SelectServer(new ServerSelector(), CancellationToken.None);
@@ -139,7 +137,7 @@ public static class Program
     }
 }
 
-#if !MONGODB_2_15
+#if !MONGODB_2_15_OR_GREATER
 #pragma warning disable SA1402 // File may only contain a single type
 internal class ServerSelector : global::MongoDB.Driver.Core.Clusters.ServerSelectors.IServerSelector
 {

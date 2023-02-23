@@ -26,9 +26,10 @@ public class ElasticsearchTests : TestHelper
     {
     }
 
-    [Fact]
+    [Theory]
     [Trait("Category", "EndToEnd")]
-    public void SubmitsTraces()
+    [MemberData(nameof(LibraryVersion.Elasticsearch), MemberType = typeof(LibraryVersion))]
+    public void SubmitsTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -36,7 +37,7 @@ public class ElasticsearchTests : TestHelper
         collector.Expect("Elastic.Clients.Elasticsearch.ElasticsearchClient");
 
         EnableBytecodeInstrumentation();
-        RunTestApplication();
+        RunTestApplication(new TestSettings { PackageVersion = packageVersion });
 
         collector.AssertExpectations();
     }

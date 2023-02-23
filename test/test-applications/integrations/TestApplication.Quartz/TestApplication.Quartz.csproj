@@ -7,9 +7,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" />
-    <PackageReference Include="Quartz" />
-    <PackageReference Include="Quartz.Extensions.DependencyInjection" />
-    <PackageReference Include="Quartz.Extensions.Hosting" />
+    <PackageReference Include="Quartz" VersionOverride="$(LibraryVersion)" />
+    <PackageReference Include="Quartz.Extensions.DependencyInjection" VersionOverride="$(LibraryVersion)" />
+    <PackageReference Include="Quartz.Extensions.Hosting" VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
 
 </Project>
