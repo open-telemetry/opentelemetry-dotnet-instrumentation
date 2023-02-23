@@ -22,6 +22,17 @@ internal static class PackageVersionDefinitions
     {
         new()
         {
+            IntegrationName = "Elasticsearch",
+            NugetPackageName = "Elastic.Clients.Elasticsearch",
+            TestApplicationName = "TestApplication.Elasticsearch",
+            Versions = new List<string>
+            {
+                "8.0.0",
+                "*"
+            }
+        },
+        new()
+        {
             IntegrationName = "MassTransit",
             NugetPackageName = "MassTransit",
             TestApplicationName = "TestApplication.MassTransit",

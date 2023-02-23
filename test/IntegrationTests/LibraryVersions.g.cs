@@ -13,6 +13,15 @@ namespace IntegrationTests;
 
 public static class LibraryVersion
 {
+    public static readonly IReadOnlyCollection<object[]> Elasticsearch = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "8.0.0" },
+        new object[] { "8.0.5" },
+#endif
+    };
     public static readonly IReadOnlyCollection<object[]> MassTransit = new List<object[]>
     {
 #if DEFAULT_TEST_PACKAGE_VERSIONS
