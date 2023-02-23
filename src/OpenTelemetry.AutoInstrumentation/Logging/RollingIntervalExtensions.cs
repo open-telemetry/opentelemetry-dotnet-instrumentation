@@ -17,7 +17,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Modified by OpenTelemetry Authors
+// Modified by OpenTelemetry Authors.
 
 namespace OpenTelemetry.AutoInstrumentation.Logging
 {

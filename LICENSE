@@ -316,4 +316,4 @@ Copyright (c) 2014  Adam Hathcock under the MIT License (MIT)
 Component Serilog compiled into OpenTelemetry.AutoInstrumentation, OpenTelemetry.AutoInstrumentation.Loader, OpenTelemetry.AutoInstrumentation.StartupHook
 is under the following copyright:
 Copyright 2013-2017 Serilog Contributors under Apache License Version 2.0
-(<https://github.com/serilog/serilog-sinks-file/blob/main/LICENSE>)
+(<https://github.com/serilog/serilog-sinks-file/blob/main/LICENSE>).
