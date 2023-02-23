@@ -31,6 +31,15 @@ public static class LibraryVersion
         new object[] { "7.0.3" },
 #endif
     };
+    public static readonly IReadOnlyCollection<object[]> GraphQL = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "2.3.0" },
+        new object[] { "2.4.0" },
+#endif
+    };
     public static readonly IReadOnlyCollection<object[]> MassTransit = new List<object[]>
     {
 #if DEFAULT_TEST_PACKAGE_VERSIONS

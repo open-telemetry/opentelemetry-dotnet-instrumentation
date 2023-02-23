@@ -44,6 +44,17 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "GraphQL",
+            NugetPackageName = "GraphQL",
+            TestApplicationName = "TestApplication.GraphQL",
+            Versions = new List<string>
+            {
+                "2.3.0",
+                "*"
+            }
+        },
+        new()
+        {
             IntegrationName = "MassTransit",
             NugetPackageName = "MassTransit",
             TestApplicationName = "TestApplication.MassTransit",

@@ -30,6 +30,14 @@ public static class LibraryVersion
             }
         },
         {
+            "TestApplication.GraphQL",
+            new List<string>
+            {
+                "2.3.0",
+                "2.4.0",
+            }
+        },
+        {
             "TestApplication.MassTransit",
             new List<string>
             {
