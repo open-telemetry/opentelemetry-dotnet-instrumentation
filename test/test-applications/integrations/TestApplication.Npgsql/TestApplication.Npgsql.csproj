@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="Npgsql" />
+    <PackageReference Include="Npgsql" VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
 
 </Project>

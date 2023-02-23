@@ -38,6 +38,14 @@ public static class LibraryVersion
             }
         },
         {
+            "TestApplication.Npgsql",
+            new List<string>
+            {
+                "6.0.0",
+                "7.0.2",
+            }
+        },
+        {
             "TestApplication.NServiceBus",
             new List<string>
             {

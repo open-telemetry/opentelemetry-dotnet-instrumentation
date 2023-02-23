@@ -55,6 +55,17 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "Npgsql",
+            NugetPackageName = "Npgsql",
+            TestApplicationName = "TestApplication.Npgsql",
+            Versions = new List<string>
+            {
+                "6.0.0",
+                "*"
+            }
+        },
+        new()
+        {
             IntegrationName = "NServiceBus",
             NugetPackageName = "NServiceBus",
             TestApplicationName = "TestApplication.NServiceBus",
