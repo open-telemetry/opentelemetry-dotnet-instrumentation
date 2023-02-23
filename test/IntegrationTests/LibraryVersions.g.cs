@@ -22,6 +22,15 @@ public static class LibraryVersion
         new object[] { "8.0.5" },
 #endif
     };
+    public static readonly IReadOnlyCollection<object[]> EntityFrameworkCore = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "6.0.12" },
+        new object[] { "7.0.3" },
+#endif
+    };
     public static readonly IReadOnlyCollection<object[]> MassTransit = new List<object[]>
     {
 #if DEFAULT_TEST_PACKAGE_VERSIONS

@@ -33,6 +33,17 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "EntityFrameworkCore",
+            NugetPackageName = "Microsoft.EntityFrameworkCore.Sqlite",
+            TestApplicationName = "TestApplication.EntityFrameworkCore",
+            Versions = new List<string>
+            {
+                "6.0.12",
+                "*"
+            }
+        },
+        new()
+        {
             IntegrationName = "MassTransit",
             NugetPackageName = "MassTransit",
             TestApplicationName = "TestApplication.MassTransit",

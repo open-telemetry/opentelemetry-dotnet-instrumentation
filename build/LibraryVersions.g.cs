@@ -22,6 +22,14 @@ public static class LibraryVersion
             }
         },
         {
+            "TestApplication.EntityFrameworkCore",
+            new List<string>
+            {
+                "6.0.12",
+                "7.0.3",
+            }
+        },
+        {
             "TestApplication.MassTransit",
             new List<string>
             {

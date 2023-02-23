@@ -28,15 +28,16 @@ public class EntityFrameworkCoreTests : TestHelper
     {
     }
 
-    [Fact]
+    [Theory]
     [Trait("Category", "EndToEnd")]
-    public void SubmitsTraces()
+    [MemberData(nameof(LibraryVersion.EntityFrameworkCore), MemberType = typeof(LibraryVersion))]
+    public void SubmitsTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         collector.Expect("OpenTelemetry.Instrumentation.EntityFrameworkCore");
 
-        RunTestApplication();
+        RunTestApplication(new TestSettings { PackageVersion = packageVersion });
 
         collector.AssertExpectations();
     }
