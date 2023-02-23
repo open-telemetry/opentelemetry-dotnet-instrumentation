@@ -13,6 +13,33 @@ namespace IntegrationTests;
 
 public static class LibraryVersion
 {
+    public static readonly IReadOnlyCollection<object[]> Elasticsearch = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "8.0.0" },
+        new object[] { "8.0.5" },
+#endif
+    };
+    public static readonly IReadOnlyCollection<object[]> EntityFrameworkCore = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "6.0.12" },
+        new object[] { "7.0.3" },
+#endif
+    };
+    public static readonly IReadOnlyCollection<object[]> GraphQL = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "2.3.0" },
+        new object[] { "2.4.0" },
+#endif
+    };
     public static readonly IReadOnlyCollection<object[]> MassTransit = new List<object[]>
     {
 #if DEFAULT_TEST_PACKAGE_VERSIONS
@@ -20,6 +47,64 @@ public static class LibraryVersion
 #else
         new object[] { "8.0.0" },
         new object[] { "8.0.13" },
+#endif
+    };
+    public static readonly IReadOnlyCollection<object[]> SqlClient = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "1.1.4" },
+        new object[] { "2.1.5" },
+        new object[] { "3.1.2" },
+        new object[] { "4.1.1" },
+        new object[] { "5.1.0" },
+#endif
+    };
+    public static readonly IReadOnlyCollection<object[]> MongoDB = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "2.13.3" },
+        new object[] { "2.15.0" },
+        new object[] { "2.19.0" },
+#endif
+    };
+    public static readonly IReadOnlyCollection<object[]> MySqlData = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "6.10.7" },
+        new object[] { "8.0.32" },
+#endif
+    };
+    public static readonly IReadOnlyCollection<object[]> Npgsql = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "6.0.0" },
+        new object[] { "7.0.2" },
+#endif
+    };
+    public static readonly IReadOnlyCollection<object[]> NServiceBus = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "8.0.0" },
+        new object[] { "8.0.3" },
+#endif
+    };
+    public static readonly IReadOnlyCollection<object[]> Quartz = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "3.4.0" },
+        new object[] { "3.6.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> StackExchangeRedis = new List<object[]>

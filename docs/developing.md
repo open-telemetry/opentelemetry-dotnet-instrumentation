@@ -185,9 +185,20 @@ Other features are tested via `SmokeTests` class or have its own test class
 if a dedicated test application is needed.
 
 Currently, the strategy is to test the library instrumentations
-against its lowest supported, but not vulnerable, version.
-The pull requests created by @dependabot with `do NOT merge` label
-are used to test against higher library versions when they are released.
+against following versions:
+
+- its lowest supported, but not vulnerable, version,
+- one version from every major release,
+- the latest supported version (defined in [`test/Directory.Packages.props`](../test/Directory.Packages.props)),
+- other specific versions, eg. containing breaking changes for our instrumentations.
+
+Tests against these versions are executed when you are using `nuke` commands.
+In case of execution from Visual Studio, only test against the latest supported
+are executed.
+
+To update set of the version modify [`PackageVersionDefinitions.cs`](../tools/LibraryVersionsGenerator/PackageVersionDefinitions.cs),
+execute [`LibraryVersionsGenerator`](../tools/LibraryVersionsGenerator/LibraryVersionsGenerator.csproj),
+and commit generated files.
 
 > `TestApplication.AspNet.NetFramework` is an exception to this strategy
 > as it would not work well, because of multiple dependent packages.

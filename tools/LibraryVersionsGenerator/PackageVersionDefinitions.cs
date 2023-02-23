@@ -22,12 +22,115 @@ internal static class PackageVersionDefinitions
     {
         new()
         {
+            IntegrationName = "Elasticsearch",
+            NugetPackageName = "Elastic.Clients.Elasticsearch",
+            TestApplicationName = "TestApplication.Elasticsearch",
+            Versions = new List<string>
+            {
+                "8.0.0",
+                "*"
+            }
+        },
+        new()
+        {
+            IntegrationName = "EntityFrameworkCore",
+            NugetPackageName = "Microsoft.EntityFrameworkCore.Sqlite",
+            TestApplicationName = "TestApplication.EntityFrameworkCore",
+            Versions = new List<string>
+            {
+                "6.0.12",
+                "*"
+            }
+        },
+        new()
+        {
+            IntegrationName = "GraphQL",
+            NugetPackageName = "GraphQL",
+            TestApplicationName = "TestApplication.GraphQL",
+            Versions = new List<string>
+            {
+                "2.3.0",
+                "*"
+            }
+        },
+        new()
+        {
             IntegrationName = "MassTransit",
             NugetPackageName = "MassTransit",
             TestApplicationName = "TestApplication.MassTransit",
             Versions = new List<string>
             {
                 "8.0.0",
+                "*"
+            }
+        },
+        new()
+        {
+            IntegrationName = "SqlClient",
+            NugetPackageName = "Microsoft.Data.SqlClient",
+            TestApplicationName = "TestApplication.SqlClient",
+            Versions = new List<string>
+            {
+                "1.1.4",
+                "2.1.5",
+                "3.1.2",
+                "4.1.1",
+                "*"
+            }
+        },
+        new()
+        {
+            IntegrationName = "MongoDB",
+            NugetPackageName = "MongoDB.Driver",
+            TestApplicationName = "TestApplication.MongoDB",
+            Versions = new List<string>
+            {
+                "2.13.3",
+                "2.15.0",
+                "*"
+            }
+        },
+        new()
+        {
+            IntegrationName = "MySqlData",
+            NugetPackageName = "MySql.Data",
+            TestApplicationName = "TestApplication.MySqlData",
+            Versions = new List<string>
+            {
+                "6.10.7",
+                "*"
+            }
+        },
+        new()
+        {
+            IntegrationName = "Npgsql",
+            NugetPackageName = "Npgsql",
+            TestApplicationName = "TestApplication.Npgsql",
+            Versions = new List<string>
+            {
+                "6.0.0",
+                "*"
+            }
+        },
+        new()
+        {
+            IntegrationName = "NServiceBus",
+            NugetPackageName = "NServiceBus",
+            TestApplicationName = "TestApplication.NServiceBus",
+            Versions = new List<string>
+            {
+                "8.0.0",
+                "*"
+            }
+        },
+        new()
+        {
+            IntegrationName = "Quartz",
+            NugetPackageName = "Quartz",
+            TestApplicationName = "TestApplication.Quartz",
+            Versions = new List<string>
+            {
+                "3.4.0",
                 "*"
             }
         },
