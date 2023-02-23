@@ -55,6 +55,17 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "NServiceBus",
+            NugetPackageName = "NServiceBus",
+            TestApplicationName = "TestApplication.NServiceBus",
+            Versions = new List<string>
+            {
+                "8.0.0",
+                "*"
+            }
+        },
+        new()
+        {
             IntegrationName = "Quartz",
             NugetPackageName = "Quartz",
             TestApplicationName = "TestApplication.Quartz",

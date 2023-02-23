@@ -38,6 +38,14 @@ public static class LibraryVersion
             }
         },
         {
+            "TestApplication.NServiceBus",
+            new List<string>
+            {
+                "8.0.0",
+                "8.0.3",
+            }
+        },
+        {
             "TestApplication.Quartz",
             new List<string>
             {
