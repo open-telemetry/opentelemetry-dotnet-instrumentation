@@ -68,15 +68,13 @@ public class AspNetTests
     {
         Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
 
-        //_environmentVariables["OTEL_SERVICE_NAME"] = ServiceName;
-
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
         using var collector = new MockSpansCollector(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
-        collector.ResourceExpector.Expect("service.name", "Default Web Site"); // this is set via env var in Dockerfile and Wep.config, but env var has precedence
+        collector.ResourceExpector.Expect("service.name", "Default Web Site"); // this is set by the ServiceNameDetector
         collector.ResourceExpector.Expect("deployment.environment", "test"); // this is set via Wep.config
 
         string collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
