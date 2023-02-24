@@ -76,7 +76,7 @@ public class AspNetTests
         // on the firewall.
         using var collector = new MockSpansCollector(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
-        collector.ResourceExpector.Expect("service.name", TestApplication.Smoke); // this is set via env var in Dockerfile and Wep.config, but env var has precedence
+        collector.ResourceExpector.Expect("service.name", "Default Web Site"); // this is set via env var in Dockerfile and Wep.config, but env var has precedence
         collector.ResourceExpector.Expect("deployment.environment", "test"); // this is set via Wep.config
 
         string collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
