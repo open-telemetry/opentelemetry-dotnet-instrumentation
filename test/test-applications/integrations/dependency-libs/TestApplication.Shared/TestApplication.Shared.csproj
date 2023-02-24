@@ -6,8 +6,4 @@
     <StartupObject />
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.ValueTuple" Condition="'$(TargetFramework)' == 'net462'"/>
-  </ItemGroup>
-
 </Project>

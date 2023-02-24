@@ -1,3 +1,6 @@
+// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
+
 //---------------------------------------------------------------------------------------
 // Exports that managed code from OpenTelemetry.AutoInstrumentation.dll will
 // P/Invoke into

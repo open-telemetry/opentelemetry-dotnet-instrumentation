@@ -31,10 +31,11 @@ public class MySqlDataTests : TestHelper
         _mySql = mySql;
     }
 
-    [Fact]
+    [Theory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    public void SubmitsTraces()
+    [MemberData(nameof(LibraryVersion.MySqlData), MemberType = typeof(LibraryVersion))]
+    public void SubmitsTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -43,7 +44,8 @@ public class MySqlDataTests : TestHelper
         EnableBytecodeInstrumentation();
         RunTestApplication(new()
         {
-            Arguments = $"--mysql {_mySql.Port}"
+            Arguments = $"--mysql {_mySql.Port}",
+            PackageVersion = packageVersion
         });
 
         collector.AssertExpectations();
