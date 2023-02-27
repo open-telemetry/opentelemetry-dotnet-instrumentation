@@ -31,7 +31,7 @@
     <PackageVersion Include="Npgsql" Version="7.0.2" />
     <PackageVersion Include="Quartz" Version="3.6.0" />
     <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.6.0" />
-    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.6.0" />
+    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.6.2" />
     <PackageVersion Include="StackExchange.Redis" Version="2.6.96" />
     <PackageVersion Include="StrongNamer" Version="0.2.5" />
     <PackageVersion Include="System.Collections.Immutable" Version="7.0.0" />
