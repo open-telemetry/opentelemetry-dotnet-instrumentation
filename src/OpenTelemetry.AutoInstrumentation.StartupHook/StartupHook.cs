@@ -69,7 +69,7 @@ internal class StartupHook
 
             if (profilerType != null)
             {
-                Logger.LogError(
+                Logger.Error(
                     $"OpenTelemetry.AutoInstrumentation assembly was already loaded from: {profilerType.Assembly?.Location}. " +
                     "Check the DOTNET_STARTUP_HOOK environment variable.");
             }
