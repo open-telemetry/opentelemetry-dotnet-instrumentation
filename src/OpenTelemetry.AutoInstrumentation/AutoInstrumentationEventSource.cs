@@ -21,8 +21,7 @@ namespace OpenTelemetry.AutoInstrumentation;
 /// <summary>
 /// EventSource implementation for OpenTelemetry AutoInstrumentation implementation.
 /// </summary>
-[EventSource(Name = "OpenTelemetry-AutoInstrumentation")]
-internal class AutoInstrumentationEventSource : EventSource
+internal partial class AutoInstrumentationEventSource : EventSource
 {
     public static AutoInstrumentationEventSource Log => new();
 
