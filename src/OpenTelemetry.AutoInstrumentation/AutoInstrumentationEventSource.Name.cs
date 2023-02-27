@@ -19,5 +19,6 @@ using System.Diagnostics.Tracing;
 namespace OpenTelemetry.AutoInstrumentation;
 
 [EventSource(Name = "OpenTelemetry-AutoInstrumentation")]
-internal partial class AutoInstrumentationEventSource 
-{}
+internal partial class AutoInstrumentationEventSource
+{
+}
