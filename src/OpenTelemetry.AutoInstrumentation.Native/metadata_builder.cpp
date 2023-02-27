@@ -1,4 +1,7 @@
-﻿#include <fstream>
+// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
+
+#include <fstream>
 #include <string>
 
 #include "clr_helpers.h"

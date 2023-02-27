@@ -66,15 +66,37 @@ partial class Build
         .Unlisted()
         .Executes(() => ControlFlow.ExecuteWithRetry(() =>
         {
+            var projectsToRestore = Solution.GetCrossPlatformManagedProjects();
+
             if (IsWin)
             {
-                DotNetRestore(s => s
-                    .SetProjectFile(Solution)
-                    .SetVerbosity(DotNetVerbosity.Normal)
-                    .SetProperty("configuration", BuildConfiguration.ToString())
-                    .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                        o.SetPackageDirectory(NugetPackageDirectory)));
+                projectsToRestore = projectsToRestore.Concat(Solution.GetWindowsOnlyTestApplications());
+            }
 
+            foreach (var project in projectsToRestore)
+            {
+                DotNetRestoreSettings Restore(DotNetRestoreSettings s) =>
+                    s.SetProjectFile(project)
+                        .SetVerbosity(DotNetVerbosity.Normal)
+                        .SetProperty("configuration", BuildConfiguration.ToString())
+                        .SetPlatform(Platform)
+                        .When(!string.IsNullOrEmpty(NugetPackageDirectory), o => o.SetPackageDirectory(NugetPackageDirectory));
+
+                if (LibraryVersion.Versions.TryGetValue(project.Name, out var libraryVersions))
+                {
+                    DotNetRestore(s =>
+                         Restore(s)
+                        .CombineWith(libraryVersions, (p, libraryVersion) =>
+                                p.SetProperty("LibraryVersion", libraryVersion)));
+                }
+                else
+                {
+                    DotNetRestore(Restore);
+                }
+            }
+
+            if (IsWin)
+            {
                 // Projects using `packages.config` can't be restored via "dotnet restore", use a NuGet Task to restore these projects.
                 var legacyRestoreProjects = Solution.GetNativeProjects()
                     .Concat(new[] { Solution.GetProject(Projects.Tests.Applications.AspNet) });
@@ -88,18 +110,6 @@ partial class Build
                         .SetVerbosity(NuGetVerbosity.Normal)
                         .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
                             o.SetPackagesDirectory(NugetPackageDirectory)));
-                }
-            }
-            else
-            {
-                foreach (var project in Solution.GetCrossPlatformManagedProjects())
-                {
-                    DotNetRestore(s => s
-                        .SetProjectFile(project)
-                        .SetVerbosity(DotNetVerbosity.Normal)
-                        .SetProperty("configuration", BuildConfiguration.ToString())
-                        .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                            o.SetPackageDirectory(NugetPackageDirectory)));
                 }
             }
         }));
@@ -134,11 +144,23 @@ partial class Build
 
             foreach (var app in testApps)
             {
-                DotNetBuild(x => x
-                    .SetProjectFile(app)
-                    .SetConfiguration(BuildConfiguration)
-                    .SetPlatform(Platform)
-                    .SetNoRestore(true));
+                DotNetBuildSettings BuildTestApplication(DotNetBuildSettings x) =>
+                    x.SetProjectFile(app)
+                        .SetConfiguration(BuildConfiguration)
+                        .SetPlatform(Platform)
+                        .SetNoRestore(true);
+
+                if (LibraryVersion.Versions.TryGetValue(app.Name, out var libraryVersions))
+                {
+                    DotNetBuild(x =>
+                         BuildTestApplication(x)
+                        .CombineWith(libraryVersions, (p, libraryVersion) =>
+                            p.SetProperty("LibraryVersion", libraryVersion)));
+                }
+                else
+                {
+                    DotNetBuild(BuildTestApplication);
+                }
             }
 
             foreach (var project in Solution.GetManagedTestProjects())
@@ -256,6 +278,16 @@ partial class Build
         .Executes(() =>
         {
             var generatorTool = Solution.GetProject(Projects.Tools.IntegrationsJsonGenerator);
+
+            DotNetRun(s => s
+                .SetProjectFile(generatorTool));
+        });
+
+    Target GenerateLibraryVersionFiles => _ => _
+        .After(PublishManagedProfiler)
+        .Executes(() =>
+        {
+            var generatorTool = Solution.GetProject(Projects.Tools.LibraryVersionsGenerator);
 
             DotNetRun(s => s
                 .SetProjectFile(generatorTool));
@@ -454,19 +486,20 @@ partial class Build
 
                         CopyNativeDependenciesToStore(file, jsonDocument, architectureStores);
 
-                        RemoveDuplicatedLibraries(depsJsonContent, architectureStores);
+                        depsJsonContent = RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsContent(depsJsonContent);
 
-                        RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsFile(depsJsonContent, file);
-
-                        // To allow roll forward for applications, like Roslyn, that target one tfm
-                        // but have a later runtime make additional copies under the original tfm folder.
                         if (folderRuntimeName == TargetFramework.NET6_0)
                         {
-                            AddFrameworkRollForwardCopy(TargetFramework.NET6_0, TargetFramework.NET7_0, architectureStores);
+                            // To allow roll forward for applications, like Roslyn, that target one tfm
+                            // but have a later runtime move the libraries under the original tfm folder
+                            // to the latest one.
+                            depsJsonContent = RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET7_0, architectureStores, depsJsonContent);
                         }
+
+                        // Write the updated deps.json file.
+                        File.WriteAllText(file, depsJsonContent);
                     });
                 RemoveFilesFromAdditionalDepsDirectory();
-
 
                 void CopyNativeDependenciesToStore(AbsolutePath file, JsonDocument jsonDocument, IReadOnlyList<string> architectureStores)
                 {
@@ -499,41 +532,17 @@ partial class Build
                     }
                 }
 
-                void RemoveDuplicatedLibraries(string depsJsonContent, IReadOnlyList<string> architectureStores)
-                {
-                    var duplicatedLibraries = new List<(string Name, string Version)> { };
-
-                    foreach (var duplicatedLibrary in duplicatedLibraries)
-                    {
-                        if (depsJsonContent.Contains(duplicatedLibrary.Name.ToLower() + "/" + duplicatedLibrary.Version))
-                        {
-                            throw new NotSupportedException($"Cannot remove {duplicatedLibrary.Name.ToLower()}/{duplicatedLibrary.Version} folder. It is referenced in json file");
-                        }
-
-                        foreach (var architectureStore in architectureStores)
-                        {
-                            var directoryToBeRemoved = Path.Combine(architectureStore, duplicatedLibrary.Name.ToLower(), duplicatedLibrary.Version);
-
-                            if (!Directory.Exists(directoryToBeRemoved))
-                            {
-                                throw new NotSupportedException($"Directory {directoryToBeRemoved} does not exists. Verify it.");
-                            }
-
-                            Directory.Delete(directoryToBeRemoved, true);
-                        }
-                    }
-                }
-
-                void RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsFile(string depsJsonContent, AbsolutePath file)
+                string RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsContent(string depsJsonContent)
                 {
                     // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from target section.
-                    depsJsonContent = Regex.Replace(depsJsonContent,
+                    var updatedDepsJsonContent = Regex.Replace(depsJsonContent,
                         "\"OpenTelemetry(.+)AutoInstrumentation.AdditionalDeps.dll(.+?)}," + Environment.NewLine + "(.+?)\"", "\"",
                         RegexOptions.IgnoreCase | RegexOptions.Singleline);
                     // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from library section and write to file.
-                    depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+?)}," + Environment.NewLine + "(.+?)\"", "\"",
+                    updatedDepsJsonContent = Regex.Replace(updatedDepsJsonContent, "\"OpenTelemetry(.+?)}," + Environment.NewLine + "(.+?)\"", "\"",
                         RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                    File.WriteAllText(file, depsJsonContent);
+
+                    return updatedDepsJsonContent;
                 }
 
                 void RemoveFilesFromAdditionalDepsDirectory()
@@ -542,8 +551,14 @@ partial class Build
                     AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(DeleteDirectory);
                 }
 
-                void AddFrameworkRollForwardCopy(string runtime, string rollForwardRuntime, IReadOnlyList<string> architectureStores)
+                string RollFrameworkForward(string runtime, string rollForwardRuntime, IReadOnlyList<string> architectureStores, string depsJsonContent)
                 {
+                    // Update the contents of the json file.
+                    var updatedDepsJsonContent = Regex.Replace(depsJsonContent,
+                        $"\"lib/{runtime}/", $"\"lib/{rollForwardRuntime}/",
+                        RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
+                    // Roll forward each architecture by renaming the tfm folder holding the assemblies.
                     foreach (var architectureStore in architectureStores)
                     {
                         var assemblyDirectories = Directory.GetDirectories(architectureStore);
@@ -561,11 +576,17 @@ partial class Build
                             if (Directory.Exists(sourceDir))
                             {
                                 var destDir = Path.Combine(assemblyVersionDirectory, "lib", rollForwardRuntime);
-                                // Directory.CreateDirectory(destDir);
+
                                 CopyDirectoryRecursively(sourceDir, destDir);
+
+                                // Since the json was also rolled forward the original tfm folder can be deleted.
+                                DeleteDirectory(sourceDir);
                             }
                         }
                     }
+
+                    // Return the updated json contents.
+                    return updatedDepsJsonContent;
                 }
             });
 

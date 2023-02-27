@@ -1,11 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="Npgsql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
+    <PackageReference Include="Npgsql" VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
 
 </Project>

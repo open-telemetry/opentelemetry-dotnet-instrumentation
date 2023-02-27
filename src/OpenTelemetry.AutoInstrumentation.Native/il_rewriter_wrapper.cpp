@@ -1,3 +1,6 @@
+// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
+
 #include "il_rewriter_wrapper.h"
 
 ILRewriter* ILRewriterWrapper::GetILRewriter() const

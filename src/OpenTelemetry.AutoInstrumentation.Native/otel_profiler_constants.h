@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef OTEL_PROFILER_CONSTANTS_H
 #define OTEL_PROFILER_CONSTANTS_H
 

@@ -9,15 +9,13 @@
     <PlatformTarget>$(Platform)</PlatformTarget>
     <LangVersion>10.0</LangVersion>
 
-    <BaseIntermediateOutputPath Condition="'$(ApiVersion)'!=''">obj\$(ApiVersion)\</BaseIntermediateOutputPath>
-    <BaseOutputPath Condition="'$(ApiVersion)'!=''">bin\$(ApiVersion)\</BaseOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(LibraryVersion)'!=''">..\obj\$(MSBuildProjectName)\$(LibraryVersion)\</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(LibraryVersion)'==''">..\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <BaseOutputPath Condition="'$(LibraryVersion)'!=''">..\bin\$(MSBuildProjectName)\$(LibraryVersion)\</BaseOutputPath>
+    <BaseOutputPath Condition="'$(LibraryVersion)'==''">..\bin\$(MSBuildProjectName)\</BaseOutputPath>
 
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
-
-    <!--These should be consolidated in a file that can be shared for the tests and test applications directories -->
-    <DefineConstants Condition="'$(BuildingInsideVisualStudio)'=='true' or '$(TestAllPackageVersions)'!='true'">$(DefineConstants);DEFAULT_TEST_APPLICATIONS</DefineConstants>
-    <DefineConstants Condition="'$(PerformComprehensiveTesting)'=='true'">$(DefineConstants);COMPREHENSIVE_TESTS</DefineConstants>
 
     <!-- Hide warnings for EOL .NET Core targets (e.g. netcoreapp3.0) -->
     <CheckEolTargetFramework>false</CheckEolTargetFramework>

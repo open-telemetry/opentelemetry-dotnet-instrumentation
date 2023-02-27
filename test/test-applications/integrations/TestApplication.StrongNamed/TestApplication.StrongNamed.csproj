@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AddTestStrongNameAssemblyKeyOnNetFramework>true</AddTestStrongNameAssemblyKeyOnNetFramework>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <ProjectReference Include="..\dependency-libs\TestLibrary.InstrumentationTarget\TestLibrary.InstrumentationTarget.csproj" />
   </ItemGroup>

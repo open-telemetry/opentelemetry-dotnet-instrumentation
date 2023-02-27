@@ -26,22 +26,22 @@ public class QuartzTests : TestHelper
     {
     }
 
-    [Fact]
+    [Theory]
     [Trait("Category", "EndToEnd")]
-    public void SubmitsTraces()
+    [MemberData(nameof(LibraryVersion.Quartz), MemberType = typeof(LibraryVersion))]
+    public void SubmitsTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         collector.Expect("OpenTelemetry.Instrumentation.Quartz");
 
-#if NET462
         RunTestApplication(new TestSettings
         {
-            Framework = "net472"
-        });
-#else
-        RunTestApplication();
+#if NET462
+            Framework = "net472",
 #endif
+            PackageVersion = packageVersion
+        });
 
         collector.AssertExpectations();
     }

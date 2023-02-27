@@ -17,10 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Protobuf Include="Proto\greet.proto" GrpcServices="Client" />
   </ItemGroup>
 

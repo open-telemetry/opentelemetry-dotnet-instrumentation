@@ -1,4 +1,4 @@
-// <copyright file="StartupLoggerBenchmarks.cs" company="OpenTelemetry Authors">
+// <copyright file="LoaderLoggerBenchmarks.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,11 +32,11 @@ Intel Core i9-10900K CPU 3.70GHz, 1 CPU, 20 logical and 10 physical cores
 namespace OpenTelemetry.AutoInstrumentation.Loader.Benchmarks;
 
 [MemoryDiagnoser]
-public class StartupLoggerBenchmarks
+public class LoaderLoggerBenchmarks
 {
     [Benchmark]
     public void SetStartupLogFilePath()
     {
-        var path = StartupLogger.SetStartupLogFilePath();
+        var path = LoaderLogger.SetStartupLogFilePath();
     }
 }

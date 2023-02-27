@@ -106,17 +106,17 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
         {
             case EventLevel.Critical:
             case EventLevel.Error:
-                log.Error("EventSource={0}, Message={1}", eventData.EventSource.Name, message);
+                log.Error("EventSource={0}, Message={1}", eventData.EventSource.Name, message, false);
                 break;
             case EventLevel.Warning:
-                log.Warning("EventSource={0}, Message={1}", eventData.EventSource.Name, message);
+                log.Warning("EventSource={0}, Message={1}", eventData.EventSource.Name, message, false);
                 break;
             case EventLevel.LogAlways:
             case EventLevel.Informational:
-                log.Information("EventSource={0}, Message={1}", eventData.EventSource.Name, message);
+                log.Information("EventSource={0}, Message={1}", eventData.EventSource.Name, message, false);
                 break;
             case EventLevel.Verbose:
-                log.Debug("EventSource={0}, Message={1}", eventData.EventSource.Name, message);
+                log.Debug("EventSource={0}, Message={1}", eventData.EventSource.Name, message, false);
                 break;
         }
     }
