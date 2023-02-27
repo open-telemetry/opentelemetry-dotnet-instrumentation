@@ -14,6 +14,8 @@ public static class ProjectsHelper
 
     private readonly static AbsolutePath SrcDirectory = NukeBuild.RootDirectory / "src";
     private readonly static AbsolutePath TestDirectory = NukeBuild.RootDirectory / "test";
+    private readonly static AbsolutePath TestIntegrationApps = TestDirectory / "test-applications" / "integrations";
+    private readonly static AbsolutePath TestNuGetPackagesApps = TestDirectory / "test-applications" / "nuget-packages";
 
     public static IEnumerable<Project> GetManagedSrcProjects(this Solution solution)
     {
@@ -61,12 +63,21 @@ public static class ProjectsHelper
         return solution.GetProject(Projects.Tests.IntegrationTests);
     }
 
-    public static IEnumerable<Project> GetTestApplications(this Solution solution)
+    public static IEnumerable<Project> GetIntegrationTestApplications(this Solution solution)
     {
-        var testApplications = solution.GetProjects(TestApplicationSelector);
+        var testApplications = solution
+            .GetProjects(TestApplicationSelector)
+            .Where(p => TestIntegrationApps.Contains(p.Directory));
         var testLibraries = solution.GetProjects(TestLibrarySelector);
 
         return testApplications.Concat(testLibraries);
+    }
+
+    public static IEnumerable<Project> GetNuGetPackagesTestApplications(this Solution solution)
+    {
+        return solution
+            .GetProjects(TestApplicationSelector)
+            .Where(p => TestNuGetPackagesApps.Contains(p.Directory));
     }
 
     public static Project GetTestMock(this Solution solution)
@@ -82,14 +93,14 @@ public static class ProjectsHelper
     public static IEnumerable<Project> GetWindowsOnlyTestApplications(this Solution solution)
     {
         return solution
-            .GetTestApplications()
+            .GetIntegrationTestApplications()
             .Where(x => x.Name.EndsWith(NetFrameworkMarker));
     }
 
     public static IEnumerable<Project> GetCrossPlatformTestApplications(this Solution solution)
     {
         return solution
-            .GetTestApplications()
+            .GetIntegrationTestApplications()
             .Where(x => !x.Name.EndsWith(NetFrameworkMarker));
     }
 

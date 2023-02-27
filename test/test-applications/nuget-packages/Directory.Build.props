@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- The NuGet package test applications shouldn't use the common build settings -->
+
+  <PropertyGroup>
+    <!-- only run .NET Framework tests on Windows -->
+    <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net462</TargetFrameworks>
+
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <LangVersion>11.0</LangVersion>
+
+    <!-- Keep the same base output path to simplify re-use of test helpers -->
+    <BaseOutputPath >..\bin\$(MSBuildProjectName)\</BaseOutputPath>
+  </PropertyGroup>
+
+</Project>

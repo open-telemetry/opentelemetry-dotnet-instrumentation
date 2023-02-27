@@ -23,7 +23,6 @@ partial class Build
     AbsolutePath TestsDirectory => RootDirectory / "test";
 
     AbsolutePath TracerHomeDirectory => TracerHome ?? (OutputDirectory / "tracer-home");
-    AbsolutePath ArtifactsDirectory => Artifacts ?? (OutputDirectory / "artifacts");
     AbsolutePath BuildDataDirectory => RootDirectory / "build_data";
     AbsolutePath ProfilerTestLogs => BuildDataDirectory / "profiler-logs";
     AbsolutePath AdditionalDepsDirectory => TracerHomeDirectory / "AdditionalDeps";
@@ -56,7 +55,7 @@ partial class Build
         .Executes(() =>
         {
             EnsureExistingDirectory(TracerHomeDirectory);
-            EnsureExistingDirectory(ArtifactsDirectory);
+            EnsureExistingDirectory(NuGetArtifactsDirectory);
             EnsureExistingDirectory(BuildDataDirectory);
             EnsureExistingDirectory(ProfilerTestLogs);
         });
@@ -80,7 +79,7 @@ partial class Build
                         .SetVerbosity(DotNetVerbosity.Normal)
                         .SetProperty("configuration", BuildConfiguration.ToString())
                         .SetPlatform(Platform)
-                        .When(!string.IsNullOrEmpty(NugetPackageDirectory), o => o.SetPackageDirectory(NugetPackageDirectory));
+                        .When(!string.IsNullOrEmpty(NuGetPackagesDirectory), o => o.SetPackageDirectory(NuGetPackagesDirectory));
 
                 if (LibraryVersion.Versions.TryGetValue(project.Name, out var libraryVersions))
                 {
@@ -108,8 +107,8 @@ partial class Build
                         .SetTargetPath(project)
                         .SetSolutionDirectory(Solution.Directory)
                         .SetVerbosity(NuGetVerbosity.Normal)
-                        .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                            o.SetPackagesDirectory(NugetPackageDirectory)));
+                        .When(!string.IsNullOrEmpty(NuGetPackagesDirectory), o =>
+                            o.SetPackagesDirectory(NuGetPackagesDirectory)));
                 }
             }
         }));

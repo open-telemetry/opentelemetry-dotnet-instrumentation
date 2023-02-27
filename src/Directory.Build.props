@@ -8,19 +8,20 @@
     <EnablePublicApi>true</EnablePublicApi>
 
     <!-- NuGet packages -->
+    <Version>0.6.0$(VersionSuffix)</Version>
     <IsPackable>true</IsPackable>
     <PackageIconUrl>https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/raw/main/opentelemetry-logo-64x64.png</PackageIconUrl>
     <PackageIcon>packageIcon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageReleaseNotes>See release notes at https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases</PackageReleaseNotes>
-    <PackageTags>OpenTelemetry;OTEL;APM;tracing;profiling;instrumentation</PackageTags>
+    <PackageTags>APM;AutoInstrumentation;Automatic Instrumentation;Instrumentation;Logs;Metrics;Monitoring;O11y;Observability;OpenTelemetry;OTel;Telemetry;Tracing</PackageTags>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation.git</RepositoryUrl>
     <Copyright>Copyright 2021 OpenTelemetry, originated from Datadog, Inc.</Copyright>
     <Company>OpenTelemetry</Company>
-    <Authors>OpenTelemetry</Authors>
+    <Authors>OpenTelemetry Authors</Authors>
   </PropertyGroup>
 
   <ItemGroup>

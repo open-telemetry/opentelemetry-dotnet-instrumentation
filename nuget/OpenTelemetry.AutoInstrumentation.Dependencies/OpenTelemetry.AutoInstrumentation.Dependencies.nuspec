@@ -1,17 +1,22 @@
 ﻿<?xml version="1.0"?>
 <package>
   <metadata>
-    <id>OpenTelemetry.AutoInstrumentation</id>
-    <version>0.6.0</version>
-    <description>OpenTelemetry Auto-Instrumentation</description>
-    <authors>OpenTelemetry Authors</authors>
-    <owners>OpenTelemetry Authors</owners>
-    <requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <license type="expression">Apache-2.0</license>
+    <id>OpenTelemetry.AutoInstrumentation.Dependencies</id>
+    <description>OpenTelemetry Auto-Instrumentation package with all managed dependencies.</description>
+
+    <!-- Common properties expected to be defined at build time -->
+    <version>$NuGetPackageVersion$</version>
+    <authors>$OpenTelemetryAuthors$</authors>
+    <requireLicenseAcceptance>$NuGetRequiredLicenseAcceptance$</requireLicenseAcceptance>
+    <license type="expression">$NuGetLicense$</license>
+
+    <!-- URI based properties -->
     <projectUrl>https://opentelemetry.io/</projectUrl>
-    <tags>Observability OpenTelemetry Monitoring Telemetry Tracing Auto Automatic Instrumentation</tags>
+    <tags>O11y Observability OpenTelemetry OTel Logs Metrics Monitoring Telemetry Tracing Auto Automatic Instrumentation</tags>
     <repository type="git" url="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation" />
+
     <dependencies>
+      <!-- TODO: Need a test/validation to make sure that this are in sync with actual projects -->
       <group targetFramework="net6.0">
         <dependency id="OpenTelemetry" version="1.4.0" />
         <dependency id="OpenTelemetry.Api" version="1.4.0" />
@@ -59,17 +64,4 @@
       <frameworkAssembly assemblyName="System.ServiceModel" targetFramework=".NETFramework4.6.2" />
     </frameworkAssemblies>
   </metadata>
-  <files>
-    <file src="bin-linux-glibc/AdditionalDeps/**/*.*" target="AdditionalDeps" />
-    <file src="bin-linux-glibc/net/**/*.*" target="net" />
-    <file src="bin-linux-glibc/store/**/*.*" target="store" />
-    <file src="bin-linux-glibc/integrations.json" target="integrations.json" />
-    <file src="bin-linux-glibc/LICENSE" target="LICENSE" />
-    <file src="bin-linux-glibc/linux-x64/**/*.*" target="linux-x64" />
-    <file src="bin-linux-musl/linux-musl-x64/**/*.*" target="linux-musl-x64" />
-    <file src="bin-windows/netfx/**/*.*" target="netfx" />
-    <file src="bin-windows/win-x64/**/*.*" target="win-x64" />
-    <file src="bin-windows/win-x86/**/*.*" target="win-x86" />
-    <file src="bin-macos/osx-x64/**/*.*" target="osx-x64" />
-  </files>
 </package>

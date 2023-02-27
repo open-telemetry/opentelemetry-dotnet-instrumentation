@@ -36,11 +36,18 @@ partial class Build : NukeBuild
 
     [Parameter("The location to create the tracer home directory. Default is './bin/tracer-home'")]
     readonly AbsolutePath TracerHome;
-    [Parameter("The location to place NuGet packages and other packages. Default is './bin/artifacts'")]
-    readonly AbsolutePath Artifacts;
 
-    [Parameter("The location to restore Nuget packages. Optional")]
-    readonly AbsolutePath NugetPackageDirectory;
+    [Parameter("The location to place the NuGet packages built from the project. Default is './bin/nuget-artifacts'")]
+    readonly AbsolutePath NuGetArtifacts;
+
+    [Parameter("The location to restore NuGet packages. Optional")]
+    readonly AbsolutePath NuGetPackagesDirectory;
+
+    [Parameter("Version number of the NuGet packages built from the project. Default is '0.6.0'")]
+    string NuGetBaseVersionNumber = "0.6.0";
+
+    [Parameter("Version suffix added to the NuGet packages built from the project. Default is '-local.1'")]
+    string NuGetVersionSuffix = "-local.1";
 
     Target Clean => _ => _
         .Description("Cleans all build output")
@@ -57,7 +64,7 @@ partial class Build : NukeBuild
             TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x => DeleteDirectory(x));
             EnsureCleanDirectory(OutputDirectory);
             EnsureCleanDirectory(TracerHomeDirectory);
-            EnsureCleanDirectory(ArtifactsDirectory);
+            EnsureCleanDirectory(NuGetArtifactsDirectory);
             EnsureCleanDirectory(NativeProfilerProject.Directory / "build");
             EnsureCleanDirectory(NativeProfilerProject.Directory / "deps");
             EnsureCleanDirectory(BuildDataDirectory);

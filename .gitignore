@@ -287,6 +287,9 @@ blog/
 # exception to the ignore rule
 !/**/.gitkeep
 
+# ignore artifacts downloaded to build OpenTelemetry.AutoInstrumentation.Runtime package
+nuget/OpenTelemetry.AutoInstrumentation.Runtime.Native/runtimes/
+
 # profiler build files
 src/OpenTelemetry.AutoInstrumentation.Native/build/
 src/OpenTelemetry.AutoInstrumentation.Native/deps/

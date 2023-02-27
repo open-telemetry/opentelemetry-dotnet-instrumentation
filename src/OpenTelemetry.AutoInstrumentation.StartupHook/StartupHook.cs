@@ -69,28 +69,25 @@ internal class StartupHook
 
             if (profilerType != null)
             {
-                Logger.Error(
-                    $"OpenTelemetry.AutoInstrumentation assembly was already loaded from: {profilerType.Assembly?.Location}. " +
-                    "Check the DOTNET_STARTUP_HOOK environment variable.");
+                Logger.Information(
+                    $"OpenTelemetry.AutoInstrumentation assembly loaded from: {profilerType.Assembly?.Location}.");
+            }
+
+            ThrowIfReferenceIncorrectOpenTelemetryVersion(loaderAssemblyLocation);
+
+            // Instrumentation is not initialized.
+            // Creating an instance of OpenTelemetry.AutoInstrumentation.Loader.Startup
+            // will initialize Instrumentation through its static constructor.
+            string loaderFilePath = Path.Combine(loaderAssemblyLocation, "OpenTelemetry.AutoInstrumentation.Loader.dll");
+            Assembly loaderAssembly = Assembly.LoadFrom(loaderFilePath);
+            var loaderInstance = loaderAssembly.CreateInstance("OpenTelemetry.AutoInstrumentation.Loader.Loader");
+            if (loaderInstance is null)
+            {
+                Logger.Error("StartupHook failed to create an instance of the Loader");
             }
             else
             {
-                ThrowIfReferenceIncorrectOpenTelemetryVersion(loaderAssemblyLocation);
-
-                // Instrumentation is not initialized.
-                // Creating an instance of OpenTelemetry.AutoInstrumentation.Loader.Startup
-                // will initialize Instrumentation through its static constructor.
-                string loaderFilePath = Path.Combine(loaderAssemblyLocation, "OpenTelemetry.AutoInstrumentation.Loader.dll");
-                Assembly loaderAssembly = Assembly.LoadFrom(loaderFilePath);
-                var loaderInstance = loaderAssembly.CreateInstance("OpenTelemetry.AutoInstrumentation.Loader.Loader");
-                if (loaderInstance is null)
-                {
-                    Logger.Error("StartupHook failed to create an instance of the Loader");
-                }
-                else
-                {
-                    Logger.Information("StartupHook initialized successfully!");
-                }
+                Logger.Information("StartupHook initialized successfully!");
             }
         }
         catch (Exception ex)
