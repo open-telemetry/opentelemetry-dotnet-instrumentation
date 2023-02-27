@@ -23,7 +23,11 @@ namespace OpenTelemetry.AutoInstrumentation;
 /// </summary>
 internal partial class AutoInstrumentationEventSource : EventSource
 {
-    public static AutoInstrumentationEventSource Log => new();
+    private AutoInstrumentationEventSource()
+    {
+    }
+
+    public static AutoInstrumentationEventSource Log { get; } = new();
 
     /// <summary>Logs as Error level message.</summary>
     /// <param name="message">Error to log.</param>
