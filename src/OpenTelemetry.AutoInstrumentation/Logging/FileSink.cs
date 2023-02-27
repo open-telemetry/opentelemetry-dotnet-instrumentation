@@ -17,21 +17,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Modified by OpenTelemetry Authors.
+
 using System.Text;
 
 namespace OpenTelemetry.AutoInstrumentation.Logging;
 
-internal sealed class FileSink : ISink, IDisposable
+internal sealed class FileSink : IDisposable
 {
     readonly TextWriter _output;
     readonly FileStream _underlyingStream;
     readonly WriteCountingStream _countingStreamWrapper;
     readonly object _syncRoot = new object();
-    static readonly long FileSizeLimitBytes = 10 * 1024 * 1024;
+    readonly long _fileSizeLimitBytes;
 
-    public FileSink(string path, Encoding encoding = null)
+    public FileSink(string path, long fileSizeLimitBytes)
     {
         if (path == null) throw new ArgumentNullException(nameof(path));
+        if (fileSizeLimitBytes < 1)
+        {
+            throw new ArgumentException("Invalid value provided; file size limit must be at least 1 byte.");
+        }
+        _fileSizeLimitBytes = fileSizeLimitBytes;
 
         var directory = Path.GetDirectoryName(path);
         if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
@@ -42,19 +49,20 @@ internal sealed class FileSink : ISink, IDisposable
         _underlyingStream = System.IO.File.Open(path, FileMode.Append, FileAccess.Write, FileShare.Read);
 
         Stream outputStream = _countingStreamWrapper = new WriteCountingStream(_underlyingStream);
-        _output = new StreamWriter(outputStream, encoding ?? new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        _output = new StreamWriter(outputStream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
     }
 
-    public void Write(string message)
+    public bool Write(string message)
     {
         lock (_syncRoot)
         {
-            if (_countingStreamWrapper.CountedLength >= FileSizeLimitBytes)
+            if (_countingStreamWrapper.CountedLength >= _fileSizeLimitBytes)
             {
-                return;
+                return false;
             }
             _output.Write(message);
             FlushToDisk();
+            return true;
         }
     }
 
@@ -66,7 +74,7 @@ internal sealed class FileSink : ISink, IDisposable
         }
     }
 
-    private void FlushToDisk()
+    public void FlushToDisk()
     {
         _output.Flush();
         _underlyingStream.Flush(true);
