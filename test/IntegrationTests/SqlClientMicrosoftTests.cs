@@ -15,7 +15,6 @@
 // </copyright>
 
 using IntegrationTests.Helpers;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
@@ -31,10 +30,11 @@ public class SqlClientMicrosoftTests : TestHelper
         _sqlServerFixture = sqlServerFixture;
     }
 
-    [Fact]
+    [Theory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    public void SubmitTraces()
+    [MemberData(nameof(LibraryVersion.SqlClient), MemberType = typeof(LibraryVersion))]
+    public void SubmitTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -42,7 +42,8 @@ public class SqlClientMicrosoftTests : TestHelper
 
         RunTestApplication(new()
         {
-            Arguments = $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}"
+            Arguments = $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}",
+            PackageVersion = packageVersion
         });
 
         collector.AssertExpectations();

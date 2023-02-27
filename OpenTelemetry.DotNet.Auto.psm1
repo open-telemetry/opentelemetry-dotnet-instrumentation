@@ -16,8 +16,10 @@
 
 #Requires -RunAsAdministrator
 
+$ServiceLocatorVariable = "OTEL_DOTNET_AUTO_INSTALL_DIR"
+
 function Get-Current-InstallDir() {
-    return [System.Environment]::GetEnvironmentVariable("OTEL_DOTNET_AUTO_INSTALL_DIR", [System.EnvironmentVariableTarget]::Machine)
+    return [System.Environment]::GetEnvironmentVariable($ServiceLocatorVariable, [System.EnvironmentVariableTarget]::Machine)
 }
 
 function Get-CLIInstallDir-From-InstallDir([string]$InstallDir) {
@@ -197,6 +199,15 @@ function Get-OpenTelemetry-Archive([string] $Version, [string] $LocalPath) {
     return Download-OpenTelemetry $Version $tempDir
 }
 
+function Test-AssemblyNotForGAC([string] $Name) {
+    switch ($Name) {
+        "netstandard.dll" { return $true }
+        "grpc_csharp_ext.x64.dll" { return $true }
+        "grpc_csharp_ext.x86.dll" { return $true }
+    }
+    return $false 
+}
+
 <#
     .SYNOPSIS
     Installs OpenTelemetry .NET Automatic Instrumentation.
@@ -213,7 +224,7 @@ function Install-OpenTelemetryCore() {
         [string]$LocalPath
     )
 
-    $version = "v0.5.1-beta.3"
+    $version = "v0.6.0-beta.2"
     $installDir = Get-CLIInstallDir-From-InstallDir $InstallDir
     $archivePath = $null
     $deleteArchive = $true
@@ -232,19 +243,25 @@ function Install-OpenTelemetryCore() {
         Expand-Archive $archivePath $installDir -Force
 
         # OpenTelemetry service locator
-        [System.Environment]::SetEnvironmentVariable('OTEL_DOTNET_AUTO_INSTALL_DIR', $installDir, [System.EnvironmentVariableTarget]::Machine)
+        [System.Environment]::SetEnvironmentVariable($ServiceLocatorVariable, $installDir, [System.EnvironmentVariableTarget]::Machine)
 
         # Register .NET Framweworks dlls in GAC
         [System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") | Out-Null
         $publish = New-Object System.EnterpriseServices.Internal.Publish 
         $dlls = Get-ChildItem -Path $installDir\netfx\ -Filter *.dll -File
-        for ($i = 0; $i -le $dlls.Count; $i++) {
+        for ($i = 0; $i -lt $dlls.Count; $i++) {
             $percentageComplete = $i / $dlls.Count * 100
             Write-Progress -Activity "Registering .NET Framweworks dlls in GAC" `
                 -Status "Module $($i+1) out of $($dlls.Count). Installing $($dlls[$i].Name):" `
                 -PercentComplete $percentageComplete
+
+            if (Test-AssemblyNotForGAC $dlls[$i].Name) {
+                continue
+            }
+
             $publish.GacInstall($dlls[$i].FullName)
         }
+        Write-Progress -Activity "Registering .NET Framweworks dlls in GAC" -Status "Ready" -Completed
     } 
     catch {
         $message = $_
@@ -273,14 +290,24 @@ function Uninstall-OpenTelemetryCore() {
     [System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") | Out-Null
     $publish = New-Object System.EnterpriseServices.Internal.Publish 
     $dlls = Get-ChildItem -Path $installDir\netfx\ -Filter *.dll -File
-    foreach ($dll in $dlls) {
-        $publish.GacRemove($dll.FullName)
+    for ($i = 0; $i -lt $dlls.Count; $i++) {
+        $percentageComplete = $i / $dlls.Count * 100
+        Write-Progress -Activity "Unregistering .NET Framweworks dlls from GAC" `
+            -Status "Module $($i+1) out of $($dlls.Count). Uninstalling $($dlls[$i].Name):" `
+            -PercentComplete $percentageComplete
+
+        if (Test-AssemblyNotForGAC $dlls[$i].Name) {
+            continue
+        }
+
+        $publish.GacRemove($dlls[$i].FullName)
     }
+    Write-Progress -Activity "Unregistering .NET Framweworks dlls from GAC" -Status "Ready" -Completed
 
     Remove-Item -LiteralPath $installDir -Force -Recurse
 
     # Remove OTel service locator variable
-    [System.Environment]::SetEnvironmentVariable('OTEL_DOTNET_AUTO_INSTALL_DIR', $null, [System.EnvironmentVariableTarget]::Machine)
+    [System.Environment]::SetEnvironmentVariable($ServiceLocatorVariable, $null, [System.EnvironmentVariableTarget]::Machine)
 }
 
 <#

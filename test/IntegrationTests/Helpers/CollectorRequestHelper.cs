@@ -15,8 +15,6 @@
 // </copyright>
 
 #if NET6_0_OR_GREATER
-using System.IO;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
 namespace IntegrationTests.Helpers;

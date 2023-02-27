@@ -55,7 +55,7 @@ public class OtlpResourceExpector : IDisposable
             throw new InvalidOperationException("Expectations were not set");
         }
 
-        timeout ??= Timeout.Expectation;
+        timeout ??= TestTimeout.Expectation;
 
         try
         {

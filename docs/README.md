@@ -18,7 +18,7 @@ OpenTelemetry .NET Automatic Instrumentation is built on top of
 [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-[`1.4.0-rc.2`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-rc.2)
+[`1.4.0-rc.3`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-rc.3)
 - `System.Diagnostics.DiagnosticSource`: [`7.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/7.0.0)
   referencing `System.Runtime.CompilerServices.Unsafe`: [`6.0.0`](https://www.nuget.org/packages/System.Runtime.CompilerServices.Unsafe/6.0.0)
 
@@ -82,10 +82,11 @@ Currently, instrumenting [`self-contained`](https://learn.microsoft.com/en-us/do
 applications is not supported. Note that a `self-contained` applications is
 automatically generated in .NET 7.0 whenever the `dotnet publish` or `dotnet build`
 command is used with a Runtime Identifier (RID) parameter, for example when `-r`
-or `--runtime` is used when running the command. The `dotnet` CLI is
-a `self-contained` application and it's incompatible with automatic instrumentation.
+or `--runtime` is used when running the command.
 
-To build and launch an instrumented application, take the following into account:
+Until version `v0.6.0-beta.1` (inclusive) there were issues instrumenting
+the `dotnet` CLI. To build and launch an instrumented application, take the
+following into account if you are using one of the affected versions:
 
 - Don't set the automatic instrumentation environment variables in the same session
 used to run the `dotnet` tool.
@@ -138,7 +139,7 @@ Example usage:
 
 ```sh
 # Download the bash script
-curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.5.1-beta.3/otel-dotnet-auto-install.sh -O
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.6.0-beta.2/otel-dotnet-auto-install.sh -O
 
 # Install core files
 sh ./otel-dotnet-auto-install.sh
@@ -158,7 +159,7 @@ uses environment variables as parameters:
 | `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                      | No       | `$HOME/.otel-dotnet-auto` |
 | `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | No       | *Calculated*              |
 | `TMPDIR`                | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`            |
-| `VERSION`               | Version to download                                              | No       | `v0.5.1-beta.3`           |
+| `VERSION`               | Version to download                                              | No       | `v0.6.0-beta.2`           |
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
@@ -179,7 +180,7 @@ Example usage (run as administrator):
 
 ```powershell
 # Download the module
-$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.5.1-beta.3/OpenTelemetry.DotNet.Auto.psm1"
+$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.6.0-beta.2/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path
 

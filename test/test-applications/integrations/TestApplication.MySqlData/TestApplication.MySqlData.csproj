@@ -5,11 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MySql.Data" />
+    <PackageReference Include="MySql.Data" VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
-  </ItemGroup>
-  
 </Project>

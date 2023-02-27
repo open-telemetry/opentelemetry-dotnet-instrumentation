@@ -14,10 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Include="..\TestApplication.NServiceBus\TestMessage.cs">
       <Link>TestMessage.cs</Link>
     </Compile>

@@ -31,9 +31,9 @@ internal class WcfServerTestHelper : TestHelper
 
     public ProcessHelper RunWcfServer(MockSpansCollector collector)
     {
-        var projectDirectory = EnvironmentHelper.GetTestApplicationProjectDirectory();
+        var baseBinDirectory = EnvironmentHelper.GetTestApplicationBaseBinDirectory();
         var exeFileName = $"{EnvironmentHelper.FullTestApplicationName}.exe";
-        var testApplicationPath = Path.Combine(projectDirectory, "bin", EnvironmentTools.GetPlatform().ToLowerInvariant(), EnvironmentTools.GetBuildConfiguration(), "net462", exeFileName);
+        var testApplicationPath = Path.Combine(baseBinDirectory, EnvironmentTools.GetPlatform().ToLowerInvariant(), EnvironmentTools.GetBuildConfiguration(), "net462", exeFileName);
 
         if (!File.Exists(testApplicationPath))
         {

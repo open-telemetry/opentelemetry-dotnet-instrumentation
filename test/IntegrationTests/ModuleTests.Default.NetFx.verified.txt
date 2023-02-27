@@ -1,10 +1,10 @@
 ﻿[
   OpenTelemetry,
   OpenTelemetry.Api,
+  OpenTelemetry.Api.ProviderBuilderExtensions,
   OpenTelemetry.AutoInstrumentation,
   OpenTelemetry.AutoInstrumentation.Loader,
   OpenTelemetry.Exporter.OpenTelemetryProtocol,
-  OpenTelemetry.Extensions.DependencyInjection,
   OpenTelemetry.Instrumentation.Http,
   OpenTelemetry.Instrumentation.Process,
   OpenTelemetry.Instrumentation.Runtime

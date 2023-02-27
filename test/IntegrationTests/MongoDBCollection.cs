@@ -15,11 +15,9 @@
 // </copyright>
 
 #if NET6_0_OR_GREATER
-using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
-using Xunit;
 
 namespace IntegrationTests;
 

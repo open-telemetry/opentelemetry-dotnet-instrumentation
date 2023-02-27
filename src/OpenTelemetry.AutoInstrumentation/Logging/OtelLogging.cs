@@ -29,6 +29,7 @@ internal static class OtelLogging
 {
     private const string OtelDotnetAutoLogDirectory = "OTEL_DOTNET_AUTO_LOG_DIRECTORY";
     private const string NixDefaultDirectory = "/var/log/opentelemetry/dotnet";
+    private const int FileSizeLimitBytes = 10 * 1024 * 1024;
 
     private static readonly ConcurrentDictionary<string, IOtelLogger> OtelLoggers = new();
 
@@ -61,7 +62,13 @@ internal static class OtelLogging
             {
                 var fileName = GetLogFileName(suffix);
                 var logPath = Path.Combine(logDirectory, fileName);
-                sink = new FileSink(logPath);
+                sink = new RollingFileSink(
+                    path: logPath,
+                    fileSizeLimitBytes: FileSizeLimitBytes,
+                    retainedFileCountLimit: 10,
+                    rollingInterval: RollingInterval.Day,
+                    rollOnFileSizeLimit: true,
+                    retainedFileTimeLimit: null);
             }
         }
         catch (Exception)
@@ -82,15 +89,15 @@ internal static class OtelLogging
             var appDomainName = AppDomain.CurrentDomain.FriendlyName;
 
             return string.IsNullOrEmpty(suffix)
-                ? $"otel-dotnet-auto-{appDomainName}-{process.Id}.log"
-                : $"otel-dotnet-auto-{appDomainName}-{process.Id}-{suffix}.log";
+                ? $"otel-dotnet-auto-{appDomainName}-{process.Id}-.log"
+                : $"otel-dotnet-auto-{appDomainName}-{process.Id}-{suffix}-.log";
         }
         catch
         {
             // We can't get the process info
             return string.IsNullOrEmpty(suffix)
-                ? $"otel-dotnet-auto-{Guid.NewGuid()}.log"
-                : $"otel-dotnet-auto-{Guid.NewGuid()}-{suffix}.log";
+                ? $"otel-dotnet-auto-{Guid.NewGuid()}-.log"
+                : $"otel-dotnet-auto-{Guid.NewGuid()}-{suffix}-.log";
         }
     }
 

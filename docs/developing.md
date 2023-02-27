@@ -155,14 +155,12 @@ You can also find the exported telemetry in `dev/log` directory.
 
 > *Warning:* Make sure to build and prepare the test environment beforehand.
 
-You can use [`dev/envvars.sh`](../dev/envvars.sh) to export profiler
-environmental variables to your current shell session.
-You must run it from the root of this repository.
-For example:
+You can reuse [`instrument.sh`](../instrument.sh) to export profiler
+environmental variables to your current Shell session:
 
 ```sh
-. ./dev/envvars.sh
-./test/test-applications/integrations/TestApplication.Smoke/bin/x64/Release/net7.0/TestApplication.Smoke
+export OTEL_DOTNET_AUTO_HOME="bin/tracer-home"
+. ./instrument.sh
 ```
 
 ### Using playground application
@@ -187,9 +185,20 @@ Other features are tested via `SmokeTests` class or have its own test class
 if a dedicated test application is needed.
 
 Currently, the strategy is to test the library instrumentations
-against its lowest supported, but not vulnerable, version.
-The pull requests created by @dependabot with `do NOT merge` label
-are used to test against higher library versions when they are released.
+against following versions:
+
+- its lowest supported, but not vulnerable, version,
+- one version from every major release,
+- the latest supported version (defined in [`test/Directory.Packages.props`](../test/Directory.Packages.props)),
+- other specific versions, eg. containing breaking changes for our instrumentations.
+
+Tests against these versions are executed when you are using `nuke` commands.
+In case of execution from Visual Studio, only test against the latest supported
+are executed.
+
+To update set of the version modify [`PackageVersionDefinitions.cs`](../tools/LibraryVersionsGenerator/PackageVersionDefinitions.cs),
+execute [`LibraryVersionsGenerator`](../tools/LibraryVersionsGenerator/LibraryVersionsGenerator.csproj),
+and commit generated files.
 
 > `TestApplication.AspNet.NetFramework` is an exception to this strategy
 > as it would not work well, because of multiple dependent packages.
@@ -223,7 +232,8 @@ the [verify-test.yml](../.github/workflows/verify-test.yml) GitHub workflow.
   The following example shows how you can debug if the profiler is attached:
 
   ```bash
-  ~/repos/opentelemetry-dotnet-instrumentation$ source dev/envvars.sh 
+  ~/repos/opentelemetry-dotnet-instrumentation$ export OTEL_DOTNET_AUTO_HOME="bin/tracer-home"
+  ~/repos/opentelemetry-dotnet-instrumentation$ . ./instrument.sh 
   ~/repos/opentelemetry-dotnet-instrumentation$ cd ../runtime/
   ~/repos/runtime$ lldb -- ./artifacts/bin/coreclr/Linux.x64.Debug/corerun ~/repos/opentelemetry-dotnet-instrumentation/examples/ConsoleApp/bin/Debug/net6.0/Examples.ConsoleApp.dll
   (lldb) target create "./artifacts/bin/coreclr/Linux.x64.Debug/corerun"

@@ -85,6 +85,7 @@ partial class Build : NukeBuild
         .After(Clean)
         .DependsOn(CreateRequiredDirectories)
         .DependsOn(Restore)
+        .DependsOn(GenerateNetFxTransientDependencies)
         .DependsOn(CompileManagedSrc)
         .DependsOn(PublishManagedProfiler)
         .DependsOn(GenerateNetFxAssemblyRedirectionSource)
@@ -106,10 +107,12 @@ partial class Build : NukeBuild
         .Description("Builds the managed unit / integration tests and runs them")
         .After(Clean, BuildTracer)
         .DependsOn(CreateRequiredDirectories)
+        .DependsOn(GenerateLibraryVersionFiles)
         .DependsOn(CompileManagedTests)
         .DependsOn(CompileMocks)
         .DependsOn(PublishMocks)
         .DependsOn(PublishIisTestApplications)
+        .DependsOn(InstallNetFxAssembliesGAC)
         .DependsOn(RunManagedTests);
 
     string ContainersFilter()

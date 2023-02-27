@@ -1,4 +1,4 @@
-// <copyright file="Startup.cs" company="OpenTelemetry Authors">
+// <copyright file="Loader.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,15 +21,15 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 /// <summary>
 /// A class that attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
 /// </summary>
-internal partial class Startup
+internal partial class Loader
 {
     private static readonly string ManagedProfilerDirectory;
 
     /// <summary>
-    /// Initializes static members of the <see cref="Startup"/> class.
+    /// Initializes static members of the <see cref="Loader"/> class.
     /// This method also attempts to load the OpenTelemetry.AutoInstrumentation .NET assembly.
     /// </summary>
-    static Startup()
+    static Loader()
     {
         ManagedProfilerDirectory = ResolveManagedProfilerDirectory();
 
@@ -39,7 +39,7 @@ internal partial class Startup
         }
         catch (Exception ex)
         {
-            StartupLogger.Log(ex, "Unable to register a callback to the CurrentDomain.AssemblyResolve event.");
+            LoaderLogger.Log(ex, "Unable to register a callback to the CurrentDomain.AssemblyResolve event.");
         }
 
         TryLoadManagedAssembly();
@@ -47,7 +47,7 @@ internal partial class Startup
 
     private static void TryLoadManagedAssembly()
     {
-        StartupLogger.Log("Managed Loader TryLoadManagedAssembly()");
+        LoaderLogger.Log("Managed Loader TryLoadManagedAssembly()");
 
         try
         {
@@ -73,7 +73,7 @@ internal partial class Startup
         }
         catch (Exception ex)
         {
-            StartupLogger.Log(ex, $"Error when loading managed assemblies. {ex.Message}");
+            LoaderLogger.Log(ex, $"Error when loading managed assemblies. {ex.Message}");
             throw;
         }
     }
@@ -86,7 +86,7 @@ internal partial class Startup
         }
         catch (Exception ex)
         {
-            StartupLogger.Log(ex, "Error while loading environment variable " + key);
+            LoaderLogger.Log(ex, "Error while loading environment variable " + key);
         }
 
         return null;

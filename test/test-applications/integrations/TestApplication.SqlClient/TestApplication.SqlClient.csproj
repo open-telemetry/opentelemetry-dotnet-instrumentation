@@ -1,11 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" VersionOverride="1.1.4" />
+    <PackageReference Include="Microsoft.Data.SqlClient" VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\dependency-libs\TestApplication.Shared\TestApplication.Shared.csproj" />
+    <PackageReference Include="System.ValueTuple" Condition="'$(TargetFramework)' == 'net462'"/>
   </ItemGroup>
-
 </Project>

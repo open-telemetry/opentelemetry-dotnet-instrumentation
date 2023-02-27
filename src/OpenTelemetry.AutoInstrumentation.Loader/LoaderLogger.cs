@@ -1,4 +1,4 @@
-// <copyright file="StartupLogger.cs" company="OpenTelemetry Authors">
+// <copyright file="LoaderLogger.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@ using System.Text;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
 
-internal static class StartupLogger
+internal static class LoaderLogger
 {
     private const string NixDefaultDirectory = "/var/log/opentelemetry/dotnet";
 

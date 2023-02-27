@@ -2,11 +2,11 @@
 
 ## dotnet is crashing
 
-Currently, instrumenting self-contained applications and the `dotnet`
-CLI tool in particular is not supported.
-See [(#1744)](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1744).
+Until version `v0.6.0-beta.1` (inclusive) there were issues instrumenting
+the `dotnet` CLI tool.
 
-Therefore, we advise executing `dotnet build` before instrumenting the terminal session
+Therefore, if you are using one of these versions, we advise executing
+`dotnet build` before instrumenting the terminal session
 or calling it in a separate terminal session.
 
 See the [Get started](./README.md#get-started)
@@ -54,6 +54,33 @@ to ensure that the required GAC installations are updated.
 
 For more information about the GAC usage by the automatic instrumentation,
 see [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1906#issuecomment-1376292814).
+
+## Assembly in AdditionalDeps was not found
+
+When you get an error message starting with
+
+```terminal
+An assembly specified in the application dependencies manifest (OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json) was not found
+  ...
+```
+
+you may have hit one of the known issues with this symptom:
+
+- [#1744](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1744)
+  Instrumentation does not work with dotnet CLI
+- [#2181](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2181)
+  Add arm64 architecture to the shared store - this affects Apple M1 machines.
+
+If it is not one of the issues above [host tracing](https://github.com/dotnet/runtime/blob/edd23fcb1b350cb1a53fa409200da55e9c33e99e/docs/design/features/host-tracing.md#host-tracing)
+should be used to gather the information needed to investigate the problem.
+Please, set the following environment variables:
+
+```terminal
+COREHOST_TRACE=1
+COREHOST_TRACEFILE=corehost_verbose_tracing.log
+```
+
+and re-run the application to collect the log.
 
 ## High CPU usage
 

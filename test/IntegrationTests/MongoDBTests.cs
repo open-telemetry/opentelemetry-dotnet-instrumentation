@@ -16,7 +16,6 @@
 
 #if NET6_0_OR_GREATER
 using IntegrationTests.Helpers;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
@@ -32,10 +31,11 @@ public class MongoDBTests : TestHelper
         _mongoDB = mongoDB;
     }
 
-    [Fact]
+    [Theory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    public void SubmitsTraces()
+    [MemberData(nameof(LibraryVersion.MongoDB), MemberType = typeof(LibraryVersion))]
+    public void SubmitsTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -48,7 +48,8 @@ public class MongoDBTests : TestHelper
         EnableBytecodeInstrumentation();
         RunTestApplication(new()
         {
-            Arguments = $"--mongo-db {_mongoDB.Port}"
+            Arguments = $"--mongo-db {_mongoDB.Port}",
+            PackageVersion = packageVersion
         });
 
         collector.AssertExpectations();
