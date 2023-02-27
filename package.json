@@ -10,6 +10,6 @@
   "license": "Apache-2.0",
   "dependencies": {
     "markdownlint-cli": "^0.33.0",
-    "cspell-cli": "^6.26.0"
+    "cspell-cli": "^6.27.0"
   }
 }
