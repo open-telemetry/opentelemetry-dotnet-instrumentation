@@ -11,19 +11,19 @@
   <ItemGroup>
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs" Version="1.4.0-rc.4" />
     <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.HttpListener" Version="1.4.0-rc.4" />
-    <PackageVersion Include="OpenTelemetry.Exporter.Zipkin" Version="1.4.0-rc.4" />
-    <PackageVersion Include="OpenTelemetry.Extensions.Propagators" Version="1.4.0-rc.4" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNet" Version="1.0.0-rc9.7" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.13" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.4" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.0.0-rc9.13" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.MySqlData" Version="1.0.0-beta.5" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="0.5.0-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Quartz" Version="1.0.0-alpha.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.1.0-rc.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.0.0-rc9.13" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc9.7" />
-    <PackageVersion Include="OpenTelemetry.Shims.OpenTracing" Version="1.0.0-rc9.13" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Zipkin" Version="1.4.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Propagators" Version="1.4.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNet" Version="1.0.0-rc9.8" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.14" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.5" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.0.0-rc9.14" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.MySqlData" Version="1.0.0-beta.6" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="0.5.0-beta.2" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Quartz" Version="1.0.0-alpha.2" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.1.0-rc.2" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.0.0-rc9.14" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc9.8" />
+    <PackageVersion Include="OpenTelemetry.Shims.OpenTracing" Version="1.0.0-rc9.14" />
   </ItemGroup>
 
   <!-- Versions from CommonExcludedAssets.props -->
