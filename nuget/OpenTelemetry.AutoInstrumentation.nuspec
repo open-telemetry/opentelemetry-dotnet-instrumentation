@@ -38,7 +38,7 @@
         <dependency id="OpenTelemetry" version="1.4.0" />
         <dependency id="OpenTelemetry.Api" version="1.4.0" />
         <dependency id="OpenTelemetry.Exporter.Console" version="1.4.0" />
-        <dependency id="OpenTelemetry.Exporter.OpenTelemetryProtocol" version="1.4.0-rc.4" />
+        <dependency id="OpenTelemetry.Exporter.OpenTelemetryProtocol" version="1.4.0" />
         <dependency id="OpenTelemetry.Exporter.Prometheus.HttpListener" version="1.4.0-rc.4" />
         <dependency id="OpenTelemetry.Exporter.Zipkin" version="1.4.0" />
         <dependency id="OpenTelemetry.Extensions.Propagators" version="1.4.0" />
