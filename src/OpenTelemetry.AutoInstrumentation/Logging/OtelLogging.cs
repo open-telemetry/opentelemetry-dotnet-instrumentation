@@ -28,8 +28,12 @@ namespace OpenTelemetry.AutoInstrumentation.Logging;
 internal static class OtelLogging
 {
     private const string OtelDotnetAutoLogDirectory = "OTEL_DOTNET_AUTO_LOG_DIRECTORY";
+    private const string OtelLogLevel = "OTEL_LOG_LEVEL";
+    private const string OtelDotnetAutoLogFileSize = "OTEL_DOTNET_AUTO_LOG_FILE_SIZE";
     private const string NixDefaultDirectory = "/var/log/opentelemetry/dotnet";
-    private const int FileSizeLimitBytes = 10 * 1024 * 1024;
+
+    private static readonly long FileSizeLimitBytes = GetConfiguredFileSizeLimitBytes();
+    private static readonly LogLevel? ConfiguredLogLevel = GetConfiguredLogLevel();
 
     private static readonly ConcurrentDictionary<string, IOtelLogger> OtelLoggers = new();
 
@@ -52,9 +56,67 @@ internal static class OtelLogging
         return OtelLoggers.GetOrAdd(suffix, CreateLogger);
     }
 
+    internal static LogLevel? GetConfiguredLogLevel()
+    {
+        var logLevel = LogLevel.Information;
+        try
+        {
+            var configuredValue = Environment.GetEnvironmentVariable(OtelLogLevel) ?? string.Empty;
+            if (configuredValue == Constants.ConfigurationValues.None)
+            {
+                return null;
+            }
+
+            if (!string.IsNullOrEmpty(configuredValue))
+            {
+                logLevel = configuredValue switch
+                {
+                    Constants.ConfigurationValues.LogLevel.Error => LogLevel.Error,
+                    Constants.ConfigurationValues.LogLevel.Warning => LogLevel.Warning,
+                    Constants.ConfigurationValues.LogLevel.Information => LogLevel.Information,
+                    Constants.ConfigurationValues.LogLevel.Debug => LogLevel.Debug,
+                    _ => logLevel
+                };
+            }
+        }
+        catch (Exception)
+        {
+            // theoretically, can happen when process has no privileges to check env
+        }
+
+        return logLevel;
+    }
+
+    internal static long GetConfiguredFileSizeLimitBytes()
+    {
+        const long defaultFileSizeLimitBytes = 10 * 1024 * 1024;
+
+        try
+        {
+            var configuredFileSizeLimit = Environment.GetEnvironmentVariable(OtelDotnetAutoLogFileSize);
+            if (string.IsNullOrEmpty(configuredFileSizeLimit))
+            {
+                return defaultFileSizeLimitBytes;
+            }
+
+            return long.TryParse(configuredFileSizeLimit, out var limit) && limit > 0 ? limit : defaultFileSizeLimitBytes;
+        }
+        catch (Exception)
+        {
+            // theoretically, can happen when process has no privileges to check env
+            return defaultFileSizeLimitBytes;
+        }
+    }
+
     private static IOtelLogger CreateLogger(string suffix)
     {
         ISink? sink = null;
+
+        if (!ConfiguredLogLevel.HasValue)
+        {
+            return NoopLogger.Instance;
+        }
+
         try
         {
             var logDirectory = GetLogDirectory();
@@ -78,7 +140,7 @@ internal static class OtelLogging
 
         sink ??= new NoopSink();
 
-        return new CustomLogger(sink);
+        return new CustomLogger(sink, ConfiguredLogLevel.Value);
     }
 
     private static string GetLogFileName(string suffix)

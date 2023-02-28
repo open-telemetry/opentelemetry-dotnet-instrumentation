@@ -54,5 +54,13 @@ internal static class Constants
             public const string B3Multi = "b3multi";
             public const string B3Single = "b3";
         }
+
+        public static class LogLevel
+        {
+            public const string Error = "error";
+            public const string Warning = "warn";
+            public const string Information = "info";
+            public const string Debug = "debug";
+        }
     }
 }
