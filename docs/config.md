@@ -36,7 +36,7 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     </configuration>
     ```
    
-3. Auto detection 
+3. Service name automatic detection
 
    If no service name is detected by manual settings one will be generated for you. This can be helpful in some circumstances.
 
