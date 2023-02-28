@@ -56,7 +56,7 @@ issues.
 ```xml
   <ItemGroup>
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.8" ExcludeAssets="runtime" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.9" ExcludeAssets="runtime" />
   </ItemGroup>
 ```
 

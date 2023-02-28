@@ -7,10 +7,19 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.6.0-beta.2...HEAD)
 
+This release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
+
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.4.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0)
+- `System.Diagnostics.DiagnosticSource`: [`7.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/7.0.0)
+
 ### Added
 `ServiceNameDetector` to improve the default service name if one is not explicitly set.
 
 ### Changed
+
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.4.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0).
 
 ### Deprecated
 

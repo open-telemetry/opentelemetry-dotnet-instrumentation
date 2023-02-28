@@ -112,15 +112,17 @@ for example `TRACES`, and `{0}` is the case-sensitive name of the instrumentatio
 | `MYSQLDATA`           | [MySql.Data](https://www.nuget.org/packages/MySql.Data) **Not supported on .NET Framework**                                                                                                     | ≥6.10.7            | source & bytecode \[2\] |
 | `NPGSQL`              | [Npgsql](https://www.nuget.org/packages/Npgsql)                                                                                                                                                 | ≥6.0.0             | source                  |
 | `NSERVICEBUS`         | [NServiceBus](https://www.nuget.org/packages/NServiceBus)                                                                                                                                       | ≥8.0.0             | source & bytecode       |
-| `SQLCLIENT`           | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient)                           | *                  | source                  |
+| `SQLCLIENT`           | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient)                           | * \[3\]            | source                  |
 | `STACKEXCHANGEREDIS`  | [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis) **Not supported on .NET Framework**                                                                                   | ≥2.0.405 < 3.0.0   | source & bytecode       |
-| `WCF`                 | [System.ServiceModel](https://www.nuget.org/packages/System.ServiceModel) **No support for server side on .NET**. For configuration see [WCF Instrumentation Configuration](wcf-config.md)      | * \[3\]            | source                  |
+| `WCF`                 | [System.ServiceModel](https://www.nuget.org/packages/System.ServiceModel) **No support for server side on .NET**. For configuration see [WCF Instrumentation Configuration](wcf-config.md)      | * \[4\]            | source                  |
 
 \[1\]: Only integrated pipeline mode is supported.
 
 \[2\]: MySql.Data 8.0.31 and higher requires bytecode instrumentation.
 
-\[3\]: On .NET it supports [System.ServiceModel.Primitives](https://www.nuget.org/packages/System.ServiceModel.Primitives)
+\[3\]: Microsoft.Data.SqlClient v3.* is not supported on .NET Framework, due to [issue](https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243).
+
+\[4\]: On .NET it supports [System.ServiceModel.Primitives](https://www.nuget.org/packages/System.ServiceModel.Primitives)
 ≥ 4.7.0.
 
 ### Metrics instrumentations

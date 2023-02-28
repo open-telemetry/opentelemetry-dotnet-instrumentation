@@ -15,6 +15,21 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\FileSink.cs">
       <Link>Logging\FileSink.cs</Link>
     </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingFileSink.cs">
+      <Link>Logging\RollingFileSink.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingInterval.cs">
+      <Link>Logging\RollingInterval.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\PathRoller.cs">
+      <Link>Logging\PathRoller.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingLogFile.cs">
+      <Link>Logging\RollingLogFile.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingIntervalExtensions.cs">
+      <Link>Logging\RollingIntervalExtensions.cs</Link>
+    </Compile>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\IOtelLogger.cs">
       <Link>Logging\IOtelLogger.cs</Link>
     </Compile>
@@ -32,6 +47,9 @@
     </Compile>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\WriteCountingStream.cs">
       <Link>Logging\WriteCountingStream.cs</Link>
+    </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\AutoInstrumentationEventSource.cs">
+      <Link>AutoInstrumentationEventSource.cs</Link>
     </Compile>
   </ItemGroup>
 

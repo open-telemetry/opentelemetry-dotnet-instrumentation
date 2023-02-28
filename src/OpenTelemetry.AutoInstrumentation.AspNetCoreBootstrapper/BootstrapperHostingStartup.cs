@@ -17,6 +17,7 @@
 using Microsoft.AspNetCore.Hosting;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Logger;
+using OpenTelemetry.AutoInstrumentation.Logging;
 
 [assembly: HostingStartup(typeof(OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper.BootstrapperHostingStartup))]
 
@@ -27,6 +28,8 @@ namespace OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper;
 /// </summary>
 internal class BootstrapperHostingStartup : IHostingStartup
 {
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger("AspNetCoreBootstrapper");
+
     private readonly LogSettings _logSettings;
 
     /// <summary>
@@ -45,13 +48,13 @@ internal class BootstrapperHostingStartup : IHostingStartup
     {
         if (!_logSettings.LogsEnabled)
         {
-            Logger.LogInformation("BootstrapperHostingStartup loaded, but OpenTelemetry Logs disabled. Skipping.");
+            Logger.Information("BootstrapperHostingStartup loaded, but OpenTelemetry Logs disabled. Skipping.");
             return;
         }
 
         if (!_logSettings.EnabledInstrumentations.Contains(LogInstrumentation.ILogger))
         {
-            Logger.LogInformation($"BootstrapperHostingStartup loaded, but {nameof(LogInstrumentation.ILogger)} instrumentation is disabled. Skipping.");
+            Logger.Information($"BootstrapperHostingStartup loaded, but {nameof(LogInstrumentation.ILogger)} instrumentation is disabled. Skipping.");
             return;
         }
 
@@ -60,11 +63,11 @@ internal class BootstrapperHostingStartup : IHostingStartup
             builder.ConfigureLogging(logging => logging.AddOpenTelemetryLogs());
 
             var applicationName = GetApplicationName();
-            Logger.LogInformation($"BootstrapperHostingStartup loaded for application with name {applicationName}.");
+            Logger.Information($"BootstrapperHostingStartup loaded for application with name {applicationName}.");
         }
         catch (Exception ex)
         {
-            Logger.LogError($"Error in BootstrapperHostingStartup: {ex}");
+            Logger.Error($"Error in BootstrapperHostingStartup: {ex}");
             throw;
         }
     }
@@ -77,7 +80,7 @@ internal class BootstrapperHostingStartup : IHostingStartup
         }
         catch (Exception ex)
         {
-            Logger.LogError($"Error getting AppDomain.CurrentDomain.FriendlyName: {ex}");
+            Logger.Error($"Error getting AppDomain.CurrentDomain.FriendlyName: {ex}");
             return string.Empty;
         }
     }

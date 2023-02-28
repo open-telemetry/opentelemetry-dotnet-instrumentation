@@ -1,4 +1,4 @@
-// <copyright file="Logger.cs" company="OpenTelemetry Authors">
+// <copyright file="AutoInstrumentationEventSource.Name.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,23 +14,11 @@
 // limitations under the License.
 // </copyright>
 
-using OpenTelemetry.AutoInstrumentation.Logging;
+using System.Diagnostics.Tracing;
 
-namespace OpenTelemetry.AutoInstrumentation.StartupHook;
+namespace OpenTelemetry.AutoInstrumentation;
 
-internal static class Logger
+[EventSource(Name = "OpenTelemetry-AutoInstrumentation")]
+internal partial class AutoInstrumentationEventSource
 {
-    private static readonly IOtelLogger Log = OtelLogging.GetLogger("StartupHook");
-
-    internal static void LogInformation(string message)
-    {
-        StartupHookEventSource.Log.Trace(message);
-        Log.Information(message);
-    }
-
-    internal static void LogError(string message)
-    {
-        StartupHookEventSource.Log.Error(message);
-        Log.Error(message);
-    }
 }
