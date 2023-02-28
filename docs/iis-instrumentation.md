@@ -67,7 +67,7 @@ to set it for all ASP.NET application running in Integrated Pipeline Mode:
 
 For ASP.NET application you can configure the most common `OTEL_` settings
 (like `OTEL_SERVICE_NAME`) via `appSettings` in `Web.config`.
-If a service name is not provided manually by environment variables or in the config, one will be generated for you.
+If a service name is not explicitly configured, one will be generated for you.
 If the application is hosted on IIS in .NET Framework this will look like Site\VirtualDirectoryPath ex: MySite\MyApp 
 
 For ASP.NET Core application you can use
