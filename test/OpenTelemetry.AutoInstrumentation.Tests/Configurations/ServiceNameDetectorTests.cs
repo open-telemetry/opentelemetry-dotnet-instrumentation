@@ -14,12 +14,9 @@
 // limitations under the License.
 // </copyright>
 
-using System.Collections.Specialized;
-using System.Linq;
 using System.Reflection;
 using FluentAssertions;
-using FluentAssertions.Execution;
-using Moq;
+using Microsoft.Extensions.Configuration;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.Resources;
 using Xunit;
@@ -28,15 +25,34 @@ namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 
 public class ServiceNameDetectorTests
 {
+    private IConfiguration configuration;
+
+    public ServiceNameDetectorTests()
+    {
+        configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> { ["OTEL_SERVICE_NAME"] = "my-service" }).Build();
+    }
+
     [Fact]
     public void Detector_ReturnsTestHost()
     {
         var expectedServiceName = Assembly.GetEntryAssembly()?.GetName().Name;
         var settings = Settings.FromDefaultSources<GeneralSettings>();
 
-        ServiceNameDetector serviceNameDetector = new();
+        ServiceNameDetector serviceNameDetector = new(new ConfigurationBuilder().Build());
         Resource resource = serviceNameDetector.Detect();
 
         resource.Attributes.Single(a => a.Key == "service.name").Value.Should().Be(expectedServiceName);
+    }
+
+    [Fact]
+    public void Detector_ReturnsConfigurationValue()
+    {
+        var expectedServiceName = Assembly.GetEntryAssembly()?.GetName().Name;
+        var settings = Settings.FromDefaultSources<GeneralSettings>();
+
+        ServiceNameDetector serviceNameDetector = new(configuration);
+        Resource resource = serviceNameDetector.Detect();
+
+        resource.Attributes.Single(a => a.Key == "service.name").Value.Should().Be("my-service");
     }
 }

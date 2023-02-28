@@ -17,21 +17,40 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Configuration;
 using OpenTelemetry.Resources;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal sealed class ServiceNameDetector : IResourceDetector
 {
+    private const string EnvVarKey = "OTEL_SERVICE_NAME";
+    private const string AttributeServiceName = "service.name";
+    private readonly IConfiguration configuration;
+
+    public ServiceNameDetector(IConfiguration configuration)
+    {
+        this.configuration = configuration;
+    }
+
     public Resource Detect()
     {
         var resource = Resource.Empty;
-        string generatedServiceName = GetGeneratedServiceName();
+        if (configuration.TryGetStringValue(EnvVarKey, out var envResourceAttributeValue))
+        {
+            return new Resource(new Dictionary<string, object>
+            {
+                [AttributeServiceName] = envResourceAttributeValue!,
+            });
+        }
+
+        // Only set if we haven't found a non-default service name
+        var generatedServiceName = GetGeneratedServiceName();
         if (!string.IsNullOrWhiteSpace(generatedServiceName))
         {
             resource = new Resource(new Dictionary<string, object>
             {
-                ["service.name"] = generatedServiceName
+                [AttributeServiceName] = generatedServiceName
             });
         }
 
@@ -53,13 +72,14 @@ internal sealed class ServiceNameDetector : IResourceDetector
     }
 
     /// <summary>
-    /// Wrapper around <see cref="Process.GetCurrentProcess"/> and <see cref="Process.ProcessName"/>
-    ///
+    /// <para>Wrapper around <see cref="Process.GetCurrentProcess"/> and <see cref="Process.ProcessName"/></para>
+    /// <para>
     /// On .NET Framework the <see cref="Process"/> class is guarded by a
     /// LinkDemand for FullTrust, so partial trust callers will throw an exception.
     /// This exception is thrown when the caller method is being JIT compiled, NOT
     /// when Process.GetCurrentProcess is called, so this wrapper method allows
     /// us to catch the exception.
+    /// </para>
     /// </summary>
     /// <returns>Returns the name of the current process.</returns>
     [MethodImpl(MethodImplOptions.NoInlining)]

@@ -14,7 +14,9 @@
 // limitations under the License.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using Microsoft.Extensions.Configuration;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
@@ -37,5 +39,18 @@ internal static class ConfigurationExtensions
         }
 
         return enabledConfigurations;
+    }
+
+    public static bool TryGetStringValue(
+        this IConfiguration configuration,
+        string key,
+#if !NETFRAMEWORK && !NETSTANDARD2_0
+        [NotNullWhen(true)]
+#endif
+        out string? value)
+    {
+        value = configuration.GetValue<string?>(key, null);
+
+        return !string.IsNullOrWhiteSpace(value);
     }
 }
