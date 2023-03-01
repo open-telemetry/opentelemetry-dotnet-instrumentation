@@ -1,4 +1,4 @@
-// <copyright file="Global.asax.cs" company="OpenTelemetry Authors">
+// <copyright file="WebApiConfig.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,15 +15,22 @@
 // </copyright>
 
 using System.Web.Http;
-using System.Web.Routing;
 
 namespace TestApplication.AspNet.NetFramework;
 
-public class MvcApplication : System.Web.HttpApplication
+public class WebApiConfig
 {
-    protected void Application_Start()
+    public static void Register(HttpConfiguration config)
     {
-        GlobalConfiguration.Configure(WebApiConfig.Register);
-        RouteConfig.RegisterRoutes(RouteTable.Routes);
+        // Web API configuration and services
+
+        // Web API routes
+        config.MapHttpAttributeRoutes();
+
+        config.Routes.MapHttpRoute(
+            name: "DefaultApi",
+            routeTemplate: "api/{controller}/{id}",
+            defaults: new { id = RouteParameter.Optional }
+        );
     }
 }
