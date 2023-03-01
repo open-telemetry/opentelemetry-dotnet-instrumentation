@@ -21,16 +21,17 @@ internal class CustomLogger : IOtelLogger
     private static readonly object[] NoPropertyValues = Array.Empty<object>();
 
     private readonly ISink _sink;
+    private readonly LogLevel _logLevel;
 
-    internal CustomLogger(ISink sink)
+    internal CustomLogger(ISink sink, LogLevel logLevel)
     {
         _sink = sink ?? throw new ArgumentNullException(nameof(sink));
+        _logLevel = logLevel;
     }
 
     public bool IsEnabled(LogLevel level)
     {
-        // Log all at the moment
-        return true;
+        return level <= _logLevel;
     }
 
     public void Debug(string messageTemplate, bool writeToEventLog)
@@ -174,27 +175,27 @@ internal class CustomLogger : IOtelLogger
 
     private void Write<T>(LogLevel level, Exception? exception, string messageTemplate, T property, bool writeToEventLog)
     {
+        // Avoid boxing + array allocation if disabled
         if (IsEnabled(level))
         {
-            // Avoid boxing + array allocation if disabled
             WriteImpl(level, exception, messageTemplate, new object?[] { property }, writeToEventLog);
         }
     }
 
     private void Write<T0, T1>(LogLevel level, Exception? exception, string messageTemplate, T0 property0, T1 property1, bool writeToEventLog)
     {
+        // Avoid boxing + array allocation if disabled
         if (IsEnabled(level))
         {
-            // Avoid boxing + array allocation if disabled
             WriteImpl(level, exception, messageTemplate, new object?[] { property0, property1 }, writeToEventLog);
         }
     }
 
     private void Write<T0, T1, T2>(LogLevel level, Exception? exception, string messageTemplate, T0 property0, T1 property1, T2 property2, bool writeToEventLog)
     {
+        // Avoid boxing + array allocation if disabled
         if (IsEnabled(level))
         {
-            // Avoid boxing + array allocation if disabled
             WriteImpl(level, exception, messageTemplate, new object?[] { property0, property1, property2 }, writeToEventLog);
         }
     }
