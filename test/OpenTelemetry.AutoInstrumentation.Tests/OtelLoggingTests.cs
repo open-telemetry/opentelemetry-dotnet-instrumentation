@@ -20,8 +20,13 @@ using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests;
 
-public class OtelLoggingTests
+public class OtelLoggingTests : IDisposable
 {
+    public OtelLoggingTests()
+    {
+        UnsetLogLevelEnvVar();
+    }
+
     [Fact]
     public void WhenNoFileSizeIsConfigured_Then_DefaultIsUsed()
     {
@@ -32,94 +37,59 @@ public class OtelLoggingTests
     [Fact]
     public void WhenValidFileSizeIsConfigured_Then_ItIsUsed()
     {
-        var read = Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE");
-        try
-        {
-            Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE", "1024");
-            OtelLogging.GetConfiguredFileSizeLimitBytes().Should().Be(1024);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE", read);
-        }
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE", "1024");
+
+        OtelLogging.GetConfiguredFileSizeLimitBytes().Should().Be(1024);
     }
 
     [Fact]
     public void WhenInvalidFileSizeIsConfigured_Then_DefaultIsUsed()
     {
-        var read = Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE");
-        try
-        {
-            Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE", "-1");
-            OtelLogging.GetConfiguredFileSizeLimitBytes().Should().Be(10 * 1024 * 1024);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE", read);
-        }
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE", "-1");
+
+        OtelLogging.GetConfiguredFileSizeLimitBytes().Should().Be(10 * 1024 * 1024);
     }
 
     [Fact]
     public void WhenLogLevelIsNotConfigured_Then_DefaultIsUsed()
     {
-        var read = Environment.GetEnvironmentVariable("OTEL_LOG_LEVEL");
-        try
-        {
-            Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", string.Empty);
+        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", null);
 
-            OtelLogging.GetConfiguredLogLevel().Should().Be(LogLevel.Information);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", read);
-        }
+        OtelLogging.GetConfiguredLogLevel().Should().Be(LogLevel.Information);
     }
 
     [Fact]
     public void WhenInvalidLogLevelIsConfigured_Then_DefaultIsUsed()
     {
-        var read = Environment.GetEnvironmentVariable("OTEL_LOG_LEVEL");
-        try
-        {
-            Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "invalid");
+        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "invalid");
 
-            OtelLogging.GetConfiguredLogLevel().Should().Be(LogLevel.Information);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", read);
-        }
+        OtelLogging.GetConfiguredLogLevel().Should().Be(LogLevel.Information);
     }
 
     [Fact]
     public void WhenValidLogLevelIsConfigured_Then_ItIsUsed()
     {
-        var read = Environment.GetEnvironmentVariable("OTEL_LOG_LEVEL");
-        try
-        {
-            Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "warn");
+        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "warn");
 
-            OtelLogging.GetConfiguredLogLevel().Should().Be(LogLevel.Warning);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", read);
-        }
+        OtelLogging.GetConfiguredLogLevel().Should().Be(LogLevel.Warning);
     }
 
     [Fact]
     public void WhenNoLoggingIsConfigured_Then_LogLevelHasNoValue()
     {
-        var read = Environment.GetEnvironmentVariable("OTEL_LOG_LEVEL");
-        try
-        {
-            Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "none");
+        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "none");
 
-            OtelLogging.GetConfiguredLogLevel().Should().BeNull();
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", read);
-        }
+        OtelLogging.GetConfiguredLogLevel().Should().BeNull();
+    }
+
+    public void Dispose()
+    {
+        UnsetLogLevelEnvVar();
+    }
+
+    private static void UnsetLogLevelEnvVar()
+    {
+        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", null);
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_FILE_SIZE", null);
     }
 }
