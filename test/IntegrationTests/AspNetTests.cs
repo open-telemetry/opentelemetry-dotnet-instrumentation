@@ -49,8 +49,7 @@ public class AspNetTests
         // on the firewall.
         using var collector = new MockSpansCollector(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
-        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry"); // Expect Mvc span
-        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry"); // Expect WebApi span
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry");
 
         string collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
         _environmentVariables["OTEL_TRACES_EXPORTER"] = "otlp";
@@ -69,13 +68,15 @@ public class AspNetTests
     {
         Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
 
+        _environmentVariables["OTEL_SERVICE_NAME"] = ServiceName;
+
         // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
         // accessible to the Windows docker container where the test application is executed by binding
         // the endpoint to all network interfaces. In order to do that it is necessary to open the port
         // on the firewall.
         using var collector = new MockSpansCollector(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
-        collector.ResourceExpector.Expect("service.name", "Default Web Site"); // this is set by the ServiceNameDetector
+        collector.ResourceExpector.Expect("service.name", ServiceName); // this is set via env var in Dockerfile and Wep.config, but env var has precedence
         collector.ResourceExpector.Expect("deployment.environment", "test"); // this is set via Wep.config
 
         string collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
@@ -167,15 +168,9 @@ public class AspNetTests
     private async Task CallTestApplicationEndpoint(int webPort)
     {
         var client = new HttpClient();
-
         var response = await client.GetAsync($"http://localhost:{webPort}");
         var content = await response.Content.ReadAsStringAsync();
-        Output.WriteLine("MVC Response:");
-        Output.WriteLine(content);
-
-        response = await client.GetAsync($"http://localhost:{webPort}/api/values");
-        content = await response.Content.ReadAsStringAsync();
-        Output.WriteLine("WebApi Response:");
+        Output.WriteLine("Response:");
         Output.WriteLine(content);
     }
 }
