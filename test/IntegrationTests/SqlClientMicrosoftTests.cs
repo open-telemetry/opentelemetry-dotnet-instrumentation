@@ -16,7 +16,6 @@
 
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace IntegrationTests;
 
