@@ -58,26 +58,20 @@ internal static class OtelLogging
 
     internal static LogLevel? GetConfiguredLogLevel()
     {
-        var logLevel = LogLevel.Information;
+        LogLevel? logLevel = LogLevel.Information;
         try
         {
             var configuredValue = Environment.GetEnvironmentVariable(OtelLogLevel) ?? string.Empty;
-            if (configuredValue == Constants.ConfigurationValues.None)
-            {
-                return null;
-            }
 
-            if (!string.IsNullOrEmpty(configuredValue))
+            logLevel = configuredValue switch
             {
-                logLevel = configuredValue switch
-                {
-                    Constants.ConfigurationValues.LogLevel.Error => LogLevel.Error,
-                    Constants.ConfigurationValues.LogLevel.Warning => LogLevel.Warning,
-                    Constants.ConfigurationValues.LogLevel.Information => LogLevel.Information,
-                    Constants.ConfigurationValues.LogLevel.Debug => LogLevel.Debug,
-                    _ => logLevel
-                };
-            }
+                Constants.ConfigurationValues.LogLevel.Error => LogLevel.Error,
+                Constants.ConfigurationValues.LogLevel.Warning => LogLevel.Warning,
+                Constants.ConfigurationValues.LogLevel.Information => LogLevel.Information,
+                Constants.ConfigurationValues.LogLevel.Debug => LogLevel.Debug,
+                Constants.ConfigurationValues.None => null,
+                _ => logLevel
+            };
         }
         catch (Exception)
         {
