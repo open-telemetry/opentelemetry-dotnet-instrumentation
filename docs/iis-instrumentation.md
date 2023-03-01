@@ -2,7 +2,7 @@
 
 ## Setup
 
-Use the `OpenTelemetry.DotNet.Auto.psm1"` PowerShell module
+Use the `OpenTelemetry.DotNet.Auto.psm1` PowerShell module
 to set up automatic instrumentation for IIS:
 
 ```powershell

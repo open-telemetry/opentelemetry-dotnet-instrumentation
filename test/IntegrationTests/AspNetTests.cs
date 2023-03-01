@@ -49,7 +49,8 @@ public class AspNetTests
         // on the firewall.
         using var collector = new MockSpansCollector(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
-        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry");
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry"); // Expect Mvc span
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry"); // Expect WebApi span
 
         string collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
         _environmentVariables["OTEL_TRACES_EXPORTER"] = "otlp";
@@ -166,9 +167,15 @@ public class AspNetTests
     private async Task CallTestApplicationEndpoint(int webPort)
     {
         var client = new HttpClient();
+
         var response = await client.GetAsync($"http://localhost:{webPort}");
         var content = await response.Content.ReadAsStringAsync();
-        Output.WriteLine("Response:");
+        Output.WriteLine("MVC Response:");
+        Output.WriteLine(content);
+
+        response = await client.GetAsync($"http://localhost:{webPort}/api/values");
+        content = await response.Content.ReadAsStringAsync();
+        Output.WriteLine("WebApi Response:");
         Output.WriteLine(content);
     }
 }
