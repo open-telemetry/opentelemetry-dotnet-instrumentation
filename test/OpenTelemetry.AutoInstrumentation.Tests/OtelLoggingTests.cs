@@ -27,6 +27,11 @@ public class OtelLoggingTests : IDisposable
         UnsetLogLevelEnvVar();
     }
 
+    public void Dispose()
+    {
+        UnsetLogLevelEnvVar();
+    }
+
     [Fact]
     public void WhenNoFileSizeIsConfigured_Then_DefaultIsUsed()
     {
@@ -80,11 +85,6 @@ public class OtelLoggingTests : IDisposable
         Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "none");
 
         OtelLogging.GetConfiguredLogLevel().Should().BeNull();
-    }
-
-    public void Dispose()
-    {
-        UnsetLogLevelEnvVar();
     }
 
     private static void UnsetLogLevelEnvVar()
