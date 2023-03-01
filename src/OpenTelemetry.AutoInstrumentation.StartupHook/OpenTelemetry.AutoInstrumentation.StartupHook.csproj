@@ -12,6 +12,9 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\CustomLogger.cs">
       <Link>Logging\CustomLogger.cs</Link>
     </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\NoopLogger.cs">
+      <Link>Logging\NoopLogger.cs</Link>
+    </Compile>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\FileSink.cs">
       <Link>Logging\FileSink.cs</Link>
     </Compile>
