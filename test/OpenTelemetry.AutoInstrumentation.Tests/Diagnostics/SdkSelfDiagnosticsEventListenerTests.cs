@@ -32,7 +32,7 @@ public class SdkSelfDiagnosticsEventListenerTests
     public void EventSourceSetup_LowerSeverity()
     {
         var testSink = new TestSink();
-        var logger = new CustomLogger(testSink);
+        var logger = new CustomLogger(testSink, LogLevel.Debug);
         using var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Error, logger);
 
         // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
@@ -46,7 +46,7 @@ public class SdkSelfDiagnosticsEventListenerTests
     public void EventSourceSetup_HigherSeverity()
     {
         var testSink = new TestSink();
-        var logger = new CustomLogger(testSink);
+        var logger = new CustomLogger(testSink, LogLevel.Debug);
         using var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Verbose, logger);
 
         // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
@@ -89,16 +89,6 @@ public class SdkSelfDiagnosticsEventListenerTests
         public void ActivityStarted(string operationName, string id)
         {
             WriteEvent(24, operationName, id);
-        }
-    }
-
-    private class TestSink : ISink
-    {
-        public IList<string> Messages { get; } = new List<string>();
-
-        public void Write(string message)
-        {
-            Messages.Add(message);
         }
     }
 }
