@@ -3,7 +3,8 @@
 ⚠️ Currently, the NuGet packages are only available as CI artifacts.
 Instructions in this document assume that the packages were downloaded
 and the target project is either using a `nuget.config` file configured to use
-the downloaded packages, e.g.: the [NuGet package test applications](./test/test-applications/nuget-packages/),
+the downloaded packages, e.g.: the
+[`nuget.config` used by the NuGet packages test applications](../../test/test-applications/nuget-packages/nuget.config),
 or the packages are added to the project by specifying the `--source` parameter
 when running the [`dotnet add package` command](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-add-package).
 
