@@ -1,7 +1,6 @@
+using System.Text.Json.Nodes;
 using Nuke.Common.IO;
 using Nuke.Common.Utilities.Collections;
-using System.Text.Json.Nodes;
-
 using static Nuke.Common.IO.FileSystemTasks;
 
 namespace Extensions;
