@@ -8,7 +8,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.6.0...HEAD)
 
 ### Added
-`ServiceNameDetector` to improve the default service name if one is not explicitly set.
+
+`ServiceNameDetector` to improve the default service name if one is not
+ explicitly set.
 
 ### Changed
 
