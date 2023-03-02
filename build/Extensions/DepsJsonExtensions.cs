@@ -8,6 +8,20 @@ namespace Extensions;
 
 internal static class DepsJsonExtensions
 {
+    public static string GetFolderRuntimeName(this JsonObject depsJson)
+    {
+        var runtimeName = depsJson["runtimeTarget"]["name"].GetValue<string>();
+        var folderRuntimeName = runtimeName switch
+        {
+            ".NETCoreApp,Version=v6.0" => "net6.0",
+            ".NETCoreApp,Version=v7.0" => "net7.0",
+            _ => throw new ArgumentOutOfRangeException(nameof(runtimeName), runtimeName,
+                "This value is not supported. You have probably introduced new .NET version to AutoInstrumentation")
+        };
+
+        return folderRuntimeName;
+    }
+
     public static void CopyNativeDependenciesToStore(this JsonObject depsJson, AbsolutePath file, IReadOnlyList<string> architectureStores)
     {
         var depsDirectory = file.Parent;

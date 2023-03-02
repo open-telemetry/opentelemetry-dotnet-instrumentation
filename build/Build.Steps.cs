@@ -475,8 +475,7 @@ partial class Build
                         var rawJson = File.ReadAllText(file);
                         var depsJson = JsonNode.Parse(rawJson).AsObject();
 
-                        var folderRuntimeName = GetFolderRuntimeName(depsJson);
-
+                        var folderRuntimeName = depsJson.GetFolderRuntimeName();
                         var architectureStores = new List<string>
                         {
                             Path.Combine(StoreDirectory, "x64", folderRuntimeName),
@@ -505,19 +504,6 @@ partial class Build
                 AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml", "**/*.dylib", "**/*.so").ForEach(DeleteFile);
                 AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(DeleteDirectory);
             });
-
-        string GetFolderRuntimeName(JsonObject jsonDocument)
-        {
-            var runtimeName = jsonDocument["runtimeTarget"]["name"].GetValue<string>();
-            var folderRuntimeName = runtimeName switch
-            {
-                ".NETCoreApp,Version=v6.0" => "net6.0",
-                ".NETCoreApp,Version=v7.0" => "net7.0",
-                _ => throw new ArgumentOutOfRangeException(nameof(runtimeName), runtimeName,
-                    "This value is not supported. You have probably introduced new .NET version to AutoInstrumentation")
-            };
-            return folderRuntimeName;
-        }
     };
 
     Target InstallDocumentationTools => _ => _
