@@ -437,74 +437,71 @@ partial class Build
             }
         });
 
-    Target CopyAdditionalDeps => _ =>
-    {
-        return _
-            .Unlisted()
-            .Description("Creates AutoInstrumentation.AdditionalDeps and shared store in tracer-home")
-            .After(CompileManagedSrc)
-            .Executes(() =>
+    Target CopyAdditionalDeps => _ => _
+        .Unlisted()
+        .Description("Creates AutoInstrumentation.AdditionalDeps and shared store in tracer-home")
+        .After(CompileManagedSrc)
+        .Executes(() =>
+        {
+            if (AdditionalDepsDirectory.DirectoryExists())
             {
-                if (AdditionalDepsDirectory.DirectoryExists())
+                Directory.Delete(AdditionalDepsDirectory, true);
+            }
+
+            if (StoreDirectory.DirectoryExists())
+            {
+                Directory.Delete(StoreDirectory, true);
+            }
+
+            DotNetPublish(s => s
+                .SetProject(Solution.GetProject(Projects.AutoInstrumentationAdditionalDeps))
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatformAnyCPU()
+                .SetProperty("TracerHomePath", TracerHomeDirectory)
+                .EnableNoBuild()
+                .EnableNoRestore()
+                .CombineWith(TestFrameworks.ExceptNetFramework(), (p, framework) => p
+                .SetFramework(framework)
+                // Additional-deps probes the directory using SemVer format.
+                // Example: For netcoreapp3.1 framework, additional-deps uses 3.1.0 or 3.1.1 and so on.
+                // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
+                .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
+
+            AdditionalDepsDirectory.GlobFiles("**/*deps.json")
+                .ForEach(file =>
                 {
-                    Directory.Delete(AdditionalDepsDirectory, true);
-                }
+                    var rawJson = File.ReadAllText(file);
+                    var depsJson = JsonNode.Parse(rawJson).AsObject();
 
-                if (StoreDirectory.DirectoryExists())
-                {
-                    Directory.Delete(StoreDirectory, true);
-                }
-
-                DotNetPublish(s => s
-                    .SetProject(Solution.GetProject(Projects.AutoInstrumentationAdditionalDeps))
-                    .SetConfiguration(BuildConfiguration)
-                    .SetTargetPlatformAnyCPU()
-                    .SetProperty("TracerHomePath", TracerHomeDirectory)
-                    .EnableNoBuild()
-                    .EnableNoRestore()
-                    .CombineWith(TestFrameworks.ExceptNetFramework(), (p, framework) => p
-                    .SetFramework(framework)
-                    // Additional-deps probes the directory using SemVer format.
-                    // Example: For netcoreapp3.1 framework, additional-deps uses 3.1.0 or 3.1.1 and so on.
-                    // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
-                    .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
-
-                AdditionalDepsDirectory.GlobFiles("**/*deps.json")
-                    .ForEach(file =>
+                    var folderRuntimeName = depsJson.GetFolderRuntimeName();
+                    var architectureStores = new List<string>
                     {
-                        var rawJson = File.ReadAllText(file);
-                        var depsJson = JsonNode.Parse(rawJson).AsObject();
+                        Path.Combine(StoreDirectory, "x64", folderRuntimeName),
+                        Path.Combine(StoreDirectory, "x86", folderRuntimeName),
+                    }.AsReadOnly();
 
-                        var folderRuntimeName = depsJson.GetFolderRuntimeName();
-                        var architectureStores = new List<string>
-                        {
-                            Path.Combine(StoreDirectory, "x64", folderRuntimeName),
-                            Path.Combine(StoreDirectory, "x86", folderRuntimeName),
-                        }.AsReadOnly();
+                    depsJson.CopyNativeDependenciesToStore(file, architectureStores);
+                    depsJson.RemoveOpenTelemetryLibraries();
 
-                        depsJson.CopyNativeDependenciesToStore(file, architectureStores);
-                        depsJson.RemoveOpenTelemetryLibraries();
+                    if (folderRuntimeName == TargetFramework.NET6_0)
+                    {
+                        // To allow roll forward for applications, like Roslyn, that target one tfm
+                        // but have a later runtime move the libraries under the original tfm folder
+                        // to the latest one.
+                        depsJson.RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET7_0, architectureStores);
+                    }
 
-                        if (folderRuntimeName == TargetFramework.NET6_0)
-                        {
-                            // To allow roll forward for applications, like Roslyn, that target one tfm
-                            // but have a later runtime move the libraries under the original tfm folder
-                            // to the latest one.
-                            depsJson.RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET7_0, architectureStores);
-                        }
+                    // Write the updated deps.json file.
+                    File.WriteAllText(file, depsJson.ToJsonString(new()
+                    {
+                        WriteIndented = true
+                    }));
+                });
 
-                        // Write the updated deps.json file.
-                        File.WriteAllText(file, depsJson.ToJsonString(new()
-                        {
-                            WriteIndented = true
-                        }));
-                    });
-
-                // Cleanup Additional Deps Directory
-                AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml", "**/*.dylib", "**/*.so").ForEach(DeleteFile);
-                AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(DeleteDirectory);
-            });
-    };
+            // Cleanup Additional Deps Directory
+            AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml", "**/*.dylib", "**/*.so").ForEach(DeleteFile);
+            AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(DeleteDirectory);
+        });
 
     Target InstallDocumentationTools => _ => _
         .Description("Installs markdownlint-cli and cspell locally. npm is required")
