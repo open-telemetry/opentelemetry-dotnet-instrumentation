@@ -59,9 +59,6 @@ and [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework).
 > `.NET Core 3.1` is not supported.
 > [0.4.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.4.0-beta.1)
 > is the latest version supporting it.
->
-> `Red Hat Enterprise Linux` lower than `9` are not supported.
-> See [(#2083)](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2083).
 
 CI tests run against the following operating systems:
 
