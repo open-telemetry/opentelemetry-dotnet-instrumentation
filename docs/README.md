@@ -51,21 +51,19 @@ can be found in the [versioning documentation](versioning.md).
 
 OpenTelemetry .NET Automatic Instrumentation attempts to work with all officially
 supported operating systems and versions of
-[.NET](https://dotnet.microsoft.com/download/dotnet),
-and [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework).
+[.NET](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core).
 
-> Versions lower than `.NET Framework 4.6.2` are not supported.
->  
-> `.NET Core 3.1` is not supported.
-> [0.4.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.4.0-beta.1)
-> is the latest version supporting it.
+The minimal supported version of
+[.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework)
+is `4.6.2`.
 
 CI tests run against the following operating systems:
 
+- [Alpine](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/alpine.dockerfile)
+- [CentOS 7](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/centos-build.dockerfile)
 - [macOS Big Sur 11](https://github.com/actions/runner-images/blob/main/images/macos/macos-11-Readme.md)
 - [Microsoft Windows Server 2022](https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md)
 - [Ubuntu 20.04 LTS](https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2004-Readme.md)
-- [Alpine](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/alpine.dockerfile)
 
 ### Instrumented libraries and frameworks
 
