@@ -18,7 +18,7 @@ partial class Build
         .DependsOn(CopyIntegrationsJsonForNuGetPackage)
         .DependsOn(SetupRuntimeNativeFolderForNuGetPackage)
         .DependsOn(BuildNuSpecNuGetPackages);
-    
+
     Target TestNuGetPackages => _ => _
         .Description(
             "Test the NuGet packages of the project assuming that the packages are available at bin/nuget-artifacts.")
@@ -75,7 +75,7 @@ partial class Build
                 var destinationPath =
                     Path.Combine(baseRuntimeNativePath, "runtimes", platformAndArchitecture, "native");
                 DeleteDirectory(destinationPath);
-                
+
                 CopyDirectoryRecursively(sourcePath, destinationPath);
             }
         });
