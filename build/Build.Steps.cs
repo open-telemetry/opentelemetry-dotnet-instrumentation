@@ -1,5 +1,4 @@
-using System.Text.Json;
-using System.Text.RegularExpressions;
+using System.Text.Json.Nodes;
 using Extensions;
 using Nuke.Common;
 using Nuke.Common.IO;
@@ -473,8 +472,8 @@ partial class Build
                 AdditionalDepsDirectory.GlobFiles("**/*deps.json")
                     .ForEach(file =>
                     {
-                        var depsJsonContent = File.ReadAllText(file);
-                        using var jsonDocument = JsonDocument.Parse(depsJsonContent);
+                        var rawJson = File.ReadAllText(file);
+                        var jsonDocument = JsonNode.Parse(rawJson).AsObject();
 
                         var folderRuntimeName = GetFolderRuntimeName(jsonDocument);
 
@@ -486,43 +485,46 @@ partial class Build
 
                         CopyNativeDependenciesToStore(file, jsonDocument, architectureStores);
 
-                        depsJsonContent = RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsContent(depsJsonContent);
+                        RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsContent(jsonDocument);
 
                         if (folderRuntimeName == TargetFramework.NET6_0)
                         {
                             // To allow roll forward for applications, like Roslyn, that target one tfm
                             // but have a later runtime move the libraries under the original tfm folder
                             // to the latest one.
-                            depsJsonContent = RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET7_0, architectureStores, depsJsonContent);
+                            RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET7_0, architectureStores, jsonDocument);
                         }
 
                         // Write the updated deps.json file.
-                        File.WriteAllText(file, depsJsonContent);
+                        File.WriteAllText(file, jsonDocument.ToJsonString(new()
+                        {
+                            WriteIndented = true
+                        }));
                     });
                 RemoveFilesFromAdditionalDepsDirectory();
 
-                void CopyNativeDependenciesToStore(AbsolutePath file, JsonDocument jsonDocument, IReadOnlyList<string> architectureStores)
+                void CopyNativeDependenciesToStore(AbsolutePath file, JsonObject jsonDocument, IReadOnlyList<string> architectureStores)
                 {
                     var depsDirectory = file.Parent;
 
-                    foreach (var targetProperty in jsonDocument.RootElement.GetProperty("targets").EnumerateObject())
+                    foreach (var targetProperty in jsonDocument["targets"].AsObject())
                     {
-                        var target = targetProperty.Value;
+                        var target = targetProperty.Value.AsObject();
 
-                        foreach (var packages in target.EnumerateObject())
+                        foreach (var packages in target)
                         {
-                            if (!packages.Value.TryGetProperty("runtimeTargets", out var runtimeTargets))
+                            if (!packages.Value.AsObject().TryGetPropertyValue("runtimeTargets", out var runtimeTargets))
                             {
                                 continue;
                             }
 
-                            foreach (var runtimeDependency in runtimeTargets.EnumerateObject())
+                            foreach (var runtimeDependency in runtimeTargets.AsObject())
                             {
-                                var sourceFileName = Path.Combine(depsDirectory, runtimeDependency.Name);
+                                var sourceFileName = Path.Combine(depsDirectory, runtimeDependency.Key);
 
                                 foreach (var architectureStore in architectureStores)
                                 {
-                                    var targetFileName = Path.Combine(architectureStore, packages.Name.ToLowerInvariant(), runtimeDependency.Name);
+                                    var targetFileName = Path.Combine(architectureStore, packages.Key.ToLowerInvariant(), runtimeDependency.Key);
                                     var targetDirectory = Path.GetDirectoryName(targetFileName);
                                     Directory.CreateDirectory(targetDirectory);
                                     File.Copy(sourceFileName, targetFileName);
@@ -532,17 +534,20 @@ partial class Build
                     }
                 }
 
-                string RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsContent(string depsJsonContent)
+                void RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsContent(JsonObject jsonDocument)
                 {
-                    // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from target section.
-                    var updatedDepsJsonContent = Regex.Replace(depsJsonContent,
-                        "\"OpenTelemetry(.+)AutoInstrumentation.AdditionalDeps.dll(.+?)}," + Environment.NewLine + "(.+?)\"", "\"",
-                        RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                    // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from library section and write to file.
-                    updatedDepsJsonContent = Regex.Replace(updatedDepsJsonContent, "\"OpenTelemetry(.+?)}," + Environment.NewLine + "(.+?)\"", "\"",
-                        RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                    var dependencies = jsonDocument["targets"].AsObject().First().Value.AsObject();
+                    var runtimeLibraries = jsonDocument["libraries"].AsObject();
+                    var keysToRemove = dependencies
+                        .Where(x => x.Key.StartsWith("OpenTelemetry"))
+                        .Select(x => x.Key)
+                        .ToList();
 
-                    return updatedDepsJsonContent;
+                    foreach (var key in keysToRemove)
+                    {
+                        dependencies.Remove(key);
+                        runtimeLibraries.Remove(key);
+                    }
                 }
 
                 void RemoveFilesFromAdditionalDepsDirectory()
@@ -551,12 +556,31 @@ partial class Build
                     AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(DeleteDirectory);
                 }
 
-                string RollFrameworkForward(string runtime, string rollForwardRuntime, IReadOnlyList<string> architectureStores, string depsJsonContent)
+                void RollFrameworkForward(string runtime, string rollForwardRuntime, IReadOnlyList<string> architectureStores, JsonObject jsonDocument)
                 {
                     // Update the contents of the json file.
-                    var updatedDepsJsonContent = Regex.Replace(depsJsonContent,
-                        $"\"lib/{runtime}/", $"\"lib/{rollForwardRuntime}/",
-                        RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                    var dependencies = jsonDocument["targets"].AsObject().First().Value.AsObject();
+                    foreach (var dep in dependencies)
+                    {
+                        var depObject = dep.Value.AsObject();
+                        if (depObject.TryGetPropertyValue("runtime", out var runtimeNode))
+                        {
+                            var runtimeObject = runtimeNode.AsObject();
+                            var libKeys = runtimeObject
+                                .Select(x => x.Key)
+                                .Where(x => x.StartsWith($"lib/{runtime}"))
+                                .ToList();
+
+                            foreach (var libKey in libKeys)
+                            {
+                                var libNode = runtimeObject[libKey];
+                                var newKey = libKey.Replace($"lib/{runtime}", $"lib/{rollForwardRuntime}");
+
+                                runtimeObject.Remove(libKey);
+                                runtimeObject.AddPair(newKey, libNode);
+                            }
+                        }
+                    }
 
                     // Roll forward each architecture by renaming the tfm folder holding the assemblies.
                     foreach (var architectureStore in architectureStores)
@@ -584,15 +608,12 @@ partial class Build
                             }
                         }
                     }
-
-                    // Return the updated json contents.
-                    return updatedDepsJsonContent;
                 }
             });
 
-        string GetFolderRuntimeName(JsonDocument jsonDocument)
+        string GetFolderRuntimeName(JsonObject jsonDocument)
         {
-            var runtimeName = jsonDocument.RootElement.GetProperty("runtimeTarget").GetProperty("name").GetString();
+            var runtimeName = jsonDocument["runtimeTarget"]["name"].GetValue<string>();
             var folderRuntimeName = runtimeName switch
             {
                 ".NETCoreApp,Version=v6.0" => "net6.0",
