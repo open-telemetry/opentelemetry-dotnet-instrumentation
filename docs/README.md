@@ -82,7 +82,7 @@ or `--runtime` is used when running the command.
 
 Until version `v0.6.0-beta.1` (inclusive) there were issues instrumenting
 the `dotnet` CLI. To build and launch an instrumented application, take the
-following into account if you are using one of the _affected versions_:
+following into account if you are using one of the *affected versions*:
 
 - Don't set the automatic instrumentation environment variables in the same session
 used to run the `dotnet` tool.
