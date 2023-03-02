@@ -58,7 +58,11 @@ public class Program
             activity?.SetTag("baz", new int[] { 1, 2, 3 });
         }
 
-        var client = new HttpClient();
+        using var client = new HttpClient
+        {
+            Timeout = TimeSpan.FromSeconds(1)
+        };
+
         try
         {
             client.GetStringAsync("http://httpstat.us/200").Wait();
