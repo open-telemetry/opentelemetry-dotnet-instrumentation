@@ -28,6 +28,14 @@ internal static class ResourceConfigurator
             .AddTelemetrySdk()
             .AddAttributes(new KeyValuePair<string, object>[] { new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version) });
 
+        var resource = resourceBuilder.Build();
+        var serviceName = resource.Attributes.FirstOrDefault(a => a.Key == "service.name").Value as string;
+        if (serviceName?.StartsWith("unknown_service:") == true)
+        {
+            // Fallback service name
+            resourceBuilder.AddAttributes(new KeyValuePair<string, object>[] { new("service.name", ServiceNameConfigurator.GetFallbackServiceName()) });
+        }
+
         if (pluginManager != null)
         {
             resourceBuilder.InvokePlugins(pluginManager);
