@@ -262,7 +262,8 @@ Important environment variables include:
 
 ### Prometheus
 
-> ⚠️ **Do NOT use in production.**
+> **Warning**
+> **Do NOT use in production.**
 >
 > Prometheus exporter is intended for the inner dev loop.
 > Production environments can use a combination of OTLP exporter
