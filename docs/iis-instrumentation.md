@@ -16,10 +16,12 @@ Install-OpenTelemetryCore
 Register-OpenTelemetryForIIS
 ```
 
-⚠️ `Register-OpenTelemetryForIIS` performs IIS restart.
+> **WArning**
+> `Register-OpenTelemetryForIIS` performs IIS restart.
 
 ### Add TelemetryHttpModule ASP.NET HTTP module
 
+> **Note**
 > This is NOT required for ASP.NET Core deployments.
 
 This step is necessary only for ASP.NET (.NET Framework).
@@ -62,6 +64,7 @@ to set it for all ASP.NET application running in Integrated Pipeline Mode:
 
 ## Configuration
 
+> **Note**
 > Remember to restart IIS after making configuration changes.
 > You can do it by executing `iisreset.exe`.
 

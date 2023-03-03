@@ -96,6 +96,7 @@ the executable.
 Download and extract the appropriate binaries from
 [the latest release](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest).
 
+> **Note**
 > The path where you put the binaries is referenced as `$INSTALL_DIR`
 
 ### Instrument a .NET application
