@@ -75,7 +75,7 @@ See [config.md#instrumented-libraries-and-frameworks](config.md#instrumented-lib
 
 Instrumenting [`self-contained`](https://learn.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained)
 applications is going to be supported through [NuGet packages](./internal/using-the-nuget-packages.md).
-Note that a `self-contained` applications is
+Note that a `self-contained` application is
 automatically generated in .NET 7.0 whenever the `dotnet publish` or `dotnet build`
 command is used with a Runtime Identifier (RID) parameter, for example when `-r`
 or `--runtime` is used when running the command.
