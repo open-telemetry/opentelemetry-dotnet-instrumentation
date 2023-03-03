@@ -46,16 +46,15 @@ require choosing between distributing a
 [_self-contained_ or a _framework-dependent_](https://learn.microsoft.com/en-us/dotnet/core/deploying/)
 application. Both types are compatible with automatic instrumentation.
 
-On the output folder of the build you will find a script that can be used to launch
-the application with the OpenTelemetry .NET automatic instrumentation.
+Use the script in the output folder of the build to launch the 
+application with automatic instrumentation activated.
 
-- On Windows: use `instrument.cmd <application_executable>`
-- On Unix: use `instrument.sh <application_executable>`
+- On Windows, use `instrument.cmd <application_executable>`
+- On Linux or Unix, use `instrument.sh <application_executable>`
 
-If the application is launched using the `dotnet` CLI just launch it using the script:
+If you launch the application using the `dotnet` CLI, add `dotnet` after the script.
 
-- On Windows: use `instrument.cmd dotnet <application>`
-- On Unix: use `instrument.sh dotnet <application>`
+- On Windows, use `instrument.cmd dotnet <application>`
+- On Linux and Unix, use `instrument.sh dotnet <application>`
 
-The script will forward any command-line parameters that you need to pass to the
-application.
+The script passes to the application all the command-line parameters you provide.
