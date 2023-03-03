@@ -16,7 +16,7 @@ Install-OpenTelemetryCore
 Register-OpenTelemetryForIIS
 ```
 
-> **WArning**
+> **Warning**
 > `Register-OpenTelemetryForIIS` performs IIS restart.
 
 ### Add TelemetryHttpModule ASP.NET HTTP module
