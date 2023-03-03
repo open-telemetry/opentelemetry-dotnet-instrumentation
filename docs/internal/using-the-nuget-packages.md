@@ -19,17 +19,15 @@ Use the NuGet packages in the following scenarios:
 
 ## Limitations
 
-While the NuGet packages are a convenient way to deploy the automatic
-instrumentation. It isn't possible or desirable to use them in all cases.
-The most common reasons to not use, or limit, the usage of the NuGet
-packages are:
+While NuGet packages are a convenient way to deploy automatic
+instrumentation, they can't be used in all cases. The most common 
+reasons for not using NuGet packages include the following:
 
-1. It is not possible to add the package to the application project, e.g.:
-the applications is produced by a third party that can't or is unwilling
-to add the package.
+1. You can't add the package to the application project. For example,
+the application is from a third party that can't add the package.
 1. Reduce disk usage, or the size of a virtual machine, when multiple applications
-to be instrumented are installed in a single machine. In this case a single
-deployment can be used by all .NET applications running on the machine.
+to be instrumented are installed in a single machine. In this case you can use 
+a single deployment for all .NET applications running on the machine.
 1. A legacy application that can't be migrated to the [SDK-style project](https://learn.microsoft.com/en-us/nuget/resources/check-project-format#check-the-project-format).
 
 ## Using the NuGet packages
