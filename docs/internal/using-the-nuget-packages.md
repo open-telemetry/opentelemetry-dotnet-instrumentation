@@ -39,12 +39,12 @@ the `OpenTelemetry.AutoInstrumentation` package to your project:
 dotnet add [<PROJECT>] package OpenTelemetry.AutoInstrumentation --source <PATH_TO_AUTO_INSTRUMENTATION_PACKAGES> --prerelease
 ```
 
-To ship the correct native runtime components with your .NET application you
-must specify a [Runtime Identifier (RID)](https://learn.microsoft.com/en-us/dotnet/core/rid-catalog)
-to build the application via `dotnet build` or `dotnet publish`. This may
-require choosing between shipping a
-[_self-contained_ or _framework-dependent_](https://learn.microsoft.com/en-us/dotnet/core/deploying/)
-application. Either choice will work with the automatic instrumentation.
+To distribute the appropriate native runtime components with your .NET application,
+specify a [Runtime Identifier (RID)](https://learn.microsoft.com/en-us/dotnet/core/rid-catalog)
+to build the application using `dotnet build` or `dotnet publish`. This might
+require choosing between distributing a
+[_self-contained_ or a _framework-dependent_](https://learn.microsoft.com/en-us/dotnet/core/deploying/)
+application. Both types are compatible with automatic instrumentation.
 
 On the output folder of the build you will find a script that can be used to launch
 the application with the OpenTelemetry .NET automatic instrumentation.
