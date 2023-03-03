@@ -10,13 +10,12 @@ when running [`dotnet add package` command](https://learn.microsoft.com/en-us/do
 
 ## When to use the NuGet packages
 
-The NuGet packages are primarily intended for the following scenarios:
+Use the NuGet packages in the following scenarios:
 
-1. Simplify deployment in certain scenarios, e.g.: container running a single application.
+1. Simplify deployment. For example, a container running a single application.
 1. Support instrumentation of [`self-contained`](https://learn.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained)
   applications.
-1. Facilitate developer experimentation with the automatic instrumentation via
-  the familiar usage of NuGet packages.
+1. Facilitate developer experimentation with automatic instrumentation through NuGet packages.
 
 ## When NOT to use the NuGet packages
 
