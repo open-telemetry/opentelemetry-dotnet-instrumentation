@@ -17,7 +17,7 @@ Use the NuGet packages in the following scenarios:
   applications.
 1. Facilitate developer experimentation with automatic instrumentation through NuGet packages.
 
-## When NOT to use the NuGet packages
+## Limitations
 
 While the NuGet packages are a convenient way to deploy the automatic
 instrumentation. It isn't possible or desirable to use them in all cases.
