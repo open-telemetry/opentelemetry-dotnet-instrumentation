@@ -15,5 +15,6 @@
 // </copyright>
 
 var httpClient = new HttpClient();
+httpClient.Timeout = TimeSpan.FromSeconds(5);
 var response = await httpClient.GetAsync("http://example.com");
 Console.WriteLine(response.StatusCode);
