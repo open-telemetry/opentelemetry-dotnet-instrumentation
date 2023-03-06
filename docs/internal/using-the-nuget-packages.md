@@ -1,6 +1,7 @@
 # Using the OpenTelemetry.AutoInstrumentation NuGet packages
 
-⚠️ Currently, NuGet packages are only available as CI artifacts.
+> **Warning**
+> Currently, NuGet packages are only available as CI artifacts.
 When following these instructions, ensure that the packages are downloaded
 and that the target project is either using a `nuget.config` file configured to use
 the downloaded packages, for example the
