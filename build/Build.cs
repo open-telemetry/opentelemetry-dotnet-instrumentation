@@ -77,8 +77,7 @@ partial class Build : NukeBuild
         .DependsOn(BuildTracer)
         .DependsOn(CompileExamples)
         .DependsOn(NativeTests)
-        .DependsOn(ManagedTests)
-        .DependsOn(CompileBenchmarks);
+        .DependsOn(ManagedTests);
 
     Target BuildTracer => _ => _
         .Description("Builds the native and managed src, and publishes the tracer home directory")
