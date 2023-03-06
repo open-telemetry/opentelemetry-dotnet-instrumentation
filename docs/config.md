@@ -23,7 +23,7 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     - `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE`
     - `OTEL_DOTNET_AUTO_[TRACES|METRICS|LOGS]_[ENABLED|DISABLED]_INSTRUMENTATIONS`
     - `OTEL_DOTNET_AUTO_LOG_DIRECTORY`
-    - `OTEL_DOTNET_AUTO_DEBUG`
+    - `OTEL_LOG_LEVEL`
     - `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`
 
     Example with `OTEL_SERVICE_NAME` setting:
@@ -364,11 +364,11 @@ If the default log directories can't be created,
 the instrumentation uses the path of the current user's [temporary folder](https://docs.microsoft.com/en-us/dotnet/api/System.IO.Path.GetTempPath?view=net-6.0)
 instead.
 
-| Environment variable                                | Description                                             | Default value                            |
-|-----------------------------------------------------|---------------------------------------------------------|------------------------------------------|
-| `OTEL_DOTNET_AUTO_LOG_DIRECTORY`                    | Directory of the .NET Tracer logs.                      | _See the previous note on default paths_ |
-| `OTEL_DOTNET_AUTO_DEBUG`                            | Enables debugging mode for the tracer.                  | `false`                                  |
-| `OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED`  | Whether the traces console exporter is enabled or not.  | `false`                                  |
-| `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED` | Whether the metrics console exporter is enabled or not. | `false`                                  |
-| `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED`    | Whether the logs console exporter is enabled or not.    | `false`                                  |
-| `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE`   | Whether the log state should be formatted.              | `false`                                  |
+| Environment variable                                | Description                                                             | Default value                            |
+|-----------------------------------------------------|-------------------------------------------------------------------------|------------------------------------------|
+| `OTEL_DOTNET_AUTO_LOG_DIRECTORY`                    | Directory of the .NET Tracer logs.                                      | _See the previous note on default paths_ |
+| `OTEL_LOG_LEVEL`                                    | SDK log level. (supported values: `none`,`error`,`warn`,`info`,`debug`) | `info`                                   |
+| `OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED`  | Whether the traces console exporter is enabled or not.                  | `false`                                  |
+| `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED` | Whether the metrics console exporter is enabled or not.                 | `false`                                  |
+| `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED`    | Whether the logs console exporter is enabled or not.                    | `false`                                  |
+| `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE`   | Whether the log state should be formatted.                              | `false`                                  |
