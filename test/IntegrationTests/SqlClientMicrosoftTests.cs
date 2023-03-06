@@ -15,7 +15,6 @@
 // </copyright>
 
 using IntegrationTests.Helpers;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
@@ -31,10 +30,21 @@ public class SqlClientMicrosoftTests : TestHelper
         _sqlServerFixture = sqlServerFixture;
     }
 
-    [Fact]
+    public static IEnumerable<object[]> GetData()
+    {
+#if NETFRAMEWORK
+        // 3.1.2 is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243
+        return LibraryVersion.SqlClient.Where(x => x.First().ToString() != "3.1.2");
+#else
+        return LibraryVersion.SqlClient;
+#endif
+    }
+
+    [Theory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
-    public void SubmitTraces()
+    [MemberData(nameof(GetData))]
+    public void SubmitTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -42,7 +52,8 @@ public class SqlClientMicrosoftTests : TestHelper
 
         RunTestApplication(new()
         {
-            Arguments = $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}"
+            Arguments = $"{_sqlServerFixture.Password} {_sqlServerFixture.Port}",
+            PackageVersion = packageVersion
         });
 
         collector.AssertExpectations();

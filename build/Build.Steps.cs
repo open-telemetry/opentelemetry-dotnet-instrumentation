@@ -1,5 +1,4 @@
-using System.Text.Json;
-using System.Text.RegularExpressions;
+using System.Text.Json.Nodes;
 using Extensions;
 using Nuke.Common;
 using Nuke.Common.IO;
@@ -66,15 +65,37 @@ partial class Build
         .Unlisted()
         .Executes(() => ControlFlow.ExecuteWithRetry(() =>
         {
+            var projectsToRestore = Solution.GetCrossPlatformManagedProjects();
+
             if (IsWin)
             {
-                DotNetRestore(s => s
-                    .SetProjectFile(Solution)
-                    .SetVerbosity(DotNetVerbosity.Normal)
-                    .SetProperty("configuration", BuildConfiguration.ToString())
-                    .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                        o.SetPackageDirectory(NugetPackageDirectory)));
+                projectsToRestore = projectsToRestore.Concat(Solution.GetWindowsOnlyTestApplications());
+            }
 
+            foreach (var project in projectsToRestore)
+            {
+                DotNetRestoreSettings Restore(DotNetRestoreSettings s) =>
+                    s.SetProjectFile(project)
+                        .SetVerbosity(DotNetVerbosity.Normal)
+                        .SetProperty("configuration", BuildConfiguration.ToString())
+                        .SetPlatform(Platform)
+                        .When(!string.IsNullOrEmpty(NugetPackageDirectory), o => o.SetPackageDirectory(NugetPackageDirectory));
+
+                if (LibraryVersion.Versions.TryGetValue(project.Name, out var libraryVersions))
+                {
+                    DotNetRestore(s =>
+                         Restore(s)
+                        .CombineWith(libraryVersions, (p, libraryVersion) =>
+                                p.SetProperty("LibraryVersion", libraryVersion)));
+                }
+                else
+                {
+                    DotNetRestore(Restore);
+                }
+            }
+
+            if (IsWin)
+            {
                 // Projects using `packages.config` can't be restored via "dotnet restore", use a NuGet Task to restore these projects.
                 var legacyRestoreProjects = Solution.GetNativeProjects()
                     .Concat(new[] { Solution.GetProject(Projects.Tests.Applications.AspNet) });
@@ -90,22 +111,11 @@ partial class Build
                             o.SetPackagesDirectory(NugetPackageDirectory)));
                 }
             }
-            else
-            {
-                foreach (var project in Solution.GetCrossPlatformManagedProjects())
-                {
-                    DotNetRestore(s => s
-                        .SetProjectFile(project)
-                        .SetVerbosity(DotNetVerbosity.Normal)
-                        .SetProperty("configuration", BuildConfiguration.ToString())
-                        .When(!string.IsNullOrEmpty(NugetPackageDirectory), o =>
-                            o.SetPackageDirectory(NugetPackageDirectory)));
-                }
-            }
         }));
 
     Target CompileManagedSrc => _ => _
         .Description("Compiles the managed code in the src directory")
+        .After(GenerateNetFxTransientDependencies)
         .After(CreateRequiredDirectories)
         .After(Restore)
         .Executes(() =>
@@ -133,11 +143,23 @@ partial class Build
 
             foreach (var app in testApps)
             {
-                DotNetBuild(x => x
-                    .SetProjectFile(app)
-                    .SetConfiguration(BuildConfiguration)
-                    .SetPlatform(Platform)
-                    .SetNoRestore(true));
+                DotNetBuildSettings BuildTestApplication(DotNetBuildSettings x) =>
+                    x.SetProjectFile(app)
+                        .SetConfiguration(BuildConfiguration)
+                        .SetPlatform(Platform)
+                        .SetNoRestore(true);
+
+                if (LibraryVersion.Versions.TryGetValue(app.Name, out var libraryVersions))
+                {
+                    DotNetBuild(x =>
+                         BuildTestApplication(x)
+                        .CombineWith(libraryVersions, (p, libraryVersion) =>
+                            p.SetProperty("LibraryVersion", libraryVersion)));
+                }
+                else
+                {
+                    DotNetBuild(BuildTestApplication);
+                }
             }
 
             foreach (var project in Solution.GetManagedTestProjects())
@@ -148,6 +170,17 @@ partial class Build
                     .SetConfiguration(BuildConfiguration)
                     .SetNoRestore(true));
             }
+        });
+
+    Target CompileBenchmarks => _ => _
+        .Description("Compiles the Benchmarks project in the test directory")
+        .After(CompileManagedSrc)
+        .Executes(() =>
+        {
+            DotNetBuild(x => x
+                .SetProjectFile(Solution.GetBenchmarks())
+                .SetConfiguration(BuildConfiguration)
+                .EnableNoRestore());
         });
 
     Target CompileNativeSrc => _ => _
@@ -223,6 +256,14 @@ partial class Build
                 .EnableNoRestore()
                 .SetFramework(TargetFramework.NET6_0)
                 .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET6_0)));
+
+            // Remove non-library files
+            TracerHomeDirectory.GlobFiles("**/*.xml").ForEach(DeleteFile);
+            (TracerHomeDirectory / "net").GlobFiles("*.json").ForEach(DeleteFile);
+            if (IsWin)
+            {
+                (TracerHomeDirectory / "netfx").GlobFiles("*.json").ForEach(DeleteFile);
+            }
         });
 
     Target PublishNativeProfiler => _ => _
@@ -236,6 +277,16 @@ partial class Build
         .Executes(() =>
         {
             var generatorTool = Solution.GetProject(Projects.Tools.IntegrationsJsonGenerator);
+
+            DotNetRun(s => s
+                .SetProjectFile(generatorTool));
+        });
+
+    Target GenerateLibraryVersionFiles => _ => _
+        .After(PublishManagedProfiler)
+        .Executes(() =>
+        {
+            var generatorTool = Solution.GetProject(Projects.Tools.LibraryVersionsGenerator);
 
             DotNetRun(s => s
                 .SetProjectFile(generatorTool));
@@ -258,6 +309,17 @@ partial class Build
         .Executes(() =>
         {
             var source = RootDirectory / "instrument.sh";
+            var dest = TracerHomeDirectory;
+            CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
+        });
+
+    Target CopyLegalFiles => _ => _
+        .Unlisted()
+        .After(Clean)
+        .After(CreateRequiredDirectories)
+        .Executes(() =>
+        {
+            var source = RootDirectory / "LICENSE";
             var dest = TracerHomeDirectory;
             CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
         });
@@ -349,6 +411,7 @@ partial class Build
 
     Target RunManagedIntegrationTests => _ => _
         .Unlisted()
+        .After(InstallNetFxAssembliesGAC)
         .After(RunManagedUnitTests)
         .Executes(() =>
         {
@@ -374,149 +437,71 @@ partial class Build
             }
         });
 
-    Target CopyAdditionalDeps => _ =>
-    {
-        return _
-            .Unlisted()
-            .Description("Creates AutoInstrumentation.AdditionalDeps and shared store in tracer-home")
-            .After(CompileManagedSrc)
-            .Executes(() =>
-            {
-                if (AdditionalDepsDirectory.DirectoryExists())
-                {
-                    Directory.Delete(AdditionalDepsDirectory, true);
-                }
-
-                if (StoreDirectory.DirectoryExists())
-                {
-                    Directory.Delete(StoreDirectory, true);
-                }
-
-                DotNetPublish(s => s
-                    .SetProject(Solution.GetProject(Projects.AutoInstrumentationAdditionalDeps))
-                    .SetConfiguration(BuildConfiguration)
-                    .SetTargetPlatformAnyCPU()
-                    .SetProperty("TracerHomePath", TracerHomeDirectory)
-                    .EnableNoBuild()
-                    .EnableNoRestore()
-                    .CombineWith(TestFrameworks.ExceptNetFramework(), (p, framework) => p
-                        .SetFramework(framework)
-                        // Additional-deps probes the directory using SemVer format.
-                        // Example: For netcoreapp3.1 framework, additional-deps uses 3.1.0 or 3.1.1 and so on.
-                        // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
-                        .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
-
-                AdditionalDepsDirectory.GlobFiles("**/*deps.json")
-                    .ForEach(file =>
-                    {
-                        var depsJsonContent = File.ReadAllText(file);
-                        using var jsonDocument = JsonDocument.Parse(depsJsonContent);
-
-                        var folderRuntimeName = GetFolderRuntimeName(jsonDocument);
-
-                        var architectureStores = new List<string>
-                        {
-                            Path.Combine(StoreDirectory, "x64", folderRuntimeName),
-                            Path.Combine(StoreDirectory, "x86", folderRuntimeName),
-                        }.AsReadOnly();
-
-                        CopyNativeDependenciesToStore(file, jsonDocument, architectureStores);
-
-                        RemoveDuplicatedLibraries(depsJsonContent, architectureStores);
-
-                        RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsFile(depsJsonContent, file);
-                    });
-                RemoveFilesFromAdditionalDepsDirectory();
-
-
-                void CopyNativeDependenciesToStore(AbsolutePath file, JsonDocument jsonDocument, IReadOnlyList<string> architectureStores)
-                {
-                    var depsDirectory = file.Parent;
-
-                    foreach (var targetProperty in jsonDocument.RootElement.GetProperty("targets").EnumerateObject())
-                    {
-                        var target = targetProperty.Value;
-
-                        foreach (var packages in target.EnumerateObject())
-                        {
-                            if (!packages.Value.TryGetProperty("runtimeTargets", out var runtimeTargets))
-                            {
-                                continue;
-                            }
-
-                            foreach (var runtimeDependency in runtimeTargets.EnumerateObject())
-                            {
-                                var sourceFileName = Path.Combine(depsDirectory, runtimeDependency.Name);
-
-                                foreach (var architectureStore in architectureStores)
-                                {
-                                    var targetFileName = Path.Combine(architectureStore, packages.Name.ToLowerInvariant(), runtimeDependency.Name);
-                                    var targetDirectory = Path.GetDirectoryName(targetFileName);
-                                    Directory.CreateDirectory(targetDirectory);
-                                    File.Copy(sourceFileName, targetFileName);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                void RemoveDuplicatedLibraries(string depsJsonContent, IReadOnlyList<string> architectureStores)
-                {
-                    var duplicatedLibraries = new List<(string Name, string Version)> { };
-
-                    foreach (var duplicatedLibrary in duplicatedLibraries)
-                    {
-                        if (depsJsonContent.Contains(duplicatedLibrary.Name.ToLower() + "/" + duplicatedLibrary.Version))
-                        {
-                            throw new NotSupportedException($"Cannot remove {duplicatedLibrary.Name.ToLower()}/{duplicatedLibrary.Version} folder. It is referenced in json file");
-                        }
-
-                        foreach (var architectureStore in architectureStores)
-                        {
-                            var directoryToBeRemoved = Path.Combine(architectureStore, duplicatedLibrary.Name.ToLower(), duplicatedLibrary.Version);
-
-                            if (!Directory.Exists(directoryToBeRemoved))
-                            {
-                                throw new NotSupportedException($"Directory {directoryToBeRemoved} does not exists. Verify it.");
-                            }
-
-                            Directory.Delete(directoryToBeRemoved, true);
-                        }
-                    }
-                }
-
-                void RemoveOpenTelemetryAutoInstrumentationAdditionalDepsFromDepsFile(string depsJsonContent, AbsolutePath file)
-                {
-                    // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from target section.
-                    depsJsonContent = Regex.Replace(depsJsonContent,
-                        "\"OpenTelemetry(.+)AutoInstrumentation.AdditionalDeps.dll(.+?)}," + Environment.NewLine + "(.+?)\"", "\"",
-                        RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                    // Remove OpenTelemetry.Instrumentation.AutoInstrumentationAdditionalDeps entry from library section and write to file.
-                    depsJsonContent = Regex.Replace(depsJsonContent, "\"OpenTelemetry(.+?)}," + Environment.NewLine + "(.+?)\"", "\"",
-                        RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                    File.WriteAllText(file, depsJsonContent);
-                }
-
-                void RemoveFilesFromAdditionalDepsDirectory()
-                {
-                    AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml", "**/*.dylib", "**/*.so").ForEach(DeleteFile);
-                    AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(DeleteDirectory);
-                }
-            });
-
-        string GetFolderRuntimeName(JsonDocument jsonDocument)
+    Target CopyAdditionalDeps => _ => _
+        .Unlisted()
+        .Description("Creates AutoInstrumentation.AdditionalDeps and shared store in tracer-home")
+        .After(CompileManagedSrc)
+        .Executes(() =>
         {
-            var runtimeName = jsonDocument.RootElement.GetProperty("runtimeTarget").GetProperty("name").GetString();
-            var folderRuntimeName = runtimeName switch
+            if (AdditionalDepsDirectory.DirectoryExists())
             {
-                ".NETCoreApp,Version=v6.0" => "net6.0",
-                ".NETCoreApp,Version=v7.0" => "net7.0",
-                _ => throw new ArgumentOutOfRangeException(nameof(runtimeName), runtimeName,
-                    "This value is not supported. You have probably introduced new .NET version to AutoInstrumentation")
-            };
-            return folderRuntimeName;
-        }
-    };
+                Directory.Delete(AdditionalDepsDirectory, true);
+            }
+
+            if (StoreDirectory.DirectoryExists())
+            {
+                Directory.Delete(StoreDirectory, true);
+            }
+
+            DotNetPublish(s => s
+                .SetProject(Solution.GetProject(Projects.AutoInstrumentationAdditionalDeps))
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatformAnyCPU()
+                .SetProperty("TracerHomePath", TracerHomeDirectory)
+                .EnableNoBuild()
+                .EnableNoRestore()
+                .CombineWith(TestFrameworks.ExceptNetFramework(), (p, framework) => p
+                .SetFramework(framework)
+                // Additional-deps probes the directory using SemVer format.
+                // Example: For netcoreapp3.1 framework, additional-deps uses 3.1.0 or 3.1.1 and so on.
+                // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
+                .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
+
+            AdditionalDepsDirectory.GlobFiles("**/*deps.json")
+                .ForEach(file =>
+                {
+                    var rawJson = File.ReadAllText(file);
+                    var depsJson = JsonNode.Parse(rawJson).AsObject();
+
+                    var folderRuntimeName = depsJson.GetFolderRuntimeName();
+                    var architectureStores = new List<string>
+                    {
+                        Path.Combine(StoreDirectory, "x64", folderRuntimeName),
+                        Path.Combine(StoreDirectory, "x86", folderRuntimeName),
+                    }.AsReadOnly();
+
+                    depsJson.CopyNativeDependenciesToStore(file, architectureStores);
+                    depsJson.RemoveOpenTelemetryLibraries();
+
+                    if (folderRuntimeName == TargetFramework.NET6_0)
+                    {
+                        // To allow roll forward for applications, like Roslyn, that target one tfm
+                        // but have a later runtime move the libraries under the original tfm folder
+                        // to the latest one.
+                        depsJson.RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET7_0, architectureStores);
+                    }
+
+                    // Write the updated deps.json file.
+                    File.WriteAllText(file, depsJson.ToJsonString(new()
+                    {
+                        WriteIndented = true
+                    }));
+                });
+
+            // Cleanup Additional Deps Directory
+            AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml", "**/*.dylib", "**/*.so").ForEach(DeleteFile);
+            AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(DeleteDirectory);
+        });
 
     Target InstallDocumentationTools => _ => _
         .Description("Installs markdownlint-cli and cspell locally. npm is required")

@@ -1,4 +1,7 @@
-﻿#include "cor_profiler_base.h"
+// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
+
+#include "cor_profiler_base.h"
 #include "logger.h"
 
 namespace trace
@@ -135,19 +138,20 @@ HRESULT STDMETHODCALLTYPE CorProfilerBase::JITCompilationStarted(FunctionID func
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::JITCompilationFinished(FunctionID functionId, HRESULT hrStatus,
-                                                                  BOOL fIsSafeToBlock)
+HRESULT STDMETHODCALLTYPE CorProfilerBase::JITCompilationFinished(FunctionID functionId,
+                                                                  HRESULT    hrStatus,
+                                                                  BOOL       fIsSafeToBlock)
 {
     return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CorProfilerBase::JITCachedFunctionSearchStarted(FunctionID functionId,
-                                                                          BOOL* pbUseCachedFunction)
+                                                                          BOOL*      pbUseCachedFunction)
 {
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::JITCachedFunctionSearchFinished(FunctionID functionId,
+HRESULT STDMETHODCALLTYPE CorProfilerBase::JITCachedFunctionSearchFinished(FunctionID        functionId,
                                                                            COR_PRF_JIT_CACHE result)
 {
     return S_OK;
@@ -218,13 +222,13 @@ HRESULT STDMETHODCALLTYPE CorProfilerBase::RemotingServerSendingReply(GUID* pCoo
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::UnmanagedToManagedTransition(FunctionID functionId,
+HRESULT STDMETHODCALLTYPE CorProfilerBase::UnmanagedToManagedTransition(FunctionID                functionId,
                                                                         COR_PRF_TRANSITION_REASON reason)
 {
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::ManagedToUnmanagedTransition(FunctionID functionId,
+HRESULT STDMETHODCALLTYPE CorProfilerBase::ManagedToUnmanagedTransition(FunctionID                functionId,
                                                                         COR_PRF_TRANSITION_REASON reason)
 {
     return S_OK;
@@ -265,9 +269,10 @@ HRESULT STDMETHODCALLTYPE CorProfilerBase::RuntimeThreadResumed(ThreadID threadI
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::MovedReferences(ULONG cMovedObjectIDRanges, ObjectID oldObjectIDRangeStart[],
+HRESULT STDMETHODCALLTYPE CorProfilerBase::MovedReferences(ULONG    cMovedObjectIDRanges,
+                                                           ObjectID oldObjectIDRangeStart[],
                                                            ObjectID newObjectIDRangeStart[],
-                                                           ULONG cObjectIDRangeLength[])
+                                                           ULONG    cObjectIDRangeLength[])
 {
     return S_OK;
 }
@@ -277,13 +282,16 @@ HRESULT STDMETHODCALLTYPE CorProfilerBase::ObjectAllocated(ObjectID objectId, Cl
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::ObjectsAllocatedByClass(ULONG cClassCount, ClassID classIds[],
-                                                                   ULONG cObjects[])
+HRESULT STDMETHODCALLTYPE CorProfilerBase::ObjectsAllocatedByClass(ULONG   cClassCount,
+                                                                   ClassID classIds[],
+                                                                   ULONG   cObjects[])
 {
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::ObjectReferences(ObjectID objectId, ClassID classId, ULONG cObjectRefs,
+HRESULT STDMETHODCALLTYPE CorProfilerBase::ObjectReferences(ObjectID objectId,
+                                                            ClassID  classId,
+                                                            ULONG    cObjectRefs,
                                                             ObjectID objectRefIds[])
 {
     return S_OK;
@@ -364,14 +372,17 @@ HRESULT STDMETHODCALLTYPE CorProfilerBase::ExceptionCatcherLeave()
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::COMClassicVTableCreated(ClassID wrappedClassId, REFGUID implementedIID,
-                                                                   void* pVTable, ULONG cSlots)
+HRESULT STDMETHODCALLTYPE CorProfilerBase::COMClassicVTableCreated(ClassID wrappedClassId,
+                                                                   REFGUID implementedIID,
+                                                                   void*   pVTable,
+                                                                   ULONG   cSlots)
 {
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::COMClassicVTableDestroyed(ClassID wrappedClassId, REFGUID implementedIID,
-                                                                     void* pVTable)
+HRESULT STDMETHODCALLTYPE CorProfilerBase::COMClassicVTableDestroyed(ClassID wrappedClassId,
+                                                                     REFGUID implementedIID,
+                                                                     void*   pVTable)
 {
     return S_OK;
 }
@@ -391,15 +402,16 @@ HRESULT STDMETHODCALLTYPE CorProfilerBase::ThreadNameChanged(ThreadID threadId, 
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::GarbageCollectionStarted(int cGenerations, BOOL generationCollected[],
+HRESULT STDMETHODCALLTYPE CorProfilerBase::GarbageCollectionStarted(int               cGenerations,
+                                                                    BOOL              generationCollected[],
                                                                     COR_PRF_GC_REASON reason)
 {
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::SurvivingReferences(ULONG cSurvivingObjectIDRanges,
+HRESULT STDMETHODCALLTYPE CorProfilerBase::SurvivingReferences(ULONG    cSurvivingObjectIDRanges,
                                                                ObjectID objectIDRangeStart[],
-                                                               ULONG cObjectIDRangeLength[])
+                                                               ULONG    cObjectIDRangeLength[])
 {
     return S_OK;
 }
@@ -414,9 +426,11 @@ HRESULT STDMETHODCALLTYPE CorProfilerBase::FinalizeableObjectQueued(DWORD finali
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::RootReferences2(ULONG cRootRefs, ObjectID rootRefIds[],
-                                                           COR_PRF_GC_ROOT_KIND rootKinds[],
-                                                           COR_PRF_GC_ROOT_FLAGS rootFlags[], UINT_PTR rootIds[])
+HRESULT STDMETHODCALLTYPE CorProfilerBase::RootReferences2(ULONG                 cRootRefs,
+                                                           ObjectID              rootRefIds[],
+                                                           COR_PRF_GC_ROOT_KIND  rootKinds[],
+                                                           COR_PRF_GC_ROOT_FLAGS rootFlags[],
+                                                           UINT_PTR              rootIds[])
 {
     return S_OK;
 }
@@ -431,8 +445,9 @@ HRESULT STDMETHODCALLTYPE CorProfilerBase::HandleDestroyed(GCHandleID handleId)
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::InitializeForAttach(IUnknown* pCorProfilerInfoUnk, void* pvClientData,
-                                                               UINT cbClientData)
+HRESULT STDMETHODCALLTYPE CorProfilerBase::InitializeForAttach(IUnknown* pCorProfilerInfoUnk,
+                                                               void*     pvClientData,
+                                                               UINT      cbClientData)
 {
     return S_OK;
 }
@@ -447,53 +462,60 @@ HRESULT STDMETHODCALLTYPE CorProfilerBase::ProfilerDetachSucceeded()
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::ReJITCompilationStarted(FunctionID functionId, ReJITID rejitId,
-                                                                   BOOL fIsSafeToBlock)
+HRESULT STDMETHODCALLTYPE CorProfilerBase::ReJITCompilationStarted(FunctionID functionId,
+                                                                   ReJITID    rejitId,
+                                                                   BOOL       fIsSafeToBlock)
 {
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::GetReJITParameters(ModuleID moduleId, mdMethodDef methodId,
+HRESULT STDMETHODCALLTYPE CorProfilerBase::GetReJITParameters(ModuleID                     moduleId,
+                                                              mdMethodDef                  methodId,
                                                               ICorProfilerFunctionControl* pFunctionControl)
 {
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::ReJITCompilationFinished(FunctionID functionId, ReJITID rejitId,
-                                                                    HRESULT hrStatus, BOOL fIsSafeToBlock)
+HRESULT STDMETHODCALLTYPE CorProfilerBase::ReJITCompilationFinished(FunctionID functionId,
+                                                                    ReJITID    rejitId,
+                                                                    HRESULT    hrStatus,
+                                                                    BOOL       fIsSafeToBlock)
 {
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::ReJITError(ModuleID moduleId, mdMethodDef methodId, FunctionID functionId,
-                                                      HRESULT hrStatus)
+HRESULT STDMETHODCALLTYPE CorProfilerBase::ReJITError(ModuleID    moduleId,
+                                                      mdMethodDef methodId,
+                                                      FunctionID  functionId,
+                                                      HRESULT     hrStatus)
 {
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::MovedReferences2(ULONG cMovedObjectIDRanges,
+HRESULT STDMETHODCALLTYPE CorProfilerBase::MovedReferences2(ULONG    cMovedObjectIDRanges,
                                                             ObjectID oldObjectIDRangeStart[],
                                                             ObjectID newObjectIDRangeStart[],
-                                                            SIZE_T cObjectIDRangeLength[])
+                                                            SIZE_T   cObjectIDRangeLength[])
 {
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::SurvivingReferences2(ULONG cSurvivingObjectIDRanges,
+HRESULT STDMETHODCALLTYPE CorProfilerBase::SurvivingReferences2(ULONG    cSurvivingObjectIDRanges,
                                                                 ObjectID objectIDRangeStart[],
-                                                                SIZE_T cObjectIDRangeLength[])
+                                                                SIZE_T   cObjectIDRangeLength[])
 {
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::ConditionalWeakTableElementReferences(ULONG cRootRefs, ObjectID keyRefIds[],
-                                                                                 ObjectID valueRefIds[],
+HRESULT STDMETHODCALLTYPE CorProfilerBase::ConditionalWeakTableElementReferences(ULONG      cRootRefs,
+                                                                                 ObjectID   keyRefIds[],
+                                                                                 ObjectID   valueRefIds[],
                                                                                  GCHandleID rootIds[])
 {
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::GetAssemblyReferences(const WCHAR* wszAssemblyPath,
+HRESULT STDMETHODCALLTYPE CorProfilerBase::GetAssemblyReferences(const WCHAR*                           wszAssemblyPath,
                                                                  ICorProfilerAssemblyReferenceProvider* pAsmRefProvider)
 {
     return S_OK;
@@ -505,14 +527,16 @@ HRESULT STDMETHODCALLTYPE CorProfilerBase::ModuleInMemorySymbolsUpdated(ModuleID
 }
 
 HRESULT STDMETHODCALLTYPE CorProfilerBase::DynamicMethodJITCompilationStarted(FunctionID functionId,
-                                                                              BOOL fIsSafeToBlock, LPCBYTE ilHeader,
-                                                                              ULONG cbILHeader)
+                                                                              BOOL       fIsSafeToBlock,
+                                                                              LPCBYTE    ilHeader,
+                                                                              ULONG      cbILHeader)
 {
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::DynamicMethodJITCompilationFinished(FunctionID functionId, HRESULT hrStatus,
-                                                                               BOOL fIsSafeToBlock)
+HRESULT STDMETHODCALLTYPE CorProfilerBase::DynamicMethodJITCompilationFinished(FunctionID functionId,
+                                                                               HRESULT    hrStatus,
+                                                                               BOOL       fIsSafeToBlock)
 {
     return S_OK;
 }
@@ -522,12 +546,18 @@ HRESULT STDMETHODCALLTYPE CorProfilerBase::DynamicMethodUnloaded(FunctionID func
     return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE CorProfilerBase::EventPipeEventDelivered(EVENTPIPE_PROVIDER provider, DWORD eventId,
-                                                                   DWORD eventVersion, ULONG cbMetadataBlob,
-                                                                   LPCBYTE metadataBlob, ULONG cbEventData,
-                                                                   LPCBYTE eventData, LPCGUID pActivityId,
-                                                                   LPCGUID pRelatedActivityId, ThreadID eventThread,
-                                                                   ULONG numStackFrames, UINT_PTR stackFrames[])
+HRESULT STDMETHODCALLTYPE CorProfilerBase::EventPipeEventDelivered(EVENTPIPE_PROVIDER provider,
+                                                                   DWORD              eventId,
+                                                                   DWORD              eventVersion,
+                                                                   ULONG              cbMetadataBlob,
+                                                                   LPCBYTE            metadataBlob,
+                                                                   ULONG              cbEventData,
+                                                                   LPCBYTE            eventData,
+                                                                   LPCGUID            pActivityId,
+                                                                   LPCGUID            pRelatedActivityId,
+                                                                   ThreadID           eventThread,
+                                                                   ULONG              numStackFrames,
+                                                                   UINT_PTR           stackFrames[])
 {
     return S_OK;
 }

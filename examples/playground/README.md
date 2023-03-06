@@ -16,7 +16,7 @@ following the [developing instructions](../../docs/developing.md).
 ## Playground application
 
 You can use the `run.sh` helper script to build
-and run the playground application with auto instrumenation.
+and run the playground application with auto instrumentation.
 
 ```sh
 ./examples/playground/run.sh

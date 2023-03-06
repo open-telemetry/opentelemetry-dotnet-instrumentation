@@ -29,11 +29,15 @@ public class GraphQLTests : TestHelper
     {
     }
 
+    public static IEnumerable<object[]> GetData()
+        => from packageVersionArray in LibraryVersion.GraphQL
+           from setDocument in new[] { true, false }
+           select new[] { packageVersionArray[0], setDocument };
+
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
     [Trait("Category", "EndToEnd")]
-    public async Task SubmitsTraces(bool setDocument)
+    [MemberData(nameof(GetData))]
+    public async Task SubmitsTraces(string packageVersion, bool setDocument)
     {
         var requests = new List<RequestInfo>();
         using var collector = new MockSpansCollector(Output);
@@ -60,14 +64,15 @@ public class GraphQLTests : TestHelper
         Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, verifyFailure: VerifyNotImplementedException);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS", "GraphQL");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED", "false");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_GRAPHQL_INSTRUMENTATION_ENABLED", "true");
         SetEnvironmentVariable("OTEL_TRACES_SAMPLER", "always_on");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED", "false");
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
         SetEnvironmentVariable("ASPNETCORE_URLS", $"http://127.0.0.1:{aspNetCorePort}/");
         EnableBytecodeInstrumentation();
-        using var process = StartTestApplication();
+        using var process = StartTestApplication(new TestSettings { PackageVersion = packageVersion });
         using var helper = new ProcessHelper(process);
         try
         {

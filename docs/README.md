@@ -9,8 +9,8 @@ to .NET applications without having to modify their source code.
 
 ⚠️ The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
-([0.5.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
-can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.5.0/docs/README.md).
+([0.6.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
+can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.6.0/docs/README.md).
 
 ---
 
@@ -18,7 +18,7 @@ OpenTelemetry .NET Automatic Instrumentation is built on top of
 [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-[`1.4.0-rc.2`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-rc.2)
+[`1.4.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0)
 - `System.Diagnostics.DiagnosticSource`: [`7.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/7.0.0)
   referencing `System.Runtime.CompilerServices.Unsafe`: [`6.0.0`](https://www.nuget.org/packages/System.Runtime.CompilerServices.Unsafe/6.0.0)
 
@@ -51,21 +51,19 @@ can be found in the [versioning documentation](versioning.md).
 
 OpenTelemetry .NET Automatic Instrumentation attempts to work with all officially
 supported operating systems and versions of
-[.NET](https://dotnet.microsoft.com/download/dotnet),
-and [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework).
+[.NET](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core).
 
-> Versions lower than `.NET Framework 4.6.2` are not supported.
->  
-> `.NET Core 3.1` is not supported.
-> [0.4.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.4.0-beta.1)
-> is the latest version supporting it.
+The minimal supported version of
+[.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework)
+is `4.6.2`.
 
 CI tests run against the following operating systems:
 
+- [Alpine](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/alpine.dockerfile)
+- [CentOS 7](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/centos-build.dockerfile)
 - [macOS Big Sur 11](https://github.com/actions/runner-images/blob/main/images/macos/macos-11-Readme.md)
 - [Microsoft Windows Server 2022](https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md)
 - [Ubuntu 20.04 LTS](https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2004-Readme.md)
-- [Alpine](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/alpine.dockerfile)
 
 ### Instrumented libraries and frameworks
 
@@ -73,11 +71,32 @@ See [config.md#instrumented-libraries-and-frameworks](config.md#instrumented-lib
 
 ## Get started
 
+### Considerations on scope
+
+Currently, instrumenting [`self-contained`](https://learn.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained)
+applications is not supported. Note that a `self-contained` applications is
+automatically generated in .NET 7.0 whenever the `dotnet publish` or `dotnet build`
+command is used with a Runtime Identifier (RID) parameter, for example when `-r`
+or `--runtime` is used when running the command.
+
+Until version `v0.6.0-beta.1` (inclusive) there were issues instrumenting
+the `dotnet` CLI. To build and launch an instrumented application, take the
+following into account if you are using one of the affected versions:
+
+- Don't set the automatic instrumentation environment variables in the same session
+used to run the `dotnet` tool.
+- Don't launch the application to be instrumented using `dotnet run` or
+`dotnet <dll>`. Build the application in an isolated shell, without the
+automatic instrumentation environment variables set, and use a separate
+session with the automatic instrumentation variables to directly launch
+the executable.
+
 ### Install
 
 Download and extract the appropriate binaries from
 [the latest release](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest).
 
+> **Note**
 > The path where you put the binaries is referenced as `$INSTALL_DIR`
 
 ### Instrument a .NET application
@@ -115,10 +134,17 @@ and instrument your .NET application using the provided Shell scripts.
 Example usage:
 
 ```sh
-curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.5.1-beta.3/otel-dotnet-auto-install.sh -O
+# Download the bash script
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.6.0/otel-dotnet-auto-install.sh -O
+
+# Install core files
 sh ./otel-dotnet-auto-install.sh
+
+# Setup the instrumentation for the current shell session
 . $HOME/.otel-dotnet-auto/instrument.sh
-OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 dotnet run
+
+# Run your application with instrumentation
+OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 ./MyNetApp
 ```
 
 [otel-dotnet-auto-install.sh](../otel-dotnet-auto-install.sh) script
@@ -129,7 +155,7 @@ uses environment variables as parameters:
 | `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                      | No       | `$HOME/.otel-dotnet-auto` |
 | `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | No       | *Calculated*              |
 | `TMPDIR`                | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`            |
-| `VERSION`               | Version to download                                              | No       | `v0.5.1-beta.3`           |
+| `VERSION`               | Version to download                                              | No       | `v0.6.0`                  |
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
@@ -149,27 +175,28 @@ and instrument your .NET application using the provided PowerShell module.
 Example usage (run as administrator):
 
 ```powershell
-# Download and import the module
-$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.5.1-beta.3/OpenTelemetry.DotNet.Auto.psm1"
+# Download the module
+$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.6.0/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path
+
+# Import the module to use its functions
 Import-Module $download_path
 
-# Install core files
+# Install core files (online vs offline method)
 Install-OpenTelemetryCore
+Install-OpenTelemetryCore -LocalPath "C:\Path\To\OpenTelemetry.zip" 
 
-# Setup IIS instrumentation
-Register-OpenTelemetryForIIS
-
-# Setup your Windows Service instrumentation
-Register-OpenTelemetryForWindowsService -WindowsServiceName "MyServiceName" -OTelServiceName "MyServiceDisplayName"
-
-# Setup environment to start instrumentation from the current PowerShell session
+# Set up the instrumentation for the current PowerShell session
 Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
 
-# Get current installation location
-Get-OpenTelemetryInstallDirectory
+# Run your application with instrumentation
+.\MyNetApp.exe
+```
 
+You can get usage information by calling:
+
+```powershell
 # List all available commands
 Get-Command -Module OpenTelemetry.DotNet.Auto
 
@@ -177,7 +204,8 @@ Get-Command -Module OpenTelemetry.DotNet.Auto
 Get-Help Install-OpenTelemetryCore -Detailed
 ```
 
-⚠️ Register for IIS and Windows Service performs a service restart.
+⚠️ The PowerShell module works only on PowerShell 5.1
+which is the one installed by default on Windows.
 
 ## Instrument a container
 
@@ -222,6 +250,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 - [Chris Ventura](https://github.com/nrcventura), New Relic
 - [Paulo Janotti](https://github.com/pjanotti), Splunk
+- [Piotr Kie&#x142;kowicz](https://github.com/Kielek), Splunk
 - [Rajkumar Rangaraj](https://github.com/rajkumar-rangaraj), Microsoft
 - [Robert Paj&#x105;k](https://github.com/pellared), Splunk
 - [Zach Montoya](https://github.com/zacharycmontoya), Datadog
@@ -229,7 +258,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 [Approvers](https://github.com/open-telemetry/community/blob/main/community-membership.md#approver)
 ([@open-telemetry/dotnet-instrumentation-approvers](https://github.com/orgs/open-telemetry/teams/dotnet-instrumentation-approvers)):
 
-- [Piotr Kie&#x142;kowicz](https://github.com/Kielek), Splunk
 - [Rasmus Kuusmann](https://github.com/RassK), Splunk
 
 [Emeritus

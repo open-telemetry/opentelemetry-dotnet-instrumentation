@@ -1,5 +1,47 @@
 # Configuration
 
+## Configuration methods
+
+You can apply configuration settings in the following ways,
+with environment variables taking precedence over `App.config` or `Web.config` file:
+
+1. Environment variables
+
+    Environment variables are the main way to configure the settings.
+
+2. `App.config` or `Web.config` file
+
+    For an application running on .NET Framework, you can use a web configuration
+    file  (`web.config`) or an application configuration file (`app.config`) to
+    configure the `OTEL_*` settings.
+
+    ⚠️ Only settings starting with `OTEL_` can be set using `App.config` or `Web.config`.
+    However, the following settings are not supported:
+
+    - `OTEL_DOTNET_AUTO_HOME`
+    - `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`
+    - `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE`
+    - `OTEL_DOTNET_AUTO_[TRACES|METRICS|LOGS]_[ENABLED|DISABLED]_INSTRUMENTATIONS`
+    - `OTEL_DOTNET_AUTO_LOG_DIRECTORY`
+    - `OTEL_DOTNET_AUTO_DEBUG`
+    - `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`
+
+    Example with `OTEL_SERVICE_NAME` setting:
+
+    ```xml
+    <configuration>
+    <appSettings>
+        <add key="OTEL_SERVICE_NAME" value="my-service-name" />
+    </appSettings>
+    </configuration>
+    ```
+
+By default we recommend using environment variables for configuration.
+However, if given setting supports it, then:
+
+- use `Web.config` for configuring an ASP.NET application (.NET Framework),
+- use `App.config` for configuring a Windows Service (.NET Framework).
+
 ## Global settings
 
 | Environment variable                 | Description                                                                                                                                                                                                                  | Default value |
@@ -20,50 +62,70 @@ for more details.
 
 ## Instrumentations
 
-| Environment variable                                 | Description                                                                                                                                                                                                                                                     | Default value                  |
-|------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|
-| `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE`                 | List of bytecode instrumentations JSON configuration filepaths, delimited by the platform-specific path separator (`;` on Windows, `:` on Linux and macOS). For example: `%ProfilerDirectory%/integrations.json`. It is required for bytecode instrumentations. |                                |
-| `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS`   | Comma-separated list of traces source instrumentations you want to enable. Set to `none` to disable all trace instrumentations.                                                                                                                                 | all available instrumentations |
-| `OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS`  | Comma-separated list of traces source and bytecode instrumentations you want to disable.                                                                                                                                                                        |                                |
-| `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS`  | Comma-separated list of metrics source instrumentations you want to enable. Set to `none` to disable all metric instrumentations.                                                                                                                               | all available instrumentations |
-| `OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS` | Comma-separated list of metrics source instrumentations you want to disable.                                                                                                                                                                                    |                                |
-| `OTEL_DOTNET_AUTO_LOGS_ENABLED_INSTRUMENTATIONS`     | Comma-separated list of logs source instrumentations you want to enable. Set to `none` to disable all metric instrumentations.                                                                                                                                  | all available instrumentations |
-| `OTEL_DOTNET_AUTO_LOGS_DISABLED_INSTRUMENTATIONS`    | Comma-separated list of logs source instrumentations you want to disable.                                                                                                                                                                                       |                                |
+All instrumentations are enabled by default for all signal types
+(traces, metrics, and logs).
+
+You can disable all instrumentations for a specific signal type by setting
+the `OTEL_DOTNET_AUTO_{SIGNAL}_INSTRUMENTATION_ENABLED`
+environment variable to `false`.
+
+For a more granular approach, you can disable specific instrumentations
+for a given signal type by setting
+the `OTEL_DOTNET_AUTO_{SIGNAL}_{0}_INSTRUMENTATION_ENABLED`
+environment variable to `false`, where `{SIGNAL}` is the type of signal,
+for example `TRACES`, and `{0}` is the case-sensitive name of the instrumentation.
+
+| Environment variable                                   | Description                                                                                                                                                                                                                                                     | Default value                                                                          |
+|--------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------|
+| `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE`                   | List of bytecode instrumentations JSON configuration filepaths, delimited by the platform-specific path separator (`;` on Windows, `:` on Linux and macOS). For example: `%ProfilerDirectory%/integrations.json`. It is required for bytecode instrumentations. |                                                                                        |
+| `OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED`             | Disables all instrumentations.                                                                                                                                                                                                                                  | `true`                                                                                 |
+| `OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED`      | Disables all trace instrumentations. Overrides `OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED`.                                                                                                                                                                      | Inherited from the current value of `OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED`         |
+| `OTEL_DOTNET_AUTO_TRACES_{0}_INSTRUMENTATION_ENABLED`  | Configuration pattern for enabling or disabling a specific trace instrumentation, where `{0}` is the uppercase id of the instrumentation you want to enable. Overrides `OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED`.                                       | Inherited from the current value of `OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED`  |
+| `OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED`     | Disables all metric instrumentations. Overrides `OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED`.                                                                                                                                                                     | Inherited from the current value of `OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED`         |
+| `OTEL_DOTNET_AUTO_METRICS_{0}_INSTRUMENTATION_ENABLED` | Configuration pattern for enabling or disabling a specific metric instrumentation, where `{0}` is the uppercase id of the instrumentation you want to enable. Overrides `OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED`.                                     | Inherited from the current value of `OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED` |
+| `OTEL_DOTNET_AUTO_LOGS_INSTRUMENTATION_ENABLED`        | Disables all log instrumentations. Overrides `OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED`.                                                                                                                                                                        | Inherited from the current value of `OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED`         |
+| `OTEL_DOTNET_AUTO_LOGS_{0}_INSTRUMENTATION_ENABLED`    | Configuration pattern for enabling or disabling a specific log instrumentation, where `{0}` is the uppercase id of the instrumentation you want to enable. Overrides `OTEL_DOTNET_AUTO_LOGS_INSTRUMENTATION_ENABLED`.                                           | Inherited from the current value of `OTEL_DOTNET_AUTO_LOGS_INSTRUMENTATION_ENABLED`    |
 
 ### Traces instrumentations
 
-| ID                   | Instrumented library                                                                                                                                                                            | Supported versions | Instrumentation type    |
-|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------|-------------------------|
-| `AspNet`             | ASP.NET Framework                                                                                                                                                                               | *                  | source                  |
-| `AspNet`             | ASP.NET Core                                                                                                                                                                                    | *                  | source                  |
-| `Elasticsearch`      | [Elastic.Clients.Elasticsearch](https://www.nuget.org/packages/Elastic.Clients.Elasticsearch)                                                                                                   | ≥8.0.0             | source                  |
-| `GraphQL`            | [GraphQL](https://www.nuget.org/packages/GraphQL)                                                                                                                                               | ≥2.3.0 & < 3.0.0   | bytecode                |
-| `GrpcNetClient`      | [Grpc.Net.Client](https://www.nuget.org/packages/Grpc.Net.Client)                                                                                                                               | ≥2.43.0 & < 3.0.0  | source                  |
-| `HttpClient`         | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | *                  | source                  |
-| `MassTransit`        | [MassTransit](https://www.nuget.org/packages/MassTransit) **Not supported on .NET Framework**                                                                                                   | ≥8.0.0             | source                  |
-| `MongoDB`            | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core) **Not supported on .NET Framework**                                                                                   | ≥2.13.3 & < 3.0.0  | source & bytecode       |
-| `MySqlData`          | [MySql.Data](https://www.nuget.org/packages/MySql.Data) **Not supported on .NET Framework**                                                                                                     | ≥6.10.7            | source & bytecode \[1\] |
-| `Npgsql`             | [Npgsql](https://www.nuget.org/packages/Npgsql)                                                                                                                                                 | ≥6.0.0             | source                  |
-| `NServiceBus`        | [NServiceBus](https://www.nuget.org/packages/NServiceBus)                                                                                                                                       | ≥8.0.0             | source & bytecode       |
-| `SqlClient`          | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient)                           | *                  | source                  |
-| `StackExchangeRedis` | [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis) **Not supported on .NET Framework**                                                                                   | ≥2.0.405 < 3.0.0   | source & bytecode       |
-| `Wcf`                | [System.ServiceModel](https://www.nuget.org/packages/System.ServiceModel) **No support for server side on .NET**. For configuration see [WCF Instrumentation Configuration](wcf-config.md)      | * \[2\]            | source                  |
+| ID                    | Instrumented library                                                                                                                                                                            | Supported versions | Instrumentation type    |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------|-------------------------|
+| `ASPNET`              | ASP.NET (.NET Framework) MVC / WebApi \[1\] **Not supported on .NET**                                                                                                                           | *                  | source                  |
+| `ASPNETCORE`          | ASP.NET Core **Not supported on .NET Framework**                                                                                                                                                | *                  | source                  |
+| `ELASTICSEARCH`       | [Elastic.Clients.Elasticsearch](https://www.nuget.org/packages/Elastic.Clients.Elasticsearch)                                                                                                   | ≥8.0.0             | source                  |
+| `ENTITYFRAMEWORKCORE` | [Microsoft.EntityFrameworkCore](https://www.nuget.org/packages/) **Not supported on .NET Framework**                                                                                            | ≥6.0.12            | source                  |
+| `GRAPHQL`             | [GraphQL](https://www.nuget.org/packages/GraphQL)                                                                                                                                               | ≥2.3.0 & < 3.0.0   | bytecode                |
+| `GRPCNETCLIENT`       | [Grpc.Net.Client](https://www.nuget.org/packages/Grpc.Net.Client)                                                                                                                               | ≥2.43.0 & < 3.0.0  | source                  |
+| `HTTPCLIENT`          | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | *                  | source                  |
+| `QUARTZ`              | [Quartz](https://www.nuget.org/packages/Quartz) **Not supported on .NET Framework 4.7.1 and older**                                                                                             | ≥3.4.0             | source                  |
+| `MASSTRANSIT`         | [MassTransit](https://www.nuget.org/packages/MassTransit) **Not supported on .NET Framework**                                                                                                   | ≥8.0.0             | source                  |
+| `MONGODB`             | [MongoDB.Driver.Core](https://www.nuget.org/packages/MongoDB.Driver.Core) **Not supported on .NET Framework**                                                                                   | ≥2.13.3 & < 3.0.0  | source & bytecode       |
+| `MYSQLDATA`           | [MySql.Data](https://www.nuget.org/packages/MySql.Data) **Not supported on .NET Framework**                                                                                                     | ≥6.10.7            | source & bytecode \[2\] |
+| `NPGSQL`              | [Npgsql](https://www.nuget.org/packages/Npgsql)                                                                                                                                                 | ≥6.0.0             | source                  |
+| `NSERVICEBUS`         | [NServiceBus](https://www.nuget.org/packages/NServiceBus)                                                                                                                                       | ≥8.0.0             | source & bytecode       |
+| `SQLCLIENT`           | [Microsoft.Data.SqlClient](https://www.nuget.org/packages/Microsoft.Data.SqlClient) and [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient)                           | * \[3\]            | source                  |
+| `STACKEXCHANGEREDIS`  | [StackExchange.Redis](https://www.nuget.org/packages/StackExchange.Redis) **Not supported on .NET Framework**                                                                                   | ≥2.0.405 < 3.0.0   | source & bytecode       |
+| `WCF`                 | [System.ServiceModel](https://www.nuget.org/packages/System.ServiceModel) **No support for server side on .NET**. For configuration see [WCF Instrumentation Configuration](wcf-config.md)      | * \[4\]            | source                  |
 
-\[1\]: MySql.Data 8.0.31 and higher requires bytecode instrumentation.
+\[1\]: Only integrated pipeline mode is supported.
 
-\[2\]: On .NET it supports [System.ServiceModel.Primitives](https://www.nuget.org/packages/System.ServiceModel.Primitives)
+\[2\]: MySql.Data 8.0.31 and higher requires bytecode instrumentation.
+
+\[3\]: Microsoft.Data.SqlClient v3.* is not supported on .NET Framework, due to [issue](https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243).
+
+\[4\]: On .NET it supports [System.ServiceModel.Primitives](https://www.nuget.org/packages/System.ServiceModel.Primitives)
 ≥ 4.7.0.
 
 ### Metrics instrumentations
 
 | ID            | Instrumented library                                                                                                                                                                            | Supported versions | Instrumentation type |
 |---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------|----------------------|
-| `AspNet`      | ASP.NET Framework \[1\]                                                                                                                                                                         | *                  | source               |
-| `AspNet`      | ASP.NET Core \[2\]                                                                                                                                                                              | *                  | source               |
-| `HttpClient`  | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | *                  | source               |
-| `NetRuntime`  | [OpenTelemetry.Instrumentation.Runtime](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.Runtime)                                                                                   | *                  | source               |
-| `Process`     | [OpenTelemetry.Instrumentation.Process](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.Process)                                                                                   | *                  | source               |
-| `NServiceBus` | [NServiceBus](https://www.nuget.org/packages/NServiceBus)                                                                                                                                       | ≥8.0.0             | source & bytecode    |
+| `ASPNET`      | ASP.NET Framework \[1\] **Not supported on .NET**                                                                                                                                               | *                  | source               |
+| `ASPNETCORE`  | ASP.NET Core \[2\]  **Not supported on .NET Framework**                                                                                                                                         | *                  | source               |
+| `HTTPCLIENT`  | [System.Net.Http.HttpClient](https://docs.microsoft.com/dotnet/api/system.net.http.httpclient) and [System.Net.HttpWebRequest](https://docs.microsoft.com/dotnet/api/system.net.httpwebrequest) | *                  | source               |
+| `NETRUNTIME`  | [OpenTelemetry.Instrumentation.Runtime](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.Runtime)                                                                                   | *                  | source               |
+| `PROCESS`     | [OpenTelemetry.Instrumentation.Process](https://www.nuget.org/packages/OpenTelemetry.Instrumentation.Process)                                                                                   | *                  | source               |
+| `NSERVICEBUS` | [NServiceBus](https://www.nuget.org/packages/NServiceBus)                                                                                                                                       | ≥8.0.0             | source & bytecode    |
 
 \[1\]: The ASP.NET metrics are generated only if the `AspNet` trace instrumentation
  is also enabled.
@@ -75,7 +137,7 @@ for more details.
 
 | ID      | Instrumented library                                                                                                            | Supported versions | Instrumentation type   |
 |---------|---------------------------------------------------------------------------------------------------------------------------------|--------------------|------------------------|
-| ILogger | [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging) **Not supported on .NET Framework** | ≥6.0.0             | bytecode or source [1] |
+| ILOGGER | [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging) **Not supported on .NET Framework** | ≥6.0.0             | bytecode or source [1] |
 
 **[1]**: For ASP.NET Core applications, the `LoggingBuilder` instrumentation
 can be enabled without using the .NET CLR Profiler by setting
@@ -161,7 +223,7 @@ To enable the OTLP exporter, set the `OTEL_TRACES_EXPORTER`/`OTEL_METRICS_EXPORT
 environment variable to `otlp`.
 
 To customize the OTLP exporter using environment variables, see the
-[OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-rc.2/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables).
+[OTLP exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-rc.3/src/OpenTelemetry.Exporter.OpenTelemetryProtocol#environment-variables).
 Important environment variables include:
 
 | Environment variable                     | Description                                                                                                                                                                                                | Default value                                                                                             |
@@ -191,7 +253,8 @@ Important environment variables include:
 
 ### Prometheus
 
-> ⚠️ **Do NOT use in production.**
+> **Warning**
+> **Do NOT use in production.**
 >
 > Prometheus exporter is intended for the inner dev loop.
 > Production environments can use a combination of OTLP exporter
@@ -206,7 +269,7 @@ The exporter exposes the metrics HTTP endpoint on `http://localhost:9464/metrics
 and it caches the responses for 300 milliseconds.
 
 See the
-[Prometheus Exporter HttpListener documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-rc.2/src/OpenTelemetry.Exporter.Prometheus.HttpListener).
+[Prometheus Exporter HttpListener documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-rc.3/src/OpenTelemetry.Exporter.Prometheus.HttpListener).
 to learn more.
 
 ### Zipkin
@@ -215,7 +278,7 @@ To enable the Zipkin exporter, set the `OTEL_TRACES_EXPORTER` environment
 variable to `zipkin`.
 
 To customize the Zipkin exporter using environment variables,
-see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-rc.2/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
+see the [Zipkin exporter documentation](https://github.com/open-telemetry/opentelemetry-dotnet/tree/core-1.4.0-rc.3/src/OpenTelemetry.Exporter.Zipkin#configuration-using-environment-variables).
 Important environment variables include:
 
 | Environment variable            | Description | Default value                        |
@@ -224,18 +287,18 @@ Important environment variables include:
 
 ## Additional settings
 
-| Environment variable                           | Description                                                                                                                                                                                                                                                                                                                                                                                        | Default value |
-|------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| `OTEL_DOTNET_AUTO_TRACES_ENABLED`              | Enables traces.                                                                                                                                                                                                                                                                                                                                                                                    | `true`        |
-| `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`         | Enables OpenTracing tracer.                                                                                                                                                                                                                                                                                                                                                                        | `false`       |
-| `OTEL_DOTNET_AUTO_LOGS_ENABLED`                | Enables logs.                                                                                                                                                                                                                                                                                                                                                                                      | `true`        |
-| `OTEL_DOTNET_AUTO_METRICS_ENABLED`             | Enables metrics.                                                                                                                                                                                                                                                                                                                                                                                   | `true`        |
-| `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`      | Enables automatic redirection of the assemblies used by the automatic instrumentation on the .NET Framework.                                                                                                                                                                                                                                                                                       | `true`        |
-| `OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES`   | Comma-separated list of additional `System.Diagnostics.ActivitySource` names to be added to the tracer at the startup. Use it to capture manually instrumented spans.                                                                                                                                                                                                                              |               |
-| `OTEL_DOTNET_AUTO_LEGACY_SOURCES`              | Comma-separated list of additional legacy source names to be added to the tracer at the startup. Use it to capture `System.Diagnostics.Activity` objects created without using the `System.Diagnostics.ActivitySource` API.                                                                                                                                                                        |               |
-| `OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION` | Controls whether the telemetry data is flushed when an [AppDomain.UnhandledException](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.unhandledexception) event is raised. Set to `true` when you suspect that you are experiencing a problem with missing telemetry data and also experiencing unhandled exceptions.                                                                 | `false`       |
-| `OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES`  | Comma-separated list of additional `System.Diagnostics.Metrics.Meter` names to be added to the meter at the startup. Use it to capture manually instrumented spans.                                                                                                                                                                                                                                |               |
-| `OTEL_DOTNET_AUTO_PLUGINS`                     | Colon-separated list of OTel SDK instrumentation plugin types, specified with the [assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname). _Note: This list must be colon-separated because the type names may include commas._ See more info on how to write plugins at [plugins.md](plugins.md). |               |
+| Environment variable                                | Description                                                                                                                                                                                                                                                                                                                                                                                        | Default value |
+|-----------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| `OTEL_DOTNET_AUTO_TRACES_ENABLED`                   | Enables traces.                                                                                                                                                                                                                                                                                                                                                                                    | `true`        |
+| `OTEL_DOTNET_AUTO_OPENTRACING_ENABLED`              | Enables OpenTracing tracer.                                                                                                                                                                                                                                                                                                                                                                        | `false`       |
+| `OTEL_DOTNET_AUTO_LOGS_ENABLED`                     | Enables logs.                                                                                                                                                                                                                                                                                                                                                                                      | `true`        |
+| `OTEL_DOTNET_AUTO_METRICS_ENABLED`                  | Enables metrics.                                                                                                                                                                                                                                                                                                                                                                                   | `true`        |
+| `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`           | Enables automatic redirection of the assemblies used by the automatic instrumentation on the .NET Framework.                                                                                                                                                                                                                                                                                       | `true`        |
+| `OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES`        | Comma-separated list of additional `System.Diagnostics.ActivitySource` names to be added to the tracer at the startup. Use it to capture manually instrumented spans.                                                                                                                                                                                                                              |               |
+| `OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES` | Comma-separated list of additional legacy source names to be added to the tracer at the startup. Use it to capture `System.Diagnostics.Activity` objects created without using the `System.Diagnostics.ActivitySource` API.                                                                                                                                                                        |               |
+| `OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION`      | Controls whether the telemetry data is flushed when an [AppDomain.UnhandledException](https://docs.microsoft.com/en-us/dotnet/api/system.appdomain.unhandledexception) event is raised. Set to `true` when you suspect that you are experiencing a problem with missing telemetry data and also experiencing unhandled exceptions.                                                                 | `false`       |
+| `OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES`       | Comma-separated list of additional `System.Diagnostics.Metrics.Meter` names to be added to the meter at the startup. Use it to capture manually instrumented spans.                                                                                                                                                                                                                                |               |
+| `OTEL_DOTNET_AUTO_PLUGINS`                          | Colon-separated list of OTel SDK instrumentation plugin types, specified with the [assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname). _Note: This list must be colon-separated because the type names may include commas._ See more info on how to write plugins at [plugins.md](plugins.md). |               |
 
 ## .NET CLR Profiler
 
@@ -244,13 +307,13 @@ environment variables to set up the profiler. See
 [.NET Runtime Profiler Loading](https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/profiling/Profiler%20Loading.md)
 for more information.
 
-| .NET Framework environment variable | .NET environment variable  | Description                                                                             | Required value                                                                                                                                                                                                                                                                                                                           |
-|-------------------------------------|----------------------------|-----------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `COR_ENABLE_PROFILING`              | `CORECLR_ENABLE_PROFILING` | Enables the profiler.                                                                   | `1`                                                                                                                                                                                                                                                                                                                                      |
-| `COR_PROFILER`                      | `CORECLR_PROFILER`         | CLSID of the profiler.                                                                  | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                                                                                                                                                                                                                                                                                                 |
+| .NET Framework environment variable | .NET environment variable  | Description                                                                             | Required value                                                                                                                                                                                                                                                  |
+|-------------------------------------|----------------------------|-----------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `COR_ENABLE_PROFILING`              | `CORECLR_ENABLE_PROFILING` | Enables the profiler.                                                                   | `1`                                                                                                                                                                                                                                                             |
+| `COR_PROFILER`                      | `CORECLR_PROFILER`         | CLSID of the profiler.                                                                  | `{918728DD-259F-4A6A-AC2B-B85E1B658318}`                                                                                                                                                                                                                        |
 | `COR_PROFILER_PATH`                 | `CORECLR_PROFILER_PATH`    | Path to the profiler.                                                                   | `$INSTALL_DIR/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so` for Linux glibc, `$INSTALL_DIR/linux-musl-x64/OpenTelemetry.AutoInstrumentation.Native.so` for Linux musl, `$INSTALL_DIR/osx-x64/OpenTelemetry.AutoInstrumentation.Native.dylib` for macOS |
-| `COR_PROFILER_PATH_32`              | `CORECLR_PROFILER_PATH_32` | Path to the 32-bit profiler. Bitness-specific paths take precedence over generic paths. | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows                                                                                                                                                                                                                                                          |
-| `COR_PROFILER_PATH_64`              | `CORECLR_PROFILER_PATH_64` | Path to the 64-bit profiler. Bitness-specific paths take precedence over generic paths. | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows                                                                                                                                                                                                                                                          |
+| `COR_PROFILER_PATH_32`              | `CORECLR_PROFILER_PATH_32` | Path to the 32-bit profiler. Bitness-specific paths take precedence over generic paths. | `$INSTALL_DIR/win-x86/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows                                                                                                                                                                                 |
+| `COR_PROFILER_PATH_64`              | `CORECLR_PROFILER_PATH_64` | Path to the 64-bit profiler. Bitness-specific paths take precedence over generic paths. | `$INSTALL_DIR/win-x64/OpenTelemetry.AutoInstrumentation.Native.dll` for Windows                                                                                                                                                                                 |
 
 Setting OpenTelemetry .NET Automatic Instrumentation as a .NET CLR Profiler
 is required for .NET Framework.

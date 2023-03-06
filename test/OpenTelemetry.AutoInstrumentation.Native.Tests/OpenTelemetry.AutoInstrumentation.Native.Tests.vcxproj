@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="assembly_version_redirection_test.cpp" />
+    <ClCompile Include="environment_variables_parser_test.cpp" />
     <ClCompile Include="integration_loader_test.cpp" />
     <ClCompile Include="integration_test.cpp" />
     <ClCompile Include="clr_helper_test.cpp" />

@@ -2,6 +2,11 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\Common.props" />
 
   <Import Project="$(MSBuildThisFileDirectory)Integrations.props" />
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)\dependency-libs\TestApplication.Shared\ConsoleHelper.cs" Link="Shared\ConsoleHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)\dependency-libs\TestApplication.Shared\ProfilerHelper.cs" Link="Shared\ProfilerHelper.cs" />
+  </ItemGroup>
   
   <!-- StyleCop -->
   <ItemGroup>

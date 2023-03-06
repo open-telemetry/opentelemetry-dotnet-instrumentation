@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # guess OS_TYPE if not provided
+OS_TYPE=${OS_TYPE:-}
 if [ -z "$OS_TYPE" ]; then
   case "$(uname -s | tr '[:upper:]' '[:lower:]')" in
     cygwin_nt*|mingw*|msys_nt*)
@@ -38,11 +39,9 @@ case "$OS_TYPE" in
     ;;
 esac
 
+ENABLE_PROFILING=${ENABLE_PROFILING:-true}
 case "$ENABLE_PROFILING" in
   "true"|"false")
-    ;;
-  "")
-    ENABLE_PROFILING="true"
     ;;
   *)
     echo "Invalid ENABLE_PROFILING. Supported values: true, false." >&2
@@ -89,18 +88,21 @@ fi
 export OTEL_DOTNET_AUTO_HOME
 
 # Configure .NET Core Runtime
+DOTNET_ADDITIONAL_DEPS=${DOTNET_ADDITIONAL_DEPS:-}
 if [ -z "$DOTNET_ADDITIONAL_DEPS" ]; then
   export DOTNET_ADDITIONAL_DEPS="${OTEL_DOTNET_AUTO_HOME}/AdditionalDeps"
 else
   export DOTNET_ADDITIONAL_DEPS="${OTEL_DOTNET_AUTO_HOME}/AdditionalDeps${SEPARATOR}${DOTNET_ADDITIONAL_DEPS}"
 fi
 
+DOTNET_SHARED_STORE=${DOTNET_SHARED_STORE:-}
 if [ -z "$DOTNET_SHARED_STORE" ]; then
   export DOTNET_SHARED_STORE="${OTEL_DOTNET_AUTO_HOME}/store"
 else
   export DOTNET_SHARED_STORE="${OTEL_DOTNET_AUTO_HOME}/store${SEPARATOR}${DOTNET_SHARED_STORE}"
 fi
 
+DOTNET_STARTUP_HOOKS=${DOTNET_STARTUP_HOOKS:-}
 if [ -z "$DOTNET_STARTUP_HOOKS" ]; then
   export DOTNET_STARTUP_HOOKS="${OTEL_DOTNET_AUTO_HOME}/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
 else

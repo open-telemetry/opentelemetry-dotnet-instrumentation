@@ -5,7 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Xunit.SkippableFact" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.csproj" />
+    <ProjectReference Include="..\..\tools\DependencyListGenerator\DependencyListGenerator.csproj" Condition=" '$(TargetFramework)' == 'net7.0' " />
   </ItemGroup>
 
 </Project>

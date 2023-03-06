@@ -14,9 +14,8 @@
 // limitations under the License.
 // </copyright>
 
-#if !NETFRAMEWORK
+#if NET6_0_OR_GREATER
 using IntegrationTests.Helpers;
-using Xunit;
 using Xunit.Abstractions;
 using static OpenTelemetry.Proto.Trace.V1.Span.Types;
 
@@ -29,16 +28,17 @@ public class MassTransitTests : TestHelper
     {
     }
 
-    [Fact]
+    [Theory]
     [Trait("Category", "EndToEnd")]
-    public void SubmitsTraces()
+    [MemberData(nameof(LibraryVersion.MassTransit), MemberType = typeof(LibraryVersion))]
+    public void SubmitsTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         collector.Expect("MassTransit", span => span.Kind == SpanKind.Producer, "Producer");
         collector.Expect("MassTransit", span => span.Kind == SpanKind.Consumer, "Consumer");
 
-        RunTestApplication();
+        RunTestApplication(new TestSettings { PackageVersion = packageVersion });
 
         collector.AssertExpectations();
     }

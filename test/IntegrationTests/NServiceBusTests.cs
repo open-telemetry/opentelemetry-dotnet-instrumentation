@@ -15,8 +15,7 @@
 // </copyright>
 
 using IntegrationTests.Helpers;
-using OpenTelemetry.AutoInstrumentation.Configuration;
-using Xunit;
+using OpenTelemetry.AutoInstrumentation.Configurations;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
@@ -29,30 +28,31 @@ public class NServiceBusTests : TestHelper
         EnableBytecodeInstrumentation();
     }
 
-    [Fact]
+    [Theory]
     [Trait("Category", "EndToEnd")]
-    public void SubmitsTraces()
+    [MemberData(nameof(LibraryVersion.NServiceBus), MemberType = typeof(LibraryVersion))]
+    public void SubmitsTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
         collector.Expect("NServiceBus.Core");
         SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsEnabled, bool.FalseString); // make sure that metrics instrumentation is not needed
 
-#if NET462
-        RunTestApplication(new TestSettings
+        using var process = StartTestApplication(new TestSettings
         {
-            Framework = "net472"
-        });
-#else
-        RunTestApplication();
+#if NET462
+            Framework = "net472",
 #endif
+            PackageVersion = packageVersion
+        });
 
         collector.AssertExpectations();
     }
 
-    [Fact]
+    [Theory]
     [Trait("Category", "EndToEnd")]
-    public void SubmitMetrics()
+    [MemberData(nameof(LibraryVersion.NServiceBus), MemberType = typeof(LibraryVersion))]
+    public void SubmitMetrics(string packageVersion)
     {
         using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
@@ -62,14 +62,14 @@ public class NServiceBusTests : TestHelper
         SetEnvironmentVariable("OTEL_METRIC_EXPORT_INTERVAL", "100");
         SetEnvironmentVariable(ConfigurationKeys.Traces.TracesEnabled, bool.FalseString); // make sure that traces instrumentation is not needed
 
-#if NET462
         using var process = StartTestApplication(new TestSettings
         {
-            Framework = "net472"
-        });
-#else
-        using var process = StartTestApplication();
+#if NET462
+            Framework = "net472",
 #endif
+            PackageVersion = packageVersion
+        });
+
         try
         {
             collector.AssertExpectations();

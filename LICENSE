@@ -199,3 +199,121 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+---------------------------------------------------------------------------
+
+OpenTelemetry .NET Automatic Instrumentation components
+
+OpenTelemetry .NET Automatic Instrumentation project contains components with
+separate copyright notices and license terms:
+
+Library Google.Protobuf is under the following copyright:
+Copyright 2008 Google Inc. All rights reserved under BSD-3-Clause license
+(<https://github.com/protocolbuffers/protobuf/blob/main/LICENSE>).
+
+Libraries
+
+- Google.Protobuf,
+- Grpc.Net.Client
+- Grpc.Net.Common,
+are under the following copyright:
+Copyright 2019 The gRPC Authors under Apache License Version 2.0
+(<https://github.com/grpc/grpc-dotnet/blob/master/LICENSE>).
+
+Libraries
+
+- OpenTelemetry
+- OpenTelemetry.Api,
+- OpenTelemetry.Api.ProviderBuilderExtensions,
+- OpenTelemetry.Exporter.Console,
+- OpenTelemetry.Exporter.OpenTelemetryProtocol,
+- OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs,
+- OpenTelemetry.Exporter.Prometheus.HttpListener,
+- OpenTelemetry.Exporter.Zipkin,
+- OpenTelemetry.Extensions.Propagators,
+- OpenTelemetry.Instrumentation.AspNetCore,
+- OpenTelemetry.Instrumentation.GrpcNetClient,
+- OpenTelemetry.Instrumentation.Http,
+- OpenTelemetry.Instrumentation.SqlClient,
+- OpenTelemetry.Shims.OpenTracing,
+are under the following copyright:
+Copyright The OpenTelemetry Authors under Apache License Version 2.0
+(<https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/LICENSE>).
+
+Libraries
+
+- OpenTelemetry.Api,
+- OpenTelemetry.Instrumentation.EntityFrameworkCore,
+- OpenTelemetry.Instrumentation.MySqlData,
+- OpenTelemetry.Instrumentation.Process,
+- OpenTelemetry.Instrumentation.Quartz,
+- OpenTelemetry.Instrumentation.Runtime,
+- OpenTelemetry.Instrumentation.StackExchangeRedis,
+- OpenTelemetry.Instrumentation.Wcf
+are under the following copyright:
+Copyright The OpenTelemetry Authors under Apache License Version 2.0
+(<https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/main/LICENSE>).
+
+Library OpenTracing is under the following copyright:
+Copyright The OpenTracing Authors under Apache License Version 2.0
+(<https://github.com/opentracing/opentracing-csharp/blob/master/LICENSE>).
+
+Libraries
+
+- Microsoft.Extensions.Configuration,
+- Microsoft.Extensions.Configuration.Abstractions,
+- Microsoft.Extensions.Configuration.Binder,
+- Microsoft.Extensions.DependencyInjection,
+- Microsoft.Extensions.DependencyInjection.Abstractions,
+- Microsoft.Extensions.Logging,
+- Microsoft.Extensions.Logging.Abstractions,
+- Microsoft.Extensions.Logging.Configuration,
+- Microsoft.Extensions.Options,
+- Microsoft.Extensions.Options.ConfigurationExtensions,
+- Microsoft.Extensions.Primitives
+- System.Diagnostics.DiagnosticSource,
+- System.Security.Permissions,
+are under the following copyright:
+Copyright (c) .NET Foundation and Contributors under the MIT License (MIT)
+(<https://github.com/dotnet/runtime/blob/main/LICENSE.TXT>).
+
+Libraries
+
+- System.Private.ServiceModel,
+- System.ServiceModel.Primitives,
+- System.ServiceModel
+are under the following copyright:
+Copyright (c) .NET Foundation and Contributors under the MIT License (MIT)
+(<https://github.com/dotnet/wcf/blob/main/LICENSE.TXT>).
+
+Library DnsClient is under the following copyright:
+Copyright The DnsClient.NET Authors under Apache License Version 2.0
+(<https://github.com/opentracing/opentracing-csharp/blob/master/LICENSE>).
+
+Libraries
+
+- MongoDB.Bson,
+- MongoDB.Driver.Core,
+- MongoDB.Libmongocrypt,
+- libmongocrypt,
+- libzstd,
+- mongocrypt
+- snappy32,
+- snappy64,
+are under the following copyright:
+Copyright 2010-present MongoDB Inc. under Apache License Version 2.0
+(<https://github.com/mongodb/mongo-csharp-driver/blob/master/License.txt>).
+
+Library MongoDB.Driver.Core.Extensions.DiagnosticSources is under the following copyright:
+Copyright MongoDB.Driver.Core.Extensions.DiagnosticSources Authors under Apache
+License Version 2.0
+(<https://github.com/jbogard/MongoDB.Driver.Core.Extensions.DiagnosticSources/blob/master/LICENSE>).
+
+Library SharpCompress is under the following copyright:
+Copyright (c) 2014  Adam Hathcock under the MIT License (MIT)
+(<https://github.com/adamhathcock/sharpcompress/blob/master/LICENSE.txt>).
+
+Component Serilog compiled into OpenTelemetry.AutoInstrumentation, OpenTelemetry.AutoInstrumentation.Loader, OpenTelemetry.AutoInstrumentation.StartupHook
+is under the following copyright:
+Copyright 2013-2017 Serilog Contributors under Apache License Version 2.0
+(<https://github.com/serilog/serilog-sinks-file/blob/main/LICENSE>).

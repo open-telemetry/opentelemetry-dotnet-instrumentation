@@ -20,7 +20,7 @@ internal static class Constants
 {
     public static class Tracer
     {
-        public const string Version = "0.5.1-beta.3";
+        public const string Version = "0.6.0";
         public const string AutoInstrumentationVersionName = "telemetry.auto.version";
     }
 
@@ -53,6 +53,14 @@ internal static class Constants
             public const string W3CBaggage = "baggage";
             public const string B3Multi = "b3multi";
             public const string B3Single = "b3";
+        }
+
+        public static class LogLevel
+        {
+            public const string Error = "error";
+            public const string Warning = "warn";
+            public const string Information = "info";
+            public const string Debug = "debug";
         }
     }
 }

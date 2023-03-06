@@ -1,14 +1,17 @@
+// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
+
 #include "clr_helpers.h"
 
 #include <cstring>
 
+#include <set>
+#include <stack>
 #include "environment_variables.h"
 #include "logger.h"
 #include "macros.h"
-#include "pal.h"
 #include "otel_profiler_constants.h"
-#include <set>
-#include <stack>
+#include "pal.h"
 
 namespace trace
 {
@@ -16,10 +19,10 @@ namespace trace
 RuntimeInformation GetRuntimeInformation(ICorProfilerInfo7* info)
 {
     COR_PRF_RUNTIME_TYPE runtime_type;
-    USHORT major_version;
-    USHORT minor_version;
-    USHORT build_version;
-    USHORT qfe_version;
+    USHORT               major_version;
+    USHORT               minor_version;
+    USHORT               build_version;
+    USHORT               qfe_version;
 
     auto hr = info->GetRuntimeInformation(nullptr, &runtime_type, &major_version, &minor_version, &build_version,
                                           &qfe_version, 0, nullptr, nullptr);
@@ -33,10 +36,10 @@ RuntimeInformation GetRuntimeInformation(ICorProfilerInfo7* info)
 
 AssemblyInfo GetAssemblyInfo(ICorProfilerInfo7* info, const AssemblyID& assembly_id)
 {
-    WCHAR assembly_name[kNameMaxSize];
-    DWORD assembly_name_len = 0;
+    WCHAR       assembly_name[kNameMaxSize];
+    DWORD       assembly_name_len = 0;
     AppDomainID app_domain_id;
-    ModuleID manifest_module_id;
+    ModuleID    manifest_module_id;
 
     auto hr = info->GetAssemblyInfo(assembly_id, kNameMaxSize, &assembly_name_len, assembly_name, &app_domain_id,
                                     &manifest_module_id);
@@ -62,16 +65,16 @@ AssemblyInfo GetAssemblyInfo(ICorProfilerInfo7* info, const AssemblyID& assembly
 AssemblyMetadata GetAssemblyImportMetadata(const ComPtr<IMetaDataAssemblyImport>& assembly_import)
 {
     mdAssembly current = mdAssemblyNil;
-    auto hr = assembly_import->GetAssemblyFromScope(&current);
+    auto       hr      = assembly_import->GetAssemblyFromScope(&current);
     if (FAILED(hr))
     {
         return {};
     }
-    WCHAR name[kNameMaxSize];
-    DWORD name_len = 0;
+    WCHAR            name[kNameMaxSize];
+    DWORD            name_len = 0;
     ASSEMBLYMETADATA assembly_metadata{};
-    DWORD assembly_flags = 0;
-    const ModuleID placeholder_module_id = 0;
+    DWORD            assembly_flags        = 0;
+    const ModuleID   placeholder_module_id = 0;
 
     hr = assembly_import->GetAssemblyProps(current, nullptr, nullptr, nullptr, name, kNameMaxSize, &name_len,
                                            &assembly_metadata, &assembly_flags);
@@ -85,13 +88,13 @@ AssemblyMetadata GetAssemblyImportMetadata(const ComPtr<IMetaDataAssemblyImport>
 }
 
 AssemblyMetadata GetReferencedAssemblyMetadata(const ComPtr<IMetaDataAssemblyImport>& assembly_import,
-                                               const mdAssemblyRef& assembly_ref)
+                                               const mdAssemblyRef&                   assembly_ref)
 {
-    WCHAR name[kNameMaxSize];
-    DWORD name_len = 0;
+    WCHAR            name[kNameMaxSize];
+    DWORD            name_len = 0;
     ASSEMBLYMETADATA assembly_metadata{};
-    DWORD assembly_flags = 0;
-    const ModuleID module_id_placeholder = 0;
+    DWORD            assembly_flags        = 0;
+    const ModuleID   module_id_placeholder = 0;
     const auto hr = assembly_import->GetAssemblyRefProps(assembly_ref, nullptr, nullptr, name, kNameMaxSize, &name_len,
                                                          &assembly_metadata, nullptr, nullptr, &assembly_flags);
     if (FAILED(hr) || name_len == 0)
@@ -116,19 +119,19 @@ std::vector<BYTE> GetSignatureByteRepresentation(ULONG signature_length, PCCOR_S
 
 FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdToken& token)
 {
-    mdToken parent_token = mdTokenNil;
+    mdToken parent_token      = mdTokenNil;
     mdToken method_spec_token = mdTokenNil;
-    mdToken method_def_token = mdTokenNil;
-    WCHAR function_name[kNameMaxSize]{};
-    DWORD function_name_len = 0;
+    mdToken method_def_token  = mdTokenNil;
+    WCHAR   function_name[kNameMaxSize]{};
+    DWORD   function_name_len = 0;
 
-    PCCOR_SIGNATURE raw_signature;
-    ULONG raw_signature_len;
-    BOOL is_generic = false;
+    PCCOR_SIGNATURE   raw_signature;
+    ULONG             raw_signature_len;
+    BOOL              is_generic = false;
     std::vector<BYTE> final_signature_bytes;
     std::vector<BYTE> method_spec_signature;
 
-    HRESULT hr = E_FAIL;
+    HRESULT    hr         = E_FAIL;
     const auto token_type = TypeFromToken(token);
     switch (token_type)
     {
@@ -143,19 +146,19 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
             break;
         case mdtMethodSpec:
         {
-            hr = metadata_import->GetMethodSpecProps(token, &parent_token, &raw_signature, &raw_signature_len);
+            hr         = metadata_import->GetMethodSpecProps(token, &parent_token, &raw_signature, &raw_signature_len);
             is_generic = true;
             if (FAILED(hr))
             {
                 return {};
             }
             const auto generic_info = GetFunctionInfo(metadata_import, parent_token);
-            final_signature_bytes = generic_info.signature.data;
-            method_spec_signature = GetSignatureByteRepresentation(raw_signature_len, raw_signature);
+            final_signature_bytes   = generic_info.signature.data;
+            method_spec_signature   = GetSignatureByteRepresentation(raw_signature_len, raw_signature);
             std::memcpy(function_name, generic_info.name.c_str(), sizeof(WCHAR) * (generic_info.name.length() + 1));
             function_name_len = DWORD(generic_info.name.length() + 1);
             method_spec_token = token;
-            method_def_token = generic_info.id;
+            method_def_token  = generic_info.id;
         }
         break;
         default:
@@ -190,13 +193,13 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
 
 ModuleInfo GetModuleInfo(ICorProfilerInfo7* info, const ModuleID& module_id)
 {
-    const DWORD module_path_size = 260;
-    WCHAR module_path[module_path_size]{};
-    DWORD module_path_len = 0;
-    LPCBYTE base_load_address;
-    AssemblyID assembly_id = 0;
-    DWORD module_flags = 0;
-    const HRESULT hr = info->GetModuleInfo2(module_id, &base_load_address, module_path_size, &module_path_len,
+    const DWORD   module_path_size = 260;
+    WCHAR         module_path[module_path_size]{};
+    DWORD         module_path_len = 0;
+    LPCBYTE       base_load_address;
+    AssemblyID    assembly_id  = 0;
+    DWORD         module_flags = 0;
+    const HRESULT hr           = info->GetModuleInfo2(module_id, &base_load_address, module_path_size, &module_path_len,
                                             module_path, &assembly_id, &module_flags);
     if (FAILED(hr) || module_path_len == 0)
     {
@@ -207,18 +210,18 @@ ModuleInfo GetModuleInfo(ICorProfilerInfo7* info, const ModuleID& module_id)
 
 TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdToken& token)
 {
-    mdToken parent_token = mdTokenNil;
-    std::shared_ptr<TypeInfo> parentTypeInfo = nullptr;
-    mdToken parent_type_token = mdTokenNil;
-    WCHAR type_name[kNameMaxSize]{};
-    DWORD type_name_len = 0;
-    DWORD type_flags;
-    std::shared_ptr<TypeInfo> extendsInfo = nullptr;
-    mdToken type_extends = mdTokenNil;
-    bool type_valueType = false;
-    bool type_isGeneric = false;
+    mdToken                   parent_token      = mdTokenNil;
+    std::shared_ptr<TypeInfo> parentTypeInfo    = nullptr;
+    mdToken                   parent_type_token = mdTokenNil;
+    WCHAR                     type_name[kNameMaxSize]{};
+    DWORD                     type_name_len = 0;
+    DWORD                     type_flags;
+    std::shared_ptr<TypeInfo> extendsInfo    = nullptr;
+    mdToken                   type_extends   = mdTokenNil;
+    bool                      type_valueType = false;
+    bool                      type_isGeneric = false;
 
-    HRESULT hr = E_FAIL;
+    HRESULT    hr         = E_FAIL;
     const auto token_type = TypeFromToken(token);
 
     switch (token_type)
@@ -246,7 +249,7 @@ TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdTo
         case mdtTypeSpec:
         {
             PCCOR_SIGNATURE signature{};
-            ULONG signature_length{};
+            ULONG           signature_length{};
 
             hr = metadata_import->GetTypeSpecFromToken(token, &signature, &signature_length);
 
@@ -281,12 +284,12 @@ TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdTo
         return {};
     }
 
-    const auto type_name_string = WSTRING(type_name);
+    const auto type_name_string    = WSTRING(type_name);
     const auto generic_token_index = type_name_string.rfind(WStr("`"));
     if (generic_token_index != std::string::npos)
     {
         const auto idxFromRight = type_name_string.length() - generic_token_index - 1;
-        type_isGeneric = idxFromRight == 1 || idxFromRight == 2;
+        type_isGeneric          = idxFromRight == 1 || idxFromRight == 2;
     }
 
     return {token,       type_name_string, mdTypeSpecNil,  token_type,
@@ -305,12 +308,14 @@ mdAssemblyRef FindAssemblyRef(const ComPtr<IMetaDataAssemblyImport>& assembly_im
     return mdAssemblyRefNil;
 }
 
-HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit, AssemblyProperty& corAssemblyProperty,
-                             mdAssemblyRef* corlib_ref)
+HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit,
+                             AssemblyProperty&                    corAssemblyProperty,
+                             mdAssemblyRef*                       corlib_ref)
 {
     if (corAssemblyProperty.ppbPublicKey != nullptr)
     {
-        // the corlib module is already loaded, use that information to create the assembly ref
+        // the corlib module is already loaded, use that information to create the
+        // assembly ref
         Logger::Debug("Using existing corlib reference: ", corAssemblyProperty.szName);
         return assembly_emit->DefineAssemblyRef(corAssemblyProperty.ppbPublicKey, corAssemblyProperty.pcbPublicKey,
                                                 corAssemblyProperty.szName.c_str(), &corAssemblyProperty.pMetaData,
@@ -320,11 +325,11 @@ HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit,
     {
         // Define an AssemblyRef to mscorlib, needed to create TypeRefs later
         ASSEMBLYMETADATA metadata{};
-        metadata.usMajorVersion = 4;
-        metadata.usMinorVersion = 0;
-        metadata.usBuildNumber = 0;
+        metadata.usMajorVersion   = 4;
+        metadata.usMinorVersion   = 0;
+        metadata.usBuildNumber    = 0;
         metadata.usRevisionNumber = 0;
-        BYTE public_key[] = {0xB7, 0x7A, 0x5C, 0x56, 0x19, 0x34, 0xE0, 0x89};
+        BYTE public_key[]         = {0xB7, 0x7A, 0x5C, 0x56, 0x19, 0x34, 0xE0, 0x89};
         return assembly_emit->DefineAssemblyRef(public_key, sizeof(public_key), WStr("mscorlib"), &metadata, NULL, 0, 0,
                                                 corlib_ref);
     }
@@ -333,7 +338,7 @@ HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit,
 // FunctionMethodArgument
 int FunctionMethodArgument::GetTypeFlags(unsigned& elementType) const
 {
-    int flag = 0;
+    int             flag  = 0;
     PCCOR_SIGNATURE pbCur = &pbBase[offset];
 
     if (*pbCur == ELEMENT_TYPE_VOID)
@@ -387,8 +392,8 @@ int FunctionMethodArgument::GetTypeFlags(unsigned& elementType) const
 
 mdToken FunctionMethodArgument::GetTypeTok(ComPtr<IMetaDataEmit2>& pEmit, mdAssemblyRef corLibRef) const
 {
-    mdToken token = mdTokenNil;
-    PCCOR_SIGNATURE pbCur = &pbBase[offset];
+    mdToken               token  = mdTokenNil;
+    PCCOR_SIGNATURE       pbCur  = &pbBase[offset];
     const PCCOR_SIGNATURE pStart = pbCur;
 
     if (*pbCur == ELEMENT_TYPE_BYREF)
@@ -469,7 +474,7 @@ mdToken FunctionMethodArgument::GetTypeTok(ComPtr<IMetaDataEmit2>& pEmit, mdAsse
 WSTRING GetSigTypeTokName(PCCOR_SIGNATURE& pbCur, const ComPtr<IMetaDataImport2>& pImport)
 {
     WSTRING tokenName = EmptyWStr;
-    bool ref_flag = false;
+    bool    ref_flag  = false;
     if (*pbCur == ELEMENT_TYPE_BYREF)
     {
         pbCur++;
@@ -635,7 +640,8 @@ bool ParseNumber(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd, unsigned* pOut)
 
     // at least one byte in the encoding, read that
 
-    if (!ParseByte(pbCur, pbEnd, &b1)) return false;
+    if (!ParseByte(pbCur, pbEnd, &b1))
+        return false;
 
     if (b1 == 0xff)
     {
@@ -648,12 +654,13 @@ bool ParseNumber(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd, unsigned* pOut)
     // early out on 1 byte encoding
     if ((b1 & 0x80) == 0)
     {
-        *pOut = (int) b1;
+        *pOut = (int)b1;
         return true;
     }
 
     // now at least 2 bytes in the encoding, read 2nd byte
-    if (!ParseByte(pbCur, pbEnd, &b2)) return false;
+    if (!ParseByte(pbCur, pbEnd, &b2))
+        return false;
 
     // early out on 2 byte encoding
     if ((b1 & 0x40) == 0)
@@ -669,24 +676,29 @@ bool ParseNumber(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd, unsigned* pOut)
         return false;
     }
 
-    if (!ParseByte(pbCur, pbEnd, &b3)) return false;
+    if (!ParseByte(pbCur, pbEnd, &b3))
+        return false;
 
-    if (!ParseByte(pbCur, pbEnd, &b4)) return false;
+    if (!ParseByte(pbCur, pbEnd, &b4))
+        return false;
 
     *pOut = ((b1 & 0x1f) << 24) | (b2 << 16) | (b3 << 8) | b4;
     return true;
 }
 
-bool ParseTypeDefOrRefEncoded(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd, unsigned char* pIndexTypeOut,
-                              unsigned* pIndexOut)
+bool ParseTypeDefOrRefEncoded(PCCOR_SIGNATURE& pbCur,
+                              PCCOR_SIGNATURE  pbEnd,
+                              unsigned char*   pIndexTypeOut,
+                              unsigned*        pIndexOut)
 {
     // parse an encoded typedef or typeref
     unsigned encoded = 0;
 
-    if (!ParseNumber(pbCur, pbEnd, &encoded)) return false;
+    if (!ParseNumber(pbCur, pbEnd, &encoded))
+        return false;
 
-    *pIndexTypeOut = (unsigned char) (encoded & 0x3);
-    *pIndexOut = (encoded >> 2);
+    *pIndexTypeOut = (unsigned char)(encoded & 0x3);
+    *pIndexOut     = (encoded >> 2);
     return true;
 }
 
@@ -716,11 +728,12 @@ bool ParseType(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd)
     */
 
     unsigned char elem_type;
-    unsigned index;
-    unsigned number;
+    unsigned      index;
+    unsigned      number;
     unsigned char indexType;
 
-    if (!ParseByte(pbCur, pbEnd, &elem_type)) return false;
+    if (!ParseByte(pbCur, pbEnd, &elem_type))
+        return false;
 
     switch (elem_type)
     {
@@ -748,12 +761,14 @@ bool ParseType(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd)
 
         case ELEMENT_TYPE_CLASS:
             // CLASS TypeDefOrRefEncoded
-            if (!ParseTypeDefOrRefEncoded(pbCur, pbEnd, &indexType, &index)) return false;
+            if (!ParseTypeDefOrRefEncoded(pbCur, pbEnd, &indexType, &index))
+                return false;
             break;
 
         case ELEMENT_TYPE_VALUETYPE:
             // VALUETYPE TypeDefOrRefEncoded
-            if (!ParseTypeDefOrRefEncoded(pbCur, pbEnd, &indexType, &index)) return false;
+            if (!ParseTypeDefOrRefEncoded(pbCur, pbEnd, &indexType, &index))
+                return false;
 
             break;
 
@@ -770,37 +785,46 @@ bool ParseType(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd)
         case ELEMENT_TYPE_SZARRAY:
             // SZARRAY Type
 
-            if (*pbCur == ELEMENT_TYPE_CMOD_OPT || *pbCur == ELEMENT_TYPE_CMOD_REQD) return false;
+            if (*pbCur == ELEMENT_TYPE_CMOD_OPT || *pbCur == ELEMENT_TYPE_CMOD_REQD)
+                return false;
 
-            if (!ParseType(pbCur, pbEnd)) return false;
+            if (!ParseType(pbCur, pbEnd))
+                return false;
 
             break;
 
         case ELEMENT_TYPE_GENERICINST:
             // GENERICINST (CLASS | VALUETYPE) TypeDefOrRefEncoded GenArgCount Type *
-            if (!ParseByte(pbCur, pbEnd, &elem_type)) return false;
+            if (!ParseByte(pbCur, pbEnd, &elem_type))
+                return false;
 
-            if (elem_type != ELEMENT_TYPE_CLASS && elem_type != ELEMENT_TYPE_VALUETYPE) return false;
+            if (elem_type != ELEMENT_TYPE_CLASS && elem_type != ELEMENT_TYPE_VALUETYPE)
+                return false;
 
-            if (!ParseTypeDefOrRefEncoded(pbCur, pbEnd, &indexType, &index)) return false;
+            if (!ParseTypeDefOrRefEncoded(pbCur, pbEnd, &indexType, &index))
+                return false;
 
-            if (!ParseNumber(pbCur, pbEnd, &number)) return false;
+            if (!ParseNumber(pbCur, pbEnd, &number))
+                return false;
 
             for (unsigned i = 0; i < number; i++)
             {
-                if (!ParseType(pbCur, pbEnd)) return false;
+                if (!ParseType(pbCur, pbEnd))
+                    return false;
             }
             break;
 
         case ELEMENT_TYPE_VAR:
             // VAR Number
-            if (!ParseNumber(pbCur, pbEnd, &number)) return false;
+            if (!ParseNumber(pbCur, pbEnd, &number))
+                return false;
 
             break;
 
         case ELEMENT_TYPE_MVAR:
             // MVAR Number
-            if (!ParseNumber(pbCur, pbEnd, &number)) return false;
+            if (!ParseNumber(pbCur, pbEnd, &number))
+                return false;
 
             break;
     }
@@ -817,11 +841,14 @@ bool ParseParam(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd)
         return false;
     }
 
-    if (pbCur >= pbEnd) return false;
+    if (pbCur >= pbEnd)
+        return false;
 
-    if (*pbCur == ELEMENT_TYPE_TYPEDBYREF) return false;
+    if (*pbCur == ELEMENT_TYPE_TYPEDBYREF)
+        return false;
 
-    if (*pbCur == ELEMENT_TYPE_BYREF) pbCur++;
+    if (*pbCur == ELEMENT_TYPE_BYREF)
+        pbCur++;
 
     return ParseType(pbCur, pbEnd);
 }
@@ -830,12 +857,14 @@ bool ParseParam(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd)
 // CustomMod* TYPEDBYREF we don't support
 bool ParseRetType(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd)
 {
+    if (*pbCur == ELEMENT_TYPE_CMOD_OPT || *pbCur == ELEMENT_TYPE_CMOD_REQD)
+        return false;
 
-    if (*pbCur == ELEMENT_TYPE_CMOD_OPT || *pbCur == ELEMENT_TYPE_CMOD_REQD) return false;
+    if (pbCur >= pbEnd)
+        return false;
 
-    if (pbCur >= pbEnd) return false;
-
-    if (*pbCur == ELEMENT_TYPE_TYPEDBYREF) return false;
+    if (*pbCur == ELEMENT_TYPE_TYPEDBYREF)
+        return false;
 
     if (*pbCur == ELEMENT_TYPE_VOID)
     {
@@ -843,7 +872,8 @@ bool ParseRetType(PCCOR_SIGNATURE& pbCur, PCCOR_SIGNATURE pbEnd)
         return true;
     }
 
-    if (*pbCur == ELEMENT_TYPE_BYREF) pbCur++;
+    if (*pbCur == ELEMENT_TYPE_BYREF)
+        pbCur++;
 
     return ParseType(pbCur, pbEnd);
 }
@@ -852,7 +882,7 @@ HRESULT FunctionMethodSignature::TryParse()
 {
     PCCOR_SIGNATURE pbCur = pbBase;
     PCCOR_SIGNATURE pbEnd = pbBase + len;
-    unsigned char elem_type;
+    unsigned char   elem_type;
 
     IfFalseRetFAIL(ParseByte(pbCur, pbEnd, &elem_type));
 
@@ -877,11 +907,13 @@ HRESULT FunctionMethodSignature::TryParse()
     auto fEncounteredSentinal = false;
     for (unsigned i = 0; i < param_count; i++)
     {
-        if (pbCur >= pbEnd) return E_FAIL;
+        if (pbCur >= pbEnd)
+            return E_FAIL;
 
         if (*pbCur == ELEMENT_TYPE_SENTINEL)
         {
-            if (fEncounteredSentinal) return E_FAIL;
+            if (fEncounteredSentinal)
+                return E_FAIL;
 
             fEncounteredSentinal = true;
             pbCur++;
@@ -902,12 +934,14 @@ HRESULT FunctionMethodSignature::TryParse()
     return S_OK;
 }
 
-bool FindTypeDefByName(const trace::WSTRING instrumentationTargetMethodTypeName, const trace::WSTRING assemblyName,
-                       const ComPtr<IMetaDataImport2>& metadata_import, mdTypeDef& typeDef)
+bool FindTypeDefByName(const trace::WSTRING            instrumentationTargetMethodTypeName,
+                       const trace::WSTRING            assemblyName,
+                       const ComPtr<IMetaDataImport2>& metadata_import,
+                       mdTypeDef&                      typeDef)
 {
-    mdTypeDef parentTypeDef = mdTypeDefNil;
-    auto nameParts = Split(instrumentationTargetMethodTypeName, '+');
-    auto instrumentedMethodTypeName = instrumentationTargetMethodTypeName;
+    mdTypeDef parentTypeDef              = mdTypeDefNil;
+    auto      nameParts                  = Split(instrumentationTargetMethodTypeName, '+');
+    auto      instrumentedMethodTypeName = instrumentationTargetMethodTypeName;
 
     if (nameParts.size() == 2)
     {
@@ -919,16 +953,16 @@ bool FindTypeDefByName(const trace::WSTRING instrumentationTargetMethodTypeName,
             // This can happen between .NET framework and .NET core, not all apis are
             // available in both. Eg: WinHttpHandler, CurlHandler, and some methods in
             // System.Data
-            Logger::Debug("Can't load the parent TypeDef: ", nameParts[0],
-                  " for nested class: ", instrumentationTargetMethodTypeName, ", Module: ", assemblyName);
+            Logger::Debug("Can't load the parent TypeDef: ", nameParts[0], " for nested class: ",
+                          instrumentationTargetMethodTypeName, ", Module: ", assemblyName);
             return false;
         }
         instrumentedMethodTypeName = nameParts[1];
     }
     else if (nameParts.size() > 2)
     {
-        Logger::Warn("Invalid TypeDef-only one layer of nested classes are supported: ", instrumentationTargetMethodTypeName,
-             ", Module: ", assemblyName);
+        Logger::Warn("Invalid TypeDef-only one layer of nested classes are supported: ",
+                     instrumentationTargetMethodTypeName, ", Module: ", assemblyName);
         return false;
     }
 

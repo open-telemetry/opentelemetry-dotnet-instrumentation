@@ -14,11 +14,11 @@
 // limitations under the License.
 // </copyright>
 
-#if !NETFRAMEWORK
+#if NET6_0_OR_GREATER
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OpenTelemetry.AutoInstrumentation.Configuration;
+using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.Logs;
 
 namespace OpenTelemetry.AutoInstrumentation.Logger;
@@ -80,7 +80,7 @@ internal static class LogBuilderExtensions
                 }
             });
 
-            AutoInstrumentationEventSource.Log.Trace($"Logs: Loaded AddOpenTelemetry from LoggingBuilder.");
+            AutoInstrumentationEventSource.Log.Information($"Logs: Loaded AddOpenTelemetry from LoggingBuilder.");
         }
         catch (Exception ex)
         {

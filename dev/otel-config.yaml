@@ -59,7 +59,6 @@ service:
       exporters:
         - logging 
         - file/logs
-        - otlp
   extensions:
     - health_check
     - zpages

@@ -81,7 +81,7 @@ public class MockSpansCollector : IDisposable
         var expectationsMet = new List<Collected>();
         var additionalEntries = new List<Collected>();
 
-        timeout ??= Timeout.Expectation;
+        timeout ??= TestTimeout.Expectation;
         var cts = new CancellationTokenSource();
 
         try
@@ -134,7 +134,7 @@ public class MockSpansCollector : IDisposable
 
     public void AssertEmpty(TimeSpan? timeout = null)
     {
-        timeout ??= Timeout.NoExpectation;
+        timeout ??= TestTimeout.NoExpectation;
         if (_spans.TryTake(out var resourceSpan, timeout.Value))
         {
             Assert.Fail($"Expected nothing, but got: {resourceSpan}");

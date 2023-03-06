@@ -5,26 +5,11 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.5.1-beta.3...HEAD)
-
-This beta release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
-
-- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-  [`1.4.0-rc.2`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-rc.2)
-- `System.Diagnostics.DiagnosticSource`: [`7.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/7.0.0)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.6.0...HEAD)
 
 ### Added
 
-- Move `OpenTelemetry.AutoInstrumentation.Native.so` to `linux-x64` directory
-  in `tracer-home` for Linux glibc, `OpenTelemetry.AutoInstrumentation.Native.so`
-  to `linux-musl-x64` for Linux musl and
-  `OpenTelemetry.AutoInstrumentation.Native.dylib`
-  to `osx-x64` for MacOS.
-
 ### Changed
-
-- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-  [`1.4.0-rc.2`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-rc.2)
 
 ### Deprecated
 
@@ -32,10 +17,103 @@ This beta release is built on top of [OpenTelemetry .NET](https://github.com/ope
 
 ### Fixed
 
+### Security
+
+## [0.6.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.6.0)
+
+This release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
+
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.4.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0)
+- `System.Diagnostics.DiagnosticSource`: [`7.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/7.0.0)
+
+### Changed
+
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.4.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0).
+
+## [0.6.0-beta.2](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.6.0-beta.2)
+
+This beta release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
+
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.4.0-rc.4`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-rc.4)
+- `System.Diagnostics.DiagnosticSource`: [`7.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/7.0.0)
+
+### Added
+
+- Support for systems with glibc versions 2.17-2.29.
+
+### Changed
+
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.4.0-rc.4`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-rc.4).
+- Replace `OTEL_DOTNET_AUTO_LEGACY_SOURCES` with `OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_LEGACY_SOURCES`.
+- Updated the shared store to correctly support
+  [framework roll-forward](https://learn.microsoft.com/en-us/dotnet/core/versions/selection#framework-dependent-apps-roll-forward)
+  from `net6.0` to `net7.0`.
+
+### Removed
+
+- Remove support for plugin method `ConfigureMetricsOptions(OpenTelemetry.Instrumentation.Process.ProcessInstrumentationOptions)`.
+
+### Fixed
+
+- Fix location of `OpenTelemetry.AutoInstrumentation.Native.so` for `linux-musl-x64`.
+- Fix issues when instrumenting `dotnet` CLI
+  [#1477](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1744).
+
+## [0.6.0-beta.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.6.0-beta.1)
+
+This beta release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
+
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.4.0-rc.3`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-rc.3)
+- `System.Diagnostics.DiagnosticSource`: [`7.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/7.0.0)
+
+### Added
+
+- Support configuring `OTEL_*` settings using `App.config` and `Web.config`.
+- Add support for Quartz traces instrumentation.
+- Add support for EntityFrameworkCore traces instrumentations.
+- Add plugin support for
+  `ResourceBuilder ConfigureResource(ResourceBuilder builder)`.
+
+### Changed
+
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.4.0-rc.3`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.4.0-rc.3)
+- Move `OpenTelemetry.AutoInstrumentation.Native.so` to `linux-x64` directory
+  in `tracer-home` for Linux glibc, `OpenTelemetry.AutoInstrumentation.Native.so`
+  to `linux-musl-x64` for Linux musl and
+  `OpenTelemetry.AutoInstrumentation.Native.dylib`
+  to `osx-x64` for MacOS.
+- Change the way to manage enabled instrumentations. The following environmental
+  variables:
+  - `OTEL_DOTNET_AUTO_TRACES_ENABLED_INSTRUMENTATIONS`,
+  - `OTEL_DOTNET_AUTO_TRACES_DISABLED_INSTRUMENTATIONS`,
+  - `OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS`,
+  - `OTEL_DOTNET_AUTO_METRICS_DISABLED_INSTRUMENTATIONS`,
+  - `OTEL_DOTNET_AUTO_LOGS_ENABLED_INSTRUMENTATIONS`,
+  - `OTEL_DOTNET_AUTO_LOGS_DISABLED_INSTRUMENTATIONS`
+
+  are replaced by:
+
+  - `OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED`,
+  - `OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED`,
+  - `OTEL_DOTNET_AUTO_TRACES_{0}_INSTRUMENTATION_ENABLED`,
+  - `OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED`,
+  - `OTEL_DOTNET_AUTO_METRICS_{0}_INSTRUMENTATION_ENABLED`,
+  - `OTEL_DOTNET_AUTO_LOGS_INSTRUMENTATION_ENABLED`,
+  - `OTEL_DOTNET_AUTO_LOGS_{0}_INSTRUMENTATION_ENABLED`.
+
+- Change instrumentation id for ASP.NET Core traces and metrics instrumentation
+  from `AspNet` to `ASPNETCORE`.
+
+### Fixed
+
 - Fix console error messages `Log: Exception creating FileSink`
  [#1885](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1885)
-
-### Security
 
 ## [0.5.1-beta.3](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.5.1-beta.3)
 

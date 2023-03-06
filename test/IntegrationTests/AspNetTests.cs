@@ -25,6 +25,8 @@ namespace IntegrationTests;
 
 public class AspNetTests
 {
+    private const string ServiceName = "TestApplication.AspNet.NetFramework";
+
     private readonly Dictionary<string, string> _environmentVariables = new();
 
     public AspNetTests(ITestOutputHelper output)
@@ -47,7 +49,8 @@ public class AspNetTests
         // on the firewall.
         using var collector = new MockSpansCollector(Output, host: "*");
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
-        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry");
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry"); // Expect Mvc span
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry"); // Expect WebApi span
 
         string collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
         _environmentVariables["OTEL_TRACES_EXPORTER"] = "otlp";
@@ -57,6 +60,34 @@ public class AspNetTests
         await CallTestApplicationEndpoint(webPort);
 
         collector.AssertExpectations();
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Windows")]
+    public async Task TracesResource()
+    {
+        Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
+
+        _environmentVariables["OTEL_SERVICE_NAME"] = ServiceName;
+
+        // Using "*" as host requires Administrator. This is needed to make the mock collector endpoint
+        // accessible to the Windows docker container where the test application is executed by binding
+        // the endpoint to all network interfaces. In order to do that it is necessary to open the port
+        // on the firewall.
+        using var collector = new MockSpansCollector(Output, host: "*");
+        using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
+        collector.ResourceExpector.Expect("service.name", ServiceName); // this is set via env var in Dockerfile and Wep.config, but env var has precedence
+        collector.ResourceExpector.Expect("deployment.environment", "test"); // this is set via Wep.config
+
+        string collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
+        _environmentVariables["OTEL_TRACES_EXPORTER"] = "otlp";
+        _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
+        var webPort = TcpPortProvider.GetOpenPort();
+        await using var container = await StartContainerAsync(webPort);
+        await CallTestApplicationEndpoint(webPort);
+
+        collector.ResourceExpector.AssertExpectations();
     }
 
     [Fact]
@@ -78,7 +109,8 @@ public class AspNetTests
         _environmentVariables["OTEL_METRICS_EXPORTER"] = "otlp";
         _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
         _environmentVariables["OTEL_METRIC_EXPORT_INTERVAL"] = "1000";
-        _environmentVariables["OTEL_DOTNET_AUTO_METRICS_ENABLED_INSTRUMENTATIONS"] = "AspNet"; // Helps to reduce noise by enabling only AspNet metrics.
+        _environmentVariables["OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED"] = "false"; // Helps to reduce noise by enabling only AspNet metrics.
+        _environmentVariables["OTEL_DOTNET_AUTO_METRICS_ASPNET_INSTRUMENTATION_ENABLED"] = "true"; // Helps to reduce noise by enabling only AspNet metrics.
         var webPort = TcpPortProvider.GetOpenPort();
         await using var container = await StartContainerAsync(webPort);
         await CallTestApplicationEndpoint(webPort);
@@ -86,7 +118,7 @@ public class AspNetTests
         collector.AssertExpectations();
     }
 
-    private async Task<TestcontainersContainer> StartContainerAsync(int webPort)
+    private async Task<IContainer> StartContainerAsync(int webPort)
     {
         // get path to test application that the profiler will attach to
         string imageName = $"testapplication-aspnet-netframework";
@@ -100,7 +132,7 @@ public class AspNetTests
         Directory.CreateDirectory(logPath);
         Output.WriteLine("Collecting docker logs to: " + logPath);
 
-        var builder = new TestcontainersBuilder<TestcontainersContainer>()
+        var builder = new ContainerBuilder()
             .WithImage(imageName)
             .WithCleanUp(cleanUp: true)
             .WithOutputConsumer(Consume.RedirectStdoutAndStderrToConsole())
@@ -137,9 +169,15 @@ public class AspNetTests
     private async Task CallTestApplicationEndpoint(int webPort)
     {
         var client = new HttpClient();
+
         var response = await client.GetAsync($"http://localhost:{webPort}");
         var content = await response.Content.ReadAsStringAsync();
-        Output.WriteLine("Response:");
+        Output.WriteLine("MVC Response:");
+        Output.WriteLine(content);
+
+        response = await client.GetAsync($"http://localhost:{webPort}/api/values");
+        content = await response.Content.ReadAsStringAsync();
+        Output.WriteLine("WebApi Response:");
         Output.WriteLine(content);
     }
 }

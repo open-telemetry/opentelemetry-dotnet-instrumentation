@@ -14,8 +14,11 @@
 // limitations under the License.
 // </copyright>
 
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
-using OpenTelemetry.AutoInstrumentation.Configuration;
+using System.IO;
 
 namespace OpenTelemetry.AutoInstrumentation.Logging;
 
@@ -24,21 +27,104 @@ namespace OpenTelemetry.AutoInstrumentation.Logging;
 /// </summary>
 internal static class OtelLogging
 {
+    private const string OtelDotnetAutoLogDirectory = "OTEL_DOTNET_AUTO_LOG_DIRECTORY";
+    private const string OtelLogLevel = "OTEL_LOG_LEVEL";
+    private const string OtelDotnetAutoLogFileSize = "OTEL_DOTNET_AUTO_LOG_FILE_SIZE";
     private const string NixDefaultDirectory = "/var/log/opentelemetry/dotnet";
 
-    private static readonly ILogger Logger;
+    private static readonly long FileSizeLimitBytes = GetConfiguredFileSizeLimitBytes();
+    private static readonly LogLevel? ConfiguredLogLevel = GetConfiguredLogLevel();
 
-    static OtelLogging()
+    private static readonly ConcurrentDictionary<string, IOtelLogger> OtelLoggers = new();
+
+    /// <summary>
+    /// Returns Logger implementation.
+    /// </summary>
+    /// <returns>Logger</returns>
+    public static IOtelLogger GetLogger()
+    {
+        return GetLogger(string.Empty);
+    }
+
+    /// <summary>
+    /// Returns Logger implementation.
+    /// </summary>
+    /// <param name="suffix">Suffix of the log file.</param>
+    /// <returns>Logger</returns>
+    public static IOtelLogger GetLogger(string suffix)
+    {
+        return OtelLoggers.GetOrAdd(suffix, CreateLogger);
+    }
+
+    internal static LogLevel? GetConfiguredLogLevel()
+    {
+        LogLevel? logLevel = LogLevel.Information;
+        try
+        {
+            var configuredValue = Environment.GetEnvironmentVariable(OtelLogLevel) ?? string.Empty;
+
+            logLevel = configuredValue switch
+            {
+                Constants.ConfigurationValues.LogLevel.Error => LogLevel.Error,
+                Constants.ConfigurationValues.LogLevel.Warning => LogLevel.Warning,
+                Constants.ConfigurationValues.LogLevel.Information => LogLevel.Information,
+                Constants.ConfigurationValues.LogLevel.Debug => LogLevel.Debug,
+                Constants.ConfigurationValues.None => null,
+                _ => logLevel
+            };
+        }
+        catch (Exception)
+        {
+            // theoretically, can happen when process has no privileges to check env
+        }
+
+        return logLevel;
+    }
+
+    internal static long GetConfiguredFileSizeLimitBytes()
+    {
+        const long defaultFileSizeLimitBytes = 10 * 1024 * 1024;
+
+        try
+        {
+            var configuredFileSizeLimit = Environment.GetEnvironmentVariable(OtelDotnetAutoLogFileSize);
+            if (string.IsNullOrEmpty(configuredFileSizeLimit))
+            {
+                return defaultFileSizeLimitBytes;
+            }
+
+            return long.TryParse(configuredFileSizeLimit, out var limit) && limit > 0 ? limit : defaultFileSizeLimitBytes;
+        }
+        catch (Exception)
+        {
+            // theoretically, can happen when process has no privileges to check env
+            return defaultFileSizeLimitBytes;
+        }
+    }
+
+    private static IOtelLogger CreateLogger(string suffix)
     {
         ISink? sink = null;
+
+        if (!ConfiguredLogLevel.HasValue)
+        {
+            return NoopLogger.Instance;
+        }
+
         try
         {
             var logDirectory = GetLogDirectory();
             if (logDirectory != null)
             {
-                var fileName = GetLogFileName();
+                var fileName = GetLogFileName(suffix);
                 var logPath = Path.Combine(logDirectory, fileName);
-                sink = new FileSink(logPath);
+                sink = new RollingFileSink(
+                    path: logPath,
+                    fileSizeLimitBytes: FileSizeLimitBytes,
+                    retainedFileCountLimit: 10,
+                    rollingInterval: RollingInterval.Day,
+                    rollOnFileSizeLimit: true,
+                    retainedFileTimeLimit: null);
             }
         }
         catch (Exception)
@@ -46,29 +132,28 @@ internal static class OtelLogging
             // unable to configure logging to a file
         }
 
-        if (sink == null)
-        {
-            sink = new NoopSink();
-        }
+        sink ??= new NoopSink();
 
-        Logger = new CustomLogger(sink);
+        return new CustomLogger(sink, ConfiguredLogLevel.Value);
     }
 
-    internal static ILogger GetLogger() => Logger;
-
-    private static string GetLogFileName()
+    private static string GetLogFileName(string suffix)
     {
         try
         {
             using var process = Process.GetCurrentProcess();
             var appDomainName = AppDomain.CurrentDomain.FriendlyName;
 
-            return $"otel-dotnet-auto-{appDomainName}-{process.Id}.log";
+            return string.IsNullOrEmpty(suffix)
+                ? $"otel-dotnet-auto-{appDomainName}-{process.Id}-.log"
+                : $"otel-dotnet-auto-{appDomainName}-{process.Id}-{suffix}-.log";
         }
         catch
         {
             // We can't get the process info
-            return $"otel-dotnet-auto-{Guid.NewGuid()}.log";
+            return string.IsNullOrEmpty(suffix)
+                ? $"otel-dotnet-auto-{Guid.NewGuid()}-.log"
+                : $"otel-dotnet-auto-{Guid.NewGuid()}-{suffix}-.log";
         }
     }
 
@@ -78,7 +163,7 @@ internal static class OtelLogging
 
         try
         {
-            logDirectory = Environment.GetEnvironmentVariable(ConfigurationKeys.LogDirectory);
+            logDirectory = Environment.GetEnvironmentVariable(OtelDotnetAutoLogDirectory);
 
             if (logDirectory == null)
             {

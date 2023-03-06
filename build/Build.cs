@@ -77,13 +77,15 @@ partial class Build : NukeBuild
         .DependsOn(BuildTracer)
         .DependsOn(CompileExamples)
         .DependsOn(NativeTests)
-        .DependsOn(ManagedTests);
+        .DependsOn(ManagedTests)
+        .DependsOn(CompileBenchmarks);
 
     Target BuildTracer => _ => _
         .Description("Builds the native and managed src, and publishes the tracer home directory")
         .After(Clean)
         .DependsOn(CreateRequiredDirectories)
         .DependsOn(Restore)
+        .DependsOn(GenerateNetFxTransientDependencies)
         .DependsOn(CompileManagedSrc)
         .DependsOn(PublishManagedProfiler)
         .DependsOn(GenerateNetFxAssemblyRedirectionSource)
@@ -91,7 +93,8 @@ partial class Build : NukeBuild
         .DependsOn(PublishNativeProfiler)
         .DependsOn(GenerateIntegrationsJson)
         .DependsOn(CopyIntegrationsJson)
-        .DependsOn(CopyInstrumentScripts);
+        .DependsOn(CopyInstrumentScripts)
+        .DependsOn(CopyLegalFiles);
 
     Target NativeTests => _ => _
         .Description("Builds the native unit tests and runs them")
@@ -104,10 +107,12 @@ partial class Build : NukeBuild
         .Description("Builds the managed unit / integration tests and runs them")
         .After(Clean, BuildTracer)
         .DependsOn(CreateRequiredDirectories)
+        .DependsOn(GenerateLibraryVersionFiles)
         .DependsOn(CompileManagedTests)
         .DependsOn(CompileMocks)
         .DependsOn(PublishMocks)
         .DependsOn(PublishIisTestApplications)
+        .DependsOn(InstallNetFxAssembliesGAC)
         .DependsOn(RunManagedTests);
 
     string ContainersFilter()

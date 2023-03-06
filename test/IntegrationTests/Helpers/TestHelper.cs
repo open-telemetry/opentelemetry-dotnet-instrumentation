@@ -109,7 +109,7 @@ public abstract class TestHelper
 
         process.Should().NotBeNull();
 
-        bool processTimeout = !process!.WaitForExit((int)Timeout.ProcessExit.TotalMilliseconds);
+        bool processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
         if (processTimeout)
         {
             process.Kill();

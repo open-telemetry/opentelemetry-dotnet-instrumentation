@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef OTEL_CLR_PROFILER_UTIL_H_
 #define OTEL_CLR_PROFILER_UTIL_H_
 
@@ -8,6 +13,7 @@
 #include <sstream>
 #include <string>
 #include <thread>
+#include <unordered_map>
 #include <vector>
 
 #include "string.h"
@@ -34,6 +40,9 @@ std::vector<WSTRING> GetEnvironmentValues(const WSTRING& name);
 
 // GetEnvironmentVariables returns list of all environment variable
 std::vector<WSTRING> GetEnvironmentVariables(const std::vector<WSTRING> &prefixes);
+
+// GetEnabledEnvironmentValues returns collection of enabled elements from values_map
+std::vector<WSTRING> GetEnabledEnvironmentValues(const bool enabled_by_default, const std::unordered_map<WSTRING, WSTRING> &values_map);
 
 // Convert Hex to string
 WSTRING HexStr(const void* data, int len);

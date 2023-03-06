@@ -17,59 +17,66 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Modified by OpenTelemetry Authors.
+
 using System.Text;
 
-namespace OpenTelemetry.AutoInstrumentation.Logging
+namespace OpenTelemetry.AutoInstrumentation.Logging;
+
+internal sealed class FileSink : IDisposable
 {
-    internal sealed class FileSink : ISink, IDisposable
+    readonly TextWriter _output;
+    readonly FileStream _underlyingStream;
+    readonly WriteCountingStream _countingStreamWrapper;
+    readonly object _syncRoot = new object();
+    readonly long _fileSizeLimitBytes;
+
+    public FileSink(string path, long fileSizeLimitBytes)
     {
-        readonly TextWriter _output;
-        readonly FileStream _underlyingStream;
-        readonly WriteCountingStream _countingStreamWrapper;
-        readonly object _syncRoot = new object();
-        static readonly long FileSizeLimitBytes = 10 * 1024 * 1024;
-
-        public FileSink(string path, Encoding encoding = null)
+        if (path == null) throw new ArgumentNullException(nameof(path));
+        if (fileSizeLimitBytes < 1)
         {
-            if (path == null) throw new ArgumentNullException(nameof(path));
+            throw new ArgumentException("Invalid value provided; file size limit must be at least 1 byte.");
+        }
+        _fileSizeLimitBytes = fileSizeLimitBytes;
 
-            var directory = Path.GetDirectoryName(path);
-            if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
+        var directory = Path.GetDirectoryName(path);
+        if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        _underlyingStream = System.IO.File.Open(path, FileMode.Append, FileAccess.Write, FileShare.Read);
+
+        Stream outputStream = _countingStreamWrapper = new WriteCountingStream(_underlyingStream);
+        _output = new StreamWriter(outputStream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+    }
+
+    public bool Write(string message)
+    {
+        lock (_syncRoot)
+        {
+            if (_countingStreamWrapper.CountedLength >= _fileSizeLimitBytes)
             {
-                Directory.CreateDirectory(directory);
+                return false;
             }
-
-            _underlyingStream = System.IO.File.Open(path, FileMode.Append, FileAccess.Write, FileShare.Read);
-
-            Stream outputStream = _countingStreamWrapper = new WriteCountingStream(_underlyingStream);
-            _output = new StreamWriter(outputStream, encoding ?? new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            _output.Write(message);
+            FlushToDisk();
+            return true;
         }
+    }
 
-        public void Write(string message)
+    public void Dispose()
+    {
+        lock (_syncRoot)
         {
-            lock (_syncRoot)
-            {
-                if (_countingStreamWrapper.CountedLength >= FileSizeLimitBytes)
-                {
-                    return;
-                }
-                _output.Write(message);
-                FlushToDisk();
-            }
+            _output.Dispose();
         }
+    }
 
-        public void Dispose()
-        {
-            lock (_syncRoot)
-            {
-                _output.Dispose();
-            }
-        }
-
-        private void FlushToDisk()
-        {
-            _output.Flush();
-            _underlyingStream.Flush(true);
-        }
+    public void FlushToDisk()
+    {
+        _output.Flush();
+        _underlyingStream.Flush(true);
     }
 }

@@ -79,7 +79,7 @@ public class MockLogsCollector : IDisposable
         var expectationsMet = new List<LogRecord>();
         var additionalEntries = new List<LogRecord>();
 
-        timeout ??= Timeout.Expectation;
+        timeout ??= TestTimeout.Expectation;
         var cts = new CancellationTokenSource();
 
         try
@@ -127,7 +127,7 @@ public class MockLogsCollector : IDisposable
 
     public void AssertEmpty(TimeSpan? timeout = null)
     {
-        timeout ??= Timeout.NoExpectation;
+        timeout ??= TestTimeout.NoExpectation;
         if (_logs.TryTake(out var logRecord, timeout.Value))
         {
             Assert.Fail($"Expected nothing, but got: {logRecord}");

@@ -12,6 +12,11 @@ public static class Projects
         public const string AutoInstrumentationMock = "OpenTelemetry.AutoInstrumentation.Mock";
     }
 
+    public static class Benchmarks
+    {
+        public const string AutoInstrumentationBenchmarks = "Benchmarks";
+    }
+
     public static class Tests
     {
         public const string AutoInstrumentationNativeTests = "OpenTelemetry.AutoInstrumentation.Native.Tests";
@@ -28,7 +33,8 @@ public static class Projects
 
     public static class Tools
     {
+        public const string LibraryVersionsGenerator = "LibraryVersionsGenerator";
         public const string IntegrationsJsonGenerator = "IntegrationsJsonGenerator";
-
+        public const string GacInstallTool = "GacInstallTool";
     }
 }

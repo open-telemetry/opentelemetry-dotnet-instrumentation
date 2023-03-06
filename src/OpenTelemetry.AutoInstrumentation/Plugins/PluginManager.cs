@@ -14,8 +14,9 @@
 // limitations under the License.
 // </copyright>
 
-using OpenTelemetry.AutoInstrumentation.Configuration;
+using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Plugins;
@@ -82,6 +83,11 @@ internal class PluginManager
         where T : notnull
     {
         ConfigureOptions(options, "ConfigureLogsOptions");
+    }
+
+    public ResourceBuilder ConfigureResourceBuilder(ResourceBuilder builder)
+    {
+        return ConfigureBuilder(builder, "ConfigureResource");
     }
 
     private void ConfigureOptions<T>(T options, string methodName)

@@ -1,22 +1,24 @@
 <Project>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
     <!-- StackExchange.Redis is required by OpenTelemetry.Instrumentation.StackExchangeRedis. ExcludeAssets="all" prevents copying it to the output -->
-    <PackageReference Include="StackExchange.Redis" Version="2.1.58" ExcludeAssets="all" />
+    <PackageReference Include="StackExchange.Redis" ExcludeAssets="all" />
     <!-- Pipelines.Sockets.Unofficial is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. ExcludeAssets="all" prevents copying it to the output -->
-    <PackageReference Include="Pipelines.Sockets.Unofficial" Version="2.1.16" ExcludeAssets="all" />
+    <PackageReference Include="Pipelines.Sockets.Unofficial" ExcludeAssets="all" />
     <!-- System.Diagnostics.PerformanceCounter is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. ExcludeAssets="all" prevents copying it to the output -->
-    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="4.7.0" ExcludeAssets="all" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" ExcludeAssets="all" />
     <!-- MySql.Data is required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
-    <PackageReference Include="MySql.Data" Version="6.10.7" ExcludeAssets="all" />
+    <PackageReference Include="MySql.Data" ExcludeAssets="all" />
     <!-- System.Configuration.ConfigurationManager is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" ExcludeAssets="all" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" ExcludeAssets="all" />
     <!-- System.Security.Cryptography.ProtectedData is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="4.7.0" ExcludeAssets="all" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" ExcludeAssets="all" />
     <!-- System.Drawing.Common is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
-    <PackageReference Include="System.Drawing.Common" Version="4.7.0" ExcludeAssets="all" />
+    <PackageReference Include="System.Drawing.Common" ExcludeAssets="all" />
     <!-- System.Windows.Extensions is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
-    <PackageReference Include="System.Windows.Extensions" Version="4.7.0" ExcludeAssets="all" />
+    <PackageReference Include="System.Windows.Extensions" ExcludeAssets="all" />
     <!-- Microsoft.Win32.SystemEvents is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. ExcludeAssets="all" prevents copying it to the output -->
-    <PackageReference Include="Microsoft.Win32.SystemEvents" Version="4.7.0" ExcludeAssets="all" />
+    <PackageReference Include="Microsoft.Win32.SystemEvents" ExcludeAssets="all" />
+    <!-- Microsoft.Bcl.AsyncInterfaces is required by StackExchange.Redis. ExcludeAssets="all" prevents copying it to the output -->
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" ExcludeAssets="all" />
   </ItemGroup>
 </Project>

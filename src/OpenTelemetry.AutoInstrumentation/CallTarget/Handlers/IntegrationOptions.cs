@@ -22,7 +22,7 @@ namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers;
 
 internal static class IntegrationOptions<TIntegration, TTarget>
 {
-    private static readonly ILogger Log = OtelLogging.GetLogger();
+    private static readonly IOtelLogger Log = OtelLogging.GetLogger();
 
     private static volatile bool _disableIntegration = false;
 

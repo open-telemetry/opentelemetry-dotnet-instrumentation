@@ -1,3 +1,6 @@
+// Copyright The OpenTelemetry Authors
+// SPDX-License-Identifier: Apache-2.0
+
 #include "rejit_handler.h"
 
 #include "logger.h"
@@ -11,10 +14,10 @@ namespace trace
 
 RejitHandlerModuleMethod::RejitHandlerModuleMethod(mdMethodDef methodDef, RejitHandlerModule* module)
 {
-    m_methodDef = methodDef;
-    m_pFunctionControl = nullptr;
-    m_module = module;
-    m_functionInfo = nullptr;
+    m_methodDef         = methodDef;
+    m_pFunctionControl  = nullptr;
+    m_module            = module;
+    m_functionInfo      = nullptr;
     m_methodReplacement = nullptr;
 }
 
@@ -71,29 +74,29 @@ void RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
     }
 
     // Enumerate all inliners and request rejit
-    ModuleID currentModuleId = m_module->GetModuleId();
-    mdMethodDef currentMethodDef = m_methodDef;
-    RejitHandler* handler = m_module->GetHandler();
-    ICorProfilerInfo7* pInfo = handler->GetCorProfilerInfo7();
+    ModuleID           currentModuleId  = m_module->GetModuleId();
+    mdMethodDef        currentMethodDef = m_methodDef;
+    RejitHandler*      handler          = m_module->GetHandler();
+    ICorProfilerInfo7* pInfo            = handler->GetCorProfilerInfo7();
 
     if (pInfo != nullptr)
     {
         // Now we enumerate all methods that inline the current methodDef
-        BOOL incompleteData = false;
+        BOOL                    incompleteData = false;
         ICorProfilerMethodEnum* methodEnum;
 
         HRESULT hr = pInfo->EnumNgenModuleMethodsInliningThisMethod(moduleId, currentModuleId, currentMethodDef,
                                                                     &incompleteData, &methodEnum);
         if (SUCCEEDED(hr))
         {
-            COR_PRF_METHOD method;
-            unsigned int total = 0;
-            std::vector<ModuleID> modules;
+            COR_PRF_METHOD           method;
+            unsigned int             total = 0;
+            std::vector<ModuleID>    modules;
             std::vector<mdMethodDef> methods;
             while (methodEnum->Next(1, &method, NULL) == S_OK)
             {
-                Logger::Debug("NGEN:: Asking rewrite for inliner [ModuleId=", method.moduleId,
-                              ",MethodDef=", method.methodId, "]");
+                Logger::Debug("NGEN:: Asking rewrite for inliner [ModuleId=", method.moduleId, ",MethodDef=",
+                              method.methodId, "]");
                 modules.push_back(method.moduleId);
                 methods.push_back(method.methodId);
                 total++;
@@ -103,8 +106,8 @@ void RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
             if (total > 0)
             {
                 handler->RequestRejit(modules, methods);
-                Logger::Info("NGEN:: Processed with ", total, " inliners [ModuleId=", currentModuleId,
-                             ",MethodDef=", currentMethodDef, "]");
+                Logger::Info("NGEN:: Processed with ", total, " inliners [ModuleId=", currentModuleId, ",MethodDef=",
+                             currentMethodDef, "]");
             }
 
             if (!incompleteData)
@@ -118,16 +121,18 @@ void RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId
         }
         else if (hr == E_INVALIDARG)
         {
-            Logger::Info("NGEN:: Error Invalid arguments in [ModuleId=", currentModuleId,
-                         ",MethodDef=", currentMethodDef, ", HR=E_INVALIDARG]");
+            Logger::Info("NGEN:: Error Invalid arguments in [ModuleId=", currentModuleId, ",MethodDef=",
+                         currentMethodDef, ", HR=E_INVALIDARG]");
         }
         else if (hr == CORPROF_E_DATAINCOMPLETE)
         {
-            Logger::Info("NGEN:: Error Incomplete data in [ModuleId=", currentModuleId, ",MethodDef=", currentMethodDef, ", HR=CORPROF_E_DATAINCOMPLETE]");
+            Logger::Info("NGEN:: Error Incomplete data in [ModuleId=", currentModuleId, ",MethodDef=", currentMethodDef,
+                         ", HR=CORPROF_E_DATAINCOMPLETE]");
         }
         else
         {
-            Logger::Info("NGEN:: Error in [ModuleId=", currentModuleId, ",MethodDef=", currentMethodDef, ", HR=", HResultStr(hr), "]");
+            Logger::Info("NGEN:: Error in [ModuleId=", currentModuleId, ",MethodDef=", currentMethodDef, ", HR=",
+                         HResultStr(hr), "]");
         }
     }
 }
@@ -140,7 +145,7 @@ RejitHandlerModule::RejitHandlerModule(ModuleID moduleId, RejitHandler* handler)
 {
     m_moduleId = moduleId;
     m_metadata = nullptr;
-    m_handler = handler;
+    m_handler  = handler;
 }
 
 ModuleID RejitHandlerModule::GetModuleId()
@@ -174,7 +179,7 @@ RejitHandlerModuleMethod* RejitHandlerModule::GetOrAddMethod(mdMethodDef methodD
     }
 
     RejitHandlerModuleMethod* methodHandler = new RejitHandlerModuleMethod(methodDef, this);
-    m_methods[methodDef] = std::unique_ptr<RejitHandlerModuleMethod>(methodHandler);
+    m_methods[methodDef]                    = std::unique_ptr<RejitHandlerModuleMethod>(methodHandler);
     return methodHandler;
 }
 
@@ -219,7 +224,7 @@ void RejitHandler::RequestRejitForInlinersInModule(ModuleID moduleId)
 RejitHandler::RejitHandler(ICorProfilerInfo7* pInfo,
                            std::function<HRESULT(RejitHandlerModule*, RejitHandlerModuleMethod*)> rewriteCallback)
 {
-    m_profilerInfo7 = pInfo;
+    m_profilerInfo7   = pInfo;
     m_rewriteCallback = rewriteCallback;
 }
 
@@ -234,7 +239,7 @@ RejitHandlerModule* RejitHandler::GetOrAddModule(ModuleID moduleId)
     }
 
     RejitHandlerModule* moduleHandler = new RejitHandlerModule(moduleId, this);
-    m_modules[moduleId] = std::unique_ptr<RejitHandlerModule>(moduleHandler);
+    m_modules[moduleId]               = std::unique_ptr<RejitHandlerModule>(moduleHandler);
     return moduleHandler;
 }
 
@@ -275,12 +280,17 @@ void RejitHandler::RequestRejit(std::vector<ModuleID>& modulesVector, std::vecto
         GetOrAddModule(modulesVector[i])->GetOrAddMethod(modulesMethodDef[i]);
     }
 
-    // Even if ICorProfilerInfo10, or later, is available the code leverages the fact
-    // that this is a startup profiler so there is no need to handle an attach scenario.
-    // Instead of using RequestReJITWithInliners to handle inlined methods that are targeted
-    // for instrumentation the code uses the ICorProfilerCallback::JITInlining callback instead.
-    // On the callback the profiler blocks the inlining of any method targeted for instrumentation.
-    HRESULT hr = m_profilerInfo7->RequestReJIT((ULONG) length, modulesVector.data(), modulesMethodDef.data());
+    // Even if ICorProfilerInfo10, or later, is available the code leverages the
+    // fact
+    // that this is a startup profiler so there is no need to handle an attach
+    // scenario.
+    // Instead of using RequestReJITWithInliners to handle inlined methods that
+    // are targeted
+    // for instrumentation the code uses the ICorProfilerCallback::JITInlining
+    // callback instead.
+    // On the callback the profiler blocks the inlining of any method targeted for
+    // instrumentation.
+    HRESULT hr = m_profilerInfo7->RequestReJIT((ULONG)length, modulesVector.data(), modulesMethodDef.data());
     if (SUCCEEDED(hr))
     {
         Logger::Info("Request ReJIT done for ", length, " methods");
@@ -294,12 +304,14 @@ void RejitHandler::RequestRejit(std::vector<ModuleID>& modulesVector, std::vecto
 void RejitHandler::Shutdown()
 {
     m_modules.clear();
-    m_profilerInfo7 = nullptr;
+    m_profilerInfo7   = nullptr;
     m_rewriteCallback = nullptr;
 }
 
-HRESULT RejitHandler::NotifyReJITParameters(ModuleID moduleId, mdMethodDef methodId,
-                                            ICorProfilerFunctionControl* pFunctionControl, ModuleMetadata* metadata)
+HRESULT RejitHandler::NotifyReJITParameters(ModuleID                     moduleId,
+                                            mdMethodDef                  methodId,
+                                            ICorProfilerFunctionControl* pFunctionControl,
+                                            ModuleMetadata*              metadata)
 {
     auto moduleHandler = GetOrAddModule(moduleId);
     moduleHandler->SetModuleMetadata(metadata);

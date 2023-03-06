@@ -43,7 +43,7 @@ internal static class ContinuationsHelper
         return typeof(object);
     }
 
-#if !NET6_0_OR_GREATER
+#if NETFRAMEWORK
     internal static TTo Convert<TFrom, TTo>(TFrom value)
     {
         return Converter<TFrom, TTo>.Convert(value);

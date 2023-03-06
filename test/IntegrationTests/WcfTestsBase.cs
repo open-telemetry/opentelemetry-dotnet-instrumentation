@@ -28,7 +28,6 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
     protected WcfTestsBase(string testAppName, ITestOutputHelper output)
         : base(testAppName, output)
     {
-        SetEnvironmentVariable("OTEL_SERVICE_NAME", testAppName);
     }
 
     [Fact]
@@ -39,7 +38,7 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
 
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        // the test app makes 2 calls (therefore we exepct 4 spans)
+        // the test app makes 2 calls (therefore we expect 4 spans)
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 1");
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 1");
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 2");
