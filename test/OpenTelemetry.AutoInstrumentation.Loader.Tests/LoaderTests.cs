@@ -49,7 +49,7 @@ public class LoaderTests
         }
 #endif
 
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_DEBUG", "1");
+        Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", profilerDirectory);
 
         var exception = Record.Exception(() => new AutoInstrumentation.Loader.Loader());
