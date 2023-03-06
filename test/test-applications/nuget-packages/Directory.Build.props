@@ -16,7 +16,7 @@
     <LangVersion>11.0</LangVersion>
 
     <!-- Keep the same base output path to simplify re-use of test helpers -->
-    <BaseOutputPath >..\bin\$(MSBuildProjectName)\</BaseOutputPath>
+    <BaseOutputPath>..\bin\$(MSBuildProjectName)\</BaseOutputPath>
   </PropertyGroup>
 
 </Project>
