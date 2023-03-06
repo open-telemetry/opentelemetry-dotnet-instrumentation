@@ -78,6 +78,28 @@ Clean your repository by running:
 git clean -fXd
 ```
 
+### Building NuGet packages locally
+
+To build the NuGet package with the native components (`OpenTelemetry.AutoInstrumentation.Runtime.Native`)
+locally it is necessary to download CI artifacts.
+
+Download the `bin-*` artifacts from a successful CI job and expand each one into
+a folder with the same name as the artifact under `./bin/ci-artifacts/`. The
+PowerShell snippet below shows how to properly copy and expand the artifacts,
+it assumes that the code is run from the root of the repository and the CI
+artifacts we added to `~/Downloads/`:
+
+```PowerShell
+$artifacts = @("bin-alpine", "bin-centos", "bin-macos-11", "bin-windows-2022")
+$destFolder = "./bin/ci-artifacts/"
+$zipFilesFolder = "~/Downloads/"
+
+rm -r -force $destFolder
+mkdir $destFolder
+
+$artifacts | % { $dest = $(Join-Path $destFolder $_); $zip = $(Join-Path $zipFilesFolder $_) + ".zip"; Expand-Archive $zip $dest }
+```
+
 ### Documentation lint
 
 If you made changes to the Markdown documents (`*.md` files), ensure that lint
