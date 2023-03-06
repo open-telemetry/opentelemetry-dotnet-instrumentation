@@ -15,18 +15,19 @@ Use the NuGet packages in the following scenarios:
 1. Simplify deployment. For example, a container running a single application.
 1. Support instrumentation of [`self-contained`](https://learn.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained)
   applications.
-1. Facilitate developer experimentation with automatic instrumentation through NuGet packages.
+1. Facilitate developer experimentation with automatic instrumentation through
+  NuGet packages.
 
 ## Limitations
 
 While NuGet packages are a convenient way to deploy automatic
-instrumentation, they can't be used in all cases. The most common 
+instrumentation, they can't be used in all cases. The most common
 reasons for not using NuGet packages include the following:
 
 1. You can't add the package to the application project. For example,
 the application is from a third party that can't add the package.
 1. Reduce disk usage, or the size of a virtual machine, when multiple applications
-to be instrumented are installed in a single machine. In this case you can use 
+to be instrumented are installed in a single machine. In this case you can use
 a single deployment for all .NET applications running on the machine.
 1. A legacy application that can't be migrated to the [SDK-style project](https://learn.microsoft.com/en-us/nuget/resources/check-project-format#check-the-project-format).
 
@@ -46,7 +47,7 @@ require choosing between distributing a
 [_self-contained_ or a _framework-dependent_](https://learn.microsoft.com/en-us/dotnet/core/deploying/)
 application. Both types are compatible with automatic instrumentation.
 
-Use the script in the output folder of the build to launch the 
+Use the script in the output folder of the build to launch the
 application with automatic instrumentation activated.
 
 - On Windows, use `instrument.cmd <application_executable>`
