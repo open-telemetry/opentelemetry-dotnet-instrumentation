@@ -37,11 +37,11 @@ private:
     LoggerImpl();
     ~LoggerImpl();
 
-    const WSTRING log_level_none  = WStr("none");
-    const WSTRING log_level_error = WStr("error");
-    const WSTRING log_level_warn  = WStr("warn");
-    const WSTRING log_level_info  = WStr("info");
-    const WSTRING log_level_debug = WStr("debug");
+    static inline const WSTRING log_level_none  = WStr("none");
+    static inline const WSTRING log_level_error = WStr("error");
+    static inline const WSTRING log_level_warn  = WStr("warn");
+    static inline const WSTRING log_level_info  = WStr("info");
+    static inline const WSTRING log_level_debug = WStr("debug");
 
 public:
     template <typename... Args>
