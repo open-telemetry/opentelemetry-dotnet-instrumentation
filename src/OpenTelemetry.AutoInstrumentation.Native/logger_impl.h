@@ -37,6 +37,12 @@ private:
     LoggerImpl();
     ~LoggerImpl();
 
+    const WSTRING log_level_none  = WStr("none");
+    const WSTRING log_level_error = WStr("error");
+    const WSTRING log_level_warn  = WStr("warn");
+    const WSTRING log_level_info  = WStr("info");
+    const WSTRING log_level_debug = WStr("debug");
+
 public:
     template <typename... Args>
     void Debug(const Args&... args);
@@ -95,7 +101,7 @@ LoggerImpl<TLoggerPolicy>::LoggerImpl()
 
     static auto configured_log_level = GetEnvironmentValue(environment::log_level);
 
-    if (configured_log_level == WStr("none"))
+    if (configured_log_level == log_level_none)
     {
         m_fileout = spdlog::null_logger_mt("LoggerImpl");
     }
@@ -103,19 +109,19 @@ LoggerImpl<TLoggerPolicy>::LoggerImpl()
     {
         auto log_level = spdlog::level::info;
 
-        if (configured_log_level == WStr("error"))
+        if (configured_log_level == log_level_error)
         {
             log_level = spdlog::level::err;
         }
-        else if (configured_log_level == WStr("warn"))
+        else if (configured_log_level == log_level_warn)
         {
             log_level = spdlog::level::warn;
         }
-        else if (configured_log_level == WStr("info"))
+        else if (configured_log_level == log_level_info)
         {
             log_level = spdlog::level::info;
         }
-        else if (configured_log_level == WStr("debug"))
+        else if (configured_log_level == log_level_debug)
         {
             log_level = spdlog::level::debug;
         }
