@@ -69,4 +69,26 @@ public class ServiceNameConfiguratorTests
             Environment.SetEnvironmentVariable(OtelServiceVariable, null);
         }
     }
+
+    [Fact]
+    public void ServiceName_Retained_EnvVarSet_EmptyBuilder()
+    {
+        const string setServiceName = "TestApplication";
+        try
+        {
+            Environment.SetEnvironmentVariable(OtelServiceVariable, setServiceName);
+
+            var resourceBuilder = ResourceBuilder.CreateEmpty();
+            ResourceConfigurator.Configure(resourceBuilder);
+            var resource = resourceBuilder.Build();
+
+            var serviceName = resource.Attributes.FirstOrDefault(a => a.Key == ServiceName).Value as string;
+
+            serviceName?.Should().Be(setServiceName);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(OtelServiceVariable, null);
+        }
+    }
 }
