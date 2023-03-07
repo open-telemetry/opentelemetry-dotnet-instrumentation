@@ -441,7 +441,7 @@ partial class Build
         .Unlisted()
         .Description("Creates AutoInstrumentation.AdditionalDeps and shared store in tracer-home")
         .After(CompileManagedSrc)
-        .Executes(() =>
+        .Executes(async () =>
         {
             if (AdditionalDepsDirectory.DirectoryExists())
             {
@@ -467,8 +467,8 @@ partial class Build
                 // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
                 .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
 
-            AdditionalDepsDirectory.GlobFiles("**/*deps.json")
-                .ForEach(file =>
+            await AdditionalDepsDirectory.GlobFiles("**/*deps.json")
+                .ForEachAsync(async file =>
                 {
                     var rawJson = File.ReadAllText(file);
                     var depsJson = JsonNode.Parse(rawJson).AsObject();
@@ -482,6 +482,8 @@ partial class Build
 
                     depsJson.CopyNativeDependenciesToStore(file, architectureStores);
                     depsJson.RemoveOpenTelemetryLibraries();
+
+                    await depsJson.CleanDuplicatesFromDepsJsonAsync();
 
                     if (folderRuntimeName == TargetFramework.NET6_0)
                     {
