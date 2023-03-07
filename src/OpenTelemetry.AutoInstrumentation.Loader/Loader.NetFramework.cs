@@ -53,12 +53,12 @@ internal partial class Loader
             try
             {
                 var loadedAssembly = Assembly.LoadFrom(path);
-                Logger.Debug("Assembly.LoadFrom(\"{0}\") succeeded={1}", path, loadedAssembly != null, false);
+                Logger.Debug<string, bool>("Assembly.LoadFrom(\"{0}\") succeeded={1}", path, loadedAssembly != null);
                 return loadedAssembly;
             }
             catch (Exception ex)
             {
-                Logger.Debug("Assembly.LoadFrom(\"{0}\") Exception: {1}", path, ex);
+                Logger.Debug(ex, "Assembly.LoadFrom(\"{0}\") Exception: {1}", path, ex.Message);
             }
         }
 

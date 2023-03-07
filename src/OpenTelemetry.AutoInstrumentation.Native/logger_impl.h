@@ -104,58 +104,56 @@ LoggerImpl<TLoggerPolicy>::LoggerImpl()
     if (configured_log_level == log_level_none)
     {
         m_fileout = spdlog::null_logger_mt("LoggerImpl");
+        return;
     }
-    else
+    auto log_level = spdlog::level::info;
+
+    if (configured_log_level == log_level_error)
     {
-        auto log_level = spdlog::level::info;
-
-        if (configured_log_level == log_level_error)
-        {
-            log_level = spdlog::level::err;
-        }
-        else if (configured_log_level == log_level_warn)
-        {
-            log_level = spdlog::level::warn;
-        }
-        else if (configured_log_level == log_level_info)
-        {
-            log_level = spdlog::level::info;
-        }
-        else if (configured_log_level == log_level_debug)
-        {
-            log_level = spdlog::level::debug;
-        }
-
-        spdlog::flush_every(std::chrono::seconds(3));
-
-        static auto current_process_name = ToString(GetCurrentProcessName());
-        static auto current_process_id   = GetPID();
-        static auto current_process_without_extension =
-            current_process_name.substr(0, current_process_name.find_last_of("."));
-
-        static auto file_name_suffix =
-            "-" + current_process_without_extension + "-" + std::to_string(current_process_id);
-
-        try
-        {
-            m_fileout = spdlog::rotating_logger_mt("Logger", GetLogPath(file_name_suffix), 1048576 * 5, 10);
-        }
-        catch (...)
-        {
-            // By writing into the stderr was changing the behavior in a CI scenario.
-            // There's not a good way to report errors when trying to create the log file.
-            // But we never should be changing the normal behavior of an app.
-            // std::cerr << "LoggerImpl Handler: Error creating native log file." << std::endl;
-            m_fileout = spdlog::null_logger_mt("LoggerImpl");
-        }
-
-        m_fileout->set_level(log_level);
-
-        m_fileout->set_pattern(TLoggerPolicy::pattern, spdlog::pattern_time_type::utc);
-
-        // trigger flush whenever info messages are logged
-        m_fileout->flush_on(spdlog::level::info);
+        log_level = spdlog::level::err;
     }
+    else if (configured_log_level == log_level_warn)
+    {
+        log_level = spdlog::level::warn;
+    }
+    else if (configured_log_level == log_level_info)
+    {
+        log_level = spdlog::level::info;
+    }
+    else if (configured_log_level == log_level_debug)
+    {
+        log_level = spdlog::level::debug;
+    }
+
+    spdlog::flush_every(std::chrono::seconds(3));
+
+    static auto current_process_name = ToString(GetCurrentProcessName());
+    static auto current_process_id   = GetPID();
+    static auto current_process_without_extension =
+        current_process_name.substr(0, current_process_name.find_last_of("."));
+
+    static auto file_name_suffix =
+        "-" + current_process_without_extension + "-" + std::to_string(current_process_id);
+
+    try
+    {
+        m_fileout = spdlog::rotating_logger_mt("Logger", GetLogPath(file_name_suffix), 1048576 * 5, 10);
+    }
+    catch (...)
+    {
+        // By writing into the stderr was changing the behavior in a CI scenario.
+        // There's not a good way to report errors when trying to create the log file.
+        // But we never should be changing the normal behavior of an app.
+        // std::cerr << "LoggerImpl Handler: Error creating native log file." << std::endl;
+        m_fileout = spdlog::null_logger_mt("LoggerImpl");
+    }
+
+    m_fileout->set_level(log_level);
+
+    m_fileout->set_pattern(TLoggerPolicy::pattern, spdlog::pattern_time_type::utc);
+
+    // trigger flush whenever info messages are logged
+    m_fileout->flush_on(spdlog::level::info);
 };
 
 template <typename TLoggerPolicy>
