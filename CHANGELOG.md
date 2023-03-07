@@ -9,11 +9,15 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Support `OTEL_LOG_LEVEL` to configure SDK logging level.
+
 ### Changed
 
 ### Deprecated
 
 ### Removed
+
+- Remove support for enabling debugging mode with `OTEL_DOTNET_AUTO_DEBUG`.
 
 ### Fixed
 
