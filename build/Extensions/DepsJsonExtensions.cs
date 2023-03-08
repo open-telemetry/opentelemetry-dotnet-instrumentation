@@ -56,12 +56,12 @@ internal static class DepsJsonExtensions
         }
     }
 
-    public static void RemoveLibrary(this JsonObject depsJson, string library)
+    public static void RemoveLibrary(this JsonObject depsJson, Predicate<string> match)
     {
         var dependencies = depsJson.GetDependencies();
         var runtimeLibraries = depsJson["libraries"].AsObject();
         var keysToRemove = dependencies
-            .Where(x => x.Key.StartsWith(library))
+            .Where(x => match(x.Key))
             .Select(x => x.Key)
             .ToList();
 
@@ -74,7 +74,7 @@ internal static class DepsJsonExtensions
 
     public static void RemoveOpenTelemetryLibraries(this JsonObject depsJson)
     {
-        RemoveLibrary(depsJson, "OpenTelemetry");
+        RemoveLibrary(depsJson, lib => lib.StartsWith("OpenTelemetry"));
     }
 
     public static async Task CleanDuplicatesFromDepsJsonAsync(this JsonObject depsJson)
@@ -107,7 +107,7 @@ internal static class DepsJsonExtensions
                         // and remove these first.
                         // TODO 2: This is just cleaning up deps json, we need to manually
                         // clean shared store also?
-                        RemoveLibrary(depsJson, dependency);
+                        RemoveLibrary(depsJson, lib => lib.Equals(dependency));
                     }
                 }
             }
