@@ -9,6 +9,6 @@ internal static class EnumerableExtensions
         foreach (var item in enumerable)
         {
             await action(item);
-        }            
+        }
     }
 }
