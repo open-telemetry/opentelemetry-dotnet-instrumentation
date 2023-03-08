@@ -20,32 +20,27 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal static class ResourceConfigurator
 {
-    public static void Configure(ResourceBuilder resourceBuilder)
+    public static ResourceBuilder CreateResourceBuilder()
     {
-        var pluginManager = Instrumentation.PluginManager;
-
-        resourceBuilder
+        var resourceBuilder = ResourceBuilder
+            .CreateEmpty() // Don't use CreateDefault because it puts service name unknown by default.
+            .AddEnvironmentVariableDetector()
             .AddTelemetrySdk()
             .AddAttributes(new KeyValuePair<string, object>[] { new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version) });
 
-        var resource = resourceBuilder.Build();
-        var serviceName = resource.Attributes.FirstOrDefault(a => a.Key == "service.name").Value as string;
-        if (serviceName?.StartsWith("unknown_service:") == true)
-        {
-            // Fallback service name
-            resourceBuilder.AddAttributes(new KeyValuePair<string, object>[] { new("service.name", ServiceNameConfigurator.GetFallbackServiceName()) });
-        }
-
+        var pluginManager = Instrumentation.PluginManager;
         if (pluginManager != null)
         {
             resourceBuilder.InvokePlugins(pluginManager);
         }
-    }
 
-    public static ResourceBuilder CreateResourceBuilder()
-    {
-        var resourceBuilder = ResourceBuilder.CreateDefault();
-        Configure(resourceBuilder);
+        var resource = resourceBuilder.Build();
+        if (!resource.Attributes.Any(kvp => kvp.Key == "service.name"))
+        {
+            // "service.name" was not configured yet use the fallback.
+            resourceBuilder.AddAttributes(new KeyValuePair<string, object>[] { new("service.name", ServiceNameConfigurator.GetFallbackServiceName()) });
+        }
+
         return resourceBuilder;
     }
 }

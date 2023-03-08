@@ -135,7 +135,7 @@ internal static class Instrumentation
                 {
                     var builder = Sdk
                         .CreateTracerProviderBuilder()
-                        .ConfigureResource(ResourceConfigurator.Configure)
+                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder())
                         .UseEnvironmentVariables(LazyInstrumentationLoader, TracerSettings.Value, _pluginManager)
                         .InvokePlugins(_pluginManager);
 
@@ -155,7 +155,7 @@ internal static class Instrumentation
                 {
                     var builder = Sdk
                         .CreateMeterProviderBuilder()
-                        .ConfigureResource(ResourceConfigurator.Configure)
+                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder())
                         .UseEnvironmentVariables(LazyInstrumentationLoader, MetricSettings.Value, _pluginManager)
                         .InvokePlugins(_pluginManager);
 
