@@ -36,6 +36,14 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     </configuration>
     ```
 
+3. Service name automatic detection
+
+   If no service name is explicitly configured one will be generated for you.
+     This can be helpful in some circumstances.
+     - If the application is hosted on IIS in .NET Framework this will be
+     `SiteName\VirtualPath` ex: `MySite\MyApp`
+     - If that is not the case it will use the name of the applications Assembly
+     Name
 By default we recommend using environment variables for configuration.
 However, if given setting supports it, then:
 
