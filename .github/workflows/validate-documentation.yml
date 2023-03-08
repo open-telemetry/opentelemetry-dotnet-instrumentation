@@ -17,6 +17,7 @@ on:
     - 'package-lock.json'
     - 'package.json'
     - '.lycheeignore'
+  merge_group:
   workflow_dispatch:
 
 jobs:
