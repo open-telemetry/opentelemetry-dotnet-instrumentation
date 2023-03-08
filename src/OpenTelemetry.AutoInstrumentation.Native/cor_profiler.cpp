@@ -47,15 +47,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 {
     auto _ = trace::Stats::Instance()->InitializeMeasure();
 
-    // check if debug mode is enabled
-    if (IsDebugEnabled())
-    {
-        Logger::EnableDebug();
-    }
-
     CorProfilerBase::Initialize(cor_profiler_info_unknown);
 
-    if (IsDebugEnabled())
+    if (Logger::IsDebugEnabled())
     {
         const auto env_variables = GetEnvironmentVariables(env_vars_prefixes_to_display);
         Logger::Debug("Environment variables:");
@@ -76,7 +70,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     // code is ready to get runtime information
     runtime_information_ = GetRuntimeInformation(this->info_);
-    if (IsDebugEnabled())
+    if (Logger::IsDebugEnabled())
     {
         if (runtime_information_.is_desktop())
         {
@@ -2669,7 +2663,7 @@ HRESULT CorProfiler::CallTarget_RewriterCallback(RejitHandlerModule*       modul
     mdTypeRef   wrapper_type_ref   = mdTypeRefNil;
     GetWrapperMethodRef(module_metadata, module_id, *method_replacement, wrapper_method_ref, wrapper_type_ref);
 
-    if (IsDebugEnabled())
+    if (Logger::IsDebugEnabled())
     {
         Logger::Debug("*** CallTarget_RewriterCallback() Start: ", caller->type.name, ".", caller->name, "() [IsVoid=",
                       isVoid, ", IsStatic=", isStatic, ", IntegrationType=",
@@ -2818,7 +2812,7 @@ HRESULT CorProfiler::CallTarget_RewriterCallback(RejitHandlerModule*       modul
     }
 
     // *** Emit BeginMethod call
-    if (IsDebugEnabled())
+    if (Logger::IsDebugEnabled())
     {
         Logger::Debug("Caller Type.Id: ", HexStr(&caller->type.id, sizeof(mdToken)));
         Logger::Debug("Caller Type.IsGeneric: ", caller->type.isGeneric);

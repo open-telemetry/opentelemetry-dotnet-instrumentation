@@ -46,19 +46,19 @@ internal partial class Loader
             return null;
         }
 
-        LoaderLogger.Debug("Requester [{0}] requested [{1}]", args?.RequestingAssembly?.FullName ?? "<null>", args?.Name ?? "<null>");
+        Logger.Debug("Requester [{0}] requested [{1}]", args?.RequestingAssembly?.FullName ?? "<null>", args?.Name ?? "<null>");
         var path = Path.Combine(ManagedProfilerDirectory, $"{assemblyName}.dll");
         if (File.Exists(path))
         {
             try
             {
                 var loadedAssembly = Assembly.LoadFrom(path);
-                LoaderLogger.Debug("Assembly.LoadFrom(\"{0}\") succeeded={1}", path, loadedAssembly != null);
+                Logger.Debug<string, bool>("Assembly.LoadFrom(\"{0}\") succeeded={1}", path, loadedAssembly != null);
                 return loadedAssembly;
             }
             catch (Exception ex)
             {
-                LoaderLogger.Debug("Assembly.LoadFrom(\"{0}\") Exception: {1}", path, ex);
+                Logger.Debug(ex, "Assembly.LoadFrom(\"{0}\") Exception: {1}", path, ex.Message);
             }
         }
 

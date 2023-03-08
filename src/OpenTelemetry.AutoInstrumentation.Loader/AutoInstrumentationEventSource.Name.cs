@@ -1,4 +1,4 @@
-// <copyright file="Program.cs" company="OpenTelemetry Authors">
+// <copyright file="AutoInstrumentationEventSource.Name.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +14,12 @@
 // limitations under the License.
 // </copyright>
 
-using BenchmarkDotNet.Running;
+using System.Diagnostics.Tracing;
 
-namespace OpenTelemetry.AutoInstrumentation.Loader.Benchmarks;
+// ReSharper disable once CheckNamespace
+namespace OpenTelemetry.AutoInstrumentation;
 
-internal class Program
+[EventSource(Name = "OpenTelemetry-AutoInstrumentation-Loader")]
+internal partial class AutoInstrumentationEventSource
 {
-    private static void Main(string[] args) => BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 }

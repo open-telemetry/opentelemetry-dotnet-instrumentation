@@ -10,7 +10,7 @@ ENV COR_ENABLE_PROFILING=1 `
     OTEL_DOTNET_AUTO_HOME=C:\opentelemetry\ `
     OTEL_DOTNET_AUTO_INTEGRATIONS_FILE=C:\opentelemetry\integrations.json `
     OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES=TestApplication.* `
-    OTEL_DOTNET_AUTO_DEBUG=1 `
+    OTEL_LOG_LEVEL=debug `
     OTEL_DOTNET_AUTO_LOG_DIRECTORY=C:\inetpub\wwwroot\logs
 WORKDIR C:\inetpub\wwwroot
 COPY bin/${configuration}/app.publish .

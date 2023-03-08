@@ -15,11 +15,15 @@ in IIS this will be the SiteName/ApplicationVirtualPath
 
 ### Added
 
+- Support `OTEL_LOG_LEVEL` to configure SDK logging level.
+
 ### Changed
 
 ### Deprecated
 
 ### Removed
+
+- Remove support for enabling debugging mode with `OTEL_DOTNET_AUTO_DEBUG`.
 
 ### Fixed
 
