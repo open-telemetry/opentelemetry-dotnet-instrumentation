@@ -96,14 +96,14 @@ Detailed debug logs can help you troubleshoot instrumentation issues, and can be
 attached to issues in this project to facilitate investigation.
 
 To get the detailed logs from the OpenTelemetry .NET Automatic Instrumentation, set
-the `OTEL_DOTNET_AUTO_DEBUG` environment variable to `true` before the
+the `OTEL_LOG_LEVEL` environment variable to `debug` before the
 instrumented process starts.
 
 By default, the library writes the log files under predefined locations. If needed,
 change the default location by updating the `OTEL_DOTNET_AUTO_LOG_DIRECTORY`
 environment variable.
 
-After obtaining the logs, remove the `OTEL_DOTNET_AUTO_DEBUG`
+After obtaining the logs, remove the `OTEL_LOG_LEVEL`
 environment variable to avoid unnecessary overhead.
 
 ## Nothing happens

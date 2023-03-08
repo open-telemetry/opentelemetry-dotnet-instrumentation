@@ -11,5 +11,52 @@
     <!-- Hide warnings for EOL .NET Core targets (e.g. netcoreapp2.0) -->
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
   </PropertyGroup>
-
+<ItemGroup>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\CustomLogger.cs">
+    <Link>Logging\CustomLogger.cs</Link>
+  </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\NoopLogger.cs">
+    <Link>Logging\NoopLogger.cs</Link>
+  </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\FileSink.cs">
+    <Link>Logging\FileSink.cs</Link>
+  </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingFileSink.cs">
+    <Link>Logging\RollingFileSink.cs</Link>
+  </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingInterval.cs">
+    <Link>Logging\RollingInterval.cs</Link>
+  </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\PathRoller.cs">
+    <Link>Logging\PathRoller.cs</Link>
+  </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingLogFile.cs">
+    <Link>Logging\RollingLogFile.cs</Link>
+  </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\RollingIntervalExtensions.cs">
+    <Link>Logging\RollingIntervalExtensions.cs</Link>
+  </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\IOtelLogger.cs">
+    <Link>Logging\IOtelLogger.cs</Link>
+  </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\ISink.cs">
+    <Link>Logging\ISink.cs</Link>
+  </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\LogLevel.cs">
+    <Link>Logging\LogLevel.cs</Link>
+  </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\NoopSink.cs">
+    <Link>Logging\NoopSink.cs</Link>
+  </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\OtelLogging.cs">
+    <Link>Logging\OtelLogging.cs</Link>
+  </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\WriteCountingStream.cs">
+    <Link>Logging\WriteCountingStream.cs</Link>
+  </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\AutoInstrumentationEventSource.cs">
+    <Link>AutoInstrumentationEventSource.cs</Link>
+  </Compile>
+  <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs" Link="Constants.cs" />
+  </ItemGroup>
 </Project>
