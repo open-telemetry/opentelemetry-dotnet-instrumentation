@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include "rejit_preprocessor.h"
 #include "stats.h"
 #include "logger.h"
