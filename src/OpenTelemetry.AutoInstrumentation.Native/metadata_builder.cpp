@@ -53,7 +53,8 @@ HRESULT MetadataBuilder::EmitAssemblyRef(const trace::AssemblyReference& assembl
     return S_OK;
 }
 
-HRESULT MetadataBuilder::FindIntegrationTypeRef(const IntegrationDefinition& integration_definition, mdTypeRef& type_ref_out) const
+HRESULT MetadataBuilder::FindIntegrationTypeRef(const IntegrationDefinition& integration_definition,
+                                                mdTypeRef&                   type_ref_out) const
 {
     const auto& cache_key = integration_definition.integration_type.get_cache_key();
     mdTypeRef   type_ref  = mdTypeRefNil;
@@ -78,7 +79,8 @@ HRESULT MetadataBuilder::FindIntegrationTypeRef(const IntegrationDefinition& int
     {
         // type is defined in another assembly,
         // find a reference to the assembly where type lives
-        const auto assembly_ref = FindAssemblyRef(assembly_import_, integration_definition.integration_type.assembly.name);
+        const auto assembly_ref =
+            FindAssemblyRef(assembly_import_, integration_definition.integration_type.assembly.name);
         if (assembly_ref == mdAssemblyRefNil)
         {
             // TODO: emit assembly reference if not found?
@@ -87,8 +89,8 @@ HRESULT MetadataBuilder::FindIntegrationTypeRef(const IntegrationDefinition& int
         }
 
         // search for an existing reference to the type
-        hr =
-            metadata_import_->FindTypeRef(assembly_ref, integration_definition.integration_type.name.c_str(), &type_ref);
+        hr = metadata_import_->FindTypeRef(assembly_ref, integration_definition.integration_type.name.c_str(),
+                                           &type_ref);
 
         if (hr == HRESULT(0x80131130) /* record not found on lookup */)
         {

@@ -12,8 +12,8 @@ RejitWorkItem::RejitWorkItem() : terminating(true), func(nullptr)
 {
 }
 
-RejitWorkItem::RejitWorkItem(std::function<void()>&& func) :
-    terminating(false), func(std::forward<std::function<void()>>(func))
+RejitWorkItem::RejitWorkItem(std::function<void()>&& func)
+    : terminating(false), func(std::forward<std::function<void()>>(func))
 {
 }
 
@@ -28,8 +28,8 @@ std::unique_ptr<RejitWorkItem> RejitWorkItem::CreateTerminatingWorkItem()
 
 RejitWorkOffloader::RejitWorkOffloader(ICorProfilerInfo7* pInfo)
 {
-    m_profilerInfo = pInfo;
-    m_offloader_queue = std::make_unique<UniqueBlockingQueue<RejitWorkItem>>();
+    m_profilerInfo           = pInfo;
+    m_offloader_queue        = std::make_unique<UniqueBlockingQueue<RejitWorkItem>>();
     m_offloader_queue_thread = std::make_unique<std::thread>(EnqueueThreadLoop, this);
 }
 
@@ -51,7 +51,7 @@ bool RejitWorkOffloader::WaitForTermination()
 
 void RejitWorkOffloader::EnqueueThreadLoop(RejitWorkOffloader* offloader)
 {
-    auto queue = offloader->m_offloader_queue.get();
+    auto queue        = offloader->m_offloader_queue.get();
     auto profilerInfo = offloader->m_profilerInfo;
 
     Logger::Info("Initializing ReJIT request thread.");

@@ -67,8 +67,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     if (methodHandler == nullptr)
     {
         Logger::Error("TracerMethodRewriter::Rewrite: methodHandler is null. "
-                     "MethodDef: ",
-                     methodHandler->GetMethodDef());
+                      "MethodDef: ",
+                      methodHandler->GetMethodDef());
 
         return S_FALSE;
     }
@@ -77,10 +77,9 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     if (tracerMethodHandler->GetIntegrationDefinition() == nullptr)
     {
-        Logger::Warn(
-            "TracerMethodRewriter::Rewrite: IntegrationDefinition is missing for "
-            "MethodDef: ", 
-            methodHandler->GetMethodDef());
+        Logger::Warn("TracerMethodRewriter::Rewrite: IntegrationDefinition is missing for "
+                     "MethodDef: ",
+                     methodHandler->GetMethodDef());
 
         return S_FALSE;
     }
@@ -89,21 +88,21 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     auto corProfiler = trace::profiler;
 
-    ModuleID module_id = moduleHandler->GetModuleId();
-    ModuleMetadata& module_metadata = *moduleHandler->GetModuleMetadata();
-    FunctionInfo* caller = methodHandler->GetFunctionInfo();
-    CallTargetTokens* callTargetTokens = module_metadata.GetCallTargetTokens();
-    mdToken function_token = caller->id;
-    FunctionMethodArgument retFuncArg = caller->method_signature.GetRet();
+    ModuleID               module_id              = moduleHandler->GetModuleId();
+    ModuleMetadata&        module_metadata        = *moduleHandler->GetModuleMetadata();
+    FunctionInfo*          caller                 = methodHandler->GetFunctionInfo();
+    CallTargetTokens*      callTargetTokens       = module_metadata.GetCallTargetTokens();
+    mdToken                function_token         = caller->id;
+    FunctionMethodArgument retFuncArg             = caller->method_signature.GetRet();
     IntegrationDefinition* integration_definition = tracerMethodHandler->GetIntegrationDefinition();
-    unsigned int retFuncElementType;
-    int retTypeFlags = retFuncArg.GetTypeFlags(retFuncElementType);
-    bool isVoid = (retTypeFlags & TypeFlagVoid) > 0;
-    bool isStatic = !(caller->method_signature.CallingConvention() & IMAGE_CEE_CS_CALLCONV_HASTHIS);
+    unsigned int           retFuncElementType;
+    int                    retTypeFlags = retFuncArg.GetTypeFlags(retFuncElementType);
+    bool                   isVoid       = (retTypeFlags & TypeFlagVoid) > 0;
+    bool                   isStatic = !(caller->method_signature.CallingConvention() & IMAGE_CEE_CS_CALLCONV_HASTHIS);
     std::vector<FunctionMethodArgument> methodArguments = caller->method_signature.GetMethodArguments();
-    int numArgs = caller->method_signature.NumberOfArguments();
-    auto metaEmit = module_metadata.metadata_emit;
-    auto metaImport = module_metadata.metadata_import;
+    int                                 numArgs         = caller->method_signature.NumberOfArguments();
+    auto                                metaEmit        = module_metadata.metadata_emit;
+    auto                                metaImport      = module_metadata.metadata_import;
 
     // *** Get reference to the integration type
     mdTypeRef integration_type_ref = mdTypeRefNil;
@@ -116,10 +115,9 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     if (Logger::IsDebugEnabled())
     {
-        Logger::Debug("*** CallTarget_RewriterCallback() Start: ", caller->type.name, ".", caller->name,
-                      "() [IsVoid=", isVoid, ", IsStatic=", isStatic,
-                      ", IntegrationType=", integration_definition->integration_type.name, ", Arguments=", numArgs,
-                      "]");
+        Logger::Debug("*** CallTarget_RewriterCallback() Start: ", caller->type.name, ".", caller->name, "() [IsVoid=",
+                      isVoid, ", IsStatic=", isStatic, ", IntegrationType=",
+                      integration_definition->integration_type.name, ", Arguments=", numArgs, "]");
     }
 
     // First we check if the managed profiler has not been loaded yet
@@ -135,8 +133,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     // *** Create rewriter
     ILRewriter rewriter(corProfiler->info_, methodHandler->GetFunctionControl(), module_id, function_token);
-    bool modified = false;
-    auto hr = rewriter.Import();
+    bool       modified = false;
+    auto       hr       = rewriter.Import();
     if (FAILED(hr))
     {
         Logger::Warn("*** CallTarget_RewriterCallback(): Call to ILRewriter.Import() failed for ", module_id, " ",
@@ -157,13 +155,13 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     reWriterWrapper.SetILPosition(rewriter.GetILList()->m_pNext);
 
     // *** Modify the Local Var Signature of the method and initialize the new local vars
-    ULONG callTargetStateIndex = static_cast<ULONG>(ULONG_MAX);
-    ULONG exceptionIndex = static_cast<ULONG>(ULONG_MAX);
-    ULONG callTargetReturnIndex = static_cast<ULONG>(ULONG_MAX);
-    ULONG returnValueIndex = static_cast<ULONG>(ULONG_MAX);
-    mdToken callTargetStateToken = mdTokenNil;
-    mdToken exceptionToken = mdTokenNil;
-    mdToken callTargetReturnToken = mdTokenNil;
+    ULONG    callTargetStateIndex  = static_cast<ULONG>(ULONG_MAX);
+    ULONG    exceptionIndex        = static_cast<ULONG>(ULONG_MAX);
+    ULONG    callTargetReturnIndex = static_cast<ULONG>(ULONG_MAX);
+    ULONG    returnValueIndex      = static_cast<ULONG>(ULONG_MAX);
+    mdToken  callTargetStateToken  = mdTokenNil;
+    mdToken  exceptionToken        = mdTokenNil;
+    mdToken  callTargetReturnToken = mdTokenNil;
     ILInstr* firstInstruction;
     callTargetTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, caller, &callTargetStateIndex, &exceptionIndex,
                                                   &callTargetReturnIndex, &returnValueIndex, &callTargetStateToken,
@@ -331,26 +329,26 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     // *** BeginMethod exception handling clause
     EHClause beginMethodExClause{};
-    beginMethodExClause.m_Flags = COR_ILEXCEPTION_CLAUSE_NONE;
-    beginMethodExClause.m_pTryBegin = firstInstruction;
-    beginMethodExClause.m_pTryEnd = beginMethodCatchFirstInstr;
+    beginMethodExClause.m_Flags         = COR_ILEXCEPTION_CLAUSE_NONE;
+    beginMethodExClause.m_pTryBegin     = firstInstruction;
+    beginMethodExClause.m_pTryEnd       = beginMethodCatchFirstInstr;
     beginMethodExClause.m_pHandlerBegin = beginMethodCatchFirstInstr;
-    beginMethodExClause.m_pHandlerEnd = beginMethodCatchLeaveInstr;
-    beginMethodExClause.m_ClassToken = callTargetTokens->GetExceptionTypeRef();
+    beginMethodExClause.m_pHandlerEnd   = beginMethodCatchLeaveInstr;
+    beginMethodExClause.m_ClassToken    = callTargetTokens->GetExceptionTypeRef();
 
     // ***
     // METHOD EXECUTION
     // ***
-    ILInstr* beginOriginalMethodInstr = reWriterWrapper.GetCurrentILInstr();
+    ILInstr* beginOriginalMethodInstr                = reWriterWrapper.GetCurrentILInstr();
     pStateLeaveToBeginOriginalMethodInstr->m_pTarget = beginOriginalMethodInstr;
-    beginMethodCatchLeaveInstr->m_pTarget = beginOriginalMethodInstr;
+    beginMethodCatchLeaveInstr->m_pTarget            = beginOriginalMethodInstr;
 
     // ***
     // ENDING OF THE METHOD EXECUTION
     // ***
 
     // *** Create return instruction and insert it at the end
-    ILInstr* methodReturnInstr = rewriter.NewILInstr();
+    ILInstr* methodReturnInstr  = rewriter.NewILInstr();
     methodReturnInstr->m_opcode = CEE_RET;
     rewriter.InsertAfter(rewriter.GetILList()->m_pPrev, methodReturnInstr);
     reWriterWrapper.SetILPosition(methodReturnInstr);
@@ -462,16 +460,16 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     // *** EndMethod exception handling clause
     EHClause endMethodExClause{};
-    endMethodExClause.m_Flags = COR_ILEXCEPTION_CLAUSE_NONE;
-    endMethodExClause.m_pTryBegin = endMethodTryStartInstr;
-    endMethodExClause.m_pTryEnd = endMethodCatchFirstInstr;
+    endMethodExClause.m_Flags         = COR_ILEXCEPTION_CLAUSE_NONE;
+    endMethodExClause.m_pTryBegin     = endMethodTryStartInstr;
+    endMethodExClause.m_pTryEnd       = endMethodCatchFirstInstr;
     endMethodExClause.m_pHandlerBegin = endMethodCatchFirstInstr;
-    endMethodExClause.m_pHandlerEnd = endMethodCatchLeaveInstr;
-    endMethodExClause.m_ClassToken = callTargetTokens->GetExceptionTypeRef();
+    endMethodExClause.m_pHandlerEnd   = endMethodCatchLeaveInstr;
+    endMethodExClause.m_ClassToken    = callTargetTokens->GetExceptionTypeRef();
 
     // *** EndMethod leave to finally
-    ILInstr* endFinallyInstr = reWriterWrapper.EndFinally();
-    endMethodTryLeave->m_pTarget = endFinallyInstr;
+    ILInstr* endFinallyInstr            = reWriterWrapper.EndFinally();
+    endMethodTryLeave->m_pTarget        = endFinallyInstr;
     endMethodCatchLeaveInstr->m_pTarget = endFinallyInstr;
 
     // ***
@@ -498,7 +496,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
                         reWriterWrapper.SetILPosition(pInstr);
                         reWriterWrapper.StLocal(returnValueIndex);
                     }
-                    pInstr->m_opcode = CEE_LEAVE_S;
+                    pInstr->m_opcode  = CEE_LEAVE_S;
                     pInstr->m_pTarget = endFinallyInstr->m_pNext;
                 }
                 break;
@@ -510,25 +508,25 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     // Exception handling clauses
     EHClause exClause{};
-    exClause.m_Flags = COR_ILEXCEPTION_CLAUSE_NONE;
-    exClause.m_pTryBegin = firstInstruction;
-    exClause.m_pTryEnd = startExceptionCatch;
+    exClause.m_Flags         = COR_ILEXCEPTION_CLAUSE_NONE;
+    exClause.m_pTryBegin     = firstInstruction;
+    exClause.m_pTryEnd       = startExceptionCatch;
     exClause.m_pHandlerBegin = startExceptionCatch;
-    exClause.m_pHandlerEnd = rethrowInstr;
-    exClause.m_ClassToken = callTargetTokens->GetExceptionTypeRef();
+    exClause.m_pHandlerEnd   = rethrowInstr;
+    exClause.m_ClassToken    = callTargetTokens->GetExceptionTypeRef();
 
     EHClause finallyClause{};
-    finallyClause.m_Flags = COR_ILEXCEPTION_CLAUSE_FINALLY;
-    finallyClause.m_pTryBegin = firstInstruction;
-    finallyClause.m_pTryEnd = rethrowInstr->m_pNext;
+    finallyClause.m_Flags         = COR_ILEXCEPTION_CLAUSE_FINALLY;
+    finallyClause.m_pTryBegin     = firstInstruction;
+    finallyClause.m_pTryEnd       = rethrowInstr->m_pNext;
     finallyClause.m_pHandlerBegin = rethrowInstr->m_pNext;
-    finallyClause.m_pHandlerEnd = endFinallyInstr;
+    finallyClause.m_pHandlerEnd   = endFinallyInstr;
 
     // ***
     // Update and Add exception clauses
     // ***
-    auto ehCount = rewriter.GetEHCount();
-    auto ehPointer = rewriter.GetEHPointer();
+    auto ehCount      = rewriter.GetEHCount();
+    auto ehPointer    = rewriter.GetEHPointer();
     auto newEHClauses = new EHClause[ehCount + 4];
     for (unsigned i = 0; i < ehCount; i++)
     {
@@ -559,9 +557,9 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
         return S_FALSE;
     }
 
-    Logger::Info("*** CallTarget_RewriterCallback() Finished: ", caller->type.name, ".", caller->name,
-                 "() [IsVoid=", isVoid, ", IsStatic=", isStatic,
-                 ", IntegrationType=", integration_definition->integration_type.name, ", Arguments=", numArgs, "]");
+    Logger::Info("*** CallTarget_RewriterCallback() Finished: ", caller->type.name, ".", caller->name, "() [IsVoid=",
+                 isVoid, ", IsStatic=", isStatic, ", IntegrationType=", integration_definition->integration_type.name,
+                 ", Arguments=", numArgs, "]");
     return S_OK;
 }
 

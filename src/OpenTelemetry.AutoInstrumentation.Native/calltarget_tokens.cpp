@@ -834,10 +834,11 @@ HRESULT CallTargetTokens::WriteBeginMethodWithArgumentsArray(void*           rew
  * PUBLIC
  **/
 
-CallTargetTokens::CallTargetTokens(ModuleMetadata* module_metadata_ptr, const bool enableByRefInstrumentation,
-                                   const bool enableCallTargetStateByRef) :
-    enable_by_ref_instrumentation(enableByRefInstrumentation),
-    enable_calltarget_state_by_ref(enableCallTargetStateByRef)
+CallTargetTokens::CallTargetTokens(ModuleMetadata* module_metadata_ptr,
+                                   const bool      enableByRefInstrumentation,
+                                   const bool      enableCallTargetStateByRef)
+    : enable_by_ref_instrumentation(enableByRefInstrumentation)
+    , enable_calltarget_state_by_ref(enableCallTargetStateByRef)
 {
     this->module_metadata_ptr = module_metadata_ptr;
     for (int i = 0; i < FASTPATH_COUNT; i++)
@@ -910,11 +911,11 @@ HRESULT CallTargetTokens::ModifyLocalSigAndInitialize(void*         rewriterWrap
     return S_OK;
 }
 
-HRESULT CallTargetTokens::WriteBeginMethod(void*                                rewriterWrapperPtr,
-                                           mdTypeRef                            integrationTypeRef,
-                                           const TypeInfo*                      currentType,
+HRESULT CallTargetTokens::WriteBeginMethod(void*                                      rewriterWrapperPtr,
+                                           mdTypeRef                                  integrationTypeRef,
+                                           const TypeInfo*                            currentType,
                                            const std::vector<FunctionMethodArgument>& methodArguments,
-                                           ILInstr**                            instruction)
+                                           ILInstr**                                  instruction)
 {
     auto hr = EnsureBaseCalltargetTokens();
     if (FAILED(hr))
@@ -1006,23 +1007,23 @@ HRESULT CallTargetTokens::WriteBeginMethod(void*                                
         if (enable_by_ref_instrumentation && (argTypeFlags & TypeFlagByRef))
         {
             PCCOR_SIGNATURE argSigBuff;
-            auto signatureSize = methodArguments[i].GetSignature(argSigBuff);
+            auto            signatureSize = methodArguments[i].GetSignature(argSigBuff);
             if (argSigBuff[0] == ELEMENT_TYPE_BYREF)
             {
                 argumentsSignatureBuffer[i] = argSigBuff + 1;
-                argumentsSignatureSize[i] = signatureSize - 1;
+                argumentsSignatureSize[i]   = signatureSize - 1;
                 signatureLength += signatureSize - 1;
             }
             else
             {
                 argumentsSignatureBuffer[i] = argSigBuff;
-                argumentsSignatureSize[i] = signatureSize;
+                argumentsSignatureSize[i]   = signatureSize;
                 signatureLength += signatureSize;
             }
         }
         else
         {
-            auto signatureSize = methodArguments[i].GetSignature(argumentsSignatureBuffer[i]);
+            auto signatureSize        = methodArguments[i].GetSignature(argumentsSignatureBuffer[i]);
             argumentsSignatureSize[i] = signatureSize;
             signatureLength += signatureSize;
         }

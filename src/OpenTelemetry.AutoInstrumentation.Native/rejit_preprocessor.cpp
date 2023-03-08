@@ -9,37 +9,38 @@ namespace trace
 // RejitPreprocessor
 
 template <class RejitRequestDefinition>
-RejitPreprocessor<RejitRequestDefinition>::RejitPreprocessor(std::shared_ptr<RejitHandler> rejit_handler,
-                                                             std::shared_ptr<RejitWorkOffloader> work_offloader) :
-    m_rejit_handler(std::move(rejit_handler)), m_work_offloader(std::move(work_offloader))
+RejitPreprocessor<RejitRequestDefinition>::RejitPreprocessor(std::shared_ptr<RejitHandler>       rejit_handler,
+                                                             std::shared_ptr<RejitWorkOffloader> work_offloader)
+    : m_rejit_handler(std::move(rejit_handler)), m_work_offloader(std::move(work_offloader))
 {
 }
 
 template <class RejitRequestDefinition>
-void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const RejitRequestDefinition& definition,
-                                          ComPtr<IMetaDataImport2>& metadataImport,
-                                          ComPtr<IMetaDataEmit2>& metadataEmit,
-                                          ComPtr<IMetaDataAssemblyImport>& assemblyImport,
-                                          ComPtr<IMetaDataAssemblyEmit>& assemblyEmit, const ModuleInfo& moduleInfo,
-                                          const mdTypeDef typeDef, std::vector<ModuleID>& vtModules,
-                                          std::vector<mdMethodDef>& vtMethodDefs)
+void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const RejitRequestDefinition&    definition,
+                                                                       ComPtr<IMetaDataImport2>&        metadataImport,
+                                                                       ComPtr<IMetaDataEmit2>&          metadataEmit,
+                                                                       ComPtr<IMetaDataAssemblyImport>& assemblyImport,
+                                                                       ComPtr<IMetaDataAssemblyEmit>&   assemblyEmit,
+                                                                       const ModuleInfo&                moduleInfo,
+                                                                       const mdTypeDef                  typeDef,
+                                                                       std::vector<ModuleID>&           vtModules,
+                                                                       std::vector<mdMethodDef>&        vtMethodDefs)
 {
     auto target_method = GetTargetMethod(definition);
 
-    Logger::Debug("  Looking for '", target_method.type.name, ".", target_method.method_name,
-                  "(", (target_method.signature_types.size() - 1), " params)' method implementation.");
+    Logger::Debug("  Looking for '", target_method.type.name, ".", target_method.method_name, "(",
+                  (target_method.signature_types.size() - 1), " params)' method implementation.");
 
     // Now we enumerate all methods with the same target method name. (All overloads of the method)
     auto enumMethods = Enumerator<mdMethodDef>(
         [&metadataImport, target_method, typeDef](HCORENUM* ptr, mdMethodDef arr[], ULONG max, ULONG* cnt) -> HRESULT {
-            return metadataImport->EnumMethodsWithName(ptr, typeDef, target_method.method_name.c_str(), arr,
-                                                       max, cnt);
+            return metadataImport->EnumMethodsWithName(ptr, typeDef, target_method.method_name.c_str(), arr, max, cnt);
         },
         [&metadataImport](HCORENUM ptr) -> void { metadataImport->CloseEnum(ptr); });
 
-    auto corProfilerInfo = m_rejit_handler->GetCorProfilerInfo();
-    auto pCorAssemblyProperty = m_rejit_handler->GetCorAssemblyProperty();
-    auto enable_by_ref_instrumentation = m_rejit_handler->GetEnableByRefInstrumentation();
+    auto corProfilerInfo                = m_rejit_handler->GetCorProfilerInfo();
+    auto pCorAssemblyProperty           = m_rejit_handler->GetCorAssemblyProperty();
+    auto enable_by_ref_instrumentation  = m_rejit_handler->GetEnableByRefInstrumentation();
     auto enable_calltarget_state_by_ref = m_rejit_handler->GetEnableCallTargetStateByRef();
 
     auto enumIterator = enumMethods.begin();
@@ -58,7 +59,7 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
         // We create a new function info into the heap from the caller functionInfo in the stack, to
         // be used later in the ReJIT process
         auto functionInfo = FunctionInfo(caller);
-        auto hr = functionInfo.method_signature.TryParse();
+        auto hr           = functionInfo.method_signature.TryParse();
         if (FAILED(hr))
         {
             Logger::Warn("    * The method signature: ", functionInfo.method_signature.str(), " cannot be parsed.");
@@ -76,13 +77,13 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
         }
 
         // Compare each mdMethodDef argument type to the instrumentation target
-        bool argumentsMismatch = false;
-        const auto methodArguments = functionInfo.method_signature.GetMethodArguments();
+        bool       argumentsMismatch = false;
+        const auto methodArguments   = functionInfo.method_signature.GetMethodArguments();
 
         Logger::Debug("    * Comparing signature for method: ", caller.type.name, ".", caller.name);
         for (unsigned int i = 0; i < numOfArgs; i++)
         {
-            const auto argumentTypeName = methodArguments[i].GetTypeTokName(metadataImport);
+            const auto argumentTypeName            = methodArguments[i].GetTypeTokName(metadataImport);
             const auto integrationArgumentTypeName = target_method.signature_types[i + 1];
             Logger::Debug("        -> ", argumentTypeName, " = ", integrationArgumentTypeName);
             if (argumentTypeName != integrationArgumentTypeName && integrationArgumentTypeName != WStr("_"))
@@ -121,8 +122,10 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
             moduleHandler->SetModuleMetadata(moduleMetadata);
         }
 
-        RejitHandlerModuleMethodCreatorFunc creator = [=, request = definition, functionInfo = functionInfo](
-                                                          const mdMethodDef method, RejitHandlerModule* module) {
+        RejitHandlerModuleMethodCreatorFunc creator =
+            [ =, request = definition, functionInfo = functionInfo ](const mdMethodDef method,
+                                                                     RejitHandlerModule* module)
+        {
             return CreateMethod(method, module, functionInfo, request);
         };
 
@@ -133,17 +136,17 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
         vtMethodDefs.push_back(methodDef);
 
         Logger::Debug("    * Enqueue for ReJIT [ModuleId=", moduleInfo.id, ", MethodDef=", TokenStr(&methodDef),
-                      ", AppDomainId=", moduleHandler->GetModuleMetadata()->app_domain_id,
-                      ", Assembly=", moduleHandler->GetModuleMetadata()->assemblyName, ", Type=", caller.type.name,
-                      ", Method=", caller.name, "(", numOfArgs, " params), Signature=", caller.signature.str(), "]");
+                      ", AppDomainId=", moduleHandler->GetModuleMetadata()->app_domain_id, ", Assembly=",
+                      moduleHandler->GetModuleMetadata()->assemblyName, ", Type=", caller.type.name, ", Method=",
+                      caller.name, "(", numOfArgs, " params), Signature=", caller.signature.str(), "]");
     }
 }
 
 template <class RejitRequestDefinition>
 ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
-                                                        const std::vector<ModuleID>& modules, 
-                                                        const std::vector<RejitRequestDefinition>& definitions,
-                                                        bool enqueueInSameThread)
+    const std::vector<ModuleID>&               modules,
+    const std::vector<RejitRequestDefinition>& definitions,
+    bool                                       enqueueInSameThread)
 {
     if (m_rejit_handler->IsShutdownRequested())
     {
@@ -152,7 +155,7 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
 
     auto corProfilerInfo = m_rejit_handler->GetCorProfilerInfo();
 
-    std::vector<ModuleID> vtModules;
+    std::vector<ModuleID>    vtModules;
     std::vector<mdMethodDef> vtMethodDefs;
 
     // Preallocate with size => 15 due this is the current max of method interceptions in a single module
@@ -162,22 +165,22 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
 
     for (const auto& module : modules)
     {
-        auto _ = trace::Stats::Instance()->CallTargetRequestRejitMeasure();
+        auto              _          = trace::Stats::Instance()->CallTargetRequestRejitMeasure();
         const ModuleInfo& moduleInfo = GetModuleInfo(corProfilerInfo, module);
         Logger::Debug("Requesting Rejit for Module: ", moduleInfo.assembly.name);
 
-        ComPtr<IUnknown> metadataInterfaces;
-        ComPtr<IMetaDataImport2> metadataImport;
-        ComPtr<IMetaDataEmit2> metadataEmit;
-        ComPtr<IMetaDataAssemblyImport> assemblyImport;
-        ComPtr<IMetaDataAssemblyEmit> assemblyEmit;
+        ComPtr<IUnknown>                  metadataInterfaces;
+        ComPtr<IMetaDataImport2>          metadataImport;
+        ComPtr<IMetaDataEmit2>            metadataEmit;
+        ComPtr<IMetaDataAssemblyImport>   assemblyImport;
+        ComPtr<IMetaDataAssemblyEmit>     assemblyEmit;
         std::unique_ptr<AssemblyMetadata> assemblyMetadata = nullptr;
 
         for (const RejitRequestDefinition& definition : definitions)
         {
             const auto target_method = GetTargetMethod(definition);
-            const auto is_derived = GetIsDerived(definition);
-            
+            const auto is_derived    = GetIsDerived(definition);
+
             if (is_derived)
             {
                 // Abstract methods handling.
@@ -185,7 +188,7 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                 {
                     Logger::Debug("  Loading Assembly Metadata...");
                     auto hr = corProfilerInfo->GetModuleMetaData(moduleInfo.id, ofRead | ofWrite, IID_IMetaDataImport2,
-                                                                metadataInterfaces.GetAddressOf());
+                                                                 metadataInterfaces.GetAddressOf());
                     if (FAILED(hr))
                     {
                         Logger::Warn("CallTarget_RequestRejitForModule failed to get metadata interface for ",
@@ -193,10 +196,10 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                         break;
                     }
 
-                    metadataImport = metadataInterfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
-                    metadataEmit = metadataInterfaces.As<IMetaDataEmit2>(IID_IMetaDataEmit);
-                    assemblyImport = metadataInterfaces.As<IMetaDataAssemblyImport>(IID_IMetaDataAssemblyImport);
-                    assemblyEmit = metadataInterfaces.As<IMetaDataAssemblyEmit>(IID_IMetaDataAssemblyEmit);
+                    metadataImport   = metadataInterfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
+                    metadataEmit     = metadataInterfaces.As<IMetaDataEmit2>(IID_IMetaDataEmit);
+                    assemblyImport   = metadataInterfaces.As<IMetaDataAssemblyImport>(IID_IMetaDataAssemblyImport);
+                    assemblyEmit     = metadataInterfaces.As<IMetaDataAssemblyEmit>(IID_IMetaDataAssemblyEmit);
                     assemblyMetadata = std::make_unique<AssemblyMetadata>(GetAssemblyImportMetadata(assemblyImport));
                     Logger::Debug("  Assembly Metadata loaded for: ", assemblyMetadata->name, "(",
                                   assemblyMetadata->version.str(), ").");
@@ -206,12 +209,12 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                 if (assemblyMetadata->name != target_method.type.assembly.name)
                 {
                     // Check if the current module contains a reference to the assembly of the integration
-                    auto assemblyRefEnum = EnumAssemblyRefs(assemblyImport);
+                    auto assemblyRefEnum     = EnumAssemblyRefs(assemblyImport);
                     auto assemblyRefIterator = assemblyRefEnum.begin();
-                    bool assemblyRefFound = false;
+                    bool assemblyRefFound    = false;
                     for (; assemblyRefIterator != assemblyRefEnum.end(); assemblyRefIterator = ++assemblyRefIterator)
                     {
-                        auto assemblyRef = *assemblyRefIterator;
+                        auto        assemblyRef         = *assemblyRefIterator;
                         const auto& assemblyRefMetadata = GetReferencedAssemblyMetadata(assemblyImport, assemblyRef);
 
                         if (assemblyRefMetadata.name == target_method.type.assembly.name &&
@@ -231,14 +234,14 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                 }
 
                 // Enumerate the types of the module in search of types implementing the integration
-                auto typeDefEnum = EnumTypeDefs(metadataImport);
+                auto typeDefEnum     = EnumTypeDefs(metadataImport);
                 auto typeDefIterator = typeDefEnum.begin();
                 for (; typeDefIterator != typeDefEnum.end(); typeDefIterator = ++typeDefIterator)
                 {
-                    auto typeDef = *typeDefIterator;
-                    const auto typeInfo = GetTypeInfo(metadataImport, typeDef);
-                    bool rewriteType = false;
-                    auto ancestorTypeInfo = typeInfo.extend_from.get();
+                    auto       typeDef          = *typeDefIterator;
+                    const auto typeInfo         = GetTypeInfo(metadataImport, typeDef);
+                    bool       rewriteType      = false;
+                    auto       ancestorTypeInfo = typeInfo.extend_from.get();
 
                     // Check if the type has ancestors
                     int maxDepth = 1;
@@ -259,8 +262,7 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
 
                                     // We check the assembly name and version
                                     if (ancestorAssemblyMetadata.name == target_method.type.assembly.name &&
-                                        target_method.type.min_version <=
-                                            ancestorAssemblyMetadata.version &&
+                                        target_method.type.min_version <= ancestorAssemblyMetadata.version &&
                                         target_method.type.max_version >= ancestorAssemblyMetadata.version)
                                     {
                                         rewriteType = true;
@@ -322,7 +324,7 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                 {
                     Logger::Debug("  Loading Assembly Metadata...");
                     auto hr = corProfilerInfo->GetModuleMetaData(moduleInfo.id, ofRead | ofWrite, IID_IMetaDataImport2,
-                                                                metadataInterfaces.GetAddressOf());
+                                                                 metadataInterfaces.GetAddressOf());
                     if (FAILED(hr))
                     {
                         Logger::Warn("CallTarget_RequestRejitForModule failed to get metadata interface for ",
@@ -330,10 +332,10 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
                         break;
                     }
 
-                    metadataImport = metadataInterfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
-                    metadataEmit = metadataInterfaces.As<IMetaDataEmit2>(IID_IMetaDataEmit);
-                    assemblyImport = metadataInterfaces.As<IMetaDataAssemblyImport>(IID_IMetaDataAssemblyImport);
-                    assemblyEmit = metadataInterfaces.As<IMetaDataAssemblyEmit>(IID_IMetaDataAssemblyEmit);
+                    metadataImport   = metadataInterfaces.As<IMetaDataImport2>(IID_IMetaDataImport);
+                    metadataEmit     = metadataInterfaces.As<IMetaDataEmit2>(IID_IMetaDataEmit);
+                    assemblyImport   = metadataInterfaces.As<IMetaDataAssemblyImport>(IID_IMetaDataAssemblyImport);
+                    assemblyEmit     = metadataInterfaces.As<IMetaDataAssemblyEmit>(IID_IMetaDataAssemblyEmit);
                     assemblyMetadata = std::make_unique<AssemblyMetadata>(GetAssemblyImportMetadata(assemblyImport));
                     Logger::Debug("  Assembly Metadata loaded for: ", assemblyMetadata->name, "(",
                                   assemblyMetadata->version.str(), ").");
@@ -353,8 +355,8 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
 
                 // We are in the right module, so we try to load the mdTypeDef from the integration target type name.
                 mdTypeDef typeDef = mdTypeDefNil;
-                auto foundType = FindTypeDefByName(target_method.type.name, moduleInfo.assembly.name,
-                                                   metadataImport, typeDef);
+                auto      foundType =
+                    FindTypeDefByName(target_method.type.name, moduleInfo.assembly.name, metadataImport, typeDef);
                 if (!foundType)
                 {
                     continue;
@@ -369,7 +371,7 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
         }
     }
 
-    const auto rejitCount = (ULONG) vtMethodDefs.size();
+    const auto rejitCount = (ULONG)vtMethodDefs.size();
 
     // Request the ReJIT for all integrations found in the module.
     if (rejitCount > 0)
@@ -389,8 +391,9 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
 
 template <class RejitRequestDefinition>
 void RejitPreprocessor<RejitRequestDefinition>::EnqueueRequestRejitForLoadedModules(
-    const std::vector<ModuleID>& modulesVector, const std::vector<RejitRequestDefinition>& definitions,
-    std::promise<ULONG>* promise)
+    const std::vector<ModuleID>&               modulesVector,
+    const std::vector<RejitRequestDefinition>& definitions,
+    std::promise<ULONG>*                       promise)
 {
     if (m_rejit_handler->IsShutdownRequested())
     {
@@ -409,8 +412,9 @@ void RejitPreprocessor<RejitRequestDefinition>::EnqueueRequestRejitForLoadedModu
 
     Logger::Debug("RejitHandler::EnqueueRequestRejitForLoadedModules");
 
-    std::function<void()> action = [=, modules = std::move(modulesVector), definitions = std::move(definitions),
-                                    promise = promise]() mutable {
+    std::function<void()> action =
+        [ =, modules = std::move(modulesVector), definitions = std::move(definitions), promise = promise ]() mutable
+    {
         // Process modules for rejit
         const auto rejitCount = RequestRejitForLoadedModules(modules, definitions, true);
 
@@ -437,14 +441,13 @@ const bool TracerRejitPreprocessor::GetIsDerived(const IntegrationDefinition& in
     return integrationDefinition.is_derived;
 }
 
-const std::unique_ptr<RejitHandlerModuleMethod> TracerRejitPreprocessor::CreateMethod(const mdMethodDef methodDef, RejitHandlerModule* module,
-                                                const FunctionInfo& functionInfo,
-                                                const IntegrationDefinition& integrationDefinition)
+const std::unique_ptr<RejitHandlerModuleMethod> TracerRejitPreprocessor::CreateMethod(
+    const mdMethodDef            methodDef,
+    RejitHandlerModule*          module,
+    const FunctionInfo&          functionInfo,
+    const IntegrationDefinition& integrationDefinition)
 {
-    return std::make_unique<TracerRejitHandlerModuleMethod>(methodDef, 
-                                                                       module,
-                                                                       functionInfo,
-                                                                       integrationDefinition);
+    return std::make_unique<TracerRejitHandlerModuleMethod>(methodDef, module, functionInfo, integrationDefinition);
 }
 
 template class RejitPreprocessor<IntegrationDefinition>;

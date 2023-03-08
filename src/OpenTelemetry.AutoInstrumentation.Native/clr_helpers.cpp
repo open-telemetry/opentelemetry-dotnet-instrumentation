@@ -58,9 +58,9 @@ AssemblyInfo GetAssemblyInfo(ICorProfilerInfo7* info, const AssemblyID& assembly
 
     if (FAILED(hr) || app_domain_name_len == 0)
     {
-        Logger::Warn("Error loading the appdomain for assembly: ", assembly_id,
-                     " [AssemblyName=", WSTRING(assembly_name), ", AssemblyLength=", assembly_name_len, ", HRESULT=0x",
-                     std::setfill('0'), std::setw(8), std::hex, hr, ", AppDomainId=", app_domain_id, "]");
+        Logger::Warn("Error loading the appdomain for assembly: ", assembly_id, " [AssemblyName=",
+                     WSTRING(assembly_name), ", AssemblyLength=", assembly_name_len, ", HRESULT=0x", std::setfill('0'),
+                     std::setw(8), std::hex, hr, ", AppDomainId=", app_domain_id, "]");
         return {};
     }
 
@@ -297,8 +297,8 @@ TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdTo
         type_isGeneric          = idxFromRight == 1 || idxFromRight == 2;
     }
 
-    return {token,       type_name_string, mdTypeSpecNil,  token_type,
-            extendsInfo, type_valueType,   type_isGeneric, parentTypeInfo, parent_token};
+    return {token,          type_name_string, mdTypeSpecNil,  token_type,  extendsInfo,
+            type_valueType, type_isGeneric,   parentTypeInfo, parent_token};
 }
 
 mdAssemblyRef FindAssemblyRef(const ComPtr<IMetaDataAssemblyImport>& assembly_import, const WSTRING& assembly_name)
