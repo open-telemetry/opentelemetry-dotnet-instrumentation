@@ -35,9 +35,10 @@ internal static class ResourceConfigurator
         }
 
         var resource = resourceBuilder.Build();
-        if (!resource.Attributes.Any(kvp => kvp.Key == "service.name"))
+        var serviceName = resource.Attributes.FirstOrDefault(a => a.Key == "service.name").Value as string;
+        if (serviceName?.StartsWith("unknown_service:") == true)
         {
-            // "service.name" was not configured yet use the fallback.
+            // Fallback service name
             resourceBuilder.AddAttributes(new KeyValuePair<string, object>[] { new("service.name", ServiceNameConfigurator.GetFallbackServiceName()) });
         }
 
