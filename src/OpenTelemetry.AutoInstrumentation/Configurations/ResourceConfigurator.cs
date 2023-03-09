@@ -20,24 +20,29 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal static class ResourceConfigurator
 {
-    public static void Configure(ResourceBuilder resourceBuilder)
-    {
-        var pluginManager = Instrumentation.PluginManager;
+    internal const string ServiceNameAttribute = "service.name";
 
-        resourceBuilder
+    public static ResourceBuilder CreateResourceBuilder()
+    {
+        var resourceBuilder = ResourceBuilder
+            .CreateEmpty() // Don't use CreateDefault because it puts service name unknown by default.
+            .AddEnvironmentVariableDetector()
             .AddTelemetrySdk()
             .AddAttributes(new KeyValuePair<string, object>[] { new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version) });
 
+        var pluginManager = Instrumentation.PluginManager;
         if (pluginManager != null)
         {
             resourceBuilder.InvokePlugins(pluginManager);
         }
-    }
 
-    public static ResourceBuilder CreateResourceBuilder()
-    {
-        var resourceBuilder = ResourceBuilder.CreateDefault();
-        Configure(resourceBuilder);
+        var resource = resourceBuilder.Build();
+        if (!resource.Attributes.Any(kvp => kvp.Key == ServiceNameAttribute))
+        {
+            // service.name was not configured yet use the fallback.
+            resourceBuilder.AddAttributes(new KeyValuePair<string, object>[] { new(ServiceNameAttribute, ServiceNameConfigurator.GetFallbackServiceName()) });
+        }
+
         return resourceBuilder;
     }
 }
