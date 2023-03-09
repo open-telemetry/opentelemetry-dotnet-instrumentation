@@ -11,7 +11,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 provided
 - The fallback service name is based on the
 Assembly name or ProcessName, if the application is .NET Framework and hosted
-in IIS this will be the SiteName/ApplicationVirtualPath
+in IIS this will be the SiteName/ApplicationVirtualPath.
 
 ### Added
 
