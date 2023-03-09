@@ -73,7 +73,7 @@ For ASP.NET application you can configure the most common `OTEL_` settings
 
 If a service name is not explicitly configured, one will be generated for you.
 If the application is hosted on IIS in .NET Framework this will use
-SiteName\VirtualDirectoryPath ex: MySite\MyApp
+`SiteName\VirtualDirectoryPath` ex: `MySite\MyApp`
 
 For ASP.NET Core application you can use
 the [`<environmentVariable>`](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/web-config#set-environment-variables)
