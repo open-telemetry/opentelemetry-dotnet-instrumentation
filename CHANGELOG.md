@@ -7,7 +7,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.6.0...HEAD)
 
-- Updated `ResourceConfigurator.cs` to set a fallback service name if one is not
+- Added a fallback service name if one is not
 provided
 - `FallbackServiceName.cs` to retrieve a more helpful service name based on the
 Assembly name or ProcessName, if the application is .NET Framework and hosted
