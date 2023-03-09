@@ -20,6 +20,8 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal static class ResourceConfigurator
 {
+    internal const string ServiceNameAttribute = "service.name";
+
     public static ResourceBuilder CreateResourceBuilder()
     {
         var resourceBuilder = ResourceBuilder
@@ -35,11 +37,10 @@ internal static class ResourceConfigurator
         }
 
         var resource = resourceBuilder.Build();
-        var serviceName = resource.Attributes.FirstOrDefault(a => a.Key == "service.name").Value as string;
-        if (serviceName?.StartsWith("unknown_service:") == true)
+        if (!resource.Attributes.Any(kvp => kvp.Key == ServiceNameAttribute))
         {
-            // Fallback service name
-            resourceBuilder.AddAttributes(new KeyValuePair<string, object>[] { new("service.name", ServiceNameConfigurator.GetFallbackServiceName()) });
+            // service.name was not configured yet use the fallback.
+            resourceBuilder.AddAttributes(new KeyValuePair<string, object>[] { new(ServiceNameAttribute, ServiceNameConfigurator.GetFallbackServiceName()) });
         }
 
         return resourceBuilder;
