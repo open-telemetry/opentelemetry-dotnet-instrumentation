@@ -9,7 +9,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Added a fallback service name if one is not
 provided
-- `FallbackServiceName.cs` to retrieve a more helpful service name based on the
+- The fallback service name is based on the
 Assembly name or ProcessName, if the application is .NET Framework and hosted
 in IIS this will be the SiteName/ApplicationVirtualPath
 
