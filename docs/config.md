@@ -23,7 +23,7 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     - `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE`
     - `OTEL_DOTNET_AUTO_[TRACES|METRICS|LOGS]_[ENABLED|DISABLED]_INSTRUMENTATIONS`
     - `OTEL_DOTNET_AUTO_LOG_DIRECTORY`
-    - `OTEL_DOTNET_AUTO_DEBUG`
+    - `OTEL_LOG_LEVEL`
     - `OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`
 
     Example with `OTEL_SERVICE_NAME` setting:
@@ -36,6 +36,14 @@ with environment variables taking precedence over `App.config` or `Web.config` f
     </configuration>
     ```
 
+3. Service name automatic detection
+
+   If no service name is explicitly configured one will be generated for you.
+     This can be helpful in some circumstances.
+     - If the application is hosted on IIS in .NET Framework this will be
+     `SiteName\VirtualPath` ex: `MySite\MyApp`
+     - If that is not the case it will use the name of the application [entry Assembly](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.assembly.getentryassembly?view=net-7.0).
+     Name
 By default we recommend using environment variables for configuration.
 However, if given setting supports it, then:
 
@@ -48,6 +56,7 @@ However, if given setting supports it, then:
 |--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
 | `OTEL_DOTNET_AUTO_HOME`              | Installation location.                                                                                                                                                                                                       |               |
 | `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` | Names of the executable files that the profiler cannot instrument. Supports multiple comma-separated values, for example: `ReservedProcess.exe,powershell.exe`. If unset, the profiler attaches to all processes by default. |               |
+| `OTEL_LOG_LEVEL`                     | SDK log level. (supported values: `none`,`error`,`warn`,`info`,`debug`)                                                                                                                                                      | `info`        |
 
 ## Resources
 
@@ -253,7 +262,8 @@ Important environment variables include:
 
 ### Prometheus
 
-> ⚠️ **Do NOT use in production.**
+> **Warning**
+> **Do NOT use in production.**
 >
 > Prometheus exporter is intended for the inner dev loop.
 > Production environments can use a combination of OTLP exporter
@@ -362,11 +372,11 @@ If the default log directories can't be created,
 the instrumentation uses the path of the current user's [temporary folder](https://docs.microsoft.com/en-us/dotnet/api/System.IO.Path.GetTempPath?view=net-6.0)
 instead.
 
-| Environment variable                                | Description                                             | Default value                            |
-|-----------------------------------------------------|---------------------------------------------------------|------------------------------------------|
-| `OTEL_DOTNET_AUTO_LOG_DIRECTORY`                    | Directory of the .NET Tracer logs.                      | _See the previous note on default paths_ |
-| `OTEL_DOTNET_AUTO_DEBUG`                            | Enables debugging mode for the tracer.                  | `false`                                  |
-| `OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED`  | Whether the traces console exporter is enabled or not.  | `false`                                  |
-| `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED` | Whether the metrics console exporter is enabled or not. | `false`                                  |
-| `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED`    | Whether the logs console exporter is enabled or not.    | `false`                                  |
-| `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE`   | Whether the log state should be formatted.              | `false`                                  |
+| Environment variable                                | Description                                                             | Default value                            |
+|-----------------------------------------------------|-------------------------------------------------------------------------|------------------------------------------|
+| `OTEL_DOTNET_AUTO_LOG_DIRECTORY`                    | Directory of the .NET Tracer logs.                                      | _See the previous note on default paths_ |
+| `OTEL_LOG_LEVEL`                                    | SDK log level. (supported values: `none`,`error`,`warn`,`info`,`debug`) | `info`                                   |
+| `OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED`  | Whether the traces console exporter is enabled or not.                  | `false`                                  |
+| `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED` | Whether the metrics console exporter is enabled or not.                 | `false`                                  |
+| `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED`    | Whether the logs console exporter is enabled or not.                    | `false`                                  |
+| `OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE`   | Whether the log state should be formatted.                              | `false`                                  |

@@ -11,8 +11,11 @@
 namespace trace {
 namespace environment {
 
-// Sets whether debug mode is enabled. Default is false.
-const WSTRING debug_enabled = WStr("OTEL_DOTNET_AUTO_DEBUG");
+// Sets logging level used by autoinstrumentation loggers
+const WSTRING log_level = WStr("OTEL_LOG_LEVEL");
+
+// Sets max size of a single log file
+const WSTRING max_log_file_size = WStr("OTEL_DOTNET_AUTO_LOG_FILE_SIZE");
 
 // Sets the paths to integration definition JSON files.
 // Supports multiple values separated with comma, for example:

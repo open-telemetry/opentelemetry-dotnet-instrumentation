@@ -88,6 +88,47 @@ WSTRING GetEnvironmentValue(const WSTRING& name)
 #endif
 }
 
+std::string GetEnvironmentValueString(const WSTRING& name)
+{
+#ifdef _WIN32
+    const size_t max_buf_size = 4096;
+    WSTRING      buf(max_buf_size, 0);
+    auto         len    = GetEnvironmentVariable(name.data(), buf.data(), static_cast<DWORD>(buf.size()));
+    auto         string = ToString(buf.substr(0, len));
+    return string;
+#else
+    auto cstr = std::getenv(ToString(name).c_str());
+    if (cstr == nullptr)
+    {
+        return {};
+    }
+    auto string = std::string(cstr);
+    return string;
+#endif
+}
+
+size_t GetConfiguredSize(const WSTRING& name, const size_t default_value)
+{
+    try
+    {
+        const auto configured_value = GetEnvironmentValueString(name);
+        if (configured_value.empty())
+        {
+            return default_value;
+        }
+        const auto converted = std::stoll(configured_value);
+        if (converted < 0)
+        {
+            return default_value;
+        }
+        return converted;
+    }
+    catch (...)
+    {
+        return default_value;
+    }
+}
+
 std::vector<WSTRING> GetEnvironmentValues(const WSTRING& name, const wchar_t delim)
 {
     std::vector<WSTRING> values;

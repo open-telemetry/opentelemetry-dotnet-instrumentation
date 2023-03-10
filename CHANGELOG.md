@@ -7,13 +7,23 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.6.0...HEAD)
 
+- Added a fallback service name if one is not
+provided
+- The fallback service name is based on the
+Assembly name or ProcessName, if the application is .NET Framework and hosted
+in IIS this will be the SiteName/ApplicationVirtualPath.
+
 ### Added
+
+- Support `OTEL_LOG_LEVEL` to configure SDK logging level.
 
 ### Changed
 
 ### Deprecated
 
 ### Removed
+
+- Remove support for enabling debugging mode with `OTEL_DOTNET_AUTO_DEBUG`.
 
 ### Fixed
 

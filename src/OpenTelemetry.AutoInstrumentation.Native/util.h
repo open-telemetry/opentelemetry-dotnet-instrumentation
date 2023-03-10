@@ -31,6 +31,10 @@ WSTRING Trim(const WSTRING& str);
 // name. Space is trimmed.
 WSTRING GetEnvironmentValue(const WSTRING& name);
 
+// GetConfiguredSize returns the environment variable value for the given name, or default value
+// if not configured, or misconfigured
+size_t GetConfiguredSize(const WSTRING& name, size_t default_value);
+
 // GetEnvironmentValues returns environment variable values for the given name
 // split by the delimiter. Space is trimmed and empty values are ignored.
 std::vector<WSTRING> GetEnvironmentValues(const WSTRING& name, const wchar_t delim);

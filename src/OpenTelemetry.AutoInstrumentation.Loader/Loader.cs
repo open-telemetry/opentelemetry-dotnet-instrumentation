@@ -15,6 +15,7 @@
 // </copyright>
 
 using System.Reflection;
+using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Loader;
 
@@ -24,6 +25,8 @@ namespace OpenTelemetry.AutoInstrumentation.Loader;
 internal partial class Loader
 {
     private static readonly string ManagedProfilerDirectory;
+
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger("Loader");
 
     /// <summary>
     /// Initializes static members of the <see cref="Loader"/> class.
@@ -39,7 +42,7 @@ internal partial class Loader
         }
         catch (Exception ex)
         {
-            LoaderLogger.Log(ex, "Unable to register a callback to the CurrentDomain.AssemblyResolve event.");
+            Logger.Error(ex, "Unable to register a callback to the CurrentDomain.AssemblyResolve event.");
         }
 
         TryLoadManagedAssembly();
@@ -47,7 +50,7 @@ internal partial class Loader
 
     private static void TryLoadManagedAssembly()
     {
-        LoaderLogger.Log("Managed Loader TryLoadManagedAssembly()");
+        Logger.Information("Managed Loader TryLoadManagedAssembly()");
 
         try
         {
@@ -73,7 +76,7 @@ internal partial class Loader
         }
         catch (Exception ex)
         {
-            LoaderLogger.Log(ex, $"Error when loading managed assemblies. {ex.Message}");
+            Logger.Error(ex, "Error when loading managed assemblies. {0}", ex.Message);
             throw;
         }
     }
@@ -86,7 +89,7 @@ internal partial class Loader
         }
         catch (Exception ex)
         {
-            LoaderLogger.Log(ex, "Error while loading environment variable " + key);
+            Logger.Error(ex, "Error while loading environment variable {0}", key);
         }
 
         return null;

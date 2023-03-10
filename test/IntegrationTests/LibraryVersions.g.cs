@@ -19,7 +19,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.0.5" },
+        new object[] { "8.0.6" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> EntityFrameworkCore = new List<object[]>
@@ -77,7 +77,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "6.10.7" },
-        new object[] { "8.0.32" },
+        new object[] { "8.0.32.1" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Npgsql = new List<object[]>

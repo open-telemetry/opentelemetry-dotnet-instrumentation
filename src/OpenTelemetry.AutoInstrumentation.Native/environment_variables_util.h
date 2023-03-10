@@ -56,10 +56,6 @@ bool IsNGENEnabled() {
                        false);
 }
 
-bool IsDebugEnabled() {
-  CheckIfTrue(GetEnvironmentValue(environment::debug_enabled));
-}
-
 bool IsDumpILRewriteEnabled() {
   CheckIfTrue(GetEnvironmentValue(environment::dump_il_rewrite_enabled));
 }

@@ -37,6 +37,16 @@ private:
     LoggerImpl();
     ~LoggerImpl();
 
+    static inline const WSTRING log_level_none  = WStr("none");
+    static inline const WSTRING log_level_error = WStr("error");
+    static inline const WSTRING log_level_warn  = WStr("warn");
+    static inline const WSTRING log_level_info  = WStr("info");
+    static inline const WSTRING log_level_debug = WStr("debug");
+
+    static inline const std::string logger_name = "Logger";
+
+    bool ShouldLog(spdlog::level::level_enum log_level);
+
 public:
     template <typename... Args>
     void Debug(const Args&... args);
@@ -55,16 +65,12 @@ public:
 
     void Flush();
 
-    void EnableDebug();
     bool IsDebugEnabled() const;
 
     static void Shutdown()
     {
         spdlog::shutdown();
     }
-
-private:
-    bool m_debug_logging_enabled;
 };
 
 template <typename TLoggerPolicy>
@@ -90,8 +96,6 @@ std::string LoggerImpl<TLoggerPolicy>::GetLogPath(const std::string& file_name_s
 template <typename TLoggerPolicy>
 LoggerImpl<TLoggerPolicy>::LoggerImpl()
 {
-    m_debug_logging_enabled = false;
-
     spdlog::set_error_handler([](const std::string& msg) {
         // By writing into the stderr was changing the behavior in a CI scenario.
         // There's not a good way to report errors when trying to create the log file.
@@ -99,18 +103,48 @@ LoggerImpl<TLoggerPolicy>::LoggerImpl()
         // std::cerr << "LoggerImpl Handler: " << msg << std::endl;
     });
 
+    static auto configured_log_level = GetEnvironmentValue(environment::log_level);
+
+    if (configured_log_level == log_level_none)
+    {
+        m_fileout = spdlog::null_logger_mt(logger_name);
+        return;
+    }
+    auto log_level = spdlog::level::info;
+
+    if (configured_log_level == log_level_error)
+    {
+        log_level = spdlog::level::err;
+    }
+    else if (configured_log_level == log_level_warn)
+    {
+        log_level = spdlog::level::warn;
+    }
+    else if (configured_log_level == log_level_info)
+    {
+        log_level = spdlog::level::info;
+    }
+    else if (configured_log_level == log_level_debug)
+    {
+        log_level = spdlog::level::debug;
+    }
+
     spdlog::flush_every(std::chrono::seconds(3));
 
     static auto current_process_name = ToString(GetCurrentProcessName());
-    static auto current_process_id = GetPID();
+    static auto current_process_id   = GetPID();
     static auto current_process_without_extension =
         current_process_name.substr(0, current_process_name.find_last_of("."));
 
-    static auto file_name_suffix = "-" + current_process_without_extension + "-" + std::to_string(current_process_id);
+    static auto file_name_suffix =
+        "-" + current_process_without_extension + "-" + std::to_string(current_process_id);
+
+    // by default, use the same size as on managed side: 10MiB
+    static auto file_size        = GetConfiguredSize(environment::max_log_file_size, 10485760);
 
     try
     {
-        m_fileout = spdlog::rotating_logger_mt("Logger", GetLogPath(file_name_suffix), 1048576 * 5, 10);
+        m_fileout = spdlog::rotating_logger_mt(logger_name, GetLogPath(file_name_suffix), file_size, 10);
     }
     catch (...)
     {
@@ -118,13 +152,14 @@ LoggerImpl<TLoggerPolicy>::LoggerImpl()
         // There's not a good way to report errors when trying to create the log file.
         // But we never should be changing the normal behavior of an app.
         // std::cerr << "LoggerImpl Handler: Error creating native log file." << std::endl;
-        m_fileout = spdlog::null_logger_mt("LoggerImpl");
+        m_fileout = spdlog::null_logger_mt(logger_name);
     }
 
-    m_fileout->set_level(spdlog::level::debug);
+    m_fileout->set_level(log_level);
 
     m_fileout->set_pattern(TLoggerPolicy::pattern, spdlog::pattern_time_type::utc);
 
+    // trigger flush whenever info messages are logged
     m_fileout->flush_on(spdlog::level::info);
 };
 
@@ -161,7 +196,8 @@ template <typename TLoggerPolicy>
 template <typename... Args>
 void LoggerImpl<TLoggerPolicy>::Debug(const Args&... args)
 {
-    if (IsDebugEnabled())
+    // to avoid possibly unnecessary LogToString conversion, check log level before calling underlying logger
+    if (ShouldLog(spdlog::level::debug))
     {
         m_fileout->debug(LogToString(args...));
     }
@@ -171,28 +207,50 @@ template <typename TLoggerPolicy>
 template <typename... Args>
 void LoggerImpl<TLoggerPolicy>::Info(const Args&... args)
 {
-    m_fileout->info(LogToString(args...));
+    // to avoid possibly unnecessary LogToString conversion, check log level before calling underlying logger
+    if (ShouldLog(spdlog::level::info))
+    {
+        m_fileout->info(LogToString(args...));
+    }
 }
 
 template <typename TLoggerPolicy>
 template <typename... Args>
 void LoggerImpl<TLoggerPolicy>::Warn(const Args&... args)
 {
-    m_fileout->warn(LogToString(args...));
+    // to avoid possibly unnecessary LogToString conversion, check log level before calling underlying logger
+    if (ShouldLog(spdlog::level::warn))
+    {
+        m_fileout->warn(LogToString(args...));
+    }
 }
 
 template <typename TLoggerPolicy>
 template <typename... Args>
 void LoggerImpl<TLoggerPolicy>::Error(const Args&... args)
 {
-    m_fileout->error(LogToString(args...));
+    // to avoid possibly unnecessary LogToString conversion, check log level before calling underlying logger
+    if (ShouldLog(spdlog::level::err))
+    {
+        m_fileout->error(LogToString(args...));
+    }
 }
 
 template <typename TLoggerPolicy>
 template< typename... Args>
 void LoggerImpl<TLoggerPolicy>::Critical(const Args&... args)
 {
-    m_fileout->critical(LogToString(args...));
+    // to avoid possibly unnecessary LogToString conversion, check log level before calling underlying logger
+    if (ShouldLog(spdlog::level::critical))
+    {
+        m_fileout->critical(LogToString(args...));
+    }
+}
+
+template <typename TLoggerPolicy>
+bool LoggerImpl<TLoggerPolicy>::ShouldLog(spdlog::level::level_enum log_level)
+{
+    return m_fileout->should_log(log_level);
 }
 
 template <typename TLoggerPolicy>
@@ -201,16 +259,11 @@ void LoggerImpl<TLoggerPolicy>::Flush()
     m_fileout->flush();
 }
 
-template <typename TLoggerPolicy>
-void LoggerImpl<TLoggerPolicy>::EnableDebug()
-{
-    m_debug_logging_enabled = true;
-}
 
 template <typename TLoggerPolicy>
 bool LoggerImpl<TLoggerPolicy>::IsDebugEnabled() const
 {
-    return m_debug_logging_enabled;
+    return m_fileout->level() == spdlog::level::debug;
 }
 
 } // namespace shared

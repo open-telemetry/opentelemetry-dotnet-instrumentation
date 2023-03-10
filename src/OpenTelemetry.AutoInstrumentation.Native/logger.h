@@ -64,11 +64,6 @@ public:
         LoggerImpl<TracerLoggerPolicy>::Instance()->Critical(args...);
     }
 
-    static void EnableDebug()
-    {
-        LoggerImpl<TracerLoggerPolicy>::Instance()->EnableDebug();
-    }
-
     static bool IsDebugEnabled()
     {
         return LoggerImpl<TracerLoggerPolicy>::Instance()->IsDebugEnabled();

@@ -7,7 +7,8 @@ to .NET applications without having to modify their source code.
 
 ---
 
-⚠️ The following documentation refers to the in-development version
+> **Warning**
+> The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
 ([0.6.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
 can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.6.0/docs/README.md).
@@ -97,6 +98,7 @@ the executable.
 Download and extract the appropriate binaries from
 [the latest release](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest).
 
+> **Note**
 > The path where you put the binaries is referenced as `$INSTALL_DIR`
 
 ### Instrument a .NET application
@@ -125,6 +127,7 @@ When running your application, make sure to:
 | `OTEL_DOTNET_AUTO_HOME`              | All versions        | `$INSTALL_DIR`                                                            |
 | `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | All versions        | `$INSTALL_DIR/integrations.json`                                          |
 
+> **Note**
 > Some settings can be omitted on .NET. For more information, see [config.md](config.md#net-clr-profiler).
 
 ### Shell scripts
@@ -166,6 +169,7 @@ uses environment variables as parameters:
 | `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                            | No       | `$HOME/.otel-dotnet-auto` |
 | `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`       | No       | *Calculated*              |
 
+> **Note**
 > On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
 
 ### PowerShell module (Windows)
@@ -204,7 +208,8 @@ Get-Command -Module OpenTelemetry.DotNet.Auto
 Get-Help Install-OpenTelemetryCore -Detailed
 ```
 
-⚠️ The PowerShell module works only on PowerShell 5.1
+> **Warning**
+> The PowerShell module works only on PowerShell 5.1
 which is the one installed by default on Windows.
 
 ## Instrument a container
