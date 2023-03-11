@@ -45,10 +45,11 @@ public class EnvironmentHelper
         Type anchorType,
         ITestOutputHelper output,
         string? testApplicationDirectory = null,
+        string testApplicationType = "integrations",
         bool prependTestApplicationToAppName = true)
     {
         TestApplicationName = testApplicationName;
-        _testApplicationDirectory = testApplicationDirectory ?? Path.Combine("test", "test-applications", "integrations");
+        _testApplicationDirectory = testApplicationDirectory ?? Path.Combine("test", "test-applications", testApplicationType);
         _targetFramework = Assembly.GetAssembly(anchorType)?.GetCustomAttribute<TargetFrameworkAttribute>()!;
         _output = output;
 
@@ -69,7 +70,11 @@ public class EnvironmentHelper
             ? "TestApplication."
             : string.Empty;
 
-        SetDefaultEnvironmentVariables();
+        if (testApplicationType == "integrations")
+        {
+            // Only integration tests assume the default environment variable settings.
+            SetDefaultEnvironmentVariables();
+        }
     }
 
     public bool DebugModeEnabled { get; set; } = true;

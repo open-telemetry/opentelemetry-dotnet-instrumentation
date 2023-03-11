@@ -170,6 +170,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GacInstallTool", "tools\Gac
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryVersionsGenerator", "tools\LibraryVersionsGenerator\LibraryVersionsGenerator.csproj", "{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{98868FAF-0854-4E66-8306-3EFA7F2E9A45}"
+	ProjectSection(SolutionItems) = preProject
+		nuget\OpenTelemetry.AutoInstrumentation.Dependencies\OpenTelemetry.AutoInstrumentation.Dependencies.nuspec = nuget\OpenTelemetry.AutoInstrumentation.Dependencies\OpenTelemetry.AutoInstrumentation.Dependencies.nuspec
+		nuget\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.nuspec = nuget\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.nuspec
+		nuget\OpenTelemetry.AutoInstrumentation.Runtime.Native\OpenTelemetry.AutoInstrumentation.Runtime.Native.nuspec = nuget\OpenTelemetry.AutoInstrumentation.Runtime.Native\OpenTelemetry.AutoInstrumentation.Runtime.Native.nuspec
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGetPackagesTests", "test\NuGetPackagesTests\NuGetPackagesTests.csproj", "{AFD7582B-E9CD-4DF4-93B4-D5BBD7F539D0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget-packages", "nuget-packages", "{2EF2F7CE-E56F-4B81-A5A5-277693529D43}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.SelfContained", "test\test-applications\nuget-packages\TestApplication.SelfContained\TestApplication.SelfContained.csproj", "{25ED93D0-A70C-4A07-84D9-EF94115259C9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -798,6 +811,30 @@ Global
 		{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8}.Release|x64.Build.0 = Release|Any CPU
 		{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8}.Release|x86.ActiveCfg = Release|Any CPU
 		{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8}.Release|x86.Build.0 = Release|Any CPU
+		{AFD7582B-E9CD-4DF4-93B4-D5BBD7F539D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFD7582B-E9CD-4DF4-93B4-D5BBD7F539D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFD7582B-E9CD-4DF4-93B4-D5BBD7F539D0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AFD7582B-E9CD-4DF4-93B4-D5BBD7F539D0}.Debug|x64.Build.0 = Debug|Any CPU
+		{AFD7582B-E9CD-4DF4-93B4-D5BBD7F539D0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AFD7582B-E9CD-4DF4-93B4-D5BBD7F539D0}.Debug|x86.Build.0 = Debug|Any CPU
+		{AFD7582B-E9CD-4DF4-93B4-D5BBD7F539D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFD7582B-E9CD-4DF4-93B4-D5BBD7F539D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFD7582B-E9CD-4DF4-93B4-D5BBD7F539D0}.Release|x64.ActiveCfg = Release|Any CPU
+		{AFD7582B-E9CD-4DF4-93B4-D5BBD7F539D0}.Release|x64.Build.0 = Release|Any CPU
+		{AFD7582B-E9CD-4DF4-93B4-D5BBD7F539D0}.Release|x86.ActiveCfg = Release|Any CPU
+		{AFD7582B-E9CD-4DF4-93B4-D5BBD7F539D0}.Release|x86.Build.0 = Release|Any CPU
+		{25ED93D0-A70C-4A07-84D9-EF94115259C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25ED93D0-A70C-4A07-84D9-EF94115259C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25ED93D0-A70C-4A07-84D9-EF94115259C9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{25ED93D0-A70C-4A07-84D9-EF94115259C9}.Debug|x64.Build.0 = Debug|Any CPU
+		{25ED93D0-A70C-4A07-84D9-EF94115259C9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{25ED93D0-A70C-4A07-84D9-EF94115259C9}.Debug|x86.Build.0 = Debug|Any CPU
+		{25ED93D0-A70C-4A07-84D9-EF94115259C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25ED93D0-A70C-4A07-84D9-EF94115259C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25ED93D0-A70C-4A07-84D9-EF94115259C9}.Release|x64.ActiveCfg = Release|Any CPU
+		{25ED93D0-A70C-4A07-84D9-EF94115259C9}.Release|x64.Build.0 = Release|Any CPU
+		{25ED93D0-A70C-4A07-84D9-EF94115259C9}.Release|x86.ActiveCfg = Release|Any CPU
+		{25ED93D0-A70C-4A07-84D9-EF94115259C9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -859,6 +896,9 @@ Global
 		{D6181786-C7F1-400D-A678-8DC300485429} = {00F4C92D-6652-4BD8-A334-B35D3E711BE6}
 		{6A63DAA1-463A-4F7E-B3FF-3B444F161DBD} = {00F4C92D-6652-4BD8-A334-B35D3E711BE6}
 		{119F5BAD-6A58-40EA-8E0A-666CADE3CAF8} = {00F4C92D-6652-4BD8-A334-B35D3E711BE6}
+		{AFD7582B-E9CD-4DF4-93B4-D5BBD7F539D0} = {5C915382-C886-457D-8641-9E766D8E5A17}
+		{2EF2F7CE-E56F-4B81-A5A5-277693529D43} = {91A299AD-6C09-4B7F-BD8B-A705D9BFC672}
+		{25ED93D0-A70C-4A07-84D9-EF94115259C9} = {2EF2F7CE-E56F-4B81-A5A5-277693529D43}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}

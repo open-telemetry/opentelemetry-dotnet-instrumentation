@@ -85,6 +85,7 @@ public static class Program
                 await PingRedis(args);
 
                 using var client = new HttpClient();
+                client.Timeout = TimeSpan.FromSeconds(5);
                 await client.GetStringAsync("https://www.bing.com", cancellation.Token);
             }
 

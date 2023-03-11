@@ -1,0 +1,38 @@
+﻿<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>OpenTelemetry.AutoInstrumentation</id>
+    <description>OpenTelemetry Auto-Instrumentation package with all required components to enable automatic instrumentation.</description>
+
+    <!-- Common properties expected to be defined at build time -->
+    <version>$NuGetPackageVersion$</version>
+    <authors>$OpenTelemetryAuthors$</authors>
+    <requireLicenseAcceptance>$NuGetRequiredLicenseAcceptance$</requireLicenseAcceptance>
+    <license type="expression">$NuGetLicense$</license>
+
+    <!-- URI based properties -->
+    <projectUrl>https://opentelemetry.io/</projectUrl>
+    <tags>O11y Observability OpenTelemetry OTel Logs Metrics Monitoring Telemetry Tracing Auto Automatic Instrumentation</tags>
+    <repository type="git" url="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation" />
+
+    <dependencies>
+      <group targetFramework=".NETFramework4.6.2">
+        <dependency id="OpenTelemetry.AutoInstrumentation.Runtime.Managed" version="$NuGetPackageVersion$" />
+        <dependency id="OpenTelemetry.AutoInstrumentation.Runtime.Native" version="$NuGetPackageVersion$" />
+      </group>
+      <group targetFramework="net6.0">
+        <dependency id="OpenTelemetry.AutoInstrumentation.Runtime.Managed" version="$NuGetPackageVersion$" />
+        <dependency id="OpenTelemetry.AutoInstrumentation.Runtime.Native" version="$NuGetPackageVersion$" />
+        <dependency id="OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper" version="$NuGetPackageVersion$" />
+        <dependency id="OpenTelemetry.AutoInstrumentation.Loader" version="$NuGetPackageVersion$" />
+        <dependency id="OpenTelemetry.AutoInstrumentation.StartupHook" version="$NuGetPackageVersion$" />
+      </group>
+    </dependencies>
+
+    <contentFiles>
+      <!-- Content files (scripts, configurations, etc) copied to the application the output folder -->
+      <files include="**/*" buildAction="None" flatten="false" copyToOutput="true" />
+    </contentFiles>
+
+  </metadata>
+</package>

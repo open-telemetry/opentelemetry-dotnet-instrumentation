@@ -23,16 +23,19 @@ namespace IntegrationTests.Helpers;
 
 public abstract class TestHelper
 {
-    protected TestHelper(string testApplicationName, ITestOutputHelper output)
+    protected TestHelper(string testApplicationName, ITestOutputHelper output, string testApplicationType = "integrations")
     {
         Output = output;
-        EnvironmentHelper = new EnvironmentHelper(testApplicationName, typeof(TestHelper), output);
+        EnvironmentHelper = new EnvironmentHelper(testApplicationName, typeof(TestHelper), output, testApplicationType: testApplicationType);
 
         output.WriteLine($"Platform: {EnvironmentTools.GetPlatform()}");
         output.WriteLine($"Configuration: {EnvironmentTools.GetBuildConfiguration()}");
         output.WriteLine($"TargetFramework: {EnvironmentHelper.GetTargetFramework()}");
         output.WriteLine($".NET Core: {EnvironmentHelper.IsCoreClr()}");
-        output.WriteLine($"Profiler DLL: {EnvironmentHelper.GetProfilerPath()}");
+        if (testApplicationType == "integrations")
+        {
+            output.WriteLine($"Profiler DLL: {EnvironmentHelper.GetProfilerPath()}");
+        }
     }
 
     protected EnvironmentHelper EnvironmentHelper { get; }

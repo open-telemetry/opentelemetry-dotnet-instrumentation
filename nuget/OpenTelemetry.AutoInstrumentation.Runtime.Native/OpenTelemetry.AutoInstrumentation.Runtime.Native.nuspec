@@ -1,0 +1,21 @@
+﻿<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>OpenTelemetry.AutoInstrumentation.Runtime.Native</id>
+    <description>Native runtime components used by the OpenTelmetry.AutoInstrumentation project.</description>
+
+    <!-- Common properties expected to be defined at build time -->
+    <version>$NuGetPackageVersion$</version>
+    <authors>$OpenTelemetryAuthors$</authors>
+    <requireLicenseAcceptance>$NuGetRequiredLicenseAcceptance$</requireLicenseAcceptance>
+    <license type="expression">$NuGetLicense$</license>
+
+    <!-- URI based properties -->
+    <projectUrl>https://opentelemetry.io/</projectUrl>
+    <tags>O11y Observability OpenTelemetry OTel Logs Metrics Monitoring Telemetry Tracing Auto Automatic Instrumentation</tags>
+    <repository type="git" url="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation" />
+
+    <!-- Runtime files are added this file folder via a nuke build target -->
+
+  </metadata>
+</package>
