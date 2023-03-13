@@ -2,9 +2,9 @@
   <Import Project="..\Directory.Packages.props" />
   <ItemGroup>
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.5" />
-    <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.0.5" />
+    <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.0.6" />
     <PackageVersion Include="FluentAssertions" Version="6.10.0" />
-    <PackageVersion Include="Google.Protobuf" Version="3.22.0" />
+    <PackageVersion Include="Google.Protobuf" Version="3.22.1" />
     <PackageVersion Include="GraphQL" Version="2.4.0" />
     <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="3.4.0" />
     <PackageVersion Include="GraphQL.Server.Ui.Playground" Version="3.4.0" />
@@ -25,9 +25,9 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
     <PackageVersion Include="MongoDB.Driver" Version="2.19.0" />
     <PackageVersion Include="Moq" Version="4.18.4" />
-    <PackageVersion Include="MySql.Data" Version="8.0.32" />
+    <PackageVersion Include="MySql.Data" Version="8.0.32.1" />
     <PackageVersion Include="NServiceBus" Version="8.0.3" />
-    <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Npgsql" Version="7.0.2" />
     <PackageVersion Include="Quartz" Version="3.6.2" />
     <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.6.2" />
@@ -40,8 +40,8 @@
     <PackageVersion Include="System.ServiceModel.Http" Version="4.10.0" />
     <PackageVersion Include="System.ServiceModel.NetTcp" Version="4.10.0" />
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
-    <PackageVersion Include="Testcontainers" Version="2.4.0" />
-    <PackageVersion Include="Verify.Xunit" Version="19.10.0" />
+    <PackageVersion Include="Testcontainers" Version="3.0.0" />
+    <PackageVersion Include="Verify.Xunit" Version="19.11.0" />
     <PackageVersion Include="xunit" Version="2.4.2" />
     <PackageVersion Include="xunit.abstractions" Version="2.0.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />

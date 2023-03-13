@@ -19,10 +19,13 @@ inline bool IsStartupHookValid(const std::vector<WSTRING>& startup_hooks, const 
         return false;
     }
 
-    const auto expected_startuphook_path =
+    const auto expected_deployment_startuphook_path =
         std::filesystem::path(home_path)
         / "net" / "OpenTelemetry.AutoInstrumentation.StartupHook.dll";
-    if (!std::filesystem::exists(expected_startuphook_path))
+    const auto expected_nuget_startuphook_path = 
+        std::filesystem::path(home_path)
+        / "OpenTelemetry.AutoInstrumentation.StartupHook.dll";
+    if (!std::filesystem::exists(expected_deployment_startuphook_path) && !std::filesystem::exists(expected_nuget_startuphook_path))
     {
         return false;
     }
@@ -31,7 +34,7 @@ inline bool IsStartupHookValid(const std::vector<WSTRING>& startup_hooks, const 
     {
         const auto start_hook_path = std::filesystem::path(*i);
         std::error_code ec;
-        if (std::filesystem::equivalent(expected_startuphook_path, start_hook_path, ec))
+        if (std::filesystem::equivalent(expected_deployment_startuphook_path, start_hook_path, ec) || std::filesystem::equivalent(expected_nuget_startuphook_path, start_hook_path, ec))
         {
             return true;
         }

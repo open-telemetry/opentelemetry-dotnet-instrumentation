@@ -3,7 +3,7 @@
   <Import Project="..\CommonExcludedAssets.props" />
 
   <PropertyGroup>
-    <Version>0.6.0</Version>
+    <PackageId>OpenTelemetry.AutoInstrumentation.Runtime.Managed</PackageId>
   </PropertyGroup>
 
   <ItemGroup>

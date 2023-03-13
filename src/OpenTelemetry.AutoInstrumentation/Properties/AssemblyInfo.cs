@@ -22,4 +22,5 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("OpenTelemetry.AutoInstrumentation.Tests")]
 [assembly: InternalsVisibleTo("IntegrationTests")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
+[assembly: InternalsVisibleTo("NuGetPackagesTests")]
 #endif
