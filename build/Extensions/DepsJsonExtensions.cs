@@ -61,7 +61,7 @@ internal static class DepsJsonExtensions
         var dependencies = depsJson.GetDependencies();
         var runtimeLibraries = depsJson["libraries"].AsObject();
         var keysToRemove = dependencies
-            .Where(x => match(x.Key))
+            .Where(x => match(x.Key.Split('/')[0]))
             .Select(x => x.Key)
             .ToList();
 
@@ -79,6 +79,8 @@ internal static class DepsJsonExtensions
 
     public static async Task CleanDuplicatesFromDepsJsonAsync(this JsonObject depsJson)
     {
+        var map = DependencyAnalyzer.Analyze(depsJson.GetDependencies());
+
         var result = AnalyzeAdapterDependencies(
             // TODO: Scan these packages from OpenTelemetry.AutoInstrumentation.AdditionalDeps
             await NugetPackageHelper.GetPackageDependenciesAsync("MongoDB.Driver.Core.Extensions.DiagnosticSources", "1.3.0"),
@@ -102,12 +104,16 @@ internal static class DepsJsonExtensions
                         .All(x => x.Value.Contains(dependency));
                     if (canBeOptimized)
                     {
-                        // TODO 1: This is removing the parent library, 
-                        // before removing parent, we need to lookup transient libraries
-                        // and remove these first.
-                        // TODO 2: This is just cleaning up deps json, we need to manually
-                        // clean shared store also?
+                        // Remove the main library
                         RemoveLibrary(depsJson, lib => lib.Equals(dependency));
+
+                        // Remove transient leftovers
+                        DependencyAnalyzer.Cleanup(map, dependency)
+                            .ForEach(transient =>
+                                RemoveLibrary(depsJson, lib => lib.Equals(transient)));
+
+                        // TODO: This is just cleaning up deps json, we need to manually
+                        // clean shared store also?
                     }
                 }
             }
