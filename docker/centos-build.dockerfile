@@ -1,13 +1,13 @@
 FROM centos:centos7.9.2009
 
 RUN yum update -y \
-    && yum -y install centos-release-scl \
-    && yum -y install make \
-    && yum -y install git \
+    && yum -y install centos-release-scl-2-3.el7.centos \
+    && yum -y install make-3.82-24.el7 \
+    && yum -y install git-1.8.3.1-24.el7_9 \
     # contains recent versions of gcc
-    && yum -y install devtoolset-9 \
+    && yum -y install devtoolset-9-9.1-0.el7 \
     # required to build llvm
-    && yum -y install python3
+    && yum -y install python3-3.6.8-18.el7
 
 RUN curl -sL https://cmake.org/files/v3.25/cmake-3.25.2-linux-x86_64.sh -o cmake_install.sh \
     && chmod +x cmake_install.sh \
