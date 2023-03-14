@@ -44,10 +44,11 @@ internal class ConsoleLogger : ILogger
         Console.WriteLine($"[{level}] {data}");
     }
 
-    public async Task LogAsync(LogLevel level, string data)
+    public Task LogAsync(LogLevel level, string data)
     {
-        await Task.Run(() => Log(level, data))
-                  .ConfigureAwait(false);
+        Log(level, data);
+
+        return Task.CompletedTask;
     }
 
     public void Log(ILogMessage message)
@@ -55,9 +56,10 @@ internal class ConsoleLogger : ILogger
         Log(message.Level, message.Message);
     }
 
-    public async Task LogAsync(ILogMessage message)
+    public Task LogAsync(ILogMessage message)
     {
-        await Task.Run(() => Log(message.Level, message.Message))
-                  .ConfigureAwait(false);
+        Log(message.Level, message.Message);
+
+        return Task.CompletedTask;
     }
 }
