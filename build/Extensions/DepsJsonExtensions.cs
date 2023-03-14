@@ -61,7 +61,7 @@ internal static class DepsJsonExtensions
         var dependencies = depsJson.GetDependencies();
         var runtimeLibraries = depsJson["libraries"].AsObject();
         var keysToRemove = dependencies
-            .Where(x => match(x.Key.Split('/')[0]))
+            .Where(x => predicate(x.Key.Split('/')[0]))
             .Select(x => x.Key)
             .ToList();
 
@@ -74,12 +74,12 @@ internal static class DepsJsonExtensions
 
     public static void RemoveOpenTelemetryLibraries(this JsonObject depsJson)
     {
-        RemoveLibrary(depsJson, lib => lib.StartsWith("OpenTelemetry"));
+        RemoveLibrary(depsJson, lib => lib.StartsWith("OpenTelemetry", StringComparison.Ordinal));
     }
 
-    public static async Task CleanDuplicatesFromDepsJsonAsync(this JsonObject depsJson)
+    public static async Task CleanDuplicatesAsync(this JsonObject depsJson)
     {
-        var map = DependencyAnalyzer.Analyze(depsJson.GetDependencies());
+        var map = DependencyAnalyzer.BuildDependencyMap(depsJson);
 
         var result = AnalyzeAdapterDependencies(
             // TODO: Scan these packages from OpenTelemetry.AutoInstrumentation.AdditionalDeps
@@ -95,34 +95,36 @@ internal static class DepsJsonExtensions
                 .OrderByDescending(x => x.Key.Version)
                 .FirstOrDefault();
 
-            if (latestVersion.Value != null)
+            if (latestVersion.Value == null)
             {
-                foreach (var dependency in latestVersion.Value)
+                continue;
+            }
+
+            foreach (var dependency in latestVersion.Value)
+            {
+                // All package versions contain the same optimisable dependency
+                var canBeOptimized = framework.Value
+                    .All(x => x.Value.Contains(dependency));
+                if (canBeOptimized)
                 {
-                    // All package versions contain the same optimisable dependency
-                    var canBeOptimized = framework.Value
-                        .All(x => x.Value.Contains(dependency));
-                    if (canBeOptimized)
-                    {
-                        // Remove the main library
-                        RemoveLibrary(depsJson, lib => lib.Equals(dependency));
+                    // Remove the main library
+                    RemoveLibrary(depsJson, lib => lib.Equals(dependency));
 
-                        // Remove transient leftovers
-                        DependencyAnalyzer.Cleanup(map, dependency)
-                            .ForEach(transient =>
-                                RemoveLibrary(depsJson, lib => lib.Equals(transient)));
+                    // Remove transient leftovers
+                    DependencyAnalyzer.Cleanup(map, dependency)
+                        .ForEach(transient =>
+                            RemoveLibrary(depsJson, lib => lib.Equals(transient)));
 
-                        // TODO: This is just cleaning up deps json, we need to manually
-                        // clean shared store also?
-                    }
+                    // TODO: This is just cleaning up deps json, we need to manually
+                    // clean shared store also?
                 }
             }
         }
     }
 
     private static Dictionary<NuGetFramework, Dictionary<NuGetVersion, ICollection<string>>> AnalyzeAdapterDependencies(
-        NugetMetaData adapterPackage,
-        IEnumerable<(NuGetVersion Version, NugetMetaData MetaData)> instrumentationPackages)
+        PackageDependencySets adapterPackage,
+        IEnumerable<(NuGetVersion Version, PackageDependencySets MetaData)> instrumentationPackages)
     {
         var result = new Dictionary<NuGetFramework, Dictionary<NuGetVersion, ICollection<string>>>();
 
@@ -218,7 +220,7 @@ internal static class DepsJsonExtensions
         }
     }
 
-    private static JsonObject GetDependencies(this JsonObject depsJson)
+    public static JsonObject GetDependencies(this JsonObject depsJson)
     {
         return depsJson["targets"].AsObject().First().Value.AsObject();
     }

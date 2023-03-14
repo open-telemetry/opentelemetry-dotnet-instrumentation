@@ -471,7 +471,7 @@ partial class Build
                     depsJson.CopyNativeDependenciesToStore(file, architectureStores);
                     depsJson.RemoveOpenTelemetryLibraries();
 
-                    await depsJson.CleanDuplicatesFromDepsJsonAsync();
+                    await depsJson.CleanDuplicatesAsync();
 
                     if (folderRuntimeName == TargetFramework.NET6_0)
                     {

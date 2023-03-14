@@ -1,14 +1,15 @@
 using System.Text.Json.Nodes;
+using Extensions;
 
 namespace Helpers;
 
 internal static class DependencyAnalyzer
 {
-    public static DepsJsonDependencyMap BuildDependencyMap(this JsonObject dependencies)
+    public static DepsJsonDependencyMap BuildDependencyMap(this JsonObject depsJson)
     {
         var dependencyMap = new DepsJsonDependencyMap();
 
-        foreach (var dependency in dependencies)
+        foreach (var dependency in depsJson.GetDependencies())
         {
             var obj = dependency.Value.AsObject();
             var package = dependency.Key.Split('/')[0];

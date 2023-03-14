@@ -6,7 +6,7 @@ namespace Models;
 
 internal class PackageDependencySets : Dictionary<NuGetFramework, Dictionary<string, PackageDependency>>
 {
-    public NugetMetaData(IEnumerable<PackageDependencyGroup> dependencySets)
+    public PackageDependencySets(IEnumerable<PackageDependencyGroup> dependencySets)
         : base(dependencySets.ToDictionary(
             k => k.TargetFramework,
             v => new Dictionary<string, PackageDependency>(
