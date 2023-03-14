@@ -9,49 +9,49 @@ internal static class DependencyAnalyzer
     {
         var dependencyMap = new DepsJsonDependencyMap();
 
-        foreach (var dependency in depsJson.GetDependencies())
+        foreach (var dependencyNode in depsJson.GetDependencies())
         {
-            var obj = dependency.Value.AsObject();
-            var package = dependency.Key.Split('/')[0];
+            var dependency = dependencyNode.Value.AsObject();
+            var dependencyId = dependencyNode.Key.Split('/')[0];
 
-            if (!dependencyMap.TryCreateEntry(package, isRoot: true))
+            if (!dependencyMap.TryCreateEntry(dependencyId, isRoot: true))
             {
-                var entry = dependencyMap[package];
+                var entry = dependencyMap[dependencyId];
 
                 entry.UpdateToRoot();
             }
 
-            foreach (var transientPackage in GetTransientPackages(obj))
+            foreach (var transientDependencyId in GetTransientDependencies(dependency))
             {
-                dependencyMap.TryCreateEntry(transientPackage, isRoot: false);
+                dependencyMap.TryCreateEntry(transientDependencyId, isRoot: false);
 
-                var entry = dependencyMap[transientPackage];
-                entry.AddReferee(package);
+                var entry = dependencyMap[transientDependencyId];
+                entry.AddReferee(dependencyId);
             }
         }
 
         return dependencyMap;
     }
 
-    internal static IList<string> Cleanup(DepsJsonDependencyMap map, string dependency)
+    internal static IList<string> Cleanup(DepsJsonDependencyMap map, string dependencyId)
     {
-        if (!map.ContainsKey(dependency))
+        if (!map.ContainsKey(dependencyId))
         {
             return Array.Empty<string>();
         }
 
         var libsToRemove = new List<string>();
-        foreach (var dependencyReferee in GetReferees(map, dependency))
+        foreach (var dependencyReferee in GetReferees(map, dependencyId))
         {
             if (dependencyReferee.Referees.Count != 1)
             {
                 continue;
             }
 
-            libsToRemove.Add(dependencyReferee.Name);
-            dependencyReferee.RemoveReferee(dependencyReferee.Name);
+            libsToRemove.Add(dependencyReferee.Id);
+            dependencyReferee.RemoveReferee(dependencyReferee.Id);
 
-            var nestedLibsToRemove = Cleanup(map, dependencyReferee.Name);
+            var nestedLibsToRemove = Cleanup(map, dependencyReferee.Id);
             if (nestedLibsToRemove.Any())
             {
                 libsToRemove.AddRange(nestedLibsToRemove);
@@ -61,38 +61,38 @@ internal static class DependencyAnalyzer
         return libsToRemove;
     }
 
-    internal static IEnumerable<DepsJsonDependency> GetReferees(DepsJsonDependencyMap map, string dependency)
+    internal static IEnumerable<DepsJsonDependency> GetReferees(DepsJsonDependencyMap map, string dependencyId)
     {
         return map
-            .Where(x => x.Value.Referees.Contains(dependency))
+            .Where(x => x.Value.Referees.Contains(dependencyId))
             .Select(x => x.Value)
             .ToList();
     }
 
-    private static IEnumerable<string> GetTransientPackages(JsonObject transientDependencies)
+    private static IEnumerable<string> GetTransientDependencies(JsonObject transientDependencies)
     {
-        if (!transientDependencies.ContainsKey("dependencies"))
+        if (!transientDependencies.TryGetPropertyValue("dependencies", out var dependenciesNode))
         {
             yield break;
         }
 
-        foreach (var transientDependency in transientDependencies["dependencies"].AsObject())
+        foreach (var transientDependencyNode in dependenciesNode.AsObject())
         {
-            yield return transientDependency.Key;
+            yield return transientDependencyNode.Key;
         }
     }
 
-    private static bool TryCreateEntry(this Dictionary<string, DepsJsonDependency> map, string package, bool isRoot)
+    private static bool TryCreateEntry(this DepsJsonDependencyMap map, string dependencyId, bool isRoot)
     {
-        if (!map.ContainsKey(package))
+        if (!map.ContainsKey(dependencyId))
         {
             var entry = new DepsJsonDependency()
             {
-                Name = package,
+                Id = dependencyId,
                 IsRoot = isRoot,
             };
 
-            map.Add(package, entry);
+            map.Add(dependencyId, entry);
 
             return true;
         }
@@ -106,7 +106,7 @@ internal static class DependencyAnalyzer
 
     internal class DepsJsonDependency
     {
-        public string Name { get; init; }
+        public string Id { get; init; }
 
         public bool IsRoot { get; set; }
 
