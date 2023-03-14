@@ -33,9 +33,9 @@ internal static class DepsJsonExtensions
         {
             var target = targetProperty.Value.AsObject();
 
-            foreach (var packages in target)
+            foreach (var packagesNode in target)
             {
-                if (!packages.Value.AsObject().TryGetPropertyValue("runtimeTargets", out var runtimeTargets))
+                if (!packagesNode.Value.AsObject().TryGetPropertyValue("runtimeTargets", out var runtimeTargets))
                 {
                     continue;
                 }
@@ -46,7 +46,7 @@ internal static class DepsJsonExtensions
 
                     foreach (var architectureStore in architectureStores)
                     {
-                        var targetFileName = Path.Combine(architectureStore, packages.Key.ToLowerInvariant(), runtimeDependency.Key);
+                        var targetFileName = Path.Combine(architectureStore, packagesNode.Key.ToLowerInvariant(), runtimeDependency.Key);
                         var targetDirectory = Path.GetDirectoryName(targetFileName);
                         Directory.CreateDirectory(targetDirectory);
                         File.Copy(sourceFileName, targetFileName);
@@ -133,29 +133,31 @@ internal static class DepsJsonExtensions
         // adapter packages part
         foreach (var adapterDependencyGroup in adapterPackage)
         {
-            result.TryAdd(adapterDependencyGroup.Key, new Dictionary<NuGetVersion, ICollection<string>>());
+            var framework = adapterDependencyGroup.Key;
+
+            result.TryAdd(framework, new Dictionary<NuGetVersion, ICollection<string>>());
 
             foreach (var adapterDependency in adapterDependencyGroup.Value)
             {
                 // Instrumentation packages part
                 foreach (var instrumentationPackage in instrumentationPackages)
                 {
-                    result[adapterDependencyGroup.Key].TryAdd(instrumentationPackage.Version, new List<string>());
+                    var dependencyGroup = result[framework];
+                    dependencyGroup.TryAdd(instrumentationPackage.Version, new List<string>());
 
                     var hasCommonDependency = instrumentationPackage
-                        .MetaData[adapterDependencyGroup.Key]
+                        .MetaData[framework]
                         .ContainsKey(adapterDependency.Value.Id);
                     if (!hasCommonDependency)
                     {
                         continue;
                     }
 
-                    var dependency = instrumentationPackage.MetaData[adapterDependencyGroup.Key][adapterDependency.Value.Id];
-
+                    var dependency = instrumentationPackage.MetaData[framework][adapterDependency.Value.Id];
                     var isDependencyVersionSatisfied = adapterDependency.Value.VersionRange.Satisfies(dependency.VersionRange.MinVersion);
                     if (isDependencyVersionSatisfied)
                     {
-                        result[adapterDependencyGroup.Key][instrumentationPackage.Version].Add(dependency.Id);
+                        dependencyGroup[instrumentationPackage.Version].Add(dependency.Id);
                     }
                 }
             }
