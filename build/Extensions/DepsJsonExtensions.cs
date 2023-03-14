@@ -5,6 +5,7 @@ using NuGet.Frameworks;
 using NuGet.Versioning;
 using Nuke.Common.IO;
 using Nuke.Common.Utilities.Collections;
+using OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDb;
 using static Nuke.Common.IO.FileSystemTasks;
 
 namespace Extensions;
@@ -83,10 +84,11 @@ internal static class DepsJsonExtensions
 
         var result = AnalyzeAdapterDependencies(
             // TODO: Scan these packages from OpenTelemetry.AutoInstrumentation.AdditionalDeps
-            await NugetPackageHelper.GetPackageDependenciesAsync("MongoDB.Driver.Core.Extensions.DiagnosticSources", "1.3.0"),
-
-            // TODO: Extract metadata from MongoClientIntegration.cs and source-link it to nuke.build?
-            await NugetPackageHelper.GetPackageDependenciesAsync("MongoDB.Driver", "2.13.3", "2.65535.65535")
+            await NugetPackageHelper.GetPackageDependenciesAsync(MongoClientIntegrationMetadata.AdapterAssembly, "1.3.0"),
+            await NugetPackageHelper.GetPackageDependenciesAsync(
+                MongoClientIntegrationMetadata.InstrumentedAssembly,
+                MongoClientIntegrationMetadata.MinimumVersion,
+                MongoClientIntegrationMetadata.MaximumVersion)
         );
 
         foreach (var framework in result)

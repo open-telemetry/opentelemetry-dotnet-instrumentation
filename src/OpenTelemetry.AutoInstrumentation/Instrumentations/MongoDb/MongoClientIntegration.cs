@@ -20,6 +20,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 #endif
 using OpenTelemetry.AutoInstrumentation.CallTarget;
+using static OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDb.MongoClientIntegrationMetadata;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
 
@@ -27,13 +28,13 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
 /// MongoDB.Driver.MongoClient calltarget instrumentation
 /// </summary>
 [InstrumentMethod(
-    assemblyName: "MongoDB.Driver",
+    assemblyName: InstrumentedAssembly,
     typeName: "MongoDB.Driver.MongoClient",
     methodName: ".ctor",
     returnTypeName: ClrNames.Void,
     parameterTypeNames: new[] { "MongoDB.Driver.MongoClientSettings" },
-    minimumVersion: "2.13.3",
-    maximumVersion: "2.65535.65535",
+    minimumVersion: MinimumVersion,
+    maximumVersion: MaximumVersion,
     integrationName: "MongoDB",
     type: InstrumentationType.Trace)]
 public static class MongoClientIntegration
@@ -73,7 +74,7 @@ public static class MongoClientIntegration
 #if NET6_0_OR_GREATER
     private static object GetInstrumentationOptions()
     {
-        Type optionsType = Type.GetType("MongoDB.Driver.Core.Extensions.DiagnosticSources.InstrumentationOptions, MongoDB.Driver.Core.Extensions.DiagnosticSources")!;
+        Type optionsType = Type.GetType($"MongoDB.Driver.Core.Extensions.DiagnosticSources.InstrumentationOptions, {AdapterAssembly}")!;
 
         var options = Activator.CreateInstance(optionsType)!;
         var publicProperty = BindingFlags.Public | BindingFlags.Instance;
@@ -104,7 +105,7 @@ public static class MongoClientIntegration
     {
         Type eventSubscriberInterface = Type.GetType("MongoDB.Driver.Core.Events.IEventSubscriber, MongoDB.Driver.Core")!;
         Type clusterBuilderType = Type.GetType("MongoDB.Driver.Core.Configuration.ClusterBuilder, MongoDB.Driver.Core")!;
-        Type listenerType = Type.GetType("MongoDB.Driver.Core.Extensions.DiagnosticSources.DiagnosticsActivityEventSubscriber, MongoDB.Driver.Core.Extensions.DiagnosticSources")!;
+        Type listenerType = Type.GetType($"MongoDB.Driver.Core.Extensions.DiagnosticSources.DiagnosticsActivityEventSubscriber, {AdapterAssembly}")!;
 
         var options = GetInstrumentationOptions();
         var listener = Activator.CreateInstance(listenerType, options);

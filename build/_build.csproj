@@ -12,6 +12,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="InstrumentationMetadata\" />
+    <Compile Include="..\src\OpenTelemetry.AutoInstrumentation\Instrumentations\MongoDb\MongoClientIntegrationMetadata.cs" Link="InstrumentationMetadata\MongoClientIntegrationMetadata.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Mono.Cecil" />
     <PackageReference Include="Nuke.Common" />
     <PackageReference Include="Nuget.CommandLine" ExcludeAssets="all" />
