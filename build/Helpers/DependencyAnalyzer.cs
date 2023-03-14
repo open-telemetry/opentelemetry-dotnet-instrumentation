@@ -4,7 +4,7 @@ namespace Helpers;
 
 internal static class DependencyAnalyzer
 {
-    public static DepsJsonDependencyMap Analyze(this JsonObject dependencies)
+    public static DepsJsonDependencyMap BuildDependencyMap(this JsonObject dependencies)
     {
         var dependencyMap = new DepsJsonDependencyMap();
 
