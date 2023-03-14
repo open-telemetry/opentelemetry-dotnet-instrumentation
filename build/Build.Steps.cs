@@ -455,38 +455,37 @@ partial class Build
                 // Major and Minor version are extracted from framework and default value of 0 is appended for patch.
                 .SetOutput(AdditionalDepsDirectory / "shared" / "Microsoft.NETCore.App" / framework.ToString().Substring(framework.ToString().Length - 3) + ".0")));
 
-            await AdditionalDepsDirectory.GlobFiles("**/*deps.json")
-                .ForEachAsync(async file =>
+            foreach (var file in AdditionalDepsDirectory.GlobFiles("**/*deps.json"))
+            {
+                var rawJson = File.ReadAllText(file);
+                var depsJson = JsonNode.Parse(rawJson).AsObject();
+
+                var folderRuntimeName = depsJson.GetFolderRuntimeName();
+                var architectureStores = new[]
                 {
-                    var rawJson = File.ReadAllText(file);
-                    var depsJson = JsonNode.Parse(rawJson).AsObject();
+                    Path.Combine(StoreDirectory, "x64", folderRuntimeName),
+                    Path.Combine(StoreDirectory, "x86", folderRuntimeName),
+                };
 
-                    var folderRuntimeName = depsJson.GetFolderRuntimeName();
-                    var architectureStores = new List<string>
-                    {
-                        Path.Combine(StoreDirectory, "x64", folderRuntimeName),
-                        Path.Combine(StoreDirectory, "x86", folderRuntimeName),
-                    }.AsReadOnly();
+                depsJson.CopyNativeDependenciesToStore(file, architectureStores);
+                depsJson.RemoveOpenTelemetryLibraries();
 
-                    depsJson.CopyNativeDependenciesToStore(file, architectureStores);
-                    depsJson.RemoveOpenTelemetryLibraries();
+                await depsJson.CleanDuplicatesAsync();
 
-                    await depsJson.CleanDuplicatesAsync();
+                if (folderRuntimeName == TargetFramework.NET6_0)
+                {
+                    // To allow roll forward for applications, like Roslyn, that target one tfm
+                    // but have a later runtime move the libraries under the original tfm folder
+                    // to the latest one.
+                    depsJson.RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET7_0, architectureStores);
+                }
 
-                    if (folderRuntimeName == TargetFramework.NET6_0)
-                    {
-                        // To allow roll forward for applications, like Roslyn, that target one tfm
-                        // but have a later runtime move the libraries under the original tfm folder
-                        // to the latest one.
-                        depsJson.RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET7_0, architectureStores);
-                    }
-
-                    // Write the updated deps.json file.
-                    File.WriteAllText(file, depsJson.ToJsonString(new()
-                    {
-                        WriteIndented = true
-                    }));
-                });
+                // Write the updated deps.json file.
+                File.WriteAllText(file, depsJson.ToJsonString(new()
+                {
+                    WriteIndented = true
+                }));
+            }
 
             // Cleanup Additional Deps Directory
             AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml", "**/*.dylib", "**/*.so").ForEach(DeleteFile);
