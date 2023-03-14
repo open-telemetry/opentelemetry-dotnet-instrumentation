@@ -10,12 +10,14 @@ namespace Helpers;
 internal static class NugetPackageHelper
 {
     private static readonly SourceRepository NugetSourceRepository;
+    private static readonly ConsoleLogger Logger;
 
     static NugetPackageHelper()
     {
         // TODO: try relay on nuget.config file
         var packageSource = new PackageSource("https://api.nuget.org/v3/index.json");
         NugetSourceRepository = new SourceRepository(packageSource, Repository.Provider.GetCoreV3());
+        Logger = new ConsoleLogger();
     }
 
     public static async Task<PackageDependencySets> GetPackageDependenciesAsync(string packageId, string version)
@@ -54,7 +56,7 @@ internal static class NugetPackageHelper
             includePrerelease: false,
             includeUnlisted: true,
             new SourceCacheContext(),
-            new ConsoleLogger(),
+            Logger,
             CancellationToken.None);
     }
 
@@ -65,7 +67,7 @@ internal static class NugetPackageHelper
         return await packageMetadataResource.GetMetadataAsync(
             new PackageIdentity(packageId, new NuGetVersion(version)),
             new SourceCacheContext(),
-            new ConsoleLogger(),
+            Logger,
             CancellationToken.None);
     }
 }
