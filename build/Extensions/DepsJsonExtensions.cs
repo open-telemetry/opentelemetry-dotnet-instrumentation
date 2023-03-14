@@ -56,7 +56,7 @@ internal static class DepsJsonExtensions
         }
     }
 
-    public static void RemoveLibrary(this JsonObject depsJson, Predicate<string> match)
+    public static void RemoveLibrary(this JsonObject depsJson, Predicate<string> predicate)
     {
         var dependencies = depsJson.GetDependencies();
         var runtimeLibraries = depsJson["libraries"].AsObject();
