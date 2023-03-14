@@ -130,20 +130,14 @@ internal static class DepsJsonExtensions
 
         foreach (var adapterDependencyGroup in adapterPackage)
         {
-            if (!result.ContainsKey(adapterDependencyGroup.Key))
-            {
-                result.Add(adapterDependencyGroup.Key, new Dictionary<NuGetVersion, ICollection<string>>());
-            }
+            result.TryAdd(adapterDependencyGroup.Key, new Dictionary<NuGetVersion, ICollection<string>>());
 
             foreach (var adapterDependency in adapterDependencyGroup.Value)
             {
                 // Instrumentation
                 foreach (var instrumentationPackage in instrumentationPackages)
                 {
-                    if (!result[adapterDependencyGroup.Key].ContainsKey(instrumentationPackage.Version))
-                    {
-                        result[adapterDependencyGroup.Key].Add(instrumentationPackage.Version, new List<string>());
-                    }
+                    result[adapterDependencyGroup.Key].TryAdd(instrumentationPackage.Version, new List<string>());
 
                     var hasCommonDependency = instrumentationPackage
                         .MetaData[adapterDependencyGroup.Key]
