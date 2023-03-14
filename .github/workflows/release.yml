@@ -17,8 +17,8 @@ jobs:
       - uses: actions/setup-dotnet@v3.0.3
         with:
           dotnet-version: | 
-            6.0.x
-            7.0.x
+            6.0.406
+            7.0.201
       - run: ./build.cmd
       - name: Upload binaries
         uses: actions/upload-artifact@v3.1.2

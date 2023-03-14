@@ -44,7 +44,7 @@ services:
 
   # OpenTelemetry Collector
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.61.0
+    image: otel/opentelemetry-collector-contrib:0.73.0
     volumes:
       - ./otel-config.yaml:/etc/otel/config.yaml
       - ./log:/log/otel
@@ -62,26 +62,26 @@ services:
       - loki
 
   jaeger:
-    image: jaegertracing/all-in-one:1.38.1
+    image: jaegertracing/all-in-one:1.42.0
     environment:
       COLLECTOR_OTLP_ENABLED: "true"
     ports:
       - "16686:16686" # Jaeger Web UI
 
   prometheus:
-    image: prom/prometheus:v2.40.5
+    image: prom/prometheus:v2.42.0
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
 
   loki:
-    image: grafana/loki:2.7.1
+    image: grafana/loki:2.7.4
     ports:
       - "3100:3100"
 
   grafana:
-    image: grafana/grafana:9.3.2
+    image: grafana/grafana:9.4.3
     volumes:
       - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
     environment:
