@@ -105,19 +105,21 @@ internal static class DepsJsonExtensions
                 // All package versions contain the same optimisable dependency
                 var canBeOptimized = framework.Value
                     .All(x => x.Value.Contains(dependency));
-                if (canBeOptimized)
+                if (!canBeOptimized)
                 {
-                    // Remove the main library
-                    RemoveLibrary(depsJson, lib => lib.Equals(dependency));
-
-                    // Remove transient leftovers
-                    DependencyAnalyzer.Cleanup(map, dependency)
-                        .ForEach(transient =>
-                            RemoveLibrary(depsJson, lib => lib.Equals(transient)));
-
-                    // TODO: This is just cleaning up deps json, we need to manually
-                    // clean shared store also?
+                    continue;
                 }
+
+                // Remove the main library
+                RemoveLibrary(depsJson, lib => lib.Equals(dependency));
+
+                // Remove transient leftovers
+                DependencyAnalyzer.Cleanup(map, dependency)
+                    .ForEach(transient =>
+                        RemoveLibrary(depsJson, lib => lib.Equals(transient)));
+
+                // TODO: This is just cleaning up deps json, we need to manually
+                // clean shared store also?
             }
         }
     }
@@ -128,13 +130,14 @@ internal static class DepsJsonExtensions
     {
         var result = new Dictionary<NuGetFramework, Dictionary<NuGetVersion, ICollection<string>>>();
 
+        // adapter packages part
         foreach (var adapterDependencyGroup in adapterPackage)
         {
             result.TryAdd(adapterDependencyGroup.Key, new Dictionary<NuGetVersion, ICollection<string>>());
 
             foreach (var adapterDependency in adapterDependencyGroup.Value)
             {
-                // Instrumentation
+                // Instrumentation packages part
                 foreach (var instrumentationPackage in instrumentationPackages)
                 {
                     result[adapterDependencyGroup.Key].TryAdd(instrumentationPackage.Version, new List<string>());
@@ -142,17 +145,17 @@ internal static class DepsJsonExtensions
                     var hasCommonDependency = instrumentationPackage
                         .MetaData[adapterDependencyGroup.Key]
                         .ContainsKey(adapterDependency.Value.Id);
-
-                    if (hasCommonDependency)
+                    if (!hasCommonDependency)
                     {
-                        var dependency = instrumentationPackage
-                        .MetaData[adapterDependencyGroup.Key][adapterDependency.Value.Id];
+                        continue;
+                    }
 
-                        var isDependencyVersionSatisfied = adapterDependency.Value.VersionRange.Satisfies(dependency.VersionRange.MinVersion);
-                        if (isDependencyVersionSatisfied)
-                        {
-                            result[adapterDependencyGroup.Key][instrumentationPackage.Version].Add(dependency.Id);
-                        }
+                    var dependency = instrumentationPackage.MetaData[adapterDependencyGroup.Key][adapterDependency.Value.Id];
+
+                    var isDependencyVersionSatisfied = adapterDependency.Value.VersionRange.Satisfies(dependency.VersionRange.MinVersion);
+                    if (isDependencyVersionSatisfied)
+                    {
+                        result[adapterDependencyGroup.Key][instrumentationPackage.Version].Add(dependency.Id);
                     }
                 }
             }
@@ -167,22 +170,24 @@ internal static class DepsJsonExtensions
         foreach (var dep in depsJson.GetDependencies())
         {
             var depObject = dep.Value.AsObject();
-            if (depObject.TryGetPropertyValue("runtime", out var runtimeNode))
+            if (!depObject.TryGetPropertyValue("runtime", out var runtimeNode))
             {
-                var runtimeObject = runtimeNode.AsObject();
-                var libKeys = runtimeObject
-                    .Select(x => x.Key)
-                    .Where(x => x.StartsWith($"lib/{runtime}"))
-                    .ToList();
+                continue;
+            }
 
-                foreach (var libKey in libKeys)
-                {
-                    var libNode = runtimeObject[libKey];
-                    var newKey = libKey.Replace($"lib/{runtime}", $"lib/{rollForwardRuntime}");
+            var runtimeObject = runtimeNode.AsObject();
+            var libKeys = runtimeObject
+                .Select(x => x.Key)
+                .Where(x => x.StartsWith($"lib/{runtime}"))
+                .ToList();
 
-                    runtimeObject.Remove(libKey);
-                    runtimeObject.AddPair(newKey, libNode);
-                }
+            foreach (var libKey in libKeys)
+            {
+                var libNode = runtimeObject[libKey];
+                var newKey = libKey.Replace($"lib/{runtime}", $"lib/{rollForwardRuntime}");
+
+                runtimeObject.Remove(libKey);
+                runtimeObject.AddPair(newKey, libNode);
             }
         }
 

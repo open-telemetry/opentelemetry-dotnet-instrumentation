@@ -33,29 +33,32 @@ internal static class DependencyAnalyzer
         return dependencyMap;
     }
 
-    internal static List<string> Cleanup(DepsJsonDependencyMap map, string dependency)
+    internal static IList<string> Cleanup(DepsJsonDependencyMap map, string dependency)
     {
-        var cleanup = new List<string>();
-
-        if (map.ContainsKey(dependency))
+        if (!map.ContainsKey(dependency))
         {
-            foreach (var dep in GetReferees(map, dependency))
-            {
-                if (dep.Count == 1)
-                {
-                    cleanup.Add(dep.Name);
-                    dep.RemoveReferee(dep.Name);
+            return Array.Empty<string>();
+        }
 
-                    var result = Cleanup(map, dep.Name);
-                    if (result.Any())
-                    {
-                        cleanup.AddRange(result);
-                    }
-                }
+        var libsToRemove = new List<string>();
+        foreach (var dependencyReferee in GetReferees(map, dependency))
+        {
+            if (dependencyReferee.Referees.Count != 1)
+            {
+                continue;
+            }
+
+            libsToRemove.Add(dependencyReferee.Name);
+            dependencyReferee.RemoveReferee(dependencyReferee.Name);
+
+            var nestedLibsToRemove = Cleanup(map, dependencyReferee.Name);
+            if (nestedLibsToRemove.Any())
+            {
+                libsToRemove.AddRange(nestedLibsToRemove);
             }
         }
 
-        return cleanup;
+        return libsToRemove;
     }
 
     internal static IEnumerable<DepsJsonDependency> GetReferees(DepsJsonDependencyMap map, string dependency)
@@ -68,12 +71,14 @@ internal static class DependencyAnalyzer
 
     private static IEnumerable<string> GetTransientPackages(JsonObject transientDependencies)
     {
-        if (transientDependencies.ContainsKey("dependencies"))
+        if (!transientDependencies.ContainsKey("dependencies"))
         {
-            foreach (var transientDependency in transientDependencies["dependencies"].AsObject())
-            {
-                yield return transientDependency.Key;
-            }
+            yield break;
+        }
+
+        foreach (var transientDependency in transientDependencies["dependencies"].AsObject())
+        {
+            yield return transientDependency.Key;
         }
     }
 
@@ -106,8 +111,6 @@ internal static class DependencyAnalyzer
         public bool IsRoot { get; set; }
 
         public HashSet<string> Referees { get; private set; } = new HashSet<string>();
-
-        public int Count => Referees.Count;
 
         public void AddReferee(string package)
         {
