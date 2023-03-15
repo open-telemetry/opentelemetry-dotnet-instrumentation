@@ -137,20 +137,31 @@ internal static class DepsJsonExtensions
         {
             var framework = adapterDependencyGroup.Key;
 
-            result.TryAdd(framework, new Dictionary<NuGetVersion, ICollection<string>>());
+            if (!result.TryGetValue(framework, out var frameworkDependencyGroup))
+            {
+                frameworkDependencyGroup = new Dictionary<NuGetVersion, ICollection<string>>();
+                result[framework] = frameworkDependencyGroup;
+            }
 
             foreach (var adapterDependency in adapterDependencyGroup.Value)
             {
                 // Instrumentation packages part
                 foreach (var instrumentationPackage in instrumentationPackages)
                 {
-                    var dependencyGroup = result[framework];
-                    dependencyGroup.TryAdd(instrumentationPackage.Version, new List<string>());
+                    if (!frameworkDependencyGroup.TryGetValue(instrumentationPackage.Version, out var versionGroupDependencies))
+                    {
+                        versionGroupDependencies = new List<string>();
+                        frameworkDependencyGroup[instrumentationPackage.Version] = versionGroupDependencies;
+                    }
 
-                    var hasCommonDependency = instrumentationPackage
-                        .DependencySets[framework]
-                        .ContainsKey(adapterDependency.Value.Id);
-                    if (!hasCommonDependency)
+                    // If adapter and instrumented package has common framework
+                    if (!instrumentationPackage.DependencySets.TryGetValue(framework, out var commonFrameworkGroup))
+                    {
+                        continue;
+                    }
+
+                    // If common framework group has common dependencies
+                    if (!commonFrameworkGroup.ContainsKey(adapterDependency.Value.Id))
                     {
                         continue;
                     }
@@ -159,7 +170,7 @@ internal static class DepsJsonExtensions
                     var isDependencyVersionSatisfied = adapterDependency.Value.VersionRange.Satisfies(dependency.VersionRange.MinVersion);
                     if (isDependencyVersionSatisfied)
                     {
-                        dependencyGroup[instrumentationPackage.Version].Add(dependency.Id);
+                        versionGroupDependencies.Add(dependency.Id);
                     }
                 }
             }
