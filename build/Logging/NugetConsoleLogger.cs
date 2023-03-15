@@ -2,7 +2,7 @@ using NuGet.Common;
 
 namespace Logging;
 
-internal class ConsoleLogger : ILogger
+internal class NugetConsoleLogger : ILogger
 {
     public void LogDebug(string data)
     {
@@ -36,12 +36,7 @@ internal class ConsoleLogger : ILogger
 
     public void LogInformationSummary(string data)
     {
-        Console.WriteLine($"[Summary] {data}");
-    }
-
-    public void Log(LogLevel level, string data)
-    {
-        Console.WriteLine($"[{level}] {data}");
+        Log(LogLevel.Information, $"[Summary] {data}");
     }
 
     public Task LogAsync(LogLevel level, string data)
@@ -61,5 +56,10 @@ internal class ConsoleLogger : ILogger
         Log(message.Level, message.Message);
 
         return Task.CompletedTask;
+    }
+
+    public void Log(LogLevel level, string data)
+    {
+        Console.WriteLine($"[{level}] {data}");
     }
 }

@@ -128,7 +128,7 @@ internal static class DepsJsonExtensions
 
     private static Dictionary<NuGetFramework, Dictionary<NuGetVersion, ICollection<string>>> AnalyzeAdapterDependencies(
         PackageDependencySets adapterPackage,
-        IEnumerable<(NuGetVersion Version, PackageDependencySets MetaData)> instrumentationPackages)
+        IEnumerable<(NuGetVersion Version, PackageDependencySets DependencySets)> instrumentationPackages)
     {
         var result = new Dictionary<NuGetFramework, Dictionary<NuGetVersion, ICollection<string>>>();
 
@@ -148,14 +148,14 @@ internal static class DepsJsonExtensions
                     dependencyGroup.TryAdd(instrumentationPackage.Version, new List<string>());
 
                     var hasCommonDependency = instrumentationPackage
-                        .MetaData[framework]
+                        .DependencySets[framework]
                         .ContainsKey(adapterDependency.Value.Id);
                     if (!hasCommonDependency)
                     {
                         continue;
                     }
 
-                    var dependency = instrumentationPackage.MetaData[framework][adapterDependency.Value.Id];
+                    var dependency = instrumentationPackage.DependencySets[framework][adapterDependency.Value.Id];
                     var isDependencyVersionSatisfied = adapterDependency.Value.VersionRange.Satisfies(dependency.VersionRange.MinVersion);
                     if (isDependencyVersionSatisfied)
                     {
