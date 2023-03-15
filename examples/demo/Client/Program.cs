@@ -31,7 +31,6 @@ var url = args[0];
 using var httpClient = new HttpClient();
 while (true)
 {
-    Thread.Sleep(5000);
     try
     {
         var content = await httpClient.GetStringAsync(url);
@@ -41,4 +40,6 @@ while (true)
     {
         Console.WriteLine(ex.Message);
     }
+
+    Thread.Sleep(5000);
 }
