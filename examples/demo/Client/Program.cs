@@ -32,6 +32,13 @@ using var httpClient = new HttpClient();
 while (true)
 {
     Thread.Sleep(5000);
-    var content = await httpClient.GetStringAsync(url);
-    Console.WriteLine(content);
+    try
+    {
+        var content = await httpClient.GetStringAsync(url);
+        Console.WriteLine(content);
+    }
+    catch (HttpRequestException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
 }
