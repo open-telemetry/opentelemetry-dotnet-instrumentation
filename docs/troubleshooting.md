@@ -117,7 +117,8 @@ File name: 'Microsoft.Extensions.DependencyInjection.Abstractions, Version=7.0.0
 #### Related issues
 
 - [#2269](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2269)
-after autoinstrumention FileNotFoundException: Could not load file or assembly 'Microsoft.Extensions.DependencyInjection.Abstractions
+after autoinstrumentation FileNotFoundException:
+Could not load file or assembly 'Microsoft.Extensions.DependencyInjection.Abstractions
 - [#2296](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2296)
 ARM64 - Could not load file or assembly Microsoft.Extensions.Logging.Abstractions
 
