@@ -85,7 +85,6 @@ Unhandled exception. System.Reflection.TargetInvocationException: Exception has 
 #### Related issues
 
 - [#1744](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1744)
-    Instrumentation does not work with dotnet CLI
 
 #### Solution
 
@@ -117,10 +116,7 @@ File name: 'Microsoft.Extensions.DependencyInjection.Abstractions, Version=7.0.0
 #### Related issues
 
 - [#2269](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2269)
-after autoinstrumentation FileNotFoundException:
-Could not load file or assembly 'Microsoft.Extensions.DependencyInjection.Abstractions
 - [#2296](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2296)
-ARM64 - Could not load file or assembly Microsoft.Extensions.Logging.Abstractions
 
 #### Solution
 
@@ -178,9 +174,7 @@ An assembly specified in the application dependencies manifest (OpenTelemetry.Au
 #### Related issues
 
 - [#1744](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1744)
-    Instrumentation does not work with dotnet CLI
 - [#2181](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2181)
-    Add arm64 architecture to the shared store - this affects Apple M1 machines.
 
 #### Solution
 
