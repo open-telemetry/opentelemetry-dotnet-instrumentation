@@ -25,7 +25,7 @@ It consists of following services:
 Windows (Git Bash):
 
 ```sh
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 macOS and Linux:
@@ -44,7 +44,7 @@ You can also find the exported telemetry in the `log` directory.
 Windows (Git Bash):
 
 ```sh
-docker-compose down --remove-orphans
+docker compose down --remove-orphans
 rm -rf log
 ```
 
