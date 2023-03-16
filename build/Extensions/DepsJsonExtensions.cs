@@ -14,16 +14,8 @@ internal static class DepsJsonExtensions
 {
     public static string GetFolderRuntimeName(this JsonObject depsJson)
     {
-        var runtimeName = depsJson["runtimeTarget"]["name"].GetValue<string>();
-        var folderRuntimeName = runtimeName switch
-        {
-            ".NETCoreApp,Version=v6.0" => "net6.0",
-            ".NETCoreApp,Version=v7.0" => "net7.0",
-            _ => throw new ArgumentOutOfRangeException(nameof(runtimeName), runtimeName,
-                "This value is not supported. You have probably introduced new .NET version to AutoInstrumentation")
-        };
-
-        return folderRuntimeName;
+        var runtime = depsJson.GetTargetFramework();
+        return NuGetFramework.Parse(runtime).ToString();
     }
 
     public static void CopyNativeDependenciesToStore(this JsonObject depsJson, AbsolutePath file, IReadOnlyList<string> architectureStores)
@@ -81,97 +73,79 @@ internal static class DepsJsonExtensions
     public static async Task CleanDuplicatesAsync(this JsonObject depsJson)
     {
         var map = DependencyAnalyzer.BuildDependencyMap(depsJson);
+        var framework = depsJson.GetTargetFramework();
 
-        var result = AnalyzeAdapterDependencies(
+        // Analyze matching dependencies between adapter package and supported bytecode instrumentation version range
+        var dependenciesAnalyzeResult = AnalyzeAdapterDependencies(
             // TODO: Scan these packages from OpenTelemetry.AutoInstrumentation.AdditionalDeps
-            await NugetPackageHelper.GetPackageDependenciesAsync(MongoClientIntegrationMetadata.AdapterAssembly, "1.3.0"),
+            await NugetPackageHelper.GetPackageDependenciesAsync(framework, MongoClientIntegrationMetadata.AdapterAssembly, "1.3.0"),
             await NugetPackageHelper.GetPackageDependenciesAsync(
+                framework,
                 MongoClientIntegrationMetadata.InstrumentedAssembly,
                 MongoClientIntegrationMetadata.MinimumVersion,
                 MongoClientIntegrationMetadata.MaximumVersion)
         );
 
-        foreach (var framework in result)
-        {
-            var latestVersion = framework.Value
-                .OrderByDescending(x => x.Key.Version)
-                .FirstOrDefault();
+        // Get common packages across versions
+        var commonPackages = GetCommonPackages(dependenciesAnalyzeResult);
 
-            if (latestVersion.Value == null)
+        foreach (var package in commonPackages)
+        {
+            // Remove the main library
+            RemoveLibrary(depsJson, lib => lib.Equals(package));
+
+            // Remove transient leftovers
+            DependencyAnalyzer.Cleanup(map, package)
+                .ForEach(transient =>
+                    RemoveLibrary(depsJson, lib => lib.Equals(transient)));
+
+            // TODO: This is just cleaning up deps json, we need to manually
+            // clean shared store also
+        }
+    }
+
+    private static IReadOnlySet<string> GetCommonPackages(Dictionary<NuGetVersion, ICollection<string>> analyzeResult)
+    {
+        var commonPackages = new HashSet<string>(analyzeResult.First().Value);
+
+        foreach (var item in analyzeResult)
+        {
+            commonPackages.IntersectWith(item.Value);
+        }
+
+        return commonPackages;
+    }
+
+    private static Dictionary<NuGetVersion, ICollection<string>> AnalyzeAdapterDependencies(
+        NuGetPackageInfo adapterPackage,
+        IDictionary<NuGetVersion, NuGetPackageInfo> instrumentationPackages)
+    {
+        var result = new Dictionary<NuGetVersion, ICollection<string>>();
+
+
+        foreach (var instrumentation in instrumentationPackages)
+        {
+            var instrumentationVersion = instrumentation.Key;
+            var instrumentationPackage = instrumentation.Value;
+
+            if (!result.TryGetValue(instrumentationVersion, out var satisfiedDependencies))
             {
-                continue;
+                satisfiedDependencies = new List<string>();
+                result[instrumentationVersion] = satisfiedDependencies;
             }
 
-            foreach (var dependency in latestVersion.Value)
+            foreach (var adapterDependency in adapterPackage.Dependencies)
             {
-                // All package versions contain the same optimisable dependency
-                var canBeOptimized = framework.Value
-                    .All(x => x.Value.Contains(dependency));
-                if (!canBeOptimized)
+                // Check if instrumentation package dependencies has adapter package dependency
+                if (!instrumentationPackage.Dependencies.TryGetValue(adapterDependency.Key, out var dependency))
                 {
                     continue;
                 }
 
-                // Remove the main library
-                RemoveLibrary(depsJson, lib => lib.Equals(dependency));
-
-                // Remove transient leftovers
-                DependencyAnalyzer.Cleanup(map, dependency)
-                    .ForEach(transient =>
-                        RemoveLibrary(depsJson, lib => lib.Equals(transient)));
-
-                // TODO: This is just cleaning up deps json, we need to manually
-                // clean shared store also?
-            }
-        }
-    }
-
-    private static Dictionary<NuGetFramework, Dictionary<NuGetVersion, ICollection<string>>> AnalyzeAdapterDependencies(
-        PackageDependencySets adapterPackage,
-        IEnumerable<(NuGetVersion Version, PackageDependencySets DependencySets)> instrumentationPackages)
-    {
-        var result = new Dictionary<NuGetFramework, Dictionary<NuGetVersion, ICollection<string>>>();
-
-        // adapter packages part
-        foreach (var adapterDependencyGroup in adapterPackage)
-        {
-            var framework = adapterDependencyGroup.Key;
-
-            if (!result.TryGetValue(framework, out var frameworkDependencyGroup))
-            {
-                frameworkDependencyGroup = new Dictionary<NuGetVersion, ICollection<string>>();
-                result[framework] = frameworkDependencyGroup;
-            }
-
-            foreach (var adapterDependency in adapterDependencyGroup.Value)
-            {
-                // Instrumentation packages part
-                foreach (var instrumentationPackage in instrumentationPackages)
+                var isDependencyVersionSatisfied = adapterDependency.Value.VersionRange.Satisfies(dependency.VersionRange.MinVersion);
+                if (isDependencyVersionSatisfied)
                 {
-                    if (!frameworkDependencyGroup.TryGetValue(instrumentationPackage.Version, out var versionGroupDependencies))
-                    {
-                        versionGroupDependencies = new List<string>();
-                        frameworkDependencyGroup[instrumentationPackage.Version] = versionGroupDependencies;
-                    }
-
-                    // If adapter and instrumented package has common framework
-                    if (!instrumentationPackage.DependencySets.TryGetValue(framework, out var commonFrameworkGroup))
-                    {
-                        continue;
-                    }
-
-                    // If common framework group has common dependencies
-                    if (!commonFrameworkGroup.ContainsKey(adapterDependency.Value.Id))
-                    {
-                        continue;
-                    }
-
-                    var dependency = instrumentationPackage.DependencySets[framework][adapterDependency.Value.Id];
-                    var isDependencyVersionSatisfied = adapterDependency.Value.VersionRange.Satisfies(dependency.VersionRange.MinVersion);
-                    if (isDependencyVersionSatisfied)
-                    {
-                        versionGroupDependencies.Add(dependency.Id);
-                    }
+                    satisfiedDependencies.Add(dependency.Id);
                 }
             }
         }
@@ -237,5 +211,10 @@ internal static class DepsJsonExtensions
     public static JsonObject GetDependencies(this JsonObject depsJson)
     {
         return depsJson["targets"].AsObject().First().Value.AsObject();
+    }
+
+    public static string GetTargetFramework(this JsonObject depsJson)
+    {
+        return depsJson["runtimeTarget"]["name"].GetValue<string>();
     }
 }
