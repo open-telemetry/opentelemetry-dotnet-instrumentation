@@ -4,8 +4,7 @@
 
 On all platforms, the minimum requirements are:
 
-- [Docker](https://docs.docker.com/engine/install/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
+- [Docker](https://www.docker.com/products/docker-desktop)
 - [.NET 6.0 SDK](https://dotnet.microsoft.com/download/dotnet/6.0)
 - [.NET 7.0 SDK](https://dotnet.microsoft.com/download/dotnet/7.0)
 
@@ -162,7 +161,7 @@ configuration for running the OpenTelemetry Collector and Jaeger.
 You can run the services using:
 
 ```sh
-docker-compose -f dev/docker-compose.yaml up
+docker compose -f dev/docker-compose.yaml up
 ```
 
 The following Web UI endpoints are exposed:
