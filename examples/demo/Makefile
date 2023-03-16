@@ -2,11 +2,11 @@
 run:
 	mkdir -p log
 	chmod 777 log
-	docker-compose up -d --build
+	docker compose up -d --build
 
 .PHONY: clean
 clean:
-	docker-compose down --remove-orphans
+	docker compose down --remove-orphans
 	rm -rf log
 
 .PHONY: wait
