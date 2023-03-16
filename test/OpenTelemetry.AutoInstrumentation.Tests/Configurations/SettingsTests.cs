@@ -29,14 +29,6 @@ public class SettingsTests : IDisposable
         ClearEnvVars();
     }
 
-    public static IEnumerable<object[]> ExporterEnvVarAndLoadSettingsAction()
-    {
-        yield return new object[] { ConfigurationKeys.Traces.Exporter, new Action(() => Settings.FromDefaultSources<TracerSettings>()) };
-        yield return new object[] { ConfigurationKeys.Metrics.Exporter, new Action(() => Settings.FromDefaultSources<MetricSettings>()) };
-        yield return new object[] { ConfigurationKeys.Logs.Exporter, new Action(() => Settings.FromDefaultSources<LogSettings>()) };
-        yield return new object[] { ConfigurationKeys.Sdk.Propagators, new Action(() => Settings.FromDefaultSources<SdkSettings>()) };
-    }
-
     public void Dispose()
     {
         ClearEnvVars();
@@ -122,6 +114,7 @@ public class SettingsTests : IDisposable
 
     [Theory]
     [InlineData("none", TracesExporter.None)]
+    [InlineData("non-supported", TracesExporter.Otlp)]
     [InlineData("otlp", TracesExporter.Otlp)]
     [InlineData("zipkin", TracesExporter.Zipkin)]
     internal void TracesExporter_SupportedValues(string tracesExporter, TracesExporter expectedTracesExporter)
@@ -135,6 +128,7 @@ public class SettingsTests : IDisposable
 
     [Theory]
     [InlineData("none", MetricsExporter.None)]
+    [InlineData("non-supported", MetricsExporter.Otlp)]
     [InlineData("otlp", MetricsExporter.Otlp)]
     [InlineData("prometheus", MetricsExporter.Prometheus)]
     internal void MetricExporter_SupportedValues(string metricExporter, MetricsExporter expectedMetricsExporter)
@@ -148,6 +142,7 @@ public class SettingsTests : IDisposable
 
     [Theory]
     [InlineData("none", LogExporter.None)]
+    [InlineData("non-supported", LogExporter.Otlp)]
     [InlineData("otlp", LogExporter.Otlp)]
     internal void LogExporter_SupportedValues(string logExporter, LogExporter expectedLogExporter)
     {
@@ -160,10 +155,13 @@ public class SettingsTests : IDisposable
 
     [Theory]
     [InlineData(null, new Propagator[] { })]
+    [InlineData("not-supported", new Propagator[] { })]
+    [InlineData("not-supported1,not-supported2", new Propagator[] { })]
     [InlineData("tracecontext", new[] { Propagator.W3CTraceContext })]
     [InlineData("baggage", new[] { Propagator.W3CBaggage })]
     [InlineData("b3multi", new[] { Propagator.B3Multi })]
     [InlineData("b3", new[] { Propagator.B3Single })]
+    [InlineData("not-supported,b3", new Propagator[] { Propagator.B3Single })]
     [InlineData("tracecontext,baggage,b3multi,b3", new[] { Propagator.W3CTraceContext, Propagator.W3CBaggage, Propagator.B3Multi, Propagator.B3Single })]
     internal void Propagators_SupportedValues(string propagators, Propagator[] expectedPropagators)
     {
@@ -266,14 +264,6 @@ public class SettingsTests : IDisposable
         var settings = Settings.FromDefaultSources<LogSettings>();
 
         settings.IncludeFormattedMessage.Should().Be(expectedValue);
-    }
-
-    [Theory]
-    [MemberData(nameof(ExporterEnvVarAndLoadSettingsAction))]
-    internal void UnsupportedExporterValues(string exporterEnvVar, Action loadSettingsAction)
-    {
-        Environment.SetEnvironmentVariable(exporterEnvVar, "not-existing");
-        loadSettingsAction.Should().Throw<FormatException>();
     }
 
     [Theory]
