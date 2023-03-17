@@ -182,7 +182,7 @@ Example usage (run as administrator):
 # Download the module
 $module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.6.0/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
-Invoke-WebRequest -Uri $module_url -OutFile $download_path
+Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
 
 # Import the module to use its functions
 Import-Module $download_path
