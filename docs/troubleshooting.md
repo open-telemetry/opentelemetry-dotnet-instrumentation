@@ -2,7 +2,7 @@
 
 ## General steps
 
-If you encounter any issue with OpenTelemetry .NET automatic instrumentation,
+If you encounter any issue with OpenTelemetry .NET Automatic Instrumentation,
 there are steps that can help you understand the issue.
 
 ### Enable detailed logging
@@ -38,7 +38,7 @@ Then restart the application to collect the logs.
 
 ## Common issues
 
-### Nothing happens
+### No telemetry is produced
 
 #### Symptoms
 
@@ -129,7 +129,7 @@ To handle dependency versions conflicts,
 update the instrumented application's project references
 to use the same versions as OpenTelemetry .NET Automatic Instrumentation.
 
-The following dependencies are used by OpenTelemetry .NET automatic instrumentation:
+The following dependencies are used by OpenTelemetry .NET Automatic Instrumentation:
 
 - [OpenTelemetry.AutoInstrumentation](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj)
 - [OpenTelemetry.AutoInstrumentation.AdditionalDeps](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/OpenTelemetry.AutoInstrumentation.AdditionalDeps/Directory.Build.props)
