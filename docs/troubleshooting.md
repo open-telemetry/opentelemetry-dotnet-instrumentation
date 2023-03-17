@@ -1,8 +1,96 @@
 # Troubleshooting
 
-## dotnet is crashing
+## General steps
 
-Until version `v0.6.0-beta.1` (inclusive) there were issues instrumenting
+If you encounter any issue with OpenTelemetry .NET Automatic Instrumentation,
+there are steps that can help you understand the issue.
+
+### Enable detailed logging
+
+Detailed debug logs can help you troubleshoot instrumentation issues, and can be
+attached to issues in this project to facilitate investigation.
+
+To get the detailed logs from the OpenTelemetry .NET Automatic Instrumentation, set
+the [`OTEL_LOG_LEVEL`](./config.md#internal-logs) environment variable to `debug`
+before the instrumented process starts.
+
+By default, the library writes the log files under predefined [locations](./config.md#internal-logs).
+If needed, change the default location by updating the `OTEL_DOTNET_AUTO_LOG_DIRECTORY`
+environment variable.
+
+After obtaining the logs, remove the `OTEL_LOG_LEVEL`
+environment variable, or set it to less verbose level
+to avoid unnecessary overhead.
+
+### Enable host tracing
+
+[Host tracing](https://github.com/dotnet/runtime/blob/edd23fcb1b350cb1a53fa409200da55e9c33e99e/docs/design/features/host-tracing.md#host-tracing)
+can be used to gather the information needed to investigate the problems
+related to various issues, like assemblies not being found. Set the following environment
+variables:
+
+```terminal
+COREHOST_TRACE=1
+COREHOST_TRACEFILE=corehost_verbose_tracing.log
+```
+
+Then restart the application to collect the logs.
+
+## Common issues
+
+### No telemetry is produced
+
+#### Symptoms
+
+There is no telemetry generated.
+There are no logs in OpenTelemetry .NET Automatic Instrumentation internal logs [location](./config.md#internal-logs).
+
+It might occur that the .NET Profiler is unable to attach
+and therefore no logs would be emitted.
+
+#### Solution
+
+The most common reason is that the instrumented application
+has no permissions to load the OpenTelemetry .NET Automatic Instrumentation
+assemblies.
+
+### Performance issues
+
+#### Symptoms
+
+High CPU usage.
+
+#### Solution
+
+Make sure that you have not enabled the automatic instrumentation globally
+by setting the environment variables at system or user scope.
+
+If the usage of system or user scope is intentional, use the [`OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`](./config.md#global-settings)
+environment variables to exclude applications from the automatic instrumentation.
+
+### `dotnet` CLI tool is crashing
+
+#### Symptoms
+
+You get error messages similar to the one below when running an app,
+for example with `dotnet run`:
+
+```txt
+PS C:\Users\Administrator\Desktop\OTelConsole-NET6.0> dotnet run My.Simple.Console
+Unhandled exception. System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation.
+---> System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation.
+---> System.TypeInitializationException: The type initializer for 'OpenTelemetry.AutoInstrumentation.Loader.Startup' threw an exception.
+---> System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation.
+---> System.IO.FileNotFoundException: Could not load file or assembly 'Microsoft.Extensions.Configuration.Abstractions, Version=7.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60'. The system cannot find the file specified.
+```
+
+#### Related issues
+
+- [#1744](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1744)
+
+#### Solution
+
+With version `v0.6.0-beta.1` and lower, there were issues when instrumenting
 the `dotnet` CLI tool.
 
 Therefore, if you are using one of these versions, we advise executing
@@ -12,29 +100,49 @@ or calling it in a separate terminal session.
 See the [Get started](./README.md#get-started)
 section for more information.
 
-## Assembly version conflicts
+### Assembly version conflicts
+
+#### Symptoms
+
+Error message similar to the one below:
+
+```txt
+Unhandled exception. System.IO.FileNotFoundException: Could not load file or assembly 'Microsoft.Extensions.DependencyInjection.Abstractions, Version=7.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60'. The system cannot find the file specified.
+
+File name: 'Microsoft.Extensions.DependencyInjection.Abstractions, Version=7.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60'
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder..ctor(WebApplicationOptions options, Action`1 configureDefaults)
+   at Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(String[] args)
+   at Program.<Main>$(String[] args) in /Blog.Core/Blog.Core.Api/Program.cs:line 26
+```
+
+#### Related issues
+
+- [#2269](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2269)
+- [#2296](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2296)
+
+#### Solution
 
 OpenTelemetry .NET NuGet packages and its dependencies
 are deployed with the OpenTelemetry .NET Automatic Instrumentation.
 
-In case of assembly version conflicts you may get a `TargetInvocationException`.
-For example:
-
-```txt
-Unhandled exception. System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation.
- ---> System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation.
- ---> System.TypeInitializationException: The type initializer for 'OpenTelemetry.AutoInstrumentation.Loader.Startup' threw an exception.
- ---> System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation.
- ---> System.TypeLoadException: Could not load type 'OpenTelemetry.Exporter.OtlpExportProtocol' from assembly 'OpenTelemetry.Exporter.OpenTelemetryProtocol, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7bd6737fe5b67e3c'.
-```
-
 To handle dependency versions conflicts,
 update the instrumented application's project references
-to use the same versions.
+to use the same versions as OpenTelemetry .NET Automatic Instrumentation.
 
-For .NET Framework applications the assembly references are, by default, updated
+The following dependencies are used by OpenTelemetry .NET Automatic Instrumentation:
+
+- [OpenTelemetry.AutoInstrumentation](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj)
+- [OpenTelemetry.AutoInstrumentation.AdditionalDeps](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/OpenTelemetry.AutoInstrumentation.AdditionalDeps/Directory.Build.props)
+
+Find their versions in the following locations:
+
+- [Directory.Packages.props](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/Directory.Packages.props)
+- [src/Directory.Packages.props](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/Directory.Packages.props)
+- [src/OpenTelemetry.AutoInstrumentation.AdditionalDeps/Directory.Packages.props](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/OpenTelemetry.AutoInstrumentation.AdditionalDeps/Directory.Packages.props)
+
+By default, assembly references for .NET Framework applications are upgraded
 during runtime to the versions used by the automatic instrumentation.
-This behavior can be controlled via the [`OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/config.md#additional-settings)
+This behavior can be controlled through the [`OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`](./config.md#additional-settings)
 setting.
 
 For the automatic redirection above to work there are two specific scenarios that
@@ -55,62 +163,22 @@ to ensure that the required GAC installations are updated.
 For more information about the GAC usage by the automatic instrumentation,
 see [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1906#issuecomment-1376292814).
 
-## Assembly in AdditionalDeps was not found
+### Assembly in AdditionalDeps was not found
 
-When you get an error message starting with
+#### Symptoms
 
-```terminal
-An assembly specified in the application dependencies manifest (OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json) was not found
-  ...
+You get an error message similar to the following:
+
+```txt
+An assembly specified in the application dependencies manifest (OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json) was not found  
 ```
 
-you may have hit one of the known issues with this symptom:
+#### Related issues
 
 - [#1744](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1744)
-  Instrumentation does not work with dotnet CLI
 - [#2181](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2181)
-  Add arm64 architecture to the shared store - this affects Apple M1 machines.
 
-If it is not one of the issues above [host tracing](https://github.com/dotnet/runtime/blob/edd23fcb1b350cb1a53fa409200da55e9c33e99e/docs/design/features/host-tracing.md#host-tracing)
-should be used to gather the information needed to investigate the problem.
-Please, set the following environment variables:
+#### Solution
 
-```terminal
-COREHOST_TRACE=1
-COREHOST_TRACEFILE=corehost_verbose_tracing.log
-```
-
-and re-run the application to collect the log.
-
-## High CPU usage
-
-Make sure that you have not enabled the automatic instrumentation globally
-by setting the environment variables at system or user scope.
-
-If the system or user scope is intended, use the `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`
-environment variables to exclude applications from the automatic instrumentation.
-
-## Collect debug logs
-
-Detailed debug logs can help you troubleshoot instrumentation issues, and can be
-attached to issues in this project to facilitate investigation.
-
-To get the detailed logs from the OpenTelemetry .NET Automatic Instrumentation, set
-the `OTEL_LOG_LEVEL` environment variable to `debug` before the
-instrumented process starts.
-
-By default, the library writes the log files under predefined locations. If needed,
-change the default location by updating the `OTEL_DOTNET_AUTO_LOG_DIRECTORY`
-environment variable.
-
-After obtaining the logs, remove the `OTEL_LOG_LEVEL`
-environment variable to avoid unnecessary overhead.
-
-## Nothing happens
-
-It may occur that the .NET Profiler is unable to attach
-and therefore no logs would be emitted.
-
-The most common reason is that the instrumented application
-has no permissions to load the OpenTelemetry .NET Automatic Instrumentation
-assemblies.
+If you encounter an issue not listed on this page, see [General steps](#general-steps)
+to collect additional diagnostic information. This might help facilitate troubleshooting.
