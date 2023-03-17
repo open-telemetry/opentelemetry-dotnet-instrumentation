@@ -42,7 +42,7 @@ on the **.NET Framework** and optional for **.NET** applications, more info belo
 ## Error handling
 
 Initialization errors, usually caused by invalid configuration,
-are logged and crash the application.
+are logged. If possible, default configuration is used otherwise it crash the application.
 
 Errors occurring at application runtime are logged and should never crash the application.
 

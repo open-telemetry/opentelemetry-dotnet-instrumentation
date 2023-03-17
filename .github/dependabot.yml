@@ -12,6 +12,11 @@ updates:
     schedule:
       interval: "daily"
 
+  - package-ecosystem: docker
+    directory: /test/IntegrationTests/docker
+    schedule:
+      interval: "daily"
+
   # Maintain dependencies for workflows checking the markdown files
   - package-ecosystem: npm
     directory: /
