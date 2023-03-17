@@ -1046,14 +1046,14 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
 
         const LoadIntegrationConfiguration
             configuration(AreTracesEnabled(), GetEnabledEnvironmentValues(AreTracesInstrumentationsEnabledByDefault(
-                                                instrumentation_enabled_by_default),
-                                        trace_integration_names),
+                                                                              instrumentation_enabled_by_default),
+                                                                          trace_integration_names),
                           AreMetricsEnabled(), GetEnabledEnvironmentValues(AreMetricsInstrumentationsEnabledByDefault(
-                                                instrumentation_enabled_by_default),
-                                        metric_integration_names),
-                            AreLogsEnabled(), GetEnabledEnvironmentValues(AreLogsInstrumentationsEnabledByDefault(
-                                                instrumentation_enabled_by_default),
-                                        log_integration_names));
+                                                                               instrumentation_enabled_by_default),
+                                                                           metric_integration_names),
+                          AreLogsEnabled(), GetEnabledEnvironmentValues(AreLogsInstrumentationsEnabledByDefault(
+                                                                            instrumentation_enabled_by_default),
+                                                                        log_integration_names));
 
         std::vector<IntegrationDefinition> integrationDefinitions;
 
@@ -1152,8 +1152,8 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
             {
                 std::promise<ULONG> promise;
                 std::future<ULONG>  future = promise.get_future();
-                tracer_integration_preprocessor->EnqueueRequestRejitForLoadedModules(module_ids_, integrationDefinitions,
-                                                                                     &promise);
+                tracer_integration_preprocessor->EnqueueRequestRejitForLoadedModules(module_ids_,
+                                                                                     integrationDefinitions, &promise);
 
                 // wait and get the value from the future<int>
                 const auto& numReJITs = future.get();
