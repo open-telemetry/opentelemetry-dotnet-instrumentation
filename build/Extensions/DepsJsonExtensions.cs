@@ -122,7 +122,6 @@ internal static class DepsJsonExtensions
     {
         var result = new Dictionary<NuGetVersion, ICollection<string>>();
 
-
         foreach (var instrumentation in instrumentationPackages)
         {
             var instrumentationVersion = instrumentation.Key;
