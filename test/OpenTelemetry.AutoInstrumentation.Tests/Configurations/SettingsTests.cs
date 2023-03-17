@@ -22,6 +22,10 @@ using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 
+// use collection to indicate that tests should not be run
+// in parallel
+// see https://xunit.net/docs/running-tests-in-parallel
+[Collection("EventEmittingTests")]
 public class SettingsTests : IDisposable
 {
     public SettingsTests()
