@@ -1,5 +1,7 @@
 # Release Process
 
+1. Update stability status in [`config.md`](config.md) if needed.
+
 1. Update the version in the following files:
 
    - [`OpenTelemetry.DotNet.Auto.psm1`](../OpenTelemetry.DotNet.Auto.psm1)

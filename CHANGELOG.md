@@ -7,15 +7,15 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.6.0...HEAD)
 
-- Added a fallback service name if one is not
-provided
-- The fallback service name is based on the
-Assembly name or ProcessName, if the application is .NET Framework and hosted
-in IIS this will be the SiteName/ApplicationVirtualPath.
-
 ### Added
 
+- Stability status added to the documentation.
 - Support `OTEL_LOG_LEVEL` to configure SDK logging level.
+- Fallback for the service name.
+  If the service name is not configured, the automatic instrumentation uses
+  the entry assembly name instead, only falling back to the process name
+  in case of an error. If the application uses .NET Framework and is hosted
+  on IIS, the service name is determined using  `SiteName/ApplicationVirtualPath`.
 
 ### Changed
 
