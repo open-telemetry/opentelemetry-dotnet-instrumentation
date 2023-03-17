@@ -327,6 +327,8 @@ struct IntegrationDefinition
 
 typedef struct _CallTargetDefinition
 {
+    WCHAR* instrumentationName;
+    WCHAR* instrumentationType;
     WCHAR* targetAssembly;
     WCHAR* targetType;
     WCHAR* targetMethod;

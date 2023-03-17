@@ -15,6 +15,7 @@
 #include "environment_variables_util.h"
 #include "il_rewriter.h"
 #include "il_rewriter_wrapper.h"
+#include "integration_loader.h"
 #include "logger.h"
 #include "metadata_builder.h"
 #include "module_metadata.h"
@@ -980,6 +981,19 @@ void CorProfiler::InitializeProfiler(WCHAR* id, CallTargetDefinition* items, int
     }
 }
 
+bool InstrumentationEnabled(const WSTRING name, const std::vector<WSTRING>& enabledIntegrationNames)
+{
+    // check if the integration is enabled
+    for (const WSTRING& enabledName : enabledIntegrationNames)
+    {
+        if (name == enabledName)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void CorProfiler::EnableByRefInstrumentation()
 {
     enable_by_ref_instrumentation = true;
@@ -1028,11 +1042,66 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
 
     if (items != nullptr && rejit_handler != nullptr)
     {
+        const bool instrumentation_enabled_by_default = AreInstrumentationsEnabledByDefault();
+
+        const LoadIntegrationConfiguration
+            configuration(AreTracesEnabled(), GetEnabledEnvironmentValues(AreTracesInstrumentationsEnabledByDefault(
+                                                instrumentation_enabled_by_default),
+                                        trace_integration_names),
+                          AreMetricsEnabled(), GetEnabledEnvironmentValues(AreMetricsInstrumentationsEnabledByDefault(
+                                                instrumentation_enabled_by_default),
+                                        metric_integration_names),
+                            AreLogsEnabled(), GetEnabledEnvironmentValues(AreLogsInstrumentationsEnabledByDefault(
+                                                instrumentation_enabled_by_default),
+                                        log_integration_names));
+
         std::vector<IntegrationDefinition> integrationDefinitions;
 
         for (int i = 0; i < size; i++)
         {
             const CallTargetDefinition& current = items[i];
+
+            const WSTRING& name = WSTRING(current.instrumentationName);
+            const WSTRING& type = WSTRING(current.instrumentationType);
+
+            if (type == WStr("Trace"))
+            {
+                if (!configuration.traces_enabled)
+                {
+                    continue;
+                }
+                if (!InstrumentationEnabled(name, configuration.enabledTraceIntegrationNames))
+                {
+                    continue;
+                }
+            }
+            else if (type == WStr("Metric"))
+            {
+                if (!configuration.metrics_enabled)
+                {
+                    continue;
+                }
+                if (!InstrumentationEnabled(name, configuration.enabledMetricIntegrationNames))
+                {
+                    continue;
+                }
+            }
+            else if (type == WStr("Log"))
+            {
+                if (!configuration.logs_enabled)
+                {
+                    continue;
+                }
+                if (!InstrumentationEnabled(name, configuration.enabledLogIntegrationNames))
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                Logger::Warn("Unsupported type for integration: ", type);
+                continue;
+            }
 
             const WSTRING& targetAssembly = WSTRING(current.targetAssembly);
             const WSTRING& targetType     = WSTRING(current.targetType);
@@ -1076,22 +1145,26 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
         definitions_ids_.emplace(definitionsId);
 
         Logger::Info("Total number of modules to analyze: ", module_ids_.size());
-        if (rejit_handler != nullptr)
-        {
-            std::promise<ULONG> promise;
-            std::future<ULONG>  future = promise.get_future();
-            tracer_integration_preprocessor->EnqueueRequestRejitForLoadedModules(module_ids_, integrationDefinitions,
-                                                                                 &promise);
 
-            // wait and get the value from the future<int>
-            const auto& numReJITs = future.get();
-            Logger::Debug("Total number of ReJIT Requested: ", numReJITs);
-        }
-
-        integration_definitions_.reserve(integration_definitions_.size() + integrationDefinitions.size());
-        for (const auto& integration : integrationDefinitions)
+        if (!integrationDefinitions.empty())
         {
-            integration_definitions_.push_back(integration);
+            if (rejit_handler != nullptr)
+            {
+                std::promise<ULONG> promise;
+                std::future<ULONG>  future = promise.get_future();
+                tracer_integration_preprocessor->EnqueueRequestRejitForLoadedModules(module_ids_, integrationDefinitions,
+                                                                                     &promise);
+
+                // wait and get the value from the future<int>
+                const auto& numReJITs = future.get();
+                Logger::Debug("Total number of ReJIT Requested: ", numReJITs);
+            }
+
+            integration_definitions_.reserve(integration_definitions_.size() + integrationDefinitions.size());
+            for (const auto& integration : integrationDefinitions)
+            {
+                integration_definitions_.push_back(integration);
+            }
         }
 
         Logger::Info("InitializeProfiler: Total integrations in profiler: ", integration_definitions_.size());
