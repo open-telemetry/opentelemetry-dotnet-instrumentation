@@ -72,7 +72,8 @@ environment variables to exclude applications from the automatic instrumentation
 
 #### Symptoms
 
-You get error messages similar to the one below when running an app, for example with `dotnet run`:
+You get error messages similar to the one below when running an app,
+for example with `dotnet run`:
 
 ```txt
 PS C:\Users\Administrator\Desktop\OTelConsole-NET6.0> dotnet run My.Simple.Console
