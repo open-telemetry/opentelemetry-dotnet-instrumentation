@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+using OpenTelemetry.AutoInstrumentation.Logging;
+
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 /// <summary>
@@ -21,6 +23,8 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 /// </summary>
 internal class LogSettings : Settings
 {
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
+
     /// <summary>
     /// Gets a value indicating whether the logs should be loaded by the profiler. Default is true.
     /// </summary>
@@ -76,7 +80,8 @@ internal class LogSettings : Settings
             case Constants.ConfigurationValues.None:
                 return LogExporter.None;
             default:
-                throw new FormatException($"Log exporter '{logExporterEnvVar}' is not supported");
+                Logger.Error($"Log exporter '{logExporterEnvVar}' is not supported. Defaulting to '{Constants.ConfigurationValues.Exporters.Otlp}'.");
+                return LogExporter.Otlp;
         }
     }
 }
