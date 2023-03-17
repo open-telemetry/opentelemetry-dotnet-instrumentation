@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+using OpenTelemetry.AutoInstrumentation.Logging;
+
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 /// <summary>
@@ -21,6 +23,8 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 /// </summary>
 internal class MetricSettings : Settings
 {
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
+
     /// <summary>
     /// Gets a value indicating whether the metrics should be loaded by the profiler. Default is true.
     /// </summary>
@@ -87,7 +91,8 @@ internal class MetricSettings : Settings
             case Constants.ConfigurationValues.None:
                 return MetricsExporter.None;
             default:
-                throw new FormatException($"Metric exporter '{metricsExporterEnvVar}' is not supported");
+                Logger.Error($"Metric exporter '{metricsExporterEnvVar}' is not supported. Defaulting to '{Constants.ConfigurationValues.Exporters.Otlp}'.");
+                return MetricsExporter.Otlp;
         }
     }
 }
