@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+using OpenTelemetry.AutoInstrumentation.Logging;
+
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 /// <summary>
@@ -21,6 +23,8 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 /// </summary>
 internal class TracerSettings : Settings
 {
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
+
     /// <summary>
     /// Gets a value indicating whether the tracer should be loaded by the profiler. Default is true.
     /// </summary>
@@ -127,7 +131,8 @@ internal class TracerSettings : Settings
             case Constants.ConfigurationValues.None:
                 return TracesExporter.None;
             default:
-                throw new FormatException($"Traces exporter '{tracesExporterEnvVar}' is not supported");
+                Logger.Error($"Traces exporter '{tracesExporterEnvVar}' is not supported. Defaulting to '{Constants.ConfigurationValues.Exporters.Otlp}'.");
+                return TracesExporter.Otlp;
         }
     }
 }

@@ -14,6 +14,9 @@
 // limitations under the License.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+using OpenTelemetry.AutoInstrumentation.Logging;
+
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 /// <summary>
@@ -21,6 +24,8 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 /// </summary>
 internal class SdkSettings : Settings
 {
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
+
     /// <summary>
     /// Gets the list of propagators to be used.
     /// </summary>
@@ -32,27 +37,38 @@ internal class SdkSettings : Settings
 
         if (!string.IsNullOrEmpty(propagators))
         {
-            foreach (var propagator in propagators!.Split(Constants.ConfigurationValues.Separator))
+            foreach (var propagatorValue in propagators!.Split(Constants.ConfigurationValues.Separator))
             {
-                Propagators.Add(ParsePropagator(propagator));
+                if (TryParsePropagator(propagatorValue, out var propagator))
+                {
+                    Propagators.Add(propagator.Value);
+                }
             }
         }
     }
 
-    private static Propagator ParsePropagator(string propagator)
+    private static bool TryParsePropagator(string propagatorValue, [NotNullWhen(true)] out Propagator? propagator)
     {
-        switch (propagator)
+        switch (propagatorValue)
         {
             case Constants.ConfigurationValues.Propagators.W3CTraceContext:
-                return Propagator.W3CTraceContext;
+                propagator = Propagator.W3CTraceContext;
+                break;
             case Constants.ConfigurationValues.Propagators.W3CBaggage:
-                return Propagator.W3CBaggage;
+                propagator = Propagator.W3CBaggage;
+                break;
             case Constants.ConfigurationValues.Propagators.B3Multi:
-                return Propagator.B3Multi;
+                propagator = Propagator.B3Multi;
+                break;
             case Constants.ConfigurationValues.Propagators.B3Single:
-                return Propagator.B3Single;
+                propagator = Propagator.B3Single;
+                break;
             default:
-                throw new FormatException($"Propagator '{propagator}' is not supported");
+                propagator = null;
+                Logger.Error($"Propagator '{propagatorValue}' is not supported. Skipping.");
+                return false;
         }
+
+        return true;
     }
 }

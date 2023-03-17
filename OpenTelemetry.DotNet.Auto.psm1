@@ -63,7 +63,7 @@ function Download-OpenTelemetry([string]$Version, [string]$Path) {
     $dlUrl = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/$Version/$archive"
     $dlPath = Join-Path $Path $archive
 
-    Invoke-WebRequest -Uri $dlUrl -OutFile $dlPath
+    Invoke-WebRequest -Uri $dlUrl -OutFile $dlPath -UseBasicParsing
 
     return $dlPath
 }
