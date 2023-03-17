@@ -19,6 +19,7 @@ using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
 using IntegrationTests.Helpers.TestContainers;
 using Microsoft.Data.SqlClient;
+using static IntegrationTests.Helpers.DockerFileHelper;
 
 namespace IntegrationTests;
 
@@ -31,7 +32,7 @@ public class SqlServerCollection : ICollectionFixture<SqlServerFixture>
 public class SqlServerFixture : IAsyncLifetime
 {
     private const int DatabasePort = 1433;
-    private const string DatabaseImage = "mcr.microsoft.com/mssql/server:2019-CU17-ubuntu-20.04";
+    private static readonly string DatabaseImage = ReadImageFrom("sql-server.Dockerfile");
 
     private IContainer? _container;
 
