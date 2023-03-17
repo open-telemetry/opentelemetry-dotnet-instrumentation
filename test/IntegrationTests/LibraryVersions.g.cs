@@ -31,6 +31,15 @@ public static class LibraryVersion
         new object[] { "7.0.4" },
 #endif
     };
+    public static readonly IReadOnlyCollection<object[]> EntityFrameworkCorePomeloMySql = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "6.0.2" },
+        new object[] { "7.0.0" },
+#endif
+    };
     public static readonly IReadOnlyCollection<object[]> GraphQL = new List<object[]>
     {
 #if DEFAULT_TEST_PACKAGE_VERSIONS

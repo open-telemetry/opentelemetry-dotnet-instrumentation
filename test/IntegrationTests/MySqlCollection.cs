@@ -55,7 +55,7 @@ public class MySqlFixture : IAsyncLifetime
         }
     }
 
-    private async Task<IContainer> LaunchMySqlContainerAsync(int port)
+    private static async Task<IContainer> LaunchMySqlContainerAsync(int port)
     {
         var containersBuilder = new ContainerBuilder()
             .WithImage(MySqlImage)
@@ -70,7 +70,7 @@ public class MySqlFixture : IAsyncLifetime
         return container;
     }
 
-    private async Task ShutdownMySqlContainerAsync(IContainer container)
+    private static async Task ShutdownMySqlContainerAsync(IContainer container)
     {
         await container.DisposeAsync();
     }

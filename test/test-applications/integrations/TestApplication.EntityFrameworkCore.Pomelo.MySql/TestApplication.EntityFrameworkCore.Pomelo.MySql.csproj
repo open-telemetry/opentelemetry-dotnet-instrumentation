@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" VersionOverride="$(LibraryVersion)" />
+
+    <!-- Microsoft.Extensions.Configuration.Abstractions is needed to bump reference to 7.0.0
+    some versions of Pomelo.EntityFrameworkCore.MySql brings to old references -->
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+  </ItemGroup>
+
+</Project>
