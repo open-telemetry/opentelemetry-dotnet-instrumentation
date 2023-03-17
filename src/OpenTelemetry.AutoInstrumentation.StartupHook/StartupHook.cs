@@ -64,18 +64,8 @@ internal class StartupHook
 
         try
         {
-            // Check Instrumentation is already initialized with native profiler.
-            var profilerType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation");
-
-            if (profilerType != null)
-            {
-                Logger.Information(
-                    $"OpenTelemetry.AutoInstrumentation assembly loaded from: {profilerType.Assembly?.Location}.");
-            }
-
             ThrowIfReferenceIncorrectOpenTelemetryVersion(loaderAssemblyLocation);
 
-            // Instrumentation is not initialized.
             // Creating an instance of OpenTelemetry.AutoInstrumentation.Loader.Startup
             // will initialize Instrumentation through its static constructor.
             string loaderFilePath = Path.Combine(loaderAssemblyLocation, "OpenTelemetry.AutoInstrumentation.Loader.dll");
