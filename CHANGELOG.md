@@ -11,9 +11,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - Stability status added to the documentation.
 - Support `OTEL_LOG_LEVEL` to configure SDK logging level.
-- Add a fallback service name if none is provided.
-  The fallback service name is based on the name of either
-  the assembly or the process. If the application uses .NET Framework and is hosted
+- Fallback for the service name.
+  If the service name is not configured, the automatic instrumentation uses
+  the entry assembly name instead, only falling back to the process name
+  in case of an error. If the application uses .NET Framework and is hosted
   on IIS, the service name is determined using  `SiteName/ApplicationVirtualPath`.
 
 ### Changed
