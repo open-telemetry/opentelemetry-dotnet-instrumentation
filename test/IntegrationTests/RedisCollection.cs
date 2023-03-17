@@ -19,6 +19,7 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
+using static IntegrationTests.Helpers.DockerFileHelper;
 
 namespace IntegrationTests;
 
@@ -31,7 +32,7 @@ public class RedisCollection : ICollectionFixture<RedisFixture>
 public class RedisFixture : IAsyncLifetime
 {
     private const int RedisPort = 6379;
-    private const string RedisImage = "redis:7.0.4";
+    private static readonly string RedisImage = ReadImageFrom("redis.Dockerfile");
 
     private IContainer? _container;
 

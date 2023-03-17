@@ -34,7 +34,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="docker\mongodb.Dockerfile" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="docker\mysql.Dockerfile" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="docker\postgres.Dockerfile" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="docker\redis.Dockerfile" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="docker\sql-server.Dockerfile" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Update="StrongNamedTestsIntegrations.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,11 +50,5 @@
   <ItemGroup>
     <!-- GrpcServices is 'none' so that we do not need to depend on the grpc nuget package, and we only need protobuf support. -->
     <Protobuf Include="opentelemetry\**\*.proto" GrpcServices="none" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="StrongNamedTestsIntegrations.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 </Project>
