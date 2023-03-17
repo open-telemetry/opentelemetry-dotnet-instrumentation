@@ -55,8 +55,8 @@ jobs:
       - uses: actions/setup-dotnet@v3.0.3
         with:
           dotnet-version: | 
-            6.0.406
-            7.0.201
+            6.0.407
+            7.0.202
       - run: brew install coreutils
         if: ${{ runner.os == 'macOS' }}
       - name: Create test directory
@@ -85,7 +85,7 @@ jobs:
         base-image: [ alpine, centos ]
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3.3.0
+      - uses: actions/checkout@v3.4.0
       - name: Test the Shell scripts from README.md in Docker container
         run: |
           set -e
