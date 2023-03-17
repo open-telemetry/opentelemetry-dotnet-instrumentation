@@ -2,7 +2,7 @@
 
 ## General steps
 
-If you encounter any issue with OpenTelemetry .NET Automatic Instrumentation,
+If you encounter any issue with OpenTelemetry .NET automatic instrumentation,
 there are steps that can help you understand the issue.
 
 ### Enable detailed logging
@@ -26,14 +26,15 @@ to avoid unnecessary overhead.
 
 [Host tracing](https://github.com/dotnet/runtime/blob/edd23fcb1b350cb1a53fa409200da55e9c33e99e/docs/design/features/host-tracing.md#host-tracing)
 can be used to gather the information needed to investigate the problems
-related to e.g assemblies not being found. Set the following environment variables:
+related to various issues, like assemblies not being found. Set the following environment
+variables:
 
 ```terminal
 COREHOST_TRACE=1
 COREHOST_TRACEFILE=corehost_verbose_tracing.log
 ```
 
-and re-run the application to collect the log.
+Then restart the application to collect the logs.
 
 ## Common issues
 
@@ -44,7 +45,7 @@ and re-run the application to collect the log.
 There is no telemetry generated.
 There are no logs in OpenTelemetry .NET Automatic Instrumentation internal logs [location](./config.md#internal-logs).
 
-It may occur that the .NET Profiler is unable to attach
+It might occur that the .NET Profiler is unable to attach
 and therefore no logs would be emitted.
 
 #### Solution
@@ -64,14 +65,14 @@ High CPU usage.
 Make sure that you have not enabled the automatic instrumentation globally
 by setting the environment variables at system or user scope.
 
-If the system or user scope is intended, use the [`OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`](./config.md#global-settings)
+If the usage of system or user scope is intentional, use the [`OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES`](./config.md#global-settings)
 environment variables to exclude applications from the automatic instrumentation.
 
 ### `dotnet` CLI tool is crashing
 
 #### Symptoms
 
-Error message when running an app with e.g `dotnet run` similar to the one below:
+You get error messages similar to the one below when running an app, for example with `dotnet run`:
 
 ```txt
 PS C:\Users\Administrator\Desktop\OTelConsole-NET6.0> dotnet run My.Simple.Console
@@ -88,7 +89,7 @@ Unhandled exception. System.Reflection.TargetInvocationException: Exception has 
 
 #### Solution
 
-Until version `v0.6.0-beta.1` (inclusive) there were issues instrumenting
+With version `v0.6.0-beta.1` and lower, there were issues when instrumenting
 the `dotnet` CLI tool.
 
 Therefore, if you are using one of these versions, we advise executing
@@ -127,20 +128,20 @@ To handle dependency versions conflicts,
 update the instrumented application's project references
 to use the same versions as OpenTelemetry .NET Automatic Instrumentation.
 
-Dependencies used by OpenTelemetry .NET Automatic Instrumentation can be found at:
+The following dependencies are used by OpenTelemetry .NET automatic instrumentation:
 
 - [OpenTelemetry.AutoInstrumentation](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/OpenTelemetry.AutoInstrumentation/OpenTelemetry.AutoInstrumentation.csproj)
 - [OpenTelemetry.AutoInstrumentation.AdditionalDeps](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/OpenTelemetry.AutoInstrumentation.AdditionalDeps/Directory.Build.props)
 
-Their versions can be found at:
+Find their versions in the following locations:
 
 - [Directory.Packages.props](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/Directory.Packages.props)
 - [src/Directory.Packages.props](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/Directory.Packages.props)
 - [src/OpenTelemetry.AutoInstrumentation.AdditionalDeps/Directory.Packages.props](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/OpenTelemetry.AutoInstrumentation.AdditionalDeps/Directory.Packages.props)
 
-For .NET Framework applications the assembly references are, by default, updated
+By default, assembly references for .NET Framework applications are upgraded
 during runtime to the versions used by the automatic instrumentation.
-This behavior can be controlled via the [`OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`](./config.md#additional-settings)
+This behavior can be controlled through the [`OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`](./config.md#additional-settings)
 setting.
 
 For the automatic redirection above to work there are two specific scenarios that
@@ -165,7 +166,7 @@ see [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentatio
 
 #### Symptoms
 
-Error message similar to the one below:
+You get an error message similar to the following:
 
 ```txt
 An assembly specified in the application dependencies manifest (OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json) was not found  
@@ -178,5 +179,5 @@ An assembly specified in the application dependencies manifest (OpenTelemetry.Au
 
 #### Solution
 
-If issue you encountered is not one of the issues above, see general steps
-at the top to collect additional info to help facilitate issue investigation.
+If you encounter an issue not listed on this page, see [General steps](#general-steps)
+to collect additional diagnostic information. This might help facilitate troubleshooting.
