@@ -26,9 +26,10 @@ public class GrpcNetClientTests : TestHelper
     {
     }
 
-    [Fact]
+    [Theory]
     [Trait("Category", "EndToEnd")]
-    public void SubmitsTraces()
+    [MemberData(nameof(LibraryVersion.GrpcNetClient), MemberType = typeof(LibraryVersion))]
+    public void SubmitsTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -38,7 +39,7 @@ public class GrpcNetClientTests : TestHelper
         // Enabling only GrpcNetClient instrumentation to have consistent set of spans.
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED", "false");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_GRPCNETCLIENT_INSTRUMENTATION_ENABLED", "true");
-        RunTestApplication();
+        RunTestApplication(new TestSettings { PackageVersion = packageVersion });
 
         collector.AssertExpectations();
     }

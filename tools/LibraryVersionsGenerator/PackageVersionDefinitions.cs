@@ -55,6 +55,17 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "GrpcNetClient",
+            NugetPackageName = "Grpc.Net.Client",
+            TestApplicationName = "TestApplication.GrpcNetClient",
+            Versions = new List<string>
+            {
+                "2.43.0",
+                "*"
+            }
+        },
+        new()
+        {
             IntegrationName = "MassTransit",
             NugetPackageName = "MassTransit",
             TestApplicationName = "TestApplication.MassTransit",
