@@ -236,6 +236,10 @@ See [config.md](config.md).
 
 See [manual-instrumentation.md](manual-instrumentation.md).
 
+## Log to trace correlation
+
+See [log-trace-correlation.md](log-trace-correlation.md).
+
 ## Troubleshooting
 
 See [troubleshooting.md](troubleshooting.md).
