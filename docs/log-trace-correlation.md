@@ -1,12 +1,12 @@
 # Log to trace correlation
 
-OpenTelemetry .NET SDK automatically enables log to trace correlation.
-When logs are emitted in a context of an active trace, trace context
+OpenTelemetry .NET SDK automatically correlates logs to trace data.
+When logs are emitted in the context of an active trace, trace context
 [fields](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md#trace-context-fields)
 are automatically populated.
 
-Sample console [application](../examples/demo/Service/Program.cs)
-emits logs correlated with an active trace:
+The following are logs produced by the sample console
+[application](../examples/demo/Service/Program.cs):
 
 ```json
 "logRecords": [
