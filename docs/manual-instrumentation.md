@@ -54,27 +54,32 @@ To create your custom metrics manually, follow these steps:
 2. Create a `Meter` instance:
 
     ```csharp
-    using var meter = new Meter("My.Application", "1.0");
+    using var meter = new Meter("Examples.Service", "1.0");
     ```
 
 3. Create an `Instrument`:
 
     ```csharp
-    var counter = meter.CreateCounter<long>("custom.counter", description: "Custom counter's description");
+    var successCounter = meter.CreateCounter<long>("srv.successes.count", description: "Number of successful responses");
     ```
 
-4. Update the `Instrument` value:
+4. Update the `Instrument` value. Optionally, set tags:
 
     ```csharp
-    counter.Add(1);
+    successCounter.Add(1, new("tagName", "tagValue"));
     ```
 
 5. Register your `Meter` with OpenTelemetry.AutoInstrumentation by setting the
 `OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES` environment variable:
 
     ```bash
-    OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES=My.Application
+    OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES=Examples.Service
     ```
+
+You can set the value to either `Examples.Service`
+or to `Examples.*`, which registers the entire prefix.
+
+You can see a sample console application with manual metric instrumentation [here](../examples/demo/Service/Program.cs).
 
 ## Further reading
 
