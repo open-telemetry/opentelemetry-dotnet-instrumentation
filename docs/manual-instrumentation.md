@@ -76,4 +76,6 @@ To create your custom metrics manually, follow these steps:
     OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES=My.Application
     ```
 
+## Further reading
+
 - [OpenTelemetry.io documentation for .NET Manual Instrumentation](https://opentelemetry.io/docs/instrumentation/net/manual/#setting-up-an-activitysource)
