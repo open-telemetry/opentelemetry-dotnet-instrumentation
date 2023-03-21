@@ -131,7 +131,7 @@ internal static class OtelLogging
 
         sink ??= new NoopSink();
 
-        return new CustomLogger(sink, ConfiguredLogLevel.Value);
+        return new InternalLogger(sink, ConfiguredLogLevel.Value);
     }
 
     private static string GetLogFileName(string suffix)

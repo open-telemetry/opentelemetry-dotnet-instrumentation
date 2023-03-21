@@ -1,4 +1,4 @@
-// <copyright file="CustomLoggerTests.cs" company="OpenTelemetry Authors">
+// <copyright file="InternalLoggerTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,13 +20,13 @@ using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.Tests;
 
-public class CustomLoggerTests
+public class InternalLoggerTests
 {
     [Fact]
     public void WhenLogLevelIsConfigured_Then_OnlyEntriesWithEqualOrLowerLevelAreForwardedToSink()
     {
         var sink = new TestSink();
-        var logger = new CustomLogger(sink, LogLevel.Information);
+        var logger = new InternalLogger(sink, LogLevel.Information);
 
         // should be logged as it matches configured log level
         logger.Information("info message", false);
