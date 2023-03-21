@@ -66,7 +66,7 @@ To create your custom metrics manually, follow these steps:
 4. Update the `Instrument` value. Optionally, set tags:
 
     ```csharp
-    successCounter.Add(1, new("tagName", "tagValue"));
+    successCounter.Add(1, new KeyValuePair<string, object?>("tagName", "tagValue"));
     ```
 
 5. Register your `Meter` with OpenTelemetry.AutoInstrumentation by setting the
