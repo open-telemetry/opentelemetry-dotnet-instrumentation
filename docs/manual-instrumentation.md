@@ -70,14 +70,14 @@ To create your custom metrics manually, follow these steps:
     ```
 
 5. Register your `Meter` with OpenTelemetry.AutoInstrumentation by setting the
-`OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES` environment variable:
+    `OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES` environment variable:
 
     ```bash
     OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES=Examples.Service
     ```
 
-You can set the value to either `Examples.Service`
-or to `Examples.*`, which registers the entire prefix.
+    You can set the value to either `Examples.Service`
+    or to `Examples.*`, which registers the entire prefix.
 
 You can see a sample console application with manual metric instrumentation [here](../examples/demo/Service/Program.cs).
 
