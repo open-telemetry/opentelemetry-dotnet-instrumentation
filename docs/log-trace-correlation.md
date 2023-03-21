@@ -1,5 +1,11 @@
 # Log to trace correlation
 
+> **Note**
+> Automatic log to trace correlation provided by OpenTelemetry .NET Automatic Instrumentation
+> currently works only for .NET applications using `Microsoft.Extensions.Logging`.
+> See [#2310](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2310)
+> and [config](./config.md#logs-instrumentations) for more details.
+
 OpenTelemetry .NET SDK automatically correlates logs to trace data.
 When logs are emitted in the context of an active trace, trace context
 [fields](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md#trace-context-fields)
