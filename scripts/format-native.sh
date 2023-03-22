@@ -24,7 +24,7 @@ if [ -z "$OS_TYPE" ]; then
   esac
 fi
 
-if [ "$OS_TYPE" == "windows"  ]; then
+if [ "$OS_TYPE" = "windows"  ]; then
     EXT=.exe
 else
     EXT=
