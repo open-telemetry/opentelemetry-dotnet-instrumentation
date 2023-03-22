@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System.Diagnostics.Tracing;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Loading;
@@ -115,7 +114,7 @@ internal static class Instrumentation
             if (TracerSettings.Value.TracesEnabled || MetricSettings.Value.MetricsEnabled)
             {
                 // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
-                _sdkEventListener = new(EventLevel.Warning, Logger);
+                _sdkEventListener = new(Logger);
 
                 // Register to shutdown events
                 AppDomain.CurrentDomain.ProcessExit += OnExit;

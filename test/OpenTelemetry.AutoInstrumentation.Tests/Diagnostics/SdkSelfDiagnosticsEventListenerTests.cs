@@ -16,10 +16,8 @@
 
 // Source originated from https://github.com/open-telemetry/opentelemetry-dotnet/blob/23609730ddd73c860553de847e67c9b2226cff94/test/OpenTelemetry.Tests/Internal/SelfDiagnosticsEventListenerTest.cs
 
-using System.Collections.Generic;
 using System.Diagnostics.Tracing;
-using FluentAssertions;
-using FluentAssertions.Execution;
+using Moq;
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using Xunit;
@@ -35,33 +33,35 @@ public class SdkSelfDiagnosticsEventListenerTests
     [Fact]
     public void EventSourceSetup_LowerSeverity()
     {
-        var testSink = new TestSink();
-        var logger = new InternalLogger(testSink, LogLevel.Debug);
-        using var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Error, logger);
+        var logger = new Mock<IOtelLogger>();
+        logger.Setup(otelLogger => otelLogger.Level).Returns(LogLevel.Error);
+
+        using var listener = new SdkSelfDiagnosticsEventListener(logger.Object);
 
         // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
         AspNetTelemetryEventSourceForTests.Log.ActivityRestored("123");
         OpenTelemetrySdkEventSourceForTests.Log.ActivityStarted("Activity started", "1");
 
-        testSink.Messages.Should().BeEmpty("events with lower severity than error should not be written.");
+        logger.Verify(otelLogger => otelLogger.Level, Times.Once);
+        logger.VerifyNoOtherCalls();
     }
 
     [Fact]
     public void EventSourceSetup_HigherSeverity()
     {
-        var testSink = new TestSink();
-        var logger = new InternalLogger(testSink, LogLevel.Debug);
-        using var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Verbose, logger);
+        var logger = new Mock<IOtelLogger>();
+        logger.Setup(otelLogger => otelLogger.Level).Returns(LogLevel.Debug);
+
+        using var listener = new SdkSelfDiagnosticsEventListener(logger.Object);
 
         // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
         AspNetTelemetryEventSourceForTests.Log.ActivityRestored("123");
         OpenTelemetrySdkEventSourceForTests.Log.ActivityStarted("Activity started", "1");
 
-        using (new AssertionScope())
-        {
-            testSink.Messages.Should().Contain(msg => msg.Contains("EventSource=OpenTelemetry-Instrumentation-AspNet-Telemetry-For-Tests, Message=Activity restored, Id='123'"));
-            testSink.Messages.Should().Contain(msg => msg.Contains("EventSource=OpenTelemetry-Sdk-For-Tests, Message=Activity started."));
-        }
+        logger.Verify(otelLogger => otelLogger.Level, Times.Once);
+        logger.Verify(otelLogger => otelLogger.Information("EventSource={0}, Message={1}", "OpenTelemetry-Instrumentation-AspNet-Telemetry-For-Tests", "Activity restored, Id='123'", false), Times.Once);
+        logger.Verify(otelLogger => otelLogger.Debug("EventSource={0}, Message={1}", "OpenTelemetry-Sdk-For-Tests", "Activity started. OperationName = 'Activity started', Id = '1'.", false), Times.Once);
+        logger.VerifyNoOtherCalls();
     }
 
     [EventSource(Name = "OpenTelemetry-Instrumentation-AspNet-Telemetry-For-Tests")]

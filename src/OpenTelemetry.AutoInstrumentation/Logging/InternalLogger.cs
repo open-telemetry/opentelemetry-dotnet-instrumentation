@@ -21,17 +21,18 @@ internal class InternalLogger : IOtelLogger
     private static readonly object[] NoPropertyValues = Array.Empty<object>();
 
     private readonly ISink _sink;
-    private readonly LogLevel _logLevel;
 
     internal InternalLogger(ISink sink, LogLevel logLevel)
     {
         _sink = sink ?? throw new ArgumentNullException(nameof(sink));
-        _logLevel = logLevel;
+        Level = logLevel;
     }
+
+    public LogLevel Level { get; }
 
     public bool IsEnabled(LogLevel level)
     {
-        return level <= _logLevel;
+        return level <= Level;
     }
 
     public void Debug(string messageTemplate, bool writeToEventLog)
