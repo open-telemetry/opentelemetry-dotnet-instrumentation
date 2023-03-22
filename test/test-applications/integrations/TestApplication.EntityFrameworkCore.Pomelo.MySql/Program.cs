@@ -26,11 +26,11 @@ var connectionString = $@"Server=127.0.0.1;Port={mySqlPort};Uid=root;Database=Te
 
 var serverVersion = ServerVersion.AutoDetect(connectionString);
 
-var contextOptions = new DbContextOptionsBuilder<TestContext>()
+var contextOptions = new DbContextOptionsBuilder<TestDbContext>()
     .UseMySql(connectionString, serverVersion)
     .Options;
 
-await using (var context = new TestContext(contextOptions))
+await using (var context = new TestDbContext(contextOptions))
 {
     await context.Database.EnsureDeletedAsync();
     await context.Database.EnsureCreatedAsync();
@@ -38,7 +38,7 @@ await using (var context = new TestContext(contextOptions))
     await context.SaveChangesAsync();
 }
 
-await using (var context = new TestContext(contextOptions))
+await using (var context = new TestDbContext(contextOptions))
 {
     foreach (var testItem in context.Set<TestItem>())
     {

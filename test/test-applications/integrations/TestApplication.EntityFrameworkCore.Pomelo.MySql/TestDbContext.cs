@@ -1,4 +1,4 @@
-// <copyright file="TestContext.cs" company="OpenTelemetry Authors">
+// <copyright file="TestDbContext.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,11 +16,11 @@
 
 using Microsoft.EntityFrameworkCore;
 
-namespace TestApplication.EntityFrameworkCore;
+namespace TestApplication.EntityFrameworkCore.Pomelo.MySql;
 
-public class TestContext : DbContext
+public class TestDbContext : DbContext
 {
-    public TestContext(DbContextOptions options)
+    public TestDbContext(DbContextOptions options)
         : base(options)
     {
     }
