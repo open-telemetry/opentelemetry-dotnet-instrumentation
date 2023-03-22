@@ -14,23 +14,25 @@
 // limitations under the License.
 // </copyright>
 
-using System.Data.Common;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using TestApplication.EntityFrameworkCore;
+using TestApplication.EntityFrameworkCore.Pomelo.MySql;
 using TestApplication.Shared;
 
 ConsoleHelper.WriteSplashScreen(args);
 
-var contextOptions = new DbContextOptionsBuilder<TestDbContext>()
-    .UseSqlite(CreateInMemoryDatabase())
-    .Options;
+var mySqlPort = GetMySqlPort(args);
 
-await using var connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
+var connectionString = $@"Server=127.0.0.1;Port={mySqlPort};Uid=root;Database=TestDatabase";
+
+var serverVersion = ServerVersion.AutoDetect(connectionString);
+
+var contextOptions = new DbContextOptionsBuilder<TestDbContext>()
+    .UseMySql(connectionString, serverVersion)
+    .Options;
 
 await using (var context = new TestDbContext(contextOptions))
 {
+    await context.Database.EnsureDeletedAsync();
     await context.Database.EnsureCreatedAsync();
     await context.AddAsync(new TestItem { Name = "TestItem" });
     await context.SaveChangesAsync();
@@ -44,9 +46,12 @@ await using (var context = new TestDbContext(contextOptions))
     }
 }
 
-static DbConnection CreateInMemoryDatabase()
+static string GetMySqlPort(string[] args)
 {
-    var connection = new SqliteConnection("Filename=:memory:");
-    connection.Open();
-    return connection;
+    if (args.Length > 1)
+    {
+        return args[1];
+    }
+
+    return "3306";
 }

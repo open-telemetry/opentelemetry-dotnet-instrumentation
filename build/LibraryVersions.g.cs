@@ -30,6 +30,14 @@ public static class LibraryVersion
             }
         },
         {
+            "TestApplication.EntityFrameworkCore.Pomelo.MySql",
+            new List<string>
+            {
+                "6.0.2",
+                "7.0.0",
+            }
+        },
+        {
             "TestApplication.GraphQL",
             new List<string>
             {
