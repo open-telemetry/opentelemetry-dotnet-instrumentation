@@ -24,7 +24,7 @@ if [ -z "$OS_TYPE" ]; then
 fi
 
 function DownloadClangTool {
-    if [ "$OS_TYPE" == "windows"  ]; then
+    if [ "$OS_TYPE" = "windows"  ]; then
         FILENAME=$1.exe
     else
         FILENAME=$1
