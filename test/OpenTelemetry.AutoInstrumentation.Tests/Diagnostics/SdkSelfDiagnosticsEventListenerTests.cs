@@ -16,7 +16,6 @@
 
 // Source originated from https://github.com/open-telemetry/opentelemetry-dotnet/blob/23609730ddd73c860553de847e67c9b2226cff94/test/OpenTelemetry.Tests/Internal/SelfDiagnosticsEventListenerTest.cs
 
-using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -36,14 +35,22 @@ public class SdkSelfDiagnosticsEventListenerTests
     public void EventSourceSetup_LowerSeverity()
     {
         var testSink = new TestSink();
-        var logger = new InternalLogger(testSink, LogLevel.Debug);
-        using var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Error, logger);
+        var logger = new InternalLogger(testSink, LogLevel.Error);
+        using var listener = new SdkSelfDiagnosticsEventListener(logger);
 
-        // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
-        AspNetTelemetryEventSourceForTests.Log.ActivityRestored("123");
-        OpenTelemetrySdkEventSourceForTests.Log.ActivityStarted("Activity started", "1");
+        AspNetTelemetryEventSourceForTests.Log.Information();
+        AspNetTelemetryEventSourceForTests.Log.Warning();
+        OpenTelemetrySdkEventSourceForTests.Log.Verbose();
 
-        testSink.Messages.Should().BeEmpty("events with lower severity than error should not be written.");
+        // Events with both Critical and Error EventLevel are logged as errors.
+        OpenTelemetrySdkEventSourceForTests.Log.Error();
+        OpenTelemetrySdkEventSourceForTests.Log.Critical();
+
+        using (new AssertionScope())
+        {
+            testSink.Messages.Count.Should().Be(2);
+            testSink.Messages.Should().OnlyContain(msg => msg.Contains("Error"));
+        }
     }
 
     [Fact]
@@ -51,16 +58,20 @@ public class SdkSelfDiagnosticsEventListenerTests
     {
         var testSink = new TestSink();
         var logger = new InternalLogger(testSink, LogLevel.Debug);
-        using var listener = new SdkSelfDiagnosticsEventListener(EventLevel.Verbose, logger);
+        using var listener = new SdkSelfDiagnosticsEventListener(logger);
 
-        // Emitting a Verbose event. Or any EventSource event with lower severity than Error.
-        AspNetTelemetryEventSourceForTests.Log.ActivityRestored("123");
-        OpenTelemetrySdkEventSourceForTests.Log.ActivityStarted("Activity started", "1");
+        AspNetTelemetryEventSourceForTests.Log.Information();
+        AspNetTelemetryEventSourceForTests.Log.Warning();
+        OpenTelemetrySdkEventSourceForTests.Log.Verbose();
+        OpenTelemetrySdkEventSourceForTests.Log.Error();
 
         using (new AssertionScope())
         {
-            testSink.Messages.Should().Contain(msg => msg.Contains("EventSource=OpenTelemetry-Instrumentation-AspNet-Telemetry-For-Tests, Message=Activity restored, Id='123'"));
-            testSink.Messages.Should().Contain(msg => msg.Contains("EventSource=OpenTelemetry-Sdk-For-Tests, Message=Activity started."));
+            testSink.Messages.Count.Should().Be(4);
+            testSink.Messages.Should().Contain(msg => msg.Contains("Error"));
+            testSink.Messages.Should().Contain(msg => msg.Contains("Warning"));
+            testSink.Messages.Should().Contain(msg => msg.Contains("Information"));
+            testSink.Messages.Should().Contain(msg => msg.Contains("Debug"));
         }
     }
 
@@ -73,10 +84,16 @@ public class SdkSelfDiagnosticsEventListenerTests
         {
         }
 
-        [Event(4, Message = "Activity restored, Id='{0}'", Level = EventLevel.Informational)]
-        public void ActivityRestored(string id)
+        [Event(4, Message = "Activity info.", Level = EventLevel.Informational)]
+        public void Information()
         {
-            WriteEvent(4, id);
+            WriteEvent(4);
+        }
+
+        [Event(5, Message = "Activity warning.", Level = EventLevel.Warning)]
+        public void Warning()
+        {
+            WriteEvent(5);
         }
     }
 
@@ -89,10 +106,22 @@ public class SdkSelfDiagnosticsEventListenerTests
         {
         }
 
-        [Event(24, Message = "Activity started. OperationName = '{0}', Id = '{1}'.", Level = EventLevel.Verbose)]
-        public void ActivityStarted(string operationName, string id)
+        [Event(24, Message = "Activity verbose.", Level = EventLevel.Verbose)]
+        public void Verbose()
         {
-            WriteEvent(24, operationName, id);
+            WriteEvent(24);
+        }
+
+        [Event(25, Message = "Activity error.", Level = EventLevel.Error)]
+        public void Error()
+        {
+            WriteEvent(25);
+        }
+
+        [Event(26, Message = "Activity critical.", Level = EventLevel.Critical)]
+        public void Critical()
+        {
+            WriteEvent(26);
         }
     }
 }

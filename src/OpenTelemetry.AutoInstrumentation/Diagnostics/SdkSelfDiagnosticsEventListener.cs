@@ -34,10 +34,10 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
     private readonly IOtelLogger log;
     private readonly List<EventSource>? eventSourcesBeforeConstructor = new();
 
-    public SdkSelfDiagnosticsEventListener(EventLevel eventLevel, IOtelLogger logger)
+    public SdkSelfDiagnosticsEventListener(IOtelLogger logger)
     {
         log = logger;
-        logLevel = eventLevel;
+        logLevel = LogLevelToEventLevel(logger.Level);
 
         List<EventSource>? eventSources;
         lock (lockObj)
@@ -119,5 +119,17 @@ internal class SdkSelfDiagnosticsEventListener : EventListener
                 log.Debug("EventSource={0}, Message={1}", eventData.EventSource.Name, message, false);
                 break;
         }
+    }
+
+    private static EventLevel LogLevelToEventLevel(LogLevel loggerLevel)
+    {
+        return loggerLevel switch
+        {
+            LogLevel.Debug => EventLevel.Verbose,
+            LogLevel.Error => EventLevel.Error,
+            LogLevel.Warning => EventLevel.Warning,
+            LogLevel.Information => EventLevel.Informational,
+            _ => throw new ArgumentOutOfRangeException(nameof(loggerLevel), loggerLevel, null)
+        };
     }
 }

@@ -18,6 +18,8 @@ namespace OpenTelemetry.AutoInstrumentation.Logging;
 
 internal interface IOtelLogger
 {
+    LogLevel Level { get; }
+
     bool IsEnabled(LogLevel level);
 
     void Debug(string messageTemplate, bool writeToEventLog = true);
