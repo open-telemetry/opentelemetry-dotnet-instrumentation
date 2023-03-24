@@ -2,7 +2,7 @@
   <Import Project="..\Directory.Packages.props" />
   <ItemGroup>
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.5" />
-    <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.0.7" />
+    <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.0.8" />
     <PackageVersion Include="FluentAssertions" Version="6.10.0" />
     <PackageVersion Include="Google.Protobuf" Version="3.22.1" />
     <PackageVersion Include="GraphQL" Version="2.4.0" />
