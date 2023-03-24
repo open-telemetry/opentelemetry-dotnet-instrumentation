@@ -164,7 +164,7 @@ jobs:
         run: ./build.cmd BuildNuGetPackages
 
       - name: Test NuGet Packages
-        run: ./build.cmd TestNuGetPackages
+        run: ./build.cmd TestNuGetPackages --containers windows
 
       - name: Upload Nuget Artifacts
         uses: actions/upload-artifact@v3.1.2
@@ -179,7 +179,9 @@ jobs:
       matrix:
         include:
           - machine: ubuntu-20.04
+            containers: linux
           - machine: macos-11
+            containers: none
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.5.0
@@ -196,4 +198,4 @@ jobs:
           path: bin/nuget-artifacts/
 
       - name: Test NuGet Packages
-        run: ./build.cmd TestNuGetPackages
+        run: ./build.cmd TestNuGetPackages --containers ${{ matrix.containers }}

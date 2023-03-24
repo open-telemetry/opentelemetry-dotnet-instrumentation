@@ -180,12 +180,20 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NuGetPackagesTests", "test\NuGetPackagesTests\NuGetPackagesTests.csproj", "{AFD7582B-E9CD-4DF4-93B4-D5BBD7F539D0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget-packages", "nuget-packages", "{2EF2F7CE-E56F-4B81-A5A5-277693529D43}"
+	ProjectSection(SolutionItems) = preProject
+		test\test-applications\nuget-packages\Directory.Build.props = test\test-applications\nuget-packages\Directory.Build.props
+		test\test-applications\nuget-packages\Directory.Build.targets = test\test-applications\nuget-packages\Directory.Build.targets
+		test\test-applications\nuget-packages\Directory.Packages.props = test\test-applications\nuget-packages\Directory.Packages.props
+		test\test-applications\nuget-packages\nuget.config = test\test-applications\nuget-packages\nuget.config
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.SelfContained", "test\test-applications\nuget-packages\TestApplication.SelfContained\TestApplication.SelfContained.csproj", "{25ED93D0-A70C-4A07-84D9-EF94115259C9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.EntityFrameworkCore.Pomelo.MySql", "test\test-applications\integrations\TestApplication.EntityFrameworkCore.Pomelo.MySql\TestApplication.EntityFrameworkCore.Pomelo.MySql.csproj", "{1D7E11AA-27B6-4863-B5EC-1F0ECC6979B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTelemetry.AutoInstrumentation.StartupHook.Tests", "test\OpenTelemetry.AutoInstrumentation.StartupHook.Tests\OpenTelemetry.AutoInstrumentation.StartupHook.Tests.csproj", "{0077F121-DC2B-425E-A2F4-DEAC2A566E14}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.AutoInstrumentation.StartupHook.Tests", "test\OpenTelemetry.AutoInstrumentation.StartupHook.Tests\OpenTelemetry.AutoInstrumentation.StartupHook.Tests.csproj", "{0077F121-DC2B-425E-A2F4-DEAC2A566E14}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.MongoDB.Nuget", "test\test-applications\nuget-packages\TestApplication.MongoDB.Nuget\TestApplication.MongoDB.Nuget.csproj", "{988B81C2-BB51-4333-A5A2-8F0219616B20}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -863,6 +871,18 @@ Global
 		{0077F121-DC2B-425E-A2F4-DEAC2A566E14}.Release|x64.Build.0 = Release|Any CPU
 		{0077F121-DC2B-425E-A2F4-DEAC2A566E14}.Release|x86.ActiveCfg = Release|Any CPU
 		{0077F121-DC2B-425E-A2F4-DEAC2A566E14}.Release|x86.Build.0 = Release|Any CPU
+		{988B81C2-BB51-4333-A5A2-8F0219616B20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{988B81C2-BB51-4333-A5A2-8F0219616B20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{988B81C2-BB51-4333-A5A2-8F0219616B20}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{988B81C2-BB51-4333-A5A2-8F0219616B20}.Debug|x64.Build.0 = Debug|Any CPU
+		{988B81C2-BB51-4333-A5A2-8F0219616B20}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{988B81C2-BB51-4333-A5A2-8F0219616B20}.Debug|x86.Build.0 = Debug|Any CPU
+		{988B81C2-BB51-4333-A5A2-8F0219616B20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{988B81C2-BB51-4333-A5A2-8F0219616B20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{988B81C2-BB51-4333-A5A2-8F0219616B20}.Release|x64.ActiveCfg = Release|Any CPU
+		{988B81C2-BB51-4333-A5A2-8F0219616B20}.Release|x64.Build.0 = Release|Any CPU
+		{988B81C2-BB51-4333-A5A2-8F0219616B20}.Release|x86.ActiveCfg = Release|Any CPU
+		{988B81C2-BB51-4333-A5A2-8F0219616B20}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -929,6 +949,7 @@ Global
 		{25ED93D0-A70C-4A07-84D9-EF94115259C9} = {2EF2F7CE-E56F-4B81-A5A5-277693529D43}
 		{1D7E11AA-27B6-4863-B5EC-1F0ECC6979B2} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{0077F121-DC2B-425E-A2F4-DEAC2A566E14} = {5C915382-C886-457D-8641-9E766D8E5A17}
+		{988B81C2-BB51-4333-A5A2-8F0219616B20} = {2EF2F7CE-E56F-4B81-A5A5-277693529D43}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}

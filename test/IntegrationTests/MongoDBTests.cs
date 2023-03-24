@@ -16,17 +16,29 @@
 
 #if NET6_0_OR_GREATER
 using IntegrationTests.Helpers;
+#if NUGET_PACKAGE_TESTS
+using NuGetPackagesTests;
+#endif
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
 [Collection(MongoDBCollection.Name)]
-public class MongoDBTests : TestHelper
+public class MongoDBTests
+#if NUGET_PACKAGE_TESTS
+    : NugetTestHelper
+#else
+    : TestHelper
+#endif
 {
     private readonly MongoDBFixture _mongoDB;
 
     public MongoDBTests(ITestOutputHelper output, MongoDBFixture mongoDB)
+#if NUGET_PACKAGE_TESTS
+        : base("MongoDB.Nuget", output)
+#else
         : base("MongoDB", output)
+#endif
     {
         _mongoDB = mongoDB;
     }
@@ -34,7 +46,11 @@ public class MongoDBTests : TestHelper
     [Theory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
+#if NUGET_PACKAGE_TESTS
+    [InlineData("")]
+#else
     [MemberData(nameof(LibraryVersion.MongoDB), MemberType = typeof(LibraryVersion))]
+#endif
     public void SubmitsTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);

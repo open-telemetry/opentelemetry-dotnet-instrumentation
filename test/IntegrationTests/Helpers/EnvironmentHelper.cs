@@ -235,12 +235,21 @@ public class EnvironmentHelper
                 "app.publish");
         }
 
-        return Path.Combine(
+        var nonSelfContainedOutputDir = Path.Combine(
             baseBinDirectory,
             packageVersion,
             EnvironmentTools.GetPlatform().ToLowerInvariant(),
             EnvironmentTools.GetBuildConfiguration(),
             targetFramework);
+
+#if NUGET_PACKAGE_TESTS
+        // The self-contained app is going to have an extra folder before it: the one
+        // with a RID like "win-x64", "linux-x64", etc.
+
+        return Directory.GetDirectories(nonSelfContainedOutputDir)[0];
+#else
+        return nonSelfContainedOutputDir;
+#endif
     }
 
     public string GetTargetFramework()

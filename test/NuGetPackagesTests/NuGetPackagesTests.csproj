@@ -4,11 +4,19 @@
     <DefineConstants>$(DefineConstants);_WINDOWS</DefineConstants>
   </PropertyGroup>
 
+
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);NUGET_PACKAGE_TESTS</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="..\IntegrationTests\Helpers\**\*.cs" />
+    <Compile Include="..\IntegrationTests\MongoDBTests.cs" />
+    <Compile Include="..\IntegrationTests\MongoDBCollection.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="..\IntegrationTests\docker\mongodb.Dockerfile" CopyToOutputDirectory="PreserveNewest" Link="docker\mongodb.Dockerfile"/>
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

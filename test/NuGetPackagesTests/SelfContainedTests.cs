@@ -18,25 +18,17 @@ using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
-namespace IntegrationTests;
+namespace NuGetPackagesTests;
 
 [Trait("Category", "EndToEnd")]
-public sealed class SelfContainedTests : TestHelper
+public sealed class SelfContainedTests : NugetTestHelper
 {
     private readonly string _selfContainedAppDir;
 
     public SelfContainedTests(ITestOutputHelper output)
-        : base("SelfContained", output, "nuget-packages")
+        : base("SelfContained", output)
     {
-        var nonSelfContainedOutputDir = EnvironmentHelper
-            .GetTestApplicationApplicationOutputDirectory();
-
-        // The self-contained app is going to have an extra folder before it: the one
-        // with a RID like "win-x64", "linux-x64", etc.
-        var childrenDirs = Directory.GetDirectories(nonSelfContainedOutputDir);
-        childrenDirs.Should().ContainSingle();
-
-        _selfContainedAppDir = childrenDirs[0];
+        _selfContainedAppDir = EnvironmentHelper.GetTestApplicationApplicationOutputDirectory();
     }
 
     [Fact]

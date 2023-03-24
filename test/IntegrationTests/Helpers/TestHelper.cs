@@ -107,12 +107,12 @@ public abstract class TestHelper
     {
         testSettings ??= new();
         using var process = StartTestApplication(testSettings);
-        Output.WriteLine($"ProcessName: " + process?.ProcessName);
+        Output.WriteLine($"ProcessName: {process?.ProcessName}");
         using var helper = new ProcessHelper(process);
 
         process.Should().NotBeNull();
 
-        bool processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
+        var processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
         if (processTimeout)
         {
             process.Kill();
@@ -133,7 +133,7 @@ public abstract class TestHelper
     /// and returns the Process instance for further interaction.
     /// </summary>
     /// <returns>Test application process</returns>
-    public Process? StartTestApplication(TestSettings? testSettings = null)
+    public virtual Process? StartTestApplication(TestSettings? testSettings = null)
     {
         testSettings ??= new();
 

@@ -19,4 +19,8 @@
     <BaseOutputPath>..\bin\$(MSBuildProjectName)\</BaseOutputPath>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\integrations\dependency-libs\TestApplication.Shared\ConsoleHelper.cs" Link="Shared\ConsoleHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\integrations\dependency-libs\TestApplication.Shared\ProfilerHelper.cs" Link="Shared\ProfilerHelper.cs" />
+  </ItemGroup>
 </Project>
