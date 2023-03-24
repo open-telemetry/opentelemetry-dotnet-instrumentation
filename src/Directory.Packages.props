@@ -31,7 +31,7 @@
     <!-- Microsoft.Bcl.AsyncInterfaces is also referenced by the .NET Framework4.6.2. In this case is not excluded -->
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="4.7.0" />
-    <PackageVersion Include="MySql.Data" Version="6.10.7" />
+    <PackageVersion Include="MySql.Data" Version="8.0.32.1" />
     <PackageVersion Include="Pipelines.Sockets.Unofficial" Version="2.1.16" />
     <PackageVersion Include="StackExchange.Redis" Version="2.1.58" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
