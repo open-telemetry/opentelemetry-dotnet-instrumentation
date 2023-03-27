@@ -13,6 +13,7 @@ updates:
       interval: "daily"
     ignore:
       - dependency-name: "mongo"
+        versions: ["6.*.*"]
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
 
   - package-ecosystem: docker
