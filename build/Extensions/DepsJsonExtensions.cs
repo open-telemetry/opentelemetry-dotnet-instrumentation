@@ -138,6 +138,7 @@ internal static class DepsJsonExtensions
                 // Check if instrumentation package dependencies has adapter package dependency
                 if (!instrumentationPackage.Dependencies.TryGetValue(adapterDependency.Key, out var dependency))
                 {
+                    // Adapter dependency is not used by the instrumented assembly dependencies.
                     continue;
                 }
 
