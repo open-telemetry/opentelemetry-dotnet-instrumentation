@@ -117,7 +117,9 @@ internal static class DepsJsonExtensions
     }
 
     private static Dictionary<NuGetVersion, ICollection<string>> AnalyzeAdapterDependencies(
+        // Dynamically loaded extra extension package that helps instrumenting.
         NuGetPackageInfo adapterPackage,
+        // Packages that are brought by the application due direct referecing instrumented package.
         IDictionary<NuGetVersion, NuGetPackageInfo> instrumentationPackages)
     {
         var result = new Dictionary<NuGetVersion, ICollection<string>>();
