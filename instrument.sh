@@ -59,7 +59,7 @@ if [ -z "$(ls -A $OTEL_DOTNET_AUTO_HOME)" ]; then
   return 1
 fi
 # get absulute path
-if [ "$OS_TYPE" == "macos" ]; then
+if [ "$OS_TYPE" = "macos" ]; then
   OTEL_DOTNET_AUTO_HOME=$(greadlink -fn $OTEL_DOTNET_AUTO_HOME)
 else
   OTEL_DOTNET_AUTO_HOME=$(readlink -fn $OTEL_DOTNET_AUTO_HOME)
@@ -69,7 +69,7 @@ if [ -z "$OTEL_DOTNET_AUTO_HOME" ]; then
   return 1
 fi
 # on Windows change to Windows path format
-if [ "$OS_TYPE" == "windows" ]; then
+if [ "$OS_TYPE" = "windows" ]; then
   OTEL_DOTNET_AUTO_HOME=$(cygpath -w $OTEL_DOTNET_AUTO_HOME)
 fi
 if [ -z "$OTEL_DOTNET_AUTO_HOME" ]; then
@@ -78,7 +78,7 @@ if [ -z "$OTEL_DOTNET_AUTO_HOME" ]; then
 fi
 
 # set the platform-specific path separator (; on Windows and : on others)
-if [ "$OS_TYPE" == "windows" ]; then
+if [ "$OS_TYPE" = "windows" ]; then
   SEPARATOR=";"
 else
   SEPARATOR=":"
@@ -129,7 +129,7 @@ if [ "$ENABLE_PROFILING" = "true" ]; then
   esac
 
   # Enable .NET Framework Profiling API
-  if [ "$OS_TYPE" == "windows" ]
+  if [ "$OS_TYPE" = "windows" ]
   then
     export COR_ENABLE_PROFILING="1"
     export COR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
@@ -141,7 +141,7 @@ if [ "$ENABLE_PROFILING" = "true" ]; then
   # Enable .NET Core Profiling API
   export CORECLR_ENABLE_PROFILING="1"
   export CORECLR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
-  if [ "$OS_TYPE" == "windows" ]
+  if [ "$OS_TYPE" = "windows" ]
   then
     # Set paths for both bitness on Windows, see https://docs.microsoft.com/en-us/dotnet/core/run-time-config/debugging-profiling#profiler-location
     export CORECLR_PROFILER_PATH_64="$OTEL_DOTNET_AUTO_HOME/win-x64/OpenTelemetry.AutoInstrumentation.Native.$SUFIX"

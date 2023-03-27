@@ -9,8 +9,8 @@
 
   <ItemGroup>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs" Link="Constants.cs" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\CustomLogger.cs">
-      <Link>Logging\CustomLogger.cs</Link>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\InternalLogger.cs">
+      <Link>Logging\InternalLogger.cs</Link>
     </Compile>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\NoopLogger.cs">
       <Link>Logging\NoopLogger.cs</Link>

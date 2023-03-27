@@ -85,7 +85,7 @@ jobs:
         base-image: [ alpine, centos ]
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3.4.0
+      - uses: actions/checkout@v3.5.0
       - name: Test the Shell scripts from README.md in Docker container
         run: |
           set -e

@@ -44,12 +44,34 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "EntityFrameworkCorePomeloMySql",
+            NugetPackageName = "Pomelo.EntityFrameworkCore.MySql",
+            TestApplicationName = "TestApplication.EntityFrameworkCore.Pomelo.MySql",
+            Versions = new List<string>
+            {
+                "6.0.2",
+                "*"
+            }
+        },
+        new()
+        {
             IntegrationName = "GraphQL",
             NugetPackageName = "GraphQL",
             TestApplicationName = "TestApplication.GraphQL",
             Versions = new List<string>
             {
                 "2.3.0",
+                "*"
+            }
+        },
+        new()
+        {
+            IntegrationName = "GrpcNetClient",
+            NugetPackageName = "Grpc.Net.Client",
+            TestApplicationName = "TestApplication.GrpcNetClient",
+            Versions = new List<string>
+            {
+                "2.43.0",
                 "*"
             }
         },

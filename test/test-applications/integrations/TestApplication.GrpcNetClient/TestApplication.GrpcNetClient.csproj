@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" VersionOverride="3.19.4" />
-    <PackageReference Include="Grpc.Net.Client" />
-    <PackageReference Include="Grpc.Net.Client.Web" Condition="'$(TargetFramework)' == 'net462'" />
+    <PackageReference Include="Grpc.Net.Client" VersionOverride="$(LibraryVersion)" />
+    <PackageReference Include="Grpc.Net.Client.Web" Condition="'$(TargetFramework)' == 'net462'" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="Grpc.Tools" VersionOverride="2.44.0" />
     <!-- Workaround! Microsoft.Extensions.Logging.Abstractions v.3.1.0 is minimal version supported by auto instrumentation.
     Grpc.Net.Client references older version. It prevents to load required version from Additional Dependencies store-->

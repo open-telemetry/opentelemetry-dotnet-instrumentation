@@ -18,7 +18,7 @@ public static class LibraryVersion
             new List<string>
             {
                 "8.0.0",
-                "8.0.7",
+                "8.0.8",
             }
         },
         {
@@ -30,6 +30,14 @@ public static class LibraryVersion
             }
         },
         {
+            "TestApplication.EntityFrameworkCore.Pomelo.MySql",
+            new List<string>
+            {
+                "6.0.2",
+                "7.0.0",
+            }
+        },
+        {
             "TestApplication.GraphQL",
             new List<string>
             {
@@ -38,11 +46,19 @@ public static class LibraryVersion
             }
         },
         {
+            "TestApplication.GrpcNetClient",
+            new List<string>
+            {
+                "2.43.0",
+                "2.52.0",
+            }
+        },
+        {
             "TestApplication.MassTransit",
             new List<string>
             {
                 "8.0.0",
-                "8.0.13",
+                "8.0.14",
             }
         },
         {
