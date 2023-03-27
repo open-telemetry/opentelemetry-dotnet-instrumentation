@@ -11,6 +11,9 @@ updates:
     directory: /docker
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: "mongo"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
 
   - package-ecosystem: docker
     directory: /test/IntegrationTests/docker
