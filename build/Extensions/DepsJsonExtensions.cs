@@ -145,6 +145,7 @@ internal static class DepsJsonExtensions
                 var isDependencyVersionSatisfied = adapterDependency.Value.VersionRange.Satisfies(dependency.VersionRange.MinVersion);
                 if (isDependencyVersionSatisfied)
                 {
+                    // Dependency from the adapter package statisfied via instrumented assembly dependency.
                     satisfiedDependencies.Add(dependency.Id);
                 }
             }
