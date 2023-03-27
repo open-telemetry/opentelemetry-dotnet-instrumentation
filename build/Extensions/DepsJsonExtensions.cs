@@ -76,7 +76,7 @@ internal static class DepsJsonExtensions
         var framework = depsJson.GetTargetFramework();
 
         // Analyze matching dependencies between adapter package and supported bytecode instrumentation version range
-        var dependenciesAnalyzeResult = AnalyzeAdapterDependencies(
+        var dependenciesAnalysisResult = AnalyzeAdapterDependencies(
             // TODO: Scan these packages from OpenTelemetry.AutoInstrumentation.AdditionalDeps
             await NugetPackageHelper.GetPackageDependenciesAsync(framework, MongoClientIntegrationMetadata.AdapterAssembly, "1.3.0"),
             await NugetPackageHelper.GetPackageDependenciesAsync(
@@ -87,7 +87,7 @@ internal static class DepsJsonExtensions
         );
 
         // Get common packages across versions
-        var commonPackages = GetCommonPackages(dependenciesAnalyzeResult);
+        var commonPackages = GetCommonPackages(dependenciesAnalysisResult);
 
         foreach (var package in commonPackages)
         {
@@ -104,11 +104,11 @@ internal static class DepsJsonExtensions
         }
     }
 
-    private static IReadOnlySet<string> GetCommonPackages(Dictionary<NuGetVersion, ICollection<string>> analyzeResult)
+    private static IReadOnlySet<string> GetCommonPackages(Dictionary<NuGetVersion, ICollection<string>> analysisResult)
     {
-        var commonPackages = new HashSet<string>(analyzeResult.First().Value);
+        var commonPackages = new HashSet<string>(analysisResult.First().Value);
 
-        foreach (var item in analyzeResult)
+        foreach (var item in analysisResult)
         {
             commonPackages.IntersectWith(item.Value);
         }
