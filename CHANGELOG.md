@@ -16,6 +16,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   the entry assembly name instead, only falling back to the process name
   in case of an error. If the application uses .NET Framework and is hosted
   on IIS, the service name is determined using  `SiteName/ApplicationVirtualPath`.
+- Add MongoDB instrumentation support for .NET Framework.
 
 ### Changed
 
