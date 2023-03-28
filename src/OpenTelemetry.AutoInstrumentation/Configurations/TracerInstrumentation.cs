@@ -43,12 +43,10 @@ internal enum TracerInstrumentation
     /// </summary>
     GraphQL = 3,
 
-#if NET6_0_OR_GREATER
     /// <summary>
     /// MongoDB instrumentation.
     /// </summary>
     MongoDB = 4,
-#endif
 
     /// <summary>
     /// Npgsql instrumentation.

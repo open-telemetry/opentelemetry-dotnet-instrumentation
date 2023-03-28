@@ -29,6 +29,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"Microsoft.Extensions.Options.ConfigurationExtensions", {7, 0, 0, 0} },
         { L"Microsoft.Extensions.Primitives", {7, 0, 0, 0} },
         { L"Microsoft.Win32.Primitives", {4, 0, 3, 0} },
+        { L"MongoDB.Driver.Core.Extensions.DiagnosticSources", {1, 0, 0, 0} },
         { L"OpenTelemetry", {1, 0, 0, 0} },
         { L"OpenTelemetry.Api", {1, 0, 0, 0} },
         { L"OpenTelemetry.Api.ProviderBuilderExtensions", {1, 0, 0, 0} },

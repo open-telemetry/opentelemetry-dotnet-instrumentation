@@ -21,4 +21,29 @@
     <!-- Microsoft.Bcl.AsyncInterfaces is required by StackExchange.Redis. ExcludeAssets="all" prevents copying it to the output -->
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" ExcludeAssets="all" />
   </ItemGroup>
+
+  <ItemGroup>
+    <!-- DnsClient is required by MongoDB.Driver.Core.Extensions.DiagnosticSources. ExcludeAssets="all" prevents copying it to the output -->
+    <PackageReference Include="MongoDB.Driver.Core" ExcludeAssets="all" />
+    <!-- DnsClient is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. ExcludeAssets="all" prevents copying it to the output -->
+    <PackageReference Include="DnsClient" ExcludeAssets="all" />
+    <!-- MongoDB.Bson is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. ExcludeAssets="all" prevents copying it to the output -->
+    <PackageReference Include="MongoDB.Bson" ExcludeAssets="all" />
+    <!-- MongoDB.Libmongocrypt is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. ExcludeAssets="all" prevents copying it to the output -->
+    <PackageReference Include="MongoDB.Libmongocrypt" ExcludeAssets="all" />
+    <!-- System.Net.Http is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. ExcludeAssets="all" prevents copying it to the output -->
+    <PackageReference Include="System.Net.Http" ExcludeAssets="all" />
+    <!-- System.Runtime.InteropServices.RuntimeInformation is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. ExcludeAssets="all" prevents copying it to the output -->
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" ExcludeAssets="all" />
+    <!-- System.Security.Cryptography.Algorithms is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. ExcludeAssets="all" prevents copying it to the output -->
+    <PackageReference Include="System.Security.Cryptography.Algorithms" ExcludeAssets="all" />
+    <!-- System.Security.Cryptography.Encoding is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. ExcludeAssets="all" prevents copying it to the output -->
+    <PackageReference Include="System.Security.Cryptography.Encoding" ExcludeAssets="all" />
+    <!-- System.Security.Cryptography.Primitives is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. ExcludeAssets="all" prevents copying it to the output -->
+    <PackageReference Include="System.Security.Cryptography.Primitives" ExcludeAssets="all" />
+    <!-- System.Security.Cryptography.X509Certificates is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. ExcludeAssets="all" prevents copying it to the output -->
+    <PackageReference Include="System.Security.Cryptography.X509Certificates" ExcludeAssets="all" />
+    <!-- SharpCompress is tranistive dependency required by MongoDB.Driver.Core.Extensions.DiagnosticSources. ExcludeAssets="all" prevents copying it to the output -->
+    <PackageReference Include="SharpCompress" ExcludeAssets="all" />
+  </ItemGroup>
 </Project>

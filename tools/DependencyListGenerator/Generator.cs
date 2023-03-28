@@ -21,7 +21,7 @@ namespace DependencyListGenerator;
 
 public static class Generator
 {
-    public static IEnumerable<TransientDependency> EnumerateDependencies(string projectPath)
+    public static IEnumerable<TransientDependency> EnumerateDependencies(string projectPath, IReadOnlyCollection<string> excludedDependencies)
     {
         var dotNetRunner = new DotNetRunner();
         var fileSystem = new FileSystem();
@@ -37,7 +37,7 @@ public static class Generator
         foreach (var dep in net462.Dependencies.OrderBy(x => x.Name))
         {
             // OpenTelemetry and OpenTracing dependencies are managed directly.
-            if (dep.IsTransitive && !dep.IsDevelopmentDependency && !dep.Name.StartsWith("OpenTelemetry") && dep.Name != "OpenTracing")
+            if (dep.IsTransitive && !dep.IsDevelopmentDependency && !dep.Name.StartsWith("OpenTelemetry") && dep.Name != "OpenTracing" && !excludedDependencies.Contains(dep.Name))
             {
                 yield return new TransientDependency(dep.Name, dep.ResolvedVersion.ToString());
             }
