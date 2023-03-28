@@ -39,7 +39,7 @@
     <PackageVersion Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageVersion Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <PackageVersion Include="System.ServiceModel.Http" Version="4.10.0" />
-    <PackageVersion Include="System.ServiceModel.NetTcp" Version="4.10.0" />
+    <PackageVersion Include="System.ServiceModel.NetTcp" Version="4.10.2" />
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
     <PackageVersion Include="Testcontainers" Version="3.0.0" />
     <PackageVersion Include="Verify.Xunit" Version="19.11.2" />
