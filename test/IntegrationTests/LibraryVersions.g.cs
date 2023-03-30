@@ -76,7 +76,7 @@ public static class LibraryVersion
         new object[] { "2.1.5" },
         new object[] { "3.1.2" },
         new object[] { "4.1.1" },
-        new object[] { "5.1.0" },
+        new object[] { "5.1.1" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MongoDB = new List<object[]>
@@ -86,7 +86,7 @@ public static class LibraryVersion
 #else
         new object[] { "2.13.3" },
         new object[] { "2.15.0" },
-        new object[] { "2.19.0" },
+        new object[] { "2.19.1" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MySqlData = new List<object[]>
