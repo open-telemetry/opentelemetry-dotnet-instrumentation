@@ -134,7 +134,7 @@ public static class LibraryVersion
         new object[] { "2.1.50" },
         new object[] { "2.5.61" },
         new object[] { "2.6.66" },
-        new object[] { "2.6.96" },
+        new object[] { "2.6.104" },
 #endif
     };
 }
