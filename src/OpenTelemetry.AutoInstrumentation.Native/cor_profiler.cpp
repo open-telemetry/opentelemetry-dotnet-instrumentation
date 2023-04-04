@@ -73,7 +73,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     }
     else
     {
-        Logger::Warn("DATADOG TRACER DIAGNOSTICS - Profiler disabled: .NET 5.0 runtime or greater is required on this "
+        Logger::Warn("Profiler disabled: .NET 5.0 runtime or greater is required on this "
                      "architecture.");
         return E_FAIL;
     }
