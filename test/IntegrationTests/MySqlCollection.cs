@@ -18,6 +18,7 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
+using static IntegrationTests.Helpers.DockerFileHelper;
 
 namespace IntegrationTests;
 
@@ -30,7 +31,7 @@ public class MySqlCollection : ICollectionFixture<MySqlFixture>
 public class MySqlFixture : IAsyncLifetime
 {
     private const int MySqlPort = 3306;
-    private const string MySqlImage = "mysql:8.0.29";
+    private static readonly string MySqlImage = ReadImageFrom("mysql.Dockerfile");
 
     private IContainer? _container;
 
@@ -54,7 +55,7 @@ public class MySqlFixture : IAsyncLifetime
         }
     }
 
-    private async Task<IContainer> LaunchMySqlContainerAsync(int port)
+    private static async Task<IContainer> LaunchMySqlContainerAsync(int port)
     {
         var containersBuilder = new ContainerBuilder()
             .WithImage(MySqlImage)
@@ -69,7 +70,7 @@ public class MySqlFixture : IAsyncLifetime
         return container;
     }
 
-    private async Task ShutdownMySqlContainerAsync(IContainer container)
+    private static async Task ShutdownMySqlContainerAsync(IContainer container)
     {
         await container.DisposeAsync();
     }

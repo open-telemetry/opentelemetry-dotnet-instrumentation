@@ -18,6 +18,7 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
+using static IntegrationTests.Helpers.DockerFileHelper;
 
 namespace IntegrationTests;
 
@@ -30,7 +31,7 @@ public class MongoDBCollection : ICollectionFixture<MongoDBFixture>
 public class MongoDBFixture : IAsyncLifetime
 {
     private const int MongoDBPort = 27017;
-    private const string MongoDBImage = "mongo:5.0.6";
+    private static readonly string MongoDBImage = ReadImageFrom("mongodb.Dockerfile");
 
     private IContainer? _container;
 

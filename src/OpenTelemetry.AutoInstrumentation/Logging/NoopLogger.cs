@@ -27,6 +27,8 @@ internal class NoopLogger : IOtelLogger
     {
     }
 
+    public LogLevel Level => default;
+
     public bool IsEnabled(LogLevel level)
     {
         return false;

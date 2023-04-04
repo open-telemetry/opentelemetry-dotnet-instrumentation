@@ -19,7 +19,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.0.7" },
+        new object[] { "8.0.8" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> EntityFrameworkCore = new List<object[]>
@@ -31,6 +31,15 @@ public static class LibraryVersion
         new object[] { "7.0.4" },
 #endif
     };
+    public static readonly IReadOnlyCollection<object[]> EntityFrameworkCorePomeloMySql = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "6.0.2" },
+        new object[] { "7.0.0" },
+#endif
+    };
     public static readonly IReadOnlyCollection<object[]> GraphQL = new List<object[]>
     {
 #if DEFAULT_TEST_PACKAGE_VERSIONS
@@ -40,13 +49,22 @@ public static class LibraryVersion
         new object[] { "2.4.0" },
 #endif
     };
+    public static readonly IReadOnlyCollection<object[]> GrpcNetClient = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "2.43.0" },
+        new object[] { "2.52.0" },
+#endif
+    };
     public static readonly IReadOnlyCollection<object[]> MassTransit = new List<object[]>
     {
 #if DEFAULT_TEST_PACKAGE_VERSIONS
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.0.13" },
+        new object[] { "8.0.14" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> SqlClient = new List<object[]>
@@ -58,7 +76,7 @@ public static class LibraryVersion
         new object[] { "2.1.5" },
         new object[] { "3.1.2" },
         new object[] { "4.1.1" },
-        new object[] { "5.1.0" },
+        new object[] { "5.1.1" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MongoDB = new List<object[]>
@@ -68,7 +86,7 @@ public static class LibraryVersion
 #else
         new object[] { "2.13.3" },
         new object[] { "2.15.0" },
-        new object[] { "2.19.0" },
+        new object[] { "2.19.1" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MySqlData = new List<object[]>
@@ -116,7 +134,7 @@ public static class LibraryVersion
         new object[] { "2.1.50" },
         new object[] { "2.5.61" },
         new object[] { "2.6.66" },
-        new object[] { "2.6.96" },
+        new object[] { "2.6.104" },
 #endif
     };
 }

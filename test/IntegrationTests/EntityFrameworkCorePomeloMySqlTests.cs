@@ -1,4 +1,4 @@
-// <copyright file="GrpcNetClientTests.cs" company="OpenTelemetry Authors">
+// <copyright file="EntityFrameworkCorePomeloMySqlTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,33 +14,41 @@
 // limitations under the License.
 // </copyright>
 
+#if NET6_0_OR_GREATER
+
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-public class GrpcNetClientTests : TestHelper
+[Collection(MySqlCollection.Name)]
+public class EntityFrameworkCorePomeloMySqlTests : TestHelper
 {
-    public GrpcNetClientTests(ITestOutputHelper output)
-        : base("GrpcNetClient", output)
+    private readonly MySqlFixture _mySql;
+
+    public EntityFrameworkCorePomeloMySqlTests(ITestOutputHelper output, MySqlFixture mySql)
+        : base("EntityFrameworkCore.Pomelo.MySql", output)
     {
+        _mySql = mySql;
     }
 
     [Theory]
     [Trait("Category", "EndToEnd")]
-    [MemberData(nameof(LibraryVersion.GrpcNetClient), MemberType = typeof(LibraryVersion))]
+    [Trait("Containers", "Linux")]
+    [MemberData(nameof(LibraryVersion.EntityFrameworkCorePomeloMySql), MemberType = typeof(LibraryVersion))]
     public void SubmitsTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.Expect("OpenTelemetry.Instrumentation.GrpcNetClient");
+        collector.Expect("OpenTelemetry.Instrumentation.EntityFrameworkCore");
 
-        // Grpc.Net.Client is using various version of http communication under the hood.
-        // Enabling only GrpcNetClient instrumentation to have consistent set of spans.
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED", "false");
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_GRPCNETCLIENT_INSTRUMENTATION_ENABLED", "true");
-        RunTestApplication(new TestSettings { PackageVersion = packageVersion });
+        RunTestApplication(new TestSettings
+        {
+            Arguments = $"--mysql {_mySql.Port}",
+            PackageVersion = packageVersion
+        });
 
         collector.AssertExpectations();
     }
 }
+#endif

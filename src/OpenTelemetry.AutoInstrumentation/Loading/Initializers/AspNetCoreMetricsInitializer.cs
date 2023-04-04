@@ -37,7 +37,7 @@ internal class AspNetCoreMetricsInitializer : InstrumentationInitializer
         Instrumentation.PluginManager?.ConfigureMetricsOptions(aspNetCoreMetricsInstrumentationOptions);
 
         var constructor = metricsType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, new[] { typeof(AspNetCoreMetricsInstrumentationOptions) })!;
-        var aspNetCoreMetrics = constructor.Invoke(new[] { aspNetCoreMetricsInstrumentationOptions });
+        var aspNetCoreMetrics = constructor.Invoke(new object?[] { aspNetCoreMetricsInstrumentationOptions });
 
         lifespanManager.Track(aspNetCoreMetrics);
     }

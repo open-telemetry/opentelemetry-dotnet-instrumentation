@@ -17,6 +17,7 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
+using static IntegrationTests.Helpers.DockerFileHelper;
 
 namespace IntegrationTests;
 
@@ -29,7 +30,7 @@ public class PostgresCollection : ICollectionFixture<PostgresFixture>
 public class PostgresFixture : IAsyncLifetime
 {
     private const int PostgresPort = 5432;
-    private const string PostgresImage = "postgres:14.4";
+    private static readonly string PostgresImage = ReadImageFrom("postgres.Dockerfile");
 
     private IContainer? _container;
 

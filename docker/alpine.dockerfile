@@ -4,7 +4,7 @@ RUN apk update \
     && apk upgrade \
     && apk add --no-cache --update \
         clang=13.0.1-r1 \
-        cmake=3.23.1-r0 \
+        cmake=3.23.5-r0 \
         make=4.3-r0 \
         bash=5.1.16-r2 \
         alpine-sdk=1.0-r1 \
