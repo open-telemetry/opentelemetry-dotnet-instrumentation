@@ -1,4 +1,4 @@
-// <copyright file="TestController.cs" company="OpenTelemetry Authors">
+// <copyright file="ProgramNet462Compat.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,26 +14,23 @@
 // limitations under the License.
 // </copyright>
 
-using Microsoft.AspNetCore.Mvc;
+#if NET462
 using Microsoft.Extensions.Logging;
 
-namespace TestApplication.Logs.Controllers;
+namespace TestApplication.Logs;
 
-[ApiController]
-[Route("[controller]")]
-public class TestController : ControllerBase
+public class ProgramNet462Compat
 {
-    private readonly ILogger<TestController> _logger;
-
-    public TestController(ILogger<TestController> logger)
+    public static void Main(string[] args)
     {
-        _logger = logger;
-    }
+        var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            // builder.AddConsole();
+        });
 
-    [HttpGet]
-    public IActionResult Get()
-    {
-        _logger.LogInformation("Information from Test App.");
-        return Ok("Hello from TestController!!!");
+        var logger = loggerFactory.CreateLogger<ProgramNet462Compat>();
+
+        logger.LogInformation("Information from Test App.");
     }
 }
+#endif

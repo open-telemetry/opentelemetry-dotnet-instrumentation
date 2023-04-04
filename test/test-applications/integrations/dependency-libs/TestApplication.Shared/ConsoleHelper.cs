@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+using System;
+
 namespace TestApplication.Shared;
 
 public static class ConsoleHelper

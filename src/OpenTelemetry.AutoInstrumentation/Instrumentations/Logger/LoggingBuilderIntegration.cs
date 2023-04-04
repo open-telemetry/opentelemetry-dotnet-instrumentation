@@ -43,14 +43,12 @@ public static class LoggingBuilderIntegration
     /// <returns>A default CallTargetReturn to satisfy the CallTarget contract</returns>
     internal static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception exception, CallTargetState state)
     {
-#if NET6_0_OR_GREATER
         if (instance is not null)
         {
             var logBuilderExtensionsType = Type.GetType("OpenTelemetry.AutoInstrumentation.Logger.LogBuilderExtensions, OpenTelemetry.AutoInstrumentation");
             var methodInfo = logBuilderExtensionsType?.GetMethod("AddOpenTelemetryLogs");
             methodInfo?.Invoke(null, new[] { (object)instance });
         }
-#endif
 
         return CallTargetReturn.GetDefault();
     }

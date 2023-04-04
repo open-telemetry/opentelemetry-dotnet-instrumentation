@@ -1,4 +1,4 @@
-// <copyright file="Startup.cs" company="OpenTelemetry Authors">
+// <copyright file="StartupNet462Compat.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,43 +14,32 @@
 // limitations under the License.
 // </copyright>
 
+#if NET462
+using System.Collections;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace TestApplication.Logs;
-public class Startup
+public class StartupNet462Compat
 {
-    public Startup(IConfiguration configuration)
-    {
-        Configuration = configuration;
-    }
-
-    public IConfiguration Configuration { get; }
-
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddControllers();
+        services.AddMvc();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    public void Configure(IApplicationBuilder app, IHostingEnvironment env)
     {
-        if (env.IsDevelopment())
+        app.UseWelcomePage("/alive-check");
+        app.UseMvc(routes =>
         {
-            app.UseDeveloperExceptionPage();
-        }
-
-        app.UseRouting();
-
-        app.UseAuthorization();
-
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapControllers();
+            routes.MapRoute(
+                name: "default",
+                template: "{controller=Home}/{action=Index}/{id?}");
         });
     }
 }
+#endif

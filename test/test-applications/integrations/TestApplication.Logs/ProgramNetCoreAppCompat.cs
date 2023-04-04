@@ -1,4 +1,4 @@
-// <copyright file="Program.cs" company="OpenTelemetry Authors">
+// <copyright file="ProgramNetCoreAppCompat.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+#if NETCOREAPP
 using System.Linq;
 using System.Net.Http;
 using Microsoft.AspNetCore.Hosting;
@@ -23,7 +24,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace TestApplication.Logs;
 
-public class Program
+public class ProgramNetCoreAppCompat
 {
     public static void Main(string[] args)
     {
@@ -41,7 +42,8 @@ public class Program
         Host.CreateDefaultBuilder(args)
             .ConfigureWebHostDefaults(webBuilder =>
             {
-                webBuilder.UseStartup<Startup>();
+                webBuilder.UseStartup<StartupNetCoreAppCompat>();
                 webBuilder.UseUrls($"http://127.0.0.1:0");
             });
 }
+#endif

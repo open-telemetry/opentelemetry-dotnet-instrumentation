@@ -5,9 +5,19 @@
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "test",
-      "applicationUrl": "http://localhost:8097",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:8051",
+        "COR_ENABLE_PROFILING": "1",
+        "COR_PROFILER": "{918728DD-259F-4A6A-AC2B-B85E1B658318}",
+        "COR_PROFILER_PATH_32": "$(SolutionDir)bin\\tracer-home\\win-x86\\OpenTelemetry.AutoInstrumentation.Native.dll",
+        "COR_PROFILER_PATH_64": "$(SolutionDir)bin\\tracer-home\\win-x64\\OpenTelemetry.AutoInstrumentation.Native.dll",
+        "OTEL_DOTNET_AUTO_HOME": "$(SolutionDir)bin\\tracer-home",
+        "OTEL_DOTNET_AUTO_INTEGRATIONS_FILE": "$(SolutionDir)bin\\tracer-home\\integrations.json",
+        "OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED": "true",
+        "OTEL_SERVICE_NAME": "CLRProfiler.Self-hosted",
+        "OTEL_LOG_LEVEL": "debug",
+        "OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED": "false"
       }
     }
   }
