@@ -18,9 +18,9 @@ namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
 
 internal abstract class Rule
 {
-    internal string? Name { get; set; }
+    public string Name { get; protected set; } = string.Empty;
 
-    internal string? Description { get; set; }
+    public string Description { get; protected set; } = string.Empty;
 
     internal abstract bool Evaluate();
 }

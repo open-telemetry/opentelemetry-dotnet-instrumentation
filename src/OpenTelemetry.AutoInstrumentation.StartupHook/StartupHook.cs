@@ -28,6 +28,7 @@ internal class StartupHook
 {
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
 
+    // This property must be initialized before any rule is evaluated since it may be used during rule evaluation.
     internal static string? LoaderAssemblyLocation { get; set; }
 
     /// <summary>
@@ -70,7 +71,7 @@ internal class StartupHook
             var ruleEngine = new RuleEngine();
             if (!ruleEngine.Validate())
             {
-                Logger.Error("Rule Engine Failure: One or more rules failed validation");
+                Logger.Error("Rule Engine Failure: One or more rules failed validation. Auto-Instrumentation won't be loaded.");
                 return;
             }
 

@@ -1,4 +1,4 @@
-// <copyright file="OpenTelemetrySdkRule.cs" company="OpenTelemetry Authors">
+// <copyright file="OpenTelemetrySdkMinimumVersionRule.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,9 +20,15 @@ using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
 
-internal class OpenTelemetrySdkRule : Rule
+internal class OpenTelemetrySdkMinimumVersionRule : Rule
 {
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
+
+    public OpenTelemetrySdkMinimumVersionRule()
+    {
+        Name = "OpenTelemetry SDK Validator";
+        Description = "Ensure that the OpenTelemetry SDK version is not older than the version used by the Auto-Instrumentation";
+    }
 
     internal override bool Evaluate()
     {

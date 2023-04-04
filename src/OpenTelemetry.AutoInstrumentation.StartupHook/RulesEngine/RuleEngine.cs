@@ -24,21 +24,9 @@ internal class RuleEngine
 
     private readonly List<Rule> _rules = new()
     {
-        new OpenTelemetrySdkRule
-        {
-            Name = "OpenTelemetry SDK Validator",
-            Description = "Ensure that the OpenTelemetry SDK version is not older than the version used by the Auto-Instrumentation"
-        },
-        new DiagnosticSourceRule
-        {
-            Name = "System.Diagnostics.DiagnosticsSource Validator",
-            Description = "TODO"
-        },
-        new InstrumentationAssemblyRule
-        {
-            Name = "Instrumentation Library Validator",
-            Description = "TODO"
-        },
+        new OpenTelemetrySdkMinimumVersionRule(),
+        new DiagnosticSourceRule(),
+        new InstrumentationAssemblyRule()
     };
 
     internal bool Validate()
