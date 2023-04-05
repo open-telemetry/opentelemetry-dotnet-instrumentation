@@ -21,6 +21,7 @@ namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
 internal class RuleEngine
 {
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
+    private static readonly RuleEngineTracker Tracker = new();
 
     private readonly List<Rule> _rules = new()
     {
@@ -32,6 +33,11 @@ internal class RuleEngine
     internal bool Validate()
     {
         var result = true;
+
+        if (Tracker.IsFileExists())
+        {
+            return result;
+        }
 
         foreach (var rule in _rules)
         {
@@ -48,6 +54,11 @@ internal class RuleEngine
                 Logger.Error($"Error evaluating rule '{rule.Name}': {ex.Message}");
                 result = false;
             }
+        }
+
+        if (result)
+        {
+            Tracker.CreateFile();
         }
 
         return result;
