@@ -26,13 +26,15 @@ public class RuleEngineTests : IDisposable
     {
         // Arrange
         SetShouldTrackEnvironmentVariable(true);
-        var ruleEngine = new RuleEngine();
+        var testRule = new TestRule();
+        var ruleEngine = new RuleEngine(new List<Rule> { testRule });
 
         // Act
         var result = ruleEngine.Validate();
 
         // Assert
         Assert.True(result);
+        Assert.True(testRule.IsEvaluated);
     }
 
     [Fact]
@@ -40,13 +42,15 @@ public class RuleEngineTests : IDisposable
     {
         // Arrange
         SetShouldTrackEnvironmentVariable(false);
-        var ruleEngine = new RuleEngine();
+        var testRule = new TestRule();
+        var ruleEngine = new RuleEngine(new List<Rule> { testRule });
 
         // Act
         var result = ruleEngine.Validate();
 
         // Assert
         Assert.True(result);
+        Assert.False(testRule.IsEvaluated);
     }
 
     [Fact]
@@ -54,49 +58,66 @@ public class RuleEngineTests : IDisposable
     {
         // Arrange
         SetShouldTrackEnvironmentVariable(null);
-        var ruleEngine = new RuleEngine();
+        var testRule = new TestRule();
+        var ruleEngine = new RuleEngine(new List<Rule> { testRule });
 
         // Act
         var result = ruleEngine.Validate();
 
         // Assert
         Assert.True(result);
+        Assert.True(testRule.IsEvaluated);
     }
 
     [Fact]
     public void RuleEngineValidation_WhenShouldTrackIsNotSet()
     {
         // Arrange
-        var ruleEngine = new RuleEngine();
+        var testRule = new TestRule();
+        var ruleEngine = new RuleEngine(new List<Rule> { testRule });
 
         // Act
         var result = ruleEngine.Validate();
 
         // Assert
         Assert.True(result);
+        Assert.True(testRule.IsEvaluated);
     }
 
     [Fact]
     public void RuleEngineValidation_WhenShouldTrackHasInvalidValue()
     {
         // Arrange
-        Environment.SetEnvironmentVariable("OTEL_RULE_ENGINE_ENABLED", "Invalid");
-        var ruleEngine = new RuleEngine();
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED", "Invalid");
+        var testRule = new TestRule();
+        var ruleEngine = new RuleEngine(new List<Rule> { testRule });
 
         // Act
         var result = ruleEngine.Validate();
 
         // Assert
         Assert.True(result);
+        Assert.True(testRule.IsEvaluated);
     }
 
     public void Dispose()
     {
-        Environment.SetEnvironmentVariable("OTEL_RULE_ENGINE_ENABLED", null);
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED", null);
     }
 
     private void SetShouldTrackEnvironmentVariable(bool? value)
     {
-        Environment.SetEnvironmentVariable("OTEL_RULE_ENGINE_ENABLED", value?.ToString());
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED", value?.ToString());
+    }
+
+    private class TestRule : Rule
+    {
+        internal bool IsEvaluated { get; private set; }
+
+        internal override bool Evaluate()
+        {
+            IsEvaluated = true;
+            return true;
+        }
     }
 }

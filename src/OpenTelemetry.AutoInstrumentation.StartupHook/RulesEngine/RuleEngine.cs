@@ -29,6 +29,14 @@ internal class RuleEngine
         new InstrumentationAssemblyRule()
     };
 
+    internal RuleEngine(List<Rule>? rules = null)
+    {
+        if (rules != null)
+        {
+            _rules = rules;
+        }
+    }
+
     internal bool Validate()
     {
         var result = true;
