@@ -88,10 +88,10 @@ internal class RuleEngineTracker
 
     private string GetFilePath()
     {
-        var processId = Process.GetCurrentProcess().ProcessName;
+        var processName = Process.GetCurrentProcess().ProcessName;
         var path = AppContext.BaseDirectory;
         var username = Environment.UserName;
-        var dataToHash = $"{processId}-{path}-{username}";
+        var dataToHash = $"{processName}-{path}-{username}";
 
         using var sha = SHA256.Create();
         var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(dataToHash));
