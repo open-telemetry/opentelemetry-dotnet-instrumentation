@@ -21,7 +21,6 @@ namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
 internal class RuleEngine
 {
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
-    private static readonly RuleEngineTracker Tracker = new();
 
     private readonly List<Rule> _rules = new()
     {
@@ -34,8 +33,9 @@ internal class RuleEngine
     {
         var result = true;
 
-        if (Tracker.IsFileExists())
+        if (bool.TryParse(Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED"), out var shouldTrack) && !shouldTrack)
         {
+            Logger.Information($"OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED is set to false, skipping rule engine validation.");
             return result;
         }
 
@@ -54,11 +54,6 @@ internal class RuleEngine
                 Logger.Error($"Error evaluating rule '{rule.Name}': {ex.Message}");
                 result = false;
             }
-        }
-
-        if (result)
-        {
-            Tracker.CreateFile();
         }
 
         return result;

@@ -1,4 +1,4 @@
-// <copyright file="RuleEngineTrackerTests.cs" company="OpenTelemetry Authors">
+// <copyright file="RuleEngineTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,76 +19,75 @@ using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.StartupHook.Tests;
 
-public class RuleEngineTrackerTests : IDisposable
+public class RuleEngineTests : IDisposable
 {
     [Fact]
-    public void CreateFile_ShouldCreateFile_WhenShouldTrackIsTrue()
+    public void RuleEngineValidation_WhenShouldTrackIsTrue()
     {
         // Arrange
         SetShouldTrackEnvironmentVariable(true);
-        var ruleEngineTracker = new RuleEngineTracker();
+        var ruleEngine = new RuleEngine();
 
         // Act
-        ruleEngineTracker.CreateFile();
+        var result = ruleEngine.Validate();
 
         // Assert
-        Assert.True(ruleEngineTracker.IsFileExists());
+        Assert.True(result);
     }
 
     [Fact]
-    public void CreateFile_ShouldNotCreateFile_WhenShouldTrackIsFalse()
+    public void RuleEngineValidation_WhenShouldTrackIsFalse()
     {
         // Arrange
         SetShouldTrackEnvironmentVariable(false);
-        var ruleEngineTracker = new RuleEngineTracker();
+        var ruleEngine = new RuleEngine();
 
         // Act
-        ruleEngineTracker.CreateFile();
+        var result = ruleEngine.Validate();
 
         // Assert
-        Assert.False(ruleEngineTracker.IsFileExists());
+        Assert.True(result);
     }
 
     [Fact]
-    public void CreateFile_ShouldCreateFile_WhenShouldTrackIsNotSet()
+    public void RuleEngineValidation_WhenShouldTrackIsNull()
     {
         // Arrange
-        var ruleEngineTracker = new RuleEngineTracker();
+        SetShouldTrackEnvironmentVariable(null);
+        var ruleEngine = new RuleEngine();
 
         // Act
-        ruleEngineTracker.CreateFile();
+        var result = ruleEngine.Validate();
 
         // Assert
-        Assert.True(ruleEngineTracker.IsFileExists());
+        Assert.True(result);
     }
 
     [Fact]
-    public void DeleteTrackerFile_ShouldDeleteFile()
+    public void RuleEngineValidation_WhenShouldTrackIsNotSet()
     {
         // Arrange
-        SetShouldTrackEnvironmentVariable(true);
-        var ruleEngineTracker = new RuleEngineTracker();
-        ruleEngineTracker.CreateFile();
+        var ruleEngine = new RuleEngine();
 
         // Act
-        ruleEngineTracker.DeleteTrackerFile();
+        var result = ruleEngine.Validate();
 
         // Assert
-        Assert.False(File.Exists(ruleEngineTracker.GetFilePath()));
+        Assert.True(result);
     }
 
     [Fact]
-    public void IsFileExists_ShouldReturnFalse_WhenShouldTrackIsFalse()
+    public void RuleEngineValidation_WhenShouldTrackHasInvalidValue()
     {
         // Arrange
-        SetShouldTrackEnvironmentVariable(false);
-        var ruleEngineTracker = new RuleEngineTracker();
+        Environment.SetEnvironmentVariable("OTEL_RULE_ENGINE_ENABLED", "Invalid");
+        var ruleEngine = new RuleEngine();
 
         // Act
-        var result = ruleEngineTracker.IsFileExists();
+        var result = ruleEngine.Validate();
 
         // Assert
-        Assert.False(result);
+        Assert.True(result);
     }
 
     public void Dispose()
