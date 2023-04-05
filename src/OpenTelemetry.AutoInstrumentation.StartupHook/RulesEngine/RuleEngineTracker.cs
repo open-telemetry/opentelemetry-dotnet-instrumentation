@@ -86,7 +86,7 @@ internal class RuleEngineTracker
         return _shouldTrack == true || File.Exists(filePath);
     }
 
-    private string GetFilePath()
+    internal string GetFilePath()
     {
         var processName = Process.GetCurrentProcess().ProcessName;
         var path = AppContext.BaseDirectory;
