@@ -29,7 +29,7 @@ public class ServiceNameConfiguratorTests
     [Fact]
     public void GetFallbackServiceName()
     {
-        var resourceBuilder = ResourceConfigurator.CreateResourceBuilder();
+        var resourceBuilder = ResourceConfigurator.CreateResourceBuilder(new List<ResourceDetector>());
         var resource = resourceBuilder.Build();
 
         var serviceName = resource.Attributes.FirstOrDefault(a => a.Key == ServiceName).Value as string;
@@ -44,7 +44,10 @@ public class ServiceNameConfiguratorTests
         {
             Environment.SetEnvironmentVariable(OtelServiceVariable, setServiceName);
 
-            var resourceBuilder = ResourceConfigurator.CreateResourceBuilder();
+            var resourceBuilder = ResourceConfigurator.CreateResourceBuilder(new List<ResourceDetector>
+            {
+                ResourceDetector.EnvironmentalVariables
+            });
             var resource = resourceBuilder.Build();
 
             var serviceName = resource.Attributes.FirstOrDefault(a => a.Key == ServiceName).Value as string;

@@ -62,7 +62,23 @@ However, if given setting supports it, then:
 
 A resource is the immutable representation of the entity producing the telemetry.
 See [Resource semantic conventions](https://github.com/open-telemetry/opentelemetry-specification/tree/main/specification/resource/semantic_conventions)
-for more details.
+for more details. Resource are detected by resource detectors.
+
+| Environment variable                             | Description                                                                                                                                                                                           | Default value | Status                                                                                                                            |
+|--------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED`     | Enables all resource detectors.                                                                                                                                                                       | `true`        | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `OTEL_DOTNET_AUTO_{0}_RESOURCE_DETECTOR_ENABLED` | Configuration pattern for enabling a specific resource detector, where `{0}` is the uppercase id of the resource detector you want to enable. Overrides `OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED`. | `true`        | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+
+Supported resource detectors:
+
+| ID                       | Description                    | Documentation                                                                                                                                                                       | Status                                                                                                                            |
+|--------------------------|--------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `ENVIRONMENTALVARIABLES` | Environment variables detector | See /[1/]                                                                                                                                                                           | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `TELEMETRYSDK`           | Telemetry SDK detector         | [Telemetry SDK resources documentation](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md?plain=1#L117) | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| `CONTAINER`              | Container detector             | [Container resource detector documentation](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/main/src/OpenTelemetry.ResourceDetectors.Container/README.md)       | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+
+/[1/] `ENVIRONMENTALVARIABLES` detector is using following environmental variables
+to detect resources:
 
 | Environment variable       | Description                                                                                                                                                                                                                                                                                                       | Default value                                                                                                                                                                                                                       | Status                                                                                                                            |
 |----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
@@ -337,9 +353,9 @@ or when the deployment changes or the Automatic Instrumentation
 library is upgraded. Once validated, there's no need to revalidate
 the rules when the application restarts.
 
-| Environment variable                   | Description         | Default value  | Status                                                                                                                            |
-|--------------------------------------- |---------------------|----------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED` | Enables RuleEngine. | `true`         | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| Environment variable                   | Description         | Default value | Status                                                                                                                            |
+|----------------------------------------|---------------------|---------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED` | Enables RuleEngine. | `true`        | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 
 ## .NET CLR Profiler
 

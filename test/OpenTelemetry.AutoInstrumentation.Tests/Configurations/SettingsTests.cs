@@ -46,6 +46,7 @@ public class SettingsTests : IDisposable
         using (new AssertionScope())
         {
             settings.Plugins.Should().BeEmpty();
+            settings.EnabledResourceDetectors.Should().NotBeEmpty();
             settings.FlushOnUnhandledException.Should().BeFalse();
             settings.OtlpExportProtocol.Should().Be(OtlpExportProtocol.HttpProtobuf);
         }
@@ -299,6 +300,20 @@ public class SettingsTests : IDisposable
         settings.FlushOnUnhandledException.Should().Be(expectedValue);
     }
 
+    [Theory]
+    [InlineData("ENVIRONMENTALVARIABLES", ResourceDetector.EnvironmentalVariables)]
+    [InlineData("TELEMETRYSDK", ResourceDetector.TelemetrySdk)]
+    [InlineData("CONTAINER", ResourceDetector.Container)]
+    internal void GeneralSettings_Instrumentations_SupportedValues(string resourceDetector, ResourceDetector expectedResourceDetector)
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, "false");
+        Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.EnabledResourceDetectorTemplate, resourceDetector), "true");
+
+        var settings = Settings.FromDefaultSources<GeneralSettings>();
+
+        settings.EnabledResourceDetectors.Should().BeEquivalentTo(new List<ResourceDetector> { expectedResourceDetector });
+    }
+
     private static void ClearEnvVars()
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.LogsInstrumentationEnabled, null);
@@ -329,6 +344,14 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.InstrumentationOptions.GraphQLSetDocument, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, null);
         Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, null);
+        Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, null);
+
+        Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, null);
+        foreach (var re in Enum.GetValues(typeof(ResourceDetector)).Cast<ResourceDetector>())
+        {
+            Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.EnabledResourceDetectorTemplate, re.ToString().ToUpperInvariant()), null);
+        }
+
         Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, null);
     }
 }

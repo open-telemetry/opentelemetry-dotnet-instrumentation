@@ -22,6 +22,7 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" />
     <PackageReference Include="OpenTelemetry.Shims.OpenTracing" />
+    <PackageReference Include="OpenTelemetry.Extensions.Docker" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
