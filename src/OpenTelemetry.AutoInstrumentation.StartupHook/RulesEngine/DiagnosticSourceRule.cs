@@ -32,7 +32,7 @@ internal class DiagnosticSourceRule : Rule
 
     internal override bool Evaluate()
     {
-        string? diagnosticSourcePackageVersion = null;
+        string? olderDiagnosticSourcePackageVersion = null;
 
         try
         {
@@ -51,7 +51,7 @@ internal class DiagnosticSourceRule : Rule
 
                 if (loadedDiagnosticSourceFileVersion < autoInstrumentationDiagnosticSourceFileVersion)
                 {
-                    diagnosticSourcePackageVersion = loadedDiagnosticSourceFileVersionInfo.FileVersion;
+                    olderDiagnosticSourcePackageVersion = loadedDiagnosticSourceFileVersionInfo.FileVersion;
                 }
             }
         }
@@ -61,9 +61,9 @@ internal class DiagnosticSourceRule : Rule
             Logger.Information($"Couldn't evaluate reference to System.Diagnostics.DiagnosticSource in an app. Exception: {ex}");
         }
 
-        if (diagnosticSourcePackageVersion != null)
+        if (olderDiagnosticSourcePackageVersion != null)
         {
-            Logger.Error($"Application has direct or indirect reference to older version of System.Diagnostics.DiagnosticSource.dll {diagnosticSourcePackageVersion}.");
+            Logger.Error($"Application has direct or indirect reference to older version of System.Diagnostics.DiagnosticSource.dll {olderDiagnosticSourcePackageVersion}.");
             return false;
         }
 
