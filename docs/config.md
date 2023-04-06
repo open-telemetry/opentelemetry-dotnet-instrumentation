@@ -327,15 +327,14 @@ Important environment variables include:
 
 ## RuleEngine
 
-The RuleEngine is a feature that validates OpenTelemetry API, SDK,
-Instrumentation, and Exporter assemblies for unsupported scenarios.
-It is supported only on .NET and .NET Core platforms. It can ensure
-that the OpenTelemetry Automatic Instrumentation is more robust and
-stable by back off during unsupported scenarios instead of crashing.
+RuleEngine is a feature that validates OpenTelemetry API, SDK,
+Instrumentation, and Exporter assemblies for unsupported scenarios,
+ensuring that OpenTelemetry automatic instrumentation is more
+stable by backing of instead of crashing. It works on .NET 6 and higher.
 
-It is recommended to enable the RuleEngine only during the first run of the
-application, or when the deployment changes or the Automatic Instrumentation
-library is upgraded, as once validated, there is no need to re-validate
+Enable RuleEngine only during the first run of the application,
+or when the deployment changes or the Automatic Instrumentation
+library is upgraded. Once validated, there's no need to revalidate
 the rules when the application restarts.
 
 | Environment variable                   | Description         | Default value  | Status                                                                                                                            |
