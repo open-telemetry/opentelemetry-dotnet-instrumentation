@@ -42,16 +42,19 @@ internal class DiagnosticSourceRule : Rule
             if (diagnosticSourceType != null)
             {
                 var loadedDiagnosticSourceAssembly = Assembly.GetAssembly(diagnosticSourceType);
-                var loadedDiagnosticSourceFileVersionInfo = FileVersionInfo.GetVersionInfo(loadedDiagnosticSourceAssembly?.Location);
-                var loadedDiagnosticSourceFileVersion = new Version(loadedDiagnosticSourceFileVersionInfo.FileVersion);
-
-                var autoInstrumentationDiagnosticSourceLocation = Path.Combine(StartupHook.LoaderAssemblyLocation ?? string.Empty, "System.Diagnostics.DiagnosticSource.dll");
-                var autoInstrumentationDiagnosticSourceFileVersionInfo = FileVersionInfo.GetVersionInfo(autoInstrumentationDiagnosticSourceLocation);
-                var autoInstrumentationDiagnosticSourceFileVersion = new Version(autoInstrumentationDiagnosticSourceFileVersionInfo.FileVersion);
-
-                if (loadedDiagnosticSourceFileVersion < autoInstrumentationDiagnosticSourceFileVersion)
+                var loadedDiagnosticSourceAssemblyFileVersionAttribute = loadedDiagnosticSourceAssembly?.GetCustomAttribute<AssemblyFileVersionAttribute>();
+                if (loadedDiagnosticSourceAssemblyFileVersionAttribute != null)
                 {
-                    olderDiagnosticSourcePackageVersion = loadedDiagnosticSourceFileVersionInfo.FileVersion;
+                    var loadedDiagnosticSourceFileVersion = new Version(loadedDiagnosticSourceAssemblyFileVersionAttribute.Version);
+
+                    var autoInstrumentationDiagnosticSourceLocation = Path.Combine(StartupHook.LoaderAssemblyLocation ?? string.Empty, "System.Diagnostics.DiagnosticSource.dll");
+                    var autoInstrumentationDiagnosticSourceFileVersionInfo = FileVersionInfo.GetVersionInfo(autoInstrumentationDiagnosticSourceLocation);
+                    var autoInstrumentationDiagnosticSourceFileVersion = new Version(autoInstrumentationDiagnosticSourceFileVersionInfo.FileVersion);
+
+                    if (loadedDiagnosticSourceFileVersion < autoInstrumentationDiagnosticSourceFileVersion)
+                    {
+                        olderDiagnosticSourcePackageVersion = loadedDiagnosticSourceAssemblyFileVersionAttribute.Version;
+                    }
                 }
             }
         }
