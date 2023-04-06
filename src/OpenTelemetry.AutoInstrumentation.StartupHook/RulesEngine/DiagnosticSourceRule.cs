@@ -14,13 +14,59 @@
 // limitations under the License.
 // </copyright>
 
+using System.Diagnostics;
+using System.Reflection;
+using OpenTelemetry.AutoInstrumentation.Logging;
+
 namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
 
 internal class DiagnosticSourceRule : Rule
 {
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
+
+    public DiagnosticSourceRule()
+    {
+        Name = "System.Diagnostics.DiagnosticSource Validator";
+        Description = "Ensure that the System.Diagnostics.DiagnosticSource version is not older than the version used by the Auto-Instrumentation";
+    }
+
     internal override bool Evaluate()
     {
-        // TODO: implement checking logic
+        string? diagnosticSourcePackageVersion = null;
+
+        try
+        {
+            // Look up for type with an assembly name, will load the library.
+            // The loaded version depends on the app's reference to the package.
+            var diagnosticSourceType = Type.GetType("System.Diagnostics.DiagnosticSource, System.Diagnostics.DiagnosticSource");
+            if (diagnosticSourceType != null)
+            {
+                var loadedDiagnosticSourceAssembly = Assembly.GetAssembly(diagnosticSourceType);
+                var loadedDiagnosticSourceFileVersionInfo = FileVersionInfo.GetVersionInfo(loadedDiagnosticSourceAssembly?.Location);
+                var loadedDiagnosticSourceFileVersion = new Version(loadedDiagnosticSourceFileVersionInfo.FileVersion);
+
+                var autoInstrumentationDiagnosticSourceLocation = Path.Combine(StartupHook.LoaderAssemblyLocation ?? string.Empty, "System.Diagnostics.DiagnosticSource.dll");
+                var autoInstrumentationDiagnosticSourceFileVersionInfo = FileVersionInfo.GetVersionInfo(autoInstrumentationDiagnosticSourceLocation);
+                var autoInstrumentationDiagnosticSourceFileVersion = new Version(autoInstrumentationDiagnosticSourceFileVersionInfo.FileVersion);
+
+                if (loadedDiagnosticSourceFileVersion < autoInstrumentationDiagnosticSourceFileVersion)
+                {
+                    diagnosticSourcePackageVersion = loadedDiagnosticSourceFileVersionInfo.FileVersion;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Exception in evaluation should not throw or crash the process.
+            Logger.Information($"Couldn't evaluate reference to System.Diagnostics.DiagnosticSource in an app. Exception: {ex}");
+        }
+
+        if (diagnosticSourcePackageVersion != null)
+        {
+            Logger.Error($"Application has direct or indirect reference to older version of System.Diagnostics.DiagnosticSource.dll {diagnosticSourcePackageVersion}.");
+            return false;
+        }
+
         return true;
     }
 }
