@@ -325,6 +325,22 @@ Important environment variables include:
 | `OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES`       | Comma-separated list of additional `System.Diagnostics.Metrics.Meter` names to be added to the meter at the startup. Use it to capture manually instrumented spans.                                                                                                                                                                                                                                |               | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 | `OTEL_DOTNET_AUTO_PLUGINS`                          | Colon-separated list of OTel SDK instrumentation plugin types, specified with the [assembly-qualified name](https://docs.microsoft.com/en-us/dotnet/api/system.type.assemblyqualifiedname?view=net-6.0#system-type-assemblyqualifiedname). _Note: This list must be colon-separated because the type names may include commas._ See more info on how to write plugins at [plugins.md](plugins.md). |               | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 
+## RuleEngine
+
+RuleEngine is a feature that validates OpenTelemetry API, SDK,
+Instrumentation, and Exporter assemblies for unsupported scenarios,
+ensuring that OpenTelemetry automatic instrumentation is more
+stable by backing of instead of crashing. It works on .NET 6 and higher.
+
+Enable RuleEngine only during the first run of the application,
+or when the deployment changes or the Automatic Instrumentation
+library is upgraded. Once validated, there's no need to revalidate
+the rules when the application restarts.
+
+| Environment variable                   | Description         | Default value  | Status                                                                                                                            |
+|--------------------------------------- |---------------------|----------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED` | Enables RuleEngine. | `true`         | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+
 ## .NET CLR Profiler
 
 The CLR uses the following

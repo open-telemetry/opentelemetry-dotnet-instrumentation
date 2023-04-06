@@ -29,9 +29,25 @@ internal class RuleEngine
         new InstrumentationAssemblyRule()
     };
 
+    internal RuleEngine()
+    {
+    }
+
+    // This constructor is used for test purpose.
+    internal RuleEngine(List<Rule> rules)
+    {
+        _rules = rules;
+    }
+
     internal bool Validate()
     {
         var result = true;
+
+        if (bool.TryParse(Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED"), out var shouldTrack) && !shouldTrack)
+        {
+            Logger.Information($"OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED is set to false, skipping rule engine validation.");
+            return result;
+        }
 
         foreach (var rule in _rules)
         {
