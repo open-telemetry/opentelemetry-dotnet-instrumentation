@@ -21,6 +21,11 @@ namespace OpenTelemetry.AutoInstrumentation.StartupHook.Tests;
 
 public class RuleEngineTests : IDisposable
 {
+    public void Dispose()
+    {
+        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED", null);
+    }
+
     [Fact]
     public void RuleEngineValidation_WhenShouldTrackIsTrue()
     {
@@ -98,11 +103,6 @@ public class RuleEngineTests : IDisposable
         // Assert
         Assert.True(result);
         Assert.True(testRule.IsEvaluated);
-    }
-
-    public void Dispose()
-    {
-        Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED", null);
     }
 
     private void SetShouldTrackEnvironmentVariable(bool? value)

@@ -29,12 +29,14 @@ internal class RuleEngine
         new InstrumentationAssemblyRule()
     };
 
-    internal RuleEngine(List<Rule>? rules = null)
+    internal RuleEngine()
     {
-        if (rules != null)
-        {
-            _rules = rules;
-        }
+    }
+
+    // This constructor is used for test purpose.
+    internal RuleEngine(List<Rule> rules)
+    {
+        _rules = rules;
     }
 
     internal bool Validate()
