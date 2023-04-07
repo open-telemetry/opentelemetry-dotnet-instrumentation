@@ -15,7 +15,7 @@
 // </copyright>
 
 using System.Runtime.CompilerServices;
-using OpenTelemetry.Extensions.Docker.Resources;
+using OpenTelemetry.ResourceDetectors.Container;
 using OpenTelemetry.Resources;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
@@ -61,7 +61,7 @@ internal static class ResourceConfigurator
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static ResourceBuilder AddContainerResourceDetector(ResourceBuilder resourceBuilder)
         {
-            return resourceBuilder.AddDetector(new DockerResourceDetector());
+            return resourceBuilder.AddDetector(new ContainerResourceDetector());
         }
     }
 }
