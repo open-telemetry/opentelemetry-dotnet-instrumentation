@@ -74,13 +74,13 @@ or `applicationHost.config` (third option).
 > are loaded by using `appcmd` command.
 > Following example shows invocation for `WebDemo\` application:
 
-```bash
+```terminal
   appcmd list modules /app.name:"WebDemo/"
 ```
 
 and correct result:
 
-```bash
+```terminal
   MODULE "TelemetryHttpModule" ( type:OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, preCondition:managedHandler )
 ```
 
