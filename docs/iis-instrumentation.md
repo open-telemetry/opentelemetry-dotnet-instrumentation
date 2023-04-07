@@ -30,56 +30,59 @@ This step is necessary only for ASP.NET (.NET Framework).
 > There are three distinct options.
 
 Add `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`
-by modifying and extending `web.config` (first two options) or `applicationHost.config` (third option).
+by modifying and extending `web.config` (first two options)
+or `applicationHost.config` (third option).
 
-1.  ```xml
-      <system.web>
-        <httpModules>
-          <add name="TelemetryHttpModule" type="OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule" />
-        </httpModules>
-      </system.web>
-    ```
+```xml
+  <system.web>
+    <httpModules>
+      <add name="TelemetryHttpModule" type="OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule" />
+    </httpModules>
+  </system.web>
+```
 
 > **Warning**
-> After applying above changes you might experience following error as this configuration requires IIS classic mode. In order to fix it you can switch to classic mode or use other options. ![error](./images/iis-500-22-error.png).
+> After applying above changes you might experience following error as this configuration
+> requires IIS classic mode.
+> In order to fix it you can switch to classic mode or use other options. ![error](./images/iis-500-22-error.png).
 
-2.  ```xml
-      <system.webServer>
-        <validation validateIntegratedModeConfiguration="false" />
-        <modules>
-          <remove name="TelemetryHttpModule" />
-          <add name="TelemetryHttpModule" type="OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule" preCondition="managedHandler" />
-        </modules>
-      </system.webServer>
-    ```
+```xml
+  <system.webServer>
+    <validation validateIntegratedModeConfiguration="false" />
+    <modules>
+      <remove name="TelemetryHttpModule" />
+      <add name="TelemetryHttpModule" type="OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule" preCondition="managedHandler" />
+    </modules>
+  </system.webServer>
+```
 
 > **Note** `applicationHost.config` is located in `%SystemDrive%\Windows\system32\inetsrv\config`.
 > Below is an example where you can add the module
 > to set it for all ASP.NET application running in Integrated Pipeline Mode:
 
-3.  ```xml
-      <location path="" overrideMode="Allow">
-        <system.webServer>
-          <modules>
-            <add name="TelemetryHttpModule" type="OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule" preCondition="managedHandler" />
-          </modules>
-        </system.webServer>
-      </location>
-    ```
+```xml
+  <location path="" overrideMode="Allow">
+    <system.webServer>
+      <modules>
+        <add name="TelemetryHttpModule" type="OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule" preCondition="managedHandler" />
+      </modules>
+    </system.webServer>
+  </location>
+```
 
-> **Note** After applying above changes you can check whether `opentelemetry modules` are loaded by using
-> `appcmd` command. Following example shows invocation for `WebDemo\` application:
+> **Note** After applying above changes you can check whether `opentelemetry modules`
+> are loaded by using `appcmd` command.
+> Following example shows invocation for `WebDemo\` application:
 
-```sh 
+```bash
   appcmd list modules /app.name:"WebDemo/"
 ```
 
 and correct result:
 
-```sh 
+```bash
   MODULE "TelemetryHttpModule" ( type:OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, preCondition:managedHandler )
 ```
-
 
 ## Configuration
 
