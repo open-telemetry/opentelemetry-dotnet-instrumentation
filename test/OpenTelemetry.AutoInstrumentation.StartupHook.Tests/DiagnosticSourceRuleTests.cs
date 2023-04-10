@@ -21,38 +21,34 @@ namespace OpenTelemetry.AutoInstrumentation.StartupHook.Tests;
 public class DiagnosticSourceRuleTests
 {
     [Theory]
-    // These version are got when adding line `<PackageReference Include="System.Diagnostics.DiagnosticSource" VersionOverride="7.0.0" />` in Example.AspNetCoreMvc.csproj.
-
-    // DS of major version lower than 7
-    [InlineData("7.00.423.11508", true)]  // Version of DLL loaded when including version 4.7.0. It was auto-upgraded to 7.0.2, version of DS in store folder.
-
-    // DS of major version of 7 but higher than auto instrumentation's version (7.0.0)
-    [InlineData("7.00.22.51805", true)]   // Version of DLL loaded when including version 7.0.0.
-    [InlineData("7.00.323.6910", true)]   // Version of DLL when including version 7.0.1.
-
-    // DS of major version of 7 but lower than the auto-upgraded version (7.0.0)
-    [InlineData("7.0.22.47203", false)]   // Version of DLL when including version 7.0.0-rc.2.22472.3 (had to use a pre-release version because 7.0.0 is the first official version of 7)
-
-    // DS of major version higher than 7
-    [InlineData("8.00.23.12803", true)]   // Version of DLL when including version 8.0.0-preview.2.23128.3
-    public void DiagnosticSourceVersion(string diagnosticSourceVersion, bool result)
+    [InlineData("6.0.0.0", "7.0.0.0", false)]
+    [InlineData("8.0.0.0", "7.0.0.0", true)]
+    [InlineData("7.0.0.0", "7.0.0.0", true)]
+    public void DiagnosticSourceVersion(string appVersion, string autoInstrumentationVersion, bool result)
     {
-        var rule = new TestableDiagnosticSourceRule(diagnosticSourceVersion);
+        var rule = new TestableDiagnosticSourceRule(appVersion, autoInstrumentationVersion);
         Assert.Equal(rule.Evaluate(), result);
     }
 }
 
 internal class TestableDiagnosticSourceRule : DiagnosticSourceRule
 {
-    private readonly string diagnosticSourceVersion;
+    private readonly string appVersion;
+    private readonly string autoInstrumentationVersion;
 
-    public TestableDiagnosticSourceRule(string diagnosticSourceVersion)
+    public TestableDiagnosticSourceRule(string appVersion, string autoInstrumentationVersion)
     {
-        this.diagnosticSourceVersion = diagnosticSourceVersion;
+        this.appVersion = appVersion;
+        this.autoInstrumentationVersion = autoInstrumentationVersion;
     }
 
-    protected override string? GetDiagnosticSourceVersion()
+    protected override Version? GetVersionFromApp()
     {
-        return diagnosticSourceVersion;
+        return new Version(appVersion);
+    }
+
+    protected override Version? GetVersionFromAutoInstrumentation()
+    {
+        return new Version(autoInstrumentationVersion);
     }
 }

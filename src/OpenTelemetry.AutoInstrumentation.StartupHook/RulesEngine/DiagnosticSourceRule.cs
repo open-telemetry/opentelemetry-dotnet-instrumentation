@@ -36,18 +36,13 @@ internal class DiagnosticSourceRule : Rule
 
         try
         {
-            var loadedDiagnosticSourceAssemblyVersionString = GetDiagnosticSourceVersion();
-            if (loadedDiagnosticSourceAssemblyVersionString != null)
+            var loadedDiagnosticSourceFileVersion = GetVersionFromApp();
+            if (loadedDiagnosticSourceFileVersion != null)
             {
-                var loadedDiagnosticSourceFileVersion = new Version(loadedDiagnosticSourceAssemblyVersionString);
-
-                var autoInstrumentationDiagnosticSourceLocation = Path.Combine(StartupHook.LoaderAssemblyLocation ?? string.Empty, "System.Diagnostics.DiagnosticSource.dll");
-                var autoInstrumentationDiagnosticSourceFileVersionInfo = FileVersionInfo.GetVersionInfo(autoInstrumentationDiagnosticSourceLocation);
-                var autoInstrumentationDiagnosticSourceFileVersion = new Version(autoInstrumentationDiagnosticSourceFileVersionInfo.FileVersion);
-
+                var autoInstrumentationDiagnosticSourceFileVersion = GetVersionFromAutoInstrumentation();
                 if (loadedDiagnosticSourceFileVersion < autoInstrumentationDiagnosticSourceFileVersion)
                 {
-                    olderDiagnosticSourcePackageVersion = loadedDiagnosticSourceAssemblyVersionString;
+                    olderDiagnosticSourcePackageVersion = autoInstrumentationDiagnosticSourceFileVersion.ToString();
                 }
             }
         }
@@ -66,7 +61,7 @@ internal class DiagnosticSourceRule : Rule
         return true;
     }
 
-    protected virtual string? GetDiagnosticSourceVersion()
+    protected virtual Version? GetVersionFromApp()
     {
         // Look up for type with an assembly name, will load the library.
         // The loaded version depends on the app's reference to the package.
@@ -75,9 +70,21 @@ internal class DiagnosticSourceRule : Rule
         {
             var loadedDiagnosticSourceAssembly = Assembly.GetAssembly(diagnosticSourceType);
             var loadedDiagnosticSourceAssemblyFileVersionAttribute = loadedDiagnosticSourceAssembly?.GetCustomAttribute<AssemblyFileVersionAttribute>();
-            return loadedDiagnosticSourceAssemblyFileVersionAttribute?.Version;
+            var versionString = loadedDiagnosticSourceAssemblyFileVersionAttribute?.Version;
+            if (versionString != null)
+            {
+                return new Version(versionString);
+            }
         }
 
         return null;
+    }
+
+    protected virtual Version? GetVersionFromAutoInstrumentation()
+    {
+        var autoInstrumentationDiagnosticSourceLocation = Path.Combine(StartupHook.LoaderAssemblyLocation ?? string.Empty, "System.Diagnostics.DiagnosticSource.dll");
+        var autoInstrumentationDiagnosticSourceFileVersionInfo = FileVersionInfo.GetVersionInfo(autoInstrumentationDiagnosticSourceLocation);
+        var autoInstrumentationDiagnosticSourceFileVersion = new Version(autoInstrumentationDiagnosticSourceFileVersionInfo.FileVersion);
+        return autoInstrumentationDiagnosticSourceFileVersion;
     }
 }
