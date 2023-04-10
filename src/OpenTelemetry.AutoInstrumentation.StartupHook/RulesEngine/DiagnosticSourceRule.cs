@@ -49,7 +49,7 @@ internal class DiagnosticSourceRule : Rule
         catch (Exception ex)
         {
             // Exception in evaluation should not throw or crash the process.
-            Logger.Information($"Couldn't evaluate reference to System.Diagnostics.DiagnosticSource in an app. Exception: {ex}");
+            Logger.Warning($"Couldn't evaluate reference to System.Diagnostics.DiagnosticSource in an app. Exception: {ex}");
         }
 
         if (olderDiagnosticSourcePackageVersion != null)
