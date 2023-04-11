@@ -21,13 +21,21 @@ using Xunit;
 namespace OpenTelemetry.AutoInstrumentation.StartupHook.Tests;
 public class DiagnosticSourceRuleTests
 {
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+    public static IEnumerable<object[]> RuleTestData =>
+       new List<object[]>
+       {
+                new object[] { "6.0.0.0", "7.0.0.0", "Rule Engine: Application has direct or indirect reference to older version of System.Diagnostics.DiagnosticSource.dll 6.0.0.0.", false },
+                new object[] { "8.0.0.0", "7.0.0.0", "Rule Engine: DiagnosticSourceRule evaluation success.", true },
+                new object[] { "7.0.0.0", "7.0.0.0", "Rule Engine: DiagnosticSourceRule evaluation success.", true },
+                new object[] { null, "7.0.0.0", "Rule Engine: DiagnosticSourceRule evaluation success.", true },
+                new object[] { "7.0.0.0", null, "Rule Engine: DiagnosticSourceRule evaluation success.", true },
+                new object[] { null, null, "Rule Engine: DiagnosticSourceRule evaluation success.", true },
+       };
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+
     [Theory]
-    [InlineData("6.0.0.0", "7.0.0.0", "Rule Engine: Application has direct or indirect reference to older version of System.Diagnostics.DiagnosticSource.dll 6.0.0.0.", false)]
-    [InlineData("8.0.0.0", "7.0.0.0", "Rule Engine: DiagnosticSourceRule evaluation success.", true)]
-    [InlineData("7.0.0.0", "7.0.0.0", "Rule Engine: DiagnosticSourceRule evaluation success.", true)]
-    [InlineData(null, "7.0.0.0", "Rule Engine: DiagnosticSourceRule evaluation success.", true)]
-    [InlineData("7.0.0.0", null, "Rule Engine: DiagnosticSourceRule evaluation success.", true)]
-    [InlineData(null, null, "Rule Engine: DiagnosticSourceRule evaluation success.", true)]
+    [MemberData(nameof(RuleTestData))]
     public void DiagnosticSourceVersion(string appVersion, string autoInstrumentationVersion, string logMessage, bool result)
     {
         var logger = new TestLogger();
