@@ -45,7 +45,7 @@ internal class InstrumentationAssemblyRule : Rule
 
             if (referencedAssemblies == null)
             {
-                Logger.Information($"Rule Engine: Could not get referenced assembly (GetReferencedAssemblies()) from an application.");
+                Logger.Warning($"Rule Engine: Could not get referenced assembly (GetReferencedAssemblies()) from an application. Skipping rule evaluation.");
                 return result;
             }
 
