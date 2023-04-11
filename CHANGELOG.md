@@ -16,6 +16,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   the entry assembly name instead, only falling back to the process name
   in case of an error. If the application uses .NET Framework and is hosted
   on IIS, the service name is determined using  `SiteName/ApplicationVirtualPath`.
+- Added a rule engine to validate potential conflicts and unsupported scenarios,
+  ensuring back off instead of crashing, improving overall stability.
+- The environment variable `OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED` could be
+  used to enable or disable the rule engine.
 
 ### Changed
 
