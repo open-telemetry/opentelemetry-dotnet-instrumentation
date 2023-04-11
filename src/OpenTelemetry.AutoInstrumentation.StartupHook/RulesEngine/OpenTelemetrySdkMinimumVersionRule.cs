@@ -66,7 +66,7 @@ internal class OpenTelemetrySdkMinimumVersionRule : Rule
             return false;
         }
 
-        logger.Information($"Rule Engine: OpenTelemetrySdkMinimumVersionRule evaluation success.");
+        logger.Information("Rule Engine: OpenTelemetrySdkMinimumVersionRule evaluation success.");
         return true;
     }
 
