@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Extensions;
 using Nuke.Common;
@@ -489,6 +491,34 @@ partial class Build
             // Cleanup Additional Deps Directory
             AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml", "**/*.dylib", "**/*.so").ForEach(DeleteFile);
             AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(DeleteDirectory);
+        });
+
+    Target PublishRuleEngineJson => _ => _
+        .After(PublishManagedProfiler)
+        .Description("Publishes a file with assembly name and version for rule engine validation.")
+        .Executes(() =>
+        {
+            var netPath = TracerHomeDirectory / "net";
+            var fileInfoList = new List<object>();
+            var files = Directory.GetFiles(netPath);
+
+            foreach (string file in files)
+            {
+                var fileName = Path.GetFileNameWithoutExtension(file);
+                var fileVersion = FileVersionInfo.GetVersionInfo(file).FileVersion;
+
+                if (fileName.StartsWith("OpenTelemetry.") && !fileName.StartsWith("OpenTelemetry.Api") && !fileName.StartsWith("OpenTelemetry.AutoInstrumentation"))
+                {
+                    fileInfoList.Add(new
+                    {
+                        FileName = fileName,
+                        FileVersion = fileVersion
+                    });
+                }
+            }
+
+            string jsonContent = JsonSerializer.Serialize(fileInfoList);
+            File.WriteAllText(Path.Combine(netPath, "ruleEngine.json"), jsonContent);
         });
 
     Target InstallDocumentationTools => _ => _

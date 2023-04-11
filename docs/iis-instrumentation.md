@@ -71,7 +71,7 @@ or `applicationHost.config` (third option).
 ```
 
 > **Note** After applying above changes you can check whether `opentelemetry modules`
-> are loaded by using `appcmd` command.
+> are loaded by using `appcmd` command which can be found under `%SystemDrive%\Windows\system32\inetsrv`.
 > Following example shows invocation for `WebDemo\` application:
 
 ```terminal
