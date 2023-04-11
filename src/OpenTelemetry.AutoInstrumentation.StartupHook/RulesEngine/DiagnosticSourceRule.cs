@@ -22,12 +22,19 @@ namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
 
 internal class DiagnosticSourceRule : Rule
 {
-    private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
+    private static IOtelLogger logger = OtelLogging.GetLogger("StartupHook");
 
     public DiagnosticSourceRule()
     {
         Name = "System.Diagnostics.DiagnosticSource Validator";
         Description = "Ensure that the System.Diagnostics.DiagnosticSource version is not older than the version used by the Auto-Instrumentation";
+    }
+
+    // This constructor is used for test purpose.
+    protected DiagnosticSourceRule(IOtelLogger otelLogger)
+        : this()
+    {
+        logger = otelLogger;
     }
 
     internal override bool Evaluate()
@@ -42,22 +49,24 @@ internal class DiagnosticSourceRule : Rule
                 var autoInstrumentationDiagnosticSourceFileVersion = GetVersionFromAutoInstrumentation();
                 if (loadedDiagnosticSourceFileVersion < autoInstrumentationDiagnosticSourceFileVersion)
                 {
-                    olderDiagnosticSourcePackageVersion = autoInstrumentationDiagnosticSourceFileVersion.ToString();
+                    olderDiagnosticSourcePackageVersion = loadedDiagnosticSourceFileVersion.ToString();
                 }
             }
         }
         catch (Exception ex)
         {
             // Exception in evaluation should not throw or crash the process.
-            Logger.Warning($"Couldn't evaluate reference to System.Diagnostics.DiagnosticSource in an app. Exception: {ex}");
+            logger.Warning($"Rule Engine: Couldn't evaluate reference to System.Diagnostics.DiagnosticSource in an app. Exception: {ex}");
+            return false;
         }
 
         if (olderDiagnosticSourcePackageVersion != null)
         {
-            Logger.Error($"Application has direct or indirect reference to older version of System.Diagnostics.DiagnosticSource.dll {olderDiagnosticSourcePackageVersion}.");
+            logger.Error($"Rule Engine: Application has direct or indirect reference to older version of System.Diagnostics.DiagnosticSource.dll {olderDiagnosticSourcePackageVersion}.");
             return false;
         }
 
+        logger.Information("Rule Engine: DiagnosticSourceRule evaluation success.");
         return true;
     }
 

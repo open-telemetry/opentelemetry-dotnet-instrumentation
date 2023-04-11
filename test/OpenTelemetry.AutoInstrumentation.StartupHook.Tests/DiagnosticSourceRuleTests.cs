@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.RulesEngine;
 using Xunit;
 
@@ -21,13 +22,18 @@ namespace OpenTelemetry.AutoInstrumentation.StartupHook.Tests;
 public class DiagnosticSourceRuleTests
 {
     [Theory]
-    [InlineData("6.0.0.0", "7.0.0.0", false)]
-    [InlineData("8.0.0.0", "7.0.0.0", true)]
-    [InlineData("7.0.0.0", "7.0.0.0", true)]
-    public void DiagnosticSourceVersion(string appVersion, string autoInstrumentationVersion, bool result)
+    [InlineData("6.0.0.0", "7.0.0.0", "Rule Engine: Application has direct or indirect reference to older version of System.Diagnostics.DiagnosticSource.dll 6.0.0.0.", false)]
+    [InlineData("8.0.0.0", "7.0.0.0", "Rule Engine: DiagnosticSourceRule evaluation success.", true)]
+    [InlineData("7.0.0.0", "7.0.0.0", "Rule Engine: DiagnosticSourceRule evaluation success.", true)]
+    [InlineData(null, "7.0.0.0", "Rule Engine: DiagnosticSourceRule evaluation success.", true)]
+    [InlineData("7.0.0.0", null, "Rule Engine: DiagnosticSourceRule evaluation success.", true)]
+    [InlineData(null, null, "Rule Engine: DiagnosticSourceRule evaluation success.", true)]
+    public void DiagnosticSourceVersion(string appVersion, string autoInstrumentationVersion, string logMessage, bool result)
     {
-        var rule = new TestableDiagnosticSourceRule(appVersion, autoInstrumentationVersion);
-        Assert.Equal(rule.Evaluate(), result);
+        var logger = new TestLogger();
+        var rule = new TestableDiagnosticSourceRule(appVersion, autoInstrumentationVersion, logger);
+        Assert.Equal(result, rule.Evaluate());
+        Assert.Equal(logMessage, logger.LogRecords[0].Message);
     }
 }
 
@@ -36,7 +42,8 @@ internal class TestableDiagnosticSourceRule : DiagnosticSourceRule
     private readonly string appVersion;
     private readonly string autoInstrumentationVersion;
 
-    public TestableDiagnosticSourceRule(string appVersion, string autoInstrumentationVersion)
+    public TestableDiagnosticSourceRule(string appVersion, string autoInstrumentationVersion, IOtelLogger otelLogger)
+        : base(otelLogger)
     {
         this.appVersion = appVersion;
         this.autoInstrumentationVersion = autoInstrumentationVersion;
@@ -44,11 +51,21 @@ internal class TestableDiagnosticSourceRule : DiagnosticSourceRule
 
     protected override Version? GetVersionFromApp()
     {
+        if (appVersion == null)
+        {
+            return null;
+        }
+
         return new Version(appVersion);
     }
 
     protected override Version? GetVersionFromAutoInstrumentation()
     {
+        if (autoInstrumentationVersion == null)
+        {
+            return null;
+        }
+
         return new Version(autoInstrumentationVersion);
     }
 }
