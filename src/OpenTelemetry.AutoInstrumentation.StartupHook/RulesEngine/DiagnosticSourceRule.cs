@@ -43,6 +43,8 @@ internal class DiagnosticSourceRule : Rule
 
         try
         {
+            // NuGet package version is not available at runtime. AssemblyVersion is available but it only changes in major version updates.
+            // Thus using AssemblyFileVersion to compare whether the loaded version is older than that of auto instrumentation.
             var loadedDiagnosticSourceFileVersion = GetVersionFromApp();
             if (loadedDiagnosticSourceFileVersion != null)
             {
