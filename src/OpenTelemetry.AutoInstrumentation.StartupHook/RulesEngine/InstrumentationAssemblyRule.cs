@@ -14,13 +14,77 @@
 // limitations under the License.
 // </copyright>
 
+using System.Diagnostics;
+using System.Reflection;
+using System.Text.Json;
+using OpenTelemetry.AutoInstrumentation.Logging;
+
 namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
 
 internal class InstrumentationAssemblyRule : Rule
 {
+    private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
+
+    public InstrumentationAssemblyRule()
+    {
+        Name = "Instrumentation Assembly Validator";
+        Description = "Ensure that the version of the OpenTelemetry Instrumentation libraries is not older than the version used by Auto-Instrumentation.";
+    }
+
     internal override bool Evaluate()
     {
-        // TODO: implement checking logic
+        var result = true;
+
+        try
+        {
+            var ruleEngineFileLocation = Path.Combine(StartupHook.LoaderAssemblyLocation ?? string.Empty, "ruleEngine.json");
+            var ruleEngineContent = File.ReadAllText(ruleEngineFileLocation);
+            var ruleFileInfoList = JsonSerializer.Deserialize<List<RuleFileInfo>>(ruleEngineContent);
+            var entryAssembly = Assembly.GetEntryAssembly();
+            var referencedAssemblies = entryAssembly?.GetReferencedAssemblies();
+
+            if (referencedAssemblies == null)
+            {
+                Logger.Warning($"Rule Engine: Could not get referenced assembly (GetReferencedAssemblies()) from an application. Skipping rule evaluation.");
+                return result;
+            }
+
+            foreach (var referencedAssembly in referencedAssemblies)
+            {
+                var ruleFileInfo = ruleFileInfoList.FirstOrDefault(file => file.FileName == referencedAssembly.Name);
+                if (ruleFileInfo != null)
+                {
+                    var autoInstrumentationFileVersion = new Version(ruleFileInfo.FileVersion);
+
+                    var appInstrumentationAssembly = Assembly.Load(referencedAssembly);
+                    var appInstrumentationFileVersionInfo = FileVersionInfo.GetVersionInfo(appInstrumentationAssembly.Location);
+                    var appInstrumentationFileVersion = new Version(appInstrumentationFileVersionInfo.FileVersion);
+
+                    if (appInstrumentationFileVersion < autoInstrumentationFileVersion)
+                    {
+                        result = false;
+                        Logger.Error($"Rule Engine: Application has direct or indirect reference to older version of Instrumentation library {ruleFileInfo.FileName} - {ruleFileInfo.FileVersion}.");
+                    }
+                    else
+                    {
+                        Logger.Information($"Rule Engine: Application has reference to Instrumentation library {ruleFileInfo.FileName} and loaded successfully.");
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Exception in rule evaluation should not impact the result of the rule.
+            Logger.Warning($"Rule Engine:Couldn't evaluate OpenTelemetry Instrumentation Evaluation. Exception: {ex}");
+        }
+
         return true;
+    }
+
+    private class RuleFileInfo
+    {
+        public string FileName { get; set; } = string.Empty;
+
+        public string FileVersion { get; set; } = string.Empty;
     }
 }
