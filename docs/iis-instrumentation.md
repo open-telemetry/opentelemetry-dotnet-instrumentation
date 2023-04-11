@@ -26,9 +26,12 @@ Register-OpenTelemetryForIIS
 
 This step is necessary only for ASP.NET (.NET Framework).
 
+> **Note**
+> There are three distinct options.
+
 Add `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule`
-ASP.NET HTTP module to your application's `Web.config`.
-You can add it in the following places:
+by modifying and extending `web.config` (first two options)
+or `applicationHost.config` (third option).
 
 ```xml
   <system.web>
@@ -37,6 +40,11 @@ You can add it in the following places:
     </httpModules>
   </system.web>
 ```
+
+> **Warning**
+> After applying above changes you might experience following error as this configuration
+> requires IIS classic mode.
+> In order to fix it you can switch to classic mode or use other options. ![error](./images/iis-500-22-error.png).
 
 ```xml
   <system.webServer>
@@ -48,9 +56,9 @@ You can add it in the following places:
   </system.webServer>
 ```
 
-The ASP.NET HTTP module can be also set in `applicationHost.config`.
-Here is an example where you can add the module
-to set it for all ASP.NET application running in Integrated Pipeline Mode:
+> **Note** `applicationHost.config` is located in `%SystemDrive%\Windows\system32\inetsrv\config`.
+> Below is an example where you can add the module
+> to set it for all ASP.NET application running in Integrated Pipeline Mode:
 
 ```xml
   <location path="" overrideMode="Allow">
@@ -60,6 +68,20 @@ to set it for all ASP.NET application running in Integrated Pipeline Mode:
       </modules>
     </system.webServer>
   </location>
+```
+
+> **Note** After applying above changes you can check whether `opentelemetry modules`
+> are loaded by using `appcmd` command which can be found under `%SystemDrive%\Windows\system32\inetsrv`.
+> Following example shows invocation for `WebDemo\` application:
+
+```terminal
+  appcmd list modules /app.name:"WebDemo/"
+```
+
+and correct result:
+
+```terminal
+  MODULE "TelemetryHttpModule" ( type:OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule, preCondition:managedHandler )
 ```
 
 ## Configuration
