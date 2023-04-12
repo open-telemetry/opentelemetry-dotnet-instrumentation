@@ -19,6 +19,7 @@ using System.Reflection;
 using System.Runtime.Versioning;
 using OpenTelemetry.AutoInstrumentation;
 using OpenTelemetry.AutoInstrumentation.Logging;
+using OpenTelemetry.AutoInstrumentation.RulesEngine;
 
 /// <summary>
 /// Dotnet StartupHook
@@ -26,6 +27,9 @@ using OpenTelemetry.AutoInstrumentation.Logging;
 internal class StartupHook
 {
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
+
+    // This property must be initialized before any rule is evaluated since it may be used during rule evaluation.
+    internal static string? LoaderAssemblyLocation { get; set; }
 
     /// <summary>
     /// Load and initialize OpenTelemetry.AutoInstrumentation assembly to bring OpenTelemetry SDK
@@ -60,15 +64,20 @@ internal class StartupHook
 
         Logger.Information("Attempting initialization.");
 
-        string loaderAssemblyLocation = GetLoaderAssemblyLocation();
+        LoaderAssemblyLocation = GetLoaderAssemblyLocation();
 
         try
         {
-            ThrowIfReferenceIncorrectOpenTelemetryVersion(loaderAssemblyLocation);
+            var ruleEngine = new RuleEngine();
+            if (!ruleEngine.Validate())
+            {
+                Logger.Error("Rule Engine Failure: One or more rules failed validation. Auto-Instrumentation won't be loaded.");
+                return;
+            }
 
             // Creating an instance of OpenTelemetry.AutoInstrumentation.Loader.Startup
             // will initialize Instrumentation through its static constructor.
-            string loaderFilePath = Path.Combine(loaderAssemblyLocation, "OpenTelemetry.AutoInstrumentation.Loader.dll");
+            string loaderFilePath = Path.Combine(LoaderAssemblyLocation, "OpenTelemetry.AutoInstrumentation.Loader.dll");
             Assembly loaderAssembly = Assembly.LoadFrom(loaderFilePath);
             var loaderInstance = loaderAssembly.CreateInstance("OpenTelemetry.AutoInstrumentation.Loader.Loader");
             if (loaderInstance is null)
@@ -82,7 +91,7 @@ internal class StartupHook
         }
         catch (Exception ex)
         {
-            Logger.Error($"Error in StartupHook initialization: LoaderFolderLocation: {loaderAssemblyLocation}, Error: {ex}");
+            Logger.Error($"Error in StartupHook initialization: LoaderFolderLocation: {LoaderAssemblyLocation}, Error: {ex}");
             throw;
         }
     }
@@ -160,43 +169,6 @@ internal class StartupHook
         {
             Logger.Error($"Error getting environment variable {variableName}: {ex}");
             return null;
-        }
-    }
-
-    private static void ThrowIfReferenceIncorrectOpenTelemetryVersion(string loaderAssemblyLocation)
-    {
-        string? oTelPackageVersion = null;
-
-        try
-        {
-            // Look up for type with an assembly name, will load the library.
-            // OpenTelemetry assembly load happens only if app has reference to the package.
-            var openTelemetryType = Type.GetType("OpenTelemetry.Sdk, OpenTelemetry");
-            if (openTelemetryType != null)
-            {
-                var loadedOTelAssembly = Assembly.GetAssembly(openTelemetryType);
-                var loadedOTelFileVersionInfo = FileVersionInfo.GetVersionInfo(loadedOTelAssembly?.Location);
-                var loadedOTelFileVersion = new Version(loadedOTelFileVersionInfo.FileVersion);
-
-                var autoInstrumentationOTelLocation = Path.Combine(loaderAssemblyLocation, "OpenTelemetry.dll");
-                var autoInstrumentationOTelFileVersionInfo = FileVersionInfo.GetVersionInfo(autoInstrumentationOTelLocation);
-                var autoInstrumentationOTelFileVersion = new Version(autoInstrumentationOTelFileVersionInfo.FileVersion);
-
-                if (loadedOTelFileVersion < autoInstrumentationOTelFileVersion)
-                {
-                    oTelPackageVersion = loadedOTelFileVersionInfo.FileVersion;
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            // Exception in evaluation should not throw or crash the process.
-            Logger.Information($"Couldn't evaluate reference to OpenTelemetry Sdk in an app. Exception: {ex}");
-        }
-
-        if (oTelPackageVersion != null)
-        {
-            throw new NotSupportedException($"Application has direct or indirect reference to older version of OpenTelemetry package {oTelPackageVersion}.");
         }
     }
 }
