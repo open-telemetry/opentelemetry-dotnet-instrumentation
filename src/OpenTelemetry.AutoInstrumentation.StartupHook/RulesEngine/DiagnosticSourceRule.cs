@@ -45,7 +45,7 @@ internal class DiagnosticSourceRule : Rule
         {
             // NuGet package version is not available at runtime. AssemblyVersion is available but it only changes in major version updates.
             // Thus using AssemblyFileVersion to compare whether the loaded version is older than that of auto instrumentation.
-            var loadedDiagnosticSourceFileVersion = GetVersionFromApp();
+            var loadedDiagnosticSourceFileVersion = GetResolvedVersion();
             if (loadedDiagnosticSourceFileVersion != null)
             {
                 var autoInstrumentationDiagnosticSourceFileVersion = GetVersionFromAutoInstrumentation();
@@ -58,7 +58,7 @@ internal class DiagnosticSourceRule : Rule
         catch (Exception ex)
         {
             // Exception in evaluation should not throw or crash the process.
-            logger.Warning($"Rule Engine: Couldn't evaluate reference to System.Diagnostics.DiagnosticSource in an app. Exception: {ex}");
+            logger.Warning($"Rule Engine: Couldn't evaluate System.Diagnostics.DiagnosticSource version. Exception: {ex}");
             return false;
         }
 
@@ -72,10 +72,9 @@ internal class DiagnosticSourceRule : Rule
         return true;
     }
 
-    protected virtual Version? GetVersionFromApp()
+    protected virtual Version? GetResolvedVersion()
     {
         // Look up for type with an assembly name, will load the library.
-        // The loaded version depends on the app's reference to the package.
         var diagnosticSourceType = Type.GetType("System.Diagnostics.DiagnosticSource, System.Diagnostics.DiagnosticSource");
         if (diagnosticSourceType != null)
         {
@@ -91,11 +90,15 @@ internal class DiagnosticSourceRule : Rule
         return null;
     }
 
-    protected virtual Version? GetVersionFromAutoInstrumentation()
+    protected virtual Version GetVersionFromAutoInstrumentation()
     {
         var autoInstrumentationDiagnosticSourceLocation = Path.Combine(StartupHook.LoaderAssemblyLocation ?? string.Empty, "System.Diagnostics.DiagnosticSource.dll");
-        var autoInstrumentationDiagnosticSourceFileVersionInfo = FileVersionInfo.GetVersionInfo(autoInstrumentationDiagnosticSourceLocation);
-        var autoInstrumentationDiagnosticSourceFileVersion = new Version(autoInstrumentationDiagnosticSourceFileVersionInfo.FileVersion);
+        var fileVersionInfo = FileVersionInfo.GetVersionInfo(autoInstrumentationDiagnosticSourceLocation);
+        var autoInstrumentationDiagnosticSourceFileVersion = new Version(
+            fileVersionInfo.FileMajorPart,
+            fileVersionInfo.FileMinorPart,
+            fileVersionInfo.FileBuildPart,
+            fileVersionInfo.FilePrivatePart);
         return autoInstrumentationDiagnosticSourceFileVersion;
     }
 }

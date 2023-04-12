@@ -29,8 +29,6 @@ public class DiagnosticSourceRuleTests
                 new object[] { "8.0.0.0", "7.0.0.0", "Rule Engine: DiagnosticSourceRule evaluation success.", true },
                 new object[] { "7.0.0.0", "7.0.0.0", "Rule Engine: DiagnosticSourceRule evaluation success.", true },
                 new object[] { null, "7.0.0.0", "Rule Engine: DiagnosticSourceRule evaluation success.", true },
-                new object[] { "7.0.0.0", null, "Rule Engine: DiagnosticSourceRule evaluation success.", true },
-                new object[] { null, null, "Rule Engine: DiagnosticSourceRule evaluation success.", true },
        };
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
@@ -57,7 +55,7 @@ internal class TestableDiagnosticSourceRule : DiagnosticSourceRule
         this.autoInstrumentationVersion = autoInstrumentationVersion;
     }
 
-    protected override Version? GetVersionFromApp()
+    protected override Version? GetResolvedVersion()
     {
         if (appVersion == null)
         {
@@ -67,13 +65,8 @@ internal class TestableDiagnosticSourceRule : DiagnosticSourceRule
         return new Version(appVersion);
     }
 
-    protected override Version? GetVersionFromAutoInstrumentation()
+    protected override Version GetVersionFromAutoInstrumentation()
     {
-        if (autoInstrumentationVersion == null)
-        {
-            return null;
-        }
-
         return new Version(autoInstrumentationVersion);
     }
 }
