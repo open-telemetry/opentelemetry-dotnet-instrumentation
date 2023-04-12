@@ -245,13 +245,13 @@ function Install-OpenTelemetryCore() {
         # OpenTelemetry service locator
         [System.Environment]::SetEnvironmentVariable($ServiceLocatorVariable, $installDir, [System.EnvironmentVariableTarget]::Machine)
 
-        # Register .NET Framweworks dlls in GAC
+        # Register .NET Framework dlls in GAC
         [System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") | Out-Null
         $publish = New-Object System.EnterpriseServices.Internal.Publish 
         $dlls = Get-ChildItem -Path $installDir\netfx\ -Filter *.dll -File
         for ($i = 0; $i -lt $dlls.Count; $i++) {
             $percentageComplete = $i / $dlls.Count * 100
-            Write-Progress -Activity "Registering .NET Framweworks dlls in GAC" `
+            Write-Progress -Activity "Registering .NET Framework dlls in GAC" `
                 -Status "Module $($i+1) out of $($dlls.Count). Installing $($dlls[$i].Name):" `
                 -PercentComplete $percentageComplete
 
@@ -261,7 +261,7 @@ function Install-OpenTelemetryCore() {
 
             $publish.GacInstall($dlls[$i].FullName)
         }
-        Write-Progress -Activity "Registering .NET Framweworks dlls in GAC" -Status "Ready" -Completed
+        Write-Progress -Activity "Registering .NET Framework dlls in GAC" -Status "Ready" -Completed
     } 
     catch {
         $message = $_
@@ -292,7 +292,7 @@ function Uninstall-OpenTelemetryCore() {
     $dlls = Get-ChildItem -Path $installDir\netfx\ -Filter *.dll -File
     for ($i = 0; $i -lt $dlls.Count; $i++) {
         $percentageComplete = $i / $dlls.Count * 100
-        Write-Progress -Activity "Unregistering .NET Framweworks dlls from GAC" `
+        Write-Progress -Activity "Unregistering .NET Framework dlls from GAC" `
             -Status "Module $($i+1) out of $($dlls.Count). Uninstalling $($dlls[$i].Name):" `
             -PercentComplete $percentageComplete
 
@@ -302,7 +302,7 @@ function Uninstall-OpenTelemetryCore() {
 
         $publish.GacRemove($dlls[$i].FullName)
     }
-    Write-Progress -Activity "Unregistering .NET Framweworks dlls from GAC" -Status "Ready" -Completed
+    Write-Progress -Activity "Unregistering .NET Framework dlls from GAC" -Status "Ready" -Completed
 
     Remove-Item -LiteralPath $installDir -Force -Recurse
 
