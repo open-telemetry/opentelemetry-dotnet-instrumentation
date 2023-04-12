@@ -35,34 +35,18 @@ internal class StartupHook
     /// </summary>
     public static void Initialize()
     {
-        var minSupportedFramework = new FrameworkName(".NETCoreApp,Version=v6.0");
-        var appTargetFramework = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
-        // This is the best way to identify application's target framework.
-        // If entry assembly framework is null, StartupHook should continue its execution.
-        if (appTargetFramework != null)
-        {
-            var appTargetFrameworkName = new FrameworkName(appTargetFramework);
-            var appTargetFrameworkVersion = appTargetFrameworkName.Version;
-
-            if (appTargetFrameworkVersion < minSupportedFramework.Version)
-            {
-                Logger.Information($"Error in StartupHook initialization: {appTargetFramework} is not supported");
-                return;
-            }
-        }
-
         try
         {
             LoaderAssemblyLocation = GetLoaderAssemblyLocation();
 
             var ruleEngine = new RuleEngine();
-            if (!ruleEngine.Validate())
+            if (!ruleEngine.ValidateRules())
             {
                 Logger.Error("Rule Engine Failure: One or more rules failed validation. Auto-Instrumentation won't be loaded.");
                 return;
             }
 
-            Logger.Information("Attempting initialization.");
+            Logger.Information("Initialization.");
 
             // Creating an instance of OpenTelemetry.AutoInstrumentation.Loader.Startup
             // will initialize Instrumentation through its static constructor.
