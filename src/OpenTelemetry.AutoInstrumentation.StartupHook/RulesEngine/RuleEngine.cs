@@ -24,6 +24,7 @@ internal class RuleEngine
 
     private readonly List<Rule> _rules = new()
     {
+        new ApplicationInExcludeListRule(),
         new OpenTelemetrySdkMinimumVersionRule(),
         new DiagnosticSourceRule(),
         new InstrumentationAssemblyRule()
