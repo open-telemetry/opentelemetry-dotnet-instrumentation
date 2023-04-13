@@ -70,6 +70,7 @@ public class ModuleTests : TestHelper
     public async Task Minimal()
     {
         SetEnvironmentVariable(ConfigurationKeys.InstrumentationEnabled, "false");
+        SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, "false");
         SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, Constants.ConfigurationValues.None);
         SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, Constants.ConfigurationValues.None);
         SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, Constants.ConfigurationValues.None);

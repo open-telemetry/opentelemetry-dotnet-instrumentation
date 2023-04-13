@@ -48,7 +48,7 @@ internal class LogSettings : Settings
     /// <summary>
     /// Gets the list of enabled instrumentations.
     /// </summary>
-    public IList<LogInstrumentation> EnabledInstrumentations { get; private set; } = new List<LogInstrumentation>();
+    public IReadOnlyList<LogInstrumentation> EnabledInstrumentations { get; private set; } = new List<LogInstrumentation>();
 
     protected override void OnLoad(Configuration configuration)
     {
