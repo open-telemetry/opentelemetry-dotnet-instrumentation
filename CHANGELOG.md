@@ -22,7 +22,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   used to enable or disable the rule engine.
 - Support for Container resource detector.
 - Support for enabling well known resource detectors
-   by using the environment variables
+  by using the environment variables
   - `OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED`
   - `OTEL_DOTNET_AUTO_{0}_RESOURCE_DETECTOR_ENABLED`.
 
