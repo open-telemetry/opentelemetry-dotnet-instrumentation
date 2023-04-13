@@ -94,6 +94,7 @@ partial class Build : NukeBuild
         .DependsOn(GenerateNetFxTransientDependencies)
         .DependsOn(CompileManagedSrc)
         .DependsOn(PublishManagedProfiler)
+        .DependsOn(PublishRuleEngineJson)
         .DependsOn(GenerateNetFxAssemblyRedirectionSource)
         .DependsOn(CompileNativeSrc)
         .DependsOn(PublishNativeProfiler)

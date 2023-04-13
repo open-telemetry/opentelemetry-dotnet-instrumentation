@@ -45,6 +45,7 @@
   /net/System.Security.Permissions.dll,
   /net/System.ServiceModel.Primitives.dll,
   /net/System.ServiceModel.dll,
+  /net/ruleEngine.json,
   /store/x64/net6.0/dnsclient/1.4.0/lib/netstandard2.1/DnsClient.dll,
   /store/x64/net6.0/microsoft.extensions.configuration.abstractions/7.0.0/lib/net7.0/Microsoft.Extensions.Configuration.Abstractions.dll,
   /store/x64/net6.0/microsoft.extensions.configuration.binder/7.0.0/lib/net7.0/Microsoft.Extensions.Configuration.Binder.dll,

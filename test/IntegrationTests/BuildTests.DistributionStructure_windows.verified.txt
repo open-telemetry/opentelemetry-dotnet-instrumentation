@@ -44,6 +44,7 @@
   \net\System.Security.Permissions.dll,
   \net\System.ServiceModel.Primitives.dll,
   \net\System.ServiceModel.dll,
+  \net\ruleEngine.json,
   \netfx\Google.Protobuf.dll,
   \netfx\Grpc.Core.Api.dll,
   \netfx\Grpc.Core.dll,
