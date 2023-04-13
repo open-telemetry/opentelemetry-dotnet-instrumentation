@@ -14,10 +14,8 @@
 // limitations under the License.
 // </copyright>
 
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Versioning;
-using OpenTelemetry.AutoInstrumentation;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.RulesEngine;
 
@@ -37,43 +35,18 @@ internal class StartupHook
     /// </summary>
     public static void Initialize()
     {
-        var minSupportedFramework = new FrameworkName(".NETCoreApp,Version=v6.0");
-        var appTargetFramework = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
-        // This is the best way to identify application's target framework.
-        // If entry assembly framework is null, StartupHook should continue its execution.
-        if (appTargetFramework != null)
-        {
-            var appTargetFrameworkName = new FrameworkName(appTargetFramework);
-            var appTargetFrameworkVersion = appTargetFrameworkName.Version;
-
-            if (appTargetFrameworkVersion < minSupportedFramework.Version)
-            {
-                Logger.Information($"Error in StartupHook initialization: {appTargetFramework} is not supported");
-                return;
-            }
-        }
-
-        var applicationName = GetApplicationName();
-        Logger.Information($"StartupHook loaded for application with name {applicationName}.");
-
-        if (IsApplicationInExcludeList(applicationName))
-        {
-            Logger.Information("Application is in the exclusion list. Skipping initialization.");
-            return;
-        }
-
-        Logger.Information("Attempting initialization.");
-
-        LoaderAssemblyLocation = GetLoaderAssemblyLocation();
-
         try
         {
+            LoaderAssemblyLocation = GetLoaderAssemblyLocation();
+
             var ruleEngine = new RuleEngine();
-            if (!ruleEngine.Validate())
+            if (!ruleEngine.ValidateRules())
             {
                 Logger.Error("Rule Engine Failure: One or more rules failed validation. Auto-Instrumentation won't be loaded.");
                 return;
             }
+
+            Logger.Information("Initialization.");
 
             // Creating an instance of OpenTelemetry.AutoInstrumentation.Loader.Startup
             // will initialize Instrumentation through its static constructor.
@@ -116,59 +89,6 @@ internal class StartupHook
         {
             Logger.Error($"Error getting loader directory location: {ex}");
             throw;
-        }
-    }
-
-    private static string GetApplicationName()
-    {
-        try
-        {
-            return AppDomain.CurrentDomain.FriendlyName;
-        }
-        catch (Exception ex)
-        {
-            Logger.Error($"Error getting AppDomain.CurrentDomain.FriendlyName: {ex}");
-            return string.Empty;
-        }
-    }
-
-    private static bool IsApplicationInExcludeList(string applicationName)
-    {
-        return GetExcludedApplicationNames().Contains(applicationName);
-    }
-
-    private static List<string> GetExcludedApplicationNames()
-    {
-        var excludedProcesses = new List<string>();
-
-        var environmentValue = GetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES");
-
-        if (environmentValue == null)
-        {
-            return excludedProcesses;
-        }
-
-        foreach (var processName in environmentValue.Split(Constants.ConfigurationValues.Separator))
-        {
-            if (!string.IsNullOrWhiteSpace(processName))
-            {
-                excludedProcesses.Add(processName.Trim());
-            }
-        }
-
-        return excludedProcesses;
-    }
-
-    private static string? GetEnvironmentVariable(string variableName)
-    {
-        try
-        {
-            return Environment.GetEnvironmentVariable(variableName);
-        }
-        catch (Exception ex)
-        {
-            Logger.Error($"Error getting environment variable {variableName}: {ex}");
-            return null;
         }
     }
 }

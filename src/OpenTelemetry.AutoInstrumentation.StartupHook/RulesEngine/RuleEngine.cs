@@ -22,7 +22,13 @@ internal class RuleEngine
 {
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
 
-    private readonly List<Rule> _rules = new()
+    private readonly List<Rule> _mandatoryRules = new()
+    {
+        new ApplicationInExcludeListRule(),
+        new MinSupportedFrameworkRule()
+    };
+
+    private readonly List<Rule> _otherRules = new()
     {
         new OpenTelemetrySdkMinimumVersionRule(),
         new DiagnosticSourceRule(),
@@ -36,12 +42,21 @@ internal class RuleEngine
     // This constructor is used for test purpose.
     internal RuleEngine(List<Rule> rules)
     {
-        _rules = rules;
+        _otherRules = rules;
     }
 
-    internal bool Validate()
+    internal bool ValidateRules()
     {
         var result = true;
+
+        // Single rule failure will stop the execution.
+        foreach (var rule in _mandatoryRules)
+        {
+            if (!EvaluateRule(rule))
+            {
+                return false;
+            }
+        }
 
         if (bool.TryParse(Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED"), out var shouldTrack) && !shouldTrack)
         {
@@ -49,23 +64,33 @@ internal class RuleEngine
             return result;
         }
 
-        foreach (var rule in _rules)
+        // All the rules are validated here.
+        foreach (var rule in _otherRules)
         {
-            try
+            if (!EvaluateRule(rule))
             {
-                if (!rule.Evaluate())
-                {
-                    Logger.Error($"Rule '{rule.Name}' failed: {rule.Description}");
-                    result = false;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Error($"Error evaluating rule '{rule.Name}': {ex.Message}");
                 result = false;
             }
         }
 
         return result;
+    }
+
+    private static bool EvaluateRule(Rule rule)
+    {
+        try
+        {
+            if (!rule.Evaluate())
+            {
+                Logger.Error($"Rule '{rule.Name}' failed: {rule.Description}");
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Warning($"Error evaluating rule '{rule.Name}': {ex.Message}");
+        }
+
+        return true;
     }
 }

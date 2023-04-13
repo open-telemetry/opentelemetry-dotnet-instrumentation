@@ -6,5 +6,6 @@
   OpenTelemetry.AutoInstrumentation.Loader,
   OpenTelemetry.Exporter.OpenTelemetryProtocol,
   OpenTelemetry.Instrumentation.Process,
-  OpenTelemetry.Instrumentation.Runtime
+  OpenTelemetry.Instrumentation.Runtime,
+  OpenTelemetry.ResourceDetectors.Container
 ]

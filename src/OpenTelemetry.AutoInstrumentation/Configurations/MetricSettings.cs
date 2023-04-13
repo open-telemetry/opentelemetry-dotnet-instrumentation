@@ -43,7 +43,7 @@ internal class MetricSettings : Settings
     /// <summary>
     /// Gets the list of enabled meters.
     /// </summary>
-    public IList<MetricInstrumentation> EnabledInstrumentations { get; private set; } = new List<MetricInstrumentation>();
+    public IReadOnlyList<MetricInstrumentation> EnabledInstrumentations { get; private set; } = new List<MetricInstrumentation>();
 
     /// <summary>
     /// Gets the list of meters to be added to the MeterProvider at the startup.
