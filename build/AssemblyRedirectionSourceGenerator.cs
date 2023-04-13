@@ -67,7 +67,8 @@ public static class AssemblyRedirectionSourceGenerator
 
     private static string GenerateEntries(SortedDictionary<string, AssemblyNameDefinition> assemblies)
     {
-        var sb = new StringBuilder(assemblies.Count * 77 /* Longest line */);
+        var longLineLength = 80;
+        var sb = new StringBuilder(assemblies.Count * longLineLength);
 
         foreach (var kvp in assemblies)
         {
