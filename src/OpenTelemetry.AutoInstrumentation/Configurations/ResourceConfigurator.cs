@@ -27,14 +27,18 @@ internal static class ResourceConfigurator
     public static ResourceBuilder CreateResourceBuilder(IReadOnlyList<ResourceDetector> enabledResourceDetectors)
     {
         var resourceBuilder = ResourceBuilder
-            .CreateEmpty(); // Don't use CreateDefault because it puts service name unknown by default.
+            .CreateEmpty() // Don't use CreateDefault because it puts service name unknown by default.
+            .AddEnvironmentVariableDetector()
+            .AddTelemetrySdk()
+            .AddAttributes(new KeyValuePair<string, object>[]
+            {
+                new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version)
+            });
 
         foreach (var enabledResourceDetector in enabledResourceDetectors)
         {
             resourceBuilder = enabledResourceDetector switch
             {
-                ResourceDetector.EnvironmentalVariables => resourceBuilder.AddEnvironmentVariableDetector(),
-                ResourceDetector.TelemetrySdk => resourceBuilder.AddTelemetrySdk().AddAttributes(new KeyValuePair<string, object>[] { new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version) }),
                 ResourceDetector.Container => Wrappers.AddContainerResourceDetector(resourceBuilder),
                 _ => resourceBuilder,
             };

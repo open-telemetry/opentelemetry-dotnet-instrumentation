@@ -301,8 +301,6 @@ public class SettingsTests : IDisposable
     }
 
     [Theory]
-    [InlineData("ENVIRONMENTALVARIABLES", ResourceDetector.EnvironmentalVariables)]
-    [InlineData("TELEMETRYSDK", ResourceDetector.TelemetrySdk)]
     [InlineData("CONTAINER", ResourceDetector.Container)]
     internal void GeneralSettings_Instrumentations_SupportedValues(string resourceDetector, ResourceDetector expectedResourceDetector)
     {
@@ -347,9 +345,9 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, null);
 
         Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, null);
-        foreach (var re in Enum.GetValues(typeof(ResourceDetector)).Cast<ResourceDetector>())
+        foreach (var resourceDetector in Enum.GetValues(typeof(ResourceDetector)).Cast<ResourceDetector>())
         {
-            Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.EnabledResourceDetectorTemplate, re.ToString().ToUpperInvariant()), null);
+            Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.EnabledResourceDetectorTemplate, resourceDetector.ToString().ToUpperInvariant()), null);
         }
 
         Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, null);

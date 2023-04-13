@@ -22,17 +22,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 internal enum ResourceDetector
 {
     /// <summary>
-    /// Environmental variables resource detector.
-    /// </summary>
-    EnvironmentalVariables = 0,
-
-    /// <summary>
-    /// TelemetrySdk resource detector.
-    /// </summary>
-    TelemetrySdk = 1,
-
-    /// <summary>
     /// Container resource detector.
     /// </summary>
-    Container = 2
+    Container = 0
 }
