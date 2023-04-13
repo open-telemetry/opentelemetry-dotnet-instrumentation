@@ -24,7 +24,7 @@ jobs:
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/checkout@v3.5.0
+      - uses: actions/checkout@v3.5.2
       - uses: actions/setup-dotnet@v3.0.3
         with:
           dotnet-version: | 
@@ -102,7 +102,7 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 60
     steps:
-    - uses: actions/checkout@v3.5.0
+    - uses: actions/checkout@v3.5.2
     - name: Build in Docker container
       run: |
         set -e
@@ -134,7 +134,7 @@ jobs:
 
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v3.5.0
+      - uses: actions/checkout@v3.5.2
 
       - name: Download Windows Artifacts from build job
         uses: actions/download-artifact@v3.0.2
@@ -182,7 +182,7 @@ jobs:
           - machine: macos-11
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/checkout@v3.5.0
+      - uses: actions/checkout@v3.5.2
       - uses: actions/setup-dotnet@v3.0.3
         with:
           dotnet-version: | 
