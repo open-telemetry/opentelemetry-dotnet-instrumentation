@@ -80,9 +80,9 @@ for more details.
 
 Supported resource detectors:
 
-| ID          | Description        | Documentation                                                                                                                                                                 | Status                                                                                                                            |
-|-------------|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `CONTAINER` | Container detector | [Container resource detector documentation](ResourceDetectors.Container-1.0.0-beta.3) | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
+| ID          | Description        | Documentation                                                                                                                                                                                                     | Status                                                                                                                            |
+|-------------|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `CONTAINER` | Container detector | [Container resource detector documentation](https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/ResourceDetectors.Container-1.0.0-beta.3/src/OpenTelemetry.ResourceDetectors.Container/README.md) | [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md) |
 
 ## Instrumentations
 
