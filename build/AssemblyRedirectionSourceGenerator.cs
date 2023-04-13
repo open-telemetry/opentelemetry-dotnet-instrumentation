@@ -37,6 +37,7 @@ public static class AssemblyRedirectionSourceGenerator
 
     private static string GenerateSourceContents(SortedDictionary<string, AssemblyNameDefinition> assemblies)
     {
+        #pragma warning disable format
         return
         $$"""
         /*
@@ -61,6 +62,7 @@ public static class AssemblyRedirectionSourceGenerator
         #endif
 
         """;
+        #pragma warning restore format
     }
 
     private static string GenerateEntries(SortedDictionary<string, AssemblyNameDefinition> assemblies)
@@ -77,6 +79,6 @@ public static class AssemblyRedirectionSourceGenerator
             .AsSpan() // Optimisation for following string manipulations
             .Trim() // Remove whitespaces
             .TrimEnd(',') // Remove trailing comma
-            .ToString(); 
+            .ToString();
     }
 }
