@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+using System.Runtime.CompilerServices;
+using OpenTelemetry.ResourceDetectors.Container;
 using OpenTelemetry.Resources;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
@@ -22,13 +24,25 @@ internal static class ResourceConfigurator
 {
     internal const string ServiceNameAttribute = "service.name";
 
-    public static ResourceBuilder CreateResourceBuilder()
+    public static ResourceBuilder CreateResourceBuilder(IReadOnlyList<ResourceDetector> enabledResourceDetectors)
     {
         var resourceBuilder = ResourceBuilder
             .CreateEmpty() // Don't use CreateDefault because it puts service name unknown by default.
             .AddEnvironmentVariableDetector()
             .AddTelemetrySdk()
-            .AddAttributes(new KeyValuePair<string, object>[] { new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version) });
+            .AddAttributes(new KeyValuePair<string, object>[]
+            {
+                new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version)
+            });
+
+        foreach (var enabledResourceDetector in enabledResourceDetectors)
+        {
+            resourceBuilder = enabledResourceDetector switch
+            {
+                ResourceDetector.Container => Wrappers.AddContainerResourceDetector(resourceBuilder),
+                _ => resourceBuilder,
+            };
+        }
 
         var pluginManager = Instrumentation.PluginManager;
         if (pluginManager != null)
@@ -44,5 +58,14 @@ internal static class ResourceConfigurator
         }
 
         return resourceBuilder;
+    }
+
+    private static class Wrappers
+    {
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static ResourceBuilder AddContainerResourceDetector(ResourceBuilder resourceBuilder)
+        {
+            return resourceBuilder.AddDetector(new ContainerResourceDetector());
+        }
     }
 }

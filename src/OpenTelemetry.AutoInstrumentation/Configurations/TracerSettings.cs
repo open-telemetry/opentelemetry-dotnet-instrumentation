@@ -48,7 +48,7 @@ internal class TracerSettings : Settings
     /// <summary>
     /// Gets the list of enabled instrumentations.
     /// </summary>
-    public IList<TracerInstrumentation> EnabledInstrumentations { get; private set; } = new List<TracerInstrumentation>();
+    public IReadOnlyList<TracerInstrumentation> EnabledInstrumentations { get; private set; } = new List<TracerInstrumentation>();
 
     /// <summary>
     /// Gets the list of activity configurations to be added to the tracer at the startup.

@@ -20,6 +20,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   ensuring back off instead of crashing, improving overall stability.
 - The environment variable `OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED` could be
   used to enable or disable the rule engine.
+- Support for Container resource detector.
+- Support for enabling well known resource detectors
+  by using the environment variables
+  - `OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED`
+  - `OTEL_DOTNET_AUTO_{0}_RESOURCE_DETECTOR_ENABLED`.
 
 ### Changed
 

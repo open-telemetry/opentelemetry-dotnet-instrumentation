@@ -7,5 +7,6 @@
   OpenTelemetry.AutoInstrumentation.StartupHook,
   OpenTelemetry.Exporter.OpenTelemetryProtocol,
   OpenTelemetry.Instrumentation.Process,
-  OpenTelemetry.Instrumentation.Runtime
+  OpenTelemetry.Instrumentation.Runtime,
+  OpenTelemetry.ResourceDetectors.Container
 ]

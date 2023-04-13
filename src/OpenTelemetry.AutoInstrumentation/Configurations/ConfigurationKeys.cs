@@ -61,6 +61,16 @@ internal static class ConfigurationKeys
     public const string InstrumentationEnabled = "OTEL_DOTNET_AUTO_INSTRUMENTATION_ENABLED";
 
     /// <summary>
+    /// Configuration key for enabling all resource detectors.
+    /// </summary>
+    public const string ResourceDetectorEnabled = "OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED";
+
+    /// <summary>
+    /// Configuration key template for enabling resource detectors.
+    /// </summary>
+    public const string EnabledResourceDetectorTemplate = "OTEL_DOTNET_AUTO_{0}_RESOURCE_DETECTOR_ENABLED";
+
+    /// <summary>
     /// Configuration keys for traces.
     /// </summary>
     public static class Traces

@@ -21,7 +21,12 @@ internal class GeneralSettings : Settings
     /// <summary>
     /// Gets the list of plugins represented by <see cref="Type.AssemblyQualifiedName"/>.
     /// </summary>
-    public IList<string> Plugins { get; private set; } = new List<string>();
+    public IList<string> Plugins { get; } = new List<string>();
+
+    /// <summary>
+    /// Gets the list of enabled resource detectors.
+    /// </summary>
+    public IReadOnlyList<ResourceDetector> EnabledResourceDetectors { get; private set; } = new List<ResourceDetector>();
 
     /// <summary>
     /// Gets a value indicating whether the <see cref="AppDomain.UnhandledException"/> event should trigger
@@ -45,6 +50,12 @@ internal class GeneralSettings : Settings
                 Plugins.Add(pluginAssemblyQualifiedName);
             }
         }
+
+        var resourceDetectorsEnabledByDefault = configuration.GetBool(ConfigurationKeys.ResourceDetectorEnabled) ?? true;
+
+        EnabledResourceDetectors = configuration.ParseEnabledEnumList<ResourceDetector>(
+            enabledByDefault: resourceDetectorsEnabledByDefault,
+            enabledConfigurationTemplate: ConfigurationKeys.EnabledResourceDetectorTemplate);
 
         FlushOnUnhandledException = configuration.GetBool(ConfigurationKeys.FlushOnUnhandledException) ?? false;
         SetupSdk = configuration.GetBool(ConfigurationKeys.SetupSdk) ?? true;
