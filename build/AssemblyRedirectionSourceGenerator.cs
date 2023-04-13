@@ -70,7 +70,7 @@ public static class AssemblyRedirectionSourceGenerator
         foreach (var kvp in assemblies)
         {
             var v = kvp.Value.Version!;
-            sb.AppendLine($"\t\t{{ L\"{kvp.Key}\", {{{v.Major}, {v.Minor}, {v.Build}, {v.Revision}}} }},");
+            sb.AppendLine($"        {{ L\"{kvp.Key}\", {{{v.Major}, {v.Minor}, {v.Build}, {v.Revision}}} }},");
         }
 
         return sb.ToString()
