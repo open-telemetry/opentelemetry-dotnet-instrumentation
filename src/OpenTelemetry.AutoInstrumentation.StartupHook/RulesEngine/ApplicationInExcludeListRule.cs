@@ -31,15 +31,14 @@ internal class ApplicationInExcludeListRule : Rule
     internal override bool Evaluate()
     {
         var applicationName = GetApplicationName();
-        Logger.Information($"Rule Engine: StartupHook loaded for application with name {applicationName}.");
 
         if (IsApplicationInExcludeList(applicationName))
         {
-            Logger.Information("Rule Engine: Application is in the exclusion list. Skipping initialization.");
+            Logger.Information($"Rule Engine: {applicationName} is in the exclusion list. Skipping initialization.");
             return false;
         }
 
-        Logger.Information("Rule Engine: ApplicationInExcludeListRule evaluation success.");
+        Logger.Debug($"Rule Engine: {applicationName} is not in the exclusion list. ApplicationInExcludeListRule evaluation success.");
         return true;
     }
 

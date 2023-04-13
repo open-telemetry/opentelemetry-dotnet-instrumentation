@@ -24,8 +24,8 @@ internal class RuleEngine
 
     private readonly List<Rule> _mandatoryRules = new()
     {
-        new MinSupportedFrameworkRule(),
-        new ApplicationInExcludeListRule()
+        new ApplicationInExcludeListRule(),
+        new MinSupportedFrameworkRule()
     };
 
     private readonly List<Rule> _otherRules = new()
