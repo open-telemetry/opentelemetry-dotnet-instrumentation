@@ -44,10 +44,7 @@ public class ServiceNameConfiguratorTests
         {
             Environment.SetEnvironmentVariable(OtelServiceVariable, setServiceName);
 
-            var resourceBuilder = ResourceConfigurator.CreateResourceBuilder(new List<ResourceDetector>
-            {
-                ResourceDetector.EnvironmentalVariables
-            });
+            var resourceBuilder = ResourceConfigurator.CreateResourceBuilder(Array.Empty<ResourceDetector>());
             var resource = resourceBuilder.Build();
 
             var serviceName = resource.Attributes.FirstOrDefault(a => a.Key == ServiceName).Value as string;
