@@ -31,7 +31,7 @@
   <!-- Versions from CommonExcludedAssets.props -->
   <ItemGroup>
     <!-- Microsoft.Bcl.AsyncInterfaces is also referenced by the .NET Framework4.6.2. In this case is not excluded -->
-    <PackageVersion Include="DnsClient" Version="1.4.0" />
+    <PackageVersion Include="DnsClient" Version="1.7.0" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="4.7.0" />
     <PackageVersion Include="MongoDB.Bson" Version="2.13.3" />
