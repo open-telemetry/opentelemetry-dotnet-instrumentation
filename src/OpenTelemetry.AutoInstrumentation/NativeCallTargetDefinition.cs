@@ -40,9 +40,7 @@ namespace OpenTelemetry.AutoInstrumentation;
  //                     ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
  //                       ██████████████████████████████████████████
  //
- // If you happen to change the layout of this structure,
- // this will lead to an AccessViolationException in netCore when using a more recent version of the nuget.
- // If you need to modify the definition, create a new interface NativeCallTargetDefinition# that will be consumed by the native layer
+ // This struct is marshalled for use in the native layer, so this struct must be kept in sync with the _CallTargetDefinition native struct
 
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
 internal struct NativeCallTargetDefinition
