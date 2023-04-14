@@ -6,20 +6,15 @@
 #ifndef OTEL_CLR_PROFILER_INTEGRATION_LOADER_H_
 #define OTEL_CLR_PROFILER_INTEGRATION_LOADER_H_
 
-#include <fstream>
-#include <locale>
-#include <nlohmann/json.hpp>
 #include <string>
-#include <unordered_set>
 #include <vector>
 
-#include "integration.h"
-#include "macros.h"
+#include "string.h"
+// #include "integration.h"
+// #include "macros.h"
 
 namespace trace
 {
-
-using json = nlohmann::json;
 
 class LoadIntegrationConfiguration {
 public:
@@ -44,38 +39,6 @@ public:
   const bool logs_enabled;
   const std::vector<WSTRING> enabledLogIntegrationNames;
 };
-
-// LoadIntegrationsFromEnvironment loads integrations from any files specified
-// in the OTEL_DOTNET_AUTO_INTEGRATIONS_FILE environment variable
-void LoadIntegrationsFromEnvironment(
-    std::vector<IntegrationMethod>& integrationMethods,
-    const LoadIntegrationConfiguration& configuration);
-
-// LoadIntegrationsFromFile loads the integrations from a file
-void LoadIntegrationsFromFile(
-    const WSTRING& file_path,
-    std::vector<IntegrationMethod>& integrationMethods,
-    const LoadIntegrationConfiguration& configuration);
-
-// LoadIntegrationsFromFile loads the integrations from a stream
-void LoadIntegrationsFromStream(
-    std::istream& stream,
-    std::vector<IntegrationMethod>& integrationMethods,
-    const LoadIntegrationConfiguration& configuration);
-
-namespace
-{
-    void IntegrationFromJson(const json::value_type& src,
-                         std::unordered_set<IntegrationMethod>& integrationMethods,
-                         const LoadIntegrationConfiguration& configuration);
-
-    void MethodReplacementFromJson(const json::value_type& src, const WSTRING& integrationName,
-                                   std::unordered_set<IntegrationMethod>& integrationMethods);
-
-    MethodReference MethodReferenceFromJson(const json::value_type& src, const bool is_target_method,
-                                            const bool is_wrapper_method);
-
-} // namespace
 
 } // namespace trace
 

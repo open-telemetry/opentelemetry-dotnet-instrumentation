@@ -173,7 +173,6 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         cor_profiler.cpp
         il_rewriter_wrapper.cpp
         il_rewriter.cpp
-        integration_loader.cpp
         integration.cpp
         metadata_builder.cpp
         miniutf.cpp
@@ -181,6 +180,10 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         util.cpp
         calltarget_tokens.cpp
         rejit_handler.cpp
+        rejit_preprocessor.cpp
+        rejit_work_offloader.cpp
+        environment_variables_util.cpp
+        method_rewriter.cpp
         lib/coreclr/src/pal/prebuilt/idl/corprof_i.cpp
         # Source dependencies retrievied via additional commands using git
         ${OUTPUT_DEPS_DIR}/fmt/libfmt.a

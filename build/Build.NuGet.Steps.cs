@@ -15,7 +15,6 @@ partial class Build
         .Description(
             "Builds the NuGet packages of the project assuming that any necessary build artifacts were already downloaded.")
         .DependsOn(BuildManagedSrcNuGetPackages)
-        .DependsOn(CopyIntegrationsJsonForNuGetPackage)
         .DependsOn(SetupRuntimeNativeFolderForNuGetPackage)
         .DependsOn(BuildNuSpecNuGetPackages);
 
@@ -38,16 +37,6 @@ partial class Build
                     .SetVersionSuffix(NuGetVersionSuffix)
                     .SetOutputDirectory(NuGetArtifactsDirectory));
             }
-        });
-
-    Target CopyIntegrationsJsonForNuGetPackage => _ => _
-        .Unlisted()
-        .Executes(() =>
-        {
-            var source = RootDirectory / "integrations.json";
-            var dest = RootDirectory / "nuget" / "OpenTelemetry.AutoInstrumentation" /
-                "contentFiles" / "any" / "any";
-            CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
         });
 
     Target SetupRuntimeNativeFolderForNuGetPackage => _ => _
@@ -82,7 +71,6 @@ partial class Build
 
     Target BuildNuSpecNuGetPackages => _ => _
         .Description("Build the NuGet packages specified by nuget/**/*.nuspec projects.")
-        .After(CopyIntegrationsJsonForNuGetPackage)
         .After(SetupRuntimeNativeFolderForNuGetPackage)
         .Executes(() =>
         {

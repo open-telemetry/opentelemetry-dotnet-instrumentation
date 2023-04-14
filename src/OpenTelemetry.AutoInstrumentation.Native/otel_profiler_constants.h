@@ -38,7 +38,7 @@ const WSTRING skip_assembly_prefixes[]{
     WStr("Microsoft.Extensions.Options"),
     WStr("Microsoft.Extensions.PlatformAbstractions"),
     WStr("Microsoft.Extensions.Primitives"),
-    WStr("Microsoft.Extensions.WebEncoders "),
+    WStr("Microsoft.Extensions.WebEncoders"),
     WStr("Microsoft.Web.Compilation.Snapshots"),
     WStr("System.Core"),
     WStr("System.Console"),
@@ -71,10 +71,11 @@ const WSTRING managed_profiler_name = WStr("OpenTelemetry.AutoInstrumentation");
 const WSTRING managed_profiler_full_assembly_version =
     WStr("OpenTelemetry.AutoInstrumentation, Version=0.6.0.0, Culture=neutral, PublicKeyToken=null");
 
+const WSTRING nonwindows_nativemethods_type = WStr("OpenTelemetry.AutoInstrumentation.NativeMethods+NonWindows");
+const WSTRING windows_nativemethods_type = WStr("OpenTelemetry.AutoInstrumentation.NativeMethods+Windows");
+
 const WSTRING managed_profiler_full_assembly_version_strong_name =
     WStr("OpenTelemetry.AutoInstrumentation, Version=0.6.0.0, Culture=neutral, PublicKeyToken=c0db600a13f60b51");
-
-const WSTRING nonwindows_nativemethods_type = WStr("OpenTelemetry.AutoInstrumentation.NativeMethods+NonWindows");
 
 } // namespace trace
 

@@ -95,6 +95,25 @@ ILInstr* ILRewriterWrapper::LoadArgument(const UINT16 index) const
     return pNewInstr;
 }
 
+ILInstr* ILRewriterWrapper::LoadArgumentRef(const UINT16 index) const
+{
+    ILInstr* pNewInstr = m_ILRewriter->NewILInstr();
+
+    if (index <= 255)
+    {
+        pNewInstr->m_opcode = CEE_LDARGA_S;
+        pNewInstr->m_Arg8   = static_cast<UINT8>(index);
+    }
+    else
+    {
+        pNewInstr->m_opcode = CEE_LDARGA;
+        pNewInstr->m_Arg16  = index;
+    }
+
+    m_ILRewriter->InsertBefore(m_ILInstr, pNewInstr);
+    return pNewInstr;
+}
+
 void ILRewriterWrapper::Cast(const mdTypeRef type_ref) const
 {
     ILInstr* pNewInstr  = m_ILRewriter->NewILInstr();
@@ -117,6 +136,14 @@ void ILRewriterWrapper::UnboxAny(const mdTypeRef type_ref) const
     pNewInstr->m_opcode = CEE_UNBOX_ANY;
     pNewInstr->m_Arg32  = type_ref;
     m_ILRewriter->InsertBefore(m_ILInstr, pNewInstr);
+}
+
+void ILRewriterWrapper::UnboxAnyAfter(const mdTypeRef type_ref) const
+{
+    ILInstr* pNewInstr  = m_ILRewriter->NewILInstr();
+    pNewInstr->m_opcode = CEE_UNBOX_ANY;
+    pNewInstr->m_Arg32  = type_ref;
+    m_ILRewriter->InsertAfter(m_ILInstr, pNewInstr);
 }
 
 void ILRewriterWrapper::CreateArray(const mdTypeRef type_ref, const INT32 size) const

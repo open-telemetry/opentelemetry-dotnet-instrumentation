@@ -3,7 +3,6 @@
   \AdditionalDeps\shared\Microsoft.NETCore.App\7.0.0\OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
   \LICENSE,
   \instrument.sh,
-  \integrations.json,
   \net\Google.Protobuf.dll,
   \net\Grpc.Core.Api.dll,
   \net\Grpc.Net.Client.dll,

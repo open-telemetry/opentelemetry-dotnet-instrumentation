@@ -28,7 +28,7 @@ public class MultipleAppDomainsTests : TestHelper
     {
     }
 
-    [Fact]
+    [Fact(Skip = "Adding third-party integrations needs to be re-implemented after the native code update. See https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2403")]
     [Trait("Category", "EndToEnd")]
     public void SubmitsTraces()
     {

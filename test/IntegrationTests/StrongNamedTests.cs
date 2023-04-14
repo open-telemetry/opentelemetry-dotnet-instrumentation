@@ -27,7 +27,7 @@ public class StrongNamedTests : TestHelper
     {
     }
 
-    [Fact]
+    [Fact(Skip = "Adding third-party integrations needs to be re-implemented after the native code update. See https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2403")]
     public void SubmitsTraces()
     {
         using var collector = new MockSpansCollector(Output);

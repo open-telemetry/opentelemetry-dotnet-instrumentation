@@ -270,6 +270,11 @@ struct AssemblyMetadata
     {
     }
 
+    AssemblyMetadata(const AssemblyMetadata& value) :
+        module_id(value.module_id), name(value.name), assembly_token(value.assembly_token), version(value.version)
+    {
+    }
+
     bool IsValid() const
     {
         return module_id != 0;
@@ -287,6 +292,26 @@ struct AssemblyProperty
 
     AssemblyProperty() : ppbPublicKey(nullptr), pcbPublicKey(0), pulHashAlgId(0), szName(EmptyWStr)
     {
+    }
+
+    AssemblyProperty(WSTRING szName, void* ppbPublicKey, ULONG pcbPublicKey, ULONG pulHashAlgId, DWORD assemblyFlags) :
+        szName(szName),
+        ppbPublicKey(ppbPublicKey),
+        pcbPublicKey(pcbPublicKey),
+        pulHashAlgId(pulHashAlgId),
+        assemblyFlags(assemblyFlags)
+    {
+    }
+
+public:
+    AssemblyProperty WithVersion(USHORT usMajorVersion, USHORT usMinorVersion, USHORT usBuildNumber, USHORT usRevisionNumber)
+    {
+        pMetaData.usMajorVersion = usMajorVersion;
+        pMetaData.usMinorVersion = usMinorVersion;
+        pMetaData.usBuildNumber = usBuildNumber;
+        pMetaData.usRevisionNumber = usRevisionNumber;
+
+        return *this;
     }
 };
 
@@ -341,6 +366,7 @@ struct TypeInfo
     const bool valueType;
     const bool isGeneric;
     std::shared_ptr<TypeInfo> parent_type;
+    const mdToken scopeToken;
 
     TypeInfo() :
         id(0),
@@ -350,11 +376,12 @@ struct TypeInfo
         extend_from(nullptr),
         valueType(false),
         isGeneric(false),
-        parent_type(nullptr)
+        parent_type(nullptr),
+        scopeToken(0)
     {
     }
     TypeInfo(mdToken id, WSTRING name, mdTypeSpec type_spec, ULONG32 token_type, std::shared_ptr<TypeInfo> extend_from,
-             bool valueType, bool isGeneric, std::shared_ptr<TypeInfo> parent_type) :
+             bool valueType, bool isGeneric, std::shared_ptr<TypeInfo> parent_type, mdToken scopeToken) :
         id(id),
         name(name),
         type_spec(type_spec),
@@ -362,7 +389,8 @@ struct TypeInfo
         extend_from(extend_from),
         valueType(valueType),
         isGeneric(isGeneric),
-        parent_type(parent_type)
+        parent_type(parent_type),
+        scopeToken(scopeToken)
     {
     }
 
@@ -553,9 +581,6 @@ ModuleInfo GetModuleInfo(ICorProfilerInfo7* info, const ModuleID& module_id);
 TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdToken& token);
 
 mdAssemblyRef FindAssemblyRef(const ComPtr<IMetaDataAssemblyImport>& assembly_import, const WSTRING& assembly_name);
-
-bool DisableOptimizations();
-bool EnableInlining();
 
 HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit, AssemblyProperty& corAssemblyProperty,
                              mdAssemblyRef* corlib_ref);
