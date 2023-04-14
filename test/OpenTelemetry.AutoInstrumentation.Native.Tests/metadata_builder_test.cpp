@@ -51,10 +51,11 @@ protected:
         GUID module_version_id;
         metadataImport->GetScopeProps(NULL, 1024, nullptr, &module_version_id);
 
-        const std::vector<IntegrationMethod> integrations;
+        const std::vector<IntegrationDefinition> integrations;
         module_metadata_ =
             new ModuleMetadata(metadataImport, metadataEmit, assemblyImport, assemblyEmit, assemblyName, app_domain_id,
-                               module_version_id, std::make_unique<std::vector<IntegrationMethod>>(integrations), NULL);
+                               module_version_id, std::make_unique<std::vector<IntegrationDefinition>>(integrations),
+                               NULL, true, true);
 
         mdModule module;
         hr = metadataImport->GetModuleFromScope(&module);
@@ -74,68 +75,3 @@ protected:
         delete this->metadata_builder_;
     }
 };
-
-TEST_F(MetadataBuilderTest, StoresWrapperMemberRef)
-{
-    const auto            min_ver = Version(0, 0, 0, 0);
-    const auto            max_ver = Version(USHRT_MAX, USHRT_MAX, USHRT_MAX, USHRT_MAX);
-    const MethodReference ref1(L"", L"", L"", min_ver, max_ver, {}, empty_sig_type_);
-    const MethodReference ref2(L"TestApplication.ExampleLibrary", L"Class1", L"Add", min_ver, max_ver, {},
-                               empty_sig_type_);
-    const MethodReference ref3(L"TestApplication.ExampleLibrary", L"Class1", L"Add", min_ver, max_ver, {},
-                               empty_sig_type_);
-    const MethodReplacement mr1(ref1, ref2, ref3);
-    auto                    hr = metadata_builder_->StoreWrapperMethodRef(mr1);
-    ASSERT_EQ(S_OK, hr);
-
-    mdMemberRef tmp;
-    auto        ok =
-        module_metadata_->TryGetWrapperMemberRef(L"[TestApplication.ExampleLibrary]Class1.Add_vMin_0.0.0.0_vMax_65535."
-                                                 L"65535.65535.65535",
-                                                 tmp);
-    EXPECT_TRUE(ok);
-    EXPECT_NE(tmp, 0);
-
-    tmp = 0;
-    ok = module_metadata_->TryGetWrapperMemberRef(L"[TestApplication.ExampleLibrary]Class2.Add_vMin_0.0.0.0_vMax_65535."
-                                                  L"65535.65535.65535",
-                                                  tmp);
-    EXPECT_FALSE(ok);
-    EXPECT_EQ(tmp, 0);
-}
-
-TEST_F(MetadataBuilderTest, StoresWrapperMemberRefForSeparateAssembly)
-{
-    const auto            min_ver = Version(0, 0, 0, 0);
-    const auto            max_ver = Version(USHRT_MAX, USHRT_MAX, USHRT_MAX, USHRT_MAX);
-    const MethodReference ref1(L"", L"", L"", min_ver, max_ver, {}, empty_sig_type_);
-    const MethodReference ref2(L"TestApplication.ExampleLibrary", L"Class1", L"Add", min_ver, max_ver, {},
-                               empty_sig_type_);
-    const MethodReference ref3(L"TestApplication.ExampleLibraryTracer", L"Class1", L"Add", min_ver, max_ver, {},
-                               empty_sig_type_);
-    const MethodReplacement mr1(ref1, ref2, ref3);
-    auto                    hr = metadata_builder_->StoreWrapperMethodRef(mr1);
-    ASSERT_EQ(S_OK, hr);
-
-    mdMemberRef tmp;
-    auto        ok =
-        module_metadata_->TryGetWrapperMemberRef(L"[TestApplication.ExampleLibraryTracer]Class1.Add_vMin_0.0.0.0_vMax_"
-                                                 L"65535.65535.65535.65535",
-                                                 tmp);
-    EXPECT_TRUE(ok);
-    EXPECT_NE(tmp, 0);
-}
-
-TEST_F(MetadataBuilderTest, StoresWrapperMemberRefRecordsFailure)
-{
-    const auto            min_ver = Version(0, 0, 0, 0);
-    const auto            max_ver = Version(USHRT_MAX, USHRT_MAX, USHRT_MAX, USHRT_MAX);
-    const MethodReference ref1(L"", L"", L"", min_ver, max_ver, {}, empty_sig_type_);
-    const MethodReference ref2(L"TestApplication.ExampleLibrary", L"Class1", L"Add", min_ver, max_ver, {},
-                               empty_sig_type_);
-    const MethodReference ref3(L"TestApplication.ExampleLibraryTracer.AssemblyDoesNotExist", L"Class1", L"Add", min_ver,
-                               max_ver, {}, empty_sig_type_);
-    const MethodReplacement mr1(ref1, ref2, ref3);
-    auto                    hr = metadata_builder_->StoreWrapperMethodRef(mr1);
-    ASSERT_NE(S_OK, hr);
-}

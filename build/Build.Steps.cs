@@ -262,16 +262,6 @@ partial class Build
         .DependsOn(PublishNativeProfilerLinux)
         .DependsOn(PublishNativeProfilerMacOs);
 
-    Target GenerateIntegrationsJson => _ => _
-        .After(PublishManagedProfiler)
-        .Executes(() =>
-        {
-            var generatorTool = Solution.GetProject(Projects.Tools.IntegrationsJsonGenerator);
-
-            DotNetRun(s => s
-                .SetProjectFile(generatorTool));
-        });
-
     Target GenerateLibraryVersionFiles => _ => _
         .After(PublishManagedProfiler)
         .Executes(() =>
@@ -280,16 +270,6 @@ partial class Build
 
             DotNetRun(s => s
                 .SetProjectFile(generatorTool));
-        });
-
-    Target CopyIntegrationsJson => _ => _
-        .Unlisted()
-        .After(GenerateIntegrationsJson)
-        .Executes(() =>
-        {
-            var source = RootDirectory / "integrations.json";
-            var dest = TracerHomeDirectory;
-            CopyFileToDirectory(source, dest, FileExistsPolicy.Overwrite);
         });
 
     Target CopyInstrumentScripts => _ => _

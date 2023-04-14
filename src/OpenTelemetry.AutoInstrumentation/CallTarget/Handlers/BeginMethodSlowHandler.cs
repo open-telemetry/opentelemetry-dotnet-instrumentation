@@ -28,7 +28,7 @@ internal static class BeginMethodSlowHandler<TIntegration, TTarget>
     {
         try
         {
-            DynamicMethod dynMethod = IntegrationMapper.CreateSlowBeginMethodDelegate(typeof(TIntegration), typeof(TTarget));
+            DynamicMethod? dynMethod = IntegrationMapper.CreateSlowBeginMethodDelegate(typeof(TIntegration), typeof(TTarget));
             if (dynMethod != null)
             {
                 _invokeDelegate = (InvokeDelegate)dynMethod.CreateDelegate(typeof(InvokeDelegate));

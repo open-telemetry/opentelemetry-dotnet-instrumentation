@@ -125,7 +125,6 @@ When running your application, make sure to:
 | `DOTNET_SHARED_STORE`                | .NET                | `$INSTALL_DIR/store`                                                      |
 | `DOTNET_STARTUP_HOOKS`               | .NET                | `$INSTALL_DIR/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll`      |
 | `OTEL_DOTNET_AUTO_HOME`              | All versions        | `$INSTALL_DIR`                                                            |
-| `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` | All versions        | `$INSTALL_DIR/integrations.json`                                          |
 
 > **Note**
 > Some settings can be omitted on .NET. For more information, see [config.md](config.md#net-clr-profiler).

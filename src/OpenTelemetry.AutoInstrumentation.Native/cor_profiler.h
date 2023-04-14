@@ -18,9 +18,11 @@
 #include "environment_variables.h"
 #include "il_rewriter.h"
 #include "integration.h"
-#include "module_metadata.h"
 #include "pal.h"
+#include "rejit_preprocessor.h"
 #include "rejit_handler.h"
+#include <unordered_set>
+#include "clr_helpers.h"
 
 namespace trace
 {
@@ -30,7 +32,10 @@ class CorProfiler : public CorProfilerBase
 private:
     std::atomic_bool is_attached_ = {false};
     RuntimeInformation runtime_information_;
-    std::vector<IntegrationMethod> integration_methods_;
+    std::vector<IntegrationDefinition> integration_definitions_;
+
+    std::unordered_set<WSTRING> definitions_ids_;
+    std::mutex definitions_ids_lock_;
 
     // Startup helper variables
     bool first_jit_compilation_completed = false;
@@ -46,10 +51,14 @@ private:
     //
     // CallTarget Members
     //
-    RejitHandler* rejit_handler = nullptr;
+    std::shared_ptr<RejitHandler> rejit_handler = nullptr;
+    bool enable_by_ref_instrumentation = false;
+    bool enable_calltarget_state_by_ref = false;
+    std::unique_ptr<TracerRejitPreprocessor> tracer_integration_preprocessor = nullptr;
 
     // Cor assembly properties
     AssemblyProperty corAssemblyProperty{};
+    AssemblyReference* managed_profiler_assembly_reference;
 
     //
     // OpCodes helper
@@ -59,9 +68,8 @@ private:
     //
     // Module helper variables
     //
-    std::mutex module_id_to_info_map_lock_;
-    std::unordered_map<ModuleID, ModuleMetadata*> module_id_to_info_map_;
-    ModuleID managed_profiler_module_id_ = 0;
+    std::mutex module_ids_lock_;
+    std::vector<ModuleID> module_ids_;
 
     //
     // Methods only for .NET Framework
@@ -92,20 +100,17 @@ private:
     //
     // Helper methods
     //
-    void RewritingPInvokeMaps(ComPtr<IUnknown> metadata_interfaces, ModuleMetadata* module_metadata, WSTRING nativemethods_type_name);
-    WSTRING GetCoreCLRProfilerPath();
-    bool GetWrapperMethodRef(ModuleMetadata* module_metadata, ModuleID module_id,
-                             const MethodReplacement& method_replacement, mdMemberRef& wrapper_method_ref,
-                             mdTypeRef& wrapper_type_ref);
+    void RewritingPInvokeMaps(const ModuleMetadata& module_metadata, const WSTRING& nativemethods_type_name);
+    bool GetIntegrationTypeRef(ModuleMetadata& module_metadata, ModuleID module_id,
+                               const IntegrationDefinition& integration_definition, mdTypeRef& integration_type_ref);
     bool ProfilerAssemblyIsLoadedIntoAppDomain(AppDomainID app_domain_id);
     std::string GetILCodes(const std::string& title, ILRewriter* rewriter, const FunctionInfo& caller,
-                           ModuleMetadata* module_metadata);
+                           const ModuleMetadata& module_metadata);
+
     //
-    // CallTarget Methods
+    // Initialization methods
     //
-    size_t CallTarget_RequestRejitForModule(ModuleID module_id, ModuleMetadata* module_metadata,
-                                            const std::vector<IntegrationMethod>& integrations);
-    HRESULT CallTarget_RewriterCallback(RejitHandlerModule* moduleHandler, RejitHandlerModuleMethod* methodHandler);
+    void InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* items, int size, bool isDerived);
 
 public:
     CorProfiler() = default;
@@ -160,6 +165,22 @@ public:
                                          HRESULT hrStatus) override;
 
     HRESULT STDMETHODCALLTYPE JITCachedFunctionSearchStarted(FunctionID functionId, BOOL* pbUseCachedFunction) override;
+
+    //
+    // ICorProfilerCallback6 methods
+    //
+    HRESULT STDMETHODCALLTYPE GetAssemblyReferences(const WCHAR* wszAssemblyPath,
+                                                    ICorProfilerAssemblyReferenceProvider* pAsmRefProvider) override;
+
+    //
+    // Add Integrations methods
+    //
+    void InitializeProfiler(WCHAR* id, CallTargetDefinition* items, int size);
+    void EnableByRefInstrumentation();
+    void EnableCallTargetStateByRef();
+    void AddDerivedInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
+
+    friend class TracerMethodRewriter;
 };
 
 // Note: Generally you should not have a single, global callback implementation,

@@ -33,6 +33,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Removed
 
 - Remove support for enabling debugging mode with `OTEL_DOTNET_AUTO_DEBUG`.
+- Removed `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` as a required environment
+  variable for bytecode instrumentation setup
 
 ### Fixed
 

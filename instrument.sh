@@ -149,7 +149,4 @@ if [ "$ENABLE_PROFILING" = "true" ]; then
   else
     export CORECLR_PROFILER_PATH="$OTEL_DOTNET_AUTO_HOME/$DOTNET_RUNTIME_ID/OpenTelemetry.AutoInstrumentation.Native.$SUFIX"
   fi
-
-  # Configure the bytecode instrumentation configuration file
-  export OTEL_DOTNET_AUTO_INTEGRATIONS_FILE="$OTEL_DOTNET_AUTO_HOME/integrations.json"
 fi

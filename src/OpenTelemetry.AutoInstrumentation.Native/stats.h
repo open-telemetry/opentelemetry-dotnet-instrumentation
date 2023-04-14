@@ -26,7 +26,13 @@ public:
     }
     ~SWStat()
     {
-        auto increment = (std::chrono::steady_clock::now() - _startTime).count();
+        Refresh();
+    }
+    void Refresh()
+    {
+        auto now = std::chrono::steady_clock::now();
+        auto increment = (now - _startTime).count();
+        _startTime = now;
         _value->fetch_add(increment);
     }
 };
@@ -36,6 +42,10 @@ class Stats : public Singleton<Stats>
     friend class Singleton<Stats>;
 
 private:
+    std::atomic_ullong totalTime = {0};
+    std::unique_ptr<SWStat> totalTimeCounter = nullptr;
+
+    std::atomic_ullong initializeProfiler = {0};
     std::atomic_ullong jitCachedFunctionSearchStarted = {0};
     std::atomic_ullong callTargetRequestRejit = {0};
     std::atomic_ullong callTargetRewriter = {0};
@@ -47,6 +57,7 @@ private:
     std::atomic_ullong initialize = {0};
 
     //
+    std::atomic_uint initializeProfilerCount = {0};
     std::atomic_uint jitCachedFunctionSearchStartedCount = {0};
     std::atomic_uint callTargetRequestRejitCount = {0};
     std::atomic_uint callTargetRewriterCount = {0};
@@ -59,6 +70,10 @@ private:
 public:
     Stats()
     {
+        totalTime = 0;
+        totalTimeCounter = std::make_unique<SWStat>(&totalTime);
+
+        initializeProfiler = 0;
         jitCachedFunctionSearchStarted = 0;
         callTargetRequestRejit = 0;
         jitInlining = 0;
@@ -68,6 +83,7 @@ public:
         assemblyLoadFinished = 0;
         initialize = 0;
 
+        initializeProfilerCount = 0;
         jitCachedFunctionSearchStartedCount = 0;
         callTargetRequestRejitCount = 0;
         jitInliningCount = 0;
@@ -75,6 +91,11 @@ public:
         moduleUnloadStartedCount = 0;
         moduleLoadFinishedCount = 0;
         assemblyLoadFinishedCount = 0;
+    }
+    SWStat InitializeProfilerMeasure()
+    {
+        initializeProfilerCount++;
+        return SWStat(&initializeProfiler);
     }
     SWStat JITCachedFunctionSearchStartedMeasure()
     {
@@ -131,6 +152,7 @@ public:
         const auto ns_jitCompilationStarted = jitCompilationStarted.load();
         const auto ns_jitInlining = jitInlining.load();
         const auto ns_jitCachedFunctionSearchStarted = jitCachedFunctionSearchStarted.load();
+        const auto ns_initializeProfiler = initializeProfiler.load();
 
         const auto count_moduleLoadFinishedCount = moduleLoadFinishedCount.load();
         const auto count_callTargetRequestRejitCount = callTargetRequestRejitCount.load();
@@ -140,13 +162,20 @@ public:
         const auto count_jitCompilationStartedCount = jitCompilationStartedCount.load();
         const auto count_jitInliningCount = jitInliningCount.load();
         const auto count_jitCachedFunctionSearchStartedCount = jitCachedFunctionSearchStartedCount.load();
+        const auto count_initializeProfilerCount = initializeProfilerCount.load();
 
         const auto ns_total = ns_initialize + ns_moduleLoadFinished + ns_callTargetRequestRejit +
                               ns_callTargetRewriter + ns_assemblyLoadFinished + ns_moduleUnloadStarted +
-                              ns_jitCompilationStarted + ns_jitInlining + ns_jitCachedFunctionSearchStarted;
+                              ns_jitCompilationStarted + ns_jitInlining + ns_jitCachedFunctionSearchStarted +
+                              ns_initializeProfiler;
+
+        totalTimeCounter->Refresh();
+        const auto ns_fromBeginToEndTotal = totalTime.load();
 
         std::stringstream ss;
-        ss << "Total ";
+        ss << "Total time: ";
+        ss << ns_fromBeginToEndTotal / 1000000 << "ms";
+        ss << " | Total time in Callbacks: ";
         ss << ns_total / 1000000 << "ms ";
         ss << "[Initialize=";
         ss << ns_initialize / 1000000 << "ms";
@@ -174,6 +203,9 @@ public:
         ss << ", JitCacheFunctionSearchStarted=";
         ss << ns_jitCachedFunctionSearchStarted / 1000000 << "ms"
            << "/" << count_jitCachedFunctionSearchStartedCount;
+        ss << ", InitializeProfiler=";
+        ss << ns_initializeProfiler / 1000000 << "ms"
+           << "/" << count_initializeProfilerCount;
         ss << "]";
         return ss.str();
     }

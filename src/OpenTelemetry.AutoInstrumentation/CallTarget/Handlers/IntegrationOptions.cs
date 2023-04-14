@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Logging;
@@ -36,7 +37,7 @@ internal static class IntegrationOptions<TIntegration, TTarget>
     {
         // ReSharper disable twice ExplicitCallerInfoArgument
         Log.Error(exception, message ?? exception.Message);
-        if (exception is DuckTypeException)
+        if (exception is DuckTypeException or TargetInvocationException { InnerException: DuckTypeException })
         {
             Log.Warning($"DuckTypeException has been detected, the integration <{typeof(TIntegration)}, {typeof(TTarget)}> will be disabled.");
             _disableIntegration = true;

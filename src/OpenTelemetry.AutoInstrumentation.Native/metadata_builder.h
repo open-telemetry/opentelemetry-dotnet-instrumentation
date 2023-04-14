@@ -24,8 +24,6 @@ private:
     const ComPtr<IMetaDataAssemblyImport> assembly_import_{};
     const ComPtr<IMetaDataAssemblyEmit> assembly_emit_{};
 
-    HRESULT FindWrapperTypeRef(const MethodReplacement& method_replacement, mdTypeRef& type_ref_out) const;
-
 public:
     MetadataBuilder(ModuleMetadata& metadata, const mdModule module, ComPtr<IMetaDataImport2> metadata_import,
                     ComPtr<IMetaDataEmit> metadata_emit, ComPtr<IMetaDataAssemblyImport> assembly_import,
@@ -39,8 +37,7 @@ public:
     {
     }
 
-    HRESULT StoreWrapperMethodRef(const MethodReplacement& method_replacement) const;
-
+    HRESULT FindIntegrationTypeRef(const IntegrationDefinition& integration_definition, mdTypeRef& type_ref_out) const;
     HRESULT EmitAssemblyRef(const trace::AssemblyReference& assembly_ref) const;
 };
 
