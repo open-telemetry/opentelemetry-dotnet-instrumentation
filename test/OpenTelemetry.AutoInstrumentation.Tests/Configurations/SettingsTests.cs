@@ -183,8 +183,8 @@ public class SettingsTests : IDisposable
 #endif
     [InlineData("GRAPHQL", TracerInstrumentation.GraphQL)]
     [InlineData("HTTPCLIENT", TracerInstrumentation.HttpClient)]
-#if NET6_0_OR_GREATER
     [InlineData("MONGODB", TracerInstrumentation.MongoDB)]
+#if NET6_0_OR_GREATER
     [InlineData("MYSQLDATA", TracerInstrumentation.MySqlData)]
     [InlineData("STACKEXCHANGEREDIS", TracerInstrumentation.StackExchangeRedis)]
 #endif

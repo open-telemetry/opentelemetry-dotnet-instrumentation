@@ -305,13 +305,13 @@ internal static class Instrumentation
                 case TracerInstrumentation.EntityFrameworkCore:
                     DelayedInitialization.Traces.AddEntityFrameworkCore(LazyInstrumentationLoader, pluginManager);
                     break;
-                case TracerInstrumentation.MongoDB:
-                    break;
                 case TracerInstrumentation.StackExchangeRedis:
                     break;
                 case TracerInstrumentation.MassTransit:
                     break;
 #endif
+                case TracerInstrumentation.MongoDB:
+                    break;
                 case TracerInstrumentation.GraphQL:
                     break;
                 case TracerInstrumentation.Npgsql:

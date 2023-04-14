@@ -37,18 +37,22 @@ public class TransientDependenciesTests
 
         var currentTestLocation = Assembly.GetExecutingAssembly().Location;
         var testDir = FindParentDir(currentTestLocation, "test");
-        var codeDir = Path.Combine(Directory.GetParent(testDir)!.FullName, "src", "OpenTelemetry.AutoInstrumentation");
+        var srcDir = Path.Combine(Directory.GetParent(testDir)!.FullName, "src");
+        var codeDir = Path.Combine(srcDir, "OpenTelemetry.AutoInstrumentation");
         var projectPath = Path.Combine(codeDir, "OpenTelemetry.AutoInstrumentation.csproj");
         var projectGenPath = Path.Combine(codeDir, "OpenTelemetry.AutoInstrumentation.g.csproj");
+        var commonExcludedAssetsPath = Path.Combine(srcDir, "CommonExcludedAssets.props");
 
         File.Copy(projectPath, projectGenPath, overwrite: true);
+
+        var excludedDependencies = ReadExcludedDependencies(commonExcludedAssetsPath);
 
         var deps = ReadTransientDeps(projectGenPath);
 
         CleanTransientDeps(projectGenPath);
 
         var generatedDeps = Generator
-            .EnumerateDependencies(projectGenPath)
+            .EnumerateDependencies(projectGenPath, excludedDependencies)
             .Select(x => x.Name)
             .ToList();
 
@@ -59,6 +63,17 @@ public class TransientDependenciesTests
             deps.Count.Should().Be(generatedDeps.Count);
             deps.Should().BeEquivalentTo(generatedDeps);
         }
+    }
+
+    private static IReadOnlyCollection<string> ReadExcludedDependencies(string commonExcludedAssetsPath)
+    {
+        var projXml = XElement.Load(commonExcludedAssetsPath);
+        return projXml
+            .Elements("ItemGroup")
+            .First(x => x.Attribute("Condition") == null)
+            .Descendants("PackageReference")
+            .Select(x => x.Attribute("Include")!.Value)
+            .ToList();
     }
 
     private static XElement? GetTransientDepsGroup(XElement projXml)

@@ -286,32 +286,10 @@ are under the following copyright:
 Copyright (c) .NET Foundation and Contributors under the MIT License (MIT)
 (<https://github.com/dotnet/wcf/blob/main/LICENSE.TXT>).
 
-Library DnsClient is under the following copyright:
-Copyright The DnsClient.NET Authors under Apache License Version 2.0
-(<https://github.com/opentracing/opentracing-csharp/blob/master/LICENSE>).
-
-Libraries
-
-- MongoDB.Bson,
-- MongoDB.Driver.Core,
-- MongoDB.Libmongocrypt,
-- libmongocrypt,
-- libzstd,
-- mongocrypt
-- snappy32,
-- snappy64,
-are under the following copyright:
-Copyright 2010-present MongoDB Inc. under Apache License Version 2.0
-(<https://github.com/mongodb/mongo-csharp-driver/blob/master/License.txt>).
-
 Library MongoDB.Driver.Core.Extensions.DiagnosticSources is under the following copyright:
 Copyright MongoDB.Driver.Core.Extensions.DiagnosticSources Authors under Apache
 License Version 2.0
 (<https://github.com/jbogard/MongoDB.Driver.Core.Extensions.DiagnosticSources/blob/master/LICENSE>).
-
-Library SharpCompress is under the following copyright:
-Copyright (c) 2014  Adam Hathcock under the MIT License (MIT)
-(<https://github.com/adamhathcock/sharpcompress/blob/master/LICENSE.txt>).
 
 Component Serilog compiled into OpenTelemetry.AutoInstrumentation, OpenTelemetry.AutoInstrumentation.Loader, OpenTelemetry.AutoInstrumentation.StartupHook
 is under the following copyright:
