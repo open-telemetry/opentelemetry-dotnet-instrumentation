@@ -14,11 +14,9 @@
 // limitations under the License.
 // </copyright>
 
-#if NET6_0_OR_GREATER
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
-#endif
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
@@ -38,9 +36,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB;
     type: InstrumentationType.Trace)]
 public static class MongoClientIntegration
 {
-#if NET6_0_OR_GREATER
     private static Delegate? _setActivityListener;
-#endif
 
     /// <summary>
     /// OnMethodBegin callback
@@ -56,7 +52,6 @@ public static class MongoClientIntegration
         // Additional deps doesn't support .NET FX
         // TODO: Find another way how to ship & load "MongoDB.Driver.Core.Extensions.DiagnosticSources"
 
-#if NET6_0_OR_GREATER
         var setListenerDelegate = _setActivityListener ??= GetClusterConfiguratorExpression().Compile();
 
         var clusterConfiguratorProperty = settings
@@ -65,12 +60,10 @@ public static class MongoClientIntegration
         var existingDelegate = clusterConfiguratorProperty?.GetValue(settings) as Delegate;
 
         clusterConfiguratorProperty?.SetValue(settings, Delegate.Combine(existingDelegate, setListenerDelegate));
-#endif
 
         return CallTargetState.GetDefault();
     }
 
-#if NET6_0_OR_GREATER
     private static object GetInstrumentationOptions()
     {
         Type optionsType = Type.GetType("MongoDB.Driver.Core.Extensions.DiagnosticSources.InstrumentationOptions, MongoDB.Driver.Core.Extensions.DiagnosticSources")!;
@@ -123,5 +116,4 @@ public static class MongoClientIntegration
 
         return setListenerLambda;
     }
-#endif
 }
