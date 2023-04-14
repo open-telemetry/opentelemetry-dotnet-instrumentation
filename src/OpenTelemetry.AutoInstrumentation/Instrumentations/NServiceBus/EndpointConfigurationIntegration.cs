@@ -43,7 +43,7 @@ integrationName: "NServiceBus",
 type: InstrumentationType.Metric)]
 public static class EndpointConfigurationIntegration
 {
-    internal static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception exception, CallTargetState state)
+    internal static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception exception, in CallTargetState state)
     {
         var openTelemetryConfigurationExtensionsType = Type.GetType("NServiceBus.OpenTelemetryConfigurationExtensions, NServiceBus.Core");
         var enableOpenTelemetryMethodInfo = openTelemetryConfigurationExtensionsType?.GetMethod("EnableOpenTelemetry");

@@ -73,7 +73,7 @@ public static class StackExchangeRedisIntegration
     /// <typeparam name="TTarget">Type of the target</typeparam>
     /// <typeparam name="TReturn">Return type</typeparam>
     /// <returns>A response value, in an async scenario will be T of Task of T</returns>
-    internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TReturn returnValue, Exception exception, CallTargetState state)
+    internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TReturn returnValue, Exception exception, in CallTargetState state)
     {
 #if NET6_0_OR_GREATER
         if (returnValue != null && Instrumentation.TracerSettings.Value.EnabledInstrumentations.Contains(TracerInstrumentation.StackExchangeRedis))
