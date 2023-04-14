@@ -35,7 +35,7 @@ public class RuleEngineTests : IDisposable
         var ruleEngine = new RuleEngine(new List<Rule> { testRule });
 
         // Act
-        var result = ruleEngine.Validate();
+        var result = ruleEngine.ValidateRules();
 
         // Assert
         Assert.True(result);
@@ -51,7 +51,7 @@ public class RuleEngineTests : IDisposable
         var ruleEngine = new RuleEngine(new List<Rule> { testRule });
 
         // Act
-        var result = ruleEngine.Validate();
+        var result = ruleEngine.ValidateRules();
 
         // Assert
         Assert.True(result);
@@ -67,7 +67,7 @@ public class RuleEngineTests : IDisposable
         var ruleEngine = new RuleEngine(new List<Rule> { testRule });
 
         // Act
-        var result = ruleEngine.Validate();
+        var result = ruleEngine.ValidateRules();
 
         // Assert
         Assert.True(result);
@@ -82,7 +82,7 @@ public class RuleEngineTests : IDisposable
         var ruleEngine = new RuleEngine(new List<Rule> { testRule });
 
         // Act
-        var result = ruleEngine.Validate();
+        var result = ruleEngine.ValidateRules();
 
         // Assert
         Assert.True(result);
@@ -98,7 +98,7 @@ public class RuleEngineTests : IDisposable
         var ruleEngine = new RuleEngine(new List<Rule> { testRule });
 
         // Act
-        var result = ruleEngine.Validate();
+        var result = ruleEngine.ValidateRules();
 
         // Assert
         Assert.True(result);

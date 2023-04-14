@@ -134,7 +134,7 @@ internal static class Instrumentation
                 {
                     var builder = Sdk
                         .CreateTracerProviderBuilder()
-                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder())
+                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, TracerSettings.Value, _pluginManager)
                         .InvokePlugins(_pluginManager);
 
@@ -154,7 +154,7 @@ internal static class Instrumentation
                 {
                     var builder = Sdk
                         .CreateMeterProviderBuilder()
-                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder())
+                        .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, MetricSettings.Value, _pluginManager)
                         .InvokePlugins(_pluginManager);
 
@@ -237,7 +237,7 @@ internal static class Instrumentation
         }
     }
 
-    private static void AddLazilyLoadedMetricInstrumentations(LazyInstrumentationLoader lazyInstrumentationLoader, IList<MetricInstrumentation> enabledInstrumentations)
+    private static void AddLazilyLoadedMetricInstrumentations(LazyInstrumentationLoader lazyInstrumentationLoader, IReadOnlyList<MetricInstrumentation> enabledInstrumentations)
     {
         foreach (var instrumentation in enabledInstrumentations)
         {
@@ -269,7 +269,7 @@ internal static class Instrumentation
         }
     }
 
-    private static void AddLazilyLoadedTraceInstrumentations(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, IList<TracerInstrumentation> enabledInstrumentations)
+    private static void AddLazilyLoadedTraceInstrumentations(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, IReadOnlyList<TracerInstrumentation> enabledInstrumentations)
     {
         foreach (var instrumentation in enabledInstrumentations)
         {

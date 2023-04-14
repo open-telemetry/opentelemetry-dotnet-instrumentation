@@ -47,6 +47,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"OpenTelemetry.Instrumentation.Runtime", {1, 1, 0, 2} },
         { L"OpenTelemetry.Instrumentation.SqlClient", {1, 0, 0, 0} },
         { L"OpenTelemetry.Instrumentation.Wcf", {1, 0, 0, 9} },
+        { L"OpenTelemetry.ResourceDetectors.Container", {1, 0, 0, 3} },
         { L"OpenTelemetry.Shims.OpenTracing", {1, 0, 0, 0} },
         { L"OpenTracing", {0, 12, 1, 0} },
         { L"System.AppContext", {4, 1, 2, 0} },
@@ -151,7 +152,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"System.Xml.XmlDocument", {4, 0, 3, 0} },
         { L"System.Xml.XmlSerializer", {4, 0, 11, 0} },
         { L"System.Xml.XPath", {4, 0, 3, 0} },
-        { L"System.Xml.XPath.XDocument", {4, 1, 0, 0} },
+        { L"System.Xml.XPath.XDocument", {4, 1, 0, 0} }
     });
 }
 }
