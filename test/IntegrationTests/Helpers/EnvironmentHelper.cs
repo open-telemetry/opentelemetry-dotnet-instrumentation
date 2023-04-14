@@ -37,7 +37,6 @@ public class EnvironmentHelper
     private readonly string _testApplicationDirectory;
     private readonly TargetFrameworkAttribute _targetFramework;
 
-    private string? _integrationsFileLocation;
     private string? _profilerFileLocation;
 
     public EnvironmentHelper(
@@ -149,26 +148,6 @@ public class EnvironmentHelper
         }
 
         throw new Exception($"Unable to find profiler at: {profilerPath}");
-    }
-
-    public string GetIntegrationsPath()
-    {
-        if (_integrationsFileLocation != null)
-        {
-            return _integrationsFileLocation;
-        }
-
-        string fileName = $"integrations.json";
-        string integrationsPath = Path.Combine(GetNukeBuildOutput(), fileName);
-
-        if (File.Exists(integrationsPath))
-        {
-            _integrationsFileLocation = integrationsPath;
-            _output?.WriteLine($"Found integrations at {_profilerFileLocation}.");
-            return _integrationsFileLocation;
-        }
-
-        throw new Exception($"Unable to find integrations at: {integrationsPath}");
     }
 
     public string GetTestApplicationPath(string packageVersion = "", string framework = "")
@@ -301,7 +280,6 @@ public class EnvironmentHelper
         CustomEnvironmentVariables["OTEL_LOG_LEVEL"] = "debug";
         CustomEnvironmentVariables["OTEL_DOTNET_AUTO_LOG_DIRECTORY"] = Path.Combine(EnvironmentTools.GetSolutionDirectory(), "build_data", "profiler-logs");
         CustomEnvironmentVariables["OTEL_DOTNET_AUTO_HOME"] = GetNukeBuildOutput();
-        CustomEnvironmentVariables["OTEL_DOTNET_AUTO_INTEGRATIONS_FILE"] = Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE") ?? GetIntegrationsPath();
         CustomEnvironmentVariables["OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES"] = "TestApplication.*";
 
         // exporters are disabled by default in order not to have errors in the logs

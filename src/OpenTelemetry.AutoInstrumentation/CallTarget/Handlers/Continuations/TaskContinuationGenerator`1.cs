@@ -22,7 +22,7 @@ namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations;
 
 internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn, TResult> : ContinuationGenerator<TTarget, TReturn>
 {
-    private static readonly Func<TTarget, TResult?, Exception?, CallTargetState, TResult>? _continuation;
+    private static readonly ContinuationMethodDelegate? _continuation;
     private static readonly bool _preserveContext;
 
     static TaskContinuationGenerator()
@@ -30,12 +30,14 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn, TResult
         var result = IntegrationMapper.CreateAsyncEndMethodDelegate(typeof(TIntegration), typeof(TTarget), typeof(TResult));
         if (result.Method != null)
         {
-            _continuation = (Func<TTarget, TResult?, Exception?, CallTargetState, TResult>)result.Method.CreateDelegate(typeof(Func<TTarget, TResult?, Exception?, CallTargetState, TResult>));
+            _continuation = (ContinuationMethodDelegate)result.Method.CreateDelegate(typeof(ContinuationMethodDelegate));
             _preserveContext = result.PreserveContext;
         }
     }
 
-    public override TReturn? SetContinuation(TTarget instance, TReturn? returnValue, Exception? exception, CallTargetState state)
+    internal delegate TResult ContinuationMethodDelegate(TTarget target, TResult? returnValue, Exception? exception, in CallTargetState state);
+
+    public override TReturn? SetContinuation(TTarget instance, TReturn? returnValue, Exception? exception, in CallTargetState state)
     {
         if (_continuation == null)
         {
@@ -44,7 +46,7 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn, TResult
 
         if (exception != null || returnValue == null)
         {
-            _continuation(instance, default, exception, state);
+            _continuation(instance, default, exception, in state);
             return returnValue;
         }
 
@@ -52,7 +54,7 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn, TResult
 
         if (previousTask.Status == TaskStatus.RanToCompletion)
         {
-            return ToTReturn(Task.FromResult(_continuation(instance, previousTask.Result, default, state)));
+            return ToTReturn(Task.FromResult(_continuation(instance, previousTask.Result, default, in state)));
         }
 
         return ToTReturn(ContinuationAction(previousTask, instance, state));
@@ -82,7 +84,7 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn, TResult
             try
             {
                 // The only supported way to extract the cancellation exception is to await the task
-                await previousTask;
+                await previousTask.ConfigureAwait(_preserveContext);
             }
             catch (Exception ex)
             {
@@ -95,7 +97,7 @@ internal class TaskContinuationGenerator<TIntegration, TTarget, TReturn, TResult
             // *
             // Calls the CallTarget integration continuation, exceptions here should never bubble up to the application
             // *
-            continuationResult = _continuation!(target, taskResult, exception, state);
+            continuationResult = _continuation!(target, taskResult, exception, in state);
         }
         catch (Exception ex)
         {

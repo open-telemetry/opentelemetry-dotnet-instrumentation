@@ -175,6 +175,62 @@ internal static class Instrumentation
             throw;
         }
 
+        try
+        {
+            Logger.Debug("Enabling by ref instrumentation.");
+            NativeMethods.EnableByRefInstrumentation();
+            Logger.Information("ByRef instrumentation enabled.");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "ByRef instrumentation cannot be enabled: ");
+        }
+
+        try
+        {
+            Logger.Debug("Enabling calltarget state by ref.");
+            NativeMethods.EnableCallTargetStateByRef();
+            Logger.Information("CallTarget State ByRef enabled.");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "CallTarget state ByRef cannot be enabled: ");
+        }
+
+        try
+        {
+            Logger.Debug("Sending CallTarget integration definitions to native library.");
+            var payload = InstrumentationDefinitions.GetAllDefinitions();
+            NativeMethods.InitializeProfiler(payload.DefinitionsId, payload.Definitions);
+            foreach (var def in payload.Definitions)
+            {
+                def.Dispose();
+            }
+
+            Logger.Information<int>("The profiler has been initialized with {count} definitions.", payload.Definitions.Length);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, ex.Message);
+        }
+
+        try
+        {
+            Logger.Debug("Sending CallTarget derived integration definitions to native library.");
+            var payload = InstrumentationDefinitions.GetDerivedDefinitions();
+            NativeMethods.AddDerivedInstrumentations(payload.DefinitionsId, payload.Definitions);
+            foreach (var def in payload.Definitions)
+            {
+                def.Dispose();
+            }
+
+            Logger.Information<int>("The profiler has been initialized with {count} derived definitions.", payload.Definitions.Length);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, ex.Message);
+        }
+
         if (TracerSettings.Value.OpenTracingEnabled)
         {
             EnableOpenTracing();

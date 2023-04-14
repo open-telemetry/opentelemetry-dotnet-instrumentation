@@ -13,7 +13,6 @@
 
 #ifndef _WIN32
 #include <dlfcn.h>
-#include "logger.h"
 #endif
 
 EXTERN_C BOOL STDAPICALLTYPE IsProfilerAttached()
@@ -32,6 +31,26 @@ EXTERN_C VOID STDAPICALLTYPE GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray,
 }
 #endif
 
+EXTERN_C VOID STDAPICALLTYPE InitializeProfiler(WCHAR* id, trace::CallTargetDefinition* items, int size)
+{
+    return trace::profiler->InitializeProfiler(id, items, size);
+}
+
+EXTERN_C VOID STDAPICALLTYPE EnableByRefInstrumentation()
+{
+    return trace::profiler->EnableByRefInstrumentation();
+}
+
+EXTERN_C VOID STDAPICALLTYPE EnableCallTargetStateByRef()
+{
+    return trace::profiler->EnableCallTargetStateByRef();
+}
+
+EXTERN_C VOID STDAPICALLTYPE AddDerivedInstrumentations(WCHAR* id, trace::CallTargetDefinition* items, int size)
+{
+    return trace::profiler->AddDerivedInstrumentations(id, items, size);
+}
+
 #ifndef _WIN32
 EXTERN_C void* dddlopen(const char* __file, int __mode)
 {
@@ -40,14 +59,7 @@ EXTERN_C void* dddlopen(const char* __file, int __mode)
 
 EXTERN_C char* dddlerror(void)
 {
-    auto errorPtr = dlerror();
-
-    if (errorPtr)
-    {
-        trace::Logger::Error("dlerror: ", errorPtr);
-    }
-
-    return errorPtr;
+    return dlerror();
 }
 
 EXTERN_C void* dddlsym(void* __restrict __handle, const char* __restrict __name)
