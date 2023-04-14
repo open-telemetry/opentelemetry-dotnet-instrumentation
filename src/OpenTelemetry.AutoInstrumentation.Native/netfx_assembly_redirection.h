@@ -152,7 +152,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"System.Xml.XmlDocument", {4, 0, 3, 0} },
         { L"System.Xml.XmlSerializer", {4, 0, 11, 0} },
         { L"System.Xml.XPath", {4, 0, 3, 0} },
-        { L"System.Xml.XPath.XDocument", {4, 1, 0, 0} },
+        { L"System.Xml.XPath.XDocument", {4, 1, 0, 0} }
     });
 }
 }
