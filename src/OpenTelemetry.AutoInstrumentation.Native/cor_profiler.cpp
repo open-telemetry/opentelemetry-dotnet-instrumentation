@@ -32,6 +32,8 @@
 #include <mach-o/getsect.h>
 #endif
 
+using namespace std::chrono_literals;
+
 #ifdef _WIN32
 #include "netfx_assembly_redirection.h"
 #endif
@@ -760,9 +762,19 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
             tracer_integration_preprocessor->EnqueueRequestRejitForLoadedModules(std::vector<ModuleID>{module_id},
                                                                                  integration_definitions_, &promise);
 
-            // wait and get the value from the future<int>
-            const auto& numReJITs = future.get();
-            Logger::Debug("Total number of ReJIT Requested: ", numReJITs);
+            // wait and get the value from the future<ULONG>
+            const auto status = future.wait_for(100ms);
+
+            if (status != std::future_status::timeout)
+            {
+                const auto& numReJITs = future.get();
+                Logger::Debug("Total number of ReJIT Requested: ", numReJITs);
+            }
+            else
+            {
+                Logger::Warn("Timeout while waiting for the rejit requests to be processed. Rejit will continue "
+                             "asynchronously, but some initial calls may not be instrumented");
+            }
         }
     }
 
