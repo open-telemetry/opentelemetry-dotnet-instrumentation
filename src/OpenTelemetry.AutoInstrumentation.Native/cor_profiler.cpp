@@ -735,7 +735,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
 
         const auto& module_metadata =
             ModuleMetadata(metadata_import, metadata_emit, assembly_import, assembly_emit, module_info.assembly.name,
-                           module_info.assembly.app_domain_id, &corAssemblyProperty, enable_by_ref_instrumentation);
+                           module_info.assembly.app_domain_id, &corAssemblyProperty);
 
         const auto& assemblyImport  = GetAssemblyImportMetadata(assembly_import);
         const auto& assemblyVersion = assemblyImport.version.str();
@@ -991,17 +991,6 @@ bool InstrumentationEnabled(const WSTRING name, const std::vector<WSTRING>& enab
         }
     }
     return false;
-}
-
-void CorProfiler::EnableByRefInstrumentation()
-{
-    enable_by_ref_instrumentation = true;
-    if (rejit_handler != nullptr)
-    {
-        rejit_handler->SetEnableByRefInstrumentation(true);
-    }
-
-    Logger::Info("ByRef Instrumentation enabled.");
 }
 
 void CorProfiler::AddDerivedInstrumentations(WCHAR* id, CallTargetDefinition* items, int size)
@@ -1322,7 +1311,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
     std::unique_ptr<ModuleMetadata> module_metadata =
         std::make_unique<ModuleMetadata>(metadataImport, metadataEmit, assemblyImport, assemblyEmit,
                                          module_info.assembly.name, module_info.assembly.app_domain_id,
-                                         &corAssemblyProperty, enable_by_ref_instrumentation);
+                                         &corAssemblyProperty);
 
     // get function info
     const auto& caller = GetFunctionInfo(module_metadata->metadata_import, function_token);

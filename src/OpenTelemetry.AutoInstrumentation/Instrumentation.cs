@@ -177,17 +177,6 @@ internal static class Instrumentation
 
         try
         {
-            Logger.Debug("Enabling by ref instrumentation.");
-            NativeMethods.EnableByRefInstrumentation();
-            Logger.Information("ByRef instrumentation enabled.");
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "ByRef instrumentation cannot be enabled: ");
-        }
-
-        try
-        {
             Logger.Debug("Sending CallTarget integration definitions to native library.");
             var payload = InstrumentationDefinitions.GetAllDefinitions();
             NativeMethods.InitializeProfiler(payload.DefinitionsId, payload.Definitions);

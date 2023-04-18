@@ -834,9 +834,7 @@ HRESULT CallTargetTokens::WriteBeginMethodWithArgumentsArray(void*           rew
  * PUBLIC
  **/
 
-CallTargetTokens::CallTargetTokens(ModuleMetadata* module_metadata_ptr,
-                                   const bool      enableByRefInstrumentation)
-    : enable_by_ref_instrumentation(enableByRefInstrumentation)
+CallTargetTokens::CallTargetTokens(ModuleMetadata* module_metadata_ptr)
 {
     this->module_metadata_ptr = module_metadata_ptr;
     for (int i = 0; i < FASTPATH_COUNT; i++)

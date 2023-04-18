@@ -130,8 +130,6 @@ private:
 
     std::shared_ptr<RejitWorkOffloader> m_work_offloader;
         
-    bool enable_by_ref_instrumentation = false;
-
     std::mutex m_ngenModules_lock;
     std::vector<ModuleID> m_ngenModules;
 
@@ -141,8 +139,6 @@ public:
     RejitHandler(ICorProfilerInfo10* pInfo, std::shared_ptr<RejitWorkOffloader> work_offloader);
 
     RejitHandlerModule* GetOrAddModule(ModuleID moduleId);
-    void SetEnableByRefInstrumentation(bool enableByRefInstrumentation);
-    bool GetEnableByRefInstrumentation();
 
     void RemoveModule(ModuleID moduleId);
     bool HasModuleAndMethod(ModuleID moduleId, mdMethodDef methodDef);

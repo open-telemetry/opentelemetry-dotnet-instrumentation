@@ -31,7 +31,7 @@ class CallTargetTokens
 {
 private:
     ModuleMetadata* module_metadata_ptr = nullptr;
-    const bool enable_by_ref_instrumentation = false;
+    const bool enable_by_ref_instrumentation = true;
     const bool enable_calltarget_state_by_ref = true;
 
     // CorLib tokens
@@ -80,7 +80,7 @@ private:
                                                const TypeInfo* currentType, ILInstr** instruction);
 
 public:
-    CallTargetTokens(ModuleMetadata* module_metadata_ptr, const bool enableByRefInstrumentation);
+    CallTargetTokens(ModuleMetadata* module_metadata_ptr);
 
     mdTypeRef GetObjectTypeRef();
     mdTypeRef GetExceptionTypeRef();

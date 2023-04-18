@@ -52,7 +52,7 @@ private:
     // CallTarget Members
     //
     std::shared_ptr<RejitHandler> rejit_handler = nullptr;
-    bool enable_by_ref_instrumentation = false;
+    bool enable_by_ref_instrumentation = true;
     bool enable_calltarget_state_by_ref = true;
     std::unique_ptr<TracerRejitPreprocessor> tracer_integration_preprocessor = nullptr;
 
@@ -176,7 +176,6 @@ public:
     // Add Integrations methods
     //
     void InitializeProfiler(WCHAR* id, CallTargetDefinition* items, int size);
-    void EnableByRefInstrumentation();
     void AddDerivedInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
 
     friend class TracerMethodRewriter;

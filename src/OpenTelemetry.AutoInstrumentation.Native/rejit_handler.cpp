@@ -549,14 +549,4 @@ void RejitHandler::RequestRejitForNGenInliners()
     }
 }
 
-void RejitHandler::SetEnableByRefInstrumentation(bool enableByRefInstrumentation)
-{
-    enable_by_ref_instrumentation = enableByRefInstrumentation;
-}
-
-bool RejitHandler::GetEnableByRefInstrumentation()
-{
-    return enable_by_ref_instrumentation;
-}
-
 } // namespace trace

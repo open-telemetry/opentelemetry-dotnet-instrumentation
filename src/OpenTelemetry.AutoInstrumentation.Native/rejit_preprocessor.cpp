@@ -45,7 +45,6 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
 
     auto corProfilerInfo                = m_rejit_handler->GetCorProfilerInfo();
     auto pCorAssemblyProperty           = m_rejit_handler->GetCorAssemblyProperty();
-    auto enable_by_ref_instrumentation  = m_rejit_handler->GetEnableByRefInstrumentation();
 
     auto enumIterator = enumMethods.begin();
     for (; enumIterator != enumMethods.end(); enumIterator = ++enumIterator)
@@ -117,8 +116,7 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
 
             const auto moduleMetadata =
                 new ModuleMetadata(metadataImport, metadataEmit, assemblyImport, assemblyEmit, moduleInfo.assembly.name,
-                                   moduleInfo.assembly.app_domain_id, pCorAssemblyProperty,
-                                   enable_by_ref_instrumentation);
+                                   moduleInfo.assembly.app_domain_id, pCorAssemblyProperty);
 
             Logger::Info("ReJIT handler stored metadata for ", moduleInfo.id, " ", moduleInfo.assembly.name,
                          " AppDomain ", moduleInfo.assembly.app_domain_id, " ", moduleInfo.assembly.app_domain_name);
