@@ -412,6 +412,11 @@ void RejitPreprocessor<RejitRequestDefinition>::EnqueueRequestRejitForLoadedModu
 
     if (modulesVector.size() == 0 || definitions.size() == 0)
     {
+        if (promise != nullptr)
+        {
+            promise->set_value(0);
+        }
+
         return;
     }
 
