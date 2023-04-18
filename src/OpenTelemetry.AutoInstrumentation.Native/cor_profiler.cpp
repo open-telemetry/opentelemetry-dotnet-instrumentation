@@ -531,7 +531,7 @@ void CorProfiler::RewritingPInvokeMaps(const ModuleMetadata& module_metadata, co
                                                              profiler_ref);
                         if (FAILED(hr))
                         {
-                            Logger::Warn("ModuleLoadFinished: DefinePinvokeMap to the actual profiler file path "
+                            Logger::Warn("RewritingPInvokeMaps: DefinePinvokeMap to the actual profiler file path "
                                          "failed, trying to restore the previous one.");
                             hr = metadata_emit->DefinePinvokeMap(methodDef, pdwMappingFlags,
                                                                  WSTRING(importName).c_str(), importModule);
@@ -540,7 +540,7 @@ void CorProfiler::RewritingPInvokeMaps(const ModuleMetadata& module_metadata, co
                                 // We only warn that we cannot rewrite the PInvokeMap but we still continue the module
                                 // load.
                                 // These errors must be handled on the caller with a try/catch.
-                                Logger::Warn("ModuleLoadFinished: Error trying to restore the previous PInvokeMap.");
+                                Logger::Warn("RewritingPInvokeMaps: Error trying to restore the previous PInvokeMap.");
                             }
                         }
                     }
@@ -548,7 +548,7 @@ void CorProfiler::RewritingPInvokeMaps(const ModuleMetadata& module_metadata, co
                     {
                         // We only warn that we cannot rewrite the PInvokeMap but we still continue the module load.
                         // These errors must be handled on the caller with a try/catch.
-                        Logger::Warn("ModuleLoadFinished: DeletePinvokeMap failed");
+                        Logger::Warn("RewritingPInvokeMaps: DeletePinvokeMap failed");
                     }
                 }
 
@@ -559,7 +559,7 @@ void CorProfiler::RewritingPInvokeMaps(const ModuleMetadata& module_metadata, co
         {
             // We only warn that we cannot rewrite the PInvokeMap but we still continue the module load.
             // These errors must be handled on the caller with a try/catch.
-            Logger::Warn("ModuleLoadFinished: Native Profiler DefineModuleRef failed");
+            Logger::Warn("RewritingPInvokeMaps: Native Profiler DefineModuleRef failed");
         }
     }
 }
@@ -716,9 +716,14 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         }
     }
 
-    if (module_info.assembly.name == managed_profiler_name)
+#ifdef _WIN32
+    const bool perform_netfx_redirect = runtime_information_.is_desktop() && IsNetFxAssemblyRedirectionEnabled();
+#else
+    const bool perform_netfx_redirect = false;
+#endif // _WIN32
+
+    if (perform_netfx_redirect || module_info.assembly.name == managed_profiler_name)
     {
-        // Fix PInvoke Rewriting
         ComPtr<IUnknown> metadata_interfaces;
         auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
                                                  metadata_interfaces.GetAddressOf());
@@ -740,17 +745,34 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
                            module_info.assembly.app_domain_id, &corAssemblyProperty, enable_by_ref_instrumentation,
                            enable_calltarget_state_by_ref);
 
-        const auto& assemblyImport  = GetAssemblyImportMetadata(assembly_import);
-        const auto& assemblyVersion = assemblyImport.version.str();
-
-        Logger::Info("ModuleLoadFinished: ", managed_profiler_name, " v", assemblyVersion, " - Fix PInvoke maps");
 #ifdef _WIN32
-        RewritingPInvokeMaps(module_metadata, windows_nativemethods_type);
-#else
-        RewritingPInvokeMaps(module_metadata, nonwindows_nativemethods_type);
+        if (perform_netfx_redirect)
+        {
+            // On the .NET Framework redirect any assembly reference to the versions required by
+            // OpenTelemetry.AutoInstrumentation assembly, the ones under netfx/ folder.
+            RedirectAssemblyReferences(assembly_import, assembly_emit);
+        }
 #endif // _WIN32
+
+        if (module_info.assembly.name == managed_profiler_name)
+        {
+#ifdef _WIN32
+            RewritingPInvokeMaps(module_metadata, windows_nativemethods_type);
+#else
+            RewritingPInvokeMaps(module_metadata, nonwindows_nativemethods_type);
+#endif // _WIN32
+        }
+
+        if (Logger::IsDebugEnabled())
+        {
+            const auto& assemblyImport  = GetAssemblyImportMetadata(assembly_import);
+            const auto& assemblyVersion = assemblyImport.version.str();
+
+            Logger::Debug("ModuleLoadFinished: done ", module_info.assembly.name, " v", assemblyVersion);
+        }
     }
-    else
+
+    if (module_info.assembly.name != managed_profiler_name)
     {
         module_ids_.push_back(module_id);
 

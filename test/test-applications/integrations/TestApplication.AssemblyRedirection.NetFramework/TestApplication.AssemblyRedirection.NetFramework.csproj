@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- In order to test assembly redirection this project will force the use of specific versions -->
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <TargetFramework>net462</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
+  </ItemGroup>
+</Project>
