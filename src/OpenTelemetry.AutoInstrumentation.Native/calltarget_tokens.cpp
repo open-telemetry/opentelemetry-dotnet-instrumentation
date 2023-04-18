@@ -835,10 +835,8 @@ HRESULT CallTargetTokens::WriteBeginMethodWithArgumentsArray(void*           rew
  **/
 
 CallTargetTokens::CallTargetTokens(ModuleMetadata* module_metadata_ptr,
-                                   const bool      enableByRefInstrumentation,
-                                   const bool      enableCallTargetStateByRef)
+                                   const bool      enableByRefInstrumentation)
     : enable_by_ref_instrumentation(enableByRefInstrumentation)
-    , enable_calltarget_state_by_ref(enableCallTargetStateByRef)
 {
     this->module_metadata_ptr = module_metadata_ptr;
     for (int i = 0; i < FASTPATH_COUNT; i++)

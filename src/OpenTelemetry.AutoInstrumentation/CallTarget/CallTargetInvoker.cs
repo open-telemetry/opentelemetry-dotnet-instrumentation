@@ -506,49 +506,6 @@ public static class CallTargetInvoker
     /// <param name="state">CallTarget state</param>
     /// <returns>CallTarget return structure</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CallTargetReturn EndMethod<TIntegration, TTarget>(TTarget instance, Exception exception, CallTargetState state)
-    {
-        if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
-        {
-            EndMethodHandler<TIntegration, TTarget>.Invoke(instance, exception, in state);
-        }
-
-        return CallTargetReturn.GetDefault();
-    }
-
-    /// <summary>
-    /// End Method with Return value invoker
-    /// </summary>
-    /// <typeparam name="TIntegration">Integration type</typeparam>
-    /// <typeparam name="TTarget">Target type</typeparam>
-    /// <typeparam name="TReturn">Return type</typeparam>
-    /// <param name="instance">Instance value</param>
-    /// <param name="returnValue">Return value</param>
-    /// <param name="exception">Exception value</param>
-    /// <param name="state">CallTarget state</param>
-    /// <returns>CallTarget return structure</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static CallTargetReturn<TReturn?> EndMethod<TIntegration, TTarget, TReturn>(TTarget instance, TReturn returnValue, Exception exception, CallTargetState state)
-    {
-        if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)
-        {
-            var result = EndMethodHandler<TIntegration, TTarget, TReturn>.Invoke(instance, returnValue, exception, in state);
-            return new CallTargetReturn<TReturn?>(result.GetReturnValue());
-        }
-
-        return new CallTargetReturn<TReturn?>(returnValue);
-    }
-
-    /// <summary>
-    /// End Method with Void return value invoker
-    /// </summary>
-    /// <typeparam name="TIntegration">Integration type</typeparam>
-    /// <typeparam name="TTarget">Target type</typeparam>
-    /// <param name="instance">Instance value</param>
-    /// <param name="exception">Exception value</param>
-    /// <param name="state">CallTarget state</param>
-    /// <returns>CallTarget return structure</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static CallTargetReturn EndMethod<TIntegration, TTarget>(TTarget instance, Exception exception, in CallTargetState state)
     {
         if (IntegrationOptions<TIntegration, TTarget>.IsIntegrationEnabled)

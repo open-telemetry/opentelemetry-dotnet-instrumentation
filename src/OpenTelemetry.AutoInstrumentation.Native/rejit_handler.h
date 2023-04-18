@@ -131,7 +131,6 @@ private:
     std::shared_ptr<RejitWorkOffloader> m_work_offloader;
         
     bool enable_by_ref_instrumentation = false;
-    bool enable_calltarget_state_by_ref = false;
 
     std::mutex m_ngenModules_lock;
     std::vector<ModuleID> m_ngenModules;
@@ -143,8 +142,6 @@ public:
 
     RejitHandlerModule* GetOrAddModule(ModuleID moduleId);
     void SetEnableByRefInstrumentation(bool enableByRefInstrumentation);
-    void SetEnableCallTargetStateByRef(bool enableCallTargetStateByRef);
-    bool GetEnableCallTargetStateByRef();
     bool GetEnableByRefInstrumentation();
 
     void RemoveModule(ModuleID moduleId);

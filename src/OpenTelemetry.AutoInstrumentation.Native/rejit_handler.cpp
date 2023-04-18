@@ -554,16 +554,6 @@ void RejitHandler::SetEnableByRefInstrumentation(bool enableByRefInstrumentation
     enable_by_ref_instrumentation = enableByRefInstrumentation;
 }
 
-void RejitHandler::SetEnableCallTargetStateByRef(bool enableCallTargetStateByRef)
-{
-    enable_calltarget_state_by_ref = enableCallTargetStateByRef;
-}
-
-bool RejitHandler::GetEnableCallTargetStateByRef()
-{
-    return enable_calltarget_state_by_ref;
-}
-
 bool RejitHandler::GetEnableByRefInstrumentation()
 {
     return enable_by_ref_instrumentation;

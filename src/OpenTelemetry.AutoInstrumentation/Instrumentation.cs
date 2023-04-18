@@ -188,17 +188,6 @@ internal static class Instrumentation
 
         try
         {
-            Logger.Debug("Enabling calltarget state by ref.");
-            NativeMethods.EnableCallTargetStateByRef();
-            Logger.Information("CallTarget State ByRef enabled.");
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "CallTarget state ByRef cannot be enabled: ");
-        }
-
-        try
-        {
             Logger.Debug("Sending CallTarget integration definitions to native library.");
             var payload = InstrumentationDefinitions.GetAllDefinitions();
             NativeMethods.InitializeProfiler(payload.DefinitionsId, payload.Definitions);

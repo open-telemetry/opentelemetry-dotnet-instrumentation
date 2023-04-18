@@ -41,11 +41,6 @@ EXTERN_C VOID STDAPICALLTYPE EnableByRefInstrumentation()
     return trace::profiler->EnableByRefInstrumentation();
 }
 
-EXTERN_C VOID STDAPICALLTYPE EnableCallTargetStateByRef()
-{
-    return trace::profiler->EnableCallTargetStateByRef();
-}
-
 EXTERN_C VOID STDAPICALLTYPE AddDerivedInstrumentations(WCHAR* id, trace::CallTargetDefinition* items, int size)
 {
     return trace::profiler->AddDerivedInstrumentations(id, items, size);
