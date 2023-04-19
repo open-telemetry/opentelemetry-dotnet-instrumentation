@@ -72,6 +72,10 @@ See [config.md#instrumented-libraries-and-frameworks](config.md#instrumented-lib
 
 ## Get started
 
+> **Note**
+> ARM architectures are not supported yet,
+> see [#2181](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2181).
+
 ### Considerations on scope
 
 Instrumenting [`self-contained`](https://learn.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained)
@@ -133,6 +137,10 @@ When running your application, make sure to:
 
 You can install OpenTelemetry .NET Automatic Instrumentation
 and instrument your .NET application using the provided Shell scripts.
+
+> **Note**
+> On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
+
 Example usage:
 
 ```sh
@@ -141,6 +149,9 @@ curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet
 
 # Install core files
 sh ./otel-dotnet-auto-install.sh
+
+# Enable execution for the instrumentation script
+chmod +x $HOME/.otel-dotnet-auto/instrument.sh
 
 # Setup the instrumentation for the current shell session
 . $HOME/.otel-dotnet-auto/instrument.sh
@@ -167,9 +178,6 @@ uses environment variables as parameters:
 | `ENABLE_PROFILING`      | Whether to set the .NET CLR Profiler, possible values: `true`, `false` | No       | `true`                    |
 | `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                            | No       | `$HOME/.otel-dotnet-auto` |
 | `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`       | No       | *Calculated*              |
-
-> **Note**
-> On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
 
 ### PowerShell module (Windows)
 
