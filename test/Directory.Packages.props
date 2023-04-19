@@ -26,7 +26,7 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
     <PackageVersion Include="MongoDB.Driver" Version="2.19.1" />
     <PackageVersion Include="Moq" Version="4.18.4" />
-    <PackageVersion Include="MySql.Data" Version="8.0.32.1" />
+    <PackageVersion Include="MySql.Data" Version="8.0.33" />
     <PackageVersion Include="NServiceBus" Version="8.0.3" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Npgsql" Version="7.0.2" />

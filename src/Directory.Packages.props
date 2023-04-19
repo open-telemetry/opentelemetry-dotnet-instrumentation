@@ -37,7 +37,7 @@
     <PackageVersion Include="MongoDB.Bson" Version="2.13.3" />
     <PackageVersion Include="MongoDB.Driver.Core" Version="2.13.3" />
     <PackageVersion Include="MongoDB.Libmongocrypt" Version="1.2.2" />
-    <PackageVersion Include="MySql.Data" Version="6.10.7" />
+    <PackageVersion Include="MySql.Data" Version="8.0.33" />
     <PackageVersion Include="Pipelines.Sockets.Unofficial" Version="2.1.16" />
     <PackageVersion Include="SharpCompress" Version="0.23.0" />
     <PackageVersion Include="StackExchange.Redis" Version="2.1.58" />
