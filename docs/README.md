@@ -15,6 +15,27 @@ can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instr
 
 ---
 
+## Quick start
+
+If you'd like to try the instrumentation on an existing application before 
+learning more about the configuration options and the project, follow
+these instructions:
+
+- On Linux and macOS, use the [shell scripts](#shell-scripts).
+- On Windows, use the [PowerShell module](#powershell-module-windows).
+
+To see the telemetry from your application directly on the standard output, set
+the following environment variables to `true` before launching your application:
+
+- `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED`
+- `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED`
+- `OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED`
+
+For a demo using `docker compose`, clone this repository and
+follow the [examples/demo/README.md](../examples/demo/README.md).
+
+## Components
+
 OpenTelemetry .NET Automatic Instrumentation is built on top of
 [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
