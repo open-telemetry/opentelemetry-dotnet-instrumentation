@@ -8,7 +8,7 @@ cmake_policy(SET CMP0015 NEW)
 # Project definition
 # ******************************************************
 
-project("OpenTelemetry.AutoInstrumentation.Native" VERSION 0.6.0)
+project("OpenTelemetry.AutoInstrumentation.Native" VERSION 0.7.0)
 
 # ******************************************************
 # Environment detection
