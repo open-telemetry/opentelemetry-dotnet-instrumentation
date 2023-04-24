@@ -95,7 +95,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "6.10.7" },
-        new object[] { "8.0.32.1" },
+        new object[] { "8.0.33" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Npgsql = new List<object[]>
