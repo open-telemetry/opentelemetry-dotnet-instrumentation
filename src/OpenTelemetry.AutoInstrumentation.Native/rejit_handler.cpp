@@ -274,23 +274,23 @@ void RejitHandler::RequestRejit(std::vector<ModuleID>& modulesVector, std::vecto
         // Request ReJIT
         // *************************************
 
-        if (m_profilerInfo10 != nullptr)
+        if (m_profilerInfo12 != nullptr)
         {
             // RequestReJITWithInliners is currently always failing with `Fatal error. Internal CLR error.
             // (0x80131506)` more research is required, meanwhile we fallback to the normal RequestReJIT and
             // manual track of inliners.
 
-            /*hr = m_profilerInfo10->RequestReJITWithInliners(COR_PRF_REJIT_BLOCK_INLINING, (ULONG)
+            /*hr = m_profilerInfo12->RequestReJITWithInliners(COR_PRF_REJIT_BLOCK_INLINING, (ULONG)
             modulesVector.size(),
             &modulesVector[0], &modulesMethodDef[0]); if (FAILED(hr))
             {
                 Warn("Error requesting ReJITWithInliners for ", vtModules.size(),
                      " methods, falling back to a normal RequestReJIT");
-                hr = m_profilerInfo10->RequestReJIT((ULONG) modulesVector.size(), &modulesVector[0],
+                hr = m_profilerInfo12->RequestReJIT((ULONG) modulesVector.size(), &modulesVector[0],
             &modulesMethodDef[0]);
             }*/
 
-            hr = m_profilerInfo10->RequestReJIT((ULONG)modulesVector.size(), &modulesVector[0], &modulesMethodDef[0]);
+            hr = m_profilerInfo12->RequestReJIT((ULONG)modulesVector.size(), &modulesVector[0], &modulesMethodDef[0]);
         }
         else
         {
@@ -313,14 +313,14 @@ void RejitHandler::RequestRejit(std::vector<ModuleID>& modulesVector, std::vecto
 RejitHandler::RejitHandler(ICorProfilerInfo7* pInfo, std::shared_ptr<RejitWorkOffloader> work_offloader)
 {
     m_profilerInfo   = pInfo;
-    m_profilerInfo10 = nullptr;
+    m_profilerInfo12 = nullptr;
     m_work_offloader = work_offloader;
 }
 
-RejitHandler::RejitHandler(ICorProfilerInfo10* pInfo, std::shared_ptr<RejitWorkOffloader> work_offloader)
+RejitHandler::RejitHandler(ICorProfilerInfo12* pInfo, std::shared_ptr<RejitWorkOffloader> work_offloader)
 {
     m_profilerInfo   = pInfo;
-    m_profilerInfo10 = pInfo;
+    m_profilerInfo12 = pInfo;
     m_work_offloader = work_offloader;
 }
 
@@ -424,7 +424,7 @@ void RejitHandler::Shutdown()
 
     m_modules.clear();
     m_profilerInfo   = nullptr;
-    m_profilerInfo10 = nullptr;
+    m_profilerInfo12 = nullptr;
 }
 
 bool RejitHandler::IsShutdownRequested()

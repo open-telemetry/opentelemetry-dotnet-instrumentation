@@ -126,7 +126,7 @@ private:
     AssemblyProperty* m_pCorAssemblyProperty = nullptr;
 
     ICorProfilerInfo7* m_profilerInfo;
-    ICorProfilerInfo10* m_profilerInfo10;
+    ICorProfilerInfo12* m_profilerInfo12;
 
     std::shared_ptr<RejitWorkOffloader> m_work_offloader;
         
@@ -139,7 +139,7 @@ private:
     void RequestRejitForInlinersInModule(ModuleID moduleId);
 public:
     RejitHandler(ICorProfilerInfo7* pInfo, std::shared_ptr<RejitWorkOffloader> work_offloader);
-    RejitHandler(ICorProfilerInfo10* pInfo, std::shared_ptr<RejitWorkOffloader> work_offloader);
+    RejitHandler(ICorProfilerInfo12* pInfo, std::shared_ptr<RejitWorkOffloader> work_offloader);
 
     RejitHandlerModule* GetOrAddModule(ModuleID moduleId);
     void SetEnableByRefInstrumentation(bool enableByRefInstrumentation);
