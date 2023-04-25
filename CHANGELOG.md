@@ -5,7 +5,21 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.6.0...HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.7.0...HEAD)
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.7.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.7.0)
 
 ### Added
 
@@ -27,19 +41,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `OTEL_DOTNET_AUTO_RESOURCE_DETECTOR_ENABLED`
   - `OTEL_DOTNET_AUTO_{0}_RESOURCE_DETECTOR_ENABLED`.
 
-### Changed
-
-### Deprecated
-
 ### Removed
 
 - Remove support for enabling debugging mode with `OTEL_DOTNET_AUTO_DEBUG`.
 - Removed `OTEL_DOTNET_AUTO_INTEGRATIONS_FILE` as a required environment
   variable for bytecode instrumentation setup
-
-### Fixed
-
-### Security
 
 ## [0.6.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.6.0)
 
