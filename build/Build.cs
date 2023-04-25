@@ -44,8 +44,8 @@ partial class Build : NukeBuild
     [Parameter("The location to restore NuGet packages. Optional")]
     readonly AbsolutePath NuGetPackagesDirectory;
 
-    [Parameter("Version number of the NuGet packages built from the project. Default is '0.6.0'")]
-    string NuGetBaseVersionNumber = "0.6.0";
+    [Parameter("Version number of the NuGet packages built from the project. Default is '0.7.0'")]
+    string NuGetBaseVersionNumber = "0.7.0";
 
     [Parameter("Version suffix added to the NuGet packages built from the project. Default is '-local.1'")]
     string NuGetVersionSuffix = "-local.1";
