@@ -32,7 +32,7 @@ public class MongoDBTests : TestHelper
 
     [Theory]
     [Trait("Category", "EndToEnd")]
-    [Trait("Containers", "Linux")]
+    [Trait("Containers", "Any")]
     [MemberData(nameof(LibraryVersion.MongoDB), MemberType = typeof(LibraryVersion))]
     public void SubmitsTraces(string packageVersion)
     {
