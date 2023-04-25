@@ -150,6 +150,6 @@ partial class Build : NukeBuild
 
     static string AndFilter(params string[] args)
     {
-        return string.Join("&", args);
+        return string.Join("&", args.Where(s => !string.IsNullOrEmpty(s)));
     }
 }
