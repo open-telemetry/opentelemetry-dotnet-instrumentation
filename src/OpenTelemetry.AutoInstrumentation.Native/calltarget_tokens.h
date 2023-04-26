@@ -30,6 +30,9 @@ namespace trace
 class CallTargetTokens
 {
 private:
+    // The variables 'enable_by_ref_instrumentation' and 'enable_calltarget_state_by_ref' will always be true,
+    // but instead of removing them and the conditional branches they affect, we will keep the variables to make
+    // future upstream pulls easier.
     ModuleMetadata* module_metadata_ptr = nullptr;
     const bool enable_by_ref_instrumentation = true;
     const bool enable_calltarget_state_by_ref = true;
