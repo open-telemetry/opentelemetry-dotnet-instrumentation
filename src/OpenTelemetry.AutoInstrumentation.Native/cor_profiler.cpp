@@ -32,6 +32,8 @@
 #include <mach-o/getsect.h>
 #endif
 
+using namespace std::chrono_literals;
+
 #ifdef _WIN32
 #include "netfx_assembly_redirection.h"
 #endif
@@ -61,30 +63,24 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         }
     }
 
-#if defined(ARM64) || defined(ARM)
-    //
-    // In ARM64 and ARM, complete ReJIT support is only available from .NET 5.0
-    //
-    ICorProfilerInfo12* info12;
-    HRESULT hrInfo12 = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo12), (void**)&info12);
-    if (SUCCEEDED(hrInfo12))
+    // get ICorProfilerInfo12 for >= .NET 5.0
+    ICorProfilerInfo12* info12 = nullptr;
+    HRESULT             hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo12), (void**)&info12);
+    if (SUCCEEDED(hr))
     {
-        Logger::Info(".NET 5.0 runtime or greater was detected.");
+        Logger::Debug("Interface ICorProfilerInfo12 found.");
+        this->info_ = info12;
     }
     else
     {
-        Logger::Warn("Profiler disabled: .NET 5.0 runtime or greater is required on this "
-                     "architecture.");
-        return E_FAIL;
-    }
-#endif
-
-    // get ICorProfilerInfo7 interface for .NET Framework >= 4.6.1 and any .NET (Core)
-    HRESULT hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo7), (void**)&this->info_);
-    if (FAILED(hr))
-    {
-        Logger::Warn("Failed to attach profiler: Not supported .NET Framework version (lower than 4.6.1).");
-        return E_FAIL;
+        // get ICorProfilerInfo7 interface for .NET Framework >= 4.6.1 and any .NET (Core)
+        hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo7), (void**)&this->info_);
+        if (FAILED(hr))
+        {
+            Logger::Warn("Failed to attach profiler: Not supported .NET Framework version (lower than 4.6.1).");
+            return E_FAIL;
+        }
+        info12 = nullptr;
     }
 
     // code is ready to get runtime information
@@ -93,7 +89,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     {
         if (runtime_information_.is_desktop())
         {
-            // on .NET Framework it is the CLR version therfore major_version == 4 and minor_version == 0
+            // on .NET Framework it is the CLR version therefore major_version == 4 and minor_version == 0
             Logger::Debug(".NET Runtime: .NET Framework");
         }
         else if (runtime_information_.major_version < 5)
@@ -175,22 +171,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         }
     }
 
-    // get ICorProfilerInfo10 for >= .NET Core 3.0
-    ICorProfilerInfo10* info10 = nullptr;
-    hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo10), (void**)&info10);
-    if (SUCCEEDED(hr))
-    {
-        Logger::Debug("Interface ICorProfilerInfo10 found.");
-    }
-    else
-    {
-        info10 = nullptr;
-    }
+    auto work_offloader = std::make_shared<RejitWorkOffloader>(this->info_);
 
-    auto pInfo          = info10 != nullptr ? info10 : this->info_;
-    auto work_offloader = std::make_shared<RejitWorkOffloader>(pInfo);
-
-    rejit_handler = info10 != nullptr ? std::make_shared<RejitHandler>(info10, work_offloader)
+    rejit_handler = info12 != nullptr ? std::make_shared<RejitHandler>(info12, work_offloader)
                                       : std::make_shared<RejitHandler>(this->info_, work_offloader);
     tracer_integration_preprocessor = std::make_unique<TracerRejitPreprocessor>(rejit_handler, work_offloader);
 
@@ -529,7 +512,7 @@ void CorProfiler::RewritingPInvokeMaps(const ModuleMetadata& module_metadata, co
                                                              profiler_ref);
                         if (FAILED(hr))
                         {
-                            Logger::Warn("ModuleLoadFinished: DefinePinvokeMap to the actual profiler file path "
+                            Logger::Warn("RewritingPInvokeMaps: DefinePinvokeMap to the actual profiler file path "
                                          "failed, trying to restore the previous one.");
                             hr = metadata_emit->DefinePinvokeMap(methodDef, pdwMappingFlags,
                                                                  WSTRING(importName).c_str(), importModule);
@@ -538,7 +521,7 @@ void CorProfiler::RewritingPInvokeMaps(const ModuleMetadata& module_metadata, co
                                 // We only warn that we cannot rewrite the PInvokeMap but we still continue the module
                                 // load.
                                 // These errors must be handled on the caller with a try/catch.
-                                Logger::Warn("ModuleLoadFinished: Error trying to restore the previous PInvokeMap.");
+                                Logger::Warn("RewritingPInvokeMaps: Error trying to restore the previous PInvokeMap.");
                             }
                         }
                     }
@@ -546,7 +529,7 @@ void CorProfiler::RewritingPInvokeMaps(const ModuleMetadata& module_metadata, co
                     {
                         // We only warn that we cannot rewrite the PInvokeMap but we still continue the module load.
                         // These errors must be handled on the caller with a try/catch.
-                        Logger::Warn("ModuleLoadFinished: DeletePinvokeMap failed");
+                        Logger::Warn("RewritingPInvokeMaps: DeletePinvokeMap failed");
                     }
                 }
 
@@ -557,7 +540,7 @@ void CorProfiler::RewritingPInvokeMaps(const ModuleMetadata& module_metadata, co
         {
             // We only warn that we cannot rewrite the PInvokeMap but we still continue the module load.
             // These errors must be handled on the caller with a try/catch.
-            Logger::Warn("ModuleLoadFinished: Native Profiler DefineModuleRef failed");
+            Logger::Warn("RewritingPInvokeMaps: Native Profiler DefineModuleRef failed");
         }
     }
 }
@@ -714,9 +697,14 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
         }
     }
 
-    if (module_info.assembly.name == managed_profiler_name)
+#ifdef _WIN32
+    const bool perform_netfx_redirect = runtime_information_.is_desktop() && IsNetFxAssemblyRedirectionEnabled();
+#else
+    const bool perform_netfx_redirect = false;
+#endif // _WIN32
+
+    if (perform_netfx_redirect || module_info.assembly.name == managed_profiler_name)
     {
-        // Fix PInvoke Rewriting
         ComPtr<IUnknown> metadata_interfaces;
         auto             hr = this->info_->GetModuleMetaData(module_id, ofRead | ofWrite, IID_IMetaDataImport2,
                                                  metadata_interfaces.GetAddressOf());
@@ -737,27 +725,58 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
             ModuleMetadata(metadata_import, metadata_emit, assembly_import, assembly_emit, module_info.assembly.name,
                            module_info.assembly.app_domain_id, &corAssemblyProperty);
 
-        const auto& assemblyImport  = GetAssemblyImportMetadata(assembly_import);
-        const auto& assemblyVersion = assemblyImport.version.str();
-
-        Logger::Info("ModuleLoadFinished: ", managed_profiler_name, " v", assemblyVersion, " - Fix PInvoke maps");
 #ifdef _WIN32
-        RewritingPInvokeMaps(module_metadata, windows_nativemethods_type);
-#else
-        RewritingPInvokeMaps(module_metadata, nonwindows_nativemethods_type);
+        if (perform_netfx_redirect)
+        {
+            // On the .NET Framework redirect any assembly reference to the versions required by
+            // OpenTelemetry.AutoInstrumentation assembly, the ones under netfx/ folder.
+            RedirectAssemblyReferences(assembly_import, assembly_emit);
+        }
 #endif // _WIN32
+
+        if (module_info.assembly.name == managed_profiler_name)
+        {
+#ifdef _WIN32
+            RewritingPInvokeMaps(module_metadata, windows_nativemethods_type);
+#else
+            RewritingPInvokeMaps(module_metadata, nonwindows_nativemethods_type);
+#endif // _WIN32
+        }
+
+        if (Logger::IsDebugEnabled())
+        {
+            const auto& assemblyImport  = GetAssemblyImportMetadata(assembly_import);
+            const auto& assemblyVersion = assemblyImport.version.str();
+
+            Logger::Debug("ModuleLoadFinished: done ", module_info.assembly.name, " v", assemblyVersion);
+        }
     }
-    else
+
+    if (module_info.assembly.name != managed_profiler_name)
     {
         module_ids_.push_back(module_id);
 
         // We call the function to analyze the module and request the ReJIT of integrations defined in this module.
         if (tracer_integration_preprocessor != nullptr && !integration_definitions_.empty())
         {
-            const auto numReJITs =
-                tracer_integration_preprocessor->RequestRejitForLoadedModules(std::vector<ModuleID>{module_id},
-                                                                              integration_definitions_);
-            Logger::Debug("Total number of ReJIT Requested: ", numReJITs);
+            std::promise<ULONG> promise;
+            std::future<ULONG>  future = promise.get_future();
+            tracer_integration_preprocessor->EnqueueRequestRejitForLoadedModules(std::vector<ModuleID>{module_id},
+                                                                                 integration_definitions_, &promise);
+
+            // wait and get the value from the future<ULONG>
+            const auto status = future.wait_for(100ms);
+
+            if (status != std::future_status::timeout)
+            {
+                const auto& numReJITs = future.get();
+                Logger::Debug("Total number of ReJIT Requested: ", numReJITs);
+            }
+            else
+            {
+                Logger::Warn("Timeout while waiting for the rejit requests to be processed. Rejit will continue "
+                             "asynchronously, but some initial calls may not be instrumented");
+            }
         }
     }
 

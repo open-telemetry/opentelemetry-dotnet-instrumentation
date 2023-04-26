@@ -10,10 +10,31 @@ to .NET applications without having to modify their source code.
 > **Warning**
 > The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
-([0.6.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
-can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.6.0/docs/README.md).
+([0.7.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
+can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v0.7.0/docs/README.md).
 
 ---
+
+## Quick start
+
+If you'd like to try the instrumentation on an existing application before
+learning more about the configuration options and the project, follow
+these instructions:
+
+- On Linux and macOS, use the [shell scripts](#shell-scripts).
+- On Windows, use the [PowerShell module](#powershell-module-windows).
+
+To see the telemetry from your application directly on the standard output, set
+the following environment variables to `true` before launching your application:
+
+- `OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED`
+- `OTEL_DOTNET_AUTO_METRICS_CONSOLE_EXPORTER_ENABLED`
+- `OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED`
+
+For a demo using `docker compose`, clone this repository and
+follow the [examples/demo/README.md](../examples/demo/README.md).
+
+## Components
 
 OpenTelemetry .NET Automatic Instrumentation is built on top of
 [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
@@ -71,6 +92,10 @@ CI tests run against the following operating systems:
 See [config.md#instrumented-libraries-and-frameworks](config.md#instrumented-libraries-and-frameworks).
 
 ## Get started
+
+> **Note**
+> ARM architectures are not supported yet,
+> see [#2181](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2181).
 
 ### Considerations on scope
 
@@ -133,14 +158,21 @@ When running your application, make sure to:
 
 You can install OpenTelemetry .NET Automatic Instrumentation
 and instrument your .NET application using the provided Shell scripts.
+
+> **Note**
+> On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
+
 Example usage:
 
 ```sh
 # Download the bash script
-curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.6.0/otel-dotnet-auto-install.sh -O
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.7.0/otel-dotnet-auto-install.sh -O
 
 # Install core files
 sh ./otel-dotnet-auto-install.sh
+
+# Enable execution for the instrumentation script
+chmod +x $HOME/.otel-dotnet-auto/instrument.sh
 
 # Setup the instrumentation for the current shell session
 . $HOME/.otel-dotnet-auto/instrument.sh
@@ -157,7 +189,7 @@ uses environment variables as parameters:
 | `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                      | No       | `$HOME/.otel-dotnet-auto` |
 | `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | No       | *Calculated*              |
 | `TMPDIR`                | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`            |
-| `VERSION`               | Version to download                                              | No       | `v0.6.0`                  |
+| `VERSION`               | Version to download                                              | No       | `v0.7.0`                  |
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
@@ -168,9 +200,6 @@ uses environment variables as parameters:
 | `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                            | No       | `$HOME/.otel-dotnet-auto` |
 | `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows`       | No       | *Calculated*              |
 
-> **Note**
-> On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
-
 ### PowerShell module (Windows)
 
 On Windows, you should install OpenTelemetry .NET Automatic Instrumentation
@@ -179,7 +208,7 @@ Example usage (run as administrator):
 
 ```powershell
 # Download the module
-$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.6.0/OpenTelemetry.DotNet.Auto.psm1"
+$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v0.7.0/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
 
