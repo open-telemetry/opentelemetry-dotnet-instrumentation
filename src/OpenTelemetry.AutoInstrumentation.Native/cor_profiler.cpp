@@ -69,30 +69,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     if (SUCCEEDED(hr))
     {
         Logger::Debug("Interface ICorProfilerInfo12 found.");
+        this->info_ = info12;
     }
     else
-    {
-        info12 = nullptr;
-    }
-    this->info_ = info12;
-
-#if defined(ARM64) || defined(ARM)
-    //
-    // In ARM64 and ARM, complete ReJIT support is only available from .NET 5.0
-    //
-    if (SUCCEEDED(hr))
-    {
-        Logger::Info(".NET 5.0 runtime or greater was detected.");
-    }
-    else
-    {
-        Logger::Warn("Profiler disabled: .NET 5.0 runtime or greater is required on this "
-                     "architecture.");
-        return E_FAIL;
-    }
-#endif
-
-    if (this->info_ == nullptr)
     {
         // get ICorProfilerInfo7 interface for .NET Framework >= 4.6.1 and any .NET (Core)
         hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo7), (void**)&this->info_);
@@ -101,6 +80,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
             Logger::Warn("Failed to attach profiler: Not supported .NET Framework version (lower than 4.6.1).");
             return E_FAIL;
         }
+        info12 = nullptr;
     }
 
     // code is ready to get runtime information
@@ -191,8 +171,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         }
     }
 
-    auto pInfo          = info12 != nullptr ? info12 : this->info_;
-    auto work_offloader = std::make_shared<RejitWorkOffloader>(pInfo);
+    auto work_offloader = std::make_shared<RejitWorkOffloader>(this->info_);
 
     rejit_handler = info12 != nullptr ? std::make_shared<RejitHandler>(info12, work_offloader)
                                       : std::make_shared<RejitHandler>(this->info_, work_offloader);
