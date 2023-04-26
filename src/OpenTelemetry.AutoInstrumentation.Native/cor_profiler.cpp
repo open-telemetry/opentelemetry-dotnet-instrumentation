@@ -63,30 +63,24 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         }
     }
 
-#if defined(ARM64) || defined(ARM)
-    //
-    // In ARM64 and ARM, complete ReJIT support is only available from .NET 5.0
-    //
-    ICorProfilerInfo12* info12;
-    HRESULT hrInfo12 = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo12), (void**)&info12);
-    if (SUCCEEDED(hrInfo12))
+    // get ICorProfilerInfo12 for >= .NET 5.0
+    ICorProfilerInfo12* info12 = nullptr;
+    HRESULT             hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo12), (void**)&info12);
+    if (SUCCEEDED(hr))
     {
-        Logger::Info(".NET 5.0 runtime or greater was detected.");
+        Logger::Debug("Interface ICorProfilerInfo12 found.");
+        this->info_ = info12;
     }
     else
     {
-        Logger::Warn("Profiler disabled: .NET 5.0 runtime or greater is required on this "
-                     "architecture.");
-        return E_FAIL;
-    }
-#endif
-
-    // get ICorProfilerInfo7 interface for .NET Framework >= 4.6.1 and any .NET (Core)
-    HRESULT hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo7), (void**)&this->info_);
-    if (FAILED(hr))
-    {
-        Logger::Warn("Failed to attach profiler: Not supported .NET Framework version (lower than 4.6.1).");
-        return E_FAIL;
+        // get ICorProfilerInfo7 interface for .NET Framework >= 4.6.1 and any .NET (Core)
+        hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo7), (void**)&this->info_);
+        if (FAILED(hr))
+        {
+            Logger::Warn("Failed to attach profiler: Not supported .NET Framework version (lower than 4.6.1).");
+            return E_FAIL;
+        }
+        info12 = nullptr;
     }
 
     // code is ready to get runtime information
@@ -95,7 +89,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     {
         if (runtime_information_.is_desktop())
         {
-            // on .NET Framework it is the CLR version therfore major_version == 4 and minor_version == 0
+            // on .NET Framework it is the CLR version therefore major_version == 4 and minor_version == 0
             Logger::Debug(".NET Runtime: .NET Framework");
         }
         else if (runtime_information_.major_version < 5)
@@ -177,22 +171,9 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         }
     }
 
-    // get ICorProfilerInfo10 for >= .NET Core 3.0
-    ICorProfilerInfo10* info10 = nullptr;
-    hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo10), (void**)&info10);
-    if (SUCCEEDED(hr))
-    {
-        Logger::Debug("Interface ICorProfilerInfo10 found.");
-    }
-    else
-    {
-        info10 = nullptr;
-    }
+    auto work_offloader = std::make_shared<RejitWorkOffloader>(this->info_);
 
-    auto pInfo          = info10 != nullptr ? info10 : this->info_;
-    auto work_offloader = std::make_shared<RejitWorkOffloader>(pInfo);
-
-    rejit_handler = info10 != nullptr ? std::make_shared<RejitHandler>(info10, work_offloader)
+    rejit_handler = info12 != nullptr ? std::make_shared<RejitHandler>(info12, work_offloader)
                                       : std::make_shared<RejitHandler>(this->info_, work_offloader);
     tracer_integration_preprocessor = std::make_unique<TracerRejitPreprocessor>(rejit_handler, work_offloader);
 
