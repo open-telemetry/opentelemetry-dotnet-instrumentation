@@ -64,7 +64,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.0.14" },
+        new object[] { "8.0.15" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> SqlClient = new List<object[]>
