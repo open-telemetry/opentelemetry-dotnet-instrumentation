@@ -19,6 +19,7 @@ partial class Build : NukeBuild
     readonly string Containers = ContainersLinux;
 
     const string ContainersNone = "none";
+    const string ContainersAny = "any";
     const string ContainersLinux = "linux";
     const string ContainersWindows = "windows";
 
@@ -125,13 +126,15 @@ partial class Build : NukeBuild
         switch (Containers)
         {
             case ContainersNone:
-                return "Containers!=Linux&Containers!=Windows";
+                return "Containers!=Linux&Containers!=Windows&Containers!=Any";
             case ContainersLinux:
                 return "Containers!=Windows";
             case ContainersWindows:
                 return "Containers!=Linux";
+            case ContainersAny:
+                throw new InvalidOperationException($"Containers={ContainersAny} is not supported directly. Specify concrete value, either Containers={ContainersLinux} or Containers={ContainersWindows}.");
             default:
-                throw new InvalidOperationException($"Container={Containers} is not supported");
+                throw new InvalidOperationException($"Containers={Containers} is not supported");
         }
     }
 
@@ -145,28 +148,8 @@ partial class Build : NukeBuild
         return "FullyQualifiedName~" + TestName;
     }
 
-    string AndFilter(params string[] args)
+    static string AndFilter(params string[] args)
     {
-        var result = string.Empty;
-        var first = true;
-
-        foreach (var arg in args)
-        {
-            if (string.IsNullOrEmpty(arg))
-            {
-                continue;
-            }
-
-            if (first)
-            {
-                result = arg;
-                first = false;
-                continue;
-            }
-
-            result += "&" + arg;
-        }
-
-        return result;
+        return string.Join("&", args.Where(s => !string.IsNullOrEmpty(s)));
     }
 }
