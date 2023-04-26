@@ -52,10 +52,9 @@ protected:
         metadataImport->GetScopeProps(NULL, 1024, nullptr, &module_version_id);
 
         const std::vector<IntegrationDefinition> integrations;
-        module_metadata_ =
-            new ModuleMetadata(metadataImport, metadataEmit, assemblyImport, assemblyEmit, assemblyName, app_domain_id,
-                               module_version_id, std::make_unique<std::vector<IntegrationDefinition>>(integrations),
-                               NULL);
+        module_metadata_ = new ModuleMetadata(metadataImport, metadataEmit, assemblyImport, assemblyEmit, assemblyName,
+                                              app_domain_id, module_version_id,
+                                              std::make_unique<std::vector<IntegrationDefinition>>(integrations), NULL);
 
         mdModule module;
         hr = metadataImport->GetModuleFromScope(&module);

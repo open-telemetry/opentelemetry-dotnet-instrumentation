@@ -43,8 +43,8 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
         },
         [&metadataImport](HCORENUM ptr) -> void { metadataImport->CloseEnum(ptr); });
 
-    auto corProfilerInfo                = m_rejit_handler->GetCorProfilerInfo();
-    auto pCorAssemblyProperty           = m_rejit_handler->GetCorAssemblyProperty();
+    auto corProfilerInfo      = m_rejit_handler->GetCorProfilerInfo();
+    auto pCorAssemblyProperty = m_rejit_handler->GetCorAssemblyProperty();
 
     auto enumIterator = enumMethods.begin();
     for (; enumIterator != enumMethods.end(); enumIterator = ++enumIterator)
