@@ -3,14 +3,14 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0.203-alpine3.17
 RUN apk update \
     && apk upgrade \
     && apk add --no-cache --update \
-        clang=13.0.1-r1 \
-        cmake=3.23.5-r0 \
-        make=4.3-r0 \
-        bash=5.1.16-r2 \
+        clang=15.0.7-r0 \
+        cmake=3.24.4-r0 \
+        make=4.3-r1 \
+        bash=5.2.15-r0 \
         alpine-sdk=1.0-r1 \
-        protobuf=3.18.1-r3 \
-        protobuf-dev=3.18.1-r3 \
-        grpc=1.46.3-r0
+        protobuf=3.21.9-r0 \
+        protobuf-dev=3.21.9-r0 \
+        grpc=1.50.1-r0
 
 ENV IsAlpine=true
 ENV PROTOBUF_PROTOC=/usr/bin/protoc
