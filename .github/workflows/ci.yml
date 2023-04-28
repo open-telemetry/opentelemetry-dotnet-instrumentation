@@ -28,8 +28,8 @@ jobs:
       - uses: actions/setup-dotnet@v3.0.3
         with:
           dotnet-version: | 
-            6.0.407
-            7.0.202
+            6.0.408
+            7.0.203
       - name: Install SQL Server (localdb)
         uses: potatoqualitee/mssqlsuite@v1.7
         if: ${{ runner.os == 'Windows' }}
@@ -186,8 +186,8 @@ jobs:
       - uses: actions/setup-dotnet@v3.0.3
         with:
           dotnet-version: | 
-            6.0.407
-            7.0.202
+            6.0.408
+            7.0.203
 
       - name: Download NuGet Artifacts from build-nuget-packages job
         uses: actions/download-artifact@v3.0.2
