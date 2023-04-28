@@ -10,7 +10,8 @@ RUN apk update \
         alpine-sdk=1.0-r1 \
         protobuf=3.21.9-r0 \
         protobuf-dev=3.21.9-r0 \
-        grpc=1.50.1-r0
+        grpc=1.50.1-r0 \
+        grpc-plugins=1.50.1-r0
 
 ENV IsAlpine=true
 ENV PROTOBUF_PROTOC=/usr/bin/protoc
