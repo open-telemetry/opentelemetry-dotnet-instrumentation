@@ -51,9 +51,12 @@ private:
     //
     // CallTarget Members
     //
+    // The variables 'enable_by_ref_instrumentation' and 'enable_calltarget_state_by_ref' will always be true,
+    // but instead of removing them and the conditional branches they affect, we will keep the variables to make
+    // future upstream pulls easier.
     std::shared_ptr<RejitHandler> rejit_handler = nullptr;
-    bool enable_by_ref_instrumentation = false;
-    bool enable_calltarget_state_by_ref = false;
+    bool enable_by_ref_instrumentation = true;
+    bool enable_calltarget_state_by_ref = true;
     std::unique_ptr<TracerRejitPreprocessor> tracer_integration_preprocessor = nullptr;
 
     // Cor assembly properties
@@ -176,8 +179,6 @@ public:
     // Add Integrations methods
     //
     void InitializeProfiler(WCHAR* id, CallTargetDefinition* items, int size);
-    void EnableByRefInstrumentation();
-    void EnableCallTargetStateByRef();
     void AddDerivedInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
 
     friend class TracerMethodRewriter;
