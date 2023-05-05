@@ -198,7 +198,7 @@ The release process is described in [releasing.md](releasing.md).
 
 Apart from regular unit tests this repository contains integration tests
 under [test/IntegrationTests](../test/IntegrationTests)
-as they give the biggest confidence if the auto-instrumentation works properly.
+as they give the biggest confidence if the automatic instrumentation works properly.
 
 Each test class has its related test application that can be found
 under [test/test-applications/integrations](../test/test-applications/integrations)

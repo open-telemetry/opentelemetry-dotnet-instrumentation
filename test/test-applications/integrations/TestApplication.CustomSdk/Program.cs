@@ -43,7 +43,7 @@ public static class Program
         // test has to be marked as long running, in order to avoid random failures
         var longRunning = Environment.GetEnvironmentVariable("LONG_RUNNING") == "true";
 
-        // if auto-instrumentation is not injecting sdk
+        // if automatic instrumentation is not injecting sdk
         // then it's client's code responsibility
         // to subscribe to all activity sources
 
@@ -57,7 +57,7 @@ public static class Program
         {
             AppDomain.CurrentDomain.ProcessExit += (sender, eventArgs) =>
             {
-                // autoinstrumentation disposes created instrumentations during AppDomain.CurrentDomain.ProcessExit
+                // automatic instrumentation disposes created instrumentations during AppDomain.CurrentDomain.ProcessExit
                 // redis instrumentation flushes inside Dispose() which creates activities
                 // delay providers disposal so that there are active listeners
                 // when redis instrumentation attempts to create new activities

@@ -27,7 +27,7 @@ internal class DiagnosticSourceRule : Rule
     public DiagnosticSourceRule()
     {
         Name = "System.Diagnostics.DiagnosticSource Validator";
-        Description = "Ensure that the System.Diagnostics.DiagnosticSource version is not older than the version used by the Auto-Instrumentation";
+        Description = "Ensure that the System.Diagnostics.DiagnosticSource version is not older than the version used by the Automatic Instrumentation";
     }
 
     // This constructor is used for test purpose.

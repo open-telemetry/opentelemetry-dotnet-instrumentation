@@ -35,6 +35,6 @@ modify CLR optimizations.
 
 ## Disable OpenTelemetry .NET SDK setup
 
-| Environment variable                   | Description                                                                            | Default value                                        |
-|----------------------------------------|----------------------------------------------------------------------------------------|------------------------------------------------------|
-| `OTEL_DOTNET_AUTO_SETUP_SDK`           | Controls whether auto-instrumentation should set up OpenTelemetry .NET SDK at startup. | `true`                                               |
+| Environment variable         | Description                                                                                 | Default value |
+|------------------------------|---------------------------------------------------------------------------------------------|---------------|
+| `OTEL_DOTNET_AUTO_SETUP_SDK` | Controls whether automatic instrumentation should set up OpenTelemetry .NET SDK at startup. | `true`        |

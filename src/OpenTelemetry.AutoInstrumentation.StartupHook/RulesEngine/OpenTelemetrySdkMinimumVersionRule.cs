@@ -27,7 +27,7 @@ internal class OpenTelemetrySdkMinimumVersionRule : Rule
     public OpenTelemetrySdkMinimumVersionRule()
     {
         Name = "OpenTelemetry SDK Validator";
-        Description = "Ensure that the OpenTelemetry SDK version is not older than the version used by the Auto-Instrumentation";
+        Description = "Ensure that the OpenTelemetry SDK version is not older than the version used by the Automatic Instrumentation";
     }
 
     // This constructor is used for test purpose.
