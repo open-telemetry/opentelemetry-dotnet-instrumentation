@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>OpenTelemetry.AutoInstrumentation</id>
-    <description>OpenTelemetry Auto-Instrumentation package with all required components to enable automatic instrumentation.</description>
+    <description>OpenTelemetry Automatic Instrumentation package with all required components to enable automatic instrumentation.</description>
 
     <!-- Common properties expected to be defined at build time -->
     <version>$NuGetPackageVersion$</version>
