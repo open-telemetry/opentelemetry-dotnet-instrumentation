@@ -42,7 +42,7 @@ internal class StartupHook
             var ruleEngine = new RuleEngine();
             if (!ruleEngine.ValidateRules())
             {
-                Logger.Error("Rule Engine Failure: One or more rules failed validation. Auto-Instrumentation won't be loaded.");
+                Logger.Error("Rule Engine Failure: One or more rules failed validation. Automatic Instrumentation won't be loaded.");
                 return;
             }
 
