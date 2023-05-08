@@ -33,14 +33,6 @@ internal static class ConfigurationKeys
     public const string ExporterOtlpProtocol = "OTEL_EXPORTER_OTLP_PROTOCOL";
 
     /// <summary>
-    /// Configuration key for setting the directory for the profiler's log files.
-    /// If not set, default is
-    /// "%ProgramData%"\OpenTelemetry .NET AutoInstrumentation\logs\" on Windows or
-    /// "/var/log/opentelemetry/dotnet/" on Linux.
-    /// </summary>
-    public const string LogDirectory = "OTEL_DOTNET_AUTO_LOG_DIRECTORY";
-
-    /// <summary>
     /// Configuration key for enabling the flushing of telemetry data when an unhandled exception occurs.
     /// </summary>
     public const string FlushOnUnhandledException = "OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION";
