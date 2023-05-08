@@ -15,7 +15,6 @@
 // </copyright>
 
 using System.Reflection;
-using System.Runtime.Versioning;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.RulesEngine;
 
@@ -35,6 +34,8 @@ internal class StartupHook
     /// </summary>
     public static void Initialize()
     {
+        bool.TryParse(Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED"), out var failFast);
+
         try
         {
             LoaderAssemblyLocation = GetLoaderAssemblyLocation();
@@ -42,20 +43,22 @@ internal class StartupHook
             var ruleEngine = new RuleEngine();
             if (!ruleEngine.ValidateRules())
             {
-                Logger.Error("Rule Engine Failure: One or more rules failed validation. Automatic Instrumentation won't be loaded.");
-                return;
+                throw new Exception("Rule Engine Failure: One or more rules failed validation. Automatic Instrumentation won't be loaded.");
             }
 
             Logger.Information("Initialization.");
 
             // Creating an instance of OpenTelemetry.AutoInstrumentation.Loader.Startup
             // will initialize Instrumentation through its static constructor.
-            string loaderFilePath = Path.Combine(LoaderAssemblyLocation, "OpenTelemetry.AutoInstrumentation.Loader.dll");
-            Assembly loaderAssembly = Assembly.LoadFrom(loaderFilePath);
+            var loaderFilePath = Path.Combine(LoaderAssemblyLocation, "OpenTelemetry.AutoInstrumentation.Loader.dll");
+            var loaderAssembly = Assembly.LoadFrom(loaderFilePath);
             var loaderInstance = loaderAssembly.CreateInstance("OpenTelemetry.AutoInstrumentation.Loader.Loader");
             if (loaderInstance is null)
             {
-                Logger.Error("StartupHook failed to create an instance of the Loader");
+                if (failFast)
+                {
+                    throw new Exception("StartupHook failed to create an instance of the Loader");
+                }
             }
             else
             {
@@ -64,8 +67,11 @@ internal class StartupHook
         }
         catch (Exception ex)
         {
-            Logger.Error($"Error in StartupHook initialization: LoaderFolderLocation: {LoaderAssemblyLocation}, Error: {ex}");
-            throw;
+            Logger.Error(ex, $"Error in StartupHook initialization: LoaderFolderLocation: {LoaderAssemblyLocation}");
+            if (failFast)
+            {
+                throw;
+            }
         }
     }
 
