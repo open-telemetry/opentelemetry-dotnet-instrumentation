@@ -84,7 +84,7 @@ else
   SEPARATOR=":"
 fi
 
-# Configure OpenTelemetry .NET Auto-Instrumentation
+# Configure OpenTelemetry .NET Automatic Instrumentation
 export OTEL_DOTNET_AUTO_HOME
 
 # Configure .NET Core Runtime

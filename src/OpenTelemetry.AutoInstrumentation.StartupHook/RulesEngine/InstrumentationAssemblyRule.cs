@@ -28,7 +28,7 @@ internal class InstrumentationAssemblyRule : Rule
     public InstrumentationAssemblyRule()
     {
         Name = "Instrumentation Assembly Validator";
-        Description = "Ensure that the version of the OpenTelemetry Instrumentation libraries is not older than the version used by Auto-Instrumentation.";
+        Description = "Ensure that the version of the OpenTelemetry Instrumentation libraries is not older than the version used by Automatic Instrumentation.";
     }
 
     internal override bool Evaluate()
