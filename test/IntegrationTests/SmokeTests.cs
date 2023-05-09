@@ -15,12 +15,12 @@
 // </copyright>
 
 using System.Reflection;
+using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
 #if NETFRAMEWORK
 using System.Net;
-using FluentAssertions;
 using FluentAssertions.Extensions;
 using IntegrationTests.Helpers.Compatibility;
 #endif
@@ -88,6 +88,28 @@ public class SmokeTests : TestHelper
 
         VerifyTestApplicationNotInstrumented();
     }
+
+#if NET6_0_OR_GREATER
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void ApplicationFailFast()
+    {
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "true");
+        var process = StartTestApplication();
+
+        process.Should().NotBeNull();
+        var processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
+        if (processTimeout)
+        {
+            process.Kill();
+        }
+
+        processTimeout.Should().BeFalse();
+
+        process!.ExitCode.Should().NotBe(0);
+    }
+#endif
 
     [Fact]
     [Trait("Category", "EndToEnd")]
