@@ -55,10 +55,10 @@ partial class Build
         .Unlisted()
         .Executes(() =>
         {
-            EnsureExistingDirectory(TracerHomeDirectory);
-            EnsureExistingDirectory(NuGetArtifactsDirectory);
-            EnsureExistingDirectory(BuildDataDirectory);
-            EnsureExistingDirectory(ProfilerTestLogs);
+            TracerHomeDirectory.CreateDirectory();
+            NuGetArtifactsDirectory.CreateDirectory();
+            BuildDataDirectory.CreateDirectory();
+            ProfilerTestLogs.CreateDirectory();
         });
 
     Target Restore => _ => _
@@ -248,11 +248,11 @@ partial class Build
                 .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET6_0)));
 
             // Remove non-library files
-            TracerHomeDirectory.GlobFiles("**/*.xml").ForEach(DeleteFile);
-            (TracerHomeDirectory / "net").GlobFiles("*.json").ForEach(DeleteFile);
+            TracerHomeDirectory.GlobFiles("**/*.xml").ForEach(file => file.DeleteFile());
+            (TracerHomeDirectory / "net").GlobFiles("*.json").ForEach(file => file.DeleteFile());
             if (IsWin)
             {
-                (TracerHomeDirectory / "netfx").GlobFiles("*.json").ForEach(DeleteFile);
+                (TracerHomeDirectory / "netfx").GlobFiles("*.json").ForEach(file => file.DeleteFile());
             }
         });
 
@@ -444,10 +444,10 @@ partial class Build
                     var depsJson = JsonNode.Parse(rawJson).AsObject();
 
                     var folderRuntimeName = depsJson.GetFolderRuntimeName();
-                    var architectureStores = new List<string>
+                    var architectureStores = new List<AbsolutePath>
                     {
-                        Path.Combine(StoreDirectory, "x64", folderRuntimeName),
-                        Path.Combine(StoreDirectory, "x86", folderRuntimeName),
+                        StoreDirectory / "x64" / folderRuntimeName,
+                        StoreDirectory / "x86" / folderRuntimeName,
                     }.AsReadOnly();
 
                     depsJson.CopyNativeDependenciesToStore(file, architectureStores);
@@ -469,8 +469,8 @@ partial class Build
                 });
 
             // Cleanup Additional Deps Directory
-            AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml", "**/*.dylib", "**/*.so").ForEach(DeleteFile);
-            AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(DeleteDirectory);
+            AdditionalDepsDirectory.GlobFiles("**/*.dll", "**/*.pdb", "**/*.xml", "**/*.dylib", "**/*.so").ForEach(file => file.DeleteFile());
+            AdditionalDepsDirectory.GlobDirectories("**/runtimes").ForEach(directory => directory.DeleteDirectory());
         });
 
     Target PublishRuleEngineJson => _ => _

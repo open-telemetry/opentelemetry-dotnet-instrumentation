@@ -93,9 +93,9 @@ partial class Build
             var project = Solution.GetProject(Projects.Tests.AutoInstrumentationNativeTests);
             var workingDirectory = project.Directory / "bin" / BuildConfiguration.ToString() / Platform.ToString();
             var exePath = workingDirectory / $"{project.Name}.exe";
-            var testExe = ToolResolver.GetLocalTool(exePath);
+            var testExe = ToolResolver.GetTool(exePath);
 
-            testExe("--gtest_output=xml", workingDirectory: workingDirectory);
+            testExe($"--gtest_output=xml", workingDirectory: workingDirectory);
         });
 
     Target PublishIisTestApplications => _ => _

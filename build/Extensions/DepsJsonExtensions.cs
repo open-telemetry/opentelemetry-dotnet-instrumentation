@@ -21,7 +21,7 @@ internal static class DepsJsonExtensions
         return folderRuntimeName;
     }
 
-    public static void CopyNativeDependenciesToStore(this JsonObject depsJson, AbsolutePath file, IReadOnlyList<string> architectureStores)
+    public static void CopyNativeDependenciesToStore(this JsonObject depsJson, AbsolutePath file, IReadOnlyList<AbsolutePath> architectureStores)
     {
         var depsDirectory = file.Parent;
 
@@ -68,7 +68,7 @@ internal static class DepsJsonExtensions
         }
     }
 
-    public static void RollFrameworkForward(this JsonObject depsJson, string runtime, string rollForwardRuntime, IReadOnlyList<string> architectureStores)
+    public static void RollFrameworkForward(this JsonObject depsJson, string runtime, string rollForwardRuntime, IReadOnlyList<AbsolutePath> architectureStores)
     {
         // Update the contents of the json file.
         foreach (var dep in depsJson.GetDependencies())
@@ -96,26 +96,26 @@ internal static class DepsJsonExtensions
         // Roll forward each architecture by renaming the tfm folder holding the assemblies.
         foreach (var architectureStore in architectureStores)
         {
-            var assemblyDirectories = Directory.GetDirectories(architectureStore);
+            var assemblyDirectories = architectureStore.GetDirectories();
             foreach (var assemblyDirectory in assemblyDirectories)
             {
-                var assemblyVersionDirectories = Directory.GetDirectories(assemblyDirectory);
-                if (assemblyVersionDirectories.Length != 1)
+                var assemblyVersionDirectories = assemblyDirectory.GetDirectories().ToList();
+                if (assemblyVersionDirectories.Count != 1)
                 {
                     throw new InvalidOperationException(
-                        $"Expected exactly one directory under {assemblyDirectory} but found {assemblyVersionDirectories.Length} instead.");
+                        $"Expected exactly one directory under {assemblyDirectory} but found {assemblyVersionDirectories.Count} instead.");
                 }
 
                 var assemblyVersionDirectory = assemblyVersionDirectories[0];
-                var sourceDir = Path.Combine(assemblyVersionDirectory, "lib", runtime);
-                if (Directory.Exists(sourceDir))
+                var sourceDir = assemblyVersionDirectory / "lib" / runtime;
+                if (sourceDir.Exists())
                 {
-                    var destDir = Path.Combine(assemblyVersionDirectory, "lib", rollForwardRuntime);
+                    var destDir = assemblyVersionDirectory / "lib" / rollForwardRuntime;
 
                     CopyDirectoryRecursively(sourceDir, destDir);
 
                     // Since the json was also rolled forward the original tfm folder can be deleted.
-                    DeleteDirectory(sourceDir);
+                    sourceDir.DeleteDirectory();
                 }
             }
         }

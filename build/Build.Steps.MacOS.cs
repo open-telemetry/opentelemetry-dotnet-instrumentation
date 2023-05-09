@@ -13,8 +13,8 @@ partial class Build
         .Executes(() =>
         {
             var nativeProjectDirectory = NativeProfilerProject.Directory;
-            CMake.Value(arguments: ".", workingDirectory: nativeProjectDirectory);
-            Make.Value(workingDirectory: nativeProjectDirectory);
+            CMake.Value(arguments: $".", workingDirectory: nativeProjectDirectory);
+            Make.Value(arguments: $"", workingDirectory: nativeProjectDirectory);
         });
 
     Target PublishNativeProfilerMacOs => _ => _

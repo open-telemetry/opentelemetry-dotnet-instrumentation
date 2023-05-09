@@ -44,8 +44,8 @@ partial class Build
         .Description("Setup the \"runtimes/{platform}-{architecture}/native\" folders under \"nuget/OpenTelemetry.AutoInstrumentation.Runtime.Native\".")
         .Executes(() =>
         {
-            const string ciArtifactsDirectory = "bin/ci-artifacts";
-            const string baseRuntimeNativePath = "./nuget/OpenTelemetry.AutoInstrumentation.Runtime.Native/";
+            var ciArtifactsDirectory = RootDirectory / "bin" / "ci-artifacts";
+            var baseRuntimeNativePath = RootDirectory / "nuget" / "OpenTelemetry.AutoInstrumentation.Runtime.Native/";
 
             var requiredArtifacts = new string[]
             {
@@ -58,12 +58,11 @@ partial class Build
 
             foreach (var artifactFolder in requiredArtifacts)
             {
-                var sourcePath = Path.Combine(ciArtifactsDirectory, artifactFolder);
+                var sourcePath = ciArtifactsDirectory / artifactFolder;
 
                 var platformAndArchitecture = Path.GetFileName(artifactFolder);
-                var destinationPath =
-                    Path.Combine(baseRuntimeNativePath, "runtimes", platformAndArchitecture, "native");
-                DeleteDirectory(destinationPath);
+                var destinationPath = baseRuntimeNativePath / "runtimes" / platformAndArchitecture / "native";
+                destinationPath.DeleteDirectory();
 
                 CopyDirectoryRecursively(sourcePath, destinationPath);
             }
