@@ -61,14 +61,14 @@ partial class Build : NukeBuild
                 DeleteReparsePoints(SourceDirectory);
                 DeleteReparsePoints(TestsDirectory);
             }
-            SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x => DeleteDirectory(x));
-            TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x => DeleteDirectory(x));
-            EnsureCleanDirectory(OutputDirectory);
-            EnsureCleanDirectory(TracerHomeDirectory);
-            EnsureCleanDirectory(NuGetArtifactsDirectory);
-            EnsureCleanDirectory(NativeProfilerProject.Directory / "build");
-            EnsureCleanDirectory(NativeProfilerProject.Directory / "deps");
-            EnsureCleanDirectory(BuildDataDirectory);
+            SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x => x.DeleteDirectory());
+            TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x => x.DeleteDirectory());
+            OutputDirectory.CreateDirectory();
+            TracerHomeDirectory.CreateDirectory();
+            NuGetArtifactsDirectory.CreateDirectory();
+            (NativeProfilerProject.Directory / "build").CreateDirectory();
+            (NativeProfilerProject.Directory / "deps").CreateDirectory();
+            BuildDataDirectory.CreateDirectory();
 
             void DeleteReparsePoints(string path)
             {
