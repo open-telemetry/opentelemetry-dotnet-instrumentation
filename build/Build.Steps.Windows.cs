@@ -95,7 +95,7 @@ partial class Build
             var exePath = workingDirectory / $"{project.Name}.exe";
             var testExe = ToolResolver.GetTool(exePath);
 
-            testExe("--gtest_output=xml", workingDirectory: workingDirectory);
+            testExe($"--gtest_output=xml", workingDirectory: workingDirectory);
         });
 
     Target PublishIisTestApplications => _ => _
