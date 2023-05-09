@@ -63,12 +63,12 @@ partial class Build : NukeBuild
             }
             SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x => x.DeleteDirectory());
             TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(x => x.DeleteDirectory());
-            OutputDirectory.CreateDirectory();
-            TracerHomeDirectory.CreateDirectory();
-            NuGetArtifactsDirectory.CreateDirectory();
-            (NativeProfilerProject.Directory / "build").CreateDirectory();
-            (NativeProfilerProject.Directory / "deps").CreateDirectory();
-            BuildDataDirectory.CreateDirectory();
+            OutputDirectory.CreateOrCleanDirectory();
+            TracerHomeDirectory.CreateOrCleanDirectory();
+            NuGetArtifactsDirectory.CreateOrCleanDirectory();
+            (NativeProfilerProject.Directory / "build").CreateOrCleanDirectory();
+            (NativeProfilerProject.Directory / "deps").CreateOrCleanDirectory();
+            BuildDataDirectory.CreateOrCleanDirectory();
 
             void DeleteReparsePoints(string path)
             {
