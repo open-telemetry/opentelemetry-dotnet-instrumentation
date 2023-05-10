@@ -9,6 +9,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- The environment variable `OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED` could be
+  used to enable or disable the failing process when
+  automatic instrumentation cannot be executed.
+
 ### Changed
 
 ### Deprecated

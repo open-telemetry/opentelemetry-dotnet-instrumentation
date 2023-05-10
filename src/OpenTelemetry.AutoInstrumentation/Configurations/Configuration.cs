@@ -17,7 +17,7 @@
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 /// <summary>
-/// Represents the configration taken from one or more configuration sources.
+/// Represents the configuration taken from one or more configuration sources.
 /// </summary>
 internal class Configuration
 {
