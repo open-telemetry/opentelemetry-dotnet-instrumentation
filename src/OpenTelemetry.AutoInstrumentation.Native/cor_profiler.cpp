@@ -38,15 +38,15 @@ using namespace std::chrono_literals;
 #include "netfx_assembly_redirection.h"
 #endif
 
-#define FailProfiler(LEVEL, MESSAGE)    \
-    Logger::LEVEL(MESSAGE);             \
-    if (IsFailFastEnabled())            \
-    {                                   \
-        throw std::exception(MESSAGE);  \
-    }                                   \
-    else                                \
-    {                                   \
-        return E_FAIL;                  \
+#define FailProfiler(LEVEL, MESSAGE)                                                                                   \
+    Logger::LEVEL(MESSAGE);                                                                                            \
+    if (IsFailFastEnabled())                                                                                           \
+    {                                                                                                                  \
+        throw std::exception(MESSAGE);                                                                                 \
+    }                                                                                                                  \
+    else                                                                                                               \
+    {                                                                                                                  \
+        return E_FAIL;                                                                                                 \
     }
 
 namespace trace
@@ -129,7 +129,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     const auto& process_name          = GetCurrentProcessName();
     const auto& exclude_process_names = GetEnvironmentValues(environment::exclude_process_names);
 
-        // attach profiler only if this process's name is NOT on the list
+    // attach profiler only if this process's name is NOT on the list
     if (!exclude_process_names.empty() && Contains(exclude_process_names, process_name))
     {
         Logger::Info("Profiler disabled: ", process_name, " found in ", environment::exclude_process_names, ".");
@@ -163,7 +163,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
         if (app_pool_id_value.size() > 1 && app_pool_id_value.at(0) == '~')
         {
-            Logger::Info("Profiler disabled: ", environment::azure_app_services_app_pool_id, " ", app_pool_id_value, " is recognized as an Azure App Services infrastructure process.");
+            Logger::Info("Profiler disabled: ", environment::azure_app_services_app_pool_id, " ", app_pool_id_value,
+                         " is recognized as an Azure App Services infrastructure process.");
             FailProfiler(Info, "Profiler disabled - Azure App Services infrastructure process.")
         }
 
@@ -172,7 +173,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
         if (cli_telemetry_profile_value == WStr("AzureKudu"))
         {
-            Logger::Info("Profiler disabled: ", app_pool_id_value, " is recognized as Kudu, an Azure App Services reserved process.");
+            Logger::Info("Profiler disabled: ", app_pool_id_value,
+                         " is recognized as Kudu, an Azure App Services reserved process.");
             FailProfiler(Info, "Profiler disabled: - Kudu, an Azure App Services reserved process.")
         }
     }
