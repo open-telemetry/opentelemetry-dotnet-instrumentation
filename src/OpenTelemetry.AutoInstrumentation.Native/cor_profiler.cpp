@@ -38,6 +38,17 @@ using namespace std::chrono_literals;
 #include "netfx_assembly_redirection.h"
 #endif
 
+#define FailProfiler(LEVEL, MESSAGE)    \
+    Logger::LEVEL(MESSAGE);             \
+    if (IsFailFastEnabled())            \
+    {                                   \
+        throw std::exception(MESSAGE);  \
+    }                                   \
+    else                                \
+    {                                   \
+        return E_FAIL;                  \
+    }
+
 namespace trace
 {
 
@@ -77,8 +88,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         hr = cor_profiler_info_unknown->QueryInterface(__uuidof(ICorProfilerInfo7), (void**)&this->info_);
         if (FAILED(hr))
         {
-            Logger::Warn("Failed to attach profiler: Not supported .NET Framework version (lower than 4.6.1).");
-            return E_FAIL;
+            FailProfiler(Warn, "Failed to attach profiler: Not supported .NET Framework version (lower than 4.6.1).")
         }
         info12 = nullptr;
     }
@@ -106,8 +116,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
     if (runtime_information_.is_core() && runtime_information_.major_version < 6)
     {
-        Logger::Warn("Failed to attach profiler: Not supported .NET version (lower than 6.0).");
-        return E_FAIL;
+        FailProfiler(Warn, "Failed to attach profiler: Not supported .NET version (lower than 6.0).")
     }
 
 #ifdef _WIN32
@@ -120,11 +129,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     const auto& process_name          = GetCurrentProcessName();
     const auto& exclude_process_names = GetEnvironmentValues(environment::exclude_process_names);
 
-    // attach profiler only if this process's name is NOT on the list
+        // attach profiler only if this process's name is NOT on the list
     if (!exclude_process_names.empty() && Contains(exclude_process_names, process_name))
     {
         Logger::Info("Profiler disabled: ", process_name, " found in ", environment::exclude_process_names, ".");
-        return E_FAIL;
+        FailProfiler(Info, "Profiler disabled - excluded process")
     }
 
     if (runtime_information_.is_core())
@@ -138,8 +147,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         const auto startup_hooks = GetEnvironmentValues(environment::dotnet_startup_hooks, ENV_VAR_PATH_SEPARATOR);
         if (!IsStartupHookValid(startup_hooks, home_path))
         {
-            Logger::Error("The required StartupHook was not configured correctly. No telemetry will be captured.");
-            return E_FAIL;
+            FailProfiler(Error, "The required StartupHook was not configured correctly. No telemetry will be captured.")
         }
     }
 
@@ -155,9 +163,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
         if (app_pool_id_value.size() > 1 && app_pool_id_value.at(0) == '~')
         {
-            Logger::Info("Profiler disabled: ", environment::azure_app_services_app_pool_id, " ", app_pool_id_value,
-                         " is recognized as an Azure App Services infrastructure process.");
-            return E_FAIL;
+            Logger::Info("Profiler disabled: ", environment::azure_app_services_app_pool_id, " ", app_pool_id_value, " is recognized as an Azure App Services infrastructure process.");
+            FailProfiler(Info, "Profiler disabled - Azure App Services infrastructure process.")
         }
 
         const auto& cli_telemetry_profile_value =
@@ -165,9 +172,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
 
         if (cli_telemetry_profile_value == WStr("AzureKudu"))
         {
-            Logger::Info("Profiler disabled: ", app_pool_id_value,
-                         " is recognized as Kudu, an Azure App Services reserved process.");
-            return E_FAIL;
+            Logger::Info("Profiler disabled: ", app_pool_id_value, " is recognized as Kudu, an Azure App Services reserved process.");
+            FailProfiler(Info, "Profiler disabled: - Kudu, an Azure App Services reserved process.")
         }
     }
 
@@ -219,8 +225,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     hr = this->info_->SetEventMask2(event_mask, COR_PRF_HIGH_ADD_ASSEMBLY_REFERENCES);
     if (FAILED(hr))
     {
-        Logger::Warn("Failed to attach profiler: unable to set event mask.");
-        return E_FAIL;
+        FailProfiler(Warn, "Failed to attach profiler: unable to set event mask.")
     }
 
     runtime_information_ = GetRuntimeInformation(this->info_);
@@ -245,8 +250,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     const auto currentModuleFileName = GetCurrentModuleFileName();
     if (currentModuleFileName == EmptyWStr)
     {
-        Logger::Error("Profiler filepath: cannot be calculated.");
-        return E_FAIL;
+        FailProfiler(Error, "Profiler filepath: cannot be calculated.")
     }
 
     // we're in!

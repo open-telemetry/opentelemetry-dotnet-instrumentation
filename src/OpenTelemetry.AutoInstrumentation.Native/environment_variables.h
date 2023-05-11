@@ -90,6 +90,9 @@ const WSTRING clr_enable_ngen = WStr("OTEL_DOTNET_AUTO_CLR_ENABLE_NGEN");
 // Enable the assembly version redirection when running on the .NET Framework.
 const WSTRING netfx_assembly_redirection_enabled = WStr("OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED");
 
+// Enable the fail fast mode.
+const WSTRING fail_fast_enabled = WStr("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED");
+
 // The list of startup hooks defined for .NET Core 3.1+ applications.
 // This is a .NET runtime environment variable. 
 // See https://github.com/dotnet/runtime/blob/main/docs/design/features/host-startup-hook.md

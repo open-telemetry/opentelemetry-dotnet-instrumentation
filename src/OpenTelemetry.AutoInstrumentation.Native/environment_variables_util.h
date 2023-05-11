@@ -48,6 +48,7 @@ bool EnableInlining();
 bool IsNGENEnabled();
 bool IsDumpILRewriteEnabled();
 bool IsAzureAppServices();
+bool IsFailFastEnabled();
 bool AreTracesEnabled();
 bool AreMetricsEnabled();
 bool AreLogsEnabled();
