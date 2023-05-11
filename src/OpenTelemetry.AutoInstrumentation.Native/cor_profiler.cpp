@@ -42,7 +42,7 @@ using namespace std::chrono_literals;
     Logger::LEVEL(MESSAGE);                                                                                            \
     if (IsFailFastEnabled())                                                                                           \
     {                                                                                                                  \
-        throw std::exception(MESSAGE);                                                                                 \
+        throw std::runtime_error(MESSAGE);                                                                             \
     }                                                                                                                  \
     else                                                                                                               \
     {                                                                                                                  \
