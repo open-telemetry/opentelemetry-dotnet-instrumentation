@@ -33,6 +33,11 @@ bool IsAzureAppServices()
     CheckIfTrue(GetEnvironmentValue(environment::azure_app_services));
 }
 
+bool IsFailFastEnabled()
+{
+    CheckIfTrue(GetEnvironmentValue(environment::fail_fast_enabled));
+}
+
 bool AreTracesEnabled()
 {
     ToBooleanWithDefault(GetEnvironmentValue(environment::traces_enabled), true);

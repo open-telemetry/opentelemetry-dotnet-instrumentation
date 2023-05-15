@@ -358,7 +358,6 @@ public class SmokeTests : TestHelper
         VerifyTestApplicationNotInstrumented();
     }
 
-#if NET6_0_OR_GREATER
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void ApplicationFailFastEnabled()
@@ -378,7 +377,6 @@ public class SmokeTests : TestHelper
 
         process!.ExitCode.Should().NotBe(0);
     }
-#endif
 
     private void VerifyTestApplicationInstrumented()
     {
