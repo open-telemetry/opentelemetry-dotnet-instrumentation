@@ -41,7 +41,7 @@ public class SettingsTests : IDisposable
     [Fact]
     internal void GeneralSettings_DefaultValues()
     {
-        var settings = Settings.FromDefaultSources<GeneralSettings>();
+        var settings = Settings.FromDefaultSources<GeneralSettings>(false);
 
         using (new AssertionScope())
         {
@@ -55,7 +55,7 @@ public class SettingsTests : IDisposable
     [Fact]
     internal void TracerSettings_DefaultValues()
     {
-        var settings = Settings.FromDefaultSources<TracerSettings>();
+        var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
         using (new AssertionScope())
         {
@@ -77,7 +77,7 @@ public class SettingsTests : IDisposable
     [Fact]
     internal void MeterSettings_DefaultValues()
     {
-        var settings = Settings.FromDefaultSources<MetricSettings>();
+        var settings = Settings.FromDefaultSources<MetricSettings>(false);
 
         using (new AssertionScope())
         {
@@ -93,7 +93,7 @@ public class SettingsTests : IDisposable
     [Fact]
     internal void LogSettings_DefaultValues()
     {
-        var settings = Settings.FromDefaultSources<LogSettings>();
+        var settings = Settings.FromDefaultSources<LogSettings>(false);
 
         using (new AssertionScope())
         {
@@ -109,7 +109,7 @@ public class SettingsTests : IDisposable
     [Fact]
     internal void SdkSettings_DefaultValues()
     {
-        var settings = Settings.FromDefaultSources<SdkSettings>();
+        var settings = Settings.FromDefaultSources<SdkSettings>(false);
 
         using (new AssertionScope())
         {
@@ -126,9 +126,19 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, tracesExporter);
 
-        var settings = Settings.FromDefaultSources<TracerSettings>();
+        var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
         settings.TracesExporter.Should().Be(expectedTracesExporter);
+    }
+
+    [Fact]
+    internal void TracesExporter_FailFast()
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.Exporter, "not-supported");
+
+        var action = () => Settings.FromDefaultSources<TracerSettings>(true);
+
+        action.Should().Throw<NotSupportedException>();
     }
 
     [Theory]
@@ -140,9 +150,19 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, metricExporter);
 
-        var settings = Settings.FromDefaultSources<MetricSettings>();
+        var settings = Settings.FromDefaultSources<MetricSettings>(false);
 
         settings.MetricExporter.Should().Be(expectedMetricsExporter);
+    }
+
+    [Fact]
+    internal void MetricExporter_FailFast()
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.Exporter, "not-supported");
+
+        var action = () => Settings.FromDefaultSources<MetricSettings>(true);
+
+        action.Should().Throw<NotSupportedException>();
     }
 
     [Theory]
@@ -153,9 +173,19 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, logExporter);
 
-        var settings = Settings.FromDefaultSources<LogSettings>();
+        var settings = Settings.FromDefaultSources<LogSettings>(false);
 
         settings.LogExporter.Should().Be(expectedLogExporter);
+    }
+
+    [Fact]
+    internal void LogExporter_FailFast()
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.Exporter, "not-supported");
+
+        var action = () => Settings.FromDefaultSources<LogSettings>(true);
+
+        action.Should().Throw<NotSupportedException>();
     }
 
     [Theory]
@@ -172,9 +202,19 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, propagators);
 
-        var settings = Settings.FromDefaultSources<SdkSettings>();
+        var settings = Settings.FromDefaultSources<SdkSettings>(false);
 
         settings.Propagators.Should().BeEquivalentTo(expectedPropagators);
+    }
+
+    [Fact]
+    internal void Propagators_FailFast()
+    {
+        Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, "not-supported");
+
+        var action = () => Settings.FromDefaultSources<SdkSettings>(true);
+
+        action.Should().Throw<NotSupportedException>();
     }
 
     [Theory]
@@ -206,7 +246,7 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false");
         Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Traces.EnabledTracesInstrumentationTemplate, tracerInstrumentation), "true");
 
-        var settings = Settings.FromDefaultSources<TracerSettings>();
+        var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
         settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<TracerInstrumentation> { expectedTracerInstrumentation });
     }
@@ -220,7 +260,7 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesSampler, expectedTracesSampler);
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesSamplerArguments, expectedTracesSamplerArguments);
 
-        var settings = Settings.FromDefaultSources<TracerSettings>();
+        var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
         settings.TracesSampler.Should().Be(expectedTracesSampler);
         settings.TracesSamplerArguments.Should().Be(expectedTracesSamplerArguments);
@@ -242,7 +282,7 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.Metrics.MetricsInstrumentationEnabled, "false");
         Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Metrics.EnabledMetricsInstrumentationTemplate, meterInstrumentation), "true");
 
-        var settings = Settings.FromDefaultSources<MetricSettings>();
+        var settings = Settings.FromDefaultSources<MetricSettings>(false);
 
         settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<MetricInstrumentation> { expectedMetricInstrumentation });
     }
@@ -254,7 +294,7 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.LogsInstrumentationEnabled, "false");
         Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.Logs.EnabledLogsInstrumentationTemplate, logInstrumentation), "true");
 
-        var settings = Settings.FromDefaultSources<LogSettings>();
+        var settings = Settings.FromDefaultSources<LogSettings>(false);
 
         settings.EnabledInstrumentations.Should().BeEquivalentTo(new List<LogInstrumentation> { expectedLogInstrumentation });
     }
@@ -266,7 +306,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Logs.IncludeFormattedMessage, includeFormattedMessage);
 
-        var settings = Settings.FromDefaultSources<LogSettings>();
+        var settings = Settings.FromDefaultSources<LogSettings>(false);
 
         settings.IncludeFormattedMessage.Should().Be(expectedValue);
     }
@@ -281,7 +321,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, otlpProtocol);
 
-        var settings = Settings.FromDefaultSources<TracerSettings>();
+        var settings = Settings.FromDefaultSources<TracerSettings>(false);
 
         // null values for expected data will be handled by OTel .NET SDK
         settings.OtlpExportProtocol.Should().Be(expectedOtlpExportProtocol);
@@ -295,7 +335,7 @@ public class SettingsTests : IDisposable
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, flushOnUnhandledException);
 
-        var settings = Settings.FromDefaultSources<GeneralSettings>();
+        var settings = Settings.FromDefaultSources<GeneralSettings>(false);
 
         settings.FlushOnUnhandledException.Should().Be(expectedValue);
     }
@@ -307,7 +347,7 @@ public class SettingsTests : IDisposable
         Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, "false");
         Environment.SetEnvironmentVariable(string.Format(ConfigurationKeys.EnabledResourceDetectorTemplate, resourceDetector), "true");
 
-        var settings = Settings.FromDefaultSources<GeneralSettings>();
+        var settings = Settings.FromDefaultSources<GeneralSettings>(false);
 
         settings.EnabledResourceDetectors.Should().BeEquivalentTo(new List<ResourceDetector> { expectedResourceDetector });
     }

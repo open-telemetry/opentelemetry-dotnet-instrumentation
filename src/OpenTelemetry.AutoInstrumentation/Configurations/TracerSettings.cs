@@ -63,7 +63,7 @@ internal class TracerSettings : Settings
     /// <summary>
     /// Gets the instrumentation options.
     /// </summary>
-    public InstrumentationOptions InstrumentationOptions { get; private set; } = new(new Configuration());
+    public InstrumentationOptions InstrumentationOptions { get; private set; } = new(new Configuration(false));
 
     /// <summary>
     /// Gets sampler to be used for traces.
@@ -131,7 +131,15 @@ internal class TracerSettings : Settings
             case Constants.ConfigurationValues.None:
                 return TracesExporter.None;
             default:
+                if (configuration.FailFast)
+                {
+                    var message = $"Traces exporter '{tracesExporterEnvVar}' is not supported.";
+                    Logger.Error(message);
+                    throw new NotSupportedException(message);
+                }
+
                 Logger.Error($"Traces exporter '{tracesExporterEnvVar}' is not supported. Defaulting to '{Constants.ConfigurationValues.Exporters.Otlp}'.");
+
                 return TracesExporter.Otlp;
         }
     }

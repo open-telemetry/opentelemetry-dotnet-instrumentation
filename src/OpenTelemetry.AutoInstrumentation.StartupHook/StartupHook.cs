@@ -15,6 +15,7 @@
 // </copyright>
 
 using System.Reflection;
+using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.RulesEngine;
 
@@ -34,7 +35,7 @@ internal class StartupHook
     /// </summary>
     public static void Initialize()
     {
-        bool.TryParse(Environment.GetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED"), out var failFast);
+        bool.TryParse(Environment.GetEnvironmentVariable(ConfigurationKeys.FailFast), out var failFast);
 
         try
         {

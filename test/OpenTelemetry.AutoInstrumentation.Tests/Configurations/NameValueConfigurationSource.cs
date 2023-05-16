@@ -15,23 +15,16 @@
 // </copyright>
 
 using System.Collections.Specialized;
+using OpenTelemetry.AutoInstrumentation.Configurations;
 
-namespace OpenTelemetry.AutoInstrumentation.Configurations;
+namespace OpenTelemetry.AutoInstrumentation.Tests.Configurations;
 
-/// <summary>
-/// Represents a configuration source that retrieves
-/// values from the provided <see cref="NameValueCollection"/>.
-/// </summary>
 internal class NameValueConfigurationSource : StringConfigurationSource
 {
     private readonly NameValueCollection _nameValueCollection;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="NameValueConfigurationSource"/> class
-    /// that wraps the specified <see cref="NameValueCollection"/>.
-    /// </summary>
-    /// <param name="nameValueCollection">The collection that will be wrapped by this configuration source.</param>
-    public NameValueConfigurationSource(NameValueCollection nameValueCollection)
+    public NameValueConfigurationSource(bool failFast, NameValueCollection nameValueCollection)
+        : base(failFast)
     {
         _nameValueCollection = nameValueCollection;
     }

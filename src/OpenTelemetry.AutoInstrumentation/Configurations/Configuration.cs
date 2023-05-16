@@ -23,10 +23,13 @@ internal class Configuration
 {
     private readonly IConfigurationSource[] _sources;
 
-    public Configuration(params IConfigurationSource[] sources)
+    public Configuration(bool failFast, params IConfigurationSource[] sources)
     {
         _sources = sources;
+        FailFast = failFast;
     }
+
+    public bool FailFast { get; }
 
     /// <summary>
     /// Gets the <see cref="string"/> value of the first setting found with

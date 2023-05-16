@@ -43,6 +43,10 @@ internal class SdkSettings : Settings
                 {
                     Propagators.Add(propagator.Value);
                 }
+                else if (configuration.FailFast)
+                {
+                    throw new NotSupportedException($"Propagator '{propagatorValue}' is not supported.");
+                }
             }
         }
     }

@@ -1,4 +1,4 @@
-// <copyright file="EnvironmentConfigurationSource.cs" company="OpenTelemetry Authors">
+// <copyright file="ConfigurationKeys.FailFast.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,28 +17,13 @@
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 /// <summary>
-/// Represents a configuration source that
-/// retrieves values from environment variables.
+/// Configuration keys
 /// </summary>
-internal class EnvironmentConfigurationSource : StringConfigurationSource
+internal partial class ConfigurationKeys
 {
-    public EnvironmentConfigurationSource(bool failFast)
-        : base(failFast)
-    {
-    }
-
-    public override string? GetString(string key)
-    {
-        try
-        {
-            return Environment.GetEnvironmentVariable(key);
-        }
-        catch
-        {
-            // We should not add a dependency from the Configuration system to the Logger system,
-            // so do nothing
-        }
-
-        return null;
-    }
+    /// <summary>
+    /// Configuration key to set fail fast behavior.
+    /// Default is <c>"http/protobuf"</c>.
+    /// </summary>
+    public const string FailFast = "OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED";
 }

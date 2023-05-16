@@ -54,6 +54,9 @@
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\AutoInstrumentationEventSource.cs">
       <Link>AutoInstrumentationEventSource.cs</Link>
     </Compile>
+    <Compile Include="..\OpenTelemetry.AutoInstrumentation\Configurations\ConfigurationKeys.FailFast.cs">
+      <Link>Configurations\ConfigurationKeys.FailFast.cs</Link>
+    </Compile>
   </ItemGroup>
 
 </Project>
