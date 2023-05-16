@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="GraphQL" VersionOverride="$(LibraryVersion)" />
+    <PackageReference Include="GraphQL.MicrosoftDI" />
+    <PackageReference Include="GraphQL.Server.Transports.AspNetCore" />
+    <PackageReference Include="GraphQL.Server.Ui.Playground" />
+    <PackageReference Include="Microsoft.AspNetCore" />
+    <PackageReference Include="System.Reactive" />
+  </ItemGroup>
+
+  <!-- Reconfigure default usings template -->
+  <ItemGroup>
+    <Using Remove="System.Net.Http.Json" />
+  </ItemGroup>
+
+</Project>

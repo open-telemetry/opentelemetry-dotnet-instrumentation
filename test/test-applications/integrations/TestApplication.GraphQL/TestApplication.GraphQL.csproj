@@ -1,10 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
+  <PropertyGroup>
+    <LibraryVersion Condition="'$(LibraryVersion)' == ''" >2.4.0</LibraryVersion>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="GraphQL" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="GraphQL.StarWars" />
-    <PackageReference Include="GraphQL.Server.Transports.AspNetCore" />
-    <PackageReference Include="GraphQL.Server.Ui.Playground" />
+    <PackageReference Include="GraphQL.Server.Transports.AspNetCore" VersionOverride="3.4.0" />
+    <PackageReference Include="GraphQL.Server.Ui.Playground" VersionOverride="3.4.0" />
     <PackageReference Include="Microsoft.AspNetCore" />
   </ItemGroup>
 

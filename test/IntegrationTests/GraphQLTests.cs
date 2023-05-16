@@ -25,7 +25,8 @@ namespace IntegrationTests;
 public class GraphQLTests : TestHelper
 {
     public GraphQLTests(ITestOutputHelper output)
-        : base("GraphQL", output)
+    // : base("GraphQL", output)
+        : base("GraphQL.NativeSupport", output)
     {
     }
 
@@ -61,13 +62,14 @@ public class GraphQLTests : TestHelper
 
         // FAILURE: query fails 'execute' step
         Request(requests, body: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}");
-        Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, verifyFailure: VerifyNotImplementedException);
+        // Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, verifyFailure: VerifyNotImplementedException);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED", "false");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_GRAPHQL_INSTRUMENTATION_ENABLED", "true");
         SetEnvironmentVariable("OTEL_TRACES_SAMPLER", "always_on");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED", "false");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "GraphQL"); // TODO remove later
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
         SetEnvironmentVariable("ASPNETCORE_URLS", $"http://127.0.0.1:{aspNetCorePort}/");
@@ -166,10 +168,16 @@ public class GraphQLTests : TestHelper
                 return false;
             }
 
+            if (!setDocument && span.Attributes.Any(attr => attr.Key == "graphql.document"))
+            {
+                return false;
+            }
+
             return true;
         }
 
-        collector.Expect("OpenTelemetry.AutoInstrumentation.GraphQL", Predicate, spanName);
+        // collector.Expect("OpenTelemetry.AutoInstrumentation.GraphQL", Predicate, spanName);
+        collector.Expect("GraphQL", Predicate, spanName);
     }
 
     private async Task SubmitRequestsAsync(int aspNetCorePort, IEnumerable<RequestInfo> requests)

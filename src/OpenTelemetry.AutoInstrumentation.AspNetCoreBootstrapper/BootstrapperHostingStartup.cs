@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System.Reflection;
 using Microsoft.AspNetCore.Hosting;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Logger;
@@ -31,6 +32,7 @@ internal class BootstrapperHostingStartup : IHostingStartup
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger("AspNetCoreBootstrapper");
 
     private readonly LogSettings _logSettings;
+    private readonly TracerSettings _traceSettings;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BootstrapperHostingStartup"/> class.
@@ -38,6 +40,7 @@ internal class BootstrapperHostingStartup : IHostingStartup
     public BootstrapperHostingStartup()
     {
         _logSettings = Instrumentation.LogSettings.Value;
+        _traceSettings = Instrumentation.TracerSettings.Value;
     }
 
     /// <summary>
@@ -69,6 +72,19 @@ internal class BootstrapperHostingStartup : IHostingStartup
         {
             Logger.Error($"Error in BootstrapperHostingStartup: {ex}");
             throw;
+        }
+
+        if (_traceSettings.EnabledInstrumentations.Contains(TracerInstrumentation.GraphQL))
+        {
+            var type = Type.GetType("GraphQL.GraphQLBuilderExtensions, GraphQL");
+            var assembly = type?.Assembly;
+
+            if (assembly != null && assembly.GetName().Version >= new Version(4, 7, 0))
+            {
+                var method = type!.GetMethod("UseTelemetry", BindingFlags.Public | BindingFlags.Static);
+
+                method?.Invoke(null, new[] { builder });
+            }
         }
     }
 
