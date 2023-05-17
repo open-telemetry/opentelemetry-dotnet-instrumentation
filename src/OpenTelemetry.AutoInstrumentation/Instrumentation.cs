@@ -68,15 +68,17 @@ internal static class Instrumentation
 
     internal static ILifespanManager LifespanManager => LazyInstrumentationLoader.LifespanManager;
 
-    internal static Lazy<GeneralSettings> GeneralSettings { get; } = new(Settings.FromDefaultSources<GeneralSettings>);
+    internal static Lazy<FailFastSettings> FailFastSettings { get; } = new(() => Settings.FromDefaultSources<FailFastSettings>(false));
 
-    internal static Lazy<TracerSettings> TracerSettings { get; } = new(Settings.FromDefaultSources<TracerSettings>);
+    internal static Lazy<GeneralSettings> GeneralSettings { get; } = new(() => Settings.FromDefaultSources<GeneralSettings>(FailFastSettings.Value.FailFast));
 
-    internal static Lazy<MetricSettings> MetricSettings { get; } = new(Settings.FromDefaultSources<MetricSettings>);
+    internal static Lazy<TracerSettings> TracerSettings { get; } = new(() => Settings.FromDefaultSources<TracerSettings>(FailFastSettings.Value.FailFast));
 
-    internal static Lazy<LogSettings> LogSettings { get; } = new(Settings.FromDefaultSources<LogSettings>);
+    internal static Lazy<MetricSettings> MetricSettings { get; } = new(() => Settings.FromDefaultSources<MetricSettings>(FailFastSettings.Value.FailFast));
 
-    internal static Lazy<SdkSettings> SdkSettings { get; } = new(Settings.FromDefaultSources<SdkSettings>);
+    internal static Lazy<LogSettings> LogSettings { get; } = new(() => Settings.FromDefaultSources<LogSettings>(FailFastSettings.Value.FailFast));
+
+    internal static Lazy<SdkSettings> SdkSettings { get; } = new(() => Settings.FromDefaultSources<SdkSettings>(FailFastSettings.Value.FailFast));
 
     /// <summary>
     /// Initialize the OpenTelemetry SDK with a pre-defined set of exporters, shims, and
@@ -242,6 +244,11 @@ internal static class Instrumentation
                     break;
                 default:
                     Logger.Warning($"Configured metric instrumentation type is not supported: {instrumentation}");
+                    if (FailFastSettings.Value.FailFast)
+                    {
+                        throw new NotSupportedException($"Configured metric instrumentation type is not supported: {instrumentation}");
+                    }
+
                     break;
             }
         }
@@ -300,6 +307,11 @@ internal static class Instrumentation
                     break;
                 default:
                     Logger.Warning($"Configured trace instrumentation type is not supported: {instrumentation}");
+                    if (FailFastSettings.Value.FailFast)
+                    {
+                        throw new NotSupportedException($"Configured trace instrumentation type is not supported: {instrumentation}");
+                    }
+
                     break;
             }
         }

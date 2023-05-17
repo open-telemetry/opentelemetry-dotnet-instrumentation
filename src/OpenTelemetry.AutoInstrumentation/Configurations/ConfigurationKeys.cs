@@ -24,7 +24,7 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 /// <summary>
 /// Configuration keys
 /// </summary>
-internal static class ConfigurationKeys
+internal partial class ConfigurationKeys
 {
     /// <summary>
     /// Configuration key for the OTLP protocol to be used.

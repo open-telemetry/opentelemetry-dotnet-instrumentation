@@ -28,10 +28,10 @@ internal abstract class Settings
     /// </summary>
     public OtlpExportProtocol? OtlpExportProtocol { get; private set; }
 
-    public static T FromDefaultSources<T>()
+    public static T FromDefaultSources<T>(bool failFast)
         where T : Settings, new()
     {
-        var configuration = new Configuration(new EnvironmentConfigurationSource());
+        var configuration = new Configuration(failFast, new EnvironmentConfigurationSource(failFast));
         var settings = new T();
         settings.Load(configuration);
         return settings;

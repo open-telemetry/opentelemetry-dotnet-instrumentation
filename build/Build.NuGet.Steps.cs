@@ -104,7 +104,7 @@ partial class Build
         .Description("Builds the NuGetPackagesTests project")
         .Executes(() =>
         {
-            var nugetPackagesTestProject = Solution.GetProject("NuGetPackagesTests");
+            var nugetPackagesTestProject = Solution.GetProjectByName("NuGetPackagesTests");
             DotNetBuild(s => s
                 .SetProjectFile(nugetPackagesTestProject)
                 .SetConfiguration(BuildConfiguration));
@@ -132,7 +132,7 @@ partial class Build
         .After(BuildNuGetPackagesTestApplications)
         .Executes(() =>
         {
-            var nugetPackagesTestProject = Solution.GetProject("NuGetPackagesTests");
+            var nugetPackagesTestProject = Solution.GetProjectByName("NuGetPackagesTests");
 
             for (var i = 0; i < TestCount; i++)
             {

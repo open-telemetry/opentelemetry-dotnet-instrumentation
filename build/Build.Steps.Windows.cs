@@ -90,7 +90,7 @@ partial class Build
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
-            var project = Solution.GetProject(Projects.Tests.AutoInstrumentationNativeTests);
+            var project = Solution.GetProjectByName(Projects.Tests.AutoInstrumentationNativeTests);
             var workingDirectory = project.Directory / "bin" / BuildConfiguration.ToString() / Platform.ToString();
             var exePath = workingDirectory / $"{project.Name}.exe";
             var testExe = ToolResolver.GetTool(exePath);
@@ -104,7 +104,7 @@ partial class Build
         .OnlyWhenStatic(() => IsWin && Containers == ContainersWindows)
         .Executes(() =>
         {
-            var aspNetProject = Solution.GetProject(Projects.Tests.Applications.AspNet);
+            var aspNetProject = Solution.GetProjectByName(Projects.Tests.Applications.AspNet);
 
             MSBuild(x => x
                 .SetConfiguration(BuildConfiguration)
@@ -129,7 +129,7 @@ partial class Build
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
-            var project = Solution.GetProject(Projects.AutoInstrumentation).GetMSBuildProject();
+            var project = Solution.GetProjectByName(Projects.AutoInstrumentation).GetMSBuildProject();
             var packages = Solution.Directory / "src" / "Directory.Packages.props";
             var commonExcludedAssets = Solution.Directory / "src" / "CommonExcludedAssets.props";
 
@@ -205,7 +205,7 @@ partial class Build
     private void RunNetFxGacOperation(string operation)
     {
         var netFxAssembliesFolder = TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET462);
-        var installTool = Solution.GetProject(Projects.Tools.GacInstallTool);
+        var installTool = Solution.GetProjectByName(Projects.Tools.GacInstallTool);
 
         DotNetRun(s => s
             .SetProjectFile(installTool)

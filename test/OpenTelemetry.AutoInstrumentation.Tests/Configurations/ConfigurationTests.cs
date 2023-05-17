@@ -35,7 +35,7 @@ public class ConfigurationTests
     [Fact]
     public void ParseEnabledEnumList_Default_Enabled()
     {
-        var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection()));
+        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection()));
 
         var list = source.ParseEnabledEnumList<TestEnum>(
             enabledByDefault: true,
@@ -47,7 +47,7 @@ public class ConfigurationTests
     [Fact]
     public void ParseEnabledEnumList_Default_Disabled()
     {
-        var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection()));
+        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection()));
 
         var list = source.ParseEnabledEnumList<TestEnum>(
             enabledByDefault: false,
@@ -59,7 +59,7 @@ public class ConfigurationTests
     [Fact]
     public void ParseEnabledEnumList_SelectivelyEnabled()
     {
-        var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection
+        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection
         {
             { "TEST_CONFIGURATION_TEST1_ENABLED", "true" },
             { "TEST_CONFIGURATION_TEST3_ENABLED", "true" }
@@ -75,7 +75,7 @@ public class ConfigurationTests
     [Fact]
     public void ParseEnabledEnumList_SelectivelyDisabled()
     {
-        var source = new Configuration(new NameValueConfigurationSource(new NameValueCollection
+        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection
         {
             { "TEST_CONFIGURATION_TEST2_ENABLED", "false" },
         }));
@@ -88,12 +88,42 @@ public class ConfigurationTests
     }
 
     [Fact]
+    public void ParseEnabledEnumList_WrongValue()
+    {
+        var source = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection
+        {
+            { "TEST_CONFIGURATION_TEST2_ENABLED", "WrongValue" },
+        }));
+
+        var list = source.ParseEnabledEnumList<TestEnum>(
+            enabledByDefault: true,
+            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
+
+        list.Should().Equal(TestEnum.Test1, TestEnum.Test2, TestEnum.Test3);
+    }
+
+    [Fact]
+    public void ParseEnabledEnumList_WrongValue_FailFast()
+    {
+        var source = new Configuration(true, new NameValueConfigurationSource(true, new NameValueCollection
+        {
+            { "TEST_CONFIGURATION_TEST2_ENABLED", "WrongValue" },
+        }));
+
+        var parse = () => source.ParseEnabledEnumList<TestEnum>(
+            enabledByDefault: true,
+            enabledConfigurationTemplate: "TEST_CONFIGURATION_{0}_ENABLED");
+
+        parse.Should().Throw<FormatException>();
+    }
+
+    [Fact]
     public void ParseEmptyAsNull_CompositeConfigurationSource()
     {
         var mockSource = new Mock<IConfigurationSource>();
         mockSource.Setup(x => x.GetString(It.Is<string>(key => key == "TEST_NULL_VALUE"))).Returns<string>(_ => null);
         mockSource.Setup(x => x.GetString(It.Is<string>(key => key == "TEST_EMPTY_VALUE"))).Returns<string>(_ => string.Empty);
-        var compositeSource = new Configuration(mockSource.Object);
+        var compositeSource = new Configuration(true, mockSource.Object);
 
         using (new AssertionScope())
         {
