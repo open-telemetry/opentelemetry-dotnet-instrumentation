@@ -63,7 +63,7 @@ internal class TracerSettings : Settings
     /// <summary>
     /// Gets the instrumentation options.
     /// </summary>
-    public InstrumentationOptions InstrumentationOptions { get; private set; } = new(new Configuration(false));
+    public InstrumentationOptions InstrumentationOptions { get; private set; } = new(new Configuration(failFast: false));
 
     /// <summary>
     /// Gets sampler to be used for traces.
