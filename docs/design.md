@@ -257,7 +257,8 @@ versions, you can still address conflicts using the methods described in
 
 ### `System.Diagnostics.DiagnosticSource` versions
 
-`System.Diagnostics.DiagnosticSource` can be referenced in two versions.
+The version of `System.Diagnostics.DiagnosticSource` used by the instrumentation
+differs depending on the .NET version:
 
 - .NET Framework is referencing the latest supported version.
   Automatic redirection is forcing this version
