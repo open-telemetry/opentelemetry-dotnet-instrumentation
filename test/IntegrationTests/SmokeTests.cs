@@ -358,14 +358,17 @@ public class SmokeTests : TestHelper
         VerifyTestApplicationNotInstrumented();
     }
 
-    [Fact]
+    [Theory]
     [Trait("Category", "EndToEnd")]
-    public void ApplicationFailFastEnabled()
+    [InlineData("OTEL_TRACES_EXPORTER", "non-supported")]
+    [InlineData("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,TestApplication.Smoke,TestApplication.Smoke.exe")]
+    public void ApplicationFailFastEnabled(string additionalVariableKey, string additionalVariableValue)
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED", "true");
-        var process = StartTestApplication();
+        SetEnvironmentVariable(additionalVariableKey, additionalVariableValue);
 
+        using var process = StartTestApplication();
+        using var helper = new ProcessHelper(process);
         process.Should().NotBeNull();
         var processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
         if (processTimeout)
@@ -373,6 +376,7 @@ public class SmokeTests : TestHelper
             process.Kill();
         }
 
+        Output.WriteResult(helper);
         processTimeout.Should().BeFalse();
 
         process!.ExitCode.Should().NotBe(0);

@@ -80,7 +80,15 @@ internal class LogSettings : Settings
             case Constants.ConfigurationValues.None:
                 return LogExporter.None;
             default:
+                if (configuration.FailFast)
+                {
+                    var message = $"Log exporter '{logExporterEnvVar}' is not supported.'.";
+                    Logger.Error(message);
+                    throw new NotSupportedException(message);
+                }
+
                 Logger.Error($"Log exporter '{logExporterEnvVar}' is not supported. Defaulting to '{Constants.ConfigurationValues.Exporters.Otlp}'.");
+
                 return LogExporter.Otlp;
         }
     }

@@ -16,7 +16,6 @@
 
 using System.Collections.Specialized;
 using FluentAssertions;
-using FluentAssertions.Collections;
 using FluentAssertions.Execution;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -172,7 +171,7 @@ public class PluginManagerTests
 
     private static GeneralSettings GetSettings(string assemblyQualifiedName)
     {
-        var config = new Configuration(new NameValueConfigurationSource(new NameValueCollection()
+        var config = new Configuration(false, new NameValueConfigurationSource(false, new NameValueCollection()
         {
             { ConfigurationKeys.ProviderPlugins, assemblyQualifiedName }
         }));
@@ -208,7 +207,7 @@ public class PluginManagerTests
         {
             var attributes = new List<KeyValuePair<string, object>>
             {
-                new KeyValuePair<string, object>("key", "value"),
+                new("key", "value"),
             };
 
             builder.AddAttributes(attributes);
