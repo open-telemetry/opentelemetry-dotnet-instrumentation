@@ -255,6 +255,16 @@ If you can't change the application build to add or update the necessary package
 versions, you can still address conflicts using the methods described in
 [Handling of Assembly version Conflicts](./troubleshooting.md#handling-of-assembly-version-conflicts).
 
+### `System.Diagnostics.DiagnosticSource` versions
+
+`System.Diagnostics.DiagnosticSource` can be referenced in two versions.
+
+- .NET Framework is referencing the latest supported version.
+  Automatic redirection is forcing this version
+  if instrumented application bring own copy.
+- .NET is referencing the lowest supported version.
+  The version can be upgraded by the instrumented application.
+
 ## Further reading
 
 OpenTelemetry:
