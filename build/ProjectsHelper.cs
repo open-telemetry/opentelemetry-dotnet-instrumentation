@@ -20,7 +20,7 @@ public static class ProjectsHelper
     public static IEnumerable<Project> GetManagedSrcProjects(this Solution solution)
     {
         return solution
-            .GetProjects(CoreProjectSelector)
+            .GetAllProjects(CoreProjectSelector)
             .Where(x =>
                 // Should contain in the src directory
                 SrcDirectory.Contains(x.Directory) &&
@@ -31,7 +31,7 @@ public static class ProjectsHelper
     public static IEnumerable<Project> GetNativeSrcProjects(this Solution solution)
     {
         return solution
-            .GetProjects(CoreProjectSelector)
+            .GetAllProjects(CoreProjectSelector)
             .Where(x =>
                 // Should contain in the src directory
                 SrcDirectory.Contains(x.Directory) &&
@@ -48,7 +48,7 @@ public static class ProjectsHelper
     public static IEnumerable<Project> GetManagedUnitTestProjects(this Solution solution)
     {
         return solution
-            .GetProjects(CoreProjectSelector)
+            .GetAllProjects(CoreProjectSelector)
             .Where(x =>
                 // Should contain in the test directory
                 TestDirectory.Contains(x.Directory) &&
@@ -60,15 +60,15 @@ public static class ProjectsHelper
 
     public static Project GetManagedIntegrationTestProject(this Solution solution)
     {
-        return solution.GetProject(Projects.Tests.IntegrationTests);
+        return solution.AllProjects.First(project => project.Name == Projects.Tests.IntegrationTests);
     }
 
     public static IEnumerable<Project> GetIntegrationTestApplications(this Solution solution)
     {
         var testApplications = solution
-            .GetProjects(TestApplicationSelector)
+            .GetAllProjects(TestApplicationSelector)
             .Where(p => TestIntegrationApps.Contains(p.Directory));
-        var testLibraries = solution.GetProjects(TestLibrarySelector);
+        var testLibraries = solution.GetAllProjects(TestLibrarySelector);
 
         return testApplications.Concat(testLibraries);
     }
@@ -76,13 +76,13 @@ public static class ProjectsHelper
     public static IEnumerable<Project> GetNuGetPackagesTestApplications(this Solution solution)
     {
         return solution
-            .GetProjects(TestApplicationSelector)
+            .GetAllProjects(TestApplicationSelector)
             .Where(p => TestNuGetPackagesApps.Contains(p.Directory));
     }
 
     public static Project GetTestMock(this Solution solution)
     {
-        return solution.GetProject(Projects.Mocks.AutoInstrumentationMock);
+        return solution.GetProjectByName(Projects.Mocks.AutoInstrumentationMock);
     }
 
     public static IEnumerable<Project> GetWindowsOnlyTestApplications(this Solution solution)
@@ -101,7 +101,7 @@ public static class ProjectsHelper
 
     public static Project GetNativeTestProject(this Solution solution)
     {
-        return solution.GetProject(Projects.Tests.AutoInstrumentationNativeTests);
+        return solution.GetProjectByName(Projects.Tests.AutoInstrumentationNativeTests);
     }
 
     public static IEnumerable<Project> GetCrossPlatformManagedProjects(this Solution solution)
@@ -116,5 +116,10 @@ public static class ProjectsHelper
     {
         return solution.GetNativeSrcProjects()
             .Concat(new[] { solution.GetNativeTestProject() });
+    }
+
+    public static Project GetProjectByName(this Solution solution, string projectName)
+    {
+        return solution.AllProjects.First(projest => projest.Name == projectName);
     }
 }

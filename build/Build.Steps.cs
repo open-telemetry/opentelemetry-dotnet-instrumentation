@@ -29,7 +29,7 @@ partial class Build
     AbsolutePath AdditionalDepsDirectory => TracerHomeDirectory / "AdditionalDeps";
     AbsolutePath StoreDirectory => TracerHomeDirectory / "store";
 
-    Project NativeProfilerProject => Solution.GetProject(Projects.AutoInstrumentationNative);
+    Project NativeProfilerProject => Solution.GetProjectByName(Projects.AutoInstrumentationNative);
 
     [LazyPathExecutable(name: "cmd")] readonly Lazy<Tool> Cmd;
     [LazyPathExecutable(name: "cmake")] readonly Lazy<Tool> CMake;
@@ -99,7 +99,7 @@ partial class Build
             {
                 // Projects using `packages.config` can't be restored via "dotnet restore", use a NuGet Task to restore these projects.
                 var legacyRestoreProjects = Solution.GetNativeProjects()
-                    .Concat(new[] { Solution.GetProject(Projects.Tests.Applications.AspNet) });
+                    .Concat(new[] { Solution.GetProjectByName(Projects.Tests.Applications.AspNet) });
 
                 foreach (var project in legacyRestoreProjects)
                 {
@@ -188,7 +188,7 @@ partial class Build
         .Description("Compiles all the example projects")
         .Executes(() =>
         {
-            foreach (var exampleProject in Solution.GetProjects("Examples.*"))
+            foreach (var exampleProject in Solution.GetAllProjects("Examples.*"))
             {
                 DotNetBuild(s => s
                     .SetProjectFile(exampleProject)
@@ -207,7 +207,7 @@ partial class Build
                 : TargetFrameworks.Where(framework => !framework.ToString().StartsWith("net4"));
 
             DotNetPublish(s => s
-                .SetProject(Solution.GetProject(Projects.AutoInstrumentation))
+                .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentation))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
@@ -220,7 +220,7 @@ partial class Build
             // We need to emit AutoInstrumentationStartupHook for .Net Core 3.1 target framework
             // to avoid application crash with .Net Core 3.1 and .NET 5.0 apps.
             DotNetPublish(s => s
-                .SetProject(Solution.GetProject(Projects.AutoInstrumentationStartupHook))
+                .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationStartupHook))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
@@ -230,7 +230,7 @@ partial class Build
 
             // AutoInstrumentationLoader publish is needed only for .NET 6.0 to support load from AutoInstrumentationStartupHook.
             DotNetPublish(s => s
-                .SetProject(Solution.GetProject(Projects.AutoInstrumentationLoader))
+                .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationLoader))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
@@ -239,7 +239,7 @@ partial class Build
                 .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET6_0)));
 
             DotNetPublish(s => s
-                .SetProject(Solution.GetProject(Projects.AutoInstrumentationAspNetCoreBootstrapper))
+                .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationAspNetCoreBootstrapper))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
@@ -266,7 +266,7 @@ partial class Build
         .After(PublishManagedProfiler)
         .Executes(() =>
         {
-            var generatorTool = Solution.GetProject(Projects.Tools.LibraryVersionsGenerator);
+            var generatorTool = Solution.GetProjectByName(Projects.Tools.LibraryVersionsGenerator);
 
             DotNetRun(s => s
                 .SetProjectFile(generatorTool));
@@ -336,7 +336,7 @@ partial class Build
         .Executes(() =>
         {
             DotNetBuild(x => x
-                .SetProjectFile(Solution.GetProject(Projects.Mocks.AutoInstrumentationMock))
+                .SetProjectFile(Solution.GetProjectByName(Projects.Mocks.AutoInstrumentationMock))
                 .SetConfiguration(BuildConfiguration)
                 .SetNoRestore(true)
             );
@@ -350,8 +350,8 @@ partial class Build
 
             var unitTestProjects = new[]
             {
-                Solution.GetProject(Projects.Tests.AutoInstrumentationLoaderTests),
-                Solution.GetProject(Projects.Tests.AutoInstrumentationTests)
+                Solution.GetProjectByName(Projects.Tests.AutoInstrumentationLoaderTests),
+                Solution.GetProjectByName(Projects.Tests.AutoInstrumentationTests)
             };
 
             if (!string.IsNullOrWhiteSpace(TestProject))
@@ -424,7 +424,7 @@ partial class Build
             }
 
             DotNetPublish(s => s
-                .SetProject(Solution.GetProject(Projects.AutoInstrumentationAdditionalDeps))
+                .SetProject(Solution.GetProjectByName(Projects.AutoInstrumentationAdditionalDeps))
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .SetProperty("TracerHomePath", TracerHomeDirectory)
@@ -545,7 +545,7 @@ partial class Build
     /// </summary>
     private void RunBootstrappingTests()
     {
-        var project = Solution.GetProject(Projects.Tests.AutoInstrumentationBootstrappingTests);
+        var project = Solution.GetProjectByName(Projects.Tests.AutoInstrumentationBootstrappingTests);
         if (!string.IsNullOrWhiteSpace(TestProject) && !project.Name.Contains(TestProject, StringComparison.OrdinalIgnoreCase))
         {
             // Test project was not selected.
