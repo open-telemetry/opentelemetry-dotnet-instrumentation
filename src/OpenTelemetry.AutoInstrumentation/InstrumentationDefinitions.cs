@@ -52,19 +52,24 @@ internal static partial class InstrumentationDefinitions
             new("GraphQL", "Trace", "GraphQL", "GraphQL.Execution.ExecutionStrategy", "ExecuteAsync",  new[] { "System.Threading.Tasks.Task`1<GraphQL.ExecutionResult>", "GraphQL.Execution.ExecutionContext" }, 2, 3, 0, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration"),
             new("GraphQL", "Trace", "GraphQL", "GraphQL.Execution.SubscriptionExecutionStrategy", "ExecuteAsync",  new[] { "System.Threading.Tasks.Task`1<GraphQL.ExecutionResult>", "GraphQL.Execution.ExecutionContext" }, 2, 3, 0, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration"),
 
+#if NET6_0_OR_GREATER
             // ILogger
             new("ILogger", "Log", "Microsoft.Extensions.Logging", "Microsoft.Extensions.Logging.LoggingBuilder", ".ctor",  new[] { "System.Void", "Microsoft.Extensions.DependencyInjection.IServiceCollection" }, 3, 1, 0, 7, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration"),
+#endif
 
             // MongoDB
             new("MongoDB", "Trace", "MongoDB.Driver", "MongoDB.Driver.MongoClient", ".ctor",  new[] { "System.Void", "MongoDB.Driver.MongoClientSettings" }, 2, 13, 3, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration"),
 
+#if NET6_0_OR_GREATER
             // MySqlData
             new("MySqlData", "Trace", "MySql.Data", "MySql.Data.MySqlClient.MySqlConnectionStringBuilder", "get_Logging",  new[] { "System.Boolean" }, 8, 0, 31, 8, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData.MySqlConnectionStringBuilderIntegration"),
+#endif
 
             // NServiceBus
             new("NServiceBus", "Trace", "NServiceBus.Core", "NServiceBus.EndpointConfiguration", ".ctor",  new[] { "System.Void", "System.String" }, 8, 0, 0, 8, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration"),
             new("NServiceBus", "Metric", "NServiceBus.Core", "NServiceBus.EndpointConfiguration", ".ctor",  new[] { "System.Void", "System.String" }, 8, 0, 0, 8, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration"),
 
+#if NET6_0_OR_GREATER
             // StackExchangeRedis
             new("StackExchangeRedis", "Trace", "StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImpl",  new[] { "StackExchange.Redis.ConnectionMultiplexer", "System.Object", "System.IO.TextWriter" }, 2, 0, 0, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration"),
             new("StackExchangeRedis", "Trace", "StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImpl",  new[] { "StackExchange.Redis.ConnectionMultiplexer", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter" }, 2, 0, 0, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration"),
@@ -73,12 +78,15 @@ internal static partial class InstrumentationDefinitions
             new("StackExchangeRedis", "Trace", "StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImplAsync",  new[] { "System.Threading.Tasks.Task`1<StackExchange.Redis.ConnectionMultiplexer>", "System.Object", "System.IO.TextWriter" }, 2, 0, 0, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync"),
             new("StackExchangeRedis", "Trace", "StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImplAsync",  new[] { "System.Threading.Tasks.Task`1<StackExchange.Redis.ConnectionMultiplexer>", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter" }, 2, 0, 0, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync"),
             new("StackExchangeRedis", "Trace", "StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImplAsync",  new[] { "System.Threading.Tasks.Task`1<StackExchange.Redis.ConnectionMultiplexer>", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter", "System.Nullable`1[StackExchange.Redis.ServerType]" }, 2, 0, 0, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync"),
+#endif
 
+#if NETFRAMEWORK
             // WcfClient
             new("WcfClient", "Trace", "System.ServiceModel", "System.ServiceModel.ChannelFactory", "InitializeEndpoint",  new[] { "System.Void", "System.String", "System.ServiceModel.EndpointAddress" }, 4, 0, 0, 4, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.WcfClientIntegration"),
             new("WcfClient", "Trace", "System.ServiceModel", "System.ServiceModel.ChannelFactory", "InitializeEndpoint",  new[] { "System.Void", "System.String", "System.ServiceModel.EndpointAddress", "System.Configuration.Configuration" }, 4, 0, 0, 4, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.WcfClientIntegration"),
             new("WcfClient", "Trace", "System.ServiceModel", "System.ServiceModel.ChannelFactory", "InitializeEndpoint",  new[] { "System.Void", "System.ServiceModel.Description.ServiceEndpoint" }, 4, 0, 0, 4, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.WcfClientIntegration"),
             new("WcfClient", "Trace", "System.ServiceModel", "System.ServiceModel.ChannelFactory", "InitializeEndpoint",  new[] { "System.Void", "System.ServiceModel.Channels.Binding", "System.ServiceModel.EndpointAddress" }, 4, 0, 0, 4, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.WcfClientIntegration"),
+#endif
         };
 
     // TODO: Generate this list using source generators
