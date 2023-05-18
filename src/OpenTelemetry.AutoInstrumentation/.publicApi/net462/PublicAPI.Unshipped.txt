@@ -17,12 +17,8 @@ OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.Instance.get -> object!
 OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.ToString() -> string!
 OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.Type.get -> System.Type!
 OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData.MySqlConnectionStringBuilderIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync
 OpenTelemetry.AutoInstrumentation.Instrumentations.Validations.StrongNamedValidation
 OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.WcfClientIntegration
 override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.ToString() -> string!
