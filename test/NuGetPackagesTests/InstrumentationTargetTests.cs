@@ -17,6 +17,7 @@
 using FluentAssertions;
 using IntegrationTests.Helpers;
 using Microsoft.Build.Evaluation;
+using NuGet.Versioning;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
@@ -51,30 +52,52 @@ public sealed class InstrumentationTargetTests : TestHelper, IDisposable
     [Fact]
     public void InstrumentApplication()
     {
-        // Ensure no MS telemetry spans.
+        // Disable dotnet CLI telemetry.
         SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", "1");
 
-        // Stop all build servers to ensure user like experience.
-        // Currently there is an issue trying to launch VBCSCompiler background server.
-        RunDotNetCli("build-server shutdown").Should().Be(0);
-
+        // Always create the app targeting a fixed framework version to simplify
+        // text replacement in the project file.
         RunDotNetCli($"new console --framework net6.0").Should().Be(0);
 
         ChangeDefaultProgramToHelloWorld();
 
-        ChangeProjectDefaults();
+        ChangeProjectDefaultsAndTargetFranework();
 
         RunDotNetCli("build").Should().Be(0);
 
-        // Find the directory with the NuGet packages.
-        var nugetArtifactsDir = Path.GetDirectoryName(
-            Path.Combine(GetTestAssemblyPath(), "../../../../../bin/nuget-artifacts/"));
-
         // Add the automatic instrumentation NuGet package to the app.
+        var nugetArtifactsDir = Path.Combine(GetTestAssemblyPath(), "../../../../../bin/nuget-artifacts/");
         RunDotNetCli(
             $"add package OpenTelemetry.AutoInstrumentation --source \"{nugetArtifactsDir}\" --prerelease").Should().Be(0);
 
         RunDotNetCli("build").Should().Be(0);
+
+        // Read the auto-instrumentation targets file and verify detection, ignoring, and instrumentation of targets.
+        var otelAutoTargetsFile = Path.Combine(GetTestAssemblyPath(), "OpenTelemetry.AutoInstrumentation.BuildTasks.targets");
+        var otelAutoTargets = new Project(otelAutoTargetsFile);
+        foreach (var instrTarget in otelAutoTargets.Xml.Items.Where(x => x.ElementName == "InstrumentationTarget"))
+        {
+            // Add instrumentation target to the app.
+            var instrTargetVersionRange = VersionRange.Parse(
+                instrTarget.Metadata.Single(x => x.Name == "TargetNuGetPackageVersionRange").Value);
+            RunDotNetCli($"add package {instrTarget.Include} --version {instrTargetVersionRange.MinVersion}").Should().Be(0);
+
+            // Build should fail because the target is not yet instrumented.
+            var instrPackageId = instrTarget.Metadata.Single(x => x.Name == "InstrumentationNuGetPackageId").Value;
+            var instrPackageVersion = instrTarget.Metadata.Single(x => x.Name == "InstrumentationNuGetPackageVersion").Value;
+            var expectedErrorMessage =
+                $"OpenTelemetry.AutoInstrumentation: add a reference to the instrumentation package '{instrPackageId}' version " +
+                $"{instrPackageVersion} or add '{instrTarget.Include}' to the property 'DisabledInstrumentations' to suppress this error.";
+
+            RunDotNetCli("build", expectedErrorMessage).Should().NotBe(0);
+
+            // Explicitly disable the instrumentation target.
+            RunDotNetCli($"build -p:DisabledInstrumentations={instrTarget.Include}").Should().Be(0);
+
+            // Add the instrumentation package, build should succeed.
+            RunDotNetCli($"add package {instrPackageId} --version {instrPackageVersion}").Should().Be(0);
+            RunDotNetCli("build").Should().Be(0);
+        }
     }
 
     private void ChangeDefaultProgramToHelloWorld()
@@ -93,7 +116,7 @@ public sealed class InstrumentationTargetTests : TestHelper, IDisposable
         File.WriteAllText("Program.cs", ProgramContent);
     }
 
-    private void ChangeProjectDefaults()
+    private void ChangeProjectDefaultsAndTargetFranework()
     {
         string tfm;
 #if NETFRAMEWORK
@@ -110,7 +133,7 @@ public sealed class InstrumentationTargetTests : TestHelper, IDisposable
         File.WriteAllText(projectFile, projectText);
     }
 
-    private int RunDotNetCli(string arguments)
+    private int RunDotNetCli(string arguments, string? expectedOutputFragment = null)
     {
         Output.WriteLine($"Running: {DotNetCli} {arguments}");
 
@@ -128,6 +151,11 @@ public sealed class InstrumentationTargetTests : TestHelper, IDisposable
         Output.WriteLine("ProcessId: " + process.Id);
         Output.WriteLine("Exit Code: " + process.ExitCode);
         Output.WriteResult(helper);
+
+        if (expectedOutputFragment is not null)
+        {
+            helper.StandardOutput.Should().Contain(expectedOutputFragment);
+        }
 
         processTimeout.Should().BeFalse("Test application timed out");
         return process.ExitCode;
