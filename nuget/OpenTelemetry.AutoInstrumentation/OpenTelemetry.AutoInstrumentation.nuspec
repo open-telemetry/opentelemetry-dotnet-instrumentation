@@ -17,10 +17,12 @@
 
     <dependencies>
       <group targetFramework=".NETFramework4.6.2">
+        <dependency id="OpenTelemetry.AutoInstrumentation.BuildTasks" version="$NuGetPackageVersion$" />
         <dependency id="OpenTelemetry.AutoInstrumentation.Runtime.Managed" version="$NuGetPackageVersion$" />
         <dependency id="OpenTelemetry.AutoInstrumentation.Runtime.Native" version="$NuGetPackageVersion$" />
       </group>
       <group targetFramework="net6.0">
+        <dependency id="OpenTelemetry.AutoInstrumentation.BuildTasks" version="$NuGetPackageVersion$" />
         <dependency id="OpenTelemetry.AutoInstrumentation.Runtime.Managed" version="$NuGetPackageVersion$" />
         <dependency id="OpenTelemetry.AutoInstrumentation.Runtime.Native" version="$NuGetPackageVersion$" />
         <dependency id="OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper" version="$NuGetPackageVersion$" />

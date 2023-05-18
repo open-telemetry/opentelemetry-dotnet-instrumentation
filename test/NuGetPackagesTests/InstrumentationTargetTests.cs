@@ -1,4 +1,4 @@
-// <copyright file="DotNetCliTests.cs" company="OpenTelemetry Authors">
+// <copyright file="InstrumentationTargetTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,29 +14,28 @@
 // limitations under the License.
 // </copyright>
 
-#if !NETFRAMEWORK
-
 using FluentAssertions;
 using IntegrationTests.Helpers;
+using Microsoft.Build.Evaluation;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
 [Trait("Category", "EndToEnd")]
-public sealed class DotNetCliTests : TestHelper, IDisposable
+public sealed class InstrumentationTargetTests : TestHelper, IDisposable
 {
     private const string DotNetCli = "dotnet";
-    private const string TargetAppName = "OTelDotNetCliTest";
+    private const string TargetAppName = "InstrumentationTargetTest";
 
     private readonly string _prevWorkingDir = Directory.GetCurrentDirectory();
     private readonly DirectoryInfo _tempWorkingDir;
 
-    public DotNetCliTests(ITestOutputHelper output)
+    public InstrumentationTargetTests(ITestOutputHelper output)
         : base(DotNetCli, output)
     {
         var tempDirName = Path.Combine(
             Path.GetTempPath(),
-            $"otel-dotnet-test-{Guid.NewGuid():N}",
+            $"instr-target-test-{Guid.NewGuid():N}",
             TargetAppName);
         _tempWorkingDir = Directory.CreateDirectory(tempDirName);
 
@@ -50,44 +49,68 @@ public sealed class DotNetCliTests : TestHelper, IDisposable
     }
 
     [Fact]
-    public void WorkFlow()
+    public void InstrumentApplication()
     {
         // Ensure no MS telemetry spans.
         SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", "1");
 
         // Stop all build servers to ensure user like experience.
         // Currently there is an issue trying to launch VBCSCompiler background server.
-        RunDotNetCli("build-server shutdown");
+        RunDotNetCli("build-server shutdown").Should().Be(0);
 
-        var tfm = $"net{Environment.Version.Major}.0";
-        RunDotNetCli($"new console --framework {tfm}");
+        RunDotNetCli($"new console --framework net6.0").Should().Be(0);
 
-        ChangeDefaultProgramToHttpClient();
+        ChangeDefaultProgramToHelloWorld();
 
-        RunDotNetCli("build");
+        ChangeProjectDefaults();
 
-        var targetAppDllPath = Path.Combine(".", "bin", "Debug", tfm, TargetAppName + ".dll");
-        RunAppWithDotNetCliAndAssertHttpSpans(targetAppDllPath);
+        RunDotNetCli("build").Should().Be(0);
 
-        // Not necessary, but, testing a common command.
-        RunDotNetCli("clean");
+        // Find the directory with the NuGet packages.
+        var nugetArtifactsDir = Path.GetDirectoryName(
+            Path.Combine(GetTestAssemblyPath(), "../../../../../bin/nuget-artifacts/"));
 
-        RunAppWithDotNetCliAndAssertHttpSpans("run -c Release");
+        // Add the automatic instrumentation NuGet package to the app.
+        RunDotNetCli(
+            $"add package OpenTelemetry.AutoInstrumentation --source \"{nugetArtifactsDir}\" --prerelease").Should().Be(0);
+
+        RunDotNetCli("build").Should().Be(0);
     }
 
-    private static void ChangeDefaultProgramToHttpClient()
+    private void ChangeDefaultProgramToHelloWorld()
     {
-        const string ProgramContent = @"
-using var httpClient = new HttpClient();
-httpClient.Timeout = TimeSpan.FromSeconds(5);
-using var response = await httpClient.GetAsync(""http://example.com"");
-Console.WriteLine(response.StatusCode);
-";
+        const string ProgramContent = """
+            public static class Program
+            {
+                public static void Main()
+                {
+                    System.Console.WriteLine("Hello World!");
+                }
+            }
+            
+            """;
 
         File.WriteAllText("Program.cs", ProgramContent);
     }
 
-    private void RunDotNetCli(string arguments)
+    private void ChangeProjectDefaults()
+    {
+        string tfm;
+#if NETFRAMEWORK
+        tfm = "net462";
+#else
+        tfm = $"net{Environment.Version.Major}.0";
+#endif
+
+        var projectFile = $"{TargetAppName}.csproj";
+        var projectText = File.ReadAllText(projectFile);
+        projectText = projectText.Replace("<TargetFramework>net6.0</TargetFramework>", $"<TargetFramework>{tfm}</TargetFramework>");
+        projectText = projectText.Replace("<ImplicitUsings>enable</ImplicitUsings>", $"<ImplicitUsings>disable</ImplicitUsings>");
+        projectText = projectText.Replace("<Nullable>enable</Nullable>", $"<Nullable>disable</Nullable>");
+        File.WriteAllText(projectFile, projectText);
+    }
+
+    private int RunDotNetCli(string arguments)
     {
         Output.WriteLine($"Running: {DotNetCli} {arguments}");
 
@@ -107,23 +130,6 @@ Console.WriteLine(response.StatusCode);
         Output.WriteResult(helper);
 
         processTimeout.Should().BeFalse("Test application timed out");
-        process.ExitCode.Should().Be(0, "Test application exited with non-zero exit code");
-    }
-
-    private void RunAppWithDotNetCliAndAssertHttpSpans(string arguments)
-    {
-        var collector = new MockSpansCollector(Output);
-        SetExporter(collector);
-
-#if NET7_0_OR_GREATER
-        collector.Expect("System.Net.Http");
-#else
-        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient");
-#endif
-
-        RunDotNetCli(arguments);
-
-        collector.AssertExpectations();
+        return process.ExitCode;
     }
 }
-#endif
