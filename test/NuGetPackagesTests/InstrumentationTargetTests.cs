@@ -32,7 +32,7 @@ public sealed class InstrumentationTargetTests : TestHelper, IDisposable
     private readonly DirectoryInfo _tempWorkingDir;
 
     public InstrumentationTargetTests(ITestOutputHelper output)
-        : base(DotNetCli, output)
+        : base(DotNetCli, output, "nuget-packages")
     {
         var tempDirName = Path.Combine(
             Path.GetTempPath(),
