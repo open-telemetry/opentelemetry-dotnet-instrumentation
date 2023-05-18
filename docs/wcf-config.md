@@ -4,44 +4,6 @@
 
 ## WCF Client Configuration (.NET Framework)
 
-Add the `IClientMessageInspector` instrumentation via a behavior extension on
-the clients you want to instrument:
-
-```xml
-<?xml version="1.0" encoding="utf-8" ?>
-<configuration>
-  <system.serviceModel>
-    <extensions>
-      <behaviorExtensions>
-        <add name="telemetryExtension" type="OpenTelemetry.Instrumentation.Wcf.TelemetryEndpointBehaviorExtensionElement, OpenTelemetry.Instrumentation.Wcf" />
-      </behaviorExtensions>
-    </extensions>
-    <behaviors>
-      <endpointBehaviors>
-        <behavior name="telemetry">
-          <telemetryExtension />
-        </behavior>
-      </endpointBehaviors>
-    </behaviors>
-    <bindings>
-      <basicHttpBinding>
-        <binding name="basicHttpConfig">
-          <security mode="None" />
-        </binding>
-      </basicHttpBinding>
-      <netTcpBinding>
-        <binding name="netTCPConfig">
-          <security mode="None" />
-        </binding>
-      </netTcpBinding>
-    </bindings>
-    <client>
-      <endpoint address="http://localhost:9009/Telemetry" binding="basicHttpBinding" bindingConfiguration="basicHttpConfig" behaviorConfiguration="telemetry" contract="TestApplication.Wcf.Client.NetFramework.IStatusServiceContract" name="StatusService_Http" />
-    </client>
-  </system.serviceModel>
-</configuration>
-```
-
 Example project available in
 [test/test-applications/integrations/TestApplication.Wcf.Client.NetFramework](../test/test-applications/integrations/TestApplication.Wcf.Client.NetFramework/)
 folder.

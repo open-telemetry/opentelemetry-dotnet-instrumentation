@@ -106,6 +106,12 @@ internal enum TracerInstrumentation
     /// <summary>
     /// ASP.NET Core instrumentation.
     /// </summary>
-    AspNetCore = 15
+    AspNetCore = 15,
+#endif
+#if NETFRAMEWORK
+    /// <summary>
+    /// WcfClient instrumentation.
+    /// </summary>
+    WcfClient = 16,
 #endif
 }
