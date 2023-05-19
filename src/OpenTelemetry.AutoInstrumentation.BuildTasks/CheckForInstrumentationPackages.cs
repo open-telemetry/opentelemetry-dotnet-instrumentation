@@ -154,7 +154,7 @@ public class CheckForInstrumentationPackages : Microsoft.Build.Utilities.Task
         }
 
         var errorMsg = $"{LogPrefix}add a reference to the instrumentation package {item.FriendlyInstrumentationPackage} " +
-            $"or add '{item.TargetNuGetPackageId}' to the property 'DisabledInstrumentations' to suppress this error.";
+            $"or add '{item.TargetNuGetPackageId}' to the property 'SkippedInstrumentations' to suppress this error.";
         Log.LogError(errorMsg);
         return true;
     }

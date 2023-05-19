@@ -124,7 +124,7 @@ public class CheckForInstrumentationPackagesTests
         sut.ErrorEventArgsList.Should().HaveCount(1);
         sut.ErrorEventArgsList[0].Message.Should().Be(
             "OpenTelemetry.AutoInstrumentation: add a reference to the instrumentation package 'Test.Package.A.Instrumentation' " +
-            "version 1.1.0 or add 'Test.Package.A' to the property 'DisabledInstrumentations' to suppress this error.");
+            "version 1.1.0 or add 'Test.Package.A' to the property 'SkippedInstrumentations' to suppress this error.");
     }
 
     private static ITaskItem[] BuildMockRuntimeCopyLocalItems((string NuGetPackageId, string NuGetPackageVersion)[] source)
