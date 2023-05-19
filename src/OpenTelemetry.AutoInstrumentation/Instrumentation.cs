@@ -187,7 +187,7 @@ internal static class Instrumentation
                 def.Dispose();
             }
 
-            Logger.Information<int>("The profiler has been initialized with {count} definitions.", payload.Definitions.Length);
+            Logger.Information<int>("The profiler has been initialized with {0} definitions.", payload.Definitions.Length);
         }
         catch (Exception ex)
         {
@@ -204,7 +204,7 @@ internal static class Instrumentation
                 def.Dispose();
             }
 
-            Logger.Information<int>("The profiler has been initialized with {count} derived definitions.", payload.Definitions.Length);
+            Logger.Information<int>("The profiler has been initialized with {0} derived definitions.", payload.Definitions.Length);
         }
         catch (Exception ex)
         {
