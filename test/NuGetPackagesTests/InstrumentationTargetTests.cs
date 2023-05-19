@@ -55,6 +55,9 @@ public sealed class InstrumentationTargetTests : TestHelper, IDisposable
         // Disable dotnet CLI telemetry.
         SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", "1");
 
+        // Do not store the packages being tested on the machine global cache.
+        SetEnvironmentVariable("NUGET_PACKAGES", _tempWorkingDir.FullName);
+
         // Always create the app targeting a fixed framework version to simplify
         // text replacement in the project file.
         RunDotNetCli($"new console --framework net6.0").Should().Be(0);
@@ -72,10 +75,16 @@ public sealed class InstrumentationTargetTests : TestHelper, IDisposable
 
         RunDotNetCli("build").Should().Be(0);
 
-        // Add the automatic instrumentation NuGet package to the app.
+        // Add the automatic instrumentation NuGet package to the app. Because the package has dependencies to other
+        // packages that may not be present yet, `dotnet add package OpenTelemetry.AutoInstrumentation --source <src>`
+        // may fail (the command doesn't support multiple sources). Workaround the issue by creating a nuget.config
+        // file and adding the proper source.
+        RunDotNetCli("new nugetconfig").Should().Be(0);
         var nugetArtifactsDir = Path.Combine(GetTestAssemblyPath(), "../../../../../bin/nuget-artifacts/");
         RunDotNetCli(
-            $"add package OpenTelemetry.AutoInstrumentation --source \"{nugetArtifactsDir}\" --prerelease").Should().Be(0);
+            $"nuget add source \"{nugetArtifactsDir}\" --name nuget-artifacts --configfile nuget.config").Should().Be(0);
+        RunDotNetCli(
+            $"add package OpenTelemetry.AutoInstrumentation --prerelease").Should().Be(0);
 
         RunDotNetCli("build").Should().Be(0);
 
