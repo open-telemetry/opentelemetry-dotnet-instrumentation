@@ -41,6 +41,15 @@ the `OpenTelemetry.AutoInstrumentation` package to your project:
 dotnet add [<PROJECT>] package OpenTelemetry.AutoInstrumentation --source <PATH_TO_AUTO_INSTRUMENTATION_PACKAGES> --prerelease
 ```
 
+If the application references packages that can be instrumented, but, require
+other packages for the instrumentation to work the build will fail and prompt
+you to either add the missing instrumentation package or to skip the
+instrumentation of the corresponding package:
+
+```terminal
+~packages/opentelemetry.autoinstrumentation.buildtasks/0.7.0-local.1/build/OpenTelemetry.AutoInstrumentation.BuildTasks.targets(29,5): error : OpenTelemetry.AutoInstrumentation: add a reference to the instrumentation package 'MongoDB.Driver.Core.Extensions.DiagnosticSources' version 1.3.0 or add 'MongoDB.Driver.Core' to the property 'SkippedInstrumentations' to suppress this error.
+```
+
 To distribute the appropriate native runtime components with your .NET application,
 specify a [Runtime Identifier (RID)](https://learn.microsoft.com/en-us/dotnet/core/rid-catalog)
 to build the application using `dotnet build` or `dotnet publish`. This might
