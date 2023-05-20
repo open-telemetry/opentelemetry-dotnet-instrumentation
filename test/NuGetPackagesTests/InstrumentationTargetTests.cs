@@ -55,9 +55,6 @@ public sealed class InstrumentationTargetTests : TestHelper, IDisposable
         // Disable dotnet CLI telemetry.
         SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", "1");
 
-        // Do not store the packages being tested on the machine global cache.
-        SetEnvironmentVariable("NUGET_PACKAGES", _tempWorkingDir.FullName);
-
         // Always create the app targeting a fixed framework version to simplify
         // text replacement in the project file.
         RunDotNetCli($"new console --framework net6.0").Should().Be(0);

@@ -8,6 +8,9 @@ set BASE_PATH=%~dp0
 set COR_ENABLE_PROFILING=1
 set COR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318}
 set COR_PROFILER_PATH=%BASE_PATH%OpenTelemetry.AutoInstrumentation.Native.dll
+:: On .NET Framework automatic assembly redirection MUST be disabled. This setting
+:: is ignored on .NET.
+set OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED=false
 
 :: Settings for .NET
 set ASPNETCORE_HOSTINGSTARTUPASSEMBLIES=OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper
