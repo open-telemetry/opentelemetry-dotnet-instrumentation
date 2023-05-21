@@ -66,7 +66,7 @@ public sealed class InstrumentationTargetTests : TestHelper, IDisposable
         tfm = $"net{Environment.Version.Major}.0";
 #endif
 
-        ChangeProjectDefaultsAndTargetFranework(tfm);
+        ChangeProjectDefaultsAndTargetFramework(tfm);
 
         ChangeDefaultProgramToHelloWorld();
 
@@ -119,21 +119,20 @@ public sealed class InstrumentationTargetTests : TestHelper, IDisposable
 
     private void ChangeDefaultProgramToHelloWorld()
     {
-        const string ProgramContent = """
-            public static class Program
-            {
-                public static void Main()
-                {
-                    System.Console.WriteLine("Hello World!");
-                }
-            }
-            
-            """;
+        const string ProgramContent = @"
+public static class Program
+{
+    public static void Main()
+    {
+        System.Console.WriteLine(""Hello World!"");
+    }
+}
+";
 
         File.WriteAllText("Program.cs", ProgramContent);
     }
 
-    private void ChangeProjectDefaultsAndTargetFranework(string tfm)
+    private void ChangeProjectDefaultsAndTargetFramework(string tfm)
     {
         var projectFile = $"{TargetAppName}.csproj";
         var projectText = File.ReadAllText(projectFile);
