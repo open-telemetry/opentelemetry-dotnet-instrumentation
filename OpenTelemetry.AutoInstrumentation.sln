@@ -169,7 +169,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraryVersionsGenerator", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{98868FAF-0854-4E66-8306-3EFA7F2E9A45}"
 	ProjectSection(SolutionItems) = preProject
-		nuget\OpenTelemetry.AutoInstrumentation.Dependencies\OpenTelemetry.AutoInstrumentation.Dependencies.nuspec = nuget\OpenTelemetry.AutoInstrumentation.Dependencies\OpenTelemetry.AutoInstrumentation.Dependencies.nuspec
 		nuget\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.nuspec = nuget\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.nuspec
 		nuget\OpenTelemetry.AutoInstrumentation.Runtime.Native\OpenTelemetry.AutoInstrumentation.Runtime.Native.nuspec = nuget\OpenTelemetry.AutoInstrumentation.Runtime.Native\OpenTelemetry.AutoInstrumentation.Runtime.Native.nuspec
 	EndProjectSection
