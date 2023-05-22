@@ -179,7 +179,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="bytecode_instrumentations.h" />
     <ClInclude Include="calltarget_tokens.h" />
     <ClInclude Include="class_factory.h" />
     <ClInclude Include="com_ptr.h" />
@@ -192,7 +191,6 @@
     <ClInclude Include="il_rewriter_wrapper.h" />
     <ClInclude Include="integration.h" />
     <ClInclude Include="clr_helpers.h" />
-    <ClInclude Include="integration_loader.h" />
     <ClInclude Include="logger.h" />
     <ClInclude Include="logger_impl.h" />
     <ClInclude Include="macros.h" />

@@ -146,32 +146,6 @@ std::vector<WSTRING> GetEnvironmentValues(const WSTRING& name)
     return GetEnvironmentValues(name, L',');
 }
 
-std::vector<WSTRING> GetEnabledEnvironmentValues(const bool enabled_by_default,
-                                                 const std::unordered_map<WSTRING, WSTRING>& values_map)
-{
-    std::vector<WSTRING> values;
-
-    for (const auto& value : values_map)
-    {
-        bool       enabled   = enabled_by_default;
-        const auto env_value = GetEnvironmentValue(value.second);
-        if (TrueCondition(env_value))
-        {
-            enabled = true;
-        }
-        else if (FalseCondition(env_value))
-        {
-            enabled = false;
-        }
-        if (enabled)
-        {
-            values.push_back(value.first);
-        }
-    }
-
-    return values;
-}
-
 std::vector<WSTRING> GetEnvironmentVariables(const std::vector<WSTRING>& prefixes)
 {
     std::vector<WSTRING> env_strings;
