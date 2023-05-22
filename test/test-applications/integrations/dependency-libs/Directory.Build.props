@@ -2,6 +2,7 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\..\..\Common.props" />
 
   <Import Project="$(MSBuildThisFileDirectory)..\Integrations.props" />
+  <Import Project="$(MSBuildThisFileDirectory)..\..\..\AddTestStrongNameAssemblyKeyOnNetFramework.props" />
 
   <!-- StyleCop -->
   <ItemGroup>
