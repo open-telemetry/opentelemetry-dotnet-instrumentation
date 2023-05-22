@@ -30,29 +30,6 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
     {
     }
 
-    [Fact]
-    [Trait("Category", "EndToEnd")]
-    public async Task SubmitsTraces()
-    {
-        EnvironmentTools.IsWindowsAdministrator().Should().BeTrue(); // WCF Server needs admin
-
-        using var collector = new MockSpansCollector(Output);
-        SetExporter(collector);
-        // the test app makes 2 calls (therefore we expect 4 spans)
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 1");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 1");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 2");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 2");
-
-        var serverHelper = new WcfServerTestHelper(Output);
-        _serverProcess = serverHelper.RunWcfServer(collector);
-        await WaitForServer();
-
-        RunTestApplication();
-
-        collector.AssertExpectations();
-    }
-
     public void Dispose()
     {
         if (_serverProcess?.Process == null)
@@ -72,6 +49,30 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         Output.WriteLine("ProcessId: " + _serverProcess.Process.Id);
         Output.WriteLine("Exit Code: " + _serverProcess.Process.ExitCode);
         Output.WriteResult(_serverProcess);
+    }
+
+    protected async Task SubmitsTracesInternal(string clientPackageVersion)
+    {
+        EnvironmentTools.IsWindowsAdministrator().Should().BeTrue(); // WCF Server needs admin
+
+        using var collector = new MockSpansCollector(Output);
+        SetExporter(collector);
+        // the test app makes 2 calls (therefore we expect 4 spans)
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 1");
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 1");
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 2");
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 2");
+
+        var serverHelper = new WcfServerTestHelper(Output);
+        _serverProcess = serverHelper.RunWcfServer(collector);
+        await WaitForServer();
+
+        RunTestApplication(new TestSettings
+        {
+            PackageVersion = clientPackageVersion
+        });
+
+        collector.AssertExpectations();
     }
 
     private async Task WaitForServer()
