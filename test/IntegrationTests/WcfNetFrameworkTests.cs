@@ -25,6 +25,13 @@ public class WcfNetFrameworkTests : WcfTestsBase
         : base("Wcf.Client.NetFramework", output)
     {
     }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public async Task SubmitsTraces()
+    {
+        await SubmitsTracesInternal(string.Empty);
+    }
 }
 
 #endif
