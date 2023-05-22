@@ -26,6 +26,14 @@ public class WcfDotNetTests : WcfTestsBase
         : base("Wcf.Client.DotNet", output)
     {
     }
+
+    [Trait("Category", "EndToEnd")]
+    [Theory]
+    [MemberData(nameof(LibraryVersion.WCFCoreClient), MemberType = typeof(LibraryVersion))]
+    public async Task SubmitTraces(string clientPackageVersion)
+    {
+        await SubmitsTracesInternal(clientPackageVersion);
+    }
 }
 
 #endif
