@@ -46,12 +46,6 @@ namespace OpenTelemetry.AutoInstrumentation;
 internal struct NativeCallTargetDefinition
 {
     [MarshalAs(UnmanagedType.LPWStr)]
-    public string InstrumentationName;
-
-    [MarshalAs(UnmanagedType.LPWStr)]
-    public string InstrumentationType;
-
-    [MarshalAs(UnmanagedType.LPWStr)]
     public string TargetAssembly;
 
     [MarshalAs(UnmanagedType.LPWStr)]
@@ -83,8 +77,6 @@ internal struct NativeCallTargetDefinition
     public string IntegrationType;
 
     public NativeCallTargetDefinition(
-            string instrumentationName,
-            string instrumentationType,
             string targetAssembly,
             string targetType,
             string targetMethod,
@@ -98,8 +90,6 @@ internal struct NativeCallTargetDefinition
             string integrationAssembly,
             string integrationType)
     {
-        InstrumentationName = instrumentationName;
-        InstrumentationType = instrumentationType;
         TargetAssembly = targetAssembly;
         TargetType = targetType;
         TargetMethod = targetMethod;

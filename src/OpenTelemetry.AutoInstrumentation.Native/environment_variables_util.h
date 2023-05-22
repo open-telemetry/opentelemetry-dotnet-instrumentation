@@ -49,14 +49,7 @@ bool IsNGENEnabled();
 bool IsDumpILRewriteEnabled();
 bool IsAzureAppServices();
 bool IsFailFastEnabled();
-bool AreTracesEnabled();
-bool AreMetricsEnabled();
-bool AreLogsEnabled();
 bool IsNetFxAssemblyRedirectionEnabled();
-bool AreInstrumentationsEnabledByDefault();
-bool AreTracesInstrumentationsEnabledByDefault(const bool enabled_if_not_configured);
-bool AreMetricsInstrumentationsEnabledByDefault(const bool enabled_if_not_configured);
-bool AreLogsInstrumentationsEnabledByDefault(const bool enabled_if_not_configured);
 
 }  // namespace trace
 
