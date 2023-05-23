@@ -14,6 +14,9 @@
 // limitations under the License.
 // </copyright>
 
+#if NETFRAMEWORK
+using System.Reflection;
+#endif
 using FluentAssertions;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
@@ -47,4 +50,17 @@ public class StrongNamedTests : TestHelper
 
         collector.AssertExpectations();
     }
+
+#if NETFRAMEWORK
+    [Fact]
+    public void VerifyIfApplicationHasStrongName()
+    {
+        var testApplicationPath = EnvironmentHelper.GetTestApplicationPath();
+
+        var assembly = Assembly.ReflectionOnlyLoadFrom(testApplicationPath);
+
+        BitConverter.ToString(assembly.GetName().GetPublicKeyToken()).Replace("-", string.Empty).ToLowerInvariant().Should().Be("0223b52cbfd4bd5b");
+    }
+#endif
+
 }
