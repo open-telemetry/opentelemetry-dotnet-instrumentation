@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System.Threading;
-
 namespace TestLibrary.InstrumentationTarget;
 
 public class Command

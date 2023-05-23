@@ -19,7 +19,6 @@ OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.Type.get -> System.Type!
 OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.Validations.StrongNamedValidation
 OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.WcfClientIntegration
 override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.ToString() -> string!
 override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.ToString() -> string!

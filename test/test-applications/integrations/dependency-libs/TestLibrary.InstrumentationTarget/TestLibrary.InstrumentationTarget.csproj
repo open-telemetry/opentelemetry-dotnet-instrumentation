@@ -5,4 +5,8 @@
     <AddTestStrongNameAssemblyKeyOnNetFramework>true</AddTestStrongNameAssemblyKeyOnNetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\src\OpenTelemetry.AutoInstrumentation\OpenTelemetry.AutoInstrumentation.csproj" />
+  </ItemGroup>
+
 </Project>

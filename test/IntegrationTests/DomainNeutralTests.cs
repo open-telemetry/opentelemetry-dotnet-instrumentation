@@ -28,7 +28,7 @@ public class DomainNeutralTests : TestHelper
     {
     }
 
-    [Fact(Skip = "Adding third-party integrations needs to be re-implemented after the native code update. See https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2403")]
+    [Fact]
     [Trait("Category", "EndToEnd")]
     public void SubmitsTraces()
     {
@@ -36,7 +36,7 @@ public class DomainNeutralTests : TestHelper
 
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.Expect("TestApplication.StrongNamedValidation");
+        collector.Expect("ByteCode.Plugin.StrongNamedValidation");
 
         // Add the necessary assembly to the GAC so it can be loaded as domain-neutral.
         var instrumentationAssembly = Path.Combine(
@@ -50,10 +50,8 @@ public class DomainNeutralTests : TestHelper
 
         // Domain-neutral depends on strong named assemblies to work, leverage some assets from
         // strong name testing in the current test.
-        var assemblyPath = GetTestAssemblyPath();
-        var integrationsFile = Path.Combine(assemblyPath, "StrongNamedTestsIntegrations.json");
-        File.Exists(integrationsFile).Should().BeTrue();
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE", integrationsFile);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "ByteCode.Plugin.StrongNamedValidation");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestLibrary.InstrumentationTarget.Plugin, TestLibrary.InstrumentationTarget, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0223b52cbfd4bd5b");
         RunTestApplication();
 
         collector.AssertExpectations();
