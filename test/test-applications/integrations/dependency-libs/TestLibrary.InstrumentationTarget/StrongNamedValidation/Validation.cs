@@ -47,7 +47,7 @@ public static class Validation
     internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance)
     {
         using var activity = ValidationActivitySource.StartActivity(nameof(Validation));
-        Console.WriteLine($"Validation: {nameof(Validation)}");
+        Console.WriteLine($"Validation: {typeof(Validation).FullName}");
         return CallTargetState.GetDefault();
     }
 }
