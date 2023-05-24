@@ -16,7 +16,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Changed
 
 - ASP.NET instrumentation no longer requires manual modification
-  config files to include `TelemetryHttpModule`.
+  of config files to include `TelemetryHttpModule`.
 
 ### Deprecated
 
