@@ -114,6 +114,9 @@ partial class Build
                     .SetProperty("PublishProfile", aspNetProject.Directory / "Properties" / "PublishProfiles" / $"FolderProfile.{BuildConfiguration}.pubxml")
                     .SetTargetPath(aspNetProject));
 
+            var localCopyTracerHome = aspNetProject.Directory / "bin" / "tracer-home";
+            CopyDirectoryRecursively(TracerHomeDirectory, localCopyTracerHome);
+
             DockerBuild(x => x
                 .SetPath(".")
                 .SetBuildArg($"configuration={BuildConfiguration}", $"windowscontainer_version={WindowsContainerVersion}")
@@ -121,6 +124,8 @@ partial class Build
                 .SetTag(Path.GetFileNameWithoutExtension(aspNetProject).Replace(".", "-").ToLowerInvariant())
                 .SetProcessWorkingDirectory(aspNetProject.Directory)
             );
+
+            Directory.Delete(localCopyTracerHome, true);
         });
 
     Target GenerateNetFxTransientDependencies => _ => _
