@@ -149,9 +149,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         }
     }
 
-    is_desktop_iis = runtime_information_.is_desktop() &&
-                     (process_name == WStr("w3wp.exe") || process_name == WStr("iisexpress.exe"));
-
     if (IsAzureAppServices())
     {
         Logger::Info("Profiler is operating within Azure App Services context.");
