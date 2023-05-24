@@ -8,14 +8,12 @@
 #include <string>
 #include <typeinfo>
 
-#include "bytecode_instrumentations.h"
 #include "clr_helpers.h"
 #include "dllmain.h"
 #include "environment_variables.h"
 #include "environment_variables_util.h"
 #include "il_rewriter.h"
 #include "il_rewriter_wrapper.h"
-#include "integration_loader.h"
 #include "logger.h"
 #include "metadata_builder.h"
 #include "module_metadata.h"
@@ -150,9 +148,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
             FailProfiler(Error, "The required StartupHook was not configured correctly. No telemetry will be captured.")
         }
     }
-
-    is_desktop_iis = runtime_information_.is_desktop() &&
-                     (process_name == WStr("w3wp.exe") || process_name == WStr("iisexpress.exe"));
 
     if (IsAzureAppServices())
     {
@@ -1005,19 +1000,6 @@ void CorProfiler::InitializeProfiler(WCHAR* id, CallTargetDefinition* items, int
     }
 }
 
-bool InstrumentationEnabled(const WSTRING name, const std::vector<WSTRING>& enabledIntegrationNames)
-{
-    // check if the integration is enabled
-    for (const WSTRING& enabledName : enabledIntegrationNames)
-    {
-        if (name == enabledName)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
 void CorProfiler::AddDerivedInstrumentations(WCHAR* id, CallTargetDefinition* items, int size)
 {
     auto    _             = trace::Stats::Instance()->InitializeProfilerMeasure();
@@ -1044,66 +1026,11 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
 
     if (items != nullptr && rejit_handler != nullptr)
     {
-        const bool instrumentation_enabled_by_default = AreInstrumentationsEnabledByDefault();
-
-        const LoadIntegrationConfiguration
-            configuration(AreTracesEnabled(), GetEnabledEnvironmentValues(AreTracesInstrumentationsEnabledByDefault(
-                                                                              instrumentation_enabled_by_default),
-                                                                          trace_integration_names),
-                          AreMetricsEnabled(), GetEnabledEnvironmentValues(AreMetricsInstrumentationsEnabledByDefault(
-                                                                               instrumentation_enabled_by_default),
-                                                                           metric_integration_names),
-                          AreLogsEnabled(), GetEnabledEnvironmentValues(AreLogsInstrumentationsEnabledByDefault(
-                                                                            instrumentation_enabled_by_default),
-                                                                        log_integration_names));
-
         std::vector<IntegrationDefinition> integrationDefinitions;
 
         for (int i = 0; i < size; i++)
         {
             const CallTargetDefinition& current = items[i];
-
-            const WSTRING& name = WSTRING(current.instrumentationName);
-            const WSTRING& type = WSTRING(current.instrumentationType);
-
-            if (type == WStr("Trace"))
-            {
-                if (!configuration.traces_enabled)
-                {
-                    continue;
-                }
-                if (!InstrumentationEnabled(name, configuration.enabledTraceIntegrationNames))
-                {
-                    continue;
-                }
-            }
-            else if (type == WStr("Metric"))
-            {
-                if (!configuration.metrics_enabled)
-                {
-                    continue;
-                }
-                if (!InstrumentationEnabled(name, configuration.enabledMetricIntegrationNames))
-                {
-                    continue;
-                }
-            }
-            else if (type == WStr("Log"))
-            {
-                if (!configuration.logs_enabled)
-                {
-                    continue;
-                }
-                if (!InstrumentationEnabled(name, configuration.enabledLogIntegrationNames))
-                {
-                    continue;
-                }
-            }
-            else
-            {
-                Logger::Warn("Unsupported type for integration: ", type);
-                continue;
-            }
 
             const WSTRING& targetAssembly = WSTRING(current.targetAssembly);
             const WSTRING& targetType     = WSTRING(current.targetType);

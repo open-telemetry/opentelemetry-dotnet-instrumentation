@@ -14,11 +14,13 @@
 // limitations under the License.
 // </copyright>
 
+using OpenTelemetry.AutoInstrumentation.Configurations;
+
 namespace OpenTelemetry.AutoInstrumentation;
 
-internal static partial class InstrumentationDefinitions
+internal static class InstrumentationDefinitions
 {
-    private static string assemblyFullName = typeof(InstrumentationDefinitions).Assembly.FullName!;
+    private static readonly string AssemblyFullName = typeof(InstrumentationDefinitions).Assembly.FullName!;
 
     internal static Payload GetAllDefinitions()
     {
@@ -46,34 +48,84 @@ internal static partial class InstrumentationDefinitions
 
     // TODO: Generate this list using source generators
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
-        => new NativeCallTargetDefinition[]
+    {
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>();
+
+        // Traces
+        var tracerSettings = Instrumentation.TracerSettings.Value;
+        if (tracerSettings.TracesEnabled)
         {
-            // GraphQL
-            new("GraphQL", "Trace", "GraphQL", "GraphQL.Execution.ExecutionStrategy", "ExecuteAsync",  new[] { "System.Threading.Tasks.Task`1<GraphQL.ExecutionResult>", "GraphQL.Execution.ExecutionContext" }, 2, 3, 0, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration"),
-            new("GraphQL", "Trace", "GraphQL", "GraphQL.Execution.SubscriptionExecutionStrategy", "ExecuteAsync",  new[] { "System.Threading.Tasks.Task`1<GraphQL.ExecutionResult>", "GraphQL.Execution.ExecutionContext" }, 2, 3, 0, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration"),
+            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.GraphQL))
+            {
+                nativeCallTargetDefinitions.Add(new("GraphQL", "GraphQL.Execution.ExecutionStrategy", "ExecuteAsync", new[] { "System.Threading.Tasks.Task`1<GraphQL.ExecutionResult>", "GraphQL.Execution.ExecutionContext" }, 2, 3, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration"));
+                nativeCallTargetDefinitions.Add(new("GraphQL", "GraphQL.Execution.SubscriptionExecutionStrategy", "ExecuteAsync", new[] { "System.Threading.Tasks.Task`1<GraphQL.ExecutionResult>", "GraphQL.Execution.ExecutionContext" }, 2, 3, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration"));
+            }
 
-            // ILogger
-            new("ILogger", "Log", "Microsoft.Extensions.Logging", "Microsoft.Extensions.Logging.LoggingBuilder", ".ctor",  new[] { "System.Void", "Microsoft.Extensions.DependencyInjection.IServiceCollection" }, 3, 1, 0, 7, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration"),
+            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.MongoDB))
+            {
+                nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.MongoClient", ".ctor", new[] { "System.Void", "MongoDB.Driver.MongoClientSettings" }, 2, 13, 3, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration"));
+            }
 
-            // MongoDB
-            new("MongoDB", "Trace", "MongoDB.Driver", "MongoDB.Driver.MongoClient", ".ctor",  new[] { "System.Void", "MongoDB.Driver.MongoClientSettings" }, 2, 13, 3, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration"),
+#if NET6_0_OR_GREATER
+            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.MySqlData))
+            {
+                nativeCallTargetDefinitions.Add(new("MySql.Data", "MySql.Data.MySqlClient.MySqlConnectionStringBuilder", "get_Logging", new[] { "System.Boolean" }, 8, 0, 31, 8, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData.MySqlConnectionStringBuilderIntegration"));
+            }
+#endif
 
-            // MySqlData
-            new("MySqlData", "Trace", "MySql.Data", "MySql.Data.MySqlClient.MySqlConnectionStringBuilder", "get_Logging",  new[] { "System.Boolean" }, 8, 0, 31, 8, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData.MySqlConnectionStringBuilderIntegration"),
+            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.NServiceBus))
+            {
+                nativeCallTargetDefinitions.Add(new("NServiceBus.Core", "NServiceBus.EndpointConfiguration", ".ctor", new[] { "System.Void", "System.String" }, 8, 0, 0, 8, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration"));
+            }
 
-            // NServiceBus
-            new("NServiceBus", "Trace", "NServiceBus.Core", "NServiceBus.EndpointConfiguration", ".ctor",  new[] { "System.Void", "System.String" }, 8, 0, 0, 8, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration"),
-            new("NServiceBus", "Metric", "NServiceBus.Core", "NServiceBus.EndpointConfiguration", ".ctor",  new[] { "System.Void", "System.String" }, 8, 0, 0, 8, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration"),
+#if NET6_0_OR_GREATER
+            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.StackExchangeRedis))
+            {
+                nativeCallTargetDefinitions.Add(new("StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImpl", new[] { "StackExchange.Redis.ConnectionMultiplexer", "System.Object", "System.IO.TextWriter" }, 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration"));
+                nativeCallTargetDefinitions.Add(new("StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImpl", new[] { "StackExchange.Redis.ConnectionMultiplexer", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter" }, 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration"));
+                nativeCallTargetDefinitions.Add(new("StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImpl", new[] { "StackExchange.Redis.ConnectionMultiplexer", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter", "System.Nullable`1[StackExchange.Redis.ServerType]" }, 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration"));
+                nativeCallTargetDefinitions.Add(new("StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImpl", new[] { "StackExchange.Redis.ConnectionMultiplexer", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter", "System.Nullable`1[StackExchange.Redis.ServerType]", "StackExchange.Redis.EndPointCollection" }, 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration"));
+                nativeCallTargetDefinitions.Add(new("StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImplAsync", new[] { "System.Threading.Tasks.Task`1<StackExchange.Redis.ConnectionMultiplexer>", "System.Object", "System.IO.TextWriter" }, 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync"));
+                nativeCallTargetDefinitions.Add(new("StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImplAsync", new[] { "System.Threading.Tasks.Task`1<StackExchange.Redis.ConnectionMultiplexer>", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter" }, 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync"));
+                nativeCallTargetDefinitions.Add(new("StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImplAsync", new[] { "System.Threading.Tasks.Task`1<StackExchange.Redis.ConnectionMultiplexer>", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter", "System.Nullable`1[StackExchange.Redis.ServerType]" }, 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync"));
+            }
+#endif
 
-            // StackExchangeRedis
-            new("StackExchangeRedis", "Trace", "StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImpl",  new[] { "StackExchange.Redis.ConnectionMultiplexer", "System.Object", "System.IO.TextWriter" }, 2, 0, 0, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration"),
-            new("StackExchangeRedis", "Trace", "StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImpl",  new[] { "StackExchange.Redis.ConnectionMultiplexer", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter" }, 2, 0, 0, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration"),
-            new("StackExchangeRedis", "Trace", "StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImpl",  new[] { "StackExchange.Redis.ConnectionMultiplexer", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter", "System.Nullable`1[StackExchange.Redis.ServerType]" }, 2, 0, 0, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration"),
-            new("StackExchangeRedis", "Trace", "StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImpl",  new[] { "StackExchange.Redis.ConnectionMultiplexer", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter", "System.Nullable`1[StackExchange.Redis.ServerType]", "StackExchange.Redis.EndPointCollection" }, 2, 0, 0, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration"),
-            new("StackExchangeRedis", "Trace", "StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImplAsync",  new[] { "System.Threading.Tasks.Task`1<StackExchange.Redis.ConnectionMultiplexer>", "System.Object", "System.IO.TextWriter" }, 2, 0, 0, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync"),
-            new("StackExchangeRedis", "Trace", "StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImplAsync",  new[] { "System.Threading.Tasks.Task`1<StackExchange.Redis.ConnectionMultiplexer>", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter" }, 2, 0, 0, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync"),
-            new("StackExchangeRedis", "Trace", "StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImplAsync",  new[] { "System.Threading.Tasks.Task`1<StackExchange.Redis.ConnectionMultiplexer>", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter", "System.Nullable`1[StackExchange.Redis.ServerType]" }, 2, 0, 0, 2, 65535, 65535, assemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync"),
-        };
+#if NETFRAMEWORK
+            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.WcfClient))
+            {
+                nativeCallTargetDefinitions.Add(new("System.ServiceModel", "System.ServiceModel.ChannelFactory", "InitializeEndpoint", new[] { "System.Void", "System.String", "System.ServiceModel.EndpointAddress" }, 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.WcfClientIntegration"));
+                nativeCallTargetDefinitions.Add(new("System.ServiceModel", "System.ServiceModel.ChannelFactory", "InitializeEndpoint", new[] { "System.Void", "System.String", "System.ServiceModel.EndpointAddress", "System.Configuration.Configuration" }, 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.WcfClientIntegration"));
+                nativeCallTargetDefinitions.Add(new("System.ServiceModel", "System.ServiceModel.ChannelFactory", "InitializeEndpoint", new[] { "System.Void", "System.ServiceModel.Description.ServiceEndpoint" }, 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.WcfClientIntegration"));
+                nativeCallTargetDefinitions.Add(new("System.ServiceModel", "System.ServiceModel.ChannelFactory", "InitializeEndpoint", new[] { "System.Void", "System.ServiceModel.Channels.Binding", "System.ServiceModel.EndpointAddress" }, 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.WcfClientIntegration"));
+            }
+#endif
+        }
+
+#if NET6_0_OR_GREATER
+        // Logs
+        var logSettings = Instrumentation.LogSettings.Value;
+        if (logSettings.LogsEnabled)
+        {
+            if (logSettings.EnabledInstrumentations.Contains(LogInstrumentation.ILogger))
+            {
+                nativeCallTargetDefinitions.Add(new("Microsoft.Extensions.Logging", "Microsoft.Extensions.Logging.LoggingBuilder", ".ctor", new[] { "System.Void", "Microsoft.Extensions.DependencyInjection.IServiceCollection" }, 3, 1, 0, 7, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration"));
+            }
+        }
+#endif
+
+        // Metrics
+        var metricSettings = Instrumentation.MetricSettings.Value;
+        if (metricSettings.MetricsEnabled)
+        {
+            if (metricSettings.EnabledInstrumentations.Contains(MetricInstrumentation.NServiceBus))
+            {
+                nativeCallTargetDefinitions.Add(new("NServiceBus.Core", "NServiceBus.EndpointConfiguration", ".ctor", new[] { "System.Void", "System.String" }, 8, 0, 0, 8, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration"));
+            }
+        }
+
+        return nativeCallTargetDefinitions.ToArray();
+    }
 
     // TODO: Generate this list using source generators
     private static NativeCallTargetDefinition[] GetDerivedDefinitionsArray()

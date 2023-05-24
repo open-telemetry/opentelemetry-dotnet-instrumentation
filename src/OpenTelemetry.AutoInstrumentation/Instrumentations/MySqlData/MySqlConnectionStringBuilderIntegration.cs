@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#if NET6_0_OR_GREATER
+
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData;
@@ -33,9 +35,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData;
     type: InstrumentationType.Trace)]
 public static class MySqlConnectionStringBuilderIntegration
 {
-#if NET6_0_OR_GREATER
     private static readonly object TrueAsObject = true;
-#endif
 
     /// <summary>
     /// OnMethodEnd callback
@@ -49,12 +49,9 @@ public static class MySqlConnectionStringBuilderIntegration
     internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TReturn returnValue, Exception exception, in CallTargetState state)
         where TTarget : struct
     {
-#if NET6_0_OR_GREATER
         var alwaysReturnTrue = (TReturn)TrueAsObject;
 
         return new CallTargetReturn<TReturn>(alwaysReturnTrue);
-#else
-        return new CallTargetReturn<TReturn>(returnValue);
-#endif
     }
 }
+#endif

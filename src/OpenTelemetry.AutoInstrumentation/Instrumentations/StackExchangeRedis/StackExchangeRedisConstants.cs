@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#if NET6_0_OR_GREATER
+
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis;
 
 internal static class StackExchangeRedisConstants
@@ -36,3 +38,5 @@ internal static class StackExchangeRedisConstants
 
     private const string ServerTypeTypeName = "StackExchange.Redis.ServerType";
 }
+
+#endif

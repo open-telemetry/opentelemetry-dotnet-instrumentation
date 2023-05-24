@@ -13,7 +13,7 @@ namespace trace
 void CorProfiler::InitNetFxAssemblyRedirectsMap()
 {
     assembly_version_redirect_map_.insert({
-        { L"Google.Protobuf", {3, 23, 0, 0} },
+        { L"Google.Protobuf", {3, 23, 1, 0} },
         { L"Grpc.Core", {2, 0, 0, 0} },
         { L"Grpc.Core.Api", {2, 0, 0, 0} },
         { L"Microsoft.Bcl.AsyncInterfaces", {7, 0, 0, 0} },
