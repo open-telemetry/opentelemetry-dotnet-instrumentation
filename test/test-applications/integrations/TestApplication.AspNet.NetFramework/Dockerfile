@@ -8,7 +8,7 @@ WORKDIR C:\opentelemetry
 COPY bin/tracer-home .
 WORKDIR C:\init
 COPY docker-init.ps1 .
-RUN [ "powershell", "-c", "C:\\init\\docker-init.ps1" ]
+RUN [ "powershell", "-c", ".\\docker-init.ps1" ]
 ENV COR_ENABLE_PROFILING=1 `
     COR_PROFILER={918728DD-259F-4A6A-AC2B-B85E1B658318} `
     COR_PROFILER_PATH=C:\opentelemetry\win-${platform}\OpenTelemetry.AutoInstrumentation.Native.dll `
