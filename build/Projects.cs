@@ -23,6 +23,7 @@ public static class Projects
         public static class Applications
         {
             public const string AspNet = "TestApplication.AspNet.NetFramework";
+            public const string Wcf = "TestApplication.Wcf.Server.IIS.NetFramework";
         }
     }
 

@@ -126,6 +126,24 @@ partial class Build
             );
 
             Directory.Delete(localCopyTracerHome, true);
+
+            var wcfProject = Solution.GetProjectByName(Projects.Tests.Applications.Wcf);
+
+            MSBuild(x => x
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatform(Platform)
+                .SetProperty("DeployOnBuild", true)
+                .SetMaxCpuCount(null)
+                .SetProperty("PublishProfile", wcfProject.Directory / "Properties" / "PublishProfiles" / $"FolderProfile.{BuildConfiguration}.pubxml")
+                .SetTargetPath(wcfProject));
+
+            DockerBuild(x => x
+                .SetPath(".")
+                .SetBuildArg($"configuration={BuildConfiguration}",
+                    $"windowscontainer_version={WindowsContainerVersion}")
+                .EnableRm()
+                .SetTag(Path.GetFileNameWithoutExtension(wcfProject).Replace(".", "-").ToLowerInvariant())
+                .SetProcessWorkingDirectory(wcfProject.Directory));
         });
 
     Target GenerateNetFxTransientDependencies => _ => _
