@@ -28,7 +28,7 @@ public class MultipleAppDomainsTests : TestHelper
     {
     }
 
-    [Fact(Skip = "Adding third-party integrations needs to be re-implemented after the native code update. See https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2403")]
+    [Fact]
     [Trait("Category", "EndToEnd")]
     public void SubmitsTraces()
     {
@@ -38,14 +38,12 @@ public class MultipleAppDomainsTests : TestHelper
         const int expectedSpanCount = 5;
         for (var i = 0; i < expectedSpanCount; i++)
         {
-            collector.Expect("TestApplication.StrongNamedValidation");
+            collector.Expect("ByteCode.Plugin.StrongNamedValidation");
         }
 
         // Use the integrations file that bring the expected instrumentation.
-        var assemblyPath = GetTestAssemblyPath();
-        var integrationsFile = Path.Combine(assemblyPath, "StrongNamedTestsIntegrations.json");
-        File.Exists(integrationsFile).Should().BeTrue();
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE", integrationsFile);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "ByteCode.Plugin.StrongNamedValidation");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestLibrary.InstrumentationTarget.Plugin, TestLibrary.InstrumentationTarget, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0223b52cbfd4bd5b");
         var (_, standardErrorOutput) = RunTestApplication();
 
         // Nothing regarding log should have been logged to the console.

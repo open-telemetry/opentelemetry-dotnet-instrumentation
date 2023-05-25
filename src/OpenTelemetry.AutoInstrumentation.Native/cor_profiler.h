@@ -178,7 +178,7 @@ public:
     //
     // Add Integrations methods
     //
-    void InitializeProfiler(WCHAR* id, CallTargetDefinition* items, int size);
+    void AddInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
     void AddDerivedInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
 
     friend class TracerMethodRewriter;

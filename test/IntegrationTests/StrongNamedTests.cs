@@ -16,8 +16,8 @@
 
 #if NETFRAMEWORK
 using System.Reflection;
-#endif
 using FluentAssertions;
+#endif
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -30,18 +30,16 @@ public class StrongNamedTests : TestHelper
     {
     }
 
-    [Fact(Skip = "Adding third-party integrations needs to be re-implemented after the native code update. See https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2403")]
+    [Fact]
     public void SubmitsTraces()
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.Expect("TestApplication.StrongNamedValidation");
+        collector.Expect("ByteCode.Plugin.StrongNamedValidation");
 
-        var assemblyPath = GetTestAssemblyPath();
-        var integrationsFile = Path.Combine(assemblyPath, "StrongNamedTestsIntegrations.json");
-        File.Exists(integrationsFile).Should().BeTrue();
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_INTEGRATIONS_FILE", integrationsFile);
         EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "ByteCode.Plugin.StrongNamedValidation");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestLibrary.InstrumentationTarget.Plugin, TestLibrary.InstrumentationTarget, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0223b52cbfd4bd5b");
         RunTestApplication();
 
         // TODO: When native logs are moved to an EventSource implementation check for the log
