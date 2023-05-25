@@ -55,6 +55,14 @@ internal static class InstrumentationDefinitions
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
         {
+#if NETFRAMEWORK
+            // AspNet
+            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.AspNet))
+            {
+                nativeCallTargetDefinitions.Add(new("System.Web", "System.Web.Compilation.BuildManager", "InvokePreStartInitMethodsCore",  new[] { "System.Void", "System.Collections.Generic.ICollection`1[System.Reflection.MethodInfo]", "System.Func`1[System.IDisposable]" }, 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.AspNet.HttpModuleIntegration"));
+            }
+#endif
+
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.GraphQL))
             {
                 nativeCallTargetDefinitions.Add(new("GraphQL", "GraphQL.Execution.ExecutionStrategy", "ExecuteAsync", new[] { "System.Threading.Tasks.Task`1<GraphQL.ExecutionResult>", "GraphQL.Execution.ExecutionContext" }, 2, 3, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration"));

@@ -241,8 +241,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         opcodes_names.push_back("->");      // CEE_SWITCH_ARG
     }
 
-    //
-    managed_profiler_assembly_reference = AssemblyReference::GetFromCache(managed_profiler_full_assembly_version);
+    managed_profiler_assembly_reference = AssemblyReference::GetFromCache(GetBytecodeInstrumentationAssembly());
 
     const auto currentModuleFileName = GetCurrentModuleFileName();
     if (currentModuleFileName == EmptyWStr)
