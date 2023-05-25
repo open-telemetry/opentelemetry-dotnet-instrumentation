@@ -32,7 +32,7 @@ internal static class NativeMethods
         return NonWindows.IsProfilerAttached();
     }
 
-    public static void InitializeProfiler(string id, NativeCallTargetDefinition[] methodArrays)
+    public static void AddInstrumentations(string id, NativeCallTargetDefinition[] methodArrays)
     {
         if (methodArrays is null || methodArrays.Length == 0)
         {
@@ -41,11 +41,11 @@ internal static class NativeMethods
 
         if (IsWindows)
         {
-            Windows.InitializeProfiler(id, methodArrays, methodArrays.Length);
+            Windows.AddInstrumentations(id, methodArrays, methodArrays.Length);
         }
         else
         {
-            NonWindows.InitializeProfiler(id, methodArrays, methodArrays.Length);
+            NonWindows.AddInstrumentations(id, methodArrays, methodArrays.Length);
         }
     }
 
@@ -74,7 +74,7 @@ internal static class NativeMethods
         public static extern bool IsProfilerAttached();
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-        public static extern void InitializeProfiler([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
+        public static extern void AddInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern void AddDerivedInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
@@ -87,7 +87,7 @@ internal static class NativeMethods
         public static extern bool IsProfilerAttached();
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
-        public static extern void InitializeProfiler([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
+        public static extern void AddInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern void AddDerivedInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);

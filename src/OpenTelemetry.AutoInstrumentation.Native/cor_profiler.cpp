@@ -983,14 +983,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITInlining(FunctionID callerId, Function
     return S_OK;
 }
 
-//
-// InitializeProfiler method
-//
-void CorProfiler::InitializeProfiler(WCHAR* id, CallTargetDefinition* items, int size)
+void CorProfiler::AddInstrumentations(WCHAR* id, CallTargetDefinition* items, int size)
 {
     auto    _             = trace::Stats::Instance()->InitializeProfilerMeasure();
     WSTRING definitionsId = WSTRING(id);
-    Logger::Info("InitializeProfiler: received id: ", definitionsId, " from managed side with ", size,
+    Logger::Info("AddInstrumentations: received id: ", definitionsId, " from managed side with ", size,
                  " integrations.");
 
     if (size > 0)
@@ -1019,7 +1016,7 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
 
     if (definitions_ids_.find(definitionsId) != definitions_ids_.end())
     {
-        Logger::Info("InitializeProfiler: Id already processed.");
+        Logger::Info("InternalAddInstrumentation: Id already processed.");
         return;
     }
 
@@ -1095,7 +1092,7 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
             }
         }
 
-        Logger::Info("InitializeProfiler: Total integrations in profiler: ", integration_definitions_.size());
+        Logger::Info("InternalAddInstrumentation: Total integrations in profiler: ", integration_definitions_.size());
     }
 }
 
