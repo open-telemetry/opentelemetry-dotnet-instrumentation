@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System.Reflection;
 using Microsoft.AspNetCore.Hosting;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Logger;
@@ -32,7 +31,6 @@ internal class BootstrapperHostingStartup : IHostingStartup
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger("AspNetCoreBootstrapper");
 
     private readonly LogSettings _logSettings;
-    private readonly TracerSettings _traceSettings;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BootstrapperHostingStartup"/> class.
@@ -40,7 +38,6 @@ internal class BootstrapperHostingStartup : IHostingStartup
     public BootstrapperHostingStartup()
     {
         _logSettings = Instrumentation.LogSettings.Value;
-        _traceSettings = Instrumentation.TracerSettings.Value;
     }
 
     /// <summary>
