@@ -71,6 +71,12 @@ internal static class DelayedInitialization
         {
             lazyInstrumentationLoader.Add(new EntityFrameworkCoreInitializer(pluginManager));
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void AddGraphQL(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
+        {
+            lazyInstrumentationLoader.Add(new GraphQLInitializer(pluginManager, tracerSettings));
+        }
 #endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]

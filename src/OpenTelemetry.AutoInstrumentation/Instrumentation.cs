@@ -145,7 +145,7 @@ internal static class Instrumentation
                 }
                 else
                 {
-                    AddLazilyLoadedTraceInstrumentations(LazyInstrumentationLoader, _pluginManager, TracerSettings.Value.EnabledInstrumentations);
+                    AddLazilyLoadedTraceInstrumentations(LazyInstrumentationLoader, _pluginManager, TracerSettings.Value);
                     Logger.Information("Initialized lazily-loaded trace instrumentations without initializing sdk.");
                 }
             }
@@ -270,9 +270,9 @@ internal static class Instrumentation
         }
     }
 
-    private static void AddLazilyLoadedTraceInstrumentations(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, IReadOnlyList<TracerInstrumentation> enabledInstrumentations)
+    private static void AddLazilyLoadedTraceInstrumentations(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
     {
-        foreach (var instrumentation in enabledInstrumentations)
+        foreach (var instrumentation in tracerSettings.EnabledInstrumentations)
         {
             switch (instrumentation)
             {
@@ -310,10 +310,11 @@ internal static class Instrumentation
                     break;
                 case TracerInstrumentation.MassTransit:
                     break;
+                case TracerInstrumentation.GraphQL:
+                    DelayedInitialization.Traces.AddGraphQL(LazyInstrumentationLoader, pluginManager, tracerSettings);
+                    break;
 #endif
                 case TracerInstrumentation.MongoDB:
-                    break;
-                case TracerInstrumentation.GraphQL:
                     break;
                 case TracerInstrumentation.Npgsql:
                     break;

@@ -29,14 +29,7 @@ public class Startup
             .AddSystemTextJson()
             .AddErrorInfoProvider(opt => opt.ExposeExceptionDetails = true)
             .AddSchema<StarWarsSchema>()
-            .AddGraphTypes(typeof(StarWarsSchema).Assembly)
-            .UseTelemetry(options =>
-             {
-                 options.RecordDocument = false;
-                 options.EnrichWithException = (activity, exception) =>
-                 {
-                 };
-             })); // TODO remove this one
+            .AddGraphTypes(typeof(StarWarsSchema).Assembly));
     }
 
     public void Configure(IApplicationBuilder app)

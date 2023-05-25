@@ -73,19 +73,6 @@ internal class BootstrapperHostingStartup : IHostingStartup
             Logger.Error($"Error in BootstrapperHostingStartup: {ex}");
             throw;
         }
-
-        if (_traceSettings.EnabledInstrumentations.Contains(TracerInstrumentation.GraphQL))
-        {
-            var type = Type.GetType("GraphQL.GraphQLBuilderExtensions, GraphQL");
-            var assembly = type?.Assembly;
-
-            if (assembly != null && assembly.GetName().Version >= new Version(4, 7, 0))
-            {
-                var method = type!.GetMethod("UseTelemetry", BindingFlags.Public | BindingFlags.Static);
-
-                method?.Invoke(null, new[] { builder });
-            }
-        }
     }
 
     private static string GetApplicationName()
