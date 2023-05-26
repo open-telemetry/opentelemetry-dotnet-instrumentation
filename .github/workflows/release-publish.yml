@@ -8,7 +8,7 @@ jobs:
   powershell-script:
     runs-on: windows-2022
     steps:
-      - uses: actions/setup-dotnet@v3.0.3
+      - uses: actions/setup-dotnet@v3.1.0
         with:
           dotnet-version: | 
             6.0.x
@@ -52,7 +52,7 @@ jobs:
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/setup-dotnet@v3.0.3
+      - uses: actions/setup-dotnet@v3.1.0
         with:
           dotnet-version: | 
             6.0.408
