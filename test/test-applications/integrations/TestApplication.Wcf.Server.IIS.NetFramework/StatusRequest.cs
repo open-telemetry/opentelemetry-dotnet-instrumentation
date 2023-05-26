@@ -1,4 +1,4 @@
-// <copyright file="StatusResponse.cs" company="OpenTelemetry Authors">
+// <copyright file="StatusRequest.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,11 +16,11 @@
 
 using System.Runtime.Serialization;
 
-namespace TestApplication.Wcf.Client.NetFramework;
+namespace TestApplication.Wcf.Server.IIS.NetFramework;
 
 [DataContract(Namespace = "http://opentelemetry.io/")]
-public class StatusResponse
+public class StatusRequest
 {
     [DataMember]
-    public DateTimeOffset ServerTime { get; set; }
+    public string Status { get; set; } = string.Empty;
 }

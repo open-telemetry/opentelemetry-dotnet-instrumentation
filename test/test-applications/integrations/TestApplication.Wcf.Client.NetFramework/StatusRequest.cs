@@ -18,7 +18,7 @@ using System.Runtime.Serialization;
 
 namespace TestApplication.Wcf.Client.NetFramework;
 
-[DataContract]
+[DataContract(Namespace = "http://opentelemetry.io/")]
 public class StatusRequest
 {
     [DataMember]

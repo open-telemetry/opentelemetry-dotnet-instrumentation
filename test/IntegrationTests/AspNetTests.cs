@@ -53,7 +53,6 @@ public class AspNetTests
         collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry"); // Expect WebApi span
 
         string collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
-        _environmentVariables["OTEL_TRACES_EXPORTER"] = "otlp";
         _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
         var webPort = TcpPortProvider.GetOpenPort();
         await using var container = await StartContainerAsync(webPort);

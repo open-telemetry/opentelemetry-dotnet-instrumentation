@@ -14,9 +14,10 @@
 // limitations under the License.
 // </copyright>
 
+using System;
 using System.Runtime.Serialization;
 
-namespace TestApplication.Wcf.Client.NetFramework;
+namespace TestApplication.Wcf.Server.IIS.NetFramework;
 
 [DataContract(Namespace = "http://opentelemetry.io/")]
 public class StatusResponse
