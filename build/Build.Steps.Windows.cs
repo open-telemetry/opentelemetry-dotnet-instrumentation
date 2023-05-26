@@ -106,45 +106,36 @@ partial class Build
         {
             var aspNetProject = Solution.GetProjectByName(Projects.Tests.Applications.AspNet);
 
-            MSBuild(x => x
-                .SetConfiguration(BuildConfiguration)
-                .SetTargetPlatform(Platform)
-                .SetProperty("DeployOnBuild", true)
-                .SetMaxCpuCount(null)
-                    .SetProperty("PublishProfile", aspNetProject.Directory / "Properties" / "PublishProfiles" / $"FolderProfile.{BuildConfiguration}.pubxml")
-                    .SetTargetPath(aspNetProject));
-
             var localCopyTracerHome = aspNetProject.Directory / "bin" / "tracer-home";
             CopyDirectoryRecursively(TracerHomeDirectory, localCopyTracerHome);
 
-            DockerBuild(x => x
-                .SetPath(".")
-                .SetBuildArg($"configuration={BuildConfiguration}", $"windowscontainer_version={WindowsContainerVersion}")
-                .SetRm(true)
-                .SetTag(Path.GetFileNameWithoutExtension(aspNetProject).Replace(".", "-").ToLowerInvariant())
-                .SetProcessWorkingDirectory(aspNetProject.Directory)
-            );
+            BuildDockerImage(aspNetProject);
 
             Directory.Delete(localCopyTracerHome, true);
 
             var wcfProject = Solution.GetProjectByName(Projects.Tests.Applications.Wcf);
-
-            MSBuild(x => x
-                .SetConfiguration(BuildConfiguration)
-                .SetTargetPlatform(Platform)
-                .SetProperty("DeployOnBuild", true)
-                .SetMaxCpuCount(null)
-                .SetProperty("PublishProfile", wcfProject.Directory / "Properties" / "PublishProfiles" / $"FolderProfile.{BuildConfiguration}.pubxml")
-                .SetTargetPath(wcfProject));
-
-            DockerBuild(x => x
-                .SetPath(".")
-                .SetBuildArg($"configuration={BuildConfiguration}",
-                    $"windowscontainer_version={WindowsContainerVersion}")
-                .EnableRm()
-                .SetTag(Path.GetFileNameWithoutExtension(wcfProject).Replace(".", "-").ToLowerInvariant())
-                .SetProcessWorkingDirectory(wcfProject.Directory));
+            BuildDockerImage(wcfProject);
         });
+
+    void BuildDockerImage(Project project)
+    {
+        MSBuild(x => x
+            .SetConfiguration(BuildConfiguration)
+            .SetTargetPlatform(Platform)
+            .SetProperty("DeployOnBuild", true)
+            .SetMaxCpuCount(null)
+            .SetProperty("PublishProfile",
+                project.Directory / "Properties" / "PublishProfiles" / $"FolderProfile.{BuildConfiguration}.pubxml")
+            .SetTargetPath(project));
+
+        DockerBuild(x => x
+            .SetPath(".")
+            .SetBuildArg($"configuration={BuildConfiguration}", $"windowscontainer_version={WindowsContainerVersion}")
+            .EnableRm()
+            .SetTag(Path.GetFileNameWithoutExtension(project).Replace(".", "-").ToLowerInvariant())
+            .SetProcessWorkingDirectory(project.Directory)
+        );
+    }
 
     Target GenerateNetFxTransientDependencies => _ => _
         .Unlisted()

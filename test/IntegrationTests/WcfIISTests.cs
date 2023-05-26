@@ -59,7 +59,6 @@ public class WcfIISTests : TestHelper
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client, "Client2");
 
         var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
-        _environmentVariables["OTEL_TRACES_EXPORTER"] = "otlp";
         _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
 
         var netTcpPort = TcpPortProvider.GetOpenPort();
