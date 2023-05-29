@@ -21,7 +21,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1602:Enumeration items should be documented", Justification = "Reviewed.")]
-[assembly: SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1402:File may only contain a single type", Justification = "Reviewed.")]
-[assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1629:Documentation text should end with a period", Justification = "Reviewed.")]
-[assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1604:Element documentation should have summary", Justification = "Reviewed")]
+[assembly: SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1402:File may only contain a single type", Justification = "Reviwed.")]
+[assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1604:Element documentation should have summary", Justification = "Reviwed.")]
+[assembly: SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1633:File should have header", Justification = "Reviwed.")]
