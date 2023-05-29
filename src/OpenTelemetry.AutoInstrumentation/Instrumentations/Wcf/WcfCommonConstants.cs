@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // </copyright>
-
+#if NETFRAMEWORK
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf;
 
 internal static class WcfCommonConstants
@@ -22,3 +22,4 @@ internal static class WcfCommonConstants
     public const string MinVersion = "4.0.0";
     public const string MaxVersion = "4.*.*";
 }
+#endif

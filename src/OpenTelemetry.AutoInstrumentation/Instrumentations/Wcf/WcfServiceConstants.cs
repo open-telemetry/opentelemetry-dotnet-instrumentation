@@ -14,9 +14,9 @@
 // limitations under the License.
 // </copyright>
 
-using OpenTelemetry.AutoInstrumentation.Configurations;
-
 #if NETFRAMEWORK
+
+using OpenTelemetry.AutoInstrumentation.Configurations;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf;
 

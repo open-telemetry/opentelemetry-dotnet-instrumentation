@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // </copyright>
-
+#if NETFRAMEWORK
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf;
 
 internal interface IKeyedByTypeCollection
@@ -22,3 +22,4 @@ internal interface IKeyedByTypeCollection
 
     bool Contains(Type t);
 }
+#endif
