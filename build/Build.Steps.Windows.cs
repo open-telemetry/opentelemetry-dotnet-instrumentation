@@ -105,20 +105,18 @@ partial class Build
         .Executes(() =>
         {
             var aspNetProject = Solution.GetProjectByName(Projects.Tests.Applications.AspNet);
-
-            var localCopyTracerHome = aspNetProject.Directory / "bin" / "tracer-home";
-            CopyDirectoryRecursively(TracerHomeDirectory, localCopyTracerHome);
-
             BuildDockerImage(aspNetProject);
 
-            Directory.Delete(localCopyTracerHome, true);
-
             var wcfProject = Solution.GetProjectByName(Projects.Tests.Applications.Wcf);
+
             BuildDockerImage(wcfProject);
         });
 
     void BuildDockerImage(Project project)
     {
+        var localCopyTracerHome = project.Directory / "bin" / "tracer-home";
+        CopyDirectoryRecursively(TracerHomeDirectory, localCopyTracerHome);
+
         MSBuild(x => x
             .SetConfiguration(BuildConfiguration)
             .SetTargetPlatform(Platform)
@@ -135,6 +133,8 @@ partial class Build
             .SetTag(Path.GetFileNameWithoutExtension(project).Replace(".", "-").ToLowerInvariant())
             .SetProcessWorkingDirectory(project.Directory)
         );
+
+        Directory.Delete(localCopyTracerHome, true);
     }
 
     Target GenerateNetFxTransientDependencies => _ => _

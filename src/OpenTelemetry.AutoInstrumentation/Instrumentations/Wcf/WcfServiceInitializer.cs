@@ -1,4 +1,4 @@
-// <copyright file="WcfClientInitializer.cs" company="OpenTelemetry Authors">
+// <copyright file="WcfServiceInitializer.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,32 +19,27 @@ using OpenTelemetry.Instrumentation.Wcf;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf;
 
-internal static class WcfClientInitializer
+internal static class WcfServiceInitializer
 {
-    private interface IChannelFactory
+    private interface IServiceHostBase
     {
-        IEndpoint Endpoint { get; }
+        IDescription Description { get; }
     }
 
-    private interface IEndpoint
+    private interface IDescription
     {
         IKeyedByTypeCollection Behaviors { get; }
     }
 
-    public static void Initialize(object instance)
+    public static void Initialize(object serviceHostInstance)
     {
-        // WcfInstrumentationActivitySource.Options is initialized by WcfInitializer
-        // when targeted assembly loads. Remaining work to initialize instrumentation
-        // is to add telemetry behavior to the endpoint's collection.
-        if (!instance.TryDuckCast<IChannelFactory>(out var channelFactory))
+        if (serviceHostInstance.TryDuckCast<IServiceHostBase>(out var serviceHost))
         {
-            return;
-        }
-
-        var behaviors = channelFactory.Endpoint.Behaviors;
-        if (!behaviors.Contains(typeof(TelemetryEndpointBehavior)))
-        {
-            behaviors.Add(new TelemetryEndpointBehavior());
+            var behaviors = serviceHost.Description.Behaviors;
+            if (!behaviors.Contains(typeof(TelemetryServiceBehavior)))
+            {
+                behaviors.Add(new TelemetryServiceBehavior());
+            }
         }
     }
 }

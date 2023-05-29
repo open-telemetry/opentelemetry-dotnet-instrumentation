@@ -1,4 +1,4 @@
-// <copyright file="WcfClientConstants.cs" company="OpenTelemetry Authors">
+// <copyright file="WcfServiceConstants.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +13,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // </copyright>
-#if NETFRAMEWORK
+
 using OpenTelemetry.AutoInstrumentation.Configurations;
+
+#if NETFRAMEWORK
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf;
 
-internal static class WcfClientConstants
+internal static class WcfServiceConstants
 {
-    public const string ChannelFactoryTypeName = "System.ServiceModel.ChannelFactory";
-    public const string InitializeEndpointMethodName = "InitializeEndpoint";
-    public const string IntegrationName = nameof(TracerInstrumentation.WcfClient);
-    public const string EndpointAddressTypeName = "System.ServiceModel.EndpointAddress";
-    public const string ServiceEndpointTypeName = "System.ServiceModel.Description.ServiceEndpoint";
-    public const string BindingTypeName = "System.ServiceModel.Channels.Binding";
-    public const string ConfigurationTypeName = "System.Configuration.Configuration";
+    public const string IntegrationName = nameof(TracerInstrumentation.WcfService);
+    public const string ServiceHostBaseTypeName = "System.ServiceModel.ServiceHostBase";
+    public const string InitializeDescriptionMethodName = "InitializeDescription";
+    public const string UriSchemeKeyedCollectionTypeName = "System.ServiceModel.UriSchemeKeyedCollection";
 }
 #endif

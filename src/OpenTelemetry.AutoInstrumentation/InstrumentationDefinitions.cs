@@ -107,6 +107,11 @@ internal static class InstrumentationDefinitions
                 nativeCallTargetDefinitions.Add(new("System.ServiceModel", "System.ServiceModel.ChannelFactory", "InitializeEndpoint", new[] { "System.Void", "System.ServiceModel.Description.ServiceEndpoint" }, 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.WcfClientIntegration"));
                 nativeCallTargetDefinitions.Add(new("System.ServiceModel", "System.ServiceModel.ChannelFactory", "InitializeEndpoint", new[] { "System.Void", "System.ServiceModel.Channels.Binding", "System.ServiceModel.EndpointAddress" }, 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.WcfClientIntegration"));
             }
+
+            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.WcfService))
+            {
+                nativeCallTargetDefinitions.Add(new("System.ServiceModel", "System.ServiceModel.ServiceHostBase", "InitializeDescription", new[] { "System.Void", "System.ServiceModel.UriSchemeKeyedCollection" }, 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.ServiceHostIntegration"));
+            }
 #endif
         }
 
