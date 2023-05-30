@@ -8,7 +8,7 @@ WORKDIR /opentelemetry
 COPY tracer.zip .
 COPY OpenTelemetry.DotNet.Auto.psm1 .
 ENV OTEL_DOTNET_AUTO_INSTALL_DIR=C:\opentelemetry
-RUN Import-Module .\OpenTelemetry.DotNet.Auto.psm1 -Verbose;Install-OpenTelemetryCore -LocalPath .\tracer.zip;Register-OpenTelemetryForIIS;
+RUN Import-Module .\OpenTelemetry.DotNet.Auto.psm1 -Verbose; Install-OpenTelemetryCore -LocalPath .\tracer.zip; Register-OpenTelemetryForIIS;
 ENV OTEL_DOTNET_AUTO_LOG_DIRECTORY=C:\inetpub\wwwroot\logs `
     OTEL_LOG_LEVEL=debug
 WORKDIR /inetpub/wwwroot
