@@ -5,8 +5,8 @@ FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-${windowsco
 ARG configuration=Debug
 ARG platform=x64
 WORKDIR /opentelemetry
-COPY tracer.zip .
-COPY OpenTelemetry.DotNet.Auto.psm1 .
+COPY bin/tracer.zip .
+COPY bin/OpenTelemetry.DotNet.Auto.psm1 .
 ENV OTEL_DOTNET_AUTO_INSTALL_DIR=C:\opentelemetry
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 RUN Import-Module .\OpenTelemetry.DotNet.Auto.psm1 -Verbose; `

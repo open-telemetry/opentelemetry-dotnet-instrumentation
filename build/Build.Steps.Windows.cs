@@ -115,11 +115,12 @@ partial class Build
     {
         const string moduleName = "OpenTelemetry.DotNet.Auto.psm1";
         var sourceModulePath = Solution.Directory / moduleName;
-        var localTracerZip = project.Directory / "tracer.zip";
+        var localBinDirectory = project.Directory / "bin";
+        var localTracerZip = localBinDirectory / "tracer.zip";
 
         try
         {
-            CopyFileToDirectory(sourceModulePath, project.Directory);
+            CopyFileToDirectory(sourceModulePath, localBinDirectory);
             TracerHomeDirectory.ZipTo(localTracerZip);
 
             MSBuild(x => x
@@ -142,7 +143,7 @@ partial class Build
         finally
         {
             localTracerZip.DeleteFile();
-            var localModulePath = project.Directory / moduleName;
+            var localModulePath = localBinDirectory / moduleName;
             localModulePath.DeleteFile();
         }
     }
