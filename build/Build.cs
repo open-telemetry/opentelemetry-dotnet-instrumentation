@@ -81,7 +81,6 @@ partial class Build : NukeBuild
 
     Target Workflow => _ => _
         .Description("GitHub workflow entry point")
-        .DependsOn(Clean)
         .DependsOn(BuildTracer)
         .DependsOn(CompileExamples)
         .DependsOn(NativeTests)
