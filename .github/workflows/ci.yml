@@ -14,7 +14,7 @@ jobs:
       matrix:
         include:
           - machine: windows-2022
-            containers: windows
+            containers: none
             log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
           - machine: ubuntu-20.04
             containers: linux
@@ -23,6 +23,9 @@ jobs:
             containers: none
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
       - uses: actions/checkout@v3.5.2
       - uses: actions/setup-dotnet@v3.2.0
@@ -30,6 +33,16 @@ jobs:
           dotnet-version: | 
             6.0.408
             7.0.302
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        id: nuget-cache
+        with:
+          key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs',  ) }}
+          path: ${{ env.NUGET_PACKAGES }}
+      - if: ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
+        name: Restore NuGet packages
+        continue-on-error: false
+        run: ./build.cmd Restore
       - name: Install SQL Server (localdb)
         uses: potatoqualitee/mssqlsuite@v1.7
         if: ${{ runner.os == 'Windows' }}

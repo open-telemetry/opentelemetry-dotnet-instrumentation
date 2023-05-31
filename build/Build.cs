@@ -90,8 +90,8 @@ partial class Build : NukeBuild
     Target BuildTracer => _ => _
         .Description("Builds the native and managed src, and publishes the tracer home directory")
         .After(Clean)
+        .After(Restore)
         .DependsOn(CreateRequiredDirectories)
-        .DependsOn(Restore)
         .DependsOn(GenerateNetFxTransientDependencies)
         .DependsOn(CompileManagedSrc)
         .DependsOn(PublishManagedProfiler)
