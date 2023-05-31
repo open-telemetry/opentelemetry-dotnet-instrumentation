@@ -17,6 +17,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - ASP.NET instrumentation no longer requires manual modification
   of config files to include `TelemetryHttpModule`.
+- Parameter for `ConfigureTracesOptions` extension point for StackExchangeRedis
+  changed type from `OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisCallsInstrumentationOptions`
+  to `OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisInstrumentationOptions`.
 
 ### Deprecated
 
