@@ -114,27 +114,39 @@ partial class Build
 
     void BuildDockerImage(Project project)
     {
-        var localCopyTracerHome = project.Directory / "bin" / "tracer-home";
-        CopyDirectoryRecursively(TracerHomeDirectory, localCopyTracerHome);
+        const string moduleName = "OpenTelemetry.DotNet.Auto.psm1";
+        var sourceModulePath = Solution.Directory / moduleName;
+        var localBinDirectory = project.Directory / "bin";
+        var localTracerZip = localBinDirectory / "tracer.zip";
 
-        MSBuild(x => x
-            .SetConfiguration(BuildConfiguration)
-            .SetTargetPlatform(Platform)
-            .SetProperty("DeployOnBuild", true)
-            .SetMaxCpuCount(null)
-            .SetProperty("PublishProfile",
-                project.Directory / "Properties" / "PublishProfiles" / $"FolderProfile.{BuildConfiguration}.pubxml")
-            .SetTargetPath(project));
+        try
+        {
+            CopyFileToDirectory(sourceModulePath, localBinDirectory);
+            TracerHomeDirectory.ZipTo(localTracerZip);
 
-        DockerBuild(x => x
-            .SetPath(".")
-            .SetBuildArg($"configuration={BuildConfiguration}", $"windowscontainer_version={WindowsContainerVersion}")
-            .EnableRm()
-            .SetTag(Path.GetFileNameWithoutExtension(project).Replace(".", "-").ToLowerInvariant())
-            .SetProcessWorkingDirectory(project.Directory)
-        );
+            MSBuild(x => x
+                .SetConfiguration(BuildConfiguration)
+                .SetTargetPlatform(Platform)
+                .SetProperty("DeployOnBuild", true)
+                .SetMaxCpuCount(null)
+                .SetProperty("PublishProfile",
+                    project.Directory / "Properties" / "PublishProfiles" / $"FolderProfile.{BuildConfiguration}.pubxml")
+                .SetTargetPath(project));
 
-        Directory.Delete(localCopyTracerHome, true);
+            DockerBuild(x => x
+                .SetPath(".")
+                .SetBuildArg($"configuration={BuildConfiguration}", $"windowscontainer_version={WindowsContainerVersion}")
+                .EnableRm()
+                .SetTag(Path.GetFileNameWithoutExtension(project).Replace(".", "-").ToLowerInvariant())
+                .SetProcessWorkingDirectory(project.Directory)
+            );
+        }
+        finally
+        {
+            localTracerZip.DeleteFile();
+            var localModulePath = localBinDirectory / moduleName;
+            localModulePath.DeleteFile();
+        }
     }
 
     Target GenerateNetFxTransientDependencies => _ => _
