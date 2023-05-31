@@ -10,7 +10,7 @@
   <!-- Versions from OpenTelemetry.AutoInstrumentation.BuildTasks.csproj -->
   <ItemGroup>
     <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="17.5.0" />
-    <PackageVersion Include="NuGet.Versioning" Version="6.6.0" />
+    <PackageVersion Include="NuGet.Versioning" Version="$(NuGetVersioningVersion)" />
   </ItemGroup>
 
   <!-- Versions from OpenTelemetry.AutoInstrumentation.csproj -->
