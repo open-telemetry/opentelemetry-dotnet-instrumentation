@@ -83,9 +83,18 @@ partial class Build : NukeBuild
         });
 
     Target Workflow => _ => _
-        .Description("GitHub workflow entry point")
+        .Description("Full workflow including build of deliverables (except NuGet packages) and run the respective tests")
+        .DependsOn(BuildWorkflow)
+        .DependsOn(TestWorkflow);
+
+    Target BuildWorkflow => _ => _
+        .Description("Builds the project deliverables (except NuGet packages)")
         .DependsOn(BuildTracer)
-        .DependsOn(CompileExamples)
+        .DependsOn(CompileExamples);
+
+    Target TestWorkflow => _ => _
+        .Description("Builds and run the tests against the local deliverables (except NuGet packages)")
+        .After(BuildWorkflow)
         .DependsOn(NativeTests)
         .DependsOn(ManagedTests);
 

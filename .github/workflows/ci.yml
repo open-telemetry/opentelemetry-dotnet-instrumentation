@@ -14,13 +14,10 @@ jobs:
       matrix:
         include:
           - machine: windows-2022
-            containers: none
             log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
           - machine: ubuntu-20.04
-            containers: linux
             log-dir: "/var/log/opentelemetry/dotnet"
           - machine: macos-11
-            containers: none
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     env:
@@ -49,18 +46,9 @@ jobs:
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
-      - name: Install SQL Server (localdb)
-        uses: potatoqualitee/mssqlsuite@v1.7
-        if: ${{ runner.os == 'Windows' }}
-        with: 
-          install: localdb
-      - run: ./build.cmd Workflow --containers ${{ matrix.containers }} --no-restore ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
-      - name: Upload logs
-        uses: actions/upload-artifact@v3.1.2
-        if: always()
-        with:
-          name: logs-${{ matrix.machine }}
-          path: build_data/
+
+      - run: ./build.cmd BuildWorkflow --no-restore ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
+
       - run: brew install coreutils
         if: ${{ runner.os == 'macOS' }}
       - name: Create test directory
@@ -97,11 +85,12 @@ jobs:
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
-      - name: Delete SQL Server MSI
-        if: ${{ runner.os == 'Windows' }}
-        shell: bash
-        run: |
-          rm SqlLocalDB.msi
+      - name: Upload build logs
+        uses: actions/upload-artifact@v3.1.2
+        if: always()
+        with:
+          name: build-logs-${{ matrix.machine }}
+          path: build_data/
       - name: Generated files unchanged
         shell: bash
         run: |
@@ -152,8 +141,24 @@ jobs:
     needs: [ build, build-container ]
 
     runs-on: windows-2022
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
       - uses: actions/checkout@v3.5.2
+
+      - uses: actions/setup-dotnet@v3.2.0
+        with:
+          dotnet-version: | 
+            6.0.408
+            7.0.302
+
+      - name: Check for NuGet packages cache
+        uses: actions/cache@v3
+        id: nuget-cache
+        with:
+          key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
+          path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download Windows Artifacts from build job
         uses: actions/download-artifact@v3.0.2
@@ -191,6 +196,87 @@ jobs:
           name: OpenTelemetry.AutoInstrumentation.NuGet.Packages
           path: bin/nuget-artifacts/
 
+  test-build-artifacts:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - machine: windows-2022
+            containers: windows
+            log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
+          - machine: ubuntu-20.04
+            containers: linux
+            log-dir: "/var/log/opentelemetry/dotnet"
+          - machine: macos-11
+            containers: none
+            log-dir: "/var/log/opentelemetry/dotnet"
+    runs-on: ${{ matrix.machine }}
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    steps:
+      - uses: actions/checkout@v3.5.2
+      - uses: actions/setup-dotnet@v3.2.0
+        with:
+          dotnet-version: | 
+            6.0.408
+            7.0.302
+      - name: Check for NuGet packages cache
+        uses: actions/cache@v3
+        id: nuget-cache
+        with:
+          key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
+          path: ${{ env.NUGET_PACKAGES }}
+      - name: Download Artifacts from build job
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: bin-${{ matrix.machine }}
+          path: bin/tracer-home
+      - name: Install SQL Server (localdb)
+        uses: potatoqualitee/mssqlsuite@v1.7
+        if: ${{ runner.os == 'Windows' }}
+        with: 
+          install: localdb
+      - run: ./build.cmd TestWorkflow --containers ${{ matrix.containers }}
+      - name: Upload logs
+        uses: actions/upload-artifact@v3.1.2
+        if: always()
+        with:
+          name: test-logs-${{ matrix.machine }}
+          path: build_data/
+      - name: Delete SQL Server MSI
+        if: ${{ runner.os == 'Windows' }}
+        shell: bash
+        run: |
+          rm SqlLocalDB.msi
+
+  test-build-container:
+    needs: build-container
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - base-image: alpine
+            os-type: linux-musl
+          - base-image: centos
+            os-type: linux-glibc
+    runs-on: ubuntu-20.04
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v3.5.2
+    - name: Download Artifacts from build job
+      uses: actions/download-artifact@v3.0.2
+      with:
+        name: bin-${{ matrix.base-image }}
+        path: bin/tracer-home
+    - name: Build in Docker container
+      run: |
+        set -e
+        docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" ./docker
+        docker run -e OS_TYPE=${{ matrix.os-type }} --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
+          ./build.sh TestWorkflow --containers none
+
   test-nuget-packages:
     needs: build-nuget-packages
     strategy:
@@ -200,6 +286,9 @@ jobs:
           - machine: ubuntu-20.04
           - machine: macos-11
     runs-on: ${{ matrix.machine }}
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
       - uses: actions/checkout@v3.5.2
       - uses: actions/setup-dotnet@v3.2.0
@@ -207,6 +296,12 @@ jobs:
           dotnet-version: | 
             6.0.408
             7.0.302
+      - name: Check for NuGet packages cache
+        uses: actions/cache@v3
+        id: nuget-cache
+        with:
+          key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
+          path: ${{ env.NUGET_PACKAGES }}
 
       - name: Download NuGet Artifacts from build-nuget-packages job
         uses: actions/download-artifact@v3.0.2
