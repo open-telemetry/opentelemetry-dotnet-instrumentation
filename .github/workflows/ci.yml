@@ -43,7 +43,8 @@ jobs:
         name: Restore NuGet packages
         continue-on-error: false
         run: ./build.cmd Restore
-      - name: Cache NuGet packages
+      - if: ${{ steps.nuget-cache.outputs.cache-hit != 'true' }}
+        name: Cache NuGet packages
         uses: actions/cache/save@v3
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
