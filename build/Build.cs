@@ -15,13 +15,14 @@ partial class Build : NukeBuild
     [Parameter("Platform to build - x86 or x64. Default is 'x64'")]
     readonly MSBuildTargetPlatform Platform = MSBuildTargetPlatform.x64;
 
-    [Parameter($"Docker containers type to be used. One of '{ContainersNone}', '{ContainersLinux}', '{ContainersWindows}'. Default is '{ContainersLinux}'")]
+    [Parameter($"Docker containers type to be used. One of '{ContainersNone}', '{ContainersLinux}', '{ContainersWindows}', '{ContainersWindowsContainersOnly}'. Default is '{ContainersLinux}'")]
     readonly string Containers = ContainersLinux;
 
     const string ContainersNone = "none";
     const string ContainersAny = "any";
     const string ContainersLinux = "linux";
     const string ContainersWindows = "windows";
+    const string ContainersWindowsContainersOnly = "windows-containers-only";
 
     [Parameter("Test projects filter. Optional, default matches all test projects. The project will be selected if the string is part of its name.")]
     readonly string TestProject = "";
@@ -142,8 +143,10 @@ partial class Build : NukeBuild
                 return "Containers!=Windows";
             case ContainersWindows:
                 return "Containers!=Linux";
+            case ContainersWindowsContainersOnly:
+                return "Containers=Windows";
             case ContainersAny:
-                throw new InvalidOperationException($"Containers={ContainersAny} is not supported directly. Specify concrete value, either Containers={ContainersLinux} or Containers={ContainersWindows}.");
+                throw new InvalidOperationException($"Containers={ContainersAny} is not supported directly. Specify concrete value, see help for options.");
             default:
                 throw new InvalidOperationException($"Containers={Containers} is not supported");
         }
