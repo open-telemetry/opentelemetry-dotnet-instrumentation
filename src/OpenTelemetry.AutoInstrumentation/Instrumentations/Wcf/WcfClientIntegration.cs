@@ -76,10 +76,7 @@ public static class WcfClientIntegration
     internal static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception exception, in CallTargetState state)
     where TTarget : WcfClientInitializer.IChannelFactory
     {
-        if (Instrumentation.TracerSettings.Value.EnabledInstrumentations.Contains(TracerInstrumentation.WcfClient))
-        {
-            WcfClientInitializer.Initialize(instance);
-        }
+        WcfClientInitializer.Initialize(instance);
 
         return CallTargetReturn.GetDefault();
     }

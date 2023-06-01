@@ -45,10 +45,7 @@ public static class ServiceHostIntegration
     internal static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception exception, in CallTargetState state)
     where TTarget : WcfServiceInitializer.IServiceHostBase
     {
-        if (Instrumentation.TracerSettings.Value.EnabledInstrumentations.Contains(TracerInstrumentation.WcfService))
-        {
-            WcfServiceInitializer.Initialize(instance);
-        }
+        WcfServiceInitializer.Initialize(instance);
 
         return CallTargetReturn.GetDefault();
     }
