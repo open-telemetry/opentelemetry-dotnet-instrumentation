@@ -31,10 +31,7 @@ partial class Build
 
             foreach (var project in Solution.GetNativeSrcProjects())
             {
-                if (!NoRestore && project.Directory.ContainsFile("packages.config"))
-                {
-                    RestoreLegacyNuGetPackagesConfig(new[] { project });
-                }
+                PerformLegacyRestoreIfNeeded(project);
 
                 // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
                 MSBuild(s => s
@@ -60,10 +57,7 @@ partial class Build
                 : new[] { MSBuildTargetPlatform.x86 };
 
             var nativeTestProject = Solution.GetNativeTestProject();
-            if (!NoRestore && nativeTestProject.Directory.ContainsFile("packages.config"))
-            {
-                RestoreLegacyNuGetPackagesConfig(new[] { nativeTestProject });
-            }
+            PerformLegacyRestoreIfNeeded(nativeTestProject);
 
             // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
             MSBuild(s => s
@@ -134,10 +128,7 @@ partial class Build
             CopyFileToDirectory(sourceModulePath, localBinDirectory);
             TracerHomeDirectory.ZipTo(localTracerZip);
 
-            if (!NoRestore && project.Directory.ContainsFile("packages.config"))
-            {
-                RestoreLegacyNuGetPackagesConfig(new[] { project });
-            }
+            PerformLegacyRestoreIfNeeded(project);
 
             MSBuild(x => x
                 .SetConfiguration(BuildConfiguration)
@@ -236,6 +227,7 @@ partial class Build
         .Unlisted()
         .After(BuildTracer)
         .OnlyWhenStatic(() => IsWin)
+        .OnlyWhenStatic(() => TestTargetFramework == TargetFramework.NET462 || TestTargetFramework == TargetFramework.NOT_SPECIFIED)
         .Executes(() => RunNetFxGacOperation("-i"));
 
     /// <remarks>
@@ -256,5 +248,13 @@ partial class Build
             .SetProjectFile(installTool)
             .SetConfiguration(BuildConfiguration)
             .SetApplicationArguments($"{operation} {netFxAssembliesFolder}"));
+    }
+
+    private void PerformLegacyRestoreIfNeeded(Project project)
+    {
+        if (!NoRestore && project.Directory.ContainsFile("packages.config"))
+        {
+            RestoreLegacyNuGetPackagesConfig(new[] { project });
+        }
     }
 }

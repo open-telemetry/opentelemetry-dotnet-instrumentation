@@ -18,6 +18,9 @@ partial class Build : NukeBuild
     [Parameter($"Docker containers type to be used. One of '{ContainersNone}', '{ContainersLinux}', '{ContainersWindows}', '{ContainersWindowsContainerTestsOnly}'. Default is '{ContainersLinux}'")]
     readonly string Containers = ContainersLinux;
 
+    [Parameter("TargetFramework to be tested. Default is empty, meaning all TFMs supported by each test")]
+    readonly TargetFramework TestTargetFramework = TargetFramework.NOT_SPECIFIED;
+
     const string ContainersNone = "none";
     const string ContainersAny = "any";
     const string ContainersLinux = "linux";

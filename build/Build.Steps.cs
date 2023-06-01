@@ -131,24 +131,32 @@ partial class Build
             var testApps = Solution.GetCrossPlatformTestApplications();
             if (IsWin)
             {
-                testApps = testApps.Concat(Solution.GetWindowsOnlyTestApplications());
+                testApps = Solution.GetWindowsOnlyTestApplications().Concat(testApps);
             }
 
             foreach (var app in testApps)
             {
-                // Special case: a test application using old packages.config needs special treatment.
-                if (app.Directory.ContainsFile("packages.config"))
+                var legacyPackagesConfig = app.Directory.ContainsFile("packages.config");
+                if (TestTargetFramework != TargetFramework.NOT_SPECIFIED &&
+                    ((legacyPackagesConfig && TestTargetFramework != TargetFramework.NET462) ||
+                     (!legacyPackagesConfig && !app.GetTargetFrameworks().Contains(TestTargetFramework))))
                 {
-                    if (!NoRestore)
-                    {
-                        RestoreLegacyNuGetPackagesConfig(new[] { app });
-                    }
+                    // Skip this app if it doesn't support the selected test TFM.
+                    continue;
+                }
+
+                // Special case: a test application using old packages.config needs special treatment.
+                if (legacyPackagesConfig)
+                {
+                    PerformLegacyRestoreIfNeeded(app);
 
                     DotNetBuild(s => s
                         .SetProjectFile(app)
-                        .SetNoRestore(true) // project w/ packages.config can't do the restore via dotnet CLI
+                        .SetNoRestore(true)  // project w/ packages.config can't do the restore via dotnet CLI
                         .SetPlatform(Platform)
-                        .SetConfiguration(BuildConfiguration));
+                        .SetConfiguration(BuildConfiguration)
+                        .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
+                            x => x.SetFramework(TestTargetFramework)));
 
                     continue;
                 }
@@ -157,7 +165,9 @@ partial class Build
                     x.SetProjectFile(app)
                         .SetConfiguration(BuildConfiguration)
                         .SetPlatform(Platform)
-                        .SetNoRestore(NoRestore);
+                        .SetNoRestore(NoRestore)
+                        .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
+                            s => s.SetFramework(TestTargetFramework));
 
                 if (LibraryVersion.Versions.TryGetValue(app.Name, out var libraryVersions))
                 {
@@ -174,11 +184,20 @@ partial class Build
 
             foreach (var project in Solution.GetManagedTestProjects())
             {
+                if (TestTargetFramework != TargetFramework.NOT_SPECIFIED &&
+                    !project.GetTargetFrameworks().Contains(TestTargetFramework))
+                {
+                    // Skip this test project if it doesn't support the selected test TFM.
+                    continue;
+                }
+
                 // Always AnyCPU
                 DotNetBuild(x => x
                     .SetProjectFile(project)
                     .SetConfiguration(BuildConfiguration)
-                    .SetNoRestore(NoRestore));
+                    .SetNoRestore(NoRestore)
+                    .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
+                        s => s.SetFramework(TestTargetFramework)));
             }
         });
 
@@ -328,6 +347,16 @@ partial class Build
             var targetFrameworks = IsWin
                 ? TargetFrameworks
                 : TargetFrameworks.ExceptNetFramework();
+            if (TestTargetFramework != TargetFramework.NOT_SPECIFIED)
+            {
+                if (!targetFrameworks.Contains(TestTargetFramework))
+                {
+                    // This test doesn't run for the selected test TFM, nothing to do.
+                    return;
+                }
+
+                targetFrameworks = new[] { TestTargetFramework };
+            }
 
             DotNetPublish(s => s
                 .SetProject(Solution.GetTestMock())
@@ -348,6 +377,8 @@ partial class Build
                 .SetProjectFile(Solution.GetProjectByName(Projects.Mocks.AutoInstrumentationMock))
                 .SetConfiguration(BuildConfiguration)
                 .SetNoRestore(NoRestore)
+                .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
+                    s => s.SetFramework(TestTargetFramework))
             );
         });
 
@@ -374,6 +405,15 @@ partial class Build
                 }
             }
 
+            if (TestTargetFramework != TargetFramework.NOT_SPECIFIED)
+            {
+                unitTestProjects = unitTestProjects
+                    .Where(p =>
+                        p.GetTargetFrameworks().Contains(TestTargetFramework) &&
+                        (p.Name != Projects.Tests.AutoInstrumentationLoaderTests || TargetFrameworks.Contains(TestTargetFramework)))
+                    .ToArray();
+            }
+
             for (int i = 0; i < TestCount; i++)
             {
                 DotNetTest(config => config
@@ -382,6 +422,8 @@ partial class Build
                     .SetFilter(TestNameFilter())
                     .SetNoRestore(NoRestore)
                     .EnableNoBuild()
+                    .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
+                        x => x.SetFramework(TestTargetFramework))
                     .CombineWith(unitTestProjects, (s, project) => s
                         .EnableTrxLogOutput(GetResultsDirectory(project))
                         .SetProjectFile(project)), degreeOfParallelism: 4);
@@ -400,8 +442,6 @@ partial class Build
                 return;
             }
 
-            var frameworks = IsWin ? TestFrameworks : TestFrameworks.ExceptNetFramework();
-
             for (int i = 0; i < TestCount; i++)
             {
                 DotNetMSBuild(config => config
@@ -411,6 +451,8 @@ partial class Build
                     .EnableTrxLogOutput(GetResultsDirectory(project))
                     .SetTargetPath(project)
                     .SetRestore(!NoRestore)
+                    .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
+                        s => s.SetProperty("TargetFramework", TestTargetFramework.ToString()))
                     .RunTests()
                 );
             }
@@ -581,6 +623,7 @@ partial class Build
                     .EnableTrxLogOutput(GetResultsDirectory(project))
                     .SetProjectFile(project)
                     .SetFilter(AndFilter(TestNameFilter(), testName))
+                    .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED, s => s.SetFramework(TestTargetFramework))
                     .SetProcessEnvironmentVariable("BOOSTRAPPING_TESTS", "true"));
             }
         }
