@@ -50,6 +50,9 @@ partial class Build : NukeBuild
     [Parameter("Version suffix added to the NuGet packages built from the project. Default is '-local.1'")]
     string NuGetVersionSuffix = "-local.1";
 
+    [Parameter("Do not restore the projects before building.")]
+    readonly bool NoRestore;
+
     Target Clean => _ => _
         .Description("Cleans all build output")
         .Executes(() =>

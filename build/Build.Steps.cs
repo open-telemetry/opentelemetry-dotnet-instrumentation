@@ -102,16 +102,7 @@ partial class Build
                     .Concat(new[] { Solution.GetProjectByName(Projects.Tests.Applications.AspNet) })
                     .Concat(new[] { Solution.GetProjectByName(Projects.Tests.Applications.Wcf) });
 
-                foreach (var project in legacyRestoreProjects)
-                {
-                    // Restore legacy projects
-                    NuGetTasks.NuGetRestore(s => s
-                        .SetTargetPath(project)
-                        .SetSolutionDirectory(Solution.Directory)
-                        .SetVerbosity(NuGetVerbosity.Normal)
-                        .When(!string.IsNullOrEmpty(NuGetPackagesDirectory), o =>
-                            o.SetPackagesDirectory(NuGetPackagesDirectory)));
-                }
+                RestoreLegacyNuGetPackagesConfig(legacyRestoreProjects);
             }
         }));
 
@@ -128,7 +119,7 @@ partial class Build
                 DotNetBuild(x => x
                     .SetProjectFile(project)
                     .SetConfiguration(BuildConfiguration)
-                    .EnableNoRestore());
+                    .SetNoRestore(NoRestore));
             }
         });
 
@@ -145,11 +136,28 @@ partial class Build
 
             foreach (var app in testApps)
             {
+                // Special case: a test application using old packages.config needs special treatment.
+                if (app.Directory.ContainsFile("packages.config"))
+                {
+                    if (!NoRestore)
+                    {
+                        RestoreLegacyNuGetPackagesConfig(new[] { app });
+                    }
+
+                    DotNetBuild(s => s
+                        .SetProjectFile(app)
+                        .SetNoRestore(true) // project w/ packages.config can't do the restore via dotnet CLI
+                        .SetPlatform(Platform)
+                        .SetConfiguration(BuildConfiguration));
+
+                    continue;
+                }
+
                 DotNetBuildSettings BuildTestApplication(DotNetBuildSettings x) =>
                     x.SetProjectFile(app)
                         .SetConfiguration(BuildConfiguration)
                         .SetPlatform(Platform)
-                        .SetNoRestore(true);
+                        .SetNoRestore(NoRestore);
 
                 if (LibraryVersion.Versions.TryGetValue(app.Name, out var libraryVersions))
                 {
@@ -170,7 +178,7 @@ partial class Build
                 DotNetBuild(x => x
                     .SetProjectFile(project)
                     .SetConfiguration(BuildConfiguration)
-                    .SetNoRestore(true));
+                    .SetNoRestore(NoRestore));
             }
         });
 
@@ -212,7 +220,7 @@ partial class Build
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
-                .EnableNoRestore()
+                .SetNoRestore(NoRestore)
                 .CombineWith(targetFrameworks, (p, framework) => p
                     .SetFramework(framework)
                     .SetOutput(TracerHomeDirectory / MapToFolderOutput(framework))));
@@ -225,7 +233,7 @@ partial class Build
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
-                .EnableNoRestore()
+                .SetNoRestore(NoRestore)
                 .SetFramework(TargetFramework.NETCore3_1)
                 .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NETCore3_1)));
 
@@ -235,7 +243,7 @@ partial class Build
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
-                .EnableNoRestore()
+                .SetNoRestore(NoRestore)
                 .SetFramework(TargetFramework.NET6_0)
                 .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET6_0)));
 
@@ -244,7 +252,7 @@ partial class Build
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
-                .EnableNoRestore()
+                .SetNoRestore(NoRestore)
                 .SetFramework(TargetFramework.NET6_0)
                 .SetOutput(TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET6_0)));
 
@@ -326,7 +334,7 @@ partial class Build
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatformAnyCPU()
                 .EnableNoBuild()
-                .EnableNoRestore()
+                .SetNoRestore(NoRestore)
                 .CombineWith(targetFrameworks, (p, framework) => p
                     .SetFramework(framework)
                     .SetOutput(TestsDirectory / Projects.Tests.AutoInstrumentationLoaderTests / "bin" / BuildConfiguration / "Profiler" / framework)));
@@ -339,7 +347,7 @@ partial class Build
             DotNetBuild(x => x
                 .SetProjectFile(Solution.GetProjectByName(Projects.Mocks.AutoInstrumentationMock))
                 .SetConfiguration(BuildConfiguration)
-                .SetNoRestore(true)
+                .SetNoRestore(NoRestore)
             );
         });
 
@@ -372,7 +380,7 @@ partial class Build
                     .SetConfiguration(BuildConfiguration)
                     .SetTargetPlatformAnyCPU()
                     .SetFilter(TestNameFilter())
-                    .EnableNoRestore()
+                    .SetNoRestore(NoRestore)
                     .EnableNoBuild()
                     .CombineWith(unitTestProjects, (s, project) => s
                         .EnableTrxLogOutput(GetResultsDirectory(project))
@@ -402,7 +410,7 @@ partial class Build
                     .SetBlameHangTimeout("5m")
                     .EnableTrxLogOutput(GetResultsDirectory(project))
                     .SetTargetPath(project)
-                    .DisableRestore()
+                    .SetRestore(!NoRestore)
                     .RunTests()
                 );
             }
@@ -430,7 +438,7 @@ partial class Build
                 .SetTargetPlatformAnyCPU()
                 .SetProperty("TracerHomePath", TracerHomeDirectory)
                 .EnableNoBuild()
-                .EnableNoRestore()
+                .SetNoRestore(NoRestore)
                 .CombineWith(TestFrameworks.ExceptNetFramework(), (p, framework) => p
                 .SetFramework(framework)
                 // Additional-deps probes the directory using SemVer format.
@@ -568,7 +576,7 @@ partial class Build
                 DotNetTest(config => config
                     .SetConfiguration(BuildConfiguration)
                     .SetTargetPlatformAnyCPU()
-                    .EnableNoRestore()
+                    .SetNoRestore(NoRestore)
                     .EnableNoBuild()
                     .EnableTrxLogOutput(GetResultsDirectory(project))
                     .SetProjectFile(project)
@@ -581,5 +589,19 @@ partial class Build
     private string MapToFolderOutput(TargetFramework targetFramework)
     {
         return targetFramework.ToString().StartsWith("net4") ? "netfx" : "net";
+    }
+
+    private void RestoreLegacyNuGetPackagesConfig(IEnumerable<Project> legacyRestoreProjects)
+    {
+        foreach (var project in legacyRestoreProjects)
+        {
+            // Restore legacy projects
+            NuGetTasks.NuGetRestore(s => s
+                .SetTargetPath(project)
+                .SetSolutionDirectory(Solution.Directory)
+                .SetVerbosity(NuGetVerbosity.Normal)
+                .When(!string.IsNullOrEmpty(NuGetPackagesDirectory), o =>
+                    o.SetPackagesDirectory(NuGetPackagesDirectory)));
+        }
     }
 }
