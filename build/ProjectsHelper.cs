@@ -67,8 +67,7 @@ public static class ProjectsHelper
     {
         var testApplications = solution
             .GetAllProjects(TestApplicationSelector)
-            .Where(p => TestIntegrationApps.Contains(p.Directory))
-            .OrderBy(p => p.Name);
+            .Where(p => TestIntegrationApps.Contains(p.Directory));
         var testLibraries = solution.GetAllProjects(TestLibrarySelector);
 
         return testApplications.Concat(testLibraries);
