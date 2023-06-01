@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Reflection;
 using Nuke.Common;
 using Nuke.Common.Tooling;
+using Serilog;
 
 [TypeConverter(typeof(TargetFrameworkTypeConverter))]
 public class TargetFramework : Enumeration
@@ -38,8 +39,13 @@ public class TargetFramework : Enumeration
                 var matchingFields = AllTargetFrameworks
                     .Where(x => string.Equals(x.Value, stringValue, StringComparison.OrdinalIgnoreCase))
                     .ToList();
-                Assert.True(matchingFields.Count == 1);
-                return matchingFields.Single();
+                if (matchingFields.Count == 1)
+                {
+                    return matchingFields.Single();
+                }
+
+                Log.Warning($"Invalid target framework '{stringValue}' falling back to the default value.");
+                return NOT_SPECIFIED;
             }
 
             return base.ConvertFrom(context, culture, value);
