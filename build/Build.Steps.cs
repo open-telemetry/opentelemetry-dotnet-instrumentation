@@ -70,7 +70,7 @@ partial class Build
 
             if (IsWin)
             {
-                projectsToRestore = projectsToRestore.Concat(Solution.GetWindowsOnlyTestApplications());
+                projectsToRestore = projectsToRestore.Concat(Solution.GetNetFrameworkOnlyTestApplications());
             }
 
             foreach (var project in projectsToRestore)
@@ -129,9 +129,9 @@ partial class Build
         .Executes(() =>
         {
             var testApps = Solution.GetCrossPlatformTestApplications();
-            if (IsWin)
+            if (IsWin && (TestTargetFramework == TargetFramework.NET462 || TestTargetFramework == TargetFramework.NOT_SPECIFIED))
             {
-                testApps = Solution.GetWindowsOnlyTestApplications().Concat(testApps);
+                testApps = Solution.GetNetFrameworkOnlyTestApplications().Concat(testApps);
             }
 
             foreach (var app in testApps)
