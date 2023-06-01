@@ -134,9 +134,9 @@ partial class Build
             CopyFileToDirectory(sourceModulePath, localBinDirectory);
             TracerHomeDirectory.ZipTo(localTracerZip);
 
-            if (!NoRestore && aspNetProject.Directory.ContainsFile("packages.config"))
+            if (!NoRestore && project.Directory.ContainsFile("packages.config"))
             {
-                RestoreLegacyNuGetPackagesConfig(new[] { aspNetProject });
+                RestoreLegacyNuGetPackagesConfig(new[] { project });
             }
 
             MSBuild(x => x
