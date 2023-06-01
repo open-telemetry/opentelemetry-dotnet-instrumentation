@@ -43,13 +43,11 @@ public static class ServiceHostIntegration
     /// <typeparam name="TTarget">Type of the target</typeparam>
     /// <returns>A response value, in an async scenario will be T of Task of T</returns>
     internal static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception exception, in CallTargetState state)
+    where TTarget : WcfServiceInitializer.IServiceHostBase
     {
         if (Instrumentation.TracerSettings.Value.EnabledInstrumentations.Contains(TracerInstrumentation.WcfService))
         {
-            if (instance != null)
-            {
-                WcfServiceInitializer.Initialize(instance);
-            }
+            WcfServiceInitializer.Initialize(instance);
         }
 
         return CallTargetReturn.GetDefault();

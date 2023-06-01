@@ -21,25 +21,22 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf;
 
 internal static class WcfServiceInitializer
 {
-    private interface IServiceHostBase
+    internal interface IServiceHostBase
     {
         IDescription Description { get; }
     }
 
-    private interface IDescription
+    internal interface IDescription
     {
         IKeyedByTypeCollection Behaviors { get; }
     }
 
-    public static void Initialize(object serviceHostInstance)
+    public static void Initialize(IServiceHostBase serviceHost)
     {
-        if (serviceHostInstance.TryDuckCast<IServiceHostBase>(out var serviceHost))
+        var behaviors = serviceHost.Description.Behaviors;
+        if (!behaviors.Contains(typeof(TelemetryServiceBehavior)))
         {
-            var behaviors = serviceHost.Description.Behaviors;
-            if (!behaviors.Contains(typeof(TelemetryServiceBehavior)))
-            {
-                behaviors.Add(new TelemetryServiceBehavior());
-            }
+            behaviors.Add(new TelemetryServiceBehavior());
         }
     }
 }

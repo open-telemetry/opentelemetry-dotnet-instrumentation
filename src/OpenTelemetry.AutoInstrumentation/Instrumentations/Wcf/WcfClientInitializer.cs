@@ -21,25 +21,21 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf;
 
 internal static class WcfClientInitializer
 {
-    private interface IChannelFactory
+    internal interface IChannelFactory
     {
         IEndpoint Endpoint { get; }
     }
 
-    private interface IEndpoint
+    internal interface IEndpoint
     {
         IKeyedByTypeCollection Behaviors { get; }
     }
 
-    public static void Initialize(object instance)
+    public static void Initialize(IChannelFactory channelFactory)
     {
         // WcfInstrumentationActivitySource.Options is initialized by WcfInitializer
         // when targeted assembly loads. Remaining work to initialize instrumentation
         // is to add telemetry behavior to the endpoint's collection.
-        if (!instance.TryDuckCast<IChannelFactory>(out var channelFactory))
-        {
-            return;
-        }
 
         var behaviors = channelFactory.Endpoint.Behaviors;
         if (!behaviors.Contains(typeof(TelemetryEndpointBehavior)))
