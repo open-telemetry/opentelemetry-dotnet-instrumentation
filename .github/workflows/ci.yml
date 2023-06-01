@@ -196,15 +196,19 @@ jobs:
           name: OpenTelemetry.AutoInstrumentation.NuGet.Packages
           path: bin/nuget-artifacts/
 
-  test-build-artifacts:
+  test-build:
     needs: build
     strategy:
       fail-fast: false
       matrix:
+        test-tfm: [ net7.0, net6.0, net462 ]
+        machine: [ windows-2022, ubuntu-20.04, macos-11 ]
+        exclude:
+          - test-tfm: net462
+            machine: macos-11
+          - test-tfm: net462
+            machine: ubuntu-20.04
         include:
-          - machine: windows-2022
-            containers: windows-container-tests-only
-            log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
           - machine: windows-2022
             containers: none
             log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
@@ -241,6 +245,50 @@ jobs:
         if: ${{ runner.os == 'Windows' }}
         with: 
           install: localdb
+      - run: ./build.cmd TestWorkflow --test-target-framework ${{ matrix.test-tfm }} --containers ${{ matrix.containers }}
+      - name: Upload logs
+        uses: actions/upload-artifact@v3.1.2
+        if: always()
+        with:
+          name: test-logs-${{ matrix.machine }}-${{ matrix.test-tfm }}-containers-${{ matrix.containers }}
+          path: build_data/
+      - name: Delete SQL Server MSI
+        if: ${{ runner.os == 'Windows' }}
+        shell: bash
+        run: |
+          rm SqlLocalDB.msi
+
+  test-build-windows-container-tests-only:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - machine: windows-2022
+            containers: windows-container-tests-only
+            log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
+    runs-on: ${{ matrix.machine }}
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    steps:
+      - uses: actions/checkout@v3.5.2
+      - uses: actions/setup-dotnet@v3.2.0
+        with:
+          dotnet-version: | 
+            6.0.408
+            7.0.302
+      - name: Check for NuGet packages cache
+        uses: actions/cache@v3
+        id: nuget-cache
+        with:
+          key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
+          path: ${{ env.NUGET_PACKAGES }}
+      - name: Download Artifacts from build job
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: bin-${{ matrix.machine }}
+          path: bin/tracer-home
       - run: ./build.cmd TestWorkflow --containers ${{ matrix.containers }}
       - name: Upload logs
         uses: actions/upload-artifact@v3.1.2
@@ -248,11 +296,6 @@ jobs:
         with:
           name: test-logs-${{ matrix.machine }}-containers-${{ matrix.containers }}
           path: build_data/
-      - name: Delete SQL Server MSI
-        if: ${{ runner.os == 'Windows' }}
-        shell: bash
-        run: |
-          rm SqlLocalDB.msi
 
   test-build-container:
     needs: build-container
