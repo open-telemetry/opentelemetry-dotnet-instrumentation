@@ -203,7 +203,7 @@ jobs:
       matrix:
         include:
           - machine: windows-2022
-            containers: windows-containers-tests
+            containers: windows-container-tests-only
             log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
           - machine: windows-2022
             containers: none

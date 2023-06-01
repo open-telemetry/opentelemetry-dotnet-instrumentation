@@ -112,7 +112,7 @@ partial class Build
     Target PublishIisTestApplications => _ => _
         .Unlisted()
         .After(CompileManagedTests)
-        .OnlyWhenStatic(() => IsWin && (Containers == ContainersWindows || Containers == ContainersWindowsContainersOnly))
+        .OnlyWhenStatic(() => IsWin && (Containers == ContainersWindows || Containers == ContainersWindowsContainerTestsOnly))
         .Executes(() =>
         {
             var aspNetProject = Solution.GetProjectByName(Projects.Tests.Applications.AspNet);
