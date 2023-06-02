@@ -140,7 +140,7 @@ partial class Build
                 {
                     // Special case: some WCF tests need a WCF server app that only builds for .NET 4.6.2
                     DotNetBuild(s => s
-                        .SetProjectFile(Solution.GetProject(Projects.Tests.Applications.WcfServer))
+                        .SetProjectFile(Solution.AllProjects.Single(p => p.Name.Equals(Projects.Tests.Applications.WcfServer, StringComparison.Ordinal)))
                         .SetConfiguration(BuildConfiguration)
                         .SetPlatform(Platform)
                         .SetNoRestore(NoRestore)
