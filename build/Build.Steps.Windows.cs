@@ -107,7 +107,7 @@ partial class Build
             var aspNetProject = Solution.GetProjectByName(Projects.Tests.Applications.AspNet);
             BuildDockerImage(aspNetProject);
 
-            DockerBuild(x => x 
+            DockerBuild(x => x
                 .SetPath(".")
                 .SetFile(aspNetProject.Directory / "Classic.Dockerfile")
                 .EnableRm()
