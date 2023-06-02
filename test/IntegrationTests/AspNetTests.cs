@@ -138,8 +138,7 @@ public class AspNetTests
             .WithName($"{imageName}-{webPort}")
             .WithNetwork(networkId, networkName)
             .WithPortBinding(webPort, 80)
-            .WithBindMount(logPath, "c:/inetpub/wwwroot/logs")
-            .WithBindMount(EnvironmentHelper.GetNukeBuildOutput(), "c:/opentelemetry");
+            .WithBindMount(logPath, "c:/inetpub/wwwroot/logs");
 
         foreach (var env in _environmentVariables)
         {

@@ -15,16 +15,11 @@
 // </copyright>
 
 #if NETFRAMEWORK
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using FluentAssertions;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Trace.V1;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
@@ -95,8 +90,7 @@ public class WcfIISTests : TestHelper
             .WithNetwork(networkId, DockerNetworkHelper.IntegrationTestsNetworkName)
             .WithPortBinding(netTcpPort, 808)
             .WithPortBinding(httpPort, 80)
-            .WithBindMount(logPath, "c:/inetpub/wwwroot/logs")
-            .WithBindMount(EnvironmentHelper.GetNukeBuildOutput(), "c:/opentelemetry");
+            .WithBindMount(logPath, "c:/inetpub/wwwroot/logs");
 
         foreach (var env in _environmentVariables)
         {
