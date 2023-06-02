@@ -100,7 +100,7 @@ partial class Build
                 // Projects using `packages.config` can't be restored via "dotnet restore", use a NuGet Task to restore these projects.
                 var legacyRestoreProjects = Solution.GetNativeProjects()
                     .Concat(new[] { Solution.GetProjectByName(Projects.Tests.Applications.AspNet) })
-                    .Concat(new[] { Solution.GetProjectByName(Projects.Tests.Applications.Wcf) });
+                    .Concat(new[] { Solution.GetProjectByName(Projects.Tests.Applications.WcfIis) });
 
                 RestoreLegacyNuGetPackagesConfig(legacyRestoreProjects);
             }
@@ -129,9 +129,23 @@ partial class Build
         .Executes(() =>
         {
             var testApps = Solution.GetCrossPlatformTestApplications();
-            if (IsWin && (TestTargetFramework == TargetFramework.NET462 || TestTargetFramework == TargetFramework.NOT_SPECIFIED))
+            if (IsWin)
             {
-                testApps = Solution.GetNetFrameworkOnlyTestApplications().Concat(testApps);
+                if (TestTargetFramework == TargetFramework.NET462 ||
+                    TestTargetFramework == TargetFramework.NOT_SPECIFIED)
+                {
+                    testApps = Solution.GetNetFrameworkOnlyTestApplications().Concat(testApps);
+                }
+                else
+                {
+                    // Special case: some WCF tests need a WCF server app that only builds for .NET 4.6.2
+                    DotNetBuild(s => s
+                        .SetProjectFile(Solution.GetProject(Projects.Tests.Applications.WcfServer))
+                        .SetConfiguration(BuildConfiguration)
+                        .SetPlatform(Platform)
+                        .SetNoRestore(NoRestore)
+                        .SetFramework(TargetFramework.NET462));
+                }
             }
 
             foreach (var app in testApps)

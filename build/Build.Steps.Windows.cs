@@ -112,7 +112,7 @@ partial class Build
             var aspNetProject = Solution.GetProjectByName(Projects.Tests.Applications.AspNet);
             BuildDockerImage(aspNetProject);
 
-            var wcfProject = Solution.GetProjectByName(Projects.Tests.Applications.Wcf);
+            var wcfProject = Solution.GetProjectByName(Projects.Tests.Applications.WcfIis);
             BuildDockerImage(wcfProject);
         });
 
