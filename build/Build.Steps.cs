@@ -11,6 +11,7 @@ using Nuke.Common.Tools.MSBuild;
 using Nuke.Common.Tools.Npm;
 using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Utilities.Collections;
+using Serilog;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
@@ -138,7 +139,7 @@ partial class Build
                 }
                 else
                 {
-                    // Special case: some WCF tests need a WCF server app that only builds for .NET 4.6.2
+                    // Special case: some WCF .NET tests need a WCF server app that only builds for .NET Framework 4.6.2
                     DotNetBuild(s => s
                         .SetProjectFile(Solution.AllProjects.Single(p => p.Name.Equals(Projects.Tests.Applications.WcfServer, StringComparison.Ordinal)))
                         .SetConfiguration(BuildConfiguration)
@@ -150,16 +151,9 @@ partial class Build
 
             foreach (var app in testApps)
             {
-                var legacyPackagesConfig = app.Directory.ContainsFile("packages.config");
-                if (TestTargetFramework != TargetFramework.NOT_SPECIFIED &&
-                    ((legacyPackagesConfig && TestTargetFramework != TargetFramework.NET462) ||
-                     (!legacyPackagesConfig && !app.GetTargetFrameworks().Contains(TestTargetFramework))))
-                {
-                    // Skip this app if it doesn't support the selected test TFM.
-                    continue;
-                }
 
                 // Special case: a test application using old packages.config needs special treatment.
+                var legacyPackagesConfig = app.Directory.ContainsFile("packages.config");
                 if (legacyPackagesConfig)
                 {
                     PerformLegacyRestoreIfNeeded(app);
@@ -175,13 +169,32 @@ partial class Build
                     continue;
                 }
 
+                string actualTestTfm = TestTargetFramework;
+                if (TestTargetFramework != TargetFramework.NOT_SPECIFIED &&
+                    !app.GetTargetFrameworks().Contains(actualTestTfm))
+                {
+                    // Before skipping this app check if not a special case for .NET Framework
+                    actualTestTfm = null;
+                    if (TestTargetFramework == TargetFramework.NET462)
+                    {
+                        actualTestTfm = app.GetTargetFrameworks().FirstOrDefault(tfm => tfm.StartsWith("net4"));
+                    }
+
+                    if (actualTestTfm is null)
+                    {
+                        // App doesn't support the select TFM, skip it.
+                        Log.Information("Skipping {0}: no suitable TFM for {1}", app.Name, TestTargetFramework);
+                        continue;
+                    }
+                }
+
                 DotNetBuildSettings BuildTestApplication(DotNetBuildSettings x) =>
                     x.SetProjectFile(app)
                         .SetConfiguration(BuildConfiguration)
                         .SetPlatform(Platform)
                         .SetNoRestore(NoRestore)
                         .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
-                            s => s.SetFramework(TestTargetFramework));
+                            s => s.SetFramework(actualTestTfm));
 
                 if (LibraryVersion.Versions.TryGetValue(app.Name, out var libraryVersions))
                 {
