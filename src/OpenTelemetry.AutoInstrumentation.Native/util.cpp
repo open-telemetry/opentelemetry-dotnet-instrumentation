@@ -114,12 +114,13 @@ size_t GetConfiguredSize(const WSTRING& name, const size_t default_value)
         {
             return default_value;
         }
-        const auto converted = std::stoll(configured_value);
-        if (converted < 0)
+        const auto   converted  = std::stoll(configured_value);
+        const size_t max_size_t = (size_t)-1;
+        if (converted < 0 || converted > max_size_t)
         {
             return default_value;
         }
-        return converted;
+        return static_cast<size_t>(converted);
     }
     catch (...)
     {

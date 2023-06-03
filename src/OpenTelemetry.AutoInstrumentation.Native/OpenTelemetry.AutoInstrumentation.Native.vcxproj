@@ -96,6 +96,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;BIT64;HOST_64BIT;AMD64;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -117,6 +118,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;_UNICODE;UNICODE;X86;HOST_X86;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Lib>
       <TargetMachine>MachineX86</TargetMachine>
@@ -143,6 +145,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;_TARGET_64BIT;BIT64;HOST_64BIT;AMD64;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -168,6 +171,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;_UNICODE;UNICODE;X86;HOST_X86;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(LIB_INCLUDES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
