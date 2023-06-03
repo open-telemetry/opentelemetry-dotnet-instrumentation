@@ -270,14 +270,9 @@ jobs:
     runs-on: ${{ matrix.machine }}
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
-      DOCKER_IMAGES_CACHE: ${{ github.workspace }}/.docker/images
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
       - uses: actions/checkout@v3.5.2
-
-      - name: Docker images after checkout
-        run: .\collector-docker-images.ps1
-
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
@@ -289,12 +284,6 @@ jobs:
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
           path: ${{ env.NUGET_PACKAGES }}
-      - name: Check for Docker images cache
-        uses: actions/cache@v3
-        id: docker-images-cache
-        with:
-          key: ${{ hashFiles('./test/test-applications/**/*.Dockerfile') }}
-          path: ${{ env.DOCKER_IMAGES_CACHE }}
       - name: Download Artifacts from build job
         uses: actions/download-artifact@v3.0.2
         with:
@@ -304,10 +293,6 @@ jobs:
         run: ./build.cmd --skip RunManagedTests --target ManagedTests --containers ${{ matrix.containers }}
       - name: Run the integration tests
         run: ./build.cmd --target RunManagedIntegrationTests --containers ${{ matrix.containers }}
-
-      - name: Docker images after tests
-        run: .\collector-docker-images.ps1
-
       - name: Upload logs
         uses: actions/upload-artifact@v3.1.2
         if: always()
