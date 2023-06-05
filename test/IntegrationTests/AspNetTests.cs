@@ -36,10 +36,12 @@ public class AspNetTests
 
     private ITestOutputHelper Output { get; }
 
-    [Fact]
+    [Theory]
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Windows")]
-    public async Task SubmitsTraces()
+    [InlineData("Classic")]
+    [InlineData("Integrated")]
+    public async Task SubmitsTraces(string appPoolMode)
     {
         Assert.True(EnvironmentTools.IsWindowsAdministrator(), "This test requires Windows Administrator privileges.");
 
@@ -55,7 +57,7 @@ public class AspNetTests
         string collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
         _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
         var webPort = TcpPortProvider.GetOpenPort();
-        await using var container = await StartContainerAsync(webPort);
+        await using var container = await StartContainerAsync(webPort, appPoolMode);
         await CallTestApplicationEndpoint(webPort);
 
         collector.AssertExpectations();
@@ -117,10 +119,10 @@ public class AspNetTests
         collector.AssertExpectations();
     }
 
-    private async Task<IContainer> StartContainerAsync(int webPort)
+    private async Task<IContainer> StartContainerAsync(int webPort, string? appPoolMode = null)
     {
         // get path to test application that the profiler will attach to
-        string imageName = $"testapplication-aspnet-netframework";
+        string imageName = appPoolMode == "Classic" ? "testapplication-aspnet-netframework-classic" : "testapplication-aspnet-netframework";
 
         string networkName = DockerNetworkHelper.IntegrationTestsNetworkName;
         string networkId = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
@@ -138,8 +140,7 @@ public class AspNetTests
             .WithName($"{imageName}-{webPort}")
             .WithNetwork(networkId, networkName)
             .WithPortBinding(webPort, 80)
-            .WithBindMount(logPath, "c:/inetpub/wwwroot/logs")
-            .WithBindMount(EnvironmentHelper.GetNukeBuildOutput(), "c:/opentelemetry");
+            .WithBindMount(logPath, "c:/inetpub/wwwroot/logs");
 
         foreach (var env in _environmentVariables)
         {

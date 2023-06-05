@@ -20,6 +20,7 @@ OpenTelemetry.AutoInstrumentation.Instrumentations.AspNet.HttpModuleIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.ServiceHostIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.WcfClientIntegration
 override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.ToString() -> string!
 override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.ToString() -> string!

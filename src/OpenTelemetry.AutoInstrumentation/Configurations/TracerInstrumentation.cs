@@ -113,5 +113,10 @@ internal enum TracerInstrumentation
     /// WcfClient instrumentation.
     /// </summary>
     WcfClient = 16,
+
+    /// <summary>
+    /// WcfService instrumentation.
+    /// </summary>
+    WcfService = 17
 #endif
 }
