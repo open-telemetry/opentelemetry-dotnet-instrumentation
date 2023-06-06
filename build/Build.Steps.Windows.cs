@@ -31,11 +31,13 @@ partial class Build
 
             foreach (var project in Solution.GetNativeSrcProjects())
             {
+                PerformLegacyRestoreIfNeeded(project);
+
                 // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
                 MSBuild(s => s
                     .SetTargetPath(project)
                     .SetConfiguration(BuildConfiguration)
-                    .DisableRestore()
+                    .SetRestore(!NoRestore)
                     .SetMaxCpuCount(null)
                     .CombineWith(platforms, (m, platform) => m
                         .SetTargetPlatform(platform)));
@@ -54,11 +56,14 @@ partial class Build
                 ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
                 : new[] { MSBuildTargetPlatform.x86 };
 
+            var nativeTestProject = Solution.GetNativeTestProject();
+            PerformLegacyRestoreIfNeeded(nativeTestProject);
+
             // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
             MSBuild(s => s
-                .SetTargetPath(Solution.GetNativeTestProject())
+                .SetTargetPath(nativeTestProject)
                 .SetConfiguration(BuildConfiguration)
-                .DisableRestore()
+                .SetRestore(!NoRestore)
                 .SetMaxCpuCount(null)
                 .CombineWith(platforms, (m, platform) => m
                     .SetTargetPlatform(platform)));
@@ -101,7 +106,7 @@ partial class Build
     Target PublishIisTestApplications => _ => _
         .Unlisted()
         .After(CompileManagedTests)
-        .OnlyWhenStatic(() => IsWin && Containers == ContainersWindows)
+        .OnlyWhenStatic(() => IsWin && (Containers == ContainersWindows || Containers == ContainersWindowsOnly))
         .Executes(() =>
         {
             var aspNetProject = Solution.GetProjectByName(Projects.Tests.Applications.AspNet);
@@ -115,7 +120,7 @@ partial class Build
                 .SetProcessWorkingDirectory(aspNetProject.Directory)
             );
 
-            var wcfProject = Solution.GetProjectByName(Projects.Tests.Applications.Wcf);
+            var wcfProject = Solution.GetProjectByName(Projects.Tests.Applications.WcfIis);
             BuildDockerImage(wcfProject);
         });
 
@@ -130,6 +135,8 @@ partial class Build
         {
             CopyFileToDirectory(sourceModulePath, localBinDirectory);
             TracerHomeDirectory.ZipTo(localTracerZip);
+
+            PerformLegacyRestoreIfNeeded(project);
 
             MSBuild(x => x
                 .SetConfiguration(BuildConfiguration)
@@ -162,7 +169,11 @@ partial class Build
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
-            var project = Solution.GetProjectByName(Projects.AutoInstrumentation).GetMSBuildProject();
+            // The target project needs to have its NuGet packages restored prior to running the tool.
+            var targetProject = Solution.GetProjectByName(Projects.AutoInstrumentation);
+            DotNetRestore(s => s.SetProjectFile(targetProject));
+
+            var project = targetProject.GetMSBuildProject();
             var packages = Solution.Directory / "src" / "Directory.Packages.props";
             var commonExcludedAssets = Solution.Directory / "src" / "CommonExcludedAssets.props";
 
@@ -223,7 +234,7 @@ partial class Build
     Target InstallNetFxAssembliesGAC => _ => _
         .Unlisted()
         .After(BuildTracer)
-        .OnlyWhenStatic(() => IsWin)
+        .OnlyWhenStatic(() => IsWin && (TestTargetFramework == TargetFramework.NET462 || TestTargetFramework == TargetFramework.NOT_SPECIFIED))
         .Executes(() => RunNetFxGacOperation("-i"));
 
     /// <remarks>
@@ -244,5 +255,13 @@ partial class Build
             .SetProjectFile(installTool)
             .SetConfiguration(BuildConfiguration)
             .SetApplicationArguments($"{operation} {netFxAssembliesFolder}"));
+    }
+
+    private void PerformLegacyRestoreIfNeeded(Project project)
+    {
+        if (!NoRestore && project.Directory.ContainsFile("packages.config"))
+        {
+            RestoreLegacyNuGetPackagesConfig(new[] { project });
+        }
     }
 }
