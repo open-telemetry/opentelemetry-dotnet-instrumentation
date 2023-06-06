@@ -15,7 +15,7 @@ partial class Build : NukeBuild
     [Parameter("Platform to build - x86 or x64. Default is 'x64'")]
     readonly MSBuildTargetPlatform Platform = MSBuildTargetPlatform.x64;
 
-    [Parameter($"Docker containers type to be used. One of '{ContainersNone}', '{ContainersLinux}', '{ContainersWindows}', '{ContainersWindowsContainerTestsOnly}'. Default is '{ContainersLinux}'")]
+    [Parameter($"Docker containers type to be used in tests. One of '{ContainersNone}', '{ContainersLinux}', '{ContainersWindows}', '{ContainersWindowsContainerTestsOnly}'. Default is '{ContainersLinux}'")]
     readonly string Containers = ContainersLinux;
 
     [Parameter("TargetFramework to be tested. Default is empty, meaning all TFMs supported by each test")]
