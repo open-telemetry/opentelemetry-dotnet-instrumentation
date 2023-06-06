@@ -271,14 +271,14 @@ jobs:
           path: bin/tracer-home
       - run: ./build.cmd NativeTests
 
-  test-build-windows-container-tests-only:
+  test-build-windows-container-tests:
     needs: build
     strategy:
       fail-fast: false
       matrix:
         include:
           - machine: windows-2022
-            containers: windows-container-tests-only
+            containers: windows-only
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.5.2
