@@ -203,13 +203,10 @@ jobs:
         include:
           - machine: windows-2022
             containers: none
-            log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
           - machine: ubuntu-20.04
             containers: linux
-            log-dir: "/var/log/opentelemetry/dotnet"
           - machine: macos-11
             containers: none
-            log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.5.2
@@ -282,7 +279,6 @@ jobs:
         include:
           - machine: windows-2022
             containers: windows-container-tests-only
-            log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.5.2
