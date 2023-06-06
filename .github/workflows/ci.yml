@@ -32,7 +32,7 @@ jobs:
             6.0.408
             7.0.302
       - name: Check for NuGet packages cache
-        uses: actions/cache@v3
+        uses: actions/cache@v3.3.1
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -152,7 +152,7 @@ jobs:
             7.0.302
 
       - name: Check for NuGet packages cache
-        uses: actions/cache@v3
+        uses: actions/cache@v3.3.1
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -225,7 +225,7 @@ jobs:
             6.0.408
             7.0.302
       - name: Check for NuGet packages cache
-        uses: actions/cache@v3
+        uses: actions/cache@v3.3.1
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -268,7 +268,7 @@ jobs:
             6.0.408
             7.0.302
       - name: Check for NuGet packages cache
-        uses: actions/cache@v3
+        uses: actions/cache@v3.3.1
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -304,7 +304,7 @@ jobs:
             6.0.408
             7.0.302
       - name: Check for NuGet packages cache
-        uses: actions/cache@v3
+        uses: actions/cache@v3.3.1
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
@@ -368,7 +368,7 @@ jobs:
             6.0.408
             7.0.302
       - name: Check for NuGet packages cache
-        uses: actions/cache@v3
+        uses: actions/cache@v3.3.1
         id: nuget-cache
         with:
           key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
