@@ -7,6 +7,10 @@ on:
   merge_group:
   workflow_dispatch:
 
+env:
+  NUGET_PACKAGES: ${{ github.workspace }}/packages
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
 jobs:
   build:
     strategy:
@@ -20,9 +24,6 @@ jobs:
           - machine: macos-11
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
-    env:
-      NUGET_PACKAGES: ${{ github.workspace }}/packages
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
       - uses: actions/checkout@v3.5.2
       - uses: actions/setup-dotnet@v3.2.0
@@ -141,9 +142,6 @@ jobs:
     needs: [ build, build-container ]
 
     runs-on: windows-2022
-    env:
-      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
       - uses: actions/checkout@v3.5.2
 
@@ -219,9 +217,6 @@ jobs:
             containers: none
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
-    env:
-      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
       - uses: actions/checkout@v3.5.2
       - uses: actions/setup-dotnet@v3.2.0
@@ -265,9 +260,6 @@ jobs:
       matrix:
         machine: [ windows-2022 ]
     runs-on: ${{ matrix.machine }}
-    env:
-      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
       - uses: actions/checkout@v3.5.2
       - uses: actions/setup-dotnet@v3.2.0
@@ -304,9 +296,6 @@ jobs:
             containers: windows-container-tests-only
             log-dir: "/c/ProgramData/OpenTelemetry .NET AutoInstrumentation/logs"
     runs-on: ${{ matrix.machine }}
-    env:
-      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
       - uses: actions/checkout@v3.5.2
       - uses: actions/setup-dotnet@v3.2.0
@@ -371,9 +360,6 @@ jobs:
           - machine: ubuntu-20.04
           - machine: macos-11
     runs-on: ${{ matrix.machine }}
-    env:
-      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
       - uses: actions/checkout@v3.5.2
       - uses: actions/setup-dotnet@v3.2.0
