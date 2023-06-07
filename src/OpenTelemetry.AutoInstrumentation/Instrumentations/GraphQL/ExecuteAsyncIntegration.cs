@@ -22,16 +22,26 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
 /// <summary>
 /// GraphQL.Execution.ExecutionStrategy calltarget instrumentation
 /// </summary>
-[GraphQLExecuteAsync(
+[InstrumentMethod(
     assemblyName: GraphQLCommon.GraphQLAssembly,
     typeName: "GraphQL.Execution.ExecutionStrategy",
+    methodName: "ExecuteAsync",
+    returnTypeName: "System.Threading.Tasks.Task`1[GraphQL.ExecutionResult]",
+    parameterTypeNames: new[] { "GraphQL.Execution.ExecutionContext" },
     minimumVersion: GraphQLCommon.Major2Minor3,
-    maximumVersion: GraphQLCommon.Major2)]
-[GraphQLExecuteAsync(
+    maximumVersion: GraphQLCommon.Major2,
+    integrationName: GraphQLCommon.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
     assemblyName: GraphQLCommon.GraphQLAssembly,
     typeName: "GraphQL.Execution.SubscriptionExecutionStrategy",
+    methodName: "ExecuteAsync",
+    returnTypeName: "System.Threading.Tasks.Task`1[GraphQL.ExecutionResult]",
+    parameterTypeNames: new[] { "GraphQL.Execution.ExecutionContext" },
     minimumVersion: GraphQLCommon.Major2Minor3,
-    maximumVersion: GraphQLCommon.Major2)]
+    maximumVersion: GraphQLCommon.Major2,
+    integrationName: GraphQLCommon.IntegrationName,
+    type: InstrumentationType.Trace)]
 public static class ExecuteAsyncIntegration
 {
     /// <summary>
