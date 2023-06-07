@@ -67,7 +67,7 @@ public class CheckForInstrumentationPackages : Microsoft.Build.Utilities.Task
         }
         catch (Exception ex)
         {
-            Log.LogError($"{LogPrefix}{ex}");
+            Log.LogErrorFromException(ex, showStackTrace: true);
             throw;
         }
     }
