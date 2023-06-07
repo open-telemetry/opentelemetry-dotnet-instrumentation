@@ -94,21 +94,18 @@ public class CheckForInstrumentationPackages : Microsoft.Build.Utilities.Task
             }
         }
 
-        var missingAnyInstrumentationAdapterPackage = false;
-
         // Process each instrumentation target item.
         foreach (var instrumentationTarget in InstrumentationTargetItems ?? Array.Empty<ITaskItem>())
         {
-            missingAnyInstrumentationAdapterPackage |=
-                MissingInstrumentationAdapterPackage(instrumentationTarget, runtimeCopyLocalItemsDictionary);
+            MissingInstrumentationAdapterPackage(instrumentationTarget, runtimeCopyLocalItemsDictionary);
         }
 
         // If missing any instrumentation adapter package then fail the build by returning false, the method
         // Log.LogError was already called.
-        return !missingAnyInstrumentationAdapterPackage;
+        return !Log.HasLoggedErrors;
     }
 
-    private bool MissingInstrumentationAdapterPackage(
+    private void MissingInstrumentationAdapterPackage(
         ITaskItem instrumentationTargetTaskItem,
         Dictionary<string, ITaskItem> runtimeCopyLocalItemsDictionary)
     {
@@ -119,7 +116,7 @@ public class CheckForInstrumentationPackages : Microsoft.Build.Utilities.Task
                 $"{LogPrefix}project doesn't reference '{item.TargetNuGetPackageId}', " +
                 $"no need for the instrumentation package {item.FriendlyInstrumentationPackage}.";
             Log.LogMessage(_logMessageImportance, msg);
-            return false;
+            return;
         }
 
         // Check if the local item is in the targeted version range.
@@ -131,7 +128,7 @@ public class CheckForInstrumentationPackages : Microsoft.Build.Utilities.Task
                 $"but not in the range {item.TargetNuGetPackageVersionRange}, " +
                 $"no need for the instrumentation package {item.FriendlyInstrumentationPackage}.";
             Log.LogMessage(_logMessageImportance, msg);
-            return false;
+            return;
         }
 
         // The application is using a version of the target package that is in the proper range.
@@ -149,13 +146,12 @@ public class CheckForInstrumentationPackages : Microsoft.Build.Utilities.Task
                     $"{LogPrefix}project already references {item.FriendlyInstrumentationPackage} " +
                     $"required to instrument '{item.TargetNuGetPackageId}' version {item.TargetNuGetPackageVersionRange}.";
                 Log.LogMessage(_logMessageImportance, msg);
-                return false;
+                return;
             }
         }
 
         var errorMsg = $"{LogPrefix}add a reference to the instrumentation package {item.FriendlyInstrumentationPackage} " +
             $"or add '{item.TargetNuGetPackageId}' to the property 'SkippedInstrumentations' to suppress this error.";
         Log.LogError(errorMsg);
-        return true;
     }
 }
