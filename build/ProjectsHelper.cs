@@ -85,7 +85,7 @@ public static class ProjectsHelper
         return solution.GetProjectByName(Projects.Mocks.AutoInstrumentationMock);
     }
 
-    public static IEnumerable<Project> GetWindowsOnlyTestApplications(this Solution solution)
+    public static IEnumerable<Project> GetNetFrameworkOnlyTestApplications(this Solution solution)
     {
         return solution
             .GetIntegrationTestApplications()

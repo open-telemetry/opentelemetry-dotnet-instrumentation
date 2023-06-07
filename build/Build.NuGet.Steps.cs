@@ -175,7 +175,7 @@ partial class Build
                     .SetBlameHangTimeout("5m")
                     .EnableTrxLogOutput(GetResultsDirectory(nugetPackagesTestProject))
                     .SetTargetPath(nugetPackagesTestProject)
-                    .DisableRestore()
+                    .SetRestore(!NoRestore)
                     .RunTests()
                 );
             }
