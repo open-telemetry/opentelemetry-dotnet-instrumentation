@@ -112,7 +112,7 @@ internal static class Instrumentation
         {
             // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
             _sdkEventListener = new(Logger);
-            
+
             _pluginManager = new PluginManager(GeneralSettings.Value);
             _pluginManager.Initializing();
 
