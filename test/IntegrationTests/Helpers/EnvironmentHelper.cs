@@ -278,7 +278,7 @@ public class EnvironmentHelper
         CustomEnvironmentVariables["COR_PROFILER_PATH"] = profilerPath;
 
         CustomEnvironmentVariables["OTEL_LOG_LEVEL"] = "debug";
-        CustomEnvironmentVariables["OTEL_DOTNET_AUTO_LOG_DIRECTORY"] = Path.Combine(EnvironmentTools.GetSolutionDirectory(), "build_data", "profiler-logs");
+        CustomEnvironmentVariables["OTEL_DOTNET_AUTO_LOG_DIRECTORY"] = Path.Combine(EnvironmentTools.GetSolutionDirectory(), "test-artifacts", "profiler-logs");
         CustomEnvironmentVariables["OTEL_DOTNET_AUTO_HOME"] = GetNukeBuildOutput();
         CustomEnvironmentVariables["OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES"] = "TestApplication.*";
 

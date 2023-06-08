@@ -75,7 +75,7 @@ partial class Build : NukeBuild
             NuGetArtifactsDirectory.CreateOrCleanDirectory();
             (NativeProfilerProject.Directory / "build").CreateOrCleanDirectory();
             (NativeProfilerProject.Directory / "deps").CreateOrCleanDirectory();
-            BuildDataDirectory.CreateOrCleanDirectory();
+            TestArtifactsDirectory.CreateOrCleanDirectory();
 
             void DeleteReparsePoints(string path)
             {

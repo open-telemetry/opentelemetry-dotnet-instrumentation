@@ -25,8 +25,8 @@ partial class Build
     AbsolutePath TestsDirectory => RootDirectory / "test";
 
     AbsolutePath TracerHomeDirectory => TracerHome ?? (OutputDirectory / "tracer-home");
-    AbsolutePath BuildDataDirectory => RootDirectory / "build_data";
-    AbsolutePath ProfilerTestLogs => BuildDataDirectory / "profiler-logs";
+    AbsolutePath TestArtifactsDirectory => RootDirectory / "test-artifacts";
+    AbsolutePath ProfilerTestLogs => TestArtifactsDirectory / "profiler-logs";
     AbsolutePath AdditionalDepsDirectory => TracerHomeDirectory / "AdditionalDeps";
     AbsolutePath StoreDirectory => TracerHomeDirectory / "store";
 
@@ -58,7 +58,7 @@ partial class Build
         {
             TracerHomeDirectory.CreateDirectory();
             NuGetArtifactsDirectory.CreateDirectory();
-            BuildDataDirectory.CreateDirectory();
+            TestArtifactsDirectory.CreateDirectory();
             ProfilerTestLogs.CreateDirectory();
         });
 
@@ -356,7 +356,7 @@ partial class Build
 
     Target RunManagedTests => _ => _
         .Unlisted()
-        .Produces(BuildDataDirectory / "profiler-logs" / "*")
+        .Produces(TestArtifactsDirectory / "profiler-logs" / "*")
         .After(BuildTracer)
         .After(CompileManagedTests)
         .After(PublishMocks)
@@ -615,7 +615,7 @@ partial class Build
         .DependsOn(MarkdownLint)
         .DependsOn(SpellcheckDocumentation);
 
-    private AbsolutePath GetResultsDirectory(Project proj) => BuildDataDirectory / "results" / proj.Name;
+    private AbsolutePath GetResultsDirectory(Project proj) => TestArtifactsDirectory / "results" / proj.Name;
 
     /// <summary>
     /// Bootstrapping tests require every single test to be run in a separate process
