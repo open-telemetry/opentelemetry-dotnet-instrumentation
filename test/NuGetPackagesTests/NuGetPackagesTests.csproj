@@ -28,8 +28,10 @@
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" />
     <PackageReference Include="Grpc.Tools" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Build" />
     <PackageReference Include="Microsoft.Data.SqlClient" />
     <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="NuGet.Versioning" />
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Runtime.InteropServices" />
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" />
@@ -37,5 +39,12 @@
     <PackageReference Include="Verify.Xunit" />
     <PackageReference Include="xunit.abstractions" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\src\OpenTelemetry.AutoInstrumentation.BuildTasks\OpenTelemetry.AutoInstrumentation.BuildTasks.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 
 </Project>
