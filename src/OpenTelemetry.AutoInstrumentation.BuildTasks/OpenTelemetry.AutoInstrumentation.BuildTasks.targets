@@ -1,0 +1,36 @@
+<Project>
+
+    <ItemGroup Label="InstrumentationTargetItems">
+
+      <InstrumentationTarget
+        Include="MongoDB.Driver.Core"
+        Condition="!$(SkippedInstrumentations.Contains('MongoDB.Driver.Core'))"
+        TargetNuGetPackageVersionRange="[2.13.3, 3.0.0)"
+        InstrumentationNuGetPackageId="MongoDB.Driver.Core.Extensions.DiagnosticSources"
+        InstrumentationNuGetPackageVersion="1.3.0" />
+
+      <InstrumentationTarget
+        Include="StackExchange.Redis"
+        Condition="!$(SkippedInstrumentations.Contains('StackExchange.Redis')) AND !$(TargetFramework.StartsWith('net4'))"
+        TargetNuGetPackageVersionRange="[2.1.58, 3.0.0)"
+        InstrumentationNuGetPackageId="OpenTelemetry.Instrumentation.StackExchangeRedis"
+        InstrumentationNuGetPackageVersion="1.0.0-rc9.8" />
+
+    </ItemGroup>
+
+  <UsingTask
+    TaskName="CheckForInstrumentationPackages"
+    AssemblyFile="$(MSBuildThisFileDirectory)netstandard2.0\OpenTelemetry.AutoInstrumentation.BuildTasks.dll" />
+
+  <Target Condition="'$(DisableCheckForInstrumentationPackagesTarget)' != 'true'"
+    Name="CheckForInstrumentationPackagesTarget"
+    AfterTargets="ResolvePackageAssets">
+
+    <CheckForInstrumentationPackages
+      InstrumentationTargetItems="@(InstrumentationTarget)"
+      RuntimeCopyLocalItems="@(RuntimeCopyLocalItems)"
+      UseVerboseLog="$(UseVerboseLog)" />
+
+  </Target>
+
+</Project>
