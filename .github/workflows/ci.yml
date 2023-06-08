@@ -237,7 +237,7 @@ jobs:
         if: always()
         with:
           name: test-logs-${{ matrix.machine }}-${{ matrix.test-tfm }}-containers-${{ matrix.containers }}
-          path: build_data/
+          path: test-artifacts/
       - name: Delete SQL Server MSI
         if: ${{ runner.os == 'Windows' }}
         shell: bash
@@ -307,7 +307,7 @@ jobs:
         if: always()
         with:
           name: test-logs-${{ matrix.machine }}-containers-${{ matrix.containers }}
-          path: build_data/
+          path: test-artifacts/
 
   test-build-container:
     needs: build-container
