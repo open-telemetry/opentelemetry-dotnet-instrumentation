@@ -34,7 +34,7 @@
     <PackageVersion Include="OpenTelemetry.ResourceDetectors.Container" Version="1.0.0-beta.3" />
   </ItemGroup>
 
-  <!-- Versions from OpenTelemetry.AutoInstrumentation.SourceGenerators.csproj -->
+  <!-- Versions from SourceGenerators.csproj -->
   <ItemGroup>
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.6.0" />
