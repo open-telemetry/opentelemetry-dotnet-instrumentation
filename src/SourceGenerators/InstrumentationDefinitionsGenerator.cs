@@ -32,13 +32,13 @@ public class InstrumentationDefinitionsGenerator : IIncrementalGenerator
     /// <inheritdoc />
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var classesWithAttributes = context.SyntaxProvider.CreateSyntaxProvider(
+        var instrumentationClasses = context.SyntaxProvider.CreateSyntaxProvider(
                 static (node, _) => IsAttributedClass(node),
                 static (node, _) => GetClassesMarkedByInstrumentMethodAttribute(node))
             .Where(static m => m != null);
 
         IncrementalValueProvider<(Compilation, ImmutableArray<ClassDeclarationSyntax?>)> compilationAndClasses
-            = context.CompilationProvider.Combine(classesWithAttributes.Collect());
+            = context.CompilationProvider.Combine(instrumentationClasses.Collect());
 
         context.RegisterSourceOutput(
             compilationAndClasses,
