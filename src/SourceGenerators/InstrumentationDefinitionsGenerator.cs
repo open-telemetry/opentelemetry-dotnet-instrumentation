@@ -22,9 +22,14 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace SourceGenerators;
 
+/// <summary>
+/// Generates InstrumentationDefinitions for byte code instrumentation.
+/// It is based on InstrumentMethodAttribute.
+/// </summary>
 [Generator]
 public class InstrumentationDefinitionsGenerator : IIncrementalGenerator
 {
+    /// <inheritdoc />
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var classesWithAttributes = context.SyntaxProvider.CreateSyntaxProvider(
