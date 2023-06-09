@@ -273,7 +273,7 @@ internal static partial class InstrumentationDefinitions
         {
             foreach (var attributeSyntax in attributeListSyntax.Attributes)
             {
-                if (attributeSyntax.Name.ToString() is "InstrumentMethod" or "InstrumentMethodAttribute" or "GraphQLExecuteAsync" or "AdoNetTargetSignature")
+                if (attributeSyntax.Name.ToString() is "InstrumentMethod" or "InstrumentMethodAttribute")
                 {
                     return classDeclarationSyntax;
                 }
