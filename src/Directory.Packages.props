@@ -29,7 +29,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Quartz" Version="1.0.0-alpha.2" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.5.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.0.0-rc9.14" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc9.9" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.0.0-rc9.10" />
     <PackageVersion Include="OpenTelemetry.Shims.OpenTracing" Version="1.0.0-rc9.14" />
     <PackageVersion Include="OpenTelemetry.ResourceDetectors.Container" Version="1.0.0-beta.3" />
   </ItemGroup>
