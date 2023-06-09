@@ -7,6 +7,12 @@
     <PackageVersion Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" />
   </ItemGroup>
 
+  <!-- Versions from OpenTelemetry.AutoInstrumentation.BuildTasks.csproj -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="15.9.20" />
+    <PackageVersion Include="NuGet.Versioning" Version="$(NuGetVersioningVersion)" />
+  </ItemGroup>
+
   <!-- Versions from OpenTelemetry.AutoInstrumentation.csproj -->
   <ItemGroup>
     <PackageVersion Include="MongoDB.Driver.Core.Extensions.DiagnosticSources" Version="1.3.0" />

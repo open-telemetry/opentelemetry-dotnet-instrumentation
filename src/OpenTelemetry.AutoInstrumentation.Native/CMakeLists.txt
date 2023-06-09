@@ -99,19 +99,19 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 # Add custom commands to setup dependencies via git
 add_custom_command(
     OUTPUT ${OUTPUT_DEPS_DIR}/json/include/nlohmann/json.hpp
-    COMMAND git clone --quiet --depth 1 --branch v3.11.2 https://github.com/nlohmann/json.git
+    COMMAND git clone -c advice.detachedHead=false --quiet --depth 1 --branch v3.11.2 https://github.com/nlohmann/json.git
     WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
 )
 
 add_custom_command(
     OUTPUT ${OUTPUT_DEPS_DIR}/re2/obj/libre2.a
-    COMMAND git clone --quiet --depth 1 --branch 2022-12-01 https://github.com/google/re2.git && cd re2 && env ARFLAGS=\"-r -s -c\" CXXFLAGS=\"-std=c++11 -O3 -g -fPIC\" make
+    COMMAND git clone -c advice.detachedHead=false --quiet --depth 1 --branch 2022-12-01 https://github.com/google/re2.git && cd re2 && env ARFLAGS=\"-r -s -c\" CXXFLAGS=\"-std=c++11 -O3 -g -fPIC\" make
     WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
 )
 
 add_custom_command(
     OUTPUT ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
-    COMMAND git clone --quiet --depth 1 --branch 9.1.0 https://github.com/fmtlib/fmt.git && cd fmt && cmake -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE -DFMT_TEST=0 -DFMT_DOC=0 . && make
+    COMMAND git clone -c advice.detachedHead=false --quiet --depth 1 --branch 9.1.0 https://github.com/fmtlib/fmt.git && cd fmt && cmake -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE -DFMT_TEST=0 -DFMT_DOC=0 . && make
     WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
 )
 

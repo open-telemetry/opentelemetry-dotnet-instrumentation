@@ -1,0 +1,10 @@
+#nullable enable
+OpenTelemetry.AutoInstrumentation.BuildTasks.CheckForInstrumentationPackages
+OpenTelemetry.AutoInstrumentation.BuildTasks.CheckForInstrumentationPackages.CheckForInstrumentationPackages() -> void
+OpenTelemetry.AutoInstrumentation.BuildTasks.CheckForInstrumentationPackages.InstrumentationTargetItems.get -> Microsoft.Build.Framework.ITaskItem![]?
+OpenTelemetry.AutoInstrumentation.BuildTasks.CheckForInstrumentationPackages.InstrumentationTargetItems.set -> void
+OpenTelemetry.AutoInstrumentation.BuildTasks.CheckForInstrumentationPackages.RuntimeCopyLocalItems.get -> Microsoft.Build.Framework.ITaskItem![]?
+OpenTelemetry.AutoInstrumentation.BuildTasks.CheckForInstrumentationPackages.RuntimeCopyLocalItems.set -> void
+OpenTelemetry.AutoInstrumentation.BuildTasks.CheckForInstrumentationPackages.UseVerboseLog.get -> bool
+OpenTelemetry.AutoInstrumentation.BuildTasks.CheckForInstrumentationPackages.UseVerboseLog.set -> void
+override OpenTelemetry.AutoInstrumentation.BuildTasks.CheckForInstrumentationPackages.Execute() -> bool

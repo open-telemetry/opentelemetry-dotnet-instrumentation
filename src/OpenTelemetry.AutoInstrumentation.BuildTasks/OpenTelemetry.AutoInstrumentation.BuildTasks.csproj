@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Target only netstandard2.0 so there is a single path in the .targets using build tasks from this package. -->
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+
+    <!-- The assembly DLL needs to be under the build folder for proper packing. -->
+    <BuildOutputTargetFolder>build</BuildOutputTargetFolder>
+
+    <!-- No warning on NU5128 since this package doesn't have any lib or ref folder. -->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+
+    <!-- The version of certain packages is needed to copy dependencies when creating the NuGet package -->
+    <NuGetVersioningVersion>6.5.0</NuGetVersioningVersion>
+  </PropertyGroup>
+
+  <!-- ItemGroup with build files -->
+  <ItemGroup>
+    <None Include="OpenTelemetry.AutoInstrumentation.BuildTasks.targets" Pack="true" PackagePath="build" />
+
+    <!-- Copy any assembly needed by the package build tasks if they are not provided by the MSBuild environment. -->
+    <None Include="$(NuGetPackageRoot)\nuget.versioning\$(NuGetVersioningVersion)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="build\netstandard2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Tasks.Core" PrivateAssets="all" />
+    <PackageReference Include="NuGet.Versioning" PrivateAssets="all" Pin="true" />
+  </ItemGroup>
+
+</Project>

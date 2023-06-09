@@ -76,7 +76,7 @@ public class WcfIISTests : TestHelper
         var networkId = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
 
         var logPath = EnvironmentHelper.IsRunningOnCI()
-            ? Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "build_data", "profiler-logs")
+            ? Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "test-artifacts", "profiler-logs")
             : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OpenTelemetry .NET AutoInstrumentation", "logs");
 
         Directory.CreateDirectory(logPath);
