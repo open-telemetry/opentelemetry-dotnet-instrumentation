@@ -84,9 +84,7 @@ endif()
 
 # Set output folders
 SET(OUTPUT_BIN_DIR ${CMAKE_BINARY_DIR}/bin)
-SET(OUTPUT_DEPS_DIR ${CMAKE_BINARY_DIR}/deps)
 FILE(MAKE_DIRECTORY ${OUTPUT_BIN_DIR})
-FILE(MAKE_DIRECTORY ${OUTPUT_DEPS_DIR})
 
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
@@ -96,26 +94,40 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 # Dependencies
 # ******************************************************
 
-# Add custom commands to setup dependencies via git
-add_custom_command(
-    OUTPUT ${OUTPUT_DEPS_DIR}/json/include/nlohmann/json.hpp
-    COMMAND git clone -c advice.detachedHead=false --quiet --depth 1 --branch v3.11.2 https://github.com/nlohmann/json.git
-    WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
+include(FetchContent)
+
+# Fetch json library
+FetchContent_Declare(
+    json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.2
 )
+FetchContent_GetProperties(json)
+if(NOT json_POPULATED)
+    FetchContent_Populate(json)
+endif()
 
-add_custom_command(
-    OUTPUT ${OUTPUT_DEPS_DIR}/re2/obj/libre2.a
-    COMMAND git clone -c advice.detachedHead=false --quiet --depth 1 --branch 2022-12-01 https://github.com/google/re2.git && cd re2 && env ARFLAGS=\"-r -s -c\" CXXFLAGS=\"-std=c++11 -O3 -g -fPIC\" make
-    WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
+# Fetch re2 library
+FetchContent_Declare(
+    re2
+    GIT_REPOSITORY https://github.com/google/re2.git
+    GIT_TAG 2022-12-01
 )
+FetchContent_GetProperties(re2)
+if(NOT re2_POPULATED)
+    FetchContent_Populate(re2)
+endif()
 
-add_custom_command(
-    OUTPUT ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
-    COMMAND git clone -c advice.detachedHead=false --quiet --depth 1 --branch 9.1.0 https://github.com/fmtlib/fmt.git && cd fmt && cmake -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE -DFMT_TEST=0 -DFMT_DOC=0 . && make
-    WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
+# Fetch fmt library
+FetchContent_Declare(
+    fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+    GIT_TAG 9.1.0
 )
-
-
+FetchContent_GetProperties(fmt)
+if(NOT fmt_POPULATED)
+    FetchContent_Populate(fmt)
+endif()
 
 # ******************************************************
 # Compiler options
@@ -185,10 +197,10 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         environment_variables_util.cpp
         method_rewriter.cpp
         lib/coreclr/src/pal/prebuilt/idl/corprof_i.cpp
-        # Source dependencies retrievied via additional commands using git
-        ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
-        ${OUTPUT_DEPS_DIR}/json/include/nlohmann/json.hpp
-        ${OUTPUT_DEPS_DIR}/re2/obj/libre2.a
+        # Source dependencies retrieved via FetchContent
+        ${fmt_SOURCE_DIR}/libfmt.a
+        ${json_SOURCE_DIR}/single_include/nlohmann/json.hpp
+        ${re2_SOURCE_DIR}/obj/libre2.a
 )
 
 set_target_properties("OpenTelemetry.AutoInstrumentation.Native.static" PROPERTIES PREFIX "")
@@ -200,22 +212,22 @@ target_include_directories("OpenTelemetry.AutoInstrumentation.Native.static"
         PUBLIC lib/coreclr/src/pal/inc
         PUBLIC lib/coreclr/src/inc
         PUBLIC lib/spdlog/include
-        PUBLIC ${OUTPUT_DEPS_DIR}/fmt/include
-        PUBLIC ${OUTPUT_DEPS_DIR}/re2
-        PUBLIC ${OUTPUT_DEPS_DIR}/json/include
+        PUBLIC ${fmt_SOURCE_DIR}/include
+        PUBLIC ${re2_SOURCE_DIR}
+        PUBLIC ${json_SOURCE_DIR}/single_include
 )
 
 # Define linker libraries
 if (ISMACOS)
     target_link_libraries("OpenTelemetry.AutoInstrumentation.Native.static"
-        ${OUTPUT_DEPS_DIR}/re2/obj/libre2.a
-        ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
+        ${re2_SOURCE_DIR}/obj/libre2.a
+        ${fmt_SOURCE_DIR}/libfmt.a
         ${CMAKE_DL_LIBS}
     )
 elseif(ISLINUX)
     target_link_libraries("OpenTelemetry.AutoInstrumentation.Native.static"
-        ${OUTPUT_DEPS_DIR}/re2/obj/libre2.a
-        ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
+        ${re2_SOURCE_DIR}/obj/libre2.a
+        ${fmt_SOURCE_DIR}/libfmt.a
         ${CMAKE_DL_LIBS}
         -static-libgcc
         -static-libstdc++
