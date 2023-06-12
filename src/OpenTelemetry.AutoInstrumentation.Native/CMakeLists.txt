@@ -188,7 +188,6 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         lib/coreclr/src/pal/prebuilt/idl/corprof_i.cpp
         # Source dependencies retrieved via FetchContent
         ${fmt_SOURCE_DIR}/libfmt.a
-        ${json_SOURCE_DIR}/single_include/nlohmann/json.hpp
         ${re2_SOURCE_DIR}/obj/libre2.a
 )
 
@@ -203,7 +202,6 @@ target_include_directories("OpenTelemetry.AutoInstrumentation.Native.static"
         PUBLIC lib/spdlog/include
         PUBLIC ${fmt_SOURCE_DIR}/include
         PUBLIC ${re2_SOURCE_DIR}
-        PUBLIC ${json_SOURCE_DIR}/single_include
 )
 
 # Define linker libraries
