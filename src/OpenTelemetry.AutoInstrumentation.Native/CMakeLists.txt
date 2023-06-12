@@ -97,11 +97,6 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 # ******************************************************
 
 # Add custom commands to setup dependencies via git
-add_custom_command(
-    OUTPUT ${OUTPUT_DEPS_DIR}/json/include/nlohmann/json.hpp
-    COMMAND git clone -c advice.detachedHead=false --quiet --depth 1 --branch v3.11.2 https://github.com/nlohmann/json.git
-    WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
-)
 
 add_custom_command(
     OUTPUT ${OUTPUT_DEPS_DIR}/re2/obj/libre2.a
@@ -187,7 +182,6 @@ add_library("OpenTelemetry.AutoInstrumentation.Native.static" STATIC
         lib/coreclr/src/pal/prebuilt/idl/corprof_i.cpp
         # Source dependencies retrievied via additional commands using git
         ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
-        ${OUTPUT_DEPS_DIR}/json/include/nlohmann/json.hpp
         ${OUTPUT_DEPS_DIR}/re2/obj/libre2.a
 )
 
