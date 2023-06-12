@@ -196,7 +196,6 @@ target_include_directories("OpenTelemetry.AutoInstrumentation.Native.static"
         PUBLIC lib/spdlog/include
         PUBLIC ${OUTPUT_DEPS_DIR}/fmt/include
         PUBLIC ${OUTPUT_DEPS_DIR}/re2
-        PUBLIC ${OUTPUT_DEPS_DIR}/json/include
 )
 
 # Define linker libraries
