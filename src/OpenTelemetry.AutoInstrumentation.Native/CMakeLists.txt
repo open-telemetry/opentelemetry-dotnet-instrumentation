@@ -96,22 +96,11 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 
 include(FetchContent)
 
-# Fetch json library
-FetchContent_Declare(
-    json
-    GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG v3.11.2
-)
-FetchContent_GetProperties(json)
-if(NOT json_POPULATED)
-    FetchContent_Populate(json)
-endif()
-
 # Fetch re2 library
 FetchContent_Declare(
     re2
     GIT_REPOSITORY https://github.com/google/re2.git
-    GIT_TAG 2022-12-01
+    GIT_TAG 2023-06-02
 )
 FetchContent_GetProperties(re2)
 if(NOT re2_POPULATED)
@@ -122,7 +111,7 @@ endif()
 FetchContent_Declare(
     fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-    GIT_TAG 9.1.0
+    GIT_TAG 10.0.0
 )
 FetchContent_GetProperties(fmt)
 if(NOT fmt_POPULATED)
