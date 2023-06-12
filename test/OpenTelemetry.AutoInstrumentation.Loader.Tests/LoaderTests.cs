@@ -38,16 +38,15 @@ public class LoaderTests
 #if NETFRAMEWORK
         var srcDir = Path.Combine(profilerDirectory, "net462");
         var dstDir = Path.Combine(profilerDirectory, "netfx");
+#else
+        var srcDir = Path.Combine(profilerDirectory, "net6.0");
+        var dstDir = Path.Combine(profilerDirectory, "net");
+#endif
+
         if (Directory.Exists(srcDir) && !Directory.Exists(dstDir))
         {
             Directory.Move(srcDir, dstDir);
         }
-#else
-        if (Directory.Exists(Path.Combine(profilerDirectory, "net6.0")))
-        {
-            Directory.Move(Path.Combine(profilerDirectory, "net6.0"), Path.Combine(profilerDirectory, "net"));
-        }
-#endif
 
         Environment.SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME", profilerDirectory);
