@@ -98,9 +98,12 @@ partial class Build
             var project = Solution.GetProjectByName(Projects.Tests.AutoInstrumentationNativeTests);
             var workingDirectory = project.Directory / "bin" / BuildConfiguration.ToString() / Platform.ToString();
             var exePath = workingDirectory / $"{project.Name}.exe";
+            var envVars = new Dictionary<string, string>(){
+                { "OTEL_DOTNET_AUTO_LOG_DIRECTORY", ProfilerTestLogs }
+            };
             var testExe = ToolResolver.GetTool(exePath);
 
-            testExe($"--gtest_output=xml", workingDirectory: workingDirectory);
+            testExe($"--gtest_output=xml", workingDirectory: workingDirectory, environmentVariables: envVars);
         });
 
     Target PublishIisTestApplications => _ => _

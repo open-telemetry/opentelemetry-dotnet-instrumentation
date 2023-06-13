@@ -448,6 +448,7 @@ partial class Build
                     .SetTargetPlatformAnyCPU()
                     .SetFilter(TestNameFilter())
                     .SetNoRestore(NoRestore)
+                    .SetProcessEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", ProfilerTestLogs)
                     .EnableNoBuild()
                     .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED,
                         x => x.SetFramework(TestTargetFramework))
@@ -651,6 +652,7 @@ partial class Build
                     .SetProjectFile(project)
                     .SetFilter(AndFilter(TestNameFilter(), testName))
                     .When(TestTargetFramework != TargetFramework.NOT_SPECIFIED, s => s.SetFramework(TestTargetFramework))
+                    .SetProcessEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", ProfilerTestLogs)
                     .SetProcessEnvironmentVariable("BOOSTRAPPING_TESTS", "true"));
             }
         }
