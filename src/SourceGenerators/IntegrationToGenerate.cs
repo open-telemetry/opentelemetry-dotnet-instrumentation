@@ -14,31 +14,12 @@
 // limitations under the License.
 // </copyright>
 
+using System.Collections.Immutable;
+
 namespace SourceGenerators;
 
-internal class IntegrationToGenerate
+internal readonly record struct IntegrationToGenerate(string IntegrationType, ImmutableArray<TargetToGenerate> Targets)
 {
-    public string? IntegrationName { get; set; }
-
-    public string? TargetAssembly { get; set; }
-
-    public string? TargetType { get; set; }
-
-    public string? TargetMethod { get; set; }
-
-    public int TargetMinimumMajor { get; set; }
-
-    public int TargetMinimumMinor { get; set; }
-
-    public int TargetMinimumPatch { get; set; }
-
-    public int TargetMaximumMajor { get; set; }
-
-    public int TargetMaximumMinor { get; set; } = 65535;
-
-    public int TargetMaximumPatch { get; set; } = 65535;
-
-    public string? IntegrationType { get; set; }
-
-    public string[]? TargetSignatureTypes { get; set; }
+    public readonly string IntegrationType = IntegrationType;
+    public readonly ImmutableArray<TargetToGenerate> Targets = Targets;
 }

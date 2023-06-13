@@ -29,137 +29,115 @@ namespace SourceGenerators;
 [Generator]
 public class InstrumentationDefinitionsGenerator : IIncrementalGenerator
 {
+    private const string InstrumentMethodAttributeName = "OpenTelemetry.AutoInstrumentation.Instrumentations.InstrumentMethodAttribute";
+
     /// <inheritdoc />
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var instrumentationClasses = context.SyntaxProvider.CreateSyntaxProvider(
-                static (node, _) => IsAttributedClass(node),
-                static (node, _) => GetClassesMarkedByInstrumentMethodAttribute(node))
+        var instrumentationClasses = context.SyntaxProvider.ForAttributeWithMetadataName(
+                InstrumentMethodAttributeName,
+                (node, _) => node is ClassDeclarationSyntax,
+                GetClassesMarkedByInstrumentMethodAttribute)
             .Where(static m => m != null);
 
-        IncrementalValueProvider<(Compilation, ImmutableArray<ClassDeclarationSyntax?>)> compilationAndClasses
-            = context.CompilationProvider.Combine(instrumentationClasses.Collect());
+        var instrumentationClassesAsOneCollection = instrumentationClasses.Collect();
 
         context.RegisterSourceOutput(
-            compilationAndClasses,
-            static (context, source) => Generate(source.Item1, source.Item2, context));
+            instrumentationClassesAsOneCollection,
+            static (context, instrumentationClasses) => Generate(in instrumentationClasses, context));
     }
 
-    private static void Generate(Compilation compilation, ImmutableArray<ClassDeclarationSyntax?> classesWithAttributes, SourceProductionContext context)
+    private static void Generate(in ImmutableArray<IntegrationToGenerate?> instrumentationClasses, SourceProductionContext context)
     {
-        if (classesWithAttributes.IsDefaultOrEmpty)
+        if (instrumentationClasses.IsDefaultOrEmpty)
         {
             return;
         }
 
-        var distinctClasses = classesWithAttributes.Distinct();
-
-        var (traceIntegrations, metricsIntegrations, logsIntegrations) = GetIntegrationsToGenerate(compilation, distinctClasses, context.CancellationToken);
-
-        var result = GenerateInstrumentationDefinitionsPartialClass(traceIntegrations, metricsIntegrations, logsIntegrations);
+        var result = GenerateInstrumentationDefinitionsPartialClass(instrumentationClasses);
         context.AddSource("InstrumentationDefinitions.g.cs", SourceText.From(result, Encoding.UTF8));
     }
 
-    private static (IReadOnlyCollection<IntegrationToGenerate> TraceIntegrations, IReadOnlyCollection<IntegrationToGenerate> MetricsIntegrations, IReadOnlyCollection<IntegrationToGenerate> LogsIntegrations) GetIntegrationsToGenerate(Compilation compilation, IEnumerable<ClassDeclarationSyntax?> classes, CancellationToken contextCancellationToken)
-    {
-        var instrumentAttribute = compilation.GetTypeByMetadataName("OpenTelemetry.AutoInstrumentation.Instrumentations.InstrumentMethodAttribute");
-
-        if (instrumentAttribute == null)
-        {
-            return (Array.Empty<IntegrationToGenerate>(), Array.Empty<IntegrationToGenerate>(), Array.Empty<IntegrationToGenerate>());
-        }
-
-        var traceIntegrations = new List<IntegrationToGenerate>();
-        var metricsIntegrations = new List<IntegrationToGenerate>();
-        var logsIntegrations = new List<IntegrationToGenerate>();
-
-        foreach (var classDeclaration in classes)
-        {
-            var semanticModel = compilation.GetSemanticModel(classDeclaration!.SyntaxTree);
-            var classNamedTypeSymbol = semanticModel.GetDeclaredSymbol(classDeclaration, contextCancellationToken) as INamedTypeSymbol;
-
-            var attributes = classNamedTypeSymbol!.GetAttributes();
-
-            foreach (var attribute in attributes)
-            {
-                if (!instrumentAttribute.Equals(attribute.AttributeClass, SymbolEqualityComparer.Default))
-                {
-                    continue;
-                }
-
-                var (integrationToGenerate, type) = CreateIntegrationToGenerate(attribute, classNamedTypeSymbol);
-
-                switch (type)
-                {
-                    case 0:
-                        traceIntegrations.Add(integrationToGenerate);
-                        break;
-                    case 1:
-                        metricsIntegrations.Add(integrationToGenerate);
-                        break;
-                    case 2:
-                        logsIntegrations.Add(integrationToGenerate);
-                        break;
-                }
-            }
-        }
-
-        return (traceIntegrations, metricsIntegrations, logsIntegrations);
-    }
-
-    private static (IntegrationToGenerate IntegrationToGenerate, int Type) CreateIntegrationToGenerate(AttributeData attribute, INamedTypeSymbol classNamedTypeSymbol)
+    private static TargetToGenerate CreateTargetToGenerate(AttributeData attribute)
     {
         var returnTypeName = attribute.ConstructorArguments[3].Value?.ToString()!;
         var parameterTypeNames = attribute.ConstructorArguments[4].Values;
 
-        var targetSignatureTypes = new string[parameterTypeNames.Length + 1];
+        var targetSignatureTypesBuilder = new StringBuilder();
 
-        targetSignatureTypes[0] = returnTypeName;
+        targetSignatureTypesBuilder.AppendFormat("\"{0}\"", returnTypeName);
 
-        for (var i = 0; i < parameterTypeNames.Length; i++)
+        foreach (var parameterTypeName in parameterTypeNames)
         {
-            targetSignatureTypes[i + 1] = parameterTypeNames[i].Value?.ToString()!;
+            targetSignatureTypesBuilder.AppendFormat(", \"{0}\"", parameterTypeName.Value);
         }
 
-        var integrationToGenerate = new IntegrationToGenerate
-        {
-            TargetAssembly = attribute.ConstructorArguments[0].Value?.ToString(),
-            TargetType = attribute.ConstructorArguments[1].Value?.ToString(),
-            TargetMethod = attribute.ConstructorArguments[2].Value?.ToString(),
-            TargetSignatureTypes = targetSignatureTypes,
-            IntegrationName = attribute.ConstructorArguments[7].Value?.ToString(),
-            IntegrationType = classNamedTypeSymbol.ToDisplayString()
-        };
+        var signalType = int.Parse(attribute.ConstructorArguments[8].Value!.ToString());
+        var integrationName = attribute.ConstructorArguments[7].Value!.ToString();
+        var targetAssembly = attribute.ConstructorArguments[0].Value!.ToString();
+        var targetType = attribute.ConstructorArguments[1].Value!.ToString();
+        var targetMethod = attribute.ConstructorArguments[2].Value!.ToString();
 
         var minVersion = attribute.ConstructorArguments[5].Value?.ToString().Split('.')!;
-        integrationToGenerate.TargetMinimumMajor = int.Parse(minVersion[0]);
-        if (minVersion.Length > 1 && minVersion[1] != "*")
-        {
-            integrationToGenerate.TargetMinimumMinor = int.Parse(minVersion[1]);
-        }
 
-        if (minVersion.Length > 2 && minVersion[2] != "*")
-        {
-            integrationToGenerate.TargetMinimumPatch = int.Parse(minVersion[2]);
-        }
+        var targetMinimumMajor = int.Parse(minVersion[0]);
+        var targetMinimumMinor = minVersion.Length > 1 && minVersion[1] != "*" ? int.Parse(minVersion[1]) : ushort.MinValue;
+        var targetMinimumPatch = minVersion.Length > 2 && minVersion[2] != "*" ? int.Parse(minVersion[2]) : ushort.MinValue;
 
         var maxVersion = attribute.ConstructorArguments[6].Value?.ToString().Split('.')!;
-        integrationToGenerate.TargetMaximumMajor = int.Parse(maxVersion[0]);
-        if (maxVersion.Length > 1 && maxVersion[1] != "*")
-        {
-            integrationToGenerate.TargetMaximumMinor = int.Parse(maxVersion[1]);
-        }
+        var targetMaximumMajor = int.Parse(maxVersion[0]);
+        var targetMaximumMinor = maxVersion.Length > 1 && maxVersion[1] != "*" ? int.Parse(maxVersion[1]) : ushort.MaxValue;
+        var targetMaximumPatch = maxVersion.Length > 2 && maxVersion[2] != "*" ? int.Parse(maxVersion[2]) : ushort.MaxValue;
 
-        if (maxVersion.Length > 2 && maxVersion[2] != "*")
-        {
-            integrationToGenerate.TargetMaximumPatch = int.Parse(maxVersion[2]);
-        }
-
-        return (integrationToGenerate, int.Parse(attribute.ConstructorArguments[8].Value!.ToString()));
+        return new TargetToGenerate(signalType, integrationName, targetAssembly, targetType, targetMethod, targetMinimumMajor, targetMinimumMinor, targetMinimumPatch, targetMaximumMajor, targetMaximumMinor, targetMaximumPatch, targetSignatureTypesBuilder.ToString());
     }
 
-    private static string GenerateInstrumentationDefinitionsPartialClass(IReadOnlyCollection<IntegrationToGenerate> traceIntegrations, IReadOnlyCollection<IntegrationToGenerate> metricsIntegrations, IReadOnlyCollection<IntegrationToGenerate> logsIntegrations)
+    private static string GenerateInstrumentationDefinitionsPartialClass(ImmutableArray<IntegrationToGenerate?> integrationClasses)
     {
+        var tracesByIntegrationName = new Dictionary<string, List<(string IntegrationType, TargetToGenerate Target)>>();
+        var logsByIntegrationName = new Dictionary<string, List<(string IntegrationType, TargetToGenerate Target)>>();
+        var metricsByIntegrationName = new Dictionary<string, List<(string IntegrationType, TargetToGenerate Target)>>();
+
+        var instrumentationCount = 0;
+
+        foreach (var integrationToGenerate in integrationClasses)
+        {
+            foreach (var targetToGenerate in integrationToGenerate!.Value.Targets)
+            {
+                Dictionary<string, List<(string IntegrationType, TargetToGenerate Target)>> byName;
+                switch (targetToGenerate.SignalType)
+                {
+                    case 0:
+                        byName = tracesByIntegrationName;
+                        break;
+                    case 1:
+                        byName = metricsByIntegrationName;
+                        break;
+                    case 2:
+                        byName = logsByIntegrationName;
+                        break;
+                    default:
+                        continue;
+                }
+
+                if (byName.TryGetValue(targetToGenerate.IntegrationName, out var value))
+                {
+                    value.Add((integrationToGenerate.Value.IntegrationType, targetToGenerate));
+                }
+                else
+                {
+                    byName.Add(
+                        targetToGenerate.IntegrationName,
+                        new List<(string IntegrationType, TargetToGenerate Target)>
+                        {
+                            (integrationToGenerate.Value.IntegrationType, targetToGenerate)
+                        });
+                }
+
+                instrumentationCount++;
+            }
+        }
+
         var sb = new StringBuilder()
             .AppendFormat(
                 @"//------------------------------------------------------------------------------
@@ -184,23 +162,23 @@ internal static partial class InstrumentationDefinitions
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
     {{
         var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>({0});",
-                traceIntegrations.Count + metricsIntegrations.Count + logsIntegrations.Count)
+                instrumentationCount)
             .AppendLine();
 
         const string tracesHeader = @"        // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)";
-        GenerateInstrumentationForSignal(traceIntegrations, sb, tracesHeader, "tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation");
+        GenerateInstrumentationForSignal(tracesByIntegrationName, sb, tracesHeader, "tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation");
 
         const string logsHeader = @"        // Logs
         var logSettings = Instrumentation.LogSettings.Value;
         if (logSettings.LogsEnabled)";
-        GenerateInstrumentationForSignal(logsIntegrations, sb, logsHeader, "logSettings.EnabledInstrumentations.Contains(LogInstrumentation");
+        GenerateInstrumentationForSignal(logsByIntegrationName, sb, logsHeader, "logSettings.EnabledInstrumentations.Contains(LogInstrumentation");
 
         const string metricsHeader = @"        // Metrics
         var metricSettings = Instrumentation.MetricSettings.Value;
         if (metricSettings.MetricsEnabled)";
-        GenerateInstrumentationForSignal(metricsIntegrations, sb, metricsHeader, "metricSettings.EnabledInstrumentations.Contains(MetricInstrumentation");
+        GenerateInstrumentationForSignal(metricsByIntegrationName, sb, metricsHeader, "metricSettings.EnabledInstrumentations.Contains(MetricInstrumentation");
 
         sb.AppendLine(@"        return nativeCallTargetDefinitions.ToArray();
     }
@@ -209,7 +187,7 @@ internal static partial class InstrumentationDefinitions
         return sb.ToString();
     }
 
-    private static void GenerateInstrumentationForSignal(IReadOnlyCollection<IntegrationToGenerate> integrations, StringBuilder sb, string signalHeader, string conditionPrefix)
+    private static void GenerateInstrumentationForSignal(Dictionary<string, List<(string IntegrationType, TargetToGenerate Target)>> integrations, StringBuilder sb, string signalHeader, string conditionPrefix)
     {
         if (integrations.Count > 0)
         {
@@ -222,11 +200,9 @@ internal static partial class InstrumentationDefinitions
         }
     }
 
-    private static void GenerateIntegrations(IReadOnlyCollection<IntegrationToGenerate> integrations, StringBuilder sb, string conditionPrefix)
+    private static void GenerateIntegrations(Dictionary<string, List<(string IntegrationType, TargetToGenerate Target)>> integrationsByName, StringBuilder sb, string conditionPrefix)
     {
-        var gropedByIntegrationName = integrations.GroupBy(x => x.IntegrationName);
-
-        foreach (var group in gropedByIntegrationName)
+        foreach (var group in integrationsByName)
         {
             sb.Append("            // ");
             sb.AppendLine(group.Key);
@@ -237,20 +213,20 @@ internal static partial class InstrumentationDefinitions
                 group.Key);
             sb.AppendLine();
 
-            foreach (var integration in group)
+            foreach (var integration in group.Value)
             {
                 sb.AppendFormat(
                     "                nativeCallTargetDefinitions.Add(new(\"{0}\", \"{1}\", \"{2}\", new[] {{{3}}}, {4}, {5}, {6}, {7}, {8}, {9}, AssemblyFullName, \"{10}\"));",
-                    integration.TargetAssembly,
-                    integration.TargetType,
-                    integration.TargetMethod,
-                    string.Join(", ", integration.TargetSignatureTypes!.Select(x => $"\"{x}\"")),
-                    integration.TargetMinimumMajor,
-                    integration.TargetMinimumMinor,
-                    integration.TargetMinimumPatch,
-                    integration.TargetMaximumMajor,
-                    integration.TargetMaximumMinor,
-                    integration.TargetMaximumPatch,
+                    integration.Target.Assembly,
+                    integration.Target.Type,
+                    integration.Target.Method,
+                    integration.Target.SignatureTypes,
+                    integration.Target.MinimumMajor,
+                    integration.Target.MinimumMinor,
+                    integration.Target.MinimumPatch,
+                    integration.Target.MaximumMajor,
+                    integration.Target.MaximumMinor,
+                    integration.Target.MaximumPatch,
                     integration.IntegrationType);
                 sb.AppendLine();
             }
@@ -260,26 +236,23 @@ internal static partial class InstrumentationDefinitions
         }
     }
 
-    private static bool IsAttributedClass(SyntaxNode node)
+    private static IntegrationToGenerate? GetClassesMarkedByInstrumentMethodAttribute(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
     {
-        return node is ClassDeclarationSyntax { AttributeLists.Count: > 0 };
-    }
-
-    private static ClassDeclarationSyntax? GetClassesMarkedByInstrumentMethodAttribute(GeneratorSyntaxContext context)
-    {
-        var classDeclarationSyntax = (ClassDeclarationSyntax)context.Node;
-
-        foreach (var attributeListSyntax in classDeclarationSyntax.AttributeLists)
+        if (context.TargetSymbol is not INamedTypeSymbol classSymbol)
         {
-            foreach (var attributeSyntax in attributeListSyntax.Attributes)
-            {
-                if (attributeSyntax.Name.ToString() is "InstrumentMethod" or "InstrumentMethodAttribute")
-                {
-                    return classDeclarationSyntax;
-                }
-            }
+            return null;
         }
 
-        return null;
+        var integrationType = classSymbol.ToDisplayString();
+
+        var targets = new List<TargetToGenerate>();
+
+        foreach (var contextAttribute in context.Attributes)
+        {
+            var targetToGenerate = CreateTargetToGenerate(contextAttribute);
+            targets.Add(targetToGenerate);
+        }
+
+        return new IntegrationToGenerate(integrationType, targets.ToImmutableArray());
     }
 }
