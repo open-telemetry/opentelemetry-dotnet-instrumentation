@@ -249,6 +249,7 @@ internal static partial class InstrumentationDefinitions
 
         foreach (var contextAttribute in context.Attributes)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var targetToGenerate = CreateTargetToGenerate(contextAttribute);
             targets.Add(targetToGenerate);
         }
