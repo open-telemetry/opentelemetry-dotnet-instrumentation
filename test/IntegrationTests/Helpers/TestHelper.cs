@@ -42,9 +42,6 @@ public abstract class TestHelper
 
     protected ITestOutputHelper Output { get; }
 
-    /// <summary>
-    /// Gets the path for the test assembly, not the shadow copy created by xunit.
-    /// </summary>
     public string GetTestAssemblyPath()
     {
 #if NETFRAMEWORK
@@ -99,10 +96,6 @@ public abstract class TestHelper
         RemoveEnvironmentVariable("OTEL_LOGS_EXPORTER");
     }
 
-    /// <summary>
-    /// RunTestApplication starts the test application, wait up to DefaultProcessTimeout.
-    /// Assertion exceptions are thrown if it timed out or the exit code is non-zero.
-    /// </summary>
     public (string StandardOutput, string ErrorOutput) RunTestApplication(TestSettings? testSettings = null)
     {
         testSettings ??= new();
@@ -128,11 +121,6 @@ public abstract class TestHelper
         return (helper.StandardOutput, helper.ErrorOutput);
     }
 
-    /// <summary>
-    /// StartTestApplication starts the test application
-    /// and returns the Process instance for further interaction.
-    /// </summary>
-    /// <returns>Test application process</returns>
     public Process? StartTestApplication(TestSettings? testSettings = null)
     {
         testSettings ??= new();

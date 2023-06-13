@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System.Collections.Immutable;
-
 namespace SourceGenerators;
 
 internal readonly record struct TargetToGenerate(int SignalType, string IntegrationName, string Assembly, string Type, string Method, int MinimumMajor, int MinimumMinor, int MinimumPatch, int MaximumMajor, int MaximumMinor, int MaximumPatch, string SignatureTypes)

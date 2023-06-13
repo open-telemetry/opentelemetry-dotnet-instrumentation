@@ -24,11 +24,14 @@ using GraphQL.Types;
 
 namespace TestApplication.GraphQL.StarWarsExtensions;
 
+/// <summary>
+/// StarWars Subscription
+/// </summary>
 /// <example>
 /// This is an example JSON request for a subscription
 /// {
 ///   "query": "subscription HumanAddedSub{ humanAdded { name } }",
-/// }
+/// }.
 /// </example>
 public class StarWarsSubscription : ObjectGraphType<object>
 {
