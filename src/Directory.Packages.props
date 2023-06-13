@@ -9,7 +9,7 @@
 
   <!-- Versions from OpenTelemetry.AutoInstrumentation.BuildTasks.csproj -->
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="15.9.20" />
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.6.3" />
     <PackageVersion Include="NuGet.Versioning" Version="$(NuGetVersioningVersion)" />
   </ItemGroup>
 
