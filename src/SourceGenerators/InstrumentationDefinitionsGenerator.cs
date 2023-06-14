@@ -254,6 +254,6 @@ internal static partial class InstrumentationDefinitions
             targets.Add(targetToGenerate);
         }
 
-        return new IntegrationToGenerate(integrationType, targets.ToImmutableArray());
+        return new IntegrationToGenerate(integrationType, new EquatableArray<TargetToGenerate>(targets.ToArray()));
     }
 }
