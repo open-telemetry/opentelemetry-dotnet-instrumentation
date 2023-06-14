@@ -34,6 +34,12 @@
     <PackageVersion Include="OpenTelemetry.ResourceDetectors.Container" Version="1.0.0-beta.4" />
   </ItemGroup>
 
+  <!-- Versions from SourceGenerators.csproj -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.6.0" />
+  </ItemGroup>
+
   <!-- Versions from CommonExcludedAssets.props -->
   <ItemGroup>
     <!-- Microsoft.Bcl.AsyncInterfaces is also referenced by the .NET Framework4.6.2. In this case is not excluded -->

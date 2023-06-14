@@ -1,4 +1,4 @@
-// <copyright file="InstrumentationType.cs" company="OpenTelemetry Authors">
+// <copyright file="IntegrationToGenerate.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +14,12 @@
 // limitations under the License.
 // </copyright>
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations;
+using System.Collections.Immutable;
 
-internal enum InstrumentationType
+namespace SourceGenerators;
+
+internal readonly record struct IntegrationToGenerate(string IntegrationType, ImmutableArray<TargetToGenerate> Targets)
 {
-    Trace = 0,
-    Metric = 1,
-    Log = 2
+    public readonly string IntegrationType = IntegrationType;
+    public readonly ImmutableArray<TargetToGenerate> Targets = Targets;
 }

@@ -4,7 +4,14 @@
 
   <PropertyGroup>
     <PackageId>OpenTelemetry.AutoInstrumentation.Runtime.Managed</PackageId>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <GeneratedFolder>Generated</GeneratedFolder>
+    <CompilerGeneratedFilesOutputPath>$(GeneratedFolder)\$(TargetFramework)</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SourceGenerators\SourceGenerators.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+    <Compile Remove="$(GeneratedFolder)/*/**/*.cs" />
+  </ItemGroup>
 
   <!-- Separate dependencies are to be shipped in the distribution but not on the NuGet package -->
   <ItemGroup Condition="$(_IsPacking) != true">

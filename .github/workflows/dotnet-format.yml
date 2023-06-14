@@ -28,7 +28,7 @@ jobs:
         dotnet-version: 7.0.302
 
     - name: Install format tool
-      run: dotnet tool install -g dotnet-format
+      run: dotnet tool install -g dotnet-format --version "7.*" --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet7/nuget/v3/index.json
 
     - name: dotnet format
-      run: dotnet-format --folder --check
+      run: dotnet-format .\OpenTelemetry.AutoInstrumentation.sln --no-restore --verify-no-changes
