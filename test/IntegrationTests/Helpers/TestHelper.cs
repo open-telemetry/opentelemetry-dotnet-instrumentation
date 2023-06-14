@@ -44,6 +44,7 @@ public abstract class TestHelper
 
     public string GetTestAssemblyPath()
     {
+        // Gets the path for the test assembly, not the shadow copy created by xunit.
 #if NETFRAMEWORK
         // CodeBase is deprecated outside .NET Framework, instead of suppressing the error
         // build the code as per recommendation for each runtime.
@@ -98,6 +99,8 @@ public abstract class TestHelper
 
     public (string StandardOutput, string ErrorOutput) RunTestApplication(TestSettings? testSettings = null)
     {
+        // RunTestApplication starts the test application, wait up to DefaultProcessTimeout.
+        // Assertion exceptions are thrown if it timed out or the exit code is non-zero.
         testSettings ??= new();
         using var process = StartTestApplication(testSettings);
         Output.WriteLine($"ProcessName: " + process?.ProcessName);
@@ -123,6 +126,8 @@ public abstract class TestHelper
 
     public Process? StartTestApplication(TestSettings? testSettings = null)
     {
+        // StartTestApplication starts the test application
+        // and returns the Process instance for further interaction.
         testSettings ??= new();
 
         // get path to test application that the profiler will attach to
