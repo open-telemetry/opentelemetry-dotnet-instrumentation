@@ -4,6 +4,7 @@ using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.NuGet;
+using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
@@ -14,6 +15,7 @@ partial class Build
     Target BuildNuGetPackages => _ => _
         .Description(
             "Builds the NuGet packages of the project assuming that any necessary build artifacts were already downloaded.")
+        .DependsOn(CleanAutoInstrumentationNuGetPackagesFromLocalCaches)
         .DependsOn(BuildManagedSrcNuGetPackages)
         .DependsOn(SetupRuntimeNativeFolderForNuGetPackage)
         .DependsOn(BuildNuSpecNuGetPackages);
@@ -66,6 +68,37 @@ partial class Build
 
                 CopyDirectoryRecursively(sourcePath, destinationPath);
             }
+        });
+
+    Target CleanAutoInstrumentationNuGetPackagesFromLocalCaches => _ => _
+        .Unlisted()
+        .Description(
+            "Remove the AutoInstrumentation packages from local caches ensuring that the latest locally built versions are used.")
+        .Before(BuildManagedSrcNuGetPackages)
+        .Before(BuildNuSpecNuGetPackages)
+        .Executes(() =>
+        {
+            const string autoInstrumentationGlob = "opentelemetry.autoinstrumentation*"; // NuGet lowers the case of the directory.
+
+            // This is mail fail if any dotnet tasks are using the packages on the background, reduce the risk by
+            // shutting down any build servers. However, this doesn't prevent tools like VS and VS Code of holding
+            // the BuildTasks package if they are doing background builds that reference the package.
+            DotNet("dotnet build-server shutdown");
+
+            // Clean the default local cache.
+            var output = DotNet("dotnet nuget locals global-packages --list", RootDirectory);
+            foreach (var line in output)
+            {
+                AbsolutePath packagesDir = Path.GetFullPath(line.Text[("global-packages: ".Length)..]);
+                var autoInstrumentationPackagesDirectories = packagesDir.GlobDirectories(autoInstrumentationGlob);
+                autoInstrumentationPackagesDirectories.ForEach(d => d.DeleteDirectory());
+            }
+
+            // Clean the NuGet test applications cache.
+            var nugetTestAppsPackagesDir =
+                RootDirectory / "test" / "test-applications" / "nuget-packages" / "packages";
+            var nugetTestAppsAutoInstrumentationPackagesDirectories = nugetTestAppsPackagesDir.GlobDirectories(autoInstrumentationGlob);
+            nugetTestAppsAutoInstrumentationPackagesDirectories.ForEach(d => d.DeleteDirectory());
         });
 
     Target BuildNuSpecNuGetPackages => _ => _
@@ -142,7 +175,7 @@ partial class Build
                     .SetBlameHangTimeout("5m")
                     .EnableTrxLogOutput(GetResultsDirectory(nugetPackagesTestProject))
                     .SetTargetPath(nugetPackagesTestProject)
-                    .DisableRestore()
+                    .SetRestore(!NoRestore)
                     .RunTests()
                 );
             }

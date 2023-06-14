@@ -26,8 +26,8 @@ jobs:
             containers: none
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/checkout@v3.5.2
-      - uses: actions/setup-dotnet@v3.0.3
+      - uses: actions/checkout@v3.5.3
+      - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
             6.0.408
@@ -38,4 +38,4 @@ jobs:
         if: always()
         with:
           name: logs-${{ matrix.machine }}
-          path: build_data/
+          path: test-artifacts/

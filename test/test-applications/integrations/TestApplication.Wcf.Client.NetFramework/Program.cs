@@ -15,23 +15,44 @@
 // </copyright>
 
 using System.ServiceModel;
+using System.ServiceModel.Channels;
+using static System.Net.WebRequestMethods;
 
 namespace TestApplication.Wcf.Client.NetFramework;
 
 internal static class Program
 {
-    public static async Task Main()
+    public static async Task Main(string[] args)
     {
-        await CallService("StatusService_Tcp").ConfigureAwait(false);
-        await CallService("StatusService_Http").ConfigureAwait(false);
+        string netTcpAddress;
+        string httpAddress;
+        if (args.Length == 0)
+        {
+            // Self-hosted service addresses
+            netTcpAddress = "net.tcp://127.0.0.1:9090/Telemetry";
+            httpAddress = "http://127.0.0.1:9009/Telemetry";
+        }
+        else if (args.Length == 2)
+        {
+            // Addresses of a service hosted in IIS inside container
+            netTcpAddress = $"net.tcp://localhost:{args[0]}/StatusService.svc";
+            httpAddress = $"http://localhost:{args[1]}/StatusService.svc";
+        }
+        else
+        {
+            throw new Exception("TestApplication.Wcf.Client.NetFramework application requires either 0 or exactly 2 arguments.");
+        }
+
+        await CallService(netTcpAddress, new NetTcpBinding(SecurityMode.None)).ConfigureAwait(false);
+        await CallService(httpAddress, new BasicHttpBinding()).ConfigureAwait(false);
     }
 
-    private static async Task CallService(string name)
+    private static async Task CallService(string address, Binding binding)
     {
         // Note: Best practice is to re-use your client/channel instances.
         // This code is not meant to illustrate best practices, only the
         // instrumentation.
-        var client = new StatusServiceClient(name);
+        var client = new StatusServiceClient(binding, new EndpointAddress(new Uri(address)));
         try
         {
             await client.OpenAsync().ConfigureAwait(false);

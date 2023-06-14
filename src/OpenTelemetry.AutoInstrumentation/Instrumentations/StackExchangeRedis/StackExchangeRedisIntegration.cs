@@ -77,7 +77,7 @@ public static class StackExchangeRedisIntegration
     /// <returns>A response value, in an async scenario will be T of Task of T</returns>
     internal static CallTargetReturn<TReturn> OnMethodEnd<TTarget, TReturn>(TReturn returnValue, Exception exception, in CallTargetState state)
     {
-        if (returnValue != null && Instrumentation.TracerSettings.Value.EnabledInstrumentations.Contains(TracerInstrumentation.StackExchangeRedis))
+        if (returnValue != null)
         {
             StackExchangeRedisInitializer.Initialize(returnValue);
         }

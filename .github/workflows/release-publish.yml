@@ -8,7 +8,7 @@ jobs:
   powershell-script:
     runs-on: windows-2022
     steps:
-      - uses: actions/setup-dotnet@v3.0.3
+      - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
             6.0.x
@@ -52,7 +52,7 @@ jobs:
             log-dir: "/var/log/opentelemetry/dotnet"
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/setup-dotnet@v3.0.3
+      - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
             6.0.408
@@ -85,7 +85,7 @@ jobs:
         base-image: [ alpine, centos ]
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3.5.2
+      - uses: actions/checkout@v3.5.3
       - name: Test the Shell scripts from README.md in Docker container
         run: |
           set -e

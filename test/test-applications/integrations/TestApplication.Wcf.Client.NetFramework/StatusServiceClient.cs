@@ -15,14 +15,15 @@
 // </copyright>
 
 using System.ServiceModel;
+using System.ServiceModel.Channels;
 using System.Threading.Tasks;
 
 namespace TestApplication.Wcf.Client.NetFramework;
 
 public class StatusServiceClient : ClientBase<IStatusServiceContract>, IStatusServiceContract
 {
-    public StatusServiceClient(string name)
-        : base(name)
+    public StatusServiceClient(Binding binding, EndpointAddress remoteAddress)
+        : base(binding, remoteAddress)
     {
     }
 

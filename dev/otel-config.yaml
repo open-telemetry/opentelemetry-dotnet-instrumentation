@@ -19,7 +19,7 @@ processors:
 
 exporters:
   logging:
-    # logLevel: debug
+    # verbosity: detailed
   file/traces:
     path: /log/otel/traces.log
   file/metrics:

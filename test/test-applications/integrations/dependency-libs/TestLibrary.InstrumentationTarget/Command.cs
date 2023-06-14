@@ -14,12 +14,13 @@
 // limitations under the License.
 // </copyright>
 
-using System.Threading;
+using System.Runtime.CompilerServices;
 
 namespace TestLibrary.InstrumentationTarget;
 
 public class Command
 {
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public void Execute()
     {
         Thread.Yield(); // Just to have some call to outside code.

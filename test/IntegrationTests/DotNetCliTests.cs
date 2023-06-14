@@ -52,7 +52,7 @@ public sealed class DotNetCliTests : TestHelper, IDisposable
     [Fact]
     public void WorkFlow()
     {
-        // Ensure to MS telemetry spans.
+        // Ensure no MS telemetry spans.
         SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", "1");
 
         // Stop all build servers to ensure user like experience.

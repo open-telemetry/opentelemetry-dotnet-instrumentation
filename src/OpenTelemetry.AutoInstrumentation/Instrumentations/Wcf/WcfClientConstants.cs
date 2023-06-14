@@ -20,11 +20,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf;
 
 internal static class WcfClientConstants
 {
-    public const string ServiceModelAssemblyName = "System.ServiceModel";
     public const string ChannelFactoryTypeName = "System.ServiceModel.ChannelFactory";
     public const string InitializeEndpointMethodName = "InitializeEndpoint";
-    public const string MinVersion = "4.0.0";
-    public const string MaxVersion = "4.*.*";
     public const string IntegrationName = nameof(TracerInstrumentation.WcfClient);
     public const string EndpointAddressTypeName = "System.ServiceModel.EndpointAddress";
     public const string ServiceEndpointTypeName = "System.ServiceModel.Description.ServiceEndpoint";

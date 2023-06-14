@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -50,6 +51,30 @@ internal class PluginManager
                 mi.Invoke(plugin.Instance, null);
             }
         }
+    }
+
+    /// <summary>
+    /// This functionality is used for testing purposes. GetAllDefinitionsPayload is not documented on the plugins.md.
+    /// The contacts is based on internal classes and InternalsVisibleTo attributes. It should be refactored before supporting it.
+    /// </summary>
+    /// <returns>List of payloads.</returns>
+    public IEnumerable<InstrumentationDefinitions.Payload> GetAllDefinitionsPayloads()
+    {
+        var payloads = new List<InstrumentationDefinitions.Payload>();
+
+        foreach (var plugin in _plugins)
+        {
+            var mi = plugin.Type.GetMethod("GetAllDefinitionsPayload", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (mi is not null)
+            {
+                if (mi.Invoke(plugin.Instance, null) is InstrumentationDefinitions.Payload payload)
+                {
+                    payloads.Add(payload);
+                }
+            }
+        }
+
+        return payloads;
     }
 
     public TracerProviderBuilder ConfigureTracerProviderBuilder(TracerProviderBuilder builder)

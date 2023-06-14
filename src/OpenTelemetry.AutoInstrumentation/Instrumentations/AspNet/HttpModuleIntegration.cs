@@ -1,0 +1,71 @@
+// <copyright file="HttpModuleIntegration.cs" company="OpenTelemetry Authors">
+// Copyright The OpenTelemetry Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// </copyright>
+
+#if NETFRAMEWORK
+using System.Web;
+using OpenTelemetry.AutoInstrumentation.CallTarget;
+using OpenTelemetry.Instrumentation.AspNet;
+
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.AspNet;
+
+/// <summary>
+/// System.Web.Compilation.BuildManager.InvokePreStartInitMethodsCore calltarget instrumentation
+/// </summary>
+[InstrumentMethod(
+    "System.Web",
+    "System.Web.Compilation.BuildManager",
+    "InvokePreStartInitMethodsCore",
+    ClrNames.Void,
+    new[] { "System.Collections.Generic.ICollection`1[System.Reflection.MethodInfo]", "System.Func`1[System.IDisposable]" },
+    "4.0.0",
+    "4.*.*",
+    "AspNet",
+    InstrumentationType.Trace)]
+public static class HttpModuleIntegration
+{
+    private static int _initialized;
+
+    /// <summary>
+    /// OnMethodBegin callback
+    /// </summary>
+    /// <typeparam name="TTarget">Type of the target</typeparam>
+    /// <typeparam name="TCollection">Type of the collection</typeparam>
+    /// <typeparam name="TFunc">Type of the </typeparam>
+    /// <param name="instance">Instance value, aka `this` of the instrumented method. This method is static so this parameter will always be null</param>
+    /// <param name="methods">The methods to be invoked</param>
+    /// <param name="setHostingEnvironmentCultures">The function to set the environment culture</param>
+    /// <returns>Calltarget state value</returns>
+    internal static CallTargetState OnMethodBegin<TTarget, TCollection, TFunc>(TTarget instance, TCollection methods, TFunc setHostingEnvironmentCultures)
+    {
+        if (Interlocked.Exchange(ref _initialized, 1) != default)
+        {
+            return CallTargetState.GetDefault();
+        }
+
+        try
+        {
+            HttpApplication.RegisterModule(typeof(TelemetryHttpModule));
+        }
+        catch
+        {
+            // Exception while registering telemetry http module
+            // nothing we can do with this
+        }
+
+        return CallTargetState.GetDefault();
+    }
+}
+#endif
