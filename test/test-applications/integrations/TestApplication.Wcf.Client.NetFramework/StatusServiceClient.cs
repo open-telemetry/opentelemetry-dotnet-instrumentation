@@ -28,7 +28,24 @@ public class StatusServiceClient : ClientBase<IStatusServiceContract>, IStatusSe
     }
 
     public Task<StatusResponse> PingAsync(StatusRequest request)
-        => this.Channel.PingAsync(request);
+    {
+        return this.Channel.PingAsync(request);
+    }
+
+    public StatusResponse PingSync(StatusRequest request)
+    {
+        return Channel.PingSync(request);
+    }
+
+    public IAsyncResult BeginPing(StatusRequest request, AsyncCallback callback, object asyncState)
+    {
+        return Channel.BeginPing(request, callback, asyncState);
+    }
+
+    public StatusResponse EndPing(IAsyncResult asyncResult)
+    {
+        return Channel.EndPing(asyncResult);
+    }
 
     public Task OpenAsync()
     {

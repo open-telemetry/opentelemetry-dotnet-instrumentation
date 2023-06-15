@@ -1,4 +1,4 @@
-// <copyright file="WcfServiceConstants.cs" company="OpenTelemetry Authors">
+// <copyright file="WcfClientCommon.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,16 +15,20 @@
 // </copyright>
 
 #if NETFRAMEWORK
+using System.Diagnostics;
 
-using OpenTelemetry.AutoInstrumentation.Configurations;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf;
-
-internal static class WcfServiceConstants
+internal static class WcfClientCommon
 {
-    public const string IntegrationName = nameof(TracerInstrumentation.WcfService);
-    public const string ServiceHostBaseTypeName = "System.ServiceModel.ServiceHostBase";
-    public const string InitializeDescriptionMethodName = "InitializeDescription";
-    public const string UriSchemeKeyedCollectionTypeName = "System.ServiceModel.UriSchemeKeyedCollection";
+    private static readonly ActivitySource Source = new ActivitySource(
+        "OpenTelemetry.AutoInstrumentation.Wcf", Constants.Tracer.Version);
+
+    private static readonly string OutgoingActivityName = $"{Source.Name}.OutgoingActivity";
+
+    internal static Activity? StartActivity()
+    {
+        return Source.StartActivity(OutgoingActivityName, ActivityKind.Client);
+    }
 }
 #endif

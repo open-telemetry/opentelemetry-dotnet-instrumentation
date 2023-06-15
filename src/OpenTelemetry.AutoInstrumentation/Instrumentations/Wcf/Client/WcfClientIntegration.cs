@@ -16,9 +16,8 @@
 #if NETFRAMEWORK
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
-using OpenTelemetry.AutoInstrumentation.Configurations;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client;
 
 /// <summary>
 /// ChannelFactory instrumentation.

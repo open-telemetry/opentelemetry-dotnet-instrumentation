@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System.Diagnostics;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using OpenTelemetry.Instrumentation.Wcf;

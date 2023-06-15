@@ -280,6 +280,9 @@ internal static class Instrumentation
                 case TracerInstrumentation.AspNet:
                     DelayedInitialization.Traces.AddAspNet(lazyInstrumentationLoader, pluginManager);
                     break;
+                case TracerInstrumentation.WcfService:
+                    DelayedInitialization.Traces.AddWcf(lazyInstrumentationLoader, pluginManager);
+                    break;
 #endif
                 case TracerInstrumentation.HttpClient:
                     DelayedInitialization.Traces.AddHttpClient(lazyInstrumentationLoader, pluginManager);
@@ -289,9 +292,6 @@ internal static class Instrumentation
                     break;
                 case TracerInstrumentation.SqlClient:
                     DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager);
-                    break;
-                case TracerInstrumentation.Wcf:
-                    DelayedInitialization.Traces.AddWcf(lazyInstrumentationLoader, pluginManager);
                     break;
                 case TracerInstrumentation.Quartz:
                     DelayedInitialization.Traces.AddQuartz(lazyInstrumentationLoader, pluginManager);
