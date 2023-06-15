@@ -530,6 +530,7 @@ partial class Build
                     }.AsReadOnly();
 
                     depsJson.CopyNativeDependenciesToStore(file, architectureStores);
+                    depsJson.RemoveDuplicatedLibraries(architectureStores);
                     depsJson.RemoveOpenTelemetryLibraries();
 
                     if (folderRuntimeName == TargetFramework.NET6_0)
