@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0.302-alpine3.17
+FROM mcr.microsoft.com/dotnet/sdk:7.0.304-alpine3.17
 
 RUN apk update \
     && apk upgrade \
@@ -20,9 +20,9 @@ ENV gRPC_PluginFullPath=/usr/bin/grpc_csharp_plugin
 # Install older sdks using the install script
 RUN curl -sSL https://dot.net/v1/dotnet-install.sh --output dotnet-install.sh \
     && echo "SHA256: $(sha256sum dotnet-install.sh)" \
-    && echo "e7e05ef4c1980e4d75dd5c27c1c387ff0dac8931595583b9ff6fa362da7c2de9  dotnet-install.sh" | sha256sum -c \
+    && echo "5840ce64f4186ccc4dac0c0fd8703acd0d387091ce48f310fef758e5f84d7a7f  dotnet-install.sh" | sha256sum -c \
     && chmod +x ./dotnet-install.sh \
-    && ./dotnet-install.sh -v 6.0.408 --install-dir /usr/share/dotnet --no-path \
+    && ./dotnet-install.sh -v 6.0.410 --install-dir /usr/share/dotnet --no-path \
     && rm dotnet-install.sh
 
 WORKDIR /project
