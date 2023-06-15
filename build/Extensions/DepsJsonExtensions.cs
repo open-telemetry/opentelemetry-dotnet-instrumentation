@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Text.Json.Nodes;
 using Nuke.Common.IO;
 using Nuke.Common.Utilities.Collections;
@@ -117,6 +118,28 @@ internal static class DepsJsonExtensions
                     // Since the json was also rolled forward the original tfm folder can be deleted.
                     sourceDir.DeleteDirectory();
                 }
+            }
+        }
+    }
+
+    public static void RemoveDuplicatedLibraries(this JsonObject depsJson, ReadOnlyCollection<AbsolutePath> architectureStores)
+    {
+        var duplicatedLibraries = new List<(string Name, string Version)> { (Name: "Microsoft.Extensions.Logging.Abstractions", Version: "7.0.0") };
+
+        foreach (var duplicatedLibrary in duplicatedLibraries)
+        {
+            if ((depsJson["libraries"] as JsonObject)!.ContainsKey(duplicatedLibrary.Name + "/" + duplicatedLibrary.Version))
+            {
+                throw new NotSupportedException($"Cannot remove {duplicatedLibrary.Name.ToLower()}/{duplicatedLibrary.Version} folder. It is referenced in json file");
+            }
+            foreach (var architectureStore in architectureStores)
+            {
+                var directoryToBeRemoved = architectureStore / duplicatedLibrary.Name.ToLower() / duplicatedLibrary.Version;
+                if (!Directory.Exists(directoryToBeRemoved))
+                {
+                    throw new NotSupportedException($"Directory {directoryToBeRemoved} does not exists. Verify it.");
+                }
+                Directory.Delete(directoryToBeRemoved, true);
             }
         }
     }
