@@ -19,7 +19,7 @@
     <PackageVersion Include="Microsoft.Build" Version="15.9.20" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="15.9.20" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.1.1" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.5" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.7" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
@@ -37,7 +37,7 @@
     <PackageVersion Include="Quartz" Version="3.6.2" />
     <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.6.2" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.6.2" />
-    <PackageVersion Include="StackExchange.Redis" Version="2.6.111" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.6.116" />
     <PackageVersion Include="StrongNamer" Version="0.2.5" />
     <PackageVersion Include="System.Collections.Immutable" Version="7.0.0" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="7.0.0" />
