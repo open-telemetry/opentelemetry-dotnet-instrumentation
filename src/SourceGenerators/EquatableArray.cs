@@ -33,7 +33,7 @@ internal readonly record struct EquatableArray<T>
 
     public bool Equals(EquatableArray<T> array)
     {
-        return _array.AsSpan().SequenceEqual(array.AsSpan());
+        return object.ReferenceEquals(_array, array) || _array.AsSpan().SequenceEqual(array.AsSpan());
     }
 
     public override int GetHashCode()
