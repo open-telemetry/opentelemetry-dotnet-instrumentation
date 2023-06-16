@@ -113,6 +113,7 @@ internal static class EnvironmentConfigurationTracerHelper
     {
         // Instrumentations
 
+#if NETFRAMEWORK
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddWcfInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
@@ -120,6 +121,7 @@ internal static class EnvironmentConfigurationTracerHelper
 
             return builder.AddSource("OpenTelemetry.Instrumentation.Wcf");
         }
+#endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddHttpClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
