@@ -13,10 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // </copyright>
+
 #if NETFRAMEWORK
-using OpenTelemetry.AutoInstrumentation.Configurations;
-using OpenTelemetry.AutoInstrumentation.DuckTyping;
-using OpenTelemetry.Instrumentation.Wcf;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client;
 
