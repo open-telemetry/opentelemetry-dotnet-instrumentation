@@ -23,7 +23,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"Microsoft.Extensions.DependencyInjection", {7, 0, 0, 0} },
         { L"Microsoft.Extensions.DependencyInjection.Abstractions", {7, 0, 0, 0} },
         { L"Microsoft.Extensions.Logging", {7, 0, 0, 0} },
-        { L"Microsoft.Extensions.Logging.Abstractions", {7, 0, 0, 0} },
+        { L"Microsoft.Extensions.Logging.Abstractions", {7, 0, 0, 1} },
         { L"Microsoft.Extensions.Logging.Configuration", {7, 0, 0, 0} },
         { L"Microsoft.Extensions.Options", {7, 0, 0, 1} },
         { L"Microsoft.Extensions.Options.ConfigurationExtensions", {7, 0, 0, 0} },
