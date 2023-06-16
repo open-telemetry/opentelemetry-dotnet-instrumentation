@@ -198,7 +198,7 @@ public static class InvokeServiceChannelProxyIntegration
 
     private static void InitializeServiceEnums(object methodType)
     {
-        // TODO: make more efficient
+        // TODO: make more efficient - https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2663
         var type = methodType.GetType();
         _serviceEnum = Enum.Parse(type, "Service");
         _beginServiceEnum = Enum.Parse(type, "BeginService");
@@ -207,7 +207,7 @@ public static class InvokeServiceChannelProxyIntegration
 
     private static void InitializeAsyncResultFields(object asyncResultInstance)
     {
-        // TODO: make more efficient
+        // TODO: make more efficient - https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2663
         var asyncResultType = asyncResultInstance.GetType().BaseType.BaseType;
 
         _asyncResultCallbackField =

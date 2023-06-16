@@ -34,7 +34,7 @@ public class WcfNetFrameworkTests : WcfTestsBase
     public async Task SubmitsTraces()
     {
         using var collector = await SubmitsTracesInternal(string.Empty);
-        // TODO: better assertions
+        // TODO: better assertions including tags and hierarchy - https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2662
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 1");
         collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client, "Client 1");
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 2");
