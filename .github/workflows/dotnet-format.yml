@@ -28,4 +28,4 @@ jobs:
         dotnet-version: 7.0.304
 
     - name: dotnet format
-      run: dotnet-format .\OpenTelemetry.AutoInstrumentation.sln --no-restore --verify-no-changes
+      run: dotnet format .\OpenTelemetry.AutoInstrumentation.sln --no-restore --verify-no-changes
