@@ -50,7 +50,7 @@ public static class LibraryVersion
             new List<string>
             {
                 "2.43.0",
-                "2.53.0",
+                "2.54.0",
             }
         },
         {
