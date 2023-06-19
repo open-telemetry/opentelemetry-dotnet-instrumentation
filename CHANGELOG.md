@@ -28,10 +28,16 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 - Parameter for `ConfigureTracesOptions` extension point for StackExchangeRedis
   changed type from `OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisCallsInstrumentationOptions`
   to `OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisInstrumentationOptions`.
+- `WCF` instrumentation split to `WCFCLIENT` and `WCFSERVICE`.
+  Both supported only on .NET Framework.
+- `WCFCLIENT` and `WCFSERVICE` no longer requires manual modification
+  of config files to include `TelemetryEndpointBehaviorExtensionElement`.
 
 ### Deprecated
 
 ### Removed
+
+- Removed `WCF` instrumentation for Core WCF Client working on .NET.
 
 ### Fixed
 

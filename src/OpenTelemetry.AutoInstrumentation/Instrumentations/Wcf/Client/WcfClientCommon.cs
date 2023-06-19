@@ -1,4 +1,4 @@
-// <copyright file="StatusRequest.cs" company="OpenTelemetry Authors">
+// <copyright file="WcfClientCommon.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +14,21 @@
 // limitations under the License.
 // </copyright>
 
-using System.Runtime.Serialization;
+#if NETFRAMEWORK
+using System.Diagnostics;
 
-namespace TestApplication.Wcf.Client.DotNet;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client;
 
-[DataContract(Namespace = "http://opentelemetry.io/")]
-public class StatusRequest
+internal static class WcfClientCommon
 {
-    [DataMember]
-    public string? Status { get; set; }
+    private static readonly ActivitySource Source = new ActivitySource(
+        "OpenTelemetry.AutoInstrumentation.Wcf", Constants.Tracer.Version);
+
+    private static readonly string OutgoingActivityName = $"{Source.Name}.OutgoingActivity";
+
+    internal static Activity? StartActivity()
+    {
+        return Source.StartActivity(OutgoingActivityName, ActivityKind.Client);
+    }
 }
+#endif

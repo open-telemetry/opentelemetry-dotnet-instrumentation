@@ -36,7 +36,6 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Process" />
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" />
     <PackageReference Include="OpenTelemetry.Shims.OpenTracing" />
     <PackageReference Include="OpenTelemetry.ResourceDetectors.Container" />
   </ItemGroup>
@@ -46,6 +45,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNet" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">

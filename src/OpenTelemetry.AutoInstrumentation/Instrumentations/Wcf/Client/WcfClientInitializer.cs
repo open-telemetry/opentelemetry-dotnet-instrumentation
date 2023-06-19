@@ -13,11 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // </copyright>
-#if NETFRAMEWORK
-using OpenTelemetry.AutoInstrumentation.DuckTyping;
-using OpenTelemetry.Instrumentation.Wcf;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf;
+#if NETFRAMEWORK
+
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client;
 
 internal static class WcfClientInitializer
 {
@@ -33,14 +32,10 @@ internal static class WcfClientInitializer
 
     public static void Initialize(IChannelFactory channelFactory)
     {
-        // WcfInstrumentationActivitySource.Options is initialized by WcfInitializer
-        // when targeted assembly loads. Remaining work to initialize instrumentation
-        // is to add telemetry behavior to the endpoint's collection.
-
         var behaviors = channelFactory.Endpoint.Behaviors;
-        if (!behaviors.Contains(typeof(TelemetryEndpointBehavior)))
+        if (!behaviors.Contains(typeof(WcfClientEndpointBehavior)))
         {
-            behaviors.Add(new TelemetryEndpointBehavior());
+            behaviors.Add(new WcfClientEndpointBehavior());
         }
     }
 }

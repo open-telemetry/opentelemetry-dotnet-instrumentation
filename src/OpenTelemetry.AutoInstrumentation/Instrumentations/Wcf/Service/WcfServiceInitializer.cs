@@ -14,10 +14,9 @@
 // limitations under the License.
 // </copyright>
 #if NETFRAMEWORK
-using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.Instrumentation.Wcf;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Service;
 
 internal static class WcfServiceInitializer
 {
