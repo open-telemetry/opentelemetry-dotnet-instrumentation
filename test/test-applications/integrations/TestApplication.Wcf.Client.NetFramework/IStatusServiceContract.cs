@@ -22,6 +22,14 @@ namespace TestApplication.Wcf.Client.NetFramework;
 [ServiceContract(Namespace = "http://opentelemetry.io/", Name = "StatusService", SessionMode = SessionMode.Allowed)]
 public interface IStatusServiceContract
 {
-    [OperationContract]
+    [OperationContract(Name = "Ping")]
     Task<StatusResponse> PingAsync(StatusRequest request);
+
+    [OperationContract(Name = "Ping")]
+    StatusResponse PingSync(StatusRequest request);
+
+    [OperationContract(Name = "Ping", AsyncPattern = true)]
+    IAsyncResult BeginPing(StatusRequest request, AsyncCallback callback, object asyncState);
+
+    StatusResponse EndPing(IAsyncResult asyncResult);
 }

@@ -15,9 +15,8 @@
 // </copyright>
 #if NETFRAMEWORK
 using OpenTelemetry.AutoInstrumentation.CallTarget;
-using OpenTelemetry.AutoInstrumentation.Configurations;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Service;
 
 /// <summary>
 /// ServerHostIntegration.

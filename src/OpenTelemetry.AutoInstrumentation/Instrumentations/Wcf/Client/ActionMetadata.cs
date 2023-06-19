@@ -1,4 +1,4 @@
-// <copyright file="WcfServiceConstants.cs" company="OpenTelemetry Authors">
+// <copyright file="ActionMetadata.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,17 +14,19 @@
 // limitations under the License.
 // </copyright>
 
+// source originated from: https://github.com/open-telemetry/opentelemetry-dotnet-contrib/tree/06b9a286a6ab2af5257ce26b5dcb6fac56112f96/src/OpenTelemetry.Instrumentation.Wcf
 #if NETFRAMEWORK
-
-using OpenTelemetry.AutoInstrumentation.Configurations;
-
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf;
-
-internal static class WcfServiceConstants
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client;
+internal sealed class ActionMetadata
 {
-    public const string IntegrationName = nameof(TracerInstrumentation.WcfService);
-    public const string ServiceHostBaseTypeName = "System.ServiceModel.ServiceHostBase";
-    public const string InitializeDescriptionMethodName = "InitializeDescription";
-    public const string UriSchemeKeyedCollectionTypeName = "System.ServiceModel.UriSchemeKeyedCollection";
+    public ActionMetadata(string? contractName, string operationName)
+    {
+        ContractName = contractName;
+        OperationName = operationName;
+    }
+
+    public string? ContractName { get; }
+
+    public string OperationName { get; }
 }
 #endif

@@ -20,8 +20,9 @@ OpenTelemetry.AutoInstrumentation.Instrumentations.AspNet.HttpModuleIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.ServiceHostIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.WcfClientIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Service.ServiceHostIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.InvokeServiceChannelProxyIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client.WcfClientIntegration
 override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.ToString() -> string!
 override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.ToString() -> string!
 static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8>(TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3, ref TArg4 arg4, ref TArg5 arg5, ref TArg6 arg6, ref TArg7 arg7, ref TArg8 arg8) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
