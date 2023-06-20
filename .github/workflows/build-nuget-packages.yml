@@ -1,0 +1,71 @@
+name: Build NuGet Packages
+
+on:
+  workflow_call:
+
+env:
+  NUGET_PACKAGES: ${{ github.workspace }}/packages
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+
+  build-container:
+    uses: ./.github/workflows/build-container.yml
+
+  build-nuget-packages:
+    needs: [ build, build-container ]
+
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v3.5.3
+
+      - uses: actions/setup-dotnet@v3.2.0
+        with:
+          dotnet-version: | 
+            6.0.410
+            7.0.304
+
+      - name: Check for NuGet packages cache
+        uses: actions/cache@v3.3.1
+        id: nuget-cache
+        with:
+          key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
+          path: ${{ env.NUGET_PACKAGES }}
+
+      - name: Download Windows Artifacts from build job
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: bin-windows-2022
+          path: bin/ci-artifacts/bin-windows-2022
+
+      - name: Download CentOS Artifacts from build job
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: bin-centos
+          path: bin/ci-artifacts/bin-centos
+
+      - name: Download Alpine Artifacts from build job
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: bin-alpine
+          path: bin/ci-artifacts/bin-alpine
+
+      - name: Download Mac-OS Artifacts from build job
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: bin-macos-11
+          path: bin/ci-artifacts/bin-macos-11
+
+      - name: Build NuGet Runtime Packages
+        run: ./build.cmd BuildNuGetPackages
+
+      - name: Test NuGet Packages
+        run: ./build.cmd TestNuGetPackages
+
+      - name: Upload Nuget Artifacts
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: bin-nuget-packages
+          path: bin/nuget-artifacts/
