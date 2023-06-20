@@ -17,6 +17,7 @@ jobs:
     uses: ./.github/workflows/build-container.yml
 
   build-nuget-packages:
+    needs: [ build, build-container ]
     uses: ./.github/workflows/build-nuget-packages.yml
 
   create-release:

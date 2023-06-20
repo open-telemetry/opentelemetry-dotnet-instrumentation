@@ -8,14 +8,9 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 jobs:
-  build:
-    uses: ./.github/workflows/build.yml
-
-  build-container:
-    uses: ./.github/workflows/build-container.yml
-
   build-nuget-packages:
-    needs: [ build, build-container ]
+    # In principle this job "needs: [ build, build-container ]", however, that would cause the build and build-container
+    # jobs to run twice, which is not what we want. Instead, we let the "caller" job handle the dependencies.
 
     runs-on: windows-2022
     steps:
