@@ -31,7 +31,8 @@ public class GraphQLTests : TestHelper
     }
 
     public static IEnumerable<object[]> GetData()
-        => from packageVersionArray in LibraryVersion.GraphQL
+        // => from packageVersionArray in LibraryVersion.GraphQL
+        => from packageVersionArray in LibraryVersion.GraphQLNativeSupport
            from setDocument in new[] { true, false }
            select new[] { packageVersionArray[0], setDocument };
 

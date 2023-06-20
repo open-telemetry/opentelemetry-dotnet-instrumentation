@@ -42,7 +42,14 @@ public static class LibraryVersion
             new List<string>
             {
                 "2.3.0",
-                "2.4.0",
+                "7.5.0",
+            }
+        },
+        {
+            "TestApplication.GraphQL.NativeSupport",
+            new List<string>
+            {
+                "7.5.0",
             }
         },
         {

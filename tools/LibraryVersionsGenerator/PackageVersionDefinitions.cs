@@ -66,6 +66,16 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "GraphQLNativeSupport",
+            NugetPackageName = "GraphQL",
+            TestApplicationName = "TestApplication.GraphQL.NativeSupport",
+            Versions = new List<string>
+            {
+                "*"
+            }
+        },
+        new()
+        {
             IntegrationName = "GrpcNetClient",
             NugetPackageName = "Grpc.Net.Client",
             TestApplicationName = "TestApplication.GrpcNetClient",
