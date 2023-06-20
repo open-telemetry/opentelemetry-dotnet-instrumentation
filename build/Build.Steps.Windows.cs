@@ -31,11 +31,13 @@ partial class Build
 
             foreach (var project in Solution.GetNativeSrcProjects())
             {
+                PerformLegacyRestoreIfNeeded(project);
+
                 // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
                 MSBuild(s => s
                     .SetTargetPath(project)
                     .SetConfiguration(BuildConfiguration)
-                    .DisableRestore()
+                    .SetRestore(!NoRestore)
                     .SetMaxCpuCount(null)
                     .CombineWith(platforms, (m, platform) => m
                         .SetTargetPlatform(platform)));
@@ -54,11 +56,14 @@ partial class Build
                 ? new[] { MSBuildTargetPlatform.x64, MSBuildTargetPlatform.x86 }
                 : new[] { MSBuildTargetPlatform.x86 };
 
+            var nativeTestProject = Solution.GetNativeTestProject();
+            PerformLegacyRestoreIfNeeded(nativeTestProject);
+
             // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
             MSBuild(s => s
-                .SetTargetPath(Solution.GetNativeTestProject())
+                .SetTargetPath(nativeTestProject)
                 .SetConfiguration(BuildConfiguration)
-                .DisableRestore()
+                .SetRestore(!NoRestore)
                 .SetMaxCpuCount(null)
                 .CombineWith(platforms, (m, platform) => m
                     .SetTargetPlatform(platform)));
@@ -93,40 +98,73 @@ partial class Build
             var project = Solution.GetProjectByName(Projects.Tests.AutoInstrumentationNativeTests);
             var workingDirectory = project.Directory / "bin" / BuildConfiguration.ToString() / Platform.ToString();
             var exePath = workingDirectory / $"{project.Name}.exe";
+            var envVars = new Dictionary<string, string>(){
+                { "OTEL_DOTNET_AUTO_LOG_DIRECTORY", ProfilerTestLogs }
+            };
             var testExe = ToolResolver.GetTool(exePath);
 
-            testExe($"--gtest_output=xml", workingDirectory: workingDirectory);
+            testExe($"--gtest_output=xml", workingDirectory: workingDirectory, environmentVariables: envVars);
         });
 
     Target PublishIisTestApplications => _ => _
         .Unlisted()
         .After(CompileManagedTests)
-        .OnlyWhenStatic(() => IsWin && Containers == ContainersWindows)
+        .OnlyWhenStatic(() => IsWin && (Containers == ContainersWindows || Containers == ContainersWindowsOnly))
         .Executes(() =>
         {
             var aspNetProject = Solution.GetProjectByName(Projects.Tests.Applications.AspNet);
+            BuildDockerImage(aspNetProject);
+
+            DockerBuild(x => x
+                .SetPath(".")
+                .SetFile(aspNetProject.Directory / "Classic.Dockerfile")
+                .EnableRm()
+                .SetTag(($"{Path.GetFileNameWithoutExtension(aspNetProject).Replace(".", "-")}-classic").ToLowerInvariant())
+                .SetProcessWorkingDirectory(aspNetProject.Directory)
+            );
+
+            var wcfProject = Solution.GetProjectByName(Projects.Tests.Applications.WcfIis);
+            BuildDockerImage(wcfProject);
+        });
+
+    void BuildDockerImage(Project project)
+    {
+        const string moduleName = "OpenTelemetry.DotNet.Auto.psm1";
+        var sourceModulePath = Solution.Directory / moduleName;
+        var localBinDirectory = project.Directory / "bin";
+        var localTracerZip = localBinDirectory / "tracer.zip";
+
+        try
+        {
+            CopyFileToDirectory(sourceModulePath, localBinDirectory);
+            TracerHomeDirectory.ZipTo(localTracerZip);
+
+            PerformLegacyRestoreIfNeeded(project);
 
             MSBuild(x => x
                 .SetConfiguration(BuildConfiguration)
                 .SetTargetPlatform(Platform)
                 .SetProperty("DeployOnBuild", true)
                 .SetMaxCpuCount(null)
-                    .SetProperty("PublishProfile", aspNetProject.Directory / "Properties" / "PublishProfiles" / $"FolderProfile.{BuildConfiguration}.pubxml")
-                    .SetTargetPath(aspNetProject));
-
-            var localCopyTracerHome = aspNetProject.Directory / "bin" / "tracer-home";
-            CopyDirectoryRecursively(TracerHomeDirectory, localCopyTracerHome);
+                .SetProperty("PublishProfile",
+                    project.Directory / "Properties" / "PublishProfiles" / $"FolderProfile.{BuildConfiguration}.pubxml")
+                .SetTargetPath(project));
 
             DockerBuild(x => x
                 .SetPath(".")
                 .SetBuildArg($"configuration={BuildConfiguration}", $"windowscontainer_version={WindowsContainerVersion}")
-                .SetRm(true)
-                .SetTag(Path.GetFileNameWithoutExtension(aspNetProject).Replace(".", "-").ToLowerInvariant())
-                .SetProcessWorkingDirectory(aspNetProject.Directory)
+                .EnableRm()
+                .SetTag(Path.GetFileNameWithoutExtension(project).Replace(".", "-").ToLowerInvariant())
+                .SetProcessWorkingDirectory(project.Directory)
             );
-
-            Directory.Delete(localCopyTracerHome, true);
-        });
+        }
+        finally
+        {
+            localTracerZip.DeleteFile();
+            var localModulePath = localBinDirectory / moduleName;
+            localModulePath.DeleteFile();
+        }
+    }
 
     Target GenerateNetFxTransientDependencies => _ => _
         .Unlisted()
@@ -134,7 +172,11 @@ partial class Build
         .OnlyWhenStatic(() => IsWin)
         .Executes(() =>
         {
-            var project = Solution.GetProjectByName(Projects.AutoInstrumentation).GetMSBuildProject();
+            // The target project needs to have its NuGet packages restored prior to running the tool.
+            var targetProject = Solution.GetProjectByName(Projects.AutoInstrumentation);
+            DotNetRestore(s => s.SetProjectFile(targetProject));
+
+            var project = targetProject.GetMSBuildProject();
             var packages = Solution.Directory / "src" / "Directory.Packages.props";
             var commonExcludedAssets = Solution.Directory / "src" / "CommonExcludedAssets.props";
 
@@ -195,7 +237,7 @@ partial class Build
     Target InstallNetFxAssembliesGAC => _ => _
         .Unlisted()
         .After(BuildTracer)
-        .OnlyWhenStatic(() => IsWin)
+        .OnlyWhenStatic(() => IsWin && (TestTargetFramework == TargetFramework.NET462 || TestTargetFramework == TargetFramework.NOT_SPECIFIED))
         .Executes(() => RunNetFxGacOperation("-i"));
 
     /// <remarks>
@@ -216,5 +258,13 @@ partial class Build
             .SetProjectFile(installTool)
             .SetConfiguration(BuildConfiguration)
             .SetApplicationArguments($"{operation} {netFxAssembliesFolder}"));
+    }
+
+    private void PerformLegacyRestoreIfNeeded(Project project)
+    {
+        if (!NoRestore && project.Directory.ContainsFile("packages.config"))
+        {
+            RestoreLegacyNuGetPackagesConfig(new[] { project });
+        }
     }
 }

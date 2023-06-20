@@ -26,7 +26,7 @@ public static class LibraryVersion
             new List<string>
             {
                 "6.0.12",
-                "7.0.5",
+                "7.0.7",
             }
         },
         {
@@ -50,7 +50,7 @@ public static class LibraryVersion
             new List<string>
             {
                 "2.43.0",
-                "2.53.0",
+                "2.54.0",
             }
         },
         {
@@ -78,7 +78,7 @@ public static class LibraryVersion
             {
                 "2.13.3",
                 "2.15.0",
-                "2.19.1",
+                "2.19.2",
             }
         },
         {
@@ -121,15 +121,7 @@ public static class LibraryVersion
                 "2.1.50",
                 "2.5.61",
                 "2.6.66",
-                "2.6.111",
-            }
-        },
-        {
-            "TestApplication.Wcf.Client.DotNet",
-            new List<string>
-            {
-                "4.10.2",
-                "6.0.0",
+                "2.6.116",
             }
         },
     };

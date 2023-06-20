@@ -123,11 +123,11 @@
     <Folder Include="App_Data\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="docker-init.ps1" />
     <None Include="Dockerfile" />
     <None Include=".dockerignore">
       <DependentUpon>Dockerfile</DependentUpon>
     </None>
+    <None Include="Classic.Dockerfile" />
     <None Include="packages.config" />
     <None Include="Properties\PublishProfiles\FolderProfile.Debug.pubxml" />
     <None Include="Properties\PublishProfiles\FolderProfile.Release.pubxml" />

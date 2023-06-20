@@ -79,11 +79,13 @@ internal static class DelayedInitialization
         }
 #endif
 
+#if NETFRAMEWORK
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddWcf(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
             lazyInstrumentationLoader.Add(new WcfInitializer(pluginManager));
         }
+#endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddQuartz(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)

@@ -16,51 +16,50 @@
 #if NETFRAMEWORK
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
-using OpenTelemetry.AutoInstrumentation.Configurations;
 
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf;
+namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client;
 
 /// <summary>
 /// ChannelFactory instrumentation.
 /// </summary>
 [InstrumentMethod(
-    assemblyName: WcfClientConstants.ServiceModelAssemblyName,
+    assemblyName: WcfCommonConstants.ServiceModelAssemblyName,
     typeName: WcfClientConstants.ChannelFactoryTypeName,
     methodName: WcfClientConstants.InitializeEndpointMethodName,
     returnTypeName: ClrNames.Void,
     parameterTypeNames: new[] { ClrNames.String, WcfClientConstants.EndpointAddressTypeName },
-    minimumVersion: WcfClientConstants.MinVersion,
-    maximumVersion: WcfClientConstants.MaxVersion,
+    minimumVersion: WcfCommonConstants.MinVersion,
+    maximumVersion: WcfCommonConstants.MaxVersion,
     integrationName: WcfClientConstants.IntegrationName,
     type: InstrumentationType.Trace)]
 [InstrumentMethod(
-    assemblyName: WcfClientConstants.ServiceModelAssemblyName,
+    assemblyName: WcfCommonConstants.ServiceModelAssemblyName,
     typeName: WcfClientConstants.ChannelFactoryTypeName,
     methodName: WcfClientConstants.InitializeEndpointMethodName,
     returnTypeName: ClrNames.Void,
     parameterTypeNames: new[] { ClrNames.String, WcfClientConstants.EndpointAddressTypeName, WcfClientConstants.ConfigurationTypeName },
-    minimumVersion: WcfClientConstants.MinVersion,
-    maximumVersion: WcfClientConstants.MaxVersion,
+    minimumVersion: WcfCommonConstants.MinVersion,
+    maximumVersion: WcfCommonConstants.MaxVersion,
     integrationName: WcfClientConstants.IntegrationName,
     type: InstrumentationType.Trace)]
 [InstrumentMethod(
-    assemblyName: WcfClientConstants.ServiceModelAssemblyName,
+    assemblyName: WcfCommonConstants.ServiceModelAssemblyName,
     typeName: WcfClientConstants.ChannelFactoryTypeName,
     methodName: WcfClientConstants.InitializeEndpointMethodName,
     returnTypeName: ClrNames.Void,
     parameterTypeNames: new[] { WcfClientConstants.ServiceEndpointTypeName },
-    minimumVersion: WcfClientConstants.MinVersion,
-    maximumVersion: WcfClientConstants.MaxVersion,
+    minimumVersion: WcfCommonConstants.MinVersion,
+    maximumVersion: WcfCommonConstants.MaxVersion,
     integrationName: WcfClientConstants.IntegrationName,
     type: InstrumentationType.Trace)]
 [InstrumentMethod(
-    assemblyName: WcfClientConstants.ServiceModelAssemblyName,
+    assemblyName: WcfCommonConstants.ServiceModelAssemblyName,
     typeName: WcfClientConstants.ChannelFactoryTypeName,
     methodName: WcfClientConstants.InitializeEndpointMethodName,
     returnTypeName: ClrNames.Void,
     parameterTypeNames: new[] { WcfClientConstants.BindingTypeName, WcfClientConstants.EndpointAddressTypeName },
-    minimumVersion: WcfClientConstants.MinVersion,
-    maximumVersion: WcfClientConstants.MaxVersion,
+    minimumVersion: WcfCommonConstants.MinVersion,
+    maximumVersion: WcfCommonConstants.MaxVersion,
     integrationName: WcfClientConstants.IntegrationName,
     type: InstrumentationType.Trace)]
 public static class WcfClientIntegration
@@ -74,14 +73,9 @@ public static class WcfClientIntegration
     /// <typeparam name="TTarget">Type of the target</typeparam>
     /// <returns>A response value, in an async scenario will be T of Task of T</returns>
     internal static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception exception, in CallTargetState state)
+    where TTarget : WcfClientInitializer.IChannelFactory
     {
-        if (Instrumentation.TracerSettings.Value.EnabledInstrumentations.Contains(TracerInstrumentation.WcfClient))
-        {
-            if (instance != null)
-            {
-                WcfClientInitializer.Initialize(instance);
-            }
-        }
+        WcfClientInitializer.Initialize(instance);
 
         return CallTargetReturn.GetDefault();
     }

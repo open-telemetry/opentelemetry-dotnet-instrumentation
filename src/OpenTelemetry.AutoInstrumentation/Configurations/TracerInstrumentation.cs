@@ -69,11 +69,12 @@ internal enum TracerInstrumentation
     /// GrpcNetClient instrumentation.
     /// </summary>
     GrpcNetClient = 8,
-
+#if NETFRAMEWORK
     /// <summary>
     /// WCF instrumentation.
     /// </summary>
-    Wcf = 9,
+    WcfService = 9,
+#endif
 
 #if NET6_0_OR_GREATER
     /// <summary>
@@ -112,6 +113,6 @@ internal enum TracerInstrumentation
     /// <summary>
     /// WcfClient instrumentation.
     /// </summary>
-    WcfClient = 16,
+    WcfClient = 16
 #endif
 }

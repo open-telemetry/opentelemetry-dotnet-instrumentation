@@ -15,19 +15,37 @@
 // </copyright>
 
 using System.ServiceModel;
+using System.ServiceModel.Channels;
 using System.Threading.Tasks;
 
 namespace TestApplication.Wcf.Client.NetFramework;
 
 public class StatusServiceClient : ClientBase<IStatusServiceContract>, IStatusServiceContract
 {
-    public StatusServiceClient(string name)
-        : base(name)
+    public StatusServiceClient(Binding binding, EndpointAddress remoteAddress)
+        : base(binding, remoteAddress)
     {
     }
 
     public Task<StatusResponse> PingAsync(StatusRequest request)
-        => this.Channel.PingAsync(request);
+    {
+        return this.Channel.PingAsync(request);
+    }
+
+    public StatusResponse PingSync(StatusRequest request)
+    {
+        return Channel.PingSync(request);
+    }
+
+    public IAsyncResult BeginPing(StatusRequest request, AsyncCallback callback, object asyncState)
+    {
+        return Channel.BeginPing(request, callback, asyncState);
+    }
+
+    public StatusResponse EndPing(IAsyncResult asyncResult)
+    {
+        return Channel.EndPing(asyncResult);
+    }
 
     public Task OpenAsync()
     {

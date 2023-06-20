@@ -110,14 +110,14 @@ internal static class Instrumentation
 
         try
         {
+            // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
+            _sdkEventListener = new(Logger);
+
             _pluginManager = new PluginManager(GeneralSettings.Value);
             _pluginManager.Initializing();
 
             if (TracerSettings.Value.TracesEnabled || MetricSettings.Value.MetricsEnabled)
             {
-                // Initialize SdkSelfDiagnosticsEventListener to create an EventListener for the OpenTelemetry SDK
-                _sdkEventListener = new(Logger);
-
                 // Register to shutdown events
                 AppDomain.CurrentDomain.ProcessExit += OnExit;
                 AppDomain.CurrentDomain.DomainUnload += OnExit;
@@ -280,6 +280,9 @@ internal static class Instrumentation
                 case TracerInstrumentation.AspNet:
                     DelayedInitialization.Traces.AddAspNet(lazyInstrumentationLoader, pluginManager);
                     break;
+                case TracerInstrumentation.WcfService:
+                    DelayedInitialization.Traces.AddWcf(lazyInstrumentationLoader, pluginManager);
+                    break;
 #endif
                 case TracerInstrumentation.HttpClient:
                     DelayedInitialization.Traces.AddHttpClient(lazyInstrumentationLoader, pluginManager);
@@ -289,9 +292,6 @@ internal static class Instrumentation
                     break;
                 case TracerInstrumentation.SqlClient:
                     DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager);
-                    break;
-                case TracerInstrumentation.Wcf:
-                    DelayedInitialization.Traces.AddWcf(lazyInstrumentationLoader, pluginManager);
                     break;
                 case TracerInstrumentation.Quartz:
                     DelayedInitialization.Traces.AddQuartz(lazyInstrumentationLoader, pluginManager);

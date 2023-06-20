@@ -1,4 +1,4 @@
-// <copyright file="StatusServiceClient.cs" company="OpenTelemetry Authors">
+// <copyright file="StatusService.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,30 +14,23 @@
 // limitations under the License.
 // </copyright>
 
+using System;
 using System.ServiceModel;
-using System.ServiceModel.Channels;
 using System.Threading.Tasks;
 
-namespace TestApplication.Wcf.Client.DotNet;
+namespace TestApplication.Wcf.Server.IIS.NetFramework;
 
-public class StatusServiceClient : ClientBase<IStatusServiceContract>, IStatusServiceContract
+[ServiceBehavior(
+    Namespace = "http://opentelemetry.io/",
+    ConcurrencyMode = ConcurrencyMode.Multiple,
+    InstanceContextMode = InstanceContextMode.Single,
+    UseSynchronizationContext = false,
+    Name = "StatusService")]
+public class StatusService : IStatusServiceContract
 {
-    public StatusServiceClient(string name)
-        : base(name)
-    {
-    }
-
-    public StatusServiceClient(Binding binding, EndpointAddress remoteAddress)
-        : base(binding, remoteAddress)
-    {
-    }
-
     public Task<StatusResponse> PingAsync(StatusRequest request)
-        => this.Channel.PingAsync(request);
-
-    public Task OpenAsync()
     {
-        ICommunicationObject communicationObject = this;
-        return Task.Factory.FromAsync(communicationObject.BeginOpen, communicationObject.EndOpen, null);
+        return Task.FromResult(
+            new StatusResponse { ServerTime = DateTimeOffset.UtcNow });
     }
 }

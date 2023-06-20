@@ -16,11 +16,11 @@
 
 using System.Runtime.Serialization;
 
-namespace TestApplication.Wcf.Client.DotNet;
+namespace TestApplication.Wcf.Server.IIS.NetFramework;
 
-[DataContract]
+[DataContract(Namespace = "http://opentelemetry.io/")]
 public class StatusRequest
 {
     [DataMember]
-    public string? Status { get; set; }
+    public string Status { get; set; } = string.Empty;
 }
