@@ -46,7 +46,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.3.0" },
-        new object[] { "7.5.0" },
+        new object[] { "2.4.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> GraphQLNativeSupport = new List<object[]>
