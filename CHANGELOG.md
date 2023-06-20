@@ -18,6 +18,8 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 - The environment variable `OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED` could be
   used to enable or disable the failing process when
   automatic instrumentation cannot be executed.
+- Add support for native [GraphQL](https://www.nuget.org/packages/GraphQL/)
+  instrumentation from version 7.5.0.
 
 ### Changed
 
