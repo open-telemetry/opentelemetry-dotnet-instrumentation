@@ -231,6 +231,9 @@ public class SettingsTests : IDisposable
     [InlineData("NPGSQL", TracerInstrumentation.Npgsql)]
     [InlineData("SQLCLIENT", TracerInstrumentation.SqlClient)]
     [InlineData("GRPCNETCLIENT", TracerInstrumentation.GrpcNetClient)]
+#if NETFRAMEWORK
+    [InlineData("WCFSERVICE", TracerInstrumentation.WcfService)]
+#endif
 #if NET6_0_OR_GREATER
     [InlineData("MASSTRANSIT", TracerInstrumentation.MassTransit)]
 #endif
@@ -240,6 +243,9 @@ public class SettingsTests : IDisposable
 #if NET6_0_OR_GREATER
     [InlineData("ENTITYFRAMEWORKCORE", TracerInstrumentation.EntityFrameworkCore)]
     [InlineData("ASPNETCORE", TracerInstrumentation.AspNetCore)]
+#endif
+#if NETFRAMEWORK
+    [InlineData("WCFCLIENT", TracerInstrumentation.WcfClient)]
 #endif
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
