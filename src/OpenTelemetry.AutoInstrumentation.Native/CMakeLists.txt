@@ -100,7 +100,7 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_BIN_DIR})
 
 add_custom_command(
     OUTPUT ${OUTPUT_DEPS_DIR}/re2/obj/libre2.a
-    COMMAND git clone -c advice.detachedHead=false --quiet --depth 1 --branch 2022-12-01 https://github.com/google/re2.git && cd re2 && env ARFLAGS=\"-r -s -c\" CXXFLAGS=\"-std=c++11 -O3 -g -fPIC\" make
+    COMMAND git clone -c advice.detachedHead=false --quiet --depth 1 --branch 2023-03-01 https://github.com/google/re2.git && cd re2 && env ARFLAGS=\"-r -s -c\" CXXFLAGS=\"-std=c++11 -O3 -g -fPIC\" make
     WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
 )
 
