@@ -32,7 +32,7 @@ public readonly struct CallTargetState
     /// Initializes a new instance of the <see cref="CallTargetState"/> struct.
     /// </summary>
     /// <param name="activity">Activity instance</param>
-    public CallTargetState(Activity activity)
+    public CallTargetState(Activity? activity)
     {
         _previousActivity = null;
         _activity = activity;
@@ -57,7 +57,7 @@ public readonly struct CallTargetState
     /// <param name="activity">Activity instance</param>
     /// <param name="state">Object state instance</param>
     /// <param name="startTime">The intended start time of the activity, intended for activities created in the OnMethodEnd handler</param>
-    public CallTargetState(Activity activity, object state, DateTimeOffset? startTime)
+    public CallTargetState(Activity? activity, object state, DateTimeOffset? startTime)
     {
         _previousActivity = null;
         _activity = activity;

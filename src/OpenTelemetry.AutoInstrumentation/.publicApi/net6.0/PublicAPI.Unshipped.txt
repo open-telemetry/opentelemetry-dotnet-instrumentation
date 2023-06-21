@@ -8,8 +8,8 @@ OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.GetReturnValue(
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.Activity.get -> System.Diagnostics.Activity?
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState() -> void
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity! activity) -> void
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity! activity, object! state, System.DateTimeOffset? startTime) -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity? activity) -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity? activity, object! state, System.DateTimeOffset? startTime) -> void
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity? activity, object! state) -> void
 OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.State.get -> object?
 OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType
@@ -18,6 +18,7 @@ OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.ToString() -> string!
 OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.Type.get -> System.Type!
 OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData.ExecuteReaderAsyncIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData.MySqlConnectionStringBuilderIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration
