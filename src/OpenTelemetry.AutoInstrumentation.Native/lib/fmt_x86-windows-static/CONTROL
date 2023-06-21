@@ -1,9 +1,7 @@
 Package: fmt
-Version: 9.1.0
-Port-Version: 1
+Version: 10.0.0
 Depends: vcpkg-cmake:x64-windows, vcpkg-cmake-config:x64-windows
 Architecture: x86-windows-static
 Multi-Arch: same
-Abi: a26c3e9a0f9d4428ae39d91f74d40d0705e7ab55fe3a7e39ccfed5f9ba219f02
+Abi: 7486e58b8ad73e2ba5ccc53ac430ce5d24119b674262b3c9990bb14ddb3c2b89
 Description: Formatting library for C++. It can be used as a safe alternative to printf or as a fast alternative to IOStreams.
-Type: Port
