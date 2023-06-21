@@ -322,6 +322,8 @@ internal static class Instrumentation
                     break;
                 case TracerInstrumentation.Elasticsearch:
                     break;
+                case TracerInstrumentation.MySqlConnector:
+                    break;
                 default:
                     Logger.Warning($"Configured trace instrumentation type is not supported: {instrumentation}");
                     if (FailFastSettings.Value.FailFast)

@@ -97,6 +97,15 @@ public static class LibraryVersion
         new object[] { "2.19.2" },
 #endif
     };
+    public static readonly IReadOnlyCollection<object[]> MySqlConnector = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "2.0.0" },
+        new object[] { "2.2.6" },
+#endif
+    };
     public static readonly IReadOnlyCollection<object[]> MySqlData = new List<object[]>
     {
 #if DEFAULT_TEST_PACKAGE_VERSIONS
@@ -121,7 +130,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.0.3" },
+        new object[] { "8.1.1" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Quartz = new List<object[]>

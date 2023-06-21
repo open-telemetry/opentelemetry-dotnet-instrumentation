@@ -124,6 +124,17 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
+            IntegrationName = "MySqlConnector",
+            NugetPackageName = "MySqlConnector",
+            TestApplicationName = "TestApplication.MySqlConnector",
+            Versions = new List<string>
+            {
+                "2.0.0",
+                "*"
+            }
+        },
+        new()
+        {
             IntegrationName = "MySqlData",
             NugetPackageName = "MySql.Data",
             TestApplicationName = "TestApplication.MySqlData",
