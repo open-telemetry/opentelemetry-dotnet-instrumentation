@@ -68,7 +68,7 @@ jobs:
       - name: Build NuGet packages with using fixed version suffix
         if: github.ref_type != 'tag'
         env:
-          NUKE_NUGET_VERSION_SUFFIX: "-run_id.${{ github.run_id }}"
+          NUKE_NUGET_VERSION_SUFFIX: "-run-id.${{ github.run_id }}" # See https://semver.org/spec/v2.0.0.html#spec-item-9 for valid version suffix
         run: ./build.cmd BuildNuGetPackages
 
       - name: Test NuGet Packages
