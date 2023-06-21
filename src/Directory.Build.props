@@ -22,6 +22,8 @@
     <Copyright>Copyright 2021 OpenTelemetry, originated from Datadog, Inc.</Copyright>
     <Company>OpenTelemetry</Company>
     <Authors>OpenTelemetry Authors</Authors>
+    <!-- No warning on empty NuGet version suffix even if using pre-release dependencies -->
+    <NoWarn>$(NoWarn);NU5104</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

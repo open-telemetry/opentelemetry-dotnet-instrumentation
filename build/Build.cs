@@ -3,7 +3,6 @@ using Nuke.Common.IO;
 using Nuke.Common.Tools.MSBuild;
 using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.EnvironmentInfo;
-using static Nuke.Common.IO.FileSystemTasks;
 
 partial class Build : NukeBuild
 {
@@ -51,8 +50,8 @@ partial class Build : NukeBuild
     [Parameter("Version number of the NuGet packages built from the project. Default is '0.7.0'")]
     string NuGetBaseVersionNumber = "0.7.0";
 
-    [Parameter("Version suffix added to the NuGet packages built from the project. Default is '-local.1'")]
-    string NuGetVersionSuffix = "-local.1";
+    [Parameter("Version suffix added to the NuGet packages built from the project. Default is empty")]
+    string NuGetVersionSuffix = string.Empty;
 
     [Parameter("Do not restore the projects before building.")]
     readonly bool NoRestore;
