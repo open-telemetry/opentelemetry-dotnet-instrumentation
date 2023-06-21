@@ -3,7 +3,7 @@
 ## fmt
 
 * Source: <https://github.com/fmtlib/fmt/>
-* Version: 9.1.0
+* Version: 10.0.0
 
 ### Setup
 
