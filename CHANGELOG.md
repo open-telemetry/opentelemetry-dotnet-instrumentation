@@ -46,7 +46,7 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 
 ### Known issues
 
-- Lack of support for MySql.Data 8.0.33. See [issue #2542](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2542).
+- Lack of support for MySql.Data 8.0.33. See [#2542](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2542).
 
 ## [0.7.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.7.0)
 

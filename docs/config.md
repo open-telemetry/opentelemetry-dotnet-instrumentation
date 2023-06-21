@@ -147,7 +147,7 @@ due to lack of stable semantic convention.
 \[2\]: MySql.Data 8.0.31 and higher requires bytecode instrumentation.
 
 \[3\]: MySql.Data supported versions are ≥6.10.7 < 8.0.33. Support for 8.0.33 is
-       tracked under [this issue](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2542).
+       tracked under [#2542](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2542).
 
 \[4\]: Microsoft.Data.SqlClient v3.* is not supported on .NET Framework, due to [issue](https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243).
 
