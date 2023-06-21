@@ -60,17 +60,6 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.GraphQL",
             Versions = new List<string>
             {
-                "2.3.0",
-                "2.4.0"
-            }
-        },
-        new()
-        {
-            IntegrationName = "GraphQLNativeSupport",
-            NugetPackageName = "GraphQL",
-            TestApplicationName = "TestApplication.GraphQL.NativeSupport",
-            Versions = new List<string>
-            {
                 "*"
             }
         },

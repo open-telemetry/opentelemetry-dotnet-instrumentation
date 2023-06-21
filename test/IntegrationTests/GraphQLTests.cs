@@ -22,23 +22,22 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-public abstract class GraphQLTests : TestHelper
+public class GraphQLTests : TestHelper
 {
-    public GraphQLTests(string testApplicationName, ITestOutputHelper output)
-    : base(testApplicationName, output)
+    public GraphQLTests(ITestOutputHelper output)
+    : base("GraphQL", output)
     {
     }
 
-    public abstract bool SupportsExceptions { get; }
-
-    public abstract string InstrumentationScope { get; }
-
-    public static IEnumerable<object[]> GetData(bool isNative)
-        => from packageVersionArray in (isNative ? LibraryVersion.GraphQLNativeSupport : LibraryVersion.GraphQL)
+    public static IEnumerable<object[]> GetData()
+        => from packageVersionArray in LibraryVersion.GraphQL
            from setDocument in new[] { true, false }
            select new[] { packageVersionArray[0], setDocument };
 
-    public async Task SubmitsTracesBase(string packageVersion, bool setDocument)
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [MemberData(nameof(GetData))]
+    public async Task SubmitsTraces(string packageVersion, bool setDocument)
     {
         var requests = new List<RequestInfo>();
         using var collector = new MockSpansCollector(Output);
@@ -60,12 +59,10 @@ public abstract class GraphQLTests : TestHelper
         Request(requests, body: @"{ ""query"":""subscription HumanAddedSub{humanAdded{name}}""}");
         Expect(collector, spanName: "subscription HumanAddedSub", graphQLOperationType: "subscription", graphQLOperationName: "HumanAddedSub", graphQLDocument: "subscription HumanAddedSub{humanAdded{name}}", setDocument: setDocument);
 
-        if (SupportsExceptions)
-        {
-            // FAILURE: query fails 'execute' step
-            Request(requests, body: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}");
-            Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, verifyFailure: VerifyNotImplementedException);
-        }
+        // TODO: re-enable if exceptions are supported again.
+        // FAILURE: query fails 'execute' step
+        // Request(requests, body: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}");
+        // Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, verifyFailure: VerifyNotImplementedException);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED", "false");
@@ -178,7 +175,7 @@ public abstract class GraphQLTests : TestHelper
             return true;
         }
 
-        collector.Expect(InstrumentationScope, Predicate, spanName);
+        collector.Expect("GraphQL", Predicate, spanName);
     }
 
     private async Task SubmitRequestsAsync(int aspNetCorePort, IEnumerable<RequestInfo> requests)

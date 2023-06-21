@@ -15,16 +15,8 @@
 // </copyright>
 
 using GraphQL;
-using GraphQL.Http;
-using GraphQL.Server;
-using GraphQL.Server.Ui.Playground;
-using GraphQL.StarWars;
-using GraphQL.StarWars.Types;
 using GraphQL.Types;
-
-#if NETFRAMEWORK
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#endif
+using StarWars;
 
 namespace TestApplication.GraphQL;
 
@@ -32,62 +24,20 @@ public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddSingleton<IDependencyResolver>(s => new FuncDependencyResolver(s.GetRequiredService));
-
-        services.AddSingleton<IDocumentExecuter, DocumentExecuter>();
-        services.AddSingleton<IDocumentWriter, DocumentWriter>();
-
         services.AddSingleton<StarWarsData>();
-        services.AddSingleton<StarWarsQuery>();
-        services.AddSingleton<StarWarsMutation>();
-        services.AddSingleton<StarWarsExtensions.StarWarsSubscription>();
-        services.AddSingleton<HumanType>();
-        services.AddSingleton<HumanInputType>();
-        services.AddSingleton<DroidType>();
-        services.AddSingleton<CharacterInterface>();
-        services.AddSingleton<EpisodeEnum>();
-        services.AddSingleton<ISchema, StarWarsSchema>();
-
-        services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
-        services.AddLogging(builder => builder.AddConsole());
-
-        services.AddGraphQL(_ =>
-            {
-                _.EnableMetrics = true;
-                _.ExposeExceptions = true;
-            })
-            .AddUserContextBuilder(httpContext => new GraphQLUserContext { User = httpContext.User });
+        services.AddGraphQL(b => b
+            .AddSystemTextJson()
+            .AddErrorInfoProvider(opt => opt.ExposeExceptionDetails = true)
+            .AddSchema<StarWarsSchema>()
+            .AddGraphTypes(typeof(StarWarsSchema).Assembly));
     }
 
-    public void Configure(
-        IApplicationBuilder app,
-#if NETFRAMEWORK
-        IHostingEnvironment env,
-#else
-        IWebHostEnvironment env,
-#endif
-        ILoggerFactory loggerFactory)
+    public void Configure(IApplicationBuilder app)
     {
-        // Get StarWarsSchema Singleton
-        var starWarsSchema = (StarWarsSchema)app.ApplicationServices.GetService(typeof(ISchema))!;
-
-        // Get StarWarsSubscription Singleton
-        var starWarsSubscription = (StarWarsExtensions.StarWarsSubscription)app.ApplicationServices.GetService(typeof(StarWarsExtensions.StarWarsSubscription))!;
-
-        // Set the subscription
-        // We do this roundabout mechanism to keep using the GraphQL.StarWars NuGet package
-        starWarsSchema.Subscription = starWarsSubscription;
         app.UseDeveloperExceptionPage();
+        app.UseWebSockets();
+        app.UseGraphQL<ISchema>();
+        app.UseGraphQLPlayground();
         app.UseWelcomePage("/alive-check");
-
-        // add http for Schema at default url /graphql
-        app.UseGraphQL<ISchema>("/graphql");
-
-        // use graphql-playground at default url /ui/playground
-        app.UseGraphQLPlayground(new GraphQLPlaygroundOptions
-        {
-            Path = "/ui/playground"
-        });
     }
 }
