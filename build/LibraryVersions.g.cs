@@ -82,6 +82,14 @@ public static class LibraryVersion
             }
         },
         {
+            "TestApplication.MySqlConnector",
+            new List<string>
+            {
+                "2.0.0",
+                "2.2.6",
+            }
+        },
+        {
             "TestApplication.MySqlData",
             new List<string>
             {
