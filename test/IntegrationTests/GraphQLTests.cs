@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#if NET6_0_OR_GREATER
+
 using System.Net;
 using System.Text;
 using IntegrationTests.Helpers;
@@ -237,3 +239,5 @@ public class GraphQLTests : TestHelper
         public string? RequestBody { get; set; }
     }
 }
+
+#endif
