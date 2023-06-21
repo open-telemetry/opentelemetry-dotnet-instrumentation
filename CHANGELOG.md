@@ -19,8 +19,6 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
   used to enable or disable the failing process when
   automatic instrumentation cannot be executed.
 - Add support for MySqlConnector traces instrumentation.
-- Add support for native [GraphQL](https://www.nuget.org/packages/GraphQL/)
-  instrumentation from version 7.5.0.
 
 ### Changed
 
@@ -35,12 +33,16 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
   Both supported only on .NET Framework.
 - `WCFCLIENT` and `WCFSERVICE` no longer requires manual modification
   of config files to include `TelemetryEndpointBehaviorExtensionElement`.
+- [GraphQL](https://www.nuget.org/packages/GraphQL/) instrumentation is now
+  supported from version 7.5.0
 
 ### Deprecated
 
 ### Removed
 
 - Removed `WCF` instrumentation for Core WCF Client working on .NET.
+- Removed [GraphQL](https://www.nuget.org/packages/GraphQL/) instrumentation
+  for versions 2.0.0-2.4.*
 
 ### Fixed
 
