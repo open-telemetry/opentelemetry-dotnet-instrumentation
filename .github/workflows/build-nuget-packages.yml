@@ -61,11 +61,15 @@ jobs:
 
       - name: Build NuGet packages using tag suffix as the NuGet version suffix
         if: github.ref_type == 'tag'
-        run: ./build.cmd BuildNuGetPackages --nuget-version-suffix "${{ steps.nuget-version-suffix.outputs.nuget-version-suffix }}"
+        env:
+          NUKE_NUGET_VERSION_SUFFIX: "${{ steps.nuget-version-suffix.outputs.nuget-version-suffix }}"
+        run: ./build.cmd BuildNuGetPackages
 
       - name: Build NuGet packages with using fixed version suffix
         if: github.ref_type != 'tag'
-        run: ./build.cmd BuildNuGetPackages --nuget-version-suffix "-run_id.${{ github.run_id }}"
+        env:
+          NUKE_NUGET_VERSION_SUFFIX: "-run_id.${{ github.run_id }}"
+        run: ./build.cmd BuildNuGetPackages
 
       - name: Test NuGet Packages
         run: ./build.cmd TestNuGetPackages

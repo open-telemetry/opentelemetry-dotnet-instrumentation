@@ -6,6 +6,16 @@ using static Nuke.Common.EnvironmentInfo;
 
 partial class Build : NukeBuild
 {
+    static Build()
+    {
+        Console.WriteLine("Build .cctor");
+    }
+
+    public Build() : base()
+    {
+        Console.WriteLine("Build .ctor");
+    }
+
     public static int Main() => Execute<Build>(x => x.BuildTracer);
 
     [Parameter("Configuration to build. Default is 'Release'")]
@@ -48,10 +58,10 @@ partial class Build : NukeBuild
     readonly AbsolutePath NuGetPackagesDirectory;
 
     [Parameter("Version number of the NuGet packages built from the project. Default is '0.7.0'")]
-    string NuGetBaseVersionNumber = "0.7.0";
+    readonly string NuGetBaseVersionNumber = "0.7.0";
 
     [Parameter("Version suffix added to the NuGet packages built from the project. Default is empty")]
-    string NuGetVersionSuffix = string.Empty;
+    readonly string NuGetVersionSuffix = string.Empty;
 
     [Parameter("Do not restore the projects before building.")]
     readonly bool NoRestore;
