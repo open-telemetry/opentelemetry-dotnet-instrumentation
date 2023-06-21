@@ -113,6 +113,11 @@ internal enum TracerInstrumentation
     /// <summary>
     /// WcfClient instrumentation.
     /// </summary>
-    WcfClient = 16
+    WcfClient = 16,
 #endif
+
+    /// <summary>
+    /// MySqlConnector instrumentation.
+    /// </summary>
+    MySqlConnector = 17
 }

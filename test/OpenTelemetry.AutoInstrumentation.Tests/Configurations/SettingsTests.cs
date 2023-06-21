@@ -247,6 +247,7 @@ public class SettingsTests : IDisposable
 #if NETFRAMEWORK
     [InlineData("WCFCLIENT", TracerInstrumentation.WcfClient)]
 #endif
+    [InlineData("MYSQLCONNECTOR", TracerInstrumentation.MySqlConnector)]
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false");
