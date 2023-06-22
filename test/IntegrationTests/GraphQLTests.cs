@@ -74,7 +74,6 @@ public class GraphQLTests : TestHelper
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
         SetEnvironmentVariable("ASPNETCORE_URLS", $"http://127.0.0.1:{aspNetCorePort}/");
-        EnableBytecodeInstrumentation();
         using var process = StartTestApplication(new TestSettings { PackageVersion = packageVersion });
         using var helper = new ProcessHelper(process);
         try
