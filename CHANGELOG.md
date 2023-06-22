@@ -42,7 +42,7 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 
 - Removed `WCF` instrumentation for Core WCF Client working on .NET.
 - Removed [GraphQL](https://www.nuget.org/packages/GraphQL/) instrumentation
-  for versions 2.0.0-2.4.*
+  for versions 2.3.0-2.4.*.
 
 ### Fixed
 
