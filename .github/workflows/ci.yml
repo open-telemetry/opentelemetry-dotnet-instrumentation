@@ -171,6 +171,8 @@ jobs:
 
   test-nuget-packages:
     needs: build-nuget-packages
+    env:
+      NUKE_NUGET_VERSION_SUFFIX: "${{ needs.build-nuget-packages.outputs.nuget-version-suffix }}"
     strategy:
       fail-fast: false
       matrix:
@@ -199,6 +201,4 @@ jobs:
           path: bin/nuget-artifacts/
 
       - name: Test NuGet Packages
-        env:
-          NUKE_NUGET_VERSION_SUFFIX: ${{ needs.build-nuget-packages.outputs.nuget-version-suffix }}
         run: ./build.cmd TestNuGetPackages
