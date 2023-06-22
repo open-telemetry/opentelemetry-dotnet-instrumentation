@@ -75,8 +75,22 @@ internal static class Program
 
             try
             {
-                Console.WriteLine("Asynchronous Programming Model pattern call");
+                Console.WriteLine("Task-based Asynchronous Pattern call");
                 var rq = new StatusRequest { Status = "1" };
+                var response = await client.PingAsync(rq).ConfigureAwait(false);
+
+                Console.WriteLine(
+                    $"[{DateTimeOffset.UtcNow:o}] Request with status {rq.Status}. Server returned: {response?.ServerTime:o}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            try
+            {
+                Console.WriteLine("Asynchronous Programming Model pattern call");
+                var rq = new StatusRequest { Status = "2" };
                 var asyncResult = client.BeginPing(rq, null!, null!);
                 var statusResponse = client.EndPing(asyncResult);
 
@@ -91,22 +105,8 @@ internal static class Program
             try
             {
                 Console.WriteLine("Synchronous call");
-                var rq = new StatusRequest { Status = "2" };
-                var response = client.PingSync(rq);
-
-                Console.WriteLine(
-                    $"[{DateTimeOffset.UtcNow:o}] Request with status {rq.Status}. Server returned: {response?.ServerTime:o}");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-
-            try
-            {
-                Console.WriteLine("Task-based Asynchronous Pattern call");
                 var rq = new StatusRequest { Status = "3" };
-                var response = await client.PingAsync(rq).ConfigureAwait(false);
+                var response = client.PingSync(rq);
 
                 Console.WriteLine(
                     $"[{DateTimeOffset.UtcNow:o}] Request with status {rq.Status}. Server returned: {response?.ServerTime:o}");
