@@ -171,8 +171,6 @@ jobs:
 
   test-nuget-packages:
     needs: build-nuget-packages
-    env:
-      NUKE_NUGET_VERSION_SUFFIX: "${{ needs.build-nuget-packages.outputs.nuget-version-suffix }}"
     strategy:
       fail-fast: false
       matrix:
@@ -199,6 +197,10 @@ jobs:
         with:
           name: bin-nuget-packages
           path: bin/nuget-artifacts/
+
+      - name: Set NUKE_NUGET_VERSION_SUFFIX
+        id: set-nuget-version-suffix
+        run: echo "NUKE_NUGET_VERSION_SUFFIX=${{ needs.build-nuget-packages.outputs.nuget-version-suffix }}" >> "$GITHUB_ENV"
 
       - name: Test NuGet Packages
         run: ./build.cmd TestNuGetPackages

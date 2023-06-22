@@ -83,7 +83,7 @@ jobs:
 
       - name: Set NuGet Version Suffix
         id: set-nuget-version-suffix
-        run: echo "suffix=${{ env.NUKE_NUGET_VERSION_SUFFIX }}" >> "$GITHUB_OUTPUT"
+        run: echo "suffix=${{ env.NUKE_NUGET_VERSION_SUFFIX }}" >> $GITHUB_OUTPUT
 
       - name: Upload Nuget Artifacts
         uses: actions/upload-artifact@v3.1.2
