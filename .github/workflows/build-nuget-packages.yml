@@ -2,6 +2,12 @@ name: Build NuGet Packages
 
 on:
   workflow_call:
+    outputs:
+      # Output the NuGet version suffix so that the caller workflow can have the correct package version.
+      nuget-version-suffix:
+        description: "The NuGet version suffix to build the packages"
+        value: ${{ jobs.build-nuget-packages.outputs.nuget-version-suffix }}
+
 
 env:
   NUGET_PACKAGES: ${{ github.workspace }}/packages
@@ -13,8 +19,7 @@ jobs:
     # jobs to run twice, which is not what we want. Instead, we let the "caller" job handle the dependencies.
 
     outputs:
-      # Output the NuGet version suffix so that the caller job can use it to restore the correct packages.
-      nuget-version-suffix: ${{ steps.set-nuget-version-suffix.outputs.nuget-version-suffix }}
+      nuget-version-suffix: ${{ steps.set-nuget-version-suffix.outputs.suffix }}
 
     runs-on: windows-2022
     steps:
@@ -78,7 +83,7 @@ jobs:
 
       - name: Set NuGet Version Suffix
         id: set-nuget-version-suffix
-        run: echo "nuget-version-suffix=${{ env.NUKE_NUGET_VERSION_SUFFIX }}" >> "$GITHUB_OUTPUT"
+        run: echo "suffix=${{ env.NUKE_NUGET_VERSION_SUFFIX }}" >> "$GITHUB_OUTPUT"
 
       - name: Upload Nuget Artifacts
         uses: actions/upload-artifact@v3.1.2
