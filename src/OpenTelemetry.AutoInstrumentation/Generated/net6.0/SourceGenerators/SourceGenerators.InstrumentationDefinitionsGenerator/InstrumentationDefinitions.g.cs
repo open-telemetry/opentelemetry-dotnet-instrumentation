@@ -19,18 +19,11 @@ internal static partial class InstrumentationDefinitions
 
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
     {
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(14);
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(12);
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
 {
-            // GraphQL
-            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.GraphQL))
-            {
-                nativeCallTargetDefinitions.Add(new("GraphQL", "GraphQL.Execution.ExecutionStrategy", "ExecuteAsync", new[] {"System.Threading.Tasks.Task`1[GraphQL.ExecutionResult]", "GraphQL.Execution.ExecutionContext"}, 2, 3, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration"));
-                nativeCallTargetDefinitions.Add(new("GraphQL", "GraphQL.Execution.SubscriptionExecutionStrategy", "ExecuteAsync", new[] {"System.Threading.Tasks.Task`1[GraphQL.ExecutionResult]", "GraphQL.Execution.ExecutionContext"}, 2, 3, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration"));
-            }
-
             // MongoDB
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.MongoDB))
             {
