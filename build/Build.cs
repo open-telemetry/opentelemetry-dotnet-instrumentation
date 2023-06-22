@@ -6,16 +6,6 @@ using static Nuke.Common.EnvironmentInfo;
 
 partial class Build : NukeBuild
 {
-    static Build()
-    {
-        Console.WriteLine("Build .cctor");
-    }
-
-    public Build() : base()
-    {
-        Console.WriteLine("Build .ctor");
-    }
-
     public static int Main() => Execute<Build>(x => x.BuildTracer);
 
     [Parameter("Configuration to build. Default is 'Release'")]
@@ -60,7 +50,9 @@ partial class Build : NukeBuild
     [Parameter("Version number of the NuGet packages built from the project. Default is '0.7.0'")]
     readonly string NuGetBaseVersionNumber = "0.7.0";
 
-    [Parameter("Version suffix added to the NuGet packages built from the project. Default is empty")]
+    [Parameter("Version suffix added to the NuGet packages built from the project, see https://semver.org/spec/v2.0.0.html#spec-item-9 for details. Default is empty")]
+    // The default needs to be empty: there is no other way to make this parameter to accept an empty string, which will be required
+    // for releases like "v1.2.0".
     readonly string NuGetVersionSuffix = string.Empty;
 
     [Parameter("Do not restore the projects before building.")]

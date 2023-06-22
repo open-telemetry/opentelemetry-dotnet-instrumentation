@@ -199,4 +199,6 @@ jobs:
           path: bin/nuget-artifacts/
 
       - name: Test NuGet Packages
+        env:
+          NUKE_NUGET_VERSION_SUFFIX: ${{ needs.build-nuget-packages.outputs.nuget-version-suffix }}
         run: ./build.cmd TestNuGetPackages

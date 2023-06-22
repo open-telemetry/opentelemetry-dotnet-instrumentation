@@ -12,6 +12,10 @@ jobs:
     # In principle this job "needs: [ build, build-container ]", however, that would cause the build and build-container
     # jobs to run twice, which is not what we want. Instead, we let the "caller" job handle the dependencies.
 
+    outputs:
+      # Output the NuGet version suffix so that the caller job can use it to restore the correct packages.
+      nuget-version-suffix: ${{ steps.set-nuget-version-suffix.outputs.nuget-version-suffix }}
+
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v3.5.3
@@ -53,26 +57,28 @@ jobs:
           name: bin-macos-11
           path: bin/ci-artifacts/bin-macos-11
 
-      - name: Set nuget-version-suffix for build triggered by 'tag' 
-        id: set-nuget-version-suffix
+      - name: Set NUKE_NUGET_VERSION_SUFFIX for build triggered by 'tag'
+        id: set-nuget-version-suffix-from-tag
         if: github.ref_type == 'tag'
         shell: bash
-        run: echo "nuget-version-suffix=$(echo ${{ github.ref_name }} | sed -n 's/.*v[0-9]\+\.[0-9]\+\.[0-9]\+\(.*\)/\1/p')" >> "$GITHUB_OUTPUT"
+        run: echo "NUKE_NUGET_VERSION_SUFFIX=$(echo ${{ github.ref_name }} | sed -n 's/.*v[0-9]\+\.[0-9]\+\.[0-9]\+\(.*\)/\1/p')" >> "$GITHUB_ENV"
 
-      - name: Build NuGet packages using tag suffix as the NuGet version suffix
-        if: github.ref_type == 'tag'
-        env:
-          NUKE_NUGET_VERSION_SUFFIX: "${{ steps.set-nuget-version-suffix.outputs.nuget-version-suffix }}"
-        run: ./build.cmd BuildNuGetPackages
-
-      - name: Build NuGet packages with using fixed version suffix
+      - name: Set NUKE_NUGET_VERSION_SUFFIX for regular build
+        id: set-nuget-version-suffix-from-run-id
         if: github.ref_type != 'tag'
-        env:
-          NUKE_NUGET_VERSION_SUFFIX: "-run-id.${{ github.run_id }}" # See https://semver.org/spec/v2.0.0.html#spec-item-9 for valid version suffix
+        shell: bash
+        # See https://semver.org/spec/v2.0.0.html#spec-item-9 for valid version suffix
+        run: echo "NUKE_NUGET_VERSION_SUFFIX=-run-id.${{ github.run_id }}" >> "$GITHUB_ENV"
+
+      - name: Build NuGet packages
         run: ./build.cmd BuildNuGetPackages
 
       - name: Test NuGet Packages
         run: ./build.cmd TestNuGetPackages
+
+      - name: Set NuGet Version Suffix
+        id: set-nuget-version-suffix
+        run: echo "nuget-version-suffix=${{ env.NUKE_NUGET_VERSION_SUFFIX }}" >> "$GITHUB_OUTPUT"
 
       - name: Upload Nuget Artifacts
         uses: actions/upload-artifact@v3.1.2
