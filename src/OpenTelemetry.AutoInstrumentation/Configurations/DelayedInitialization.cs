@@ -48,6 +48,12 @@ internal static class DelayedInitialization
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void AddGraphQL(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
+        {
+            lazyInstrumentationLoader.Add(new GraphQLInitializer(pluginManager, tracerSettings));
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddGrpcClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
             lazyInstrumentationLoader.Add(new GrpcClientInitializer(pluginManager));
@@ -70,12 +76,6 @@ internal static class DelayedInitialization
         public static void AddEntityFrameworkCore(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
             lazyInstrumentationLoader.Add(new EntityFrameworkCoreInitializer(pluginManager));
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void AddGraphQL(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
-        {
-            lazyInstrumentationLoader.Add(new GraphQLInitializer(pluginManager, tracerSettings));
         }
 #endif
 

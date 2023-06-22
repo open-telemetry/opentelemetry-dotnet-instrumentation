@@ -287,6 +287,9 @@ internal static class Instrumentation
                 case TracerInstrumentation.HttpClient:
                     DelayedInitialization.Traces.AddHttpClient(lazyInstrumentationLoader, pluginManager);
                     break;
+                case TracerInstrumentation.GraphQL:
+                    DelayedInitialization.Traces.AddGraphQL(LazyInstrumentationLoader, pluginManager, tracerSettings);
+                    break;
                 case TracerInstrumentation.GrpcNetClient:
                     DelayedInitialization.Traces.AddGrpcClient(lazyInstrumentationLoader, pluginManager);
                     break;
@@ -309,9 +312,6 @@ internal static class Instrumentation
                 case TracerInstrumentation.StackExchangeRedis:
                     break;
                 case TracerInstrumentation.MassTransit:
-                    break;
-                case TracerInstrumentation.GraphQL:
-                    DelayedInitialization.Traces.AddGraphQL(LazyInstrumentationLoader, pluginManager, tracerSettings);
                     break;
 #endif
                 case TracerInstrumentation.MongoDB:
