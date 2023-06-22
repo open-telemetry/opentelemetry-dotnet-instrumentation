@@ -34,7 +34,7 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 - `WCFCLIENT` and `WCFSERVICE` no longer requires manual modification
   of config files to include `TelemetryEndpointBehaviorExtensionElement`.
 - [GraphQL](https://www.nuget.org/packages/GraphQL/) instrumentation is now
-  supported from version 7.5.0
+  supported from version 7.5.0.
 
 ### Deprecated
 
