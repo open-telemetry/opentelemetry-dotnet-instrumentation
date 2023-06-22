@@ -86,6 +86,9 @@ jobs:
         with:
           name: bin-${{ matrix.machine }}
           path: bin/tracer-home
+      - name: Regenerate LibraryVersions.g.cs
+        # Regenerate the library versions file to surface any version changes made to the packages being tested.
+        run: ./build.cmd GenerateLibraryVersionFiles
       - name: Generated files unchanged
         shell: bash
         run: |
