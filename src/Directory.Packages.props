@@ -47,7 +47,7 @@
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="4.7.0" />
     <PackageVersion Include="MongoDB.Bson" Version="2.13.3" />
-    <PackageVersion Include="MongoDB.Driver.Core" Version="2.13.3" />
+    <PackageVersion Include="MongoDB.Driver.Core" Version="2.20.0" />
     <PackageVersion Include="MongoDB.Libmongocrypt" Version="1.2.2" />
     <PackageVersion Include="MySql.Data" Version="6.10.7" />
     <PackageVersion Include="Pipelines.Sockets.Unofficial" Version="2.1.16" />
