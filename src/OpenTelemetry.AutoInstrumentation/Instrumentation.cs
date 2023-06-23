@@ -179,13 +179,13 @@ internal static class Instrumentation
 
         if (GeneralSettings.Value.ProfilerEnabled)
         {
-            RegisterInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
+            RegisterBytecodeInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
 
             try
             {
                 foreach (var payload in _pluginManager.GetAllDefinitionsPayloads())
                 {
-                    RegisterInstrumentations(payload);
+                    RegisterBytecodeInstrumentations(payload);
                 }
             }
             catch (Exception ex)
@@ -221,7 +221,7 @@ internal static class Instrumentation
         }
     }
 
-    private static void RegisterInstrumentations(InstrumentationDefinitions.Payload payload)
+    private static void RegisterBytecodeInstrumentations(InstrumentationDefinitions.Payload payload)
     {
         try
         {
