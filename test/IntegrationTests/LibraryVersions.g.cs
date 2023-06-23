@@ -86,7 +86,7 @@ public static class LibraryVersion
 #else
         new object[] { "2.13.3" },
         new object[] { "2.15.0" },
-        new object[] { "2.19.2" },
+        new object[] { "2.20.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MySqlConnector = new List<object[]>
