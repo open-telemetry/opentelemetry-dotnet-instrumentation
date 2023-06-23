@@ -21,6 +21,7 @@
   </metadata>
 
   <files>
+    <file src="**\*" target="\" />
     <file src="..\..\opentelemetry-icon-color.png" target="images\opentelemetry-icon-color.png" />
   </files>
 
