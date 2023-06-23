@@ -15,11 +15,6 @@
 #include <dlfcn.h>
 #endif
 
-EXTERN_C BOOL STDAPICALLTYPE IsProfilerAttached()
-{
-    return trace::profiler != nullptr && trace::profiler->IsAttached();
-}
-
 #ifdef _WIN32
 // GetAssemblyAndSymbolsBytes is used when injecting the Loader into a .NET Framework application.
 EXTERN_C VOID STDAPICALLTYPE GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray,

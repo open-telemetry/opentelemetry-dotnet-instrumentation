@@ -118,8 +118,6 @@ private:
 public:
     CorProfiler() = default;
 
-    bool IsAttached() const;
-
     WSTRING GetBytecodeInstrumentationAssembly() const;
 
 #ifdef _WIN32
