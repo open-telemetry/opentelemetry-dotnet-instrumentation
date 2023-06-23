@@ -56,14 +56,7 @@
 1. If the `release-publish` GitHub workflow succeeds, publish the NuGet packages:
     1. Unzip `opentelemetry-dotnet-instrumentation-nuget-packages.zip` to a local
     folder.
-    1. Obtain the API key from nuget.org
-    1. Run the following command to publish the packages:
-
-       ```bash
-       dotnet nuget push <package-paths> --source https://api.nuget.org/v3/index.json --api-key <api-key>
-       ```
-
-    1. Delete the API key from nuget.org
+    1. Upload and publish the packages to nuget.org.
 
 1. For a non-RC and non-beta release, update the version in:
 
