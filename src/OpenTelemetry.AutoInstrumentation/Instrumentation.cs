@@ -177,35 +177,42 @@ internal static class Instrumentation
             throw;
         }
 
-        RegisterInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
-
-        try
+        if (GeneralSettings.Value.ProfilerEnabled)
         {
-            foreach (var payload in _pluginManager.GetAllDefinitionsPayloads())
+            RegisterInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
+
+            try
             {
-                RegisterInstrumentations(payload);
+                foreach (var payload in _pluginManager.GetAllDefinitionsPayloads())
+                {
+                    RegisterInstrumentations(payload);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Exception occurred while registering instrumentations from plugins.");
-        }
-
-        try
-        {
-            Logger.Debug("Sending CallTarget derived integration definitions to native library.");
-            var payload = InstrumentationDefinitions.GetDerivedDefinitions();
-            NativeMethods.AddDerivedInstrumentations(payload.DefinitionsId, payload.Definitions);
-            foreach (var def in payload.Definitions)
+            catch (Exception ex)
             {
-                def.Dispose();
+                Logger.Error(ex, "Exception occurred while registering instrumentations from plugins.");
             }
 
-            Logger.Information("The profiler has been initialized with {0} derived definitions.", payload.Definitions.Length);
+            try
+            {
+                Logger.Debug("Sending CallTarget derived integration definitions to native library.");
+                var payload = InstrumentationDefinitions.GetDerivedDefinitions();
+                NativeMethods.AddDerivedInstrumentations(payload.DefinitionsId, payload.Definitions);
+                foreach (var def in payload.Definitions)
+                {
+                    def.Dispose();
+                }
+
+                Logger.Information("The profiler has been initialized with {0} derived definitions.", payload.Definitions.Length);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, ex.Message);
+            }
         }
-        catch (Exception ex)
+        else
         {
-            Logger.Error(ex, ex.Message);
+            Logger.Debug("Skipping profiler initialization. {0} is disabled", ConfigurationKeys.ProfilingEnabled);
         }
 
         if (TracerSettings.Value.OpenTracingEnabled)
