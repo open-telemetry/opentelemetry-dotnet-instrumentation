@@ -26,7 +26,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="7.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.6.2" />
-    <PackageVersion Include="MongoDB.Driver" Version="2.19.2" />
+    <PackageVersion Include="MongoDB.Driver" Version="2.20.0" />
     <PackageVersion Include="Moq" Version="4.18.4" />
     <PackageVersion Include="MySqlConnector" Version="2.2.6" />
     <PackageVersion Include="MySql.Data" Version="8.0.32.1" />
