@@ -43,27 +43,6 @@ internal static class Instrumentation
     private static MeterProvider? _meterProvider;
     private static PluginManager? _pluginManager;
 
-    /// <summary>
-    /// Gets a value indicating whether OpenTelemetry's profiler is attached to the current process.
-    /// </summary>
-    /// <value>
-    ///   <c>true</c> if the profiler is currently attached; <c>false</c> otherwise.
-    /// </value>
-    public static bool ProfilerAttached
-    {
-        get
-        {
-            try
-            {
-                return NativeMethods.IsProfilerAttached();
-            }
-            catch (DllNotFoundException)
-            {
-                return false;
-            }
-        }
-    }
-
     internal static PluginManager? PluginManager => _pluginManager;
 
     internal static ILifespanManager LifespanManager => LazyInstrumentationLoader.LifespanManager;
