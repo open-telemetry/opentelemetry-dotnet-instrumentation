@@ -38,10 +38,12 @@ internal enum TracerInstrumentation
     /// </summary>
     SqlClient = 2,
 
+#if NET6_0_OR_GREATER
     /// <summary>
     /// GraphQL instrumentation.
     /// </summary>
     GraphQL = 3,
+#endif
 
     /// <summary>
     /// MongoDB instrumentation.
