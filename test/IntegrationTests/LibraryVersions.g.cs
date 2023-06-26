@@ -45,8 +45,7 @@ public static class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
         new object[] { string.Empty }
 #else
-        new object[] { "2.3.0" },
-        new object[] { "2.4.0" },
+        new object[] { "7.5.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> GrpcNetClient = new List<object[]>

@@ -221,7 +221,9 @@ public class SettingsTests : IDisposable
 #if NETFRAMEWORK
     [InlineData("ASPNET", TracerInstrumentation.AspNet)]
 #endif
+#if NET6_0_OR_GREATER
     [InlineData("GRAPHQL", TracerInstrumentation.GraphQL)]
+#endif
     [InlineData("HTTPCLIENT", TracerInstrumentation.HttpClient)]
     [InlineData("MONGODB", TracerInstrumentation.MongoDB)]
 #if NET6_0_OR_GREATER

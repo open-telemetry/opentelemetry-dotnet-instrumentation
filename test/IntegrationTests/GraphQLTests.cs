@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#if NET6_0_OR_GREATER
+
 using System.Net;
 using System.Text;
 using IntegrationTests.Helpers;
@@ -25,7 +27,7 @@ namespace IntegrationTests;
 public class GraphQLTests : TestHelper
 {
     public GraphQLTests(ITestOutputHelper output)
-        : base("GraphQL", output)
+    : base("GraphQL", output)
     {
     }
 
@@ -59,9 +61,10 @@ public class GraphQLTests : TestHelper
         Request(requests, body: @"{ ""query"":""subscription HumanAddedSub{humanAdded{name}}""}");
         Expect(collector, spanName: "subscription HumanAddedSub", graphQLOperationType: "subscription", graphQLOperationName: "HumanAddedSub", graphQLDocument: "subscription HumanAddedSub{humanAdded{name}}", setDocument: setDocument);
 
+        // TODO: re-enable if exceptions are supported again.
         // FAILURE: query fails 'execute' step
-        Request(requests, body: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}");
-        Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, verifyFailure: VerifyNotImplementedException);
+        // Request(requests, body: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}");
+        // Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, verifyFailure: VerifyNotImplementedException);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED", "false");
@@ -71,7 +74,6 @@ public class GraphQLTests : TestHelper
 
         int aspNetCorePort = TcpPortProvider.GetOpenPort();
         SetEnvironmentVariable("ASPNETCORE_URLS", $"http://127.0.0.1:{aspNetCorePort}/");
-        EnableBytecodeInstrumentation();
         using var process = StartTestApplication(new TestSettings { PackageVersion = packageVersion });
         using var helper = new ProcessHelper(process);
         try
@@ -119,7 +121,7 @@ public class GraphQLTests : TestHelper
             exceptionEvent.Attributes.Any(x => x.Key == "exception.stacktrace");
     }
 
-    private static void Expect(
+    private void Expect(
         MockSpansCollector collector,
         string spanName,
         string graphQLOperationType,
@@ -166,10 +168,15 @@ public class GraphQLTests : TestHelper
                 return false;
             }
 
+            if (!setDocument && span.Attributes.Any(attr => attr.Key == "graphql.document"))
+            {
+                return false;
+            }
+
             return true;
         }
 
-        collector.Expect("OpenTelemetry.AutoInstrumentation.GraphQL", Predicate, spanName);
+        collector.Expect("GraphQL", Predicate, spanName);
     }
 
     private async Task SubmitRequestsAsync(int aspNetCorePort, IEnumerable<RequestInfo> requests)
@@ -231,3 +238,5 @@ public class GraphQLTests : TestHelper
         public string? RequestBody { get; set; }
     }
 }
+
+#endif

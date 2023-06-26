@@ -60,7 +60,6 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.GraphQL",
             Versions = new List<string>
             {
-                "2.3.0",
                 "*"
             }
         },

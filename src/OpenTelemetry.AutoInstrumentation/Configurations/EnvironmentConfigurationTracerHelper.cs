@@ -52,6 +52,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.MySqlData => Wrappers.AddMySqlClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.StackExchangeRedis => builder.AddSource("OpenTelemetry.Instrumentation.StackExchangeRedis"),
                 TracerInstrumentation.EntityFrameworkCore => Wrappers.AddEntityFrameworkCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
+                TracerInstrumentation.GraphQL => Wrappers.AddGraphQLInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
 #endif
                 _ => null
             };
@@ -164,6 +165,13 @@ internal static class EnvironmentConfigurationTracerHelper
             DelayedInitialization.Traces.AddMySqlClient(lazyInstrumentationLoader, pluginManager);
 
             return builder.AddSource("OpenTelemetry.Instrumentation.MySqlData");
+        }
+
+        public static TracerProviderBuilder AddGraphQLInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)
+        {
+            DelayedInitialization.Traces.AddGraphQL(lazyInstrumentationLoader, pluginManager, tracerSettings);
+
+            return builder.AddSource("GraphQL");
         }
 #endif
 

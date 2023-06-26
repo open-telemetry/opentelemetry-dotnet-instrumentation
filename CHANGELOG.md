@@ -33,12 +33,16 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
   Both supported only on .NET Framework.
 - `WCFCLIENT` and `WCFSERVICE` no longer requires manual modification
   of config files to include `TelemetryEndpointBehaviorExtensionElement`.
+- [GraphQL](https://www.nuget.org/packages/GraphQL/) instrumentation is now
+  supported from version 7.5.0 working on .NET.
 
 ### Deprecated
 
 ### Removed
 
 - Removed `WCF` instrumentation for Core WCF Client working on .NET.
+- Removed [GraphQL](https://www.nuget.org/packages/GraphQL/) instrumentation
+  for versions 2.3.0-2.4.*.
 
 ### Fixed
 

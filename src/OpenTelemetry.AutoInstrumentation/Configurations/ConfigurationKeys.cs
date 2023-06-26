@@ -16,7 +16,6 @@
 
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
-using OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
 using OpenTelemetry.Logs;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
@@ -134,7 +133,6 @@ internal partial class ConfigurationKeys
         {
             /// <summary>
             /// Configuration key for GraphQL instrumentation to enable passing query as a document attribute.
-            /// See <see cref="GraphQLTags.Document"/>.
             /// </summary>
             public const string GraphQLSetDocument = "OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT";
         }
