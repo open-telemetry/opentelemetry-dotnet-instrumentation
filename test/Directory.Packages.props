@@ -35,7 +35,7 @@
     <PackageVersion Include="Npgsql" Version="7.0.4" />
     <PackageVersion Include="NuGet.Versioning" Version="6.5.0" />
     <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
-    <PackageVersion Include="Quartz" Version="3.6.2" />
+    <PackageVersion Include="Quartz" Version="3.6.3" />
     <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.6.2" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.6.2" />
     <PackageVersion Include="StackExchange.Redis" Version="2.6.116" />
