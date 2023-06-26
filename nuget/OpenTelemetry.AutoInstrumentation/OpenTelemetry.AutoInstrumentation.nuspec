@@ -3,6 +3,7 @@
   <metadata>
     <id>OpenTelemetry.AutoInstrumentation</id>
     <description>OpenTelemetry Automatic Instrumentation package with all required components to enable automatic instrumentation.</description>
+    <icon>images\opentelemetry-icon-color.png</icon>
 
     <!-- Common properties expected to be defined at build time -->
     <version>$NuGetPackageVersion$</version>
@@ -33,8 +34,14 @@
 
     <contentFiles>
       <!-- Content files (scripts, configurations, etc) copied to the application the output folder -->
-      <files include="**/*" buildAction="None" flatten="false" copyToOutput="true" />
+      <files include="**\*" buildAction="None" flatten="false" copyToOutput="true" />
     </contentFiles>
 
   </metadata>
+
+  <files>
+    <file src="**\*" target="\" />
+    <file src="..\..\opentelemetry-icon-color.png" target="images\opentelemetry-icon-color.png" />
+  </files>
+
 </package>

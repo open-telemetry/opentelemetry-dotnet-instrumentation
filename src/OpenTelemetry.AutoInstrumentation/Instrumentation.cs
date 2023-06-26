@@ -43,27 +43,6 @@ internal static class Instrumentation
     private static MeterProvider? _meterProvider;
     private static PluginManager? _pluginManager;
 
-    /// <summary>
-    /// Gets a value indicating whether OpenTelemetry's profiler is attached to the current process.
-    /// </summary>
-    /// <value>
-    ///   <c>true</c> if the profiler is currently attached; <c>false</c> otherwise.
-    /// </value>
-    public static bool ProfilerAttached
-    {
-        get
-        {
-            try
-            {
-                return NativeMethods.IsProfilerAttached();
-            }
-            catch (DllNotFoundException)
-            {
-                return false;
-            }
-        }
-    }
-
     internal static PluginManager? PluginManager => _pluginManager;
 
     internal static ILifespanManager LifespanManager => LazyInstrumentationLoader.LifespanManager;
@@ -177,35 +156,42 @@ internal static class Instrumentation
             throw;
         }
 
-        RegisterInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
-
-        try
+        if (GeneralSettings.Value.ProfilerEnabled)
         {
-            foreach (var payload in _pluginManager.GetAllDefinitionsPayloads())
+            RegisterBytecodeInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
+
+            try
             {
-                RegisterInstrumentations(payload);
+                foreach (var payload in _pluginManager.GetAllDefinitionsPayloads())
+                {
+                    RegisterBytecodeInstrumentations(payload);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Exception occurred while registering instrumentations from plugins.");
-        }
-
-        try
-        {
-            Logger.Debug("Sending CallTarget derived integration definitions to native library.");
-            var payload = InstrumentationDefinitions.GetDerivedDefinitions();
-            NativeMethods.AddDerivedInstrumentations(payload.DefinitionsId, payload.Definitions);
-            foreach (var def in payload.Definitions)
+            catch (Exception ex)
             {
-                def.Dispose();
+                Logger.Error(ex, "Exception occurred while registering instrumentations from plugins.");
             }
 
-            Logger.Information("The profiler has been initialized with {0} derived definitions.", payload.Definitions.Length);
+            try
+            {
+                Logger.Debug("Sending CallTarget derived integration definitions to native library.");
+                var payload = InstrumentationDefinitions.GetDerivedDefinitions();
+                NativeMethods.AddDerivedInstrumentations(payload.DefinitionsId, payload.Definitions);
+                foreach (var def in payload.Definitions)
+                {
+                    def.Dispose();
+                }
+
+                Logger.Information("The profiler has been initialized with {0} derived definitions.", payload.Definitions.Length);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, ex.Message);
+            }
         }
-        catch (Exception ex)
+        else
         {
-            Logger.Error(ex, ex.Message);
+            Logger.Debug("Skipping CLR Profiler initialization. {0} environment variable was not set to '1'.", ConfigurationKeys.ProfilingEnabled);
         }
 
         if (TracerSettings.Value.OpenTracingEnabled)
@@ -214,7 +200,7 @@ internal static class Instrumentation
         }
     }
 
-    private static void RegisterInstrumentations(InstrumentationDefinitions.Payload payload)
+    private static void RegisterBytecodeInstrumentations(InstrumentationDefinitions.Payload payload)
     {
         try
         {
