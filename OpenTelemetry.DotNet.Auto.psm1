@@ -222,7 +222,7 @@ function Install-OpenTelemetryCore() {
         [string]$LocalPath
     )
 
-    $version = "v0.7.0"
+    $version = "v1.0.0-rc.1"
     $installDir = Get-CLIInstallDir-From-InstallDir $InstallDir
     $archivePath = $null
     $deleteArchive = $true

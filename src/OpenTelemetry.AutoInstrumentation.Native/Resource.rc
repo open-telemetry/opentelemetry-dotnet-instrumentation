@@ -69,12 +69,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "The OpenTelemetry Authors"
             VALUE "FileDescription", "OpenTelemetry CLR Profiler"
-            VALUE "FileVersion", "0.7.0.0"
+            VALUE "FileVersion", "1.0.0.0"
             VALUE "InternalName", "OpenTelemetry.AutoInstrumentation.Native.DLL"
             VALUE "LegalCopyright", "Copyright 2021 The OpenTelemetry Authors"
             VALUE "OriginalFilename", "OpenTelemetry.AutoInstrumentation.Native.DLL"
             VALUE "ProductName", "OpenTelemetry .NET AutoInstrumentation"
-            VALUE "ProductVersion", "0.7.0"
+            VALUE "ProductVersion", "1.0.0"
         END
     END
     BLOCK "VarFileInfo"
