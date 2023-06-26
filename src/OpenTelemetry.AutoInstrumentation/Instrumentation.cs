@@ -212,7 +212,7 @@ internal static class Instrumentation
         }
         else
         {
-            Logger.Debug("Skipping profiler initialization. {0} is disabled", ConfigurationKeys.ProfilingEnabled);
+            Logger.Debug("Skipping CLR Profiler initialization. {0} environment variable was not set to '1'.", ConfigurationKeys.ProfilingEnabled);
         }
 
         if (TracerSettings.Value.OpenTracingEnabled)

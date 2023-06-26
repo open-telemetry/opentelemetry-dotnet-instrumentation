@@ -26,10 +26,10 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 /// </summary>
 internal partial class ConfigurationKeys
 {
-#if NETFRAMEWORK
     /// <summary>
     /// Configuration key for enabling profiler.
     /// </summary>
+#if NETFRAMEWORK
     public const string ProfilingEnabled = "COR_ENABLE_PROFILING";
 #else
     public const string ProfilingEnabled = "CORECLR_ENABLE_PROFILING";
