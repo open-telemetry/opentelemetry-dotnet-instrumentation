@@ -27,6 +27,15 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 internal partial class ConfigurationKeys
 {
     /// <summary>
+    /// Configuration key for enabling profiler.
+    /// </summary>
+#if NETFRAMEWORK
+    public const string ProfilingEnabled = "COR_ENABLE_PROFILING";
+#else
+    public const string ProfilingEnabled = "CORECLR_ENABLE_PROFILING";
+#endif
+
+    /// <summary>
     /// Configuration key for the OTLP protocol to be used.
     /// Default is <c>"http/protobuf"</c>.
     /// </summary>
