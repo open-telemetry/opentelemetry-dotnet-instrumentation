@@ -3,6 +3,7 @@
   <metadata>
     <id>OpenTelemetry.AutoInstrumentation.Runtime.Native</id>
     <description>Native runtime components used by the OpenTelmetry.AutoInstrumentation project.</description>
+    <icon>images\opentelemetry-icon-color.png</icon>
 
     <!-- Common properties expected to be defined at build time -->
     <version>$NuGetPackageVersion$</version>
@@ -18,4 +19,10 @@
     <!-- Runtime files are added this file folder via a nuke build target -->
 
   </metadata>
+
+  <files>
+    <file src="**\*" target="\" />
+    <file src="..\..\opentelemetry-icon-color.png" target="images\opentelemetry-icon-color.png" />
+  </files>
+
 </package>

@@ -53,6 +53,11 @@
 
 1. Check the status of [the `release-publish` GitHub workflow](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/actions/workflows/release-publish.yml).
 
+1. If the `release-publish` GitHub workflow succeeds, publish the NuGet packages:
+    1. Unzip `opentelemetry-dotnet-instrumentation-nuget-packages.zip` to a local
+    folder.
+    1. Upload and publish the packages to nuget.org.
+
 1. For a non-RC and non-beta release, update the version in:
 
    - [`examples/demo/Dockerfile`](../examples/demo/Dockerfile)
