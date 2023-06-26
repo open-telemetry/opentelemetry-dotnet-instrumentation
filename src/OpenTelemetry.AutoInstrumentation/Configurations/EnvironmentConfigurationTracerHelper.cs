@@ -37,7 +37,6 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.AspNet => Wrappers.AddAspNetInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.WcfService => Wrappers.AddWcfInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
 #endif
-                TracerInstrumentation.GraphQL => Wrappers.AddGraphQLInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
                 TracerInstrumentation.GrpcNetClient => Wrappers.AddGrpcClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.HttpClient => Wrappers.AddHttpClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.Npgsql => builder.AddSource("Npgsql"),
@@ -53,6 +52,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.MySqlData => Wrappers.AddMySqlClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.StackExchangeRedis => builder.AddSource("OpenTelemetry.Instrumentation.StackExchangeRedis"),
                 TracerInstrumentation.EntityFrameworkCore => Wrappers.AddEntityFrameworkCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
+                TracerInstrumentation.GraphQL => Wrappers.AddGraphQLInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
 #endif
                 _ => null
             };
@@ -166,7 +166,6 @@ internal static class EnvironmentConfigurationTracerHelper
 
             return builder.AddSource("OpenTelemetry.Instrumentation.MySqlData");
         }
-#endif
 
         public static TracerProviderBuilder AddGraphQLInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)
         {
@@ -174,6 +173,7 @@ internal static class EnvironmentConfigurationTracerHelper
 
             return builder.AddSource("GraphQL");
         }
+#endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddSqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
