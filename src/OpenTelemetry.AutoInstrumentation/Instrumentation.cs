@@ -171,23 +171,6 @@ internal static class Instrumentation
             {
                 Logger.Error(ex, "Exception occurred while registering instrumentations from plugins.");
             }
-
-            try
-            {
-                Logger.Debug("Sending CallTarget derived integration definitions to native library.");
-                var payload = InstrumentationDefinitions.GetDerivedDefinitions();
-                NativeMethods.AddDerivedInstrumentations(payload.DefinitionsId, payload.Definitions);
-                foreach (var def in payload.Definitions)
-                {
-                    def.Dispose();
-                }
-
-                Logger.Information("The profiler has been initialized with {0} derived definitions.", payload.Definitions.Length);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex, ex.Message);
-            }
         }
         else
         {

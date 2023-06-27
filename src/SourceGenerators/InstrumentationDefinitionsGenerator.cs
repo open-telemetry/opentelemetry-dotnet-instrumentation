@@ -192,7 +192,7 @@ internal static partial class InstrumentationDefinitions
         if (integrations.Count > 0)
         {
             sb.AppendLine(signalHeader)
-                .AppendLine("{");
+                .AppendLine("        {");
             GenerateIntegrations(integrations, sb, conditionPrefix);
 
             sb.AppendLine("        }")
@@ -202,8 +202,18 @@ internal static partial class InstrumentationDefinitions
 
     private static void GenerateIntegrations(Dictionary<string, List<(string IntegrationType, TargetToGenerate Target)>> integrationsByName, StringBuilder sb, string conditionPrefix)
     {
+        bool firstLine = true;
         foreach (var group in integrationsByName)
         {
+            if (!firstLine)
+            {
+                sb.AppendLine();
+            }
+            else
+            {
+                firstLine = false;
+            }
+
             sb.Append("            // ");
             sb.AppendLine(group.Key);
             sb.AppendFormat(
@@ -232,7 +242,6 @@ internal static partial class InstrumentationDefinitions
             }
 
             sb.AppendLine("            }");
-            sb.AppendLine();
         }
     }
 
