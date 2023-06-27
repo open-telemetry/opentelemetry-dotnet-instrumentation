@@ -49,9 +49,6 @@ public static class MongoClientIntegration
     internal static CallTargetState OnMethodBegin<TTarget, TMongoClientSettings>(TTarget instance, TMongoClientSettings settings)
         where TMongoClientSettings : notnull
     {
-        // Additional deps doesn't support .NET FX
-        // TODO: Find another way how to ship & load "MongoDB.Driver.Core.Extensions.DiagnosticSources"
-
         var setListenerDelegate = _setActivityListener ??= GetClusterConfiguratorExpression().Compile();
 
         var clusterConfiguratorProperty = settings

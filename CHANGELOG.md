@@ -24,7 +24,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 This release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-  [`1.5.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.5.0)
+  [`1.5.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.5.1)
 - `System.Diagnostics.DiagnosticSource`: [`7.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/7.0.0)
 
 ### Added
@@ -37,7 +37,7 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 ### Changed
 
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-  [`1.5.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.5.0).
+  [`1.5.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.5.1).
 - ASP.NET instrumentation no longer requires manual modification
   of config files to include `TelemetryHttpModule`.
 - Parameter for `ConfigureTracesOptions` extension point for StackExchangeRedis

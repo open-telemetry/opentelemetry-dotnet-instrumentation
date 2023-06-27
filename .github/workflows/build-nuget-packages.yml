@@ -28,8 +28,8 @@ jobs:
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
-            6.0.410
-            7.0.304
+            6.0.411
+            7.0.305
 
       - name: Check for NuGet packages cache
         uses: actions/cache@v3.3.1
