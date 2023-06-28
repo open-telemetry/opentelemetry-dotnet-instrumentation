@@ -82,7 +82,7 @@ public class WcfIISTests : TestHelper
     {
         const string imageName = "testapplication-wcf-server-iis-netframework";
 
-        _ = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
+        var networkName = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
 
         var logPath = EnvironmentHelper.IsRunningOnCI()
             ? Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "test-artifacts", "profiler-logs")
@@ -95,7 +95,7 @@ public class WcfIISTests : TestHelper
             .WithImage(imageName)
             .WithCleanUp(cleanUp: true)
             .WithName($"{imageName}")
-            .WithNetwork(DockerNetworkHelper.IntegrationTestsNetworkName)
+            .WithNetwork(networkName)
             .WithPortBinding(netTcpPort, 808)
             .WithPortBinding(httpPort, 80)
             .WithBindMount(logPath, "c:/inetpub/wwwroot/logs");

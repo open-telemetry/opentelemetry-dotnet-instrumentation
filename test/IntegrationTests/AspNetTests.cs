@@ -124,7 +124,7 @@ public class AspNetTests
         // get path to test application that the profiler will attach to
         var imageName = appPoolMode == "Classic" ? "testapplication-aspnet-netframework-classic" : "testapplication-aspnet-netframework";
 
-        _ = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
+        var networkName = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
 
         var logPath = EnvironmentHelper.IsRunningOnCI()
             ? Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "test-artifacts", "profiler-logs")
@@ -136,7 +136,7 @@ public class AspNetTests
             .WithImage(imageName)
             .WithCleanUp(cleanUp: true)
             .WithName($"{imageName}-{webPort}")
-            .WithNetwork(DockerNetworkHelper.IntegrationTestsNetworkName)
+            .WithNetwork(networkName)
             .WithPortBinding(webPort, 80)
             .WithBindMount(logPath, "c:/inetpub/wwwroot/logs");
 
