@@ -559,7 +559,7 @@ partial class Build
         .Executes(() =>
         {
             var netPath = TracerHomeDirectory / "net";
-            var ruleEngineJsonFilePath = Path.Combine(netPath, "ruleEngine.json");
+            var ruleEngineJsonFilePath = netPath / "ruleEngine.json";
             var ruleEngineJsonNugetFilePath = RootDirectory / "nuget" / "OpenTelemetry.AutoInstrumentation" / "contentFiles" / "any" / "any" / "RuleEngine.json";
             var fileInfoList = new List<object>();
             var files = Directory.GetFiles(netPath);
