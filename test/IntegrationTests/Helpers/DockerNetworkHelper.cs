@@ -50,17 +50,17 @@ internal static class DockerNetworkHelper
             }
         }
 
-        var networkParams = new NetworksCreateParameters()
+        var networkParams = new NetworksCreateParameters
         {
             Name = IntegrationTestsNetworkName,
             Driver = "nat",
-            IPAM = new IPAM()
+            IPAM = new IPAM
             {
                 Config = new List<IPAMConfig>()
             }
         };
 
-        networkParams.IPAM.Config.Add(new IPAMConfig()
+        networkParams.IPAM.Config.Add(new IPAMConfig
         {
             Gateway = IntegrationTestsGateway,
             Subnet = "10.1.1.0/24"

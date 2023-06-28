@@ -54,7 +54,7 @@ public class AspNetTests
         collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry"); // Expect Mvc span
         collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry"); // Expect WebApi span
 
-        string collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
+        var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
         _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
         var webPort = TcpPortProvider.GetOpenPort();
         await using var container = await StartContainerAsync(webPort, appPoolMode);
@@ -81,7 +81,7 @@ public class AspNetTests
         collector.ResourceExpector.Expect("service.name", ServiceName); // this is set via env var in Dockerfile and Wep.config, but env var has precedence
         collector.ResourceExpector.Expect("deployment.environment", "test"); // this is set via Wep.config
 
-        string collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
+        var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
         _environmentVariables["OTEL_TRACES_EXPORTER"] = "otlp";
         _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
         var webPort = TcpPortProvider.GetOpenPort();
@@ -106,7 +106,7 @@ public class AspNetTests
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
         collector.Expect("OpenTelemetry.Instrumentation.AspNet");
 
-        string collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
+        var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
         _environmentVariables["OTEL_METRICS_EXPORTER"] = "otlp";
         _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
         _environmentVariables["OTEL_METRIC_EXPORT_INTERVAL"] = "1000";
@@ -122,12 +122,11 @@ public class AspNetTests
     private async Task<IContainer> StartContainerAsync(int webPort, string? appPoolMode = null)
     {
         // get path to test application that the profiler will attach to
-        string imageName = appPoolMode == "Classic" ? "testapplication-aspnet-netframework-classic" : "testapplication-aspnet-netframework";
+        var imageName = appPoolMode == "Classic" ? "testapplication-aspnet-netframework-classic" : "testapplication-aspnet-netframework";
 
-        string networkName = DockerNetworkHelper.IntegrationTestsNetworkName;
-        string networkId = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
+        _ = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
 
-        string logPath = EnvironmentHelper.IsRunningOnCI()
+        var logPath = EnvironmentHelper.IsRunningOnCI()
             ? Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "test-artifacts", "profiler-logs")
             : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"OpenTelemetry .NET AutoInstrumentation", "logs");
         Directory.CreateDirectory(logPath);
@@ -136,9 +135,8 @@ public class AspNetTests
         var builder = new ContainerBuilder()
             .WithImage(imageName)
             .WithCleanUp(cleanUp: true)
-            .WithOutputConsumer(Consume.RedirectStdoutAndStderrToConsole())
             .WithName($"{imageName}-{webPort}")
-            .WithNetwork(networkId, networkName)
+            .WithNetwork(DockerNetworkHelper.IntegrationTestsNetworkName)
             .WithPortBinding(webPort, 80)
             .WithBindMount(logPath, "c:/inetpub/wwwroot/logs");
 
