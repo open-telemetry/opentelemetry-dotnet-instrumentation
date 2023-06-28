@@ -1,14 +1,5 @@
 # Using the OpenTelemetry.AutoInstrumentation NuGet packages
 
-> **Warning**
-> Currently, NuGet packages are only available as CI artifacts.
-When following these instructions, ensure that the packages are downloaded
-and that the target project is either using a `nuget.config` file configured to use
-the downloaded packages, for example the
-[`nuget.config` used by the NuGet packages test applications](../../test/test-applications/nuget-packages/nuget.config),
-or the packages are added to the project by specifying the `--source` parameter
-when running [`dotnet add package` command](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-add-package).
-
 ## When to use the NuGet packages
 
 Use the NuGet packages in the following scenarios:
@@ -18,6 +9,8 @@ Use the NuGet packages in the following scenarios:
   applications.
 1. Facilitate developer experimentation with automatic instrumentation through
   NuGet packages.
+1. Solve version conflicts between the dependencies used by the application and the
+  automatic instrumentation.
 
 ## Limitations
 
@@ -38,7 +31,7 @@ To automatically instrument your application with OpenTelemetry .NET add
 the `OpenTelemetry.AutoInstrumentation` package to your project:
 
 ```terminal
-dotnet add [<PROJECT>] package OpenTelemetry.AutoInstrumentation --source <PATH_TO_AUTO_INSTRUMENTATION_PACKAGES> --prerelease
+dotnet add [<PROJECT>] package OpenTelemetry.AutoInstrumentation --prerelease
 ```
 
 If the application references packages that can be instrumented, but, require
