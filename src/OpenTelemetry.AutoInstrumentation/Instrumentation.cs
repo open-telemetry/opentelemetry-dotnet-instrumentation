@@ -385,16 +385,26 @@ internal static class Instrumentation
         {
             if (_tracerProvider is not null)
             {
+                const string OpenTracingShimActivitySourceName = "OpenTelemetry.AutoInstrumentation.OpenTracingShim";
+
                 // Instantiate the OpenTracing shim. The underlying OpenTelemetry tracer will create
-                // spans using the "OpenTelemetry.AutoInstrumentation.OpenTracingShim" source.
+                // spans using the OpenTracingShimActivitySourceName source.
                 var openTracingShim = new TracerShim(
-                    _tracerProvider.GetTracer("OpenTelemetry.AutoInstrumentation.OpenTracingShim"),
+                    _tracerProvider.GetTracer(OpenTracingShimActivitySourceName),
                     Propagators.DefaultTextMapPropagator);
 
                 // This registration must occur prior to any reference to the OpenTracing tracer:
                 // otherwise the no-op tracer is going to be used by OpenTracing instead.
-                GlobalTracer.RegisterIfAbsent(openTracingShim);
-                Logger.Information("OpenTracingShim loaded.");
+                if (GlobalTracer.RegisterIfAbsent(openTracingShim))
+                {
+                    Logger.Information("OpenTracingShim registered as the OpenTracing global tracer.");
+                }
+                else
+                {
+                    Logger.Error(
+                        "OpenTracingShim could not be registered as the OpenTracing global tracer." +
+                        "Another tracer was already registered. OpenTracing signals will not be captured.");
+                }
             }
             else
             {

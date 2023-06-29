@@ -34,6 +34,7 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Npgsql" Version="7.0.4" />
     <PackageVersion Include="NuGet.Versioning" Version="6.5.0" />
+    <PackageVersion Include="OpenTracing" Version="0.12.1" />
     <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
     <PackageVersion Include="Quartz" Version="3.6.3" />
     <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.6.3" />
