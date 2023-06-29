@@ -23,7 +23,7 @@ internal static partial class InstrumentationDefinitions
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
-{
+        {
             // AspNet
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.AspNet))
             {
@@ -57,19 +57,17 @@ internal static partial class InstrumentationDefinitions
             {
                 nativeCallTargetDefinitions.Add(new("System.ServiceModel", "System.ServiceModel.ServiceHostBase", "InitializeDescription", new[] {"System.Void", "System.ServiceModel.UriSchemeKeyedCollection"}, 4, 0, 0, 4, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Service.ServiceHostIntegration"));
             }
-
         }
 
         // Metrics
         var metricSettings = Instrumentation.MetricSettings.Value;
         if (metricSettings.MetricsEnabled)
-{
+        {
             // NServiceBus
             if (metricSettings.EnabledInstrumentations.Contains(MetricInstrumentation.NServiceBus))
             {
                 nativeCallTargetDefinitions.Add(new("NServiceBus.Core", "NServiceBus.EndpointConfiguration", ".ctor", new[] {"System.Void", "System.String"}, 8, 0, 0, 8, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration"));
             }
-
         }
 
         return nativeCallTargetDefinitions.ToArray();
