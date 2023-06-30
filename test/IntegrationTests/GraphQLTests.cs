@@ -58,13 +58,13 @@ public class GraphQLTests : TestHelper
         Expect(collector, id: 3, spanName: "mutation AddBobaFett", setDocument: setDocument);
 
         // SUCCESS: subscription
-        Request(requests, id: 5, body: @"{ ""query"":""subscription HumanAddedSub{humanAdded{name}}""}");
-        Expect(collector, id: 5, spanName: "subscription HumanAddedSub", setDocument: setDocument);
+        Request(requests, id: 4, body: @"{ ""query"":""subscription HumanAddedSub{humanAdded{name}}""}");
+        Expect(collector, id: 4, spanName: "subscription HumanAddedSub", setDocument: setDocument);
 
         // TODO: re-enable if exceptions are supported again.
         // FAILURE: query fails 'execute' step
-        // Request(requests, id: 6, body: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}");
-        // Expect(collector, id: 6, spanName: "subscription NotImplementedSub", setDocument: setDocument, verifyFailure: VerifyNotImplementedException);
+        // Request(requests, id: 5, body: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}");
+        // Expect(collector, id: 5, spanName: "subscription NotImplementedSub", setDocument: setDocument, verifyFailure: VerifyNotImplementedException);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED", "false");
