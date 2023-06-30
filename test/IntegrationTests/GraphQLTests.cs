@@ -117,7 +117,7 @@ public class GraphQLTests : TestHelper
 
     private static string GetTraceIdHex(byte id)
     {
-        return BitConverter.ToString(GetTraceIdBytes(id)).Replace("-", string.Empty);
+        return id.ToString("x32");
     }
 
     private static bool VerifyNotImplementedException(Span span)
