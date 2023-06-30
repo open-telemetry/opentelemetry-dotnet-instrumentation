@@ -18,8 +18,9 @@ can be found [here](https://github.com/open-telemetry/opentelemetry-dotnet-instr
 ## Quick start
 
 If you'd like to try the instrumentation on an existing application before
-learning more about the configuration options and the project, follow
-these instructions:
+learning more about the configuration options and the project, follow the
+instructions at [Using the OpenTelemetry.AutoInstrumentation NuGet packages](./using-the-nuget-packages.md#using-the-opentelemetryautoinstrumentation-nuget-packages)
+or use the appropriate install script:
 
 - On Linux and macOS, use the [shell scripts](#shell-scripts).
 - On Windows, use the [PowerShell module](#powershell-module-windows).
@@ -100,7 +101,7 @@ See [config.md#instrumented-libraries-and-frameworks](config.md#instrumented-lib
 ### Considerations on scope
 
 Instrumenting [`self-contained`](https://learn.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained)
-applications is going to be supported through [NuGet packages](./internal/using-the-nuget-packages.md).
+applications is supported through [NuGet packages](./using-the-nuget-packages.md).
 Note that a `self-contained` application is
 automatically generated in .NET 7.0 whenever the `dotnet publish` or `dotnet build`
 command is used with a Runtime Identifier (RID) parameter, for example when `-r`
