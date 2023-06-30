@@ -99,6 +99,28 @@ mkdir $destFolder
 $artifacts | % { $dest = $(Join-Path $destFolder $_); $zip = $(Join-Path $zipFilesFolder $_) + ".zip"; Expand-Archive $zip $dest }
 ```
 
+Now you are ready to build the packages locally:
+
+```cmd
+dotnet nuke BuildNuGetPackages
+```
+
+to run the tests locally use:
+
+```cmd
+dotnet nuke TestNuGetPackages
+```
+
+To use the locally built NuGet packages in other projects on the local machine ensure
+that the target project is either using a `nuget.config`, adding `<repo>/bin/nuget-artifacts/`
+to the NuGet sources for example the
+[`nuget.config` used by the NuGet packages test applications](../test/test-applications/nuget-packages/nuget.config),
+or the packages are added to the project by specifying the `--source` parameter
+when running [`dotnet add package` command](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-add-package).
+
+Notice that package references are also cached so if you rebuild be sure to clean-up
+the cached versions too.
+
 ### Documentation lint
 
 If you made changes to the Markdown documents (`*.md` files), ensure that lint

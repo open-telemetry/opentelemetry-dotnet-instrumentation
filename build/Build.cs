@@ -3,7 +3,6 @@ using Nuke.Common.IO;
 using Nuke.Common.Tools.MSBuild;
 using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.EnvironmentInfo;
-using static Nuke.Common.IO.FileSystemTasks;
 
 partial class Build : NukeBuild
 {
@@ -48,11 +47,13 @@ partial class Build : NukeBuild
     [Parameter("The location to restore NuGet packages. Optional")]
     readonly AbsolutePath NuGetPackagesDirectory;
 
-    [Parameter("Version number of the NuGet packages built from the project. Default is '0.7.0'")]
-    string NuGetBaseVersionNumber = "0.7.0";
+    [Parameter("Version number of the NuGet packages built from the project. Default is '1.0.0'")]
+    readonly string NuGetBaseVersionNumber = "1.0.0";
 
-    [Parameter("Version suffix added to the NuGet packages built from the project. Default is '-local.1'")]
-    string NuGetVersionSuffix = "-local.1";
+    [Parameter("Version suffix added to the NuGet packages built from the project, see https://semver.org/spec/v2.0.0.html#spec-item-9 for details. Default is empty")]
+    // The default needs to be empty: there is no other way to make this parameter to accept an empty string, which will be required
+    // for releases like "v1.2.0".
+    readonly string NuGetVersionSuffix = string.Empty;
 
     [Parameter("Do not restore the projects before building.")]
     readonly bool NoRestore;

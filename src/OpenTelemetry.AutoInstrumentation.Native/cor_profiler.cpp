@@ -1336,11 +1336,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
 }
 #endif
 
-bool CorProfiler::IsAttached() const
-{
-    return is_attached_;
-}
-
 WSTRING CorProfiler::GetBytecodeInstrumentationAssembly() const
 {
     WSTRING bytecodeInstrumentationAssembly = managed_profiler_full_assembly_version;

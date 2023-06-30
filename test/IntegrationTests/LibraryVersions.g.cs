@@ -28,7 +28,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "6.0.12" },
-        new object[] { "7.0.5" },
+        new object[] { "7.0.8" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> EntityFrameworkCorePomeloMySql = new List<object[]>
@@ -45,8 +45,7 @@ public static class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
         new object[] { string.Empty }
 #else
-        new object[] { "2.3.0" },
-        new object[] { "2.4.0" },
+        new object[] { "7.5.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> GrpcNetClient = new List<object[]>
@@ -55,7 +54,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.43.0" },
-        new object[] { "2.53.0" },
+        new object[] { "2.54.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MassTransit = new List<object[]>
@@ -86,7 +85,16 @@ public static class LibraryVersion
 #else
         new object[] { "2.13.3" },
         new object[] { "2.15.0" },
-        new object[] { "2.19.2" },
+        new object[] { "2.20.0" },
+#endif
+    };
+    public static readonly IReadOnlyCollection<object[]> MySqlConnector = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "2.0.0" },
+        new object[] { "2.2.6" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MySqlData = new List<object[]>
@@ -113,7 +121,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.0.3" },
+        new object[] { "8.1.1" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Quartz = new List<object[]>
@@ -122,7 +130,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "3.4.0" },
-        new object[] { "3.6.2" },
+        new object[] { "3.6.3" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> StackExchangeRedis = new List<object[]>
@@ -134,16 +142,7 @@ public static class LibraryVersion
         new object[] { "2.1.50" },
         new object[] { "2.5.61" },
         new object[] { "2.6.66" },
-        new object[] { "2.6.111" },
-#endif
-    };
-    public static readonly IReadOnlyCollection<object[]> WCFCoreClient = new List<object[]>
-    {
-#if DEFAULT_TEST_PACKAGE_VERSIONS
-        new object[] { string.Empty }
-#else
-        new object[] { "4.10.2" },
-        new object[] { "6.0.0" },
+        new object[] { "2.6.116" },
 #endif
     };
 }

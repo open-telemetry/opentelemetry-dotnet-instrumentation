@@ -14,14 +14,17 @@
 // limitations under the License.
 // </copyright>
 
+using System.Diagnostics;
+using System.Reflection;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
-using static System.Net.WebRequestMethods;
 
 namespace TestApplication.Wcf.Client.NetFramework;
 
 internal static class Program
 {
+    private static readonly ActivitySource Source = new(Assembly.GetExecutingAssembly().GetName().Name, "1.0.0.0");
+
     public static async Task Main(string[] args)
     {
         string netTcpAddress;
@@ -40,10 +43,21 @@ internal static class Program
         }
         else
         {
-            throw new Exception("TestApplication.Wcf.Client.NetFramework application requires either 0 or exactly 2 arguments.");
+            throw new Exception(
+                "TestApplication.Wcf.Client.NetFramework application requires either 0 or exactly 2 arguments.");
         }
 
-        await CallService(netTcpAddress, new NetTcpBinding(SecurityMode.None)).ConfigureAwait(false);
+        try
+        {
+            Console.WriteLine("=============NetTcp===============");
+            await CallService(netTcpAddress, new NetTcpBinding(SecurityMode.None)).ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            // netTcp fails on open when there is no endpoint
+        }
+
+        Console.WriteLine("=============Http===============");
         await CallService(httpAddress, new BasicHttpBinding()).ConfigureAwait(false);
     }
 
@@ -53,20 +67,56 @@ internal static class Program
         // This code is not meant to illustrate best practices, only the
         // instrumentation.
         var client = new StatusServiceClient(binding, new EndpointAddress(new Uri(address)));
+        await client.OpenAsync().ConfigureAwait(false);
+
         try
         {
-            await client.OpenAsync().ConfigureAwait(false);
+            using var parent = Source.StartActivity("Parent");
 
-            var statusRequest = new StatusRequest
+            try
             {
-                Status = Guid.NewGuid().ToString("N"),
-            };
+                Console.WriteLine("Task-based Asynchronous Pattern call");
+                var rq = new StatusRequest { Status = "1" };
+                var response = await client.PingAsync(rq).ConfigureAwait(false);
 
-            var time = DateTimeOffset.UtcNow.ToString("o");
-            var response = await client.PingAsync(
-                statusRequest).ConfigureAwait(false);
+                Console.WriteLine(
+                    $"[{DateTimeOffset.UtcNow:o}] Request with status {rq.Status}. Server returned: {response?.ServerTime:o}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
 
-            Console.WriteLine($"[{time}] Sending request with status {statusRequest.Status}. Server returned: {response?.ServerTime:o}");
+            try
+            {
+                Console.WriteLine("Asynchronous Programming Model pattern call");
+                var rq = new StatusRequest { Status = "2" };
+                var asyncResult = client.BeginPing(rq, null!, null!);
+                var statusResponse = client.EndPing(asyncResult);
+
+                Console.WriteLine(
+                    $"[{DateTimeOffset.UtcNow:o}] Request with status {rq.Status}. Server returned: {statusResponse?.ServerTime:o}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            try
+            {
+                Console.WriteLine("Synchronous call");
+                var rq = new StatusRequest { Status = "3" };
+                var response = client.PingSync(rq);
+
+                Console.WriteLine(
+                    $"[{DateTimeOffset.UtcNow:o}] Request with status {rq.Status}. Server returned: {response?.ServerTime:o}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            using var sibling = Source.StartActivity("Sibling");
         }
         finally
         {

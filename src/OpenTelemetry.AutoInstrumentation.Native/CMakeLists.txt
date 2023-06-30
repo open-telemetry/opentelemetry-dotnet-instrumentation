@@ -8,7 +8,7 @@ cmake_policy(SET CMP0015 NEW)
 # Project definition
 # ******************************************************
 
-project("OpenTelemetry.AutoInstrumentation.Native" VERSION 0.7.0)
+project("OpenTelemetry.AutoInstrumentation.Native" VERSION 1.0.0)
 
 # ******************************************************
 # Environment detection
@@ -100,7 +100,7 @@ include(FetchContent)
 FetchContent_Declare(
     re2
     GIT_REPOSITORY https://github.com/google/re2.git
-    GIT_TAG 2023-06-02
+    GIT_TAG 2023-03-01
 )
 FetchContent_GetProperties(re2)
 if(NOT re2_POPULATED)
@@ -111,7 +111,7 @@ endif()
 FetchContent_Declare(
     fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-    GIT_TAG 10.0.0
+    GIT_TAG 9.1.0
 )
 FetchContent_GetProperties(fmt)
 if(NOT fmt_POPULATED)

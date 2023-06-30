@@ -1,0 +1,93 @@
+name: Build NuGet Packages
+
+on:
+  workflow_call:
+    outputs:
+      # Output the NuGet version suffix so that the caller workflow can have the correct package version.
+      nuget-version-suffix:
+        description: "The NuGet version suffix to build the packages"
+        value: ${{ jobs.build-nuget-packages.outputs.nuget-version-suffix }}
+
+
+env:
+  NUGET_PACKAGES: ${{ github.workspace }}/packages
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+jobs:
+  build-nuget-packages:
+    # In principle this job "needs: [ build, build-container ]", however, that would cause the build and build-container
+    # jobs to run twice, which is not what we want. Instead, we let the "caller" job handle the dependencies.
+
+    outputs:
+      nuget-version-suffix: ${{ steps.set-nuget-version-suffix.outputs.suffix }}
+
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v3.5.3
+
+      - uses: actions/setup-dotnet@v3.2.0
+        with:
+          dotnet-version: | 
+            6.0.411
+            7.0.305
+
+      - name: Check for NuGet packages cache
+        uses: actions/cache@v3.3.1
+        id: nuget-cache
+        with:
+          key: ${{ hashFiles('**/Directory.packages.props', './build/LibraryVersions.g.cs', '**/packages.config' ) }}
+          path: ${{ env.NUGET_PACKAGES }}
+
+      - name: Download Windows Artifacts from build job
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: bin-windows-2022
+          path: bin/ci-artifacts/bin-windows-2022
+
+      - name: Download CentOS Artifacts from build job
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: bin-centos
+          path: bin/ci-artifacts/bin-centos
+
+      - name: Download Alpine Artifacts from build job
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: bin-alpine
+          path: bin/ci-artifacts/bin-alpine
+
+      - name: Download Mac-OS Artifacts from build job
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: bin-macos-11
+          path: bin/ci-artifacts/bin-macos-11
+
+      - name: Set NUKE_NUGET_VERSION_SUFFIX for build triggered by 'tag'
+        id: set-nuget-version-suffix-from-tag
+        if: github.ref_type == 'tag'
+        shell: bash
+        run: echo "NUKE_NUGET_VERSION_SUFFIX=$(echo ${{ github.ref_name }} | sed -n 's/.*v[0-9]\+\.[0-9]\+\.[0-9]\+\(.*\)/\1/p')" >> "$GITHUB_ENV"
+
+      - name: Set NUKE_NUGET_VERSION_SUFFIX for regular build
+        id: set-nuget-version-suffix-from-run-id
+        if: github.ref_type != 'tag'
+        shell: bash
+        # See https://semver.org/spec/v2.0.0.html#spec-item-9 for valid version suffix
+        run: echo "NUKE_NUGET_VERSION_SUFFIX=-run-id.${{ github.run_id }}" >> "$GITHUB_ENV"
+
+      - name: Build NuGet packages
+        run: ./build.cmd BuildNuGetPackages
+
+      - name: Test NuGet Packages
+        run: ./build.cmd TestNuGetPackages
+
+      - name: Set NuGet Version Suffix
+        id: set-nuget-version-suffix
+        shell: bash
+        run: echo "suffix=${{ env.NUKE_NUGET_VERSION_SUFFIX }}" >> $GITHUB_OUTPUT
+
+      - name: Upload Nuget Artifacts
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: bin-nuget-packages
+          path: bin/nuget-artifacts/

@@ -24,14 +24,14 @@ namespace IntegrationTests.Helpers;
 /// </summary>
 internal static class DockerNetworkHelper
 {
-    public const string IntegrationTestsNetworkName = "integration-tests";
     public const string IntegrationTestsGateway = "10.1.1.1";
+    private const string IntegrationTestsNetworkName = "integration-tests";
 
     /// <summary>
     /// Creates a new Docker network with fixed name and gateway.
     /// if named network exists with specified fixed gateway address, gets the existing one.
     /// </summary>
-    /// <returns>Docker network ID</returns>
+    /// <returns>Docker network name</returns>
     internal static async Task<string> SetupIntegrationTestsNetworkAsync()
     {
         var client = new DockerClientConfiguration().CreateClient();
@@ -50,17 +50,17 @@ internal static class DockerNetworkHelper
             }
         }
 
-        var networkParams = new NetworksCreateParameters()
+        var networkParams = new NetworksCreateParameters
         {
             Name = IntegrationTestsNetworkName,
             Driver = "nat",
-            IPAM = new IPAM()
+            IPAM = new IPAM
             {
                 Config = new List<IPAMConfig>()
             }
         };
 
-        networkParams.IPAM.Config.Add(new IPAMConfig()
+        networkParams.IPAM.Config.Add(new IPAMConfig
         {
             Gateway = IntegrationTestsGateway,
             Subnet = "10.1.1.0/24"
@@ -72,6 +72,6 @@ internal static class DockerNetworkHelper
             throw new Exception("Could not create docker network");
         }
 
-        return result.ID;
+        return IntegrationTestsNetworkName;
     }
 }

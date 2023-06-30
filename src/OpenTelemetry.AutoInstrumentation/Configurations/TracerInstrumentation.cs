@@ -38,10 +38,12 @@ internal enum TracerInstrumentation
     /// </summary>
     SqlClient = 2,
 
+#if NET6_0_OR_GREATER
     /// <summary>
     /// GraphQL instrumentation.
     /// </summary>
     GraphQL = 3,
+#endif
 
     /// <summary>
     /// MongoDB instrumentation.
@@ -69,11 +71,12 @@ internal enum TracerInstrumentation
     /// GrpcNetClient instrumentation.
     /// </summary>
     GrpcNetClient = 8,
-
+#if NETFRAMEWORK
     /// <summary>
     /// WCF instrumentation.
     /// </summary>
-    Wcf = 9,
+    WcfService = 9,
+#endif
 
 #if NET6_0_OR_GREATER
     /// <summary>
@@ -113,10 +116,10 @@ internal enum TracerInstrumentation
     /// WcfClient instrumentation.
     /// </summary>
     WcfClient = 16,
+#endif
 
     /// <summary>
-    /// WcfService instrumentation.
+    /// MySqlConnector instrumentation.
     /// </summary>
-    WcfService = 17
-#endif
+    MySqlConnector = 17
 }

@@ -17,6 +17,7 @@
 using System.Net.Sockets;
 using FluentAssertions;
 using IntegrationTests.Helpers;
+using OpenTelemetry.Proto.Trace.V1;
 using Xunit.Abstractions;
 using static OpenTelemetry.Proto.Trace.V1.Span.Types;
 
@@ -51,17 +52,12 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
         Output.WriteResult(_serverProcess);
     }
 
-    protected async Task SubmitsTracesInternal(string clientPackageVersion)
+    protected async Task<MockSpansCollector> SubmitsTracesInternal(string clientPackageVersion)
     {
         EnvironmentTools.IsWindowsAdministrator().Should().BeTrue(); // WCF Server needs admin
 
-        using var collector = new MockSpansCollector(Output);
+        var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        // the test app makes 2 calls (therefore we expect 4 spans)
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 1");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 1");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Server, "Server 2");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == SpanKind.Client, "Client 2");
 
         var serverHelper = new WcfServerTestHelper(Output);
         _serverProcess = serverHelper.RunWcfServer(collector);
@@ -72,7 +68,7 @@ public abstract class WcfTestsBase : TestHelper, IDisposable
             PackageVersion = clientPackageVersion
         });
 
-        collector.AssertExpectations();
+        return collector;
     }
 
     private async Task WaitForServer()

@@ -60,7 +60,6 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.GraphQL",
             Versions = new List<string>
             {
-                "2.3.0",
                 "*"
             }
         },
@@ -109,6 +108,17 @@ internal static class PackageVersionDefinitions
             {
                 "2.13.3",
                 "2.15.0",
+                "*"
+            }
+        },
+        new()
+        {
+            IntegrationName = "MySqlConnector",
+            NugetPackageName = "MySqlConnector",
+            TestApplicationName = "TestApplication.MySqlConnector",
+            Versions = new List<string>
+            {
+                "2.0.0",
                 "*"
             }
         },
@@ -167,17 +177,6 @@ internal static class PackageVersionDefinitions
                 "2.1.50",
                 "2.5.61",
                 "2.6.66",
-                "*"
-            }
-        },
-        new()
-        {
-            IntegrationName = "WCFCoreClient",
-            NugetPackageName = "System.ServiceModel.Http",
-            TestApplicationName = "TestApplication.Wcf.Client.DotNet",
-            Versions = new List<string>
-            {
-                "4.10.2",
                 "*"
             }
         }
