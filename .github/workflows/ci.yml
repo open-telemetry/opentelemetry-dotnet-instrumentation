@@ -150,8 +150,13 @@ jobs:
       matrix:
         include:
           - base-image: alpine
+            build-source: alpine
             os-type: linux-musl
           - base-image: centos
+            build-source: centos
+            os-type: linux-glibc
+          - base-image: debian
+            build-source: centos
             os-type: linux-glibc
     runs-on: ubuntu-20.04
     timeout-minutes: 60
@@ -160,7 +165,7 @@ jobs:
     - name: Download Artifacts from build job
       uses: actions/download-artifact@v3.0.2
       with:
-        name: bin-${{ matrix.base-image }}
+        name: bin-${{ matrix.build-source }}
         path: bin/tracer-home
     - name: Build in Docker container
       run: |
