@@ -5,29 +5,11 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.7.0...HEAD)
-
-This release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
-
-- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-  [`1.5.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.5.0)
-- `System.Diagnostics.DiagnosticSource`: [`7.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/7.0.0)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.0.0-rc.1...HEAD)
 
 ### Added
 
-- The environment variable `OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED` could be
-  used to enable or disable the failing process when
-  automatic instrumentation cannot be executed.
-
 ### Changed
-
-- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-  [`1.5.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.5.0).
-- ASP.NET instrumentation no longer requires manual modification
-  of config files to include `TelemetryHttpModule`.
-- Parameter for `ConfigureTracesOptions` extension point for StackExchangeRedis
-  changed type from `OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisCallsInstrumentationOptions`
-  to `OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisInstrumentationOptions`.
 
 ### Deprecated
 
@@ -36,6 +18,47 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 ### Fixed
 
 ### Security
+
+## [1.0.0-rc.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.0.0-rc.1)
+
+This release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
+
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.5.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.5.1)
+- `System.Diagnostics.DiagnosticSource`: [`7.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/7.0.0)
+
+### Added
+
+- The environment variable `OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED` could be
+  used to enable or disable the failing process when
+  automatic instrumentation cannot be executed.
+- Add support for MySqlConnector traces instrumentation.
+
+### Changed
+
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.5.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.5.1).
+- ASP.NET instrumentation no longer requires manual modification
+  of config files to include `TelemetryHttpModule`.
+- Parameter for `ConfigureTracesOptions` extension point for StackExchangeRedis
+  changed type from `OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisCallsInstrumentationOptions`
+  to `OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisInstrumentationOptions`.
+- `WCF` instrumentation split to `WCFCLIENT` and `WCFSERVICE`.
+  Both supported only on .NET Framework.
+- `WCFCLIENT` and `WCFSERVICE` no longer requires manual modification
+  of config files to include `TelemetryEndpointBehaviorExtensionElement`.
+- [GraphQL](https://www.nuget.org/packages/GraphQL/) instrumentation is now
+  supported from version 7.5.0 working on .NET.
+
+### Removed
+
+- Removed `WCF` instrumentation for Core WCF Client working on .NET.
+- Removed [GraphQL](https://www.nuget.org/packages/GraphQL/) instrumentation
+  for versions 2.3.0-2.4.*.
+
+### Known issues
+
+- Lack of support for MySql.Data 8.0.33. See [#2542](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2542).
 
 ## [0.7.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.7.0)
 

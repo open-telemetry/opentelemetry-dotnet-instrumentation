@@ -221,7 +221,9 @@ public class SettingsTests : IDisposable
 #if NETFRAMEWORK
     [InlineData("ASPNET", TracerInstrumentation.AspNet)]
 #endif
+#if NET6_0_OR_GREATER
     [InlineData("GRAPHQL", TracerInstrumentation.GraphQL)]
+#endif
     [InlineData("HTTPCLIENT", TracerInstrumentation.HttpClient)]
     [InlineData("MONGODB", TracerInstrumentation.MongoDB)]
 #if NET6_0_OR_GREATER
@@ -231,6 +233,9 @@ public class SettingsTests : IDisposable
     [InlineData("NPGSQL", TracerInstrumentation.Npgsql)]
     [InlineData("SQLCLIENT", TracerInstrumentation.SqlClient)]
     [InlineData("GRPCNETCLIENT", TracerInstrumentation.GrpcNetClient)]
+#if NETFRAMEWORK
+    [InlineData("WCFSERVICE", TracerInstrumentation.WcfService)]
+#endif
 #if NET6_0_OR_GREATER
     [InlineData("MASSTRANSIT", TracerInstrumentation.MassTransit)]
 #endif
@@ -241,6 +246,10 @@ public class SettingsTests : IDisposable
     [InlineData("ENTITYFRAMEWORKCORE", TracerInstrumentation.EntityFrameworkCore)]
     [InlineData("ASPNETCORE", TracerInstrumentation.AspNetCore)]
 #endif
+#if NETFRAMEWORK
+    [InlineData("WCFCLIENT", TracerInstrumentation.WcfClient)]
+#endif
+    [InlineData("MYSQLCONNECTOR", TracerInstrumentation.MySqlConnector)]
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false");

@@ -19,18 +19,11 @@ internal static partial class InstrumentationDefinitions
 
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
     {
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(14);
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(12);
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
-{
-            // GraphQL
-            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.GraphQL))
-            {
-                nativeCallTargetDefinitions.Add(new("GraphQL", "GraphQL.Execution.ExecutionStrategy", "ExecuteAsync", new[] {"System.Threading.Tasks.Task`1[GraphQL.ExecutionResult]", "GraphQL.Execution.ExecutionContext"}, 2, 3, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration"));
-                nativeCallTargetDefinitions.Add(new("GraphQL", "GraphQL.Execution.SubscriptionExecutionStrategy", "ExecuteAsync", new[] {"System.Threading.Tasks.Task`1[GraphQL.ExecutionResult]", "GraphQL.Execution.ExecutionContext"}, 2, 3, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration"));
-            }
-
+        {
             // MongoDB
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.MongoDB))
             {
@@ -60,31 +53,28 @@ internal static partial class InstrumentationDefinitions
                 nativeCallTargetDefinitions.Add(new("StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImplAsync", new[] {"System.Threading.Tasks.Task`1[StackExchange.Redis.ConnectionMultiplexer]", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter"}, 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync"));
                 nativeCallTargetDefinitions.Add(new("StackExchange.Redis", "StackExchange.Redis.ConnectionMultiplexer", "ConnectImplAsync", new[] {"System.Threading.Tasks.Task`1[StackExchange.Redis.ConnectionMultiplexer]", "StackExchange.Redis.ConfigurationOptions", "System.IO.TextWriter", "System.Nullable`1[StackExchange.Redis.ServerType]"}, 2, 0, 0, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync"));
             }
-
         }
 
         // Logs
         var logSettings = Instrumentation.LogSettings.Value;
         if (logSettings.LogsEnabled)
-{
+        {
             // ILogger
             if (logSettings.EnabledInstrumentations.Contains(LogInstrumentation.ILogger))
             {
                 nativeCallTargetDefinitions.Add(new("Microsoft.Extensions.Logging", "Microsoft.Extensions.Logging.LoggingBuilder", ".ctor", new[] {"System.Void", "Microsoft.Extensions.DependencyInjection.IServiceCollection"}, 3, 1, 0, 7, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration"));
             }
-
         }
 
         // Metrics
         var metricSettings = Instrumentation.MetricSettings.Value;
         if (metricSettings.MetricsEnabled)
-{
+        {
             // NServiceBus
             if (metricSettings.EnabledInstrumentations.Contains(MetricInstrumentation.NServiceBus))
             {
                 nativeCallTargetDefinitions.Add(new("NServiceBus.Core", "NServiceBus.EndpointConfiguration", ".ctor", new[] {"System.Void", "System.String"}, 8, 0, 0, 8, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration"));
             }
-
         }
 
         return nativeCallTargetDefinitions.ToArray();

@@ -13,7 +13,7 @@ namespace trace
 void CorProfiler::InitNetFxAssemblyRedirectsMap()
 {
     assembly_version_redirect_map_.insert({
-        { L"Google.Protobuf", {3, 23, 2, 0} },
+        { L"Google.Protobuf", {3, 23, 3, 0} },
         { L"Grpc.Core", {2, 0, 0, 0} },
         { L"Grpc.Core.Api", {2, 0, 0, 0} },
         { L"Microsoft.Bcl.AsyncInterfaces", {7, 0, 0, 0} },
@@ -23,7 +23,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"Microsoft.Extensions.DependencyInjection", {7, 0, 0, 0} },
         { L"Microsoft.Extensions.DependencyInjection.Abstractions", {7, 0, 0, 0} },
         { L"Microsoft.Extensions.Logging", {7, 0, 0, 0} },
-        { L"Microsoft.Extensions.Logging.Abstractions", {7, 0, 0, 0} },
+        { L"Microsoft.Extensions.Logging.Abstractions", {7, 0, 0, 1} },
         { L"Microsoft.Extensions.Logging.Configuration", {7, 0, 0, 0} },
         { L"Microsoft.Extensions.Options", {7, 0, 0, 1} },
         { L"Microsoft.Extensions.Options.ConfigurationExtensions", {7, 0, 0, 0} },
@@ -33,7 +33,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"OpenTelemetry", {1, 0, 0, 0} },
         { L"OpenTelemetry.Api", {1, 0, 0, 0} },
         { L"OpenTelemetry.Api.ProviderBuilderExtensions", {1, 0, 0, 0} },
-        { L"OpenTelemetry.AutoInstrumentation", {0, 7, 0, 0} },
+        { L"OpenTelemetry.AutoInstrumentation", {1, 0, 0, 0} },
         { L"OpenTelemetry.Exporter.Console", {1, 0, 0, 0} },
         { L"OpenTelemetry.Exporter.OpenTelemetryProtocol", {1, 0, 0, 0} },
         { L"OpenTelemetry.Exporter.Prometheus.HttpListener", {1, 0, 0, 0} },

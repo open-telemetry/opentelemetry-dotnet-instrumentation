@@ -95,9 +95,8 @@ Bytecode instrumentations must be implemented following
 the proper attribute annotation so that the native CLR Profiler implementation
 can inject them at runtime. Some examples include:
 
-  - [GraphQL](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/GraphQL)
   - [Logger](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/Logger/)
-  - [MongoDb](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/MongoDb/)
+  - [MongoDB](../src/OpenTelemetry.AutoInstrumentation/Instrumentations/MongoDB/)
 
 Both kinds of instrumentation are enabled only when the targeted modules are loaded
 into the targeted application.

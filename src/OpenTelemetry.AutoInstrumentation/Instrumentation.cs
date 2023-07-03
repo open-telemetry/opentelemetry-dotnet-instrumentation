@@ -43,27 +43,6 @@ internal static class Instrumentation
     private static MeterProvider? _meterProvider;
     private static PluginManager? _pluginManager;
 
-    /// <summary>
-    /// Gets a value indicating whether OpenTelemetry's profiler is attached to the current process.
-    /// </summary>
-    /// <value>
-    ///   <c>true</c> if the profiler is currently attached; <c>false</c> otherwise.
-    /// </value>
-    public static bool ProfilerAttached
-    {
-        get
-        {
-            try
-            {
-                return NativeMethods.IsProfilerAttached();
-            }
-            catch (DllNotFoundException)
-            {
-                return false;
-            }
-        }
-    }
-
     internal static PluginManager? PluginManager => _pluginManager;
 
     internal static ILifespanManager LifespanManager => LazyInstrumentationLoader.LifespanManager;
@@ -145,7 +124,7 @@ internal static class Instrumentation
                 }
                 else
                 {
-                    AddLazilyLoadedTraceInstrumentations(LazyInstrumentationLoader, _pluginManager, TracerSettings.Value.EnabledInstrumentations);
+                    AddLazilyLoadedTraceInstrumentations(LazyInstrumentationLoader, _pluginManager, TracerSettings.Value);
                     Logger.Information("Initialized lazily-loaded trace instrumentations without initializing sdk.");
                 }
             }
@@ -177,35 +156,42 @@ internal static class Instrumentation
             throw;
         }
 
-        RegisterInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
-
-        try
+        if (GeneralSettings.Value.ProfilerEnabled)
         {
-            foreach (var payload in _pluginManager.GetAllDefinitionsPayloads())
+            RegisterBytecodeInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
+
+            try
             {
-                RegisterInstrumentations(payload);
+                foreach (var payload in _pluginManager.GetAllDefinitionsPayloads())
+                {
+                    RegisterBytecodeInstrumentations(payload);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Exception occurred while registering instrumentations from plugins.");
-        }
-
-        try
-        {
-            Logger.Debug("Sending CallTarget derived integration definitions to native library.");
-            var payload = InstrumentationDefinitions.GetDerivedDefinitions();
-            NativeMethods.AddDerivedInstrumentations(payload.DefinitionsId, payload.Definitions);
-            foreach (var def in payload.Definitions)
+            catch (Exception ex)
             {
-                def.Dispose();
+                Logger.Error(ex, "Exception occurred while registering instrumentations from plugins.");
             }
 
-            Logger.Information("The profiler has been initialized with {0} derived definitions.", payload.Definitions.Length);
+            try
+            {
+                Logger.Debug("Sending CallTarget derived integration definitions to native library.");
+                var payload = InstrumentationDefinitions.GetDerivedDefinitions();
+                NativeMethods.AddDerivedInstrumentations(payload.DefinitionsId, payload.Definitions);
+                foreach (var def in payload.Definitions)
+                {
+                    def.Dispose();
+                }
+
+                Logger.Information("The profiler has been initialized with {0} derived definitions.", payload.Definitions.Length);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, ex.Message);
+            }
         }
-        catch (Exception ex)
+        else
         {
-            Logger.Error(ex, ex.Message);
+            Logger.Debug("Skipping CLR Profiler initialization. {0} environment variable was not set to '1'.", ConfigurationKeys.ProfilingEnabled);
         }
 
         if (TracerSettings.Value.OpenTracingEnabled)
@@ -214,7 +200,7 @@ internal static class Instrumentation
         }
     }
 
-    private static void RegisterInstrumentations(InstrumentationDefinitions.Payload payload)
+    private static void RegisterBytecodeInstrumentations(InstrumentationDefinitions.Payload payload)
     {
         try
         {
@@ -270,15 +256,18 @@ internal static class Instrumentation
         }
     }
 
-    private static void AddLazilyLoadedTraceInstrumentations(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, IReadOnlyList<TracerInstrumentation> enabledInstrumentations)
+    private static void AddLazilyLoadedTraceInstrumentations(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
     {
-        foreach (var instrumentation in enabledInstrumentations)
+        foreach (var instrumentation in tracerSettings.EnabledInstrumentations)
         {
             switch (instrumentation)
             {
 #if NETFRAMEWORK
                 case TracerInstrumentation.AspNet:
                     DelayedInitialization.Traces.AddAspNet(lazyInstrumentationLoader, pluginManager);
+                    break;
+                case TracerInstrumentation.WcfService:
+                    DelayedInitialization.Traces.AddWcf(lazyInstrumentationLoader, pluginManager);
                     break;
 #endif
                 case TracerInstrumentation.HttpClient:
@@ -289,9 +278,6 @@ internal static class Instrumentation
                     break;
                 case TracerInstrumentation.SqlClient:
                     DelayedInitialization.Traces.AddSqlClient(lazyInstrumentationLoader, pluginManager);
-                    break;
-                case TracerInstrumentation.Wcf:
-                    DelayedInitialization.Traces.AddWcf(lazyInstrumentationLoader, pluginManager);
                     break;
                 case TracerInstrumentation.Quartz:
                     DelayedInitialization.Traces.AddQuartz(lazyInstrumentationLoader, pluginManager);
@@ -310,16 +296,19 @@ internal static class Instrumentation
                     break;
                 case TracerInstrumentation.MassTransit:
                     break;
+                case TracerInstrumentation.GraphQL:
+                    DelayedInitialization.Traces.AddGraphQL(LazyInstrumentationLoader, pluginManager, tracerSettings);
+                    break;
 #endif
                 case TracerInstrumentation.MongoDB:
-                    break;
-                case TracerInstrumentation.GraphQL:
                     break;
                 case TracerInstrumentation.Npgsql:
                     break;
                 case TracerInstrumentation.NServiceBus:
                     break;
                 case TracerInstrumentation.Elasticsearch:
+                    break;
+                case TracerInstrumentation.MySqlConnector:
                     break;
                 default:
                     Logger.Warning($"Configured trace instrumentation type is not supported: {instrumentation}");
@@ -396,16 +385,26 @@ internal static class Instrumentation
         {
             if (_tracerProvider is not null)
             {
+                const string OpenTracingShimActivitySourceName = "OpenTelemetry.AutoInstrumentation.OpenTracingShim";
+
                 // Instantiate the OpenTracing shim. The underlying OpenTelemetry tracer will create
-                // spans using the "OpenTelemetry.AutoInstrumentation.OpenTracingShim" source.
+                // spans using the OpenTracingShimActivitySourceName source.
                 var openTracingShim = new TracerShim(
-                    _tracerProvider.GetTracer("OpenTelemetry.AutoInstrumentation.OpenTracingShim"),
+                    _tracerProvider.GetTracer(OpenTracingShimActivitySourceName),
                     Propagators.DefaultTextMapPropagator);
 
                 // This registration must occur prior to any reference to the OpenTracing tracer:
                 // otherwise the no-op tracer is going to be used by OpenTracing instead.
-                GlobalTracer.RegisterIfAbsent(openTracingShim);
-                Logger.Information("OpenTracingShim loaded.");
+                if (GlobalTracer.RegisterIfAbsent(openTracingShim))
+                {
+                    Logger.Information("OpenTracingShim registered as the OpenTracing global tracer.");
+                }
+                else
+                {
+                    Logger.Error(
+                        "OpenTracingShim could not be registered as the OpenTracing global tracer." +
+                        "Another tracer was already registered. OpenTracing signals will not be captured.");
+                }
             }
             else
             {
