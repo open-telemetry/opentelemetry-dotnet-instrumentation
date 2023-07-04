@@ -9,6 +9,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Support for Azure App Service resource detector.
+
 ### Changed
 
 ### Deprecated

@@ -36,8 +36,9 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Process" />
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" />
-    <PackageReference Include="OpenTelemetry.Shims.OpenTracing" />
+    <PackageReference Include="OpenTelemetry.ResourceDetectors.Azure" />
     <PackageReference Include="OpenTelemetry.ResourceDetectors.Container" />
+    <PackageReference Include="OpenTelemetry.Shims.OpenTracing" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">

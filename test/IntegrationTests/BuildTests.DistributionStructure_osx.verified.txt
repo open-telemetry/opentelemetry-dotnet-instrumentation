@@ -34,6 +34,7 @@
   /net/OpenTelemetry.Instrumentation.Runtime.dll,
   /net/OpenTelemetry.Instrumentation.SqlClient.dll,
   /net/OpenTelemetry.Instrumentation.StackExchangeRedis.dll,
+  /net/OpenTelemetry.ResourceDetectors.Azure.dll,
   /net/OpenTelemetry.ResourceDetectors.Container.dll,
   /net/OpenTelemetry.Shims.OpenTracing.dll,
   /net/OpenTelemetry.dll,

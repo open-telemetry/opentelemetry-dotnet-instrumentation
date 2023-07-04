@@ -15,6 +15,7 @@
 // </copyright>
 
 using System.Runtime.CompilerServices;
+using OpenTelemetry.ResourceDetectors.Azure;
 using OpenTelemetry.ResourceDetectors.Container;
 using OpenTelemetry.Resources;
 
@@ -40,7 +41,8 @@ internal static class ResourceConfigurator
             resourceBuilder = enabledResourceDetector switch
             {
                 ResourceDetector.Container => Wrappers.AddContainerResourceDetector(resourceBuilder),
-                _ => resourceBuilder,
+                ResourceDetector.Azure => Wrappers.AddAzureResourceDetecor(resourceBuilder),
+                _ => resourceBuilder
             };
         }
 
@@ -66,6 +68,12 @@ internal static class ResourceConfigurator
         public static ResourceBuilder AddContainerResourceDetector(ResourceBuilder resourceBuilder)
         {
             return resourceBuilder.AddDetector(new ContainerResourceDetector());
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static ResourceBuilder AddAzureResourceDetecor(ResourceBuilder resourceBuilder)
+        {
+            return resourceBuilder.AddDetector(new AppServiceResourceDetector());
         }
     }
 }
