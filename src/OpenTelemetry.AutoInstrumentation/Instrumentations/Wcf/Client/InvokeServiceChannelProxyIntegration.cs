@@ -166,8 +166,7 @@ public static class InvokeServiceChannelProxyIntegration
         var duckCastedAsyncResult = DuckCast(sendAsyncResult);
 
         var initialCallback = duckCastedAsyncResult.Callback;
-        AsyncCallback newCallback = NewCallback;
-        duckCastedAsyncResult.Callback = newCallback;
+        duckCastedAsyncResult.Callback = NewCallback;
         void NewCallback(IAsyncResult asyncResult)
         {
             try
