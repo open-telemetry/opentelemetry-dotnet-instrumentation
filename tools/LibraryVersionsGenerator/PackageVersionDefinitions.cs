@@ -28,6 +28,7 @@ internal static class PackageVersionDefinitions
             Versions = new List<string>
             {
                 "8.0.0",
+                "8.1.1",
                 "*"
             }
         },
