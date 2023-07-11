@@ -55,6 +55,7 @@ public static class LibraryVersion
 #else
         new object[] { "2.43.0" },
         new object[] { "2.54.0" },
+        new object[] { "2.55.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MassTransit = new List<object[]>
