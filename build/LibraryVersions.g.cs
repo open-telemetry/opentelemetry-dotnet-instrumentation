@@ -129,6 +129,7 @@ public static class LibraryVersion
                 "2.5.61",
                 "2.6.66",
                 "2.6.116",
+                "2.6.122",
             }
         },
     };
