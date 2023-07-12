@@ -71,6 +71,7 @@ internal static class PackageVersionDefinitions
             Versions = new List<string>
             {
                 "2.43.0",
+                "2.54.0",
                 "*"
             }
         },
