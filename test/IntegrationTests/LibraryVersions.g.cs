@@ -29,6 +29,7 @@ public static class LibraryVersion
 #else
         new object[] { "6.0.12" },
         new object[] { "7.0.8" },
+        new object[] { "7.0.9" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> EntityFrameworkCorePomeloMySql = new List<object[]>
