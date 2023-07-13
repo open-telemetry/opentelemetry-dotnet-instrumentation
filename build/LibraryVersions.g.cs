@@ -20,6 +20,7 @@ public static class LibraryVersion
                 "8.0.0",
                 "8.1.1",
                 "8.1.2",
+                "8.1.3",
             }
         },
         {
