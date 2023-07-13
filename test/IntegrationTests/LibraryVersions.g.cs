@@ -20,7 +20,6 @@ public static class LibraryVersion
 #else
         new object[] { "8.0.0" },
         new object[] { "8.1.1" },
-        new object[] { "8.1.2" },
         new object[] { "8.1.3" },
 #endif
     };
