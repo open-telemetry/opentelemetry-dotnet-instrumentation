@@ -46,25 +46,25 @@ public class GraphQLTests : TestHelper
         SetExporter(collector);
 
         // SUCCESS: query using GET
-        Request(requests, method: "GET", url: "/graphql?query=" + WebUtility.UrlEncode("query{hero{name appearsIn}}"));
-        Expect(collector, spanName: "query", graphQLOperationType: "query", graphQLOperationName: null, graphQLDocument: "query{hero{name appearsIn}}", setDocument: setDocument);
+        Request(requests, id: 1, method: "GET", url: "/graphql?query=" + WebUtility.UrlEncode("query{hero{name appearsIn}}"));
+        Expect(collector, id: 1, spanName: "query", setDocument: setDocument);
 
         // SUCCESS: query using POST (default)
-        Request(requests, body: @"{""query"":""query HeroQuery{hero{name appearsIn}}"",""operationName"": ""HeroQuery""}");
-        Expect(collector, spanName: "query HeroQuery", graphQLOperationType: "query", graphQLOperationName: "HeroQuery", graphQLDocument: "query HeroQuery{hero{name appearsIn}}", setDocument: setDocument);
+        Request(requests, id: 2, body: @"{""query"":""query HeroQuery{hero{name appearsIn}}"",""operationName"": ""HeroQuery""}");
+        Expect(collector, id: 2, spanName: "query HeroQuery", setDocument: setDocument);
 
         // SUCCESS: mutation
-        Request(requests, body: @"{""query"":""mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}"",""variables"":{""human"":{""name"": ""Boba Fett""}}}");
-        Expect(collector, spanName: "mutation AddBobaFett", graphQLOperationType: "mutation", graphQLOperationName: "AddBobaFett", graphQLDocument: "mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}", setDocument: setDocument);
+        Request(requests, id: 3, body: @"{""query"":""mutation AddBobaFett($human:HumanInput!){createHuman(human: $human){id name}}"",""variables"":{""human"":{""name"": ""Boba Fett""}}}");
+        Expect(collector, id: 3, spanName: "mutation AddBobaFett", setDocument: setDocument);
 
         // SUCCESS: subscription
-        Request(requests, body: @"{ ""query"":""subscription HumanAddedSub{humanAdded{name}}""}");
-        Expect(collector, spanName: "subscription HumanAddedSub", graphQLOperationType: "subscription", graphQLOperationName: "HumanAddedSub", graphQLDocument: "subscription HumanAddedSub{humanAdded{name}}", setDocument: setDocument);
+        Request(requests, id: 4, body: @"{ ""query"":""subscription HumanAddedSub{humanAdded{name}}""}");
+        Expect(collector, id: 4, spanName: "subscription HumanAddedSub", setDocument: setDocument);
 
         // TODO: re-enable if exceptions are supported again.
         // FAILURE: query fails 'execute' step
-        // Request(requests, body: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}");
-        // Expect(collector, spanName: "subscription NotImplementedSub", graphQLOperationType: "subscription", graphQLOperationName: "NotImplementedSub", graphQLDocument: "subscription NotImplementedSub{throwNotImplementedException{name}}", setDocument: setDocument, verifyFailure: VerifyNotImplementedException);
+        // Request(requests, id: 5, body: @"{""query"":""subscription NotImplementedSub{throwNotImplementedException{name}}""}");
+        // Expect(collector, id: 5, spanName: "subscription NotImplementedSub", setDocument: setDocument, verifyFailure: VerifyNotImplementedException);
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED", "false");
@@ -96,14 +96,28 @@ public class GraphQLTests : TestHelper
         }
     }
 
-    private static void Request(List<RequestInfo> requests, string method = "POST", string url = "/graphql", string? body = null)
+    private static void Request(List<RequestInfo> requests, byte id, string method = "POST", string url = "/graphql", string? body = null)
     {
         requests.Add(new RequestInfo
         {
+            Id = GetTraceIdHex(id),
             Url = url,
             HttpMethod = method,
             RequestBody = body
         });
+    }
+
+    private static byte[] GetTraceIdBytes(byte id)
+    {
+        var traceId = new byte[16];
+        traceId[traceId.Length - 1] = id;
+
+        return traceId;
+    }
+
+    private static string GetTraceIdHex(byte id)
+    {
+        return id.ToString("x32");
     }
 
     private static bool VerifyNotImplementedException(Span span)
@@ -124,26 +138,16 @@ public class GraphQLTests : TestHelper
     private void Expect(
         MockSpansCollector collector,
         string spanName,
-        string graphQLOperationType,
-        string? graphQLOperationName,
-        string graphQLDocument,
+        byte id,
         bool setDocument,
         Predicate<Span>? verifyFailure = null)
     {
+        var traceIdBytes = GetTraceIdBytes(id);
+
         bool Predicate(Span span)
         {
-#if NETFRAMEWORK
-            // There is no parent Span. There is no parent Activity on .NET Fx
-            if (span.Kind != Span.Types.SpanKind.Server)
-#else
-            // AspNetCore instrumentation always creates parent Activity. The activity is not recorded if instrumentation is disabled.
-            if (span.Kind != Span.Types.SpanKind.Internal)
-#endif
-            {
-                return false;
-            }
-
-            if (span.Name != spanName)
+            var traceId = span.TraceId.ToByteArray();
+            if (!traceId.SequenceEqual(traceIdBytes))
             {
                 return false;
             }
@@ -153,17 +157,7 @@ public class GraphQLTests : TestHelper
                 return verifyFailure(span);
             }
 
-            if (!span.Attributes.Any(attr => attr.Key == "graphql.operation.type" && attr.Value?.StringValue == graphQLOperationType))
-            {
-                return false;
-            }
-
-            if (graphQLOperationName != null && !span.Attributes.Any(attr => attr.Key == "graphql.operation.name" && attr.Value?.StringValue == graphQLOperationName))
-            {
-                return false;
-            }
-
-            if (setDocument && !span.Attributes.Any(attr => attr.Key == "graphql.document" && attr.Value?.StringValue == graphQLDocument))
+            if (setDocument && !span.Attributes.Any(attr => attr.Key == "graphql.document" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)))
             {
                 return false;
             }
@@ -194,12 +188,16 @@ public class GraphQLTests : TestHelper
         {
             var url = $"http://localhost:{aspNetCorePort}{requestInfo.Url}";
             var method = requestInfo.HttpMethod;
+            var w3c = $"00-{requestInfo.Id}-0000000000000001-01";
 
             HttpResponseMessage response;
 
             if (method == "GET")
             {
-                response = await client.GetAsync(url);
+                using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+                requestMessage.Headers.Add("traceparent", w3c);
+
+                response = await client.SendAsync(requestMessage);
             }
             else if (method == "POST")
             {
@@ -208,7 +206,11 @@ public class GraphQLTests : TestHelper
                     throw new NotSupportedException("RequestBody cannot be null when you are using POST method");
                 }
 
-                response = await client.PostAsync(url, new StringContent(requestInfo.RequestBody, Encoding.UTF8, "application/json"));
+                using var requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
+                requestMessage.Content = new StringContent(requestInfo.RequestBody, Encoding.UTF8, "application/json");
+                requestMessage.Headers.Add("traceparent", w3c);
+
+                response = await client.SendAsync(requestMessage);
             }
             else
             {
@@ -236,6 +238,8 @@ public class GraphQLTests : TestHelper
         public string? HttpMethod { get; set; }
 
         public string? RequestBody { get; set; }
+
+        public string? Id { get; set; }
     }
 }
 

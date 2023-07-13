@@ -50,6 +50,7 @@ public static class LibraryVersion
             {
                 "2.43.0",
                 "2.54.0",
+                "2.55.0",
             }
         },
         {
