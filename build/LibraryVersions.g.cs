@@ -27,6 +27,7 @@ public static class LibraryVersion
             {
                 "6.0.12",
                 "7.0.8",
+                "7.0.9",
             }
         },
         {
@@ -130,6 +131,7 @@ public static class LibraryVersion
                 "2.5.61",
                 "2.6.66",
                 "2.6.116",
+                "2.6.122",
             }
         },
     };
