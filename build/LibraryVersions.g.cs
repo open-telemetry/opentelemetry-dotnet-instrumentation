@@ -18,7 +18,7 @@ public static class LibraryVersion
             new List<string>
             {
                 "8.0.0",
-                "8.1.1",
+                "8.1.3",
             }
         },
         {
@@ -131,6 +131,7 @@ public static class LibraryVersion
                 "2.5.61",
                 "2.6.66",
                 "2.6.116",
+                "2.6.122",
             }
         },
     };

@@ -19,7 +19,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.1.1" },
+        new object[] { "8.1.3" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> EntityFrameworkCore = new List<object[]>
@@ -145,6 +145,7 @@ public static class LibraryVersion
         new object[] { "2.5.61" },
         new object[] { "2.6.66" },
         new object[] { "2.6.116" },
+        new object[] { "2.6.122" },
 #endif
     };
 }
