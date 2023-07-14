@@ -54,6 +54,23 @@ The most common reason is that the instrumented application
 has no permissions to load the OpenTelemetry .NET Automatic Instrumentation
 assemblies.
 
+### Could not install package 'OpenTelemetry.AutoInstrumentation.Runtime.Native'
+
+#### Symptoms
+
+When adding the NuGet packages to your project you get an error message similar
+to:
+
+```txt
+Could not install package 'OpenTelemetry.AutoInstrumentation.Runtime.Native 1.0.0-rc.1'. You are trying to install this package into a project that targets '.NETFramework,Version=v4.7.2', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author.
+```
+
+#### Solution
+
+The NuGet packages don't support old-style `csproj` projects. Either deploy the
+automatic instrumentation to the [machine instead of using NuGet packages](./README.md###powershell-module),
+or migrate your project to the SDK style `csproj`.
+
 ### Performance issues
 
 #### Symptoms
