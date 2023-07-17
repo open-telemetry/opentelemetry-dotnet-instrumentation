@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
@@ -30,23 +31,23 @@ internal class ApplicationInExcludeListRule : Rule
 
     internal override bool Evaluate()
     {
-        var applicationName = GetApplicationName();
+        var processModuleName = GetProcessModuleName();
 
-        if (IsApplicationInExcludeList(applicationName))
+        if (IsProcessInExcludeList(processModuleName))
         {
-            Logger.Information($"Rule Engine: {applicationName} is in the exclusion list. Skipping initialization.");
+            Logger.Information($"Rule Engine: {processModuleName} is in the exclusion list. Skipping initialization.");
             return false;
         }
 
-        Logger.Debug($"Rule Engine: {applicationName} is not in the exclusion list. ApplicationInExcludeListRule evaluation success.");
+        Logger.Debug($"Rule Engine: {processModuleName} is not in the exclusion list. ApplicationInExcludeListRule evaluation success.");
         return true;
     }
 
-    private static string GetApplicationName()
+    private static string GetProcessModuleName()
     {
         try
         {
-            return AppDomain.CurrentDomain.FriendlyName;
+            return Process.GetCurrentProcess().MainModule.ModuleName;
         }
         catch (Exception ex)
         {
@@ -55,12 +56,12 @@ internal class ApplicationInExcludeListRule : Rule
         }
     }
 
-    private static bool IsApplicationInExcludeList(string applicationName)
+    private static bool IsProcessInExcludeList(string processName)
     {
-        return GetExcludedApplicationNames().Contains(applicationName);
+        return GetExcludedProcessNames().Contains(processName);
     }
 
-    private static List<string> GetExcludedApplicationNames()
+    private static List<string> GetExcludedProcessNames()
     {
         var excludedProcesses = new List<string>();
 
