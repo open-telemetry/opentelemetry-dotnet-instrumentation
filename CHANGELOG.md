@@ -17,6 +17,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - In plugins `ConfigureTracerProvider` and `ConfigureMeterProvider` are changed now
   to `AfterConfigureTracerProvider` and `AfterConfigureMeterProvider`.
   See [plugins documentation](/docs/plugins.md) for details.
+- Changed `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` behavior in case of using
+StartupHook only. Now consistent with native logic by excluding only by
+application module name.
 
 ### Deprecated
 
