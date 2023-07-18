@@ -18,8 +18,16 @@ public class MyPlugin
         // My custom logic here
     }
 
-    // To configure tracing SDK
-    public OpenTelemetry.Trace.TracerProviderBuilder ConfigureTracerProvider(OpenTelemetry.Trace.TracerProviderBuilder builder)
+    // To configure tracing SDK before Auto Instrumentation configured SDK
+    public OpenTelemetry.Trace.TracerProviderBuilder BeforeConfigureTracerProvider(OpenTelemetry.Trace.TracerProviderBuilder builder)
+    {
+        // My custom logic here
+
+        return builder;
+    }
+
+    // To configure tracing SDK after Auto Instrumentation configured SDK
+    public OpenTelemetry.Trace.TracerProviderBuilder AfterConfigureTracerProvider(OpenTelemetry.Trace.TracerProviderBuilder builder)
     {
         // My custom logic here
 
@@ -33,8 +41,16 @@ public class MyPlugin
         // Find supported options below
     }
 
-    // To configure metrics SDK
-    public OpenTelemetry.Metrics.MeterProviderBuilder ConfigureMeterProvider(OpenTelemetry.Metrics.MeterProviderBuilder builder)
+    // To configure metrics SDK before Auto Instrumentation configured SDK
+    public OpenTelemetry.Metrics.MeterProviderBuilder BeforeConfigureMeterProvider(OpenTelemetry.Metrics.MeterProviderBuilder builder)
+    {
+        // My custom logic here
+
+        return builder;
+    }
+
+    // To configure metrics SDK after Auto Instrumentation configured SDK
+    public OpenTelemetry.Metrics.MeterProviderBuilder AfterConfigureMeterProvider(OpenTelemetry.Metrics.MeterProviderBuilder builder)
     {
         // My custom logic here
 

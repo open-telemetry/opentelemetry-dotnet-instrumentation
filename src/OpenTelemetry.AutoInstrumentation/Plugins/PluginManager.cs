@@ -77,14 +77,24 @@ internal class PluginManager
         return payloads;
     }
 
-    public TracerProviderBuilder ConfigureTracerProviderBuilder(TracerProviderBuilder builder)
+    public TracerProviderBuilder BeforeConfigureTracerProviderBuilder(TracerProviderBuilder builder)
     {
-        return ConfigureBuilder(builder, "ConfigureTracerProvider");
+        return ConfigureBuilder(builder, "BeforeConfigureTracerProvider");
     }
 
-    public MeterProviderBuilder ConfigureMeterProviderBuilder(MeterProviderBuilder builder)
+    public MeterProviderBuilder BeforeConfigureMeterProviderBuilder(MeterProviderBuilder builder)
     {
-        return ConfigureBuilder(builder, "ConfigureMeterProvider");
+        return ConfigureBuilder(builder, "BeforeConfigureMeterProvider");
+    }
+
+    public TracerProviderBuilder AfterConfigureTracerProviderBuilder(TracerProviderBuilder builder)
+    {
+        return ConfigureBuilder(builder, "AfterConfigureTracerProvider");
+    }
+
+    public MeterProviderBuilder AfterConfigureMeterProviderBuilder(MeterProviderBuilder builder)
+    {
+        return ConfigureBuilder(builder, "AfterConfigureMeterProvider");
     }
 
     public void ConfigureMetricsOptions<T>(T options)

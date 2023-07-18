@@ -23,14 +23,24 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 
 internal static class PluginsConfigurationHelper
 {
-    public static TracerProviderBuilder InvokePlugins(this TracerProviderBuilder builder, PluginManager pluginManager)
+    public static TracerProviderBuilder InvokePluginsBefore(this TracerProviderBuilder builder, PluginManager pluginManager)
     {
-        return pluginManager.ConfigureTracerProviderBuilder(builder);
+        return pluginManager.BeforeConfigureTracerProviderBuilder(builder);
     }
 
-    public static MeterProviderBuilder InvokePlugins(this MeterProviderBuilder builder, PluginManager pluginManager)
+    public static MeterProviderBuilder InvokePluginsBefore(this MeterProviderBuilder builder, PluginManager pluginManager)
     {
-        return pluginManager.ConfigureMeterProviderBuilder(builder);
+        return pluginManager.BeforeConfigureMeterProviderBuilder(builder);
+    }
+
+    public static TracerProviderBuilder InvokePluginsAfter(this TracerProviderBuilder builder, PluginManager pluginManager)
+    {
+        return pluginManager.AfterConfigureTracerProviderBuilder(builder);
+    }
+
+    public static MeterProviderBuilder InvokePluginsAfter(this MeterProviderBuilder builder, PluginManager pluginManager)
+    {
+        return pluginManager.AfterConfigureMeterProviderBuilder(builder);
     }
 
     public static ResourceBuilder InvokePlugins(this ResourceBuilder builder, PluginManager pluginManager)
