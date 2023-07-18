@@ -85,6 +85,12 @@ public abstract class TestHelper
         SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{collector.Port}");
     }
 
+    public void DisableBytecodeInstrumentation()
+    {
+        SetEnvironmentVariable("COR_ENABLE_PROFILING", "0");
+        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "0");
+    }
+
     public void EnableBytecodeInstrumentation()
     {
         SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "1");
@@ -138,8 +144,6 @@ public abstract class TestHelper
         }
 
         Output.WriteLine($"Starting Application: {testApplicationPath}");
-        var executable = EnvironmentHelper.IsCoreClr() ? EnvironmentHelper.GetTestApplicationExecutionSource() : testApplicationPath;
-        var args = EnvironmentHelper.IsCoreClr() ? $"{testApplicationPath} {testSettings.Arguments ?? string.Empty}" : testSettings.Arguments;
-        return InstrumentedProcessHelper.Start(executable, args, EnvironmentHelper);
+        return InstrumentedProcessHelper.Start(testApplicationPath, testSettings.Arguments, EnvironmentHelper);
     }
 }

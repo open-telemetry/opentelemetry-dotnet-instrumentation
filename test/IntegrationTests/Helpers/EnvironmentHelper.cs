@@ -154,7 +154,7 @@ public class EnvironmentHelper
     {
         string extension = "exe";
 
-        if (IsCoreClr() || _testApplicationDirectory.Contains("aspnet"))
+        if (_testApplicationDirectory.Contains("aspnet"))
         {
             extension = "dll";
         }
@@ -162,32 +162,6 @@ public class EnvironmentHelper
         var appFileName = $"{FullTestApplicationName}.{extension}";
         var testApplicationPath = Path.Combine(GetTestApplicationApplicationOutputDirectory(packageVersion: packageVersion, framework: framework), appFileName);
         return testApplicationPath;
-    }
-
-    public string GetTestApplicationExecutionSource()
-    {
-        string executor;
-
-        if (_testApplicationDirectory.Contains("aspnet"))
-        {
-            executor = $"C:\\Program Files{(Environment.Is64BitProcess ? string.Empty : " (x86)")}\\IIS Express\\iisexpress.exe";
-        }
-        else if (IsCoreClr())
-        {
-            executor = EnvironmentTools.IsWindows() ? "dotnet.exe" : "dotnet";
-        }
-        else
-        {
-            var appFileName = $"{FullTestApplicationName}.exe";
-            executor = Path.Combine(GetTestApplicationApplicationOutputDirectory(), appFileName);
-
-            if (!File.Exists(executor))
-            {
-                throw new Exception($"Unable to find executing assembly at {executor}");
-            }
-        }
-
-        return executor;
     }
 
     public string GetTestApplicationBaseBinDirectory()

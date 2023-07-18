@@ -61,8 +61,8 @@ public class SmokeTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public void WhenClrProfilerIsNotEnabled()
     {
-        SetEnvironmentVariable("COR_ENABLE_PROFILING", "0");
-        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "0");
+        DisableBytecodeInstrumentation();
+
 #if NETFRAMEWORK
         // on .NET Framework it is required to set the CLR .NET Profiler
         VerifyTestApplicationNotInstrumented();
@@ -71,20 +71,42 @@ public class SmokeTests : TestHelper
 #endif
     }
 
-    [Fact]
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
     [Trait("Category", "EndToEnd")]
-    public void ApplicationIsNotExcluded()
+    public void ApplicationIsNotExcluded(bool useNativeProfiler)
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", "dotnet,dotnet.exe");
+        if (useNativeProfiler)
+        {
+            EnableBytecodeInstrumentation();
+        }
+        else
+        {
+            DisableBytecodeInstrumentation();
+        }
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", string.Empty);
 
         VerifyTestApplicationInstrumented();
     }
 
-    [Fact]
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
     [Trait("Category", "EndToEnd")]
-    public void ApplicationIsExcluded()
+    public void ApplicationIsExcluded(bool useNativeProfiler)
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
+        if (useNativeProfiler)
+        {
+            EnableBytecodeInstrumentation();
+        }
+        else
+        {
+            DisableBytecodeInstrumentation();
+        }
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
 
         VerifyTestApplicationNotInstrumented();
     }
