@@ -159,7 +159,10 @@ public class EnvironmentHelper
             extension = "dll";
         }
 
-        var appFileName = $"{FullTestApplicationName}.{extension}";
+        var appFileName = EnvironmentTools.IsWindows()
+            ? $"{FullTestApplicationName}.{extension}"
+            : FullTestApplicationName;
+
         var testApplicationPath = Path.Combine(GetTestApplicationApplicationOutputDirectory(packageVersion: packageVersion, framework: framework), appFileName);
         return testApplicationPath;
     }

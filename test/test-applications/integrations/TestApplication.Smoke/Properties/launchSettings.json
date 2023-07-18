@@ -1,0 +1,20 @@
+{
+  "profiles": {
+    "TestApplication.Smoke": {
+      "commandName": "Project",
+      "commandLineArgs": "dotnet TestApplication.Smoke.dll",
+      "workingDirectory": "F:\\Dev\\forks\\rassk\\opentelemetry-dotnet-instrumentation\\test\\test-applications\\integrations\\bin\\TestApplication.Smoke\\x64\\Debug\\net7.0",
+      "environmentVariables": {
+        "DOTNET_SHARED_STORE": "F:\\Dev\\forks\\rassk\\opentelemetry-dotnet-instrumentation\\bin\\tracer-home\\store",
+        "DOTNET_ADDITIONAL_DEPS": "F:\\Dev\\forks\\rassk\\opentelemetry-dotnet-instrumentation\\bin\\tracer-home\\AdditionalDeps",
+        "CORECLR_ENABLE_PROFILING": "1",
+        "CORECLR_PROFILER": "{918728DD-259F-4A6A-AC2B-B85E1B658318}",
+        "CORECLR_PROFILER_PATH": "F:\\Dev\\forks\\rassk\\opentelemetry-dotnet-instrumentation\\bin\\tracer-home\\win-x64\\OpenTelemetry.AutoInstrumentation.Native.dll",
+        "OTEL_DOTNET_AUTO_HOME": "F:\\Dev\\forks\\rassk\\opentelemetry-dotnet-instrumentation\\bin\\tracer-home\\",
+        "OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES": "TestApplication.*",
+        "OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED": "true"
+      },
+      "nativeDebugging": true
+    }
+  }
+}
