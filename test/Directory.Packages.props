@@ -1,7 +1,6 @@
 <Project>
   <Import Project="..\Directory.Packages.props" />
   <ItemGroup>
-    <PackageVersion Include="BenchmarkDotNet" Version="0.13.6" />
     <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.1.3" />
     <PackageVersion Include="FluentAssertions" Version="6.11.0" />
     <PackageVersion Include="Google.Protobuf" Version="3.23.4" />
