@@ -47,4 +47,20 @@ internal static class PluginsConfigurationHelper
     {
         return pluginManager.ConfigureResourceBuilder(builder);
     }
+
+    public static void TryCallInitialized(this TracerProvider? provider, PluginManager pluginManager)
+    {
+        if (provider is not null)
+        {
+            pluginManager.InitializedProvider(provider);
+        }
+    }
+
+    public static void TryCallInitialized(this MeterProvider? provider, PluginManager pluginManager)
+    {
+        if (provider is not null)
+        {
+            pluginManager.InitializedProvider(provider);
+        }
+    }
 }
