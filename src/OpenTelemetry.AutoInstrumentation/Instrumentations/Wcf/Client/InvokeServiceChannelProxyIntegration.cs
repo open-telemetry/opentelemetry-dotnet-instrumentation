@@ -63,10 +63,10 @@ public static class InvokeServiceChannelProxyIntegration
     private interface ISendAsyncResult
     {
         [DuckField(Name = "exception")]
-        Exception Exception { get; }
+        Exception? Exception { get; }
 
         [DuckField(Name = "callback")]
-        AsyncCallback Callback { get; set; }
+        AsyncCallback? Callback { get; set; }
     }
 
     /// <summary>
@@ -169,16 +169,10 @@ public static class InvokeServiceChannelProxyIntegration
         duckCastedAsyncResult.Callback = NewCallback;
         void NewCallback(IAsyncResult asyncResult)
         {
-            try
+            var e = duckCastedAsyncResult.Exception;
+            if (e != null)
             {
-                var e = duckCastedAsyncResult.Exception;
-                if (e is Exception ex)
-                {
-                    activity.SetException(ex);
-                }
-            }
-            finally
-            {
+                activity.SetException(e);
                 activity.Stop();
             }
 
@@ -220,15 +214,9 @@ public static class InvokeServiceChannelProxyIntegration
             (t, a) =>
             {
                 var localActivity = a as Activity;
-                try
+                if (t.Exception is not null)
                 {
-                    if (t.Exception is not null)
-                    {
-                        localActivity.SetException(t.Exception.InnerException);
-                    }
-                }
-                finally
-                {
+                    localActivity.SetException(t.Exception.InnerException);
                     localActivity?.Stop();
                 }
             },
@@ -238,15 +226,9 @@ public static class InvokeServiceChannelProxyIntegration
 
     private static void CompleteSync(Exception? ex, Activity activity)
     {
-        try
+        if (ex != null)
         {
-            if (ex != null)
-            {
-                activity.SetException(ex);
-            }
-        }
-        finally
-        {
+            activity.SetException(ex);
             activity.Stop();
         }
     }

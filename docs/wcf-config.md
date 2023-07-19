@@ -8,6 +8,13 @@ Example project available in
 [test/test-applications/integrations/TestApplication.Wcf.Client.NetFramework](../test/test-applications/integrations/TestApplication.Wcf.Client.NetFramework/)
 folder.
 
+⚠️ **NOTICE:** Instrumentation of
+[APM-style](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/asynchronous-programming-model-apm)
+calls is supported, but have known limitations.
+It is recommended to convert them to
+[TAP-style](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap)
+calls.
+
 ## WCF Client Configuration (.NET)
 
 Instrumentation for WCF Client on .NET is not supported.
