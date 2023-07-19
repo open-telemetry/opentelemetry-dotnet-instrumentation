@@ -115,6 +115,8 @@ internal class WcfClientMessageInspector : IClientMessageInspector
 
                 activity.SetTag(WcfClientConstants.SoapReplyActionTag, reply.Headers.Action);
             }
+
+            activity.Stop();
         }
     }
 

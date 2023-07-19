@@ -55,6 +55,11 @@ internal static class WcfClientInstrumentation
                channelPath.Value.StringValue == expectedChannelPath;
     }
 
+    public static bool ValidateSpanSuccessStatus(Span span)
+    {
+        return span.Status == null;
+    }
+
     private static KeyValue ExtractAttribute(IEnumerable<KeyValue> attributes, string key)
     {
         return attributes.Single(kv => kv.Key == key);
