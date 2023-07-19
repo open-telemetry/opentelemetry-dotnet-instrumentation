@@ -113,12 +113,12 @@ public class PluginManagerTests
         var settings = GetSettings(pluginAssemblyQualifiedName);
         var pluginManager = new PluginManager(settings);
 
-        var traceProviderBuilderMock = new Mock<TracerProviderBuilder>();
+        var tracerProviderBuilderMock = new Mock<TracerProviderBuilder>();
         var meterProviderBuilderMock = new Mock<MeterProviderBuilder>();
 
-        var traceBeforeAction = () => traceProviderBuilderMock.Object.InvokePluginsBefore(pluginManager);
+        var traceBeforeAction = () => tracerProviderBuilderMock.Object.InvokePluginsBefore(pluginManager);
         var meterBeforeAction = () => meterProviderBuilderMock.Object.InvokePluginsBefore(pluginManager);
-        var traceAfterAction = () => traceProviderBuilderMock.Object.InvokePluginsAfter(pluginManager);
+        var traceAfterAction = () => tracerProviderBuilderMock.Object.InvokePluginsAfter(pluginManager);
         var meterAfterAction = () => meterProviderBuilderMock.Object.InvokePluginsAfter(pluginManager);
 
         using (new AssertionScope())
@@ -128,8 +128,8 @@ public class PluginManagerTests
             traceAfterAction.Should().NotThrow();
             meterAfterAction.Should().NotThrow();
 
-            traceProviderBuilderMock.Verify(x => x.AddSource(It.Is<string>(x => x == "My.Custom.Before.Source")), Times.Once);
-            traceProviderBuilderMock.Verify(x => x.AddSource(It.Is<string>(x => x == "My.Custom.After.Source")), Times.Once);
+            tracerProviderBuilderMock.Verify(x => x.AddSource(It.Is<string>(x => x == "My.Custom.Before.Source")), Times.Once);
+            tracerProviderBuilderMock.Verify(x => x.AddSource(It.Is<string>(x => x == "My.Custom.After.Source")), Times.Once);
             meterProviderBuilderMock.Verify(x => x.AddMeter(It.Is<string>(x => x == "My.Custom.Before.Meter")), Times.Once);
             meterProviderBuilderMock.Verify(x => x.AddMeter(It.Is<string>(x => x == "My.Custom.After.Meter")), Times.Once);
         }
@@ -138,7 +138,7 @@ public class PluginManagerTests
     [Fact]
     public void InvokeInitializationEvents()
     {
-        var traceProviderMock = new Mock<TracerProvider>();
+        var tracerProviderMock = new Mock<TracerProvider>();
         var meterProviderMock = new Mock<MeterProvider>();
 
         var pluginAssemblyQualifiedName = typeof(MockPlugin).AssemblyQualifiedName!;
@@ -146,13 +146,13 @@ public class PluginManagerTests
         var pluginManager = new PluginManager(settings);
 
         var initializingAction = () => pluginManager.Initializing();
-        var traceProviderInitializedAction = () => pluginManager.InitializedProvider(traceProviderMock.Object);
+        var tracerProviderInitializedAction = () => pluginManager.InitializedProvider(tracerProviderMock.Object);
         var meterProviderInitializedAction = () => pluginManager.InitializedProvider(meterProviderMock.Object);
 
         using (new AssertionScope())
         {
             initializingAction.Should().NotThrow();
-            traceProviderInitializedAction.Should().NotThrow();
+            tracerProviderInitializedAction.Should().NotThrow();
             meterProviderInitializedAction.Should().NotThrow();
 
             var plugin = pluginManager.Plugins
@@ -161,7 +161,7 @@ public class PluginManagerTests
                 .As<MockPlugin>();
 
             plugin.IsInitializingCalled.Should().BeTrue();
-            plugin.IsTraceProviderInitializedCalled.Should().BeTrue();
+            plugin.IsTracerProviderInitializedCalled.Should().BeTrue();
             plugin.IsMeterProviderInitializedCalled.Should().BeTrue();
         }
     }
@@ -223,7 +223,7 @@ public class PluginManagerTests
     {
         public bool IsInitializingCalled { get; private set; } = false;
 
-        public bool IsTraceProviderInitializedCalled { get; private set; } = false;
+        public bool IsTracerProviderInitializedCalled { get; private set; } = false;
 
         public bool IsMeterProviderInitializedCalled { get; private set; } = false;
 
@@ -237,14 +237,14 @@ public class PluginManagerTests
             IsInitializingCalled = true;
         }
 
-        public void TraceProviderInitialized(TracerProvider tracerProvider)
+        public void TracerProviderInitialized(TracerProvider tracerProvider)
         {
-            if (IsTraceProviderInitializedCalled)
+            if (IsTracerProviderInitializedCalled)
             {
                 throw new InvalidOperationException("Allready called");
             }
 
-            IsTraceProviderInitializedCalled = true;
+            IsTracerProviderInitializedCalled = true;
         }
 
         public void MeterProviderInitialized(MeterProvider meterProvider)

@@ -10,7 +10,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Added
 
 - Added `BeforeConfigureTracerProvider`, `BeforeConfigureMeterProvider`,
-  `TraceProviderInitialized` and `MeterProviderInitialized` for plugins.
+  `TracerProviderInitialized` and `MeterProviderInitialized` for plugins.
   See [plugins documentation](/docs/plugins.md) for details.
 
 ### Changed

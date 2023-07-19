@@ -74,7 +74,7 @@ internal class PluginManager
 
     public void InitializedProvider(TracerProvider tracerProvider)
     {
-        CallPlugins("TraceProviderInitialized", (typeof(TracerProvider), tracerProvider));
+        CallPlugins("TracerProviderInitialized", (typeof(TracerProvider), tracerProvider));
     }
 
     public void InitializedProvider(MeterProvider meterProvider)

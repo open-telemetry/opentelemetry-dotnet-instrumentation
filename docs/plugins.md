@@ -18,8 +18,8 @@ public class MyPlugin
         // My custom logic here
     }
 
-    // To access TraceProvider right after TraceProviderBuilder.Build() is executed.
-    public void TraceProviderInitialized(TracerProvider tracerProvider)
+    // To access TracerProvider right after TracerProviderBuilder.Build() is executed.
+    public void TracerProviderInitialized(TracerProvider tracerProvider)
     {
         // My custom logic here
     }
