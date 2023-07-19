@@ -79,6 +79,11 @@ internal static class Program
                 var rq = new StatusRequest { Status = "1" };
                 var response = await client.PingAsync(rq).ConfigureAwait(false);
 
+                // Task.Yield() is required in order for successive calls
+                // not to timeout, this seems to be a known issue for e.g console apps
+                // making WCF sync calls after an async call
+                await Task.Yield();
+
                 Console.WriteLine(
                     $"[{DateTimeOffset.UtcNow:o}] Request with status {rq.Status}. Server returned: {response?.ServerTime:o}");
             }
