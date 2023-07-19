@@ -161,8 +161,8 @@ public class PluginManagerTests
                 .As<MockPlugin>();
 
             plugin.IsInitializingCalled.Should().BeTrue();
-            plugin.TraceProviderInitializedCalled.Should().BeTrue();
-            plugin.MeterProviderInitializedCalled.Should().BeTrue();
+            plugin.IsTraceProviderInitializedCalled.Should().BeTrue();
+            plugin.IsMeterProviderInitializedCalled.Should().BeTrue();
         }
     }
 
@@ -223,9 +223,9 @@ public class PluginManagerTests
     {
         public bool IsInitializingCalled { get; private set; } = false;
 
-        public bool TraceProviderInitializedCalled { get; private set; } = false;
+        public bool IsTraceProviderInitializedCalled { get; private set; } = false;
 
-        public bool MeterProviderInitializedCalled { get; private set; } = false;
+        public bool IsMeterProviderInitializedCalled { get; private set; } = false;
 
         public void Initializing()
         {
@@ -239,22 +239,22 @@ public class PluginManagerTests
 
         public void TraceProviderInitialized(TracerProvider tracerProvider)
         {
-            if (TraceProviderInitializedCalled)
+            if (IsTraceProviderInitializedCalled)
             {
                 throw new InvalidOperationException("Allready called");
             }
 
-            TraceProviderInitializedCalled = true;
+            IsTraceProviderInitializedCalled = true;
         }
 
         public void MeterProviderInitialized(MeterProvider meterProvider)
         {
-            if (MeterProviderInitializedCalled)
+            if (IsMeterProviderInitializedCalled)
             {
                 throw new InvalidOperationException("Allready called");
             }
 
-            MeterProviderInitializedCalled = true;
+            IsMeterProviderInitializedCalled = true;
         }
 
         public TracerProviderBuilder BeforeConfigureTracerProvider(TracerProviderBuilder builder)
