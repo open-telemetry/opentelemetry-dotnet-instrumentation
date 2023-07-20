@@ -41,6 +41,7 @@ internal class PluginManager
         _plugins = plugins;
     }
 
+    // Created for testing purposes.
     internal IReadOnlyList<(Type Type, object Instance)> Plugins => _plugins;
 
     public void Initializing()
