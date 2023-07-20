@@ -32,9 +32,14 @@ internal class ApplicationInExcludeListRule : Rule
     internal override bool Evaluate()
     {
         var appDomainName = GetAppDomainName();
-        var processModuleName = GetProcessModuleName();
+        if (appDomainName.Equals("dotnet", StringComparison.InvariantCultureIgnoreCase))
+        {
+            Logger.Information($"Rule Engine: AppDomain name is dotnet. Skipping initialization.");
+            return false;
+        }
 
-        if (IsApplicationInExcludeList(appDomainName, processModuleName))
+        var processModuleName = GetProcessModuleName();
+        if (GetExcludedApplicationNames().Contains(processModuleName, StringComparer.InvariantCultureIgnoreCase))
         {
             Logger.Information($"Rule Engine: {appDomainName} is in the exclusion list. Skipping initialization.");
             return false;
@@ -68,12 +73,6 @@ internal class ApplicationInExcludeListRule : Rule
             Logger.Error($"Error getting AppDomain.CurrentDomain.FriendlyName: {ex}");
             return string.Empty;
         }
-    }
-
-    private static bool IsApplicationInExcludeList(string appDomainName, string processModuleName)
-    {
-        return GetExcludedApplicationNames().Contains(processModuleName, StringComparer.InvariantCultureIgnoreCase) ||
-            appDomainName.Equals("dotnet", StringComparison.InvariantCultureIgnoreCase);
     }
 
     private static ICollection<string> GetExcludedApplicationNames()
