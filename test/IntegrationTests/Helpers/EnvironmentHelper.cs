@@ -150,14 +150,14 @@ public class EnvironmentHelper
         throw new Exception($"Unable to find profiler at: {profilerPath}");
     }
 
-    public string GetTestApplicationPath(string packageVersion = "", string framework = "")
+    public string GetTestApplicationPath(string packageVersion = "", string framework = "", TestAppStartupMode startupMode = TestAppStartupMode.Auto)
     {
-        string extension = "exe";
-
-        if (IsCoreClr() || _testApplicationDirectory.Contains("aspnet"))
-        {
-            extension = "dll";
-        }
+        string extension = startupMode switch {
+            TestAppStartupMode.Auto => IsCoreClr() || _testApplicationDirectory.Contains("aspnet") ? "dll" : "exe",
+            TestAppStartupMode.DotnetCLI => "dll",
+            TestAppStartupMode.Exe => "exe",
+            _ => throw new InvalidOperationException($"Unknown startup mode '{startupMode}'")
+        };
 
         var appFileName = $"{FullTestApplicationName}.{extension}";
         var testApplicationPath = Path.Combine(GetTestApplicationApplicationOutputDirectory(packageVersion: packageVersion, framework: framework), appFileName);

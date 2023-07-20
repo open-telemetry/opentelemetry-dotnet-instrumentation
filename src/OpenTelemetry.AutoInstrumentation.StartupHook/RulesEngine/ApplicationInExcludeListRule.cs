@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
@@ -30,19 +31,33 @@ internal class ApplicationInExcludeListRule : Rule
 
     internal override bool Evaluate()
     {
-        var applicationName = GetApplicationName();
+        var appDomainName = GetAppDomainName();
+        var processModuleName = GetProcessModuleName();
 
-        if (IsApplicationInExcludeList(applicationName))
+        if (IsApplicationInExcludeList(appDomainName, processModuleName))
         {
-            Logger.Information($"Rule Engine: {applicationName} is in the exclusion list. Skipping initialization.");
+            Logger.Information($"Rule Engine: {appDomainName} is in the exclusion list. Skipping initialization.");
             return false;
         }
 
-        Logger.Debug($"Rule Engine: {applicationName} is not in the exclusion list. ApplicationInExcludeListRule evaluation success.");
+        Logger.Debug($"Rule Engine: {appDomainName} is not in the exclusion list. ApplicationInExcludeListRule evaluation success.");
         return true;
     }
 
-    private static string GetApplicationName()
+    private static string GetProcessModuleName()
+    {
+        try
+        {
+            return Process.GetCurrentProcess().MainModule.ModuleName;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Error getting Process.MainModule.ModuleName: {ex}");
+            return string.Empty;
+        }
+    }
+
+    private static string GetAppDomainName()
     {
         try
         {
@@ -55,12 +70,18 @@ internal class ApplicationInExcludeListRule : Rule
         }
     }
 
-    private static bool IsApplicationInExcludeList(string applicationName)
+    private static bool IsApplicationInExcludeList(string appDomainName, string processModuleName)
     {
-        return GetExcludedApplicationNames().Contains(applicationName);
+        return GetExcludedApplicationNames().Contains(processModuleName, StringComparer.InvariantCultureIgnoreCase) ||
+            GetExcludedAppDomainNames().Contains(appDomainName, StringComparer.InvariantCultureIgnoreCase);
     }
 
-    private static List<string> GetExcludedApplicationNames()
+    private static ICollection<string> GetExcludedAppDomainNames()
+    {
+        return new[] { "dotnet", "dotnet.exe" };
+    }
+
+    private static ICollection<string> GetExcludedApplicationNames()
     {
         var excludedProcesses = new List<string>();
 
