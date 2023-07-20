@@ -21,6 +21,8 @@ jobs:
     timeout-minutes: 60
     steps:
     - uses: actions/checkout@v3.5.3
+      with:
+        fetch-depth: 0 # fetching all, needed to correctly calculate version
     - name: Build in Docker container
       run: |
         set -e

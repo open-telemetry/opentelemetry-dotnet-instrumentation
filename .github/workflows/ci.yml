@@ -44,6 +44,8 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.5.3
+        with:
+          fetch-depth: 0 # fetching all, needed to correctly calculate version
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
@@ -87,6 +89,8 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.5.3
+        with:
+          fetch-depth: 0 # fetching all, needed to correctly calculate version
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
@@ -116,6 +120,8 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.5.3
+        with:
+          fetch-depth: 0 # fetching all, needed to correctly calculate version
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
@@ -162,6 +168,8 @@ jobs:
     timeout-minutes: 60
     steps:
     - uses: actions/checkout@v3.5.3
+      with:
+        fetch-depth: 0 # fetching all, needed to correctly calculate version
     - name: Download Artifacts from build job
       uses: actions/download-artifact@v3.0.2
       with:
@@ -185,6 +193,8 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.5.3
+        with:
+          fetch-depth: 0 # fetching all, needed to correctly calculate version
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
