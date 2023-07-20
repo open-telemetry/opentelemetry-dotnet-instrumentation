@@ -73,12 +73,7 @@ internal class ApplicationInExcludeListRule : Rule
     private static bool IsApplicationInExcludeList(string appDomainName, string processModuleName)
     {
         return GetExcludedApplicationNames().Contains(processModuleName, StringComparer.InvariantCultureIgnoreCase) ||
-            GetExcludedAppDomainNames().Contains(appDomainName, StringComparer.InvariantCultureIgnoreCase);
-    }
-
-    private static ICollection<string> GetExcludedAppDomainNames()
-    {
-        return new[] { "dotnet", "dotnet.exe" };
+            appDomainName.Equals("dotnet", StringComparison.InvariantCultureIgnoreCase);
     }
 
     private static ICollection<string> GetExcludedApplicationNames()

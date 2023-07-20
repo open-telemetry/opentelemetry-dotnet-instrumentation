@@ -63,8 +63,8 @@ However, if given setting supports it, then:
 \[1\] If `OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED` is set to `true` then processes
 excluded from instrumentation by `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` will fail
 instead of silently continue.
-\[2\] `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` can NOT be used in case process is
-not started directly from exe. (e.g.: `dotnet MyApp.dll` has process name `dotnet`)
+\[2\] Notice that applications launched via `dotnet MyApp.dll` have process
+name `dotnet` or `dotnet.exe`.
 
 ## Resources
 
