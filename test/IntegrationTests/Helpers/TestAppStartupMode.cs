@@ -26,12 +26,12 @@ public enum TestAppStartupMode
     Auto,
 
     /// <summary>
-    /// Execute using Dotnet CLI (eg: dotnet.exe MyApp.dll)
+    /// Execute using Dotnet CLI (e.g.: dotnet.exe MyApp.dll)
     /// </summary>
     DotnetCLI,
 
     /// <summary>
-    /// Execute directly using compiled exe (eg: MyApp.exe)
+    /// Execute directly using compiled exe (e.g.: MyApp.exe)
     /// </summary>
     Exe
 }
