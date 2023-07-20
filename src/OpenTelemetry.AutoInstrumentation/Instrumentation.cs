@@ -121,6 +121,7 @@ internal static class Instrumentation
                         .InvokePluginsAfter(_pluginManager);
 
                     _tracerProvider = builder.Build();
+                    _tracerProvider.TryCallInitialized(_pluginManager);
                     Logger.Information("OpenTelemetry tracer initialized.");
                 }
                 else
@@ -142,6 +143,7 @@ internal static class Instrumentation
                         .InvokePluginsAfter(_pluginManager);
 
                     _meterProvider = builder.Build();
+                    _meterProvider.TryCallInitialized(_pluginManager);
                     Logger.Information("OpenTelemetry meter initialized.");
                 }
                 else

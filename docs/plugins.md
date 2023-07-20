@@ -18,6 +18,18 @@ public class MyPlugin
         // My custom logic here
     }
 
+    // To access TracerProvider right after TracerProviderBuilder.Build() is executed.
+    public void TracerProviderInitialized(TracerProvider tracerProvider)
+    {
+        // My custom logic here
+    }
+
+    // To access MeterProvider right after MeterProviderBuilder.Build() is executed.
+    public void MeterProviderInitialized(MeterProvider meterProvider)
+    {
+        // My custom logic here
+    }
+
     // To configure tracing SDK before Auto Instrumentation configured SDK
     public OpenTelemetry.Trace.TracerProviderBuilder BeforeConfigureTracerProvider(OpenTelemetry.Trace.TracerProviderBuilder builder)
     {
