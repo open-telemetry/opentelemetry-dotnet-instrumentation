@@ -45,7 +45,7 @@ internal class ApplicationInExcludeListRule : Rule
             return false;
         }
 
-        Logger.Debug($"Rule Engine: {appDomainName} is not in the exclusion list. ApplicationInExcludeListRule evaluation success.");
+        Logger.Debug($"Rule Engine: {processModuleName} is not in the exclusion list. ApplicationInExcludeListRule evaluation success.");
         return true;
     }
 
