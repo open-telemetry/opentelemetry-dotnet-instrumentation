@@ -41,7 +41,7 @@ internal class ApplicationInExcludeListRule : Rule
         var processModuleName = GetProcessModuleName();
         if (GetExcludedApplicationNames().Contains(processModuleName, StringComparer.InvariantCultureIgnoreCase))
         {
-            Logger.Information($"Rule Engine: {appDomainName} is in the exclusion list. Skipping initialization.");
+            Logger.Information($"Rule Engine: {processModuleName} is in the exclusion list. Skipping initialization.");
             return false;
         }
 
