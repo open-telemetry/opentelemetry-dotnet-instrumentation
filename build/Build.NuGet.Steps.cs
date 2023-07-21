@@ -2,7 +2,6 @@ using System.Runtime.InteropServices;
 using Extensions;
 using Nuke.Common;
 using Nuke.Common.IO;
-using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.NuGet;
 using Nuke.Common.Utilities.Collections;
@@ -37,8 +36,7 @@ partial class Build
                 DotNetPack(x => x
                     .SetProject(project)
                     .SetConfiguration(BuildConfiguration)
-                    .SetOutputDirectory(NuGetArtifactsDirectory)
-                    .When(!string.IsNullOrWhiteSpace(NuGetVersionSuffix), s => s.SetVersionSuffix(NuGetVersionSuffix)));
+                    .SetOutputDirectory(NuGetArtifactsDirectory));
             }
         });
 
@@ -117,7 +115,7 @@ partial class Build
                 // NU5128: "Some target frameworks declared in the dependencies group of the nuspec and the lib/ref folder do not have exact matches in the other location."
                 { "NoWarn", "NU5104;NU5128" },
                 { "NuGetLicense", "Apache-2.0" },
-                { "NuGetPackageVersion", $"{NuGetBaseVersionNumber}{NuGetVersionSuffix}" },
+                { "NuGetPackageVersion", VersionHelper.GetVersion() },
                 { "NuGetRequiredLicenseAcceptance", "true" },
                 { "OpenTelemetryAuthors", "OpenTelemetry Authors" }
             };
@@ -155,7 +153,7 @@ partial class Build
                 // Unlike the integration apps these require a restore step.
                 DotNetBuild(s => s
                     .SetProjectFile(packagesTestApplicationProject)
-                    .SetProperty("NuGetPackageVersion", $"{NuGetBaseVersionNumber}{NuGetVersionSuffix}")
+                    .SetProperty("NuGetPackageVersion", VersionHelper.GetVersion())
                     .SetRuntime(RuntimeInformation.RuntimeIdentifier)
                     .SetConfiguration(BuildConfiguration)
                     .SetPlatform(Platform));
