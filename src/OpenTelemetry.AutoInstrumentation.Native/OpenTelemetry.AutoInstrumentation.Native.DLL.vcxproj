@@ -216,7 +216,9 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Resource.rc" />
+    <ResourceCompile Include="Resource.rc">
+      <AdditionalOptions>/dOTEL_AUTO_VERSION_MAJOR="$(OTEL_AUTO_VERSION_MAJOR)" /dOTEL_AUTO_VERSION_MINOR="$(OTEL_AUTO_VERSION_MINOR)" /dOTEL_AUTO_VERSION_PATCH="$(OTEL_AUTO_VERSION_PATCH)"</AdditionalOptions>
+    </ResourceCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
