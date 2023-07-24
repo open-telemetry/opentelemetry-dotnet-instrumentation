@@ -1,4 +1,4 @@
-// <copyright file="TestSettings.cs" company="OpenTelemetry Authors">
+// <copyright file="TestAppStartupMode.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,13 +16,22 @@
 
 namespace IntegrationTests.Helpers;
 
-public class TestSettings
+public enum TestAppStartupMode
 {
-    public string? Arguments { get; set; } = null;
+    /// <summary>
+    /// Automatically determine startup mode
+    /// Dotnet Core = DotnetCLI
+    /// Dotnet FX = Exe
+    /// </summary>
+    Auto,
 
-    public string PackageVersion { get; set; } = string.Empty;
+    /// <summary>
+    /// Execute using Dotnet CLI (e.g.: dotnet.exe MyApp.dll)
+    /// </summary>
+    DotnetCLI,
 
-    public string Framework { get; set; } = string.Empty;
-
-    public TestAppStartupMode StartupMode { get; set; }
+    /// <summary>
+    /// Execute directly using compiled exe (e.g.: MyApp.exe)
+    /// </summary>
+    Exe
 }
