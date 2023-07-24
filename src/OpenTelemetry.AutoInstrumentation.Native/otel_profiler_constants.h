@@ -9,6 +9,7 @@
 #include <string>
 
 #include "environment_variables.h"
+#include "version.h"
 
 namespace trace
 {
@@ -75,10 +76,10 @@ const WSTRING nonwindows_nativemethods_type = WStr("OpenTelemetry.AutoInstrument
 #endif // _WIN32
 
 const WSTRING managed_profiler_full_assembly_version =
-    WStr("OpenTelemetry.AutoInstrumentation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+    WStr("OpenTelemetry.AutoInstrumentation, Version=") + ToWSTRING(FILE_VERSION) + WStr(", Culture=neutral, PublicKeyToken=null");
 
 const WSTRING managed_profiler_full_assembly_version_strong_name =
-    WStr("OpenTelemetry.AutoInstrumentation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c0db600a13f60b51");
+    WStr("OpenTelemetry.AutoInstrumentation, Version=") + ToWSTRING(FILE_VERSION) + WStr(", Culture=neutral, PublicKeyToken=c0db600a13f60b51");
 
 } // namespace trace
 
