@@ -17,7 +17,7 @@ partial class Build
             buildDirectory.CreateDirectory();
 
             CMake.Value(
-                arguments: $"../ -DCMAKE_BUILD_TYPE=Release",
+                arguments: $"../ -DCMAKE_BUILD_TYPE=Release -DOTEL_AUTO_VERSION={VersionHelper.GetVersionWithoutSuffixes()}",
                 workingDirectory: buildDirectory);
             Make.Value(
                 arguments: $"",

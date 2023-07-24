@@ -6,4 +6,9 @@ public static class VersionHelper
     {
         return typeof(VersionHelper).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0];
     }
+
+    public static string GetVersionWithoutSuffixes()
+    {
+        return GetVersion().Split('-')[0];
+    }
 }

@@ -13,8 +13,12 @@ partial class Build
         .Executes(() =>
         {
             var nativeProjectDirectory = NativeProfilerProject.Directory;
-            CMake.Value(arguments: $".", workingDirectory: nativeProjectDirectory);
-            Make.Value(arguments: $"", workingDirectory: nativeProjectDirectory);
+            CMake.Value(
+                arguments: $". -DOTEL_AUTO_VERSION={VersionHelper.GetVersionWithoutSuffixes()}",
+                workingDirectory: nativeProjectDirectory);
+            Make.Value(
+                arguments: $"",
+                workingDirectory: nativeProjectDirectory);
         });
 
     Target PublishNativeProfilerMacOs => _ => _
