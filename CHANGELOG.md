@@ -25,6 +25,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` works correctly when .NET CLR Profiler
+  is not enabled.
+
 ### Security
 
 ## [1.0.0-rc.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.0.0-rc.1)
