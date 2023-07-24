@@ -68,11 +68,14 @@ const WSTRING opentelemetry_autoinstrumentation_loader_assemblyName = WStr("Open
 
 const WSTRING managed_profiler_name = WStr("OpenTelemetry.AutoInstrumentation");
 
+#ifdef _WIN32
+const WSTRING windows_nativemethods_type = WStr("OpenTelemetry.AutoInstrumentation.NativeMethods+Windows");
+#else
+const WSTRING nonwindows_nativemethods_type = WStr("OpenTelemetry.AutoInstrumentation.NativeMethods+NonWindows");
+#endif // _WIN32
+
 const WSTRING managed_profiler_full_assembly_version =
     WStr("OpenTelemetry.AutoInstrumentation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
-
-const WSTRING nonwindows_nativemethods_type = WStr("OpenTelemetry.AutoInstrumentation.NativeMethods+NonWindows");
-const WSTRING windows_nativemethods_type = WStr("OpenTelemetry.AutoInstrumentation.NativeMethods+Windows");
 
 const WSTRING managed_profiler_full_assembly_version_strong_name =
     WStr("OpenTelemetry.AutoInstrumentation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c0db600a13f60b51");
