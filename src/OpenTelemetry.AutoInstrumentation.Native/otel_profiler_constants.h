@@ -76,10 +76,10 @@ const WSTRING nonwindows_nativemethods_type = WStr("OpenTelemetry.AutoInstrument
 #endif // _WIN32
 
 const WSTRING managed_profiler_full_assembly_version =
-    WStr("OpenTelemetry.AutoInstrumentation, Version=") + ToWSTRING(FILE_VERSION) + WStr(", Culture=neutral, PublicKeyToken=null");
+    WStr("OpenTelemetry.AutoInstrumentation, Version=") + ToWSTRING(ASSEMBLY_VERSION) + WStr(", Culture=neutral, PublicKeyToken=null");
 
 const WSTRING managed_profiler_full_assembly_version_strong_name =
-    WStr("OpenTelemetry.AutoInstrumentation, Version=") + ToWSTRING(FILE_VERSION) + WStr(", Culture=neutral, PublicKeyToken=c0db600a13f60b51");
+    WStr("OpenTelemetry.AutoInstrumentation, Version=") + ToWSTRING(ASSEMBLY_VERSION) + WStr(", Culture=neutral, PublicKeyToken=c0db600a13f60b51");
 
 } // namespace trace
 
