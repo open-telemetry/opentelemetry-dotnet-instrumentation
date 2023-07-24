@@ -75,18 +75,18 @@ public class SmokeTests : TestHelper
     [Trait("Category", "EndToEnd")]
     public void ApplicationIsNotExcluded()
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", "dotnet,dotnet.exe");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", string.Empty);
 
-        VerifyTestApplicationInstrumented();
+        VerifyTestApplicationInstrumented(TestAppStartupMode.Exe);
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void ApplicationIsExcluded()
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
 
-        VerifyTestApplicationNotInstrumented();
+        VerifyTestApplicationNotInstrumented(TestAppStartupMode.Exe);
     }
 
     [Fact]
@@ -382,7 +382,7 @@ public class SmokeTests : TestHelper
         process!.ExitCode.Should().NotBe(0);
     }
 
-    private void VerifyTestApplicationInstrumented()
+    private void VerifyTestApplicationInstrumented(TestAppStartupMode startupMode = TestAppStartupMode.Auto)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -397,19 +397,19 @@ public class SmokeTests : TestHelper
 
         EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
-        RunTestApplication();
+        RunTestApplication(new() { StartupMode = startupMode });
 
         collector.AssertExpectations();
     }
 
-    private void VerifyTestApplicationNotInstrumented()
+    private void VerifyTestApplicationNotInstrumented(TestAppStartupMode startupMode = TestAppStartupMode.Auto)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
         EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
-        RunTestApplication();
+        RunTestApplication(new() { StartupMode = startupMode });
 
         collector.AssertEmpty();
     }
