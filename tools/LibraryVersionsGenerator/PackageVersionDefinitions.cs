@@ -71,8 +71,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.GrpcNetClient",
             Versions = new List<string>
             {
-                "2.43.0",
-                "2.54.0",
+                "2.52.0",
                 "*"
             }
         },

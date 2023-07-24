@@ -49,8 +49,7 @@ public static class LibraryVersion
             "TestApplication.GrpcNetClient",
             new List<string>
             {
-                "2.43.0",
-                "2.54.0",
+                "2.52.0",
                 "2.55.0",
             }
         },

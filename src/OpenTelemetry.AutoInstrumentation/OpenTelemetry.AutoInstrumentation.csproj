@@ -49,6 +49,8 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <!--Grpc.Net.Client is added here to force update version t0 2.52.0. It should be removed when we upgrade OTel to 1.6.0 -->
+    <PackageReference Include="Grpc.Net.Client" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
     <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" />

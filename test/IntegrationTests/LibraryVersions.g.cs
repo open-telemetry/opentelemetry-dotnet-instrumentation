@@ -54,8 +54,7 @@ public static class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
         new object[] { string.Empty }
 #else
-        new object[] { "2.43.0" },
-        new object[] { "2.54.0" },
+        new object[] { "2.52.0" },
         new object[] { "2.55.0" },
 #endif
     };
