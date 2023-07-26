@@ -58,6 +58,7 @@ public class WcfNetFrameworkTests : WcfTestsBase
         collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom sibling");
 
         collector.ExpectCollected(WcfClientInstrumentation.ValidateExpectedSpanHierarchy);
+
         collector.AssertExpectations();
     }
 
@@ -75,12 +76,13 @@ public class WcfNetFrameworkTests : WcfTestsBase
         collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom parent");
         collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom sibling");
 
+        collector.ExpectCollected(WcfClientInstrumentation.ValidateExpectedSpanHierarchy);
+
         RunTestApplication(new TestSettings
         {
             PackageVersion = string.Empty
         });
 
-        collector.ExpectCollected(WcfClientInstrumentation.ValidateExpectedSpanHierarchy);
         collector.AssertExpectations();
     }
 
