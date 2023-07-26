@@ -35,6 +35,7 @@ public class MockSpansCollector : IDisposable
 
     private readonly BlockingCollection<Collected> _spans = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
+    private Func<ICollection<Collected>, bool>? _hierarchyExpectation;
 
     public MockSpansCollector(ITestOutputHelper output, string host = "localhost")
     {
@@ -68,6 +69,11 @@ public class MockSpansCollector : IDisposable
         description ??= "<no description>";
 
         _expectations.Add(new Expectation(instrumentationScopeName, predicate, description));
+    }
+
+    public void ExpectHierarchy(Func<ICollection<Collected>, bool> hierarchyExpectation)
+    {
+        _hierarchyExpectation = hierarchyExpectation;
     }
 
     public void AssertExpectations(TimeSpan? timeout = null)
@@ -116,6 +122,11 @@ public class MockSpansCollector : IDisposable
 
                 if (missingExpectations.Count == 0)
                 {
+                    if (_hierarchyExpectation != null && !_hierarchyExpectation(expectationsMet))
+                    {
+                        FailHierarchyExpectation(expectationsMet);
+                    }
+
                     return;
                 }
             }
@@ -139,6 +150,19 @@ public class MockSpansCollector : IDisposable
         {
             Assert.Fail($"Expected nothing, but got: {resourceSpan}");
         }
+    }
+
+    private static void FailHierarchyExpectation(List<Collected> expectationsMet)
+    {
+        var message = new StringBuilder();
+        message.AppendLine("Span hierarchy expectation failed.");
+        message.AppendLine("Spans considered for hierarchy verification:");
+        foreach (var line in expectationsMet)
+        {
+            message.AppendLine($"    \"{line}\"");
+        }
+
+        Assert.Fail(message.ToString());
     }
 
     private static void FailExpectations(
@@ -210,23 +234,7 @@ public class MockSpansCollector : IDisposable
         _output.WriteLine($"[{name}]: {msg}");
     }
 
-    private class Expectation
-    {
-        public Expectation(string instrumentationScopeName, Func<Span, bool> predicate, string? description)
-        {
-            InstrumentationScopeName = instrumentationScopeName;
-            Predicate = predicate;
-            Description = description;
-        }
-
-        public string InstrumentationScopeName { get; }
-
-        public Func<Span, bool> Predicate { get; }
-
-        public string? Description { get; }
-    }
-
-    private class Collected
+    public class Collected
     {
         public Collected(string instrumentationScopeName, Span span)
         {
@@ -242,5 +250,21 @@ public class MockSpansCollector : IDisposable
         {
             return $"InstrumentationScopeName = {InstrumentationScopeName}, Span = {Span}";
         }
+    }
+
+    private class Expectation
+    {
+        public Expectation(string instrumentationScopeName, Func<Span, bool> predicate, string? description)
+        {
+            InstrumentationScopeName = instrumentationScopeName;
+            Predicate = predicate;
+            Description = description;
+        }
+
+        public string InstrumentationScopeName { get; }
+
+        public Func<Span, bool> Predicate { get; }
+
+        public string? Description { get; }
     }
 }

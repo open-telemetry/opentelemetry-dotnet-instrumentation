@@ -67,6 +67,11 @@ public class WcfIISTests : TestHelper
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 6");
         collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => WcfClientInstrumentation.ValidateBasicSpanExpectations(span, WcfClientInstrumentation.HttpChannelScheme, ExpectedChannelPath, ExpectedPeerName, httpPort, WcfClientInstrumentation.HttpBindingMessageVersion) && WcfClientInstrumentation.ValidateSpanSuccessStatus(span), "Client 6");
 
+        collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom parent");
+        collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom sibling");
+
+        collector.ExpectHierarchy(WcfClientInstrumentation.ValidateExpectedSpanHierarchy);
+
         var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
         _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
 

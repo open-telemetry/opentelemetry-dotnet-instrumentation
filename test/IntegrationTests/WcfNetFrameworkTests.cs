@@ -54,6 +54,10 @@ public class WcfNetFrameworkTests : WcfTestsBase
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 6");
         collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => WcfClientInstrumentation.ValidateBasicSpanExpectations(span, WcfClientInstrumentation.HttpChannelScheme, ExpectedChannelPath, ExpectedPeerName, HttpPort, WcfClientInstrumentation.HttpBindingMessageVersion) && WcfClientInstrumentation.ValidateSpanSuccessStatus(span), "Client 6");
 
+        collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom parent");
+        collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom sibling");
+
+        collector.ExpectHierarchy(WcfClientInstrumentation.ValidateExpectedSpanHierarchy);
         collector.AssertExpectations();
     }
 
@@ -68,11 +72,15 @@ public class WcfNetFrameworkTests : WcfTestsBase
         collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => ValidateErrorSpanExpectations(span), "Client 2");
         collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => ValidateErrorSpanExpectations(span), "Client 3");
 
+        collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom parent");
+        collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom sibling");
+
         RunTestApplication(new TestSettings
         {
             PackageVersion = string.Empty
         });
 
+        collector.ExpectHierarchy(WcfClientInstrumentation.ValidateExpectedSpanHierarchy);
         collector.AssertExpectations();
     }
 
