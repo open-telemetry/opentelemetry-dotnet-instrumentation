@@ -199,6 +199,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.GraphQL", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.OpenTracing", "test\test-applications\integrations\TestApplication.OpenTracing\TestApplication.OpenTracing.csproj", "{C66927FD-ED1F-4079-8733-51AB7463060D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Azure", "test\test-applications\integrations\TestApplication.Azure\TestApplication.Azure\TestApplication.Azure.csproj", "{3A125210-A784-4982-ACDB-C3442E414E44}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -935,6 +937,18 @@ Global
 		{C66927FD-ED1F-4079-8733-51AB7463060D}.Release|x64.Build.0 = Release|x64
 		{C66927FD-ED1F-4079-8733-51AB7463060D}.Release|x86.ActiveCfg = Release|x86
 		{C66927FD-ED1F-4079-8733-51AB7463060D}.Release|x86.Build.0 = Release|x86
+		{3A125210-A784-4982-ACDB-C3442E414E44}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{3A125210-A784-4982-ACDB-C3442E414E44}.Debug|Any CPU.Build.0 = Debug|x64
+		{3A125210-A784-4982-ACDB-C3442E414E44}.Debug|x64.ActiveCfg = Debug|x64
+		{3A125210-A784-4982-ACDB-C3442E414E44}.Debug|x64.Build.0 = Debug|x64
+		{3A125210-A784-4982-ACDB-C3442E414E44}.Debug|x86.ActiveCfg = Debug|x86
+		{3A125210-A784-4982-ACDB-C3442E414E44}.Debug|x86.Build.0 = Debug|x86
+		{3A125210-A784-4982-ACDB-C3442E414E44}.Release|Any CPU.ActiveCfg = Release|x64
+		{3A125210-A784-4982-ACDB-C3442E414E44}.Release|Any CPU.Build.0 = Release|x64
+		{3A125210-A784-4982-ACDB-C3442E414E44}.Release|x64.ActiveCfg = Release|x64
+		{3A125210-A784-4982-ACDB-C3442E414E44}.Release|x64.Build.0 = Release|x64
+		{3A125210-A784-4982-ACDB-C3442E414E44}.Release|x86.ActiveCfg = Release|x86
+		{3A125210-A784-4982-ACDB-C3442E414E44}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1006,6 +1020,7 @@ Global
 		{C46AF7DB-AD9A-48BD-ABE7-BD9B3A6ED7A4} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{BB720565-B83C-497F-ACF9-B0D13642DA19} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{C66927FD-ED1F-4079-8733-51AB7463060D} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
+		{3A125210-A784-4982-ACDB-C3442E414E44} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}
