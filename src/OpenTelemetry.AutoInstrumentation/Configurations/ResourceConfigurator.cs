@@ -41,7 +41,7 @@ internal static class ResourceConfigurator
             resourceBuilder = enabledResourceDetector switch
             {
                 ResourceDetector.Container => Wrappers.AddContainerResourceDetector(resourceBuilder),
-                ResourceDetector.Azure => Wrappers.AddAzureResourceDetecor(resourceBuilder),
+                ResourceDetector.AzureAppService => Wrappers.AddAzureAppServiceResourceDetector(resourceBuilder),
                 _ => resourceBuilder
             };
         }
@@ -71,7 +71,7 @@ internal static class ResourceConfigurator
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static ResourceBuilder AddAzureResourceDetecor(ResourceBuilder resourceBuilder)
+        public static ResourceBuilder AddAzureAppServiceResourceDetector(ResourceBuilder resourceBuilder)
         {
             return resourceBuilder.AddDetector(new AppServiceResourceDetector());
         }

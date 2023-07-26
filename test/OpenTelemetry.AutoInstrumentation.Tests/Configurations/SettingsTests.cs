@@ -351,7 +351,7 @@ public class SettingsTests : IDisposable
 
     [Theory]
     [InlineData("CONTAINER", ResourceDetector.Container)]
-    [InlineData("AZURE", ResourceDetector.Azure)]
+    [InlineData("AZUREAPPSERVICE", ResourceDetector.AzureAppService)]
     internal void GeneralSettings_Instrumentations_SupportedValues(string resourceDetector, ResourceDetector expectedResourceDetector)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, "false");
