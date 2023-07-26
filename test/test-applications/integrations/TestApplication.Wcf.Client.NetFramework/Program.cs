@@ -47,6 +47,7 @@ internal static class Program
                 "TestApplication.Wcf.Client.NetFramework application requires either 0 or exactly 2 arguments.");
         }
 
+        using var parent = Source.StartActivity("Parent");
         try
         {
             Console.WriteLine("=============NetTcp===============");
@@ -59,6 +60,7 @@ internal static class Program
 
         Console.WriteLine("=============Http===============");
         await CallService(httpAddress, new BasicHttpBinding()).ConfigureAwait(false);
+        using var sibling = Source.StartActivity("Sibling");
     }
 
     private static async Task CallService(string address, Binding binding)
@@ -71,8 +73,6 @@ internal static class Program
 
         try
         {
-            using var parent = Source.StartActivity("Parent");
-
             try
             {
                 Console.WriteLine("Task-based Asynchronous Pattern call");
@@ -120,8 +120,6 @@ internal static class Program
             {
                 Console.WriteLine(e.Message);
             }
-
-            using var sibling = Source.StartActivity("Sibling");
         }
         finally
         {
