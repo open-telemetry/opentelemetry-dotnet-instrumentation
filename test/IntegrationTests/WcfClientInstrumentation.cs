@@ -15,6 +15,7 @@
 // </copyright>
 #if NETFRAMEWORK
 
+using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Trace.V1;
 
@@ -58,6 +59,21 @@ internal static class WcfClientInstrumentation
     public static bool ValidateSpanSuccessStatus(Span span)
     {
         return span.Status == null;
+    }
+
+    public static bool ValidateExpectedSpanHierarchy(ICollection<MockSpansCollector.Collected> assertedSpans)
+    {
+        var customParent = assertedSpans.Single(collected =>
+            collected.InstrumentationScopeName == "TestApplication.Wcf.Client.NetFramework" &&
+            collected.Span.Name == "Parent");
+        var customSibling = assertedSpans.Single(collected =>
+            collected.InstrumentationScopeName == "TestApplication.Wcf.Client.NetFramework" &&
+            collected.Span.Name == "Sibling");
+        var wcfClientSpans = assertedSpans.Where(collected =>
+            collected.InstrumentationScopeName == "OpenTelemetry.AutoInstrumentation.Wcf");
+
+        return wcfClientSpans.All(span => span.Span.ParentSpanId == customParent.Span.SpanId) &&
+               customSibling.Span.ParentSpanId == customParent.Span.SpanId;
     }
 
     private static KeyValue ExtractAttribute(IEnumerable<KeyValue> attributes, string key)
