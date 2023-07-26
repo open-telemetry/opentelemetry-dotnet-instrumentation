@@ -35,7 +35,7 @@ public class MockSpansCollector : IDisposable
 
     private readonly BlockingCollection<Collected> _spans = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
-    private Func<ICollection<Collected>, bool>? _hierarchyExpectation;
+    private Func<ICollection<Collected>, bool>? _collectedExpectation;
 
     public MockSpansCollector(ITestOutputHelper output, string host = "localhost")
     {
@@ -71,9 +71,9 @@ public class MockSpansCollector : IDisposable
         _expectations.Add(new Expectation(instrumentationScopeName, predicate, description));
     }
 
-    public void ExpectHierarchy(Func<ICollection<Collected>, bool> hierarchyExpectation)
+    public void ExpectCollected(Func<ICollection<Collected>, bool> collectedExpectation)
     {
-        _hierarchyExpectation = hierarchyExpectation;
+        _collectedExpectation = collectedExpectation;
     }
 
     public void AssertExpectations(TimeSpan? timeout = null)
@@ -122,9 +122,9 @@ public class MockSpansCollector : IDisposable
 
                 if (missingExpectations.Count == 0)
                 {
-                    if (_hierarchyExpectation != null && !_hierarchyExpectation(expectationsMet))
+                    if (_collectedExpectation != null && !_collectedExpectation(expectationsMet))
                     {
-                        FailHierarchyExpectation(expectationsMet);
+                        FailCollectedExpectation(expectationsMet);
                     }
 
                     return;
@@ -152,11 +152,11 @@ public class MockSpansCollector : IDisposable
         }
     }
 
-    private static void FailHierarchyExpectation(List<Collected> expectationsMet)
+    private static void FailCollectedExpectation(List<Collected> expectationsMet)
     {
         var message = new StringBuilder();
-        message.AppendLine("Span hierarchy expectation failed.");
-        message.AppendLine("Spans considered for hierarchy verification:");
+        message.AppendLine("Collected spans expectation failed.");
+        message.AppendLine("Collected spans:");
         foreach (var line in expectationsMet)
         {
             message.AppendLine($"    \"{line}\"");

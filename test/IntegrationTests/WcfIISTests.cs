@@ -70,7 +70,7 @@ public class WcfIISTests : TestHelper
         collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom parent");
         collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom sibling");
 
-        collector.ExpectHierarchy(WcfClientInstrumentation.ValidateExpectedSpanHierarchy);
+        collector.ExpectCollected(WcfClientInstrumentation.ValidateExpectedSpanHierarchy);
 
         var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
         _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
