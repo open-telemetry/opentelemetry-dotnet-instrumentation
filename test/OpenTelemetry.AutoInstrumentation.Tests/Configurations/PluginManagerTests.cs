@@ -77,14 +77,18 @@ public class PluginManagerTests
         var settings = GetSettings(pluginAssemblyQualifiedName);
         var pluginManager = new PluginManager(settings);
 
-        var tracerAction = () => Sdk.CreateTracerProviderBuilder().InvokePlugins(pluginManager);
-        var meterAction = () => Sdk.CreateMeterProviderBuilder().InvokePlugins(pluginManager);
+        var tracerBeforeAction = () => Sdk.CreateTracerProviderBuilder().InvokePluginsBefore(pluginManager);
+        var meterBeforeAction = () => Sdk.CreateMeterProviderBuilder().InvokePluginsBefore(pluginManager);
+        var tracerAfterAction = () => Sdk.CreateTracerProviderBuilder().InvokePluginsAfter(pluginManager);
+        var meterAfterAction = () => Sdk.CreateMeterProviderBuilder().InvokePluginsAfter(pluginManager);
         var resourceAction = () => ResourceBuilder.CreateEmpty().InvokePlugins(pluginManager);
 
         using (new AssertionScope())
         {
-            tracerAction.Should().NotThrow();
-            meterAction.Should().NotThrow();
+            tracerBeforeAction.Should().NotThrow();
+            meterBeforeAction.Should().NotThrow();
+            tracerAfterAction.Should().NotThrow();
+            meterAfterAction.Should().NotThrow();
             resourceAction.Should().NotThrow();
         }
     }
@@ -109,22 +113,56 @@ public class PluginManagerTests
         var settings = GetSettings(pluginAssemblyQualifiedName);
         var pluginManager = new PluginManager(settings);
 
-        var traceProviderBuilderMock = new Mock<TracerProviderBuilder>();
-        traceProviderBuilderMock.Setup(x => x.AddSource(It.Is<string>(x => x == "My.Custom.Source"))).Verifiable();
-
+        var tracerProviderBuilderMock = new Mock<TracerProviderBuilder>();
         var meterProviderBuilderMock = new Mock<MeterProviderBuilder>();
-        meterProviderBuilderMock.Setup(x => x.AddMeter(It.Is<string>(x => x == "My.Custom.Meter"))).Verifiable();
 
-        var tracerAction = () => traceProviderBuilderMock.Object.InvokePlugins(pluginManager);
-        var meterAction = () => meterProviderBuilderMock.Object.InvokePlugins(pluginManager);
+        var traceBeforeAction = () => tracerProviderBuilderMock.Object.InvokePluginsBefore(pluginManager);
+        var meterBeforeAction = () => meterProviderBuilderMock.Object.InvokePluginsBefore(pluginManager);
+        var traceAfterAction = () => tracerProviderBuilderMock.Object.InvokePluginsAfter(pluginManager);
+        var meterAfterAction = () => meterProviderBuilderMock.Object.InvokePluginsAfter(pluginManager);
 
         using (new AssertionScope())
         {
-            tracerAction.Should().NotThrow();
-            meterAction.Should().NotThrow();
+            traceBeforeAction.Should().NotThrow();
+            meterBeforeAction.Should().NotThrow();
+            traceAfterAction.Should().NotThrow();
+            meterAfterAction.Should().NotThrow();
 
-            traceProviderBuilderMock.Verify();
-            meterProviderBuilderMock.Verify();
+            tracerProviderBuilderMock.Verify(x => x.AddSource(It.Is<string>(x => x == "My.Custom.Before.Source")), Times.Once);
+            tracerProviderBuilderMock.Verify(x => x.AddSource(It.Is<string>(x => x == "My.Custom.After.Source")), Times.Once);
+            meterProviderBuilderMock.Verify(x => x.AddMeter(It.Is<string>(x => x == "My.Custom.Before.Meter")), Times.Once);
+            meterProviderBuilderMock.Verify(x => x.AddMeter(It.Is<string>(x => x == "My.Custom.After.Meter")), Times.Once);
+        }
+    }
+
+    [Fact]
+    public void InvokeInitializationEvents()
+    {
+        var tracerProviderMock = new Mock<TracerProvider>();
+        var meterProviderMock = new Mock<MeterProvider>();
+
+        var pluginAssemblyQualifiedName = typeof(MockPlugin).AssemblyQualifiedName!;
+        var settings = GetSettings(pluginAssemblyQualifiedName);
+        var pluginManager = new PluginManager(settings);
+
+        var initializingAction = () => pluginManager.Initializing();
+        var tracerProviderInitializedAction = () => pluginManager.InitializedProvider(tracerProviderMock.Object);
+        var meterProviderInitializedAction = () => pluginManager.InitializedProvider(meterProviderMock.Object);
+
+        using (new AssertionScope())
+        {
+            initializingAction.Should().NotThrow();
+            tracerProviderInitializedAction.Should().NotThrow();
+            meterProviderInitializedAction.Should().NotThrow();
+
+            var plugin = pluginManager.Plugins
+                .Single(x => x.Type.IsAssignableFrom(typeof(MockPlugin)))
+                .Instance
+                .As<MockPlugin>();
+
+            plugin.IsInitializingCalled.Should().BeTrue();
+            plugin.IsTracerProviderInitializedCalled.Should().BeTrue();
+            plugin.IsMeterProviderInitializedCalled.Should().BeTrue();
         }
     }
 
@@ -183,16 +221,66 @@ public class PluginManagerTests
 
     public class MockPlugin
     {
-        public TracerProviderBuilder ConfigureTracerProvider(TracerProviderBuilder builder)
+        public bool IsInitializingCalled { get; private set; } = false;
+
+        public bool IsTracerProviderInitializedCalled { get; private set; } = false;
+
+        public bool IsMeterProviderInitializedCalled { get; private set; } = false;
+
+        public void Initializing()
         {
-            builder.AddSource("My.Custom.Source");
+            if (IsInitializingCalled)
+            {
+                throw new InvalidOperationException("Allready called");
+            }
+
+            IsInitializingCalled = true;
+        }
+
+        public void TracerProviderInitialized(TracerProvider tracerProvider)
+        {
+            if (IsTracerProviderInitializedCalled)
+            {
+                throw new InvalidOperationException("Allready called");
+            }
+
+            IsTracerProviderInitializedCalled = true;
+        }
+
+        public void MeterProviderInitialized(MeterProvider meterProvider)
+        {
+            if (IsMeterProviderInitializedCalled)
+            {
+                throw new InvalidOperationException("Allready called");
+            }
+
+            IsMeterProviderInitializedCalled = true;
+        }
+
+        public TracerProviderBuilder BeforeConfigureTracerProvider(TracerProviderBuilder builder)
+        {
+            builder.AddSource("My.Custom.Before.Source");
 
             return builder;
         }
 
-        public MeterProviderBuilder ConfigureMeterProvider(MeterProviderBuilder builder)
+        public MeterProviderBuilder BeforeConfigureMeterProvider(MeterProviderBuilder builder)
         {
-            builder.AddMeter("My.Custom.Meter");
+            builder.AddMeter("My.Custom.Before.Meter");
+
+            return builder;
+        }
+
+        public TracerProviderBuilder AfterConfigureTracerProvider(TracerProviderBuilder builder)
+        {
+            builder.AddSource("My.Custom.After.Source");
+
+            return builder;
+        }
+
+        public MeterProviderBuilder AfterConfigureMeterProvider(MeterProviderBuilder builder)
+        {
+            builder.AddMeter("My.Custom.After.Meter");
 
             return builder;
         }
@@ -224,7 +312,7 @@ public class PluginManagerTests
             _dummyParameter = dummyParameter;
         }
 
-        public TracerProviderBuilder ConfigureTracerProvider(TracerProviderBuilder builder)
+        public TracerProviderBuilder AfterConfigureTracerProvider(TracerProviderBuilder builder)
         {
             builder.AddSource(_dummyParameter);
 

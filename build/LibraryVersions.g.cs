@@ -18,7 +18,7 @@ public static class LibraryVersion
             new List<string>
             {
                 "8.0.0",
-                "8.1.1",
+                "8.9.0",
             }
         },
         {
@@ -27,6 +27,7 @@ public static class LibraryVersion
             {
                 "6.0.12",
                 "7.0.8",
+                "7.0.9",
             }
         },
         {
@@ -48,8 +49,8 @@ public static class LibraryVersion
             "TestApplication.GrpcNetClient",
             new List<string>
             {
-                "2.43.0",
-                "2.54.0",
+                "2.52.0",
+                "2.55.0",
             }
         },
         {
@@ -85,7 +86,7 @@ public static class LibraryVersion
             new List<string>
             {
                 "2.0.0",
-                "2.2.6",
+                "2.2.7",
             }
         },
         {
@@ -128,7 +129,7 @@ public static class LibraryVersion
                 "2.1.50",
                 "2.5.61",
                 "2.6.66",
-                "2.6.116",
+                "2.6.122",
             }
         },
     };

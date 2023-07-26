@@ -15,7 +15,6 @@
 // </copyright>
 #if NETFRAMEWORK
 using System.Diagnostics;
-using System.Reflection;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Util;
@@ -40,8 +39,6 @@ public static class InvokeServiceChannelProxyIntegration
     private static object? _serviceEnum;
     private static object? _beginServiceEnum;
     private static object? _taskServiceEnum;
-    private static FieldInfo? _asyncResultExceptionField;
-    private static FieldInfo? _asyncResultCallbackField;
 
     internal interface IServiceProxyChannel
     {
@@ -61,6 +58,15 @@ public static class InvokeServiceChannelProxyIntegration
     private interface IReturnMessage
     {
         object ReturnValue { get; }
+    }
+
+    private interface ISendAsyncResult
+    {
+        [DuckField(Name = "exception")]
+        Exception? Exception { get; }
+
+        [DuckField(Name = "callback")]
+        AsyncCallback? Callback { get; set; }
     }
 
     /// <summary>
@@ -157,32 +163,29 @@ public static class InvokeServiceChannelProxyIntegration
 
     private static void OverrideCallback(object sendAsyncResult, Activity activity)
     {
-        if (_asyncResultCallbackField == null || _asyncResultExceptionField == null)
-        {
-            InitializeAsyncResultFields(sendAsyncResult);
-        }
+        var duckCastedAsyncResult = DuckCast(sendAsyncResult);
 
-        var initialCallback = _asyncResultCallbackField?.GetValue(sendAsyncResult) as AsyncCallback;
-        AsyncCallback newCallback = NewCallback;
-        _asyncResultCallbackField?.SetValue(sendAsyncResult, newCallback);
-
+        var initialCallback = duckCastedAsyncResult.Callback;
+        duckCastedAsyncResult.Callback = NewCallback;
         void NewCallback(IAsyncResult asyncResult)
         {
-            try
+            var e = duckCastedAsyncResult.Exception;
+            if (e != null)
             {
-                var e = _asyncResultExceptionField?.GetValue(asyncResult);
-                if (e is Exception ex)
-                {
-                    activity.SetException(ex);
-                }
-            }
-            finally
-            {
+                activity.SetException(e);
                 activity.Stop();
             }
 
             initialCallback?.Invoke(asyncResult);
         }
+    }
+
+    private static ISendAsyncResult DuckCast(object sendAsyncResult)
+    {
+        // we are interested in private fields of grandparent type
+        var targetType = sendAsyncResult.GetType().BaseType.BaseType;
+        var createTypeResult = DuckType.CreateCache<ISendAsyncResult>.GetProxy(targetType);
+        return createTypeResult.CreateInstance<ISendAsyncResult>(sendAsyncResult);
     }
 
     private static void StopWithException(Exception exception, Activity activity)
@@ -198,22 +201,10 @@ public static class InvokeServiceChannelProxyIntegration
 
     private static void InitializeServiceEnums(object methodType)
     {
-        // TODO: make more efficient - https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2663
         var type = methodType.GetType();
         _serviceEnum = Enum.Parse(type, "Service");
         _beginServiceEnum = Enum.Parse(type, "BeginService");
         _taskServiceEnum = Enum.Parse(type, "TaskService");
-    }
-
-    private static void InitializeAsyncResultFields(object asyncResultInstance)
-    {
-        // TODO: make more efficient - https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2663
-        var asyncResultType = asyncResultInstance.GetType().BaseType.BaseType;
-
-        _asyncResultCallbackField =
-            asyncResultType?.GetField("callback", BindingFlags.Instance | BindingFlags.NonPublic);
-        _asyncResultExceptionField =
-            asyncResultType?.GetField("exception", BindingFlags.Instance | BindingFlags.NonPublic);
     }
 
     private static void AttachActivityCompletionContinuation(IReturnMessage returnValue, Activity activity)
@@ -223,15 +214,9 @@ public static class InvokeServiceChannelProxyIntegration
             (t, a) =>
             {
                 var localActivity = a as Activity;
-                try
+                if (t.Exception is not null)
                 {
-                    if (t.Exception is not null)
-                    {
-                        localActivity.SetException(t.Exception.InnerException);
-                    }
-                }
-                finally
-                {
+                    localActivity.SetException(t.Exception.InnerException);
                     localActivity?.Stop();
                 }
             },
@@ -241,15 +226,9 @@ public static class InvokeServiceChannelProxyIntegration
 
     private static void CompleteSync(Exception? ex, Activity activity)
     {
-        try
+        if (ex != null)
         {
-            if (ex != null)
-            {
-                activity.SetException(ex);
-            }
-        }
-        finally
-        {
+            activity.SetException(ex);
             activity.Stop();
         }
     }

@@ -115,11 +115,13 @@ internal static class Instrumentation
                 {
                     var builder = Sdk
                         .CreateTracerProviderBuilder()
+                        .InvokePluginsBefore(_pluginManager)
                         .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, TracerSettings.Value, _pluginManager)
-                        .InvokePlugins(_pluginManager);
+                        .InvokePluginsAfter(_pluginManager);
 
                     _tracerProvider = builder.Build();
+                    _tracerProvider.TryCallInitialized(_pluginManager);
                     Logger.Information("OpenTelemetry tracer initialized.");
                 }
                 else
@@ -135,11 +137,13 @@ internal static class Instrumentation
                 {
                     var builder = Sdk
                         .CreateMeterProviderBuilder()
+                        .InvokePluginsBefore(_pluginManager)
                         .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, MetricSettings.Value, _pluginManager)
-                        .InvokePlugins(_pluginManager);
+                        .InvokePluginsAfter(_pluginManager);
 
                     _meterProvider = builder.Build();
+                    _meterProvider.TryCallInitialized(_pluginManager);
                     Logger.Information("OpenTelemetry meter initialized.");
                 }
                 else

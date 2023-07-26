@@ -19,7 +19,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.1.1" },
+        new object[] { "8.9.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> EntityFrameworkCore = new List<object[]>
@@ -29,6 +29,7 @@ public static class LibraryVersion
 #else
         new object[] { "6.0.12" },
         new object[] { "7.0.8" },
+        new object[] { "7.0.9" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> EntityFrameworkCorePomeloMySql = new List<object[]>
@@ -53,8 +54,8 @@ public static class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
         new object[] { string.Empty }
 #else
-        new object[] { "2.43.0" },
-        new object[] { "2.54.0" },
+        new object[] { "2.52.0" },
+        new object[] { "2.55.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MassTransit = new List<object[]>
@@ -94,7 +95,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.0.0" },
-        new object[] { "2.2.6" },
+        new object[] { "2.2.7" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MySqlData = new List<object[]>
@@ -142,7 +143,7 @@ public static class LibraryVersion
         new object[] { "2.1.50" },
         new object[] { "2.5.61" },
         new object[] { "2.6.66" },
-        new object[] { "2.6.116" },
+        new object[] { "2.6.122" },
 #endif
     };
 }

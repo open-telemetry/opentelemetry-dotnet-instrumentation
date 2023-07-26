@@ -1,5 +1,7 @@
 # Plugins
 
+**Status**: [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md).
+
 You can use `OTEL_DOTNET_AUTO_PLUGINS` environment variable to extend the
 configuration and overwrite options of the OpenTelemetry .NET SDK Tracer, Meter or
 Logs. A plugin must be a non-static, non-abstract class which has a default constructor
@@ -16,8 +18,28 @@ public class MyPlugin
         // My custom logic here
     }
 
-    // To configure tracing SDK
-    public OpenTelemetry.Trace.TracerProviderBuilder ConfigureTracerProvider(OpenTelemetry.Trace.TracerProviderBuilder builder)
+    // To access TracerProvider right after TracerProviderBuilder.Build() is executed.
+    public void TracerProviderInitialized(TracerProvider tracerProvider)
+    {
+        // My custom logic here
+    }
+
+    // To access MeterProvider right after MeterProviderBuilder.Build() is executed.
+    public void MeterProviderInitialized(MeterProvider meterProvider)
+    {
+        // My custom logic here
+    }
+
+    // To configure tracing SDK before Auto Instrumentation configured SDK
+    public OpenTelemetry.Trace.TracerProviderBuilder BeforeConfigureTracerProvider(OpenTelemetry.Trace.TracerProviderBuilder builder)
+    {
+        // My custom logic here
+
+        return builder;
+    }
+
+    // To configure tracing SDK after Auto Instrumentation configured SDK
+    public OpenTelemetry.Trace.TracerProviderBuilder AfterConfigureTracerProvider(OpenTelemetry.Trace.TracerProviderBuilder builder)
     {
         // My custom logic here
 
@@ -31,8 +53,16 @@ public class MyPlugin
         // Find supported options below
     }
 
-    // To configure metrics SDK
-    public OpenTelemetry.Metrics.MeterProviderBuilder ConfigureMeterProvider(OpenTelemetry.Metrics.MeterProviderBuilder builder)
+    // To configure metrics SDK before Auto Instrumentation configured SDK
+    public OpenTelemetry.Metrics.MeterProviderBuilder BeforeConfigureMeterProvider(OpenTelemetry.Metrics.MeterProviderBuilder builder)
+    {
+        // My custom logic here
+
+        return builder;
+    }
+
+    // To configure metrics SDK after Auto Instrumentation configured SDK
+    public OpenTelemetry.Metrics.MeterProviderBuilder AfterConfigureMeterProvider(OpenTelemetry.Metrics.MeterProviderBuilder builder)
     {
         // My custom logic here
 

@@ -27,6 +27,8 @@ namespace IntegrationTests;
 
 public class WcfIISTests : TestHelper
 {
+    private const string ExpectedChannelPath = "/StatusService.svc";
+    private const string ExpectedPeerName = "localhost";
     private readonly Dictionary<string, string> _environmentVariables = new();
 
     public WcfIISTests(ITestOutputHelper output)
@@ -49,24 +51,24 @@ public class WcfIISTests : TestHelper
         SetExporter(collector);
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
 
+        var netTcpPort = TcpPortProvider.GetOpenPort();
+        var httpPort = TcpPortProvider.GetOpenPort();
+
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 1");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client, "Client 1");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => WcfClientInstrumentation.ValidateBasicSpanExpectations(span, WcfClientInstrumentation.NetTcpChannelScheme, ExpectedChannelPath, ExpectedPeerName, netTcpPort, WcfClientInstrumentation.NetTcpBindingMessageVersion) && WcfClientInstrumentation.ValidateSpanSuccessStatus(span), "Client 1");
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 2");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client, "Client 2");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => WcfClientInstrumentation.ValidateBasicSpanExpectations(span, WcfClientInstrumentation.NetTcpChannelScheme, ExpectedChannelPath, ExpectedPeerName, netTcpPort, WcfClientInstrumentation.NetTcpBindingMessageVersion) && WcfClientInstrumentation.ValidateSpanSuccessStatus(span), "Client 2");
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 3");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client, "Client 3");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => WcfClientInstrumentation.ValidateBasicSpanExpectations(span, WcfClientInstrumentation.NetTcpChannelScheme, ExpectedChannelPath, ExpectedPeerName, netTcpPort, WcfClientInstrumentation.NetTcpBindingMessageVersion) && WcfClientInstrumentation.ValidateSpanSuccessStatus(span), "Client 3");
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 4");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client, "Client 4");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => WcfClientInstrumentation.ValidateBasicSpanExpectations(span, WcfClientInstrumentation.HttpChannelScheme, ExpectedChannelPath, ExpectedPeerName, httpPort, WcfClientInstrumentation.HttpBindingMessageVersion) && WcfClientInstrumentation.ValidateSpanSuccessStatus(span), "Client 4");
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 5");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client, "Client 5");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => WcfClientInstrumentation.ValidateBasicSpanExpectations(span, WcfClientInstrumentation.HttpChannelScheme, ExpectedChannelPath, ExpectedPeerName, httpPort, WcfClientInstrumentation.HttpBindingMessageVersion) && WcfClientInstrumentation.ValidateSpanSuccessStatus(span), "Client 5");
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 6");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client, "Client 6");
+        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => WcfClientInstrumentation.ValidateBasicSpanExpectations(span, WcfClientInstrumentation.HttpChannelScheme, ExpectedChannelPath, ExpectedPeerName, httpPort, WcfClientInstrumentation.HttpBindingMessageVersion) && WcfClientInstrumentation.ValidateSpanSuccessStatus(span), "Client 6");
 
         var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
         _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
-
-        var netTcpPort = TcpPortProvider.GetOpenPort();
-        var httpPort = TcpPortProvider.GetOpenPort();
 
         await using var container = await StartContainerAsync(netTcpPort, httpPort);
 
@@ -94,7 +96,7 @@ public class WcfIISTests : TestHelper
         var builder = new ContainerBuilder()
             .WithImage(imageName)
             .WithCleanUp(cleanUp: true)
-            .WithName($"{imageName}")
+            .WithName(imageName)
             .WithNetwork(networkName)
             .WithPortBinding(netTcpPort, 808)
             .WithPortBinding(httpPort, 80)

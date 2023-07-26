@@ -130,16 +130,34 @@ public abstract class TestHelper
         // and returns the Process instance for further interaction.
         testSettings ??= new();
 
+        var startupMode = testSettings.StartupMode;
+        if (startupMode == TestAppStartupMode.Auto)
+        {
+            startupMode = EnvironmentHelper.IsCoreClr() ? TestAppStartupMode.DotnetCLI : TestAppStartupMode.Exe;
+        }
+
         // get path to test application that the profiler will attach to
-        var testApplicationPath = EnvironmentHelper.GetTestApplicationPath(testSettings.PackageVersion, testSettings.Framework);
+        var testApplicationPath = EnvironmentHelper.GetTestApplicationPath(testSettings.PackageVersion, testSettings.Framework, startupMode);
         if (!File.Exists(testApplicationPath))
         {
             throw new Exception($"application not found: {testApplicationPath}");
         }
 
-        Output.WriteLine($"Starting Application: {testApplicationPath}");
-        var executable = EnvironmentHelper.IsCoreClr() ? EnvironmentHelper.GetTestApplicationExecutionSource() : testApplicationPath;
-        var args = EnvironmentHelper.IsCoreClr() ? $"{testApplicationPath} {testSettings.Arguments ?? string.Empty}" : testSettings.Arguments;
-        return InstrumentedProcessHelper.Start(executable, args, EnvironmentHelper);
+        if (startupMode == TestAppStartupMode.DotnetCLI)
+        {
+            Output.WriteLine($"DotnetCLI Starting Application: {testApplicationPath}");
+            var executable = EnvironmentHelper.GetTestApplicationExecutionSource();
+            var args = $"{testApplicationPath} {testSettings.Arguments ?? string.Empty}";
+            return InstrumentedProcessHelper.Start(executable, args, EnvironmentHelper);
+        }
+        else if (startupMode == TestAppStartupMode.Exe)
+        {
+            Output.WriteLine($"Starting Application: {testApplicationPath}");
+            return InstrumentedProcessHelper.Start(testApplicationPath, testSettings.Arguments, EnvironmentHelper);
+        }
+        else
+        {
+            throw new InvalidOperationException($"StartupMode '{startupMode}' has no logic defined.");
+        }
     }
 }
