@@ -14,6 +14,14 @@ public static class LibraryVersion
     public static IReadOnlyDictionary<string, IReadOnlyCollection<string>> Versions = new Dictionary<string, IReadOnlyCollection<string>>
     {
         {
+            "TestApplication.Azure",
+            new List<string>
+            {
+                "12.13.0",
+                "12.17.0",
+            }
+        },
+        {
             "TestApplication.Elasticsearch",
             new List<string>
             {
