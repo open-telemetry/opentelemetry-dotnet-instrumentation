@@ -38,9 +38,14 @@ public class AzureTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.Expect(
-            "OpenTelemetry.Instrumentation.Http.HttpClient",
-            IsBlobSpan);
+
+#if NETFRAMEWORK
+        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpWebRequest", IsBlobSpan);
+#elif NET7_0_OR_GREATER
+        collector.Expect("System.Net.Http", IsBlobSpan);
+#else
+        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient", IsBlobSpan);
+#endif
 
         RunTestApplication(new()
         {
