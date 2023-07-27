@@ -21,8 +21,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client;
 
 internal static class WcfClientCommon
 {
-    private static readonly ActivitySource Source = new ActivitySource(
-        "OpenTelemetry.AutoInstrumentation.Wcf", Constants.Tracer.Version);
+    private static readonly ActivitySource Source = new("OpenTelemetry.AutoInstrumentation.Wcf", AutoInstrumentationVersion.Version);
 
     private static readonly string OutgoingActivityName = $"{Source.Name}.OutgoingActivity";
 

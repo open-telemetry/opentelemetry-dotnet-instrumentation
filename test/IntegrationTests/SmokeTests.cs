@@ -109,14 +109,7 @@ public class SmokeTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.ResourceExpector.Expect("service.name", ServiceName); // this is set via env var and App.config, but env var has precedence
-#if NETFRAMEWORK
-        collector.ResourceExpector.Expect("deployment.environment", "test"); // this is set via App.config
-#endif
-        collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
-        collector.ResourceExpector.Expect("telemetry.sdk.language", "dotnet");
-        collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0]);
-        collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
+        ExpectResources(collector.ResourceExpector);
 
         EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
@@ -131,11 +124,7 @@ public class SmokeTests : TestHelper
     {
         using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
-        collector.ResourceExpector.Expect("service.name", ServiceName);
-        collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
-        collector.ResourceExpector.Expect("telemetry.sdk.language", "dotnet");
-        collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0]);
-        collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
+        ExpectResources(collector.ResourceExpector);
 
         EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
@@ -151,11 +140,7 @@ public class SmokeTests : TestHelper
     {
         using var collector = new MockLogsCollector(Output);
         SetExporter(collector);
-        collector.ResourceExpector.Expect("service.name", ServiceName);
-        collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
-        collector.ResourceExpector.Expect("telemetry.sdk.language", "dotnet");
-        collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0]);
-        collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
+        ExpectResources(collector.ResourceExpector);
 
         EnableOnlyHttpClientTraceInstrumentation();
         EnableBytecodeInstrumentation();
@@ -380,6 +365,18 @@ public class SmokeTests : TestHelper
         processTimeout.Should().BeFalse();
 
         process!.ExitCode.Should().NotBe(0);
+    }
+
+    private static void ExpectResources(OtlpResourceExpector resourceExpector)
+    {
+        resourceExpector.Expect("service.name", ServiceName); // this is set via env var and App.config, but env var has precedence
+#if NETFRAMEWORK
+        resourceExpector.Expect("deployment.environment", "test"); // this is set via App.config
+#endif
+        resourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
+        resourceExpector.Expect("telemetry.sdk.language", "dotnet");
+        resourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0]);
+        resourceExpector.Expect("telemetry.auto.version", typeof(OpenTelemetry.AutoInstrumentation.Constants).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0]);
     }
 
     private void VerifyTestApplicationInstrumented(TestAppStartupMode startupMode = TestAppStartupMode.Auto)

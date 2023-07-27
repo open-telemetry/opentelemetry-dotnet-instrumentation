@@ -9,13 +9,6 @@
    - [`OpenTelemetry.DotNet.Auto.psm1`](../OpenTelemetry.DotNet.Auto.psm1)
    - [`otel-dotnet-auto-install.sh`](../otel-dotnet-auto-install.sh)
    - [`docs/README.md`](./README.md)
-   - [`build/Build.cs`](../build/Build.cs)
-   - [`src/Directory.Build.props`](../src/Directory.Build.props)
-   - [`src/OpenTelemetry.AutoInstrumentation/Constants.cs`](../src/OpenTelemetry.AutoInstrumentation/Constants.cs)
-   - [`src/OpenTelemetry.AutoInstrumentation.Native/CMakeLists.txt`](../src/OpenTelemetry.AutoInstrumentation.Native/CMakeLists.txt)
-   - [`src/OpenTelemetry.AutoInstrumentation.Native/Resource.rc`](../src/OpenTelemetry.AutoInstrumentation.Native/Resource.rc)
-   - [`src/OpenTelemetry.AutoInstrumentation.Native/otel_profiler_constants.h`](../src/OpenTelemetry.AutoInstrumentation.Native/otel_profiler_constants.h)
-   - [`src/OpenTelemetry.AutoInstrumentation.Native/version.h`](../src/OpenTelemetry.AutoInstrumentation.Native/version.h)
 
 1. Update the [CHANGELOG.md](../CHANGELOG.md) with the new release.
 

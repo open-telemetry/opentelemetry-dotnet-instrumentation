@@ -1,6 +1,5 @@
 using Nuke.Common;
 using Nuke.Common.IO;
-using Nuke.Common.Tooling;
 using Serilog;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
@@ -16,8 +15,10 @@ partial class Build
             var buildDirectory = NativeProfilerProject.Directory / "build";
             buildDirectory.CreateDirectory();
 
+            var (major, minor, patch) = VersionHelper.GetVersionParts();
+
             CMake.Value(
-                arguments: $"../ -DCMAKE_BUILD_TYPE=Release",
+                arguments: $"../ -DCMAKE_BUILD_TYPE=Release -DOTEL_AUTO_VERSION={VersionHelper.GetVersionWithoutSuffixes()} -DOTEL_AUTO_VERSION_MAJOR={major} -DOTEL_AUTO_VERSION_MINOR={minor} -DOTEL_AUTO_VERSION_PATCH={patch}",
                 workingDirectory: buildDirectory);
             Make.Value(
                 arguments: $"",
