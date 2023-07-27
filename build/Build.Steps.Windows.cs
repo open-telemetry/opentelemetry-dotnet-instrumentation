@@ -33,12 +33,17 @@ partial class Build
             {
                 PerformLegacyRestoreIfNeeded(project);
 
+                var (major, minor, patch) = VersionHelper.GetVersionParts();
+
                 // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
                 MSBuild(s => s
                     .SetTargetPath(project)
                     .SetConfiguration(BuildConfiguration)
                     .SetRestore(!NoRestore)
                     .SetMaxCpuCount(null)
+                    .SetProperty("OTEL_AUTO_VERSION_MAJOR", major)
+                    .SetProperty("OTEL_AUTO_VERSION_MINOR", minor)
+                    .SetProperty("OTEL_AUTO_VERSION_PATCH", patch)
                     .CombineWith(platforms, (m, platform) => m
                         .SetTargetPlatform(platform)));
             }

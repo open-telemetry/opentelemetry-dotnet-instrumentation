@@ -8,7 +8,6 @@
     <EnablePublicApi>true</EnablePublicApi>
 
     <!-- NuGet packages -->
-    <Version>1.0.0$(VersionSuffix)</Version>
     <IsPackable>true</IsPackable>
     <PackageIcon>opentelemetry-icon-color.png</PackageIcon>
     <PackageProjectUrl>https://opentelemetry.io</PackageProjectUrl>
@@ -23,6 +22,16 @@
     <Authors>OpenTelemetry Authors</Authors>
     <!-- No warning on empty NuGet version suffix even if using pre-release dependencies -->
     <NoWarn>$(NoWarn);NU5104</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <PropertyGroup>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
   </PropertyGroup>
 
   <ItemGroup>
