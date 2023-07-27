@@ -17,7 +17,7 @@
     <PackageTags>APM;AutoInstrumentation;Automatic Instrumentation;Instrumentation;Logs;Metrics;Monitoring;O11y;Observability;OpenTelemetry;OTel;Telemetry;Tracing</PackageTags>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation.git</RepositoryUrl>
-    <Copyright>Copyright 2021 OpenTelemetry, originated from Datadog, Inc.</Copyright>
+    <Copyright>Copyright 2021 OpenTelemetry Authors</Copyright>
     <Company>OpenTelemetry</Company>
     <Authors>OpenTelemetry Authors</Authors>
     <!-- No warning on empty NuGet version suffix even if using pre-release dependencies -->
