@@ -15,6 +15,7 @@
 // </copyright>
 
 using IntegrationTests.Helpers;
+using OpenTelemetry.Proto.Trace.V1;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
@@ -37,7 +38,9 @@ public class AzureTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.Expect("Azure");
+        collector.Expect(
+            "OpenTelemetry.Instrumentation.Http.HttpClient",
+            IsBlobSpan);
 
         RunTestApplication(new()
         {
@@ -45,5 +48,10 @@ public class AzureTests : TestHelper
         });
 
         collector.AssertExpectations();
+    }
+
+    private static bool IsBlobSpan(Span span)
+    {
+        return span.Name == "HTTP PUT" && span.Attributes.Any(att => att.Key == "http.url" && att.Value.ToString().StartsWith("{ \"stringValue\": \"http://127.0.0.1:10000/devstoreaccount1/test-container-"));
     }
 }
