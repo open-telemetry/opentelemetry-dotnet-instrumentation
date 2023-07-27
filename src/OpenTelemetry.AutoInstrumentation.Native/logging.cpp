@@ -20,7 +20,7 @@ bool dump_il_rewrite_enabled = false;
 
 std::string Logger::GetLogPath(const std::string& file_name_suffix)
 {
-    const auto path = ToString(DatadogLogFilePath(file_name_suffix));
+    const auto path = ToString(GetOpenTelemetryLogFilePath(file_name_suffix));
 
     const auto log_path = std::filesystem::path(path);
 
