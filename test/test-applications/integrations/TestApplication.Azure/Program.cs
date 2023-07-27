@@ -33,4 +33,6 @@ var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
 // Create the container if it does not exist
 await containerClient.CreateIfNotExistsAsync();
 
-await containerClient.ExistsAsync();
+var exists = await containerClient.ExistsAsync();
+
+Console.WriteLine(exists);
