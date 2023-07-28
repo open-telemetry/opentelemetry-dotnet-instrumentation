@@ -4,4 +4,7 @@
     <PackageReference Include="Azure.Storage.Blobs" VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
 
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
+  </ItemGroup>
 </Project>

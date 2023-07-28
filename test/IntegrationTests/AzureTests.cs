@@ -43,15 +43,11 @@ public class AzureTests : TestHelper
         collector.Expect("Azure.Core.Http");
         collector.Expect("Azure.Storage.Blobs.BlobContainerClient");
 
-#if NETFRAMEWORK
-        collector.Expect("OpenTelemetry.Instrumentation.Http.HttpWebRequest", IsBlobSpan);
-#elif NET7_0_OR_GREATER
+#if NET7_0_OR_GREATER
         collector.Expect("System.Net.Http", IsBlobSpan);
-#else
+#elif NET6_0_OR_GREATER
         collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient", IsBlobSpan);
 #endif
-
-        SetEnvironmentVariable("AZURE_EXPERIMENTAL_ENABLE_ACTIVITY_SOURCE", "true");
 
         RunTestApplication(new()
         {
