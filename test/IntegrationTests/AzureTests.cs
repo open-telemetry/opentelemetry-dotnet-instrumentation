@@ -46,6 +46,7 @@ public class AzureTests : TestHelper
 #else
         collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient", IsBlobSpan);
 #endif
+        SetEnvironmentVariable("AZURE_EXPERIMENTAL_ENABLE_ACTIVITY_SOURCE", "true");
 
         RunTestApplication(new()
         {
