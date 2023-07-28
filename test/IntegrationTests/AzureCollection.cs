@@ -37,7 +37,7 @@ public class AzureFixture : IAsyncLifetime
 
     public AzureFixture()
     {
-        Port = BlobServicePort;
+        Port = TcpPortProvider.GetOpenPort();
     }
 
     public int Port { get; }
@@ -57,12 +57,11 @@ public class AzureFixture : IAsyncLifetime
 
     private static async Task<IContainer> LaunchAzureContainerAsync(int port)
     {
-        var waitForOs = await GetWaitForOSTypeAsync();
         var containersBuilder = new ContainerBuilder()
             .WithImage(AzureStorageImage)
             .WithName($"azure-storage-{port}")
             .WithPortBinding(port, BlobServicePort)
-            .WithWaitStrategy(waitForOs.UntilPortIsAvailable(BlobServicePort));
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(BlobServicePort));
 
         var container = containersBuilder.Build();
         await container.StartAsync();
@@ -73,18 +72,5 @@ public class AzureFixture : IAsyncLifetime
     private static async Task ShutdownAzureContainerAsync(IContainer container)
     {
         await container.DisposeAsync();
-    }
-
-    private static async Task<IWaitForContainerOS> GetWaitForOSTypeAsync()
-    {
-#if _WINDOWS
-        var isWindowsEngine = await DockerSystemHelper.GetIsWindowsEngineEnabled();
-
-        return isWindowsEngine
-            ? Wait.ForWindowsContainer()
-            : Wait.ForUnixContainer();
-#else
-        return await Task.Run(Wait.ForUnixContainer);
-#endif
     }
 }

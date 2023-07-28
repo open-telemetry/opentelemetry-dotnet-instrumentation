@@ -19,10 +19,12 @@ using TestApplication.Shared;
 
 ConsoleHelper.WriteSplashScreen(args);
 
-const string DeveloperConnectionString = "UseDevelopmentStorage=true";
+var port = GetBlobServicePortPort(args);
+
+var developerConnectionString = $"DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:{port}/devstoreaccount1;";
 
 // Create a blob service client using the developer connection string
-var blobServiceClient = new BlobServiceClient(DeveloperConnectionString);
+var blobServiceClient = new BlobServiceClient(developerConnectionString);
 
 // Generate a random container name
 var containerName = $"test-container-{Guid.NewGuid()}";
@@ -36,3 +38,13 @@ await containerClient.CreateIfNotExistsAsync();
 var exists = await containerClient.ExistsAsync();
 
 Console.WriteLine(exists);
+
+static string GetBlobServicePortPort(string[] args)
+{
+    if (args.Length == 1)
+    {
+        return args[0];
+    }
+
+    return "10000";
+}
