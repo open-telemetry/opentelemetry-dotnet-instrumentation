@@ -33,6 +33,7 @@ public class AzureTests : TestHelper
 
     [Theory]
     [Trait("Category", "EndToEnd")]
+    [Trait("Containers", "Linux")]
     [MemberData(nameof(LibraryVersion.Azure), MemberType = typeof(LibraryVersion))]
     public void SubmitsTraces(string packageVersion)
     {
