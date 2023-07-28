@@ -7,5 +7,6 @@
   OpenTelemetry.Exporter.OpenTelemetryProtocol,
   OpenTelemetry.Instrumentation.Process,
   OpenTelemetry.Instrumentation.Runtime,
+  OpenTelemetry.ResourceDetectors.Azure,
   OpenTelemetry.ResourceDetectors.Container
 ]

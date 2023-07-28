@@ -20,7 +20,6 @@ internal static class Constants
 {
     public static class Tracer
     {
-        public const string Version = "1.0.0-rc.1";
         public const string AutoInstrumentationVersionName = "telemetry.auto.version";
     }
 

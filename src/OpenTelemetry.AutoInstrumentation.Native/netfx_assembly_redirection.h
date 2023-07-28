@@ -8,10 +8,15 @@
 #include "cor_profiler.h"
 
 #ifdef _WIN32
+#define STR(Z1) #Z1
+#define AUTO_MAJOR STR(OTEL_AUTO_VERSION_MAJOR) 
+
 namespace trace
 {
 void CorProfiler::InitNetFxAssemblyRedirectsMap()
 {
+    const USHORT auto_major = atoi(AUTO_MAJOR);
+
     assembly_version_redirect_map_.insert({
         { L"Google.Protobuf", {3, 23, 4, 0} },
         { L"Grpc.Core", {2, 0, 0, 0} },
@@ -33,7 +38,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"OpenTelemetry", {1, 0, 0, 0} },
         { L"OpenTelemetry.Api", {1, 0, 0, 0} },
         { L"OpenTelemetry.Api.ProviderBuilderExtensions", {1, 0, 0, 0} },
-        { L"OpenTelemetry.AutoInstrumentation", {1, 0, 0, 0} },
+        { L"OpenTelemetry.AutoInstrumentation", {auto_major, 0, 0, 0} },
         { L"OpenTelemetry.Exporter.Console", {1, 0, 0, 0} },
         { L"OpenTelemetry.Exporter.OpenTelemetryProtocol", {1, 0, 0, 0} },
         { L"OpenTelemetry.Exporter.Prometheus.HttpListener", {1, 0, 0, 0} },
@@ -48,6 +53,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"OpenTelemetry.Instrumentation.Runtime", {1, 5, 0, 0} },
         { L"OpenTelemetry.Instrumentation.SqlClient", {1, 0, 0, 0} },
         { L"OpenTelemetry.Instrumentation.Wcf", {1, 0, 0, 10} },
+        { L"OpenTelemetry.ResourceDetectors.Azure", {1, 0, 0, 2} },
         { L"OpenTelemetry.ResourceDetectors.Container", {1, 0, 0, 4} },
         { L"OpenTelemetry.Shims.OpenTracing", {1, 0, 0, 0} },
         { L"OpenTracing", {0, 12, 1, 0} },

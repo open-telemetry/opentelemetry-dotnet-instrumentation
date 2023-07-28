@@ -40,7 +40,7 @@ namespace trace
 {
 
 template <class TLoggerPolicy>
-inline WSTRING GetDatadogLogFilePath(const std::string& file_name_suffix)
+inline WSTRING GetOpenTelemetryLogFilePath(const std::string& file_name_suffix)
 {
     const auto file_name = TLoggerPolicy::file_name + file_name_suffix + ".log";
 

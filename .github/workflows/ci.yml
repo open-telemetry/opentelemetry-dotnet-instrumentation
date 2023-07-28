@@ -44,6 +44,8 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.5.3
+        with:
+          fetch-depth: 0 # fetching all, needed to correctly calculate version
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
@@ -87,6 +89,8 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.5.3
+        with:
+          fetch-depth: 0 # fetching all, needed to correctly calculate version
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
@@ -116,6 +120,8 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.5.3
+        with:
+          fetch-depth: 0 # fetching all, needed to correctly calculate version
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
@@ -162,6 +168,8 @@ jobs:
     timeout-minutes: 60
     steps:
     - uses: actions/checkout@v3.5.3
+      with:
+        fetch-depth: 0 # fetching all, needed to correctly calculate version
     - name: Download Artifacts from build job
       uses: actions/download-artifact@v3.0.2
       with:
@@ -172,7 +180,7 @@ jobs:
         set -e
         docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" ./docker
         docker run -e OS_TYPE=${{ matrix.os-type }} --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
-          ./build.sh TestWorkflow --containers none
+          /bin/sh -c 'git config --global --add safe.directory /project && ./build.sh TestWorkflow --containers none'
 
   test-nuget-packages:
     needs: build-nuget-packages
@@ -185,6 +193,8 @@ jobs:
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.5.3
+        with:
+          fetch-depth: 0 # fetching all, needed to correctly calculate version
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
@@ -202,10 +212,6 @@ jobs:
         with:
           name: bin-nuget-packages
           path: bin/nuget-artifacts/
-
-      - name: Set NUKE_NUGET_VERSION_SUFFIX
-        id: set-nuget-version-suffix
-        run: echo "NUKE_NUGET_VERSION_SUFFIX=${{ needs.build-nuget-packages.outputs.nuget-version-suffix }}" >> "$GITHUB_ENV"
 
       - name: Test NuGet Packages
         run: ./build.cmd TestNuGetPackages
