@@ -65,8 +65,8 @@ public class MockSpansCollector : IDisposable
 
     public void Expect(string instrumentationScopeName, Func<Span, bool>? predicate = null, string? description = null)
     {
+        description ??= $"<no description> Instrumentation Scope Name: '{instrumentationScopeName}', predicate is null: '{predicate == null}'";
         predicate ??= x => true;
-        description ??= "<no description>";
 
         _expectations.Add(new Expectation(instrumentationScopeName, predicate, description));
     }
