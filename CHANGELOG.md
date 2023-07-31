@@ -5,7 +5,21 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.0.0-rc.1...HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.0.0-rc.2...HEAD)
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [1.0.0-rc.2](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.0.0-rc.2)
 
 ### Added
 
@@ -23,16 +37,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   See [plugins documentation](/docs/plugins.md) for details.
 - Minimal version of `Grpc.Net.Client` supported on .NET updated to `2.52.0`.
 
-### Deprecated
-
-### Removed
-
 ### Fixed
 
 - `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` works correctly when .NET CLR Profiler
   is not enabled.
-
-### Security
 
 ## [1.0.0-rc.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.0.0-rc.1)
 
