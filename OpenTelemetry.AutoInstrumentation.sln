@@ -199,7 +199,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.GraphQL", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.OpenTracing", "test\test-applications\integrations\TestApplication.OpenTracing\TestApplication.OpenTracing.csproj", "{C66927FD-ED1F-4079-8733-51AB7463060D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Azure", "test\test-applications\integrations\TestApplication.Azure\TestApplication.Azure.csproj", "{3A125210-A784-4982-ACDB-C3442E414E44}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Azure", "test\test-applications\integrations\TestApplication.Azure\TestApplication.Azure.csproj", "{3A125210-A784-4982-ACDB-C3442E414E44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,1 +1,1 @@
-﻿FROM mcr.microsoft.com/azure-storage/azurite:latest
+FROM mcr.microsoft.com/azure-storage/azurite:2019-CU21-ubuntu-20.04
