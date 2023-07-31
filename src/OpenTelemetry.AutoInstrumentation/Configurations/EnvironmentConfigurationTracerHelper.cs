@@ -246,8 +246,7 @@ internal static class EnvironmentConfigurationTracerHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddAzureInstrumentation(TracerProviderBuilder builder)
         {
-            const string AzureActivitySourceName = "AZURE_EXPERIMENTAL_ENABLE_ACTIVITY_SOURCE";
-            Environment.SetEnvironmentVariable(AzureActivitySourceName, "true");
+            AppContext.SetSwitch("Azure.Experimental.EnableActivitySource", true);
             return builder.AddSource("Azure.*");
         }
     }
