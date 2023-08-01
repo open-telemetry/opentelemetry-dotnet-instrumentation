@@ -47,6 +47,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "7.5.0" },
+        new object[] { "7.6.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> GrpcNetClient = new List<object[]>
