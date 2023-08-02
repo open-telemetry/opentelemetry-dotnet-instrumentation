@@ -46,6 +46,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.Quartz => Wrappers.AddQuartzInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.MongoDB => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources"),
                 TracerInstrumentation.MySqlConnector => builder.AddSource("MySqlConnector"),
+                TracerInstrumentation.Azure => Wrappers.AddAzureInstrumentation(builder),
 #if NET6_0_OR_GREATER
                 TracerInstrumentation.AspNetCore => Wrappers.AddAspNetCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.MassTransit => builder.AddSource("MassTransit"),
@@ -240,6 +241,13 @@ internal static class EnvironmentConfigurationTracerHelper
 
                 pluginManager.ConfigureTracesOptions(options);
             });
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static TracerProviderBuilder AddAzureInstrumentation(TracerProviderBuilder builder)
+        {
+            AppContext.SetSwitch("Azure.Experimental.EnableActivitySource", true);
+            return builder.AddSource("Azure.*");
         }
     }
 }

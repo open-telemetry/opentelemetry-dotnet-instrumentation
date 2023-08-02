@@ -13,6 +13,15 @@ namespace IntegrationTests;
 
 public static class LibraryVersion
 {
+    public static readonly IReadOnlyCollection<object[]> Azure = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "12.13.0" },
+        new object[] { "12.17.0" },
+#endif
+    };
     public static readonly IReadOnlyCollection<object[]> Elasticsearch = new List<object[]>
     {
 #if DEFAULT_TEST_PACKAGE_VERSIONS
