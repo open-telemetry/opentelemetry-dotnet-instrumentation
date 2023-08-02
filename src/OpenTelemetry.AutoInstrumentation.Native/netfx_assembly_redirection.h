@@ -72,7 +72,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"System.Data.Common", {4, 2, 0, 0} },
         { L"System.Diagnostics.Contracts", {4, 0, 1, 0} },
         { L"System.Diagnostics.Debug", {4, 0, 11, 0} },
-        { L"System.Diagnostics.DiagnosticSource", {7, 0, 0, 0} },
+        { L"System.Diagnostics.DiagnosticSource", {7, 0, 0, 2} },
         { L"System.Diagnostics.FileVersionInfo", {4, 0, 2, 0} },
         { L"System.Diagnostics.Process", {4, 1, 2, 0} },
         { L"System.Diagnostics.StackTrace", {4, 1, 0, 0} },
