@@ -121,5 +121,10 @@ internal enum TracerInstrumentation
     /// <summary>
     /// MySqlConnector instrumentation.
     /// </summary>
-    MySqlConnector = 17
+    MySqlConnector = 17,
+
+    /// <summary>
+    /// Azure SDK instrumentation.
+    /// </summary>
+    Azure = 18
 }

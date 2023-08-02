@@ -14,6 +14,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Added `BeforeConfigureTracerProvider`, `BeforeConfigureMeterProvider`,
   `TracerProviderInitialized` and `MeterProviderInitialized` for plugins.
   See [plugins documentation](/docs/plugins.md) for details.
+- Added support for Azure SDK traces instrumentation.
 
 ### Changed
 

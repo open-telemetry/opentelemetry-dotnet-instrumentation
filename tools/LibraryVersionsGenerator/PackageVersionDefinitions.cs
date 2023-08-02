@@ -22,6 +22,17 @@ internal static class PackageVersionDefinitions
     {
         new()
         {
+            IntegrationName = "Azure",
+            NugetPackageName = "Azure.Storage.Blobs",
+            TestApplicationName = "TestApplication.Azure",
+            Versions = new List<string>
+            {
+                "12.13.0",
+                "*"
+            }
+        },
+        new()
+        {
             IntegrationName = "Elasticsearch",
             NugetPackageName = "Elastic.Clients.Elasticsearch",
             TestApplicationName = "TestApplication.Elasticsearch",
