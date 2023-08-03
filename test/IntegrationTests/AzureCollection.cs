@@ -14,8 +14,9 @@
 // limitations under the License.
 // </copyright>
 
+#if NET6_0_OR_GREATER
+
 using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
 using static IntegrationTests.Helpers.DockerFileHelper;
@@ -74,3 +75,4 @@ public class AzureFixture : IAsyncLifetime
         await container.DisposeAsync();
     }
 }
+#endif

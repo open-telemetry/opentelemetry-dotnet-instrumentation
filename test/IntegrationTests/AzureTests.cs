@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+#if NET6_0_OR_GREATER
+
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -57,3 +59,4 @@ public class AzureTests : TestHelper
         collector.AssertExpectations();
     }
 }
+#endif
