@@ -41,6 +41,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 - `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` works correctly when .NET CLR Profiler
   is not enabled.
+- Fixed manual tracing when instrumented project is referencing
+  `System.Diagnostics.DiagnosticSource` `7.0.2`
+  [#2780](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2780).
 
 ## [1.0.0-rc.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.0.0-rc.1)
 
