@@ -190,6 +190,7 @@ jobs:
         include:
           - machine: ubuntu-20.04
           - machine: macos-11
+          - machine: windows-2022
     runs-on: ${{ matrix.machine }}
     steps:
       - uses: actions/checkout@v3.5.3
