@@ -1,0 +1,1 @@
+Readme for OpenTelemetry.AutoInstrumentation.AspNetCoreBootstraper.

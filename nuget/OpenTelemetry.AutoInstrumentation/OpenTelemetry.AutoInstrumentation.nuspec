@@ -4,6 +4,7 @@
     <id>OpenTelemetry.AutoInstrumentation</id>
     <description>OpenTelemetry Automatic Instrumentation package with all required components to enable automatic instrumentation.</description>
     <icon>images\opentelemetry-icon-color.png</icon>
+    <readme>docs\README.md</readme>
 
     <!-- Common properties expected to be defined at build time -->
     <version>$NuGetPackageVersion$</version>
@@ -42,6 +43,7 @@
   <files>
     <file src="**\*" target="\" />
     <file src="..\..\opentelemetry-icon-color.png" target="images\opentelemetry-icon-color.png" />
+    <file src="..\..\src\OpenTelemetry.AutoInstrumentation\docs\README.md" target="docs\README.md" />
   </files>
 
 </package>

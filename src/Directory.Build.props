@@ -15,6 +15,7 @@
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageReleaseNotes>See release notes at https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases</PackageReleaseNotes>
     <PackageTags>APM;AutoInstrumentation;Automatic Instrumentation;Instrumentation;Logs;Metrics;Monitoring;O11y;Observability;OpenTelemetry;OTel;Telemetry;Tracing</PackageTags>
+    <PackageReadmeFile>docs\README.md</PackageReadmeFile>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation.git</RepositoryUrl>
     <Copyright>Copyright The OpenTelemetry Authors</Copyright>
@@ -37,6 +38,7 @@
   <ItemGroup>
     <!-- NuGet -->
     <None Include="$(MSBuildThisFileDirectory)\..\opentelemetry-icon-color.png" Pack="true" Visible="false" PackagePath="opentelemetry-icon-color.png" />
+    <None Include="docs\README.md" Pack="true" PackagePath="docs\README.md" />
 
     <!-- StyleCop -->
     <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" Link="GlobalSuppressions.src.cs" />
