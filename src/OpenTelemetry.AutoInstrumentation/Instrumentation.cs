@@ -303,6 +303,8 @@ internal static class Instrumentation
                 case TracerInstrumentation.GraphQL:
                     DelayedInitialization.Traces.AddGraphQL(LazyInstrumentationLoader, pluginManager, tracerSettings);
                     break;
+                case TracerInstrumentation.Azure:
+                    break;
 #endif
                 case TracerInstrumentation.MongoDB:
                     break;
@@ -313,8 +315,6 @@ internal static class Instrumentation
                 case TracerInstrumentation.Elasticsearch:
                     break;
                 case TracerInstrumentation.MySqlConnector:
-                    break;
-                case TracerInstrumentation.Azure:
                     break;
                 default:
                     Logger.Warning($"Configured trace instrumentation type is not supported: {instrumentation}");
