@@ -1,0 +1,242 @@
+﻿[
+  {
+    InstrumentationScopeName: OpenTelemetry.Instrumentation.MySqlData,
+    Span: {
+      TraceId: Id_1,
+      SpanId: Id_2,
+      TraceState: ,
+      ParentSpanId: ,
+      Name: ,
+      Kind: Client,
+      Attributes: [
+        {
+          Key: db.system,
+          Value: {
+            StringValue: mysql,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: db.name,
+          Value: {
+            StringValue: ,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: peer.service,
+          Value: {
+            StringValue: 127.0.0.1,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        }
+      ]
+    }
+  },
+  {
+    InstrumentationScopeName: OpenTelemetry.Instrumentation.MySqlData,
+    Span: {
+      TraceId: Id_3,
+      SpanId: Id_4,
+      TraceState: ,
+      ParentSpanId: ,
+      Name: ,
+      Kind: Client,
+      Attributes: [
+        {
+          Key: db.system,
+          Value: {
+            StringValue: mysql,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: db.name,
+          Value: {
+            StringValue: ,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: peer.service,
+          Value: {
+            StringValue: 127.0.0.1,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        }
+      ]
+    }
+  },
+  {
+    InstrumentationScopeName: OpenTelemetry.Instrumentation.MySqlData,
+    Span: {
+      TraceId: Id_5,
+      SpanId: Id_6,
+      TraceState: ,
+      ParentSpanId: ,
+      Name: ,
+      Kind: Client,
+      Attributes: [
+        {
+          Key: db.system,
+          Value: {
+            StringValue: mysql,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: db.name,
+          Value: {
+            StringValue: ,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: peer.service,
+          Value: {
+            StringValue: 127.0.0.1,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        }
+      ]
+    }
+  },
+  {
+    InstrumentationScopeName: OpenTelemetry.Instrumentation.MySqlData,
+    Span: {
+      TraceId: Id_7,
+      SpanId: Id_8,
+      TraceState: ,
+      ParentSpanId: ,
+      Name: ,
+      Kind: Client,
+      Attributes: [
+        {
+          Key: db.system,
+          Value: {
+            StringValue: mysql,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: db.name,
+          Value: {
+            StringValue: ,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: peer.service,
+          Value: {
+            StringValue: 127.0.0.1,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        }
+      ]
+    }
+  },
+  {
+    InstrumentationScopeName: OpenTelemetry.Instrumentation.MySqlData,
+    Span: {
+      TraceId: Id_9,
+      SpanId: Id_10,
+      TraceState: ,
+      ParentSpanId: ,
+      Name: ,
+      Kind: Client,
+      Attributes: [
+        {
+          Key: db.system,
+          Value: {
+            StringValue: mysql,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: db.name,
+          Value: {
+            StringValue: ,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: peer.service,
+          Value: {
+            StringValue: 127.0.0.1,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        }
+      ]
+    }
+  },
+  {
+    InstrumentationScopeName: OpenTelemetry.Instrumentation.MySqlData,
+    Span: {
+      TraceId: Id_11,
+      SpanId: Id_12,
+      TraceState: ,
+      ParentSpanId: ,
+      Name: ,
+      Kind: Client,
+      Attributes: [
+        {
+          Key: db.system,
+          Value: {
+            StringValue: mysql,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: db.name,
+          Value: {
+            StringValue: ,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: peer.service,
+          Value: {
+            StringValue: 127.0.0.1,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        }
+      ]
+    }
+  }
+]

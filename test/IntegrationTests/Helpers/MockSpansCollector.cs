@@ -143,6 +143,38 @@ public class MockSpansCollector : IDisposable
         }
     }
 
+    public List<Collected> GetSpans(TimeSpan? timeout = null)
+    {
+        var expectationsMet = new List<Collected>();
+        var spans = new List<Collected>();
+
+        timeout ??= TestTimeout.Expectation;
+        var cts = new CancellationTokenSource();
+        var count = 0;
+
+        try
+        {
+            cts.CancelAfter(timeout.Value);
+            foreach (var resourceSpans in _spans.GetConsumingEnumerable(cts.Token))
+            {
+                spans.Add(resourceSpans);
+                count++;
+            }
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            // CancelAfter called with non-positive value
+            // FailExpectations(missingExpectations, expectationsMet, additionalEntries);
+        }
+        catch (OperationCanceledException)
+        {
+            // timeout
+            // FailExpectations(missingExpectations, expectationsMet, additionalEntries);
+        }
+
+        return spans;
+    }
+
     public void AssertEmpty(TimeSpan? timeout = null)
     {
         timeout ??= TestTimeout.NoExpectation;

@@ -15,12 +15,18 @@
 // </copyright>
 
 #if NET6_0_OR_GREATER
+using System.Text;
+using Google.Protobuf;
 using IntegrationTests.Helpers;
+using Microsoft.AspNetCore.DataProtection.KeyManagement.Internal;
+using OpenTelemetry.Proto.Collector.Trace.V1;
+using OpenTelemetry.Proto.Trace.V1;
 using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
 [Collection(MySqlCollection.Name)]
+[UsesVerify]
 public class MySqlDataTests : TestHelper
 {
     private readonly MySqlFixture _mySql;
@@ -35,7 +41,7 @@ public class MySqlDataTests : TestHelper
     [Trait("Category", "EndToEnd")]
     [Trait("Containers", "Linux")]
     [MemberData(nameof(LibraryVersion.MySqlData), MemberType = typeof(LibraryVersion))]
-    public void SubmitsTraces(string packageVersion)
+    public async Task SubmitsTraces(string packageVersion)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -48,7 +54,52 @@ public class MySqlDataTests : TestHelper
             PackageVersion = packageVersion
         });
 
-        collector.AssertExpectations();
+        var spans = collector.GetSpans(timeout: TimeSpan.FromSeconds(5));
+
+        var settings = new VerifySettings();
+        settings.IgnoreMember<Span>(x => x.StartTimeUnixNano);
+        settings.IgnoreMember<Span>(x => x.EndTimeUnixNano);
+        settings.AddExtraSettings(
+            _ => _.Converters.Add(new SpanConverter()));
+
+        await Verifier.Verify(spans, settings)
+                      .UseFileName(nameof(MySqlDataTests));
+    }
+
+    private class SpanConverter : WriteOnlyJsonConverter<Span>
+    {
+        private readonly Dictionary<ByteString, string> _cache = new();
+        private int _counter = 1;
+
+        public override void Write(VerifyJsonWriter writer, Span value)
+        {
+            writer.WriteStartObject();
+            writer.WriteMember(value, NormalizeByteString(value.TraceId), "TraceId");
+            writer.WriteMember(value, NormalizeByteString(value.SpanId), "SpanId");
+            writer.WriteMember(value, value.TraceState, "TraceState");
+            writer.WriteMember(value, NormalizeByteString(value.ParentSpanId), "ParentSpanId");
+            writer.WriteMember(value, value.Name, "Name");
+            writer.WriteMember(value, value.Kind, "Kind");
+            writer.WriteMember(value, value.Attributes, "Attributes");
+            writer.WriteEndObject();
+        }
+
+        public string NormalizeByteString(ByteString byteString)
+        {
+            if (byteString.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            if (!_cache.TryGetValue(byteString, out var cachedString))
+            {
+                cachedString = $"Id_{_counter}";
+                _cache.Add(byteString, cachedString);
+                _counter++;
+            }
+
+            return cachedString;
+        }
     }
 }
 #endif

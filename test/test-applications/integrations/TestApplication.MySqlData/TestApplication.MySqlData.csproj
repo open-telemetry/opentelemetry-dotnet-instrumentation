@@ -6,8 +6,8 @@
 
   <ItemGroup>
     <!-- Manually edited the csproj to test the new project -->
-    <!-- <PackageReference Include="MySql.Data" VersionOverride="$(LibraryVersion)" /> -->
-    <PackageReference Include="MySql.Data" VersionOverride="8.0.33" />
+    <PackageReference Include="MySql.Data" VersionOverride="$(LibraryVersion)" />
+    <!-- <PackageReference Include="MySql.Data" VersionOverride="8.0.33" /> -->
   </ItemGroup>
 
 </Project>
