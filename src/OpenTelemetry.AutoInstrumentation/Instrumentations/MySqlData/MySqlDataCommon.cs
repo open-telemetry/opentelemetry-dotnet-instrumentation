@@ -14,8 +14,11 @@
 // limitations under the License.
 // </copyright>
 
+#if NET6_0_OR_GREATER
+
 using System.Data;
 using System.Diagnostics;
+using OpenTelemetry.Instrumentation.MySqlData;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData;
 
@@ -34,12 +37,16 @@ internal class MySqlDataCommon
 
     internal const string MysqlDatabaseSystemName = "mysql";
     internal static readonly ActivitySource ActivitySource = new ActivitySource(
-        "OpenTelemetry.Instrumentation.MySqlData", Constants.Tracer.Version); // In the library, it uses the version of the instrumentation library, e.g. "1.0.0.7"
+        "OpenTelemetry.Instrumentation.MySqlData", AutoInstrumentationVersion.Version); // In the library, it uses the version of the instrumentation library, e.g. "1.0.0.7"
 
     internal static readonly IEnumerable<KeyValuePair<string, object?>> CreationTags = new[]
     {
         new KeyValuePair<string, object?>(DbSystem, MysqlDatabaseSystemName),
     };
+
+    // Store the MySqlDataInstrumentationOptions that corresponds to the most recent MySqlDataInstrumentation instance,
+    // since each new MySqlDataInstrumentation replaces previous instances
+    internal static OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentationOptions? MySqlDataInstrumentationOptions { get; set; }
 
     internal static Activity? CreateActivity<TCommand>(TCommand command)
         where TCommand : IMySqlCommand
@@ -53,19 +60,17 @@ internal class MySqlDataCommon
         if (activity.IsAllDataRequested)
         {
             // Figure out how to get the options, if possible
-            /*
-            if (this.options.SetDbStatement)
+            if (MySqlDataInstrumentationOptions is not null && MySqlDataInstrumentationOptions.SetDbStatement)
             {
                 activity.SetTag(DbStatement, command.CommandText);
             }
-            */
 
-            if (command.SqlConnection?.Settings is not null)
+            if (command.Connection?.Settings is not null)
             {
-                activity.DisplayName = command.SqlConnection.Settings.Database;
-                activity.SetTag(DbName, command.SqlConnection.Settings.Database);
+                activity.DisplayName = command.Connection.Settings.Database;
+                activity.SetTag(DbName, command.Connection.Settings.Database);
 
-                AddConnectionLevelDetailsToActivity(command.SqlConnection.Settings, activity);
+                AddConnectionLevelDetailsToActivity(command.Connection.Settings, activity);
             }
         }
 
@@ -85,8 +90,7 @@ internal class MySqlDataCommon
     private static void AddConnectionLevelDetailsToActivity(IMySqlConnectionStringBuilder dataSource, Activity activity)
     {
         // Figure out how to get the options, if possible
-        /*
-        if (!this.options.EnableConnectionLevelAttributes)
+        if (MySqlDataInstrumentationOptions is null || !MySqlDataInstrumentationOptions.EnableConnectionLevelAttributes)
         {
             activity.SetTag(PeerService, dataSource.Server);
         }
@@ -106,6 +110,6 @@ internal class MySqlDataCommon
             activity.SetTag(NetPeerPort, dataSource.Port);
             activity.SetTag(DbUser, dataSource.UserID);
         }
-        */
     }
 }
+#endif

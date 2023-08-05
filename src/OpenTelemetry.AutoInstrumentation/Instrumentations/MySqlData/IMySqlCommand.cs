@@ -14,10 +14,14 @@
 // limitations under the License.
 // </copyright>
 
-using System.Data;
+using System.Reflection;
+using OpenTelemetry.AutoInstrumentation.DuckTyping;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData;
 internal interface IMySqlCommand
 {
-    IMySqlConnection? SqlConnection { get; }
+    [Duck(BindingFlags = DuckAttribute.DefaultFlags | BindingFlags.IgnoreCase | BindingFlags.DeclaredOnly)]
+    IMySqlConnection? Connection { get; }
+
+    string CommandText { get; }
 }

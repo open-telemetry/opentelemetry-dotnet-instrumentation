@@ -19,7 +19,7 @@ internal static partial class InstrumentationDefinitions
 
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
     {
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(12);
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(13);
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
@@ -33,6 +33,7 @@ internal static partial class InstrumentationDefinitions
             // MySqlData
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.MySqlData))
             {
+                nativeCallTargetDefinitions.Add(new("MySql.Data", "MySql.Data.MySqlClient.MySqlCommand", "ExecuteReaderAsync", new[] {"System.Threading.Tasks.Task`1<MySql.Data.MySqlClient.MySqlDataReader>", "System.Data.CommandBehavior", "System.Boolean", "System.Threading.CancellationToken"}, 8, 0, 33, 8, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData.ExecuteReaderAsyncIntegration"));
                 nativeCallTargetDefinitions.Add(new("MySql.Data", "MySql.Data.MySqlClient.MySqlConnectionStringBuilder", "get_Logging", new[] {"System.Boolean"}, 8, 0, 31, 8, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData.MySqlConnectionStringBuilderIntegration"));
             }
 
