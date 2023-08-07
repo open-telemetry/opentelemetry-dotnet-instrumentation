@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>OpenTelemetry.AutoInstrumentation.Runtime.Native</id>
-    <description>Native runtime components used by the OpenTelmetry.AutoInstrumentation project.</description>
+    <description>Native runtime components used by the OpenTelemetry.AutoInstrumentation project.</description>
     <icon>images\opentelemetry-icon-color.png</icon>
 
     <!-- Common properties expected to be defined at build time -->

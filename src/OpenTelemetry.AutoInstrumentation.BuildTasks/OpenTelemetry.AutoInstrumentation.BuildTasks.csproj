@@ -3,6 +3,7 @@
   <PropertyGroup>
     <!-- Target only netstandard2.0 so there is a single path in the .targets using build tasks from this package. -->
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <Description>Build tasks used by the OpenTelemetry.AutoInstrumentation project.</Description>
 
     <!-- The assembly DLL needs to be under the build folder for proper packing. -->
     <BuildOutputTargetFolder>build</BuildOutputTargetFolder>

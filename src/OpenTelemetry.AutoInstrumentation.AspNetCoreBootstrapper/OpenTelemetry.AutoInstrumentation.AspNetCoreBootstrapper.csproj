@@ -4,6 +4,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0</TargetFrameworks>
+    <Description>ASP.NET Core Bootstrapper used by the OpenTelemetry.AutoInstrumentation project.</Description>
   </PropertyGroup>
   
   <ItemGroup>

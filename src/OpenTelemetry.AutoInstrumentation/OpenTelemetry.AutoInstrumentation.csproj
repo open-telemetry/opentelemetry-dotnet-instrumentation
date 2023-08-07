@@ -4,6 +4,7 @@
 
   <PropertyGroup>
     <PackageId>OpenTelemetry.AutoInstrumentation.Runtime.Managed</PackageId>
+    <Description>Managed components used by the OpenTelemetry.AutoInstrumentation project.</Description>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <GeneratedFolder>Generated</GeneratedFolder>
     <CompilerGeneratedFilesOutputPath>$(GeneratedFolder)\$(TargetFramework)</CompilerGeneratedFilesOutputPath>
