@@ -71,6 +71,31 @@ public class SmokeTests : TestHelper
 #endif
     }
 
+#if !NETFRAMEWORK
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [InlineData(TestAppStartupMode.DotnetCLI)]
+    [InlineData(TestAppStartupMode.Exe)]
+    public void WhenClrProfilerIsNotEnabledStartupHookIsEnabledApplicationIsExcluded(TestAppStartupMode testAppStartupMode)
+    {
+        switch (testAppStartupMode)
+        {
+            case TestAppStartupMode.DotnetCLI:
+                SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", "dotnet,dotnet.exe");
+                break;
+            case TestAppStartupMode.Exe:
+                SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
+                break;
+            default:
+                throw new ArgumentException($"{testAppStartupMode} is not supported by this test", nameof(testAppStartupMode));
+        }
+
+        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "0");
+
+        VerifyTestApplicationNotInstrumented(testAppStartupMode);
+    }
+#endif
+
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void ApplicationIsNotExcluded()
