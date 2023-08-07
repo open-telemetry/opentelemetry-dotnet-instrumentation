@@ -25,10 +25,14 @@ ConsoleHelper.WriteSplashScreen(args);
 var builder = Host.CreateDefaultBuilder()
     .ConfigureServices((cxt, services) =>
     {
+#if QUARTZ_3_7_0_OR_GREATER
+        services.AddQuartz();
+#else
         services.AddQuartz(q =>
         {
             q.UseMicrosoftDependencyInjectionJobFactory();
         });
+#endif
         services.AddQuartzHostedService(opt =>
         {
             opt.WaitForJobsToComplete = true;
