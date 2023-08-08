@@ -28,9 +28,37 @@
           }
         },
         {
-          Key: peer.service,
+          Key: net.peer.ip,
           Value: {
             StringValue: 127.0.0.1,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: net.peer.port,
+          Value: {
+            StringValue: ,
+            BoolValue: false,
+            IntValue: 63304,
+            BytesValue: [],
+            ValueCase: IntValue
+          }
+        },
+        {
+          Key: db.user,
+          Value: {
+            StringValue: root,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: peer.service,
+          Value: {
+            StringValue: 127.0.0.1:63304,
             BoolValue: false,
             BytesValue: [],
             ValueCase: StringValue
@@ -68,9 +96,37 @@
           }
         },
         {
-          Key: peer.service,
+          Key: net.peer.ip,
           Value: {
             StringValue: 127.0.0.1,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: net.peer.port,
+          Value: {
+            StringValue: ,
+            BoolValue: false,
+            IntValue: 63304,
+            BytesValue: [],
+            ValueCase: IntValue
+          }
+        },
+        {
+          Key: db.user,
+          Value: {
+            StringValue: root,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: peer.service,
+          Value: {
+            StringValue: 127.0.0.1:63304,
             BoolValue: false,
             BytesValue: [],
             ValueCase: StringValue
@@ -108,9 +164,37 @@
           }
         },
         {
-          Key: peer.service,
+          Key: net.peer.ip,
           Value: {
             StringValue: 127.0.0.1,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: net.peer.port,
+          Value: {
+            StringValue: ,
+            BoolValue: false,
+            IntValue: 63304,
+            BytesValue: [],
+            ValueCase: IntValue
+          }
+        },
+        {
+          Key: db.user,
+          Value: {
+            StringValue: root,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: peer.service,
+          Value: {
+            StringValue: 127.0.0.1:63304,
             BoolValue: false,
             BytesValue: [],
             ValueCase: StringValue
@@ -148,9 +232,37 @@
           }
         },
         {
-          Key: peer.service,
+          Key: net.peer.ip,
           Value: {
             StringValue: 127.0.0.1,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: net.peer.port,
+          Value: {
+            StringValue: ,
+            BoolValue: false,
+            IntValue: 63304,
+            BytesValue: [],
+            ValueCase: IntValue
+          }
+        },
+        {
+          Key: db.user,
+          Value: {
+            StringValue: root,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: peer.service,
+          Value: {
+            StringValue: 127.0.0.1:63304,
             BoolValue: false,
             BytesValue: [],
             ValueCase: StringValue
@@ -188,9 +300,37 @@
           }
         },
         {
-          Key: peer.service,
+          Key: net.peer.ip,
           Value: {
             StringValue: 127.0.0.1,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: net.peer.port,
+          Value: {
+            StringValue: ,
+            BoolValue: false,
+            IntValue: 63304,
+            BytesValue: [],
+            ValueCase: IntValue
+          }
+        },
+        {
+          Key: db.user,
+          Value: {
+            StringValue: root,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: peer.service,
+          Value: {
+            StringValue: 127.0.0.1:63304,
             BoolValue: false,
             BytesValue: [],
             ValueCase: StringValue
@@ -228,9 +368,37 @@
           }
         },
         {
-          Key: peer.service,
+          Key: net.peer.ip,
           Value: {
             StringValue: 127.0.0.1,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: net.peer.port,
+          Value: {
+            StringValue: ,
+            BoolValue: false,
+            IntValue: 63304,
+            BytesValue: [],
+            ValueCase: IntValue
+          }
+        },
+        {
+          Key: db.user,
+          Value: {
+            StringValue: root,
+            BoolValue: false,
+            BytesValue: [],
+            ValueCase: StringValue
+          }
+        },
+        {
+          Key: peer.service,
+          Value: {
+            StringValue: 127.0.0.1:63304,
             BoolValue: false,
             BytesValue: [],
             ValueCase: StringValue
