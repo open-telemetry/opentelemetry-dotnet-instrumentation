@@ -15,7 +15,7 @@
     <!-- URI based properties -->
     <projectUrl>https://opentelemetry.io/</projectUrl>
     <tags>O11y Observability OpenTelemetry OTel Logs Metrics Monitoring Telemetry Tracing Auto Automatic Instrumentation</tags>
-    <repository type="git" url="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation" />
+    <repository type="git" url="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation" commit="$CommitId$"/>
 
     <dependencies>
       <group targetFramework=".NETFramework4.6.2">

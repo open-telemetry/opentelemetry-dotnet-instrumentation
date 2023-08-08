@@ -32,8 +32,10 @@ netcoreapp
 NETFX
 NGEN
 nullptr
+nupkg
 popq
 SIGUSR
+snupkg
 stdlibc
 struct
 TRACEFILE
