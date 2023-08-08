@@ -117,7 +117,8 @@ partial class Build
                 { "NuGetLicense", "Apache-2.0" },
                 { "NuGetPackageVersion", VersionHelper.GetVersion() },
                 { "NuGetRequiredLicenseAcceptance", "true" },
-                { "OpenTelemetryAuthors", "OpenTelemetry Authors" }
+                { "OpenTelemetryAuthors", "OpenTelemetry Authors" },
+                { "CommitId", VersionHelper.GetCommitId() }
             };
 
             var nuspecSolutionFolder = Solution.GetSolutionFolder("nuget")
