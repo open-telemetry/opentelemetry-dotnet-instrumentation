@@ -1,1 +1,1 @@
-Readme for OpenTelemetry.AutoInstrumentation.
+Readme for OpenTelemetry.AutoInstrumentation.Runtime.Managed.
