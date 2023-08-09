@@ -66,6 +66,26 @@ jobs:
       - name: Build NuGet packages
         run: ./build.cmd BuildNuGetPackages
 
+      - name: Install dotnet-validate
+        run: dotnet tool install --global dotnet-validate --version 0.0.1-preview.304
+
+      - name: Install Meziantou.Framework.NuGetPackageValidation.Tool
+        run: dotnet tool install --global Meziantou.Framework.NuGetPackageValidation.Tool --version 1.0.12
+
+      - name: Validate nuget packages
+        shell: pwsh
+        run: |
+          foreach ($file in (Get-ChildItem bin/nuget-artifacts//*.nupkg)) {
+            dotnet validate package local $($file)
+            if (-not ($LASTEXITCODE -eq 0)) {
+              throw "dotnet validate failed for $($file)";
+            }
+            meziantou.validate-nuget-package $($file)
+            if (-not ($LASTEXITCODE -eq 0)) {
+              throw "meziantou.validate-nuget-package validate failed for $($file)";
+            }
+          }
+        
       - name: Upload Nuget Artifacts
         uses: actions/upload-artifact@v3.1.2
         with:
