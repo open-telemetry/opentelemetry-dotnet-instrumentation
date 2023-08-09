@@ -290,9 +290,6 @@ internal static class Instrumentation
                 case TracerInstrumentation.AspNetCore:
                     DelayedInitialization.Traces.AddAspNetCore(lazyInstrumentationLoader, pluginManager);
                     break;
-                case TracerInstrumentation.MySqlData:
-                    DelayedInitialization.Traces.AddMySqlClient(LazyInstrumentationLoader, pluginManager);
-                    break;
                 case TracerInstrumentation.EntityFrameworkCore:
                     DelayedInitialization.Traces.AddEntityFrameworkCore(LazyInstrumentationLoader, pluginManager);
                     break;

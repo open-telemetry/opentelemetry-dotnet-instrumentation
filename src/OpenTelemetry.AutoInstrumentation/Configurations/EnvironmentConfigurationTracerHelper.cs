@@ -49,7 +49,6 @@ internal static class EnvironmentConfigurationTracerHelper
 #if NET6_0_OR_GREATER
                 TracerInstrumentation.AspNetCore => Wrappers.AddAspNetCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.MassTransit => builder.AddSource("MassTransit"),
-                TracerInstrumentation.MySqlData => Wrappers.AddMySqlClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.StackExchangeRedis => builder.AddSource("OpenTelemetry.Instrumentation.StackExchangeRedis"),
                 TracerInstrumentation.EntityFrameworkCore => Wrappers.AddEntityFrameworkCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.GraphQL => Wrappers.AddGraphQLInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
@@ -158,14 +157,6 @@ internal static class EnvironmentConfigurationTracerHelper
             return builder
                 .AddSource("OpenTelemetry.Instrumentation.AspNetCore")
                 .AddLegacySource("Microsoft.AspNetCore.Hosting.HttpRequestIn");
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static TracerProviderBuilder AddMySqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
-        {
-            DelayedInitialization.Traces.AddMySqlClient(lazyInstrumentationLoader, pluginManager);
-
-            return builder.AddSource("OpenTelemetry.Instrumentation.MySqlData");
         }
 
         public static TracerProviderBuilder AddGraphQLInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader, TracerSettings tracerSettings)

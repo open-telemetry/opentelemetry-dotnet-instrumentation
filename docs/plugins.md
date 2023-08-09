@@ -119,7 +119,6 @@ public class MyPlugin
 | OpenTelemetry.Instrumentation.Quartz.QuartzInstrumentationOptions                         | OpenTelemetry.Instrumentation.Quartz              | 1.0.0-alpha.3 |
 | OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentationOptions                   | OpenTelemetry.Instrumentation.SqlClient           | 1.5.1-beta.1  |
 | OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisInstrumentationOptions | OpenTelemetry.Instrumentation.StackExchangeRedis  | 1.0.0-rc9.10  |
-| OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentationOptions                   | OpenTelemetry.Instrumentation.MySqlData           | 1.0.0-beta.7  |
 | OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationOptions                               | OpenTelemetry.Instrumentation.Wcf                 | 1.0.0-rc.10   |
 
 ### Metrics

@@ -1,4 +1,4 @@
-// <copyright file="IMySqlDataInstrumentation.cs" company="OpenTelemetry Authors">
+// <copyright file="IMySqlDataInstrumentationOptions.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,9 +19,12 @@
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData;
-internal interface IMySqlDataInstrumentation
+internal interface IMySqlDataInstrumentationOptions : IDuckType
 {
-    [DuckField(Name = "options")]
-    IMySqlDataInstrumentationOptions Options { get; }
+    bool RecordException { get; }
+
+    bool SetDbStatement { get; }
+
+    bool EnableConnectionLevelAttributes { get; }
 }
 #endif

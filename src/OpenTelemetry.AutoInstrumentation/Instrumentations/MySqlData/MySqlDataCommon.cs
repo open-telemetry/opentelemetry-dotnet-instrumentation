@@ -18,7 +18,6 @@
 
 using System.Data;
 using System.Diagnostics;
-using OpenTelemetry.Instrumentation.MySqlData;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData;
 
@@ -45,7 +44,7 @@ internal class MySqlDataCommon
 
     // Store the MySqlDataInstrumentationOptions that corresponds to the most recent MySqlDataInstrumentation instance,
     // since each new MySqlDataInstrumentation replaces previous instances
-    internal static OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentationOptions? MySqlDataInstrumentationOptions { get; set; }
+    internal static IMySqlDataInstrumentationOptions? MySqlDataInstrumentationOptions { get; set; }
 
     internal static Activity? CreateActivity<TCommand>(TCommand command)
         where TCommand : IMySqlCommand
@@ -58,8 +57,10 @@ internal class MySqlDataCommon
 
         if (activity.IsAllDataRequested)
         {
-            // Figure out how to get the options, if possible
-            if (MySqlDataInstrumentationOptions is not null && MySqlDataInstrumentationOptions.SetDbStatement)
+            // Do two null checks on MySqlDataInstrumentationOptions
+            // - MySqlDataInstrumentationOptions can be null if it is never set (MySqlDataInstrumentationConstructorIntegration was never called)
+            // - MySqlDataInstrumentationOptions.Instance can be null if the original MySqlDataInstrumentation had a null options field
+            if (MySqlDataInstrumentationOptions?.Instance is not null && MySqlDataInstrumentationOptions.SetDbStatement)
             {
                 activity.SetTag(DbStatement, command.CommandText);
             }
