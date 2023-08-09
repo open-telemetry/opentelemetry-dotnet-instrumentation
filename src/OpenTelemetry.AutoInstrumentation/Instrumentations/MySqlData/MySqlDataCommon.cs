@@ -36,8 +36,7 @@ internal class MySqlDataCommon
     internal const string PeerService = "peer.service";
 
     internal const string MysqlDatabaseSystemName = "mysql";
-    internal static readonly ActivitySource ActivitySource = new ActivitySource(
-        "OpenTelemetry.Instrumentation.MySqlData", AutoInstrumentationVersion.Version); // In the library, it uses the version of the instrumentation library, e.g. "1.0.0.7"
+    internal static readonly ActivitySource ActivitySource = new("OpenTelemetry.AutoInstrumentation.MySqlData", AutoInstrumentationVersion.Version);
 
     internal static readonly IEnumerable<KeyValuePair<string, object?>> CreationTags = new[]
     {

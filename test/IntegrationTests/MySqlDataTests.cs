@@ -42,7 +42,6 @@ public class MySqlDataTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.Expect("OpenTelemetry.Instrumentation.MySqlData");
 
         EnableBytecodeInstrumentation();
         RunTestApplication(new()

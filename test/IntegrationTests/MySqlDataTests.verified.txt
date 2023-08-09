@@ -1,6 +1,6 @@
 ﻿[
   {
-    InstrumentationScopeName: OpenTelemetry.Instrumentation.MySqlData,
+    InstrumentationScopeName: OpenTelemetry.AutoInstrumentation.MySqlData,
     Span: {
       TraceId: Id_1,
       SpanId: Id_2,
@@ -25,7 +25,7 @@
     }
   },
   {
-    InstrumentationScopeName: OpenTelemetry.Instrumentation.MySqlData,
+    InstrumentationScopeName: OpenTelemetry.AutoInstrumentation.MySqlData,
     Span: {
       TraceId: Id_3,
       SpanId: Id_4,
@@ -50,7 +50,7 @@
     }
   },
   {
-    InstrumentationScopeName: OpenTelemetry.Instrumentation.MySqlData,
+    InstrumentationScopeName: OpenTelemetry.AutoInstrumentation.MySqlData,
     Span: {
       TraceId: Id_5,
       SpanId: Id_6,
@@ -75,7 +75,7 @@
     }
   },
   {
-    InstrumentationScopeName: OpenTelemetry.Instrumentation.MySqlData,
+    InstrumentationScopeName: OpenTelemetry.AutoInstrumentation.MySqlData,
     Span: {
       TraceId: Id_7,
       SpanId: Id_8,
@@ -100,7 +100,7 @@
     }
   },
   {
-    InstrumentationScopeName: OpenTelemetry.Instrumentation.MySqlData,
+    InstrumentationScopeName: OpenTelemetry.AutoInstrumentation.MySqlData,
     Span: {
       TraceId: Id_9,
       SpanId: Id_10,
@@ -125,7 +125,7 @@
     }
   },
   {
-    InstrumentationScopeName: OpenTelemetry.Instrumentation.MySqlData,
+    InstrumentationScopeName: OpenTelemetry.AutoInstrumentation.MySqlData,
     Span: {
       TraceId: Id_11,
       SpanId: Id_12,
