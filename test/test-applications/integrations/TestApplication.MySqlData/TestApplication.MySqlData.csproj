@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Manually edited the csproj to test the new project -->
+    <PackageReference Include="Google.Protobuf" VersionOverride="3.21.9" />
     <PackageReference Include="MySql.Data" VersionOverride="$(LibraryVersion)" />
   </ItemGroup>
 
