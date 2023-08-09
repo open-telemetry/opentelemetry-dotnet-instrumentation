@@ -15,11 +15,8 @@
 // </copyright>
 
 #if NET6_0_OR_GREATER
-using System.Text;
 using Google.Protobuf;
 using IntegrationTests.Helpers;
-using Microsoft.AspNetCore.DataProtection.KeyManagement.Internal;
-using OpenTelemetry.Proto.Collector.Trace.V1;
 using OpenTelemetry.Proto.Trace.V1;
 using Xunit.Abstractions;
 
@@ -59,8 +56,8 @@ public class MySqlDataTests : TestHelper
         var settings = new VerifySettings();
         settings.IgnoreMember<Span>(x => x.StartTimeUnixNano);
         settings.IgnoreMember<Span>(x => x.EndTimeUnixNano);
-        settings.AddExtraSettings(
-            _ => _.Converters.Add(new SpanConverter()));
+        settings.AddExtraSettings(_ => _.Converters.Add(new SpanConverter()));
+        settings.AddExtraSettings(_ => _.Converters.Add(new KeyValueConverter(x => x.Replace(_mySql.Port.ToString(), "3306"))));
 
         await Verifier.Verify(spans, settings)
                       .UseFileName(nameof(MySqlDataTests));
@@ -99,6 +96,24 @@ public class MySqlDataTests : TestHelper
             }
 
             return cachedString;
+        }
+    }
+
+    private class KeyValueConverter : WriteOnlyJsonConverter<OpenTelemetry.Proto.Common.V1.KeyValue>
+    {
+        private Func<string, string> _valueStringReplace;
+
+        public KeyValueConverter(Func<string, string> valueStringReplace)
+        {
+            _valueStringReplace = valueStringReplace;
+        }
+
+        public override void Write(VerifyJsonWriter writer, OpenTelemetry.Proto.Common.V1.KeyValue value)
+        {
+            writer.WriteStartObject();
+            writer.WriteMember(value, value.Key, "Key");
+            writer.WriteMember(value, _valueStringReplace(value.Value.ToString()), "Value");
+            writer.WriteEndObject();
         }
     }
 }

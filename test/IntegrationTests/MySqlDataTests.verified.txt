@@ -11,58 +11,27 @@
       Attributes: [
         {
           Key: db.system,
-          Value: {
-            StringValue: mysql,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "mysql" }
         },
         {
           Key: db.name,
-          Value: {
-            StringValue: ,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "" }
         },
         {
           Key: net.peer.ip,
-          Value: {
-            StringValue: 127.0.0.1,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "127.0.0.1" }
         },
         {
           Key: net.peer.port,
-          Value: {
-            StringValue: ,
-            BoolValue: false,
-            IntValue: 63304,
-            BytesValue: [],
-            ValueCase: IntValue
-          }
+          Value: { "intValue": "3306" }
         },
         {
           Key: db.user,
-          Value: {
-            StringValue: root,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "root" }
         },
         {
           Key: peer.service,
-          Value: {
-            StringValue: 127.0.0.1:63304,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "127.0.0.1:3306" }
         }
       ]
     }
@@ -79,58 +48,27 @@
       Attributes: [
         {
           Key: db.system,
-          Value: {
-            StringValue: mysql,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "mysql" }
         },
         {
           Key: db.name,
-          Value: {
-            StringValue: ,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "" }
         },
         {
           Key: net.peer.ip,
-          Value: {
-            StringValue: 127.0.0.1,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "127.0.0.1" }
         },
         {
           Key: net.peer.port,
-          Value: {
-            StringValue: ,
-            BoolValue: false,
-            IntValue: 63304,
-            BytesValue: [],
-            ValueCase: IntValue
-          }
+          Value: { "intValue": "3306" }
         },
         {
           Key: db.user,
-          Value: {
-            StringValue: root,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "root" }
         },
         {
           Key: peer.service,
-          Value: {
-            StringValue: 127.0.0.1:63304,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "127.0.0.1:3306" }
         }
       ]
     }
@@ -147,58 +85,27 @@
       Attributes: [
         {
           Key: db.system,
-          Value: {
-            StringValue: mysql,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "mysql" }
         },
         {
           Key: db.name,
-          Value: {
-            StringValue: ,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "" }
         },
         {
           Key: net.peer.ip,
-          Value: {
-            StringValue: 127.0.0.1,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "127.0.0.1" }
         },
         {
           Key: net.peer.port,
-          Value: {
-            StringValue: ,
-            BoolValue: false,
-            IntValue: 63304,
-            BytesValue: [],
-            ValueCase: IntValue
-          }
+          Value: { "intValue": "3306" }
         },
         {
           Key: db.user,
-          Value: {
-            StringValue: root,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "root" }
         },
         {
           Key: peer.service,
-          Value: {
-            StringValue: 127.0.0.1:63304,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "127.0.0.1:3306" }
         }
       ]
     }
@@ -215,58 +122,27 @@
       Attributes: [
         {
           Key: db.system,
-          Value: {
-            StringValue: mysql,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "mysql" }
         },
         {
           Key: db.name,
-          Value: {
-            StringValue: ,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "" }
         },
         {
           Key: net.peer.ip,
-          Value: {
-            StringValue: 127.0.0.1,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "127.0.0.1" }
         },
         {
           Key: net.peer.port,
-          Value: {
-            StringValue: ,
-            BoolValue: false,
-            IntValue: 63304,
-            BytesValue: [],
-            ValueCase: IntValue
-          }
+          Value: { "intValue": "3306" }
         },
         {
           Key: db.user,
-          Value: {
-            StringValue: root,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "root" }
         },
         {
           Key: peer.service,
-          Value: {
-            StringValue: 127.0.0.1:63304,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "127.0.0.1:3306" }
         }
       ]
     }
@@ -283,58 +159,27 @@
       Attributes: [
         {
           Key: db.system,
-          Value: {
-            StringValue: mysql,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "mysql" }
         },
         {
           Key: db.name,
-          Value: {
-            StringValue: ,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "" }
         },
         {
           Key: net.peer.ip,
-          Value: {
-            StringValue: 127.0.0.1,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "127.0.0.1" }
         },
         {
           Key: net.peer.port,
-          Value: {
-            StringValue: ,
-            BoolValue: false,
-            IntValue: 63304,
-            BytesValue: [],
-            ValueCase: IntValue
-          }
+          Value: { "intValue": "3306" }
         },
         {
           Key: db.user,
-          Value: {
-            StringValue: root,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "root" }
         },
         {
           Key: peer.service,
-          Value: {
-            StringValue: 127.0.0.1:63304,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "127.0.0.1:3306" }
         }
       ]
     }
@@ -351,58 +196,27 @@
       Attributes: [
         {
           Key: db.system,
-          Value: {
-            StringValue: mysql,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "mysql" }
         },
         {
           Key: db.name,
-          Value: {
-            StringValue: ,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "" }
         },
         {
           Key: net.peer.ip,
-          Value: {
-            StringValue: 127.0.0.1,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "127.0.0.1" }
         },
         {
           Key: net.peer.port,
-          Value: {
-            StringValue: ,
-            BoolValue: false,
-            IntValue: 63304,
-            BytesValue: [],
-            ValueCase: IntValue
-          }
+          Value: { "intValue": "3306" }
         },
         {
           Key: db.user,
-          Value: {
-            StringValue: root,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "root" }
         },
         {
           Key: peer.service,
-          Value: {
-            StringValue: 127.0.0.1:63304,
-            BoolValue: false,
-            BytesValue: [],
-            ValueCase: StringValue
-          }
+          Value: { "stringValue": "127.0.0.1:3306" }
         }
       ]
     }
