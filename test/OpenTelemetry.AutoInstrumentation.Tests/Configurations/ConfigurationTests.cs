@@ -17,7 +17,7 @@
 using System.Collections.Specialized;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using Moq;
+using NSubstitute;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using Xunit;
 
@@ -120,10 +120,10 @@ public class ConfigurationTests
     [Fact]
     public void ParseEmptyAsNull_CompositeConfigurationSource()
     {
-        var mockSource = new Mock<IConfigurationSource>();
-        mockSource.Setup(x => x.GetString(It.Is<string>(key => key == "TEST_NULL_VALUE"))).Returns<string>(_ => null);
-        mockSource.Setup(x => x.GetString(It.Is<string>(key => key == "TEST_EMPTY_VALUE"))).Returns<string>(_ => string.Empty);
-        var compositeSource = new Configuration(true, mockSource.Object);
+        var mockSource = Substitute.For<IConfigurationSource>();
+        mockSource.GetString(Arg.Is<string>(key => key == "TEST_NULL_VALUE")).Returns(_ => null);
+        mockSource.GetString(Arg.Is<string>(key => key == "TEST_EMPTY_VALUE"))!.Returns<string>(_ => string.Empty);
+        var compositeSource = new Configuration(true, mockSource);
 
         using (new AssertionScope())
         {

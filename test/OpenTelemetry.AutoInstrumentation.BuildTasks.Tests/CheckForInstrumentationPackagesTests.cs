@@ -16,7 +16,7 @@
 
 using FluentAssertions;
 using Microsoft.Build.Framework;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace OpenTelemetry.AutoInstrumentation.BuildTasks.Tests;
@@ -133,10 +133,10 @@ public class CheckForInstrumentationPackagesTests
         for (var i = 0; i < source.Length; i++)
         {
             var (nuGetPackageId, nuGetPackageVersion) = source[i];
-            var mockTaskItem = new Mock<ITaskItem>();
-            mockTaskItem.Setup(x => x.GetMetadata("NuGetPackageId")).Returns(nuGetPackageId);
-            mockTaskItem.Setup(x => x.GetMetadata("NuGetPackageVersion")).Returns(nuGetPackageVersion);
-            taskItems[i] = mockTaskItem.Object;
+            var mockTaskItem = Substitute.For<ITaskItem>();
+            mockTaskItem.GetMetadata("NuGetPackageId").Returns(nuGetPackageId);
+            mockTaskItem.GetMetadata("NuGetPackageVersion").Returns(nuGetPackageVersion);
+            taskItems[i] = mockTaskItem;
         }
 
         return taskItems;
@@ -149,12 +149,12 @@ public class CheckForInstrumentationPackagesTests
         for (var i = 0; i < source.Length; i++)
         {
             var (itemSpec, targetNuGetPackageVersionRange, instrumentationNuGetPackageId, instrumentationNuGetPackageVersion) = source[i];
-            var mockTaskItem = new Mock<ITaskItem>();
-            mockTaskItem.Setup(x => x.ItemSpec).Returns(itemSpec);
-            mockTaskItem.Setup(x => x.GetMetadata("TargetNuGetPackageVersionRange")).Returns(targetNuGetPackageVersionRange);
-            mockTaskItem.Setup(x => x.GetMetadata("InstrumentationNuGetPackageId")).Returns(instrumentationNuGetPackageId);
-            mockTaskItem.Setup(x => x.GetMetadata("InstrumentationNuGetPackageVersion")).Returns(instrumentationNuGetPackageVersion);
-            taskItems[i] = mockTaskItem.Object;
+            var mockTaskItem = Substitute.For<ITaskItem>();
+            mockTaskItem.ItemSpec.Returns(itemSpec);
+            mockTaskItem.GetMetadata("TargetNuGetPackageVersionRange").Returns(targetNuGetPackageVersionRange);
+            mockTaskItem.GetMetadata("InstrumentationNuGetPackageId").Returns(instrumentationNuGetPackageId);
+            mockTaskItem.GetMetadata("InstrumentationNuGetPackageVersion").Returns(instrumentationNuGetPackageVersion);
+            taskItems[i] = mockTaskItem;
         }
 
         return taskItems;
@@ -169,16 +169,16 @@ public class CheckForInstrumentationPackagesTests
         {
             var task = new CheckForInstrumentationPackages();
 
-            var mockBuildEngine = new Mock<IBuildEngine>();
-            task.BuildEngine = mockBuildEngine.Object;
+            var mockBuildEngine = Substitute.For<IBuildEngine>();
+            task.BuildEngine = mockBuildEngine;
 
             // Capture the BuildMessageEventArgs argument passed to LogMessageEvent.
-            mockBuildEngine.Setup(x => x.LogMessageEvent(It.IsAny<BuildMessageEventArgs>()))
-                .Callback<BuildMessageEventArgs>(_buildMessageEventArgsList.Add);
+            mockBuildEngine.When(x => x.LogMessageEvent(Arg.Any<BuildMessageEventArgs>()))
+                .Do(x => _buildMessageEventArgsList.Add(x.ArgAt<BuildMessageEventArgs>(0)));
 
             // Capture the BuildErrorEventArgs argument passed to LogErrorEvent.
-            mockBuildEngine.Setup(x => x.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
-                .Callback<BuildErrorEventArgs>(_buildErrorEventArgsList.Add);
+            mockBuildEngine.When(x => x.LogErrorEvent(Arg.Any<BuildErrorEventArgs>()))
+                .Do(x => _buildErrorEventArgsList.Add(x.ArgAt<BuildErrorEventArgs>(0)));
 
             Task = task;
             MockBuildEngine = mockBuildEngine;
@@ -186,7 +186,7 @@ public class CheckForInstrumentationPackagesTests
 
         public CheckForInstrumentationPackages Task { get; }
 
-        public Mock<IBuildEngine> MockBuildEngine { get; }
+        public IBuildEngine MockBuildEngine { get; }
 
         public IReadOnlyList<BuildMessageEventArgs> MessageEventArgsList => _buildMessageEventArgsList;
 

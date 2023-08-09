@@ -18,7 +18,7 @@ using System.Collections.Specialized;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.Extensions.Logging;
-using Moq;
+using NSubstitute;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Logs;
@@ -113,13 +113,13 @@ public class PluginManagerTests
         var settings = GetSettings(pluginAssemblyQualifiedName);
         var pluginManager = new PluginManager(settings);
 
-        var tracerProviderBuilderMock = new Mock<TracerProviderBuilder>();
-        var meterProviderBuilderMock = new Mock<MeterProviderBuilder>();
+        var tracerProviderBuilderMock = Substitute.For<TracerProviderBuilder>();
+        var meterProviderBuilderMock = Substitute.For<MeterProviderBuilder>();
 
-        var traceBeforeAction = () => tracerProviderBuilderMock.Object.InvokePluginsBefore(pluginManager);
-        var meterBeforeAction = () => meterProviderBuilderMock.Object.InvokePluginsBefore(pluginManager);
-        var traceAfterAction = () => tracerProviderBuilderMock.Object.InvokePluginsAfter(pluginManager);
-        var meterAfterAction = () => meterProviderBuilderMock.Object.InvokePluginsAfter(pluginManager);
+        var traceBeforeAction = () => tracerProviderBuilderMock.InvokePluginsBefore(pluginManager);
+        var meterBeforeAction = () => meterProviderBuilderMock.InvokePluginsBefore(pluginManager);
+        var traceAfterAction = () => tracerProviderBuilderMock.InvokePluginsAfter(pluginManager);
+        var meterAfterAction = () => meterProviderBuilderMock.InvokePluginsAfter(pluginManager);
 
         using (new AssertionScope())
         {
@@ -128,26 +128,26 @@ public class PluginManagerTests
             traceAfterAction.Should().NotThrow();
             meterAfterAction.Should().NotThrow();
 
-            tracerProviderBuilderMock.Verify(x => x.AddSource(It.Is<string>(x => x == "My.Custom.Before.Source")), Times.Once);
-            tracerProviderBuilderMock.Verify(x => x.AddSource(It.Is<string>(x => x == "My.Custom.After.Source")), Times.Once);
-            meterProviderBuilderMock.Verify(x => x.AddMeter(It.Is<string>(x => x == "My.Custom.Before.Meter")), Times.Once);
-            meterProviderBuilderMock.Verify(x => x.AddMeter(It.Is<string>(x => x == "My.Custom.After.Meter")), Times.Once);
+            tracerProviderBuilderMock.Received(1).AddSource(Arg.Is<string>(x => x == "My.Custom.Before.Source"));
+            tracerProviderBuilderMock.Received(1).AddSource(Arg.Is<string>(x => x == "My.Custom.After.Source"));
+            meterProviderBuilderMock.Received(1).AddMeter(Arg.Is<string>(x => x == "My.Custom.Before.Meter"));
+            meterProviderBuilderMock.Received(1).AddMeter(Arg.Is<string>(x => x == "My.Custom.After.Meter"));
         }
     }
 
     [Fact]
     public void InvokeInitializationEvents()
     {
-        var tracerProviderMock = new Mock<TracerProvider>();
-        var meterProviderMock = new Mock<MeterProvider>();
+        var tracerProviderMock = Substitute.For<TracerProvider>();
+        var meterProviderMock = Substitute.For<MeterProvider>();
 
         var pluginAssemblyQualifiedName = typeof(MockPlugin).AssemblyQualifiedName!;
         var settings = GetSettings(pluginAssemblyQualifiedName);
         var pluginManager = new PluginManager(settings);
 
         var initializingAction = () => pluginManager.Initializing();
-        var tracerProviderInitializedAction = () => pluginManager.InitializedProvider(tracerProviderMock.Object);
-        var meterProviderInitializedAction = () => pluginManager.InitializedProvider(meterProviderMock.Object);
+        var tracerProviderInitializedAction = () => pluginManager.InitializedProvider(tracerProviderMock);
+        var meterProviderInitializedAction = () => pluginManager.InitializedProvider(meterProviderMock);
 
         using (new AssertionScope())
         {
