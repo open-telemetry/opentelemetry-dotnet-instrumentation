@@ -18,20 +18,8 @@
           Value: { "stringValue": "" }
         },
         {
-          Key: net.peer.ip,
-          Value: { "stringValue": "127.0.0.1" }
-        },
-        {
-          Key: net.peer.port,
-          Value: { "intValue": "3306" }
-        },
-        {
-          Key: db.user,
-          Value: { "stringValue": "root" }
-        },
-        {
           Key: peer.service,
-          Value: { "stringValue": "127.0.0.1:3306" }
+          Value: { "stringValue": "127.0.0.1" }
         }
       ]
     }
@@ -55,20 +43,8 @@
           Value: { "stringValue": "" }
         },
         {
-          Key: net.peer.ip,
-          Value: { "stringValue": "127.0.0.1" }
-        },
-        {
-          Key: net.peer.port,
-          Value: { "intValue": "3306" }
-        },
-        {
-          Key: db.user,
-          Value: { "stringValue": "root" }
-        },
-        {
           Key: peer.service,
-          Value: { "stringValue": "127.0.0.1:3306" }
+          Value: { "stringValue": "127.0.0.1" }
         }
       ]
     }
@@ -92,20 +68,8 @@
           Value: { "stringValue": "" }
         },
         {
-          Key: net.peer.ip,
-          Value: { "stringValue": "127.0.0.1" }
-        },
-        {
-          Key: net.peer.port,
-          Value: { "intValue": "3306" }
-        },
-        {
-          Key: db.user,
-          Value: { "stringValue": "root" }
-        },
-        {
           Key: peer.service,
-          Value: { "stringValue": "127.0.0.1:3306" }
+          Value: { "stringValue": "127.0.0.1" }
         }
       ]
     }
@@ -129,20 +93,8 @@
           Value: { "stringValue": "" }
         },
         {
-          Key: net.peer.ip,
-          Value: { "stringValue": "127.0.0.1" }
-        },
-        {
-          Key: net.peer.port,
-          Value: { "intValue": "3306" }
-        },
-        {
-          Key: db.user,
-          Value: { "stringValue": "root" }
-        },
-        {
           Key: peer.service,
-          Value: { "stringValue": "127.0.0.1:3306" }
+          Value: { "stringValue": "127.0.0.1" }
         }
       ]
     }
@@ -166,20 +118,8 @@
           Value: { "stringValue": "" }
         },
         {
-          Key: net.peer.ip,
-          Value: { "stringValue": "127.0.0.1" }
-        },
-        {
-          Key: net.peer.port,
-          Value: { "intValue": "3306" }
-        },
-        {
-          Key: db.user,
-          Value: { "stringValue": "root" }
-        },
-        {
           Key: peer.service,
-          Value: { "stringValue": "127.0.0.1:3306" }
+          Value: { "stringValue": "127.0.0.1" }
         }
       ]
     }
@@ -203,20 +143,8 @@
           Value: { "stringValue": "" }
         },
         {
-          Key: net.peer.ip,
-          Value: { "stringValue": "127.0.0.1" }
-        },
-        {
-          Key: net.peer.port,
-          Value: { "intValue": "3306" }
-        },
-        {
-          Key: db.user,
-          Value: { "stringValue": "root" }
-        },
-        {
           Key: peer.service,
-          Value: { "stringValue": "127.0.0.1:3306" }
+          Value: { "stringValue": "127.0.0.1" }
         }
       ]
     }
