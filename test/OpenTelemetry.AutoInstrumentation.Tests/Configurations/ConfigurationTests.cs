@@ -121,7 +121,7 @@ public class ConfigurationTests
     public void ParseEmptyAsNull_CompositeConfigurationSource()
     {
         var mockSource = Substitute.For<IConfigurationSource>();
-        mockSource.GetString(Arg.Is<string>(key => key == "TEST_NULL_VALUE"))!.Returns<string>(_ => null!);
+        mockSource.GetString(Arg.Is<string>(key => key == "TEST_NULL_VALUE")).Returns(_ => null);
         mockSource.GetString(Arg.Is<string>(key => key == "TEST_EMPTY_VALUE"))!.Returns<string>(_ => string.Empty);
         var compositeSource = new Configuration(true, mockSource);
 
