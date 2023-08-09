@@ -14,9 +14,12 @@
 // limitations under the License.
 // </copyright>
 
+#if NET6_0_OR_GREATER
+
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData;
 
 internal interface IMySqlConnection
 {
     IMySqlConnectionStringBuilder Settings { get; }
 }
+#endif
