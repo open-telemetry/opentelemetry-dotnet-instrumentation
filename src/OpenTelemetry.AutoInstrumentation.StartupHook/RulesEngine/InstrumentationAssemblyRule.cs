@@ -78,7 +78,7 @@ internal class InstrumentationAssemblyRule : Rule
             Logger.Warning($"Rule Engine:Couldn't evaluate OpenTelemetry Instrumentation Evaluation. Exception: {ex}");
         }
 
-        return true;
+        return result;
     }
 
     private class RuleFileInfo
