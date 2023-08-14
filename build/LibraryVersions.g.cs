@@ -101,8 +101,7 @@ public static class LibraryVersion
             "TestApplication.MySqlData",
             new List<string>
             {
-                "6.10.7",
-                "8.0.32.1",
+                "8.1.0",
             }
         },
         {
