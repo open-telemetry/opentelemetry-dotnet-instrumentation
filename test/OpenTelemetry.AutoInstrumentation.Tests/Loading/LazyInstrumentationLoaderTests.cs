@@ -28,18 +28,24 @@ public class LazyInstrumentationLoaderTests
     [Fact]
     public void InitializesOnAssemblyLoad()
     {
-        var initializer = new DummyInitializer();
+        var initializer1 = new DummyInitializer();
+        var initializer2 = new DummyInitializer();
         using (var loader = new LazyInstrumentationLoader())
         {
-            loader.Add(initializer);
+            loader.Add(initializer1); // Before loading the assembly
 
             CreateDummyAssembly(); // Creates and loads assembly dynamically. This should trigger also assembly load event.
+
+            loader.Add(initializer2); // After loading the assembly
         }
 
         using (new AssertionScope())
         {
-            initializer.Initialized.Should().BeTrue();
-            initializer.Disposed.Should().BeTrue();
+            initializer1.Initialized.Should().BeTrue();
+            initializer1.Disposed.Should().BeTrue();
+
+            initializer2.Initialized.Should().BeTrue();
+            initializer2.Disposed.Should().BeTrue();
         }
     }
 
