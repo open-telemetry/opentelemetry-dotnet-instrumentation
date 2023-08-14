@@ -25,6 +25,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Fixes instrumentation loading issue where delayed instrumentation initialization
+  could not bootstrap both traces and metrics.
+  Affected scope: ASP.NET Core and HttpClient instrumentations.
+
 ### Security
 
 ## [1.0.0-rc.2](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.0.0-rc.2)

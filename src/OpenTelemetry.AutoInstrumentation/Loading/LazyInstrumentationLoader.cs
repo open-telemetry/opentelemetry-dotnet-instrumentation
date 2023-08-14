@@ -46,10 +46,7 @@ internal class LazyInstrumentationLoader : IDisposable
         private readonly InstrumentationInitializer _instrumentationInitializer;
         private readonly ILifespanManager _lifespanManager;
         private readonly string _requiredAssemblyName;
-
-#if NETFRAMEWORK
         private int _initialized;
-#endif
 
         public OnAssemblyLoadInitializer(ILifespanManager lifespanManager, InstrumentationInitializer instrumentationInitializer)
         {
@@ -59,8 +56,6 @@ internal class LazyInstrumentationLoader : IDisposable
 
             AppDomain.CurrentDomain.AssemblyLoad += CurrentDomain_AssemblyLoad;
 
-#if NETFRAMEWORK
-
             // 1. NetFramework doesn't have startuphook that executes before the main content.
             //    So, we must check at the startup, if the required assembly is already loaded.
             // 2. There are multiple race conditions here between assembly loaded event and checking
@@ -68,21 +63,27 @@ internal class LazyInstrumentationLoader : IDisposable
             // 3. To eliminate risks that initializer doesn't invoke, we ensure that both strategies
             //    are active at the same time, whichever executes first, determines the loading moment.
 
-            var isRequiredAssemblyLoaded = AppDomain.CurrentDomain
-                .GetAssemblies()
-                .Any(x => GetAssemblyName(x) == _requiredAssemblyName);
+            var isRequiredAssemblyLoaded = Array.Exists(AppDomain.CurrentDomain.GetAssemblies(), x => IsAssemblyNameEqual(x, _requiredAssemblyName));
             if (isRequiredAssemblyLoaded)
             {
                 OnRequiredAssemblyDetected();
             }
-#endif
+        }
+
+        private static bool IsAssemblyNameEqual(Assembly assembly, string expectedAssemblyName)
+        {
+            var assemblyName = assembly.FullName.AsSpan();
+            if (assemblyName.Length <= expectedAssemblyName.Length)
+            {
+                return false;
+            }
+
+            return assemblyName.StartsWith(expectedAssemblyName.AsSpan()) && assemblyName[expectedAssemblyName.Length] == ',';
         }
 
         private void CurrentDomain_AssemblyLoad(object? sender, AssemblyLoadEventArgs args)
         {
-            var assemblyName = GetAssemblyName(args.LoadedAssembly);
-
-            if (_requiredAssemblyName == assemblyName)
+            if (IsAssemblyNameEqual(args.LoadedAssembly, _requiredAssemblyName))
             {
                 OnRequiredAssemblyDetected();
             }
@@ -90,13 +91,11 @@ internal class LazyInstrumentationLoader : IDisposable
 
         private void OnRequiredAssemblyDetected()
         {
-#if NETFRAMEWORK
             if (Interlocked.Exchange(ref _initialized, value: 1) != default)
             {
                 // OnRequiredAssemblyDetected() was already called before
                 return;
             }
-#endif
 
             AppDomain.CurrentDomain.AssemblyLoad -= CurrentDomain_AssemblyLoad;
 
@@ -111,11 +110,6 @@ internal class LazyInstrumentationLoader : IDisposable
             {
                 OtelLogger.Error(ex, "'{0}' failed", initializerName);
             }
-        }
-
-        private string? GetAssemblyName(Assembly assembly)
-        {
-            return assembly.FullName?.Split(new[] { ',' }, count: 2)[0];
         }
     }
 }
