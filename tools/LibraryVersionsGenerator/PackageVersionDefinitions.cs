@@ -141,7 +141,6 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.MySqlData",
             Versions = new List<string>
             {
-                "6.10.7",
                 "*"
             }
         },

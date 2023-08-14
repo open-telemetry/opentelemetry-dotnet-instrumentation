@@ -19,7 +19,7 @@ internal static partial class InstrumentationDefinitions
 
     private static NativeCallTargetDefinition[] GetDefinitionsArray()
     {
-        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(12);
+        var nativeCallTargetDefinitions = new List<NativeCallTargetDefinition>(11);
         // Traces
         var tracerSettings = Instrumentation.TracerSettings.Value;
         if (tracerSettings.TracesEnabled)
@@ -28,12 +28,6 @@ internal static partial class InstrumentationDefinitions
             if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.MongoDB))
             {
                 nativeCallTargetDefinitions.Add(new("MongoDB.Driver", "MongoDB.Driver.MongoClient", ".ctor", new[] {"System.Void", "MongoDB.Driver.MongoClientSettings"}, 2, 13, 3, 2, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration"));
-            }
-
-            // MySqlData
-            if (tracerSettings.EnabledInstrumentations.Contains(TracerInstrumentation.MySqlData))
-            {
-                nativeCallTargetDefinitions.Add(new("MySql.Data", "MySql.Data.MySqlClient.MySqlConnectionStringBuilder", "get_Logging", new[] {"System.Boolean"}, 8, 0, 31, 8, 65535, 65535, AssemblyFullName, "OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData.MySqlConnectionStringBuilderIntegration"));
             }
 
             // NServiceBus

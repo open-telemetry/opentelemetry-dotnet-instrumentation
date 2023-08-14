@@ -7,17 +7,15 @@
     <PackageReference Include="Pipelines.Sockets.Unofficial" ExcludeAssets="all" />
     <!-- System.Diagnostics.PerformanceCounter is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
     <PackageReference Include="System.Diagnostics.PerformanceCounter" ExcludeAssets="all" />
-    <!-- MySql.Data is required by OpenTelemetry.Instrumentation.MySqlData. -->
-    <PackageReference Include="MySql.Data" ExcludeAssets="all" />
-    <!-- System.Configuration.ConfigurationManager is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. -->
+    <!-- System.Configuration.ConfigurationManager is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
     <PackageReference Include="System.Configuration.ConfigurationManager" ExcludeAssets="all" />
-    <!-- System.Security.Cryptography.ProtectedData is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. -->
+    <!-- System.Security.Cryptography.ProtectedData is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
     <PackageReference Include="System.Security.Cryptography.ProtectedData" ExcludeAssets="all" />
-    <!-- System.Drawing.Common is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. -->
+    <!-- System.Drawing.Common is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
     <PackageReference Include="System.Drawing.Common" ExcludeAssets="all" />
-    <!-- System.Windows.Extensions is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. -->
+    <!-- System.Windows.Extensions is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
     <PackageReference Include="System.Windows.Extensions" ExcludeAssets="all" />
-    <!-- Microsoft.Win32.SystemEvents is tranistive dependency required by OpenTelemetry.Instrumentation.MySqlData. -->
+    <!-- Microsoft.Win32.SystemEvents is tranistive dependency required by OpenTelemetry.Instrumentation.StackExchangeRedis. -->
     <PackageReference Include="Microsoft.Win32.SystemEvents" ExcludeAssets="all" />
     <!-- Microsoft.Bcl.AsyncInterfaces is required by StackExchange.Redis. -->
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" ExcludeAssets="all" />
