@@ -28,7 +28,6 @@
   /net/OpenTelemetry.Instrumentation.EntityFrameworkCore.dll,
   /net/OpenTelemetry.Instrumentation.GrpcNetClient.dll,
   /net/OpenTelemetry.Instrumentation.Http.dll,
-  /net/OpenTelemetry.Instrumentation.MySqlData.dll,
   /net/OpenTelemetry.Instrumentation.Process.dll,
   /net/OpenTelemetry.Instrumentation.Quartz.dll,
   /net/OpenTelemetry.Instrumentation.Runtime.dll,
