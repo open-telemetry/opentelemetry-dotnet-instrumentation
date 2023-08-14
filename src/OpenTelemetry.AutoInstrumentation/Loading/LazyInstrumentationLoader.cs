@@ -63,23 +63,27 @@ internal class LazyInstrumentationLoader : IDisposable
             // 3. To eliminate risks that initializer doesn't invoke, we ensure that both strategies
             //    are active at the same time, whichever executes first, determines the loading moment.
 
-            var isRequiredAssemblyLoaded = Array.Exists(AppDomain.CurrentDomain.GetAssemblies(), x => GetAssemblyName(x) == _requiredAssemblyName);
+            var isRequiredAssemblyLoaded = Array.Exists(AppDomain.CurrentDomain.GetAssemblies(), x => IsAssemblyNameEqual(x, _requiredAssemblyName));
             if (isRequiredAssemblyLoaded)
             {
                 OnRequiredAssemblyDetected();
             }
         }
 
-        private static string? GetAssemblyName(Assembly assembly)
+        private static bool IsAssemblyNameEqual(Assembly assembly, string expectedAssemblyName)
         {
-            return assembly.FullName?.Split(new[] { ',' }, count: 2)[0];
+            var assemblyName = assembly.FullName.AsSpan();
+            if (assemblyName.Length <= expectedAssemblyName.Length)
+            {
+                return false;
+            }
+
+            return assemblyName.StartsWith(expectedAssemblyName.AsSpan()) && assemblyName[expectedAssemblyName.Length] == ',';
         }
 
         private void CurrentDomain_AssemblyLoad(object? sender, AssemblyLoadEventArgs args)
         {
-            var assemblyName = GetAssemblyName(args.LoadedAssembly);
-
-            if (_requiredAssemblyName == assemblyName)
+            if (IsAssemblyNameEqual(args.LoadedAssembly, _requiredAssemblyName))
             {
                 OnRequiredAssemblyDetected();
             }
