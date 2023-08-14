@@ -11,9 +11,17 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- [MySql.Data](https://www.nuget.org/packages/MySql.Data/) instrumentation is now
+  supported from version 8.1.0 working on .NET.
+
 ### Deprecated
 
 ### Removed
+
+- Removed [MySql.Data](https://www.nuget.org/packages/MySql.Data/) instrumentation
+  for versions 6.10.7-8.0.33.
+- Removed support for `OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentationOptions`
+  for plugins.
 
 ### Fixed
 
