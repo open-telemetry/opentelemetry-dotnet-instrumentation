@@ -41,6 +41,7 @@ const WSTRING skip_assembly_prefixes[]{
     WStr("Microsoft.Extensions.Primitives"),
     WStr("Microsoft.Extensions.WebEncoders"),
     WStr("Microsoft.Web.Compilation.Snapshots"),
+    WStr("OpenTelemetry"),
     WStr("System.Core"),
     WStr("System.Console"),
     WStr("System.Collections"),
@@ -53,6 +54,18 @@ const WSTRING skip_assembly_prefixes[]{
     WStr("System.Text"),
     WStr("System.Threading"),
     WStr("System.Xml"),
+    // Various assemblies that should never be instrumented:
+    WStr("runtime"),
+    WStr("RefEmit_"),
+    WStr("vstest"),
+    WStr("testhost"),
+    WStr("dotnet"),
+    WStr("SOS"),
+    WStr("NuGet"),
+    WStr("VBCSCompiler"),
+    WStr("csc"),
+    WStr("DuckTypeNotVisibleAssembly"),
+    WStr("Newtonsoft.Json"),
 };
 
 const WSTRING skip_assemblies[]{WStr("mscorlib"),
