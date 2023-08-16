@@ -1,1 +1,1 @@
-FROM mcr.microsoft.com/azure-storage/azurite:3.25.1
+FROM mcr.microsoft.com/azure-storage/azurite:3.26.0
