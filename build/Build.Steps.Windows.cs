@@ -256,6 +256,13 @@ partial class Build
 
     private void RunNetFxGacOperation(string operation)
     {
+        // To update the GAC, we need to run the tool as Administrator.
+        // Throw if not running as a Windows Administrator.
+        if (!IsWindowsAdministrator())
+        {
+            throw new InvalidOperationException("This target must be run on Windows as Administrator.");
+        }
+
         var netFxAssembliesFolder = TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET462);
         var installTool = Solution.GetProjectByName(Projects.Tools.GacInstallTool);
 
@@ -263,6 +270,21 @@ partial class Build
             .SetProjectFile(installTool)
             .SetConfiguration(BuildConfiguration)
             .SetApplicationArguments($"{operation} {netFxAssembliesFolder}"));
+
+        static bool IsWindowsAdministrator()
+        {
+            if (!IsWin)
+            {
+                return false;
+            }
+
+#pragma warning disable CA1416 // Validate platform compatibility
+            using var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
+            var principal = new System.Security.Principal.WindowsPrincipal(identity);
+
+            return principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
+#pragma warning restore CA1416 // Validate platform compatibility
+        }
     }
 
     private void PerformLegacyRestoreIfNeeded(Project project)
