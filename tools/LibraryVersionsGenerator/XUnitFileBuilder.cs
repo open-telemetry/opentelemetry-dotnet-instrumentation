@@ -35,6 +35,12 @@ internal sealed class XUnitFileBuilder : CSharpFileBuilder
         return this;
     }
 
+    public override CSharpFileBuilder AddVersionWithDependencies(string version, Dictionary<string, string> dependencies)
+    {
+        // Dependencies info is currently not usable here. Build is located based on main package version string.
+        return AddVersion(version);
+    }
+
     public override CSharpFileBuilder EndTestPackage()
     {
         Builder.AppendLine(@"#endif

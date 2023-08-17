@@ -87,8 +87,17 @@ partial class Build
                 {
                     DotNetRestore(s =>
                          Restore(s)
-                        .CombineWith(libraryVersions, (p, libraryVersion) =>
-                                p.SetProperty("LibraryVersion", libraryVersion)));
+                        .CombineWith(libraryVersions, (p, buildInfo) =>
+                        {
+                            p.SetProperty("LibraryVersion", buildInfo.LibraryVersion);
+
+                            foreach (var item in buildInfo.AdditionalMetaData)
+                            {
+                                p.SetProperty(item.Key, item.Value);
+                            }
+
+                            return p;
+                        }));
                 }
                 else
                 {
@@ -200,8 +209,17 @@ partial class Build
                 {
                     DotNetBuild(x =>
                          BuildTestApplication(x)
-                        .CombineWith(libraryVersions, (p, libraryVersion) =>
-                            p.SetProperty("LibraryVersion", libraryVersion)));
+                        .CombineWith(libraryVersions, (p, buildInfo) =>
+                        {
+                            p.SetProperty("LibraryVersion", buildInfo.LibraryVersion);
+
+                            foreach (var item in buildInfo.AdditionalMetaData)
+                            {
+                                p.SetProperty(item.Key, item.Value);
+                            }
+
+                            return p;
+                        }));
                 }
                 else
                 {
