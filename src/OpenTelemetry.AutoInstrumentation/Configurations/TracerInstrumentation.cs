@@ -123,10 +123,8 @@ internal enum TracerInstrumentation
     /// </summary>
     MySqlConnector = 17,
 
-#if NET6_0_OR_GREATER
     /// <summary>
     /// Azure SDK instrumentation.
     /// </summary>
     Azure = 18
-#endif
 }

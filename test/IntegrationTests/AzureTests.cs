@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-#if NET6_0_OR_GREATER
-
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 
@@ -48,6 +46,10 @@ public class AzureTests : TestHelper
         collector.Expect("System.Net.Http");
 #elif NET6_0_OR_GREATER
         collector.Expect("OpenTelemetry.Instrumentation.Http.HttpClient");
+#elif NETFRAMEWORK
+        // On .NET Framework the "OpenTelemetry.Instrumentation.Http.HttpWebRequest"
+        // ends up being suppressed by the addition of headers via the Azure instrumentation
+        // See https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry.Instrumentation.Http/Implementation/HttpWebRequestActivitySource.netfx.cs#L279-L284
 #endif
 
         RunTestApplication(new()
@@ -59,4 +61,3 @@ public class AzureTests : TestHelper
         collector.AssertExpectations();
     }
 }
-#endif

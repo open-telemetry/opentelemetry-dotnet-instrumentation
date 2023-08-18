@@ -46,6 +46,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.Quartz => Wrappers.AddQuartzInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.MongoDB => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources"),
                 TracerInstrumentation.MySqlConnector => builder.AddSource("MySqlConnector"),
+                TracerInstrumentation.Azure => Wrappers.AddAzureInstrumentation(builder),
 #if NET6_0_OR_GREATER
                 TracerInstrumentation.AspNetCore => Wrappers.AddAspNetCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.MassTransit => builder.AddSource("MassTransit"),
@@ -53,7 +54,6 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.StackExchangeRedis => builder.AddSource("OpenTelemetry.Instrumentation.StackExchangeRedis"),
                 TracerInstrumentation.EntityFrameworkCore => Wrappers.AddEntityFrameworkCoreInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.GraphQL => Wrappers.AddGraphQLInstrumentation(builder, pluginManager, lazyInstrumentationLoader, settings),
-                TracerInstrumentation.Azure => Wrappers.AddAzureInstrumentation(builder),
 #endif
                 _ => null
             };
@@ -166,6 +166,7 @@ internal static class EnvironmentConfigurationTracerHelper
 
             return builder.AddSource("GraphQL");
         }
+#endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddAzureInstrumentation(TracerProviderBuilder builder)
@@ -173,7 +174,6 @@ internal static class EnvironmentConfigurationTracerHelper
             AppContext.SetSwitch("Azure.Experimental.EnableActivitySource", true);
             return builder.AddSource("Azure.*");
         }
-#endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static TracerProviderBuilder AddSqlClientInstrumentation(TracerProviderBuilder builder, PluginManager pluginManager, LazyInstrumentationLoader lazyInstrumentationLoader)
