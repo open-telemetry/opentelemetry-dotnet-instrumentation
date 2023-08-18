@@ -49,7 +49,7 @@ public class AzureTests : TestHelper
 #elif NETFRAMEWORK
         // On .NET Framework the "OpenTelemetry.Instrumentation.Http.HttpWebRequest"
         // ends up being suppressed by the addition of headers via the Azure instrumentation
-        // See https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry.Instrumentation.Http/Implementation/HttpWebRequestActivitySource.netfx.cs#L279-L284
+        // See https://github.com/open-telemetry/opentelemetry-dotnet/blob/f6a1c04e8115a828dd33269f639daf2924796bae/src/OpenTelemetry.Instrumentation.Http/Implementation/HttpWebRequestActivitySource.netfx.cs#L279-L284
 #endif
 
         RunTestApplication(new()
