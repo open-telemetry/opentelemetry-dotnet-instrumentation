@@ -9,134 +9,136 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using Models;
+
 public static class LibraryVersion
 {
-    public static IReadOnlyDictionary<string, IReadOnlyCollection<string>> Versions = new Dictionary<string, IReadOnlyCollection<string>>
+    public static IReadOnlyDictionary<string, IReadOnlyCollection<PackageBuildInfo>> Versions = new Dictionary<string, IReadOnlyCollection<PackageBuildInfo>>
     {
         {
             "TestApplication.Azure",
-            new List<string>
+            new List<PackageBuildInfo>
             {
-                "12.13.0",
-                "12.17.0",
+                new("12.13.0"),
+                new("12.17.0"),
             }
         },
         {
             "TestApplication.Elasticsearch",
-            new List<string>
+            new List<PackageBuildInfo>
             {
-                "8.0.0",
-                "8.9.2",
+                new("8.0.0"),
+                new("8.9.2"),
             }
         },
         {
             "TestApplication.EntityFrameworkCore",
-            new List<string>
+            new List<PackageBuildInfo>
             {
-                "6.0.12",
-                "7.0.10",
+                new("6.0.12"),
+                new("7.0.10"),
             }
         },
         {
             "TestApplication.EntityFrameworkCore.Pomelo.MySql",
-            new List<string>
+            new List<PackageBuildInfo>
             {
-                "6.0.2",
-                "7.0.0",
+                new("6.0.2"),
+                new("7.0.0"),
             }
         },
         {
             "TestApplication.GraphQL",
-            new List<string>
+            new List<PackageBuildInfo>
             {
-                "7.5.0",
-                "7.6.0",
+                new("7.5.0", new() {{"GraphQLMicrosoftDI","7.5.0"},{"GraphQLServerTransportsAspNetCore","7.5.0"},{"GraphQLServerUIPlayground","7.5.0"}}),
+                new("7.6.1", new() {{"GraphQLMicrosoftDI","7.6.1"},{"GraphQLServerTransportsAspNetCore","7.6.0"},{"GraphQLServerUIPlayground","7.6.0"}}),
             }
         },
         {
             "TestApplication.GrpcNetClient",
-            new List<string>
+            new List<PackageBuildInfo>
             {
-                "2.52.0",
-                "2.55.0",
+                new("2.52.0"),
+                new("2.55.0"),
             }
         },
         {
             "TestApplication.MassTransit",
-            new List<string>
+            new List<PackageBuildInfo>
             {
-                "8.0.0",
-                "8.1.0",
+                new("8.0.0"),
+                new("8.1.0"),
             }
         },
         {
             "TestApplication.SqlClient",
-            new List<string>
+            new List<PackageBuildInfo>
             {
-                "1.1.4",
-                "2.1.5",
-                "3.1.2",
-                "4.1.1",
-                "5.1.1",
+                new("1.1.4"),
+                new("2.1.5"),
+                new("3.1.2"),
+                new("4.1.1"),
+                new("5.1.1"),
             }
         },
         {
             "TestApplication.MongoDB",
-            new List<string>
+            new List<PackageBuildInfo>
             {
-                "2.13.3",
-                "2.15.0",
-                "2.21.0",
+                new("2.13.3"),
+                new("2.15.0"),
+                new("2.21.0"),
             }
         },
         {
             "TestApplication.MySqlConnector",
-            new List<string>
+            new List<PackageBuildInfo>
             {
-                "2.0.0",
-                "2.2.7",
+                new("2.0.0"),
+                new("2.2.7"),
             }
         },
         {
             "TestApplication.MySqlData",
-            new List<string>
+            new List<PackageBuildInfo>
             {
-                "8.1.0",
+                new("8.1.0"),
             }
         },
         {
             "TestApplication.Npgsql",
-            new List<string>
+            new List<PackageBuildInfo>
             {
-                "6.0.0",
-                "7.0.4",
+                new("6.0.0"),
+                new("7.0.4"),
             }
         },
         {
             "TestApplication.NServiceBus",
-            new List<string>
+            new List<PackageBuildInfo>
             {
-                "8.0.0",
-                "8.1.1",
+                new("8.0.0"),
+                new("8.1.1"),
             }
         },
         {
             "TestApplication.Quartz",
-            new List<string>
+            new List<PackageBuildInfo>
             {
-                "3.4.0",
-                "3.7.0",
+                new("3.4.0"),
+                new("3.7.0"),
             }
         },
         {
             "TestApplication.StackExchangeRedis",
-            new List<string>
+            new List<PackageBuildInfo>
             {
-                "2.0.495",
-                "2.1.50",
-                "2.5.61",
-                "2.6.66",
-                "2.6.122",
+                new("2.0.495"),
+                new("2.1.50"),
+                new("2.5.61"),
+                new("2.6.66"),
+                new("2.6.122"),
             }
         },
     };

@@ -1,5 +1,8 @@
+using Models;
+using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.MSBuild;
+using static Nuke.Common.Tooling.SettingsEntityExtensions;
 
 namespace Extensions;
 
@@ -67,6 +70,40 @@ internal static class DotNetSettingsExtensions
     {
         return settings
             .SetProperty("VSTestTestCaseFilter", filter);
+    }
+
+    public static DotNetBuildSettings[] CombineWithBuildInfos(this DotNetBuildSettings settings, IReadOnlyCollection<PackageBuildInfo> buildInfos)
+    {
+        // NOTE: SetProperty creates internally a new instance!
+
+        return settings.CombineWith(buildInfos, (p, buildInfo) =>
+        {
+            p = p.SetProperty("LibraryVersion", buildInfo.LibraryVersion);
+
+            foreach (var item in buildInfo.AdditionalMetaData)
+            {
+                p = p.SetProperty(item.Key, item.Value);
+            }
+
+            return p;
+        });
+    }
+
+    public static DotNetRestoreSettings[] CombineWithBuildInfos(this DotNetRestoreSettings settings, IReadOnlyCollection<PackageBuildInfo> buildInfos)
+    {
+        // NOTE: SetProperty creates internally a new instance!
+
+        return settings.CombineWith(buildInfos, (p, buildInfo) =>
+        {
+            p = p.SetProperty("LibraryVersion", buildInfo.LibraryVersion);
+
+            foreach (var item in buildInfo.AdditionalMetaData)
+            {
+                p = p.SetProperty(item.Key, item.Value);
+            }
+
+            return p;
+        });
     }
 
     private static string GetTargetPlatform(MSBuildTargetPlatform platform) =>

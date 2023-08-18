@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+using LibraryVersionsGenerator.Models;
+
 namespace LibraryVersionsGenerator;
 
 internal static class PackageVersionDefinitions
@@ -25,10 +27,10 @@ internal static class PackageVersionDefinitions
             IntegrationName = "Azure",
             NugetPackageName = "Azure.Storage.Blobs",
             TestApplicationName = "TestApplication.Azure",
-            Versions = new List<string>
+            Versions = new List<PackageVersion>
             {
-                "12.13.0",
-                "*"
+                new("12.13.0"),
+                new("*")
             }
         },
         new()
@@ -36,10 +38,10 @@ internal static class PackageVersionDefinitions
             IntegrationName = "Elasticsearch",
             NugetPackageName = "Elastic.Clients.Elasticsearch",
             TestApplicationName = "TestApplication.Elasticsearch",
-            Versions = new List<string>
+            Versions = new List<PackageVersion>
             {
-                "8.0.0",
-                "*"
+                new("8.0.0"),
+                new("*")
             }
         },
         new()
@@ -47,10 +49,10 @@ internal static class PackageVersionDefinitions
             IntegrationName = "EntityFrameworkCore",
             NugetPackageName = "Microsoft.EntityFrameworkCore.Sqlite",
             TestApplicationName = "TestApplication.EntityFrameworkCore",
-            Versions = new List<string>
+            Versions = new List<PackageVersion>
             {
-                "6.0.12",
-                "*"
+                new("6.0.12"),
+                new("*")
             }
         },
         new()
@@ -58,10 +60,10 @@ internal static class PackageVersionDefinitions
             IntegrationName = "EntityFrameworkCorePomeloMySql",
             NugetPackageName = "Pomelo.EntityFrameworkCore.MySql",
             TestApplicationName = "TestApplication.EntityFrameworkCore.Pomelo.MySql",
-            Versions = new List<string>
+            Versions = new List<PackageVersion>
             {
-                "6.0.2",
-                "*"
+                new("6.0.2"),
+                new("*")
             }
         },
         new()
@@ -69,10 +71,10 @@ internal static class PackageVersionDefinitions
             IntegrationName = "GraphQL",
             NugetPackageName = "GraphQL",
             TestApplicationName = "TestApplication.GraphQL",
-            Versions = new List<string>
+            Versions = new List<GraphQLVersion>
             {
-                "7.5.0",
-                "*"
+                new("7.5.0") { MicrosoftDIVersion = "7.5.0", ServerTransportsAspNetCoreVersion = "7.5.0", ServerUIPlayground = "7.5.0" },
+                new("*") { MicrosoftDIVersion = "*", ServerTransportsAspNetCoreVersion = "*", ServerUIPlayground = "*" },
             }
         },
         new()
@@ -80,10 +82,10 @@ internal static class PackageVersionDefinitions
             IntegrationName = "GrpcNetClient",
             NugetPackageName = "Grpc.Net.Client",
             TestApplicationName = "TestApplication.GrpcNetClient",
-            Versions = new List<string>
+            Versions = new List<PackageVersion>
             {
-                "2.52.0",
-                "*"
+                new("2.52.0"),
+                new("*")
             }
         },
         new()
@@ -91,10 +93,10 @@ internal static class PackageVersionDefinitions
             IntegrationName = "MassTransit",
             NugetPackageName = "MassTransit",
             TestApplicationName = "TestApplication.MassTransit",
-            Versions = new List<string>
+            Versions = new List<PackageVersion>
             {
-                "8.0.0",
-                "*"
+                new("8.0.0"),
+                new("*")
             }
         },
         new()
@@ -102,13 +104,13 @@ internal static class PackageVersionDefinitions
             IntegrationName = "SqlClient",
             NugetPackageName = "Microsoft.Data.SqlClient",
             TestApplicationName = "TestApplication.SqlClient",
-            Versions = new List<string>
+            Versions = new List<PackageVersion>
             {
-                "1.1.4",
-                "2.1.5",
-                "3.1.2",
-                "4.1.1",
-                "*"
+                new("1.1.4"),
+                new("2.1.5"),
+                new("3.1.2"),
+                new("4.1.1"),
+                new("*")
             }
         },
         new()
@@ -116,11 +118,11 @@ internal static class PackageVersionDefinitions
             IntegrationName = "MongoDB",
             NugetPackageName = "MongoDB.Driver",
             TestApplicationName = "TestApplication.MongoDB",
-            Versions = new List<string>
+            Versions = new List<PackageVersion>
             {
-                "2.13.3",
-                "2.15.0",
-                "*"
+                new("2.13.3"),
+                new("2.15.0"),
+                new("*")
             }
         },
         new()
@@ -128,10 +130,10 @@ internal static class PackageVersionDefinitions
             IntegrationName = "MySqlConnector",
             NugetPackageName = "MySqlConnector",
             TestApplicationName = "TestApplication.MySqlConnector",
-            Versions = new List<string>
+            Versions = new List<PackageVersion>
             {
-                "2.0.0",
-                "*"
+                new("2.0.0"),
+                new("*")
             }
         },
         new()
@@ -139,9 +141,9 @@ internal static class PackageVersionDefinitions
             IntegrationName = "MySqlData",
             NugetPackageName = "MySql.Data",
             TestApplicationName = "TestApplication.MySqlData",
-            Versions = new List<string>
+            Versions = new List<PackageVersion>
             {
-                "*"
+                new("*")
             }
         },
         new()
@@ -149,10 +151,10 @@ internal static class PackageVersionDefinitions
             IntegrationName = "Npgsql",
             NugetPackageName = "Npgsql",
             TestApplicationName = "TestApplication.Npgsql",
-            Versions = new List<string>
+            Versions = new List<PackageVersion>
             {
-                "6.0.0",
-                "*"
+                new("6.0.0"),
+                new("*")
             }
         },
         new()
@@ -160,10 +162,10 @@ internal static class PackageVersionDefinitions
             IntegrationName = "NServiceBus",
             NugetPackageName = "NServiceBus",
             TestApplicationName = "TestApplication.NServiceBus",
-            Versions = new List<string>
+            Versions = new List<PackageVersion>
             {
-                "8.0.0",
-                "*"
+                new("8.0.0"),
+                new("*")
             }
         },
         new()
@@ -171,10 +173,10 @@ internal static class PackageVersionDefinitions
             IntegrationName = "Quartz",
             NugetPackageName = "Quartz",
             TestApplicationName = "TestApplication.Quartz",
-            Versions = new List<string>
+            Versions = new List<PackageVersion>
             {
-                "3.4.0",
-                "*"
+                new("3.4.0"),
+                new("*")
             }
         },
         new()
@@ -182,13 +184,13 @@ internal static class PackageVersionDefinitions
             IntegrationName = "StackExchangeRedis",
             NugetPackageName = "StackExchange.Redis",
             TestApplicationName = "TestApplication.StackExchangeRedis",
-            Versions = new List<string>
+            Versions = new List<PackageVersion>
             {
-                "2.0.495",
-                "2.1.50",
-                "2.5.61",
-                "2.6.66",
-                "*"
+                new("2.0.495"),
+                new("2.1.50"),
+                new("2.5.61"),
+                new("2.6.66"),
+                new("*")
             }
         }
     };
@@ -201,6 +203,6 @@ internal static class PackageVersionDefinitions
 
         required public string TestApplicationName { get; init; }
 
-        required public IReadOnlyCollection<string> Versions { get; init; }
+        required public IReadOnlyCollection<PackageVersion> Versions { get; init; }
     }
 }

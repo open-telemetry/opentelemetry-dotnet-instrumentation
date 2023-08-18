@@ -14,16 +14,20 @@
 // limitations under the License.
 // </copyright>
 
+using System.Text;
+
 namespace LibraryVersionsGenerator;
 
 internal sealed class BuildFileBuilder : CSharpFileBuilder
 {
     public override CSharpFileBuilder BeginClass(string classNamespace, string className)
     {
+        AddUsing("Models");
+
         base.BeginClass(classNamespace, className);
 
         Builder.AppendLine(
-            @"    public static IReadOnlyDictionary<string, IReadOnlyCollection<string>> Versions = new Dictionary<string, IReadOnlyCollection<string>>
+            @"    public static IReadOnlyDictionary<string, IReadOnlyCollection<PackageBuildInfo>> Versions = new Dictionary<string, IReadOnlyCollection<PackageBuildInfo>>
     {");
 
         return this;
@@ -41,7 +45,7 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
         Builder.AppendLine(
             @$"        {{
             ""{testApplicationName}"",
-            new List<string>
+            new List<PackageBuildInfo>
             {{");
 
         return this;
@@ -49,7 +53,13 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
 
     public override CSharpFileBuilder AddVersion(string version)
     {
-        Builder.AppendLine($"                \"{version}\",");
+        Builder.AppendLine($"                new(\"{version}\"),");
+        return this;
+    }
+
+    public override CSharpFileBuilder AddVersionWithDependencies(string version, Dictionary<string, string> dependencies)
+    {
+        Builder.AppendLine($"                new(\"{version}\", {SerializeDictionary(dependencies)}),");
         return this;
     }
 
@@ -58,5 +68,27 @@ internal sealed class BuildFileBuilder : CSharpFileBuilder
         Builder.AppendLine(@"            }
         },");
         return this;
+    }
+
+    private static string SerializeDictionary(Dictionary<string, string> dictionary)
+    {
+        var dictionarySb = new StringBuilder();
+        dictionarySb.Append("new() {");
+
+        for (var i = 0; i < dictionary.Count; i++)
+        {
+            var dependency = dictionary.ElementAt(i);
+
+            dictionarySb.Append($"{{\"{dependency.Key}\",\"{dependency.Value}\"}}");
+
+            if (i != dictionary.Count - 1)
+            {
+                dictionarySb.Append(',');
+            }
+        }
+
+        dictionarySb.Append("}");
+
+        return dictionarySb.ToString();
     }
 }

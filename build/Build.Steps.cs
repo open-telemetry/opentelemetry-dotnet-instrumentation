@@ -87,8 +87,7 @@ partial class Build
                 {
                     DotNetRestore(s =>
                          Restore(s)
-                        .CombineWith(libraryVersions, (p, libraryVersion) =>
-                                p.SetProperty("LibraryVersion", libraryVersion)));
+                         .CombineWithBuildInfos(libraryVersions));
                 }
                 else
                 {
@@ -200,8 +199,7 @@ partial class Build
                 {
                     DotNetBuild(x =>
                          BuildTestApplication(x)
-                        .CombineWith(libraryVersions, (p, libraryVersion) =>
-                            p.SetProperty("LibraryVersion", libraryVersion)));
+                         .CombineWithBuildInfos(libraryVersions));
                 }
                 else
                 {
