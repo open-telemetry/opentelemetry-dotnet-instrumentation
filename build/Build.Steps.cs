@@ -199,7 +199,7 @@ partial class Build
                 {
                     DotNetBuild(x =>
                          BuildTestApplication(x)
-                            .CombineWithBuildInfos(libraryVersions));
+                         .CombineWithBuildInfos(libraryVersions));
                 }
                 else
                 {
