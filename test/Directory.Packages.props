@@ -6,7 +6,7 @@
     <PackageVersion Include="FluentAssertions" Version="6.11.0" />
     <PackageVersion Include="Google.Protobuf" Version="3.24.0" />
     <PackageVersion Include="GraphQL" Version="7.6.0" />
-    <PackageVersion Include="GraphQL.MicrosoftDI" Version="7.6.0" />
+    <PackageVersion Include="GraphQL.MicrosoftDI" Version="7.6.1" />
     <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="7.6.0" />
     <PackageVersion Include="GraphQL.Server.Ui.Playground" Version="7.6.0" />
     <PackageVersion Include="Grpc.Net.Client" Version="2.55.0" />
