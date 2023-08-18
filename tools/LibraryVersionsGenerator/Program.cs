@@ -16,10 +16,11 @@
 
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using LibraryVersionsGenerator;
 using LibraryVersionsGenerator.Models;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
+
+namespace LibraryVersionsGenerator;
 
 public class Program
 {
