@@ -302,9 +302,9 @@ internal static class Instrumentation
                 case TracerInstrumentation.GraphQL:
                     DelayedInitialization.Traces.AddGraphQL(LazyInstrumentationLoader, pluginManager, tracerSettings);
                     break;
+#endif
                 case TracerInstrumentation.Azure:
                     break;
-#endif
                 case TracerInstrumentation.MongoDB:
                     break;
                 case TracerInstrumentation.Npgsql:
