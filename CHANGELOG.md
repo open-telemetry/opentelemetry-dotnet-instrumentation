@@ -9,6 +9,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Added support for Azure SDK traces instrumentation on .NET Framework.
+
 ### Changed
 
 - [MySql.Data](https://www.nuget.org/packages/MySql.Data/) instrumentation is now
