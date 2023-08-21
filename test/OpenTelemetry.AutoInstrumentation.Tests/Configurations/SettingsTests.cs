@@ -250,9 +250,7 @@ public class SettingsTests : IDisposable
     [InlineData("WCFCLIENT", TracerInstrumentation.WcfClient)]
 #endif
     [InlineData("MYSQLCONNECTOR", TracerInstrumentation.MySqlConnector)]
-#if NET6_0_OR_GREATER
     [InlineData("AZURE", TracerInstrumentation.Azure)]
-#endif
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false");
