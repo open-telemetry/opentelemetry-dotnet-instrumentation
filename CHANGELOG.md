@@ -27,9 +27,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
-- Fixes instrumentation loading issue where delayed instrumentation initialization
+- Fixed instrumentation loading issue where delayed instrumentation initialization
   could not bootstrap both traces and metrics.
   Affected scope: ASP.NET Core and HttpClient instrumentations.
+- Fixed `ILogger` log instrumentation issue that caused logs to be exported multiple times.
 
 ### Security
 
