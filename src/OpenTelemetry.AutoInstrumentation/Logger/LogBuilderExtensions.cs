@@ -25,6 +25,8 @@ namespace OpenTelemetry.AutoInstrumentation.Logger;
 
 internal static class LogBuilderExtensions
 {
+    private static Type? _loggingProviderSdkType;
+
     public static ILoggingBuilder AddOpenTelemetryLogs(this ILoggingBuilder builder)
     {
         try
@@ -35,9 +37,12 @@ internal static class LogBuilderExtensions
             }
 
             // Integrate AddOpenTelemetry only once for ServiceCollection.
-            var openTelemetryLoggerProviderDescriptor = services.FirstOrDefault(descriptor => descriptor.ImplementationType == typeof(OpenTelemetryLoggerProvider));
+
+            _loggingProviderSdkType ??= Type.GetType("OpenTelemetry.Logs.LoggerProviderBuilderSdk, OpenTelemetry");
+            var openTelemetryLoggerProviderDescriptor = services.FirstOrDefault(descriptor => descriptor.ImplementationType == _loggingProviderSdkType);
             if (openTelemetryLoggerProviderDescriptor != null)
             {
+                AutoInstrumentationEventSource.Log.Verbose("Logs: AddOpenTelemetry already called on logging builder instance.");
                 return builder;
             }
 
