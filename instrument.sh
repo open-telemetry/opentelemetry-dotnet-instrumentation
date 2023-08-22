@@ -150,3 +150,5 @@ if [ "$ENABLE_PROFILING" = "true" ]; then
     export CORECLR_PROFILER_PATH="$OTEL_DOTNET_AUTO_HOME/$DOTNET_RUNTIME_ID/OpenTelemetry.AutoInstrumentation.Native.$SUFIX"
   fi
 fi
+
+$@
