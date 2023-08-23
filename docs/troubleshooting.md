@@ -164,10 +164,16 @@ Find their versions in the following locations:
 - [src/Directory.Packages.props](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/Directory.Packages.props)
 - [src/OpenTelemetry.AutoInstrumentation.AdditionalDeps/Directory.Packages.props](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/src/OpenTelemetry.AutoInstrumentation.AdditionalDeps/Directory.Packages.props)
 
-By default, assembly references for .NET Framework applications are upgraded
+By default, assembly references for .NET Framework applications are redirected
 during runtime to the versions used by the automatic instrumentation.
 This behavior can be controlled through the [`OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED`](./config.md#additional-settings)
 setting.
+
+If the application already ships binding redirection for assemblies
+used by automatic instrumentation this automatic redirection may fail,
+see [#2833](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2833).
+Check if any existing binding redirect prevent redirection to the versions
+listed at [netfx_assembly_redirection.h](../src/OpenTelemetry.AutoInstrumentation.Native/netfx_assembly_redirection.h).
 
 For the automatic redirection above to work there are two specific scenarios that
 require the assemblies used to instrument .NET Framework
