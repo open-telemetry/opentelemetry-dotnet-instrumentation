@@ -207,6 +207,12 @@ export OTEL_DOTNET_AUTO_HOME="bin/tracer-home"
 . ./instrument.sh
 ```
 
+The script can also launch the application to be instrumented directly:
+
+```sh
+OTEL_DOTNET_AUTO_HOME="bin/tracer-home" ./instrument.sh dotnet MyApp.dll
+```
+
 ### Using playground application
 
 You can use [the example playground application](../examples/playground)
