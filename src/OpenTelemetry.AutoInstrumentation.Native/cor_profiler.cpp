@@ -67,9 +67,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         const auto env_variables = GetEnvironmentVariables(env_vars_prefixes_to_display);
         Logger::Debug("Environment variables:");
 
-        const std::regex secrets_regex(
-            "(?:^|_)(API|TOKEN|SECRET|KEY|PASSWORD|PASS|PWD|HEADER|CREDENTIALS)(?:_|$)", 
-            std::regex_constants::ECMAScript | std::regex_constants::icase);
+        const std::regex secrets_regex("(?:^|_)(API|TOKEN|SECRET|KEY|PASSWORD|PASS|PWD|HEADER|CREDENTIALS)(?:_|$)",
+                                       std::regex_constants::ECMAScript | std::regex_constants::icase);
 
         for (const auto& env_variable : env_variables)
         {
