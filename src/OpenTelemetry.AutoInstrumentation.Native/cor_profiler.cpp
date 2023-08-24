@@ -7,7 +7,11 @@
 #include <corprof.h>
 #include <string>
 #include <typeinfo>
+#ifdef _WIN32
 #include <regex>
+#else
+#include <re2/re2.h>
+#endif
 
 #include "clr_helpers.h"
 #include "dllmain.h"
@@ -67,12 +71,20 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         const auto env_variables = GetEnvironmentVariables(env_vars_prefixes_to_display);
         Logger::Debug("Environment variables:");
 
+#ifdef _WIN32
         const std::regex secrets_regex("(?:^|_)(API|TOKEN|SECRET|KEY|PASSWORD|PASS|PWD|HEADER|CREDENTIALS)(?:_|$)",
                                        std::regex_constants::ECMAScript | std::regex_constants::icase);
+#else
+        static re2::RE2 re("(?:^|_)(API|TOKEN|SECRET|KEY|PASSWORD|PASS|PWD|HEADER|CREDENTIALS)(?:_|$)", RE2::Quiet);
+#endif
 
         for (const auto& env_variable : env_variables)
         {
+#ifdef _WIN32
             if (!std::regex_search(ToString(env_variable), secrets_regex))
+#else
+            if (!re2::RE2::PartialMatch(ToString(env_variable), re))
+#endif
             {
                 Logger::Debug("  ", env_variable);
             }
