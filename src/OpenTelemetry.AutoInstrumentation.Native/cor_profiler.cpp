@@ -88,6 +88,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
             {
                 Logger::Debug("  ", env_variable);
             }
+            else
+            {
+                // Remove secret value and replace with <hidden>
+                Logger::Debug("  ", env_variable.substr(0, env_variable.find_first_of('=')), "=<hidden>");
+            }
         }
     }
 
