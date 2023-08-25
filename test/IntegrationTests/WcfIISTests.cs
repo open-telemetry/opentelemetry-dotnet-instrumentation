@@ -54,18 +54,11 @@ public class WcfIISTests : TestHelper
         var netTcpPort = TcpPortProvider.GetOpenPort();
         var httpPort = TcpPortProvider.GetOpenPort();
 
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 1");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => WcfClientInstrumentation.ValidateBasicSpanExpectations(span, WcfClientInstrumentation.NetTcpChannelScheme, ExpectedChannelPath, ExpectedPeerName, netTcpPort, WcfClientInstrumentation.NetTcpBindingMessageVersion) && WcfClientInstrumentation.ValidateSpanSuccessStatus(span), "Client 1");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 2");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => WcfClientInstrumentation.ValidateBasicSpanExpectations(span, WcfClientInstrumentation.NetTcpChannelScheme, ExpectedChannelPath, ExpectedPeerName, netTcpPort, WcfClientInstrumentation.NetTcpBindingMessageVersion) && WcfClientInstrumentation.ValidateSpanSuccessStatus(span), "Client 2");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 3");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => WcfClientInstrumentation.ValidateBasicSpanExpectations(span, WcfClientInstrumentation.NetTcpChannelScheme, ExpectedChannelPath, ExpectedPeerName, netTcpPort, WcfClientInstrumentation.NetTcpBindingMessageVersion) && WcfClientInstrumentation.ValidateSpanSuccessStatus(span), "Client 3");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 4");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => WcfClientInstrumentation.ValidateBasicSpanExpectations(span, WcfClientInstrumentation.HttpChannelScheme, ExpectedChannelPath, ExpectedPeerName, httpPort, WcfClientInstrumentation.HttpBindingMessageVersion) && WcfClientInstrumentation.ValidateSpanSuccessStatus(span), "Client 4");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 5");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => WcfClientInstrumentation.ValidateBasicSpanExpectations(span, WcfClientInstrumentation.HttpChannelScheme, ExpectedChannelPath, ExpectedPeerName, httpPort, WcfClientInstrumentation.HttpBindingMessageVersion) && WcfClientInstrumentation.ValidateSpanSuccessStatus(span), "Client 5");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 6");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => WcfClientInstrumentation.ValidateBasicSpanExpectations(span, WcfClientInstrumentation.HttpChannelScheme, ExpectedChannelPath, ExpectedPeerName, httpPort, WcfClientInstrumentation.HttpBindingMessageVersion) && WcfClientInstrumentation.ValidateSpanSuccessStatus(span), "Client 6");
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server, "Server 1");
+        // filtering by name required, because client instrumentation creates some additional spans, e.g for connection registration
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client && span.Name == "http://opentelemetry.io/StatusService/Ping", "Client 1");
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server, "Server 2");
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client && span.Name == "http://opentelemetry.io/StatusService/Ping", "Client 2");
 
         collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom parent");
         collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom sibling");

@@ -13,72 +13,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // </copyright>
-#if NETFRAMEWORK
-
 using IntegrationTests.Helpers;
-using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Trace.V1;
 
 namespace IntegrationTests;
 
 internal static class WcfClientInstrumentation
 {
-    public const string NetTcpBindingMessageVersion = "Soap12 (http://www.w3.org/2003/05/soap-envelope) Addressing10 (http://www.w3.org/2005/08/addressing)";
-    public const string HttpBindingMessageVersion = "Soap11 (http://schemas.xmlsoap.org/soap/envelope/) AddressingNone (http://schemas.microsoft.com/ws/2005/05/addressing/none)";
-    public const string NetTcpChannelScheme = "net.tcp";
-    public const string HttpChannelScheme = "http";
-
-    public static bool ValidateBasicSpanExpectations(
-        Span span,
-        string expectedChannelScheme,
-        string expectedChannelPath,
-        string expectedPeerName,
-        int expectedPeerPort,
-        string expectedMessageVersion)
-    {
-        var attributes = span.Attributes;
-        var rpcSystem = ExtractAttribute(attributes, "rpc.system");
-        var rpcService = ExtractAttribute(attributes, "rpc.service");
-        var rpcMethod = ExtractAttribute(attributes, "rpc.method");
-        var soapMessageVersion = ExtractAttribute(attributes, "soap.message_version");
-        var netPeerPort = ExtractAttribute(attributes, "net.peer.port");
-        var netPeerName = ExtractAttribute(attributes, "net.peer.name");
-        var channelSchemeTag = ExtractAttribute(attributes, "wcf.channel.scheme");
-        var channelPath = ExtractAttribute(attributes, "wcf.channel.path");
-        return span.Kind == Span.Types.SpanKind.Client &&
-               rpcSystem.Value.StringValue == "dotnet_wcf" &&
-               rpcService.Value.StringValue == "http://opentelemetry.io/StatusService" &&
-               rpcMethod.Value.StringValue == "Ping" &&
-               netPeerName.Value.StringValue == expectedPeerName &&
-               netPeerPort.Value.IntValue == expectedPeerPort &&
-               channelSchemeTag.Value.StringValue == expectedChannelScheme &&
-               soapMessageVersion.Value.StringValue == expectedMessageVersion &&
-               channelPath.Value.StringValue == expectedChannelPath;
-    }
-
-    public static bool ValidateSpanSuccessStatus(Span span)
-    {
-        return span.Status == null;
-    }
-
     public static bool ValidateExpectedSpanHierarchy(ICollection<MockSpansCollector.Collected> assertedSpans)
     {
         var customParent = assertedSpans.Single(collected =>
-            collected.InstrumentationScopeName == "TestApplication.Wcf.Client.NetFramework" &&
+            collected.InstrumentationScopeName.StartsWith("TestApplication.Wcf.Client") &&
             collected.Span.Name == "Parent");
         var customSibling = assertedSpans.Single(collected =>
-            collected.InstrumentationScopeName == "TestApplication.Wcf.Client.NetFramework" &&
+            collected.InstrumentationScopeName.StartsWith("TestApplication.Wcf.Client") &&
             collected.Span.Name == "Sibling");
         var wcfClientSpans = assertedSpans.Where(collected =>
-            collected.InstrumentationScopeName == "OpenTelemetry.AutoInstrumentation.Wcf");
+            collected.Span.Kind == Span.Types.SpanKind.Client &&
+            collected.InstrumentationScopeName == "OpenTelemetry.Instrumentation.Wcf");
 
         return wcfClientSpans.All(span => span.Span.ParentSpanId == customParent.Span.SpanId) &&
                customSibling.Span.ParentSpanId == customParent.Span.SpanId;
     }
-
-    private static KeyValue ExtractAttribute(IEnumerable<KeyValue> attributes, string key)
-    {
-        return attributes.Single(kv => kv.Key == key);
-    }
 }
-#endif

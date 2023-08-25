@@ -141,5 +141,13 @@ public static class LibraryVersion
                 new("2.6.122"),
             }
         },
+        {
+            "TestApplication.Wcf.Client.DotNet",
+            new List<PackageBuildInfo>
+            {
+                new("4.10.2"),
+                new("6.0.0"),
+            }
+        },
     };
 }

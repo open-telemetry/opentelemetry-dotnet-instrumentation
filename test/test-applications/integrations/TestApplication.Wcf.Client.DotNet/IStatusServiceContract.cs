@@ -17,7 +17,7 @@
 using System.ServiceModel;
 using System.Threading.Tasks;
 
-namespace TestApplication.Wcf.Client.NetFramework;
+namespace TestApplication.Wcf.Client.DotNet;
 
 [ServiceContract(Namespace = "http://opentelemetry.io/", Name = "StatusService", SessionMode = SessionMode.Allowed)]
 public interface IStatusServiceContract

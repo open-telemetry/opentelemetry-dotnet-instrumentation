@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-#if NETFRAMEWORK
-
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Instrumentation.Wcf;
 
@@ -46,4 +44,3 @@ internal class WcfInitializer : InstrumentationInitializer
         instrumentationType?.GetProperty("Options")?.SetValue(null, options);
     }
 }
-#endif

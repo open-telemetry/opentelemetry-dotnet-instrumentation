@@ -8,16 +8,31 @@ Example project available in
 [test/test-applications/integrations/TestApplication.Wcf.Client.NetFramework](../test/test-applications/integrations/TestApplication.Wcf.Client.NetFramework/)
 folder.
 
-⚠️ **NOTICE:** Instrumentation of
-[APM-style](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/asynchronous-programming-model-apm)
-calls is supported, but have known limitations.
-It is recommended to convert them to
-[TAP-style](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap)
-calls.
-
 ## WCF Client Configuration (.NET)
 
-Instrumentation for WCF Client on .NET is not supported.
+Add `OpenTelemetry.Instrumentation.Wcf` and `System.Diagnostics.DiagnosticSource`
+package to the project. The version of `OpenTelemetry.Instrumentation.Wcf`
+should match the one used by AutoInstrumentation library to avoid compatibility
+issues.
+
+```xml
+  <ItemGroup>
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.2" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.11" ExcludeAssets="runtime" />
+  </ItemGroup>
+```
+
+Add the `TelemetryEndpointBehavior` behavior on the
+clients you want to instrument:
+
+```csharp
+StatusServiceClient client = new StatusServiceClient(binding, remoteAddress);
+client.Endpoint.EndpointBehaviors.Add(new TelemetryEndpointBehavior());
+```
+
+Example project available in
+[test/test-applications/integrations/TestApplication.Wcf.Client.DotNet](../test/test-applications/integrations/TestApplication.Wcf.Client.DotNet/)
+folder.
 
 ## WCF Server Configuration (.NET Framework)
 

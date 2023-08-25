@@ -246,9 +246,7 @@ public class SettingsTests : IDisposable
     [InlineData("ENTITYFRAMEWORKCORE", TracerInstrumentation.EntityFrameworkCore)]
     [InlineData("ASPNETCORE", TracerInstrumentation.AspNetCore)]
 #endif
-#if NETFRAMEWORK
     [InlineData("WCFCLIENT", TracerInstrumentation.WcfClient)]
-#endif
     [InlineData("MYSQLCONNECTOR", TracerInstrumentation.MySqlConnector)]
     [InlineData("AZURE", TracerInstrumentation.Azure)]
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)

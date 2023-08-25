@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+using OpenTelemetry.Instrumentation.Wcf;
+
 #if NETFRAMEWORK
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client;
@@ -33,9 +35,9 @@ internal static class WcfClientInitializer
     public static void Initialize(IChannelFactory channelFactory)
     {
         var behaviors = channelFactory.Endpoint.Behaviors;
-        if (!behaviors.Contains(typeof(WcfClientEndpointBehavior)))
+        if (!behaviors.Contains(typeof(TelemetryEndpointBehavior)))
         {
-            behaviors.Add(new WcfClientEndpointBehavior());
+            behaviors.Add(new TelemetryEndpointBehavior());
         }
     }
 }

@@ -192,6 +192,17 @@ internal static class PackageVersionDefinitions
                 new("2.6.66"),
                 new("*")
             }
+        },
+        new()
+        {
+            IntegrationName = "WCFCoreClient",
+            NugetPackageName = "System.ServiceModel.Http",
+            TestApplicationName = "TestApplication.Wcf.Client.DotNet",
+            Versions = new List<PackageVersion>
+            {
+                new("4.10.2"),
+                new("*")
+            }
         }
     };
 
