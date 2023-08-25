@@ -18,7 +18,6 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using FluentAssertions;
-using Google.Protobuf;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Trace.V1;
 using Xunit.Abstractions;
@@ -27,8 +26,6 @@ namespace IntegrationTests;
 
 public class WcfIISTests : TestHelper
 {
-    private const string ExpectedChannelPath = "/StatusService.svc";
-    private const string ExpectedPeerName = "localhost";
     private readonly Dictionary<string, string> _environmentVariables = new();
 
     public WcfIISTests(ITestOutputHelper output)

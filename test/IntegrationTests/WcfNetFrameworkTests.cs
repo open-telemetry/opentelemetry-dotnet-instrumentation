@@ -15,10 +15,7 @@
 // </copyright>
 
 #if NETFRAMEWORK
-using Google.Protobuf;
-using Google.Protobuf.Collections;
 using IntegrationTests.Helpers;
-using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Trace.V1;
 using Xunit.Abstractions;
 

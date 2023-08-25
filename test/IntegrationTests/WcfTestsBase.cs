@@ -16,7 +16,6 @@
 
 using System.Net.Sockets;
 using FluentAssertions;
-using Google.Protobuf;
 using IntegrationTests.Helpers;
 using Xunit.Abstractions;
 using static OpenTelemetry.Proto.Trace.V1.Span.Types;
@@ -24,10 +23,6 @@ using static OpenTelemetry.Proto.Trace.V1.Span.Types;
 namespace IntegrationTests;
 public abstract class WcfTestsBase : TestHelper, IDisposable
 {
-    protected const int NetTcpPort = 9090;
-    protected const int HttpPort = 9009;
-    protected const string ExpectedChannelPath = "/Telemetry";
-    protected const string ExpectedPeerName = "127.0.0.1";
     private readonly string _testAppName;
     private ProcessHelper? _serverProcess;
 
