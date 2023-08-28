@@ -22,10 +22,10 @@ internal static class WcfCommonConstants
 #else
     public const string ServiceModelAssemblyName = "System.Private.ServiceModel";
 
-    public const string NewServiceModelAssemblyName = "System.ServiceModel.Primitives";
+    public const string ServiceModelPrimitivesAssemblyName = "System.ServiceModel.Primitives";
     public const string Min6Version = "6.0.0";
     public const string Max6Version = "6.*.*";
 #endif
-    public const string MinVersion = "4.0.0";
-    public const string MaxVersion = "4.*.*";
+    public const string Min4Version = "4.0.0";
+    public const string Max4Version = "4.*.*";
 }
