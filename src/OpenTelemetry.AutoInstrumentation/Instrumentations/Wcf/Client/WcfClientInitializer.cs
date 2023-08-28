@@ -16,8 +16,6 @@
 
 using OpenTelemetry.Instrumentation.Wcf;
 
-#if NETFRAMEWORK
-
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client;
 
 internal static class WcfClientInitializer
@@ -41,4 +39,3 @@ internal static class WcfClientInitializer
         }
     }
 }
-#endif

@@ -32,6 +32,7 @@ public class WcfDotNetTests : WcfTestsBase
     [MemberData(nameof(LibraryVersion.WCFCoreClient), MemberType = typeof(LibraryVersion))]
     public async Task SubmitTraces(string clientPackageVersion)
     {
+        EnableBytecodeInstrumentation();
         await SubmitsTracesInternal(clientPackageVersion);
     }
 }

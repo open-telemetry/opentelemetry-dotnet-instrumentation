@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // </copyright>
-#if NETFRAMEWORK
 
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 
@@ -32,6 +31,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client;
     maximumVersion: WcfCommonConstants.MaxVersion,
     integrationName: WcfClientConstants.IntegrationName,
     type: InstrumentationType.Trace)]
+#if NETFRAMEWORK
 [InstrumentMethod(
     assemblyName: WcfCommonConstants.ServiceModelAssemblyName,
     typeName: WcfClientConstants.ChannelFactoryTypeName,
@@ -42,6 +42,7 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client;
     maximumVersion: WcfCommonConstants.MaxVersion,
     integrationName: WcfClientConstants.IntegrationName,
     type: InstrumentationType.Trace)]
+#endif
 [InstrumentMethod(
     assemblyName: WcfCommonConstants.ServiceModelAssemblyName,
     typeName: WcfClientConstants.ChannelFactoryTypeName,
@@ -80,4 +81,3 @@ public static class WcfClientIntegration
         return CallTargetReturn.GetDefault();
     }
 }
-#endif

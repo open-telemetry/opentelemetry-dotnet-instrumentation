@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // </copyright>
-#if NETFRAMEWORK
 using OpenTelemetry.AutoInstrumentation.Configurations;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client;
@@ -28,4 +27,3 @@ internal static class WcfClientConstants
     public const string BindingTypeName = "System.ServiceModel.Channels.Binding";
     public const string ConfigurationTypeName = "System.Configuration.Configuration";
 }
-#endif

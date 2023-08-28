@@ -18,7 +18,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
-using OpenTelemetry.Instrumentation.Wcf;
 
 namespace TestApplication.Wcf.Client.DotNet;
 
@@ -53,7 +52,6 @@ internal static class Program
         // This code is not meant to illustrate best practices, only the
         // instrumentation.
         var client = new StatusServiceClient(binding, new EndpointAddress(new Uri(address)));
-        client.Endpoint.EndpointBehaviors.Add(new TelemetryEndpointBehavior());
         await client.OpenAsync().ConfigureAwait(false);
 
         try

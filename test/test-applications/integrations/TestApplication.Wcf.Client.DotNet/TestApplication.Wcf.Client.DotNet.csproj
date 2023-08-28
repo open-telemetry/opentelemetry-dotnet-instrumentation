@@ -7,7 +7,6 @@
   <ItemGroup>
     <PackageReference Include="System.ServiceModel.Http" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="System.ServiceModel.NetTcp" VersionOverride="$(LibraryVersion)" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" ExcludeAssets="runtime" />
   </ItemGroup>
 
 </Project>
