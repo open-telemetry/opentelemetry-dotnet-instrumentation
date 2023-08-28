@@ -31,18 +31,6 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client;
     maximumVersion: WcfCommonConstants.MaxVersion,
     integrationName: WcfClientConstants.IntegrationName,
     type: InstrumentationType.Trace)]
-#if NETFRAMEWORK
-[InstrumentMethod(
-    assemblyName: WcfCommonConstants.ServiceModelAssemblyName,
-    typeName: WcfClientConstants.ChannelFactoryTypeName,
-    methodName: WcfClientConstants.InitializeEndpointMethodName,
-    returnTypeName: ClrNames.Void,
-    parameterTypeNames: new[] { ClrNames.String, WcfClientConstants.EndpointAddressTypeName, WcfClientConstants.ConfigurationTypeName },
-    minimumVersion: WcfCommonConstants.MinVersion,
-    maximumVersion: WcfCommonConstants.MaxVersion,
-    integrationName: WcfClientConstants.IntegrationName,
-    type: InstrumentationType.Trace)]
-#endif
 [InstrumentMethod(
     assemblyName: WcfCommonConstants.ServiceModelAssemblyName,
     typeName: WcfClientConstants.ChannelFactoryTypeName,
@@ -63,6 +51,50 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf.Client;
     maximumVersion: WcfCommonConstants.MaxVersion,
     integrationName: WcfClientConstants.IntegrationName,
     type: InstrumentationType.Trace)]
+#if NET6_0_OR_GREATER
+[InstrumentMethod(
+    assemblyName: WcfCommonConstants.NewServiceModelAssemblyName,
+    typeName: WcfClientConstants.ChannelFactoryTypeName,
+    methodName: WcfClientConstants.InitializeEndpointMethodName,
+    returnTypeName: ClrNames.Void,
+    parameterTypeNames: new[] { ClrNames.String, WcfClientConstants.EndpointAddressTypeName },
+    minimumVersion: WcfCommonConstants.Min6Version,
+    maximumVersion: WcfCommonConstants.Max6Version,
+    integrationName: WcfClientConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: WcfCommonConstants.NewServiceModelAssemblyName,
+    typeName: WcfClientConstants.ChannelFactoryTypeName,
+    methodName: WcfClientConstants.InitializeEndpointMethodName,
+    returnTypeName: ClrNames.Void,
+    parameterTypeNames: new[] { WcfClientConstants.ServiceEndpointTypeName },
+    minimumVersion: WcfCommonConstants.Min6Version,
+    maximumVersion: WcfCommonConstants.Max6Version,
+    integrationName: WcfClientConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+[InstrumentMethod(
+    assemblyName: WcfCommonConstants.NewServiceModelAssemblyName,
+    typeName: WcfClientConstants.ChannelFactoryTypeName,
+    methodName: WcfClientConstants.InitializeEndpointMethodName,
+    returnTypeName: ClrNames.Void,
+    parameterTypeNames: new[] { WcfClientConstants.BindingTypeName, WcfClientConstants.EndpointAddressTypeName },
+    minimumVersion: WcfCommonConstants.Min6Version,
+    maximumVersion: WcfCommonConstants.Max6Version,
+    integrationName: WcfClientConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+#endif
+#if NETFRAMEWORK
+[InstrumentMethod(
+    assemblyName: WcfCommonConstants.ServiceModelAssemblyName,
+    typeName: WcfClientConstants.ChannelFactoryTypeName,
+    methodName: WcfClientConstants.InitializeEndpointMethodName,
+    returnTypeName: ClrNames.Void,
+    parameterTypeNames: new[] { ClrNames.String, WcfClientConstants.EndpointAddressTypeName, WcfClientConstants.ConfigurationTypeName },
+    minimumVersion: WcfCommonConstants.MinVersion,
+    maximumVersion: WcfCommonConstants.MaxVersion,
+    integrationName: WcfClientConstants.IntegrationName,
+    type: InstrumentationType.Trace)]
+#endif
 public static class WcfClientIntegration
 {
     /// <summary>
