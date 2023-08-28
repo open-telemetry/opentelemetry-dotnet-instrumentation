@@ -4,6 +4,6 @@
   <ItemGroup>
     <PackageVersion Include="Mono.Cecil" Version="0.11.5" />
     <PackageVersion Include="Nuke.Common" Version="7.0.3" />
-    <PackageVersion Include="Nuget.CommandLine" Version="6.6.1" />
+    <PackageVersion Include="Nuget.CommandLine" Version="6.7.0" />
   </ItemGroup>
 </Project>
