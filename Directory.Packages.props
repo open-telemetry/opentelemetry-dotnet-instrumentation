@@ -11,6 +11,6 @@
     <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.5.1" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.5.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.5.1-beta.1" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.10" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Wcf" Version="1.0.0-rc.11" />
   </ItemGroup>
 </Project>

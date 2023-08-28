@@ -111,12 +111,11 @@ internal enum TracerInstrumentation
     /// </summary>
     AspNetCore = 15,
 #endif
-#if NETFRAMEWORK
+
     /// <summary>
     /// WcfClient instrumentation.
     /// </summary>
     WcfClient = 16,
-#endif
 
     /// <summary>
     /// MySqlConnector instrumentation.

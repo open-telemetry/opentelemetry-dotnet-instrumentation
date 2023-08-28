@@ -1,4 +1,4 @@
-// <copyright file="IKeyedByTypeCollection.cs" company="OpenTelemetry Authors">
+// <copyright file="IStatusServiceContract.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // </copyright>
-namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf;
 
-internal interface IKeyedByTypeCollection
+using System.ServiceModel;
+using System.Threading.Tasks;
+
+namespace TestApplication.Wcf.Client.DotNet;
+
+[ServiceContract(Namespace = "http://opentelemetry.io/", Name = "StatusService", SessionMode = SessionMode.Allowed)]
+public interface IStatusServiceContract
 {
-    void Add(object o);
-
-    bool Contains(Type t);
+    [OperationContract]
+    Task<StatusResponse> PingAsync(StatusRequest request);
 }

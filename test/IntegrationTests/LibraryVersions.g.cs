@@ -154,4 +154,13 @@ public static class LibraryVersion
         new object[] { "2.6.122" },
 #endif
     };
+    public static readonly IReadOnlyCollection<object[]> WCFCoreClient = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "4.10.2" },
+        new object[] { "6.0.0" },
+#endif
+    };
 }

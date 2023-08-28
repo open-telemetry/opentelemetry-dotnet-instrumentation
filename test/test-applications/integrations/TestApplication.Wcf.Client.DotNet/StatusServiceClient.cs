@@ -18,7 +18,7 @@ using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Threading.Tasks;
 
-namespace TestApplication.Wcf.Client.NetFramework;
+namespace TestApplication.Wcf.Client.DotNet;
 
 public class StatusServiceClient : ClientBase<IStatusServiceContract>, IStatusServiceContract
 {
@@ -36,11 +36,5 @@ public class StatusServiceClient : ClientBase<IStatusServiceContract>, IStatusSe
     {
         ICommunicationObject communicationObject = this;
         return Task.Factory.FromAsync(communicationObject.BeginOpen, communicationObject.EndOpen, null);
-    }
-
-    public Task CloseAsync()
-    {
-        ICommunicationObject communicationObject = this;
-        return Task.Factory.FromAsync(communicationObject.BeginClose, communicationObject.EndClose, null);
     }
 }

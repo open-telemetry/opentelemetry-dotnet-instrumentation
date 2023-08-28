@@ -40,6 +40,7 @@
     <PackageReference Include="OpenTelemetry.ResourceDetectors.Azure" />
     <PackageReference Include="OpenTelemetry.ResourceDetectors.Container" />
     <PackageReference Include="OpenTelemetry.Shims.OpenTracing" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
@@ -47,7 +48,6 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNet" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">

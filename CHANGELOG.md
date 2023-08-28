@@ -10,6 +10,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Added
 
 - Added support for Azure SDK traces instrumentation on .NET Framework.
+- Added support for `WCFCLIENT` instrumentation on .NET.
 
 ### Changed
 
