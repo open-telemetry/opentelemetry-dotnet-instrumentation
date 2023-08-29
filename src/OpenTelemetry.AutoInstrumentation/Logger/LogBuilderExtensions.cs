@@ -81,7 +81,7 @@ internal static class LogBuilderExtensions
                     case LogExporter.None:
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException($"Traces exporter '{settings.LogExporter}' is incorrect");
+                        throw new ArgumentOutOfRangeException($"Logs exporter '{settings.LogExporter}' is incorrect");
                 }
             });
 
