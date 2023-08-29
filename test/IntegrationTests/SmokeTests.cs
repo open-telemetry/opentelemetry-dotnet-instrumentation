@@ -412,7 +412,7 @@ public class SmokeTests : TestHelper
         var logs = Directory.GetFiles(tempLogsDirectory);
         logs.Should().NotBeNull();
 
-        var nativeLog = logs.FirstOrDefault(x => x.Contains("native-dotnet"));
+        var nativeLog = logs.FirstOrDefault(x => x.StartsWith("otel-dotnet-auto-native-"));
         nativeLog.Should().NotBeNull();
 
         var nativeLogContent = File.ReadAllText(nativeLog!);
@@ -434,7 +434,11 @@ public class SmokeTests : TestHelper
         var lines = log.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
         var variables = lines
             .SkipWhile(x => !x.Contains("Environment variables:"))
+#if NETFRAMEWORK
+            .TakeWhile(x => !x.Contains(".NET Runtime: .NET Framework"))
+#else
             .TakeWhile(x => !x.Contains("Interface ICorProfilerInfo12 found."))
+#endif
             .Skip(1)
             .Select(ParseEnvironmentVariableLogEntry)
             .ToEnvironmentVariablesList();
