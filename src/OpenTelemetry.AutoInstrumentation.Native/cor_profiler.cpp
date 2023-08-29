@@ -71,6 +71,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         const auto env_variables = GetEnvironmentVariables(env_vars_prefixes_to_display);
         Logger::Debug("Environment variables:");
 
+        // Update the list also in SmokeTests.NativeLogsHaveNoSensitiveData
         const auto secrets_pattern = "(?:^|_)(API|TOKEN|SECRET|KEY|PASSWORD|PASS|PWD|HEADER|CREDENTIALS)(?:_|$)";
 #ifdef _WIN32
         const std::regex secrets_regex(secrets_pattern, std::regex_constants::ECMAScript | std::regex_constants::icase);
