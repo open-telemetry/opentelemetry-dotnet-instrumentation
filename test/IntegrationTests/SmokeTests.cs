@@ -14,7 +14,6 @@
 // limitations under the License.
 // </copyright>
 
-using System.Diagnostics;
 using System.Reflection;
 using FluentAssertions;
 using IntegrationTests.Helpers;
