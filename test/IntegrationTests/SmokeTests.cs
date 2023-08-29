@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System.Diagnostics;
 using System.Reflection;
 using FluentAssertions;
 using IntegrationTests.Helpers;
@@ -390,6 +391,64 @@ public class SmokeTests : TestHelper
         processTimeout.Should().BeFalse();
 
         process!.ExitCode.Should().NotBe(0);
+    }
+
+    [Fact]
+    public void NativeLogsHaveNoSensitiveData()
+    {
+        var tempLogsDirectory = DirectoryHelpers.GetTempDirectory();
+        var secretIdentificators = new[] { "API", "TOKEN", "SECRET", "KEY", "PASSWORD", "PASS", "PWD", "HEADER", "CREDENTIALS" };
+
+        EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", tempLogsDirectory);
+        SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
+
+        foreach (var item in secretIdentificators)
+        {
+            SetEnvironmentVariable($"OTEL_{item}_VALUE", "this is secret!");
+        }
+
+        RunTestApplication();
+
+        var logs = Directory.GetFiles(tempLogsDirectory);
+        logs.Should().NotBeNull();
+
+        var nativeLog = logs.FirstOrDefault(x => x.Contains("native-dotnet"));
+        nativeLog.Should().NotBeNull();
+
+        var nativeLogContent = File.ReadAllText(nativeLog!);
+        nativeLogContent.Should().NotBeNullOrWhiteSpace();
+
+        var environmentVariables = ParseEnvironmentVariablesLog(nativeLogContent);
+        environmentVariables.Should().NotBeEmpty();
+
+        var secretVariables = environmentVariables
+            .Where(item => secretIdentificators.Any(i => item.Key.Contains(i)))
+            .ToList();
+
+        secretVariables.Should().NotBeEmpty();
+        secretVariables.Should().AllSatisfy(secret => secret.Value.Should().Be("<hidden>"));
+    }
+
+    private static ICollection<(string Key, string Value)> ParseEnvironmentVariablesLog(string log)
+    {
+        var lines = log.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+        var variables = lines
+            .SkipWhile(x => !x.Contains("Environment variables:"))
+            .TakeWhile(x => !x.Contains("Interface ICorProfilerInfo12 found."))
+            .Skip(1)
+            .Select(ParseEnvironmentVariableLogEntry)
+            .ToEnvironmentVariablesList();
+
+        return variables;
+    }
+
+    private static string ParseEnvironmentVariableLogEntry(string entry)
+    {
+        const string startMarker = "[debug]";
+        var startIndex = entry.IndexOf("[debug]") + startMarker.Length;
+
+        return entry.AsSpan().Slice(startIndex).Trim().ToString();
     }
 
     private static void ExpectResources(OtlpResourceExpector resourceExpector)
