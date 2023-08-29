@@ -23,7 +23,7 @@ internal static class DirectoryHelpers
 #if NET7_0_OR_GREATER
         return Directory.CreateTempSubdirectory("native_logs").FullName;
 #else
-        var tempDir = Path.Combine(Path.GetTempPath(), "native_logs" + Path.GetRandomFileName());
+        var tempDir = Path.Combine(Path.GetTempPath(), "native_logs_" + Path.GetRandomFileName());
         Directory.CreateDirectory(tempDir);
 
         return tempDir;
