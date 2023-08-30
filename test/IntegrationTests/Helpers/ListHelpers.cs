@@ -1,4 +1,4 @@
-// <copyright file="DictionaryHelpers.cs" company="OpenTelemetry Authors">
+// <copyright file="ListHelpers.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,15 +16,15 @@
 
 namespace IntegrationTests.Helpers;
 
-internal static class DictionaryHelpers
+internal static class ListHelpers
 {
-    public static ICollection<(string Key, string Value)> ToEnvironmentVariablesList(this IEnumerable<string> list)
+    public static ICollection<KeyValuePair<string, string>> ToEnvironmentVariablesList(this IEnumerable<string> list)
     {
         return list.Select(x =>
             {
                 var keyValuePair = x.Split(new[] { '=' }, 2);
 
-                return (keyValuePair[0], keyValuePair[1]);
+                return new KeyValuePair<string, string>(keyValuePair[0], keyValuePair[1]);
             })
             .ToList();
     }

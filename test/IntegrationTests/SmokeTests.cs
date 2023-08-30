@@ -395,41 +395,48 @@ public class SmokeTests : TestHelper
     [Fact]
     public void NativeLogsHaveNoSensitiveData()
     {
-        var tempLogsDirectory = DirectoryHelpers.GetTempDirectory();
+        var tempLogsDirectory = DirectoryHelpers.CreateTempDirectory();
         var secretIdentificators = new[] { "API", "TOKEN", "SECRET", "KEY", "PASSWORD", "PASS", "PWD", "HEADER", "CREDENTIALS" };
 
         EnableBytecodeInstrumentation();
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", tempLogsDirectory);
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", tempLogsDirectory.FullName);
         SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
 
         foreach (var item in secretIdentificators)
         {
             SetEnvironmentVariable($"OTEL_{item}_VALUE", "this is secret!");
+
+            if (!EnvironmentTools.IsWindows())
+            {
+                SetEnvironmentVariable($"otel_{item.ToLowerInvariant()}_value2", "this is secret!");
+            }
         }
 
-        RunTestApplication();
+        try
+        {
+            RunTestApplication();
 
-        var logs = Directory.GetFiles(tempLogsDirectory);
-        logs.Should().NotBeNull();
+            var nativeLog = tempLogsDirectory.GetFiles("otel-dotnet-auto-native-*").Single();
+            var nativeLogContent = File.ReadAllText(nativeLog.FullName);
+            nativeLogContent.Should().NotBeNullOrWhiteSpace();
 
-        var nativeLog = logs.FirstOrDefault(x => x.Contains("otel-dotnet-auto-native-"));
-        nativeLog.Should().NotBeNull();
+            var environmentVariables = ParseEnvironmentVariablesLog(nativeLogContent);
+            environmentVariables.Should().NotBeEmpty();
 
-        var nativeLogContent = File.ReadAllText(nativeLog!);
-        nativeLogContent.Should().NotBeNullOrWhiteSpace();
+            var secretVariables = environmentVariables
+                .Where(item => secretIdentificators.Any(i => item.Key.Contains(i)))
+                .ToList();
 
-        var environmentVariables = ParseEnvironmentVariablesLog(nativeLogContent);
-        environmentVariables.Should().NotBeEmpty();
-
-        var secretVariables = environmentVariables
-            .Where(item => secretIdentificators.Any(i => item.Key.Contains(i)))
-            .ToList();
-
-        secretVariables.Should().NotBeEmpty();
-        secretVariables.Should().AllSatisfy(secret => secret.Value.Should().Be("<hidden>"));
+            secretVariables.Should().NotBeEmpty();
+            secretVariables.Should().AllSatisfy(secret => secret.Value.Should().Be("<hidden>"));
+        }
+        finally
+        {
+            tempLogsDirectory.Delete(true);
+        }
     }
 
-    private static ICollection<(string Key, string Value)> ParseEnvironmentVariablesLog(string log)
+    private static ICollection<KeyValuePair<string, string>> ParseEnvironmentVariablesLog(string log)
     {
         var lines = log.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
         var variables = lines
