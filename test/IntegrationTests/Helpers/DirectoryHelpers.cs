@@ -18,15 +18,13 @@ namespace IntegrationTests.Helpers;
 
 internal static class DirectoryHelpers
 {
-    public static string GetTempDirectory()
+    public static DirectoryInfo CreateTempDirectory()
     {
 #if NET7_0_OR_GREATER
-        return Directory.CreateTempSubdirectory("native_logs").FullName;
+        return Directory.CreateTempSubdirectory("native_logs");
 #else
         var tempDir = Path.Combine(Path.GetTempPath(), "native_logs_" + Path.GetRandomFileName());
-        Directory.CreateDirectory(tempDir);
-
-        return tempDir;
+        return Directory.CreateDirectory(tempDir);
 #endif
     }
 }
