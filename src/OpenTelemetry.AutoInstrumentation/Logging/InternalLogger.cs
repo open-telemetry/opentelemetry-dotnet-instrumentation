@@ -214,7 +214,7 @@ internal class InternalLogger : IOtelLogger
     {
         try
         {
-            var rawMessage = args.Length > 0 ? string.Format(messageTemplate, args) : messageTemplate;
+            var rawMessage = string.Format(messageTemplate, args);
             if (exception != null)
             {
                 rawMessage += $"{Environment.NewLine}Exception: {exception.Message}{Environment.NewLine}{exception}";

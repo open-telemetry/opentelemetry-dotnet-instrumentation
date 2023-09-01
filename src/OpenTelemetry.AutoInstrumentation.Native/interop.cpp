@@ -26,6 +26,11 @@ EXTERN_C VOID STDAPICALLTYPE GetAssemblyAndSymbolsBytes(BYTE** pAssemblyArray,
 }
 #endif
 
+EXTERN_C BOOL STDAPICALLTYPE IsProfilerAttached()
+{
+    return trace::profiler != nullptr && trace::profiler->IsAttached();
+}
+
 EXTERN_C VOID STDAPICALLTYPE AddInstrumentations(WCHAR* id, trace::CallTargetDefinition* items, int size)
 {
     return trace::profiler->AddInstrumentations(id, items, size);

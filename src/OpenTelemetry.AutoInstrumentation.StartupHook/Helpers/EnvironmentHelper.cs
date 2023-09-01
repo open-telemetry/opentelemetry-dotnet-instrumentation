@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System.Security;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.Helpers;
@@ -28,9 +29,9 @@ internal static class EnvironmentHelper
         {
             return Environment.GetEnvironmentVariable(variableName);
         }
-        catch (Exception ex)
+        catch (SecurityException ex)
         {
-            Logger.Error($"Error getting environment variable {variableName}: {ex}");
+            Logger.Error(ex, "Error getting environment variable {0}:", variableName);
             return null;
         }
     }

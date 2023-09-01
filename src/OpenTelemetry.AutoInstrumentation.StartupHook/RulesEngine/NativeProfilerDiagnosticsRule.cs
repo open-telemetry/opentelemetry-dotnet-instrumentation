@@ -43,70 +43,80 @@ internal class NativeProfilerDiagnosticsRule : Rule
     internal override bool Evaluate()
     {
         var isProfilerEnabled = EnvironmentHelper.GetEnvironmentVariable(ProfilerEnabledVariable) == "1";
-        if (!isProfilerEnabled)
+        if (isProfilerEnabled)
         {
-            Logger.Debug($"CLR profiler is not enabled.");
+            try
+            {
+                if (NativeMethods.IsProfilerAttached())
+                {
+                    return true;
+                }
+            }
+            catch { /* Native profiler is not attached. Continue with diagnosis */ }
+        }
+        else
+        {
+            Logger.Warning("{0} environment variable is not set to '1'. The CLR Profiler is disabled and no bytecode instrumentations are going to be injected.", ProfilerEnabledVariable);
             return true;
         }
 
         var profilerId = EnvironmentHelper.GetEnvironmentVariable(ProfilerIdVariable);
         if (profilerId != ProfilerId)
         {
-            Logger.Warning($"Detected CLR profiler is enabled but different profiler ID is provided '{profilerId}'.");
+            Logger.Warning("The CLR profiler is enabled, but a different profiler ID was provided '{0}'.", profilerId);
 
             // Different native profiler not assosiated to OTel might be used. We don't want to fail here.
             return true;
         }
 
-        var profilerPath = EnvironmentHelper.GetEnvironmentVariable(ProfilerPathVariable);
-        var profilerPath32 = EnvironmentHelper.GetEnvironmentVariable(Profiler32BitPathVariable);
-        var profilerPath64 = EnvironmentHelper.GetEnvironmentVariable(Profiler64BitPathVariable);
-
-        var isPathUndefined = string.IsNullOrWhiteSpace(profilerPath);
-        var isPath32Undefined = string.IsNullOrWhiteSpace(profilerPath32);
-        var isPath64Undefined = string.IsNullOrWhiteSpace(profilerPath64);
-
-        if (isPathUndefined)
+        if (Environment.Is64BitProcess)
         {
-            if (isPath32Undefined && isPath64Undefined)
-            {
-                Logger.Error($"CLR profiler path is not defined. Define '{ProfilerPathVariable}', '{Profiler32BitPathVariable}' or '{Profiler64BitPathVariable}'.");
-                return false;
-            }
-
-            if (Environment.Is64BitProcess && isPath64Undefined)
-            {
-                Logger.Error($"CLR profiler (64bit) path is not defined. Define '{Profiler64BitPathVariable}'.");
-                return false;
-            }
-
-            if (!Environment.Is64BitProcess && isPath32Undefined)
-            {
-                Logger.Error($"CLR profiler (32bit) path is not defined. Define '{Profiler32BitPathVariable}'.");
-                return false;
-            }
+            Verify64BitVariables();
+        }
+        else
+        {
+            Verify32BitVariables();
         }
 
-        if (!isPathUndefined && !File.Exists(profilerPath))
+        return false;
+    }
+
+    private static void Verify32BitVariables()
+    {
+        VerifyVariables(Profiler32BitPathVariable, "32bit");
+    }
+
+    private static void Verify64BitVariables()
+    {
+        VerifyVariables(Profiler64BitPathVariable, "64bit");
+    }
+
+    private static void VerifyVariables(string archPathVariable, string expectedBitness)
+    {
+        var profilerPathGeneral = EnvironmentHelper.GetEnvironmentVariable(ProfilerPathVariable);
+        var profilerPathArch = EnvironmentHelper.GetEnvironmentVariable(archPathVariable);
+
+        var isPathUndefined = string.IsNullOrWhiteSpace(profilerPathGeneral);
+        var isPathArchUndefined = string.IsNullOrWhiteSpace(profilerPathArch);
+
+        if (isPathUndefined && isPathArchUndefined)
         {
-            Logger.Error($"CLR profiler is not found at '{profilerPath}'. Recheck '{ProfilerPathVariable}'.");
-            return false;
+            Logger.Error("CLR profiler path is not defined. Define '{0}' or '{1}'.", ProfilerPathVariable, archPathVariable);
+            return;
         }
 
-        if (!isPath64Undefined && !File.Exists(profilerPath64))
+        var definedProfilerPath = isPathArchUndefined ? profilerPathGeneral : profilerPathArch;
+        var definedProfilerVariable = isPathArchUndefined ? ProfilerPathVariable : archPathVariable;
+
+        if (File.Exists(definedProfilerPath))
         {
-            Logger.Error($"CLR profiler (64bit) is not found at '{profilerPath64}'. Recheck '{Profiler64BitPathVariable}'.");
-            return false;
+            // File is found but profiler is not attaching.
+            Logger.Error("CLR profiler is not attaching profiler found at '{0}'. Recheck that {1} process is attaching {1} native profiler via {2} or {3}.", new object[] { definedProfilerPath!, expectedBitness, ProfilerPathVariable, archPathVariable });
         }
-
-        if (!isPath32Undefined && !File.Exists(profilerPath32))
+        else
         {
-            Logger.Error($"CLR profiler (32bit) is not found at '{profilerPath32}'. Recheck '{Profiler32BitPathVariable}'.");
-            return false;
+            // File not found.
+            Logger.Error("CLR profiler ({0}) is not found at '{1}'. Recheck '{2}'.", expectedBitness, definedProfilerPath, definedProfilerVariable);
         }
-
-        // TODO: Maybe it's possible to check if located profiler dll and process bitnesses are matching.
-
-        return true;
     }
 }

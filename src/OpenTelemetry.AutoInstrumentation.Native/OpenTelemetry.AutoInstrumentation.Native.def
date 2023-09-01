@@ -4,5 +4,6 @@ EXPORTS
     DllCanUnloadNow PRIVATE
     DllGetClassObject PRIVATE
     GetAssemblyAndSymbolsBytes
+    IsProfilerAttached
     AddInstrumentations
     AddDerivedInstrumentations
