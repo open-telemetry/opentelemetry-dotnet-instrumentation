@@ -51,8 +51,16 @@ internal class NativeProfilerDiagnosticsRule : Rule
                 {
                     return true;
                 }
+                else
+                {
+                    Logger.Debug("IsProfilerAttached returned false.");
+                }
             }
-            catch { /* Native profiler is not attached. Continue with diagnosis */ }
+            catch (Exception ex)
+            {
+                /* Native profiler is not attached. Continue with diagnosis */
+                Logger.Debug(ex, "Error checking if native profiler is attached.");
+            }
         }
         else
         {
