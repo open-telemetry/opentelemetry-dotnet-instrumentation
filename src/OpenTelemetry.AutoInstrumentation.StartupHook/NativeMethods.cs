@@ -20,6 +20,6 @@ namespace OpenTelemetry.AutoInstrumentation;
 
 internal static class NativeMethods
 {
-    [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+    [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
     public static extern bool IsProfilerAttached();
 }
