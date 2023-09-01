@@ -10,8 +10,6 @@
 
   <ItemGroup>
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Constants.cs" Link="Constants.cs" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\FrameworkDescription.cs" Link="FrameworkDescription.cs" />
-    <Compile Include="..\OpenTelemetry.AutoInstrumentation\FrameworkDescription.NetCore.cs" Link="FrameworkDescription.NetCore.cs" />
     <Compile Include="..\OpenTelemetry.AutoInstrumentation\Logging\InternalLogger.cs">
       <Link>Logging\InternalLogger.cs</Link>
     </Compile>
