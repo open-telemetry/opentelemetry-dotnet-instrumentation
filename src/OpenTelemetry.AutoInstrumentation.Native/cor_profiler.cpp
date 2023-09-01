@@ -1008,7 +1008,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITInlining(FunctionID callerId, Function
     return S_OK;
 }
 
-bool CorProfiler::IsAttached() const 
+bool CorProfiler::IsAttached() const
 {
     return is_attached_;
 }
