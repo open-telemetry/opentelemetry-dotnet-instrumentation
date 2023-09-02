@@ -34,14 +34,12 @@ internal static class NativeMethods
 
     private static IntPtr ImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
     {
-        IntPtr libHandle = IntPtr.Zero;
-
         if (libraryName == "OpenTelemetry.AutoInstrumentation.Native")
         {
-            libHandle = NativeLibrary.Load(GetProfilerPath());
+            return NativeLibrary.Load(GetProfilerPath());
         }
 
-        return libHandle;
+        return IntPtr.Zero;
     }
 
     private static string GetProfilerPath()
