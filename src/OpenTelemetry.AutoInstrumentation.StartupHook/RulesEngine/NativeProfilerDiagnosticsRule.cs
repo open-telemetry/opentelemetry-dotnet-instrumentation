@@ -72,52 +72,53 @@ internal class NativeProfilerDiagnosticsRule : Rule
 
         if (Environment.Is64BitProcess)
         {
-            Verify64BitVariables();
+            VerifyPathVariables(Profiler64BitPathVariable, "64bit");
         }
         else
         {
-            Verify32BitVariables();
+            VerifyPathVariables(Profiler32BitPathVariable, "32bit");
         }
 
         return false;
     }
 
-    private static void Verify32BitVariables()
+    private static void VerifyPathVariables(string archPathVariable, string expectedBitness)
     {
-        VerifyVariables(Profiler32BitPathVariable, "32bit");
-    }
-
-    private static void Verify64BitVariables()
-    {
-        VerifyVariables(Profiler64BitPathVariable, "64bit");
-    }
-
-    private static void VerifyVariables(string archPathVariable, string expectedBitness)
-    {
-        var profilerPathGeneral = EnvironmentHelper.GetEnvironmentVariable(ProfilerPathVariable);
-        var profilerPathArch = EnvironmentHelper.GetEnvironmentVariable(archPathVariable);
-
-        var isPathUndefined = string.IsNullOrWhiteSpace(profilerPathGeneral);
-        var isPathArchUndefined = string.IsNullOrWhiteSpace(profilerPathArch);
-
-        if (isPathUndefined && isPathArchUndefined)
+        if (VerifyPathIssue(archPathVariable, expectedBitness))
         {
-            Logger.Error("CLR profiler path is not defined. Define '{0}' or '{1}'.", ProfilerPathVariable, archPathVariable);
             return;
         }
 
-        var definedProfilerPath = isPathArchUndefined ? profilerPathGeneral : profilerPathArch;
-        var definedProfilerVariable = isPathArchUndefined ? ProfilerPathVariable : archPathVariable;
+        if (VerifyPathIssue(ProfilerPathVariable, expectedBitness))
+        {
+            return;
+        }
 
-        if (File.Exists(definedProfilerPath))
+        Logger.Error("CLR profiler path is not defined. Define '{0}' or '{1}'.", ProfilerPathVariable, archPathVariable);
+    }
+
+    private static bool VerifyPathIssue(string profilerPathVariable, string expectedBitness)
+    {
+        var profilerPath = EnvironmentHelper.GetEnvironmentVariable(profilerPathVariable);
+
+        // Nothing to verify. Signal that VerifyVariables can continue searching for issues.
+        if (string.IsNullOrWhiteSpace(profilerPath))
+        {
+            return false;
+        }
+
+        if (File.Exists(profilerPath))
         {
             // File is found but profiler is not attaching.
-            Logger.Error("CLR profiler is not attaching profiler found at '{0}'. Recheck that {1} process is attaching {1} native profiler via {2} or {3}.", new object[] { definedProfilerPath!, expectedBitness, ProfilerPathVariable, archPathVariable });
+            Logger.Error("CLR profiler is not attaching profiler found at '{0}'. Recheck that {1} process is attaching {1} native profiler via {2}.", new object[] { profilerPath, expectedBitness, profilerPathVariable });
         }
         else
         {
             // File not found.
-            Logger.Error("CLR profiler ({0}) is not found at '{1}'. Recheck '{2}'.", expectedBitness, definedProfilerPath, definedProfilerVariable);
+            Logger.Error("CLR profiler ({0}) is not found at '{1}'. Recheck '{2}'.", expectedBitness, profilerPath, profilerPathVariable);
         }
+
+        // Path issue verified. VerifyVariables should not continue.
+        return true;
     }
 }

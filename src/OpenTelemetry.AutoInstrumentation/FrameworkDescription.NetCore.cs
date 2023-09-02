@@ -14,7 +14,7 @@
 // limitations under the License.
 // </copyright>
 
-#if NET || NETCOREAPP
+#if NET6_0_OR_GREATER
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
