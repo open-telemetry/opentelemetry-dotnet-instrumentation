@@ -29,7 +29,7 @@ internal static class NativeMethods
         NativeLibrary.SetDllImportResolver(typeof(NativeMethods).Assembly, ImportResolver);
     }
 
-    [DllImport("OpenTelemetry.AutoInstrumentation.Native", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
     public static extern bool IsProfilerAttached();
 
     private static IntPtr ImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
