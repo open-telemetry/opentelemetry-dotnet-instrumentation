@@ -17,6 +17,8 @@
 using OpenTelemetry.AutoInstrumentation.Helpers;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
+using static OpenTelemetry.AutoInstrumentation.Constants.EnvironmentVariables;
+
 namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
 
 /// <summary>
@@ -25,13 +27,6 @@ namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
 /// </summary>
 internal class NativeProfilerDiagnosticsRule : Rule
 {
-    private const string ProfilerEnabledVariable = "CORECLR_ENABLE_PROFILING";
-    private const string ProfilerIdVariable = "CORECLR_PROFILER";
-    private const string ProfilerPathVariable = "CORECLR_PROFILER_PATH";
-    private const string Profiler32BitPathVariable = "CORECLR_PROFILER_PATH_32";
-    private const string Profiler64BitPathVariable = "CORECLR_PROFILER_PATH_64";
-    private const string ProfilerId = "{918728DD-259F-4A6A-AC2B-B85E1B658318}";
-
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
 
     public NativeProfilerDiagnosticsRule()
@@ -51,10 +46,8 @@ internal class NativeProfilerDiagnosticsRule : Rule
                 {
                     return true;
                 }
-                else
-                {
-                    Logger.Debug("IsProfilerAttached returned false.");
-                }
+
+                Logger.Debug("IsProfilerAttached returned false.");
             }
             catch (Exception ex)
             {

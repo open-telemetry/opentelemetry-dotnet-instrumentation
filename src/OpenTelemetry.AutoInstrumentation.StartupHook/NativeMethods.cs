@@ -18,6 +18,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using OpenTelemetry.AutoInstrumentation.Helpers;
 
+using static OpenTelemetry.AutoInstrumentation.Constants.EnvironmentVariables;
+
 namespace OpenTelemetry.AutoInstrumentation;
 
 internal static class NativeMethods
@@ -36,48 +38,45 @@ internal static class NativeMethods
 
         if (libraryName == "OpenTelemetry.AutoInstrumentation.Native")
         {
-            var homePath = EnvironmentHelper.GetEnvironmentVariable("OTEL_DOTNET_AUTO_HOME")!;
-            string archDir;
-            string extension;
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                archDir = Environment.Is64BitProcess ? "win-x64" : "win-x86";
-                extension = "dll";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                archDir = Environment.Is64BitProcess ? GetLinuxDir(homePath) : throw new PlatformNotSupportedException("32bit Linux is not supported.");
-                extension = "so";
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                archDir = Environment.Is64BitProcess ? "osx-x64" : throw new PlatformNotSupportedException("32bit MacOS is not supported.");
-                extension = "dylib";
-            }
-            else
-            {
-                throw new NotSupportedException("Platfrom is not supported");
-            }
-
-            libHandle = NativeLibrary.Load(Path.Combine(homePath, archDir, $"OpenTelemetry.AutoInstrumentation.Native.{extension}"));
+            libHandle = NativeLibrary.Load(GetProfilerPath());
         }
 
         return libHandle;
     }
 
-    private static string GetLinuxDir(string homePath)
+    private static string GetProfilerPath()
     {
-        if (Directory.Exists(Path.Combine(homePath, "linux-x64")))
+        // Try get CORECLR_PROFILER_PATH_64
+        if (Environment.Is64BitProcess && TryRetrieveProfilerPath(Profiler64BitPathVariable, out var profiler64Path))
         {
-            return "linux-x64";
+            return profiler64Path!;
         }
 
-        if (Directory.Exists(Path.Combine(homePath, "linux-musl-x64")))
+        // Try get CORECLR_PROFILER_PATH_32
+        if (!Environment.Is64BitProcess && TryRetrieveProfilerPath(Profiler32BitPathVariable, out var profiler32Path))
         {
-            return "linux-musl-x64";
+            return profiler32Path!;
         }
 
-        throw new PlatformNotSupportedException("Could not determine Linux platform.");
+        // Try get CORECLR_PROFILER_PATH
+        if (TryRetrieveProfilerPath(ProfilerPathVariable, out var profilerPath))
+        {
+            return profilerPath!;
+        }
+
+        throw new DllNotFoundException($"Could not find native profiler path");
+    }
+
+    private static bool TryRetrieveProfilerPath(string pathVariable, out string? profilerPath)
+    {
+        var profilerPathValue = EnvironmentHelper.GetEnvironmentVariable(pathVariable);
+        if (!string.IsNullOrWhiteSpace(profilerPathValue))
+        {
+            profilerPath = profilerPathValue;
+            return true;
+        }
+
+        profilerPath = null;
+        return false;
     }
 }
