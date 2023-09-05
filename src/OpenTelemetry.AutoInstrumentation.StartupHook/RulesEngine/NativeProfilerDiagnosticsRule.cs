@@ -97,7 +97,7 @@ internal class NativeProfilerDiagnosticsRule : Rule
         Logger.Error("CLR profiler path is not defined. Define '{0}' or '{1}'.", ProfilerPathVariable, archPathVariable);
     }
 
-    private static bool VerifyPathIssue(string profilerPathVariable, string expectedBitness)
+    private static bool TryPathVariable(string profilerPathVariable, string expectedBitness)
     {
         var profilerPath = EnvironmentHelper.GetEnvironmentVariable(profilerPathVariable);
 
