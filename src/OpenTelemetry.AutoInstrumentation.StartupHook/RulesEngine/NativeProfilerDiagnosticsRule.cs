@@ -51,7 +51,7 @@ internal class NativeProfilerDiagnosticsRule : Rule
                 return true;
             }
 
-            Logger.Debug("IsProfilerAttached returned false.");
+            Logger.Error("IsProfilerAttached returned false, the native log should describe the root cause.");
         }
         catch (Exception ex)
         {
