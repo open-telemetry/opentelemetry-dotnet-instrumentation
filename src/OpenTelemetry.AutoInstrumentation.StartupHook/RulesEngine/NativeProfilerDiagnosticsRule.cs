@@ -84,12 +84,12 @@ internal class NativeProfilerDiagnosticsRule : Rule
 
     private static void VerifyPathVariables(string archPathVariable, string expectedBitness)
     {
-        if (VerifyPathIssue(archPathVariable, expectedBitness))
+        if (TryPathVariable(archPathVariable, expectedBitness))
         {
             return;
         }
 
-        if (VerifyPathIssue(ProfilerPathVariable, expectedBitness))
+        if (TryPathVariable(ProfilerPathVariable, expectedBitness))
         {
             return;
         }
