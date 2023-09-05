@@ -38,27 +38,25 @@ internal class NativeProfilerDiagnosticsRule : Rule
     internal override bool Evaluate()
     {
         var isProfilerEnabled = EnvironmentHelper.GetEnvironmentVariable(ProfilerEnabledVariable) == "1";
-        if (isProfilerEnabled)
-        {
-            try
-            {
-                if (NativeMethods.IsProfilerAttached())
-                {
-                    return true;
-                }
-
-                Logger.Debug("IsProfilerAttached returned false.");
-            }
-            catch (Exception ex)
-            {
-                /* Native profiler is not attached. Continue with diagnosis */
-                Logger.Debug(ex, "Error checking if native profiler is attached.");
-            }
-        }
-        else
+        if (!isProfilerEnabled)
         {
             Logger.Warning("{0} environment variable is not set to '1'. The CLR Profiler is disabled and no bytecode instrumentations are going to be injected.", ProfilerEnabledVariable);
             return true;
+        }
+
+        try
+        {
+            if (NativeMethods.IsProfilerAttached())
+            {
+                return true;
+            }
+
+            Logger.Debug("IsProfilerAttached returned false.");
+        }
+        catch (Exception ex)
+        {
+            /* Native profiler is not attached. Continue with diagnosis */
+            Logger.Debug(ex, "Error checking if native profiler is attached.");
         }
 
         var profilerId = EnvironmentHelper.GetEnvironmentVariable(ProfilerIdVariable);
