@@ -108,7 +108,7 @@ internal class NativeProfilerDiagnosticsRule : Rule
         if (File.Exists(profilerPath))
         {
             // File is found but profiler is not attaching.
-            Logger.Error("CLR profiler is not attaching profiler found at '{0}'. Recheck that {1} process is attaching {1} native profiler via {2}.", new object[] { profilerPath, expectedBitness, profilerPathVariable });
+            Logger.Error("CLR profiler was not correctly loaded into the process. Profiler found at '{0}'. Recheck that {1} process is attaching {1} native profiler via {2}.", new object[] { profilerPath, expectedBitness, profilerPathVariable });
         }
         else
         {
