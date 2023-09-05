@@ -32,7 +32,8 @@ internal class RuleEngine
     {
         new OpenTelemetrySdkMinimumVersionRule(),
         new DiagnosticSourceRule(),
-        new InstrumentationAssemblyRule()
+        new InstrumentationAssemblyRule(),
+        new NativeProfilerDiagnosticsRule()
     };
 
     internal RuleEngine()

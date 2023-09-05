@@ -15,6 +15,7 @@
 // </copyright>
 
 using System.Diagnostics;
+using OpenTelemetry.AutoInstrumentation.Helpers;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
@@ -79,7 +80,7 @@ internal class ApplicationInExcludeListRule : Rule
     {
         var excludedProcesses = new List<string>();
 
-        var environmentValue = GetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES");
+        var environmentValue = EnvironmentHelper.GetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES");
 
         if (environmentValue == null)
         {
@@ -95,18 +96,5 @@ internal class ApplicationInExcludeListRule : Rule
         }
 
         return excludedProcesses;
-    }
-
-    private static string? GetEnvironmentVariable(string variableName)
-    {
-        try
-        {
-            return Environment.GetEnvironmentVariable(variableName);
-        }
-        catch (Exception ex)
-        {
-            Logger.Error($"Error getting environment variable {variableName}: {ex}");
-            return null;
-        }
     }
 }
