@@ -48,19 +48,19 @@ internal static class NativeMethods
         var bitnessSpecificProfilerPathVariable = Environment.Is64BitProcess ? Profiler64BitPathVariable : Profiler32BitPathVariable;
         if (TryRetrieveProfilerPath(bitnessSpecificProfilerPathVariable, out var bitnessSpecificProfilerPath))
         {
-            return bitnessSpecificProfilerPath!;
+            return bitnessSpecificProfilerPath;
         }
 
         // Try get CORECLR_PROFILER_PATH
         if (TryRetrieveProfilerPath(ProfilerPathVariable, out var profilerPath))
         {
-            return profilerPath!;
+            return profilerPath;
         }
 
         throw new DllNotFoundException($"Could not find native profiler path");
     }
 
-    private static bool TryRetrieveProfilerPath(string pathVariable, out string? profilerPath)
+    private static bool TryRetrieveProfilerPath(string pathVariable, out string profilerPath)
     {
         var profilerPathValue = EnvironmentHelper.GetEnvironmentVariable(pathVariable);
         if (!string.IsNullOrWhiteSpace(profilerPathValue))
@@ -69,7 +69,7 @@ internal static class NativeMethods
             return true;
         }
 
-        profilerPath = null;
+        profilerPath = string.Empty;
         return false;
     }
 }
