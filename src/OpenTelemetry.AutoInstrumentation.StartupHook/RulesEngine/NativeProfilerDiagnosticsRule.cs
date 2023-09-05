@@ -44,6 +44,15 @@ internal class NativeProfilerDiagnosticsRule : Rule
             return true;
         }
 
+        var profilerId = EnvironmentHelper.GetEnvironmentVariable(ProfilerIdVariable);
+        if (profilerId != ProfilerId)
+        {
+            Logger.Warning("The CLR profiler is enabled, but a different profiler ID was provided '{0}'.", profilerId);
+
+            // Different native profiler not assosiated to OTel might be used. We don't want to fail here.
+            return true;
+        }
+
         try
         {
             if (NativeMethods.IsProfilerAttached())
@@ -57,15 +66,6 @@ internal class NativeProfilerDiagnosticsRule : Rule
         {
             /* Native profiler is not attached. Continue with diagnosis */
             Logger.Debug(ex, "Error checking if native profiler is attached.");
-        }
-
-        var profilerId = EnvironmentHelper.GetEnvironmentVariable(ProfilerIdVariable);
-        if (profilerId != ProfilerId)
-        {
-            Logger.Warning("The CLR profiler is enabled, but a different profiler ID was provided '{0}'.", profilerId);
-
-            // Different native profiler not assosiated to OTel might be used. We don't want to fail here.
-            return true;
         }
 
         if (Environment.Is64BitProcess)
