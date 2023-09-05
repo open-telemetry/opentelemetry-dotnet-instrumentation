@@ -44,16 +44,11 @@ internal static class NativeMethods
 
     private static string GetProfilerPath()
     {
-        // Try get CORECLR_PROFILER_PATH_64
-        if (Environment.Is64BitProcess && TryRetrieveProfilerPath(Profiler64BitPathVariable, out var profiler64Path))
+        // Bitness specific path has priority
+        var bitnessSpecificProfilerPathVariable = Environment.Is64BitProcess ? Profiler64BitPathVariable : Profiler32BitPathVariable;
+        if (TryRetrieveProfilerPath(bitnessSpecificProfilerPathVariable, out var bitnessSpecificProfilerPath))
         {
-            return profiler64Path!;
-        }
-
-        // Try get CORECLR_PROFILER_PATH_32
-        if (!Environment.Is64BitProcess && TryRetrieveProfilerPath(Profiler32BitPathVariable, out var profiler32Path))
-        {
-            return profiler32Path!;
+            return bitnessSpecificProfilerPath!;
         }
 
         // Try get CORECLR_PROFILER_PATH
