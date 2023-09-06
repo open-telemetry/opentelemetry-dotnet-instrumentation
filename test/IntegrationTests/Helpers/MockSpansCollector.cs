@@ -88,7 +88,7 @@ public class MockSpansCollector : IDisposable
         var additionalEntries = new List<Collected>();
 
         timeout ??= TestTimeout.Expectation;
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
 
         try
         {

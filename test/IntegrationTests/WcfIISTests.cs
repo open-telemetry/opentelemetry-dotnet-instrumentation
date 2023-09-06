@@ -105,7 +105,7 @@ public class WcfIISTests : TestHelper
         }
 
         var container = builder.Build();
-        var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
         try
         {
             await container.StartAsync(cts.Token);
