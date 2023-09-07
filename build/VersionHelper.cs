@@ -17,7 +17,7 @@ public static class VersionHelper
 
     public static string GetVersionWithoutSuffixes()
     {
-        return Version.Value.Split('-')[0];
+        return Version.Value.Split('-', '+')[0];
     }
 
     public static (string Major, string Minor, string Patch) GetVersionParts()
