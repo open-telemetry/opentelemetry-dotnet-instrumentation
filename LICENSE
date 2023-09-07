@@ -227,7 +227,6 @@ Libraries
 - OpenTelemetry.Api.ProviderBuilderExtensions,
 - OpenTelemetry.Exporter.Console,
 - OpenTelemetry.Exporter.OpenTelemetryProtocol,
-- OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs,
 - OpenTelemetry.Exporter.Prometheus.HttpListener,
 - OpenTelemetry.Exporter.Zipkin,
 - OpenTelemetry.Extensions.Propagators,
