@@ -42,7 +42,7 @@ jobs:
             test "$(ls -A /var/log/opentelemetry/dotnet )"
         '
     - name: Publish Linux build
-      uses: actions/upload-artifact@v3.1.2
+      uses: actions/upload-artifact@v3.1.3
       with:
         name: bin-${{ matrix.base-image }}
         path: bin/tracer-home
