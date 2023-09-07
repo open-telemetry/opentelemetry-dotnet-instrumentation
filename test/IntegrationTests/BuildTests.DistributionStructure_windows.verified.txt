@@ -19,7 +19,6 @@
   \net\OpenTelemetry.AutoInstrumentation.dll,
   \net\OpenTelemetry.AutoInstrumentation.pdb,
   \net\OpenTelemetry.Exporter.Console.dll,
-  \net\OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs.dll,
   \net\OpenTelemetry.Exporter.OpenTelemetryProtocol.dll,
   \net\OpenTelemetry.Exporter.Prometheus.HttpListener.dll,
   \net\OpenTelemetry.Exporter.Zipkin.dll,

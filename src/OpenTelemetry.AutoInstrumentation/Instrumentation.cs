@@ -19,7 +19,6 @@ using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
-using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Shims.OpenTracing;
 using OpenTelemetry.Trace;
@@ -200,7 +199,7 @@ internal static class Instrumentation
 
         if (TracerSettings.Value.OpenTracingEnabled)
         {
-            EnableOpenTracing();
+            OpenTracingHelper.EnableOpenTracing(_tracerProvider);
         }
     }
 
@@ -402,45 +401,6 @@ internal static class Instrumentation
                 // If we encounter an error while logging there is nothing else we can do
                 // with the exception.
             }
-        }
-    }
-
-    private static void EnableOpenTracing()
-    {
-        try
-        {
-            if (_tracerProvider is not null)
-            {
-                const string OpenTracingShimActivitySourceName = "OpenTelemetry.AutoInstrumentation.OpenTracingShim";
-
-                // Instantiate the OpenTracing shim. The underlying OpenTelemetry tracer will create
-                // spans using the OpenTracingShimActivitySourceName source.
-                var openTracingShim = new TracerShim(
-                    _tracerProvider.GetTracer(OpenTracingShimActivitySourceName),
-                    Propagators.DefaultTextMapPropagator);
-
-                // This registration must occur prior to any reference to the OpenTracing tracer:
-                // otherwise the no-op tracer is going to be used by OpenTracing instead.
-                if (GlobalTracer.RegisterIfAbsent(openTracingShim))
-                {
-                    Logger.Information("OpenTracingShim registered as the OpenTracing global tracer.");
-                }
-                else
-                {
-                    Logger.Error(
-                        "OpenTracingShim could not be registered as the OpenTracing global tracer." +
-                        "Another tracer was already registered. OpenTracing signals will not be captured.");
-                }
-            }
-            else
-            {
-                Logger.Information("OpenTracingShim was not loaded as the provider is not initialized.");
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "OpenTracingShim exception.");
-            throw;
         }
     }
 }
