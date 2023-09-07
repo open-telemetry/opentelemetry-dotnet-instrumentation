@@ -102,7 +102,7 @@ public class MockLogsCollector : IDisposable
         var additionalEntries = new List<LogRecord>();
 
         timeout ??= TestTimeout.Expectation;
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
 
         try
         {

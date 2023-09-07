@@ -95,6 +95,8 @@ public class WcfIISTests : TestHelper
             .WithNetwork(networkName)
             .WithPortBinding(netTcpPort, 808)
             .WithPortBinding(httpPort, 80)
+            .WithWaitStrategy(Wait.ForWindowsContainer().UntilHttpRequestIsSucceeded(rq
+                => rq.ForPort(80).ForPath("/StatusService.svc")))
             .WithBindMount(logPath, "c:/inetpub/wwwroot/logs");
 
         foreach (var env in _environmentVariables)
@@ -103,14 +105,15 @@ public class WcfIISTests : TestHelper
         }
 
         var container = builder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
         try
         {
-            var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
-            wasStarted.Should().BeTrue($"Container based on {imageName} has to be operational for the test.");
+            await container.StartAsync(cts.Token);
             Output.WriteLine("Container was started successfully.");
         }
         catch
         {
+            Output.WriteLine("Container failed to start in a required time frame.");
             await container.DisposeAsync();
             throw;
         }
