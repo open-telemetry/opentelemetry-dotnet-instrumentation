@@ -32,7 +32,7 @@ public class OpenTracingTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.Expect("OpenTelemetry.AutoInstrumentation.OpenTracingShim");
+        collector.Expect("opentracing-shim");
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_OPENTRACING_ENABLED", "true");
         RunTestApplication();

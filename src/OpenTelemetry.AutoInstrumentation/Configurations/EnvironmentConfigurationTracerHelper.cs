@@ -64,6 +64,11 @@ internal static class EnvironmentConfigurationTracerHelper
             };
         }
 
+        if (settings.OpenTracingEnabled)
+        {
+            builder.AddOpenTracingShimSource();
+        }
+
         builder
             .SetSampler(settings)
             // Exporters can cause dependency loads.
