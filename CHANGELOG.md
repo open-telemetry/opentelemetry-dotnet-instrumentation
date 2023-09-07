@@ -7,6 +7,12 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.0.0-rc.2...HEAD)
 
+This release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
+
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.6.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.6.0)
+- `System.Diagnostics.DiagnosticSource`: [`7.0.2`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/7.0.2)
+
 ### Added
 
 - Added support for Azure SDK traces instrumentation on .NET Framework.
@@ -14,8 +20,12 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.6.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.6.0).
 - [MySql.Data](https://www.nuget.org/packages/MySql.Data/) instrumentation is now
   supported from version 8.1.0 working on .NET.
+- OpenTracing traces are registered under `opentracing-shim` name
+  instead of `OpenTelemetry.AutoInstrumentation.OpenTracingShim`.
 
 ### Deprecated
 
