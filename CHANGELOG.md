@@ -5,7 +5,21 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.0.0-rc.2...HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.0.0...HEAD)
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [1.0.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.0.0)
 
 This release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
@@ -27,8 +41,6 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 - OpenTracing spans are registered under `opentracing-shim` name
   instead of `OpenTelemetry.AutoInstrumentation.OpenTracingShim`.
 
-### Deprecated
-
 ### Removed
 
 - Removed [MySql.Data](https://www.nuget.org/packages/MySql.Data/) instrumentation
@@ -43,8 +55,6 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
   Affected scope: ASP.NET Core and HttpClient instrumentations.
 - Fixed `ILogger` log instrumentation issue that caused logs to be exported
   multiple times.
-
-### Security
 
 ## [1.0.0-rc.2](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.0.0-rc.2)
 
