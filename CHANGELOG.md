@@ -24,7 +24,7 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
   [`1.6.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.6.0).
 - [MySql.Data](https://www.nuget.org/packages/MySql.Data/) instrumentation is now
   supported from version 8.1.0 working on .NET.
-- OpenTracing traces are registered under `opentracing-shim` name
+- OpenTracing spans are registered under `opentracing-shim` name
   instead of `OpenTelemetry.AutoInstrumentation.OpenTracingShim`.
 
 ### Deprecated
