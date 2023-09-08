@@ -4,7 +4,7 @@
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.17.0" />
     <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.9.2" />
     <PackageVersion Include="FluentAssertions" Version="6.12.0" />
-    <PackageVersion Include="Google.Protobuf" Version="3.24.2" />
+    <PackageVersion Include="Google.Protobuf" Version="3.24.3" />
     <PackageVersion Include="GraphQL" Version="7.6.1" />
     <PackageVersion Include="GraphQL.MicrosoftDI" Version="7.6.1" />
     <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="7.6.0" />
