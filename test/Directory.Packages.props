@@ -49,7 +49,7 @@
     <PackageVersion Include="System.ServiceModel.Http" Version="6.0.0" />
     <PackageVersion Include="System.ServiceModel.NetTcp" Version="6.0.0" />
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
-    <PackageVersion Include="Testcontainers" Version="3.4.0" />
+    <PackageVersion Include="Testcontainers" Version="3.5.0" />
     <PackageVersion Include="Verify.Xunit" Version="20.8.2" />
     <PackageVersion Include="xunit" Version="2.5.0" />
     <PackageVersion Include="xunit.abstractions" Version="2.0.3" />
