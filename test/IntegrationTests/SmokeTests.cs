@@ -17,7 +17,9 @@
 using System.Reflection;
 using FluentAssertions;
 using IntegrationTests.Helpers;
+using OpenTelemetry.Logs;
 using Xunit.Abstractions;
+using LogRecord = OpenTelemetry.Proto.Logs.V1.LogRecord;
 
 #if NETFRAMEWORK
 using System.Net;
@@ -270,6 +272,28 @@ public class SmokeTests : TestHelper
         RunTestApplication();
 
         collector.AssertExpectations();
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void LogTraceCorrelation()
+    {
+        using var collector = new MockCorrelationCollector(Output);
+
+        SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "otlp");
+        SetEnvironmentVariable("OTEL_LOGS_EXPORTER", "otlp");
+        SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{collector.Port}");
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
+        EnableBytecodeInstrumentation();
+        RunTestApplication();
+
+        collector.ExpectSpan(collectedSpan => collectedSpan.InstrumentationScopeName == "MyCompany.MyProduct.MyLibrary");
+        collector.ExpectLogRecord(record => Convert.ToString(record.Body) == "{ \"stringValue\": \"Example log message\" }");
+
+        collector.AssertCorrelation();
     }
 
     [Theory]
