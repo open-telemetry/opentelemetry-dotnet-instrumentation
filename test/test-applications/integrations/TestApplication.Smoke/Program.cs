@@ -29,13 +29,7 @@ public class Program
     public static void Main(string[] args)
     {
         ConsoleHelper.WriteSplashScreen(args);
-        using var loggerFactory = LoggerFactory.Create(builder =>
-        {
-            builder
-                .AddFilter("Microsoft", LogLevel.Warning);
-        });
-        var logger = loggerFactory.CreateLogger<Program>();
-        EmitTraces(logger);
+        EmitTracesAndLogs();
         EmitMetrics();
 
         // The "LONG_RUNNING" environment variable is used by tests that access/receive
@@ -52,7 +46,7 @@ public class Program
         }
     }
 
-    private static void EmitTraces(ILogger logger)
+    private static void EmitTracesAndLogs()
     {
         var myActivitySource = new ActivitySource(SourceName, "1.0.0");
 
@@ -75,6 +69,12 @@ public class Program
             Console.WriteLine(ex);
         }
 
+        using var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder
+                .AddFilter("Microsoft", LogLevel.Warning);
+        });
+        var logger = loggerFactory.CreateLogger<Program>();
         logger.LogInformation("Example log message");
     }
 

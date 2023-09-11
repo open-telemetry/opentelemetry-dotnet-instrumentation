@@ -33,22 +33,21 @@ public class TestHttpServer : IDisposable
     {
         _output = output;
 
-        var builder = new WebHostBuilder()
+        _listener = new WebHostBuilder()
             .UseKestrel(options =>
-                options.Listen(IPAddress.Loopback, 0)); // dynamic port
-
-        builder.Configure(x =>
-        {
-            foreach (var pathHandler in pathHandlers)
+                options.Listen(IPAddress.Loopback, 0)) // dynamic port
+            .Configure(x =>
             {
-                x.Map(pathHandler.Path, x =>
+                foreach (var pathHandler in pathHandlers)
                 {
-                    x.Run(pathHandler.Delegate);
-                });
-            }
-        });
+                    x.Map(pathHandler.Path, x =>
+                    {
+                        x.Run(pathHandler.Delegate);
+                    });
+                }
+            })
+            .Build();
 
-        _listener = builder.Build();
         _listener.Start();
 
         var address = _listener.ServerFeatures!
