@@ -32,7 +32,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v4.2.1
+        uses: docker/build-push-action@v5.0.0
         with:
           file: ./docker/centos-build.dockerfile
           push: true
