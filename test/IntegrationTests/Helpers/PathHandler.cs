@@ -1,4 +1,4 @@
-// <copyright file="Program.cs" company="OpenTelemetry Authors">
+// <copyright file="PathHandler.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,27 +14,21 @@
 // limitations under the License.
 // </copyright>
 
-// Example usage:
-//     dotnet run http://localhost:5200
-if (args.Length != 1)
-{
-    Console.WriteLine(@"URL missing");
-    return 2;
-}
+#if NET6_0_OR_GREATER
+using Microsoft.AspNetCore.Http;
 
-var url = args[0];
-using var httpClient = new HttpClient();
-while (true)
+namespace IntegrationTests.Helpers;
+
+public class PathHandler
 {
-    try
+    public PathHandler(RequestDelegate @delegate, string path)
     {
-        var content = await httpClient.GetStringAsync(url);
-        Console.WriteLine(content);
-    }
-    catch (HttpRequestException ex)
-    {
-        Console.WriteLine(ex.Message);
+        Delegate = @delegate;
+        Path = path;
     }
 
-    Thread.Sleep(5000);
+    public RequestDelegate Delegate { get; }
+
+    public string Path { get; }
 }
+#endif
