@@ -31,8 +31,7 @@ internal class RuleEngine
     private readonly List<Rule> _otherRules = new()
     {
         new OpenTelemetrySdkMinimumVersionRule(),
-        new DiagnosticSourceRule(),
-        new InstrumentationAssemblyRule(),
+        new AssemblyFileVersionRule(),
         new NativeProfilerDiagnosticsRule()
     };
 

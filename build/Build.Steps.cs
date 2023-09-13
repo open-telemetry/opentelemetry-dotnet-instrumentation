@@ -557,18 +557,17 @@ partial class Build
         .Executes(() =>
         {
             var netPath = TracerHomeDirectory / "net";
-            var ruleEngineJsonFilePath = netPath / "ruleEngine.json";
-            var ruleEngineJsonNugetFilePath = RootDirectory / "nuget" / "OpenTelemetry.AutoInstrumentation" / "contentFiles" / "any" / "any" / "RuleEngine.json";
-            var fileInfoList = new List<object>();
             var files = Directory.GetFiles(netPath);
+            var fileInfoList = new List<object>(files.Length);
 
             foreach (string file in files)
             {
                 var fileName = Path.GetFileNameWithoutExtension(file);
-                var fileVersion = FileVersionInfo.GetVersionInfo(file).FileVersion;
 
-                if (fileName.StartsWith("OpenTelemetry.") && !fileName.StartsWith("OpenTelemetry.Api") && !fileName.StartsWith("OpenTelemetry.AutoInstrumentation"))
+                if (fileName == "System.Diagnostics.DiagnosticSource" ||
+                    (fileName.StartsWith("OpenTelemetry.") && !fileName.StartsWith("OpenTelemetry.Api") && !fileName.StartsWith("OpenTelemetry.AutoInstrumentation")))
                 {
+                    var fileVersion = FileVersionInfo.GetVersionInfo(file).FileVersion;
                     fileInfoList.Add(new
                     {
                         FileName = fileName,
@@ -579,7 +578,11 @@ partial class Build
 
             JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
             string jsonContent = JsonSerializer.Serialize(fileInfoList, options);
+
+            var ruleEngineJsonFilePath = netPath / "ruleEngine.json";
             File.WriteAllText(ruleEngineJsonFilePath, jsonContent);
+
+            var ruleEngineJsonNugetFilePath = RootDirectory / "nuget" / "OpenTelemetry.AutoInstrumentation" / "contentFiles" / "any" / "any" / "RuleEngine.json";
             File.Delete(ruleEngineJsonNugetFilePath);
             File.Copy(ruleEngineJsonFilePath, ruleEngineJsonNugetFilePath);
         });
