@@ -28,23 +28,8 @@ internal class RuleEngine
         new MinSupportedFrameworkRule()
     };
 
-    private readonly List<Rule> _otherRules = new()
-    {
-        new OpenTelemetrySdkMinimumVersionRule(),
-        new DiagnosticSourceRule(),
-        new InstrumentationAssemblyRule(),
-        new NativeProfilerDiagnosticsRule()
-    };
-
-    internal RuleEngine()
-    {
-    }
-
-    // This constructor is used for test purpose.
-    internal RuleEngine(List<Rule> rules)
-    {
-        _otherRules = rules;
-    }
+    // Optional rules are exposed as a property for testing purposes.
+    internal List<Rule>? OptionalRules { private get; set; } = null;
 
     internal bool ValidateRules()
     {
@@ -65,8 +50,16 @@ internal class RuleEngine
             return result;
         }
 
+        OptionalRules ??= new()
+        {
+            new OpenTelemetrySdkMinimumVersionRule(),
+            new DiagnosticSourceRule(),
+            new InstrumentationAssemblyRule(),
+            new NativeProfilerDiagnosticsRule()
+        };
+
         // All the rules are validated here.
-        foreach (var rule in _otherRules)
+        foreach (var rule in OptionalRules)
         {
             if (!EvaluateRule(rule))
             {
