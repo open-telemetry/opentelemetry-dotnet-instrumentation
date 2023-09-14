@@ -53,26 +53,23 @@ internal class AssemblyFileVersionRule : Rule
             foreach (var referencedAssembly in referencedAssemblies)
             {
                 var ruleFileInfo = ruleFileInfoList.FirstOrDefault(file => file.FileName == referencedAssembly.Name);
-                if (ruleFileInfo is null)
+                if (ruleFileInfo != null)
                 {
-                    // If the assembly is not directly referenced by the entry assembly, assume that it is okay to proceed.
-                    continue;
-                }
+                    var autoInstrumentationFileVersion = new Version(ruleFileInfo.FileVersion);
 
-                var autoInstrumentationFileVersion = new Version(ruleFileInfo.FileVersion);
+                    var appInstrumentationAssembly = Assembly.Load(referencedAssembly);
+                    var appInstrumentationFileVersionInfo = FileVersionInfo.GetVersionInfo(appInstrumentationAssembly.Location);
+                    var appInstrumentationFileVersion = new Version(appInstrumentationFileVersionInfo.FileVersion);
 
-                var appInstrumentationAssembly = Assembly.Load(referencedAssembly);
-                var appInstrumentationFileVersionInfo = FileVersionInfo.GetVersionInfo(appInstrumentationAssembly.Location);
-                var appInstrumentationFileVersion = new Version(appInstrumentationFileVersionInfo.FileVersion);
-
-                if (appInstrumentationFileVersion < autoInstrumentationFileVersion)
-                {
-                    result = false;
-                    Logger.Error($"Rule Engine: Application has direct or indirect reference to older version of assembly {ruleFileInfo.FileName} - {ruleFileInfo.FileVersion}.");
-                }
-                else
-                {
-                    Logger.Information($"Rule Engine: Application has reference to assembly {ruleFileInfo.FileName} and loaded successfully.");
+                    if (appInstrumentationFileVersion < autoInstrumentationFileVersion)
+                    {
+                        result = false;
+                        Logger.Error($"Rule Engine: Application has direct or indirect reference to older version of assembly {ruleFileInfo.FileName} - {ruleFileInfo.FileVersion}.");
+                    }
+                    else
+                    {
+                        Logger.Information($"Rule Engine: Application has reference to assembly {ruleFileInfo.FileName} and loaded successfully.");
+                    }
                 }
             }
         }
