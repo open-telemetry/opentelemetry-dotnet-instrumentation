@@ -41,7 +41,6 @@ internal class AssemblyFileVersionRule : Rule
             var ruleEngineContent = File.ReadAllText(ruleEngineFileLocation);
             var ruleFileInfoList = JsonSerializer.Deserialize<List<RuleFileInfo>>(ruleEngineContent);
             var entryAssembly = Assembly.GetEntryAssembly();
-            Logger.Information($"Rule Engine: Entry Assembly: {entryAssembly?.FullName}");
             var referencedAssemblies = entryAssembly?.GetReferencedAssemblies();
 
             if (referencedAssemblies == null)
