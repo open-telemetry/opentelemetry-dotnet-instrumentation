@@ -28,8 +28,17 @@ internal class RuleEngine
         new MinSupportedFrameworkRule()
     };
 
-    // Optional rules are exposed as a property for testing purposes.
-    internal List<Rule>? OptionalRules { private get; set; } = null;
+    private readonly List<Rule>? _optionalRules;
+
+    internal RuleEngine()
+    {
+    }
+
+    // This constructor is used for test purpose.
+    internal RuleEngine(List<Rule> optionalRules)
+    {
+        _optionalRules = optionalRules;
+    }
 
     internal bool ValidateRules()
     {
@@ -50,7 +59,7 @@ internal class RuleEngine
             return result;
         }
 
-        OptionalRules ??= new()
+        var optionalRules = _optionalRules ?? new()
         {
             new OpenTelemetrySdkMinimumVersionRule(),
             new DiagnosticSourceRule(),
@@ -59,7 +68,7 @@ internal class RuleEngine
         };
 
         // All the rules are validated here.
-        foreach (var rule in OptionalRules)
+        foreach (var rule in optionalRules)
         {
             if (!EvaluateRule(rule))
             {
