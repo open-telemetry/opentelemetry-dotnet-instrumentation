@@ -62,8 +62,7 @@ internal class RuleEngine
         var optionalRules = _optionalRules ?? new()
         {
             new OpenTelemetrySdkMinimumVersionRule(),
-            new DiagnosticSourceRule(),
-            new InstrumentationAssemblyRule(),
+            new AssemblyFileVersionRule(),
             new NativeProfilerDiagnosticsRule()
         };
 
