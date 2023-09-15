@@ -11,5 +11,6 @@ export DOTNET_STARTUP_HOOKS=${BASE_PATH}/OpenTelemetry.AutoInstrumentation.Start
 
 # Settings for OpenTelemetry
 export OTEL_DOTNET_AUTO_HOME=${BASE_PATH}
+export OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED=false
 
 $@
