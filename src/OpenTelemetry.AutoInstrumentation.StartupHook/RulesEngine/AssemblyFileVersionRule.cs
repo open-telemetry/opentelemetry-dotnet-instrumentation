@@ -1,4 +1,4 @@
-// <copyright file="InstrumentationAssemblyRule.cs" company="OpenTelemetry Authors">
+// <copyright file="AssemblyFileVersionRule.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,14 +21,14 @@ using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
 
-internal class InstrumentationAssemblyRule : Rule
+internal class AssemblyFileVersionRule : Rule
 {
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
 
-    public InstrumentationAssemblyRule()
+    public AssemblyFileVersionRule()
     {
-        Name = "Instrumentation Assembly Validator";
-        Description = "Ensure that the version of the OpenTelemetry Instrumentation libraries is not older than the version used by Automatic Instrumentation.";
+        Name = "Assembly File Version Validator";
+        Description = "Ensure that the version of key assemblies is not older than the version used by Automatic Instrumentation.";
     }
 
     internal override bool Evaluate()
@@ -63,11 +63,11 @@ internal class InstrumentationAssemblyRule : Rule
                     if (appInstrumentationFileVersion < autoInstrumentationFileVersion)
                     {
                         result = false;
-                        Logger.Error($"Rule Engine: Application has direct or indirect reference to older version of Instrumentation library {ruleFileInfo.FileName} - {ruleFileInfo.FileVersion}.");
+                        Logger.Error($"Rule Engine: Application has direct or indirect reference to older version of assembly {ruleFileInfo.FileName} - {ruleFileInfo.FileVersion}.");
                     }
                     else
                     {
-                        Logger.Information($"Rule Engine: Application has reference to Instrumentation library {ruleFileInfo.FileName} and loaded successfully.");
+                        Logger.Information($"Rule Engine: Application has reference to assembly {ruleFileInfo.FileName} and loaded successfully.");
                     }
                 }
             }
@@ -75,7 +75,7 @@ internal class InstrumentationAssemblyRule : Rule
         catch (Exception ex)
         {
             // Exception in rule evaluation should not impact the result of the rule.
-            Logger.Warning($"Rule Engine:Couldn't evaluate OpenTelemetry Instrumentation Evaluation. Exception: {ex}");
+            Logger.Warning($"Rule Engine: Couldn't evaluate assembly reference file version. Exception: {ex}");
         }
 
         return result;
