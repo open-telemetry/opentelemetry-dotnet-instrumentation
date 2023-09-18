@@ -32,7 +32,7 @@ public class RuleEngineTests : IDisposable
         // Arrange
         SetShouldTrackEnvironmentVariable(true);
         var testRule = new TestRule();
-        var ruleEngine = new RuleEngine(new List<Rule> { testRule });
+        var ruleEngine = new RuleEngine(new Lazy<List<Rule>>(() => new() { testRule }));
 
         // Act
         var result = ruleEngine.ValidateRules();
@@ -48,7 +48,7 @@ public class RuleEngineTests : IDisposable
         // Arrange
         SetShouldTrackEnvironmentVariable(false);
         var testRule = new TestRule();
-        var ruleEngine = new RuleEngine(new List<Rule> { testRule });
+        var ruleEngine = new RuleEngine(new Lazy<List<Rule>>(() => new() { testRule }));
 
         // Act
         var result = ruleEngine.ValidateRules();
@@ -64,7 +64,7 @@ public class RuleEngineTests : IDisposable
         // Arrange
         SetShouldTrackEnvironmentVariable(null);
         var testRule = new TestRule();
-        var ruleEngine = new RuleEngine(new List<Rule> { testRule });
+        var ruleEngine = new RuleEngine(new Lazy<List<Rule>>(() => new() { testRule }));
 
         // Act
         var result = ruleEngine.ValidateRules();
@@ -79,7 +79,7 @@ public class RuleEngineTests : IDisposable
     {
         // Arrange
         var testRule = new TestRule();
-        var ruleEngine = new RuleEngine(new List<Rule> { testRule });
+        var ruleEngine = new RuleEngine(new Lazy<List<Rule>>(() => new() { testRule }));
 
         // Act
         var result = ruleEngine.ValidateRules();
@@ -95,7 +95,7 @@ public class RuleEngineTests : IDisposable
         // Arrange
         Environment.SetEnvironmentVariable("OTEL_DOTNET_AUTO_RULE_ENGINE_ENABLED", "Invalid");
         var testRule = new TestRule();
-        var ruleEngine = new RuleEngine(new List<Rule> { testRule });
+        var ruleEngine = new RuleEngine(new Lazy<List<Rule>>(() => new() { testRule }));
 
         // Act
         var result = ruleEngine.ValidateRules();
