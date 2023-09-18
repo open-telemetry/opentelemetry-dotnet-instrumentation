@@ -121,7 +121,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "6.0.0" },
-        new object[] { "7.0.4" },
+        new object[] { "7.0.6" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> NServiceBus = new List<object[]>
