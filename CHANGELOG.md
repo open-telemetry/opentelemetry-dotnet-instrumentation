@@ -14,6 +14,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 #### Dependency updates
 
 - .NET Framework only, `Google.Protobuf` updated from `3.24.2` to `3.24.3`.
+- `Google.Protobuf` updated from `1.0.0-beta.2` to `1.0.0-beta.3`.
 
 ### Deprecated
 
