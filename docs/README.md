@@ -10,9 +10,9 @@ to .NET applications without having to modify their source code.
 > **Warning**
 > The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
-([1.0.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
+([1.0.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
 can be found in [opentelemetry.io](https://github.com/open-telemetry/opentelemetry.io/tree/main/content/en/docs/instrumentation/net/automatic)
-or [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.0.0/docs/README.md).
+or [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.0.1/docs/README.md).
 
 ---
 
@@ -168,7 +168,7 @@ Example usage:
 
 ```sh
 # Download the bash script
-curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v1.0.0/otel-dotnet-auto-install.sh -O
+curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v1.0.1/otel-dotnet-auto-install.sh -O
 
 # Install core files
 sh ./otel-dotnet-auto-install.sh
@@ -191,7 +191,7 @@ uses environment variables as parameters:
 | `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                      | No       | `$HOME/.otel-dotnet-auto` |
 | `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | No       | *Calculated*              |
 | `TMPDIR`                | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`            |
-| `VERSION`               | Version to download                                              | No       | `1.0.0`                   |
+| `VERSION`               | Version to download                                              | No       | `1.0.1`                   |
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
@@ -210,7 +210,7 @@ Example usage (run as administrator):
 
 ```powershell
 # Download the module
-$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v1.0.0-rc.2/OpenTelemetry.DotNet.Auto.psm1"
+$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v1.0.1/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
 

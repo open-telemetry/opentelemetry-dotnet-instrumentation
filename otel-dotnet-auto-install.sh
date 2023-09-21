@@ -31,7 +31,7 @@ esac
 
 test -z "$OTEL_DOTNET_AUTO_HOME" && OTEL_DOTNET_AUTO_HOME="$HOME/.otel-dotnet-auto"
 test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"
-test -z "$VERSION" && VERSION="v1.0.0"
+test -z "$VERSION" && VERSION="v1.0.1"
 
 RELEASES_URL="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases"
 ARCHIVE="opentelemetry-dotnet-instrumentation-$OS_TYPE.zip"
