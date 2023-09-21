@@ -1,7 +1,7 @@
 FROM ghcr.io/open-telemetry/opentelemetry-dotnet-instrumentation-centos7-build-image:main
 
 RUN rpm -Uvh https://packages.microsoft.com/config/centos/7/packages-microsoft-prod.rpm
-RUN yum -y install dotnet-sdk-6.0-6.0.413-1 dotnet-sdk-7.0-7.0.400-1
+RUN yum -y install dotnet-sdk-6.0-6.0.414-1 dotnet-sdk-7.0-7.0.401-1
 
 WORKDIR /project
 COPY ./docker-entrypoint.sh /
