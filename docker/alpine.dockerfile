@@ -1,17 +1,17 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0.401-alpine3.17
+FROM mcr.microsoft.com/dotnet/sdk:7.0.401-alpine3.18
 
 RUN apk update \
     && apk upgrade \
     && apk add --no-cache --update \
-        clang=15.0.7-r0 \
-        cmake=3.24.4-r0 \
-        make=4.3-r1 \
-        bash=5.2.15-r0 \
+        clang=16.0.6-r1 \
+        cmake=3.26.5-r0 \
+        make=4.4.1-r1 \
+        bash=5.2.15-r5 \
         alpine-sdk=1.0-r1 \
-        protobuf=3.21.9-r0 \
-        protobuf-dev=3.21.9-r0 \
-        grpc=1.50.1-r0 \
-        grpc-plugins=1.50.1-r0
+        protobuf=3.21.12-r2 \
+        protobuf-dev=3.21.12-r2 \
+        grpc=1.54.2-r0 \
+        grpc-plugins=1.54.2-r0
 
 ENV IsAlpine=true
 ENV PROTOBUF_PROTOC=/usr/bin/protoc
