@@ -13,19 +13,27 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
-- .NET Framework only, `Google.Protobuf` updated from `3.24.2` to `3.24.3`.
-- `OpenTelemetry.ResourceDetectors.Azure` updated from `1.0.0-beta.2` to `1.0.0-beta.3`.
-
 ### Deprecated
 
 ### Removed
 
 ### Fixed
 
+### Security
+
+## [1.0.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.0.1)
+
+### Changed
+
+#### Dependency updates
+
+- .NET Framework only, `Google.Protobuf` updated from `3.24.2` to `3.24.3`.
+- `OpenTelemetry.ResourceDetectors.Azure` updated from `1.0.0-beta.2` to `1.0.0-beta.3`.
+
+### Fixed
+
 - Fixed Rule checking System.Diagnostics.DiagnosticSource version for net7.0
   failing on correct configuration [#2950](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2950).
-
-### Security
 
 ## [1.0.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.0.0)
 
