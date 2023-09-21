@@ -11,7 +11,7 @@ jobs:
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
-            6.0.413
+            6.0.414
             7.0.400
       - name: Test the PowerShell module instructions from README.md
         shell: powershell
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
-            6.0.413
+            6.0.414
             7.0.400
       - run: brew install coreutils
         if: ${{ runner.os == 'macOS' }}
