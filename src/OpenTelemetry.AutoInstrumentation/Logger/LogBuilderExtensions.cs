@@ -31,8 +31,9 @@ internal static class LogBuilderExtensions
     {
         try
         {
-            if (!(builder.Services is ServiceCollection services))
+            if (!(builder.Services is IServiceCollection services))
             {
+                AutoInstrumentationEventSource.Log.Verbose("Logs: The builder.Services property is not of the IServiceCollection type, so we're skipping the integration of logs with ServiceCollection.");
                 return builder;
             }
 
