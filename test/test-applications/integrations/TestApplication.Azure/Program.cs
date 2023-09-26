@@ -14,12 +14,26 @@
 // limitations under the License.
 // </copyright>
 
+using System.Diagnostics;
 using Azure.Storage.Blobs;
 using TestApplication.Shared;
 
+ActivitySource myActivitySource = new ActivitySource("MyCompany.MyProduct.MyLibrary");
+
 ConsoleHelper.WriteSplashScreen(args);
 
+AppContext.SetSwitch("Azure.Experimental.EnableActivitySource", true);
+// ConsoleHelper.WriteSplashScreen(args);
+
 var port = GetBlobServicePortPort(args);
+
+using (var activity = myActivitySource.StartActivity("SayHello"))
+{
+    activity?.SetTag("foo", 1);
+    activity?.SetTag("bar", "Hello, World!");
+    activity?.SetTag("baz", new int[] { 1, 2, 3 });
+    activity?.SetStatus(ActivityStatusCode.Ok);
+}
 
 // connection string based on https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite?tabs=visual-studio#well-known-storage-account-and-key
 var developerConnectionString = $"DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:{port}/devstoreaccount1;";
