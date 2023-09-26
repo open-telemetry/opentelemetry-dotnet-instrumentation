@@ -31,7 +31,7 @@ internal static class LogBuilderExtensions
     {
         try
         {
-            if (!(builder.Services is IServiceCollection services))
+            if (builder.Services == null)
             {
                 AutoInstrumentationEventSource.Log.Verbose("Logs: The builder.Services property is not of the IServiceCollection type, so we're skipping the integration of logs with ServiceCollection.");
                 return builder;
@@ -40,7 +40,7 @@ internal static class LogBuilderExtensions
             // Integrate AddOpenTelemetry only once for ServiceCollection.
 
             _loggingProviderSdkType ??= Type.GetType("OpenTelemetry.Logs.LoggerProviderBuilderSdk, OpenTelemetry");
-            var openTelemetryLoggerProviderDescriptor = services.FirstOrDefault(descriptor => descriptor.ImplementationType == _loggingProviderSdkType);
+            var openTelemetryLoggerProviderDescriptor = builder.Services.FirstOrDefault(descriptor => descriptor.ImplementationType == _loggingProviderSdkType);
             if (openTelemetryLoggerProviderDescriptor != null)
             {
                 AutoInstrumentationEventSource.Log.Verbose("Logs: AddOpenTelemetry already called on logging builder instance.");
