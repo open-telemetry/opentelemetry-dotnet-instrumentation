@@ -6,8 +6,6 @@
 
 1. Update the version in the following files:
 
-   - [`OpenTelemetry.DotNet.Auto.psm1`](../OpenTelemetry.DotNet.Auto.psm1)
-   - [`otel-dotnet-auto-install.sh`](../otel-dotnet-auto-install.sh)
    - [`docs/README.md`](./README.md)
 
 1. Update the [CHANGELOG.md](../CHANGELOG.md) with the new release.

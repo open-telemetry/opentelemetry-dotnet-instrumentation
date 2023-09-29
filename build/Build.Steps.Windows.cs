@@ -114,6 +114,7 @@ partial class Build
     Target PublishIisTestApplications => _ => _
         .Unlisted()
         .After(CompileManagedTests)
+        .After(BuildInstallationScripts)
         .OnlyWhenStatic(() => IsWin && (Containers == ContainersWindows || Containers == ContainersWindowsOnly))
         .Executes(() =>
         {
@@ -135,7 +136,7 @@ partial class Build
     void BuildDockerImage(Project project)
     {
         const string moduleName = "OpenTelemetry.DotNet.Auto.psm1";
-        var sourceModulePath = Solution.Directory / moduleName;
+        var sourceModulePath = InstallationScriptsDirectory / moduleName;
         var localBinDirectory = project.Directory / "bin";
         var localTracerZip = localBinDirectory / "tracer.zip";
 

@@ -100,6 +100,7 @@ partial class Build : NukeBuild
         .After(Clean)
         .After(Restore)
         .DependsOn(CreateRequiredDirectories)
+        .DependsOn(BuildInstallationScripts)
         .DependsOn(GenerateNetFxTransientDependencies)
         .DependsOn(CompileManagedSrc)
         .DependsOn(PublishManagedProfiler)
