@@ -122,6 +122,7 @@ partial class Build : NukeBuild
         .Description("Builds the managed unit / integration tests and runs them")
         .After(Clean, BuildTracer)
         .DependsOn(CreateRequiredDirectories)
+        .DependsOn(BuildInstallationScripts)
         .DependsOn(GenerateLibraryVersionFiles)
         .DependsOn(CompileManagedTests)
         .DependsOn(CompileMocks)
