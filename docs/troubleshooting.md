@@ -186,9 +186,9 @@ of assemblies loaded as domain-neutral.
 different versions of some assemblies also shipped in the `netfx` folder.
 
 If you are having problems in one of the scenarios above run again the
-`Install-OpenTelemetryCore` command from the
-[PowerShell installation module](../OpenTelemetry.DotNet.Auto.psm1)
-to ensure that the required GAC installations are updated.
+`Install-OpenTelemetryCore` command from the PowerShell installation module
+`OpenTelemetry.DotNet.Auto.psm1` to ensure that the required GAC installations
+are updated.
 
 For more information about the GAC usage by the automatic instrumentation,
 see [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/1906#issuecomment-1376292814).

@@ -20,7 +20,7 @@ jobs:
           cd testapp
           dotnet new console
           dotnet publish -f net7.0 -c Release
-          $module_url = "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/OpenTelemetry.DotNet.Auto.psm1"
+          $module_url = "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/OpenTelemetry.DotNet.Auto.psm1"
           $dl_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
           $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\*"
           Invoke-WebRequest -Uri $module_url -OutFile $dl_path
@@ -70,7 +70,7 @@ jobs:
           cd testapp
           dotnet new console
           dotnet publish -f net7.0 -c Release
-          curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/otel-dotnet-auto-install.sh -O
+          curl -sSfL https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/otel-dotnet-auto-install.sh -O
           sh ./otel-dotnet-auto-install.sh
             test "$(ls -A "$HOME/.otel-dotnet-auto")"
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
@@ -96,7 +96,7 @@ jobs:
             cd testapp
             dotnet new console
             dotnet publish -f net7.0 -c Release
-            curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/otel-dotnet-auto-install.sh -O
+            curl -sSfL https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/otel-dotnet-auto-install.sh -O
             sh ./otel-dotnet-auto-install.sh
               test "$(ls -A "$HOME/.otel-dotnet-auto")"
             curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
