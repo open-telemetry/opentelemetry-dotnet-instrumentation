@@ -183,7 +183,7 @@ chmod +x $HOME/.otel-dotnet-auto/instrument.sh
 OTEL_SERVICE_NAME=myapp OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 ./MyNetApp
 ```
 
-[otel-dotnet-auto-install.sh](../otel-dotnet-auto-install.sh) script
+`otel-dotnet-auto-install.sh` script
 uses environment variables as parameters:
 
 | Parameter               | Description                                                      | Required | Default value             |
