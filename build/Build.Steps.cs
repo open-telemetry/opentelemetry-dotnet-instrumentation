@@ -536,6 +536,7 @@ partial class Build
                         // but have a later runtime move the libraries under the original tfm folder
                         // to the latest one.
                         depsJson.RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET7_0, architectureStores);
+                        depsJson.RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET8_0, architectureStores);
                     }
 
                     // Write the updated deps.json file.
