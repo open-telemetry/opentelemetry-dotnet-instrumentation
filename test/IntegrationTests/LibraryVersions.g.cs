@@ -93,8 +93,7 @@ public static class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
         new object[] { string.Empty }
 #else
-        new object[] { "2.13.3" },
-        new object[] { "2.15.0" },
+        new object[] { "2.19.0" },
         new object[] { "2.21.0" },
 #endif
     };

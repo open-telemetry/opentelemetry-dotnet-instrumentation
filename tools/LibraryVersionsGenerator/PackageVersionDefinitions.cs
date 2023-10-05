@@ -121,8 +121,9 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.MongoDB",
             Versions = new List<PackageVersion>
             {
-                new("2.13.3"),
-                new("2.15.0"),
+                // new("2.13.3"), - high vulnarability https://github.com/advisories/GHSA-7j9m-j397-g4wx, <= 2.18.0 test should be skipped
+                // new("2.15.0"), - high vulnarability https://github.com/advisories/GHSA-7j9m-j397-g4wx, <= 2.18.0 test should be skipped
+                new("2.19.0"),
                 new("*")
             }
         },
