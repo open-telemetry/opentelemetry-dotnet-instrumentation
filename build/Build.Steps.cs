@@ -48,9 +48,7 @@ partial class Build
     };
 
     private static readonly IEnumerable<TargetFramework> TestFrameworks = TargetFrameworks
-        .Concat(new[] {
-            TargetFramework.NET7_0
-        });
+        .Concat(TargetFramework.NET7_0, TargetFramework.NET8_0);
 
     Target CreateRequiredDirectories => _ => _
         .Unlisted()
@@ -99,8 +97,8 @@ partial class Build
             {
                 // Projects using `packages.config` can't be restored via "dotnet restore", use a NuGet Task to restore these projects.
                 var legacyRestoreProjects = Solution.GetNativeProjects()
-                    .Concat(new[] { Solution.GetProjectByName(Projects.Tests.Applications.AspNet) })
-                    .Concat(new[] { Solution.GetProjectByName(Projects.Tests.Applications.WcfIis) });
+                    .Concat(Solution.GetProjectByName(Projects.Tests.Applications.AspNet))
+                    .Concat(Solution.GetProjectByName(Projects.Tests.Applications.WcfIis));
 
                 RestoreLegacyNuGetPackagesConfig(legacyRestoreProjects);
             }
