@@ -29,6 +29,7 @@ jobs:
           dotnet-version: | 
             6.0.414
             7.0.401
+            8.0.100-rc.1.23455.8
       - name: Check for NuGet packages cache
         uses: actions/cache@v3.3.1
         id: nuget-cache
