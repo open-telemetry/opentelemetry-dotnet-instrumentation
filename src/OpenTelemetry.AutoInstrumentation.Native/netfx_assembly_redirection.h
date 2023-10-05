@@ -18,7 +18,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
     const USHORT auto_major = atoi(AUTO_MAJOR);
 
     assembly_version_redirect_map_.insert({
-        { L"Google.Protobuf", {3, 24, 3, 0} },
+        { L"Google.Protobuf", {3, 24, 4, 0} },
         { L"Grpc.Core", {2, 0, 0, 0} },
         { L"Grpc.Core.Api", {2, 0, 0, 0} },
         { L"Microsoft.Bcl.AsyncInterfaces", {7, 0, 0, 0} },
