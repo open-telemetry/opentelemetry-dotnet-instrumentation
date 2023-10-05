@@ -15,6 +15,7 @@ internal static class DepsJsonExtensions
         {
             ".NETCoreApp,Version=v6.0" => "net6.0",
             ".NETCoreApp,Version=v7.0" => "net7.0",
+            ".NETCoreApp,Version=v8.0" => "net8.0",
             _ => throw new ArgumentOutOfRangeException(nameof(runtimeName), runtimeName,
                 "This value is not supported. You have probably introduced new .NET version to AutoInstrumentation")
         };

@@ -5,7 +5,7 @@
   <PropertyGroup>
     <DefineConstants Condition="'$(BuildingInsideVisualStudio)'=='true'">$(DefineConstants);DEFAULT_TEST_PACKAGE_VERSIONS</DefineConstants>
     <!-- only run .NET Framework tests on Windows -->
-    <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0;net6.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net462</TargetFrameworks>
 
     <!-- Hide warnings for EOL .NET Core targets (e.g. netcoreapp3.0) -->
