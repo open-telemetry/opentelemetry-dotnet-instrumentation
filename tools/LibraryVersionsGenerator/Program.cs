@@ -49,19 +49,24 @@ public class Program
             xUnitFileStringBuilder.BeginTestPackage(packageVersionDefinition.TestApplicationName, packageVersionDefinition.IntegrationName);
             buildFileStringBuilder.BeginTestPackage(packageVersionDefinition.TestApplicationName, packageVersionDefinition.IntegrationName);
 
+            HashSet<string> uniqueVersions = new(packageVersionDefinition.Versions.Count);
+
             foreach (var version in packageVersionDefinition.Versions)
             {
                 var calculatedVersion = EvaluateVersion(packageVersionDefinition.NugetPackageName, version.Version);
 
-                if (version.GetType() == typeof(PackageVersion))
+                if (uniqueVersions.Add(calculatedVersion))
                 {
-                    xUnitFileStringBuilder.AddVersion(calculatedVersion);
-                    buildFileStringBuilder.AddVersion(calculatedVersion);
-                }
-                else
-                {
-                    xUnitFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version));
-                    buildFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version));
+                    if (version.GetType() == typeof(PackageVersion))
+                    {
+                        xUnitFileStringBuilder.AddVersion(calculatedVersion);
+                        buildFileStringBuilder.AddVersion(calculatedVersion);
+                    }
+                    else
+                    {
+                        xUnitFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version));
+                        buildFileStringBuilder.AddVersionWithDependencies(calculatedVersion, GetDependencies(version));
+                    }
                 }
             }
 

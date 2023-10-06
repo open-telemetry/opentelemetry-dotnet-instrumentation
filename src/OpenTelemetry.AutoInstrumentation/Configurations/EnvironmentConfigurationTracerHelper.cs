@@ -46,7 +46,7 @@ internal static class EnvironmentConfigurationTracerHelper
                 TracerInstrumentation.Npgsql => builder.AddSource("Npgsql"),
                 TracerInstrumentation.SqlClient => Wrappers.AddSqlClientInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.NServiceBus => builder.AddSource("NServiceBus.Core"),
-                TracerInstrumentation.Elasticsearch => builder.AddSource("Elastic.Clients.Elasticsearch.ElasticsearchClient"),
+                TracerInstrumentation.Elasticsearch => builder.AddSource("Elastic.Clients.Elasticsearch.ElasticsearchClient").AddSource("Elastic.Transport"),
                 TracerInstrumentation.Quartz => Wrappers.AddQuartzInstrumentation(builder, pluginManager, lazyInstrumentationLoader),
                 TracerInstrumentation.MongoDB => builder.AddSource("MongoDB.Driver.Core.Extensions.DiagnosticSources"),
                 TracerInstrumentation.MySqlConnector => builder.AddSource("MySqlConnector"),

@@ -34,7 +34,14 @@ public class ElasticsearchTests : TestHelper
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
-        collector.Expect("Elastic.Clients.Elasticsearch.ElasticsearchClient");
+        if (string.IsNullOrEmpty(packageVersion) || new Version(packageVersion).CompareTo(new Version(8, 10, 0)) >= 0)
+        {
+            collector.Expect("Elastic.Transport");
+        }
+        else
+        {
+            collector.Expect("Elastic.Clients.Elasticsearch.ElasticsearchClient");
+        }
 
         EnableBytecodeInstrumentation();
         RunTestApplication(new TestSettings { PackageVersion = packageVersion });

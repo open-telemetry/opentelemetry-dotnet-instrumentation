@@ -33,5 +33,12 @@ var settings = new ElasticsearchClientSettings(fakeUri)
 
 var client = new ElasticsearchClient(settings);
 
-await client.SearchAsync<TestObject>(s =>
-    s.Index("test-index").From(0).Size(10).Query(q => q.Term(t => t.Id, 1)));
+try
+{
+    await client.SearchAsync<TestObject>(s =>
+        s.Index("test-index").From(0).Size(10).Query(q => q.Term(t => t.Id, 1)));
+}
+catch (UnexpectedTransportException)
+{
+    // ignore this exception as it does not impact creating activity
+}
