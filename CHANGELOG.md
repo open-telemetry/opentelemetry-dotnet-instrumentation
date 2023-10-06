@@ -9,6 +9,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Added support `Elastic.Clients.Elasticsearch` traces instrumentation 8.10.0+.
+
 ### Changed
 
 #### Dependency updates

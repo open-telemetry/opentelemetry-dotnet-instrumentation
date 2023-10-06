@@ -41,6 +41,7 @@ internal static class PackageVersionDefinitions
             Versions = new List<PackageVersion>
             {
                 new("8.0.0"),
+                new("8.10.0"), // 8.10.0 introduces breaking change for ActivitySource name
                 new("*")
             }
         },
