@@ -249,6 +249,7 @@ public class SettingsTests : IDisposable
     [InlineData("WCFCLIENT", TracerInstrumentation.WcfClient)]
     [InlineData("MYSQLCONNECTOR", TracerInstrumentation.MySqlConnector)]
     [InlineData("AZURE", TracerInstrumentation.Azure)]
+    [InlineData("ELASTICTRANSPORT", TracerInstrumentation.ElasticTransport)]
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false");

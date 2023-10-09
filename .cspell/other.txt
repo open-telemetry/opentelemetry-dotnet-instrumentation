@@ -11,6 +11,7 @@ distro
 Dockerfiles
 ducktype
 dylib
+ELASTICTRANSPORT
 ENTITYFRAMEWORKCORE
 envvars
 GRPCNETCLIENT

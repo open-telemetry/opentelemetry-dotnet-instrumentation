@@ -125,5 +125,10 @@ internal enum TracerInstrumentation
     /// <summary>
     /// Azure SDK instrumentation.
     /// </summary>
-    Azure = 18
+    Azure = 18,
+
+    /// <summary>
+    /// Elastic.Transport instrumentation.
+    /// </summary>
+    ElasticTransport = 19,
 }

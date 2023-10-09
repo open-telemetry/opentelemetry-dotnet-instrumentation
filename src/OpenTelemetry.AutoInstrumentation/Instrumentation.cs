@@ -319,6 +319,8 @@ internal static class Instrumentation
                     break;
                 case TracerInstrumentation.Elasticsearch:
                     break;
+                case TracerInstrumentation.ElasticTransport:
+                    break;
                 case TracerInstrumentation.MySqlConnector:
                     break;
                 default:
