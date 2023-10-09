@@ -530,13 +530,16 @@ partial class Build
                     depsJson.RemoveDuplicatedLibraries(architectureStores);
                     depsJson.RemoveOpenTelemetryLibraries();
 
+                    // To allow roll forward for applications, like Roslyn, that target one tfm
+                    // but have a later runtime move the libraries under the original tfm folder
+                    // to the latest one.
                     if (folderRuntimeName == TargetFramework.NET6_0)
                     {
-                        // To allow roll forward for applications, like Roslyn, that target one tfm
-                        // but have a later runtime move the libraries under the original tfm folder
-                        // to the latest one.
-                        depsJson.RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET7_0, architectureStores);
                         depsJson.RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET8_0, architectureStores);
+                    }
+                    else if (folderRuntimeName == TargetFramework.NET7_0 || folderRuntimeName == TargetFramework.NET8_0)
+                    {
+                        depsJson.RollFrameworkForward(TargetFramework.NET7_0, TargetFramework.NET8_0, architectureStores);
                     }
 
                     // Write the updated deps.json file.
@@ -544,6 +547,15 @@ partial class Build
                     {
                         WriteIndented = true
                     }));
+
+                    // workaround for rc version
+                    if (file!.Parent!.Name.Contains("8.0.0"))
+                    {
+                        var newDirectory = file.Parent.Parent / "8.0.0-rc.1.23419.4";
+                        newDirectory.CreateOrCleanDirectory();
+                        file.Move(newDirectory / file.Name);
+                        file.Parent.DeleteDirectory();
+                    }
                 });
 
             // Cleanup Additional Deps Directory
