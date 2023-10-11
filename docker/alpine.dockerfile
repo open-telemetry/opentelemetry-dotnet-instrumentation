@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0.401-alpine3.18
+FROM mcr.microsoft.com/dotnet/sdk:7.0.402-alpine3.18
 
 RUN apk update \
     && apk upgrade \
