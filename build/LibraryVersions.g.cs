@@ -88,7 +88,7 @@ public static class LibraryVersion
             {
                 new("2.13.3"),
                 new("2.15.0"),
-                new("2.21.0"),
+                new("2.22.0"),
             }
         },
         {
