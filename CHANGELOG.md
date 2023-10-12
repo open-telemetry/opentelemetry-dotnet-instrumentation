@@ -18,6 +18,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 #### Dependency updates
 
 - .NET Framework only, `Google.Protobuf` updated from `3.24.3` to `3.24.4`.
+- .NET Framework only, `OpenTelemetry.Instrumentation.AspNet` and
+  `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule` updated from
+  `1.0.0-rc9.9` to `1.6.0-beta.1`.
 
 ### Deprecated
 
