@@ -25,7 +25,27 @@ namespace OpenTelemetry.AutoInstrumentation.Logger;
 
 internal static class LogBuilderExtensions
 {
+    private static bool? _autoInstrumentationStartupAssemblyConfigured;
     private static Type? _loggingProviderSdkType;
+    private static Type? _applicationLifetimeType;
+
+    public static void AddOpenTelemetryLogsFromIntegration(this ILoggingBuilder builder)
+    {
+        // For Net6, if HostingStartupAssembly is configured, we don't want to call integration again for host's ServiceCollection.
+        // OpenTelemetryLogger-related services were already added to WebApplicationServiceCollection and will
+        // be copied to host's ServiceCollection later. We can't depend on integration's
+        // capability to detect if integration was called before (by checking if ServiceDescriptor with
+        // given type is already added to ServiceCollection) as copying services from WebApplicationServiceCollection
+        // to host's ServiceCollection happens AFTER integration is called.
+
+        // All of this additional checking is NOT needed for net7. There we can rely on integration's capability
+        // to detect if integration was called before, because WebApplicationServiceCollection is not used when building host.
+
+        if (builder.Services is ServiceCollection && !(IsNet6() && IsAutoInstrumentationStartupAssemblyConfigured() && IsHostServiceCollection(builder.Services)))
+        {
+            AddOpenTelemetryLogs(builder);
+        }
+    }
 
     public static ILoggingBuilder AddOpenTelemetryLogs(this ILoggingBuilder builder)
     {
@@ -95,6 +115,32 @@ internal static class LogBuilderExtensions
         }
 
         return builder;
+    }
+
+    private static bool IsAutoInstrumentationStartupAssemblyConfigured()
+    {
+        // If autoinstrumentation's HostingStartupAssembly is configured, assume integration was already called.
+        _autoInstrumentationStartupAssemblyConfigured ??= IsAutoInstrumentationStartupAssemblySet();
+        return _autoInstrumentationStartupAssemblyConfigured.Value;
+    }
+
+    private static bool IsNet6()
+    {
+        var frameworkDescription = FrameworkDescription.Instance;
+        return frameworkDescription.Name == ".NET" && frameworkDescription.ProductVersion.StartsWith("6");
+    }
+
+    private static bool IsHostServiceCollection(IServiceCollection builderServices)
+    {
+        _applicationLifetimeType ??= Type.GetType("Microsoft.Extensions.Hosting.Internal.ApplicationLifetime, Microsoft.Extensions.Hosting");
+        var applicationLifetimeDescriptor = builderServices.FirstOrDefault(sd => sd.ImplementationType == _applicationLifetimeType);
+        return applicationLifetimeDescriptor != null;
+    }
+
+    private static bool IsAutoInstrumentationStartupAssemblySet()
+    {
+        var environmentVariable = Environment.GetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES");
+        return environmentVariable != null && environmentVariable.Contains("OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
     }
 }
 #endif

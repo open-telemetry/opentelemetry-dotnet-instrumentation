@@ -47,7 +47,7 @@ public static class LoggingBuilderIntegration
         if (instance is not null)
         {
             var logBuilderExtensionsType = Type.GetType("OpenTelemetry.AutoInstrumentation.Logger.LogBuilderExtensions, OpenTelemetry.AutoInstrumentation");
-            var methodInfo = logBuilderExtensionsType?.GetMethod("AddOpenTelemetryLogs");
+            var methodInfo = logBuilderExtensionsType?.GetMethod("AddOpenTelemetryLogsFromIntegration");
             methodInfo?.Invoke(null, new[] { (object)instance });
         }
 
