@@ -33,6 +33,7 @@ public class MinimalApiTests : TestHelper
     [InlineData(true, true)]
     [InlineData(true, false)]
     [InlineData(false, true)]
+    [Trait("Category", "EndToEnd")]
     public async Task SubmitsLogsWithoutDuplicates(bool enableByteCodeInstrumentation, bool enableHostingStartupAssembly)
     {
         using var collector = new MockLogsCollector(Output);
