@@ -18,9 +18,11 @@ namespace OpenTelemetry.AutoInstrumentation;
 
 internal static class Constants
 {
-    public static class Tracer
+    public static class DistributionAttributes
     {
-        public const string AutoInstrumentationVersionName = "telemetry.auto.version";
+        public const string TelemetryDistroNameAttributeName = "telemetry.distro.name";
+        public const string TelemetryDistroNameAttributeValue = "opentelemetry-dotnet-instrumentation";
+        public const string TelemetryDistroVersionAttributeName = "telemetry.distro.version";
     }
 
     public static class ConfigurationValues
