@@ -551,7 +551,7 @@ partial class Build
                     // workaround for rc version
                     if (file!.Parent!.Name.Contains("8.0.0"))
                     {
-                        var newDirectory = file.Parent.Parent / "8.0.0-rc.1.23419.4";
+                        var newDirectory = file.Parent.Parent / "8.0.0-rc.2.23479.6";
                         newDirectory.CreateOrCleanDirectory();
                         file.Move(newDirectory / file.Name);
                         file.Parent.DeleteDirectory();

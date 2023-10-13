@@ -25,7 +25,7 @@ jobs:
     - name: Setup .NET 8
       uses: actions/setup-dotnet@v3.2.0
       with:
-        dotnet-version: 8.0.100-rc.1.23455.8
+        dotnet-version: 8.0.100-rc.2.23502.2
 
     - name: dotnet format
       run: dotnet format .\OpenTelemetry.AutoInstrumentation.sln --no-restore --verify-no-changes
