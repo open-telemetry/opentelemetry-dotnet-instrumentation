@@ -28,8 +28,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
-- Fixed log emission issue for ASP.NET Core 6.0 apps when bytecode
-  instrumentation is enabled and `WebApplicationBuilder` is used
+- Fixed log emission issue which resulted in same logs being exported multiple
+  times for ASP.NET Core 6.0 apps when bytecode instrumentation was enabled
+  and `WebApplicationBuilder` was used.
 
 ### Security
 

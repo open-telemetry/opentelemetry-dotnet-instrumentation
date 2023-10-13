@@ -16,6 +16,7 @@
 
 #if NET6_0_OR_GREATER
 
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry.AutoInstrumentation.Configurations;
@@ -27,7 +28,6 @@ internal static class LogBuilderExtensions
 {
     private static bool? _autoInstrumentationStartupAssemblyConfigured;
     private static Type? _loggingProviderSdkType;
-    private static Type? _applicationLifetimeType;
 
     public static void AddOpenTelemetryLogsFromIntegration(this ILoggingBuilder builder)
     {
@@ -132,15 +132,41 @@ internal static class LogBuilderExtensions
 
     private static bool IsHostServiceCollection(IServiceCollection builderServices)
     {
-        _applicationLifetimeType ??= Type.GetType("Microsoft.Extensions.Hosting.Internal.ApplicationLifetime, Microsoft.Extensions.Hosting");
-        var applicationLifetimeDescriptor = builderServices.FirstOrDefault(sd => sd.ImplementationType == _applicationLifetimeType);
+        // check if assembly is loaded before trying to get type,
+        // in order to avoid triggering an unnecessary load
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        var extensionsHostingAssembly = assemblies.FirstOrDefault(a => IsExtensionsHostingAssembly(a));
+        if (extensionsHostingAssembly == null)
+        {
+            return false;
+        }
+
+        var applicationLifetimeType = extensionsHostingAssembly.GetType("Microsoft.Extensions.Hosting.Internal.ApplicationLifetime");
+        if (applicationLifetimeType == null)
+        {
+            return false;
+        }
+
+        var applicationLifetimeDescriptor = builderServices.FirstOrDefault(sd => sd.ImplementationType == applicationLifetimeType);
         return applicationLifetimeDescriptor != null;
+    }
+
+    private static bool IsExtensionsHostingAssembly(Assembly assembly)
+    {
+        const string expectedAssemblyName = "Microsoft.Extensions.Hosting";
+        var assemblyName = assembly.FullName.AsSpan();
+        if (assemblyName.Length <= expectedAssemblyName.Length)
+        {
+            return false;
+        }
+
+        return assemblyName.StartsWith(expectedAssemblyName.AsSpan()) && assemblyName[expectedAssemblyName.Length] == ',';
     }
 
     private static bool IsAutoInstrumentationStartupAssemblySet()
     {
         var environmentVariable = Environment.GetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES");
-        return environmentVariable != null && environmentVariable.Contains("OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
+        return environmentVariable != null && environmentVariable.Contains("OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper", StringComparison.OrdinalIgnoreCase);
     }
 }
 #endif
