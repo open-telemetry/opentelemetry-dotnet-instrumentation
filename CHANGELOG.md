@@ -12,12 +12,18 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Added support for `Elastic.Transport` traces instrumentation 0.4.16+.
   `Elastic.Clients.Elasticsearch` 8.10.0+ traces instrumentation is covered by
   `Elastic.Transport` traces instrumentation.
+- Added `telemetry.distro.name` resource attribute. The value is set to `opentelemetry-dotnet-instrumentation`.
 
 ### Changed
+
+- Change telemetry resource attribute name from `telemetry.auto.version` to `telemetry.distro.version`.
 
 #### Dependency updates
 
 - .NET Framework only, `Google.Protobuf` updated from `3.24.3` to `3.24.4`.
+- .NET Framework only, `OpenTelemetry.Instrumentation.AspNet` and
+  `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule` updated from
+  `1.0.0-rc9.9` to `1.6.0-beta.1`.
 
 ### Deprecated
 

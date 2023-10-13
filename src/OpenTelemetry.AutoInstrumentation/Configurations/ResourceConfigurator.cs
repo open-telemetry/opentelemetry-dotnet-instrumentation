@@ -33,7 +33,8 @@ internal static class ResourceConfigurator
             .AddTelemetrySdk()
             .AddAttributes(new KeyValuePair<string, object>[]
             {
-                new(Constants.Tracer.AutoInstrumentationVersionName, AutoInstrumentationVersion.Version)
+                new(Constants.DistributionAttributes.TelemetryDistroNameAttributeName, Constants.DistributionAttributes.TelemetryDistroNameAttributeValue),
+                new(Constants.DistributionAttributes.TelemetryDistroVersionAttributeName, AutoInstrumentationVersion.Version)
             });
 
         foreach (var enabledResourceDetector in enabledResourceDetectors)

@@ -495,7 +495,8 @@ public class SmokeTests : TestHelper
         resourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
         resourceExpector.Expect("telemetry.sdk.language", "dotnet");
         resourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0]);
-        resourceExpector.Expect("telemetry.auto.version", typeof(OpenTelemetry.AutoInstrumentation.Constants).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0]);
+        resourceExpector.Expect("telemetry.distro.name", "opentelemetry-dotnet-instrumentation");
+        resourceExpector.Expect("telemetry.distro.version", typeof(OpenTelemetry.AutoInstrumentation.Constants).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0]);
     }
 
     private void VerifyTestApplicationInstrumented(TestAppStartupMode startupMode = TestAppStartupMode.Auto)
