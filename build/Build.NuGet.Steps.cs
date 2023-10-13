@@ -149,13 +149,27 @@ partial class Build
         .Description("Builds the TestApplications.* used by the NuGetPackagesTests")
         .Executes(() =>
         {
+            string MapToNet8RuntimeIdentifiers(string oldRuntimeIdentifier)
+            {
+#if NET8_0_OR_GREATER
+#error Remove method when _build.cproj starts targeting .NET8+
+#endif
+                switch (oldRuntimeIdentifier)
+                {
+                    case "ubuntu.20.04-x64": return "linux-x64";
+                    case "osx.11.0-x64": return "osx-x64";
+                    case "win10-x64": return "win-x64";
+                }
+                throw new NotSupportedException($"{oldRuntimeIdentifier} is not supported. Extend MapToNet8RuntimeIdentifiers.");
+            }
+
             foreach (var packagesTestApplicationProject in Solution.GetNuGetPackagesTestApplications())
             {
                 // Unlike the integration apps these require a restore step.
                 DotNetBuild(s => s
                     .SetProjectFile(packagesTestApplicationProject)
                     .SetProperty("NuGetPackageVersion", VersionHelper.GetVersion())
-                    .SetRuntime(RuntimeInformation.RuntimeIdentifier)
+                    .SetRuntime(MapToNet8RuntimeIdentifiers(RuntimeInformation.RuntimeIdentifier))
                     .SetConfiguration(BuildConfiguration)
                     .SetPlatform(Platform));
             }
