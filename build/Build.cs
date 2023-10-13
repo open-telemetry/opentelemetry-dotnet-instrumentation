@@ -89,6 +89,13 @@ partial class Build : NukeBuild
         .DependsOn(BuildTracer)
         .DependsOn(CompileExamples);
 
+    Target BuildNativeWorkflow  => _ => _
+        .Description("Builds the native code project deliverables.")
+        .After(Clean)
+        .DependsOn(CreateRequiredDirectories)
+        .DependsOn(CompileNativeSrc)
+        .DependsOn(PublishNativeProfiler);
+
     Target TestWorkflow => _ => _
         .Description("Builds and run the tests against the local deliverables (except NuGet packages)")
         .After(BuildWorkflow)

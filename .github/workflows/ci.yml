@@ -12,11 +12,15 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 jobs:
-  build:
-    uses: ./.github/workflows/build.yml
-
   build-container:
     uses: ./.github/workflows/build-container.yml
+
+  build-centos-native:
+    uses: ./.github/workflows/build-centos-native-container.yml
+
+  build:
+    needs: build-centos-native
+    uses: ./.github/workflows/build.yml
 
   build-nuget-packages:
     needs: [ build, build-container ]
@@ -153,7 +157,7 @@ jobs:
           path: test-artifacts/
 
   test-build-container:
-    needs: build-container
+    needs: [build, build-container]
     strategy:
       fail-fast: false
       matrix:
@@ -162,10 +166,10 @@ jobs:
             build-source: alpine
             os-type: linux-musl
           - base-image: centos
-            build-source: centos
+            build-source: ubuntu-20.04
             os-type: linux-glibc
           - base-image: debian
-            build-source: centos
+            build-source: ubuntu-20.04
             os-type: linux-glibc
     runs-on: ubuntu-20.04
     timeout-minutes: 60

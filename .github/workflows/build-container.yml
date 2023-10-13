@@ -16,9 +16,6 @@ jobs:
           - base-image: alpine
             os-type: linux-musl
             net-version: net8.0
-          - base-image: centos
-            os-type: linux-glibc
-            net-version: net7.0
     runs-on: ubuntu-20.04
     timeout-minutes: 60
     steps:
