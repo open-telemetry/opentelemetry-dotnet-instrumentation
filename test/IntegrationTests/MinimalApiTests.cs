@@ -31,7 +31,7 @@ public class MinimalApiTests : TestHelper
     {
     }
 
-    [Theory]
+    [SkippableTheory]
     [InlineData(true, true)]
     [InlineData(true, false)]
     [InlineData(false, true)]
