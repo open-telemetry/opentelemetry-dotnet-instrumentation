@@ -152,8 +152,8 @@ partial class Build
             string MapToNet8RuntimeIdentifiers(string oldRuntimeIdentifier)
             {
 #if NET8_0_OR_GREATER
-#error Remove method when _build.cproj starts targeting .NET8+
-#endif
+                return oldRuntimeIdentifier;
+#else
                 switch (oldRuntimeIdentifier)
                 {
                     case "ubuntu.20.04-x64": return "linux-x64";
@@ -161,6 +161,7 @@ partial class Build
                     case "win10-x64": return "win-x64";
                 }
                 throw new NotSupportedException($"{oldRuntimeIdentifier} is not supported. Extend MapToNet8RuntimeIdentifiers.");
+#endif
             }
 
             foreach (var packagesTestApplicationProject in Solution.GetNuGetPackagesTestApplications())

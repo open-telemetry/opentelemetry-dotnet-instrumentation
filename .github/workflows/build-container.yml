@@ -15,7 +15,6 @@ jobs:
         include:
           - base-image: alpine
             os-type: linux-musl
-            net-version: net8.0
     runs-on: ubuntu-20.04
     timeout-minutes: 60
     steps:
@@ -34,10 +33,10 @@ jobs:
         docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" ./docker
         docker run --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project --rm mybuildimage /bin/sh -c '
           set -e
-          dotnet publish -f ${{ matrix.net-version }} -c Release ./test/test-applications/integrations/TestApplication.Smoke
+          dotnet publish -f net8.0 -c Release ./test/test-applications/integrations/TestApplication.Smoke
           export OTEL_DOTNET_AUTO_HOME="${PWD}/bin/tracer-home"
           . ./instrument.sh
-          ./test/test-applications/integrations/bin/TestApplication.Smoke/Release/${{ matrix.net-version }}/publish/TestApplication.Smoke
+          ./test/test-applications/integrations/bin/TestApplication.Smoke/Release/net8.0/publish/TestApplication.Smoke
             test "$(ls -A /var/log/opentelemetry/dotnet )"
         '
     - name: Publish Linux build

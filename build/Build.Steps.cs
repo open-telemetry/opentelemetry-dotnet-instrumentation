@@ -48,7 +48,11 @@ partial class Build
     };
 
     private static readonly IEnumerable<TargetFramework> TestFrameworks = TargetFrameworks
-        .Concat(TargetFramework.NET7_0, TargetFramework.NET8_0);
+        .Concat(TargetFramework.NET7_0
+#if  NET8_0_OR_GREATER
+            , TargetFramework.NET8_0
+#endif
+            );
 
     Target CreateRequiredDirectories => _ => _
         .Unlisted()

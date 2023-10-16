@@ -182,6 +182,9 @@ jobs:
       with:
         name: bin-${{ matrix.build-source }}
         path: bin/tracer-home
+    - name: remove global.json workaround for Centos
+      if: ${{ matrix.base-image == 'centos' }}
+      run: rm global.json
     - name: Build in Docker container
       run: |
         set -e
