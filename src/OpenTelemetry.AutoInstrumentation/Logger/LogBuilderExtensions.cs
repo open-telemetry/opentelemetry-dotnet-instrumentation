@@ -30,7 +30,7 @@ internal static class LogBuilderExtensions
     private static bool? _autoInstrumentationStartupAssemblyConfigured;
     private static Type? _loggingProviderSdkType;
 
-    public static void AddOpenTelemetryLogsFromIntegration(this ILoggingBuilder builder)
+    public static void AddOpenTelemetryLogsFromIntegration(ILoggingBuilder builder)
     {
         // For Net6, if HostingStartupAssembly is configured, we don't want to call integration again for host's ServiceCollection.
         // OpenTelemetryLogger-related services were already added to WebApplicationServiceCollection and will
