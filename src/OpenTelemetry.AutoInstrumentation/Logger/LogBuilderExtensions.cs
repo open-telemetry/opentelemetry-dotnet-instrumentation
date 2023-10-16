@@ -17,6 +17,7 @@
 #if NET6_0_OR_GREATER
 
 using System.Reflection;
+using System.Security;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry.AutoInstrumentation.Configurations;
@@ -165,8 +166,15 @@ internal static class LogBuilderExtensions
 
     private static bool IsAutoInstrumentationStartupAssemblySet()
     {
-        var environmentVariable = Environment.GetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES");
-        return environmentVariable != null && environmentVariable.Contains("OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper", StringComparison.OrdinalIgnoreCase);
+        try
+        {
+            var environmentVariable = Environment.GetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES");
+            return environmentVariable != null && environmentVariable.Contains("OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper", StringComparison.OrdinalIgnoreCase);
+        }
+        catch (SecurityException)
+        {
+            return false;
+        }
     }
 }
 #endif
