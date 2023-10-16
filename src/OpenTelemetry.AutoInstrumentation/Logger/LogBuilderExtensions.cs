@@ -17,7 +17,6 @@
 #if NET6_0_OR_GREATER
 
 using System.Reflection;
-using System.Security;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry.AutoInstrumentation.Configurations;
@@ -27,9 +26,10 @@ namespace OpenTelemetry.AutoInstrumentation.Logger;
 
 internal static class LogBuilderExtensions
 {
-    private static bool? _autoInstrumentationStartupAssemblyConfigured;
     private static Type? _loggingProviderSdkType;
+    private static volatile bool _hostingStartupRan;
 
+    // this method is only called from LoggingBuilderIntegration
     public static void AddOpenTelemetryLogsFromIntegration(ILoggingBuilder builder)
     {
         // For Net6, if HostingStartupAssembly is configured, we don't want to call integration again for host's ServiceCollection.
@@ -42,13 +42,20 @@ internal static class LogBuilderExtensions
         // All of this additional checking is NOT needed for net7. There we can rely on integration's capability
         // to detect if integration was called before, because WebApplicationServiceCollection is not used when building host.
 
-        if (builder.Services is ServiceCollection && !(IsNet6() && IsAutoInstrumentationStartupAssemblyConfigured() && IsHostServiceCollection(builder.Services)))
+        if (builder.Services is ServiceCollection && !(IsNet6() && _hostingStartupRan && IsHostServiceCollection(builder.Services)))
         {
             AddOpenTelemetryLogs(builder);
         }
     }
 
-    public static ILoggingBuilder AddOpenTelemetryLogs(this ILoggingBuilder builder)
+    // this method is only called from BootstrapperHostingStartup
+    public static void AddOpenTelemetryLogsFromStartup(this ILoggingBuilder builder)
+    {
+        AddOpenTelemetryLogs(builder);
+        _hostingStartupRan = true;
+    }
+
+    private static ILoggingBuilder AddOpenTelemetryLogs(ILoggingBuilder builder)
     {
         try
         {
@@ -118,13 +125,6 @@ internal static class LogBuilderExtensions
         return builder;
     }
 
-    private static bool IsAutoInstrumentationStartupAssemblyConfigured()
-    {
-        // If autoinstrumentation's HostingStartupAssembly is configured, assume integration was already called.
-        _autoInstrumentationStartupAssemblyConfigured ??= IsAutoInstrumentationStartupAssemblySet();
-        return _autoInstrumentationStartupAssemblyConfigured.Value;
-    }
-
     private static bool IsNet6()
     {
         var frameworkDescription = FrameworkDescription.Instance;
@@ -162,19 +162,6 @@ internal static class LogBuilderExtensions
         }
 
         return assemblyName.StartsWith(expectedAssemblyName.AsSpan()) && assemblyName[expectedAssemblyName.Length] == ',';
-    }
-
-    private static bool IsAutoInstrumentationStartupAssemblySet()
-    {
-        try
-        {
-            var environmentVariable = Environment.GetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES");
-            return environmentVariable != null && environmentVariable.Contains("OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper", StringComparison.OrdinalIgnoreCase);
-        }
-        catch (SecurityException)
-        {
-            return false;
-        }
     }
 }
 #endif
