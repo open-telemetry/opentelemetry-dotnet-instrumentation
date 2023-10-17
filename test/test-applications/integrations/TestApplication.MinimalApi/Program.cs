@@ -18,7 +18,15 @@ using System.Net.Http;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 
+using var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder
+                .AddFilter("Microsoft", LogLevel.Warning);
+        });
+var logger = loggerFactory.CreateLogger<Program>();
+logger.LogInformation("Logged before host is built.");
 var builder = WebApplication.CreateBuilder(args);
+
 using var app = builder.Build();
 app.MapGet("/test", (ILogger<Program> logger) =>
 {

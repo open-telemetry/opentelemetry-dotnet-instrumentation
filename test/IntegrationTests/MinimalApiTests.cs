@@ -45,18 +45,22 @@ public class MinimalApiTests : TestHelper
         using var collector = new MockLogsCollector(Output);
         SetExporter(collector);
 
-        collector.ExpectCollected(ValidateSingleAppLogRecord, "App log record should be exported once.");
-
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
 
         if (enableByteCodeInstrumentation)
         {
             EnableBytecodeInstrumentation();
+            collector.ExpectCollected(ValidateCombinedLogsExport, "All log records should be exported once.");
         }
 
         if (enableHostingStartupAssembly)
         {
             SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
+            if (!enableByteCodeInstrumentation)
+            {
+                // otherwise expectation was already set
+                collector.ExpectCollected(ValidateSingleAppLogExport, "Application log records should be exported once.");
+            }
         }
 
         RunTestApplication();
@@ -67,9 +71,21 @@ public class MinimalApiTests : TestHelper
         collector.AssertCollected();
     }
 
-    private static bool ValidateSingleAppLogRecord(IEnumerable<LogRecord> records)
+    private static bool ValidateCombinedLogsExport(IEnumerable<LogRecord> records)
     {
-        return records.Count(lr => Convert.ToString(lr.Body) == "{ \"stringValue\": \"Request received.\" }") == 1;
+        return ValidateSingleAppLogExport(records) && ValidateSingleBeforeHostLogRecord(records);
+    }
+
+    private static bool ValidateSingleBeforeHostLogRecord(IEnumerable<LogRecord> records)
+    {
+        var beforeHostLogCount = records.Count(lr => Convert.ToString(lr.Body) == "{ \"stringValue\": \"Logged before host is built.\" }");
+        return beforeHostLogCount == 1;
+    }
+
+    private static bool ValidateSingleAppLogExport(IEnumerable<LogRecord> records)
+    {
+        var appLogCount = records.Count(lr => Convert.ToString(lr.Body) == "{ \"stringValue\": \"Request received.\" }");
+        return appLogCount == 1;
     }
 }
 #endif

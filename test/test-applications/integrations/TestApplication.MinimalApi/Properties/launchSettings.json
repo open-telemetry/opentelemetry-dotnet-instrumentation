@@ -31,8 +31,8 @@
       "launchBrowser": false,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "CORECLR_ENABLE_PROFILING": "1",
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper",
+        "CORECLR_ENABLE_PROFILING": "1",
         "CORECLR_PROFILER": "{918728DD-259F-4A6A-AC2B-B85E1B658318}",
         "CORECLR_PROFILER_PATH": "$(SolutionDir)bin\\tracer-home\\win-x64\\OpenTelemetry.AutoInstrumentation.Native.dll",
         "DOTNET_ADDITIONAL_DEPS": "$(SolutionDir)bin\\tracer-home\\AdditionalDeps",
