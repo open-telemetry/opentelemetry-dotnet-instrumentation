@@ -89,7 +89,7 @@ partial class Build : NukeBuild
         .DependsOn(BuildTracer)
         .DependsOn(CompileExamples);
 
-    Target BuildNativeWorkflow  => _ => _
+    Target BuildNativeWorkflow => _ => _
         .Description("Builds the native code project deliverables.")
         .After(Clean)
         .DependsOn(CreateRequiredDirectories)
