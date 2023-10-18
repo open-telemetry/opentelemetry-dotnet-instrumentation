@@ -1,4 +1,4 @@
-// <copyright file="LogRazorTests.cs" company="OpenTelemetry Authors">
+// <copyright file="WorkerTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,46 +14,45 @@
 // limitations under the License.
 // </copyright>
 
-#if NET6_0_OR_GREATER
 using IntegrationTests.Helpers;
+using OpenTelemetry.Proto.Logs.V1;
 using Xunit.Abstractions;
+
+#if NET6_0_OR_GREATER
 
 namespace IntegrationTests;
 
-public class LogRazorTests : TestHelper
+public class WorkerTests : TestHelper
 {
-    public LogRazorTests(ITestOutputHelper output)
-        : base("Razor", output)
+    public WorkerTests(ITestOutputHelper output)
+        : base("Worker", output)
     {
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    [Trait("Category", "EndToEnd")]
-    public void SubmitLogs(bool enableClrProfiler)
+    [Fact]
+    public async Task SubmitsLogsWithoutDuplicates()
     {
         using var collector = new MockLogsCollector(Output);
         SetExporter(collector);
-        collector.Expect(logRecord =>
-        {
-            var logsAsString = Convert.ToString(logRecord);
-            return logsAsString != null && logsAsString.Contains("Warning from Razor App.");
-        });
 
-        if (enableClrProfiler)
-        {
-            EnableBytecodeInstrumentation();
-        }
-        else
-        {
-            SetEnvironmentVariable("ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", "OpenTelemetry.AutoInstrumentation.AspNetCoreBootstrapper");
-        }
+        collector.ExpectCollected(ValidateSingleAppLogRecord, "App log record should be exported once.");
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
+
+        EnableBytecodeInstrumentation();
+
         RunTestApplication();
 
-        collector.AssertExpectations();
+        // wait for fixed amount of time for logs to be collected before asserting
+        await Task.Delay(TimeSpan.FromSeconds(10));
+
+        collector.AssertCollected();
+    }
+
+    private static bool ValidateSingleAppLogRecord(IEnumerable<LogRecord> records)
+    {
+        return records.Count(lr => Convert.ToString(lr.Body) == "{ \"stringValue\": \"Worker running.\" }") == 1;
     }
 }
+
 #endif

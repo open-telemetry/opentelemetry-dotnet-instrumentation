@@ -1,4 +1,4 @@
-// <copyright file="Index.cshtml.cs" company="OpenTelemetry Authors">
+// <copyright file="Program.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,23 +14,10 @@
 // limitations under the License.
 // </copyright>
 
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using TestApplication.Worker;
 
-namespace TestApplication.Razor.Pages;
+IHost host = Host.CreateDefaultBuilder(args)
+    .ConfigureServices(services => { services.AddHostedService<Worker>(); })
+    .Build();
 
-#pragma warning disable SA1649 // File name should match first type name
-public class IndexModel : PageModel
-#pragma warning restore SA1649 // File name should match first type name
-{
-    private readonly ILogger<IndexModel> _logger;
-
-    public IndexModel(ILogger<IndexModel> logger)
-    {
-        _logger = logger;
-    }
-
-    public void OnGet()
-    {
-        _logger.LogWarning("Warning from Razor App.");
-    }
-}
+await host.RunAsync();

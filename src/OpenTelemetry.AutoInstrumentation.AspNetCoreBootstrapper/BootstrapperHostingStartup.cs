@@ -60,7 +60,7 @@ internal class BootstrapperHostingStartup : IHostingStartup
 
         try
         {
-            builder.ConfigureLogging(logging => logging.AddOpenTelemetryLogs());
+            builder.ConfigureLogging(logging => logging.AddOpenTelemetryLogsFromStartup());
 
             var applicationName = GetApplicationName();
             Logger.Information($"BootstrapperHostingStartup loaded for application with name {applicationName}.");

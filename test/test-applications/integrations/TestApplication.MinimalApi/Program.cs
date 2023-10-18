@@ -18,27 +18,27 @@ using System.Net.Http;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 
-namespace TestApplication.Razor;
+using var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder
+                .AddFilter("Microsoft", LogLevel.Warning);
+        });
+var logger = loggerFactory.CreateLogger<Program>();
+logger.LogInformation("Logged before host is built.");
+var builder = WebApplication.CreateBuilder(args);
 
-public class Program
+using var app = builder.Build();
+app.MapGet("/test", (ILogger<Program> logger) =>
 {
-    public static void Main(string[] args)
-    {
-        using var host = CreateHostBuilder(args).Build();
-        host.Start();
+    logger.LogInformation("Request received.");
+    return "Hello World!";
+});
 
-        var server = (IServer?)host.Services.GetService(typeof(IServer));
-        var addressFeature = server?.Features.Get<IServerAddressesFeature>();
-        var address = addressFeature?.Addresses.First();
-        using var httpClient = new HttpClient();
-        httpClient.GetAsync($"{address}/").Wait();
-    }
+app.Start();
 
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder.UseStartup<Startup>();
-                webBuilder.UseUrls($"http://127.0.0.1:0");
-            });
-}
+var server = (IServer?)app.Services.GetService(typeof(IServer));
+var addressFeature = server?.Features.Get<IServerAddressesFeature>();
+var address = addressFeature?.Addresses.First();
+
+using var httpClient = new HttpClient();
+httpClient.GetAsync($"{address}/test").Wait();

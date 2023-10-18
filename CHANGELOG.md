@@ -32,6 +32,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Fixed
 
+- Fixed log emission issue which resulted in same logs being exported multiple
+  times for ASP.NET Core 6.0 apps when bytecode instrumentation was enabled
+  and `WebApplicationBuilder` was used.
+
 ### Security
 
 ## [1.0.2](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.0.2)
