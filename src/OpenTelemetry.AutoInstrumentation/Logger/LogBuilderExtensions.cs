@@ -16,7 +16,6 @@
 
 #if NET6_0_OR_GREATER
 
-using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry.AutoInstrumentation.Configurations;
@@ -55,14 +54,14 @@ internal static class LogBuilderExtensions
         _hostingStartupRan = true;
     }
 
-    private static ILoggingBuilder AddOpenTelemetryLogs(ILoggingBuilder builder)
+    private static void AddOpenTelemetryLogs(ILoggingBuilder builder)
     {
         try
         {
             if (builder.Services == null)
             {
                 AutoInstrumentationEventSource.Log.Verbose("Logs: The builder.Services property is not of the IServiceCollection type, so we're skipping the integration of logs with ServiceCollection.");
-                return builder;
+                return;
             }
 
             // Integrate AddOpenTelemetry only once for ServiceCollection.
@@ -72,7 +71,7 @@ internal static class LogBuilderExtensions
             if (openTelemetryLoggerProviderDescriptor != null)
             {
                 AutoInstrumentationEventSource.Log.Verbose("Logs: AddOpenTelemetry already called on logging builder instance.");
-                return builder;
+                return;
             }
 
             var settings = Instrumentation.LogSettings.Value;
@@ -121,8 +120,6 @@ internal static class LogBuilderExtensions
             AutoInstrumentationEventSource.Log.Error($"Error in AddOpenTelemetryLogs: {ex}");
             throw;
         }
-
-        return builder;
     }
 
     private static bool IsNet6()
@@ -133,16 +130,7 @@ internal static class LogBuilderExtensions
 
     private static bool IsHostServiceCollection(IServiceCollection builderServices)
     {
-        // check if assembly is loaded before trying to get type,
-        // in order to avoid triggering an unnecessary load
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-        var extensionsHostingAssembly = assemblies.FirstOrDefault(a => IsExtensionsHostingAssembly(a));
-        if (extensionsHostingAssembly == null)
-        {
-            return false;
-        }
-
-        var applicationLifetimeType = extensionsHostingAssembly.GetType("Microsoft.Extensions.Hosting.Internal.ApplicationLifetime");
+        var applicationLifetimeType = Type.GetType("Microsoft.Extensions.Hosting.Internal.ApplicationLifetime, Microsoft.Extensions.Hosting");
         if (applicationLifetimeType == null)
         {
             return false;
@@ -150,18 +138,6 @@ internal static class LogBuilderExtensions
 
         var applicationLifetimeDescriptor = builderServices.FirstOrDefault(sd => sd.ImplementationType == applicationLifetimeType);
         return applicationLifetimeDescriptor != null;
-    }
-
-    private static bool IsExtensionsHostingAssembly(Assembly assembly)
-    {
-        const string expectedAssemblyName = "Microsoft.Extensions.Hosting";
-        var assemblyName = assembly.FullName.AsSpan();
-        if (assemblyName.Length <= expectedAssemblyName.Length)
-        {
-            return false;
-        }
-
-        return assemblyName.StartsWith(expectedAssemblyName.AsSpan()) && assemblyName[expectedAssemblyName.Length] == ',';
     }
 }
 #endif
