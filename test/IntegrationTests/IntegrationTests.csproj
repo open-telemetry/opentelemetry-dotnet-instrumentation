@@ -26,6 +26,7 @@
     <PackageReference Include="Testcontainers" />
     <PackageReference Include="Verify.Xunit" />
     <PackageReference Include="xunit.abstractions" />
+    <PackageReference Include="Xunit.SkippableFact" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' OR '$(TargetFramework)' == 'net6.0' ">

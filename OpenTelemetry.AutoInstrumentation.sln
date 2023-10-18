@@ -203,7 +203,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Azure", "te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.Wcf.Client.DotNet", "test\test-applications\integrations\TestApplication.Wcf.Client.DotNet\TestApplication.Wcf.Client.DotNet.csproj", "{EDE168E0-DBCD-4DE3-B55A-4B633ED6565E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Razor", "test\test-applications\integrations\TestApplication.Razor\TestApplication.Razor.csproj", "{1C76773E-2582-40DB-A720-3798E3928876}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApplication.MinimalApi", "test\test-applications\integrations\TestApplication.MinimalApi\TestApplication.MinimalApi.csproj", "{803A3DD1-016E-4713-8066-A1C81A6ADBA3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication.Worker", "test\test-applications\integrations\TestApplication.Worker\TestApplication.Worker.csproj", "{E04065C2-0512-41C6-A428-AC85342B3D03}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -965,18 +967,30 @@ Global
 		{EDE168E0-DBCD-4DE3-B55A-4B633ED6565E}.Release|x64.Build.0 = Release|x64
 		{EDE168E0-DBCD-4DE3-B55A-4B633ED6565E}.Release|x86.ActiveCfg = Release|x86
 		{EDE168E0-DBCD-4DE3-B55A-4B633ED6565E}.Release|x86.Build.0 = Release|x86
-		{1C76773E-2582-40DB-A720-3798E3928876}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{1C76773E-2582-40DB-A720-3798E3928876}.Debug|Any CPU.Build.0 = Debug|x64
-		{1C76773E-2582-40DB-A720-3798E3928876}.Debug|x64.ActiveCfg = Debug|x64
-		{1C76773E-2582-40DB-A720-3798E3928876}.Debug|x64.Build.0 = Debug|x64
-		{1C76773E-2582-40DB-A720-3798E3928876}.Debug|x86.ActiveCfg = Debug|x86
-		{1C76773E-2582-40DB-A720-3798E3928876}.Debug|x86.Build.0 = Debug|x86
-		{1C76773E-2582-40DB-A720-3798E3928876}.Release|Any CPU.ActiveCfg = Release|x64
-		{1C76773E-2582-40DB-A720-3798E3928876}.Release|Any CPU.Build.0 = Release|x64
-		{1C76773E-2582-40DB-A720-3798E3928876}.Release|x64.ActiveCfg = Release|x64
-		{1C76773E-2582-40DB-A720-3798E3928876}.Release|x64.Build.0 = Release|x64
-		{1C76773E-2582-40DB-A720-3798E3928876}.Release|x86.ActiveCfg = Release|x86
-		{1C76773E-2582-40DB-A720-3798E3928876}.Release|x86.Build.0 = Release|x86
+		{803A3DD1-016E-4713-8066-A1C81A6ADBA3}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{803A3DD1-016E-4713-8066-A1C81A6ADBA3}.Debug|Any CPU.Build.0 = Debug|x64
+		{803A3DD1-016E-4713-8066-A1C81A6ADBA3}.Debug|x64.ActiveCfg = Debug|x64
+		{803A3DD1-016E-4713-8066-A1C81A6ADBA3}.Debug|x64.Build.0 = Debug|x64
+		{803A3DD1-016E-4713-8066-A1C81A6ADBA3}.Debug|x86.ActiveCfg = Debug|x86
+		{803A3DD1-016E-4713-8066-A1C81A6ADBA3}.Debug|x86.Build.0 = Debug|x86
+		{803A3DD1-016E-4713-8066-A1C81A6ADBA3}.Release|Any CPU.ActiveCfg = Release|x64
+		{803A3DD1-016E-4713-8066-A1C81A6ADBA3}.Release|Any CPU.Build.0 = Release|x64
+		{803A3DD1-016E-4713-8066-A1C81A6ADBA3}.Release|x64.ActiveCfg = Release|x64
+		{803A3DD1-016E-4713-8066-A1C81A6ADBA3}.Release|x64.Build.0 = Release|x64
+		{803A3DD1-016E-4713-8066-A1C81A6ADBA3}.Release|x86.ActiveCfg = Release|x86
+		{803A3DD1-016E-4713-8066-A1C81A6ADBA3}.Release|x86.Build.0 = Release|x86
+		{E04065C2-0512-41C6-A428-AC85342B3D03}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{E04065C2-0512-41C6-A428-AC85342B3D03}.Debug|Any CPU.Build.0 = Debug|x64
+		{E04065C2-0512-41C6-A428-AC85342B3D03}.Debug|x64.ActiveCfg = Debug|x64
+		{E04065C2-0512-41C6-A428-AC85342B3D03}.Debug|x64.Build.0 = Debug|x64
+		{E04065C2-0512-41C6-A428-AC85342B3D03}.Debug|x86.ActiveCfg = Debug|x86
+		{E04065C2-0512-41C6-A428-AC85342B3D03}.Debug|x86.Build.0 = Debug|x86
+		{E04065C2-0512-41C6-A428-AC85342B3D03}.Release|Any CPU.ActiveCfg = Release|x64
+		{E04065C2-0512-41C6-A428-AC85342B3D03}.Release|Any CPU.Build.0 = Release|x64
+		{E04065C2-0512-41C6-A428-AC85342B3D03}.Release|x64.ActiveCfg = Release|x64
+		{E04065C2-0512-41C6-A428-AC85342B3D03}.Release|x64.Build.0 = Release|x64
+		{E04065C2-0512-41C6-A428-AC85342B3D03}.Release|x86.ActiveCfg = Release|x86
+		{E04065C2-0512-41C6-A428-AC85342B3D03}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1050,7 +1064,8 @@ Global
 		{C66927FD-ED1F-4079-8733-51AB7463060D} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{3A125210-A784-4982-ACDB-C3442E414E44} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 		{EDE168E0-DBCD-4DE3-B55A-4B633ED6565E} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
-		{1C76773E-2582-40DB-A720-3798E3928876} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
+		{803A3DD1-016E-4713-8066-A1C81A6ADBA3} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
+		{E04065C2-0512-41C6-A428-AC85342B3D03} = {E409ADD3-9574-465C-AB09-4324D205CC7C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {160A1D00-1F5B-40F8-A155-621B4459D78F}
