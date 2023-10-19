@@ -81,6 +81,15 @@ The minimal supported version of
 [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework)
 is `4.6.2`.
 
+Supported processor architectures are:
+
+- x86
+- AMD64 (x86-64)
+
+> **Note**
+> ARM architectures are not supported yet,
+> see [#2181](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2181).
+
 CI tests run against the following operating systems:
 
 - [Alpine](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/alpine.dockerfile)
@@ -94,10 +103,6 @@ CI tests run against the following operating systems:
 See [config.md#instrumented-libraries-and-frameworks](config.md#instrumented-libraries-and-frameworks).
 
 ## Get started
-
-> **Note**
-> ARM architectures are not supported yet,
-> see [#2181](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2181).
 
 ### Considerations on scope
 
