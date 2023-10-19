@@ -46,7 +46,7 @@
     <PackageVersion Include="System.Reactive" Version="6.0.0" />
     <PackageVersion Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageVersion Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
-    <PackageVersion Include="System.ServiceModel.Http" Version="6.0.0" />
+    <PackageVersion Include="System.ServiceModel.Http" Version="6.1.0" />
     <PackageVersion Include="System.ServiceModel.NetTcp" Version="6.0.0" />
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
     <PackageVersion Include="Testcontainers" Version="3.5.0" />
