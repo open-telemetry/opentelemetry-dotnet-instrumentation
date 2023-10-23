@@ -16,6 +16,10 @@ Install-OpenTelemetryCore
 Register-OpenTelemetryForIIS
 ```
 
+If you are using versions 0.7.0 - 1.1.0 of the OpenTelemetry .NET Automatic Instrumentation
+and you are instrumenting an ASP.NET Core application, you must also configure
+the application's application pool with `.NET CLR Version` set to `No Managed Code`.
+
 > **Warning**
 > `Register-OpenTelemetryForIIS` performs IIS restart.
 
