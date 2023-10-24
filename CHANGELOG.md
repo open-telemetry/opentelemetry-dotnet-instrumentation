@@ -14,6 +14,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Dependency updates
 
 - .NET Framework only, `Grpc.Core.Api` updated from `2.57.0` to `2.58.0`.
+- .NET only, `OpenTelemetry.Instrumentation.EntityFrameworkCore` updated
+  from `1.0.0-beta.7` to `1.0.0-beta.8`.
 
 ### Deprecated
 
