@@ -6,6 +6,7 @@ bytecode
 cmake
 Codespaces
 coreutils
+corhlpr
 Couchbase
 distro
 Dockerfiles
@@ -17,8 +18,10 @@ envvars
 GRPCNETCLIENT
 HKLM
 HTTPCLIENT
+ifdef
 ILOGGER
 inetsrv
+JIT
 LINQ
 MASSTRANSIT
 metricsexporter
@@ -48,6 +51,7 @@ TMPDIR
 tracesexporter
 unencrypted
 UNENCRYPTEDSUPPORT
+unregistration
 vcpkg
 WCFCLIENT
 WCFSERVICE
