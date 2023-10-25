@@ -17,9 +17,24 @@
 #Requires -RunAsAdministrator
 
 $ServiceLocatorVariable = "OTEL_DOTNET_AUTO_INSTALL_DIR"
+$ServiceVersionVariable = "OTEL_DOTNET_AUTO_INSTALL_VERSION"
 
 function Get-Current-InstallDir() {
     return [System.Environment]::GetEnvironmentVariable($ServiceLocatorVariable, [System.EnvironmentVariableTarget]::Machine)
+}
+
+function Get-Current-InstallVersion() {
+    return [System.Environment]::GetEnvironmentVariable($ServiceVersionVariable, [System.EnvironmentVariableTarget]::Machine)
+}
+
+function Get-Newest-InstallVersion() { 
+    $query = "https://api.github.com/repos/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest"
+
+    $response = Invoke-WebRequest -Uri $query
+    $responseJson = $response.Content | ConvertFrom-Json
+    $release = $responseJson.tag_name
+
+    return $release
 }
 
 function Get-CLIInstallDir-From-InstallDir([string]$InstallDir) {
@@ -62,6 +77,16 @@ function Download-OpenTelemetry([string]$Version, [string]$Path) {
     $archive = "opentelemetry-dotnet-instrumentation-windows.zip"
     $dlUrl = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/$Version/$archive"
     $dlPath = Join-Path $Path $archive
+
+    Invoke-WebRequest -Uri $dlUrl -OutFile $dlPath -UseBasicParsing
+
+    return $dlPath
+}
+
+function Download-OpenTelemetry-Install-Module([string]$Version, [string]$Path) {
+    $module = "OpenTelemetry.DotNet.Auto.psm1"
+    $dlUrl = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/$Version/$module"
+    $dlPath = Join-Path $Path $module
 
     Invoke-WebRequest -Uri $dlUrl -OutFile $dlPath -UseBasicParsing
 
@@ -206,6 +231,44 @@ function Test-AssemblyNotForGAC([string] $Name) {
     return $false 
 }
 
+function Is-Greater-Version($v1, $v2) {
+    # Helper convert version main part to version object
+    function ToVersion($version) {
+        return ($version -replace '^v' -replace '-.+$') -as [version]
+    }
+
+    # Helper convert version pre part to version object
+    function RankPre($version) {
+        # $null is full release
+        $rank = "alpha", "beta", "rc", $null
+        $ranked = $null
+
+        if ($version -match "^v\d+\.\d+\.\d+?(\-(?<pre>[\w\.]+))") {
+            $token = $matches['pre'].split('.')[0]
+            $ranked = $matches['pre'] -replace $token, $rank.IndexOf($token)
+        }
+        else {
+            $ranked = $rank.IndexOf($null)
+            $ranked = "$($ranked).0"
+        }
+
+        return $ranked -as [version]
+    }
+
+    $v1Version = ToVersion $v1
+    $v2Version = ToVersion $v2
+
+    if ($v1Version -gt $v2Version) { return $true }
+    if ($v1Version -lt $v2Version) { return $false }
+
+    $v1PreRank = RankPre $v1
+    $v2PreRank = RankPre $v2
+
+    if ($v1PreRank -gt $v2PreRank) { return $true }
+
+    return $false;
+}
+
 <#
     .SYNOPSIS
     Installs OpenTelemetry .NET Automatic Instrumentation.
@@ -243,6 +306,9 @@ function Install-OpenTelemetryCore() {
         # OpenTelemetry service locator
         [System.Environment]::SetEnvironmentVariable($ServiceLocatorVariable, $installDir, [System.EnvironmentVariableTarget]::Machine)
 
+        # OpenTelemetry version
+        [System.Environment]::SetEnvironmentVariable($ServiceVersionVariable, $version, [System.EnvironmentVariableTarget]::Machine)
+
         # Register .NET Framework dlls in GAC
         [System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a") | Out-Null
         $publish = New-Object System.EnterpriseServices.Internal.Publish 
@@ -250,7 +316,7 @@ function Install-OpenTelemetryCore() {
         for ($i = 0; $i -lt $dlls.Count; $i++) {
             $percentageComplete = $i / $dlls.Count * 100
             Write-Progress -Activity "Registering .NET Framework dlls in GAC" `
-                -Status "Module $($i+1) out of $($dlls.Count). Installing $($dlls[$i].Name):" `
+                -Status "Module $($i + 1) out of $($dlls.Count). Installing $($dlls[$i].Name):" `
                 -PercentComplete $percentageComplete
 
             if (Test-AssemblyNotForGAC $dlls[$i].Name) {
@@ -291,7 +357,7 @@ function Uninstall-OpenTelemetryCore() {
     for ($i = 0; $i -lt $dlls.Count; $i++) {
         $percentageComplete = $i / $dlls.Count * 100
         Write-Progress -Activity "Unregistering .NET Framework dlls from GAC" `
-            -Status "Module $($i+1) out of $($dlls.Count). Uninstalling $($dlls[$i].Name):" `
+            -Status "Module $($i + 1) out of $($dlls.Count). Uninstalling $($dlls[$i].Name):" `
             -PercentComplete $percentageComplete
 
         if (Test-AssemblyNotForGAC $dlls[$i].Name) {
@@ -306,6 +372,55 @@ function Uninstall-OpenTelemetryCore() {
 
     # Remove OTel service locator variable
     [System.Environment]::SetEnvironmentVariable($ServiceLocatorVariable, $null, [System.EnvironmentVariableTarget]::Machine)
+    [System.Environment]::SetEnvironmentVariable($ServiceVersionVariable, $null, [System.EnvironmentVariableTarget]::Machine)
+}
+
+<#
+    .SYNOPSIS
+    Update OpenTelemetry .NET Automatic Instrumentation.
+    .PARAMETER RegisterIIS
+    Registers IIS 
+#>
+function Update-OpenTelemetryCore() {
+    param(
+        [Parameter(Mandatory = $false)]
+        [bool]$RegisterIIS = $false
+    )
+
+    $currentInstallVersion = Get-Current-InstallVersion
+    if (-not $currentInstallVersion) {
+        Write-Warning "OpenTelemetry .NET Automatic Instrumentation's version is not detected. Re-install manually."
+
+        return
+    }
+
+    $newestInstallVersion = Get-Newest-InstallVersion
+    if (-not(Is-Greater-Version $newestInstallVersion $currentInstallVersion)) {
+        Write-Warning "Newest version of OpenTelemetry .NET Automatic Instrumentation is already installed."
+
+        return
+    }
+
+    Write-Information -MessageData "Updating OpenTelemetry .NET Automatic Instrumentation from $($currentInstallVersion) to $($newestInstallVersion)." -InformationAction Continue
+
+    $currentInstallPath = Get-Current-InstallDir
+
+    Uninstall-OpenTelemetryCore
+    if ($RegisterIIS) {
+        Unregister-OpenTelemetryForIIS -NoReset $true
+    }
+
+    Prepare-Install-Directory $currentInstallPath
+
+    $modulePath = Download-OpenTelemetry-Install-Module $newestInstallVersion $currentInstallPath
+
+    Remove-Module OpenTelemetry.Dotnet.Auto
+    Import-Module $modulePath
+
+    Install-OpenTelemetryCore
+    if ($RegisterIIS) {
+        Register-OpenTelemetryForIIS
+    }
 }
 
 <#
@@ -414,12 +529,22 @@ function Unregister-OpenTelemetryForCurrentSession() {
 <#
     .SYNOPSIS
     Removes IIS environment variables to disable automatic instrumentation.
-    Performs IIS reset after removal.
+    Performs IIS reset after removal by default.
+    .PARAMETER NoReset
+    Does not perform IIS reset.
 #>
 function Unregister-OpenTelemetryForIIS() {
+    param(
+        [Parameter(Mandatory = $false)]
+        [bool]$NoReset = $false
+    )
+
     Remove-Windows-Service -WindowsServiceName "W3SVC"
     Remove-Windows-Service -WindowsServiceName "WAS"
-    Reset-IIS
+
+    if (-not $NoReset) {
+        Reset-IIS
+    }
 }
 
 <#
@@ -458,6 +583,7 @@ Export-ModuleMember -Function Register-OpenTelemetryForIIS
 Export-ModuleMember -Function Register-OpenTelemetryForWindowsService
 Export-ModuleMember -Function Register-OpenTelemetryForCurrentSession
 Export-ModuleMember -Function Uninstall-OpenTelemetryCore
+Export-ModuleMember -Function Update-OpenTelemetryCore
 Export-ModuleMember -Function Unregister-OpenTelemetryForIIS
 Export-ModuleMember -Function Unregister-OpenTelemetryForWindowsService
 Export-ModuleMember -Function Unregister-OpenTelemetryForCurrentSession
