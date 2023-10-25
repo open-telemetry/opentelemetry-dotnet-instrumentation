@@ -37,7 +37,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "6.0.12" },
-        new object[] { "7.0.12" },
+        new object[] { "7.0.13" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> EntityFrameworkCorePomeloMySql = new List<object[]>
@@ -64,7 +64,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.52.0" },
-        new object[] { "2.57.0" },
+        new object[] { "2.58.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MassTransit = new List<object[]>
@@ -159,7 +159,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "4.10.2" },
-        new object[] { "6.0.0" },
+        new object[] { "6.1.0" },
 #endif
     };
 }

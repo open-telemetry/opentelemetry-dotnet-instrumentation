@@ -9,8 +9,8 @@
     <PackageVersion Include="GraphQL.MicrosoftDI" Version="7.6.1" />
     <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="7.6.0" />
     <PackageVersion Include="GraphQL.Server.Ui.Playground" Version="7.6.0" />
-    <PackageVersion Include="Grpc.Net.Client" Version="2.57.0" />
-    <PackageVersion Include="Grpc.Net.Client.Web" Version="2.57.0" />
+    <PackageVersion Include="Grpc.Net.Client" Version="2.58.0" />
+    <PackageVersion Include="Grpc.Net.Client.Web" Version="2.58.0" />
     <PackageVersion Include="Grpc.Tools" Version="2.51.0" />
     <PackageVersion Include="MassTransit" Version="8.1.1" />
     <PackageVersion Include="Microsoft.AspNetCore" Version="2.2.0" />
@@ -19,7 +19,7 @@
     <PackageVersion Include="Microsoft.Build" Version="15.9.20" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="15.9.20" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.1.1" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.12" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.13" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
@@ -46,8 +46,8 @@
     <PackageVersion Include="System.Reactive" Version="6.0.0" />
     <PackageVersion Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageVersion Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
-    <PackageVersion Include="System.ServiceModel.Http" Version="6.0.0" />
-    <PackageVersion Include="System.ServiceModel.NetTcp" Version="6.0.0" />
+    <PackageVersion Include="System.ServiceModel.Http" Version="6.1.0" />
+    <PackageVersion Include="System.ServiceModel.NetTcp" Version="6.1.0" />
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
     <PackageVersion Include="Testcontainers" Version="3.5.0" />
     <PackageVersion Include="Verify.Xunit" Version="20.8.2" />

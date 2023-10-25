@@ -5,7 +5,25 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.0.2...HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.1.0..HEAD)
+
+### Added
+
+### Changed
+
+### Dependency updates
+
+- .NET Framework only, `Grpc.Core.Api` updated from `2.57.0` to `2.58.0`.
+- .NET only, `OpenTelemetry.Instrumentation.EntityFrameworkCore` updated
+  from `1.0.0-beta.7` to `1.0.0-beta.8`.
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [1.1.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.1.0)
 
 ### Added
 
@@ -26,17 +44,11 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule` updated from
   `1.0.0-rc9.9` to `1.6.0-beta.1`.
 
-### Deprecated
-
-### Removed
-
 ### Fixed
 
 - Fixed log emission issue which resulted in same logs being exported multiple
   times for ASP.NET Core 6.0 apps when bytecode instrumentation was enabled
   and `WebApplicationBuilder` was used.
-
-### Security
 
 ## [1.0.2](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.0.2)
 

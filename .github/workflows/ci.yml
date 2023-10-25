@@ -47,7 +47,7 @@ jobs:
             containers: none
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/checkout@v4.1.0
+      - uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
       - uses: actions/setup-dotnet@v3.2.0
@@ -93,7 +93,7 @@ jobs:
         machine: [ windows-2022 ]
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/checkout@v4.1.0
+      - uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
       - uses: actions/setup-dotnet@v3.2.0
@@ -125,7 +125,7 @@ jobs:
             containers: windows-only
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/checkout@v4.1.0
+      - uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
       - uses: actions/setup-dotnet@v3.2.0
@@ -174,7 +174,7 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 60
     steps:
-    - uses: actions/checkout@v4.1.0
+    - uses: actions/checkout@v4.1.1
       with:
         fetch-depth: 0 # fetching all, needed to correctly calculate version
     - name: Download Artifacts from build job
@@ -203,7 +203,7 @@ jobs:
           - machine: windows-2022
     runs-on: ${{ matrix.machine }}
     steps:
-      - uses: actions/checkout@v4.1.0
+      - uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
       - uses: actions/setup-dotnet@v3.2.0

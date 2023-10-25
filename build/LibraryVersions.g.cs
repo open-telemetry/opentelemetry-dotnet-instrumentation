@@ -36,7 +36,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("6.0.12"),
-                new("7.0.12"),
+                new("7.0.13"),
             }
         },
         {
@@ -60,7 +60,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.52.0"),
-                new("2.57.0"),
+                new("2.58.0"),
             }
         },
         {
@@ -145,7 +145,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("4.10.2"),
-                new("6.0.0"),
+                new("6.1.0"),
             }
         },
     };

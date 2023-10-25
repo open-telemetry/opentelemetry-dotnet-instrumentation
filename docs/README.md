@@ -10,9 +10,9 @@ to .NET applications without having to modify their source code.
 > **Warning**
 > The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
-([1.0.2](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
+([1.1.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
 can be found in [opentelemetry.io](https://github.com/open-telemetry/opentelemetry.io/tree/main/content/en/docs/instrumentation/net/automatic)
-or [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.0.2/docs/README.md).
+or [here](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/v1.1.0/docs/README.md).
 
 ---
 
@@ -81,6 +81,15 @@ The minimal supported version of
 [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework)
 is `4.6.2`.
 
+Supported processor architectures are:
+
+- x86
+- AMD64 (x86-64)
+
+> **Note**
+> ARM architectures are not supported yet,
+> see [#2181](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2181).
+
 CI tests run against the following operating systems:
 
 - [Alpine](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/alpine.dockerfile)
@@ -95,10 +104,6 @@ CI tests run against the following operating systems:
 See [config.md#instrumented-libraries-and-frameworks](config.md#instrumented-libraries-and-frameworks).
 
 ## Get started
-
-> **Note**
-> ARM architectures are not supported yet,
-> see [#2181](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2181).
 
 ### Considerations on scope
 
@@ -157,7 +162,7 @@ Example usage:
 
 ```sh
 # Download the bash script
-curl -sSfL https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v1.0.2/otel-dotnet-auto-install.sh -O
+curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.1.0/otel-dotnet-auto-install.sh -O
 
 # Install core files
 sh ./otel-dotnet-auto-install.sh
@@ -180,7 +185,7 @@ uses environment variables as parameters:
 | `OTEL_DOTNET_AUTO_HOME` | Location where binaries are to be installed                      | No       | `$HOME/.otel-dotnet-auto` |
 | `OS_TYPE`               | Possible values: `linux-glibc`, `linux-musl`, `macos`, `windows` | No       | *Calculated*              |
 | `TMPDIR`                | Temporary directory used when downloading the files              | No       | `$(mktemp -d)`            |
-| `VERSION`               | Version to download                                              | No       | `1.0.2`                   |
+| `VERSION`               | Version to download                                              | No       | `1.1.0`                   |
 
 [instrument.sh](../instrument.sh) script
 uses environment variables as parameters:
@@ -199,7 +204,7 @@ Example usage (run as administrator):
 
 ```powershell
 # Download the module
-$module_url = "https://raw.githubusercontent.com/open-telemetry/opentelemetry-dotnet-instrumentation/v1.0.2/OpenTelemetry.DotNet.Auto.psm1"
+$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.1.0/OpenTelemetry.DotNet.Auto.psm1"
 $download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
 Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
 
