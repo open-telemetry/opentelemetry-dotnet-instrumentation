@@ -113,6 +113,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.1.0" },
+        new object[] { "8.2.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Npgsql = new List<object[]>
@@ -130,7 +131,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.1.4" },
+        new object[] { "8.1.5" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Quartz = new List<object[]>
