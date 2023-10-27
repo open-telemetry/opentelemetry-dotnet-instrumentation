@@ -112,7 +112,7 @@ public static class LibraryVersion
 #if DEFAULT_TEST_PACKAGE_VERSIONS
         new object[] { string.Empty }
 #else
-        new object[] { "8.1.0" },
+        new object[] { "8.2.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Npgsql = new List<object[]>
