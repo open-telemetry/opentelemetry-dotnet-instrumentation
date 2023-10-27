@@ -26,6 +26,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Removed
 
+- Plugins, removed supported for `OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreMetricsInstrumentationOptions`.
+
 ### Fixed
 
 ## [1.1.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.1.0)
