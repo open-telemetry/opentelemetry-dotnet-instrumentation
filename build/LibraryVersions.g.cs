@@ -79,7 +79,7 @@ public static class LibraryVersion
                 new("2.1.5"),
                 new("3.1.2"),
                 new("4.1.1"),
-                new("5.1.1"),
+                new("5.1.2"),
             }
         },
         {
@@ -103,6 +103,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.1.0"),
+                new("8.2.0"),
             }
         },
         {
@@ -118,7 +119,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.0.0"),
-                new("8.1.4"),
+                new("8.1.5"),
             }
         },
         {

@@ -85,7 +85,7 @@ public static class LibraryVersion
         new object[] { "2.1.5" },
         new object[] { "3.1.2" },
         new object[] { "4.1.1" },
-        new object[] { "5.1.1" },
+        new object[] { "5.1.2" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MongoDB = new List<object[]>
@@ -112,6 +112,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.1.0" },
+        new object[] { "8.2.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Npgsql = new List<object[]>
@@ -129,7 +130,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.1.4" },
+        new object[] { "8.1.5" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Quartz = new List<object[]>
