@@ -103,6 +103,7 @@ public static class LibraryVersion
             "TestApplication.MySqlData",
             new List<PackageBuildInfo>
             {
+                new("8.1.0"),
                 new("8.2.0"),
             }
         },
