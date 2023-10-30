@@ -9,6 +9,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Ability to update installation via PS module (`OpenTelemetry.DotNet.Auto.psm1`).
+
 ### Changed
 
 ### Dependency updates
