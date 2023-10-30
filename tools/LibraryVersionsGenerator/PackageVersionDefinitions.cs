@@ -144,6 +144,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.MySqlData",
             Versions = new List<PackageVersion>
             {
+                new("8.1.0"),
                 new("*")
             }
         },
