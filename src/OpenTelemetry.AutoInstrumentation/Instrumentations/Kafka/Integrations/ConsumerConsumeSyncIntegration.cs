@@ -67,28 +67,28 @@ public static class ConsumerConsumeSyncIntegration
         string? spanName = null;
         if (!string.IsNullOrEmpty(consumeResult.Topic))
         {
-            spanName = $"{consumeResult.Topic} {MessagingTags.Values.ProcessOperationName}";
+            spanName = $"{consumeResult.Topic} {MessagingAttributes.Values.ProcessOperationName}";
         }
 
-        spanName ??= MessagingTags.Values.ProcessOperationName;
+        spanName ??= MessagingAttributes.Values.ProcessOperationName;
         var activity = KafkaCommon.Source.StartActivity(spanName, ActivityKind.Consumer, propagatedContext.ActivityContext);
 
         if (activity is { IsAllDataRequested: true })
         {
             if (ConsumerCache.TryGet(instance!, out var groupId))
             {
-                KafkaCommon.SetCommonTags(
+                KafkaCommon.SetCommonAttributes(
                     activity,
-                    MessagingTags.Values.ProcessOperationName,
+                    MessagingAttributes.Values.ProcessOperationName,
                     consumeResult.Topic,
                     consumeResult.Partition,
                     consumeResult.Message?.Key,
                     instance.DuckCast<IClientName>()!);
 
-                activity.SetTag(MessagingTags.Keys.Kafka.ConsumerGroupId, groupId);
+                activity.SetTag(MessagingAttributes.Keys.Kafka.ConsumerGroupId, groupId);
                 if (consumeResult.Offset is not null)
                 {
-                    activity.SetTag(MessagingTags.Keys.Kafka.PartitionOffset, consumeResult.Offset.Value);
+                    activity.SetTag(MessagingAttributes.Keys.Kafka.PartitionOffset, consumeResult.Offset.Value);
                 }
             }
         }

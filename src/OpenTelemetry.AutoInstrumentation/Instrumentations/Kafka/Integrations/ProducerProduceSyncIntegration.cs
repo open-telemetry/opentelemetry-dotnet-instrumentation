@@ -46,10 +46,10 @@ public static class ProducerProduceSyncIntegration
         string? spanName = null;
         if (!string.IsNullOrEmpty(topicPartition.Topic))
         {
-            spanName = $"{topicPartition.Topic} {MessagingTags.Values.PublishOperationName}";
+            spanName = $"{topicPartition.Topic} {MessagingAttributes.Values.PublishOperationName}";
         }
 
-        spanName ??= MessagingTags.Values.PublishOperationName;
+        spanName ??= MessagingAttributes.Values.PublishOperationName;
         var activity = KafkaCommon.Source.StartActivity(name: spanName, ActivityKind.Producer);
         if (activity is not null)
         {
@@ -60,15 +60,15 @@ public static class ProducerProduceSyncIntegration
 
             if (activity.IsAllDataRequested)
             {
-                KafkaCommon.SetCommonTags(
+                KafkaCommon.SetCommonAttributes(
                     activity,
-                    MessagingTags.Values.PublishOperationName,
+                    MessagingAttributes.Values.PublishOperationName,
                     topicPartition.Topic,
                     topicPartition.Partition,
                     message.Key,
                     instance.DuckCast<IClientName>()!);
 
-                activity.SetTag(MessagingTags.Keys.Kafka.IsTombstone, message.Value is null);
+                activity.SetTag(MessagingAttributes.Keys.Kafka.IsTombstone, message.Value is null);
             }
 
             // Store as state information if delivery handler was set

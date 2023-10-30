@@ -16,7 +16,7 @@
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka;
 
-internal static class MessagingTags
+internal static class MessagingAttributes
 {
     internal static class Keys
     {

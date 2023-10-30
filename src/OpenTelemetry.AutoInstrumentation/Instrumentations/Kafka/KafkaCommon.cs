@@ -54,13 +54,13 @@ internal static class KafkaCommon
     public static void StopCurrentConsumerActivity()
     {
         var activity = Activity.Current;
-        if (activity is not null && activity.OperationName.EndsWith(MessagingTags.Values.ProcessOperationName, StringComparison.Ordinal))
+        if (activity is not null && activity.OperationName.EndsWith(MessagingAttributes.Values.ProcessOperationName, StringComparison.Ordinal))
         {
             activity.Stop();
         }
     }
 
-    public static void SetCommonTags(
+    public static void SetCommonAttributes(
         Activity activity,
         string operationName,
         string? topic,
@@ -68,22 +68,22 @@ internal static class KafkaCommon
         object? key,
         IClientName client)
     {
-        activity.SetTag(MessagingTags.Keys.MessagingOperation, operationName);
-        activity.SetTag(MessagingTags.Keys.MessagingSystem, MessagingTags.Values.KafkaMessagingSystemName);
+        activity.SetTag(MessagingAttributes.Keys.MessagingOperation, operationName);
+        activity.SetTag(MessagingAttributes.Keys.MessagingSystem, MessagingAttributes.Values.KafkaMessagingSystemName);
         if (!string.IsNullOrEmpty(topic))
         {
-            activity.SetTag(MessagingTags.Keys.DestinationName, topic);
+            activity.SetTag(MessagingAttributes.Keys.DestinationName, topic);
         }
 
-        activity.SetTag(MessagingTags.Keys.ClientId, client.Name);
+        activity.SetTag(MessagingAttributes.Keys.ClientId, client.Name);
         if (key is not null)
         {
-            activity.SetTag(MessagingTags.Keys.Kafka.MessageKey, key);
+            activity.SetTag(MessagingAttributes.Keys.Kafka.MessageKey, key);
         }
 
         if (partition is not null)
         {
-            activity.SetTag(MessagingTags.Keys.Kafka.Partition, partition.Value);
+            activity.SetTag(MessagingAttributes.Keys.Kafka.Partition, partition.Value);
         }
     }
 }

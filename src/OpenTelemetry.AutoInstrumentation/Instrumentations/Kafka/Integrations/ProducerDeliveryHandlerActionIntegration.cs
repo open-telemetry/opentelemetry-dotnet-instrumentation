@@ -105,12 +105,12 @@ public static class ProducerDeliveryHandlerActionIntegration
                 if (deliveryReport.Partition is not null)
                 {
                     // Set the final partition message was delivered to.
-                    activity.SetTag(MessagingTags.Keys.Kafka.Partition, deliveryReport.Partition.Value);
+                    activity.SetTag(MessagingAttributes.Keys.Kafka.Partition, deliveryReport.Partition.Value);
                 }
 
                 if (deliveryReport.Offset is not null)
                 {
-                    activity.SetTag(MessagingTags.Keys.Kafka.PartitionOffset, deliveryReport.Offset.Value);
+                    activity.SetTag(MessagingAttributes.Keys.Kafka.PartitionOffset, deliveryReport.Offset.Value);
                 }
             }
 
