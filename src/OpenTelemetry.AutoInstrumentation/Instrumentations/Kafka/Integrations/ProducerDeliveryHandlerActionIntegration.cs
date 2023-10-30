@@ -97,7 +97,7 @@ public static class ProducerDeliveryHandlerActionIntegration
         {
             if (report.TryDuckCast<IDeliveryReport>(out var deliveryReport))
             {
-                if (deliveryReport.Error.IsError)
+                if (deliveryReport.Error is { IsError: true })
                 {
                     activity.SetException(new Exception(deliveryReport.Error.ToString()));
                 }

@@ -43,9 +43,15 @@ public static class ProducerProduceSyncIntegration
         where TTopicPartition : ITopicPartition
         where TMessage : IKafkaMessage
     {
-        var spanName = $"{topicPartition.Topic} {MessagingTags.Values.PublishOperationName}";
+        string? spanName = null;
+        if (!string.IsNullOrEmpty(topicPartition.Topic))
+        {
+            spanName = $"{topicPartition.Topic} {MessagingTags.Values.PublishOperationName}";
+        }
+
+        spanName ??= MessagingTags.Values.PublishOperationName;
         var activity = KafkaCommon.Source.StartActivity(name: spanName, ActivityKind.Producer);
-        if (activity != null)
+        if (activity is not null)
         {
             Propagators.DefaultTextMapPropagator.Inject<IKafkaMessage>(
                 new PropagationContext(activity.Context, Baggage.Current),
@@ -58,7 +64,7 @@ public static class ProducerProduceSyncIntegration
                     activity,
                     MessagingTags.Values.PublishOperationName,
                     topicPartition.Topic,
-                    topicPartition.Partition.Value,
+                    topicPartition.Partition,
                     message.Key,
                     instance.DuckCast<IClientName>()!);
 

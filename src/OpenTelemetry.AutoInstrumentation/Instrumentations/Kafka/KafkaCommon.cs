@@ -43,7 +43,7 @@ internal static class KafkaCommon
 
     public static IEnumerable<string> MessageHeaderValueGetter(IConsumeResult? message, string key)
     {
-        if (message?.Message.Headers is not null && message.Message.Headers.TryGetLastBytes(key, out var bytes))
+        if (message?.Message?.Headers is not null && message.Message.Headers.TryGetLastBytes(key, out var bytes))
         {
             return new[] { Encoding.UTF8.GetString(bytes) };
         }
@@ -63,20 +63,27 @@ internal static class KafkaCommon
     public static void SetCommonTags(
         Activity activity,
         string operationName,
-        string topic,
-        int partition,
+        string? topic,
+        IPartition? partition,
         object? key,
         IClientName client)
     {
         activity.SetTag(MessagingTags.Keys.MessagingOperation, operationName);
         activity.SetTag(MessagingTags.Keys.MessagingSystem, MessagingTags.Values.KafkaMessagingSystemName);
-        activity.SetTag(MessagingTags.Keys.DestinationName, topic);
+        if (!string.IsNullOrEmpty(topic))
+        {
+            activity.SetTag(MessagingTags.Keys.DestinationName, topic);
+        }
+
         activity.SetTag(MessagingTags.Keys.ClientId, client.Name);
         if (key is not null)
         {
             activity.SetTag(MessagingTags.Keys.Kafka.MessageKey, key);
         }
 
-        activity.SetTag(MessagingTags.Keys.Kafka.Partition, partition);
+        if (partition is not null)
+        {
+            activity.SetTag(MessagingTags.Keys.Kafka.Partition, partition.Value);
+        }
     }
 }

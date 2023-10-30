@@ -64,8 +64,14 @@ public static class ConsumerConsumeSyncIntegration
         }
 
         var propagatedContext = Propagators.DefaultTextMapPropagator.Extract(default, consumeResult, KafkaCommon.MessageHeaderValueGetter);
-        var name = $"{consumeResult.Topic} {MessagingTags.Values.ProcessOperationName}";
-        var activity = KafkaCommon.Source.StartActivity(name, ActivityKind.Consumer, propagatedContext.ActivityContext);
+        string? spanName = null;
+        if (!string.IsNullOrEmpty(consumeResult.Topic))
+        {
+            spanName = $"{consumeResult.Topic} {MessagingTags.Values.ProcessOperationName}";
+        }
+
+        spanName ??= MessagingTags.Values.ProcessOperationName;
+        var activity = KafkaCommon.Source.StartActivity(spanName, ActivityKind.Consumer, propagatedContext.ActivityContext);
 
         if (activity is { IsAllDataRequested: true })
         {
@@ -75,12 +81,15 @@ public static class ConsumerConsumeSyncIntegration
                     activity,
                     MessagingTags.Values.ProcessOperationName,
                     consumeResult.Topic,
-                    consumeResult.Partition.Value,
-                    consumeResult.Message.Key,
+                    consumeResult.Partition,
+                    consumeResult.Message?.Key,
                     instance.DuckCast<IClientName>()!);
 
                 activity.SetTag(MessagingTags.Keys.Kafka.ConsumerGroupId, groupId);
-                activity.SetTag(MessagingTags.Keys.Kafka.PartitionOffset, consumeResult.Offset.Value);
+                if (consumeResult.Offset is not null)
+                {
+                    activity.SetTag(MessagingTags.Keys.Kafka.PartitionOffset, consumeResult.Offset.Value);
+                }
             }
         }
 
