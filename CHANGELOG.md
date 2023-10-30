@@ -9,6 +9,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Added support for `KAFKA` traces instrumentation.
+
 ### Changed
 
 ### Dependency updates

@@ -164,4 +164,13 @@ public static class LibraryVersion
         new object[] { "6.1.0" },
 #endif
     };
+    public static readonly IReadOnlyCollection<object[]> Kafka = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "1.4.0" },
+        new object[] { "2.3.0" },
+#endif
+    };
 }
