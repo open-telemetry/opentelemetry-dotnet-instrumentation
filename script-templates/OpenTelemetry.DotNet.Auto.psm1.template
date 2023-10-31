@@ -446,7 +446,7 @@ function Register-OpenTelemetryForIIS() {
     $installDir = Get-Current-InstallDir
 
     if (-not $installDir) {
-        return
+        throw "OpenTelemetry Core must be setup first. Run 'Install-OpenTelemetryCore' to setup OpenTelemetry Core."
     }
 
     if ($installDir -notlike "$env:ProgramFiles\*") {
