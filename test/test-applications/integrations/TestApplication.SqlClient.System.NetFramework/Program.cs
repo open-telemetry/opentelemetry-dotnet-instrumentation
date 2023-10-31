@@ -20,7 +20,7 @@ using TestApplication.Shared;
 namespace TestApplication.SqlClient.System;
 
 /// <summary>
-/// This test application uses SqlConnection from System.Data (shipped by framework).
+/// This test application uses SqlConnection from System.Data (shipped with .NET Framework).
 /// </summary>
 public class Program
 {
