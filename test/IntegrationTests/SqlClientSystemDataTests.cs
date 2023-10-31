@@ -24,7 +24,7 @@ namespace IntegrationTests;
 public class SqlClientSystemDataTests : TestHelper
 {
     public SqlClientSystemDataTests(ITestOutputHelper output)
-        : base("SqlClient.NetFramework", output)
+        : base("SqlClient.System.NetFramework", output)
     {
     }
 

@@ -14,11 +14,14 @@
 // limitations under the License.
 // </copyright>
 
-using Microsoft.Data.SqlClient;
+using System.Data.SqlClient;
 using TestApplication.Shared;
 
-namespace TestApplication.SqlClient;
+namespace TestApplication.SqlClient.System;
 
+/// <summary>
+/// This test application uses SqlConnection from System.Data.SqlClient (NuGet package).
+/// </summary>
 public class Program
 {
     private const string CreateCommand = "CREATE TABLE MY_TABLE ( Id int, Value1 varchar(255), Value2 varchar(255) )";
