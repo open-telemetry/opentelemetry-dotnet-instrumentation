@@ -75,21 +75,21 @@ public static class ConsumerConsumeSyncIntegration
 
         if (activity is { IsAllDataRequested: true })
         {
+            KafkaCommon.SetCommonAttributes(
+                activity,
+                MessagingAttributes.Values.ProcessOperationName,
+                consumeResult.Topic,
+                consumeResult.Partition,
+                consumeResult.Message?.Key,
+                instance.DuckCast<IClientName>()!);
             if (ConsumerCache.TryGet(instance!, out var groupId))
             {
-                KafkaCommon.SetCommonAttributes(
-                    activity,
-                    MessagingAttributes.Values.ProcessOperationName,
-                    consumeResult.Topic,
-                    consumeResult.Partition,
-                    consumeResult.Message?.Key,
-                    instance.DuckCast<IClientName>()!);
-
                 activity.SetTag(MessagingAttributes.Keys.Kafka.ConsumerGroupId, groupId);
-                if (consumeResult.Offset is not null)
-                {
-                    activity.SetTag(MessagingAttributes.Keys.Kafka.PartitionOffset, consumeResult.Offset.Value);
-                }
+            }
+
+            if (consumeResult.Offset is not null)
+            {
+                activity.SetTag(MessagingAttributes.Keys.Kafka.PartitionOffset, consumeResult.Offset.Value);
             }
         }
 
