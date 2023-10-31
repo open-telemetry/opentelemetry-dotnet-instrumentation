@@ -102,15 +102,25 @@ internal static class PackageVersionDefinitions
         },
         new()
         {
-            IntegrationName = "SqlClient",
+            IntegrationName = "SqlClientMicrosoft",
             NugetPackageName = "Microsoft.Data.SqlClient",
-            TestApplicationName = "TestApplication.SqlClient",
+            TestApplicationName = "TestApplication.SqlClient.Microsoft",
             Versions = new List<PackageVersion>
             {
                 new("1.1.4"),
                 new("2.1.5"),
                 new("3.1.2"),
                 new("4.1.1"),
+                new("*")
+            }
+        },
+        new()
+        {
+            IntegrationName = "SqlClientSystem",
+            NugetPackageName = "System.Data.SqlClient",
+            TestApplicationName = "TestApplication.SqlClient.System",
+            Versions = new List<PackageVersion>
+            {
                 new("*")
             }
         },

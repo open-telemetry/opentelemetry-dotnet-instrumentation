@@ -72,7 +72,7 @@ public static class LibraryVersion
             }
         },
         {
-            "TestApplication.SqlClient",
+            "TestApplication.SqlClient.Microsoft",
             new List<PackageBuildInfo>
             {
                 new("1.1.4"),
@@ -80,6 +80,13 @@ public static class LibraryVersion
                 new("3.1.2"),
                 new("4.1.1"),
                 new("5.1.2"),
+            }
+        },
+        {
+            "TestApplication.SqlClient.System",
+            new List<PackageBuildInfo>
+            {
+                new("4.8.5"),
             }
         },
         {
