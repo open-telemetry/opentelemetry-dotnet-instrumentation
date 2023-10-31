@@ -235,7 +235,7 @@ Updating OpenTelemetry installation:
 
 ```powershell
 # Import the previously downloaded module.
-# Note: It's best to use the same version of the module and installation to uninstall properly.
+# Note: It's best to use the same version of the module for installation and uninstallation to ensure proper removal.
 Import-Module "path/to/OpenTelemetry.DotNet.Auto.psm1"
 
 # If IIS was previously registered, use RegisterIIS = $true.
