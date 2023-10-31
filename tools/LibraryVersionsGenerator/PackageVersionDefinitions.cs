@@ -121,6 +121,7 @@ internal static class PackageVersionDefinitions
             TestApplicationName = "TestApplication.SqlClient.System",
             Versions = new List<PackageVersion>
             {
+                new("4.8.5"),
                 new("*")
             }
         },
