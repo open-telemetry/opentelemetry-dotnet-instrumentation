@@ -17,6 +17,7 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Networks;
+using static IntegrationTests.Helpers.DockerFileHelper;
 
 namespace IntegrationTests;
 
@@ -31,13 +32,13 @@ public class KafkaCollection : ICollectionFixture<KafkaFixture>
 /// </summary>
 public class KafkaFixture : IAsyncLifetime
 {
-    private const string ZooKeeperImage = "confluentinc/cp-zookeeper:latest";
-    private const string KafkaImage = "confluentinc/cp-kafka:latest";
     private const int KafkaPort = 9092;
     private const int ZookeeperClientPort = 2181;
     private const string KafkaContainerName = "integration-test-kafka";
     private const string TestNetworkName = $"{KafkaContainerName}-network";
     private const string ZookeeperContainerName = $"{KafkaContainerName}-zookeeper";
+    private static readonly string ZooKeeperImage = ReadImageFrom("zookeeper.Dockerfile");
+    private static readonly string KafkaImage = ReadImageFrom("kafka.Dockerfile");
     private IContainer? _kafkaContainer;
     private IContainer? _zooKeeperContainer;
     private INetwork? _containerNetwork;
