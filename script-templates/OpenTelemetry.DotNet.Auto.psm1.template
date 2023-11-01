@@ -25,7 +25,7 @@ function Get-Current-InstallDir() {
 function Get-Newest-InstallVersion() { 
     $query = "https://api.github.com/repos/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest"
 
-    $response = Invoke-WebRequest -Uri $query
+    $response = Invoke-WebRequest -Uri $query -UseBasicParsing
     $responseJson = $response.Content | ConvertFrom-Json
     $release = $responseJson.tag_name
 
