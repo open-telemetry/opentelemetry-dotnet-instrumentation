@@ -1,4 +1,4 @@
-// <copyright file="SqlClientMicrosoftTests.cs" company="OpenTelemetry Authors">
+// <copyright file="SqlClientSystemTests.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,24 +20,19 @@ using Xunit.Abstractions;
 namespace IntegrationTests;
 
 [Collection(SqlServerCollection.Name)]
-public class SqlClientMicrosoftTests : TestHelper
+public class SqlClientSystemTests : TestHelper
 {
     private readonly SqlServerFixture _sqlServerFixture;
 
-    public SqlClientMicrosoftTests(ITestOutputHelper output, SqlServerFixture sqlServerFixture)
-        : base("SqlClient.Microsoft", output)
+    public SqlClientSystemTests(ITestOutputHelper output, SqlServerFixture sqlServerFixture)
+        : base("SqlClient.System", output)
     {
         _sqlServerFixture = sqlServerFixture;
     }
 
     public static IEnumerable<object[]> GetData()
     {
-#if NETFRAMEWORK
-        // 3.1.2 is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243
-        return LibraryVersion.SqlClientMicrosoft.Where(x => x.First().ToString() != "3.1.2");
-#else
-        return LibraryVersion.SqlClientMicrosoft;
-#endif
+        return LibraryVersion.SqlClientSystem;
     }
 
     [Theory]

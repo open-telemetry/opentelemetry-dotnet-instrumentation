@@ -9,6 +9,9 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Added support for [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient/)
+  (NuGet package) traces instrumentation from `4.8.5`.
+- Ability to update installation via PS module (`OpenTelemetry.DotNet.Auto.psm1`).
 - Added support for `KAFKA` traces instrumentation.
 
 ### Changed
@@ -18,10 +21,20 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - .NET Framework only, `Grpc.Core.Api` updated from `2.57.0` to `2.58.0`.
 - .NET only, `OpenTelemetry.Instrumentation.EntityFrameworkCore` updated
   from `1.0.0-beta.7` to `1.0.0-beta.8`.
+- .NET only, `OpenTelemetry.Instrumentation.AspNetCore` updated
+  from `1.5.1-beta.1` to `1.6.0-beta.2`.
+- `OpenTelemetry.Instrumentation.GrpcNetClient`,
+  `OpenTelemetry.Instrumentation.Http`,
+  and `OpenTelemetry.Instrumentation.SqlClient` updated from `1.5.1-beta.1` to `1.6.0-beta.2`.
+- .NET only, `OpenTelemetry.Instrumentation.StackExchangeRedis` updated
+  from `1.0.0-rc9.10` to `1.0.0-rc9.12`.
 
 ### Deprecated
 
 ### Removed
+
+- Removed support for `OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreMetricsInstrumentationOptions`
+  for plugins.
 
 ### Fixed
 

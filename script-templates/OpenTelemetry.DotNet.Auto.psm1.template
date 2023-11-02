@@ -22,6 +22,16 @@ function Get-Current-InstallDir() {
     return [System.Environment]::GetEnvironmentVariable($ServiceLocatorVariable, [System.EnvironmentVariableTarget]::Machine)
 }
 
+function Get-Newest-InstallVersion() { 
+    $query = "https://api.github.com/repos/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest"
+
+    $response = Invoke-WebRequest -Uri $query -UseBasicParsing
+    $responseJson = $response.Content | ConvertFrom-Json
+    $release = $responseJson.tag_name
+
+    return $release
+}
+
 function Get-CLIInstallDir-From-InstallDir([string]$InstallDir) {
     $dir = "OpenTelemetry .NET AutoInstrumentation"
     
@@ -62,6 +72,16 @@ function Download-OpenTelemetry([string]$Version, [string]$Path) {
     $archive = "opentelemetry-dotnet-instrumentation-windows.zip"
     $dlUrl = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/$Version/$archive"
     $dlPath = Join-Path $Path $archive
+
+    Invoke-WebRequest -Uri $dlUrl -OutFile $dlPath -UseBasicParsing
+
+    return $dlPath
+}
+
+function Download-OpenTelemetry-Install-Module([string]$Version, [string]$Path) {
+    $module = "OpenTelemetry.DotNet.Auto.psm1"
+    $dlUrl = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/$Version/$module"
+    $dlPath = Join-Path $Path $module
 
     Invoke-WebRequest -Uri $dlUrl -OutFile $dlPath -UseBasicParsing
 
@@ -206,6 +226,44 @@ function Test-AssemblyNotForGAC([string] $Name) {
     return $false 
 }
 
+function Is-Greater-Version($v1, $v2) {
+    # Helper convert version main part to version object
+    function ToVersion($version) {
+        return ($version -replace '^v' -replace '-.+$') -as [version]
+    }
+
+    # Helper convert version pre part to version object
+    function RankPre($version) {
+        # $null is full release
+        $rank = "alpha", "beta", "rc", $null
+        $ranked = $null
+
+        if ($version -match "^v\d+\.\d+\.\d+?(\-(?<pre>[\w\.]+))") {
+            $token = $matches['pre'].split('.')[0]
+            $ranked = $matches['pre'] -replace $token, $rank.IndexOf($token)
+        }
+        else {
+            $ranked = $rank.IndexOf($null)
+            $ranked = "$($ranked).0"
+        }
+
+        return $ranked -as [version]
+    }
+
+    $v1Version = ToVersion $v1
+    $v2Version = ToVersion $v2
+
+    if ($v1Version -gt $v2Version) { return $true }
+    if ($v1Version -lt $v2Version) { return $false }
+
+    $v1PreRank = RankPre $v1
+    $v2PreRank = RankPre $v2
+
+    if ($v1PreRank -gt $v2PreRank) { return $true }
+
+    return $false;
+}
+
 <#
     .SYNOPSIS
     Installs OpenTelemetry .NET Automatic Instrumentation.
@@ -306,6 +364,52 @@ function Uninstall-OpenTelemetryCore() {
 
     # Remove OTel service locator variable
     [System.Environment]::SetEnvironmentVariable($ServiceLocatorVariable, $null, [System.EnvironmentVariableTarget]::Machine)
+}
+
+<#
+    .SYNOPSIS
+    Update OpenTelemetry .NET Automatic Instrumentation.
+    .PARAMETER RegisterIIS
+    Registers IIS 
+#>
+function Update-OpenTelemetryCore() {
+    param(
+        [Parameter(Mandatory = $false)]
+        [bool]$RegisterIIS = $false
+    )
+
+    $currentInstallVersion = Get-OpenTelemetryInstallVersion
+    if (-not $currentInstallVersion) {
+        return
+    }
+
+    $newestInstallVersion = Get-Newest-InstallVersion
+    if (-not(Is-Greater-Version $newestInstallVersion $currentInstallVersion)) {
+        Write-Warning "Newest version of OpenTelemetry .NET Automatic Instrumentation is already installed."
+
+        return
+    }
+
+    Write-Information -MessageData "Updating OpenTelemetry .NET Automatic Instrumentation from $($currentInstallVersion) to $($newestInstallVersion)." -InformationAction Continue
+
+    $currentInstallPath = Get-Current-InstallDir
+
+    Uninstall-OpenTelemetryCore
+    if ($RegisterIIS) {
+        Unregister-OpenTelemetryForIIS -NoReset $true
+    }
+
+    Prepare-Install-Directory $currentInstallPath
+
+    $modulePath = Download-OpenTelemetry-Install-Module $newestInstallVersion $currentInstallPath
+
+    Remove-Module OpenTelemetry.Dotnet.Auto
+    Import-Module $modulePath
+
+    Install-OpenTelemetryCore
+    if ($RegisterIIS) {
+        Register-OpenTelemetryForIIS
+    }
 }
 
 <#
@@ -414,12 +518,22 @@ function Unregister-OpenTelemetryForCurrentSession() {
 <#
     .SYNOPSIS
     Removes IIS environment variables to disable automatic instrumentation.
-    Performs IIS reset after removal.
+    Performs IIS reset after removal by default.
+    .PARAMETER NoReset
+    Does not perform IIS reset.
 #>
 function Unregister-OpenTelemetryForIIS() {
+    param(
+        [Parameter(Mandatory = $false)]
+        [bool]$NoReset = $false
+    )
+
     Remove-Windows-Service -WindowsServiceName "W3SVC"
     Remove-Windows-Service -WindowsServiceName "WAS"
-    Reset-IIS
+
+    if (-not $NoReset) {
+        Reset-IIS
+    }
 }
 
 <#
@@ -453,12 +567,28 @@ function Get-OpenTelemetryInstallDirectory() {
     Write-Warning "OpenTelemetry .NET Automatic Instrumentation is not installed."
 }
 
+<#
+    .SYNOPSIS
+    Gets OpenTelemetry .NET Automatic Instrumentation install version. 
+#>
+function Get-OpenTelemetryInstallVersion() {
+    $installDir = Get-OpenTelemetryInstallDirectory
+
+    if ($installDir) {
+        $mainDllPath = [IO.Path]::Combine($installDir, 'net', 'OpenTelemetry.AutoInstrumentation.dll')
+
+        return "v" + ([System.Diagnostics.FileVersionInfo]::GetVersionInfo($mainDllPath).ProductVersion).split('+', 2)[0]
+    }
+}
+
 Export-ModuleMember -Function Install-OpenTelemetryCore
 Export-ModuleMember -Function Register-OpenTelemetryForIIS
 Export-ModuleMember -Function Register-OpenTelemetryForWindowsService
 Export-ModuleMember -Function Register-OpenTelemetryForCurrentSession
 Export-ModuleMember -Function Uninstall-OpenTelemetryCore
+Export-ModuleMember -Function Update-OpenTelemetryCore
 Export-ModuleMember -Function Unregister-OpenTelemetryForIIS
 Export-ModuleMember -Function Unregister-OpenTelemetryForWindowsService
 Export-ModuleMember -Function Unregister-OpenTelemetryForCurrentSession
 Export-ModuleMember -Function Get-OpenTelemetryInstallDirectory
+Export-ModuleMember -Function Get-OpenTelemetryInstallVersion

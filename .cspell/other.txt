@@ -51,6 +51,7 @@ TMPDIR
 tracesexporter
 unencrypted
 UNENCRYPTEDSUPPORT
+uninstallation
 unregistration
 vcpkg
 WCFCLIENT
