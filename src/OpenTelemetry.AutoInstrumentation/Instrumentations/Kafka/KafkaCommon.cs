@@ -64,7 +64,7 @@ internal static class KafkaCommon
         Activity activity,
         string operationName,
         string? topic,
-        IPartition? partition,
+        Partition partition,
         object? key,
         IClientName client)
     {
@@ -81,9 +81,6 @@ internal static class KafkaCommon
             activity.SetTag(MessagingAttributes.Keys.Kafka.MessageKey, key);
         }
 
-        if (partition is not null)
-        {
-            activity.SetTag(MessagingAttributes.Keys.Kafka.Partition, partition.Value);
-        }
+        activity.SetTag(MessagingAttributes.Keys.Kafka.Partition, partition.Value);
     }
 }

@@ -19,5 +19,5 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
 // wraps https://github.com/confluentinc/confluent-kafka-dotnet/blob/D/src/Confluent.Kafka/ConsumerBuilder.cs
 internal interface IConsumerBuilder
 {
-    public IEnumerable<KeyValuePair<string, string>> Config { get; set; }
+    public IEnumerable<KeyValuePair<string, string>>? Config { get; set; }
 }

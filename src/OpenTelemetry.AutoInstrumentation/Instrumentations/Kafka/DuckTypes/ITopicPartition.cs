@@ -21,5 +21,5 @@ internal interface ITopicPartition
 {
     string? Topic { get; }
 
-    IPartition? Partition { get; }
+    Partition Partition { get; }
 }

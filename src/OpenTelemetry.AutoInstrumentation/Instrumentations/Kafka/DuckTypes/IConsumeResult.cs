@@ -23,7 +23,7 @@ internal interface IConsumeResult
 
     public string? Topic { get; set; }
 
-    public IOffset? Offset { get; set; }
+    public Offset Offset { get; set; }
 
-    public IPartition? Partition { get; set; }
+    public Partition Partition { get; set; }
 }

@@ -17,6 +17,7 @@
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
+// ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
 
@@ -36,16 +37,29 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
 public static class ConsumerConstructorIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget, TConsumerBuilder>(TTarget instance, TConsumerBuilder consumerBuilder)
-    where TConsumerBuilder : IConsumerBuilder
+    where TConsumerBuilder : IConsumerBuilder, IDuckType
     {
+        // duck type created for consumer builder is a struct
+        if (consumerBuilder.Instance is null)
+        {
+            // invalid parameters, exit early
+            return CallTargetState.GetDefault();
+        }
+
         string? consumerGroupId = null;
 
-        foreach (var keyValuePair in consumerBuilder.Config)
+        if (consumerBuilder.Config is not null)
         {
-            if (string.Equals(keyValuePair.Key, KafkaCommon.ConsumerGroupIdConfigKey, StringComparison.OrdinalIgnoreCase))
+            foreach (var keyValuePair in consumerBuilder.Config)
             {
-                consumerGroupId = keyValuePair.Value;
-                break;
+                if (string.Equals(
+                        keyValuePair.Key,
+                        KafkaCommon.ConsumerGroupIdConfigKey,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    consumerGroupId = keyValuePair.Value;
+                    break;
+                }
             }
         }
 

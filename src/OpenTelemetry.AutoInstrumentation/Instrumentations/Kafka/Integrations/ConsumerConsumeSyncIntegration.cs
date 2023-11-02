@@ -82,14 +82,12 @@ public static class ConsumerConsumeSyncIntegration
                 consumeResult.Partition,
                 consumeResult.Message?.Key,
                 instance.DuckCast<IClientName>()!);
+
+            activity.SetTag(MessagingAttributes.Keys.Kafka.PartitionOffset, consumeResult.Offset.Value);
+
             if (ConsumerCache.TryGet(instance!, out var groupId))
             {
                 activity.SetTag(MessagingAttributes.Keys.Kafka.ConsumerGroupId, groupId);
-            }
-
-            if (consumeResult.Offset is not null)
-            {
-                activity.SetTag(MessagingAttributes.Keys.Kafka.PartitionOffset, consumeResult.Offset.Value);
             }
         }
 

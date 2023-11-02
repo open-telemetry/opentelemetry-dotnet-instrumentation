@@ -20,6 +20,7 @@ using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
 using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.Context.Propagation;
+// ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
 
@@ -40,9 +41,16 @@ public static class ProducerProduceSyncIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget, TTopicPartition, TMessage, TDeliveryHandler>(
         TTarget instance, TTopicPartition topicPartition, TMessage message, TDeliveryHandler deliveryHandler)
-        where TTopicPartition : ITopicPartition
-        where TMessage : IKafkaMessage
+        where TTopicPartition : ITopicPartition, IDuckType
+        where TMessage : IKafkaMessage, IDuckType
     {
+        // duck types created for message and topicPartition are structs
+        if (message.Instance is null || topicPartition.Instance is null)
+        {
+            // invalid parameters, exit early
+            return CallTargetState.GetDefault();
+        }
+
         string? spanName = null;
         if (!string.IsNullOrEmpty(topicPartition.Topic))
         {

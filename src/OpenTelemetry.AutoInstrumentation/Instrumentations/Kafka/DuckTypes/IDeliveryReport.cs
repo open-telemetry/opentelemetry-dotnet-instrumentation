@@ -21,7 +21,7 @@ internal interface IDeliveryReport
 {
     IError? Error { get; set; }
 
-    public IPartition? Partition { get; set; }
+    public Partition Partition { get; set; }
 
-    public IOffset? Offset { get; set; }
+    public Offset Offset { get; set; }
 }
