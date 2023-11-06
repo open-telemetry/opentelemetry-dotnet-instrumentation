@@ -14,7 +14,7 @@ processors:
   batch:
 
 exporters:
-  logging:
+  debug:
     # verbosity: detailed
   file/traces:
     path: /log/otel/traces.log
@@ -41,7 +41,7 @@ service:
         - zipkin
       processors: [batch]
       exporters:
-        - logging 
+        - debug 
         - file/traces
         - otlp
     metrics:
@@ -49,7 +49,7 @@ service:
         - otlp
       processors: [batch]
       exporters:
-        - logging 
+        - debug 
         - file/metrics
         - prometheus
     logs:
@@ -57,7 +57,7 @@ service:
         - otlp
       processors: [batch]
       exporters:
-        - logging 
+        - debug 
         - file/logs
         - loki
   extensions:

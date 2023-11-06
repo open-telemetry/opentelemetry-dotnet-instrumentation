@@ -76,7 +76,7 @@ public static class LibraryVersion
         new object[] { "8.1.1" },
 #endif
     };
-    public static readonly IReadOnlyCollection<object[]> SqlClient = new List<object[]>
+    public static readonly IReadOnlyCollection<object[]> SqlClientMicrosoft = new List<object[]>
     {
 #if DEFAULT_TEST_PACKAGE_VERSIONS
         new object[] { string.Empty }
@@ -86,6 +86,14 @@ public static class LibraryVersion
         new object[] { "3.1.2" },
         new object[] { "4.1.1" },
         new object[] { "5.1.2" },
+#endif
+    };
+    public static readonly IReadOnlyCollection<object[]> SqlClientSystem = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "4.8.5" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MongoDB = new List<object[]>
@@ -151,7 +159,7 @@ public static class LibraryVersion
         new object[] { "2.1.50" },
         new object[] { "2.5.61" },
         new object[] { "2.6.66" },
-        new object[] { "2.6.122" },
+        new object[] { "2.7.4" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> WCFCoreClient = new List<object[]>

@@ -111,14 +111,14 @@ public class MyPlugin
 | OpenTelemetry.Exporter.ConsoleExporterOptions                                             | OpenTelemetry.Exporter.Console                    | 1.6.0         |
 | OpenTelemetry.Exporter.ZipkinExporterOptions                                              | OpenTelemetry.Exporter.Zipkin                     | 1.6.0         |
 | OpenTelemetry.Exporter.OtlpExporterOptions                                                | OpenTelemetry.Exporter.OpenTelemetryProtocol      | 1.6.0         |
-| OpenTelemetry.Instrumentation.AspNet.AspNetInstrumentationOptions                         | OpenTelemetry.Instrumentation.AspNet              | 1.6.0-beta.1  |
-| OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentationOptions                 | OpenTelemetry.Instrumentation.AspNetCore          | 1.5.1-beta.1  |
+| OpenTelemetry.Instrumentation.AspNet.AspNetInstrumentationOptions                         | OpenTelemetry.Instrumentation.AspNet              | 1.6.0-beta.2  |
+| OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentationOptions                 | OpenTelemetry.Instrumentation.AspNetCore          | 1.6.0-beta.2  |
 | OpenTelemetry.Instrumentation.EntityFrameworkCore.EntityFrameworkInstrumentationOptions   | OpenTelemetry.Instrumentation.EntityFrameworkCore | 1.0.0-beta.8  |
-| OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientInstrumentationOptions              | OpenTelemetry.Instrumentation.GrpcNetClient       | 1.5.1-beta.1  |
-| OpenTelemetry.Instrumentation.Http.HttpClientInstrumentationOptions                       | OpenTelemetry.Instrumentation.Http                | 1.5.1-beta.1  |
+| OpenTelemetry.Instrumentation.GrpcNetClient.GrpcClientInstrumentationOptions              | OpenTelemetry.Instrumentation.GrpcNetClient       | 1.6.0-beta.2  |
+| OpenTelemetry.Instrumentation.Http.HttpClientInstrumentationOptions                       | OpenTelemetry.Instrumentation.Http                | 1.6.0-beta.2  |
 | OpenTelemetry.Instrumentation.Quartz.QuartzInstrumentationOptions                         | OpenTelemetry.Instrumentation.Quartz              | 1.0.0-alpha.3 |
-| OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentationOptions                   | OpenTelemetry.Instrumentation.SqlClient           | 1.5.1-beta.1  |
-| OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisInstrumentationOptions | OpenTelemetry.Instrumentation.StackExchangeRedis  | 1.0.0-rc9.10  |
+| OpenTelemetry.Instrumentation.SqlClient.SqlClientInstrumentationOptions                   | OpenTelemetry.Instrumentation.SqlClient           | 1.6.0-beta.2  |
+| OpenTelemetry.Instrumentation.StackExchangeRedis.StackExchangeRedisInstrumentationOptions | OpenTelemetry.Instrumentation.StackExchangeRedis  | 1.0.0-rc9.12  |
 | OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationOptions                               | OpenTelemetry.Instrumentation.Wcf                 | 1.0.0-rc.12   |
 
 ### Metrics
@@ -129,7 +129,6 @@ public class MyPlugin
 | OpenTelemetry.Exporter.ConsoleExporterOptions                                    | OpenTelemetry.Exporter.Console                 | 1.6.0         |
 | OpenTelemetry.Exporter.PrometheusExporterOptions                                 | OpenTelemetry.Exporter.Prometheus.HttpListener | 1.6.0-rc.1    |
 | OpenTelemetry.Exporter.OtlpExporterOptions                                       | OpenTelemetry.Exporter.OpenTelemetryProtocol   | 1.6.0         |
-| OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreMetricsInstrumentationOptions | OpenTelemetry.Instrumentation.AspNetCore       | 1.5.1-beta.1  |
 | OpenTelemetry.Instrumentation.Runtime.RuntimeInstrumentationOptions              | OpenTelemetry.Instrumentation.Runtime          | 1.5.1         |
 
 ### Logs

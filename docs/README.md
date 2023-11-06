@@ -232,6 +232,22 @@ Get-Command -Module OpenTelemetry.DotNet.Auto
 Get-Help Install-OpenTelemetryCore -Detailed
 ```
 
+Updating OpenTelemetry installation:
+
+```powershell
+# Import the previously downloaded module. After an update the module is found in the default install directory.
+# Note: It's best to use the same version of the module for installation and uninstallation to ensure proper removal.
+Import-Module "C:\Program Files\OpenTelemetry .NET AutoInstrumentation\OpenTelemetry.DotNet.Auto.psm1"
+
+# If IIS was previously registered, use RegisterIIS = $true.
+Update-OpenTelemetryCore -RegisterIIS $true
+
+# If Windows services were previously registered, these must be re-registered manually.
+Unregister-OpenTelemetryForWindowsService -WindowsServiceName MyServiceName
+Update-OpenTelemetryCore
+Register-OpenTelemetryForWindowsService -WindowsServiceName MyServiceName -OTelServiceName MyOtelServiceName
+```
+
 > **Warning**
 > The PowerShell module works only on PowerShell 5.1
 which is the one installed by default on Windows.

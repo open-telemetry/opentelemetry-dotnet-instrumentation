@@ -14,11 +14,14 @@
 // limitations under the License.
 // </copyright>
 
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using TestApplication.Shared;
 
-namespace TestApplication.SqlClient;
+namespace TestApplication.SqlClient.Microsoft;
 
+/// <summary>
+/// This test application uses SqlConnection from Microsoft.Data.SqlClient (Nuget package).
+/// </summary>
 public class Program
 {
     private const string CreateCommand = "CREATE TABLE MY_TABLE ( Id int, Value1 varchar(255), Value2 varchar(255) )";
@@ -30,7 +33,8 @@ public class Program
     {
         ConsoleHelper.WriteSplashScreen(args);
 
-        const string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Connect Timeout=30;TrustServerCertificate=True;";
+        (string databasePassword, string databasePort) = ParseArgs(args);
+        var connectionString = GetConnectionString(databasePassword, databasePort);
 
         using (var connection = new SqlConnection(connectionString))
         {
@@ -127,5 +131,20 @@ public class Program
     private static async Task ExecuteDropAsync(SqlConnection connection)
     {
         await ExecuteCommandAsync(DropCommand, connection);
+    }
+
+    private static string GetConnectionString(string databasePassword, string databasePort)
+    {
+        return $"Server=127.0.0.1,{databasePort};User=sa;Password={databasePassword};TrustServerCertificate=True;";
+    }
+
+    private static (string DatabasePassword, string Port) ParseArgs(IReadOnlyList<string> args)
+    {
+        if (args?.Count != 2)
+        {
+            throw new ArgumentException($"{nameof(TestApplication.SqlClient)}: requires two command-line arguments: <dbPassword> <dbPort>");
+        }
+
+        return (DatabasePassword: args[0], Port: args[1]);
     }
 }

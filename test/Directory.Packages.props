@@ -4,7 +4,7 @@
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.18.0" />
     <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.10.0" />
     <PackageVersion Include="FluentAssertions" Version="6.12.0" />
-    <PackageVersion Include="Google.Protobuf" Version="3.24.4" />
+    <PackageVersion Include="Google.Protobuf" Version="3.25.0" />
     <PackageVersion Include="GraphQL" Version="7.6.1" />
     <PackageVersion Include="GraphQL.MicrosoftDI" Version="7.6.1" />
     <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="7.6.0" />
@@ -39,9 +39,10 @@
     <PackageVersion Include="Quartz" Version="3.7.0" />
     <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.7.0" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.7.0" />
-    <PackageVersion Include="StackExchange.Redis" Version="2.6.122" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.7.4" />
     <PackageVersion Include="StrongNamer" Version="0.2.5" />
     <PackageVersion Include="System.Collections.Immutable" Version="7.0.0" />
+    <PackageVersion Include="System.Data.SqlClient" Version="4.8.5" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="7.0.2" />
     <PackageVersion Include="System.Reactive" Version="6.0.0" />
     <PackageVersion Include="System.Runtime.InteropServices" Version="4.3.0" />
@@ -51,7 +52,7 @@
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
     <PackageVersion Include="Testcontainers" Version="3.5.0" />
     <PackageVersion Include="Verify.Xunit" Version="20.8.2" />
-    <PackageVersion Include="xunit" Version="2.5.3" />
+    <PackageVersion Include="xunit" Version="2.6.1" />
     <PackageVersion Include="xunit.abstractions" Version="2.0.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.3" />
     <PackageVersion Include="Xunit.SkippableFact" Version="1.4.13" />

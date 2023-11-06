@@ -18,7 +18,7 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
     const USHORT auto_major = atoi(AUTO_MAJOR);
 
     assembly_version_redirect_map_.insert({
-        { L"Google.Protobuf", {3, 24, 4, 0} },
+        { L"Google.Protobuf", {3, 25, 0, 0} },
         { L"Grpc.Core", {2, 0, 0, 0} },
         { L"Grpc.Core.Api", {2, 0, 0, 0} },
         { L"Microsoft.Bcl.AsyncInterfaces", {7, 0, 0, 0} },
@@ -44,8 +44,8 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"OpenTelemetry.Exporter.Prometheus.HttpListener", {1, 0, 0, 0} },
         { L"OpenTelemetry.Exporter.Zipkin", {1, 0, 0, 0} },
         { L"OpenTelemetry.Extensions.Propagators", {1, 0, 0, 0} },
-        { L"OpenTelemetry.Instrumentation.AspNet", {1, 6, 0, 1} },
-        { L"OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule", {1, 6, 0, 1} },
+        { L"OpenTelemetry.Instrumentation.AspNet", {1, 6, 0, 2} },
+        { L"OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule", {1, 6, 0, 2} },
         { L"OpenTelemetry.Instrumentation.GrpcNetClient", {1, 0, 0, 0} },
         { L"OpenTelemetry.Instrumentation.Http", {1, 0, 0, 0} },
         { L"OpenTelemetry.Instrumentation.Process", {0, 5, 0, 3} },
