@@ -31,7 +31,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - .NET Framework only, `OpenTelemetry.Instrumentation.AspNet` and
   `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule` updated from
   `1.6.0-beta.1` to `1.6.0-beta.2`.
--  `OpenTelemetry.Instrumentation.Wcf` updated from `1.0.0-rc.12` to `1.0.0-rc.13`.
+- `OpenTelemetry.Instrumentation.Wcf` updated from `1.0.0-rc.12` to `1.0.0-rc.13`.
 
 ### Deprecated
 
