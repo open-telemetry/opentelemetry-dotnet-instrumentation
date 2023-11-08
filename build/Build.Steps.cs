@@ -126,6 +126,7 @@ partial class Build
     Target CompileManagedTests => _ => _
         .Description("Compiles the managed code in the test directory")
         .After(CompileManagedSrc)
+        .After(CompileNativeDependenciesForManagedTests)
         .Executes(() =>
         {
             var testApps = Solution.GetCrossPlatformTestApplications();
@@ -225,6 +226,12 @@ partial class Build
                         s => s.SetFramework(TestTargetFramework)));
             }
         });
+
+    Target CompileNativeDependenciesForManagedTests => _ => _
+        .Description("Compiles the native dependencies for testing applications")
+        .DependsOn(CompileNativeDependenciesForManagedTestsWindows)
+        .DependsOn(CompileNativeDependenciesForManagedTestsLinux)
+        .DependsOn(CompileNativeDependenciesForManagedTestsMacOs);
 
     Target CompileNativeSrc => _ => _
         .Description("Compiles the native loader")

@@ -7,6 +7,7 @@ public static class ProjectsHelper
     private const string NativeProjectMarker = "Native"; // Contains word Native
     private const string TestsProjectMarker = "Tests"; // Ends with word Tests
     private const string NetFrameworkMarker = ".NetFramework"; // Ends with word .NetFramework
+    private const string NativeDepMarker = ".NativeDep"; // Ends with word .NativeDep
 
     private const string CoreProjectSelector = "OpenTelemetry.AutoInstrumentation*";
     private const string TestApplicationSelector = "TestApplication.*";
@@ -85,6 +86,11 @@ public static class ProjectsHelper
         return solution.GetProjectByName(Projects.Mocks.AutoInstrumentationMock);
     }
 
+    public static Project GetContinuousProfilerNativeDep(this Solution solution)
+    {
+        return solution.GetProjectByName(Projects.Tests.Applications.ContinuousProfilerNativeDep);
+    }
+
     public static IEnumerable<Project> GetNetFrameworkOnlyTestApplications(this Solution solution)
     {
         return solution
@@ -96,7 +102,8 @@ public static class ProjectsHelper
     {
         return solution
             .GetIntegrationTestApplications()
-            .Where(x => !x.Name.EndsWith(NetFrameworkMarker));
+            .Where(x => !x.Name.EndsWith(NetFrameworkMarker))
+            .Where(x => !x.Name.EndsWith(NativeDepMarker));
     }
 
     public static Project GetNativeTestProject(this Solution solution)
