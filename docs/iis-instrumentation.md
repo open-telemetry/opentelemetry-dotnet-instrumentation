@@ -24,12 +24,12 @@ the debug-level tracer logs will show that no ReJIT's (bytecode rewriting) have
 occurred. See this [issue](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2934#issuecomment-1746669737)
 for further details.
 
-> **Warning**
+> [!WARNING]
 > `Register-OpenTelemetryForIIS` performs IIS restart.
 
 ## Configuration
 
-> **Note**
+> [!NOTE]
 > Remember to restart IIS after making configuration changes.
 > You can do it by executing `iisreset.exe`.
 
