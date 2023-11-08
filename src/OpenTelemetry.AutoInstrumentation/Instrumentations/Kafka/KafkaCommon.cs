@@ -16,7 +16,6 @@
 
 using System.Diagnostics;
 using System.Text;
-using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka;
@@ -24,19 +23,11 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka;
 internal static class KafkaCommon
 {
     public const string ConsumerGroupIdConfigKey = "group.id";
-    private static readonly Type HeadersType;
-
-    static KafkaCommon()
-    {
-        HeadersType = Type.GetType("Confluent.Kafka.Headers, Confluent.Kafka")!;
-    }
 
     public static ActivitySource Source { get; } = new("OpenTelemetry.AutoInstrumentation.Kafka");
 
     public static void MessageHeaderValueSetter(IKafkaMessage msg, string key, string val)
     {
-        msg.Headers ??= Activator.CreateInstance(HeadersType).DuckCast<IHeaders>();
-
         msg.Headers?.Remove(key);
         msg.Headers?.Add(key, Encoding.UTF8.GetBytes(val));
     }

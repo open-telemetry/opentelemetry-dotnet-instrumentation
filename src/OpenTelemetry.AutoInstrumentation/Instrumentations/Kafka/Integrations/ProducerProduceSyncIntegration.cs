@@ -41,26 +41,26 @@ public static class ProducerProduceSyncIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget, TTopicPartition, TMessage, TDeliveryHandler>(
         TTarget instance, TTopicPartition topicPartition, TMessage message, TDeliveryHandler deliveryHandler)
-        where TTopicPartition : ITopicPartition, IDuckType
         where TMessage : IKafkaMessage, IDuckType
     {
-        // duck types created for message and topicPartition are structs
-        if (message.Instance is null || topicPartition.Instance is null)
+        // duck type created for message is a struct
+        if (message.Instance is null || topicPartition is null || !topicPartition.TryDuckCast<ITopicPartition>(out var duckTypedTopicPartition))
         {
             // invalid parameters, exit early
             return CallTargetState.GetDefault();
         }
 
         string? spanName = null;
-        if (!string.IsNullOrEmpty(topicPartition.Topic))
+        if (!string.IsNullOrEmpty(duckTypedTopicPartition.Topic))
         {
-            spanName = $"{topicPartition.Topic} {MessagingAttributes.Values.PublishOperationName}";
+            spanName = $"{duckTypedTopicPartition.Topic} {MessagingAttributes.Values.PublishOperationName}";
         }
 
         spanName ??= MessagingAttributes.Values.PublishOperationName;
         var activity = KafkaCommon.Source.StartActivity(name: spanName, ActivityKind.Producer);
         if (activity is not null)
         {
+            message.Headers ??= MessageHeadersHelper<TTopicPartition>.Create();
             Propagators.DefaultTextMapPropagator.Inject<IKafkaMessage>(
                 new PropagationContext(activity.Context, Baggage.Current),
                 message,
@@ -71,8 +71,8 @@ public static class ProducerProduceSyncIntegration
                 KafkaCommon.SetCommonAttributes(
                     activity,
                     MessagingAttributes.Values.PublishOperationName,
-                    topicPartition.Topic,
-                    topicPartition.Partition,
+                    duckTypedTopicPartition.Topic,
+                    duckTypedTopicPartition.Partition,
                     message.Key,
                     instance.DuckCast<IClientName>()!);
 
@@ -115,5 +115,21 @@ public static class ProducerProduceSyncIntegration
         }
 
         return CallTargetReturn.GetDefault();
+    }
+
+    private static class MessageHeadersHelper<TTypeMarker>
+    {
+        // ReSharper disable once StaticMemberInGenericType
+        private static readonly Type HeadersType;
+
+        static MessageHeadersHelper()
+        {
+            HeadersType = typeof(TTypeMarker).Assembly.GetType("Confluent.Kafka.Headers")!;
+        }
+
+        public static IHeaders? Create()
+        {
+            return Activator.CreateInstance(HeadersType).DuckCast<IHeaders>();
+        }
     }
 }
