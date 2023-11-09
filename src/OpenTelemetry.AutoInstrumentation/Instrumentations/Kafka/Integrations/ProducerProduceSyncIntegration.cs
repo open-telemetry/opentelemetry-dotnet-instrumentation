@@ -74,7 +74,7 @@ public static class ProducerProduceSyncIntegration
                     duckTypedTopicPartition.Topic,
                     duckTypedTopicPartition.Partition,
                     message.Key,
-                    instance.DuckCast<IClientName>()!);
+                    instance.DuckCast<IClientName>());
 
                 activity.SetTag(MessagingAttributes.Keys.Kafka.IsTombstone, message.Value is null);
             }

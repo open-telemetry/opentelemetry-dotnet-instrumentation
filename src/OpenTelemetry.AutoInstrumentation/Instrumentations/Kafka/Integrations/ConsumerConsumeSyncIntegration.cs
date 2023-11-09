@@ -81,7 +81,7 @@ public static class ConsumerConsumeSyncIntegration
                 consumeResult.Topic,
                 consumeResult.Partition,
                 consumeResult.Message?.Key,
-                instance.DuckCast<IClientName>()!);
+                instance.DuckCast<IClientName>());
 
             activity.SetTag(MessagingAttributes.Keys.Kafka.PartitionOffset, consumeResult.Offset.Value);
 
