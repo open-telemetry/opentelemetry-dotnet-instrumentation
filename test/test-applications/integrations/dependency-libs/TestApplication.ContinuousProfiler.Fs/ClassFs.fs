@@ -22,5 +22,5 @@ open System.Threading;
 module ClassFs =
     let methodFs testParam =
         Console.WriteLine("Thread.Sleep - starting " + testParam)
-        Thread.Sleep(TimeSpan.FromSeconds(6))
+        Thread.Sleep(TimeSpan.FromSeconds(2))
         Console.WriteLine("Thread.Sleep - finished")
