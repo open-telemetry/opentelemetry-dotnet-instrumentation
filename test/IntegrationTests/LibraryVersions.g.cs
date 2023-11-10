@@ -169,7 +169,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "4.10.2" },
-        new object[] { "6.1.0" },
+        new object[] { "6.2.0" },
 #endif
     };
 }
