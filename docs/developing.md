@@ -196,7 +196,7 @@ You can also find the exported telemetry in `dev/log` directory.
 
 ### Instrument an application
 
-> **Warning**
+> [!WARNING]
 > Make sure to build and prepare the test environment beforehand.
 
 You can reuse [`instrument.sh`](../instrument.sh) to export profiler
@@ -250,7 +250,7 @@ To update set of the version modify [`PackageVersionDefinitions.cs`](../tools/Li
 execute [`LibraryVersionsGenerator`](../tools/LibraryVersionsGenerator/LibraryVersionsGenerator.csproj),
 and commit generated files.
 
-> **Note**
+> [!NOTE]
 > `TestApplication.AspNet.NetFramework` is an exception to this strategy
 > as it would not work well, because of multiple dependent packages.
 > `TestApplication.AspNet.NetFramework` references the latest versions

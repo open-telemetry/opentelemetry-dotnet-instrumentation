@@ -1,6 +1,6 @@
 # Log to trace correlation
 
-> **Note**
+> [!NOTE]
 > Automatic log to trace correlation provided by OpenTelemetry .NET Automatic Instrumentation
 > currently works only for .NET applications using `Microsoft.Extensions.Logging`.
 > See [#2310](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2310)

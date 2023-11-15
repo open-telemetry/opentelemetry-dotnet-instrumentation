@@ -18,6 +18,7 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using FluentAssertions;
+using Google.Protobuf;
 using IntegrationTests.Helpers;
 using OpenTelemetry.Proto.Trace.V1;
 using Xunit.Abstractions;
@@ -51,16 +52,18 @@ public class WcfIISTests : TestHelper
         var netTcpPort = TcpPortProvider.GetOpenPort();
         var httpPort = TcpPortProvider.GetOpenPort();
 
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server, "Server 1");
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && !IndicatesHealthCheckRequest(span), "Server 1");
         // filtering by name required, because client instrumentation creates some additional spans, e.g for connection registration
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client && span.Name == "http://opentelemetry.io/StatusService/Ping", "Client 1");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server, "Server 2");
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && !IndicatesHealthCheckRequest(span), "Server 2");
         collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client && span.Name == "http://opentelemetry.io/StatusService/Ping", "Client 2");
+
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "AspNet Server 1");
 
         collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom parent");
         collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom sibling");
 
-        collector.ExpectCollected(WcfClientInstrumentation.ValidateExpectedSpanHierarchy);
+        collector.ExpectCollected(ValidateExpectedSpanHierarchy);
 
         var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
         _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
@@ -73,6 +76,23 @@ public class WcfIISTests : TestHelper
         });
 
         collector.AssertExpectations();
+    }
+
+    private static bool IndicatesHealthCheckRequest(Span span)
+    {
+        return span.Attributes.Single(attr => attr.Key == "rpc.method").Value.StringValue == string.Empty;
+    }
+
+    private static bool ValidateExpectedSpanHierarchy(ICollection<MockSpansCollector.Collected> collectedSpans)
+    {
+        var wcfServerSpans = collectedSpans.Where(collected =>
+            collected.Span.Kind == Span.Types.SpanKind.Server &&
+            collected.InstrumentationScopeName == "OpenTelemetry.Instrumentation.Wcf");
+        var aspNetServerSpan = collectedSpans.Single(collected =>
+            collected.Span.Kind == Span.Types.SpanKind.Server &&
+            collected.InstrumentationScopeName == "OpenTelemetry.Instrumentation.AspNet.Telemetry");
+        var aspNetParentedWcfServerSpans = wcfServerSpans.Count(sp => sp.Span.ParentSpanId == aspNetServerSpan.Span.SpanId);
+        return aspNetParentedWcfServerSpans == 1 && WcfClientInstrumentation.ValidateExpectedSpanHierarchy(collectedSpans);
     }
 
     private async Task<IContainer> StartContainerAsync(int netTcpPort, int httpPort)

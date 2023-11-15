@@ -17,7 +17,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Dependency updates
 
-- .NET Framework only, `Grpc.Core.Api` updated from `2.57.0` to `2.58.0`.
+- .NET Framework only, `Grpc.Core.Api` updated from `2.57.0` to `2.59.0`.
 - .NET only, `OpenTelemetry.Instrumentation.EntityFrameworkCore` updated
   from `1.0.0-beta.7` to `1.0.0-beta.8`.
 - .NET only, `OpenTelemetry.Instrumentation.AspNetCore` updated
@@ -31,6 +31,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - .NET Framework only, `OpenTelemetry.Instrumentation.AspNet` and
   `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule` updated from
   `1.6.0-beta.1` to `1.6.0-beta.2`.
+- `OpenTelemetry.Instrumentation.Wcf` updated from `1.0.0-rc.12` to `1.0.0-rc.13`.
 
 ### Deprecated
 

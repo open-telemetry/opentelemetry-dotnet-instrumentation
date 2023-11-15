@@ -19,7 +19,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "12.13.0" },
-        new object[] { "12.18.0" },
+        new object[] { "12.19.1" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Elasticsearch = new List<object[]>
@@ -64,7 +64,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.52.0" },
-        new object[] { "2.58.0" },
+        new object[] { "2.59.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MassTransit = new List<object[]>
@@ -138,7 +138,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.1.5" },
+        new object[] { "8.1.6" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> Quartz = new List<object[]>
@@ -168,7 +168,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "4.10.2" },
-        new object[] { "6.1.0" },
+        new object[] { "6.2.0" },
 #endif
     };
 }

@@ -7,7 +7,7 @@ to .NET applications without having to modify their source code.
 
 ---
 
-> **Warning**
+> [!WARNING]
 > The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
 ([1.1.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
@@ -86,7 +86,7 @@ Supported processor architectures are:
 - x86
 - AMD64 (x86-64)
 
-> **Note**
+> [!NOTE]
 > ARM architectures are not supported yet,
 > see [#2181](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2181).
 
@@ -119,7 +119,7 @@ or `--runtime` is used when running the command.
 Download and extract the appropriate binaries from
 [the latest release](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest).
 
-> **Note**
+> [!NOTE]
 > The path where you put the binaries is referenced as `$INSTALL_DIR`
 
 ### Instrument a .NET application
@@ -147,7 +147,7 @@ When running your application, make sure to:
 | `DOTNET_STARTUP_HOOKS`     | .NET                | `$INSTALL_DIR/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll`      |
 | `OTEL_DOTNET_AUTO_HOME`    | All versions        | `$INSTALL_DIR`                                                            |
 
-> **Note**
+> [!NOTE]
 > Some settings can be omitted on .NET. For more information, see [config.md](config.md#net-clr-profiler).
 
 ### Shell scripts
@@ -155,7 +155,7 @@ When running your application, make sure to:
 You can install OpenTelemetry .NET Automatic Instrumentation
 and instrument your .NET application using the provided Shell scripts.
 
-> **Note**
+> [!NOTE]
 > On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
 
 Example usage:
@@ -248,7 +248,7 @@ Update-OpenTelemetryCore
 Register-OpenTelemetryForWindowsService -WindowsServiceName MyServiceName -OTelServiceName MyOtelServiceName
 ```
 
-> **Warning**
+> [!WARNING]
 > The PowerShell module works only on PowerShell 5.1
 which is the one installed by default on Windows.
 

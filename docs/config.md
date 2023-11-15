@@ -305,7 +305,7 @@ Important environment variables include:
 
 **Status**: [Experimental](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/versioning-and-stability.md)
 
-> **Warning**
+> [!WARNING]
 > **Do NOT use in production.**
 >
 > Prometheus exporter is intended for the inner dev loop.
