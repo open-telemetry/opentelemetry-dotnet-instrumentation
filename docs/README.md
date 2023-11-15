@@ -96,8 +96,8 @@ CI tests run against the following operating systems:
 - [CentOS 7](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/centos-build.dockerfile)
   (.NET 8 is not supported)
 - [macOS Big Sur 11](https://github.com/actions/runner-images/blob/main/images/macos/macos-11-Readme.md)
-- [Microsoft Windows Server 2022](https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md)
-- [Ubuntu 20.04 LTS](https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2004-Readme.md)
+- [Microsoft Windows Server 2022](https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md)
+- [Ubuntu 20.04 LTS](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2004-Readme.md)
 
 ### Instrumented libraries and frameworks
 
