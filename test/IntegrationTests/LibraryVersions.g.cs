@@ -29,6 +29,7 @@ public static class LibraryVersion
 #else
         new object[] { "8.0.0" },
         new object[] { "8.10.0" },
+        new object[] { "8.11.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> EntityFrameworkCore = new List<object[]>
@@ -73,7 +74,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.1.1" },
+        new object[] { "8.1.2" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> SqlClientMicrosoft = new List<object[]>
@@ -111,7 +112,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.0.0" },
-        new object[] { "2.2.7" },
+        new object[] { "2.3.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MySqlData = new List<object[]>
