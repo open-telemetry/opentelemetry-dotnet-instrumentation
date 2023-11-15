@@ -46,7 +46,7 @@ jobs:
           name: bin-windows-2022
           path: bin/ci-artifacts/bin-windows-2022
 
-      - name: Download ubuntu Artifacts from build job
+      - name: Download Ubuntu Artifacts from build job
         uses: actions/download-artifact@v3.0.2
         with:
           name: bin-ubuntu-20.04
