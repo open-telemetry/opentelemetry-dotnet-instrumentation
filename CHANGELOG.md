@@ -9,6 +9,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Add support for .NET 8.
 - Added support for [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient/)
   (NuGet package) traces instrumentation from `4.8.5`.
 - Ability to update installation via PS module (`OpenTelemetry.DotNet.Auto.psm1`).
@@ -46,7 +47,6 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
-- Add support for .NET 8.
 - Added support for `Elastic.Transport` traces instrumentation 0.4.16+.
   `Elastic.Clients.Elasticsearch` 8.10.0+ traces instrumentation is covered by
   `Elastic.Transport` traces instrumentation.
