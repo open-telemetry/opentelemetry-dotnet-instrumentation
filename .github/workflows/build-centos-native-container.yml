@@ -20,7 +20,6 @@ jobs:
     - name: Build native library in Docker container
       run: |
         set -e
-        rm global.json
         docker build -t mybuildimage -f "./docker/centos.dockerfile" ./docker
         docker run -e OS_TYPE=linux-glibc --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
           /bin/sh -c 'git config --global --add safe.directory /project && ./build.sh BuildNativeWorkflow'
