@@ -1,7 +1,7 @@
 ﻿[
   /AdditionalDeps/shared/Microsoft.NETCore.App/6.0.0/OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
   /AdditionalDeps/shared/Microsoft.NETCore.App/7.0.0/OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
-  /AdditionalDeps/shared/Microsoft.NETCore.App/8.0.0-rc.2.23479.6/OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
+  /AdditionalDeps/shared/Microsoft.NETCore.App/8.0.0/OpenTelemetry.AutoInstrumentation.AdditionalDeps.deps.json,
   /LICENSE,
   /instrument.sh,
   /linux-musl-x64/OpenTelemetry.AutoInstrumentation.Native.so,
