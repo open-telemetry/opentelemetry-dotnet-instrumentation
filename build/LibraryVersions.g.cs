@@ -103,7 +103,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.0.0"),
-                new("2.2.7"),
+                new("2.3.0"),
             }
         },
         {
