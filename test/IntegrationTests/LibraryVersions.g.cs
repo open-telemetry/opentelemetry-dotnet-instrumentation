@@ -29,6 +29,7 @@ public static class LibraryVersion
 #else
         new object[] { "8.0.0" },
         new object[] { "8.10.0" },
+        new object[] { "8.11.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> EntityFrameworkCore = new List<object[]>
