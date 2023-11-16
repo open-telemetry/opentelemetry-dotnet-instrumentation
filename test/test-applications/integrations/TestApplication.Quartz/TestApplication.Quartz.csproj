@@ -12,8 +12,6 @@
     <PackageReference Include="Quartz" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="Quartz.Extensions.DependencyInjection" VersionOverride="$(LibraryVersion)" />
     <PackageReference Include="Quartz.Extensions.Hosting" VersionOverride="$(LibraryVersion)" />
-    <!-- Microsoft.Extensions.Hosting 7.0.1 is referencing System.Diagnostics.DiagnosticSource 7.0.1. Minimal supported version is 7.0.2 -->
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
 </Project>
