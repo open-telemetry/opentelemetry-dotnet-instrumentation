@@ -20,7 +20,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("12.13.0"),
-                new("12.19.0"),
+                new("12.19.1"),
             }
         },
         {
@@ -29,6 +29,7 @@ public static class LibraryVersion
             {
                 new("8.0.0"),
                 new("8.10.0"),
+                new("8.11.0"),
             }
         },
         {
@@ -68,7 +69,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.0.0"),
-                new("8.1.1"),
+                new("8.1.2"),
             }
         },
         {
@@ -93,8 +94,7 @@ public static class LibraryVersion
             "TestApplication.MongoDB",
             new List<PackageBuildInfo>
             {
-                new("2.13.3"),
-                new("2.15.0"),
+                new("2.19.0"),
                 new("2.22.0"),
             }
         },
@@ -103,7 +103,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.0.0"),
-                new("2.2.7"),
+                new("2.3.0"),
             }
         },
         {
@@ -154,7 +154,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("4.10.2"),
-                new("6.1.0"),
+                new("6.2.0"),
             }
         },
     };

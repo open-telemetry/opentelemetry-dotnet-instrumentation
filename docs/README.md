@@ -94,9 +94,10 @@ CI tests run against the following operating systems:
 
 - [Alpine](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/alpine.dockerfile)
 - [CentOS 7](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/centos-build.dockerfile)
+  (.NET 8 is not supported)
 - [macOS Big Sur 11](https://github.com/actions/runner-images/blob/main/images/macos/macos-11-Readme.md)
-- [Microsoft Windows Server 2022](https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md)
-- [Ubuntu 20.04 LTS](https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2004-Readme.md)
+- [Microsoft Windows Server 2022](https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md)
+- [Ubuntu 20.04 LTS](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2004-Readme.md)
 
 ### Instrumented libraries and frameworks
 
@@ -109,7 +110,7 @@ See [config.md#instrumented-libraries-and-frameworks](config.md#instrumented-lib
 Instrumenting [`self-contained`](https://learn.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained)
 applications is supported through [NuGet packages](./using-the-nuget-packages.md).
 Note that a `self-contained` application is
-automatically generated in .NET 7.0 whenever the `dotnet publish` or `dotnet build`
+automatically generated in .NET 7+ whenever the `dotnet publish` or `dotnet build`
 command is used with a Runtime Identifier (RID) parameter, for example when `-r`
 or `--runtime` is used when running the command.
 

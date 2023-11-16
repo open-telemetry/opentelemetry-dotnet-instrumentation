@@ -23,6 +23,7 @@ using LogRecord = OpenTelemetry.Proto.Logs.V1.LogRecord;
 
 #if NETFRAMEWORK
 using System.Net;
+using System.Net.Http;
 using FluentAssertions.Extensions;
 using IntegrationTests.Helpers.Compatibility;
 #endif

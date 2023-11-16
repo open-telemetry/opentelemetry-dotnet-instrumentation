@@ -1,10 +1,10 @@
 <Project>
   <Import Project="..\Directory.Packages.props" />
   <ItemGroup>
-    <PackageVersion Include="Azure.Storage.Blobs" Version="12.19.0" />
-    <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.10.0" />
+    <PackageVersion Include="Azure.Storage.Blobs" Version="12.19.1" />
+    <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.11.0" />
     <PackageVersion Include="FluentAssertions" Version="6.12.0" />
-    <PackageVersion Include="Google.Protobuf" Version="3.25.0" />
+    <PackageVersion Include="Google.Protobuf" Version="3.25.1" />
     <PackageVersion Include="GraphQL" Version="7.6.1" />
     <PackageVersion Include="GraphQL.MicrosoftDI" Version="7.6.1" />
     <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="7.6.0" />
@@ -12,7 +12,7 @@
     <PackageVersion Include="Grpc.Net.Client" Version="2.59.0" />
     <PackageVersion Include="Grpc.Net.Client.Web" Version="2.59.0" />
     <PackageVersion Include="Grpc.Tools" Version="2.51.0" />
-    <PackageVersion Include="MassTransit" Version="8.1.1" />
+    <PackageVersion Include="MassTransit" Version="8.1.2" />
     <PackageVersion Include="Microsoft.AspNetCore" Version="2.2.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageVersion Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
@@ -20,15 +20,15 @@
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="15.9.20" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.1.2" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.13" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
-    <PackageVersion Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="8.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageVersion Include="MongoDB.Driver" Version="2.22.0" />
     <PackageVersion Include="NSubstitute" Version="5.1.0" />
-    <PackageVersion Include="MySqlConnector" Version="2.2.7" />
+    <PackageVersion Include="MySqlConnector" Version="2.3.0" />
     <PackageVersion Include="MySql.Data" Version="8.2.0" />
     <PackageVersion Include="NServiceBus" Version="8.1.6" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
@@ -41,16 +41,16 @@
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.7.0" />
     <PackageVersion Include="StackExchange.Redis" Version="2.7.4" />
     <PackageVersion Include="StrongNamer" Version="0.2.5" />
-    <PackageVersion Include="System.Collections.Immutable" Version="7.0.0" />
+    <PackageVersion Include="System.Collections.Immutable" Version="8.0.0" />
     <PackageVersion Include="System.Data.SqlClient" Version="4.8.5" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="7.0.2" />
     <PackageVersion Include="System.Reactive" Version="6.0.0" />
     <PackageVersion Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageVersion Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
-    <PackageVersion Include="System.ServiceModel.Http" Version="6.1.0" />
-    <PackageVersion Include="System.ServiceModel.NetTcp" Version="6.1.0" />
+    <PackageVersion Include="System.ServiceModel.Http" Version="6.2.0" />
+    <PackageVersion Include="System.ServiceModel.NetTcp" Version="6.2.0" />
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
-    <PackageVersion Include="Testcontainers" Version="3.5.0" />
+    <PackageVersion Include="Testcontainers" Version="3.6.0" />
     <PackageVersion Include="Verify.Xunit" Version="20.8.2" />
     <PackageVersion Include="xunit" Version="2.6.1" />
     <PackageVersion Include="xunit.abstractions" Version="2.0.3" />
