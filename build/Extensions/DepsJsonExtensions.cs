@@ -125,7 +125,7 @@ internal static class DepsJsonExtensions
 
     public static void RemoveDuplicatedLibraries(this JsonObject depsJson, ReadOnlyCollection<AbsolutePath> architectureStores)
     {
-        var duplicatedLibraries = new List<(string Name, string Version)> { (Name: "Microsoft.Extensions.Logging.Abstractions", Version: "7.0.0") };
+        var duplicatedLibraries = new List<(string Name, string Version)>();
 
         foreach (var duplicatedLibrary in duplicatedLibraries)
         {
