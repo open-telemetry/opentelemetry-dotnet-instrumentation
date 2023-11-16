@@ -94,8 +94,7 @@ public static class LibraryVersion
             "TestApplication.MongoDB",
             new List<PackageBuildInfo>
             {
-                new("2.13.3"),
-                new("2.15.0"),
+                new("2.19.0"),
                 new("2.22.0"),
             }
         },

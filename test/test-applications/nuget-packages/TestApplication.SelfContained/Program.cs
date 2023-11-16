@@ -14,6 +14,10 @@
 // limitations under the License.
 // </copyright>
 
+#if NETFRAMEWORK
+using System.Net.Http;
+#endif
+
 var httpClient = new HttpClient();
 httpClient.Timeout = TimeSpan.FromSeconds(5);
 var response = await httpClient.GetAsync("http://example.com");

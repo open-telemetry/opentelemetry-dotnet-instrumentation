@@ -48,9 +48,11 @@ partial class Build
     };
 
     private static readonly IEnumerable<TargetFramework> TestFrameworks = TargetFrameworks
-        .Concat(new[] {
-            TargetFramework.NET7_0
-        });
+        .Concat(TargetFramework.NET7_0
+#if  NET8_0_OR_GREATER
+            , TargetFramework.NET8_0
+#endif
+            );
 
     Target CreateRequiredDirectories => _ => _
         .Unlisted()
@@ -99,8 +101,8 @@ partial class Build
             {
                 // Projects using `packages.config` can't be restored via "dotnet restore", use a NuGet Task to restore these projects.
                 var legacyRestoreProjects = Solution.GetNativeProjects()
-                    .Concat(new[] { Solution.GetProjectByName(Projects.Tests.Applications.AspNet) })
-                    .Concat(new[] { Solution.GetProjectByName(Projects.Tests.Applications.WcfIis) });
+                    .Concat(Solution.GetProjectByName(Projects.Tests.Applications.AspNet))
+                    .Concat(Solution.GetProjectByName(Projects.Tests.Applications.WcfIis));
 
                 RestoreLegacyNuGetPackagesConfig(legacyRestoreProjects);
             }
@@ -532,12 +534,16 @@ partial class Build
                     depsJson.RemoveDuplicatedLibraries(architectureStores);
                     depsJson.RemoveOpenTelemetryLibraries();
 
+                    // To allow roll forward for applications, like Roslyn, that target one tfm
+                    // but have a later runtime move the libraries under the original tfm folder
+                    // to the latest one.
                     if (folderRuntimeName == TargetFramework.NET6_0)
                     {
-                        // To allow roll forward for applications, like Roslyn, that target one tfm
-                        // but have a later runtime move the libraries under the original tfm folder
-                        // to the latest one.
-                        depsJson.RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET7_0, architectureStores);
+                        depsJson.RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET8_0, architectureStores);
+                    }
+                    else if (folderRuntimeName == TargetFramework.NET7_0 || folderRuntimeName == TargetFramework.NET8_0)
+                    {
+                        depsJson.RollFrameworkForward(TargetFramework.NET7_0, TargetFramework.NET8_0, architectureStores);
                     }
 
                     // Write the updated deps.json file.
