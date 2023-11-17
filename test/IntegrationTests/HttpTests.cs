@@ -99,7 +99,7 @@ public class HttpTests : TestHelper
 
         RunTestApplication();
 
-        collector.AssertExpectations(TimeSpan.FromSeconds(3));
+        collector.AssertExpectations();
     }
 }
 #endif
