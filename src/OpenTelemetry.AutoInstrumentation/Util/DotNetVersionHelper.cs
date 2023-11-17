@@ -1,4 +1,4 @@
-// <copyright file="Program.cs" company="OpenTelemetry Authors">
+// <copyright file="DotNetVersionHelper.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +14,11 @@
 // limitations under the License.
 // </copyright>
 
-#if NETFRAMEWORK
-using System.Net.Http;
-#endif
+namespace OpenTelemetry.AutoInstrumentation.Util;
+#if NET6_0_OR_GREATER
 
-var httpClient = new HttpClient();
-httpClient.Timeout = TimeSpan.FromSeconds(5);
-var response = await httpClient.GetAsync("http://example.com");
-Console.WriteLine(response.StatusCode);
+internal static class DotNetVersionHelper
+{
+    public static int DotNetMajorVersion { get; } = typeof(object).Assembly.GetName().Version?.Major ?? 0;
+}
+#endif

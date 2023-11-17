@@ -18,6 +18,7 @@ using System.Runtime.CompilerServices;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
+using OpenTelemetry.AutoInstrumentation.Util;
 using OpenTelemetry.Metrics;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
@@ -103,8 +104,17 @@ internal static class EnvironmentConfigurationMetricHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static MeterProviderBuilder AddHttpClientInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-            DelayedInitialization.Metrics.AddHttpClient(lazyInstrumentationLoader);
+#if NET6_0_OR_GREATER
+            if (DotNetVersionHelper.DotNetMajorVersion >= 8)
+            {
+                // HTTP has build in support for metrics in .NET8. Executing OpenTelemetry.Instrumentation.Http in this case leads to duplicated metrics.
+                return builder
+                    .AddMeter("System.Net.Http")
+                    .AddMeter("System.Net.NameResolution");
+            }
+#endif
 
+            DelayedInitialization.Metrics.AddHttpClient(lazyInstrumentationLoader);
             return builder.AddMeter("OpenTelemetry.Instrumentation.Http");
         }
 

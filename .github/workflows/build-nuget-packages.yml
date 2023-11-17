@@ -29,8 +29,9 @@ jobs:
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
-            6.0.416
-            7.0.403
+            6.0.417
+            7.0.404
+            8.0.100
 
       - name: Check for NuGet packages cache
         uses: actions/cache@v3.3.1
@@ -45,11 +46,11 @@ jobs:
           name: bin-windows-2022
           path: bin/ci-artifacts/bin-windows-2022
 
-      - name: Download CentOS Artifacts from build job
+      - name: Download Ubuntu Artifacts from build job
         uses: actions/download-artifact@v3.0.2
         with:
-          name: bin-centos
-          path: bin/ci-artifacts/bin-centos
+          name: bin-ubuntu-20.04
+          path: bin/ci-artifacts/bin-ubuntu-20.04
 
       - name: Download Alpine Artifacts from build job
         uses: actions/download-artifact@v3.0.2

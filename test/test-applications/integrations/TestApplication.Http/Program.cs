@@ -37,8 +37,9 @@ public class Program
         var server = (IServer?)host.Services.GetService(typeof(IServer));
         var addressFeature = server?.Features.Get<IServerAddressesFeature>();
         var address = addressFeature?.Addresses.First();
+        var dnsAddress = address?.Replace("127.0.0.1", "localhost"); // needed to force DNS resolution to test metrics
         using var httpClient = new HttpClient();
-        httpClient.GetAsync($"{address}/test").Wait();
+        httpClient.GetAsync($"{dnsAddress}/test").Wait();
     }
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>

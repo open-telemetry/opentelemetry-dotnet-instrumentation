@@ -9,6 +9,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- Add support for .NET 8.
 - Added support for [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient/)
   (NuGet package) traces instrumentation from `4.8.5`.
 - Ability to update installation via PS module (`OpenTelemetry.DotNet.Auto.psm1`).
@@ -18,7 +19,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Dependency updates
 
-- .NET Framework only, `Grpc.Core.Api` updated from `2.57.0` to `2.58.0`.
+- .NET Framework only, `Grpc.Core.Api` updated from `2.57.0` to `2.59.0`.
 - .NET only, `OpenTelemetry.Instrumentation.EntityFrameworkCore` updated
   from `1.0.0-beta.7` to `1.0.0-beta.8`.
 - .NET only, `OpenTelemetry.Instrumentation.AspNetCore` updated
@@ -28,11 +29,28 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   and `OpenTelemetry.Instrumentation.SqlClient` updated from `1.5.1-beta.1` to `1.6.0-beta.2`.
 - .NET only, `OpenTelemetry.Instrumentation.StackExchangeRedis` updated
   from `1.0.0-rc9.10` to `1.0.0-rc9.12`.
-- .NET Framework only, `Google.Protobuf` updated from `3.24.4` to `3.25.0`.
+- .NET Framework only, `Google.Protobuf` updated from `3.24.4` to `3.25.1`.
 - .NET Framework only, `OpenTelemetry.Instrumentation.AspNet` and
   `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule` updated from
   `1.6.0-beta.1` to `1.6.0-beta.2`.
 - `OpenTelemetry.Instrumentation.Wcf` updated from `1.0.0-rc.12` to `1.0.0-rc.13`.
+- .NET Framework only, following packages updated
+  - `Microsoft.Bcl.AsyncInterfaces` from `7.0.0` to `8.0.0`,
+  - `Microsoft.Extensions.Configuration` from `7.0.0` to `8.0.0`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `7.0.0` to `8.0.0`,
+  - `Microsoft.Extensions.Configuration.Binder` from `7.0.4` to `8.0.0`,
+  - `Microsoft.Extensions.DependencyInjection` from `7.0.0` to `8.0.0`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions` from `7.0.0` to `8.0.0`,
+  - `Microsoft.Extensions.Logging` from `7.0.0` to `8.0.0`,
+  - `Microsoft.Extensions.Options` from `7.0.1` to `8.0.0`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions` from `7.0.0` to `8.0.0`,
+  - `Microsoft.Extensions.Primitives` from `7.0.0` to `8.0.0`,
+  - `System.Text.Encodings.Web` from `7.0.0` to `8.0.0`,
+  - `System.Text.Json` from `7.0.3` to `8.0.0`.
+- Following packages updated
+  - `Microsoft.Extensions.Logging.Abstractions` from `7.0.1` to `8.0.0`,
+  - `Microsoft.Extensions.Logging.Configuration` from `7.0.0` to `8.0.0`,
+  - `System.Diagnostics.DiagnosticSource` from `7.0.2` to `8.0.0`.
 
 ### Deprecated
 

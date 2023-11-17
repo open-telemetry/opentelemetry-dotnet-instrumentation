@@ -11,15 +11,16 @@ jobs:
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
-            6.0.416
-            7.0.403
+            6.0.417
+            7.0.404
+            8.0.100
       - name: Test the PowerShell module instructions from README.md
         shell: powershell
         run: |
           mkdir testapp
           cd testapp
           dotnet new console
-          dotnet publish -f net7.0 -c Release
+          dotnet publish -f net8.0 -c Release
           $module_url = "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/OpenTelemetry.DotNet.Auto.psm1"
           $dl_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
           $log_path = "C:\ProgramData\OpenTelemetry .NET AutoInstrumentation\logs\*"
@@ -28,12 +29,12 @@ jobs:
           Install-OpenTelemetryCore
           $install_dir = Get-OpenTelemetryInstallDirectory
           Register-OpenTelemetryForCurrentSession -OTelServiceName "MyServiceDisplayName"
-          ./bin/Release/net7.0/publish/testapp
+          ./bin/Release/net8.0/publish/testapp
           if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
           if (-not (Test-Path $log_path)) { throw "Log file does not exist. Instrumentation test failed." }
           Remove-Item $log_path
           Unregister-OpenTelemetryForCurrentSession
-          ./bin/Release/net7.0/publish/testapp
+          ./bin/Release/net8.0/publish/testapp
           if (-not $?) { throw "dotnet help returned exit code: $LASTEXITCODE" }
           if (Test-Path $log_path) { throw "Log file exists. Instrumentation unregister failed." }
           Uninstall-OpenTelemetryCore
@@ -55,8 +56,9 @@ jobs:
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
-            6.0.416
-            7.0.403
+            6.0.417
+            7.0.404
+            8.0.100
       - run: brew install coreutils
         if: ${{ runner.os == 'macOS' }}
       - name: Create test directory
@@ -69,13 +71,13 @@ jobs:
           mkdir testapp
           cd testapp
           dotnet new console
-          dotnet publish -f net7.0 -c Release
+          dotnet publish -f net8.0 -c Release
           curl -sSfL https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/otel-dotnet-auto-install.sh -O
           sh ./otel-dotnet-auto-install.sh
             test "$(ls -A "$HOME/.otel-dotnet-auto")"
           curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
           . ./instrument.sh
-          ./bin/Release/net7.0/publish/testapp
+          ./bin/Release/net8.0/publish/testapp
             test "$(ls -A '${{ matrix.log-dir }}' )"
 
   shell-scripts-container:
@@ -95,12 +97,12 @@ jobs:
             mkdir testapp
             cd testapp
             dotnet new console
-            dotnet publish -f net7.0 -c Release
+            dotnet publish -f net8.0 -c Release
             curl -sSfL https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/otel-dotnet-auto-install.sh -O
             sh ./otel-dotnet-auto-install.sh
               test "$(ls -A "$HOME/.otel-dotnet-auto")"
             curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
             . ./instrument.sh
-            ./bin/Release/net7.0/publish/testapp
+            ./bin/Release/net8.0/publish/testapp
               test "$(ls -A /var/log/opentelemetry/dotnet )"
           '

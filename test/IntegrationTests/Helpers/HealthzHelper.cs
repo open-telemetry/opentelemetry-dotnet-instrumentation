@@ -15,6 +15,9 @@
 // </copyright>
 
 using System.Net;
+#if NETFRAMEWORK
+using System.Net.Http;
+#endif
 using Xunit.Abstractions;
 
 namespace IntegrationTests.Helpers;

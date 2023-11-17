@@ -7,7 +7,7 @@ to .NET applications without having to modify their source code.
 
 ---
 
-> **Warning**
+> [!WARNING]
 > The following documentation refers to the in-development version
 of OpenTelemetry .NET Automatic Instrumentation. Docs for the latest version
 ([1.1.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest))
@@ -86,7 +86,7 @@ Supported processor architectures are:
 - x86
 - AMD64 (x86-64)
 
-> **Note**
+> [!NOTE]
 > ARM architectures are not supported yet,
 > see [#2181](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2181).
 
@@ -94,9 +94,10 @@ CI tests run against the following operating systems:
 
 - [Alpine](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/alpine.dockerfile)
 - [CentOS 7](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docker/centos-build.dockerfile)
+  (.NET 8 is not supported)
 - [macOS Big Sur 11](https://github.com/actions/runner-images/blob/main/images/macos/macos-11-Readme.md)
-- [Microsoft Windows Server 2022](https://github.com/actions/runner-images/blob/main/images/win/Windows2022-Readme.md)
-- [Ubuntu 20.04 LTS](https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2004-Readme.md)
+- [Microsoft Windows Server 2022](https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md)
+- [Ubuntu 20.04 LTS](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2004-Readme.md)
 
 ### Instrumented libraries and frameworks
 
@@ -109,7 +110,7 @@ See [config.md#instrumented-libraries-and-frameworks](config.md#instrumented-lib
 Instrumenting [`self-contained`](https://learn.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained)
 applications is supported through [NuGet packages](./using-the-nuget-packages.md).
 Note that a `self-contained` application is
-automatically generated in .NET 7.0 whenever the `dotnet publish` or `dotnet build`
+automatically generated in .NET 7+ whenever the `dotnet publish` or `dotnet build`
 command is used with a Runtime Identifier (RID) parameter, for example when `-r`
 or `--runtime` is used when running the command.
 
@@ -118,7 +119,7 @@ or `--runtime` is used when running the command.
 Download and extract the appropriate binaries from
 [the latest release](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest).
 
-> **Note**
+> [!NOTE]
 > The path where you put the binaries is referenced as `$INSTALL_DIR`
 
 ### Instrument a .NET application
@@ -146,7 +147,7 @@ When running your application, make sure to:
 | `DOTNET_STARTUP_HOOKS`     | .NET                | `$INSTALL_DIR/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll`      |
 | `OTEL_DOTNET_AUTO_HOME`    | All versions        | `$INSTALL_DIR`                                                            |
 
-> **Note**
+> [!NOTE]
 > Some settings can be omitted on .NET. For more information, see [config.md](config.md#net-clr-profiler).
 
 ### Shell scripts
@@ -154,7 +155,7 @@ When running your application, make sure to:
 You can install OpenTelemetry .NET Automatic Instrumentation
 and instrument your .NET application using the provided Shell scripts.
 
-> **Note**
+> [!NOTE]
 > On macOS [`coreutils`](https://formulae.brew.sh/formula/coreutils) is required.
 
 Example usage:
@@ -247,7 +248,7 @@ Update-OpenTelemetryCore
 Register-OpenTelemetryForWindowsService -WindowsServiceName MyServiceName -OTelServiceName MyOtelServiceName
 ```
 
-> **Warning**
+> [!WARNING]
 > The PowerShell module works only on PowerShell 5.1
 which is the one installed by default on Windows.
 

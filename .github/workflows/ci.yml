@@ -12,11 +12,15 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 jobs:
-  build:
-    uses: ./.github/workflows/build.yml
-
   build-container:
     uses: ./.github/workflows/build-container.yml
+
+  build-centos-native:
+    uses: ./.github/workflows/build-centos-native-container.yml
+
+  build:
+    needs: build-centos-native
+    uses: ./.github/workflows/build.yml
 
   build-nuget-packages:
     needs: [ build, build-container ]
@@ -27,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-tfm: [ net7.0, net6.0, net462 ]
+        test-tfm: [ net8.0, net7.0, net6.0, net462 ]
         machine: [ windows-2022, ubuntu-20.04, macos-11 ]
         exclude:
           - test-tfm: net462
@@ -49,8 +53,9 @@ jobs:
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
-            6.0.416
-            7.0.403
+            6.0.417
+            7.0.404
+            8.0.100
       - name: Check for NuGet packages cache
         uses: actions/cache@v3.3.1
         id: nuget-cache
@@ -94,8 +99,9 @@ jobs:
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
-            6.0.416
-            7.0.403
+            6.0.417
+            7.0.404
+            8.0.100
       - name: Check for NuGet packages cache
         uses: actions/cache@v3.3.1
         id: nuget-cache
@@ -125,8 +131,9 @@ jobs:
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
-            6.0.416
-            7.0.403
+            6.0.417
+            7.0.404
+            8.0.100
       - name: Check for NuGet packages cache
         uses: actions/cache@v3.3.1
         id: nuget-cache
@@ -150,7 +157,7 @@ jobs:
           path: test-artifacts/
 
   test-build-container:
-    needs: build-container
+    needs: [build, build-container]
     strategy:
       fail-fast: false
       matrix:
@@ -159,10 +166,10 @@ jobs:
             build-source: alpine
             os-type: linux-musl
           - base-image: centos
-            build-source: centos
+            build-source: ubuntu-20.04
             os-type: linux-glibc
           - base-image: debian
-            build-source: centos
+            build-source: ubuntu-20.04
             os-type: linux-glibc
     runs-on: ubuntu-20.04
     timeout-minutes: 60
@@ -199,8 +206,9 @@ jobs:
       - uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: | 
-            6.0.416
-            7.0.403
+            6.0.417
+            7.0.404
+            8.0.100
       - name: Check for NuGet packages cache
         uses: actions/cache@v3.3.1
         id: nuget-cache
