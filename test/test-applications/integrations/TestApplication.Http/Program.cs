@@ -45,9 +45,8 @@ public class Program
         var address = addressFeature?.Addresses.First();
         var dnsAddress = address?.Replace("127.0.0.1", "localhost"); // needed to force DNS resolution to test metrics
         using var httpClient = new HttpClient();
-        httpClient.GetAsync($"{dnsAddress}/exception").Wait();
         httpClient.GetAsync($"{dnsAddress}/test").Wait();
-
+        httpClient.GetAsync($"{dnsAddress}/exception").Wait();
 #if NET8_0_OR_GREATER
         var hubConnection = new HubConnectionBuilder().WithUrl($"{dnsAddress}/signalr").Build();
         hubConnection.StartAsync().Wait();
