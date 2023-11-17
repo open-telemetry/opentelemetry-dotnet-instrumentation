@@ -107,7 +107,9 @@ internal static class EnvironmentConfigurationMetricHelper
 #if NET6_0_OR_GREATER
             if (DotNetVersionHelper.DotNetMajorVersion >= 8)
             {
-                return builder.AddMeter("System.Net.Http")
+                // HTTP has build in support for metrics in .NET8. Executing OpenTelemetry.Instrumentation.Http in this case leads to duplicated metrics.
+                return builder
+                    .AddMeter("System.Net.Http")
                     .AddMeter("System.Net.NameResolution");
             }
 #endif
