@@ -74,13 +74,13 @@ public static class ProducerProduceSyncIntegration
                     duckTypedTopicPartition.Topic,
                     duckTypedTopicPartition.Partition,
                     message.Key,
-                    instance.DuckCast<IClientName>());
+                    instance.DuckCast<INamedClient>());
 
                 activity.SetTag(MessagingAttributes.Keys.Kafka.IsTombstone, message.Value is null);
             }
 
             // Store as state information if delivery handler was set
-            return new CallTargetState(activity, deliveryHandler is null);
+            return new CallTargetState(activity, deliveryHandler);
         }
 
         return CallTargetState.GetDefault();
@@ -100,7 +100,7 @@ public static class ProducerProduceSyncIntegration
         }
 
         // If delivery handler was not set, stop the activity
-        if (state.State is true)
+        if (state.State is null)
         {
             activity.Stop();
         }

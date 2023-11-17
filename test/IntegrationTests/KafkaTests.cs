@@ -65,7 +65,7 @@ public class KafkaTests : TestHelper
     {
         var kafkaMessageOffset = span.Attributes.Single(kv => kv.Key == "messaging.kafka.message.offset").Value.IntValue;
         var consumerGroupId = span.Attributes.Single(kv => kv.Key == "messaging.kafka.consumer.group").Value.StringValue;
-        return ValidateCommonTags(span.Attributes, topicName, "rdkafka#consumer-2", "process", 0) &&
+        return ValidateCommonTags(span.Attributes, topicName, "rdkafka#consumer-2", "receive", 0) &&
                kafkaMessageOffset == messageOffset &&
                consumerGroupId == $"test-consumer-group-{topicName}";
     }
@@ -97,7 +97,7 @@ public class KafkaTests : TestHelper
 
     private static bool ValidatePropagation(ICollection<MockSpansCollector.Collected> collectedSpans, string topicName)
     {
-        var expectedProcessOperationName = $"{topicName} process";
+        var expectedReceiveOperationName = $"{topicName} receive";
         var expectedPublishOperationName = $"{topicName} publish";
         var producerSpans = collectedSpans
             .Where(span =>
@@ -105,16 +105,24 @@ public class KafkaTests : TestHelper
                 !span.Span.Attributes.Single(attr => attr.Key == "messaging.kafka.message.tombstone").Value.BoolValue)
             .ToList();
         var firstProducerSpan = producerSpans[0].Span;
-        var firstConsumerSpan = GetMatchingConsumerSpan(collectedSpans, firstProducerSpan, expectedProcessOperationName);
+        var firstConsumerSpan = GetMatchingConsumerSpan(collectedSpans, firstProducerSpan, expectedReceiveOperationName);
         var secondProducerSpan = producerSpans[1].Span;
-        var secondConsumerSpan = GetMatchingConsumerSpan(collectedSpans, secondProducerSpan, expectedProcessOperationName);
+        var secondConsumerSpan = GetMatchingConsumerSpan(collectedSpans, secondProducerSpan, expectedReceiveOperationName);
 
-        return firstProducerSpan.SpanId == firstConsumerSpan.Span.ParentSpanId &&
-               secondProducerSpan.SpanId == secondConsumerSpan.Span.ParentSpanId;
+        return firstConsumerSpan is not null && secondConsumerSpan is not null;
     }
 
-    private static MockSpansCollector.Collected GetMatchingConsumerSpan(ICollection<MockSpansCollector.Collected> arg, Span producerSpan, string expectedProcessOperationName)
+    private static MockSpansCollector.Collected? GetMatchingConsumerSpan(ICollection<MockSpansCollector.Collected> collectedSpans, Span producerSpan, string expectedReceiveOperationName)
     {
-        return arg.Single(span => span.Span.Name == expectedProcessOperationName && span.Span.TraceId == producerSpan.TraceId);
+        return collectedSpans
+            .SingleOrDefault(span =>
+            {
+                var parentLinksCount = span.Span.Links.Count(
+                    link =>
+                        link.TraceId == producerSpan.TraceId &&
+                        link.SpanId == producerSpan.SpanId);
+                return span.Span.Name == expectedReceiveOperationName &&
+                       parentLinksCount == 1;
+            });
     }
 }

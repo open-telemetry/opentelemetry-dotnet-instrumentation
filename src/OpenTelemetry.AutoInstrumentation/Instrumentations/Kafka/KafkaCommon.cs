@@ -42,22 +42,13 @@ internal static class KafkaCommon
         return Enumerable.Empty<string>();
     }
 
-    public static void StopCurrentConsumerActivity()
-    {
-        var activity = Activity.Current;
-        if (activity is not null && activity.OperationName.EndsWith(MessagingAttributes.Values.ProcessOperationName, StringComparison.Ordinal))
-        {
-            activity.Stop();
-        }
-    }
-
     public static void SetCommonAttributes(
         Activity activity,
         string operationName,
         string? topic,
         Partition partition,
         object? key,
-        IClientName? client)
+        INamedClient? client)
     {
         activity.SetTag(MessagingAttributes.Keys.MessagingOperation, operationName);
         activity.SetTag(MessagingAttributes.Keys.MessagingSystem, MessagingAttributes.Values.KafkaMessagingSystemName);

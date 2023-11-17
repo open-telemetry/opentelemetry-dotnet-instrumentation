@@ -39,11 +39,13 @@ public static class ConsumerConsumeSyncIntegration
 {
     internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance, int timeout)
     {
-        // Attempting to consume another message marks the end
-        // of a previous message processing
-        KafkaCommon.StopCurrentConsumerActivity();
-
-        return CallTargetState.GetDefault();
+        // Preferably, activity would be started here,
+        // and link to propagated context added later;
+        // this is currently not possible, so capture start time
+        // to use it when starting activity to get approximate
+        // activity duration.
+        // TODO: accurate on .NET, but not .NET Fx
+        return new CallTargetState(null, null, DateTime.UtcNow);
     }
 
     internal static CallTargetReturn<TResponse> OnMethodEnd<TTarget, TResponse>(TTarget instance, TResponse response, Exception? exception, in CallTargetState state)
@@ -67,21 +69,26 @@ public static class ConsumerConsumeSyncIntegration
         string? spanName = null;
         if (!string.IsNullOrEmpty(consumeResult.Topic))
         {
-            spanName = $"{consumeResult.Topic} {MessagingAttributes.Values.ProcessOperationName}";
+            spanName = $"{consumeResult.Topic} {MessagingAttributes.Values.ReceiveOperationName}";
         }
 
-        spanName ??= MessagingAttributes.Values.ProcessOperationName;
-        var activity = KafkaCommon.Source.StartActivity(spanName, ActivityKind.Consumer, propagatedContext.ActivityContext);
+        spanName ??= MessagingAttributes.Values.ReceiveOperationName;
+
+        var activityLinks = propagatedContext.ActivityContext.IsValid()
+                ? new[] { new ActivityLink(propagatedContext.ActivityContext) }
+                : Array.Empty<ActivityLink>();
+        var startTime = (DateTimeOffset)state.StartTime!;
+        var activity = KafkaCommon.Source.StartActivity(name: spanName, kind: ActivityKind.Consumer, links: activityLinks, startTime: startTime);
 
         if (activity is { IsAllDataRequested: true })
         {
             KafkaCommon.SetCommonAttributes(
                 activity,
-                MessagingAttributes.Values.ProcessOperationName,
+                MessagingAttributes.Values.ReceiveOperationName,
                 consumeResult.Topic,
                 consumeResult.Partition,
                 consumeResult.Message?.Key,
-                instance.DuckCast<IClientName>());
+                instance.DuckCast<INamedClient>());
 
             activity.SetTag(MessagingAttributes.Keys.Kafka.PartitionOffset, consumeResult.Offset.Value);
 
@@ -90,6 +97,8 @@ public static class ConsumerConsumeSyncIntegration
                 activity.SetTag(MessagingAttributes.Keys.Kafka.ConsumerGroupId, groupId);
             }
         }
+
+        activity?.Stop();
 
         return new CallTargetReturn<TResponse>(response);
     }

@@ -33,13 +33,6 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
     type: InstrumentationType.Trace)]
 public static class ConsumerDisposeIntegration
 {
-    internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance)
-    {
-        // Disposing the consumer marks the end of processing a message
-        KafkaCommon.StopCurrentConsumerActivity();
-        return CallTargetState.GetDefault();
-    }
-
     internal static CallTargetReturn OnMethodEnd<TTarget>(TTarget instance, Exception? exception, in CallTargetState state)
     {
         ConsumerCache.Remove(instance!);

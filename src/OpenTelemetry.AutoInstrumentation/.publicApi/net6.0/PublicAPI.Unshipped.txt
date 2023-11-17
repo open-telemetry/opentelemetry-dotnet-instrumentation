@@ -1,7 +1,9 @@
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity? activity, object? state) -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity? activity, object? state, System.DateTimeOffset? startTime) -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.StartTime.get -> System.DateTimeOffset?
 OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerCloseIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerConstructorIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerConsumeSyncIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerDisposeIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerUnsubscribeIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ProducerDeliveryHandlerActionIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ProducerProduceSyncIntegration

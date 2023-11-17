@@ -34,5 +34,4 @@ internal static class IntegrationConstants
     public const string MessageTypeName = "Confluent.Kafka.Message`2[!0,!1]";
     public const string ActionOfDeliveryReportTypeName = "System.Action`1[Confluent.Kafka.DeliveryReport`2[!0,!1]]";
     public const string ConsumeResultTypeName = "Confluent.Kafka.ConsumeResult`2[!0,!1]";
-    public const string UnsubscribeMethodName = "Unsubscribe";
 }
