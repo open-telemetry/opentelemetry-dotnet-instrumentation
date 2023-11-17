@@ -35,6 +35,7 @@ public class MockMetricsCollector : IDisposable
 
     private readonly List<Expectation> _expectations = new();
     private readonly BlockingCollection<List<Collected>> _metricsSnapshots = new(10); // bounded to avoid memory leak; contains protobuf type
+    private Func<ICollection<Collected>, bool>? _additionalEntriesExpectation;
 
     public MockMetricsCollector(ITestOutputHelper output, string host = "localhost")
     {
@@ -67,6 +68,11 @@ public class MockMetricsCollector : IDisposable
         description ??= instrumentationScopeName;
 
         _expectations.Add(new Expectation(instrumentationScopeName, predicate, description));
+    }
+
+    public void ExpectAdditionalEntries(Func<ICollection<Collected>, bool> additionalEntriesExpectation)
+    {
+        _additionalEntriesExpectation = additionalEntriesExpectation;
     }
 
     public void AssertExpectations(TimeSpan? timeout = null)
@@ -121,6 +127,11 @@ public class MockMetricsCollector : IDisposable
 
                 if (missingExpectations.Count == 0)
                 {
+                    if (_additionalEntriesExpectation != null && !_additionalEntriesExpectation(additionalEntries))
+                    {
+                        FailAdditionalEntriesExpectation(additionalEntries);
+                    }
+
                     return;
                 }
             }
@@ -128,12 +139,12 @@ public class MockMetricsCollector : IDisposable
         catch (ArgumentOutOfRangeException)
         {
             // CancelAfter called with non-positive value
-            FailMetrics(missingExpectations, expectationsMet, additionalEntries);
+            FailExpectations(missingExpectations, expectationsMet, additionalEntries);
         }
         catch (OperationCanceledException)
         {
             // timeout
-            FailMetrics(missingExpectations, expectationsMet, additionalEntries);
+            FailExpectations(missingExpectations, expectationsMet, additionalEntries);
         }
     }
 
@@ -149,7 +160,20 @@ public class MockMetricsCollector : IDisposable
         }
     }
 
-    private static void FailMetrics(
+    private static void FailAdditionalEntriesExpectation(List<Collected> expectationsMet)
+    {
+        var message = new StringBuilder();
+        message.AppendLine("Additional entries - metrics expectation failed.");
+        message.AppendLine("Additional entries -  metrics:");
+        foreach (var line in expectationsMet)
+        {
+            message.AppendLine($"    \"{line}\"");
+        }
+
+        Assert.Fail(message.ToString());
+    }
+
+    private static void FailExpectations(
         List<Expectation> missingExpectations,
         List<Collected> expectationsMet,
         List<Collected> additionalEntries)
@@ -223,23 +247,7 @@ public class MockMetricsCollector : IDisposable
         _output.WriteLine($"[{name}]: {msg}");
     }
 
-    private class Expectation
-    {
-        public Expectation(string instrumentationScopeName, Func<Metric, bool> predicate, string? description)
-        {
-            InstrumentationScopeName = instrumentationScopeName;
-            Predicate = predicate;
-            Description = description;
-        }
-
-        public string InstrumentationScopeName { get; }
-
-        public Func<Metric, bool> Predicate { get; }
-
-        public string? Description { get; }
-    }
-
-    private class Collected
+    public class Collected
     {
         public Collected(string instrumentationScopeName, Metric metric)
         {
@@ -255,5 +263,21 @@ public class MockMetricsCollector : IDisposable
         {
             return $"InstrumentationScopeName = {InstrumentationScopeName}, Metric = {Metric}";
         }
+    }
+
+    private class Expectation
+    {
+        public Expectation(string instrumentationScopeName, Func<Metric, bool> predicate, string? description)
+        {
+            InstrumentationScopeName = instrumentationScopeName;
+            Predicate = predicate;
+            Description = description;
+        }
+
+        public string InstrumentationScopeName { get; }
+
+        public Func<Metric, bool> Predicate { get; }
+
+        public string? Description { get; }
     }
 }
