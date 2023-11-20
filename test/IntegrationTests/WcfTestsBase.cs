@@ -21,6 +21,7 @@ using Xunit.Abstractions;
 using static OpenTelemetry.Proto.Trace.V1.Span.Types;
 
 namespace IntegrationTests;
+
 public abstract class WcfTestsBase : TestHelper, IDisposable
 {
     private readonly string _testAppName;
