@@ -10,7 +10,7 @@ namespace StarWars;
 /// This is an example JSON request for a subscription
 /// {
 ///   "query": "subscription HumanAddedSub{ humanAdded { name } }",
-/// }
+/// }.
 /// </example>
 internal class StarWarsSubscription : ObjectGraphType<object>
 {

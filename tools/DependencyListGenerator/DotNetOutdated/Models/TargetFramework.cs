@@ -1,6 +1,7 @@
 using NuGet.Frameworks;
 
 namespace DependencyListGenerator.DotNetOutdated.Models;
+
 public class TargetFramework
 {
     public TargetFramework(NuGetFramework name)
