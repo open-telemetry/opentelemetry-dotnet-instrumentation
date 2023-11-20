@@ -39,7 +39,7 @@
     <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
     <PackageVersion Include="Quartz" Version="3.8.0" />
     <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.7.0" />
-    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.7.0" />
+    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.8.0" />
     <PackageVersion Include="StackExchange.Redis" Version="2.7.4" />
     <PackageVersion Include="StrongNamer" Version="0.2.5" />
     <PackageVersion Include="System.Collections.Immutable" Version="8.0.0" />
