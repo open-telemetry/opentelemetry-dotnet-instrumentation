@@ -40,7 +40,7 @@ public static class ConsumerConsumeSyncIntegration
     internal static CallTargetState OnMethodBegin<TTarget>(TTarget instance, int timeout)
     {
         // Preferably, activity would be started here,
-        // and link to propagated context added later;
+        // and link to propagated context later;
         // this is currently not possible, so capture start time
         // to use it when starting activity to get approximate
         // activity duration.
