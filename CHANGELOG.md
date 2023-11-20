@@ -24,7 +24,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - .NET only, `OpenTelemetry.Instrumentation.AspNetCore` updated
   from `1.5.1-beta.1` to `1.6.0-beta.3`.
 - `OpenTelemetry.Instrumentation.GrpcNetClient`,
-  and `OpenTelemetry.Instrumentation.Http`,
+  and `OpenTelemetry.Instrumentation.Http`
   updated from `1.5.1-beta.1` to `1.6.0-beta.3`.
 - `OpenTelemetry.Instrumentation.SqlClient` updated from `1.5.1-beta.1` to `1.6.0-beta.2`.
 - .NET only, `OpenTelemetry.Instrumentation.StackExchangeRedis` updated
