@@ -71,7 +71,7 @@ jobs:
         run: dotnet tool install --global dotnet-validate --version 0.0.1-preview.304
 
       - name: Install Meziantou.Framework.NuGetPackageValidation.Tool
-        run: dotnet tool install --global Meziantou.Framework.NuGetPackageValidation.Tool --version 1.0.12
+        run: dotnet tool install --global Meziantou.Framework.NuGetPackageValidation.Tool --version 1.0.14
 
       - name: Validate nuget packages
         shell: pwsh
