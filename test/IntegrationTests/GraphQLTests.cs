@@ -68,7 +68,9 @@ public class GraphQLTests : TestHelper
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT", setDocument.ToString());
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_INSTRUMENTATION_ENABLED", "false");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_INSTRUMENTATION_ENABLED", "false"); // disable metrics to disable side effect of AspNetCore - working propagation on .NET6 and .NET7
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_GRAPHQL_INSTRUMENTATION_ENABLED", "true");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ASPNETCORE_INSTRUMENTATION_ENABLED", "true"); // AspNetCore Instrumentation enables propagation used in this test
         SetEnvironmentVariable("OTEL_TRACES_SAMPLER", "always_on");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_NETFX_REDIRECT_ENABLED", "false");
 
@@ -110,7 +112,7 @@ public class GraphQLTests : TestHelper
     private static byte[] GetTraceIdBytes(byte id)
     {
         var traceId = new byte[16];
-        traceId[traceId.Length - 1] = id;
+        traceId[^1] = id;
 
         return traceId;
     }
@@ -120,27 +122,11 @@ public class GraphQLTests : TestHelper
         return id.ToString("x32");
     }
 
-    private static bool VerifyNotImplementedException(Span span)
-    {
-        var exceptionEvent = span.Events.SingleOrDefault();
-
-        if (exceptionEvent == null)
-        {
-            return false;
-        }
-
-        return
-            exceptionEvent.Attributes.Any(x => x.Key == "exception.type" && x.Value?.StringValue == "System.NotImplementedException") &&
-            exceptionEvent.Attributes.Any(x => x.Key == "exception.message") &&
-            exceptionEvent.Attributes.Any(x => x.Key == "exception.stacktrace");
-    }
-
     private void Expect(
         MockSpansCollector collector,
         string spanName,
         byte id,
-        bool setDocument,
-        Predicate<Span>? verifyFailure = null)
+        bool setDocument)
     {
         var traceIdBytes = GetTraceIdBytes(id);
 
@@ -150,11 +136,6 @@ public class GraphQLTests : TestHelper
             if (!traceId.SequenceEqual(traceIdBytes))
             {
                 return false;
-            }
-
-            if (verifyFailure != null)
-            {
-                return verifyFailure(span);
             }
 
             if (setDocument && !span.Attributes.Any(attr => attr.Key == "graphql.document" && !string.IsNullOrWhiteSpace(attr.Value?.StringValue)))
