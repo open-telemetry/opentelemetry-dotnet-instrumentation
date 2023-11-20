@@ -233,12 +233,12 @@ internal static class PackageVersionDefinitions
 
     internal record PackageVersionDefinition
     {
-        required public string IntegrationName { get; init; }
+        public required string IntegrationName { get; init; }
 
-        required public string NugetPackageName { get; init; }
+        public required string NugetPackageName { get; init; }
 
-        required public string TestApplicationName { get; init; }
+        public required string TestApplicationName { get; init; }
 
-        required public IReadOnlyCollection<PackageVersion> Versions { get; init; }
+        public required IReadOnlyCollection<PackageVersion> Versions { get; init; }
     }
 }
