@@ -82,12 +82,18 @@ public class HttpTests : TestHelper
     {
         using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
-        collector.Expect("OpenTelemetry.Instrumentation.AspNetCore");
 #if NET8_0_OR_GREATER
         collector.Expect("System.Net.Http");
         collector.Expect("System.Net.NameResolution");
-        collector.ExpectAdditionalEntries(x => x.All(m => m.InstrumentationScopeName != "OpenTelemetry.Instrumentation.Http"));
+        collector.Expect("Microsoft.AspNetCore.Hosting");
+        collector.Expect("Microsoft.AspNetCore.Server.Kestrel");
+        collector.Expect("Microsoft.AspNetCore.Http.Connections");
+        collector.Expect("Microsoft.AspNetCore.Routing");
+        collector.Expect("Microsoft.AspNetCore.Diagnostics");
+        collector.Expect("Microsoft.AspNetCore.RateLimiting");
+        collector.ExpectAdditionalEntries(x => x.All(m => m.InstrumentationScopeName != "OpenTelemetry.Instrumentation.AspNetCore" && m.InstrumentationScopeName != "OpenTelemetry.Instrumentation.Http"));
 #else
+        collector.Expect("OpenTelemetry.Instrumentation.AspNetCore");
         collector.Expect("OpenTelemetry.Instrumentation.Http");
 #endif
 
