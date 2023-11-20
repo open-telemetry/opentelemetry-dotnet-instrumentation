@@ -17,10 +17,8 @@
 #if NET6_0_OR_GREATER
 
 using IntegrationTests.Helpers;
-using OpenTelemetry.AutoInstrumentation;
 using OpenTelemetry.Proto.Logs.V1;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace IntegrationTests;
 
