@@ -5,7 +5,25 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.1.0..HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.2.0..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [1.2.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.2.0)
+
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.6.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.6.0)
+- `System.Diagnostics.DiagnosticSource`: [`8.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/8.0.0)
 
 ### Added
 
@@ -16,7 +34,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Changed
 
-### Dependency updates
+#### Dependency updates
 
 - .NET Framework only, `Grpc.Core.Api` updated from `2.57.0` to `2.59.0`.
 - .NET only, `OpenTelemetry.Instrumentation.EntityFrameworkCore` updated
@@ -52,14 +70,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - `Microsoft.Extensions.Logging.Configuration` from `7.0.0` to `8.0.0`,
   - `System.Diagnostics.DiagnosticSource` from `7.0.2` to `8.0.0`.
 
-### Deprecated
-
 ### Removed
 
 - Removed support for `OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreMetricsInstrumentationOptions`
   for plugins.
-
-### Fixed
 
 ## [1.1.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.1.0)
 
