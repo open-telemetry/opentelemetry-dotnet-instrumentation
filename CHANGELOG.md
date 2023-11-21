@@ -21,6 +21,10 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [1.2.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.2.0)
 
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.6.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.6.0)
+- `System.Diagnostics.DiagnosticSource`: [`8.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/8.0.0)
+
 ### Added
 
 - Add support for .NET 8.
