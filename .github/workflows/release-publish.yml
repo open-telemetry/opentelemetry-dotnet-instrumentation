@@ -84,7 +84,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        base-image: [ alpine, centos ]
+        include:
+          - base-image: alpine
+            net-version: net8.0
+          - base-image: centos
+            net-version: net7.0
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4.1.1
@@ -97,12 +101,12 @@ jobs:
             mkdir testapp
             cd testapp
             dotnet new console
-            dotnet publish -f net8.0 -c Release
+            dotnet publish -f ${{ matrix.net-version }} -c Release
             curl -sSfL https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/otel-dotnet-auto-install.sh -O
             sh ./otel-dotnet-auto-install.sh
               test "$(ls -A "$HOME/.otel-dotnet-auto")"
             curl -sSfL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/instrument.sh -O
             . ./instrument.sh
-            ./bin/Release/net8.0/publish/testapp
+            ./bin/Release/${{ matrix.net-version }}/publish/testapp
               test "$(ls -A /var/log/opentelemetry/dotnet )"
           '
