@@ -157,5 +157,13 @@ public static class LibraryVersion
                 new("6.2.0"),
             }
         },
+        {
+            "TestApplication.Kafka",
+            new List<PackageBuildInfo>
+            {
+                new("1.4.0"),
+                new("2.3.0"),
+            }
+        },
     };
 }
