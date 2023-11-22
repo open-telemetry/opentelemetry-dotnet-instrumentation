@@ -1,1 +1,1 @@
-FROM confluentinc/cp-kafka:7.5.1
+FROM confluentinc/cp-kafka:7.5.2
