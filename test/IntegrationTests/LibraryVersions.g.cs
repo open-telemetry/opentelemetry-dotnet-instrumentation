@@ -148,7 +148,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "3.4.0" },
-        new object[] { "3.7.0" },
+        new object[] { "3.8.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> StackExchangeRedis = new List<object[]>
