@@ -27,6 +27,7 @@ public readonly struct CallTargetState
     private readonly Activity? _previousActivity;
     private readonly Activity? _activity;
     private readonly object? _state;
+    private readonly DateTimeOffset? _startTime;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CallTargetState"/> struct.
@@ -37,6 +38,7 @@ public readonly struct CallTargetState
         _previousActivity = null;
         _activity = activity;
         _state = null;
+        _startTime = null;
     }
 
     /// <summary>
@@ -44,11 +46,12 @@ public readonly struct CallTargetState
     /// </summary>
     /// <param name="activity">Activity instance</param>
     /// <param name="state">Object state instance</param>
-    public CallTargetState(Activity? activity, object state)
+    public CallTargetState(Activity? activity, object? state)
     {
         _previousActivity = null;
         _activity = activity;
         _state = state;
+        _startTime = null;
     }
 
     /// <summary>
@@ -57,11 +60,12 @@ public readonly struct CallTargetState
     /// <param name="activity">Activity instance</param>
     /// <param name="state">Object state instance</param>
     /// <param name="startTime">The intended start time of the activity, intended for activities created in the OnMethodEnd handler</param>
-    public CallTargetState(Activity activity, object state, DateTimeOffset? startTime)
+    public CallTargetState(Activity? activity, object? state, DateTimeOffset? startTime)
     {
         _previousActivity = null;
         _activity = activity;
         _state = state;
+        _startTime = startTime;
     }
 
     internal CallTargetState(Activity? previousActivity, CallTargetState state)
@@ -69,6 +73,7 @@ public readonly struct CallTargetState
         _previousActivity = previousActivity;
         _activity = state._activity;
         _state = state._state;
+        _startTime = state.StartTime;
     }
 
     /// <summary>
@@ -80,6 +85,11 @@ public readonly struct CallTargetState
     /// Gets the CallTarget BeginMethod state
     /// </summary>
     public object? State => _state;
+
+    /// <summary>
+    /// Gets the start time.
+    /// </summary>
+    public DateTimeOffset? StartTime => _startTime;
 
     internal Activity? PreviousActivity => _previousActivity;
 
