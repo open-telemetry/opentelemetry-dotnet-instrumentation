@@ -96,7 +96,7 @@ internal static class EnvironmentConfigurationMetricHelper
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static MeterProviderBuilder AddAspNetCoreInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
-            if (DotNetVersionHelper.DotNetMajorVersion >= 8)
+            if (Environment.Version.Major >= 8)
             {
                 // AspNetCore has build in support for metrics in .NET8. Executing OpenTelemetry.Instrumentation.AspNetCore in this case leads to duplicated metrics.
                 return builder
@@ -117,7 +117,7 @@ internal static class EnvironmentConfigurationMetricHelper
         public static MeterProviderBuilder AddHttpClientInstrumentation(MeterProviderBuilder builder, LazyInstrumentationLoader lazyInstrumentationLoader)
         {
 #if NET6_0_OR_GREATER
-            if (DotNetVersionHelper.DotNetMajorVersion >= 8)
+            if (Environment.Version.Major >= 8)
             {
                 // HTTP has build in support for metrics in .NET8. Executing OpenTelemetry.Instrumentation.Http in this case leads to duplicated metrics.
                 return builder
