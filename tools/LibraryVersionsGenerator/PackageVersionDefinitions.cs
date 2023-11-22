@@ -217,6 +217,17 @@ internal static class PackageVersionDefinitions
                 new("4.10.2"),
                 new("*")
             }
+        },
+        new()
+        {
+            IntegrationName = "Kafka",
+            NugetPackageName = "Confluent.Kafka",
+            TestApplicationName = "TestApplication.Kafka",
+            Versions = new List<PackageVersion>
+            {
+                new("1.4.0"),
+                new("*")
+            }
         }
     };
 
