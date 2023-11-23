@@ -106,7 +106,7 @@ add_custom_command(
 
 add_custom_command(
     OUTPUT ${OUTPUT_DEPS_DIR}/fmt/libfmt.a
-    COMMAND git clone -c advice.detachedHead=false --quiet --depth 1 --branch 9.1.0 https://github.com/fmtlib/fmt.git && cd fmt && cmake -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE -DFMT_TEST=0 -DFMT_DOC=0 . && make
+    COMMAND git clone -c advice.detachedHead=false --quiet --depth 1 --branch 10.1.1 https://github.com/fmtlib/fmt.git && cd fmt && cmake -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE -DFMT_TEST=0 -DFMT_DOC=0 . && make
     WORKING_DIRECTORY ${OUTPUT_DEPS_DIR}
 )
 
