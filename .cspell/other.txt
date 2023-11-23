@@ -39,6 +39,7 @@ OPENTRACING
 OTEL_DOTNET_AUTO_FLUSH_ON_UNHANDLEDEXCEPTION
 OWIN
 pipefail
+portfile
 proto
 protobuf
 protos
