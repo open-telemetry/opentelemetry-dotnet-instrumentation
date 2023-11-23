@@ -24,11 +24,11 @@ internal class GraphQLVersion : PackageVersion
     }
 
     [PackageDependency("GraphQL.MicrosoftDI", "GraphQLMicrosoftDI")]
-    required public string MicrosoftDIVersion { get; set; }
+    public required string MicrosoftDIVersion { get; set; }
 
     [PackageDependency("GraphQL.Server.Transports.AspNetCore", "GraphQLServerTransportsAspNetCore")]
-    required public string ServerTransportsAspNetCoreVersion { get; set; }
+    public required string ServerTransportsAspNetCoreVersion { get; set; }
 
     [PackageDependency("GraphQL.Server.Ui.Playground", "GraphQLServerUIPlayground")]
-    required public string ServerUIPlayground { get; set; }
+    public required string ServerUIPlayground { get; set; }
 }

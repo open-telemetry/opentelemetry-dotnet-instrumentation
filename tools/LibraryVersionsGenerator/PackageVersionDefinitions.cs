@@ -217,17 +217,28 @@ internal static class PackageVersionDefinitions
                 new("4.10.2"),
                 new("*")
             }
+        },
+        new()
+        {
+            IntegrationName = "Kafka",
+            NugetPackageName = "Confluent.Kafka",
+            TestApplicationName = "TestApplication.Kafka",
+            Versions = new List<PackageVersion>
+            {
+                new("1.4.0"),
+                new("*")
+            }
         }
     };
 
     internal record PackageVersionDefinition
     {
-        required public string IntegrationName { get; init; }
+        public required string IntegrationName { get; init; }
 
-        required public string NugetPackageName { get; init; }
+        public required string NugetPackageName { get; init; }
 
-        required public string TestApplicationName { get; init; }
+        public required string TestApplicationName { get; init; }
 
-        required public IReadOnlyCollection<PackageVersion> Versions { get; init; }
+        public required IReadOnlyCollection<PackageVersion> Versions { get; init; }
     }
 }

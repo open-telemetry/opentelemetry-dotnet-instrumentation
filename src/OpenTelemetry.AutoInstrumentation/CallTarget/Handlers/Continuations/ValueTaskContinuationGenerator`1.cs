@@ -17,6 +17,7 @@
 #pragma warning disable SA1649 // File name must match first type name
 
 namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations;
+
 #if NET6_0_OR_GREATER
 internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn, TResult> : ContinuationGenerator<TTarget, TReturn>
 {

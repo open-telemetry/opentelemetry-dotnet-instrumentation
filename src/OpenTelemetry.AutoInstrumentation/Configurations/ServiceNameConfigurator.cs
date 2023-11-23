@@ -19,6 +19,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
+
 internal static class ServiceNameConfigurator
 {
     internal static string GetFallbackServiceName()

@@ -15,6 +15,7 @@
 // </copyright>
 
 namespace OpenTelemetry.AutoInstrumentation.CallTarget.Handlers.Continuations;
+
 #if NET6_0_OR_GREATER
 internal class ValueTaskContinuationGenerator<TIntegration, TTarget, TReturn> : ContinuationGenerator<TTarget, TReturn>
 {

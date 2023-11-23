@@ -131,4 +131,9 @@ internal enum TracerInstrumentation
     /// Elastic.Transport instrumentation.
     /// </summary>
     ElasticTransport = 19,
+
+    /// <summary>
+    /// Kafka client instrumentation
+    /// </summary>
+    Kafka = 20
 }

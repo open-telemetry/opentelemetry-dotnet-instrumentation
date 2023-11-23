@@ -13,7 +13,7 @@ namespace StarWars;
 ///       "name": "Boba Fett"
 ///     }
 ///   }
-/// }
+/// }.
 /// </example>
 public class StarWarsMutation : ObjectGraphType
 {

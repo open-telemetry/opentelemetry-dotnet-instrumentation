@@ -112,7 +112,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.0.0" },
-        new object[] { "2.3.0" },
+        new object[] { "2.3.1" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MySqlData = new List<object[]>
@@ -130,7 +130,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "6.0.0" },
-        new object[] { "7.0.6" },
+        new object[] { "8.0.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> NServiceBus = new List<object[]>
@@ -148,7 +148,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "3.4.0" },
-        new object[] { "3.7.0" },
+        new object[] { "3.8.0" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> StackExchangeRedis = new List<object[]>
@@ -170,6 +170,15 @@ public static class LibraryVersion
 #else
         new object[] { "4.10.2" },
         new object[] { "6.2.0" },
+#endif
+    };
+    public static readonly IReadOnlyCollection<object[]> Kafka = new List<object[]>
+    {
+#if DEFAULT_TEST_PACKAGE_VERSIONS
+        new object[] { string.Empty }
+#else
+        new object[] { "1.4.0" },
+        new object[] { "2.3.0" },
 #endif
     };
 }

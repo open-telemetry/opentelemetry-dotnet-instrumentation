@@ -3,6 +3,7 @@
   <ItemGroup>
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.19.1" />
     <PackageVersion Include="Elastic.Clients.Elasticsearch" Version="8.11.0" />
+    <PackageVersion Include="Confluent.Kafka" Version="2.3.0" />
     <PackageVersion Include="FluentAssertions" Version="6.12.0" />
     <PackageVersion Include="Google.Protobuf" Version="3.25.1" />
     <PackageVersion Include="GraphQL" Version="7.6.1" />
@@ -16,6 +17,7 @@
     <PackageVersion Include="Microsoft.AspNetCore" Version="2.2.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageVersion Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Build" Version="15.9.20" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="15.9.20" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.1.2" />
@@ -28,17 +30,17 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageVersion Include="MongoDB.Driver" Version="2.22.0" />
     <PackageVersion Include="NSubstitute" Version="5.1.0" />
-    <PackageVersion Include="MySqlConnector" Version="2.3.0" />
+    <PackageVersion Include="MySqlConnector" Version="2.3.1" />
     <PackageVersion Include="MySql.Data" Version="8.2.0" />
     <PackageVersion Include="NServiceBus" Version="8.1.6" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="Npgsql" Version="7.0.6" />
+    <PackageVersion Include="Npgsql" Version="8.0.0" />
     <PackageVersion Include="NuGet.Versioning" Version="6.5.0" />
     <PackageVersion Include="OpenTracing" Version="0.12.1" />
     <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
-    <PackageVersion Include="Quartz" Version="3.7.0" />
-    <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.7.0" />
-    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.7.0" />
+    <PackageVersion Include="Quartz" Version="3.8.0" />
+    <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.8.0" />
+    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.8.0" />
     <PackageVersion Include="StackExchange.Redis" Version="2.7.4" />
     <PackageVersion Include="StrongNamer" Version="0.2.5" />
     <PackageVersion Include="System.Collections.Immutable" Version="8.0.0" />
@@ -52,9 +54,9 @@
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
     <PackageVersion Include="Testcontainers" Version="3.6.0" />
     <PackageVersion Include="Verify.Xunit" Version="20.8.2" />
-    <PackageVersion Include="xunit" Version="2.6.1" />
+    <PackageVersion Include="xunit" Version="2.6.2" />
     <PackageVersion Include="xunit.abstractions" Version="2.0.3" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.4" />
     <PackageVersion Include="Xunit.SkippableFact" Version="1.4.13" />
   </ItemGroup>
 </Project>
