@@ -49,24 +49,24 @@ public class WcfIISTests : TestHelper
         SetExporter(collector);
         using var fwPort = FirewallHelper.OpenWinPort(collector.Port, Output);
 
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 1");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client, "Client 1");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 2");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client, "Client 2");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 3");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client, "Client 3");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 4");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client, "Client 4");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 5");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client, "Client 5");
-        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "Server 6");
-        collector.Expect("OpenTelemetry.AutoInstrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client, "Client 6");
+        var netTcpPort = TcpPortProvider.GetOpenPort();
+        var httpPort = TcpPortProvider.GetOpenPort();
+
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && !IndicatesHealthCheckRequest(span), "Server 1");
+        // filtering by name required, because client instrumentation creates some additional spans, e.g for connection registration
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client && span.Name == "http://opentelemetry.io/StatusService/Ping", "Client 1");
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Server && !IndicatesHealthCheckRequest(span), "Server 2");
+        collector.Expect("OpenTelemetry.Instrumentation.Wcf", span => span.Kind == Span.Types.SpanKind.Client && span.Name == "http://opentelemetry.io/StatusService/Ping", "Client 2");
+
+        collector.Expect("OpenTelemetry.Instrumentation.AspNet.Telemetry", span => span.Kind == Span.Types.SpanKind.Server && span.ParentSpanId != ByteString.Empty, "AspNet Server 1");
+
+        collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom parent");
+        collector.Expect("TestApplication.Wcf.Client.NetFramework", span => span.Kind == Span.Types.SpanKind.Internal, "Custom sibling");
+
+        collector.ExpectCollected(ValidateExpectedSpanHierarchy);
 
         var collectorUrl = $"http://{DockerNetworkHelper.IntegrationTestsGateway}:{collector.Port}";
         _environmentVariables["OTEL_EXPORTER_OTLP_ENDPOINT"] = collectorUrl;
-
-        var netTcpPort = TcpPortProvider.GetOpenPort();
-        var httpPort = TcpPortProvider.GetOpenPort();
 
         await using var container = await StartContainerAsync(netTcpPort, httpPort);
 
@@ -78,11 +78,28 @@ public class WcfIISTests : TestHelper
         collector.AssertExpectations();
     }
 
+    private static bool IndicatesHealthCheckRequest(Span span)
+    {
+        return span.Attributes.Single(attr => attr.Key == "rpc.method").Value.StringValue == string.Empty;
+    }
+
+    private static bool ValidateExpectedSpanHierarchy(ICollection<MockSpansCollector.Collected> collectedSpans)
+    {
+        var wcfServerSpans = collectedSpans.Where(collected =>
+            collected.Span.Kind == Span.Types.SpanKind.Server &&
+            collected.InstrumentationScopeName == "OpenTelemetry.Instrumentation.Wcf");
+        var aspNetServerSpan = collectedSpans.Single(collected =>
+            collected.Span.Kind == Span.Types.SpanKind.Server &&
+            collected.InstrumentationScopeName == "OpenTelemetry.Instrumentation.AspNet.Telemetry");
+        var aspNetParentedWcfServerSpans = wcfServerSpans.Count(sp => sp.Span.ParentSpanId == aspNetServerSpan.Span.SpanId);
+        return aspNetParentedWcfServerSpans == 1 && WcfClientInstrumentation.ValidateExpectedSpanHierarchy(collectedSpans);
+    }
+
     private async Task<IContainer> StartContainerAsync(int netTcpPort, int httpPort)
     {
         const string imageName = "testapplication-wcf-server-iis-netframework";
 
-        var networkId = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
+        var networkName = await DockerNetworkHelper.SetupIntegrationTestsNetworkAsync();
 
         var logPath = EnvironmentHelper.IsRunningOnCI()
             ? Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE"), "test-artifacts", "profiler-logs")
@@ -94,11 +111,12 @@ public class WcfIISTests : TestHelper
         var builder = new ContainerBuilder()
             .WithImage(imageName)
             .WithCleanUp(cleanUp: true)
-            .WithOutputConsumer(Consume.RedirectStdoutAndStderrToConsole())
-            .WithName($"{imageName}")
-            .WithNetwork(networkId, DockerNetworkHelper.IntegrationTestsNetworkName)
+            .WithName(imageName)
+            .WithNetwork(networkName)
             .WithPortBinding(netTcpPort, 808)
             .WithPortBinding(httpPort, 80)
+            .WithWaitStrategy(Wait.ForWindowsContainer().UntilHttpRequestIsSucceeded(rq
+                => rq.ForPort(80).ForPath("/StatusService.svc")))
             .WithBindMount(logPath, "c:/inetpub/wwwroot/logs");
 
         foreach (var env in _environmentVariables)
@@ -107,14 +125,15 @@ public class WcfIISTests : TestHelper
         }
 
         var container = builder.Build();
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
         try
         {
-            var wasStarted = container.StartAsync().Wait(TimeSpan.FromMinutes(5));
-            wasStarted.Should().BeTrue($"Container based on {imageName} has to be operational for the test.");
+            await container.StartAsync(cts.Token);
             Output.WriteLine("Container was started successfully.");
         }
         catch
         {
+            Output.WriteLine("Container failed to start in a required time frame.");
             await container.DisposeAsync();
             throw;
         }

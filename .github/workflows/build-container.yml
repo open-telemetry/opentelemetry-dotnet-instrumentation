@@ -1,0 +1,48 @@
+name: Build on Containers
+
+on:
+  workflow_call:
+
+env:
+  NUGET_PACKAGES: ${{ github.workspace }}/packages
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+jobs:
+  build-container:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - base-image: alpine
+            os-type: linux-musl
+    runs-on: ubuntu-20.04
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v4.1.1
+      with:
+        fetch-depth: 0 # fetching all, needed to correctly calculate version
+    - name: Build in Docker container
+      run: |
+        set -e
+        docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" ./docker
+        docker run -e OS_TYPE=${{ matrix.os-type }} --rm --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project mybuildimage \
+          /bin/sh -c 'git config --global --add safe.directory /project && ./build.sh BuildWorkflow'
+    - name: Test the Shell scripts from README.md in Docker container
+      run: |
+        set -e
+        docker build -t mybuildimage -f "./docker/${{ matrix.base-image }}.dockerfile" ./docker
+        docker run --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project --rm mybuildimage /bin/sh -c '
+          set -e
+          dotnet publish -f net8.0 -c Release ./test/test-applications/integrations/TestApplication.Smoke
+          export OTEL_DOTNET_AUTO_HOME="${PWD}/bin/tracer-home"
+          . ./instrument.sh
+          ./test/test-applications/integrations/bin/TestApplication.Smoke/Release/net8.0/publish/TestApplication.Smoke
+            test "$(ls -A /var/log/opentelemetry/dotnet )"
+        '
+    - name: Publish Linux build
+      uses: actions/upload-artifact@v3.1.3
+      with:
+        name: bin-${{ matrix.base-image }}
+        path: bin/tracer-home
+      if: (${{ job.status }} != 'cancelled')
+      continue-on-error: true

@@ -24,5 +24,10 @@ internal enum ResourceDetector
     /// <summary>
     /// Container resource detector.
     /// </summary>
-    Container = 0
+    Container = 0,
+
+    /// <summary>
+    /// Azure App Service resource detector.
+    /// </summary>
+    AzureAppService = 1
 }

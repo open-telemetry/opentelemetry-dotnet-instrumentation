@@ -5,79 +5,46 @@ on:
     tags: [ v* ]
   workflow_dispatch:
 
-jobs:
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        machine: [ windows-2022, macos-11 ]
-    runs-on: ${{ matrix.machine }}
-    steps:
-      - uses: actions/checkout@v3.5.3
-      - uses: actions/setup-dotnet@v3.2.0
-        with:
-          dotnet-version: | 
-            6.0.410
-            7.0.304
-      - run: ./build.cmd
-      - name: Upload binaries
-        uses: actions/upload-artifact@v3.1.2
-        if: always()
-        with:
-          name: bin-${{ matrix.machine }}
-          path: bin/tracer-home
+env:
+  NUGET_PACKAGES: ${{ github.workspace }}/packages
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
-  container-build:
-    name: Container Build 
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - base-image: alpine
-            os-type: linux-musl
-          - base-image: centos
-            os-type: linux-glibc
-    runs-on: ubuntu-20.04
-    timeout-minutes: 60
-    steps:
-    - uses: actions/checkout@v3.5.3
-    - name: Build Docker image
-      run: |
-        docker build \
-          --tag otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
-          --file "./docker/${{ matrix.base-image }}.dockerfile" \
-          ./docker
-    - name: Build in Docker container
-      run: |
-        docker run --rm \
-          -e OS_TYPE=${{ matrix.os-type }} --mount type=bind,source="${GITHUB_WORKSPACE}",target=/project \
-          otel-dotnet-autoinstrumentation/${{ matrix.base-image }} \
-          ./build.sh
-    - name: Upload ${{ matrix.base-image }} binaries
-      uses: actions/upload-artifact@v3.1.2
-      if: always()
-      with:
-        name: bin-${{ matrix.base-image }}
-        path: bin/tracer-home
+jobs:
+  build-container:
+    uses: ./.github/workflows/build-container.yml
+
+  build-centos-native:
+    uses: ./.github/workflows/build-centos-native-container.yml
+
+  build:
+    needs: build-centos-native
+    uses: ./.github/workflows/build.yml
+
+  build-nuget-packages:
+    needs: [ build, build-container ]
+    uses: ./.github/workflows/build-nuget-packages.yml
 
   create-release:
     name: Create GH release
     runs-on: ubuntu-20.04
-    needs: [ build, container-build ]
+    needs: [ build, build-container, build-nuget-packages ]
     permissions:
       contents: write
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v3.5.3
+      - uses: actions/checkout@v4.1.1
       - uses: actions/download-artifact@v3.0.2
         with:
           path: .
       - name: Install zip
         uses: montudor/action-zip@v1.0.0
       - run: cd bin-alpine ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-musl.zip . * ; cd ..
-      - run: cd bin-centos ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc.zip . * ; cd ..
+      - run: cd bin-ubuntu-20.04 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-linux-glibc.zip . * ; cd ..
       - run: cd bin-windows-2022 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-windows.zip . * ; cd ..
       - run: cd bin-macos-11 ; zip -qq -r ../opentelemetry-dotnet-instrumentation-macos.zip . * ; cd ..
+      - run: cd bin-nuget-packages ; zip -qq -r ../opentelemetry-dotnet-instrumentation-nuget-packages.zip . * ; cd ..
+      - run: cp installation-scripts-windows-2022/otel-dotnet-auto-install.sh ./otel-dotnet-auto-install.sh
+      - run: cp installation-scripts-windows-2022/OpenTelemetry.DotNet.Auto.psm1 ./OpenTelemetry.DotNet.Auto.psm1
       - name: Create Release
         run: gh release create ${{ github.ref_name }} --title ${{ github.ref_name }} --verify-tag --draft ./*.zip ./otel-dotnet-auto-install.sh ./OpenTelemetry.DotNet.Auto.psm1
         env:

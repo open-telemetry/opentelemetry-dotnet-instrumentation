@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 
+using System.Diagnostics;
+using OpenTelemetry.AutoInstrumentation.Helpers;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
@@ -30,19 +32,38 @@ internal class ApplicationInExcludeListRule : Rule
 
     internal override bool Evaluate()
     {
-        var applicationName = GetApplicationName();
-
-        if (IsApplicationInExcludeList(applicationName))
+        var appDomainName = GetAppDomainName();
+        if (appDomainName.Equals("dotnet", StringComparison.InvariantCultureIgnoreCase))
         {
-            Logger.Information($"Rule Engine: {applicationName} is in the exclusion list. Skipping initialization.");
+            Logger.Information($"Rule Engine: AppDomain name is dotnet. Skipping initialization.");
             return false;
         }
 
-        Logger.Debug($"Rule Engine: {applicationName} is not in the exclusion list. ApplicationInExcludeListRule evaluation success.");
+        var processModuleName = GetProcessModuleName();
+        if (GetExcludedApplicationNames().Contains(processModuleName, StringComparer.InvariantCultureIgnoreCase))
+        {
+            Logger.Information($"Rule Engine: {processModuleName} is in the exclusion list. Skipping initialization.");
+            return false;
+        }
+
+        Logger.Debug($"Rule Engine: {processModuleName} is not in the exclusion list. ApplicationInExcludeListRule evaluation success.");
         return true;
     }
 
-    private static string GetApplicationName()
+    private static string GetProcessModuleName()
+    {
+        try
+        {
+            return Process.GetCurrentProcess().MainModule.ModuleName;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error($"Error getting Process.MainModule.ModuleName: {ex}");
+            return string.Empty;
+        }
+    }
+
+    private static string GetAppDomainName()
     {
         try
         {
@@ -55,16 +76,11 @@ internal class ApplicationInExcludeListRule : Rule
         }
     }
 
-    private static bool IsApplicationInExcludeList(string applicationName)
-    {
-        return GetExcludedApplicationNames().Contains(applicationName);
-    }
-
-    private static List<string> GetExcludedApplicationNames()
+    private static ICollection<string> GetExcludedApplicationNames()
     {
         var excludedProcesses = new List<string>();
 
-        var environmentValue = GetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES");
+        var environmentValue = EnvironmentHelper.GetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES");
 
         if (environmentValue == null)
         {
@@ -80,18 +96,5 @@ internal class ApplicationInExcludeListRule : Rule
         }
 
         return excludedProcesses;
-    }
-
-    private static string? GetEnvironmentVariable(string variableName)
-    {
-        try
-        {
-            return Environment.GetEnvironmentVariable(variableName);
-        }
-        catch (Exception ex)
-        {
-            Logger.Error($"Error getting environment variable {variableName}: {ex}");
-            return null;
-        }
     }
 }

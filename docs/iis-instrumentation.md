@@ -16,12 +16,19 @@ Install-OpenTelemetryCore
 Register-OpenTelemetryForIIS
 ```
 
-> **Warning**
+If you are instrumenting an ASP.NET Core application, you must also configure
+the application's application pool with `.NET CLR Version` set to `No Managed Code`.
+If this is not configured correctly, no telemetry data will be generated and
+the debug-level tracer logs will show that no ReJIT's (bytecode rewriting) have
+occurred. See this [issue](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2934#issuecomment-1746669737)
+for further details.
+
+> [!WARNING]
 > `Register-OpenTelemetryForIIS` performs IIS restart.
 
 ## Configuration
 
-> **Note**
+> [!NOTE]
 > Remember to restart IIS after making configuration changes.
 > You can do it by executing `iisreset.exe`.
 

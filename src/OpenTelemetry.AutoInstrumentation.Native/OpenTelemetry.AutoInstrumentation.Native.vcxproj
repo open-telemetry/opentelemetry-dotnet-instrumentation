@@ -94,7 +94,7 @@
       <ConformanceMode>true</ConformanceMode>
       <SDLCheck>true</SDLCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;BIT64;HOST_64BIT;AMD64;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;BIT64;HOST_64BIT;AMD64;_UNICODE;UNICODE;OTEL_AUTO_VERSION_MAJOR=$(OTEL_AUTO_VERSION_MAJOR);OTEL_AUTO_VERSION_MINOR=$(OTEL_AUTO_VERSION_MINOR);OTEL_AUTO_VERSION_PATCH=$(OTEL_AUTO_VERSION_PATCH);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
@@ -116,7 +116,7 @@
       <ConformanceMode>true</ConformanceMode>
       <SDLCheck>true</SDLCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;_UNICODE;UNICODE;X86;HOST_X86;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;_UNICODE;UNICODE;X86;HOST_X86;OTEL_AUTO_VERSION_MAJOR=$(OTEL_AUTO_VERSION_MAJOR);OTEL_AUTO_VERSION_MINOR=$(OTEL_AUTO_VERSION_MINOR);OTEL_AUTO_VERSION_PATCH=$(OTEL_AUTO_VERSION_PATCH);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
@@ -143,7 +143,7 @@
       <ConformanceMode>true</ConformanceMode>
       <SDLCheck>true</SDLCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;_TARGET_64BIT;BIT64;HOST_64BIT;AMD64;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;_TARGET_64BIT;BIT64;HOST_64BIT;AMD64;_UNICODE;UNICODE;OTEL_AUTO_VERSION_MAJOR=$(OTEL_AUTO_VERSION_MAJOR);OTEL_AUTO_VERSION_MINOR=$(OTEL_AUTO_VERSION_MINOR);OTEL_AUTO_VERSION_PATCH=$(OTEL_AUTO_VERSION_PATCH);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
@@ -169,7 +169,7 @@
       <ConformanceMode>true</ConformanceMode>
       <SDLCheck>true</SDLCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;_UNICODE;UNICODE;X86;HOST_X86;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;_UNICODE;UNICODE;X86;HOST_X86;OTEL_AUTO_VERSION_MAJOR=$(OTEL_AUTO_VERSION_MAJOR);OTEL_AUTO_VERSION_MINOR=$(OTEL_AUTO_VERSION_MINOR);OTEL_AUTO_VERSION_PATCH=$(OTEL_AUTO_VERSION_PATCH);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LIB_INCLUDES);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
@@ -246,6 +246,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="docs\README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

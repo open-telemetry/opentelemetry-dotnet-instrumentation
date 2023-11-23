@@ -6,6 +6,7 @@
     <DefineConstants Condition="'$(BuildingInsideVisualStudio)'=='true'">$(DefineConstants);DEFAULT_TEST_PACKAGE_VERSIONS</DefineConstants>
     <!-- only run .NET Framework tests on Windows -->
     <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(IsCentos)' == '' ">net8.0;$(TargetFrameworks)</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net462</TargetFrameworks>
 
     <!-- Hide warnings for EOL .NET Core targets (e.g. netcoreapp3.0) -->
@@ -15,7 +16,7 @@
   <ItemGroup>
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="Moq" />
+    <PackageReference Include="NSubstitute" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

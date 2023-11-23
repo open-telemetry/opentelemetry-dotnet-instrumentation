@@ -12,10 +12,10 @@ public static class ProjectsHelper
     private const string TestApplicationSelector = "TestApplication.*";
     private const string TestLibrarySelector = "TestLibrary.*";
 
-    private readonly static AbsolutePath SrcDirectory = NukeBuild.RootDirectory / "src";
-    private readonly static AbsolutePath TestDirectory = NukeBuild.RootDirectory / "test";
-    private readonly static AbsolutePath TestIntegrationApps = TestDirectory / "test-applications" / "integrations";
-    private readonly static AbsolutePath TestNuGetPackagesApps = TestDirectory / "test-applications" / "nuget-packages";
+    private static readonly AbsolutePath SrcDirectory = NukeBuild.RootDirectory / "src";
+    private static readonly AbsolutePath TestDirectory = NukeBuild.RootDirectory / "test";
+    private static readonly AbsolutePath TestIntegrationApps = TestDirectory / "test-applications" / "integrations";
+    private static readonly AbsolutePath TestNuGetPackagesApps = TestDirectory / "test-applications" / "nuget-packages";
 
     public static IEnumerable<Project> GetManagedSrcProjects(this Solution solution)
     {

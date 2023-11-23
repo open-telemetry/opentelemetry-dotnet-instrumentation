@@ -18,10 +18,11 @@ namespace OpenTelemetry.AutoInstrumentation;
 
 internal static class Constants
 {
-    public static class Tracer
+    public static class DistributionAttributes
     {
-        public const string Version = "0.7.0";
-        public const string AutoInstrumentationVersionName = "telemetry.auto.version";
+        public const string TelemetryDistroNameAttributeName = "telemetry.distro.name";
+        public const string TelemetryDistroNameAttributeValue = "opentelemetry-dotnet-instrumentation";
+        public const string TelemetryDistroVersionAttributeName = "telemetry.distro.version";
     }
 
     public static class ConfigurationValues
@@ -62,5 +63,15 @@ internal static class Constants
             public const string Information = "info";
             public const string Debug = "debug";
         }
+    }
+
+    public static class EnvironmentVariables
+    {
+        public const string ProfilerEnabledVariable = "CORECLR_ENABLE_PROFILING";
+        public const string ProfilerIdVariable = "CORECLR_PROFILER";
+        public const string ProfilerPathVariable = "CORECLR_PROFILER_PATH";
+        public const string Profiler32BitPathVariable = "CORECLR_PROFILER_PATH_32";
+        public const string Profiler64BitPathVariable = "CORECLR_PROFILER_PATH_64";
+        public const string ProfilerId = "{918728DD-259F-4A6A-AC2B-B85E1B658318}";
     }
 }

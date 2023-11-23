@@ -17,10 +17,13 @@
 using System.Reflection;
 using FluentAssertions;
 using IntegrationTests.Helpers;
+using OpenTelemetry.Logs;
 using Xunit.Abstractions;
+using LogRecord = OpenTelemetry.Proto.Logs.V1.LogRecord;
 
 #if NETFRAMEWORK
 using System.Net;
+using System.Net.Http;
 using FluentAssertions.Extensions;
 using IntegrationTests.Helpers.Compatibility;
 #endif
@@ -71,22 +74,47 @@ public class SmokeTests : TestHelper
 #endif
     }
 
+#if !NETFRAMEWORK
+    [Theory]
+    [Trait("Category", "EndToEnd")]
+    [InlineData(TestAppStartupMode.DotnetCLI)]
+    [InlineData(TestAppStartupMode.Exe)]
+    public void WhenClrProfilerIsNotEnabledStartupHookIsEnabledApplicationIsExcluded(TestAppStartupMode testAppStartupMode)
+    {
+        switch (testAppStartupMode)
+        {
+            case TestAppStartupMode.DotnetCLI:
+                SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", "dotnet,dotnet.exe");
+                break;
+            case TestAppStartupMode.Exe:
+                SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
+                break;
+            default:
+                throw new ArgumentException($"{testAppStartupMode} is not supported by this test", nameof(testAppStartupMode));
+        }
+
+        SetEnvironmentVariable("CORECLR_ENABLE_PROFILING", "0");
+
+        VerifyTestApplicationNotInstrumented(testAppStartupMode);
+    }
+#endif
+
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void ApplicationIsNotExcluded()
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", "dotnet,dotnet.exe");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", string.Empty);
 
-        VerifyTestApplicationInstrumented();
+        VerifyTestApplicationInstrumented(TestAppStartupMode.Exe);
     }
 
     [Fact]
     [Trait("Category", "EndToEnd")]
     public void ApplicationIsExcluded()
     {
-        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"dotnet,dotnet.exe,{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES", $"{EnvironmentHelper.FullTestApplicationName},{EnvironmentHelper.FullTestApplicationName}.exe");
 
-        VerifyTestApplicationNotInstrumented();
+        VerifyTestApplicationNotInstrumented(TestAppStartupMode.Exe);
     }
 
     [Fact]
@@ -109,14 +137,7 @@ public class SmokeTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        collector.ResourceExpector.Expect("service.name", ServiceName); // this is set via env var and App.config, but env var has precedence
-#if NETFRAMEWORK
-        collector.ResourceExpector.Expect("deployment.environment", "test"); // this is set via App.config
-#endif
-        collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
-        collector.ResourceExpector.Expect("telemetry.sdk.language", "dotnet");
-        collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0]);
-        collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
+        ExpectResources(collector.ResourceExpector);
 
         EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
@@ -131,11 +152,7 @@ public class SmokeTests : TestHelper
     {
         using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
-        collector.ResourceExpector.Expect("service.name", ServiceName);
-        collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
-        collector.ResourceExpector.Expect("telemetry.sdk.language", "dotnet");
-        collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0]);
-        collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
+        ExpectResources(collector.ResourceExpector);
 
         EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
@@ -151,11 +168,7 @@ public class SmokeTests : TestHelper
     {
         using var collector = new MockLogsCollector(Output);
         SetExporter(collector);
-        collector.ResourceExpector.Expect("service.name", ServiceName);
-        collector.ResourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
-        collector.ResourceExpector.Expect("telemetry.sdk.language", "dotnet");
-        collector.ResourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0]);
-        collector.ResourceExpector.Expect("telemetry.auto.version", OpenTelemetry.AutoInstrumentation.Constants.Tracer.Version);
+        ExpectResources(collector.ResourceExpector);
 
         EnableOnlyHttpClientTraceInstrumentation();
         EnableBytecodeInstrumentation();
@@ -260,6 +273,28 @@ public class SmokeTests : TestHelper
         RunTestApplication();
 
         collector.AssertExpectations();
+    }
+
+    [Fact]
+    [Trait("Category", "EndToEnd")]
+    public void LogTraceCorrelation()
+    {
+        using var collector = new MockCorrelationCollector(Output);
+
+        SetEnvironmentVariable("OTEL_TRACES_EXPORTER", "otlp");
+        SetEnvironmentVariable("OTEL_LOGS_EXPORTER", "otlp");
+        SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", $"http://localhost:{collector.Port}");
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
+
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOGS_INCLUDE_FORMATTED_MESSAGE", "true");
+        EnableBytecodeInstrumentation();
+        RunTestApplication();
+
+        collector.ExpectSpan(collectedSpan => collectedSpan.InstrumentationScopeName == "MyCompany.MyProduct.MyLibrary");
+        collector.ExpectLogRecord(record => Convert.ToString(record.Body) == "{ \"stringValue\": \"Example log message\" }");
+
+        collector.AssertCorrelation();
     }
 
     [Theory]
@@ -382,7 +417,89 @@ public class SmokeTests : TestHelper
         process!.ExitCode.Should().NotBe(0);
     }
 
-    private void VerifyTestApplicationInstrumented()
+    [Fact]
+    public void NativeLogsHaveNoSensitiveData()
+    {
+        var tempLogsDirectory = DirectoryHelpers.CreateTempDirectory();
+        var secretIdentificators = new[] { "API", "TOKEN", "SECRET", "KEY", "PASSWORD", "PASS", "PWD", "HEADER", "CREDENTIALS" };
+
+        EnableBytecodeInstrumentation();
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_LOG_DIRECTORY", tempLogsDirectory.FullName);
+        SetEnvironmentVariable("OTEL_LOG_LEVEL", "debug");
+
+        foreach (var item in secretIdentificators)
+        {
+            SetEnvironmentVariable($"OTEL_{item}_VALUE", "this is secret!");
+
+            if (!EnvironmentTools.IsWindows())
+            {
+                SetEnvironmentVariable($"otel_{item.ToLowerInvariant()}_value2", "this is secret!");
+            }
+        }
+
+        try
+        {
+            RunTestApplication();
+
+            var nativeLog = tempLogsDirectory.GetFiles("otel-dotnet-auto-native-*").Single();
+            var nativeLogContent = File.ReadAllText(nativeLog.FullName);
+            nativeLogContent.Should().NotBeNullOrWhiteSpace();
+
+            var environmentVariables = ParseEnvironmentVariablesLog(nativeLogContent);
+            environmentVariables.Should().NotBeEmpty();
+
+            var secretVariables = environmentVariables
+                .Where(item => secretIdentificators.Any(i => item.Key.Contains(i)))
+                .ToList();
+
+            secretVariables.Should().NotBeEmpty();
+            secretVariables.Should().AllSatisfy(secret => secret.Value.Should().Be("<hidden>"));
+        }
+        finally
+        {
+            tempLogsDirectory.Delete(true);
+        }
+    }
+
+    private static ICollection<KeyValuePair<string, string>> ParseEnvironmentVariablesLog(string log)
+    {
+        var lines = log.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+        var variables = lines
+            .SkipWhile(x => !x.Contains("Environment variables:"))
+#if NETFRAMEWORK
+            .TakeWhile(x => !x.Contains(".NET Runtime: .NET Framework"))
+#else
+            .TakeWhile(x => !x.Contains("Interface ICorProfilerInfo12 found."))
+#endif
+            .Skip(1)
+            .Select(ParseEnvironmentVariableLogEntry)
+            .ToEnvironmentVariablesList();
+
+        return variables;
+    }
+
+    private static string ParseEnvironmentVariableLogEntry(string entry)
+    {
+        const string startMarker = "[debug]";
+        var startIndex = entry.IndexOf("[debug]") + startMarker.Length;
+
+        return entry.AsSpan().Slice(startIndex).Trim().ToString();
+    }
+
+    private static void ExpectResources(OtlpResourceExpector resourceExpector)
+    {
+        resourceExpector.Expect("service.name", ServiceName); // this is set via env var and App.config, but env var has precedence
+#if NETFRAMEWORK
+        resourceExpector.Expect("deployment.environment", "test"); // this is set via App.config
+#endif
+        resourceExpector.Expect("telemetry.sdk.name", "opentelemetry");
+        resourceExpector.Expect("telemetry.sdk.language", "dotnet");
+        resourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0]);
+        resourceExpector.Expect("telemetry.distro.name", "opentelemetry-dotnet-instrumentation");
+        resourceExpector.Expect("telemetry.distro.version", typeof(OpenTelemetry.AutoInstrumentation.Constants).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0]);
+    }
+
+    private void VerifyTestApplicationInstrumented(TestAppStartupMode startupMode = TestAppStartupMode.Auto)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
@@ -397,19 +514,19 @@ public class SmokeTests : TestHelper
 
         EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
-        RunTestApplication();
+        RunTestApplication(new() { StartupMode = startupMode });
 
         collector.AssertExpectations();
     }
 
-    private void VerifyTestApplicationNotInstrumented()
+    private void VerifyTestApplicationNotInstrumented(TestAppStartupMode startupMode = TestAppStartupMode.Auto)
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
 
         EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
-        RunTestApplication();
+        RunTestApplication(new() { StartupMode = startupMode });
 
         collector.AssertEmpty();
     }

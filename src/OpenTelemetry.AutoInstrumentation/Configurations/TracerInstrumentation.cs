@@ -38,10 +38,12 @@ internal enum TracerInstrumentation
     /// </summary>
     SqlClient = 2,
 
+#if NET6_0_OR_GREATER
     /// <summary>
     /// GraphQL instrumentation.
     /// </summary>
     GraphQL = 3,
+#endif
 
     /// <summary>
     /// MongoDB instrumentation.
@@ -109,10 +111,29 @@ internal enum TracerInstrumentation
     /// </summary>
     AspNetCore = 15,
 #endif
-#if NETFRAMEWORK
+
     /// <summary>
     /// WcfClient instrumentation.
     /// </summary>
-    WcfClient = 16
-#endif
+    WcfClient = 16,
+
+    /// <summary>
+    /// MySqlConnector instrumentation.
+    /// </summary>
+    MySqlConnector = 17,
+
+    /// <summary>
+    /// Azure SDK instrumentation.
+    /// </summary>
+    Azure = 18,
+
+    /// <summary>
+    /// Elastic.Transport instrumentation.
+    /// </summary>
+    ElasticTransport = 19,
+
+    /// <summary>
+    /// Kafka client instrumentation
+    /// </summary>
+    Kafka = 20
 }

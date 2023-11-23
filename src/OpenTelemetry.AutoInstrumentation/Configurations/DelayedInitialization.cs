@@ -60,26 +60,25 @@ internal static class DelayedInitialization
         }
 
 #if NET6_0_OR_GREATER
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void AddMySqlClient(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
-        {
-            lazyInstrumentationLoader.Add(new MySqlDataInitializer(pluginManager));
-        }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddEntityFrameworkCore(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
             lazyInstrumentationLoader.Add(new EntityFrameworkCoreInitializer(pluginManager));
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void AddGraphQL(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
+        {
+            lazyInstrumentationLoader.Add(new GraphQLInitializer(pluginManager, tracerSettings));
+        }
 #endif
 
-#if NETFRAMEWORK
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddWcf(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
         {
             lazyInstrumentationLoader.Add(new WcfInitializer(pluginManager));
         }
-#endif
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void AddQuartz(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)

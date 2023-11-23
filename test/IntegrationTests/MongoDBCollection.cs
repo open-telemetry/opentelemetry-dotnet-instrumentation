@@ -15,6 +15,7 @@
 // </copyright>
 
 using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
 using IntegrationTests.Helpers;
 using static IntegrationTests.Helpers.DockerFileHelper;
@@ -56,13 +57,7 @@ public class MongoDBFixture : IAsyncLifetime
 
     private async Task<IContainer> LaunchMongoContainerAsync(int port)
     {
-        var waitForOs =
-#if _WINDOWS
-         Wait.ForWindowsContainer();
-#else
-         Wait.ForUnixContainer();
-#endif
-
+        var waitForOs = await GetWaitForOSTypeAsync();
         var mongoContainersBuilder = new ContainerBuilder()
             .WithImage(MongoDBImage)
             .WithName($"mongo-db-{port}")
@@ -78,5 +73,18 @@ public class MongoDBFixture : IAsyncLifetime
     private async Task ShutdownMongoContainerAsync(IContainer container)
     {
         await container.DisposeAsync();
+    }
+
+    private async Task<IWaitForContainerOS> GetWaitForOSTypeAsync()
+    {
+#if _WINDOWS
+        var isWindowsEngine = await DockerSystemHelper.GetIsWindowsEngineEnabled();
+
+        return isWindowsEngine
+            ? Wait.ForWindowsContainer()
+            : Wait.ForUnixContainer();
+#else
+        return await Task.Run(Wait.ForUnixContainer);
+#endif
     }
 }

@@ -50,10 +50,15 @@ public static class AssemblyRedirectionSourceGenerator
         #include "cor_profiler.h"
 
         #ifdef _WIN32
+        #define STR(Z1) #Z1
+        #define AUTO_MAJOR STR(OTEL_AUTO_VERSION_MAJOR) 
+        
         namespace trace
         {
         void CorProfiler::InitNetFxAssemblyRedirectsMap()
         {
+            const USHORT auto_major = atoi(AUTO_MAJOR);
+
             assembly_version_redirect_map_.insert({
                 {{GenerateEntries(assemblies)}}
             });
@@ -73,7 +78,14 @@ public static class AssemblyRedirectionSourceGenerator
         foreach (var kvp in assemblies)
         {
             var v = kvp.Value.Version!;
-            sb.AppendLine($"        {{ L\"{kvp.Key}\", {{{v.Major}, {v.Minor}, {v.Build}, {v.Revision}}} }},");
+            if (kvp.Key != "OpenTelemetry.AutoInstrumentation")
+            {
+                sb.AppendLine($"        {{ L\"{kvp.Key}\", {{{v.Major}, {v.Minor}, {v.Build}, {v.Revision}}} }},");
+            }
+            else
+            {
+                sb.AppendLine($"        {{ L\"{kvp.Key}\", {{auto_major, 0, 0, 0}} }},");
+            }
         }
 
         return sb.ToString()

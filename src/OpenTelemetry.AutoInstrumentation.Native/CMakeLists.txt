@@ -8,7 +8,7 @@ cmake_policy(SET CMP0015 NEW)
 # Project definition
 # ******************************************************
 
-project("OpenTelemetry.AutoInstrumentation.Native" VERSION 0.7.0)
+project("OpenTelemetry.AutoInstrumentation.Native" VERSION ${OTEL_AUTO_VERSION})
 
 # ******************************************************
 # Environment detection
@@ -143,6 +143,10 @@ elseif (ISARM64)
 elseif (ISARM)
     add_compile_options(-DARM)
 endif()
+
+add_compile_definitions(OTEL_AUTO_VERSION_MAJOR=${OTEL_AUTO_VERSION_MAJOR})
+add_compile_definitions(OTEL_AUTO_VERSION_MINOR=${OTEL_AUTO_VERSION_MINOR})
+add_compile_definitions(OTEL_AUTO_VERSION_PATCH=${OTEL_AUTO_VERSION_PATCH})
 
 # ******************************************************
 # Suppress Warning on MacOS

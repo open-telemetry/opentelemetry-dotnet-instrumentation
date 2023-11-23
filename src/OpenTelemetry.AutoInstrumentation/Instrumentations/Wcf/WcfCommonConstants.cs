@@ -13,13 +13,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // </copyright>
-#if NETFRAMEWORK
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Wcf;
 
 internal static class WcfCommonConstants
 {
+#if NETFRAMEWORK
     public const string ServiceModelAssemblyName = "System.ServiceModel";
-    public const string MinVersion = "4.0.0";
-    public const string MaxVersion = "4.*.*";
-}
+#else
+    public const string ServiceModelAssemblyName = "System.Private.ServiceModel";
+
+    public const string ServiceModelPrimitivesAssemblyName = "System.ServiceModel.Primitives";
+    public const string Min6Version = "6.0.0";
+    public const string Max6Version = "6.*.*";
 #endif
+    public const string Min4Version = "4.0.0";
+    public const string Max4Version = "4.*.*";
+}

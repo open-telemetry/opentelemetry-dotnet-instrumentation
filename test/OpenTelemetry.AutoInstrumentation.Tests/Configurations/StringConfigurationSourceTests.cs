@@ -15,7 +15,6 @@
 // </copyright>
 
 using FluentAssertions;
-using Moq;
 using OpenTelemetry.AutoInstrumentation.Configurations;
 using Xunit;
 

@@ -22,7 +22,7 @@ Package is acquired via [Microsoft vcpkg](https://github.com/microsoft/vcpkg)
 ## spdlog
 
 * Source: <https://github.com/gabime/spdlog>
-* Version: 1.11.0
+* Version: 1.12.0
 
 ### Setup
 

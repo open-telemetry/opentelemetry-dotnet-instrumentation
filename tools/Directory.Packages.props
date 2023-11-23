@@ -1,9 +1,9 @@
 <Project>
   <Import Project="..\Directory.Packages.props" />
   <ItemGroup>
-    <PackageVersion Include="McMaster.Extensions.CommandLineUtils" Version="4.0.2" />
+    <PackageVersion Include="McMaster.Extensions.CommandLineUtils" Version="4.1.0" />
     <PackageVersion Include="Microsoft.Build" Version="17.6.3" />
-    <PackageVersion Include="NuGet.ProjectModel" Version="6.6.1" />
-    <PackageVersion Include="System.IO.Abstractions" Version="19.2.29" />
+    <PackageVersion Include="NuGet.ProjectModel" Version="6.8.0" />
+    <PackageVersion Include="System.IO.Abstractions" Version="19.2.87" />
   </ItemGroup>
 </Project>

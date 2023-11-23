@@ -28,12 +28,12 @@ public class Plugin
         Console.WriteLine($"{nameof(Plugin)}.{nameof(Initializing)}() invoked.");
     }
 
-    public TracerProviderBuilder ConfigureTracerProvider(TracerProviderBuilder builder)
+    public TracerProviderBuilder BeforeConfigureTracerProvider(TracerProviderBuilder builder)
     {
         return builder.AddSource(TestApplication.Smoke.Program.SourceName);
     }
 
-    public MeterProviderBuilder ConfigureMeterProvider(MeterProviderBuilder builder)
+    public MeterProviderBuilder BeforeConfigureMeterProvider(MeterProviderBuilder builder)
     {
         return builder.AddMeter(TestApplication.Smoke.Program.SourceName);
     }

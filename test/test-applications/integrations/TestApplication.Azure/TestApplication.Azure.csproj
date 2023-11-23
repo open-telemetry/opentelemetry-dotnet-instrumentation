@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Storage.Blobs" VersionOverride="$(LibraryVersion)" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Condition=" '$(TargetFramework)' == 'net6.0' " />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" VersionOverride="8.0.0" Condition=" '$(TargetFramework)' == 'net462' and '$(LibraryVersion)' != '' and '$(LibraryVersion)'&lt;'12.18.0' " />
+  </ItemGroup>
+</Project>

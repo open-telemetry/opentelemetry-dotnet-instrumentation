@@ -7,6 +7,11 @@
 #include <corprof.h>
 #include <string>
 #include <typeinfo>
+#ifdef _WIN32
+#include <regex>
+#else
+#include <re2/re2.h>
+#endif
 
 #include "clr_helpers.h"
 #include "dllmain.h"
@@ -66,9 +71,29 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         const auto env_variables = GetEnvironmentVariables(env_vars_prefixes_to_display);
         Logger::Debug("Environment variables:");
 
+        // Update the list also in SmokeTests.NativeLogsHaveNoSensitiveData
+        const auto secrets_pattern = "(?:^|_)(API|TOKEN|SECRET|KEY|PASSWORD|PASS|PWD|HEADER|CREDENTIALS)(?:_|$)";
+#ifdef _WIN32
+        const std::regex secrets_regex(secrets_pattern, std::regex_constants::ECMAScript | std::regex_constants::icase);
+#else
+        static re2::RE2 re(secrets_pattern, RE2::Quiet);
+#endif
+
         for (const auto& env_variable : env_variables)
         {
-            Logger::Debug("  ", env_variable);
+#ifdef _WIN32
+            if (!std::regex_search(ToString(env_variable), secrets_regex))
+#else
+            if (!re2::RE2::PartialMatch(ToString(env_variable), re))
+#endif
+            {
+                Logger::Debug("  ", env_variable);
+            }
+            else
+            {
+                // Remove secret value and replace with <hidden>
+                Logger::Debug("  ", env_variable.substr(0, env_variable.find_first_of('=')), "=<hidden>");
+            }
         }
     }
 
@@ -983,6 +1008,11 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITInlining(FunctionID callerId, Function
     return S_OK;
 }
 
+bool CorProfiler::IsAttached() const
+{
+    return is_attached_;
+}
+
 void CorProfiler::AddInstrumentations(WCHAR* id, CallTargetDefinition* items, int size)
 {
     auto    _             = trace::Stats::Instance()->InitializeProfilerMeasure();
@@ -1335,11 +1365,6 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
     return S_OK;
 }
 #endif
-
-bool CorProfiler::IsAttached() const
-{
-    return is_attached_;
-}
 
 WSTRING CorProfiler::GetBytecodeInstrumentationAssembly() const
 {

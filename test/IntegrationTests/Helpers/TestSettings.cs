@@ -23,4 +23,6 @@ public class TestSettings
     public string PackageVersion { get; set; } = string.Empty;
 
     public string Framework { get; set; } = string.Empty;
+
+    public TestAppStartupMode StartupMode { get; set; }
 }

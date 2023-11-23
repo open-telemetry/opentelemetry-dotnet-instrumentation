@@ -227,7 +227,6 @@ Libraries
 - OpenTelemetry.Api.ProviderBuilderExtensions,
 - OpenTelemetry.Exporter.Console,
 - OpenTelemetry.Exporter.OpenTelemetryProtocol,
-- OpenTelemetry.Exporter.OpenTelemetryProtocol.Logs,
 - OpenTelemetry.Exporter.Prometheus.HttpListener,
 - OpenTelemetry.Exporter.Zipkin,
 - OpenTelemetry.Extensions.Propagators,
@@ -244,7 +243,6 @@ Libraries
 
 - OpenTelemetry.Api,
 - OpenTelemetry.Instrumentation.EntityFrameworkCore,
-- OpenTelemetry.Instrumentation.MySqlData,
 - OpenTelemetry.Instrumentation.Process,
 - OpenTelemetry.Instrumentation.Quartz,
 - OpenTelemetry.Instrumentation.Runtime,

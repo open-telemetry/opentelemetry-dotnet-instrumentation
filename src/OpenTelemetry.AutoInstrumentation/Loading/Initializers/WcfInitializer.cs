@@ -14,8 +14,8 @@
 // limitations under the License.
 // </copyright>
 
-#if NETFRAMEWORK
-
+using System.Reflection;
+using OpenTelemetry.AutoInstrumentation.Configurations;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Instrumentation.Wcf;
 
@@ -44,6 +44,15 @@ internal class WcfInitializer : InstrumentationInitializer
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.Wcf.WcfInstrumentationActivitySource, OpenTelemetry.Instrumentation.Wcf");
 
         instrumentationType?.GetProperty("Options")?.SetValue(null, options);
+
+#if NETFRAMEWORK
+        var enabledTraceInstrumentations = Instrumentation.TracerSettings.Value.EnabledInstrumentations;
+        if (enabledTraceInstrumentations.Contains(TracerInstrumentation.WcfService) && enabledTraceInstrumentations.Contains(TracerInstrumentation.AspNet))
+        {
+            var aspNetParentSpanCorrectorType = Type.GetType("OpenTelemetry.Instrumentation.Wcf.Implementation.AspNetParentSpanCorrector, OpenTelemetry.Instrumentation.Wcf");
+            var methodInfo = aspNetParentSpanCorrectorType?.GetMethod("Register", BindingFlags.Static | BindingFlags.Public);
+            methodInfo?.Invoke(null, null);
+        }
+#endif
     }
 }
-#endif

@@ -22,16 +22,6 @@ internal static class NativeMethods
 {
     private static readonly bool IsWindows = string.Equals(FrameworkDescription.Instance.OSPlatform, "Windows", StringComparison.OrdinalIgnoreCase);
 
-    public static bool IsProfilerAttached()
-    {
-        if (IsWindows)
-        {
-            return Windows.IsProfilerAttached();
-        }
-
-        return NonWindows.IsProfilerAttached();
-    }
-
     public static void AddInstrumentations(string id, NativeCallTargetDefinition[] methodArrays)
     {
         if (methodArrays is null || methodArrays.Length == 0)
@@ -71,9 +61,6 @@ internal static class NativeMethods
     private static class Windows
     {
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-        public static extern bool IsProfilerAttached();
-
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern void AddInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
@@ -83,9 +70,6 @@ internal static class NativeMethods
     // assume .NET Core if not running on Windows
     private static class NonWindows
     {
-        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
-        public static extern bool IsProfilerAttached();
-
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern void AddInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
 

@@ -3,7 +3,7 @@ LIBRARY "OpenTelemetry.AutoInstrumentation.Native.dll"
 EXPORTS
     DllCanUnloadNow PRIVATE
     DllGetClassObject PRIVATE
-    IsProfilerAttached
     GetAssemblyAndSymbolsBytes
+    IsProfilerAttached
     AddInstrumentations
     AddDerivedInstrumentations

@@ -1,7 +1,9 @@
 aspnet
 ASPNETCORE
 ASSERTE
+autoinstrumentation
 Bootstrapper
+buildtasks
 callq
 CLSID
 CONTRACTL
@@ -30,8 +32,10 @@ netcoreapp
 NETFX
 NGEN
 nullptr
+nupkg
 popq
 SIGUSR
+snupkg
 stdlibc
 struct
 TRACEFILE

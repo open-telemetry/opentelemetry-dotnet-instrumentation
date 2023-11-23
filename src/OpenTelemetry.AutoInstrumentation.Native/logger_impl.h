@@ -76,7 +76,7 @@ public:
 template <typename TLoggerPolicy>
 std::string LoggerImpl<TLoggerPolicy>::GetLogPath(const std::string& file_name_suffix)
 {
-    const auto path = ToString(GetDatadogLogFilePath<TLoggerPolicy>(file_name_suffix));
+    const auto path = ToString(GetOpenTelemetryLogFilePath<TLoggerPolicy>(file_name_suffix));
 
     const auto log_path = std::filesystem::path(path);
 

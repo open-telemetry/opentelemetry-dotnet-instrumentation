@@ -1,14 +1,9 @@
 <Project>
-  <!-- This file prevents unintended imports of unrelated MSBuild files -->
-  <!-- Uncomment to include parent Directory.Packages.props file -->
-  <!--<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Packages.props', '$(MSBuildThisFileDirectory)../'))" />-->
+  <Import Project="..\Directory.Packages.props" />
 
-  <PropertyGroup>
-    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-  </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Mono.Cecil" Version="0.11.5" />
-    <PackageVersion Include="Nuke.Common" Version="7.0.2" />
-    <PackageVersion Include="Nuget.CommandLine" Version="6.6.1" />
+    <PackageVersion Include="Nuke.Common" Version="7.0.6" />
+    <PackageVersion Include="Nuget.CommandLine" Version="6.8.0" />
   </ItemGroup>
 </Project>

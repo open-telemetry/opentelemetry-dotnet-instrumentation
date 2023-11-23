@@ -37,8 +37,11 @@ internal class HttpClientMetricsInitializer
             return;
         }
 
+        var optionsType = Type.GetType("OpenTelemetry.Instrumentation.Http.HttpClientMetricInstrumentationOptions, OpenTelemetry.Instrumentation.Http")!;
+        var options = Activator.CreateInstance(optionsType)!;
+
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.Http.HttpClientMetrics, OpenTelemetry.Instrumentation.Http")!;
-        var instrumentation = Activator.CreateInstance(instrumentationType)!;
+        var instrumentation = Activator.CreateInstance(instrumentationType, options)!;
 
         lifespanManager.Track(instrumentation);
     }

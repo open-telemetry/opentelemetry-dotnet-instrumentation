@@ -19,7 +19,6 @@ using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
-using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Shims.OpenTracing;
 using OpenTelemetry.Trace;
@@ -42,27 +41,6 @@ internal static class Instrumentation
     private static TracerProvider? _tracerProvider;
     private static MeterProvider? _meterProvider;
     private static PluginManager? _pluginManager;
-
-    /// <summary>
-    /// Gets a value indicating whether OpenTelemetry's profiler is attached to the current process.
-    /// </summary>
-    /// <value>
-    ///   <c>true</c> if the profiler is currently attached; <c>false</c> otherwise.
-    /// </value>
-    public static bool ProfilerAttached
-    {
-        get
-        {
-            try
-            {
-                return NativeMethods.IsProfilerAttached();
-            }
-            catch (DllNotFoundException)
-            {
-                return false;
-            }
-        }
-    }
 
     internal static PluginManager? PluginManager => _pluginManager;
 
@@ -136,16 +114,18 @@ internal static class Instrumentation
                 {
                     var builder = Sdk
                         .CreateTracerProviderBuilder()
+                        .InvokePluginsBefore(_pluginManager)
                         .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, TracerSettings.Value, _pluginManager)
-                        .InvokePlugins(_pluginManager);
+                        .InvokePluginsAfter(_pluginManager);
 
                     _tracerProvider = builder.Build();
+                    _tracerProvider.TryCallInitialized(_pluginManager);
                     Logger.Information("OpenTelemetry tracer initialized.");
                 }
                 else
                 {
-                    AddLazilyLoadedTraceInstrumentations(LazyInstrumentationLoader, _pluginManager, TracerSettings.Value.EnabledInstrumentations);
+                    AddLazilyLoadedTraceInstrumentations(LazyInstrumentationLoader, _pluginManager, TracerSettings.Value);
                     Logger.Information("Initialized lazily-loaded trace instrumentations without initializing sdk.");
                 }
             }
@@ -156,11 +136,13 @@ internal static class Instrumentation
                 {
                     var builder = Sdk
                         .CreateMeterProviderBuilder()
+                        .InvokePluginsBefore(_pluginManager)
                         .SetResourceBuilder(ResourceConfigurator.CreateResourceBuilder(GeneralSettings.Value.EnabledResourceDetectors))
                         .UseEnvironmentVariables(LazyInstrumentationLoader, MetricSettings.Value, _pluginManager)
-                        .InvokePlugins(_pluginManager);
+                        .InvokePluginsAfter(_pluginManager);
 
                     _meterProvider = builder.Build();
+                    _meterProvider.TryCallInitialized(_pluginManager);
                     Logger.Information("OpenTelemetry meter initialized.");
                 }
                 else
@@ -177,44 +159,51 @@ internal static class Instrumentation
             throw;
         }
 
-        RegisterInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
-
-        try
+        if (GeneralSettings.Value.ProfilerEnabled)
         {
-            foreach (var payload in _pluginManager.GetAllDefinitionsPayloads())
+            RegisterBytecodeInstrumentations(InstrumentationDefinitions.GetAllDefinitions());
+
+            try
             {
-                RegisterInstrumentations(payload);
+                foreach (var payload in _pluginManager.GetAllDefinitionsPayloads())
+                {
+                    RegisterBytecodeInstrumentations(payload);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Exception occurred while registering instrumentations from plugins.");
-        }
-
-        try
-        {
-            Logger.Debug("Sending CallTarget derived integration definitions to native library.");
-            var payload = InstrumentationDefinitions.GetDerivedDefinitions();
-            NativeMethods.AddDerivedInstrumentations(payload.DefinitionsId, payload.Definitions);
-            foreach (var def in payload.Definitions)
+            catch (Exception ex)
             {
-                def.Dispose();
+                Logger.Error(ex, "Exception occurred while registering instrumentations from plugins.");
             }
 
-            Logger.Information("The profiler has been initialized with {0} derived definitions.", payload.Definitions.Length);
+            try
+            {
+                Logger.Debug("Sending CallTarget derived integration definitions to native library.");
+                var payload = InstrumentationDefinitions.GetDerivedDefinitions();
+                NativeMethods.AddDerivedInstrumentations(payload.DefinitionsId, payload.Definitions);
+                foreach (var def in payload.Definitions)
+                {
+                    def.Dispose();
+                }
+
+                Logger.Information("The profiler has been initialized with {0} derived definitions.", payload.Definitions.Length);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, ex.Message);
+            }
         }
-        catch (Exception ex)
+        else
         {
-            Logger.Error(ex, ex.Message);
+            Logger.Debug("Skipping CLR Profiler initialization. {0} environment variable was not set to '1'.", ConfigurationKeys.ProfilingEnabled);
         }
 
         if (TracerSettings.Value.OpenTracingEnabled)
         {
-            EnableOpenTracing();
+            OpenTracingHelper.EnableOpenTracing(_tracerProvider);
         }
     }
 
-    private static void RegisterInstrumentations(InstrumentationDefinitions.Payload payload)
+    private static void RegisterBytecodeInstrumentations(InstrumentationDefinitions.Payload payload)
     {
         try
         {
@@ -270,9 +259,13 @@ internal static class Instrumentation
         }
     }
 
-    private static void AddLazilyLoadedTraceInstrumentations(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, IReadOnlyList<TracerInstrumentation> enabledInstrumentations)
+    private static void AddLazilyLoadedTraceInstrumentations(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager, TracerSettings tracerSettings)
     {
-        foreach (var instrumentation in enabledInstrumentations)
+        // ensure WcfInitializer is added only once,
+        // it is needed when either WcfClient or WcfService instrumentations are enabled
+        // to initialize WcfInstrumentationOptions
+        var wcfInstrumentationAdded = false;
+        foreach (var instrumentation in tracerSettings.EnabledInstrumentations)
         {
             switch (instrumentation)
             {
@@ -281,7 +274,7 @@ internal static class Instrumentation
                     DelayedInitialization.Traces.AddAspNet(lazyInstrumentationLoader, pluginManager);
                     break;
                 case TracerInstrumentation.WcfService:
-                    DelayedInitialization.Traces.AddWcf(lazyInstrumentationLoader, pluginManager);
+                    AddWcfIfNeeded(lazyInstrumentationLoader, pluginManager, ref wcfInstrumentationAdded);
                     break;
 #endif
                 case TracerInstrumentation.HttpClient:
@@ -296,12 +289,14 @@ internal static class Instrumentation
                 case TracerInstrumentation.Quartz:
                     DelayedInitialization.Traces.AddQuartz(lazyInstrumentationLoader, pluginManager);
                     break;
+                case TracerInstrumentation.WcfClient:
+                    AddWcfIfNeeded(lazyInstrumentationLoader, pluginManager, ref wcfInstrumentationAdded);
+                    break;
 #if NET6_0_OR_GREATER
                 case TracerInstrumentation.AspNetCore:
                     DelayedInitialization.Traces.AddAspNetCore(lazyInstrumentationLoader, pluginManager);
                     break;
                 case TracerInstrumentation.MySqlData:
-                    DelayedInitialization.Traces.AddMySqlClient(LazyInstrumentationLoader, pluginManager);
                     break;
                 case TracerInstrumentation.EntityFrameworkCore:
                     DelayedInitialization.Traces.AddEntityFrameworkCore(LazyInstrumentationLoader, pluginManager);
@@ -310,16 +305,25 @@ internal static class Instrumentation
                     break;
                 case TracerInstrumentation.MassTransit:
                     break;
-#endif
-                case TracerInstrumentation.MongoDB:
-                    break;
                 case TracerInstrumentation.GraphQL:
+                    DelayedInitialization.Traces.AddGraphQL(LazyInstrumentationLoader, pluginManager, tracerSettings);
+                    break;
+#endif
+                case TracerInstrumentation.Azure:
+                    break;
+                case TracerInstrumentation.MongoDB:
                     break;
                 case TracerInstrumentation.Npgsql:
                     break;
                 case TracerInstrumentation.NServiceBus:
                     break;
                 case TracerInstrumentation.Elasticsearch:
+                    break;
+                case TracerInstrumentation.ElasticTransport:
+                    break;
+                case TracerInstrumentation.MySqlConnector:
+                    break;
+                case TracerInstrumentation.Kafka:
                     break;
                 default:
                     Logger.Warning($"Configured trace instrumentation type is not supported: {instrumentation}");
@@ -331,6 +335,20 @@ internal static class Instrumentation
                     break;
             }
         }
+    }
+
+    private static void AddWcfIfNeeded(
+        LazyInstrumentationLoader lazyInstrumentationLoader,
+        PluginManager pluginManager,
+        ref bool wcfInstrumentationAdded)
+    {
+        if (wcfInstrumentationAdded)
+        {
+            return;
+        }
+
+        DelayedInitialization.Traces.AddWcf(lazyInstrumentationLoader, pluginManager);
+        wcfInstrumentationAdded = true;
     }
 
     private static void OnExit(object? sender, EventArgs e)
@@ -387,35 +405,6 @@ internal static class Instrumentation
                 // If we encounter an error while logging there is nothing else we can do
                 // with the exception.
             }
-        }
-    }
-
-    private static void EnableOpenTracing()
-    {
-        try
-        {
-            if (_tracerProvider is not null)
-            {
-                // Instantiate the OpenTracing shim. The underlying OpenTelemetry tracer will create
-                // spans using the "OpenTelemetry.AutoInstrumentation.OpenTracingShim" source.
-                var openTracingShim = new TracerShim(
-                    _tracerProvider.GetTracer("OpenTelemetry.AutoInstrumentation.OpenTracingShim"),
-                    Propagators.DefaultTextMapPropagator);
-
-                // This registration must occur prior to any reference to the OpenTracing tracer:
-                // otherwise the no-op tracer is going to be used by OpenTracing instead.
-                GlobalTracer.RegisterIfAbsent(openTracingShim);
-                Logger.Information("OpenTracingShim loaded.");
-            }
-            else
-            {
-                Logger.Information("OpenTracingShim was not loaded as the provider is not initialized.");
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "OpenTracingShim exception.");
-            throw;
         }
     }
 }

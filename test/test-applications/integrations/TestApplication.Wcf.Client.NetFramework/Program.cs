@@ -47,6 +47,7 @@ internal static class Program
                 "TestApplication.Wcf.Client.NetFramework application requires either 0 or exactly 2 arguments.");
         }
 
+        using var parent = Source.StartActivity("Parent");
         try
         {
             Console.WriteLine("=============NetTcp===============");
@@ -59,6 +60,7 @@ internal static class Program
 
         Console.WriteLine("=============Http===============");
         await CallService(httpAddress, new BasicHttpBinding()).ConfigureAwait(false);
+        using var sibling = Source.StartActivity("Sibling");
     }
 
     private static async Task CallService(string address, Binding binding)
@@ -71,42 +73,16 @@ internal static class Program
 
         try
         {
-            using var parent = Source.StartActivity("Parent");
-
-            try
-            {
-                Console.WriteLine("Asynchronous Programming Model pattern call");
-                var rq = new StatusRequest { Status = "1" };
-                var asyncResult = client.BeginPing(rq, null!, null!);
-                var statusResponse = client.EndPing(asyncResult);
-
-                Console.WriteLine(
-                    $"[{DateTimeOffset.UtcNow:o}] Request with status {rq.Status}. Server returned: {statusResponse?.ServerTime:o}");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-
-            try
-            {
-                Console.WriteLine("Synchronous call");
-                var rq = new StatusRequest { Status = "2" };
-                var response = client.PingSync(rq);
-
-                Console.WriteLine(
-                    $"[{DateTimeOffset.UtcNow:o}] Request with status {rq.Status}. Server returned: {response?.ServerTime:o}");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-
             try
             {
                 Console.WriteLine("Task-based Asynchronous Pattern call");
-                var rq = new StatusRequest { Status = "3" };
+                var rq = new StatusRequest { Status = "1" };
                 var response = await client.PingAsync(rq).ConfigureAwait(false);
+
+                // Task.Yield() is required in order for successive calls
+                // not to timeout, this seems to be a known issue for e.g console apps
+                // making WCF sync calls after an async call
+                await Task.Yield();
 
                 Console.WriteLine(
                     $"[{DateTimeOffset.UtcNow:o}] Request with status {rq.Status}. Server returned: {response?.ServerTime:o}");
@@ -115,8 +91,6 @@ internal static class Program
             {
                 Console.WriteLine(e.Message);
             }
-
-            using var sibling = Source.StartActivity("Sibling");
         }
         finally
         {

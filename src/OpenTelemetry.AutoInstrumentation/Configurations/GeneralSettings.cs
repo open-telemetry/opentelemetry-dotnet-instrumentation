@@ -40,6 +40,11 @@ internal class GeneralSettings : Settings
     /// </summary>
     public bool SetupSdk { get; private set; }
 
+    /// <summary>
+    /// Gets a value indicating whether the profiler is enabled.
+    /// </summary>
+    public bool ProfilerEnabled { get; private set; }
+
     protected override void OnLoad(Configuration configuration)
     {
         var providerPlugins = configuration.GetString(ConfigurationKeys.ProviderPlugins);
@@ -59,5 +64,7 @@ internal class GeneralSettings : Settings
 
         FlushOnUnhandledException = configuration.GetBool(ConfigurationKeys.FlushOnUnhandledException) ?? false;
         SetupSdk = configuration.GetBool(ConfigurationKeys.SetupSdk) ?? true;
+
+        ProfilerEnabled = configuration.GetString(ConfigurationKeys.ProfilingEnabled) == "1";
     }
 }

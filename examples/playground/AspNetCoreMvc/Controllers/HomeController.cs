@@ -31,7 +31,6 @@ public class HomeController : Controller
     public IActionResult Index()
     {
         var instrumentationType = Type.GetType("OpenTelemetry.AutoInstrumentation.Instrumentation, OpenTelemetry.AutoInstrumentation");
-        ViewBag.ProfilerAttached = instrumentationType?.GetProperty("ProfilerAttached", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) ?? false;
         ViewBag.TracerAssemblyLocation = Type.GetType("OpenTelemetry.Trace.Tracer, OpenTelemetry.Api")?.Assembly.Location;
         ViewBag.ClrProfilerAssemblyLocation = instrumentationType?.Assembly.Location;
         ViewBag.StackTrace = StackTraceHelper.GetUsefulStack();

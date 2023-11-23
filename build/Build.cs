@@ -3,7 +3,6 @@ using Nuke.Common.IO;
 using Nuke.Common.Tools.MSBuild;
 using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.EnvironmentInfo;
-using static Nuke.Common.IO.FileSystemTasks;
 
 partial class Build : NukeBuild
 {
@@ -48,12 +47,6 @@ partial class Build : NukeBuild
     [Parameter("The location to restore NuGet packages. Optional")]
     readonly AbsolutePath NuGetPackagesDirectory;
 
-    [Parameter("Version number of the NuGet packages built from the project. Default is '0.7.0'")]
-    string NuGetBaseVersionNumber = "0.7.0";
-
-    [Parameter("Version suffix added to the NuGet packages built from the project. Default is '-local.1'")]
-    string NuGetVersionSuffix = "-local.1";
-
     [Parameter("Do not restore the projects before building.")]
     readonly bool NoRestore;
 
@@ -96,6 +89,13 @@ partial class Build : NukeBuild
         .DependsOn(BuildTracer)
         .DependsOn(CompileExamples);
 
+    Target BuildNativeWorkflow => _ => _
+        .Description("Builds the native code project deliverables.")
+        .After(Clean)
+        .DependsOn(CreateRequiredDirectories)
+        .DependsOn(CompileNativeSrc)
+        .DependsOn(PublishNativeProfiler);
+
     Target TestWorkflow => _ => _
         .Description("Builds and run the tests against the local deliverables (except NuGet packages)")
         .After(BuildWorkflow)
@@ -107,6 +107,7 @@ partial class Build : NukeBuild
         .After(Clean)
         .After(Restore)
         .DependsOn(CreateRequiredDirectories)
+        .DependsOn(BuildInstallationScripts)
         .DependsOn(GenerateNetFxTransientDependencies)
         .DependsOn(CompileManagedSrc)
         .DependsOn(PublishManagedProfiler)
@@ -128,6 +129,7 @@ partial class Build : NukeBuild
         .Description("Builds the managed unit / integration tests and runs them")
         .After(Clean, BuildTracer)
         .DependsOn(CreateRequiredDirectories)
+        .DependsOn(BuildInstallationScripts)
         .DependsOn(GenerateLibraryVersionFiles)
         .DependsOn(CompileManagedTests)
         .DependsOn(CompileMocks)

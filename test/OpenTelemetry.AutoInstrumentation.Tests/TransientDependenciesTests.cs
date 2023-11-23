@@ -14,9 +14,9 @@
 // limitations under the License.
 // </copyright>
 
-// This test is defined in NET7.0 because the tool is written in .NET 7.0
+// This test is defined in NET8.0 because the tool is written in .NET 8.0
 // The actual test is testing .NET 462 context.
-#if NET7_0_OR_GREATER
+#if NET8_0_OR_GREATER
 
 using System.Reflection;
 using System.Runtime.InteropServices;

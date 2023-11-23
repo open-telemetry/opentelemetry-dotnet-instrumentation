@@ -198,7 +198,7 @@ public class SettingsTests : IDisposable
     [InlineData("b3", new[] { Propagator.B3Single })]
     [InlineData("not-supported,b3", new Propagator[] { Propagator.B3Single })]
     [InlineData("tracecontext,baggage,b3multi,b3", new[] { Propagator.W3CTraceContext, Propagator.W3CBaggage, Propagator.B3Multi, Propagator.B3Single })]
-    internal void Propagators_SupportedValues(string propagators, Propagator[] expectedPropagators)
+    internal void Propagators_SupportedValues(string? propagators, Propagator[] expectedPropagators)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Sdk.Propagators, propagators);
 
@@ -221,7 +221,9 @@ public class SettingsTests : IDisposable
 #if NETFRAMEWORK
     [InlineData("ASPNET", TracerInstrumentation.AspNet)]
 #endif
+#if NET6_0_OR_GREATER
     [InlineData("GRAPHQL", TracerInstrumentation.GraphQL)]
+#endif
     [InlineData("HTTPCLIENT", TracerInstrumentation.HttpClient)]
     [InlineData("MONGODB", TracerInstrumentation.MongoDB)]
 #if NET6_0_OR_GREATER
@@ -244,9 +246,11 @@ public class SettingsTests : IDisposable
     [InlineData("ENTITYFRAMEWORKCORE", TracerInstrumentation.EntityFrameworkCore)]
     [InlineData("ASPNETCORE", TracerInstrumentation.AspNetCore)]
 #endif
-#if NETFRAMEWORK
     [InlineData("WCFCLIENT", TracerInstrumentation.WcfClient)]
-#endif
+    [InlineData("MYSQLCONNECTOR", TracerInstrumentation.MySqlConnector)]
+    [InlineData("AZURE", TracerInstrumentation.Azure)]
+    [InlineData("ELASTICTRANSPORT", TracerInstrumentation.ElasticTransport)]
+    [InlineData("KAFKA", TracerInstrumentation.Kafka)]
     internal void TracerSettings_Instrumentations_SupportedValues(string tracerInstrumentation, TracerInstrumentation expectedTracerInstrumentation)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.Traces.TracesInstrumentationEnabled, "false");
@@ -323,7 +327,7 @@ public class SettingsTests : IDisposable
     [InlineData("http/protobuf", null)]
     [InlineData("grpc", null)]
     [InlineData("nonExistingProtocol", null)]
-    internal void OtlpExportProtocol_DependsOnCorrespondingEnvVariable(string otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol)
+    internal void OtlpExportProtocol_DependsOnCorrespondingEnvVariable(string? otlpProtocol, OtlpExportProtocol? expectedOtlpExportProtocol)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.ExporterOtlpProtocol, otlpProtocol);
 
@@ -337,7 +341,7 @@ public class SettingsTests : IDisposable
     [InlineData("true", true)]
     [InlineData("false", false)]
     [InlineData(null, false)]
-    internal void FlushOnUnhandledException_DependsOnCorrespondingEnvVariable(string flushOnUnhandledException, bool expectedValue)
+    internal void FlushOnUnhandledException_DependsOnCorrespondingEnvVariable(string? flushOnUnhandledException, bool expectedValue)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.FlushOnUnhandledException, flushOnUnhandledException);
 
@@ -348,6 +352,7 @@ public class SettingsTests : IDisposable
 
     [Theory]
     [InlineData("CONTAINER", ResourceDetector.Container)]
+    [InlineData("AZUREAPPSERVICE", ResourceDetector.AzureAppService)]
     internal void GeneralSettings_Instrumentations_SupportedValues(string resourceDetector, ResourceDetector expectedResourceDetector)
     {
         Environment.SetEnvironmentVariable(ConfigurationKeys.ResourceDetectorEnabled, "false");

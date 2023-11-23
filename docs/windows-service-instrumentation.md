@@ -2,7 +2,7 @@
 
 ## Setup
 
-Use the `OpenTelemetry.DotNet.Auto.psm1"` PowerShell module
+Use the `OpenTelemetry.DotNet.Auto.psm1` PowerShell module
 to set up automatic instrumentation for a Windows Service:
 
 ```powershell
@@ -16,12 +16,12 @@ Install-OpenTelemetryCore
 Register-OpenTelemetryForWindowsService -WindowsServiceName "WindowsServiceName" -OTelServiceName "MyServiceDisplayName"
 ```
 
-> **Warning**
+> [!WARNING]
 > `Register-OpenTelemetryForWindowsService` performs a service restart.
 
 ## Configuration
 
-> **Note**
+> [!NOTE]
 > Remember to restart the Windows Service after making configuration changes.
 > You can do it by executing
 > `Restart-Service -Name $WindowsServiceName -Force` in PowerShell.

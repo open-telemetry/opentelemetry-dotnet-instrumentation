@@ -2,7 +2,9 @@
 
   <PropertyGroup>
     <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(IsCentos)' == '' ">net8.0;$(TargetFrameworks)</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net472</TargetFrameworks>
+    <DefineConstants Condition="'$(LibraryVersion)'=='' or '$(LibraryVersion)'>='3.7.0'">$(DefineConstants);QUARTZ_3_7_0_OR_GREATER</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

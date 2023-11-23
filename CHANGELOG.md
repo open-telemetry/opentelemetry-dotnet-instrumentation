@@ -5,12 +5,192 @@ All notable changes to this component are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v0.7.0...HEAD)
+## [Unreleased](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/compare/v1.2.0..HEAD)
+
+### Added
+
+### Changed
+
+#### Dependency updates
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+## [1.2.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.2.0)
+
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.6.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.6.0)
+- `System.Diagnostics.DiagnosticSource`: [`8.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/8.0.0)
+
+### Added
+
+- Add support for .NET 8.
+- Added support for [System.Data.SqlClient](https://www.nuget.org/packages/System.Data.SqlClient/)
+  (NuGet package) traces instrumentation from `4.8.5`.
+- Ability to update installation via PS module (`OpenTelemetry.DotNet.Auto.psm1`).
+- Added support for `KAFKA` traces instrumentation.
+
+### Changed
+
+#### Dependency updates
+
+- .NET Framework only, `Grpc.Core.Api` updated from `2.57.0` to `2.59.0`.
+- .NET only, `OpenTelemetry.Instrumentation.EntityFrameworkCore` updated
+  from `1.0.0-beta.7` to `1.0.0-beta.8`.
+- .NET only, `OpenTelemetry.Instrumentation.AspNetCore` updated
+  from `1.5.1-beta.1` to `1.6.0-beta.3`.
+- `OpenTelemetry.Instrumentation.GrpcNetClient`,
+  and `OpenTelemetry.Instrumentation.Http`
+  updated from `1.5.1-beta.1` to `1.6.0-beta.3`.
+- `OpenTelemetry.Instrumentation.SqlClient` updated from `1.5.1-beta.1` to `1.6.0-beta.2`.
+- .NET only, `OpenTelemetry.Instrumentation.StackExchangeRedis` updated
+  from `1.0.0-rc9.10` to `1.0.0-rc9.12`.
+- .NET Framework only, `Google.Protobuf` updated from `3.24.4` to `3.25.1`.
+- .NET Framework only, `OpenTelemetry.Instrumentation.AspNet` and
+  `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule` updated from
+  `1.6.0-beta.1` to `1.6.0-beta.2`.
+- `OpenTelemetry.Instrumentation.Wcf` updated from `1.0.0-rc.12` to `1.0.0-rc.13`.
+- .NET Framework only, following packages updated
+  - `Microsoft.Bcl.AsyncInterfaces` from `7.0.0` to `8.0.0`,
+  - `Microsoft.Extensions.Configuration` from `7.0.0` to `8.0.0`,
+  - `Microsoft.Extensions.Configuration.Abstractions` from `7.0.0` to `8.0.0`,
+  - `Microsoft.Extensions.Configuration.Binder` from `7.0.4` to `8.0.0`,
+  - `Microsoft.Extensions.DependencyInjection` from `7.0.0` to `8.0.0`,
+  - `Microsoft.Extensions.DependencyInjection.Abstractions` from `7.0.0` to `8.0.0`,
+  - `Microsoft.Extensions.Logging` from `7.0.0` to `8.0.0`,
+  - `Microsoft.Extensions.Options` from `7.0.1` to `8.0.0`,
+  - `Microsoft.Extensions.Options.ConfigurationExtensions` from `7.0.0` to `8.0.0`,
+  - `Microsoft.Extensions.Primitives` from `7.0.0` to `8.0.0`,
+  - `System.Text.Encodings.Web` from `7.0.0` to `8.0.0`,
+  - `System.Text.Json` from `7.0.3` to `8.0.0`.
+- Following packages updated
+  - `Microsoft.Extensions.Logging.Abstractions` from `7.0.1` to `8.0.0`,
+  - `Microsoft.Extensions.Logging.Configuration` from `7.0.0` to `8.0.0`,
+  - `System.Diagnostics.DiagnosticSource` from `7.0.2` to `8.0.0`.
+
+### Removed
+
+- Removed support for `OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreMetricsInstrumentationOptions`
+  for plugins.
+
+## [1.1.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.1.0)
+
+### Added
+
+- Added support for `Elastic.Transport` traces instrumentation 0.4.16+.
+  `Elastic.Clients.Elasticsearch` 8.10.0+ traces instrumentation is covered by
+  `Elastic.Transport` traces instrumentation.
+- Added `telemetry.distro.name` resource attribute. The value is set to `opentelemetry-dotnet-instrumentation`.
+
+### Changed
+
+- Change telemetry resource attribute name from `telemetry.auto.version` to `telemetry.distro.version`.
+
+#### Dependency updates
+
+- .NET Framework only, `Google.Protobuf` updated from `3.24.3` to `3.24.4`.
+- .NET Framework only, `OpenTelemetry.Instrumentation.AspNet` and
+  `OpenTelemetry.Instrumentation.AspNet.TelemetryHttpModule` updated from
+  `1.0.0-rc9.9` to `1.6.0-beta.1`.
+
+### Fixed
+
+- Fixed log emission issue which resulted in same logs being exported multiple
+  times for ASP.NET Core 6.0 apps when bytecode instrumentation was enabled
+  and `WebApplicationBuilder` was used.
+
+## [1.0.2](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.0.2)
+
+### Fixed
+
+- Fixed log emission issue for ASP.NET Core 6.0 apps and enhanced diagnostics.
+
+## [1.0.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.0.1)
+
+### Changed
+
+#### Dependency updates
+
+- .NET Framework only, `Google.Protobuf` updated from `3.24.2` to `3.24.3`.
+- `OpenTelemetry.ResourceDetectors.Azure` updated from `1.0.0-beta.2` to `1.0.0-beta.3`.
+
+### Fixed
+
+- Fixed Rule checking System.Diagnostics.DiagnosticSource version for net7.0
+  failing on correct configuration [#2950](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2950).
+
+## [1.0.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.0.0)
 
 This release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
 
 - [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-  [`1.5.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.5.0)
+  [`1.6.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.6.0)
+- `System.Diagnostics.DiagnosticSource`: [`7.0.2`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/7.0.2)
+
+### Added
+
+- Added support for Azure SDK traces instrumentation on .NET Framework.
+- Added support for `WCFCLIENT` instrumentation on .NET.
+
+### Changed
+
+- Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.6.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.6.0).
+- [MySql.Data](https://www.nuget.org/packages/MySql.Data/) instrumentation is now
+  supported from version 8.1.0 working on .NET.
+- OpenTracing spans are registered under `opentracing-shim` name
+  instead of `OpenTelemetry.AutoInstrumentation.OpenTracingShim`.
+
+### Removed
+
+- Removed [MySql.Data](https://www.nuget.org/packages/MySql.Data/) instrumentation
+  for versions 6.10.7-8.0.33.
+- Removed support for `OpenTelemetry.Instrumentation.MySqlData.MySqlDataInstrumentationOptions`
+  for plugins.
+
+### Fixed
+
+- Fixed instrumentation loading issue where delayed instrumentation initialization
+  could not bootstrap both traces and metrics.
+  Affected scope: ASP.NET Core and HttpClient instrumentations.
+- Fixed `ILogger` log instrumentation issue that caused logs to be exported
+  multiple times.
+
+## [1.0.0-rc.2](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.0.0-rc.2)
+
+### Added
+
+- Support for Azure App Service resource detector.
+
+- Added `BeforeConfigureTracerProvider`, `BeforeConfigureMeterProvider`,
+  `TracerProviderInitialized` and `MeterProviderInitialized` for plugins.
+  See [plugins documentation](/docs/plugins.md) for details.
+- Added support for Azure SDK traces instrumentation on .NET.
+
+### Changed
+
+- In plugins `ConfigureTracerProvider` and `ConfigureMeterProvider` are changed now
+  to `AfterConfigureTracerProvider` and `AfterConfigureMeterProvider`.
+  See [plugins documentation](/docs/plugins.md) for details.
+- Minimal version of `Grpc.Net.Client` supported on .NET updated to `2.52.0`.
+
+### Fixed
+
+- `OTEL_DOTNET_AUTO_EXCLUDE_PROCESSES` works correctly when .NET CLR Profiler
+  is not enabled.
+- Fixed manual tracing when instrumented project is referencing
+  `System.Diagnostics.DiagnosticSource` `7.0.2`
+  [#2780](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2780).
+
+## [1.0.0-rc.1](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.0.0-rc.1)
+
+This release is built on top of [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet):
+
+- [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
+  [`1.5.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.5.1)
 - `System.Diagnostics.DiagnosticSource`: [`7.0.0`](https://www.nuget.org/packages/System.Diagnostics.DiagnosticSource/7.0.0)
 
 ### Added
@@ -18,11 +198,12 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
 - The environment variable `OTEL_DOTNET_AUTO_FAIL_FAST_ENABLED` could be
   used to enable or disable the failing process when
   automatic instrumentation cannot be executed.
+- Add support for MySqlConnector traces instrumentation.
 
 ### Changed
 
 - Updated [Core components](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/VERSIONING.md#core-components):
-  [`1.5.0`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.5.0).
+  [`1.5.1`](https://github.com/open-telemetry/opentelemetry-dotnet/releases/tag/core-1.5.1).
 - ASP.NET instrumentation no longer requires manual modification
   of config files to include `TelemetryHttpModule`.
 - Parameter for `ConfigureTracesOptions` extension point for StackExchangeRedis
@@ -32,16 +213,18 @@ This release is built on top of [OpenTelemetry .NET](https://github.com/open-tel
   Both supported only on .NET Framework.
 - `WCFCLIENT` and `WCFSERVICE` no longer requires manual modification
   of config files to include `TelemetryEndpointBehaviorExtensionElement`.
-
-### Deprecated
+- [GraphQL](https://www.nuget.org/packages/GraphQL/) instrumentation is now
+  supported from version 7.5.0 working on .NET.
 
 ### Removed
 
 - Removed `WCF` instrumentation for Core WCF Client working on .NET.
+- Removed [GraphQL](https://www.nuget.org/packages/GraphQL/) instrumentation
+  for versions 2.3.0-2.4.*.
 
-### Fixed
+### Known issues
 
-### Security
+- Lack of support for MySql.Data 8.0.33. See [#2542](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/issues/2542).
 
 ## [0.7.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v0.7.0)
 

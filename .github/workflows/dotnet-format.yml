@@ -20,15 +20,12 @@ jobs:
 
     steps:
     - name: check out code
-      uses: actions/checkout@v3.5.3
+      uses: actions/checkout@v4.1.1
 
-    - name: Setup .NET 7.0
+    - name: Setup .NET 8
       uses: actions/setup-dotnet@v3.2.0
       with:
-        dotnet-version: 7.0.304
-
-    - name: Install format tool
-      run: dotnet tool install -g dotnet-format --version "7.*" --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet7/nuget/v3/index.json
+        dotnet-version: 8.0.100
 
     - name: dotnet format
-      run: dotnet-format .\OpenTelemetry.AutoInstrumentation.sln --no-restore --verify-no-changes
+      run: dotnet format .\OpenTelemetry.AutoInstrumentation.sln --no-restore --verify-no-changes

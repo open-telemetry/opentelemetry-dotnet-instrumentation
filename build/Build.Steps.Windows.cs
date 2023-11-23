@@ -33,12 +33,17 @@ partial class Build
             {
                 PerformLegacyRestoreIfNeeded(project);
 
+                var (major, minor, patch) = VersionHelper.GetVersionParts();
+
                 // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
                 MSBuild(s => s
                     .SetTargetPath(project)
                     .SetConfiguration(BuildConfiguration)
                     .SetRestore(!NoRestore)
                     .SetMaxCpuCount(null)
+                    .SetProperty("OTEL_AUTO_VERSION_MAJOR", major)
+                    .SetProperty("OTEL_AUTO_VERSION_MINOR", minor)
+                    .SetProperty("OTEL_AUTO_VERSION_PATCH", patch)
                     .CombineWith(platforms, (m, platform) => m
                         .SetTargetPlatform(platform)));
             }
@@ -109,6 +114,7 @@ partial class Build
     Target PublishIisTestApplications => _ => _
         .Unlisted()
         .After(CompileManagedTests)
+        .After(BuildInstallationScripts)
         .OnlyWhenStatic(() => IsWin && (Containers == ContainersWindows || Containers == ContainersWindowsOnly))
         .Executes(() =>
         {
@@ -130,7 +136,7 @@ partial class Build
     void BuildDockerImage(Project project)
     {
         const string moduleName = "OpenTelemetry.DotNet.Auto.psm1";
-        var sourceModulePath = Solution.Directory / moduleName;
+        var sourceModulePath = InstallationScriptsDirectory / moduleName;
         var localBinDirectory = project.Directory / "bin";
         var localTracerZip = localBinDirectory / "tracer.zip";
 
@@ -251,6 +257,13 @@ partial class Build
 
     private void RunNetFxGacOperation(string operation)
     {
+        // To update the GAC, we need to run the tool as Administrator.
+        // Throw if not running as a Windows Administrator.
+        if (!IsWindowsAdministrator())
+        {
+            throw new InvalidOperationException("This target must be run on Windows as Administrator.");
+        }
+
         var netFxAssembliesFolder = TracerHomeDirectory / MapToFolderOutput(TargetFramework.NET462);
         var installTool = Solution.GetProjectByName(Projects.Tools.GacInstallTool);
 
@@ -258,6 +271,21 @@ partial class Build
             .SetProjectFile(installTool)
             .SetConfiguration(BuildConfiguration)
             .SetApplicationArguments($"{operation} {netFxAssembliesFolder}"));
+
+        static bool IsWindowsAdministrator()
+        {
+            if (!IsWin)
+            {
+                return false;
+            }
+
+#pragma warning disable CA1416 // Validate platform compatibility
+            using var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
+            var principal = new System.Security.Principal.WindowsPrincipal(identity);
+
+            return principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
+#pragma warning restore CA1416 // Validate platform compatibility
+        }
     }
 
     private void PerformLegacyRestoreIfNeeded(Project project)

@@ -45,7 +45,7 @@ public class MockZipkinCollector : IDisposable
 #if NETFRAMEWORK
         _listener = new TestHttpServer(output, HandleHttpRequests, host, "/api/v2/spans/");
 #else
-        _listener = new TestHttpServer(output, HandleHttpRequests, "/api/v2/spans");
+        _listener = new TestHttpServer(output, new PathHandler(HandleHttpRequests, "/api/v2/spans"));
 #endif
     }
 
@@ -81,7 +81,7 @@ public class MockZipkinCollector : IDisposable
         var additionalEntries = new List<ZSpanMock>();
 
         timeout ??= TestTimeout.Expectation;
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
 
         try
         {

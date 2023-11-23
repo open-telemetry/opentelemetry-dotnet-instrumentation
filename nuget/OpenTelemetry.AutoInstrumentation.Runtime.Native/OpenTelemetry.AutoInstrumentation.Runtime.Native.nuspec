@@ -2,7 +2,9 @@
 <package>
   <metadata>
     <id>OpenTelemetry.AutoInstrumentation.Runtime.Native</id>
-    <description>Native runtime components used by the OpenTelmetry.AutoInstrumentation project.</description>
+    <description>Native runtime components used by the OpenTelemetry.AutoInstrumentation project.</description>
+    <icon>images\opentelemetry-icon-color.png</icon>
+    <readme>docs\README.md</readme>
 
     <!-- Common properties expected to be defined at build time -->
     <version>$NuGetPackageVersion$</version>
@@ -13,9 +15,16 @@
     <!-- URI based properties -->
     <projectUrl>https://opentelemetry.io/</projectUrl>
     <tags>O11y Observability OpenTelemetry OTel Logs Metrics Monitoring Telemetry Tracing Auto Automatic Instrumentation</tags>
-    <repository type="git" url="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation" />
+    <repository type="git" url="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation" commit="$CommitId$"/>
 
     <!-- Runtime files are added this file folder via a nuke build target -->
 
   </metadata>
+
+  <files>
+    <file src="**\*" target="\" />
+    <file src="..\..\opentelemetry-icon-color.png" target="images\opentelemetry-icon-color.png" />
+    <file src="..\..\src\OpenTelemetry.AutoInstrumentation.Native\README.md" target="docs\README.md" />
+  </files>
+
 </package>

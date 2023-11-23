@@ -15,6 +15,7 @@
 // </copyright>
 
 using System.Runtime.CompilerServices;
+using OpenTelemetry.ResourceDetectors.Azure;
 using OpenTelemetry.ResourceDetectors.Container;
 using OpenTelemetry.Resources;
 
@@ -32,7 +33,8 @@ internal static class ResourceConfigurator
             .AddTelemetrySdk()
             .AddAttributes(new KeyValuePair<string, object>[]
             {
-                new(Constants.Tracer.AutoInstrumentationVersionName, Constants.Tracer.Version)
+                new(Constants.DistributionAttributes.TelemetryDistroNameAttributeName, Constants.DistributionAttributes.TelemetryDistroNameAttributeValue),
+                new(Constants.DistributionAttributes.TelemetryDistroVersionAttributeName, AutoInstrumentationVersion.Version)
             });
 
         foreach (var enabledResourceDetector in enabledResourceDetectors)
@@ -40,7 +42,8 @@ internal static class ResourceConfigurator
             resourceBuilder = enabledResourceDetector switch
             {
                 ResourceDetector.Container => Wrappers.AddContainerResourceDetector(resourceBuilder),
-                _ => resourceBuilder,
+                ResourceDetector.AzureAppService => Wrappers.AddAzureAppServiceResourceDetector(resourceBuilder),
+                _ => resourceBuilder
             };
         }
 
@@ -66,6 +69,12 @@ internal static class ResourceConfigurator
         public static ResourceBuilder AddContainerResourceDetector(ResourceBuilder resourceBuilder)
         {
             return resourceBuilder.AddDetector(new ContainerResourceDetector());
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static ResourceBuilder AddAzureAppServiceResourceDetector(ResourceBuilder resourceBuilder)
+        {
+            return resourceBuilder.AddDetector(new AppServiceResourceDetector());
         }
     }
 }

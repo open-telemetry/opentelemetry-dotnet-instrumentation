@@ -35,6 +35,8 @@ public class MockLogsCollector : IDisposable
     private readonly BlockingCollection<LogRecord> _logs = new(100); // bounded to avoid memory leak
     private readonly List<Expectation> _expectations = new();
 
+    private CollectedExpectation? _collectedExpectation;
+
     public MockLogsCollector(ITestOutputHelper output, string host = "localhost")
     {
         _output = output;
@@ -42,7 +44,7 @@ public class MockLogsCollector : IDisposable
 #if NETFRAMEWORK
         _listener = new(output, HandleHttpRequests, host, "/v1/logs/");
 #else
-        _listener = new(output, HandleHttpRequests, "/v1/logs");
+        _listener = new(output, new PathHandler(HandleHttpRequests, "/v1/logs"));
 #endif
     }
 
@@ -68,6 +70,26 @@ public class MockLogsCollector : IDisposable
         _expectations.Add(new Expectation(predicate, description));
     }
 
+    public void ExpectCollected(Func<ICollection<LogRecord>, bool> collectedExpectation, string description)
+    {
+        _collectedExpectation = new(collectedExpectation, description);
+    }
+
+    public void AssertCollected()
+    {
+        if (_collectedExpectation == null)
+        {
+            throw new InvalidOperationException("Expectation for collected logs was not set");
+        }
+
+        var collected = _logs.ToArray();
+
+        if (!_collectedExpectation.Predicate(collected))
+        {
+            FailCollectedExpectation(_collectedExpectation.Description, collected);
+        }
+    }
+
     public void AssertExpectations(TimeSpan? timeout = null)
     {
         if (_expectations.Count == 0)
@@ -80,7 +102,7 @@ public class MockLogsCollector : IDisposable
         var additionalEntries = new List<LogRecord>();
 
         timeout ??= TestTimeout.Expectation;
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
 
         try
         {
@@ -132,6 +154,19 @@ public class MockLogsCollector : IDisposable
         {
             Assert.Fail($"Expected nothing, but got: {logRecord}");
         }
+    }
+
+    private static void FailCollectedExpectation(string? collectedExpectationDescription, LogRecord[] collectedLogRecords)
+    {
+        var message = new StringBuilder();
+        message.AppendLine($"Collected logs expectation failed: {collectedExpectationDescription}");
+        message.AppendLine("Collected logs:");
+        foreach (var logRecord in collectedLogRecords)
+        {
+            message.AppendLine($"    \"{logRecord}\"");
+        }
+
+        Assert.Fail(message.ToString());
     }
 
     private static void FailExpectations(
@@ -212,6 +247,19 @@ public class MockLogsCollector : IDisposable
         }
 
         public Func<LogRecord, bool> Predicate { get; }
+
+        public string? Description { get; }
+    }
+
+    private class CollectedExpectation
+    {
+        public CollectedExpectation(Func<ICollection<LogRecord>, bool> predicate, string? description)
+        {
+            Predicate = predicate;
+            Description = description;
+        }
+
+        public Func<ICollection<LogRecord>, bool> Predicate { get; }
 
         public string? Description { get; }
     }

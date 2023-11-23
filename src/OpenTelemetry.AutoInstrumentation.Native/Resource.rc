@@ -50,9 +50,17 @@ END
 // Version
 //
 
+#define STRTMP3(V1, V2, V3) #V1 "." #V2 "." #V3
+#define STR3(V1, V2, V3) STRTMP3(V1, V2, V3)
+#define STRTMP4(V1, V2, V3, V4) #V1 "." #V2 "." #V3 "." #V4
+#define STR4(V1, V2, V3, V4) STRTMP4(V1, V2, V3, V4)
+#define VERSION_3PARTS STR3(OTEL_AUTO_VERSION_MAJOR, OTEL_AUTO_VERSION_MINOR, OTEL_AUTO_VERSION_PATCH)
+#define VERSION_4PARTS STR4(OTEL_AUTO_VERSION_MAJOR, OTEL_AUTO_VERSION_MINOR, OTEL_AUTO_VERSION_PATCH, 0)
+#define FILEVERSIONCOMMA OTEL_AUTO_VERSION_MAJOR,OTEL_AUTO_VERSION_MINOR,OTEL_AUTO_VERSION_PATCH,0
+
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,7,0,0
- PRODUCTVERSION 0,7,0,0
+ FILEVERSION FILEVERSIONCOMMA
+ PRODUCTVERSION FILEVERSIONCOMMA
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -69,12 +77,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "The OpenTelemetry Authors"
             VALUE "FileDescription", "OpenTelemetry CLR Profiler"
-            VALUE "FileVersion", "0.7.0.0"
+            VALUE "FileVersion", VERSION_4PARTS
             VALUE "InternalName", "OpenTelemetry.AutoInstrumentation.Native.DLL"
-            VALUE "LegalCopyright", "Copyright 2021 The OpenTelemetry Authors"
+            VALUE "LegalCopyright", "Copyright The OpenTelemetry Authors"
             VALUE "OriginalFilename", "OpenTelemetry.AutoInstrumentation.Native.DLL"
             VALUE "ProductName", "OpenTelemetry .NET AutoInstrumentation"
-            VALUE "ProductVersion", "0.7.0"
+            VALUE "ProductVersion", VERSION_3PARTS
         END
     END
     BLOCK "VarFileInfo"

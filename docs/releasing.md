@@ -6,16 +6,7 @@
 
 1. Update the version in the following files:
 
-   - [`OpenTelemetry.DotNet.Auto.psm1`](../OpenTelemetry.DotNet.Auto.psm1)
-   - [`otel-dotnet-auto-install.sh`](../otel-dotnet-auto-install.sh)
    - [`docs/README.md`](./README.md)
-   - [`build/Build.cs`](../build/Build.cs)
-   - [`src/Directory.Build.props`](../src/Directory.Build.props)
-   - [`src/OpenTelemetry.AutoInstrumentation/Constants.cs`](../src/OpenTelemetry.AutoInstrumentation/Constants.cs)
-   - [`src/OpenTelemetry.AutoInstrumentation.Native/CMakeLists.txt`](../src/OpenTelemetry.AutoInstrumentation.Native/CMakeLists.txt)
-   - [`src/OpenTelemetry.AutoInstrumentation.Native/Resource.rc`](../src/OpenTelemetry.AutoInstrumentation.Native/Resource.rc)
-   - [`src/OpenTelemetry.AutoInstrumentation.Native/otel_profiler_constants.h`](../src/OpenTelemetry.AutoInstrumentation.Native/otel_profiler_constants.h)
-   - [`src/OpenTelemetry.AutoInstrumentation.Native/version.h`](../src/OpenTelemetry.AutoInstrumentation.Native/version.h)
 
 1. Update the [CHANGELOG.md](../CHANGELOG.md) with the new release.
 
@@ -53,7 +44,15 @@
 
 1. Check the status of [the `release-publish` GitHub workflow](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/actions/workflows/release-publish.yml).
 
-1. For a non-RC and non-beta release, update the version in:
+1. If the `release-publish` GitHub workflow succeeds, publish the NuGet packages:
+    1. Unzip `opentelemetry-dotnet-instrumentation-nuget-packages.zip` to a local
+    folder.
+    1. Upload and publish the packages (`.nupkg`)
+       and corresponding symbol packages (`.snupkg`) to nuget.org.
+
+1. For a stable release, update the version in:
 
    - [`examples/demo/Dockerfile`](../examples/demo/Dockerfile)
    - [OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator/blob/main/autoinstrumentation/dotnet/version.txt)
+
+1. For a stable release, update documentation under [opentelemetry.io](https://github.com/open-telemetry/opentelemetry.io/tree/main/content/en/docs/instrumentation/net/automatic).

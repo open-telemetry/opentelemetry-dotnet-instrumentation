@@ -25,7 +25,7 @@ public class SqlClientMicrosoftTests : TestHelper
     private readonly SqlServerFixture _sqlServerFixture;
 
     public SqlClientMicrosoftTests(ITestOutputHelper output, SqlServerFixture sqlServerFixture)
-        : base("SqlClient", output)
+        : base("SqlClient.Microsoft", output)
     {
         _sqlServerFixture = sqlServerFixture;
     }
@@ -34,9 +34,9 @@ public class SqlClientMicrosoftTests : TestHelper
     {
 #if NETFRAMEWORK
         // 3.1.2 is not supported on .NET Framework. For details check: https://github.com/open-telemetry/opentelemetry-dotnet/issues/4243
-        return LibraryVersion.SqlClient.Where(x => x.First().ToString() != "3.1.2");
+        return LibraryVersion.SqlClientMicrosoft.Where(x => x.First().ToString() != "3.1.2");
 #else
-        return LibraryVersion.SqlClient;
+        return LibraryVersion.SqlClientMicrosoft;
 #endif
     }
 

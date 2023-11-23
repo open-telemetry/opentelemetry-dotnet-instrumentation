@@ -48,9 +48,11 @@ partial class Build
     };
 
     private static readonly IEnumerable<TargetFramework> TestFrameworks = TargetFrameworks
-        .Concat(new[] {
-            TargetFramework.NET7_0
-        });
+        .Concat(TargetFramework.NET7_0
+#if  NET8_0_OR_GREATER
+            , TargetFramework.NET8_0
+#endif
+            );
 
     Target CreateRequiredDirectories => _ => _
         .Unlisted()
@@ -87,8 +89,7 @@ partial class Build
                 {
                     DotNetRestore(s =>
                          Restore(s)
-                        .CombineWith(libraryVersions, (p, libraryVersion) =>
-                                p.SetProperty("LibraryVersion", libraryVersion)));
+                         .CombineWithBuildInfos(libraryVersions));
                 }
                 else
                 {
@@ -100,8 +101,8 @@ partial class Build
             {
                 // Projects using `packages.config` can't be restored via "dotnet restore", use a NuGet Task to restore these projects.
                 var legacyRestoreProjects = Solution.GetNativeProjects()
-                    .Concat(new[] { Solution.GetProjectByName(Projects.Tests.Applications.AspNet) })
-                    .Concat(new[] { Solution.GetProjectByName(Projects.Tests.Applications.WcfIis) });
+                    .Concat(Solution.GetProjectByName(Projects.Tests.Applications.AspNet))
+                    .Concat(Solution.GetProjectByName(Projects.Tests.Applications.WcfIis));
 
                 RestoreLegacyNuGetPackagesConfig(legacyRestoreProjects);
             }
@@ -200,8 +201,7 @@ partial class Build
                 {
                     DotNetBuild(x =>
                          BuildTestApplication(x)
-                        .CombineWith(libraryVersions, (p, libraryVersion) =>
-                            p.SetProperty("LibraryVersion", libraryVersion)));
+                         .CombineWithBuildInfos(libraryVersions));
                 }
                 else
                 {
@@ -418,6 +418,7 @@ partial class Build
             var unitTestProjects = new[]
             {
                 Solution.GetProjectByName(Projects.Tests.AutoInstrumentationLoaderTests),
+                Solution.GetProjectByName(Projects.Tests.AutoInstrumentationStartupHookTests),
                 Solution.GetProjectByName(Projects.Tests.AutoInstrumentationTests)
             };
 
@@ -533,12 +534,16 @@ partial class Build
                     depsJson.RemoveDuplicatedLibraries(architectureStores);
                     depsJson.RemoveOpenTelemetryLibraries();
 
+                    // To allow roll forward for applications, like Roslyn, that target one tfm
+                    // but have a later runtime move the libraries under the original tfm folder
+                    // to the latest one.
                     if (folderRuntimeName == TargetFramework.NET6_0)
                     {
-                        // To allow roll forward for applications, like Roslyn, that target one tfm
-                        // but have a later runtime move the libraries under the original tfm folder
-                        // to the latest one.
-                        depsJson.RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET7_0, architectureStores);
+                        depsJson.RollFrameworkForward(TargetFramework.NET6_0, TargetFramework.NET8_0, architectureStores);
+                    }
+                    else if (folderRuntimeName == TargetFramework.NET7_0 || folderRuntimeName == TargetFramework.NET8_0)
+                    {
+                        depsJson.RollFrameworkForward(TargetFramework.NET7_0, TargetFramework.NET8_0, architectureStores);
                     }
 
                     // Write the updated deps.json file.
@@ -559,16 +564,17 @@ partial class Build
         .Executes(() =>
         {
             var netPath = TracerHomeDirectory / "net";
-            var fileInfoList = new List<object>();
             var files = Directory.GetFiles(netPath);
+            var fileInfoList = new List<object>(files.Length);
 
             foreach (string file in files)
             {
                 var fileName = Path.GetFileNameWithoutExtension(file);
-                var fileVersion = FileVersionInfo.GetVersionInfo(file).FileVersion;
 
-                if (fileName.StartsWith("OpenTelemetry.") && !fileName.StartsWith("OpenTelemetry.Api") && !fileName.StartsWith("OpenTelemetry.AutoInstrumentation"))
+                if (fileName == "System.Diagnostics.DiagnosticSource" ||
+                    (fileName.StartsWith("OpenTelemetry.") && !fileName.StartsWith("OpenTelemetry.Api") && !fileName.StartsWith("OpenTelemetry.AutoInstrumentation")))
                 {
+                    var fileVersion = FileVersionInfo.GetVersionInfo(file).FileVersion;
                     fileInfoList.Add(new
                     {
                         FileName = fileName,
@@ -577,8 +583,15 @@ partial class Build
                 }
             }
 
-            string jsonContent = JsonSerializer.Serialize(fileInfoList);
-            File.WriteAllText(Path.Combine(netPath, "ruleEngine.json"), jsonContent);
+            JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
+            string jsonContent = JsonSerializer.Serialize(fileInfoList, options);
+
+            var ruleEngineJsonFilePath = netPath / "ruleEngine.json";
+            File.WriteAllText(ruleEngineJsonFilePath, jsonContent);
+
+            var ruleEngineJsonNugetFilePath = RootDirectory / "nuget" / "OpenTelemetry.AutoInstrumentation" / "contentFiles" / "any" / "any" / "RuleEngine.json";
+            File.Delete(ruleEngineJsonNugetFilePath);
+            File.Copy(ruleEngineJsonFilePath, ruleEngineJsonNugetFilePath);
         });
 
     Target InstallDocumentationTools => _ => _

@@ -27,6 +27,7 @@ internal class SqlClientInitializer
     public SqlClientInitializer(LazyInstrumentationLoader lazyInstrumentationLoader, PluginManager pluginManager)
     {
         _pluginManager = pluginManager;
+        lazyInstrumentationLoader.Add(new GenericInitializer("System.Data.SqlClient", InitializeOnFirstCall));
         lazyInstrumentationLoader.Add(new GenericInitializer("Microsoft.Data.SqlClient", InitializeOnFirstCall));
 
 #if NETFRAMEWORK

@@ -16,7 +16,6 @@
 
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
-using OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL;
 using OpenTelemetry.Logs;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
@@ -26,6 +25,15 @@ namespace OpenTelemetry.AutoInstrumentation.Configurations;
 /// </summary>
 internal partial class ConfigurationKeys
 {
+    /// <summary>
+    /// Configuration key for enabling profiler.
+    /// </summary>
+#if NETFRAMEWORK
+    public const string ProfilingEnabled = "COR_ENABLE_PROFILING";
+#else
+    public const string ProfilingEnabled = "CORECLR_ENABLE_PROFILING";
+#endif
+
     /// <summary>
     /// Configuration key for the OTLP protocol to be used.
     /// Default is <c>"http/protobuf"</c>.
@@ -125,7 +133,6 @@ internal partial class ConfigurationKeys
         {
             /// <summary>
             /// Configuration key for GraphQL instrumentation to enable passing query as a document attribute.
-            /// See <see cref="GraphQLTags.Document"/>.
             /// </summary>
             public const string GraphQLSetDocument = "OTEL_DOTNET_AUTO_GRAPHQL_SET_DOCUMENT";
         }

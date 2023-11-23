@@ -1,44 +1,11 @@
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn.CallTargetReturn() -> void
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.CallTargetReturn() -> void
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.CallTargetReturn(T returnValue) -> void
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.GetReturnValue() -> T
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.Activity.get -> System.Diagnostics.Activity?
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState() -> void
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity! activity) -> void
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity! activity, object! state, System.DateTimeOffset? startTime) -> void
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity? activity, object! state) -> void
-OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.State.get -> object?
-OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType
-OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.Instance.get -> object!
-OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.ToString() -> string!
-OpenTelemetry.AutoInstrumentation.DuckTyping.IDuckType.Type.get -> System.Type!
-OpenTelemetry.AutoInstrumentation.Instrumentations.GraphQL.ExecuteAsyncIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.Logger.LoggingBuilderIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.MongoDB.MongoClientIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.MySqlData.MySqlConnectionStringBuilderIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.NServiceBus.EndpointConfigurationIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegration
-OpenTelemetry.AutoInstrumentation.Instrumentations.StackExchangeRedis.StackExchangeRedisIntegrationAsync
-override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.ToString() -> string!
-override OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.ToString() -> string!
-static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8>(TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3, ref TArg4 arg4, ref TArg5 arg5, ref TArg6 arg6, ref TArg7 arg7, ref TArg8 arg8) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
-static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7>(TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3, ref TArg4 arg4, ref TArg5 arg5, ref TArg6 arg6, ref TArg7 arg7) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
-static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6>(TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3, ref TArg4 arg4, ref TArg5 arg5, ref TArg6 arg6) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
-static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4, TArg5>(TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3, ref TArg4 arg4, ref TArg5 arg5) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
-static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3, TArg4>(TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3, ref TArg4 arg4) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
-static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2, TArg3>(TTarget instance, ref TArg1 arg1, ref TArg2 arg2, ref TArg3 arg3) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
-static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1, TArg2>(TTarget instance, ref TArg1 arg1, ref TArg2 arg2) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
-static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget, TArg1>(TTarget instance, ref TArg1 arg1) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
-static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget>(TTarget instance) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
-static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.BeginMethod<TIntegration, TTarget>(TTarget instance, object![]! arguments) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
-static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.EndMethod<TIntegration, TTarget, TReturn>(TTarget instance, TReturn returnValue, System.Exception! exception, in OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState state) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<TReturn?>
-static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.EndMethod<TIntegration, TTarget>(TTarget instance, System.Exception! exception, in OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState state) -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn
-static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.GetDefaultValue<T>() -> T?
-static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker.LogException<TIntegration, TTarget>(System.Exception! exception) -> void
-static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn.GetDefault() -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn
-static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>.GetDefault() -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn<T>
-static OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.GetDefault() -> OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity? activity, object? state) -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity? activity, object? state, System.DateTimeOffset? startTime) -> void
+OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.StartTime.get -> System.DateTimeOffset?
+OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerCloseIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerConstructorIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerConsumeSyncIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerDisposeIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ProducerDeliveryHandlerActionIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ProducerProduceSyncIntegration
+*REMOVED*OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity? activity, object! state) -> void
+*REMOVED*OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity! activity, object! state, System.DateTimeOffset? startTime) -> void

@@ -36,7 +36,6 @@ partial class Build
                 DotNetPack(x => x
                     .SetProject(project)
                     .SetConfiguration(BuildConfiguration)
-                    .SetVersionSuffix(NuGetVersionSuffix)
                     .SetOutputDirectory(NuGetArtifactsDirectory));
             }
         });
@@ -52,7 +51,7 @@ partial class Build
             var requiredArtifacts = new string[]
             {
                 "bin-alpine/linux-musl-x64",
-                "bin-centos/linux-x64",
+                "bin-ubuntu-20.04/linux-x64",
                 "bin-macos-11/osx-x64",
                 "bin-windows-2022/win-x64",
                 "bin-windows-2022/win-x86"
@@ -112,11 +111,14 @@ partial class Build
             // Keeping common values here and using them as properties
             var nuspecCommonProperties = new Dictionary<string, object>
             {
-                { "NoWarn", "NU5128" },
+                // NU5104: "A stable release of a package should not have a prerelease dependency."
+                // NU5128: "Some target frameworks declared in the dependencies group of the nuspec and the lib/ref folder do not have exact matches in the other location."
+                { "NoWarn", "NU5104;NU5128" },
                 { "NuGetLicense", "Apache-2.0" },
-                { "NuGetPackageVersion", $"{NuGetBaseVersionNumber}{NuGetVersionSuffix}" },
+                { "NuGetPackageVersion", VersionHelper.GetVersion() },
                 { "NuGetRequiredLicenseAcceptance", "true" },
-                { "OpenTelemetryAuthors", "OpenTelemetry Authors" }
+                { "OpenTelemetryAuthors", "OpenTelemetry Authors" },
+                { "CommitId", VersionHelper.GetCommitId() }
             };
 
             var nuspecSolutionFolder = Solution.GetSolutionFolder("nuget")
@@ -147,13 +149,28 @@ partial class Build
         .Description("Builds the TestApplications.* used by the NuGetPackagesTests")
         .Executes(() =>
         {
+            string MapToNet8RuntimeIdentifiers(string oldRuntimeIdentifier)
+            {
+#if NET8_0_OR_GREATER
+                return oldRuntimeIdentifier;
+#else
+                switch (oldRuntimeIdentifier)
+                {
+                    case "ubuntu.20.04-x64": return "linux-x64";
+                    case "osx.11.0-x64": return "osx-x64";
+                    case "win10-x64": return "win-x64";
+                }
+                throw new NotSupportedException($"{oldRuntimeIdentifier} is not supported. Extend MapToNet8RuntimeIdentifiers.");
+#endif
+            }
+
             foreach (var packagesTestApplicationProject in Solution.GetNuGetPackagesTestApplications())
             {
                 // Unlike the integration apps these require a restore step.
                 DotNetBuild(s => s
                     .SetProjectFile(packagesTestApplicationProject)
-                    .SetProperty("NuGetPackageVersion", $"{NuGetBaseVersionNumber}{NuGetVersionSuffix}")
-                    .SetRuntime(RuntimeInformation.RuntimeIdentifier)
+                    .SetProperty("NuGetPackageVersion", VersionHelper.GetVersion())
+                    .SetRuntime(MapToNet8RuntimeIdentifiers(RuntimeInformation.RuntimeIdentifier))
                     .SetConfiguration(BuildConfiguration)
                     .SetPlatform(Platform));
             }
