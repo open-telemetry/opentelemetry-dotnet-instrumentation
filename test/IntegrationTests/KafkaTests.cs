@@ -52,7 +52,7 @@ public class KafkaTests : TestHelper
         // For 1.4.0 null is returned when attempting to read from non-existent topic,
         // and no exception is thrown,
         // instrumentation creates no span in such case.
-        if (packageVersion == "2.3.0")
+        if (packageVersion == string.Empty || Version.Parse(packageVersion) >= new Version(2, 3, 0))
         {
             // Failed consume attempt.
             collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Consumer && ValidateConsumeExceptionSpan(span, topicName), "Failed Consume attempt.");
