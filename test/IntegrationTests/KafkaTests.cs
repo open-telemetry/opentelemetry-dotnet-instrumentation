@@ -45,9 +45,9 @@ public class KafkaTests : TestHelper
         SetExporter(collector);
 
         // Failed produce attempts made before topic is created.
-        collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProduceExceptionSpan(span, topicName), "Failed Produce attempt with delivery handler set.");
+        collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateResultProcessingProduceExceptionSpan(span, topicName), "Failed Produce attempt with delivery handler set.");
         collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProduceExceptionSpan(span, topicName), "Failed Produce attempt without delivery handler set.");
-        collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateProduceExceptionSpan(span, topicName), "Failed ProduceAsync attempt.");
+        collector.Expect(KafkaInstrumentationScopeName, span => span.Kind == Span.Types.SpanKind.Producer && ValidateResultProcessingProduceExceptionSpan(span, topicName), "Failed ProduceAsync attempt.");
 
         // For 1.4.0 null is returned when attempting to read from non-existent topic,
         // and no exception is thrown,
@@ -99,12 +99,24 @@ public class KafkaTests : TestHelper
                consumerGroupId == $"test-consumer-group-{topicName}";
     }
 
+    private static bool ValidateBasicProduceExceptionSpanExpectations(Span span, string topicName)
+    {
+        return ValidateCommonTags(span.Attributes, topicName, "rdkafka#producer-1", "publish", -1, "testkey") &&
+               span.Status.Code == Status.Types.StatusCode.Error;
+    }
+
     private static bool ValidateProduceExceptionSpan(Span span, string topicName)
     {
-        var expectedOffset = span.Attributes.SingleOrDefault(kv => kv.Key == "messaging.kafka.message.offset")?.Value.IntValue;
-        return ValidateCommonTags(span.Attributes, topicName, "rdkafka#producer-1", "publish", -1, "testkey") &&
-               expectedOffset == InvalidOffset &&
-               span.Status.Code == Status.Types.StatusCode.Error;
+        return ValidateBasicProduceExceptionSpanExpectations(span, topicName) &&
+               span.Attributes.Count(kv => kv.Key == "messaging.kafka.message.offset") == 0;
+    }
+
+    private static bool ValidateResultProcessingProduceExceptionSpan(Span span, string topicName)
+    {
+        // DeliveryResult processing results in offset being set.
+        var offset = span.Attributes.SingleOrDefault(kv => kv.Key == "messaging.kafka.message.offset")?.Value.IntValue;
+        return ValidateBasicProduceExceptionSpanExpectations(span, topicName) &&
+               offset == InvalidOffset;
     }
 
     private static bool ValidateProducerSpan(Span span, string topicName, int partition, bool tombstoneExpected = false)
