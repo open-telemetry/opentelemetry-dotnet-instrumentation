@@ -586,6 +586,36 @@ function Get-OpenTelemetryInstallVersion() {
     }
 }
 
+<#
+    .SYNOPSIS
+    Enables OpenTelemetry .NET Automatic Instrumentation for IIS AppPool
+    .PARAMETER AppPoolName
+    IIS AppPool name
+#>
+function Enable-OpenTelemetryForIISAppPool() {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$AppPoolName
+    ) 
+
+    Remove-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -filter "system.applicationHost/applicationPools/add[@name='$($AppPoolName)']/environmentVariables" -name "." -AtElement @{name='COR_ENABLE_PROFILING'}
+}
+
+<#
+    .SYNOPSIS
+    Disables OpenTelemetry .NET Automatic Instrumentation for IIS AppPool
+    .PARAMETER AppPoolName
+    IIS AppPool name
+#>
+function Disable-OpenTelemetryForIISAppPool() {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$AppPoolName
+    )
+
+    Add-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -filter "system.applicationHost/applicationPools/add[@name='$($AppPoolName)']/environmentVariables" -name "." -value @{name='COR_ENABLE_PROFILING';value='0'}
+}
+
 Export-ModuleMember -Function Install-OpenTelemetryCore
 Export-ModuleMember -Function Register-OpenTelemetryForIIS
 Export-ModuleMember -Function Register-OpenTelemetryForWindowsService
@@ -597,3 +627,5 @@ Export-ModuleMember -Function Unregister-OpenTelemetryForWindowsService
 Export-ModuleMember -Function Unregister-OpenTelemetryForCurrentSession
 Export-ModuleMember -Function Get-OpenTelemetryInstallDirectory
 Export-ModuleMember -Function Get-OpenTelemetryInstallVersion
+Export-ModuleMember -Function Enable-OpenTelemetryForIISAppPool
+Export-ModuleMember -Function Disable-OpenTelemetryForIISAppPool
