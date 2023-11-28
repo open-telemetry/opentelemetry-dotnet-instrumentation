@@ -14,11 +14,10 @@
 // limitations under the License.
 // </copyright>
 
-using System.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.CallTarget;
 using OpenTelemetry.AutoInstrumentation.DuckTyping;
 using OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
-using OpenTelemetry.Context.Propagation;
+using OpenTelemetry.AutoInstrumentation.Util;
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
 
@@ -51,9 +50,9 @@ public static class ConsumerConsumeSyncIntegration
     internal static CallTargetReturn<TResponse> OnMethodEnd<TTarget, TResponse>(TTarget instance, TResponse response, Exception? exception, in CallTargetState state)
     {
         IConsumeResult? consumeResult;
-        if (exception is not null && exception.TryDuckCast<IResultException>(out var resultException))
+        if (exception is not null && exception.TryDuckCast<IConsumeException>(out var consumeException))
         {
-            consumeResult = resultException.ConsumerRecord;
+            consumeResult = consumeException.ConsumerRecord;
         }
         else
         {
@@ -65,37 +64,10 @@ public static class ConsumerConsumeSyncIntegration
             return new CallTargetReturn<TResponse>(response);
         }
 
-        var propagatedContext = Propagators.DefaultTextMapPropagator.Extract(default, consumeResult, KafkaCommon.MessageHeaderValueGetter);
-        string? spanName = null;
-        if (!string.IsNullOrEmpty(consumeResult.Topic))
+        var activity = KafkaInstrumentation.StartConsumerActivity(consumeResult, (DateTimeOffset)state.StartTime!, instance!);
+        if (exception is not null)
         {
-            spanName = $"{consumeResult.Topic} {MessagingAttributes.Values.ReceiveOperationName}";
-        }
-
-        spanName ??= MessagingAttributes.Values.ReceiveOperationName;
-
-        var activityLinks = propagatedContext.ActivityContext.IsValid()
-                ? new[] { new ActivityLink(propagatedContext.ActivityContext) }
-                : Array.Empty<ActivityLink>();
-        var startTime = (DateTimeOffset)state.StartTime!;
-        var activity = KafkaCommon.Source.StartActivity(name: spanName, kind: ActivityKind.Consumer, links: activityLinks, startTime: startTime);
-
-        if (activity is { IsAllDataRequested: true })
-        {
-            KafkaCommon.SetCommonAttributes(
-                activity,
-                MessagingAttributes.Values.ReceiveOperationName,
-                consumeResult.Topic,
-                consumeResult.Partition,
-                consumeResult.Message?.Key,
-                instance.DuckCast<INamedClient>());
-
-            activity.SetTag(MessagingAttributes.Keys.Kafka.PartitionOffset, consumeResult.Offset.Value);
-
-            if (ConsumerCache.TryGet(instance!, out var groupId))
-            {
-                activity.SetTag(MessagingAttributes.Keys.Kafka.ConsumerGroupId, groupId);
-            }
+            activity.SetException(exception);
         }
 
         activity?.Stop();

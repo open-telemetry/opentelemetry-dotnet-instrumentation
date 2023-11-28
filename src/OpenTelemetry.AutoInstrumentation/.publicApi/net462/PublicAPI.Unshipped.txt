@@ -6,6 +6,7 @@ OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerCo
 OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerConsumeSyncIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ConsumerDisposeIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ProducerDeliveryHandlerActionIntegration
+OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ProducerProduceAsyncIntegration
 OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations.ProducerProduceSyncIntegration
 *REMOVED*OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity? activity, object! state) -> void
 *REMOVED*OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState.CallTargetState(System.Diagnostics.Activity! activity, object! state, System.DateTimeOffset? startTime) -> void

@@ -1,4 +1,4 @@
-// <copyright file="IDeliveryReport.cs" company="OpenTelemetry Authors">
+// <copyright file="IConsumeException.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,8 +16,8 @@
 
 namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.DuckTypes;
 
-// wraps https://github.com/confluentinc/confluent-kafka-dotnet/blob/07de95ed647af80a0db39ce6a8891a630423b952/src/Confluent.Kafka/DeliveryReport.cs
-internal interface IDeliveryReport : IDeliveryResult
+// wraps https://github.com/confluentinc/confluent-kafka-dotnet/blob/07de95ed647af80a0db39ce6a8891a630423b952/src/Confluent.Kafka/ConsumeException.cs
+internal interface IConsumeException
 {
-    IError? Error { get; set; }
+    public IConsumeResult? ConsumerRecord { get; set; }
 }

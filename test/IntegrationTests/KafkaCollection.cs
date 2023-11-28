@@ -96,6 +96,7 @@ public class KafkaFixture : IAsyncLifetime
             .WithName(KafkaContainerName)
             .WithPortBinding(KafkaPort)
             .WithEnvironment("KAFKA_BROKER_ID", "1")
+            .WithEnvironment("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "false")
             .WithEnvironment("KAFKA_ZOOKEEPER_CONNECT", $"{zookeeperContainerName}:{ZookeeperClientPort}")
             .WithEnvironment("KAFKA_ADVERTISED_LISTENERS", $"PLAINTEXT://{KafkaContainerName}:29092,PLAINTEXT_HOST://localhost:{KafkaPort}")
             .WithEnvironment("KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT")

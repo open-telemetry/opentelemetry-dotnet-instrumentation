@@ -36,6 +36,8 @@ namespace OpenTelemetry.AutoInstrumentation.Instrumentations.Kafka.Integrations;
     type: InstrumentationType.Trace)]
 public static class ConsumerConstructorIntegration
 {
+    private const string ConsumerGroupIdConfigKey = "group.id";
+
     internal static CallTargetState OnMethodBegin<TTarget, TConsumerBuilder>(TTarget instance, TConsumerBuilder consumerBuilder)
     where TConsumerBuilder : IConsumerBuilder, IDuckType
     {
@@ -54,7 +56,7 @@ public static class ConsumerConstructorIntegration
             {
                 if (string.Equals(
                         keyValuePair.Key,
-                        KafkaCommon.ConsumerGroupIdConfigKey,
+                        ConsumerGroupIdConfigKey,
                         StringComparison.OrdinalIgnoreCase))
                 {
                     consumerGroupId = keyValuePair.Value;

@@ -102,12 +102,7 @@ public static class ProducerDeliveryHandlerActionIntegration
                     activity.SetException(new Exception(deliveryReport.Error.ToString()));
                 }
 
-                // Set the final partition message was delivered to.
-                activity.SetTag(MessagingAttributes.Keys.Kafka.Partition, deliveryReport.Partition.Value);
-
-                activity.SetTag(
-                        MessagingAttributes.Keys.Kafka.PartitionOffset,
-                        deliveryReport.Offset.Value);
+                KafkaInstrumentation.SetDeliveryResults(activity, deliveryReport);
             }
 
             try

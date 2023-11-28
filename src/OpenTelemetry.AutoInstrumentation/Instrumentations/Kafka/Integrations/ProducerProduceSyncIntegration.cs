@@ -43,43 +43,18 @@ public static class ProducerProduceSyncIntegration
         TTarget instance, TTopicPartition topicPartition, TMessage message, TDeliveryHandler deliveryHandler)
         where TMessage : IKafkaMessage, IDuckType
     {
-        // duck type created for message is a struct
-        if (message.Instance is null || topicPartition is null || !topicPartition.TryDuckCast<ITopicPartition>(out var duckTypedTopicPartition))
+        // Duck type created for message is a struct.
+        if (message.Instance is null || topicPartition is null)
         {
-            // invalid parameters, exit early
+            // Exit early if provided parameters are invalid.
             return CallTargetState.GetDefault();
         }
 
-        string? spanName = null;
-        if (!string.IsNullOrEmpty(duckTypedTopicPartition.Topic))
-        {
-            spanName = $"{duckTypedTopicPartition.Topic} {MessagingAttributes.Values.PublishOperationName}";
-        }
-
-        spanName ??= MessagingAttributes.Values.PublishOperationName;
-        var activity = KafkaCommon.Source.StartActivity(name: spanName, ActivityKind.Producer);
+        var activity = KafkaInstrumentation.StartProducerActivity(topicPartition.DuckCast<ITopicPartition>(), message, instance.DuckCast<INamedClient>()!);
         if (activity is not null)
         {
-            message.Headers ??= MessageHeadersHelper<TTopicPartition>.Create();
-            Propagators.DefaultTextMapPropagator.Inject<IKafkaMessage>(
-                new PropagationContext(activity.Context, Baggage.Current),
-                message,
-                KafkaCommon.MessageHeaderValueSetter);
-
-            if (activity.IsAllDataRequested)
-            {
-                KafkaCommon.SetCommonAttributes(
-                    activity,
-                    MessagingAttributes.Values.PublishOperationName,
-                    duckTypedTopicPartition.Topic,
-                    duckTypedTopicPartition.Partition,
-                    message.Key,
-                    instance.DuckCast<INamedClient>());
-
-                activity.SetTag(MessagingAttributes.Keys.Kafka.IsTombstone, message.Value is null);
-            }
-
-            // Store as state information if delivery handler was set
+            KafkaInstrumentation.InjectContext<TTopicPartition>(message, activity);
+            // Store delivery handler as state.
             return new CallTargetState(activity, deliveryHandler);
         }
 
@@ -99,8 +74,8 @@ public static class ProducerProduceSyncIntegration
             activity.SetException(exception);
         }
 
-        // If delivery handler was not set, stop the activity
-        if (state.State is null)
+        // If delivery handler was not set, stop the activity.
+        if (state.State is null || exception is not null)
         {
             activity.Stop();
         }
@@ -109,27 +84,11 @@ public static class ProducerProduceSyncIntegration
             // If delivery handler was set,
             // only set parent as a current activity.
             // Activity will be stopped inside updated
-            // delivery handler
+            // delivery handler.
             var current = Activity.Current;
             Activity.Current = current?.Parent;
         }
 
         return CallTargetReturn.GetDefault();
-    }
-
-    private static class MessageHeadersHelper<TTypeMarker>
-    {
-        // ReSharper disable once StaticMemberInGenericType
-        private static readonly Type HeadersType;
-
-        static MessageHeadersHelper()
-        {
-            HeadersType = typeof(TTypeMarker).Assembly.GetType("Confluent.Kafka.Headers")!;
-        }
-
-        public static IHeaders? Create()
-        {
-            return Activator.CreateInstance(HeadersType).DuckCast<IHeaders>();
-        }
     }
 }
