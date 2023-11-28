@@ -119,8 +119,9 @@ internal static class Program
 
     private static async Task WaitForSuccessfulProduceAsync(IProducer<string, string> producer, string topicName, CancellationToken token)
     {
-        while (!token.IsCancellationRequested)
+        while (true)
         {
+            token.ThrowIfCancellationRequested();
             try
             {
                 await producer.ProduceAsync(topicName, CreateTestMessage(), token);
