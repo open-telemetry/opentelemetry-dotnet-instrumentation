@@ -58,3 +58,44 @@ Consider setting common environment variables,
 for all applications deployed to IIS
 by setting the environment variables for
 `W3SVC` and `WAS` Windows Services as described in [windows-service-instrumentation.md](windows-service-instrumentation.md).
+
+#### Disable Instrumentation per Application Pool (.NET Framework only)
+
+You can use PowerShell module to quickly enable and disable instrumentation on
+specific application pool.
+
+```powershell
+# Import the module
+Import-Module "OpenTelemetry.DotNet.Auto.psm1"
+
+# NOTE! Application pool name is case sensitive.
+# It is warning only if a wrong application pool name is used.
+
+# Adds COR_ENABLE_PROFILING=0 environment variable to MyAppPool config
+Disable-OpenTelemetryForIISAppPool -AppPoolName MyAppPool
+
+# Removes COR_ENABLE_PROFILING=0 environment variable from MyAppPool config
+Enable-OpenTelemetryForIISAppPool -AppPoolName MyAppPool
+
+# Restart Application Pool
+Restart-WebAppPool -Name "MyAppPool"
+```
+
+> [!NOTE]
+> The application pool environment variable takes precedence over
+> global IIS registration.
+
+You can also use IIS UI to configure and verify specific environment variables per
+application pool.
+
+1. Open Internet Information Service (IIS) Manager.
+1. Select the server from the left.
+1. Open 'Configuration Editor' from the Management section.
+1. Open section 'system.applicationHost/applicationPools'
+1. Press '...' in the first entry of the table (Collection).
+1. Select row with your application pool name.
+1. At the 'Properties' section, select 'environmentVariables' and press '...'.
+1. Add or Remove environment variables.
+1. Close all external windows and press 'Apply' in the main
+   'Configuration Editor' view.
+1. Restart your application.
