@@ -27,19 +27,24 @@ internal static class KafkaInstrumentation
 {
     private static ActivitySource Source { get; } = new("OpenTelemetry.AutoInstrumentation.Kafka");
 
-    public static Activity? StartConsumerActivity(IConsumeResult consumeResult, DateTimeOffset startTime, object consumer)
+    public static Activity? StartConsumerActivity(IConsumeResult? consumeResult, DateTimeOffset startTime, object consumer)
     {
-        var propagatedContext = Propagators.DefaultTextMapPropagator.Extract(default, consumeResult, MessageHeaderValueGetter);
-        string? spanName = null;
-        if (!string.IsNullOrEmpty(consumeResult.Topic))
+        PropagationContext? propagatedContext = null;
+        if (consumeResult is not null)
         {
-            spanName = $"{consumeResult.Topic} {MessagingAttributes.Values.ReceiveOperationName}";
+            propagatedContext = Propagators.DefaultTextMapPropagator.Extract(default, consumeResult, MessageHeaderValueGetter);
+        }
+
+        string? spanName = null;
+        if (!string.IsNullOrEmpty(consumeResult?.Topic))
+        {
+            spanName = $"{consumeResult?.Topic} {MessagingAttributes.Values.ReceiveOperationName}";
         }
 
         spanName ??= MessagingAttributes.Values.ReceiveOperationName;
 
-        var activityLinks = propagatedContext.ActivityContext.IsValid()
-            ? new[] { new ActivityLink(propagatedContext.ActivityContext) }
+        var activityLinks = propagatedContext is not null && propagatedContext.Value.ActivityContext.IsValid()
+            ? new[] { new ActivityLink(propagatedContext.Value.ActivityContext) }
             : Array.Empty<ActivityLink>();
         var activity = Source.StartActivity(name: spanName, kind: ActivityKind.Consumer, links: activityLinks, startTime: startTime);
 
@@ -48,12 +53,15 @@ internal static class KafkaInstrumentation
             SetCommonAttributes(
                 activity,
                 MessagingAttributes.Values.ReceiveOperationName,
-                consumeResult.Topic,
-                consumeResult.Partition,
-                consumeResult.Message?.Key,
+                consumeResult?.Topic,
+                consumeResult?.Partition,
+                consumeResult?.Message?.Key,
                 consumer.DuckCast<INamedClient>());
 
-            activity.SetTag(MessagingAttributes.Keys.Kafka.PartitionOffset, consumeResult.Offset.Value);
+            if (consumeResult is not null)
+            {
+                activity.SetTag(MessagingAttributes.Keys.Kafka.PartitionOffset, consumeResult.Offset.Value);
+            }
 
             if (ConsumerCache.TryGet(consumer, out var groupId))
             {
@@ -116,7 +124,7 @@ internal static class KafkaInstrumentation
         Activity activity,
         string operationName,
         string? topic,
-        Partition partition,
+        Partition? partition,
         object? key,
         INamedClient? client)
     {
@@ -137,7 +145,10 @@ internal static class KafkaInstrumentation
             activity.SetTag(MessagingAttributes.Keys.Kafka.MessageKey, key);
         }
 
-        activity.SetTag(MessagingAttributes.Keys.Kafka.Partition, partition.Value);
+        if (partition is not null)
+        {
+            activity.SetTag(MessagingAttributes.Keys.Kafka.Partition, partition.Value.Value);
+        }
     }
 
     private static IEnumerable<string> MessageHeaderValueGetter(IConsumeResult? message, string key)
