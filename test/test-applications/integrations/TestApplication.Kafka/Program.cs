@@ -15,58 +15,195 @@
 // </copyright>
 
 using Confluent.Kafka;
+using Confluent.Kafka.Admin;
 
-var config = new ProducerConfig { BootstrapServers = "localhost:9092" };
-var topicName = args[0];
-using var p = new ProducerBuilder<string, string>(config).Build();
-try
+namespace TestApplication.Kafka;
+
+internal static class Program
 {
-    // produce a message without a delivery handler set
-    p.Produce(topicName, new Message<string, string> { Key = "testkey", Value = "test" });
-    // produce a message and set a delivery handler
-    p.Produce(topicName, new Message<string, string> { Key = "testkey", Value = "test" }, report =>
+    private const string MessageKey = "testkey";
+    private const string BootstrapServers = "localhost:9092";
+
+    public static async Task<int> Main(string[] args)
     {
-        Console.WriteLine($"Finished sending msg, offset: {report.Offset.Value}.");
-    });
-    p.Flush();
-    Console.WriteLine("Delivered messages.");
-}
-catch (ProduceException<Null, string> e)
-{
-    Console.WriteLine($"Delivery failed: {e.Error.Reason}.");
-}
+        var topicName = args[0];
 
-var conf = new ConsumerConfig
-{
-    GroupId = $"test-consumer-group-{topicName}",
-    BootstrapServers = "localhost:9092",
-    // https://github.com/confluentinc/confluent-kafka-dotnet/tree/07de95ed647af80a0db39ce6a8891a630423b952#basic-consumer-example
-    AutoOffsetReset = AutoOffsetReset.Earliest,
-    EnableAutoCommit = true
-};
+        using var waitEvent = new ManualResetEventSlim();
 
-using (var consumer = new ConsumerBuilder<string, string>(conf).Build())
-{
-    consumer.Subscribe(topicName);
+        using var producer = BuildProducer(BootstrapServers);
 
-    try
-    {
-        ConsumeMessage(consumer);
-        ConsumeMessage(consumer);
+        // Attempts are made to produce messages to non-existent topic.
+        // Intention is to verify exception handling logic
+        // in ProduceProducerSyncIntegration, ProduceProducerAsyncIntegration
+        // and ProducerDeliveryHandlerActionIntegration.
+        // Note: order of calls seems to be important to test
+        // exception handling in all of the mentioned classes.
+        TryProduceSyncWithDeliveryHandler(producer, topicName, report =>
+        {
+            Console.WriteLine(
+                $"Delivery report received, message offset: {report.Offset.Value}, error: {report.Error.IsError}.");
+            waitEvent.Set();
+        });
+        await TryProduceAsync(producer, topicName);
+        TryProduceSync(producer, topicName);
+
+        using var consumer = BuildConsumer(topicName, BootstrapServers);
+        consumer.Subscribe(topicName);
+
+        TryConsumeMessage(consumer);
+
+        Console.WriteLine("Waiting on delivery handler.");
+        if (!waitEvent.Wait(TimeSpan.FromSeconds(10)))
+        {
+            Console.WriteLine("Timed-out waiting for delivery handler to complete.");
+            return 1;
+        }
+
+        Console.WriteLine("Delivery handler completed.");
+
+        await CreateTopic(BootstrapServers, topicName);
+        Console.WriteLine("Topic creation completed.");
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+
+        // Required as first few Produce attempts may still fail
+        // with "unknown topic" error
+        // after topic creation completed.
+        await WaitForSuccessfulProduceAsync(producer, topicName, cts.Token);
+
+        producer.Produce(topicName, CreateTestMessage());
+        producer.Produce(
+            topicName,
+            CreateTestMessage(),
+            report =>
+            {
+                Console.WriteLine(
+                    $"Delivery report received, message offset: {report.Offset.Value}, error: {report.Error.IsError}.");
+            });
+        producer.Flush(cts.Token);
+
+        // Consume all the produced messages.
+        consumer.Consume(cts.Token);
+        consumer.Consume(cts.Token);
+        consumer.Consume(cts.Token);
+
+        // Produce a tombstone.
+        producer.Produce(topicName, new Message<string, string> { Key = MessageKey, Value = null! });
+        return 0;
     }
-    catch (ConsumeException e)
+
+    private static void TryProduceSync(IProducer<string, string> producer, string topicName)
     {
-        Console.WriteLine($"Error occured: {e.Error.Reason}.");
+        try
+        {
+            producer.Produce(topicName, CreateTestMessage());
+        }
+        catch (ProduceException<string, string> e)
+        {
+            Console.WriteLine($"Produce sync without delivery handler exception: {e.Error.Reason}");
+        }
     }
-}
 
-// produce a tombstone
-p.Produce(topicName, new Message<string, string> { Key = "testkey", Value = null! });
+    private static void TryConsumeMessage(IConsumer<string, string> consumer)
+    {
+        try
+        {
+            var cr = consumer.Consume(TimeSpan.FromSeconds(5));
+            Console.WriteLine($"Consumption succeeded, message received: {cr?.Message}");
+        }
+        catch (ConsumeException ex)
+        {
+            Console.WriteLine($"Consumption exception: {ex.Error.Reason}");
+        }
+    }
 
-return;
+    private static async Task WaitForSuccessfulProduceAsync(IProducer<string, string> producer, string topicName, CancellationToken token)
+    {
+        while (true)
+        {
+            token.ThrowIfCancellationRequested();
+            try
+            {
+                await producer.ProduceAsync(topicName, CreateTestMessage(), token);
+                return;
+            }
+            catch (ProduceException<string, string> ex)
+            {
+                Console.WriteLine($"ProduceAsync exception: {ex.Error.Reason}");
+            }
 
-void ConsumeMessage(IConsumer<string, string> consumer)
-{
-    var cr = consumer.Consume(TimeSpan.FromSeconds(10));
-    Console.WriteLine($"Consumed message '{cr?.Message?.Value}' at: '{cr?.TopicPartitionOffset}'.");
+            await Task.Delay(TimeSpan.FromSeconds(1), token);
+        }
+    }
+
+    private static IProducer<string, string> BuildProducer(string bootstrapServers)
+    {
+        var config = new ProducerConfig
+        {
+            BootstrapServers = bootstrapServers
+        };
+        return new ProducerBuilder<string, string>(config).Build();
+    }
+
+    private static IConsumer<string, string> BuildConsumer(string topicName, string bootstrapServers)
+    {
+        var conf = new ConsumerConfig
+        {
+            GroupId = $"test-consumer-group-{topicName}",
+            BootstrapServers = bootstrapServers,
+            // https://github.com/confluentinc/confluent-kafka-dotnet/tree/07de95ed647af80a0db39ce6a8891a630423b952#basic-consumer-example
+            AutoOffsetReset = AutoOffsetReset.Earliest,
+            EnableAutoCommit = true
+        };
+
+        return new ConsumerBuilder<string, string>(conf).Build();
+    }
+
+    private static async Task TryProduceAsync(
+        IProducer<string, string> producer,
+        string topicName)
+    {
+        try
+        {
+            await producer.ProduceAsync(topicName, CreateTestMessage());
+        }
+        catch (ProduceException<string, string> ex)
+        {
+            Console.WriteLine($"ProduceAsync exception: {ex.Error.Reason}");
+        }
+    }
+
+    private static Message<string, string> CreateTestMessage()
+    {
+        return new Message<string, string> { Key = MessageKey, Value = "test" };
+    }
+
+    private static void TryProduceSyncWithDeliveryHandler(IProducer<string, string> producer, string topic, Action<DeliveryReport<string, string>> deliveryHandler)
+    {
+        try
+        {
+            producer.Produce(
+                topic,
+                CreateTestMessage(),
+                deliveryHandler);
+        }
+        catch (ProduceException<string, string> e)
+        {
+            Console.WriteLine($"Produce sync with delivery handler exception: {e.Error.Reason}");
+        }
+    }
+
+    private static async Task CreateTopic(string bootstrapServers, string topic)
+    {
+        var adminClientConfig = new AdminClientConfig
+        {
+            BootstrapServers = bootstrapServers
+        };
+
+        using var adminClient = new AdminClientBuilder(adminClientConfig).Build();
+        await adminClient.CreateTopicsAsync(new[]
+        {
+            new TopicSpecification { Name = topic, ReplicationFactor = 1, NumPartitions = 1 }
+        });
+    }
 }
