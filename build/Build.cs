@@ -131,6 +131,7 @@ partial class Build : NukeBuild
         .DependsOn(CreateRequiredDirectories)
         .DependsOn(BuildInstallationScripts)
         .DependsOn(GenerateLibraryVersionFiles)
+        .DependsOn(CompileNativeDependenciesForManagedTests)
         .DependsOn(CompileManagedTests)
         .DependsOn(CompileMocks)
         .DependsOn(PublishMocks)

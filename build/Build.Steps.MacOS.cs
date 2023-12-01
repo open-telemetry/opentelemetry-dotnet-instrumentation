@@ -24,6 +24,21 @@ partial class Build
                 workingDirectory: nativeProjectDirectory);
         });
 
+    Target CompileNativeDependenciesForManagedTestsMacOs => _ => _
+        .Unlisted()
+        .After(CreateRequiredDirectories)
+        .OnlyWhenStatic(() => IsOsx)
+        .Executes(() =>
+        {
+            var buildDirectory = Solution.GetContinuousProfilerNativeDep().Directory.ToString();
+            CMake.Value(
+                arguments: "-S .",
+                workingDirectory: buildDirectory);
+            Make.Value(
+                arguments: $"",
+                workingDirectory: buildDirectory);
+        });
+
     Target PublishNativeProfilerMacOs => _ => _
         .Unlisted()
         .OnlyWhenStatic(() => IsOsx)

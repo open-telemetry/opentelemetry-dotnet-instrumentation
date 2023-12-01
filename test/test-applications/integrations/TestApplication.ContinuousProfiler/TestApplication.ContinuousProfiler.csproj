@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(IsCentos)' == '' ">net8.0;$(TargetFrameworks)</TargetFrameworks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Condition="'$(OS)' == 'Windows_NT'" Include="..\dependency-libs\TestApplication.ContinuousProfiler.NativeDep\bin\$(Configuration)\$(Platform)\TestApplication.ContinuousProfiler.NativeDep.dll" Link="TestApplication.ContinuousProfiler.NativeDep.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' " Include="..\dependency-libs\TestApplication.ContinuousProfiler.NativeDep\bin\TestApplication.ContinuousProfiler.NativeDep.so" Link="TestApplication.ContinuousProfiler.NativeDep.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
+    <None Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' " Include="..\dependency-libs\TestApplication.ContinuousProfiler.NativeDep\bin\TestApplication.ContinuousProfiler.NativeDep.dylib" Link="TestApplication.ContinuousProfiler.NativeDep.dylib">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\dependency-libs\TestApplication.ContinuousProfiler.Vb\TestApplication.ContinuousProfiler.Vb.vbproj" />
+  </ItemGroup>
+
+</Project>

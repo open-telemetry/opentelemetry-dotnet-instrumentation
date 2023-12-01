@@ -49,6 +49,24 @@ partial class Build
             }
         });
 
+    Target CompileNativeDependenciesForManagedTestsWindows => _ => _
+        .Unlisted()
+        .After(CompileManagedSrc)
+        .After(GenerateNetFxAssemblyRedirectionSource)
+        .OnlyWhenStatic(() => IsWin)
+        .Executes(() =>
+        {
+            var continuousProfilerNativeDepProject = Solution.GetContinuousProfilerNativeDep();
+            PerformLegacyRestoreIfNeeded(continuousProfilerNativeDepProject);
+            // Can't use dotnet msbuild, as needs to use the VS version of MSBuild
+            MSBuild(s => s
+                .SetProjectFile(continuousProfilerNativeDepProject)
+                .SetConfiguration(BuildConfiguration)
+                .SetRestore(!NoRestore)
+                .SetTargetPlatform(Platform)
+                .SetRestore(false));
+        });
+
     Target CompileNativeTestsWindows => _ => _
         .Unlisted()
         .After(CompileNativeSrc)

@@ -1,5 +1,6 @@
 using Nuke.Common;
 using Nuke.Common.IO;
+using Nuke.Common.Tooling;
 using Serilog;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
@@ -19,6 +20,21 @@ partial class Build
 
             CMake.Value(
                 arguments: $"../ -DCMAKE_BUILD_TYPE=Release -DOTEL_AUTO_VERSION={VersionHelper.GetVersionWithoutSuffixes()} -DOTEL_AUTO_VERSION_MAJOR={major} -DOTEL_AUTO_VERSION_MINOR={minor} -DOTEL_AUTO_VERSION_PATCH={patch}",
+                workingDirectory: buildDirectory);
+            Make.Value(
+                arguments: $"",
+                workingDirectory: buildDirectory);
+        });
+
+    Target CompileNativeDependenciesForManagedTestsLinux => _ => _
+        .Unlisted()
+        .After(CreateRequiredDirectories)
+        .OnlyWhenStatic(() => IsLinux)
+        .Executes(() =>
+        {
+            var buildDirectory = Solution.GetContinuousProfilerNativeDep().Directory.ToString();
+            CMake.Value(
+                arguments: "-S .",
                 workingDirectory: buildDirectory);
             Make.Value(
                 arguments: $"",
