@@ -27,6 +27,7 @@ internal static class IntegrationConstants
     public const string ConsumerTypeName = "Confluent.Kafka.Consumer`2";
     public const string ConsumerBuilderTypeName = "Confluent.Kafka.ConsumerBuilder`2[!0,!1]";
     public const string ProduceSyncMethodName = "Produce";
+    public const string ProduceAsyncMethodName = "ProduceAsync";
     public const string ConsumeSyncMethodName = "Consume";
     public const string DisposeMethodName = "Dispose";
     public const string CloseMethodName = "Close";
