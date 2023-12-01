@@ -87,6 +87,9 @@ internal static class Program
         consumer.Consume(cts.Token);
         consumer.Consume(cts.Token);
 
+        // Additional attempt that returns no message.
+        consumer.Consume(TimeSpan.FromSeconds(5));
+
         // Produce a tombstone.
         producer.Produce(topicName, new Message<string, string> { Key = MessageKey, Value = null! });
         return 0;
@@ -153,6 +156,7 @@ internal static class Program
             BootstrapServers = bootstrapServers,
             // https://github.com/confluentinc/confluent-kafka-dotnet/tree/07de95ed647af80a0db39ce6a8891a630423b952#basic-consumer-example
             AutoOffsetReset = AutoOffsetReset.Earliest,
+            CancellationDelayMaxMs = 5000,
             EnableAutoCommit = true
         };
 
