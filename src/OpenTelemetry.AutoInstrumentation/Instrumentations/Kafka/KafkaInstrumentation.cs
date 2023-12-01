@@ -46,7 +46,23 @@ internal static class KafkaInstrumentation
         var activityLinks = propagatedContext is not null && propagatedContext.Value.ActivityContext.IsValid()
             ? new[] { new ActivityLink(propagatedContext.Value.ActivityContext) }
             : Array.Empty<ActivityLink>();
-        var activity = Source.StartActivity(name: spanName, kind: ActivityKind.Consumer, links: activityLinks, startTime: startTime);
+
+        // https://github.com/open-telemetry/oteps/blob/5531cb2cb61df5ff9660d1078613e6c09cb396a8/text/trace/0220-messaging-semantic-conventions-span-structure.md?plain=1#L200
+        // If consumer span would be a root span of a new trace,
+        // use message's creation context as a parent,
+        // in addition to linking to it.
+        var parentContext =
+            Activity.Current is null ?
+            propagatedContext?.ActivityContext ?? default :
+            default;
+
+        var activity = Source.StartActivity(
+            spanName,
+            kind: ActivityKind.Consumer,
+            links: activityLinks,
+            startTime: startTime,
+            parentContext: parentContext,
+            tags: null);
 
         if (activity is { IsAllDataRequested: true })
         {
