@@ -17,6 +17,7 @@
 using System.Runtime.CompilerServices;
 using OpenTelemetry.ResourceDetectors.Azure;
 using OpenTelemetry.ResourceDetectors.Container;
+using OpenTelemetry.ResourceDetectors.ProcessRuntime;
 using OpenTelemetry.Resources;
 
 namespace OpenTelemetry.AutoInstrumentation.Configurations;
@@ -43,6 +44,7 @@ internal static class ResourceConfigurator
             {
                 ResourceDetector.Container => Wrappers.AddContainerResourceDetector(resourceBuilder),
                 ResourceDetector.AzureAppService => Wrappers.AddAzureAppServiceResourceDetector(resourceBuilder),
+                ResourceDetector.ProcessRuntime => Wrappers.AddProcessRuntimeResourceDetector(resourceBuilder),
                 _ => resourceBuilder
             };
         }
@@ -75,6 +77,12 @@ internal static class ResourceConfigurator
         public static ResourceBuilder AddAzureAppServiceResourceDetector(ResourceBuilder resourceBuilder)
         {
             return resourceBuilder.AddDetector(new AppServiceResourceDetector());
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static ResourceBuilder AddProcessRuntimeResourceDetector(ResourceBuilder resourceBuilder)
+        {
+            return resourceBuilder.AddDetector(new ProcessRuntimeDetector());
         }
     }
 }

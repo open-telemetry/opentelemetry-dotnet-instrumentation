@@ -39,6 +39,7 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" />
     <PackageReference Include="OpenTelemetry.ResourceDetectors.Azure" />
     <PackageReference Include="OpenTelemetry.ResourceDetectors.Container" />
+    <PackageReference Include="OpenTelemetry.ResourceDetectors.ProcessRuntime" />
     <PackageReference Include="OpenTelemetry.Shims.OpenTracing" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Wcf" />
   </ItemGroup>

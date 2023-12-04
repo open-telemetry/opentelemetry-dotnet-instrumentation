@@ -37,6 +37,7 @@
   /net/OpenTelemetry.Instrumentation.Wcf.dll,
   /net/OpenTelemetry.ResourceDetectors.Azure.dll,
   /net/OpenTelemetry.ResourceDetectors.Container.dll,
+  /net/OpenTelemetry.ResourceDetectors.ProcessRuntime.dll,
   /net/OpenTelemetry.Shims.OpenTracing.dll,
   /net/OpenTelemetry.dll,
   /net/OpenTracing.dll,

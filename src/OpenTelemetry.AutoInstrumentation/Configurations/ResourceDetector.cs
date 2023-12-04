@@ -29,5 +29,10 @@ internal enum ResourceDetector
     /// <summary>
     /// Azure App Service resource detector.
     /// </summary>
-    AzureAppService = 1
+    AzureAppService = 1,
+
+    /// <summary>
+    /// Process Runtime resource detector.
+    /// </summary>
+    ProcessRuntime = 2
 }
