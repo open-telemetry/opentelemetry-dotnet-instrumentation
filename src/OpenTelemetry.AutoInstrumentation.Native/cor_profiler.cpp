@@ -1129,6 +1129,32 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
 void CorProfiler::ConfigureContinuousProfiler(bool threadSamplingEnabled, bool allocationSamplingEnabled, unsigned int samplingInterval)
 {
     Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", threadSamplingEnabled, ", allocationSamplingEnabled: ", allocationSamplingEnabled, ", interval: " , samplingInterval);
+
+    if (!threadSamplingEnabled && !allocationSamplingEnabled)
+    {
+        Logger::Debug("ConfigureContinuousProfiler: Thread sampling and allocations sampling disabled.");
+        return;
+    }
+
+    DWORD pdvEventsLow;
+    DWORD pdvEventsHigh;
+    auto  hr = this->info_->GetEventMask2(&pdvEventsLow, &pdvEventsHigh);
+    if (FAILED(hr))
+    {
+        Logger::Warn("ConfigureContinuousProfiler: Failed to take event masks for continuous profiler.");
+        return;
+    }
+
+    pdvEventsLow |= COR_PRF_MONITOR_THREADS | COR_PRF_ENABLE_STACK_SNAPSHOT;
+
+    hr = this->info_->SetEventMask2(pdvEventsLow, pdvEventsHigh);
+    if (FAILED(hr))
+    {
+        Logger::Warn("ConfigureContinuousProfiler: Failed to set event masks for continuous profiler.");
+        return;
+    }
+
+    Logger::Info("ConfigureContinuousProfiler: Events masks configured for continuous profiler");
 }
 
 //
