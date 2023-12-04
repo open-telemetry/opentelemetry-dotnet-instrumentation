@@ -181,6 +181,11 @@ public:
     void AddInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
     void AddDerivedInstrumentations(WCHAR* id, CallTargetDefinition* items, int size);
 
+    //
+    // Continuous Profiler methods
+    //
+    void ConfigureContinuousProfiler(bool threadSamplingEnabled, bool allocationSamplingEnabled, unsigned int samplingInterval);
+
     friend class TracerMethodRewriter;
 };
 

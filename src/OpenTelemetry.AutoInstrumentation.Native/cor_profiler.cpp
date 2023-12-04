@@ -1126,6 +1126,11 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
     }
 }
 
+void CorProfiler::ConfigureContinuousProfiler(bool threadSamplingEnabled, bool allocationSamplingEnabled, unsigned int samplingInterval)
+{
+    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", threadSamplingEnabled, ", allocationSamplingEnabled: ", allocationSamplingEnabled, ", interval: " , samplingInterval);
+}
+
 //
 // ICorProfilerCallback6 methods
 //

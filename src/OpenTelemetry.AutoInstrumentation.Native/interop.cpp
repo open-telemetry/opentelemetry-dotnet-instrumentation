@@ -41,6 +41,11 @@ EXTERN_C VOID STDAPICALLTYPE AddDerivedInstrumentations(WCHAR* id, trace::CallTa
     return trace::profiler->AddDerivedInstrumentations(id, items, size);
 }
 
+EXTERN_C VOID STDAPICALLTYPE ConfigureContinuousProfiler(bool threadSamplingEnabled, bool allocationSamplingEnabled, unsigned int samplingInterval)
+{
+    return trace::profiler->ConfigureContinuousProfiler(threadSamplingEnabled, allocationSamplingEnabled, samplingInterval);
+}
+
 #ifndef _WIN32
 EXTERN_C void* dddlopen(const char* __file, int __mode)
 {

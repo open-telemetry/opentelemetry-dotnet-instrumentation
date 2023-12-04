@@ -43,6 +43,18 @@ internal static class NativeMethods
         }
     }
 
+    public static void ConfigureNativeContinuousProfiler(bool threadSamplingEnabled, bool allocationSamplingEnabled, uint samplingInterval)
+    {
+        if (IsWindows)
+        {
+            Windows.ConfigureContinuousProfiler(threadSamplingEnabled, allocationSamplingEnabled, samplingInterval);
+        }
+        else
+        {
+            NonWindows.ConfigureContinuousProfiler(threadSamplingEnabled, allocationSamplingEnabled, samplingInterval);
+        }
+    }
+
     // the "dll" extension is required on .NET Framework
     // and optional on .NET Core
     private static class Windows
@@ -52,6 +64,9 @@ internal static class NativeMethods
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
         public static extern void AddDerivedInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
+
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
+        public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, bool allocationSamplingEnabled, uint samplingInterval);
     }
 
     // assume .NET Core if not running on Windows
@@ -62,5 +77,8 @@ internal static class NativeMethods
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
         public static extern void AddDerivedInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
+
+        [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
+        public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, bool allocationSamplingEnabled, uint samplingInterval);
     }
 }

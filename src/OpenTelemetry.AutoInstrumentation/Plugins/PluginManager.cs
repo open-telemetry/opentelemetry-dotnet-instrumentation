@@ -9,7 +9,7 @@ using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.AutoInstrumentation.Plugins;
 
-internal class PluginManager
+internal partial class PluginManager
 {
     private readonly IReadOnlyList<(Type Type, object Instance)> _plugins;
 

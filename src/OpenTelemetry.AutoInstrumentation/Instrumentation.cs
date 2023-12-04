@@ -79,6 +79,15 @@ internal static class Instrumentation
             _pluginManager = new PluginManager(GeneralSettings.Value);
             _pluginManager.Initializing();
 
+#if NET6_0_OR_GREATER
+            var (threadSamplingEnabled, allocationSamplingEnabled, samplingInterval) = _pluginManager.GetFirstContinuousConfiguration() ?? Tuple.Create(false, false, 0u);
+
+            if (threadSamplingEnabled || allocationSamplingEnabled)
+            {
+                NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, allocationSamplingEnabled, samplingInterval);
+            }
+#endif
+
             if (TracerSettings.Value.TracesEnabled || MetricSettings.Value.MetricsEnabled)
             {
                 // Register to shutdown events
