@@ -49,7 +49,7 @@ internal class NativeProfilerDiagnosticsRule : Rule
         {
             Logger.Warning("The CLR profiler is enabled, but a different profiler ID was provided '{0}'.", profilerId);
 
-            // Different native profiler not assosiated to OTel might be used. We don't want to fail here.
+            // Different native profiler not associated to OTel might be used. We don't want to fail here.
             return true;
         }
 

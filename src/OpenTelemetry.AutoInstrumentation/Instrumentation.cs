@@ -20,9 +20,7 @@ using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
 using OpenTelemetry.AutoInstrumentation.Plugins;
 using OpenTelemetry.Metrics;
-using OpenTelemetry.Shims.OpenTracing;
 using OpenTelemetry.Trace;
-using OpenTracing.Util;
 
 namespace OpenTelemetry.AutoInstrumentation;
 
