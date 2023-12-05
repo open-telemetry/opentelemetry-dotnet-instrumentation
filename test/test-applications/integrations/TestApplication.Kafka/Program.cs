@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System.Diagnostics;
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
 
@@ -23,6 +24,8 @@ internal static class Program
 {
     private const string MessageKey = "testkey";
     private const string BootstrapServers = "localhost:9092";
+
+    private static readonly ActivitySource Source = new("TestApplication.Kafka");
 
     public static async Task<int> Main(string[] args)
     {
@@ -85,7 +88,11 @@ internal static class Program
         // Consume all the produced messages.
         consumer.Consume(cts.Token);
         consumer.Consume(cts.Token);
-        consumer.Consume(cts.Token);
+
+        using (var activity = Source.StartActivity("ManuallyStarted"))
+        {
+            consumer.Consume(cts.Token);
+        }
 
         // Additional attempt that returns no message.
         consumer.Consume(TimeSpan.FromSeconds(5));
