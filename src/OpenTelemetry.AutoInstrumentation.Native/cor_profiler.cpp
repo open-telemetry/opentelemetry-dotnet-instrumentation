@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#include "continuous_profiler.h"
 #include "cor_profiler.h"
 
 #include "corhlpr.h"
@@ -63,6 +64,7 @@ CorProfiler* profiler = nullptr;
 HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_unknown)
 {
     auto _ = trace::Stats::Instance()->InitializeMeasure();
+    this->continuousProfiler = nullptr;
 
     CorProfilerBase::Initialize(cor_profiler_info_unknown);
 
@@ -104,6 +106,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     {
         Logger::Debug("Interface ICorProfilerInfo12 found.");
         this->info_ = info12;
+        this->info12_ = info12;
     }
     else
     {
@@ -114,6 +117,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
             FailProfiler(Warn, "Failed to attach profiler: Not supported .NET Framework version (lower than 4.6.1).")
         }
         info12 = nullptr;
+        this->info12_ = nullptr;
     }
 
     // code is ready to get runtime information
@@ -1138,7 +1142,7 @@ void CorProfiler::ConfigureContinuousProfiler(bool threadSamplingEnabled, bool a
 
     DWORD pdvEventsLow;
     DWORD pdvEventsHigh;
-    auto  hr = this->info_->GetEventMask2(&pdvEventsLow, &pdvEventsHigh);
+    auto  hr = this->info12_->GetEventMask2(&pdvEventsLow, &pdvEventsHigh);
     if (FAILED(hr))
     {
         Logger::Warn("ConfigureContinuousProfiler: Failed to take event masks for continuous profiler.");
@@ -1147,14 +1151,26 @@ void CorProfiler::ConfigureContinuousProfiler(bool threadSamplingEnabled, bool a
 
     pdvEventsLow |= COR_PRF_MONITOR_THREADS | COR_PRF_ENABLE_STACK_SNAPSHOT;
 
-    hr = this->info_->SetEventMask2(pdvEventsLow, pdvEventsHigh);
+    hr = this->info12_->SetEventMask2(pdvEventsLow, pdvEventsHigh);
     if (FAILED(hr))
     {
         Logger::Warn("ConfigureContinuousProfiler: Failed to set event masks for continuous profiler.");
         return;
     }
 
+    this->continuousProfiler = new continuous_profiler::ContinuousProfiler();
+    this->continuousProfiler->SetGlobalInfo12(this->info12_);
     Logger::Info("ConfigureContinuousProfiler: Events masks configured for continuous profiler");
+
+    if(threadSamplingEnabled)
+    {
+        this->continuousProfiler->StartThreadSampling();
+    }
+
+    if(allocationSamplingEnabled)
+    {
+        this->continuousProfiler->StartAllocationSampling();
+    }
 }
 
 //
