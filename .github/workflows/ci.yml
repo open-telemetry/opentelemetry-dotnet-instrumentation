@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
-      - uses: actions/setup-dotnet@v3.2.0
+      - uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
             6.0.417
@@ -96,7 +96,7 @@ jobs:
       - uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
-      - uses: actions/setup-dotnet@v3.2.0
+      - uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
             6.0.417
@@ -128,7 +128,7 @@ jobs:
       - uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
-      - uses: actions/setup-dotnet@v3.2.0
+      - uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
             6.0.417
@@ -203,7 +203,7 @@ jobs:
       - uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0 # fetching all, needed to correctly calculate version
-      - uses: actions/setup-dotnet@v3.2.0
+      - uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: | 
             6.0.417
