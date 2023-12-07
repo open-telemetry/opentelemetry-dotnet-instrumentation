@@ -56,13 +56,14 @@ void RejitHandlerModuleMethod::SetFunctionInfo(const FunctionInfo& functionInfo)
 bool RejitHandlerModuleMethod::RequestRejitForInlinersInModule(ModuleID moduleId)
 {
     // Enumerate all inliners and request rejit
-    ModuleID           currentModuleId  = m_module->GetModuleId();
-    mdMethodDef        currentMethodDef = m_methodDef;
+    ModuleID    currentModuleId  = m_module->GetModuleId();
+    mdMethodDef currentMethodDef = m_methodDef;
 
-    Logger::Debug("RejitHandlerModuleMethod::RequestRejitForInlinersInModule for ", "[ModuleInliner=", moduleId, ", ModuleId=", currentModuleId, ", MethodDef=", currentMethodDef, "]");
+    Logger::Debug("RejitHandlerModuleMethod::RequestRejitForInlinersInModule for ", "[ModuleInliner=", moduleId,
+                  ", ModuleId=", currentModuleId, ", MethodDef=", currentMethodDef, "]");
 
-    RejitHandler*      handler          = m_module->GetHandler();
-    ICorProfilerInfo7* pInfo            = handler->GetCorProfilerInfo();
+    RejitHandler*      handler = m_module->GetHandler();
+    ICorProfilerInfo7* pInfo   = handler->GetCorProfilerInfo();
     if (pInfo != nullptr)
     {
         // Now we enumerate all methods that inline the current methodDef
@@ -232,7 +233,7 @@ void RejitHandlerModule::RequestRejitForInlinersInModule(ModuleID moduleId)
     }
 
     std::lock_guard<std::mutex> methodsGuard(m_methods_lock);
-    bool success = true;
+    bool                        success = true;
     for (const auto& method : m_methods)
     {
         success = success && method.second.get()->RequestRejitForInlinersInModule(moduleId);

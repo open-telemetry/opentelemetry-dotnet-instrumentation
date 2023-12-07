@@ -22,9 +22,9 @@ const int signatureBufferSize = 500;
  * CALLTARGET CONSTANTS
  **/
 
-static const WSTRING managed_profiler_calltarget_getdefaultvalue_name = WStr("GetDefaultValue");
-static const WSTRING managed_profiler_calltarget_statetype_getdefault_name = WStr("GetDefault");
-static const WSTRING managed_profiler_calltarget_returntype_getdefault_name = WStr("GetDefault");
+static const WSTRING managed_profiler_calltarget_getdefaultvalue_name           = WStr("GetDefaultValue");
+static const WSTRING managed_profiler_calltarget_statetype_getdefault_name      = WStr("GetDefault");
+static const WSTRING managed_profiler_calltarget_returntype_getdefault_name     = WStr("GetDefault");
 static const WSTRING managed_profiler_calltarget_returntype_getreturnvalue_name = WStr("GetReturnValue");
 
 /**
@@ -167,8 +167,8 @@ mdTypeRef CallTargetTokens::GetTargetVoidReturnTypeRef()
     // *** Ensure calltargetreturn void type ref
     if (callTargetReturnVoidTypeRef == mdTypeRefNil)
     {
-        hr = module_metadata->metadata_emit->DefineTypeRefByName(
-            profilerAssemblyRef, GetCallTargetReturnType().data(), &callTargetReturnVoidTypeRef);
+        hr = module_metadata->metadata_emit->DefineTypeRefByName(profilerAssemblyRef, GetCallTargetReturnType().data(),
+                                                                 &callTargetReturnVoidTypeRef);
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper callTargetReturnVoidTypeRef could not be defined.");
@@ -178,7 +178,6 @@ mdTypeRef CallTargetTokens::GetTargetVoidReturnTypeRef()
 
     return callTargetReturnVoidTypeRef;
 }
-
 
 mdMemberRef CallTargetTokens::GetCallTargetStateDefaultMemberRef()
 {
@@ -343,15 +342,15 @@ mdMethodSpec CallTargetTokens::GetCallTargetDefaultValueMethodSpec(TypeSignature
     return getDefaultMethodSpec;
 }
 
-HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*             reWriter,
+HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*    reWriter,
                                          TypeSignature* methodReturnValue,
-                                         ULONG*                  callTargetStateIndex,
-                                         ULONG*                  exceptionIndex,
-                                         ULONG*                  callTargetReturnIndex,
-                                         ULONG*                  returnValueIndex,
-                                         mdToken*                callTargetStateToken,
-                                         mdToken*                exceptionToken,
-                                         mdToken*                callTargetReturnToken)
+                                         ULONG*         callTargetStateIndex,
+                                         ULONG*         exceptionIndex,
+                                         ULONG*         callTargetReturnIndex,
+                                         ULONG*         returnValueIndex,
+                                         mdToken*       callTargetStateToken,
+                                         mdToken*       exceptionToken,
+                                         mdToken*       callTargetReturnToken)
 {
     auto hr = EnsureBaseCalltargetTokens();
     if (FAILED(hr))
@@ -408,7 +407,7 @@ HRESULT CallTargetTokens::ModifyLocalSig(ILRewriter*             reWriter,
     unsigned        callTargetReturnBuffer;
     ULONG           callTargetReturnSize;
     ULONG           callTargetReturnSizeForNewSignature = 0;
-    const auto [retTypeElementType, retTypeFlags] = methodReturnValue->GetElementTypeAndFlags();
+    const auto[retTypeElementType, retTypeFlags] = methodReturnValue->GetElementTypeAndFlags();
 
     if (retTypeFlags != TypeFlagVoid)
     {
@@ -540,7 +539,6 @@ ModuleMetadata* CallTargetTokens::GetMetadata()
 {
     return module_metadata_ptr;
 }
-
 
 HRESULT CallTargetTokens::EnsureBaseCalltargetTokens()
 {
@@ -728,8 +726,7 @@ mdToken CallTargetTokens::GetCurrentTypeRef(const TypeInfo* currentType, bool& i
     }
 }
 
-CallTargetTokens::CallTargetTokens(ModuleMetadata* moduleMetadataPtr)
-    : module_metadata_ptr(moduleMetadataPtr)
+CallTargetTokens::CallTargetTokens(ModuleMetadata* moduleMetadataPtr) : module_metadata_ptr(moduleMetadataPtr)
 {
 }
 /**

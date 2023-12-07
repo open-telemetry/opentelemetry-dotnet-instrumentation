@@ -2585,7 +2585,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCachedFunctionSearchStarted(FunctionID
                      functionId);
         return S_OK;
     }
-    
+
     // Call RequestRejit for register inliners and current NGEN module.
     if (rejit_handler != nullptr)
     {

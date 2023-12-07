@@ -100,13 +100,13 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     mdToken                function_token         = caller->id;
     TypeSignature          retFuncArg             = caller->method_signature.GetReturnValue();
     IntegrationDefinition* integration_definition = tracerMethodHandler->GetIntegrationDefinition();
-    const auto [retFuncElementType, retTypeFlags] = retFuncArg.GetElementTypeAndFlags();
-    bool                   isVoid       = (retTypeFlags & TypeFlagVoid) > 0;
-    bool                   isStatic = !(caller->method_signature.CallingConvention() & IMAGE_CEE_CS_CALLCONV_HASTHIS);
-    const auto&            methodArguments              = caller->method_signature.GetMethodArguments();
-    int                                 numArgs         = caller->method_signature.NumberOfArguments();
-    auto                                metaEmit        = module_metadata.metadata_emit;
-    auto                                metaImport      = module_metadata.metadata_import;
+    const auto[retFuncElementType, retTypeFlags] = retFuncArg.GetElementTypeAndFlags();
+    bool        isVoid          = (retTypeFlags & TypeFlagVoid) > 0;
+    bool        isStatic        = !(caller->method_signature.CallingConvention() & IMAGE_CEE_CS_CALLCONV_HASTHIS);
+    const auto& methodArguments = caller->method_signature.GetMethodArguments();
+    int         numArgs         = caller->method_signature.NumberOfArguments();
+    auto        metaEmit        = module_metadata.metadata_emit;
+    auto        metaImport      = module_metadata.metadata_import;
 
     // *** Get reference to the integration type
     mdTypeRef integration_type_ref = mdTypeRefNil;
@@ -168,8 +168,8 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     mdToken  callTargetReturnToken = mdTokenNil;
     ILInstr* firstInstruction;
     tracerTokens->ModifyLocalSigAndInitialize(&reWriterWrapper, caller, &callTargetStateIndex, &exceptionIndex,
-                                                  &callTargetReturnIndex, &returnValueIndex, &callTargetStateToken,
-                                                  &exceptionToken, &callTargetReturnToken, &firstInstruction);
+                                              &callTargetReturnIndex, &returnValueIndex, &callTargetStateToken,
+                                              &exceptionToken, &callTargetReturnToken, &firstInstruction);
 
     // ***
     // BEGIN METHOD PART
@@ -226,7 +226,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
         // Load the arguments directly (FastPath)
         for (int i = 0; i < numArgs; i++)
         {
-            const auto [elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
+            const auto[elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
             if (corProfiler->enable_by_ref_instrumentation)
             {
                 if (argTypeFlags & TypeFlagByRef)
@@ -258,7 +258,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
         {
             reWriterWrapper.BeginLoadValueIntoArray(i);
             reWriterWrapper.LoadArgument(i + (isStatic ? 0 : 1));
-            const auto [elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
+            const auto[elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
             if (argTypeFlags & TypeFlagByRef)
             {
                 Logger::Warn("*** CallTarget_RewriterCallback(): Methods with ref parameters "
@@ -315,7 +315,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     ILInstr* beginCallInstruction;
     hr = tracerTokens->WriteBeginMethod(&reWriterWrapper, integration_type_ref, &caller->type, methodArguments,
-                                            &beginCallInstruction);
+                                        &beginCallInstruction);
     if (FAILED(hr))
     {
         // Error message is written to the log in WriteBeginMethod.
@@ -326,8 +326,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     // *** BeginMethod call catch
     ILInstr* beginMethodCatchFirstInstr = nullptr;
-    tracerTokens->WriteLogException(&reWriterWrapper, integration_type_ref, &caller->type,
-                                        &beginMethodCatchFirstInstr);
+    tracerTokens->WriteLogException(&reWriterWrapper, integration_type_ref, &caller->type, &beginMethodCatchFirstInstr);
     ILInstr* beginMethodCatchLeaveInstr = reWriterWrapper.CreateInstr(CEE_LEAVE_S);
 
     // *** BeginMethod exception handling clause
@@ -435,12 +434,12 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
     if (isVoid)
     {
         tracerTokens->WriteEndVoidReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type,
-                                                      &endMethodCallInstr);
+                                                  &endMethodCallInstr);
     }
     else
     {
         tracerTokens->WriteEndReturnMemberRef(&reWriterWrapper, integration_type_ref, &caller->type, &retFuncArg,
-                                                  &endMethodCallInstr);
+                                              &endMethodCallInstr);
     }
     reWriterWrapper.StLocal(callTargetReturnIndex);
 
@@ -449,7 +448,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
         ILInstr* callTargetReturnGetReturnInstr;
         reWriterWrapper.LoadLocalAddress(callTargetReturnIndex);
         tracerTokens->WriteCallTargetReturnGetReturnValue(&reWriterWrapper, callTargetReturnToken,
-                                                              &callTargetReturnGetReturnInstr);
+                                                          &callTargetReturnGetReturnInstr);
         reWriterWrapper.StLocal(returnValueIndex);
     }
 
@@ -457,8 +456,7 @@ HRESULT TracerMethodRewriter::Rewrite(RejitHandlerModule* moduleHandler, RejitHa
 
     // *** EndMethod call catch
     ILInstr* endMethodCatchFirstInstr = nullptr;
-    tracerTokens->WriteLogException(&reWriterWrapper, integration_type_ref, &caller->type,
-                                        &endMethodCatchFirstInstr);
+    tracerTokens->WriteLogException(&reWriterWrapper, integration_type_ref, &caller->type, &endMethodCatchFirstInstr);
     ILInstr* endMethodCatchLeaveInstr = reWriterWrapper.CreateInstr(CEE_LEAVE_S);
 
     // *** EndMethod exception handling clause

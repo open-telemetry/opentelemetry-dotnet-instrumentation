@@ -343,8 +343,8 @@ HRESULT GetCorLibAssemblyRef(const ComPtr<IMetaDataAssemblyEmit>& assembly_emit,
 // TypeSignature
 std::tuple<unsigned, int> TypeSignature::GetElementTypeAndFlags() const
 {
-    int             typeFlags = 0;
-    unsigned        elementType;
+    int      typeFlags = 0;
+    unsigned elementType;
 
     PCCOR_SIGNATURE pbCur = &pbBase[offset];
 

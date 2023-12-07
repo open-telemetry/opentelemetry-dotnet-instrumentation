@@ -14,12 +14,16 @@ const int signatureBufferSize = 500;
  * TRACER CONSTANTS
  **/
 
-static const WSTRING managed_profiler_calltarget_type = WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker");
-static const WSTRING managed_profiler_calltarget_statetype =WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState");
-static const WSTRING managed_profiler_calltarget_returntype = WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn");
-static const WSTRING managed_profiler_calltarget_returntype_generics = WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn`1");
-static const WSTRING managed_profiler_calltarget_beginmethod_name = WStr("BeginMethod");
-static const WSTRING managed_profiler_calltarget_endmethod_name = WStr("EndMethod");
+static const WSTRING managed_profiler_calltarget_type =
+    WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetInvoker");
+static const WSTRING managed_profiler_calltarget_statetype =
+    WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetState");
+static const WSTRING managed_profiler_calltarget_returntype =
+    WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn");
+static const WSTRING managed_profiler_calltarget_returntype_generics =
+    WStr("OpenTelemetry.AutoInstrumentation.CallTarget.CallTargetReturn`1");
+static const WSTRING managed_profiler_calltarget_beginmethod_name  = WStr("BeginMethod");
+static const WSTRING managed_profiler_calltarget_endmethod_name    = WStr("EndMethod");
 static const WSTRING managed_profiler_calltarget_logexception_name = WStr("LogException");
 
 /**
@@ -27,25 +31,27 @@ static const WSTRING managed_profiler_calltarget_logexception_name = WStr("LogEx
  **/
 
 // slowpath BeginMethod
-HRESULT TracerTokens::WriteBeginMethodWithArgumentsArray(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
-                                                             const TypeInfo* currentType, ILInstr** instruction)
+HRESULT TracerTokens::WriteBeginMethodWithArgumentsArray(void*           rewriterWrapperPtr,
+                                                         mdTypeRef       integrationTypeRef,
+                                                         const TypeInfo* currentType,
+                                                         ILInstr**       instruction)
 {
     auto hr = EnsureBaseCalltargetTokens();
     if (FAILED(hr))
     {
         return hr;
     }
-    ILRewriterWrapper* rewriterWrapper = (ILRewriterWrapper*) rewriterWrapperPtr;
-    ModuleMetadata* module_metadata = GetMetadata();
+    ILRewriterWrapper* rewriterWrapper = (ILRewriterWrapper*)rewriterWrapperPtr;
+    ModuleMetadata*    module_metadata = GetMetadata();
 
     if (beginArrayMemberRef == mdMemberRefNil)
     {
         unsigned callTargetStateBuffer;
-        auto callTargetStateSize = CorSigCompressToken(callTargetStateTypeRef, &callTargetStateBuffer);
+        auto     callTargetStateSize = CorSigCompressToken(callTargetStateTypeRef, &callTargetStateBuffer);
 
-        auto signatureLength = 8 + callTargetStateSize;
+        auto          signatureLength = 8 + callTargetStateSize;
         COR_SIGNATURE signature[signatureBufferSize];
-        unsigned offset = 0;
+        unsigned      offset = 0;
 
         signature[offset++] = IMAGE_CEE_CS_CALLCONV_GENERIC;
         signature[offset++] = 0x02;
@@ -74,19 +80,19 @@ HRESULT TracerTokens::WriteBeginMethodWithArgumentsArray(void* rewriterWrapperPt
     mdMethodSpec beginArrayMethodSpec = mdMethodSpecNil;
 
     unsigned integrationTypeBuffer;
-    ULONG integrationTypeSize = CorSigCompressToken(integrationTypeRef, &integrationTypeBuffer);
+    ULONG    integrationTypeSize = CorSigCompressToken(integrationTypeRef, &integrationTypeBuffer);
 
-    bool isValueType = currentType->valueType;
+    bool    isValueType    = currentType->valueType;
     mdToken currentTypeRef = GetCurrentTypeRef(currentType, isValueType);
 
     unsigned currentTypeBuffer;
-    ULONG currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
+    ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
 
-    auto signatureLength = 4 + integrationTypeSize + currentTypeSize;
+    auto          signatureLength = 4 + integrationTypeSize + currentTypeSize;
     COR_SIGNATURE signature[signatureBufferSize];
-    unsigned offset = 0;
-    signature[offset++] = IMAGE_CEE_CS_CALLCONV_GENERICINST;
-    signature[offset++] = 0x02;
+    unsigned      offset = 0;
+    signature[offset++]  = IMAGE_CEE_CS_CALLCONV_GENERICINST;
+    signature[offset++]  = 0x02;
 
     signature[offset++] = ELEMENT_TYPE_CLASS;
     memcpy(&signature[offset], &integrationTypeBuffer, integrationTypeSize);
@@ -139,13 +145,11 @@ const WSTRING& TracerTokens::GetCallTargetReturnGenericType()
     return managed_profiler_calltarget_returntype_generics;
 }
 
-
 /**
  * PUBLIC
  **/
 
-TracerTokens::TracerTokens(ModuleMetadata* module_metadata_ptr) :
-    CallTargetTokens(module_metadata_ptr)
+TracerTokens::TracerTokens(ModuleMetadata* module_metadata_ptr) : CallTargetTokens(module_metadata_ptr)
 {
     for (int i = 0; i < FASTPATH_COUNT; i++)
     {
@@ -153,9 +157,11 @@ TracerTokens::TracerTokens(ModuleMetadata* module_metadata_ptr) :
     }
 }
 
-HRESULT TracerTokens::WriteBeginMethod(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
-                                           const TypeInfo* currentType,
-                                           const std::vector<TypeSignature>& methodArguments, ILInstr** instruction)
+HRESULT TracerTokens::WriteBeginMethod(void*                             rewriterWrapperPtr,
+                                       mdTypeRef                         integrationTypeRef,
+                                       const TypeInfo*                   currentType,
+                                       const std::vector<TypeSignature>& methodArguments,
+                                       ILInstr**                         instruction)
 {
     auto hr = EnsureBaseCalltargetTokens();
     if (FAILED(hr))
@@ -163,10 +169,10 @@ HRESULT TracerTokens::WriteBeginMethod(void* rewriterWrapperPtr, mdTypeRef integ
         return hr;
     }
 
-    ILRewriterWrapper* rewriterWrapper = (ILRewriterWrapper*) rewriterWrapperPtr;
-    ModuleMetadata* module_metadata = GetMetadata();
+    ILRewriterWrapper* rewriterWrapper = (ILRewriterWrapper*)rewriterWrapperPtr;
+    ModuleMetadata*    module_metadata = GetMetadata();
 
-    auto numArguments = (int) methodArguments.size();
+    auto numArguments = (int)methodArguments.size();
     if (numArguments >= FASTPATH_COUNT)
     {
         return WriteBeginMethodWithArgumentsArray(rewriterWrapperPtr, integrationTypeRef, currentType, instruction);
@@ -179,7 +185,7 @@ HRESULT TracerTokens::WriteBeginMethod(void* rewriterWrapperPtr, mdTypeRef integ
     if (beginMethodFastPathRefs[numArguments] == mdMemberRefNil)
     {
         unsigned callTargetStateBuffer;
-        auto callTargetStateSize = CorSigCompressToken(callTargetStateTypeRef, &callTargetStateBuffer);
+        auto     callTargetStateSize = CorSigCompressToken(callTargetStateTypeRef, &callTargetStateBuffer);
 
         unsigned long signatureLength;
         if (enable_by_ref_instrumentation)
@@ -191,7 +197,7 @@ HRESULT TracerTokens::WriteBeginMethod(void* rewriterWrapperPtr, mdTypeRef integ
             signatureLength = 6 + (numArguments * 2) + callTargetStateSize;
         }
         COR_SIGNATURE signature[signatureBufferSize];
-        unsigned offset = 0;
+        unsigned      offset = 0;
 
         signature[offset++] = IMAGE_CEE_CS_CALLCONV_GENERIC;
         signature[offset++] = 0x02 + numArguments;
@@ -214,9 +220,10 @@ HRESULT TracerTokens::WriteBeginMethod(void* rewriterWrapperPtr, mdTypeRef integ
             signature[offset++] = 0x01 + (i + 1);
         }
 
-        auto hr = module_metadata->metadata_emit->DefineMemberRef(
-            callTargetTypeRef, managed_profiler_calltarget_beginmethod_name.data(), signature, signatureLength,
-            &beginMethodFastPathRefs[numArguments]);
+        auto hr = module_metadata->metadata_emit->DefineMemberRef(callTargetTypeRef,
+                                                                  managed_profiler_calltarget_beginmethod_name.data(),
+                                                                  signature, signatureLength,
+                                                                  &beginMethodFastPathRefs[numArguments]);
         if (FAILED(hr))
         {
             Logger::Warn("Wrapper beginMethod for ", numArguments, " arguments could not be defined.");
@@ -227,49 +234,49 @@ HRESULT TracerTokens::WriteBeginMethod(void* rewriterWrapperPtr, mdTypeRef integ
     mdMethodSpec beginMethodSpec = mdMethodSpecNil;
 
     unsigned integrationTypeBuffer;
-    ULONG integrationTypeSize = CorSigCompressToken(integrationTypeRef, &integrationTypeBuffer);
+    ULONG    integrationTypeSize = CorSigCompressToken(integrationTypeRef, &integrationTypeBuffer);
 
-    bool isValueType = currentType->valueType;
+    bool    isValueType    = currentType->valueType;
     mdToken currentTypeRef = GetCurrentTypeRef(currentType, isValueType);
 
     unsigned currentTypeBuffer;
-    ULONG currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
+    ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
 
     auto signatureLength = 4 + integrationTypeSize + currentTypeSize;
 
     PCCOR_SIGNATURE argumentsSignatureBuffer[FASTPATH_COUNT];
-    ULONG argumentsSignatureSize[FASTPATH_COUNT];
+    ULONG           argumentsSignatureSize[FASTPATH_COUNT];
     for (auto i = 0; i < numArguments; i++)
     {
-        const auto [elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
+        const auto[elementType, argTypeFlags] = methodArguments[i].GetElementTypeAndFlags();
 
         if (enable_by_ref_instrumentation && (argTypeFlags & TypeFlagByRef))
         {
             PCCOR_SIGNATURE argSigBuff;
-            auto signatureSize = methodArguments[i].GetSignature(argSigBuff);
+            auto            signatureSize = methodArguments[i].GetSignature(argSigBuff);
             if (argSigBuff[0] == ELEMENT_TYPE_BYREF)
             {
                 argumentsSignatureBuffer[i] = argSigBuff + 1;
-                argumentsSignatureSize[i] = signatureSize - 1;
+                argumentsSignatureSize[i]   = signatureSize - 1;
                 signatureLength += signatureSize - 1;
             }
             else
             {
                 argumentsSignatureBuffer[i] = argSigBuff;
-                argumentsSignatureSize[i] = signatureSize;
+                argumentsSignatureSize[i]   = signatureSize;
                 signatureLength += signatureSize;
             }
         }
         else
         {
-            auto signatureSize = methodArguments[i].GetSignature(argumentsSignatureBuffer[i]);
+            auto signatureSize        = methodArguments[i].GetSignature(argumentsSignatureBuffer[i]);
             argumentsSignatureSize[i] = signatureSize;
             signatureLength += signatureSize;
         }
     }
 
     COR_SIGNATURE signature[signatureBufferSize];
-    unsigned offset = 0;
+    unsigned      offset = 0;
 
     signature[offset++] = IMAGE_CEE_CS_CALLCONV_GENERICINST;
     signature[offset++] = 0x02 + numArguments;
@@ -308,16 +315,18 @@ HRESULT TracerTokens::WriteBeginMethod(void* rewriterWrapperPtr, mdTypeRef integ
 }
 
 // endmethod with void return
-HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
-                                                      const TypeInfo* currentType, ILInstr** instruction)
+HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void*           rewriterWrapperPtr,
+                                                  mdTypeRef       integrationTypeRef,
+                                                  const TypeInfo* currentType,
+                                                  ILInstr**       instruction)
 {
     auto hr = EnsureBaseCalltargetTokens();
     if (FAILED(hr))
     {
         return hr;
     }
-    ILRewriterWrapper* rewriterWrapper = (ILRewriterWrapper*) rewriterWrapperPtr;
-    ModuleMetadata* module_metadata = GetMetadata();
+    ILRewriterWrapper* rewriterWrapper = (ILRewriterWrapper*)rewriterWrapperPtr;
+    ModuleMetadata*    module_metadata = GetMetadata();
 
     if (endVoidMemberRef == mdMemberRefNil)
     {
@@ -325,10 +334,10 @@ HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void* rewriterWrapperPtr, mdTy
         auto callTargetReturnVoidSize = CorSigCompressToken(callTargetReturnVoidTypeRef, &callTargetReturnVoidBuffer);
 
         unsigned exTypeRefBuffer;
-        auto exTypeRefSize = CorSigCompressToken(exTypeRef, &exTypeRefBuffer);
+        auto     exTypeRefSize = CorSigCompressToken(exTypeRef, &exTypeRefBuffer);
 
         unsigned callTargetStateBuffer;
-        auto callTargetStateSize = CorSigCompressToken(callTargetStateTypeRef, &callTargetStateBuffer);
+        auto     callTargetStateSize = CorSigCompressToken(callTargetStateTypeRef, &callTargetStateBuffer);
 
         auto signatureLength = 8 + callTargetReturnVoidSize + exTypeRefSize + callTargetStateSize;
         if (enable_calltarget_state_by_ref)
@@ -337,7 +346,7 @@ HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void* rewriterWrapperPtr, mdTy
         }
 
         COR_SIGNATURE signature[signatureBufferSize];
-        unsigned offset = 0;
+        unsigned      offset = 0;
 
         signature[offset++] = IMAGE_CEE_CS_CALLCONV_GENERIC;
         signature[offset++] = 0x02;
@@ -376,19 +385,19 @@ HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void* rewriterWrapperPtr, mdTy
     mdMethodSpec endVoidMethodSpec = mdMethodSpecNil;
 
     unsigned integrationTypeBuffer;
-    ULONG integrationTypeSize = CorSigCompressToken(integrationTypeRef, &integrationTypeBuffer);
+    ULONG    integrationTypeSize = CorSigCompressToken(integrationTypeRef, &integrationTypeBuffer);
 
-    bool isValueType = currentType->valueType;
+    bool    isValueType    = currentType->valueType;
     mdToken currentTypeRef = GetCurrentTypeRef(currentType, isValueType);
 
     unsigned currentTypeBuffer;
-    ULONG currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
+    ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
 
-    auto signatureLength = 4 + integrationTypeSize + currentTypeSize;
+    auto          signatureLength = 4 + integrationTypeSize + currentTypeSize;
     COR_SIGNATURE signature[signatureBufferSize];
-    unsigned offset = 0;
-    signature[offset++] = IMAGE_CEE_CS_CALLCONV_GENERICINST;
-    signature[offset++] = 0x02;
+    unsigned      offset = 0;
+    signature[offset++]  = IMAGE_CEE_CS_CALLCONV_GENERICINST;
+    signature[offset++]  = 0x02;
 
     signature[offset++] = ELEMENT_TYPE_CLASS;
     memcpy(&signature[offset], &integrationTypeBuffer, integrationTypeSize);
@@ -418,17 +427,19 @@ HRESULT TracerTokens::WriteEndVoidReturnMemberRef(void* rewriterWrapperPtr, mdTy
 }
 
 // endmethod with return type
-HRESULT TracerTokens::WriteEndReturnMemberRef(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
-                                                  const TypeInfo* currentType, TypeSignature* returnArgument,
-                                                  ILInstr** instruction)
+HRESULT TracerTokens::WriteEndReturnMemberRef(void*           rewriterWrapperPtr,
+                                              mdTypeRef       integrationTypeRef,
+                                              const TypeInfo* currentType,
+                                              TypeSignature*  returnArgument,
+                                              ILInstr**       instruction)
 {
     auto hr = EnsureBaseCalltargetTokens();
     if (FAILED(hr))
     {
         return hr;
     }
-    ILRewriterWrapper* rewriterWrapper = (ILRewriterWrapper*) rewriterWrapperPtr;
-    ModuleMetadata* module_metadata = GetMetadata();
+    ILRewriterWrapper* rewriterWrapper = (ILRewriterWrapper*)rewriterWrapperPtr;
+    ModuleMetadata*    module_metadata = GetMetadata();
     GetTargetReturnValueTypeRef(returnArgument);
 
     // *** Define base MethodMemberRef for the type
@@ -436,13 +447,13 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void* rewriterWrapperPtr, mdTypeRe
     mdMemberRef endMethodMemberRef = mdMemberRefNil;
 
     unsigned callTargetReturnTypeRefBuffer;
-    auto callTargetReturnTypeRefSize = CorSigCompressToken(callTargetReturnTypeRef, &callTargetReturnTypeRefBuffer);
+    auto     callTargetReturnTypeRefSize = CorSigCompressToken(callTargetReturnTypeRef, &callTargetReturnTypeRefBuffer);
 
     unsigned exTypeRefBuffer;
-    auto exTypeRefSize = CorSigCompressToken(exTypeRef, &exTypeRefBuffer);
+    auto     exTypeRefSize = CorSigCompressToken(exTypeRef, &exTypeRefBuffer);
 
     unsigned callTargetStateBuffer;
-    auto callTargetStateSize = CorSigCompressToken(callTargetStateTypeRef, &callTargetStateBuffer);
+    auto     callTargetStateSize = CorSigCompressToken(callTargetStateTypeRef, &callTargetStateBuffer);
 
     auto signatureLength = 14 + callTargetReturnTypeRefSize + exTypeRefSize + callTargetStateSize;
     if (enable_calltarget_state_by_ref)
@@ -451,7 +462,7 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void* rewriterWrapperPtr, mdTypeRe
     }
 
     COR_SIGNATURE signature[signatureBufferSize];
-    unsigned offset = 0;
+    unsigned      offset = 0;
 
     signature[offset++] = IMAGE_CEE_CS_CALLCONV_GENERIC;
     signature[offset++] = 0x03;
@@ -497,19 +508,19 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void* rewriterWrapperPtr, mdTypeRe
     mdMethodSpec endMethodSpec = mdMethodSpecNil;
 
     unsigned integrationTypeBuffer;
-    ULONG integrationTypeSize = CorSigCompressToken(integrationTypeRef, &integrationTypeBuffer);
+    ULONG    integrationTypeSize = CorSigCompressToken(integrationTypeRef, &integrationTypeBuffer);
 
-    bool isValueType = currentType->valueType;
+    bool    isValueType    = currentType->valueType;
     mdToken currentTypeRef = GetCurrentTypeRef(currentType, isValueType);
 
     unsigned currentTypeBuffer;
-    ULONG currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
+    ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
 
     PCCOR_SIGNATURE returnSignatureBuffer;
-    auto returnSignatureLength = returnArgument->GetSignature(returnSignatureBuffer);
+    auto            returnSignatureLength = returnArgument->GetSignature(returnSignatureBuffer);
 
     signatureLength = 4 + integrationTypeSize + currentTypeSize + returnSignatureLength;
-    offset = 0;
+    offset          = 0;
 
     signature[offset++] = IMAGE_CEE_CS_CALLCONV_GENERICINST;
     signature[offset++] = 0x03;
@@ -545,25 +556,27 @@ HRESULT TracerTokens::WriteEndReturnMemberRef(void* rewriterWrapperPtr, mdTypeRe
 }
 
 // write log exception
-HRESULT TracerTokens::WriteLogException(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
-                                            const TypeInfo* currentType, ILInstr** instruction)
+HRESULT TracerTokens::WriteLogException(void*           rewriterWrapperPtr,
+                                        mdTypeRef       integrationTypeRef,
+                                        const TypeInfo* currentType,
+                                        ILInstr**       instruction)
 {
     auto hr = EnsureBaseCalltargetTokens();
     if (FAILED(hr))
     {
         return hr;
     }
-    ILRewriterWrapper* rewriterWrapper = (ILRewriterWrapper*) rewriterWrapperPtr;
-    ModuleMetadata* module_metadata = GetMetadata();
+    ILRewriterWrapper* rewriterWrapper = (ILRewriterWrapper*)rewriterWrapperPtr;
+    ModuleMetadata*    module_metadata = GetMetadata();
 
     if (logExceptionRef == mdMemberRefNil)
     {
         unsigned exTypeRefBuffer;
-        auto exTypeRefSize = CorSigCompressToken(exTypeRef, &exTypeRefBuffer);
+        auto     exTypeRefSize = CorSigCompressToken(exTypeRef, &exTypeRefBuffer);
 
-        auto signatureLength = 5 + exTypeRefSize;
+        auto          signatureLength = 5 + exTypeRefSize;
         COR_SIGNATURE signature[signatureBufferSize];
-        unsigned offset = 0;
+        unsigned      offset = 0;
 
         signature[offset++] = IMAGE_CEE_CS_CALLCONV_GENERIC;
         signature[offset++] = 0x02;
@@ -587,19 +600,19 @@ HRESULT TracerTokens::WriteLogException(void* rewriterWrapperPtr, mdTypeRef inte
     mdMethodSpec logExceptionMethodSpec = mdMethodSpecNil;
 
     unsigned integrationTypeBuffer;
-    ULONG integrationTypeSize = CorSigCompressToken(integrationTypeRef, &integrationTypeBuffer);
+    ULONG    integrationTypeSize = CorSigCompressToken(integrationTypeRef, &integrationTypeBuffer);
 
-    bool isValueType = currentType->valueType;
+    bool    isValueType    = currentType->valueType;
     mdToken currentTypeRef = GetCurrentTypeRef(currentType, isValueType);
 
     unsigned currentTypeBuffer;
-    ULONG currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
+    ULONG    currentTypeSize = CorSigCompressToken(currentTypeRef, &currentTypeBuffer);
 
-    auto signatureLength = 4 + integrationTypeSize + currentTypeSize;
+    auto          signatureLength = 4 + integrationTypeSize + currentTypeSize;
     COR_SIGNATURE signature[signatureBufferSize];
-    unsigned offset = 0;
-    signature[offset++] = IMAGE_CEE_CS_CALLCONV_GENERICINST;
-    signature[offset++] = 0x02;
+    unsigned      offset = 0;
+    signature[offset++]  = IMAGE_CEE_CS_CALLCONV_GENERICINST;
+    signature[offset++]  = 0x02;
 
     signature[offset++] = ELEMENT_TYPE_CLASS;
     memcpy(&signature[offset], &integrationTypeBuffer, integrationTypeSize);
