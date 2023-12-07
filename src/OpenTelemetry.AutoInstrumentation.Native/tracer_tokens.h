@@ -1,3 +1,8 @@
+/*
+ * Copyright The OpenTelemetry Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef OTEL_CLR_PROFILER_TRACER_TOKENS_H_
 #define OTEL_CLR_PROFILER_TRACER_TOKENS_H_
 
