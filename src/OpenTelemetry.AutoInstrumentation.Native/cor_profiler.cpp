@@ -1340,7 +1340,8 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCompilationStartedOnNetFramework(Funct
 
         first_jit_compilation_app_domains.insert(module_metadata->app_domain_id);
 
-        hr = RunAutoInstrumentationLoader(module_metadata->metadata_emit, module_id, function_token);
+        hr = RunAutoInstrumentationLoader(module_metadata->metadata_emit, module_id, function_token, caller,
+                                          *module_metadata);
         if (FAILED(hr))
         {
             Logger::Warn("JITCompilationStarted: Call to RunAutoInstrumentationLoader() failed for ", module_id, " ",
@@ -1460,10 +1461,10 @@ const std::string indent_values[] = {
     std::string(2 * 10, ' '),
 };
 
-std::string CorProfiler::GetILCodes(const std::string&    title,
-                                    ILRewriter*           rewriter,
-                                    const FunctionInfo&   caller,
-                                    const ModuleMetadata& module_metadata)
+std::string CorProfiler::GetILCodes(const std::string&              title,
+                                    ILRewriter*                     rewriter,
+                                    const FunctionInfo&             caller,
+                                    const ComPtr<IMetaDataImport2>& metadata_import)
 {
     std::stringstream orig_sstream;
     orig_sstream << title;
@@ -1484,8 +1485,7 @@ std::string CorProfiler::GetILCodes(const std::string&    title,
 
     if (localVarSig != mdTokenNil)
     {
-        auto hr =
-            module_metadata.metadata_import->GetSigFromToken(localVarSig, &originalSignature, &originalSignatureSize);
+        auto hr = metadata_import->GetSigFromToken(localVarSig, &originalSignature, &originalSignatureSize);
         if (SUCCEEDED(hr))
         {
             orig_sstream << std::endl
@@ -1592,7 +1592,7 @@ std::string CorProfiler::GetILCodes(const std::string&    title,
 
             if (cInstr->m_opcode == CEE_CALL || cInstr->m_opcode == CEE_CALLVIRT || cInstr->m_opcode == CEE_NEWOBJ)
             {
-                const auto memberInfo = GetFunctionInfo(module_metadata.metadata_import, (mdMemberRef)cInstr->m_Arg32);
+                const auto memberInfo = GetFunctionInfo(metadata_import, (mdMemberRef)cInstr->m_Arg32);
                 orig_sstream << "  | ";
                 orig_sstream << ToString(memberInfo.type.name);
                 orig_sstream << ".";
@@ -1613,7 +1613,7 @@ std::string CorProfiler::GetILCodes(const std::string&    title,
                      cInstr->m_opcode == CEE_UNBOX_ANY || cInstr->m_opcode == CEE_NEWARR ||
                      cInstr->m_opcode == CEE_INITOBJ)
             {
-                const auto typeInfo = GetTypeInfo(module_metadata.metadata_import, (mdTypeRef)cInstr->m_Arg32);
+                const auto typeInfo = GetTypeInfo(metadata_import, (mdTypeRef)cInstr->m_Arg32);
                 orig_sstream << "  | ";
                 orig_sstream << ToString(typeInfo.name);
             }
@@ -1621,8 +1621,7 @@ std::string CorProfiler::GetILCodes(const std::string&    title,
             {
                 WCHAR szString[1024];
                 ULONG szStringLength;
-                auto  hr = module_metadata.metadata_import->GetUserString((mdString)cInstr->m_Arg32, szString, 1024,
-                                                                         &szStringLength);
+                auto  hr = metadata_import->GetUserString((mdString)cInstr->m_Arg32, szString, 1024, &szStringLength);
                 if (SUCCEEDED(hr))
                 {
                     orig_sstream << "  | \"";
@@ -1664,7 +1663,9 @@ std::string CorProfiler::GetILCodes(const std::string&    title,
 //
 HRESULT CorProfiler::RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>& metadata_emit,
                                                   const ModuleID                module_id,
-                                                  const mdToken                 function_token)
+                                                  const mdToken                 function_token,
+                                                  const FunctionInfo&           caller,
+                                                  const ModuleMetadata&         module_metadata)
 {
     mdMethodDef ret_method_token;
     auto        hr = GenerateLoaderMethod(module_id, &ret_method_token);
@@ -2288,6 +2289,16 @@ HRESULT CorProfiler::GenerateLoaderMethod(const ModuleID module_id, mdMethodDef*
     pNewInstr           = rewriter_void.NewILInstr();
     pNewInstr->m_opcode = CEE_RET;
     rewriter_void.InsertBefore(pFirstInstr, pNewInstr);
+
+    if (IsDumpILRewriteEnabled())
+    {
+        mdToken      token = 0;
+        TypeInfo     typeInfo{};
+        WSTRING      methodName = WStr("__DDVoidMethodCall__");
+        FunctionInfo caller(token, methodName, typeInfo, MethodSignature(), FunctionMethodSignature());
+        Logger::Info(
+            GetILCodes("*** GenerateLoaderMethod(): Modified Code: ", &rewriter_void, caller, metadata_import));
+    }
 
     hr = rewriter_void.Export();
     if (FAILED(hr))
