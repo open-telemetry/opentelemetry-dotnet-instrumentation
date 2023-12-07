@@ -301,9 +301,6 @@ void RejitHandler::RequestRejit(std::vector<ModuleID>& modulesVector, std::vecto
         {
             Logger::Warn("Error requesting ReJIT for ", modulesVector.size(), " methods");
         }
-
-        // Request for NGen Inliners
-        RequestRejitForNGenInliners();
     }
 }
 

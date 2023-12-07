@@ -385,6 +385,7 @@ ULONG RejitPreprocessor<RejitRequestDefinition>::RequestRejitForLoadedModules(
         else
         {
             m_rejit_handler->EnqueueForRejit(vtModules, vtMethodDefs);
+            m_rejit_handler->RequestRejitForNGenInliners();
         }
     }
 
@@ -434,6 +435,7 @@ void RejitPreprocessor<RejitRequestDefinition>::EnqueueRequestRejitForLoadedModu
 
     // Enqueue
     m_work_offloader->Enqueue(std::make_unique<RejitWorkItem>(std::move(action)));
+    m_rejit_handler->RequestRejitForNGenInliners();
 }
 
 // TraceIntegrationRejitPreprocessor
