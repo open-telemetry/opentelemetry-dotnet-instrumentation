@@ -18,8 +18,6 @@
 #include "integration.h"
 #include "string.h" // NOLINT
 
-#define FASTPATH_COUNT 9
-
 namespace trace
 {
 
@@ -30,17 +28,11 @@ namespace trace
 class CallTargetTokens
 {
 private:
-    // The variables 'enable_by_ref_instrumentation' and 'enable_calltarget_state_by_ref' will always be true,
-    // but instead of removing them and the conditional branches they affect, we will keep the variables to make
-    // future upstream pulls easier.
     ModuleMetadata* module_metadata_ptr = nullptr;
-    const bool enable_by_ref_instrumentation = true;
-    const bool enable_calltarget_state_by_ref = true;
 
     // CorLib tokens
     mdAssemblyRef corLibAssemblyRef = mdAssemblyRefNil;
     mdTypeRef objectTypeRef = mdTypeRefNil;
-    mdTypeRef exTypeRef = mdTypeRefNil;
     mdTypeRef typeRef = mdTypeRefNil;
     mdTypeRef runtimeTypeHandleRef = mdTypeRefNil;
     mdToken getTypeFromHandleToken = mdTokenNil;
@@ -48,43 +40,51 @@ private:
 
     // CallTarget tokens
     mdAssemblyRef profilerAssemblyRef = mdAssemblyRefNil;
-    mdTypeRef callTargetTypeRef = mdTypeRefNil;
-    mdTypeRef callTargetStateTypeRef = mdTypeRefNil;
-    mdTypeRef callTargetReturnVoidTypeRef = mdTypeRefNil;
-    mdTypeRef callTargetReturnTypeRef = mdTypeRefNil;
-
-    mdMemberRef beginArrayMemberRef = mdMemberRefNil;
-    mdMemberRef beginMethodFastPathRefs[FASTPATH_COUNT];
-    mdMemberRef endVoidMemberRef = mdMemberRefNil;
-
-    mdMemberRef logExceptionRef = mdMemberRefNil;
 
     mdMemberRef callTargetStateTypeGetDefault = mdMemberRefNil;
     mdMemberRef callTargetReturnVoidTypeGetDefault = mdMemberRefNil;
     mdMemberRef getDefaultMemberRef = mdMemberRefNil;
 
-    ModuleMetadata* GetMetadata();
     HRESULT EnsureCorLibTokens();
-    HRESULT EnsureBaseCalltargetTokens();
     mdTypeRef GetTargetStateTypeRef();
     mdTypeRef GetTargetVoidReturnTypeRef();
-    mdTypeSpec GetTargetReturnValueTypeRef(FunctionMethodArgument* returnArgument);
     mdMemberRef GetCallTargetStateDefaultMemberRef();
     mdMemberRef GetCallTargetReturnVoidDefaultMemberRef();
     mdMemberRef GetCallTargetReturnValueDefaultMemberRef(mdTypeSpec callTargetReturnTypeSpec);
-    mdMethodSpec GetCallTargetDefaultValueMethodSpec(FunctionMethodArgument* methodArgument);
-    mdToken GetCurrentTypeRef(const TypeInfo* currentType, bool& isValueType);
+    mdMethodSpec GetCallTargetDefaultValueMethodSpec(TypeSignature* methodArgument);
 
-    HRESULT ModifyLocalSig(ILRewriter* reWriter, FunctionMethodArgument* methodReturnValue, ULONG* callTargetStateIndex,
+    HRESULT ModifyLocalSig(ILRewriter* reWriter, TypeSignature* methodReturnValue, ULONG* callTargetStateIndex,
                            ULONG* exceptionIndex, ULONG* callTargetReturnIndex, ULONG* returnValueIndex,
                            mdToken* callTargetStateToken, mdToken* exceptionToken, mdToken* callTargetReturnToken);
 
     HRESULT WriteBeginMethodWithArgumentsArray(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
                                                const TypeInfo* currentType, ILInstr** instruction);
 
-public:
-    CallTargetTokens(ModuleMetadata* module_metadata_ptr);
+protected:
+    // The variables 'enable_by_ref_instrumentation' and 'enable_calltarget_state_by_ref' will always be true,
+    // but instead of removing them and the conditional branches they affect, we will keep the variables to make
+    // future upstream pulls easier.
+    const bool enable_by_ref_instrumentation  = true;
+    const bool enable_calltarget_state_by_ref = true;
+    mdTypeRef  callTargetTypeRef              = mdTypeRefNil;
+    mdTypeRef  callTargetStateTypeRef         = mdTypeRefNil;
+    mdTypeRef  callTargetReturnVoidTypeRef    = mdTypeRefNil;
+    mdTypeRef  callTargetReturnTypeRef        = mdTypeRefNil;
+    mdTypeRef  exTypeRef                      = mdTypeRefNil;
 
+    ModuleMetadata* GetMetadata();
+    HRESULT         EnsureBaseCalltargetTokens();
+    mdTypeSpec      GetTargetReturnValueTypeRef(TypeSignature* returnArgument);
+    mdToken         GetCurrentTypeRef(const TypeInfo* currentType, bool& isValueType);
+
+    virtual const WSTRING& GetCallTargetType()              = 0;
+    virtual const WSTRING& GetCallTargetStateType()         = 0;
+    virtual const WSTRING& GetCallTargetReturnType()        = 0;
+    virtual const WSTRING& GetCallTargetReturnGenericType() = 0;
+
+    CallTargetTokens(ModuleMetadata* moduleMetadataPtr);
+
+public:
     mdTypeRef GetObjectTypeRef();
     mdTypeRef GetExceptionTypeRef();
     mdAssemblyRef GetCorLibAssemblyRef();
@@ -94,18 +94,6 @@ public:
                                         ULONG* callTargetReturnIndex, ULONG* returnValueIndex,
                                         mdToken* callTargetStateToken, mdToken* exceptionToken,
                                         mdToken* callTargetReturnToken, ILInstr** firstInstruction);
-
-    HRESULT WriteBeginMethod(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef, const TypeInfo* currentType,
-                             const std::vector<FunctionMethodArgument>& methodArguments, ILInstr** instruction);
-
-    HRESULT WriteEndVoidReturnMemberRef(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef,
-                                        const TypeInfo* currentType, ILInstr** instruction);
-
-    HRESULT WriteEndReturnMemberRef(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef, const TypeInfo* currentType,
-                                    FunctionMethodArgument* returnArgument, ILInstr** instruction);
-
-    HRESULT WriteLogException(void* rewriterWrapperPtr, mdTypeRef integrationTypeRef, const TypeInfo* currentType,
-                              ILInstr** instruction);
 
     HRESULT WriteCallTargetReturnGetReturnValue(void* rewriterWrapperPtr, mdTypeSpec callTargetReturnTypeSpec,
                                                 ILInstr** instruction);
