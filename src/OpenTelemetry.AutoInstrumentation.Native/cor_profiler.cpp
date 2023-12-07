@@ -615,7 +615,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::ModuleLoadFinished(ModuleID module_id, HR
     {
         // We check if the Module contains NGEN images and added to the
         // rejit handler list to verify the inlines.
-        rejit_handler->AddNGenModule(module_id);
+        rejit_handler->AddNGenInlinerModule(module_id);
     }
 
     AppDomainID app_domain_id = module_info.assembly.app_domain_id;
@@ -2584,6 +2584,13 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCachedFunctionSearchStarted(FunctionID
         Logger::Warn("JITCachedFunctionSearchStarted: Call to ICorProfilerInfo4.GetFunctionInfo() failed for ",
                      functionId);
         return S_OK;
+    }
+    
+    // Call RequestRejit for register inliners and current NGEN module.
+    if (rejit_handler != nullptr)
+    {
+        // Process the current module to detect inliners.
+        rejit_handler->AddNGenInlinerModule(module_id);
     }
 
     // Verify that we have the metadata for this module
