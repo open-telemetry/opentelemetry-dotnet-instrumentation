@@ -5,8 +5,8 @@ namespace TestApplication.ContinuousProfiler;
 
 public class Plugin
 {
-    public Tuple<bool, bool, uint> GetContinuousProfilerConfiguration()
+    public Tuple<bool, uint, bool, uint> GetContinuousProfilerConfiguration()
     {
-        return Tuple.Create(true, true, 123u);
+        return Tuple.Create(true, 123u, true, 3u);
     }
 }

@@ -1,7 +1,6 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
-#include "continuous_profiler.h"
 #include "cor_profiler.h"
 
 #include "corhlpr.h"
@@ -30,6 +29,7 @@
 #include "stats.h"
 #include "util.h"
 #include "version.h"
+#include "continuous_profiler.h"
 
 #ifdef MACOS
 #include <mach-o/dyld.h>
@@ -991,7 +991,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITInlining(FunctionID callerId, Function
 
     ModuleID calleeModuleId;
     mdToken  calleFunctionToken = mdTokenNil;
-    auto     hr                 = this->info_->GetFunctionInfo(calleeId, NULL, &calleeModuleId, &calleFunctionToken);
+    auto     hr                 = this->info_->GetFunctionInfo(calleeId, nullptr, &calleeModuleId, &calleFunctionToken);
 
     *pfShouldInline = true;
 
@@ -1130,9 +1130,9 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
     }
 }
 
-void CorProfiler::ConfigureContinuousProfiler(bool threadSamplingEnabled, bool allocationSamplingEnabled, unsigned int samplingInterval)
+void CorProfiler::ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute)
 {
-    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", threadSamplingEnabled, ", allocationSamplingEnabled: ", allocationSamplingEnabled, ", interval: " , samplingInterval);
+    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", threadSamplingEnabled, ", thread sampling interval: ", threadSamplingInterval, ", allocationSamplingEnabled: ", allocationSamplingEnabled, ", max memory samples per minute: " , maxMemorySamplesPerMinute);
 
     if (!threadSamplingEnabled && !allocationSamplingEnabled)
     {
@@ -1164,12 +1164,12 @@ void CorProfiler::ConfigureContinuousProfiler(bool threadSamplingEnabled, bool a
 
     if(threadSamplingEnabled)
     {
-        this->continuousProfiler->StartThreadSampling();
+        this->continuousProfiler->StartThreadSampling(threadSamplingInterval);
     }
 
     if(allocationSamplingEnabled)
     {
-        this->continuousProfiler->StartAllocationSampling();
+        this->continuousProfiler->StartAllocationSampling(maxMemorySamplesPerMinute);
     }
 }
 

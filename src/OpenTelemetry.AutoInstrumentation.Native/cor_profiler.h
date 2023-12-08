@@ -24,6 +24,7 @@
 #include <unordered_set>
 #include "clr_helpers.h"
 
+// Forward declaration
 namespace continuous_profiler
 {
 class ContinuousProfiler;
@@ -192,7 +193,7 @@ public:
     //
     // Continuous Profiler methods
     //
-    void ConfigureContinuousProfiler(bool threadSamplingEnabled, bool allocationSamplingEnabled, unsigned int samplingInterval);
+    void ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute);
 
     friend class TracerMethodRewriter;
 };

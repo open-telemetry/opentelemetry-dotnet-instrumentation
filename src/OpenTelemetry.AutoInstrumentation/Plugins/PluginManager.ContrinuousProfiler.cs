@@ -7,14 +7,14 @@ namespace OpenTelemetry.AutoInstrumentation.Plugins;
 
 internal partial class PluginManager
 {
-    public Tuple<bool, bool, uint>? GetFirstContinuousConfiguration()
+    public Tuple<bool, uint, bool, uint>? GetFirstContinuousConfiguration()
     {
         foreach (var plugin in _plugins)
         {
             var mi = plugin.Type.GetMethod("GetContinuousProfilerConfiguration");
             if (mi is not null)
             {
-                if (mi.Invoke(plugin.Instance, null) is Tuple<bool, bool, uint> continuousProfilerConfiguration)
+                if (mi.Invoke(plugin.Instance, null) is Tuple<bool, uint, bool, uint> continuousProfilerConfiguration)
                 {
                     return continuousProfilerConfiguration;
                 }

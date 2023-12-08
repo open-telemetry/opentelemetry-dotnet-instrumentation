@@ -80,11 +80,11 @@ internal static class Instrumentation
             _pluginManager.Initializing();
 
 #if NET6_0_OR_GREATER
-            var (threadSamplingEnabled, allocationSamplingEnabled, samplingInterval) = _pluginManager.GetFirstContinuousConfiguration() ?? Tuple.Create(false, false, 0u);
+            var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute) = _pluginManager.GetFirstContinuousConfiguration() ?? Tuple.Create(false, 0u, false, 0u);
 
             if (threadSamplingEnabled || allocationSamplingEnabled)
             {
-                NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, allocationSamplingEnabled, samplingInterval);
+                NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute);
             }
 #endif
 

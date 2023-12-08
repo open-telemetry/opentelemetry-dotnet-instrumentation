@@ -43,15 +43,15 @@ internal static class NativeMethods
         }
     }
 
-    public static void ConfigureNativeContinuousProfiler(bool threadSamplingEnabled, bool allocationSamplingEnabled, uint samplingInterval)
+    public static void ConfigureNativeContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute)
     {
         if (IsWindows)
         {
-            Windows.ConfigureContinuousProfiler(threadSamplingEnabled, allocationSamplingEnabled, samplingInterval);
+            Windows.ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute);
         }
         else
         {
-            NonWindows.ConfigureContinuousProfiler(threadSamplingEnabled, allocationSamplingEnabled, samplingInterval);
+            NonWindows.ConfigureContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute);
         }
     }
 
@@ -66,7 +66,7 @@ internal static class NativeMethods
         public static extern void AddDerivedInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native.dll")]
-        public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, bool allocationSamplingEnabled, uint samplingInterval);
+        public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute);
     }
 
     // assume .NET Core if not running on Windows
@@ -79,6 +79,6 @@ internal static class NativeMethods
         public static extern void AddDerivedInstrumentations([MarshalAs(UnmanagedType.LPWStr)] string id, [In] NativeCallTargetDefinition[] methodArrays, int size);
 
         [DllImport("OpenTelemetry.AutoInstrumentation.Native")]
-        public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, bool allocationSamplingEnabled, uint samplingInterval);
+        public static extern void ConfigureContinuousProfiler(bool threadSamplingEnabled, uint threadSamplingInterval, bool allocationSamplingEnabled, uint maxMemorySamplesPerMinute);
     }
 }
