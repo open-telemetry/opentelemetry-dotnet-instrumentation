@@ -80,7 +80,7 @@ internal static class Instrumentation
             _pluginManager.Initializing();
 
 #if NET6_0_OR_GREATER
-            var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute) = _pluginManager.GetFirstContinuousConfiguration() ?? Tuple.Create(false, 0u, false, 0u);
+            var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, continuousProfilerExporter) = _pluginManager.GetFirstContinuousConfiguration() ?? Tuple.Create(false, 0u, false, 0u, TimeSpan.Zero, new object());
 
             if (threadSamplingEnabled || allocationSamplingEnabled)
             {
@@ -146,6 +146,12 @@ internal static class Instrumentation
                     Logger.Information("Initialized lazily-loaded metric instrumentations without initializing sdk.");
                 }
             }
+#if NET6_0_OR_GREATER
+            if (threadSamplingEnabled || allocationSamplingEnabled)
+            {
+                ContinuousProfiler.ContinuousProfilerProcessor.Initialize(threadSamplingEnabled, allocationSamplingEnabled, exportInterval, continuousProfilerExporter);
+            }
+#endif
         }
         catch (Exception ex)
         {

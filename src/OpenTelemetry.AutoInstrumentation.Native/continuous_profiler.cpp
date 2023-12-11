@@ -128,7 +128,7 @@ int32_t AllocationSamplingConsumeAndReplaceBuffer(int32_t len, unsigned char* bu
 {
     if (len <= 0 || buf == nullptr)
     {
-        trace::Logger::Warn("Unexpected 0/null buffer to SignalFxReadAllocationSamples");
+        trace::Logger::Warn("Unexpected 0/null buffer to ContinuousProfilerReadAllocationSamples");
         return 0;
     }
     std::vector<unsigned char>* to_use = nullptr;
@@ -967,15 +967,15 @@ void NameCache<TKey, TValue>::Clear()
 
 extern "C"
 {
-    EXPORTTHIS int32_t SignalFxReadThreadSamples(int32_t len, unsigned char* buf)
+    EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf)
     {
         return ThreadSamplingConsumeOneThreadSample(len, buf);
     }
-    EXPORTTHIS int32_t SignalFxReadAllocationSamples(int32_t len, unsigned char* buf)
+    EXPORTTHIS int32_t ContinuousProfilerReadAllocationSamples(int32_t len, unsigned char* buf)
     {
         return AllocationSamplingConsumeAndReplaceBuffer(len, buf);
     }
-    EXPORTTHIS void SignalFxSetNativeContext(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId,
+    EXPORTTHIS void ContinuousProfilerSetNativeContext(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId,
                                              int32_t managedThreadId)
     {
         ThreadID threadId;

@@ -27,10 +27,10 @@ constexpr auto unknown_managed_thread_id = -1;
 
 extern "C"
 {
-    EXPORTTHIS int32_t SignalFxReadThreadSamples(int32_t len, unsigned char* buf);
-    EXPORTTHIS int32_t SignalFxReadAllocationSamples(int32_t len, unsigned char* buf);
+    EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf);
+    EXPORTTHIS int32_t ContinuousProfilerReadAllocationSamples(int32_t len, unsigned char* buf);
     // ReSharper disable CppInconsistentNaming
-    EXPORTTHIS void SignalFxSetNativeContext(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId, int32_t managedThreadId);
+    EXPORTTHIS void ContinuousProfilerSetNativeContext(uint64_t traceIdHigh, uint64_t traceIdLow, uint64_t spanId, int32_t managedThreadId);
     // ReSharper restore CppInconsistentNaming
 }
 

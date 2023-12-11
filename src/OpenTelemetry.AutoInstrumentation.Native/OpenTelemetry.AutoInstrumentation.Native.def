@@ -8,3 +8,6 @@ EXPORTS
     AddInstrumentations
     AddDerivedInstrumentations
     ConfigureContinuousProfiler
+    ContinuousProfilerReadThreadSamples
+    ContinuousProfilerReadAllocationSamples
+    ContinuousProfilerSetNativeContext
