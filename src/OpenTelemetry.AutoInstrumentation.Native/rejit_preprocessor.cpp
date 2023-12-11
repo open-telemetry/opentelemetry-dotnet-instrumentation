@@ -80,8 +80,8 @@ void RejitPreprocessor<RejitRequestDefinition>::ProcessTypeDefForRejit(const Rej
         }
 
         // Compare each mdMethodDef argument type to the instrumentation target
-        bool       argumentsMismatch = false;
-        const auto methodArguments   = functionInfo.method_signature.GetMethodArguments();
+        bool        argumentsMismatch = false;
+        const auto& methodArguments   = functionInfo.method_signature.GetMethodArguments();
 
         Logger::Debug("    * Comparing signature for method: ", caller.type.name, ".", caller.name);
         for (unsigned int i = 0; i < numOfArgs; i++)

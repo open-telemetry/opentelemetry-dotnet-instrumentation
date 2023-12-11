@@ -95,7 +95,7 @@ private:
     //
     // Loader methods. These are only used on the .NET Framework.
     //
-    HRESULT RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>&, const ModuleID module_id, const mdToken function_token);
+    HRESULT RunAutoInstrumentationLoader(const ComPtr<IMetaDataEmit2>&, const ModuleID module_id, const mdToken function_token, const FunctionInfo& caller, const ModuleMetadata& module_metadata);
     HRESULT GenerateLoaderMethod(const ModuleID module_id, mdMethodDef* ret_method_token);
     HRESULT AddIISPreStartInitFlags(const ModuleID module_id, const mdToken function_token);
 #endif
@@ -108,7 +108,7 @@ private:
                                const IntegrationDefinition& integration_definition, mdTypeRef& integration_type_ref);
     bool ProfilerAssemblyIsLoadedIntoAppDomain(AppDomainID app_domain_id);
     std::string GetILCodes(const std::string& title, ILRewriter* rewriter, const FunctionInfo& caller,
-                           const ModuleMetadata& module_metadata);
+                           const ComPtr<IMetaDataImport2>& metadata_import);
 
     //
     // Initialization methods
