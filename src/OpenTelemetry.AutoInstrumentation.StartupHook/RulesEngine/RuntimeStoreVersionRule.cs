@@ -9,7 +9,7 @@ namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
 
 internal class RuntimeStoreVersionRule : Rule
 {
-    private const string AdditionalDepsEnvironmentVariable = "DOTNET_ADDITIONAL_DEPS";
+    private const string RuntimeStoreEnvironmentVariable = "DOTNET_SHARED_STORE";
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
 
     public RuntimeStoreVersionRule()
@@ -24,12 +24,6 @@ internal class RuntimeStoreVersionRule : Rule
 
         try
         {
-            if (Environment.GetEnvironmentVariable(AdditionalDepsEnvironmentVariable) == null)
-            {
-                Logger.Warning($"Rule Engine: {AdditionalDepsEnvironmentVariable} environment variable not found. Skipping rule evaluation.");
-                return result;
-            }
-
             var configuredStoreDirectory = GetConfiguredStoreDirectory();
             if (configuredStoreDirectory == null)
             {
@@ -37,9 +31,9 @@ internal class RuntimeStoreVersionRule : Rule
                 return result;
             }
 
-            string[] storeFiles = Directory.GetFiles(configuredStoreDirectory, "*.dll", SearchOption.AllDirectories);
+            var storeFiles = Directory.GetFiles(configuredStoreDirectory, "*.dll", SearchOption.AllDirectories);
 
-            foreach (string file in storeFiles)
+            foreach (var file in storeFiles)
             {
                 var runTimeStoreFileVersionInfo = FileVersionInfo.GetVersionInfo(file);
                 var runTimeStoreFileVersion = new Version(runTimeStoreFileVersionInfo.FileVersion);
@@ -74,8 +68,12 @@ internal class RuntimeStoreVersionRule : Rule
     {
         try
         {
-            var tracerHomeDirectory = Directory.GetParent(StartupHook.LoaderAssemblyLocation).ToString().ToString();
-            var storeDirectory = Path.Combine(tracerHomeDirectory, "store");
+            var storeDirectory = Environment.GetEnvironmentVariable(RuntimeStoreEnvironmentVariable);
+            if (storeDirectory == null)
+            {
+                Logger.Warning($"Rule Engine: {RuntimeStoreEnvironmentVariable} environment variable not found. Skipping rule evaluation.");
+                return null;
+            }
 
             // Check if the store directory exists
             if (!Directory.Exists(storeDirectory))
@@ -85,7 +83,7 @@ internal class RuntimeStoreVersionRule : Rule
             }
 
             var architecture = Environment.Is64BitProcess ? "x64" : "x86";
-            string targetFramework = "net" + Environment.Version.Major.ToString() + "." + Environment.Version.Minor.ToString();
+            var targetFramework = "net" + Environment.Version.Major.ToString() + "." + Environment.Version.Minor.ToString();
             var finalPath = Path.Combine(storeDirectory, architecture.ToString(), targetFramework);
 
             return finalPath;
