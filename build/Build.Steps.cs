@@ -531,11 +531,10 @@ partial class Build
                     var depsJson = JsonNode.Parse(rawJson).AsObject();
 
                     var folderRuntimeName = depsJson.GetFolderRuntimeName();
-                    var architectureStores = new List<AbsolutePath>
-                    {
-                        StoreDirectory / "x64" / folderRuntimeName,
-                        StoreDirectory / "x86" / folderRuntimeName,
-                    }.AsReadOnly();
+                    var architectureStores = new List<AbsolutePath>()
+                        .AddIf(StoreDirectory / "x64" / folderRuntimeName, true) // All OS'es support x64 runtime
+                        .AddIf(StoreDirectory / "x86" / folderRuntimeName, IsWin) // Only Windows supports x86 runtime
+                        .AsReadOnly();
 
                     depsJson.CopyNativeDependenciesToStore(file, architectureStores);
                     depsJson.RemoveDuplicatedLibraries(architectureStores);
