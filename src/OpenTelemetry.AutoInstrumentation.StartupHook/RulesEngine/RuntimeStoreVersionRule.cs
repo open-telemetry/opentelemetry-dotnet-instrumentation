@@ -31,17 +31,25 @@ internal class RuntimeStoreVersionRule : Rule
                 return result;
             }
 
-            var storeFiles = Directory.GetFiles(configuredStoreDirectory, "*.dll", SearchOption.AllDirectories);
+            var storeFiles = Directory.GetFiles(configuredStoreDirectory, "Microsoft.Extensions*.dll", SearchOption.AllDirectories);
 
             foreach (var file in storeFiles)
             {
-                var runTimeStoreFileVersionInfo = FileVersionInfo.GetVersionInfo(file);
-                var runTimeStoreFileVersion = new Version(runTimeStoreFileVersionInfo.FileVersion);
-
                 var assemblyName = Path.GetFileNameWithoutExtension(file);
                 var appInstrumentationAssembly = Assembly.Load(assemblyName);
                 var appInstrumentationFileVersionInfo = FileVersionInfo.GetVersionInfo(appInstrumentationAssembly.Location);
                 var appInstrumentationFileVersion = new Version(appInstrumentationFileVersionInfo.FileVersion);
+
+                if (appInstrumentationFileVersion.Major < 5)
+                {
+                    // Special case to handle runtime store version 3.1.x.x package references in app.
+                    // Skip rule evaluation for assemblies with version 3.1.x.x.
+                    Logger.Debug($"Rule Engine: Skipping rule evaluation for runtime store assembly {appInstrumentationFileVersionInfo.FileName} with version {appInstrumentationFileVersion}.");
+                    continue;
+                }
+
+                var runTimeStoreFileVersionInfo = FileVersionInfo.GetVersionInfo(file);
+                var runTimeStoreFileVersion = new Version(runTimeStoreFileVersionInfo.FileVersion);
 
                 if (appInstrumentationFileVersion < runTimeStoreFileVersion)
                 {
@@ -50,7 +58,7 @@ internal class RuntimeStoreVersionRule : Rule
                 }
                 else
                 {
-                    Logger.Information($"Rule Engine: Runtime store assembly {runTimeStoreFileVersionInfo.FileName} is validated successfully.");
+                    Logger.Debug($"Rule Engine: Runtime store assembly {runTimeStoreFileVersionInfo.FileName} is validated successfully.");
                 }
             }
         }
