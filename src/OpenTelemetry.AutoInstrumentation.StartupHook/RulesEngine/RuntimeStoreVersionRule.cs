@@ -36,7 +36,17 @@ internal class RuntimeStoreVersionRule : Rule
             foreach (var file in storeFiles)
             {
                 var assemblyName = Path.GetFileNameWithoutExtension(file);
-                var appInstrumentationAssembly = Assembly.Load(assemblyName);
+                Assembly appInstrumentationAssembly;
+                try
+                {
+                    appInstrumentationAssembly = Assembly.Load(assemblyName);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Warning(ex, $"Rule Engine: Assembly load failed. Skipping rule evaluation for assembly - {assemblyName}");
+                    continue;
+                }
+
                 var appInstrumentationFileVersionInfo = FileVersionInfo.GetVersionInfo(appInstrumentationAssembly.Location);
                 var appInstrumentationFileVersion = new Version(appInstrumentationFileVersionInfo.FileVersion);
 
@@ -62,10 +72,10 @@ internal class RuntimeStoreVersionRule : Rule
                 }
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // Exception in rule evaluation should not impact the result of the rule.
-            Logger.Warning("Rule Engine: Couldn't evaluate reference to runtime store assemblies in an app.");
+            Logger.Warning(ex, "Rule Engine: Couldn't evaluate reference to runtime store assemblies in an app.");
             throw;
         }
 
@@ -92,13 +102,13 @@ internal class RuntimeStoreVersionRule : Rule
 
             var architecture = Environment.Is64BitProcess ? "x64" : "x86";
             var targetFramework = "net" + Environment.Version.Major.ToString() + "." + Environment.Version.Minor.ToString();
-            var finalPath = Path.Combine(storeDirectory, architecture.ToString(), targetFramework);
+            var finalPath = Path.Combine(storeDirectory, architecture, targetFramework);
 
             return finalPath;
         }
         catch (Exception ex)
         {
-            Logger.Error($"Error getting store directory location: {ex}");
+            Logger.Warning(ex, "Error getting store directory location");
             throw;
         }
     }
