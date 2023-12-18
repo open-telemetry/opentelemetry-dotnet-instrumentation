@@ -1,7 +1,13 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NET6_0_OR_GREATER
+using System.Diagnostics;
+#endif
 using OpenTelemetry.AutoInstrumentation.Configurations;
+#if NET6_0_OR_GREATER
+using OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
+#endif
 using OpenTelemetry.AutoInstrumentation.Diagnostics;
 using OpenTelemetry.AutoInstrumentation.Loading;
 using OpenTelemetry.AutoInstrumentation.Logging;
@@ -85,6 +91,7 @@ internal static class Instrumentation
             if (threadSamplingEnabled || allocationSamplingEnabled)
             {
                 NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute);
+                Activity.CurrentChanged += ContinuousProfilerProcessor.Activity_CurrentChanged;
             }
 #endif
 

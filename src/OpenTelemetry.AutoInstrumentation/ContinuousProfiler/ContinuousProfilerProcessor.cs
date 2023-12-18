@@ -3,6 +3,7 @@
 
 #if NET6_0_OR_GREATER
 
+using System.Globalization;
 using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.ContinuousProfiler;
@@ -12,6 +13,26 @@ internal static class ContinuousProfilerProcessor
     public const string BackgroundThreadName = "OpenTelemetry Continuous Profiler Thread";
 
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger();
+
+    public static void Activity_CurrentChanged(object? sender, System.Diagnostics.ActivityChangedEventArgs e)
+    {
+        var currentActivity = e.Current;
+        var managedThreadId = Environment.CurrentManagedThreadId;
+
+        if (currentActivity != null)
+        {
+            var hexTraceId = currentActivity.TraceId.ToHexString();
+            NativeMethods.ContinuousProfilerSetNativeContext(
+                traceIdHigh: ulong.Parse(hexTraceId.AsSpan(0, 16), NumberStyles.HexNumber, CultureInfo.InvariantCulture),
+                traceIdLow: ulong.Parse(hexTraceId.AsSpan(16), NumberStyles.HexNumber, CultureInfo.InvariantCulture),
+                spanId: ulong.Parse(currentActivity.SpanId.ToHexString(), NumberStyles.HexNumber, CultureInfo.InvariantCulture),
+                managedThreadId: managedThreadId);
+        }
+        else
+        {
+            NativeMethods.ContinuousProfilerSetNativeContext(0, 0, 0, managedThreadId);
+        }
+    }
 
     public static void Initialize(bool threadSamplingEnabled, bool allocationSamplingEnabled, TimeSpan exportInterval, object continuousProfilerExporter)
     {
