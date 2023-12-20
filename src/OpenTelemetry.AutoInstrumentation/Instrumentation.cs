@@ -86,12 +86,20 @@ internal static class Instrumentation
             _pluginManager.Initializing();
 
 #if NET6_0_OR_GREATER
+            var profilerEnabled = GeneralSettings.Value.ProfilerEnabled;
             var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, continuousProfilerExporter) = _pluginManager.GetFirstContinuousConfiguration() ?? Tuple.Create(false, 0u, false, 0u, TimeSpan.Zero, new object());
 
             if (threadSamplingEnabled || allocationSamplingEnabled)
             {
-                NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute);
-                Activity.CurrentChanged += ContinuousProfilerProcessor.Activity_CurrentChanged;
+                if (profilerEnabled)
+                {
+                    NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute);
+                    Activity.CurrentChanged += ContinuousProfilerProcessor.Activity_CurrentChanged;
+                }
+                else
+                {
+                    Logger.Warning("Continuous Profiler will be not enabled. CLR Profiler is not enabled.");
+                }
             }
 #endif
 
@@ -154,9 +162,9 @@ internal static class Instrumentation
                 }
             }
 #if NET6_0_OR_GREATER
-            if (threadSamplingEnabled || allocationSamplingEnabled)
+            if (profilerEnabled && (threadSamplingEnabled || allocationSamplingEnabled))
             {
-                ContinuousProfiler.ContinuousProfilerProcessor.Initialize(threadSamplingEnabled, allocationSamplingEnabled, exportInterval, continuousProfilerExporter);
+                ContinuousProfilerProcessor.Initialize(threadSamplingEnabled, allocationSamplingEnabled, exportInterval, continuousProfilerExporter);
             }
 #endif
         }
