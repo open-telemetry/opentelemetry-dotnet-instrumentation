@@ -33,12 +33,12 @@ public class OtlpResourceExpector : IDisposable
 
     public void Expect(string key, string value)
     {
-        _resourceExpectations.Add(new ResourceExpectation { Key = key, StringValue = value });
+        _resourceExpectations.Add(new ResourceExpectation(key, value));
     }
 
     public void Expect(string key, long value)
     {
-        _resourceExpectations.Add(new ResourceExpectation { Key = key, IntValue = value });
+        _resourceExpectations.Add(new ResourceExpectation(key, value));
     }
 
     public void AssertExpectations(TimeSpan? timeout = null)
@@ -113,7 +113,8 @@ public class OtlpResourceExpector : IDisposable
         message.AppendLine("Missing resource expectations:");
         foreach (var expectation in missingExpectations)
         {
-            message.AppendLine($"  - \"{expectation.Key}={expectation.StringValue}\"");
+            var value = !string.IsNullOrEmpty(expectation.StringValue) ? expectation.StringValue : expectation.IntValue!.Value.ToString(CultureInfo.InvariantCulture);
+            message.AppendLine($"  - \"{expectation.Key}={value}\"");
         }
 
         message.AppendLine("Actual resource attributes:");
@@ -128,10 +129,22 @@ public class OtlpResourceExpector : IDisposable
 
     private class ResourceExpectation
     {
-        public string? Key { get; set; }
+        public ResourceExpectation(string key, string stringValue)
+        {
+            Key = key;
+            StringValue = stringValue;
+        }
 
-        public string? StringValue { get; set; }
+        public ResourceExpectation(string key, long intValue)
+        {
+            Key = key;
+            IntValue = intValue;
+        }
 
-        public long? IntValue { get; set; }
+        public string Key { get; }
+
+        public string? StringValue { get; }
+
+        public long? IntValue { get; }
     }
 }
