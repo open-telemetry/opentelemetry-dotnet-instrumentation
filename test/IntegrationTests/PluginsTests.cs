@@ -20,7 +20,7 @@ public class PluginsTests : TestHelper
     {
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
 
-        var (standardOutput, _) = RunTestApplication();
+        var (standardOutput, _, _) = RunTestApplication();
 
         standardOutput.Should().Contain("Plugin.Initializing() invoked.");
     }
@@ -41,7 +41,7 @@ public class PluginsTests : TestHelper
 #endif
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
-        var (standardOutput, _) = RunTestApplication();
+        var (standardOutput, _, _) = RunTestApplication();
 
         collector.AssertExpectations();
         standardOutput.Should().Contain("Plugin.ConfigureTracesOptions(OtlpExporterOptions options) invoked.");
@@ -57,7 +57,7 @@ public class PluginsTests : TestHelper
 
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_PLUGINS", "TestApplication.Plugins.Plugin, TestApplication.Plugins, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
 
-        var (standardOutput, _) = RunTestApplication();
+        var (standardOutput, _, _) = RunTestApplication();
 
         collector.AssertExpectations();
         standardOutput.Should().Contain("Plugin.ConfigureMetricsOptions(OtlpExporterOptions options) invoked.");
