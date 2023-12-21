@@ -86,7 +86,7 @@ internal static class SampleNativeFormatParser
 
                     if (threadName == "OpenTelemetry Continuous Profiler Thread")
                     {
-                        // TODO Splunk: add configuration option to include the sampler thread. By default remove it.
+                        // TODO add configuration option to include the sampler thread. By default remove it.
                         continue;
                     }
 
@@ -174,7 +174,7 @@ internal static class SampleNativeFormatParser
                     ReadStackFrames(code, threadSample, codeDictionary, buffer, ref position);
                     if (threadName == "OpenTelemetry Continuous Profiler Thread")
                     {
-                        // TODO Splunk: add configuration option to include the sampler thread. By default remove it.
+                        // TODO: add configuration option to include the sampler thread. By default remove it.
                         continue;
                     }
 
