@@ -63,7 +63,7 @@ CorProfiler* profiler = nullptr;
 //
 HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_unknown)
 {
-    auto _ = trace::Stats::Instance()->InitializeMeasure();
+    auto _                   = trace::Stats::Instance()->InitializeMeasure();
     this->continuousProfiler = nullptr;
 
     CorProfilerBase::Initialize(cor_profiler_info_unknown);
@@ -105,7 +105,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
     if (SUCCEEDED(hr))
     {
         Logger::Debug("Interface ICorProfilerInfo12 found.");
-        this->info_ = info12;
+        this->info_   = info12;
         this->info12_ = info12;
     }
     else
@@ -116,7 +116,7 @@ HRESULT STDMETHODCALLTYPE CorProfiler::Initialize(IUnknown* cor_profiler_info_un
         {
             FailProfiler(Warn, "Failed to attach profiler: Not supported .NET Framework version (lower than 4.6.1).")
         }
-        info12 = nullptr;
+        info12        = nullptr;
         this->info12_ = nullptr;
     }
 
@@ -1130,9 +1130,14 @@ void CorProfiler::InternalAddInstrumentation(WCHAR* id, CallTargetDefinition* it
     }
 }
 
-void CorProfiler::ConfigureContinuousProfiler(bool threadSamplingEnabled, unsigned int threadSamplingInterval, bool allocationSamplingEnabled, unsigned int maxMemorySamplesPerMinute)
+void CorProfiler::ConfigureContinuousProfiler(bool         threadSamplingEnabled,
+                                              unsigned int threadSamplingInterval,
+                                              bool         allocationSamplingEnabled,
+                                              unsigned int maxMemorySamplesPerMinute)
 {
-    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", threadSamplingEnabled, ", thread sampling interval: ", threadSamplingInterval, ", allocationSamplingEnabled: ", allocationSamplingEnabled, ", max memory samples per minute: " , maxMemorySamplesPerMinute);
+    Logger::Info("ConfigureContinuousProfiler: thread sampling enabled: ", threadSamplingEnabled,
+                 ", thread sampling interval: ", threadSamplingInterval, ", allocationSamplingEnabled: ",
+                 allocationSamplingEnabled, ", max memory samples per minute: ", maxMemorySamplesPerMinute);
 
     if (!threadSamplingEnabled && !allocationSamplingEnabled)
     {
@@ -1162,12 +1167,12 @@ void CorProfiler::ConfigureContinuousProfiler(bool threadSamplingEnabled, unsign
     this->continuousProfiler->SetGlobalInfo12(this->info12_);
     Logger::Info("ConfigureContinuousProfiler: Events masks configured for continuous profiler");
 
-    if(threadSamplingEnabled)
+    if (threadSamplingEnabled)
     {
         this->continuousProfiler->StartThreadSampling(threadSamplingInterval);
     }
 
-    if(allocationSamplingEnabled)
+    if (allocationSamplingEnabled)
     {
         this->continuousProfiler->StartAllocationSampling(maxMemorySamplesPerMinute);
     }

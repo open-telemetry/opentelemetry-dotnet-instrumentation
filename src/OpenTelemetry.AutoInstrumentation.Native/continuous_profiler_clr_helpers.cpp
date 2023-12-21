@@ -23,11 +23,11 @@ namespace continuous_profiler
 FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdToken& token)
 {
     mdToken parent_token = mdTokenNil;
-    WCHAR function_name[trace::kNameMaxSize]{};
-    DWORD function_name_len = 0;
+    WCHAR   function_name[trace::kNameMaxSize]{};
+    DWORD   function_name_len = 0;
 
     PCCOR_SIGNATURE raw_signature;
-    ULONG raw_signature_len;
+    ULONG           raw_signature_len;
 
     HRESULT hr = E_FAIL;
     switch (const auto token_type = TypeFromToken(token))
@@ -37,9 +37,9 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
                                                     &function_name_len, &raw_signature, &raw_signature_len);
             break;
         case mdtMethodDef:
-            hr = metadata_import->GetMemberProps(token, &parent_token, function_name, trace::kNameMaxSize, &function_name_len,
-                                                 nullptr, &raw_signature, &raw_signature_len, nullptr, nullptr, nullptr,
-                                                 nullptr, nullptr);
+            hr = metadata_import->GetMemberProps(token, &parent_token, function_name, trace::kNameMaxSize,
+                                                 &function_name_len, nullptr, &raw_signature, &raw_signature_len,
+                                                 nullptr, nullptr, nullptr, nullptr, nullptr);
             break;
         case mdtMethodSpec:
         {
@@ -65,24 +65,24 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
     // parent_token could be: TypeDef, TypeRef, TypeSpec, ModuleRef, MethodDef
     const auto type_info = GetTypeInfo(metadata_import, parent_token);
 
-    return {token, trace::WSTRING(function_name), type_info,
-            FunctionMethodSignature(raw_signature, raw_signature_len)};
+    return {token, trace::WSTRING(function_name), type_info, FunctionMethodSignature(raw_signature, raw_signature_len)};
 }
 
 TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdToken& token)
 {
-    std::shared_ptr<TypeInfo> parentTypeInfo = nullptr;
-    mdToken parent_type_token = mdTokenNil;
-    WCHAR type_name[trace::kNameMaxSize]{};
-    DWORD type_name_len = 0;
-    DWORD type_flags;
+    std::shared_ptr<TypeInfo> parentTypeInfo    = nullptr;
+    mdToken                   parent_type_token = mdTokenNil;
+    WCHAR                     type_name[trace::kNameMaxSize]{};
+    DWORD                     type_name_len = 0;
+    DWORD                     type_flags;
 
     HRESULT hr = E_FAIL;
 
     switch (const auto token_type = TypeFromToken(token))
     {
         case mdtTypeDef:
-            hr = metadata_import->GetTypeDefProps(token, type_name, trace::kNameMaxSize, &type_name_len, &type_flags, nullptr);
+            hr = metadata_import->GetTypeDefProps(token, type_name, trace::kNameMaxSize, &type_name_len, &type_flags,
+                                                  nullptr);
 
             metadata_import->GetNestedClassProps(token, &parent_type_token);
             if (parent_type_token != mdTokenNil)
@@ -96,7 +96,7 @@ TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdTo
         case mdtTypeSpec:
         {
             PCCOR_SIGNATURE signature{};
-            ULONG signature_length{};
+            ULONG           signature_length{};
 
             hr = metadata_import->GetTypeSpecFromToken(token, &signature, &signature_length);
 
@@ -139,8 +139,9 @@ TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdTo
     return {token, type_name_string};
 }
 
-trace::WSTRING ExtractParameterName(PCCOR_SIGNATURE& pb_cur, const ComPtr<IMetaDataImport2>& metadata_import,
-                                     const mdGenericParam* generic_parameters)
+trace::WSTRING ExtractParameterName(PCCOR_SIGNATURE&                pb_cur,
+                                    const ComPtr<IMetaDataImport2>& metadata_import,
+                                    const mdGenericParam*           generic_parameters)
 {
     pb_cur++;
     ULONG num = 0;
@@ -149,8 +150,8 @@ trace::WSTRING ExtractParameterName(PCCOR_SIGNATURE& pb_cur, const ComPtr<IMetaD
     {
         return kUnknown;
     }
-    WCHAR param_type_name[kParamNameMaxLen]{};
-    ULONG pch_name = 0;
+    WCHAR      param_type_name[kParamNameMaxLen]{};
+    ULONG      pch_name = 0;
     const auto hr = metadata_import->GetGenericParamProps(generic_parameters[num], nullptr, nullptr, nullptr, nullptr,
                                                           param_type_name, kParamNameMaxLen, &pch_name);
     if (FAILED(hr))
@@ -161,11 +162,13 @@ trace::WSTRING ExtractParameterName(PCCOR_SIGNATURE& pb_cur, const ComPtr<IMetaD
     return param_type_name;
 }
 
-trace::WSTRING GetSigTypeTokNameNew(PCCOR_SIGNATURE& pb_cur, const ComPtr<IMetaDataImport2>& metadata_import,
-                                  mdGenericParam class_params[], mdGenericParam method_params[])
+trace::WSTRING GetSigTypeTokNameNew(PCCOR_SIGNATURE&                pb_cur,
+                                    const ComPtr<IMetaDataImport2>& metadata_import,
+                                    mdGenericParam                  class_params[],
+                                    mdGenericParam                  method_params[])
 {
     trace::WSTRING token_name = trace::EmptyWStr;
-    bool ref_flag = false;
+    bool           ref_flag   = false;
     if (*pb_cur == ELEMENT_TYPE_BYREF)
     {
         pb_cur++;
@@ -304,8 +307,9 @@ trace::WSTRING GetSigTypeTokNameNew(PCCOR_SIGNATURE& pb_cur, const ComPtr<IMetaD
     return token_name;
 }
 
-trace::WSTRING TypeSignature::GetTypeTokName(ComPtr<IMetaDataImport2>& pImport, mdGenericParam class_params[],
-                                                 mdGenericParam method_params[]) const
+trace::WSTRING TypeSignature::GetTypeTokName(ComPtr<IMetaDataImport2>& pImport,
+                                             mdGenericParam            class_params[],
+                                             mdGenericParam            method_params[]) const
 {
     PCCOR_SIGNATURE pbCur = &pbBase[offset];
     return GetSigTypeTokNameNew(pbCur, pImport, class_params, method_params);
@@ -315,7 +319,7 @@ HRESULT FunctionMethodSignature::TryParse()
 {
     PCCOR_SIGNATURE pbCur = pbBase;
     PCCOR_SIGNATURE pbEnd = pbBase + len;
-    unsigned char elem_type;
+    unsigned char   elem_type;
 
     IfFalseRetFAIL(trace::ParseByte(pbCur, pbEnd, &elem_type));
 
@@ -328,17 +332,18 @@ HRESULT FunctionMethodSignature::TryParse()
     unsigned param_count;
     IfFalseRetFAIL(trace::ParseNumber(pbCur, pbEnd, &param_count));
 
-
     IfFalseRetFAIL(trace::ParseRetType(pbCur, pbEnd));
 
     auto fEncounteredSentinal = false;
     for (unsigned i = 0; i < param_count; i++)
     {
-        if (pbCur >= pbEnd) return E_FAIL;
+        if (pbCur >= pbEnd)
+            return E_FAIL;
 
         if (*pbCur == ELEMENT_TYPE_SENTINEL)
         {
-            if (fEncounteredSentinal) return E_FAIL;
+            if (fEncounteredSentinal)
+                return E_FAIL;
 
             fEncounteredSentinal = true;
             pbCur++;
@@ -350,8 +355,8 @@ HRESULT FunctionMethodSignature::TryParse()
 
         TypeSignature argument{};
         argument.pbBase = pbBase;
-        argument.length = (ULONG) (pbCur - pbParam);
-        argument.offset = (ULONG) (pbCur - pbBase - argument.length);
+        argument.length = (ULONG)(pbCur - pbParam);
+        argument.offset = (ULONG)(pbCur - pbBase - argument.length);
 
         params.push_back(argument);
     }
