@@ -84,7 +84,7 @@ public abstract class TestHelper
         RemoveEnvironmentVariable("OTEL_LOGS_EXPORTER");
     }
 
-    public (string StandardOutput, string ErrorOutput) RunTestApplication(TestSettings? testSettings = null)
+    public (string StandardOutput, string ErrorOutput, int ProcessId) RunTestApplication(TestSettings? testSettings = null)
     {
         // RunTestApplication starts the test application, wait up to DefaultProcessTimeout.
         // Assertion exceptions are thrown if it timed out or the exit code is non-zero.
@@ -94,6 +94,8 @@ public abstract class TestHelper
         using var helper = new ProcessHelper(process);
 
         process.Should().NotBeNull();
+
+        var processId = process!.Id;
 
         bool processTimeout = !process!.WaitForExit((int)TestTimeout.ProcessExit.TotalMilliseconds);
         if (processTimeout)
@@ -108,7 +110,7 @@ public abstract class TestHelper
         processTimeout.Should().BeFalse("Test application timed out");
         process.ExitCode.Should().Be(0, "Test application exited with non-zero exit code");
 
-        return (helper.StandardOutput, helper.ErrorOutput);
+        return (helper.StandardOutput, helper.ErrorOutput, processId);
     }
 
     public Process? StartTestApplication(TestSettings? testSettings = null)
