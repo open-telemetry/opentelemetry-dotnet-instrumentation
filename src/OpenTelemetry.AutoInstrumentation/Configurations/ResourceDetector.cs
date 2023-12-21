@@ -21,5 +21,15 @@ internal enum ResourceDetector
     /// <summary>
     /// Process Runtime resource detector.
     /// </summary>
-    ProcessRuntime = 2
+    ProcessRuntime = 2,
+
+    /// <summary>
+    /// Process resource detector.
+    /// </summary>
+    Process = 3,
+
+    /// <summary>
+    /// Host resource detector.
+    /// </summary>
+    Host = 4
 }

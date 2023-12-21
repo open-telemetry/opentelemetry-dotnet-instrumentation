@@ -9,7 +9,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
-- Support for Process Runtime resource detector.
+- Support for Host, Process, and Process Runtime resource detectors.
 
 ### Changed
 
