@@ -25,7 +25,7 @@ public class ContinuousProfilerTests : TestHelper
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "TestApplication.ContinuousProfiler");
         var (standardOutput, _, _) = RunTestApplication();
 
-        var expectedStackTrace = string.Join("\r\n", CreateExpectedStackTrace());
+        var expectedStackTrace = string.Join(Environment.NewLine, CreateExpectedStackTrace());
 
         standardOutput.Should().Contain(expectedStackTrace);
     }
