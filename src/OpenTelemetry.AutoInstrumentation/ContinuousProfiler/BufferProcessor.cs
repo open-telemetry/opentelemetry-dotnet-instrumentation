@@ -31,27 +31,37 @@ internal class BufferProcessor
     {
         if (_threadSamplingEnabled)
         {
-            var buffer = new byte[BufferSize];
-            var read = NativeMethods.ContinuousProfilerReadThreadSamples(buffer.Length, buffer);
-            if (read <= 0)
-            {
-                return;
-            }
-
-            _exportThreadSamplesMethod.Invoke(_continuousProfilerExporter, new object[] { buffer, read });
+            ProcessThreadSamples();
         }
 
         if (_allocationSamplingEnabled)
         {
-            var buffer = new byte[BufferSize];
-            var read = NativeMethods.ContinuousProfilerReadAllocationSamples(buffer.Length, buffer);
-            if (read <= 0)
-            {
-                return;
-            }
-
-            _exportAllocationSamplesMethod.Invoke(_continuousProfilerExporter, new object[] { buffer, read });
+            ProcessAllocationSamples();
         }
+    }
+
+    private void ProcessThreadSamples()
+    {
+        var buffer = new byte[BufferSize];
+        var read = NativeMethods.ContinuousProfilerReadThreadSamples(buffer.Length, buffer);
+        if (read <= 0)
+        {
+            return;
+        }
+
+        _exportThreadSamplesMethod.Invoke(_continuousProfilerExporter, new object[] { buffer, read });
+    }
+
+    private void ProcessAllocationSamples()
+    {
+        var buffer = new byte[BufferSize];
+        var read = NativeMethods.ContinuousProfilerReadAllocationSamples(buffer.Length, buffer);
+        if (read <= 0)
+        {
+            return;
+        }
+
+        _exportAllocationSamplesMethod.Invoke(_continuousProfilerExporter, new object[] { buffer, read });
     }
 }
 #endif
