@@ -22,16 +22,17 @@ internal static class ContinuousProfilerProcessor
         if (currentActivity != null)
         {
             var hexTraceId = currentActivity.TraceId.ToHexString();
-            NativeMethods.ContinuousProfilerSetNativeContext(
-                traceIdHigh: ulong.Parse(hexTraceId.AsSpan(0, 16), NumberStyles.HexNumber, CultureInfo.InvariantCulture),
-                traceIdLow: ulong.Parse(hexTraceId.AsSpan(16), NumberStyles.HexNumber, CultureInfo.InvariantCulture),
-                spanId: ulong.Parse(currentActivity.SpanId.ToHexString(), NumberStyles.HexNumber, CultureInfo.InvariantCulture),
-                managedThreadId: managedThreadId);
+
+            if (ulong.TryParse(hexTraceId.AsSpan(0, 16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var traceIdHigh) &&
+                ulong.TryParse(hexTraceId.AsSpan(16), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var traceIdLow) &&
+                ulong.TryParse(currentActivity.SpanId.ToHexString(), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var spanId))
+            {
+                NativeMethods.ContinuousProfilerSetNativeContext(traceIdHigh, traceIdLow, spanId, managedThreadId);
+                return;
+            }
         }
-        else
-        {
-            NativeMethods.ContinuousProfilerSetNativeContext(0, 0, 0, managedThreadId);
-        }
+
+        NativeMethods.ContinuousProfilerSetNativeContext(0, 0, 0, managedThreadId);
     }
 
     public static void Initialize(bool threadSamplingEnabled, bool allocationSamplingEnabled, TimeSpan exportInterval, object continuousProfilerExporter)
