@@ -17,6 +17,7 @@ internal class BufferProcessor
     private readonly object _continuousProfilerExporter;
     private readonly MethodInfo _exportThreadSamplesMethod;
     private readonly MethodInfo _exportAllocationSamplesMethod;
+    private readonly byte[] _buffer = new byte[BufferSize];
 
     public BufferProcessor(bool threadSamplingEnabled, bool allocationSamplingEnabled, object continuousProfilerExporter, MethodInfo exportThreadSamplesMethod, MethodInfo exportAllocationSamplesMethod)
     {
@@ -42,26 +43,24 @@ internal class BufferProcessor
 
     private void ProcessThreadSamples()
     {
-        var buffer = new byte[BufferSize];
-        var read = NativeMethods.ContinuousProfilerReadThreadSamples(buffer.Length, buffer);
+        var read = NativeMethods.ContinuousProfilerReadThreadSamples(_buffer.Length, _buffer);
         if (read <= 0)
         {
             return;
         }
 
-        _exportThreadSamplesMethod.Invoke(_continuousProfilerExporter, new object[] { buffer, read });
+        _exportThreadSamplesMethod.Invoke(_continuousProfilerExporter, new object[] { _buffer, read });
     }
 
     private void ProcessAllocationSamples()
     {
-        var buffer = new byte[BufferSize];
-        var read = NativeMethods.ContinuousProfilerReadAllocationSamples(buffer.Length, buffer);
+        var read = NativeMethods.ContinuousProfilerReadAllocationSamples(_buffer.Length, _buffer);
         if (read <= 0)
         {
             return;
         }
 
-        _exportAllocationSamplesMethod.Invoke(_continuousProfilerExporter, new object[] { buffer, read });
+        _exportAllocationSamplesMethod.Invoke(_continuousProfilerExporter, new object[] { _buffer, read });
     }
 }
 #endif
