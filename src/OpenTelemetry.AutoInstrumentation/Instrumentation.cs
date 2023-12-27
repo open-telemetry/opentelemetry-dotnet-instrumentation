@@ -89,6 +89,8 @@ internal static class Instrumentation
             var profilerEnabled = GeneralSettings.Value.ProfilerEnabled;
             var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, continuousProfilerExporter) = _pluginManager.GetFirstContinuousConfiguration();
 
+            Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {threadSamplingEnabled}, thread sampling interval: {threadSamplingInterval}, allocation sampling enabled: {allocationSamplingEnabled}, max memory samples per minute: {maxMemorySamplesPerMinute}, export interval: {exportInterval}, continuous profiler exporter: {continuousProfilerExporter.GetType()}");
+
             if (threadSamplingEnabled || allocationSamplingEnabled)
             {
                 if (profilerEnabled)
