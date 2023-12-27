@@ -178,6 +178,25 @@ public:
 
     HRESULT STDMETHODCALLTYPE JITCachedFunctionSearchStarted(FunctionID functionId, BOOL* pbUseCachedFunction) override;
 
+    // ICorProfilerInfo callbacks to track thread naming (used by ThreadSampler only)
+    HRESULT STDMETHODCALLTYPE ThreadCreated(ThreadID threadId) override;
+    HRESULT STDMETHODCALLTYPE ThreadDestroyed(ThreadID threadId) override;
+    HRESULT STDMETHODCALLTYPE ThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[]) override;
+
+    // Needed for allocation sampling
+    HRESULT STDMETHODCALLTYPE EventPipeEventDelivered(EVENTPIPE_PROVIDER provider,
+                                                      DWORD              eventId,
+                                                      DWORD              eventVersion,
+                                                      ULONG              cbMetadataBlob,
+                                                      LPCBYTE            metadataBlob,
+                                                      ULONG              cbEventData,
+                                                      LPCBYTE            eventData,
+                                                      LPCGUID            pActivityId,
+                                                      LPCGUID            pRelatedActivityId,
+                                                      ThreadID           eventThread,
+                                                      ULONG              numStackFrames,
+                                                      UINT_PTR           stackFrames[]) override;
+
     //
     // ICorProfilerCallback6 methods
     //

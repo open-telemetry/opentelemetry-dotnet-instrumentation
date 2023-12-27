@@ -2672,4 +2672,50 @@ HRESULT STDMETHODCALLTYPE CorProfiler::JITCachedFunctionSearchStarted(FunctionID
     return S_OK;
 }
 
+
+HRESULT STDMETHODCALLTYPE CorProfiler::ThreadCreated(ThreadID threadId)
+{
+    if (continuousProfiler != nullptr)
+    {
+        continuousProfiler->ThreadCreated(threadId);
+    }
+    return S_OK;
+}
+HRESULT STDMETHODCALLTYPE CorProfiler::ThreadDestroyed(ThreadID threadId)
+{
+    if (continuousProfiler != nullptr)
+    {
+        continuousProfiler->ThreadDestroyed(threadId);
+    }
+    return S_OK;
+}
+HRESULT STDMETHODCALLTYPE CorProfiler::ThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR name[])
+{
+    if (continuousProfiler != nullptr)
+    {
+        continuousProfiler->ThreadNameChanged(threadId, cchName, name);
+    }
+    return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE CorProfiler::EventPipeEventDelivered(EVENTPIPE_PROVIDER provider,
+                                                               DWORD              eventId,
+                                                               DWORD              eventVersion,
+                                                               ULONG              cbMetadataBlob,
+                                                               LPCBYTE            metadataBlob,
+                                                               ULONG              cbEventData,
+                                                               LPCBYTE            eventData,
+                                                               LPCGUID            pActivityId,
+                                                               LPCGUID            pRelatedActivityId,
+                                                               ThreadID           eventThread,
+                                                               ULONG              numStackFrames,
+                                                               UINT_PTR           stackFrames[])
+{
+    if (continuousProfiler != nullptr && eventId == 10 && eventVersion == 4)
+    {
+        continuousProfiler->AllocationTick(cbEventData, eventData);
+    }
+    return S_OK;
+}
+
 } // namespace trace

@@ -13,11 +13,23 @@ internal static class ClassA
 
     public static void MethodA()
     {
+        const int numberOfItems = 1024;
+        var items = new List<string>();
+        for (var i = 0; i < numberOfItems; i++)
+        {
+            items.Add(i.ToString("D10000"));
+        }
+
         MethodABytes(
             false,
             '\0',
             sbyte.MaxValue,
             byte.MaxValue);
+
+        for (var i = 0; i < numberOfItems; i++)
+        {
+            TextWriter.Null.Write(items[i][^2]);
+        }
     }
 
     public static void MethodABytes(

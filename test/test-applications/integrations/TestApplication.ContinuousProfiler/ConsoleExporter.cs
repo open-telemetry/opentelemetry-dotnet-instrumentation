@@ -22,6 +22,12 @@ public class ConsoleExporter
     public void ExportAllocationSamples(byte[] buffer, int read)
     {
         var allocationSamples = SampleNativeFormatParser.ParseAllocationSamples(buffer, read);
-        Console.WriteLine("ExportAllocationSamples: " + string.Join("\n", allocationSamples!.First().ThreadSample.Frames));
+        var allocationSample = allocationSamples.FirstOrDefault();
+        if (allocationSample == null)
+        {
+            return;
+        }
+
+        Console.WriteLine("ExportAllocationSamples[" + allocationSample.AllocationSizeBytes + "]" + string.Join("\n", allocationSample.ThreadSample.Frames));
     }
 }
