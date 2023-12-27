@@ -724,7 +724,7 @@ void ContinuousProfiler::SetGlobalInfo12(ICorProfilerInfo12* cor_profiler_info12
 
 void ContinuousProfiler::StartThreadSampling(const unsigned int threadSamplingInterval)
 {
-    trace::Logger::Info("AlwaysOnProfiler::StartThreadSampling");
+    trace::Logger::Info("ContinuousProfiler::StartThreadSampling");
     this->threadSamplingInterval = threadSamplingInterval;
 #ifdef _WIN32
     CreateThread(nullptr, 0, &SamplingThreadMain, this, 0, nullptr);
@@ -910,7 +910,7 @@ void ContinuousProfiler::StartAllocationSampling(const unsigned int maxMemorySam
         trace::Logger::Error("Could not enable allocation sampling: session pipe error", hr);
     }
 
-    trace::Logger::Info("AlwaysOnProfiler::MemoryProfiling started.");
+    trace::Logger::Info("ContinuousProfiler::MemoryProfiling started.");
 }
 
 void ContinuousProfiler::ThreadCreated(ThreadID thread_id)
