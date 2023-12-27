@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace My.Custom.Test.Namespace;
@@ -11,6 +12,7 @@ internal static class ClassA
 
     private delegate int Callback(int n);
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static void MethodA()
     {
         const int numberOfItems = 1024;
@@ -32,6 +34,7 @@ internal static class ClassA
         }
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static void MethodABytes(
         bool b,
         char c,
@@ -49,6 +52,7 @@ internal static class ClassA
             nuint.MaxValue);
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static void MethodAInts(
         ushort ui16,
         short i16,
@@ -62,6 +66,7 @@ internal static class ClassA
         MethodAFloats(float.MaxValue, double.MaxValue);
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static unsafe void MethodAFloats(
         float fl,
         double db)
@@ -71,6 +76,7 @@ internal static class ClassA
         MethodAPointer(pointer);
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static unsafe void MethodAPointer(int* pointer)
     {
         MethodAOthers(
@@ -83,6 +89,7 @@ internal static class ClassA
             new List<string>());
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static void MethodAOthers<T>(
         string s,
         object obj,
