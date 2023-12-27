@@ -87,7 +87,7 @@ internal static class Instrumentation
 
 #if NET6_0_OR_GREATER
             var profilerEnabled = GeneralSettings.Value.ProfilerEnabled;
-            var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, continuousProfilerExporter) = _pluginManager.GetFirstContinuousConfiguration() ?? Tuple.Create(false, 0u, false, 0u, TimeSpan.Zero, new object());
+            var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, continuousProfilerExporter) = _pluginManager.GetFirstContinuousConfiguration();
 
             if (threadSamplingEnabled || allocationSamplingEnabled)
             {
