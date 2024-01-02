@@ -40,17 +40,17 @@ internal static class ResourceConfigurator
             };
         }
 
-        var pluginManager = Instrumentation.PluginManager;
-        if (pluginManager != null)
-        {
-            resourceBuilder.InvokePlugins(pluginManager);
-        }
-
         var resource = resourceBuilder.Build();
         if (!resource.Attributes.Any(kvp => kvp.Key == ServiceNameAttribute))
         {
             // service.name was not configured yet use the fallback.
             resourceBuilder.AddAttributes(new KeyValuePair<string, object>[] { new(ServiceNameAttribute, ServiceNameConfigurator.GetFallbackServiceName()) });
+        }
+
+        var pluginManager = Instrumentation.PluginManager;
+        if (pluginManager != null)
+        {
+            resourceBuilder.InvokePlugins(pluginManager);
         }
 
         return resourceBuilder;
