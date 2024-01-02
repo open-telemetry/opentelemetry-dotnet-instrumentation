@@ -617,10 +617,12 @@ WSTRING GetSigTypeTokName(PCCOR_SIGNATURE& pbCur, const ComPtr<IMetaDataImport2>
     {
         tokenName += WStr("&");
     }
+
     if (pointer_flag)
     {
         tokenName += WStr("*");
     }
+
     return tokenName;
 }
 
