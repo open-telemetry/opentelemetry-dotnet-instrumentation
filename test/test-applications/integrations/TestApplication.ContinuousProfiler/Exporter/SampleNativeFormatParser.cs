@@ -10,6 +10,9 @@ namespace TestApplication.ContinuousProfiler;
 /// </summary>
 internal static class SampleNativeFormatParser
 {
+    // TODO use value from ContinuousProfilerProcessor.BackgroundThreadName when it will be moved to main project
+    public const string BackgroundThreadName = "OpenTelemetry Continuous Profiler Thread";
+
     private static readonly UnicodeEncoding UnicodeEncoding = new();
 
     /// <summary>
@@ -85,7 +88,7 @@ internal static class SampleNativeFormatParser
 
                     ReadStackFrames(code, threadSample, codeDictionary, buffer, ref position);
 
-                    if (threadName == "OpenTelemetry Continuous Profiler Thread")
+                    if (threadName == BackgroundThreadName)
                     {
                         // TODO add configuration option to include the sampler thread. By default remove it.
                         continue;
@@ -175,7 +178,7 @@ internal static class SampleNativeFormatParser
                     var codeDictionary = new Dictionary<int, string>();
 
                     ReadStackFrames(code, threadSample, codeDictionary, buffer, ref position);
-                    if (threadName == "OpenTelemetry Continuous Profiler Thread")
+                    if (threadName == BackgroundThreadName)
                     {
                         // TODO: add configuration option to include the sampler thread. By default remove it.
                         continue;
