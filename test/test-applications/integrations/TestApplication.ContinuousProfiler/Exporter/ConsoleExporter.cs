@@ -28,6 +28,6 @@ public class ConsoleExporter
             return;
         }
 
-        Console.WriteLine("ExportAllocationSamples[" + allocationSample.AllocationSizeBytes + "]" + string.Join("\n", allocationSample.ThreadSample.Frames));
+        Console.WriteLine($"ExportAllocationSamples[{allocationSample.AllocationSizeBytes}]{string.Join("\n", allocationSample.ThreadSample.Frames)}");
     }
 }
