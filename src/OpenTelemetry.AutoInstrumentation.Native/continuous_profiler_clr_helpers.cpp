@@ -57,6 +57,7 @@ FunctionInfo GetFunctionInfo(const ComPtr<IMetaDataImport2>& metadata_import, co
             trace::Logger::Warn("[trace::GetFunctionInfo] unknown token type: {}", token_type);
             return {};
     }
+
     if (FAILED(hr) || function_name_len == 0)
     {
         return {};
@@ -121,6 +122,7 @@ TypeInfo GetTypeInfo(const ComPtr<IMetaDataImport2>& metadata_import, const mdTo
         case mdtMethodDef:
             return GetFunctionInfo(metadata_import, token).type;
     }
+
     if (FAILED(hr) || type_name_len == 0)
     {
         return {};

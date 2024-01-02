@@ -24,7 +24,6 @@ constexpr auto unknown_managed_thread_id = -1;
 #define EXPORTTHIS __attribute__((visibility("default")))
 #endif
 
-
 extern "C"
 {
     EXPORTTHIS int32_t ContinuousProfilerReadThreadSamples(int32_t len, unsigned char* buf);
@@ -86,7 +85,6 @@ public:
     {
     }
 };
-
 
 class ThreadSamplesBuffer
 {
