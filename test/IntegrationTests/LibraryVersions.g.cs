@@ -74,7 +74,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "8.0.0" },
-        new object[] { "8.1.2" },
+        new object[] { "8.1.3" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> SqlClientMicrosoft = new List<object[]>
@@ -103,7 +103,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.19.0" },
-        new object[] { "2.22.0" },
+        new object[] { "2.23.1" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MySqlConnector = new List<object[]>
@@ -112,7 +112,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.0.0" },
-        new object[] { "2.3.1" },
+        new object[] { "2.3.3" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MySqlData = new List<object[]>
@@ -130,7 +130,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "6.0.0" },
-        new object[] { "8.0.0" },
+        new object[] { "8.0.1" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> NServiceBus = new List<object[]>
@@ -160,7 +160,7 @@ public static class LibraryVersion
         new object[] { "2.1.50" },
         new object[] { "2.5.61" },
         new object[] { "2.6.66" },
-        new object[] { "2.7.4" },
+        new object[] { "2.7.10" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> WCFCoreClient = new List<object[]>
