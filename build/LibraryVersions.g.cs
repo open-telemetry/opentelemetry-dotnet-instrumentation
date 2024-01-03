@@ -146,7 +146,7 @@ public static class LibraryVersion
                 new("2.1.50"),
                 new("2.5.61"),
                 new("2.6.66"),
-                new("2.7.4"),
+                new("2.7.10"),
             }
         },
         {
