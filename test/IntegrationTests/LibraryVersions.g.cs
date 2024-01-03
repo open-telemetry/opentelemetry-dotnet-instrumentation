@@ -103,7 +103,7 @@ public static class LibraryVersion
         new object[] { string.Empty }
 #else
         new object[] { "2.19.0" },
-        new object[] { "2.22.0" },
+        new object[] { "2.23.1" },
 #endif
     };
     public static readonly IReadOnlyCollection<object[]> MySqlConnector = new List<object[]>

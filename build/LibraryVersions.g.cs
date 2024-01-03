@@ -95,7 +95,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.19.0"),
-                new("2.22.0"),
+                new("2.23.1"),
             }
         },
         {
