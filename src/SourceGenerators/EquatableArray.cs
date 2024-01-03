@@ -40,11 +40,6 @@ internal readonly record struct EquatableArray<T>
         }
     }
 
-    private ReadOnlySpan<T> AsSpan()
-    {
-        return _array.AsSpan();
-    }
-
     IEnumerator<T> IEnumerable<T>.GetEnumerator()
     {
         return ((IEnumerable<T>)_array).GetEnumerator();
@@ -53,5 +48,10 @@ internal readonly record struct EquatableArray<T>
     IEnumerator IEnumerable.GetEnumerator()
     {
         return ((IEnumerable<T>)_array).GetEnumerator();
+    }
+
+    private ReadOnlySpan<T> AsSpan()
+    {
+        return _array.AsSpan();
     }
 }
