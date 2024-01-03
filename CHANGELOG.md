@@ -15,6 +15,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 #### Dependency updates
 
+- .NET Framework only, `Grpc.Core.Api` updated from `2.59.0` to `2.60.0`.
+
 ### Deprecated
 
 ### Removed
