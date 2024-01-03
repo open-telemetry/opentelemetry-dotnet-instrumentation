@@ -39,6 +39,40 @@ constexpr auto kMaxVolatileFunctionNameCacheSize = 2000;
 // https://github.com/dotnet/samples/blob/2cf486af936261b04a438ea44779cdc26c613f98/core/profiling/stacksampling/src/sampler.cpp
 // That stack sampling project is worth reading for a simpler (though higher overhead) take on thread sampling.
 
+/*
+  Locking/threading design:
+  We have the following shared data structures:
+  - A buffer for captured thread samples, used by a single writing thread and a single (managed) reading one
+  - A buffer for captured allocation samples, used by any application thread at any time
+  - a name cache (data structure for building humnan-readable stack traces), used during both thread and
+    allocation sampling
+  - a cache of thread id->thread name (set by each thread itself, used during either sample type)
+  - a cache of thread span context state (set by any application thread at any time, used during either sample type)
+
+  In general we want to keep locks "adjacent" to just one data structure and usage of them local to one
+  modifying/reading method to simplify analysis.  However, there are some special cases.
+  Here are the locks in use:
+  - cpu_buffer_lock guarding access to the thread samples buffer
+  - allocation_buffer_lock guarding access to the buffer for allocation samples
+  - name_cache_lock, guarding the
+  - thread_state_lock_ guarding the thread name map
+  - thread_span_context_lock guarding that data structure
+  - (special) a profiling_lock so only one type of profiling (thread stacks or allocation sample) runs at a time
+
+  The special cases worth calling out about locking behavior are:
+  - Because the stack sampler pauses the CLR, to avoid deadlock it needs to know that no application thread
+    is holding a lock it needs (e.g., thread_span_context_lock) while it is paused.  So, it acquires
+    all the necessary locks at once before pausing the CLR.
+  - Because the thread sampler pauses the whole CLR and then proceeds to walk every
+    thread's stack (using the name cache for each stack entry), it obviously needs the
+    name_cache_lock but we don't want to pay the overhead of locking/unlocking it in that tight loop.
+    So, it is acquired once before the iteration of threads start, and unlike other locks,
+    the methods for this are specifically coded assuming you own
+  - AllocationTick(s - possibly on multiple threads) and the thread sampler can happen concurrently,
+    so the profiling_lock is used with unique_lock and shared_lock to ensure that any allocation samples
+    are fully processed before pausing the CLR for thread samples.
+*/
+
 static std::mutex                  cpu_buffer_lock = std::mutex();
 static std::vector<unsigned char>* cpu_buffer_a;
 static std::vector<unsigned char>* cpu_buffer_b;
