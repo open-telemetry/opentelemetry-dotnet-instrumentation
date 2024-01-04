@@ -67,7 +67,6 @@ void CorProfiler::InitNetFxAssemblyRedirectsMap()
         { L"System.Collections.NonGeneric", {4, 0, 3, 0} },
         { L"System.Collections.Specialized", {4, 0, 3, 0} },
         { L"System.ComponentModel", {4, 0, 1, 0} },
-        { L"System.ComponentModel.Annotations", {4, 2, 1, 0} },
         { L"System.ComponentModel.EventBasedAsync", {4, 0, 11, 0} },
         { L"System.ComponentModel.Primitives", {4, 1, 2, 0} },
         { L"System.ComponentModel.TypeConverter", {4, 1, 2, 0} },
