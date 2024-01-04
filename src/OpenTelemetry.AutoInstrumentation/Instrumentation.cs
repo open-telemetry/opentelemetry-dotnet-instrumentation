@@ -87,21 +87,25 @@ internal static class Instrumentation
 
 #if NET6_0_OR_GREATER
             var profilerEnabled = GeneralSettings.Value.ProfilerEnabled;
-            var (threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute, exportInterval, continuousProfilerExporter) = _pluginManager.GetFirstContinuousConfiguration();
+            var threadSamplingEnabled = false;
+            var allocationSamplingEnabled = false;
+            TimeSpan exportInterval = default;
+            object? continuousProfilerExporter = null;
 
-            Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {threadSamplingEnabled}, thread sampling interval: {threadSamplingInterval}, allocation sampling enabled: {allocationSamplingEnabled}, max memory samples per minute: {maxMemorySamplesPerMinute}, export interval: {exportInterval}, continuous profiler exporter: {continuousProfilerExporter.GetType()}");
-
-            if (threadSamplingEnabled || allocationSamplingEnabled)
+            if (profilerEnabled)
             {
-                if (profilerEnabled)
+                (threadSamplingEnabled, var threadSamplingInterval, allocationSamplingEnabled, var maxMemorySamplesPerMinute, exportInterval, continuousProfilerExporter) = _pluginManager.GetFirstContinuousConfiguration();
+                Logger.Debug($"Continuous profiling configuration: Thread sampling enabled: {threadSamplingEnabled}, thread sampling interval: {threadSamplingInterval}, allocation sampling enabled: {allocationSamplingEnabled}, max memory samples per minute: {maxMemorySamplesPerMinute}, export interval: {exportInterval}, continuous profiler exporter: {continuousProfilerExporter.GetType()}");
+
+                if (threadSamplingEnabled || allocationSamplingEnabled)
                 {
                     NativeMethods.ConfigureNativeContinuousProfiler(threadSamplingEnabled, threadSamplingInterval, allocationSamplingEnabled, maxMemorySamplesPerMinute);
                     Activity.CurrentChanged += ContinuousProfilerProcessor.Activity_CurrentChanged;
                 }
-                else
-                {
-                    Logger.Warning("Continuous Profiler will be not enabled. CLR Profiler is not enabled.");
-                }
+            }
+            else
+            {
+                Logger.Information("CLR Profiler is not enabled. Continuous Profiler will be not started even if configured correctly.");
             }
 #endif
 
@@ -166,7 +170,7 @@ internal static class Instrumentation
 #if NET6_0_OR_GREATER
             if (profilerEnabled && (threadSamplingEnabled || allocationSamplingEnabled))
             {
-                ContinuousProfilerProcessor.Initialize(threadSamplingEnabled, allocationSamplingEnabled, exportInterval, continuousProfilerExporter);
+                ContinuousProfilerProcessor.Initialize(threadSamplingEnabled, allocationSamplingEnabled, exportInterval, continuousProfilerExporter!);
             }
 #endif
         }
