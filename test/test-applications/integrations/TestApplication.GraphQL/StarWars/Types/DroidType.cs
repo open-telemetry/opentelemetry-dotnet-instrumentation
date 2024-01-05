@@ -21,8 +21,12 @@ public class DroidType : ObjectGraphType<Droid>
         Field<ListGraphType<CharacterInterface>>("friends")
             .Resolve(context => data.GetFriends(context.Source));
 
+#if GRAPHQL_7_7_OR_GREATER
+        Connection<CharacterInterface>("friendsConnection")
+#else
         Connection<CharacterInterface>()
             .Name("friendsConnection")
+#endif
             .Description("A list of a character's friends.")
             .Bidirectional()
             .Resolve(context => context.GetPagedResults<Droid, StarWarsCharacter>(data, context.Source.Friends));

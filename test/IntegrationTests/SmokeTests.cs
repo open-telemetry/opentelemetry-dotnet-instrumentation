@@ -124,11 +124,13 @@ public class SmokeTests : TestHelper
     {
         using var collector = new MockSpansCollector(Output);
         SetExporter(collector);
-        ExpectResources(collector.ResourceExpector);
 
         EnableOnlyHttpClientTraceInstrumentation();
+        SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED", "true");
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
-        RunTestApplication();
+        var (_, _, processId) = RunTestApplication();
+
+        ExpectResources(collector.ResourceExpector, processId);
 
         collector.ResourceExpector.AssertExpectations();
     }
@@ -139,11 +141,12 @@ public class SmokeTests : TestHelper
     {
         using var collector = new MockMetricsCollector(Output);
         SetExporter(collector);
-        ExpectResources(collector.ResourceExpector);
 
         EnableOnlyHttpClientTraceInstrumentation();
         SetEnvironmentVariable("OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES", "MyCompany.MyProduct.MyLibrary");
-        RunTestApplication();
+        var (_, _, processId) = RunTestApplication();
+
+        ExpectResources(collector.ResourceExpector, processId);
 
         collector.ResourceExpector.AssertExpectations();
     }
@@ -155,11 +158,12 @@ public class SmokeTests : TestHelper
     {
         using var collector = new MockLogsCollector(Output);
         SetExporter(collector);
-        ExpectResources(collector.ResourceExpector);
 
         EnableOnlyHttpClientTraceInstrumentation();
         EnableBytecodeInstrumentation();
-        RunTestApplication();
+        var (_, _, processId) = RunTestApplication();
+
+        ExpectResources(collector.ResourceExpector, processId);
 
         collector.ResourceExpector.AssertExpectations();
     }
@@ -473,7 +477,7 @@ public class SmokeTests : TestHelper
         return entry.AsSpan().Slice(startIndex).Trim().ToString();
     }
 
-    private static void ExpectResources(OtlpResourceExpector resourceExpector)
+    private static void ExpectResources(OtlpResourceExpector resourceExpector, int processId)
     {
         resourceExpector.Expect("service.name", ServiceName); // this is set via env var and App.config, but env var has precedence
 #if NETFRAMEWORK
@@ -484,6 +488,9 @@ public class SmokeTests : TestHelper
         resourceExpector.Expect("telemetry.sdk.version", typeof(OpenTelemetry.Resources.Resource).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0]);
         resourceExpector.Expect("telemetry.distro.name", "opentelemetry-dotnet-instrumentation");
         resourceExpector.Expect("telemetry.distro.version", typeof(OpenTelemetry.AutoInstrumentation.Constants).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion.Split('+')[0]);
+
+        resourceExpector.Expect("process.pid", processId);
+        resourceExpector.Expect("host.name", Environment.MachineName);
 #if NETFRAMEWORK
         resourceExpector.Expect("process.runtime.name", ".NET Framework");
 #else

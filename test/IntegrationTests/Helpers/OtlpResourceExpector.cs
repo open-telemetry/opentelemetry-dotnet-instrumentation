@@ -1,6 +1,7 @@
 // Copyright The OpenTelemetry Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Globalization;
 using System.Text;
 using Google.Protobuf.Collections;
 using OpenTelemetry.Proto.Common.V1;
@@ -32,7 +33,12 @@ public class OtlpResourceExpector : IDisposable
 
     public void Expect(string key, string value)
     {
-        _resourceExpectations.Add(new ResourceExpectation { Key = key, Value = value });
+        _resourceExpectations.Add(new ResourceExpectation(key, value));
+    }
+
+    public void Expect(string key, long value)
+    {
+        _resourceExpectations.Add(new ResourceExpectation(key, value));
     }
 
     public void AssertExpectations(TimeSpan? timeout = null)
@@ -48,20 +54,20 @@ public class OtlpResourceExpector : IDisposable
         {
             if (!_resourceAttributesEvent.WaitOne(timeout.Value))
             {
-                FailResourceMetrics(_resourceExpectations, null);
+                FailResource(_resourceExpectations, null);
                 return;
             }
 
-            AssertResourceMetrics(_resourceExpectations, _resourceAttributes);
+            AssertResource(_resourceExpectations, _resourceAttributes);
         }
         catch (ArgumentOutOfRangeException)
         {
             // WaitOne called with non-positive value
-            FailResourceMetrics(_resourceExpectations, null);
+            FailResource(_resourceExpectations, null);
         }
     }
 
-    private static void AssertResourceMetrics(List<ResourceExpectation> resourceExpectations, RepeatedField<KeyValue>? actualResourceAttributes)
+    private static void AssertResource(List<ResourceExpectation> resourceExpectations, RepeatedField<KeyValue>? actualResourceAttributes)
     {
         var missingExpectations = new List<ResourceExpectation>(resourceExpectations);
         if (actualResourceAttributes != null)
@@ -75,7 +81,12 @@ public class OtlpResourceExpector : IDisposable
                         continue;
                     }
 
-                    if (resourceAttribute.Value.StringValue != missingExpectations[i].Value)
+                    if (missingExpectations[i].StringValue != null && resourceAttribute.Value.StringValue != missingExpectations[i].StringValue)
+                    {
+                        continue;
+                    }
+
+                    if (missingExpectations[i].IntValue != null && resourceAttribute.Value.IntValue != missingExpectations[i].IntValue)
                     {
                         continue;
                     }
@@ -88,11 +99,11 @@ public class OtlpResourceExpector : IDisposable
 
         if (missingExpectations.Count > 0)
         {
-            FailResourceMetrics(missingExpectations, actualResourceAttributes);
+            FailResource(missingExpectations, actualResourceAttributes);
         }
     }
 
-    private static void FailResourceMetrics(List<ResourceExpectation> missingExpectations, RepeatedField<KeyValue>? attributes)
+    private static void FailResource(List<ResourceExpectation> missingExpectations, RepeatedField<KeyValue>? attributes)
     {
         attributes ??= new();
 
@@ -102,13 +113,15 @@ public class OtlpResourceExpector : IDisposable
         message.AppendLine("Missing resource expectations:");
         foreach (var expectation in missingExpectations)
         {
-            message.AppendLine($"  - \"{expectation.Key}={expectation.Value}\"");
+            var value = !string.IsNullOrEmpty(expectation.StringValue) ? expectation.StringValue : expectation.IntValue!.Value.ToString(CultureInfo.InvariantCulture);
+            message.AppendLine($"  - \"{expectation.Key}={value}\"");
         }
 
         message.AppendLine("Actual resource attributes:");
         foreach (var attribute in attributes)
         {
-            message.AppendLine($"  + \"{attribute.Key}={attribute.Value.StringValue}\"");
+            var value = !string.IsNullOrEmpty(attribute.Value.StringValue) ? attribute.Value.StringValue : attribute.Value.IntValue.ToString(CultureInfo.InvariantCulture);
+            message.AppendLine($"  + \"{attribute.Key}={value}\"");
         }
 
         Assert.Fail(message.ToString());
@@ -116,8 +129,22 @@ public class OtlpResourceExpector : IDisposable
 
     private class ResourceExpectation
     {
-        public string? Key { get; set; }
+        public ResourceExpectation(string key, string stringValue)
+        {
+            Key = key;
+            StringValue = stringValue;
+        }
 
-        public string? Value { get; set; }
+        public ResourceExpectation(string key, long intValue)
+        {
+            Key = key;
+            IntValue = intValue;
+        }
+
+        public string Key { get; }
+
+        public string? StringValue { get; }
+
+        public long? IntValue { get; }
     }
 }
