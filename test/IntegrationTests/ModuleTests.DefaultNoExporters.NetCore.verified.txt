@@ -10,5 +10,7 @@
   OpenTelemetry.Instrumentation.Runtime,
   OpenTelemetry.ResourceDetectors.Azure,
   OpenTelemetry.ResourceDetectors.Container,
+  OpenTelemetry.ResourceDetectors.Host,
+  OpenTelemetry.ResourceDetectors.Process,
   OpenTelemetry.ResourceDetectors.ProcessRuntime
 ]

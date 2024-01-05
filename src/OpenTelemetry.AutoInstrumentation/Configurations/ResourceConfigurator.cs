@@ -4,6 +4,8 @@
 using System.Runtime.CompilerServices;
 using OpenTelemetry.ResourceDetectors.Azure;
 using OpenTelemetry.ResourceDetectors.Container;
+using OpenTelemetry.ResourceDetectors.Host;
+using OpenTelemetry.ResourceDetectors.Process;
 using OpenTelemetry.ResourceDetectors.ProcessRuntime;
 using OpenTelemetry.Resources;
 
@@ -32,14 +34,10 @@ internal static class ResourceConfigurator
                 ResourceDetector.Container => Wrappers.AddContainerResourceDetector(resourceBuilder),
                 ResourceDetector.AzureAppService => Wrappers.AddAzureAppServiceResourceDetector(resourceBuilder),
                 ResourceDetector.ProcessRuntime => Wrappers.AddProcessRuntimeResourceDetector(resourceBuilder),
+                ResourceDetector.Process => Wrappers.AddProcessResourceDetector(resourceBuilder),
+                ResourceDetector.Host => Wrappers.AddHostResourceDetector(resourceBuilder),
                 _ => resourceBuilder
             };
-        }
-
-        var pluginManager = Instrumentation.PluginManager;
-        if (pluginManager != null)
-        {
-            resourceBuilder.InvokePlugins(pluginManager);
         }
 
         var resource = resourceBuilder.Build();
@@ -47,6 +45,12 @@ internal static class ResourceConfigurator
         {
             // service.name was not configured yet use the fallback.
             resourceBuilder.AddAttributes(new KeyValuePair<string, object>[] { new(ServiceNameAttribute, ServiceNameConfigurator.GetFallbackServiceName()) });
+        }
+
+        var pluginManager = Instrumentation.PluginManager;
+        if (pluginManager != null)
+        {
+            resourceBuilder.InvokePlugins(pluginManager);
         }
 
         return resourceBuilder;
@@ -70,6 +74,18 @@ internal static class ResourceConfigurator
         public static ResourceBuilder AddProcessRuntimeResourceDetector(ResourceBuilder resourceBuilder)
         {
             return resourceBuilder.AddDetector(new ProcessRuntimeDetector());
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static ResourceBuilder AddProcessResourceDetector(ResourceBuilder resourceBuilder)
+        {
+            return resourceBuilder.AddDetector(new ProcessDetector());
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static ResourceBuilder AddHostResourceDetector(ResourceBuilder resourceBuilder)
+        {
+            return resourceBuilder.AddDetector(new HostDetector());
         }
     }
 }

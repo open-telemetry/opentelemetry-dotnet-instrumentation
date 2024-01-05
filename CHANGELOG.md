@@ -9,17 +9,21 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
-- Support for Process Runtime resource detector.
+- Support for Host, Process, and Process Runtime resource detectors.
 
 ### Changed
 
 #### Dependency updates
+
+- .NET Framework only, `Grpc.Core.Api` updated from `2.59.0` to `2.60.0`.
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+
+- Set `service.name` resource attribute before invoking the plugin.
 
 ## [1.2.0](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/tag/v1.2.0)
 

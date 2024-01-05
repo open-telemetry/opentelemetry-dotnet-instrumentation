@@ -53,7 +53,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("7.5.0", new() {{"GraphQLMicrosoftDI","7.5.0"},{"GraphQLServerTransportsAspNetCore","7.5.0"},{"GraphQLServerUIPlayground","7.5.0"}}),
-                new("7.6.1", new() {{"GraphQLMicrosoftDI","7.6.1"},{"GraphQLServerTransportsAspNetCore","7.6.0"},{"GraphQLServerUIPlayground","7.6.0"}}),
+                new("7.7.2", new() {{"GraphQLMicrosoftDI","7.7.2"},{"GraphQLServerTransportsAspNetCore","7.6.0"},{"GraphQLServerUIPlayground","7.6.0"}}),
             }
         },
         {
@@ -61,7 +61,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.52.0"),
-                new("2.59.0"),
+                new("2.60.0"),
             }
         },
         {
@@ -69,7 +69,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("8.0.0"),
-                new("8.1.2"),
+                new("8.1.3"),
             }
         },
         {
@@ -95,7 +95,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.19.0"),
-                new("2.22.0"),
+                new("2.23.1"),
             }
         },
         {
@@ -103,7 +103,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("2.0.0"),
-                new("2.3.1"),
+                new("2.3.3"),
             }
         },
         {
@@ -119,7 +119,7 @@ public static class LibraryVersion
             new List<PackageBuildInfo>
             {
                 new("6.0.0"),
-                new("8.0.0"),
+                new("8.0.1"),
             }
         },
         {
@@ -146,7 +146,7 @@ public static class LibraryVersion
                 new("2.1.50"),
                 new("2.5.61"),
                 new("2.6.66"),
-                new("2.7.4"),
+                new("2.7.10"),
             }
         },
         {
