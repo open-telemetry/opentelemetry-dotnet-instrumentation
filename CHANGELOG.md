@@ -24,7 +24,7 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Changed supported method parameters for plugins
   - from `OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreInstrumentationOptions`
     to `OpenTelemetry.Instrumentation.AspNetCore.AspNetCoreTraceInstrumentationOptions`,
-  - from `OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions`
+  - from `OpenTelemetry.Instrumentation.Http.HttpClientInstrumentationOptions`
     to `OpenTelemetry.Instrumentation.Http.HttpClientTraceInstrumentationOptions`.
 
 #### Dependency updates
