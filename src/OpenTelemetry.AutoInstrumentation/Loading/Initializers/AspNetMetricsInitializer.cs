@@ -30,7 +30,7 @@ internal class AspNetMetricsInitializer
         var instrumentationType = Type.GetType("OpenTelemetry.Instrumentation.AspNet.AspNetMetrics, OpenTelemetry.Instrumentation.AspNet");
 
         var options = new OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions();
-        _pluginManager.ConfigureTracesOptions(options);
+        _pluginManager.ConfigureMetricsOptions(options);
 
         var instrumentation = Activator.CreateInstance(instrumentationType, args: options);
 
