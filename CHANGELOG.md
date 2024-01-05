@@ -14,6 +14,8 @@ This component adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ### Added
 
 - Support for Host, Process, and Process Runtime resource detectors.
+- Support for `OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions`
+  for plugins.
 
 ### Changed
 

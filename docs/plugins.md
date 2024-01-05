@@ -123,13 +123,14 @@ public class MyPlugin
 
 ### Metrics
 
-| Options type                                                        | NuGet package                                  | NuGet version |
-|---------------------------------------------------------------------|------------------------------------------------|---------------|
-| OpenTelemetry.Metrics.MetricReaderOptions                           | OpenTelemetry                                  | 1.7.0         |
-| OpenTelemetry.Exporter.ConsoleExporterOptions                       | OpenTelemetry.Exporter.Console                 | 1.7.0         |
-| OpenTelemetry.Exporter.PrometheusExporterOptions                    | OpenTelemetry.Exporter.Prometheus.HttpListener | 1.7.0-rc.1    |
-| OpenTelemetry.Exporter.OtlpExporterOptions                          | OpenTelemetry.Exporter.OpenTelemetryProtocol   | 1.7.0         |
-| OpenTelemetry.Instrumentation.Runtime.RuntimeInstrumentationOptions | OpenTelemetry.Instrumentation.Runtime          | 1.7.0         |
+| Options type                                                             | NuGet package                                  | NuGet version |
+|--------------------------------------------------------------------------|------------------------------------------------|---------------|
+| OpenTelemetry.Metrics.MetricReaderOptions                                | OpenTelemetry                                  | 1.7.0         |
+| OpenTelemetry.Exporter.ConsoleExporterOptions                            | OpenTelemetry.Exporter.Console                 | 1.7.0         |
+| OpenTelemetry.Exporter.PrometheusExporterOptions                         | OpenTelemetry.Exporter.Prometheus.HttpListener | 1.7.0-rc.1    |
+| OpenTelemetry.Exporter.OtlpExporterOptions                               | OpenTelemetry.Exporter.OpenTelemetryProtocol   | 1.7.0         |
+| OpenTelemetry.Instrumentation.AspNet.AspNetMetricsInstrumentationOptions | OpenTelemetry.Instrumentation.AspNet           | 1.7.0-beta.1  |
+| OpenTelemetry.Instrumentation.Runtime.RuntimeInstrumentationOptions      | OpenTelemetry.Instrumentation.Runtime          | 1.7.0         |
 
 ### Logs
 
