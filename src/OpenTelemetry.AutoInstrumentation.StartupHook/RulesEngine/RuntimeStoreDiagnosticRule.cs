@@ -7,28 +7,34 @@ using OpenTelemetry.AutoInstrumentation.Logging;
 
 namespace OpenTelemetry.AutoInstrumentation.RulesEngine;
 
-internal class RuntimeStoreVersionRule : Rule
+internal class RuntimeStoreDiagnosticRule : Rule
 {
     private const string RuntimeStoreEnvironmentVariable = "DOTNET_SHARED_STORE";
     private static readonly IOtelLogger Logger = OtelLogging.GetLogger("StartupHook");
 
-    public RuntimeStoreVersionRule()
+    public RuntimeStoreDiagnosticRule()
     {
-        Name = "Runtime Store Assembly Validator";
-        Description = "Ensure that the runtime store assembly versions are not lower than the version used by the Application";
+        Name = "Runtime Store Diagnostic Rule";
+        Description = "Logs detail that assembly versions in the runtime store are not lower than the version the Application uses.";
     }
 
     internal override bool Evaluate()
     {
-        var result = true;
-
         try
         {
+            // Skip rule evaluation if the application is running in self-contained mode.
+            if (IsSelfContained())
+            {
+                Logger.Debug("Rule Engine: Skipping rule evaluation for self-contained application.");
+                return true;
+            }
+
             var configuredStoreDirectory = GetConfiguredStoreDirectory();
             if (configuredStoreDirectory == null)
             {
                 // Store location not found, skip rule evaluation
-                return result;
+                Logger.Debug("Rule Engine: Skipping rule evaluation as runtime store location is not found.");
+                return true;
             }
 
             var storeFiles = Directory.GetFiles(configuredStoreDirectory, "Microsoft.Extensions*.dll", SearchOption.AllDirectories);
@@ -37,6 +43,7 @@ internal class RuntimeStoreVersionRule : Rule
             {
                 var assemblyName = Path.GetFileNameWithoutExtension(file);
                 Assembly appInstrumentationAssembly;
+
                 try
                 {
                     appInstrumentationAssembly = Assembly.Load(assemblyName);
@@ -63,8 +70,7 @@ internal class RuntimeStoreVersionRule : Rule
 
                 if (appInstrumentationFileVersion < runTimeStoreFileVersion)
                 {
-                    result = false;
-                    Logger.Error($"Rule Engine: Application has direct or indirect reference to lower version of runtime store assembly {runTimeStoreFileVersionInfo.FileName} - {appInstrumentationFileVersion}.");
+                    Logger.Warning($"Rule Engine: Application has direct or indirect reference to lower version of runtime store assembly {runTimeStoreFileVersionInfo.FileName} - {appInstrumentationFileVersion}. ");
                 }
                 else
                 {
@@ -76,10 +82,10 @@ internal class RuntimeStoreVersionRule : Rule
         {
             // Exception in rule evaluation should not impact the result of the rule.
             Logger.Warning(ex, "Rule Engine: Couldn't evaluate reference to runtime store assemblies in an app.");
-            throw;
         }
 
-        return result;
+        // This a diagnostic rule, so we always return true.
+        return true;
     }
 
     private static string? GetConfiguredStoreDirectory()
@@ -87,16 +93,17 @@ internal class RuntimeStoreVersionRule : Rule
         try
         {
             var storeDirectory = Environment.GetEnvironmentVariable(RuntimeStoreEnvironmentVariable);
+            // Skip rule evaluation if the store directory is not configured.
             if (storeDirectory == null)
             {
-                Logger.Warning($"Rule Engine: {RuntimeStoreEnvironmentVariable} environment variable not found. Skipping rule evaluation.");
+                Logger.Debug($"Rule Engine: {RuntimeStoreEnvironmentVariable} environment variable not found. Skipping rule evaluation.");
                 return null;
             }
 
             // Check if the store directory exists
             if (!Directory.Exists(storeDirectory))
             {
-                Logger.Warning($"Rule Engine: Runtime store directory not found at {storeDirectory}. Skipping rule evaluation.");
+                Logger.Debug($"Rule Engine: Runtime store directory not found at {storeDirectory}. Skipping rule evaluation.");
                 return null;
             }
 
@@ -111,5 +118,22 @@ internal class RuntimeStoreVersionRule : Rule
             Logger.Warning(ex, "Error getting store directory location");
             throw;
         }
+    }
+
+    private static bool IsSelfContained()
+    {
+        var assemblyPath = Assembly.GetExecutingAssembly().Location;
+        var directory = Path.GetDirectoryName(assemblyPath);
+
+        // Check for the presence of a known .NET runtime file
+        if (directory != null &&
+            (File.Exists(Path.Combine(directory, "coreclr.dll")) ||
+            File.Exists(Path.Combine(directory, "libcoreclr.so")) ||
+            File.Exists(Path.Combine(directory, "libcoreclr.dylib"))))
+        {
+            return true;
+        }
+
+        return false;
     }
 }

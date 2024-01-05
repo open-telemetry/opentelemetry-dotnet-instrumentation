@@ -81,10 +81,10 @@ internal class RuleEngine
     {
         return new()
         {
+            new RuntimeStoreDiagnosticRule(),
             new OpenTelemetrySdkMinimumVersionRule(),
             new AssemblyFileVersionRule(),
-            new NativeProfilerDiagnosticsRule(),
-            new RuntimeStoreVersionRule()
+            new NativeProfilerDiagnosticsRule()
         };
     }
 }
